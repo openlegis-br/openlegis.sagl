@@ -22,7 +22,7 @@ for documento in context.zsql.documento_administrativo_pesquisar_publico_zsql(ti
  if hasattr(context.sapl_documentos.administrativo, assinado):
    if context.REQUEST.ind_publico == 0:
      file = getattr(context.sapl_documentos.administrativo,assinado)
-     file.manage_permission('View', roles=['Authenticated'], acquire=0)
+     file.manage_permission('View', roles=['Manager','Authenticated'], acquire=0)
    if context.REQUEST.ind_publico == 1:
      file = getattr(context.sapl_documentos.administrativo,assinado)
      file.manage_permission('View', roles=['Anonymous', 'Authenticated'], acquire=0)
@@ -33,7 +33,7 @@ for documento in context.zsql.documento_administrativo_pesquisar_publico_zsql(ti
   if hasattr(context.sapl_documentos.administrativo, filename_acessorio):
     if context.REQUEST.ind_publico == 0:
       file = getattr(context.sapl_documentos.administrativo,filename_acessorio)
-      file.manage_permission('View', roles=['Authenticated'], acquire=0)
+      file.manage_permission('View', roles=['Manager','Authenticated'], acquire=0)
     if context.REQUEST.ind_publico == 1:
       file = getattr(context.sapl_documentos.administrativo,filename_acessorio)
       file.manage_permission('View', roles=['Anonymous', 'Authenticated'], acquire=0)

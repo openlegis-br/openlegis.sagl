@@ -131,19 +131,23 @@ $(document).ready(function () {
     var tipo_proposicao = form.lst_tip_proposicao[form.lst_tip_proposicao.selectedIndex].value;
     var separador = tipo_proposicao.indexOf("&");
     var ind_mat_ou_doc = tipo_proposicao.split("&");
+    
     if (ind_mat_ou_doc[1]=='D') {
       $("#divMat").show();
       form.lst_tip_id_basica.disabled = 0;
       form.txt_num_ident_basica.disabled = 0;
       form.txt_ano_ident_basica.disabled = 0;
+      $("#divAssunto").hide();
     }
     else {
       $("#divMat").hide();     
       form.lst_tip_id_basica.disabled = 1;
       form.txt_num_ident_basica.disabled = 1;
       form.txt_ano_ident_basica.disabled = 1;
+      $("#divAssunto").show();     
     }
     return;
+    
   }
 
     function addFileField() {
@@ -489,10 +493,35 @@ $(function () {
       </div>
     </div>
 
+<dtml-if expr="des_tipo_proposicao=='Requerimento' or des_tipo_proposicao=='Indicação' or des_tipo_proposicao=='Moção'">
+  <div class="form-row" id="divAssunto" <dtml-if expr="not _.has_key('cod_proposicao')">style="display:none;"</dtml-if>>
+    <div class="col-12 mb-3">
+      <label for="lst_assunto">Assunto</label>
+          <select class="form-control selectpicker show-tick" data-actions-box="true" data-size="10" data-selected-text-format="count > 4" data-live-search="true" id="lst_assunto" name="lst_assunto" <dtml-if "not _.has_key('cod_assunto_sel') or prop_recebida"> disabled </dtml-if>>
+             <option value="0"></option>
+             <dtml-in expr="zsql.assunto_proposicao_obter_zsql(tip_proposicao=_.int(tip_proposicao_sel))">
+                <option
+                  <dtml-if cod_assunto_sel>
+                     <dtml-if expr="_.int(cod_assunto_sel) == _.int(cod_assunto)">
+                        selected
+                     </dtml-if>
+                  </dtml-if>
+                  value="<dtml-var cod_assunto>">
+                  <dtml-var des_assunto> (<dtml-var nom_orgao>)
+                </option>
+             </dtml-in>
+          </select>
+    </div>
+  </div>
+<dtml-else>
+    <input type="hidden" name="lst_assunto" value=""> 
+</dtml-if>
+
+
   <div class="form-row" id="divMat" <dtml-if expr="not _.has_key('cod_proposicao') or ind_mat_ou_doc=='M'">style="display:none;"</dtml-if>>
     <div class="col-12 col-md-6 mb-3">
       <label for="lst_tip_id_basica">Matéria Principal</label>
-          <select class="custom-select" id="lst_tip_id_basica" name="lst_tip_id_basica" <dtml-if "not _.has_key('tip_id_basica_sel') or prop_recebida"> disabled </dtml-if>>
+          <select class="custom-select" id="lst_tip_id_basica" name="lst_tip_id_basica" <dtml-if "not _.has_key('tip_id_basica_sel') or prop_recebida or prop_devolvida"> disabled </dtml-if>>
              <option value="0"></option>
              <dtml-in expr="zsql.tipo_materia_legislativa_obter_zsql(tip_natureza='P')">
                 <option
@@ -541,7 +570,7 @@ $(function () {
   </dtml-if>
 
 <dtml-if cod_proposicao>
-<dtml-if expr="des_tipo_proposicao=='Requerimento de Solicitação' or des_tipo_proposicao=='Indicação'">
+<dtml-if expr="des_tipo_proposicao=='Requerimento' or des_tipo_proposicao=='Indicação'">
     <div class="form-row">
         <div class="col-12 mb-3">
          <iframe
@@ -571,6 +600,7 @@ $(function () {
            <input class="form-control" id="lng" name="lng" type="text" value="<dtml-var txt_lng missing>" readonly>
         </div>
     </div>
+    <dtml-comment>
     <div class="form-row">
         <div class="col-12 col-md-6 mb-3">
            <label class="form-label d-block">Fotografia 1</label>
@@ -607,6 +637,7 @@ $(function () {
                  </dtml-if>
             </div>
    </div>
+  </dtml-comment>
 </dtml-if>
   <legend>Textos da Proposição</legend>
   <dtml-if expr="AUTHENTICATED_USER.has_role(['Autor', 'Assessor Parlamentar'])">

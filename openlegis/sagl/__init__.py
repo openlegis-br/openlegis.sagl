@@ -76,6 +76,7 @@ def initialize(context):
     allow_module('xml.sax.saxutils')
     allow_module('email.mime.text')
     allow_module('AccessControl.PermissionRole')
+    allow_module('collections.Counter')
 
     tools = (SAGLTool.SAGLTool,)
     ToolInit('SAGL Tool',

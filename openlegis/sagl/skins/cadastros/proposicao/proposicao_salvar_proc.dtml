@@ -22,6 +22,9 @@
             <dtml-call expr="REQUEST.set('col_username', col_username)">
             <dtml-call expr="REQUEST.set('dat_envio', dat_envio)">
             <dtml-call expr="REQUEST.set('dat_recebimento', dat_recebimento)">
+            <dtml-if expr="des_tipo_proposicao!='Requerimento' or des_tipo_proposicao!='Indicação' or des_tipo_proposicao!='Moção'">
+              <dtml-call expr="REQUEST.set('cod_assunto', '')">
+            </dtml-if>
         </dtml-in>
       <dtml-comment>
         <dtml-if expr="col_username!=AUTHENTICATED_USER.getUserName()">
@@ -71,6 +74,7 @@
          cod_autor          = int(cod_autor),
          tip_proposicao     = hdn_tip_proposicao,
          cod_materia        = cod_materia,
+         cod_assunto        = lst_assunto,
          txt_descricao      = txt_descricao)">
       <dtml-call expr="zsql.trans_commit_zsql()">         
     <dtml-except>
@@ -156,7 +160,6 @@
  <dtml-if lat>
     <dtml-call expr="metodog(cod_proposicao=cod_proposicao, endereco='', lat=lat, lng=lng)">
  </dtml-if>
-
 
 <dtml-comment>LOG DE AUDITORIA</dtml-comment>
 <dtml-if dbcon_logs>

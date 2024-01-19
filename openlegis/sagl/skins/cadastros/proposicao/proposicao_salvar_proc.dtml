@@ -1,4 +1,3 @@
-
 <dtml-call expr="REQUEST.set('save_ok', '1')">
 
 <dtml-comment> Verifica se a matéria legislativa existe no cadastro.</dtml-comment>
@@ -102,6 +101,22 @@
       </dtml-if>
     </dtml-if>
 
+    <dtml-if file_nom_image1>
+      <dtml-call expr="REQUEST.set('id_image1', _.str(cod_proposicao)+'_image_1.jpg')">
+        <dtml-try>
+            <dtml-call expr="sapl_documentos.proposicao.manage_addImage(id_image1,file=file_nom_image1)">
+        <dtml-except> 
+        </dtml-try>
+    </dtml-if>
+
+    <dtml-if file_nom_image2>
+      <dtml-call expr="REQUEST.set('id_image2', _.str(cod_proposicao)+'_image_2.jpg')">
+        <dtml-try>
+            <dtml-call expr="sapl_documentos.proposicao.manage_addImage(id_image2,file=file_nom_image2)">
+        <dtml-except>
+        </dtml-try>
+    </dtml-if>
+
     <dtml-if file_nom_anexo>
        <dtml-try>
         <dtml-in file_nom_anexo prefix="file">
@@ -126,8 +141,25 @@
     </dtml-if>
 </dtml-if>
 
+<dtml-unless hdn_id>
+<dtml-if lat>
+  <dtml-call expr="REQUEST.set('metodog', zsql.proposicao_geocode_incluir_zsql)">
+</dtml-if>
+</dtml-unless>
+
+<dtml-if hdn_id>
+<dtml-if lat>
+  <dtml-call expr="REQUEST.set('metodog', zsql.proposicao_geocode_atualizar_zsql)">
+</dtml-if>
+</dtml-if>
+
+ <dtml-if lat>
+    <dtml-call expr="metodog(cod_proposicao=cod_proposicao, endereco='', lat=lat, lng=lng)">
+ </dtml-if>
+
+
 <dtml-comment>LOG DE AUDITORIA</dtml-comment>
-<dtml-if expr="_.has_key('cod_proposicao') and dbcon_logs">
+<dtml-if dbcon_logs>
   <dtml-call expr="zsql.logs_registrar_zsql(
             usuario      = REQUEST['AUTHENTICATED_USER'].getUserName(), 
             data         = DateTime().strftime('%Y-%m-%d %H:%M:%S'),
@@ -137,4 +169,3 @@
             dados        = REQUEST.form.items(),
             cod_registro = cod_proposicao)"> 
 </dtml-if>
-

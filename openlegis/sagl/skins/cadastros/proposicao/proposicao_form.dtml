@@ -493,8 +493,8 @@ $(function () {
       </div>
     </div>
 
-<dtml-if expr="des_tipo_proposicao=='Requerimento' or des_tipo_proposicao=='Indicação' or des_tipo_proposicao=='Moção'">
-  <div class="form-row" id="divAssunto" <dtml-if expr="not _.has_key('cod_proposicao')">style="display:none;"</dtml-if>>
+<dtml-if expr="_.has_key('cod_proposicao') and (des_tipo_proposicao=='Requerimento' or des_tipo_proposicao=='Indicação' or des_tipo_proposicao=='Moção')">
+<div class="form-row" id="divAssunto" <dtml-if expr="not _.has_key('cod_proposicao')">style="display:none;"</dtml-if>>
     <div class="col-12 mb-3">
       <label for="lst_assunto">Assunto</label>
           <select class="form-control selectpicker show-tick" data-actions-box="true" data-size="10" data-selected-text-format="count > 4" data-live-search="true" id="lst_assunto" name="lst_assunto" <dtml-if "not _.has_key('cod_assunto_sel') or prop_recebida"> disabled </dtml-if>>

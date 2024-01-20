@@ -37,11 +37,11 @@
 
  <div class="row mb-2">
       <div class="col-12 col-md-6 align-self-center">
-        <h1 class="firstHeading">Calendário das Sessões</h1>
+        <h1 class="firstHeading">Calendário das Reuniões</h1>
       </div>
       <div class="col-12 col-md-6 text-left text-md-right">
         <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Sessao Plenaria', 'Operador Ordem Dia'])">
-          <a class="btn btn-sm btn-primary mb-3" href="<dtml-var portal_url>/cadastros/sessao_plenaria/sessao_plenaria_form">Incluir Sessão</a> 
+          <a class="btn btn-sm btn-primary mb-3" href="<dtml-var portal_url>/cadastros/sessao_plenaria/sessao_plenaria_form">Incluir Reunião</a> 
         </dtml-if>
       </div>
  </div>
@@ -102,7 +102,7 @@
                 </select>
    </div>
    <div class="col-12 col-sm-5 mb-3">
-    <label for="lst_tip_sessao">Tipo de Sessão</label>
+    <label for="lst_tip_sessao">Tipo de Reunião</label>
                 <select class="custom-select" id="lst_tip_sessao" name="lst_tip_sessao" onChange="atualiza_tip_sessao(document.sessao_plen_form.lst_ano_sessao[document.sessao_plen_form.lst_ano_sessao.selectedIndex].value, document.sessao_plen_form.lst_mes_sessao[document.sessao_plen_form.lst_mes_sessao.selectedIndex].value,document.sessao_plen_form.lst_dia_sessao[document.sessao_plen_form.lst_dia_sessao.selectedIndex].value,document.sessao_plen_form.lst_tip_sessao[document.sessao_plen_form.lst_tip_sessao.selectedIndex].value)">
                   <option value="-1">Todos</option>
                     <dtml-in expr="zsql.tipo_sessao_plenaria_obter_zsql()">
@@ -158,16 +158,16 @@
                <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Sessao Plenaria', 'Operador Ordem Dia'])">
                  <a href="<dtml-var portal_url>/cadastros/sessao_plenaria/sessao_plenaria_mostrar_proc?cod_sessao_plen=<dtml-var cod_sessao_plen>&dat_
 inicio_sessao=<dtml-var dat_inicio_sessao missing>&num_legislatura=<dtml-var num_legislatura missing>">
-                   <p class="h4 card-title "><dtml-var num_sessao_plen>ª <dtml-if expr="nom_sessao!='Audiência Pública'">Sessão</dtml-if> <dtml-var nom_sessao></p>
+                   <p class="h4 card-title "><dtml-var num_sessao_plen>ª <dtml-if expr="nom_sessao!='Audiência Pública'">Reunião</dtml-if> <dtml-var nom_sessao> <dtml-if expr="cod_periodo_sessao != None"><dtml-in expr="zsql.periodo_sessao_obter_zsql(cod_periodo=cod_periodo_sessao)"> do <dtml-var num_periodo>º Período</dtml-in></dtml-if></p>
                  </a>
                <dtml-else>
                   <dtml-let id_pauta="_.str(cod_sessao_plen)+'_pauta_sessao.pdf'">
                      <dtml-if "_.hasattr(sapl_documentos.pauta_sessao,id_pauta)">
                         <a href="agenda_sessao_plen_mostrar_proc?cod_sessao_plen=<dtml-var cod_sessao_plen>&dat_sessao=<dtml-var dat_inicio_sessao>">
-                          <p class="h4 card-title"><dtml-var num_sessao_plen>ª <dtml-if expr="nom_sessao!='Audiência Pública'">Sessão</dtml-if> <dtml-var nom_sessao></p>    
+                          <p class="h4 card-title"><dtml-var num_sessao_plen>ª <dtml-if expr="nom_sessao!='Audiência Pública'">Reunião</dtml-if> <dtml-var nom_sessao></p>    
                         </a>                    
                     <dtml-else>
-                        <p class="h4 card-title"><dtml-var num_sessao_plen>ª <dtml-if expr="nom_sessao!='Audiência Pública'">Sessão</dtml-if> <dtml-var nom_sessao></p> 
+                        <p class="h4 card-title"><dtml-var num_sessao_plen>ª <dtml-if expr="nom_sessao!='Audiência Pública'">Reunião</dtml-if> <dtml-var nom_sessao></p> 
                      </dtml-if>
                   </dtml-let>
                </dtml-if>     
@@ -252,7 +252,7 @@ inicio_sessao=<dtml-var dat_inicio_sessao missing>&num_legislatura=<dtml-var num
   </dtml-if sequence-end>
 
 <dtml-else>
-  <p>Nenhuma sessão encontrada.</p>
+  <p>Nenhuma reunião encontrada.</p>
 </dtml-in>
 
 </form>

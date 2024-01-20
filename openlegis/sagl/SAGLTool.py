@@ -1866,8 +1866,8 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
             lab = Label()
             lab.setOrigin(0,250)
             lab.angle = 90
-            lab.fontName = 'Arial'
-            lab.fontSize = 7
+            lab.fontName = 'Times_New_Roman'
+            lab.fontSize = 8
             lab.textAnchor = 'start'
             lab.boxAnchor = 'n'
             lab.setText(mensagem)
@@ -1887,13 +1887,13 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         packet2 = StringIO.StringIO()
         d = canvas.Canvas(packet2, pagesize=A4)
         d.setFillColorRGB(0,0,0)
-        d.setFont("Arial_Bold", 13)
+        d.setFont("Times_New_Roman_Bold", 13)
         # alinhamento a esquerda
         #d.drawString(85, 700, texto)
         # alinhamento centralizado
         d.drawCentredString(pwidth/2, 700, texto)
         # nome autor abaixo da numeracao
-        d.setFont("Arial_Italic", 10)
+        d.setFont("Times_New_Roman_Bold", 10)
         #d.drawCentredString(pwidth/2, 688, nome_autor)
         d.save()
         packet2.seek(0)

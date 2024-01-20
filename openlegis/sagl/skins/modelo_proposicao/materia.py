@@ -37,6 +37,9 @@ inf_basicas_dic['url_validacao'] = "" + context.generico.absolute_url()+"/confer
 inf_basicas_dic['nom_prefeito'] = 'Não Cadastrado'
 inf_basicas_dic['par_prefeito'] = 'Não Cadastrado'
 
+inf_basicas_dic['des_assunto'] = ''
+inf_basicas_dic['orgao_responsavel'] = ''
+
 for materia in context.zsql.materia_obter_zsql(cod_materia=cod_materia):
     num_proposicao = " "
     nom_arquivo = str(materia.cod_materia)+'_texto_integral.odt'

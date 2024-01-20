@@ -1,0 +1,31 @@
+<dtml-if expr="hdn_cod_periodo != '0'">
+  <dtml-call expr="REQUEST.set('metodo', zsql.periodo_sessao_atualizar_zsql)">
+    <dtml-call expr="REQUEST.set('metodo1', 'atualizar')">
+<dtml-else> 
+  <dtml-call expr="REQUEST.set('metodo', zsql.periodo_sessao_incluir_zsql)">
+    <dtml-call expr="REQUEST.set('metodo1', 'incluir')">
+</dtml-if>
+
+<dtml-try>
+                          
+  <dtml-call expr="metodo(cod_periodo = hdn_cod_periodo,
+                          num_periodo = hdn_num_periodo,
+                          num_legislatura = hdn_num_legislatura,
+                          cod_sessao_leg = hdn_cod_sessao_leg,
+                          tip_sessao = hdn_tip_sessao,
+                          dat_inicio = pysc.data_converter_pysc(hdn_dat_inicio),
+                          dat_fim = pysc.data_converter_pysc(hdn_dat_fim)
+                          )">
+
+<dtml-except>
+  <dtml-let mensagem="'Não foi possível salvar. Cerfique-se que não exista período idêntico e tente novamente!'"  tipo_mensagem="'danger'"> 
+    <dtml-var mensagem_emitir>
+  </dtml-let> 
+  
+<dtml-else>
+  <dtml-let mensagem="'Período salvo com sucesso!'">
+    <dtml-var mensagem_emitir>
+  </dtml-let>
+ 
+</dtml-try>
+

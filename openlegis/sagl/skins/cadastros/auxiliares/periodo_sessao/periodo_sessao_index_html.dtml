@@ -1,0 +1,267 @@
+<dtml-var standard_html_header>
+
+<script type="text/javascript" src="<dtml-var portal_url>/javascript/data_validar.js"></script>
+
+<script type="text/javascript">
+
+function atualiza_num_leg(num_legislatura,cod_sessao_plen){
+    if (cod_sessao_plen=="-1"){
+        location.href = "periodo_sessao_index_html?num_legislatura_sel="+num_legislatura;
+        }
+    else {
+        location.href = "periodo_sessao_index_html?num_legislatura_sel="+num_legislatura;
+       }
+}
+
+  function submeter(cod_periodo, num_periodo, tip_sessao, dat_inicio, dat_fim, form) {
+    if (cod_periodo.value == "") {
+      alert("O campo não pode ficar vazio!");
+      cod_periodo.focus();
+      return;
+    }
+    
+    if (num_periodo.value == "") {
+      alert("O período deve ser preenchido!");
+      num_periodo.focus();
+      return;
+    }
+
+    if (tip_sessao.value == 0) {
+       alert("O tipo de reunião deve ser selecionado!");
+       tip_sessao.focus();
+       return;
+    }
+    
+    if (dat_inicio.value == "") {
+      alert("A data de início deve ser preenchida!");
+      dat_inicio.focus();
+      return;
+    }
+    
+    if (dat_fim.value == "") {
+      alert("A data de fim deve ser preenchida!");
+      dat_fim.focus();
+      return;
+    }
+
+    if (dat_inicio.value!="" && !IsValidDate(dat_inicio.value)){
+       alert("Digite uma data de início válida!");
+       dat_inicio.focus();
+       return false;
+    }
+
+    if (dat_fim.value!="" && !IsValidDate(dat_fim.value)){
+       alert("Digite uma data de fim válida!");
+       dat_fim.focus();
+       return false;
+    }
+
+    form.hdn_cod_periodo.value = cod_periodo;
+    form.hdn_num_periodo.value = num_periodo.value;
+    form.hdn_tip_sessao.value = tip_sessao.value;
+    form.hdn_dat_inicio.value = dat_inicio.value;
+    form.hdn_dat_fim.value = dat_fim.value;
+    
+    form.submit();
+
+  }
+
+  function excluir(cod_periodo) {
+    if (confirm("Deseja realmente excluir?")) {      
+      location.href = "<dtml-var absolute_url>/periodo_sessao_excluir_proc?hdn_cod_periodo=" + cod_periodo;
+    }
+  }
+
+</script>
+
+  <h1 class="firstHeading">Períodos de Reunião </h1> 
+
+  <form name="periodo_sessao_form" method="post" action="periodo_sessao_salvar_proc">
+
+  <div class="row mb-2">
+  <div class="col-12 col-sm-6 mb-3">
+      <label for="lst_num_legislatura" class="required">Legislatura:</label>
+      <select class="custom-select show-tick jumpmenu" data-dropup-auto="false" data-size="6" id="lst_num_legislatura" name="lst_num_legislatura required">
+          <dtml-in expr="zsql.legislatura_obter_zsql(ind_excluido=0)">
+             <option
+               <dtml-if expr="(not _.has_key('num_legislatura_sel') and (_.DateTime() >= dat_inicio and _.DateTime() <= dat_fim))
+                           or (_.has_key('num_legislatura_sel') and num_legislatura == _.int(num_legislatura_sel))">
+                 selected
+                 <dtml-call expr="REQUEST.set('num_legislatura_sel', num_legislatura)">
+               </dtml-if>
+                 value="<dtml-var ACTUAL_URL>?num_legislatura_sel=<dtml-var num_legislatura>">
+               <dtml-var expr="pysc.periodo_legislatura_format_pysc(num_legislatura, dat_inicio, dat_fim)">
+               <dtml-if expr="(_.DateTime() >= dat_inicio) and (_.DateTime() <= dat_fim)">(Atual)</dtml-if>
+             </option>
+          <dtml-else>
+             <option selected value="<dtml-var ACTUAL_URL>?num_legislatura_sel=-1"></option>
+             <dtml-call expr="REQUEST.set('num_legislatura_sel', '-1')">
+          </dtml-in>
+        </select>
+        <dtml-if expr="not _.has_key('num_legislatura_sel')">
+          <dtml-in expr="zsql.legislatura_obter_zsql(ind_excluido=0)">
+            <dtml-if sequence-start>
+               <dtml-call expr="REQUEST.set('num_legislatura_sel', num_legislatura)">
+            </dtml-if>
+          </dtml-in>
+        </dtml-if>
+  </div>
+    <div class="col-12 col-sm-6 mb-3">
+        <label for="lst_sessao_leg" class="required">Sessão Legislativa</label>
+         <select class="custom-select show-tick jumpmenu" data-dropup-auto="false" data-size="4" id="lst_sessao_leg" name="lst_sessao_leg">
+           <dtml-in expr="zsql.sessao_legislativa_obter_zsql(num_legislatura=num_legislatura_sel)">
+              <option
+                <dtml-if expr="((not _.has_key('cod_sessao_leg_sel') and not _.has_key('prim_sel') 
+                                and (_.DateTime() >= dat_inicio and _.DateTime() <= dat_fim)))
+                                or (not _.has_key('cod_sessao_leg_sel') and not _.has_key('prim_sel')) 
+                                or (_.has_key('cod_sessao_leg_sel') and cod_sessao_leg == cod_sessao_leg_sel)">
+                     selected
+                     <dtml-call expr="REQUEST.set('prim_sel', cod_sessao_leg)">
+                     <dtml-call expr="REQUEST.set('cod_sessao_leg_sel', cod_sessao_leg)">
+                </dtml-if>
+                value="<dtml-var ACTUAL_URL>?cod_sessao_leg_sel=<dtml-var cod_sessao_leg>&num_legislatura_sel=<dtml-var num_legislatura>">
+                <dtml-var num_sessao_leg>ª (<dtml-var dat_inicio_conv> - <dtml-var dat_fim_conv>)
+		<dtml-if expr="(_.DateTime() >= dat_inicio) and (_.DateTime() <= dat_fim)">(Atual)</dtml-if>
+              </option>
+           </dtml-in>
+         </select>
+ 
+        <div class="invalid-feedback">
+          Este campo é obrigatório!
+        </div>  
+    </div>
+  </div>
+
+<dtml-if cod_sessao_leg_sel>  
+  <dtml-in expr="zsql.periodo_sessao_obter_zsql(num_legislatura=num_legislatura_sel, cod_sessao_leg=cod_sessao_leg_sel)">
+    <dtml-if sequence-start>
+       <table class="table table-bordered">
+        <thead class="table-secondary">                     
+         <tr>
+           <th>Período</th>
+           <th>Tipo de Reunião</th>
+           <th>Início</th>
+           <th>Fim</th>
+           <th>Ações</th>
+         </tr>
+        </thead>
+     </dtml-if sequence-start>
+         <tr> 
+          <td>
+            <label for="txt_num_periodo_<dtml-var cod_periodo>" class="required d-none">Período</label>
+            <input class="form-control" type="text" id="txt_num_periodo_<dtml-var cod_periodo>" name="txt_num_periodo_<dtml-var cod_periodo>" 
+             value="<dtml-var num_periodo>" maxlength="2" readonly />
+          </td>
+          <td>
+            <label for="lst_tip_sessao_<dtml-var cod_periodo>" class="required d-none">Tipo</label>
+            <select class="custom-select" id="lst_tip_sessao_<dtml-var cod_periodo>" name="lst_tip_sessao_<dtml-var cod_periodo>" disabled>
+               <dtml-in expr="zsql.tipo_sessao_plenaria_obter_zsql(tip_sessao=tip_sessao)">
+                  <option           
+                   value="<dtml-var tip_sessao>"><dtml-var nom_sessao>
+                  </option>
+                </dtml-in>
+            </select> 
+          </td>
+          <td>
+            <label for="txt_dat_inicio_<dtml-var cod_periodo>" class="required d-none">Início</label>
+            <input class="form-control date" type="text" id="txt_dat_inicio_<dtml-var cod_periodo>" name="txt_dat_inicio_<dtml-var cod_periodo>" 
+             value="<dtml-var data_inicio>" />
+          </td>
+          <td>
+            <label for="txt_dat_fim_<dtml-var cod_periodo>" class="required d-none">Fim</label>
+            <input class="form-control date" type="text" id="txt_dat_fim_<dtml-var cod_periodo>" name="txt_dat_fim_<dtml-var cod_periodo>" 
+             value="<dtml-var data_fim>" />
+          </td>
+          <td>
+             <input class="btn btn-primary btn-sm mb-1" type="button" value="Atualizar" onClick="submeter(<dtml-var cod_periodo>, document.periodo_sessao_form.txt_num_periodo_<dtml-var cod_periodo>, document.periodo_sessao_form.lst_tip_sessao_<dtml-var cod_periodo>, document.periodo_sessao_form.txt_dat_inicio_<dtml-var cod_periodo>, document.periodo_sessao_form.txt_dat_fim_<dtml-var cod_periodo>, document.periodo_sessao_form)" />
+             <a class="btn btn-danger btn-sm mb-1" href="javascript:excluir(<dtml-var cod_periodo>)">Excluir</a>
+          </td>
+     </tr>
+    <dtml-if sequence-end>
+       </table>
+    </dtml-if sequence-end>
+   <dtml-else>
+      <p>Nenhum período cadastrado na Sessão Legislativa selecionada.</p>
+   </dtml-in>  
+<dtml-else>
+      <p>Nenhuma Sessão Legislativa cadastrada na Legislatura selecionada.</p>
+</dtml-if>
+
+        <legend>Formulário de Inclusão</legend>
+        <input type="hidden" name="hdn_num_legislatura" value="<dtml-var num_legislatura_sel>" /> 
+        <input type="hidden" name="hdn_cod_sessao_leg" value="<dtml-var cod_sessao_leg_sel>" />  
+        <input type="hidden" name="hdn_num_periodo" />  
+        <input type="hidden" name="hdn_cod_periodo" />  
+        <input type="hidden" name="hdn_tip_sessao" />
+        <input type="hidden" name="hdn_dat_inicio" /> 
+        <input type="hidden" name="hdn_dat_fim" />  
+        <table class="table table-bordered">
+        <thead class="table-secondary">                     
+         <tr>
+           <th>Período</th>
+           <th>Tipo de Reunião</th>
+           <th>Início</th>
+           <th>Fim</th>
+           <th>Ação</th>
+         </tr>
+        </thead>
+         <tr> 
+          <td>
+            <label for="txt_num_periodo" class="d-none required">Período</label>
+            <input class="form-control number" type="number" id="txt_num_periodo" name="txt_num_periodo" min="1" max="12" maxlength="2" />
+          </td>
+          <td>
+            <label for="lst_tip_sessao" class="d-none required">Tipo</label>
+            <select class="custom-select" id="lst_tip_sessao" name="lst_tip_sessao">
+               <option value ="0"></option>
+               <dtml-in expr="zsql.tipo_sessao_plenaria_obter_zsql(ind_excluido=0)">
+                  <option           
+                   value="<dtml-var tip_sessao>"><dtml-var nom_sessao>
+                  </option>
+                </dtml-in>
+            </select> 
+          </td>
+          <td>
+            <label for="txt_dat_inicio" class="d-none required">Início</label>
+            <input class="form-control date" type="text" id="txt_dat_inicio" name="txt_dat_inicio" 
+             value="" />
+          </td>
+          <td>
+            <label for="txt_dat_fim" class="d-none required">Fim</label>
+            <input class="form-control date" type="text" id="txt_dat_fim" name="txt_dat_fim" 
+             value="" />
+          </td>
+          <td>
+             <input class="btn btn-primary btn-sm" type="button" value="Incluir" onClick="submeter(0, document.periodo_sessao_form.txt_num_periodo, document.periodo_sessao_form.lst_tip_sessao, document.periodo_sessao_form.txt_dat_inicio, document.periodo_sessao_form.txt_dat_fim, document.periodo_sessao_form)" />         
+
+          </td>
+     </tr>
+    </table>
+ 
+
+</form>
+
+<script type="text/javascript">
+    function initJumpMenus() {
+        // Turns all <select> elements with the 'jumpmenu' class into jump menus
+        var selectElements = document.getElementsByTagName("select");
+        for( i = 0; i < selectElements.length; i++ ) {
+            // Check for the class and make sure the element has an ID
+            if( selectElements[i].className == "custom-select show-tick jumpmenu" && document.getElementById(selectElements[i].id) != "" ) {
+                jumpmenu = document.getElementById(selectElements[i].id);
+                jumpmenu.onchange = function() {
+                    if( this.options[this.selectedIndex].value != '' ) {
+                        // Redirect
+                        location.href=this.options[this.selectedIndex].value;
+                    }
+                }
+            }
+        }
+    }
+    window.onload = function() {
+        initJumpMenus();
+    }
+</script>
+
+<dtml-var standard_html_footer>
+

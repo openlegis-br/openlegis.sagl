@@ -164,10 +164,10 @@ inicio_sessao=<dtml-var dat_inicio_sessao missing>&num_legislatura=<dtml-var num
                   <dtml-let id_pauta="_.str(cod_sessao_plen)+'_pauta_sessao.pdf'">
                      <dtml-if "_.hasattr(sapl_documentos.pauta_sessao,id_pauta)">
                         <a href="agenda_sessao_plen_mostrar_proc?cod_sessao_plen=<dtml-var cod_sessao_plen>&dat_sessao=<dtml-var dat_inicio_sessao>">
-                          <p class="h4 card-title"><dtml-var num_sessao_plen>ª <dtml-if expr="nom_sessao!='Audiência Pública'">Reunião</dtml-if> <dtml-var nom_sessao></p>    
+                          <p class="h4 card-title"><dtml-var num_sessao_plen>ª <dtml-if expr="nom_sessao!='Audiência Pública'">Reunião</dtml-if> <dtml-var nom_sessao> <dtml-if expr="cod_periodo_sessao != None"><dtml-in expr="zsql.periodo_sessao_obter_zsql(cod_periodo=cod_periodo_sessao)"> do <dtml-var num_periodo>º Período</dtml-in></dtml-if></p>    
                         </a>                    
                     <dtml-else>
-                        <p class="h4 card-title"><dtml-var num_sessao_plen>ª <dtml-if expr="nom_sessao!='Audiência Pública'">Reunião</dtml-if> <dtml-var nom_sessao></p> 
+                        <p class="h4 card-title"><dtml-var num_sessao_plen>ª <dtml-if expr="nom_sessao!='Audiência Pública'">Reunião</dtml-if> <dtml-var nom_sessao> <dtml-if expr="cod_periodo_sessao != None"><dtml-in expr="zsql.periodo_sessao_obter_zsql(cod_periodo=cod_periodo_sessao)"> do <dtml-var num_periodo>º Período</dtml-in></dtml-if></p> 
                      </dtml-if>
                   </dtml-let>
                </dtml-if>     

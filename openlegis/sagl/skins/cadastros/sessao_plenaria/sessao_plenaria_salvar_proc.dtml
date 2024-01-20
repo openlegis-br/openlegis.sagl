@@ -2,7 +2,7 @@
     <dtml-call expr="REQUEST.set('metodo', zsql.sessao_plenaria_atualizar_zsql)">
 <dtml-elif expr="zsql.sessao_plenaria_obter_zsql(num_sessao_plen=txt_num_sessao_plen,tip_sessao=lst_tip_sessao_plen,dat_inicio_sessao=pysc.data_converter_pysc(data=txt_dat_inicio_sessao))">
     <dtml-call expr="REQUEST.set('erro', 1)">
-    <dtml-let mensagem="'Já existe no cadastro uma sessão com esse tipo e número!'" tipo_mensagem="'warning'">
+    <dtml-let mensagem="'Já existe no cadastro uma reunião com esse tipo e número!'" tipo_mensagem="'warning'">
         <dtml-var mensagem_emitir>
     </dtml-let>
 <dtml-else>
@@ -24,6 +24,7 @@
                                 url_fotos               = txt_url_fotos,
                                 url_audio               = txt_url_audio,
                                 url_video               = txt_url_video,
+                                cod_periodo_sessao	= hdn_cod_periodo_sessao,
                                 tip_expediente		= txt_tema)">
     <dtml-except>
         <dtml-let mensagem="'Não foi possível salvar os dados. Tente novamente!'" tipo_mensagem="'danger'">

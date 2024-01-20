@@ -47,6 +47,13 @@ for proposicao in context.zsql.proposicao_obter_zsql(cod_proposicao=cod_proposic
     txt_ementa = proposicao.txt_descricao
     dat_apresentacao = context.pysc.data_converter_por_extenso_pysc(data=DateTime().strftime("%d/%m/%Y"))
 
+    inf_basicas_dic['des_assunto'] = ''
+    inf_basicas_dic['orgao_responsavel'] = ''
+    if proposicao.cod_assunto != None:
+       for assunto in context.zsql.assunto_proposicao_obter_zsql(cod_assunto = proposicao.cod_assunto):
+           inf_basicas_dic['des_assunto'] = assunto.des_assunto
+           inf_basicas_dic['orgao_responsavel'] = assunto.nom_orgao
+
     materia_vinculada = {}
     if proposicao.cod_materia != None:
        for materia in context.zsql.materia_obter_zsql(cod_materia = proposicao.cod_materia):

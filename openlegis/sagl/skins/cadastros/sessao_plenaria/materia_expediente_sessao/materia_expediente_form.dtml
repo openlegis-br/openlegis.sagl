@@ -131,7 +131,6 @@
               <select class="custom-select" id="lst_tip_id_basica" name="lst_tip_id_basica" onChange="ementa_buscar(document.materia_expediente_form)" required>
                <option>Selecione</option>
                   <dtml-in expr="zsql.tipo_materia_legislativa_obter_zsql(ind_excluido=0)">
-                    <dtml-if expr="des_tipo_materia=='Requerimento' or des_tipo_materia=='Indicação' or des_tipo_materia=='Moção'">
                      <option
                        <dtml-if cod_materia>
                           <dtml-in expr="zsql.materia_obter_zsql(cod_materia = cod_materia)">
@@ -145,7 +144,6 @@
                        value="<dtml-var tip_materia>">
                         <dtml-var des_tipo_materia missing>
                       </option>
-                     </dtml-if>
                   </dtml-in>
               </select>
           </div>

@@ -168,7 +168,13 @@ $(document).ready(function(){
                        - <b><dtml-var nom_autor_join></b><dtml-unless sequence-end>,</dtml-unless>
                     </dtml-in>
                  </dtml-in>
-                 - <dtml-var txt_observacao>
+                 - <dtml-var txt_observacao> <br />
+               <dtml-in expr="zsql.turno_discussao_obter_zsql(cod_turno=tip_turno)">
+	          <b>Turno:</b> <dtml-var des_turno> -
+               </dtml-in>               
+               <dtml-in expr="zsql.quorum_votacao_obter_zsql(cod_quorum=tip_quorum)">
+	          <b>Quórum:</b> <dtml-var des_quorum>
+               </dtml-in>
               </td>
               <td>
                 <dtml-in expr="zsql.votacao_expediente_materia_obter_zsql(cod_sessao_plen=cod_sessao_plen, cod_materia=cod_materia,cod_ordem=cod_ordem, ind_excluido=0)">

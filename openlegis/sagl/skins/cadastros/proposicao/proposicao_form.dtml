@@ -28,7 +28,15 @@
               return false;
           }
       }
- 
+
+   <dtml-if expr="_.has_key('cod_proposicao') and (des_tipo_proposicao=='Requerimento' or des_tipo_proposicao=='Indicação' or des_tipo_proposicao=='Moção')">
+     if (form.lst_assunto.selectedIndex==''){
+       alert("O assunto deve ser selecionado!");
+       form.lst_assunto.focus();
+       return false;
+     }
+   </dtml-if>
+
       form.hdn_tip_proposicao.value = tipo_proposicao.substring(0, separador);
       form.submit();
   }

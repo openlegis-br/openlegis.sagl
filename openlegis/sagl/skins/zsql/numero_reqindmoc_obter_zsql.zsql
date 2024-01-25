@@ -10,12 +10,15 @@ SELECT
  
 FROM
    materia_legislativa
-   LEFT JOIN tipo_materia_legislativa ON materia_legislativa.tip_id_basica = tipo_materia_legislativa.tip_materia
-
+   LEFT JOIN tipo_materia_legislativa ON materia_legislativa.tip_id_basica = tipo_materia_legislativa.tip_materia,
+   legislatura
 
 where
  (tipo_materia_legislativa.des_tipo_materia = 'Requerimento' 
    OR tipo_materia_legislativa.des_tipo_materia = 'Indicação'
    OR tipo_materia_legislativa.des_tipo_materia = 'Moção')
- and materia_legislativa.ano_ident_basica > 2021
- and materia_legislativa.ind_excluido = 0
+  and materia_legislativa.ano_ident_basica >= YEAR(legislatura.dat_inicio)
+  and materia_legislativa.ano_ident_basica <= YEAR(legislatura.dat_fim)
+  and materia_legislativa.ind_excluido = 0
+ 
+ORDER BY legislatura.num_legislatura DESC

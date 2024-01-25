@@ -56,6 +56,7 @@ $(document).ready(function() {
       </div>
     </th>
     <th width="20%">Nome do Usuário</th>
+    <th>Nome Completo</th>
     <th>Perfil</th>
   </tr>
  </thead>
@@ -71,6 +72,11 @@ $(document).ready(function() {
           </td>
           <td>
             <a href="usuario_mostrar_proc?nome=<dtml-var sequence-item>"><i class="fa fa-fw fa-user"></i> <dtml-var sequence-item></a>
+          </td>
+          <td>
+            <dtml-in expr="zsql.usuario_obter_zsql(col_username=sequence-item)">
+              <dtml-var nom_completo missing>
+            </dtml-in>
           </td>
           <td>
              <dtml-in user_roles>

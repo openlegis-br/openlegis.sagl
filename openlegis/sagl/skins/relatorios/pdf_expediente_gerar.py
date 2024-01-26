@@ -57,7 +57,7 @@ def pauta(pauta_dic):
     # inicio do bloco 
     tmp+='\t<story>\n'
     # dados da sessao
-    tmp+='\t\t<para style="P0">'+ str(pauta_dic["num_sessao_plen"]) +'ª REUNIÃO ' + pauta_dic["nom_sessao"] + ' do ' + str(pauta_dic["num_periodo"]) + 'º PERÍODO - ' + pauta_dic["dat_inicio_sessao"] + '</para>\n'
+    tmp+='\t\t<para style="P0">'+ str(pauta_dic["num_sessao_plen"]) +'ª REUNIÃO ' + pauta_dic["nom_sessao"] + ' DO ' + str(pauta_dic["num_periodo"]) + 'º PERÍODO - ' + pauta_dic["dat_inicio_sessao"] + '</para>\n'
     tmp+='\t\t<para style="P2" spaceAfter="4">\n'
     tmp+='\t\t\t<font color="white"> </font>\n'
     tmp+='\t\t</para>\n'
@@ -68,9 +68,9 @@ def pauta(pauta_dic):
 
     if pauta_dic["lst_requerimentos_vereadores"] != []:
         tmp+='\t\t<condPageBreak height="20mm"/>\n'
-        tmp+='\t\t<para style="P1" spaceBefore="20"><b>LISTAGEM DE LEITURA</b></para>\n'
+        tmp+='\t\t<para style="P1" spaceBefore="10"><b>LISTAGEM DE LEITURA</b></para>\n'
     for dic in pauta_dic["lst_requerimentos_vereadores"]:
-        tmp+='\t\t<para style="P2" spaceBefore="10"><b><u>' + str(dic['vereador']) + '</u></b>:</para>\n'
+        tmp+='\t\t<para style="P2" spaceBefore="20"><b><u>' + str(dic['vereador']) + ' (' + str(dic['qtde_materias']) + ')</u></b></para>\n'
         for item in dic['materias']:
             tmp+='\t\t<para style="P2" spaceBefore="5"><font color="#126e90"><b>' + item['id_materia'] + '</b></font> - ' + item['txt_ementa'] + '</para>\n'
     

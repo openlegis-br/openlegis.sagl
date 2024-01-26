@@ -168,7 +168,7 @@ else:
                 dic["des_quorum"] = quorum.des_quorum
             dic["tip_votacao"]=""
             for tip_votacao in context.zsql.tipo_votacao_obter_zsql(tip_votacao=item.tip_votacao):
-                dic["tip_votacao"] = tip_votacao.des_tipo_votacao
+                dic["tip_votacao"] = 'Votação ' + str(tip_votacao.des_tipo_votacao)
 
             dic["emenda"] = ''
             lst_qtde_emendas=[]

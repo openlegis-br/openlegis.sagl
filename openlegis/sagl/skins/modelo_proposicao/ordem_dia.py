@@ -71,7 +71,7 @@ if request.has_key('ind_audiencia'):
     lst_sdiscussao=[]
     lst_discussao_unica=[]
 else:
-    for sessao in context.zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=codigo, ind_excluido=0):
+    for sessao in context.zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=cod_sessao_plen, ind_excluido=0):
         data = context.pysc.data_converter_pysc(sessao.dat_inicio_sessao)
         inf_basicas_dic = {} # dicionário que armazenará as informacoes basicas da sessao plenaria 
         # seleciona o tipo da sessao plenaria
@@ -99,7 +99,7 @@ else:
 
         # Lista das matérias apresentadas
         inf_basicas_dic["apresentada"] = []
-        for materia_apresentada in context.zsql.materia_apresentada_sessao_obter_zsql(dat_ordem=data,cod_sessao_plen=codigo,ind_excluido=0):
+        for materia_apresentada in context.zsql.materia_apresentada_sessao_obter_zsql(dat_ordem=data,cod_sessao_plen=cod_sessao_plen,ind_excluido=0):
             dic_materia_apresentada = {}
             # seleciona os detalhes de uma matéria
             if materia_apresentada.cod_materia != None:

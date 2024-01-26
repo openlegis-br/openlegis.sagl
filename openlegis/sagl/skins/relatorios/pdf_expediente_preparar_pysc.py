@@ -12,7 +12,6 @@ import os
 
 request=context.REQUEST
 response=request.RESPONSE
-session= request.SESSIO
 
 lst_autores_requerimentos = []
 lst_requerimentos = []

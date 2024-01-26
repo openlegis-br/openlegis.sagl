@@ -64,18 +64,18 @@ for sessao in context.zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=cod_sessao
                        for autor in context.zsql.autor_obter_zsql(cod_autor = autoria.cod_autor):
                            for parlamentar in context.zsql.parlamentar_obter_zsql(cod_parlamentar=autor.cod_parlamentar):
                                if parlamentar.sex_parlamentar == 'M':
-                                  dic_autores["nom_parlamentar"] = autoria['nom_autor_join']
+                                  dic_autores["nom_parlamentar"] = autoria['nom_autor_join'].encode('utf-8').upper()
                                if parlamentar.sex_parlamentar == 'F':
-                                  dic_autores["nom_parlamentar"] = autoria['nom_autor_join']
+                                  dic_autores["nom_parlamentar"] = autoria['nom_autor_join'].encode('utf-8').upper()
                     else:
                        dic_materia["cod_autor"] = int(autoria.cod_autor)
                        dic_autores["cod_autor"] = int(autoria.cod_autor)
                        for autor in context.zsql.autor_obter_zsql(cod_autor = autoria.cod_autor):
                            for parlamentar in context.zsql.parlamentar_obter_zsql(cod_parlamentar=autor.cod_parlamentar):
                                if parlamentar.sex_parlamentar == 'M':
-                                  dic_autores["nom_parlamentar"] = autoria['nom_autor_join']
+                                  dic_autores["nom_parlamentar"] = autoria['nom_autor_join'].encode('utf-8').upper()
                                if parlamentar.sex_parlamentar == 'F':
-                                  dic_autores["nom_parlamentar"] = autoria['nom_autor_join']
+                                  dic_autores["nom_parlamentar"] = autoria['nom_autor_join'].encode('utf-8').upper()
                 lst_autores_requerimentos.append(dic_autores)
                 lst_requerimentos.append(dic_materia)
                 lst_qtde_requerimentos.append(materia.cod_materia)

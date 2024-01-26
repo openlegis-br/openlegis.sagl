@@ -83,7 +83,7 @@ def principal(dic_cabecalho, dic_rodape, imagem, pauta_dic):
     tmp=''
     tmp+='<?xml version="1.0" encoding="utf-8" standalone="no" ?>\n'
     tmp+='<!DOCTYPE document SYSTEM "rml_1_0.dtd">\n'
-    tmp+='<document filename="str(inf_basicas_dic["cod_sessao_plen"])+"_pauta_expediente.pdf">\n'
+    tmp+='<document filename="pauta_expediente.pdf">\n'
     tmp+='\t<template pageSize="(21cm, 29.7cm)" title="Pauta de Leitura" author="OpenLegis" allowSplitting="20">\n'
     tmp+='\t\t<pageTemplate id="first">\n'
     tmp+='\t\t\t<pageGraphics>\n'

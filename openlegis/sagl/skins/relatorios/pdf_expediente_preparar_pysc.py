@@ -150,7 +150,7 @@ linha2 = casa["end_web_casa"]
 dat_emissao = DateTime().strftime("%d/%m/%Y")
 rodape = [linha1, linha2, dat_emissao]
 
-caminho = context.pdf_ordem_dia_gerar(cabecalho, rodape, imagem, pauta_dic)
+caminho = context.pdf_expediente_gerar(cabecalho, rodape, imagem, pauta_dic)
 if caminho=='aviso':
    return response.redirect('mensagem_emitir_proc')
 else:

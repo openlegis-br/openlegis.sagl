@@ -118,7 +118,7 @@ else:
                    comissoes.append(dic)
                dic_materia_apresentada["comissoes"] = ', '.join(['%s' % (value) for (value) in comissoes]) 
                dic_materia_apresentada["txt_ementa"] = materia.txt_ementa
-               dic_materia_apresentada["materia"] = materia.des_tipo_materia+" "+str(materia.num_ident_basica)+"/"+str(materia.ano_ident_basica)
+               dic_materia_apresentada["materia"] = str(materia.des_tipo_materia.decode('utf-8').upper())+' Nº '+str(materia.num_ident_basica)+'/'+str(materia.ano_ident_basica)
                dic_materia_apresentada["link_materia"] = '<link href="'+context.sapl_documentos.absolute_url()+'/materia/'+ str(materia_apresentada.cod_materia) + '_texto_integral.pdf' +'">'+materia.des_tipo_materia.decode('utf-8').upper()+' Nº '+str(materia.num_ident_basica)+'/'+str(materia.ano_ident_basica)+'</link>'
                dic_materia_apresentada["nom_autor"] = ""
                autores = context.zsql.autoria_obter_zsql(cod_materia=materia_apresentada.cod_materia)
@@ -149,7 +149,7 @@ else:
             for turno in context.zsql.turno_discussao_obter_zsql(cod_turno=item.tip_turno):
                 dic["des_turno"] = str(turno.des_turno)
                 dic["cod_turno"] = int(turno.cod_turno)
-            dic['materia'] = materia.des_tipo_materia.decode('utf-8').upper()+" N° "+str(materia.num_ident_basica) + '/' + str(materia.ano_ident_basica)
+            dic['materia'] = str(materia.des_tipo_materia.decode('utf-8').upper())+" N° "+str(materia.num_ident_basica) + '/' + str(materia.ano_ident_basica)
             dic["link_materia"] = '<link href="'+context.sapl_documentos.absolute_url()+'/materia/'+ str(materia.cod_materia) + '_texto_integral.pdf' +'">'+materia.des_tipo_materia.decode('utf-8').upper()+' Nº '+str(materia.num_ident_basica)+'/'+str(materia.ano_ident_basica)+'</link>'
             dic["txt_ementa"] = materia.txt_ementa
             dic['nom_autor'] = ''

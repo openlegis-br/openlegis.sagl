@@ -11,6 +11,8 @@
 from Products.CMFCore.utils import getToolByName
 st = getToolByName(context, 'portal_sagl')
 
+from DateTime import DateTime
+
 request = context.REQUEST
 response =  request.RESPONSE
 

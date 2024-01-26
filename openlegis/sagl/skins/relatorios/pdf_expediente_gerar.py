@@ -132,7 +132,7 @@ def indicacoes(lst_indicacoes):
     """
     tmp = ''
     if lst_indicacoes != []:
-       tmp+='\t\t<para style="P7" spaceBefore="15"><b><u>LEITURA DE INDICAÇÕES</u></b></para>\n\n'
+       tmp+='\t\t<para style="P7" spaceBefore="15"><b><u>INDICAÇÕES</u></b></para>\n\n'
        tmp+='\t\t<para style="P2" spaceAfter="6">\n'
        tmp+='\t\t\t<font color="white"> </font>\n'
        tmp+='\t\t</para>\n'
@@ -157,7 +157,7 @@ def pareceres(lst_pareceres):
     """
     tmp = ''
     if lst_pareceres != []:
-       tmp+='\t\t<para style="P7" spaceBefore="15"><b><u>VOTAÇÃO DE PARECERES</u></b></para>\n\n'
+       tmp+='\t\t<para style="P7" spaceBefore="15"><b><u>PARECERES</u></b></para>\n\n'
        tmp+='\t\t<para style="P2" spaceAfter="6">\n'
        tmp+='\t\t\t<font color="white"> </font>\n'
        tmp+='\t\t</para>\n'
@@ -182,7 +182,7 @@ def requerimentos(lst_requerimentos):
     """
     tmp = ''
     if lst_requerimentos != []:
-       tmp+='\t\t<para style="P7" spaceBefore="15"><b><u>VOTAÇÃO DE REQUERIMENTOS</u></b></para>\n\n'
+       tmp+='\t\t<para style="P7" spaceBefore="15"><b><u>REQUERIMENTOS</u></b></para>\n\n'
        tmp+='\t\t<para style="P2" spaceAfter="6">\n'
        tmp+='\t\t\t<font color="white"> </font>\n'
        tmp+='\t\t</para>\n'
@@ -207,7 +207,7 @@ def mocoes(lst_mocoes):
     """
     tmp = ''
     if lst_mocoes != []:
-       tmp+='\t\t<para style="P7" spaceBefore="15"><b><u>VOTAÇÃO DE MOÇÕES</u></b></para>\n\n'
+       tmp+='\t\t<para style="P7" spaceBefore="15"><b><u>MOÇÕES</u></b></para>\n\n'
        tmp+='\t\t<para style="P2" spaceAfter="6">\n'
        tmp+='\t\t\t<font color="white"> </font>\n'
        tmp+='\t\t</para>\n'
@@ -290,8 +290,8 @@ def principal(cabecalho, rodape, sessao, imagem, inf_basicas_dic):
     tmp+=indicacoes(lst_indicacoes)
     tmp+=requerimentos(lst_requerimentos)
     tmp+=mocoes(lst_mocoes)
-    tmp+=outros(lst_outros)
-    tmp+=presidente(lst_presidente)
+    #tmp+=outros(lst_outros)
+    #tmp+=presidente(lst_presidente)
     tmp+='\t</story>\n'
     tmp+='</document>\n'
     tmp_pdf=parseString(tmp)

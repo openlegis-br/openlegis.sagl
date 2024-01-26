@@ -45,7 +45,7 @@ def paraStyle():
     tmp+='\t\t</initialize>\n'
     tmp+='\t\t<paraStyle name="P0" fontName="Helvetica-Bold" fontSize="12" leading="14" alignment="CENTER"/>\n'
     tmp+='\t\t<paraStyle name="P1" fontName="Helvetica" fontSize="12" leading="14" alignment="CENTER"/>\n'
-    tmp+='\t\t<paraStyle name="P2" fontName="Helvetica" fontSize="12" leading="14" alignment="JUSTIFY"/>\n'
+    tmp+='\t\t<paraStyle name="P2" fontName="Helvetica" fontSize="11" leading="14" alignment="JUSTIFY"/>\n'
     tmp+='\t\t<paraStyle name="P3" fontName="Helvetica" fontSize="11" leading="13" alignment="JUSTIFY"/>\n'
     tmp+='\t\t<paraStyle name="P4" fontName="Helvetica" fontSize="11" leading="13" alignment="CENTER"/>\n'
     tmp+='\t</stylesheet>\n'
@@ -57,7 +57,7 @@ def pauta(pauta_dic):
     # inicio do bloco 
     tmp+='\t<story>\n'
     # dados da sessao
-    tmp+='\t\t<para style="P0"> str(pauta_dic["num_sessao_plen"]) +'ª REUNIÃO ' + pauta_dic["nom_sessao"] + ' do ' + str(pauta_dic["num_periodo"]) 'PERÍODO - ' + pauta_dic["dat_inicio_sessao"] + '</para>\n'
+    tmp+='\t\t<para style="P0">'+ str(pauta_dic["num_sessao_plen"]) +'ª REUNIÃO ' + pauta_dic["nom_sessao"] + ' do ' + str(pauta_dic["num_periodo"]) + 'º PERÍODO - ' + pauta_dic["dat_inicio_sessao"] + '</para>\n'
     tmp+='\t\t<para style="P2" spaceAfter="4">\n'
     tmp+='\t\t\t<font color="white"> </font>\n'
     tmp+='\t\t</para>\n'
@@ -79,7 +79,7 @@ def pauta(pauta_dic):
     return tmp
 
 def principal(dic_cabecalho, dic_rodape, imagem, pauta_dic):
-    arquivoPdf=str(inf_basicas_dic["cod_sessao_plen"])+"_pauta_expediente.pdf"
+    arquivoPdf=str(pauta_dic["cod_sessao_plen"])+"_pauta_expediente.pdf"
     tmp=''
     tmp+='<?xml version="1.0" encoding="utf-8" standalone="no" ?>\n'
     tmp+='<!DOCTYPE document SYSTEM "rml_1_0.dtd">\n'

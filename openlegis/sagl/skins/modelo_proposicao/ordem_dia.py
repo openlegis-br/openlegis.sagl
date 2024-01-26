@@ -89,7 +89,10 @@ else:
         inf_basicas_dic["hr_inicio_sessao"] = sessao.hr_inicio_sessao
         inf_basicas_dic["dat_fim_sessao"] = sessao.dat_fim_sessao
         inf_basicas_dic["hr_fim_sessao"] = sessao.hr_fim_sessao
-
+        inf_basicas_dic["num_periodo"] = ''
+        for periodo in context.zsql.periodo_sessao_obter_zsql(cod_periodo=sessao.cod_periodo_sessao):
+	    inf_basicas_dic["num_periodo"] = periodo.num_periodo
+	    
         nom_arquivo = str(cod_sessao_plen)+'_pauta_sessao.odt'
 
         # obtém o nome do Presidente da Câmara titular

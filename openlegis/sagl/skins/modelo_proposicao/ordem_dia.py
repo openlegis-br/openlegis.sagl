@@ -107,7 +107,7 @@ else:
                     inf_basicas_dic["lst_presidente"] = presidencia.nom_parlamentar
 
         # Lista das matérias apresentadas
-        inf_basicas_dic["apresentada"] = []
+        lst_apresentadas = []
         for materia_apresentada in context.zsql.materia_apresentada_sessao_obter_zsql(dat_ordem=data,cod_sessao_plen=cod_sessao_plen,ind_excluido=0):
             dic_materia_apresentada = {}
             # seleciona os detalhes de uma matéria
@@ -131,8 +131,10 @@ else:
                        nome_autor = autor['nom_autor_join']
                    lista_autor.append(nome_autor)
                dic_materia_apresentada["nom_autor"] = ', '.join(['%s' % (value) for (value) in lista_autor]) 
-               inf_basicas_dic["apresentada"].append(dic_materia_apresentada)
+              lst_apresentadas.append(dic_materia_apresentada)
+        inf_basicas_dic["apresentada"] = lst_apresentadas
 
+	    
         # Ordem do Dia
         inf_basicas_dic["pdiscussao"] = []
         inf_basicas_dic["sdiscussao"] = []

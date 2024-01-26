@@ -89,12 +89,8 @@ def inf_basicas(inf_basicas_dic):
     hr_fim_sessao = inf_basicas_dic["hr_fim_sessao"]
 
     tmp=""
-    tmp+='\t\t<para style="P0">' + str(inf_basicas_dic['num_sessao_plen']) + 'ª SESSÃO ' + str(inf_basicas_dic['nom_sessao']) + ' DA ' + str(inf_basicas_dic['num_legislatura']) + 'ª LEGISLATURA' + ', EM '+ str(inf_basicas_dic["dia_sessao"])+'</para>\n'
+    tmp+='\t\t<para style="P0">' + str(inf_basicas_dic['num_sessao_plen']) + 'ª REUNIÃO ' + str(inf_basicas_dic['nom_sessao']) + ' DA ' + str(inf_basicas_dic['num_legislatura']) + 'ª LEGISLATURA' + ', EM '+ str(inf_basicas_dic["dia_sessao"])+'</para>\n'
     tmp+='\t\t<para style="P2" spaceAfter="4">\n'
-    tmp+='\t\t\t<font color="white"> </font>\n'
-    tmp+='\t\t</para>\n'
-    tmp+='\t\t<para style="P4">(Pauta das Matérias do Expediente)</para>\n'
-    tmp+='\t\t<para style="P2" spaceAfter="12">\n'
     tmp+='\t\t\t<font color="white"> </font>\n'
     tmp+='\t\t</para>\n'
     tmp+='\t\t<condPageBreak height="3cm"/>\n'

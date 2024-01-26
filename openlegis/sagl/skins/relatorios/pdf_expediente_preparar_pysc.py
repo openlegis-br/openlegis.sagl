@@ -19,6 +19,13 @@ lst_qtde_requerimentos = []
 
 pauta_dic = {}
 
+tipo_expediente = []
+for item in context.zsql.tipo_expediente_obter_zsql(ind_excluido=0):
+    dic_expediente = {}
+    dic_expediente['cod_expediente'] = item.cod_expediente
+    dic_expediente['nom_expediente'] = item.nom_expediente
+    tipo_expediente.append(dic_expediente)
+
 cod_sessao_plen = context.REQUEST['cod_sessao_plen']
 
 for sessao in context.zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=cod_sessao_plen, ind_excluido=0):

@@ -28,7 +28,7 @@ if request.has_key('ind_audiencia'):
     inf_basicas_dic["num_legislatura"] = sessao.num_legislatura
     inf_basicas_dic["num_sessao_leg"] = sessao.num_sessao_leg
     inf_basicas_dic["dat_inicio_sessao"] = sessao.dat_inicio_sessao
-    inf_basicas_dic["ano_sessao"] = DateTime(sessao.dat_inicio_sessao, datefmt='international').strftime('%Y')
+    inf_basicas_dic["ano_sessao"] = sessao.ano_sessao
     inf_basicas_dic["dia_sessao"] = context.pysc.data_converter_por_extenso_pysc(data=sessao.dat_inicio_sessao)
     inf_basicas_dic["hr_inicio_sessao"] = sessao.hr_inicio_sessao
     inf_basicas_dic["dat_fim_sessao"] = sessao.dat_fim_sessao

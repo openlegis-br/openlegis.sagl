@@ -113,9 +113,8 @@ else:
                dic_materia_apresentada["num_ordem"] = materia_apresentada.num_ordem
                comissoes = []
                for despacho in context.zsql.despacho_inicial_obter_zsql(cod_materia=materia_apresentada.cod_materia):
-                   dic = {}
-                   dic["nom_comissao"] = despacho.nom_comissao_index
-                   comissoes.append(dic)
+                   nom_comissao = despacho.nom_comissao_index
+                   comissoes.append(nom_comissao)
                dic_materia_apresentada["comissoes"] = '; '.join(['%s' % (value) for (value) in comissoes]) 
                dic_materia_apresentada["txt_ementa"] = materia.txt_ementa
                dic_materia_apresentada["materia"] = str(materia.des_tipo_materia.decode('utf-8').upper())+' Nº '+str(materia.num_ident_basica)+'/'+str(materia.ano_ident_basica)

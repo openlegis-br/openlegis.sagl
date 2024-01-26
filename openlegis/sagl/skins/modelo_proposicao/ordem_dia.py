@@ -31,7 +31,7 @@ if request.has_key('ind_audiencia'):
     inf_basicas_dic["dat_fim_sessao"] = sessao.dat_fim_sessao
     inf_basicas_dic["hr_fim_sessao"] = sessao.hr_fim_sessao
     inf_basicas_dic["periodo"] = ''
-    for periodo in context.zsql.periodo_sessao_obter_zsql(cod_periodo=sessao.cod_periodo_sessao)
+    for periodo in context.zsql.periodo_sessao_obter_zsql(cod_periodo=sessao.cod_periodo_sessao):
 	 inf_basicas_dic["periodo"] = periodo.num_periodo
     data = context.pysc.data_converter_pysc(sessao.dat_inicio_sessao)
     nom_arquivo = str(cod_sessao_plen)+'_pauta_sessao.odt'

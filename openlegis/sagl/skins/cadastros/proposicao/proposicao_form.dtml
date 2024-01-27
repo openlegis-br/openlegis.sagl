@@ -791,7 +791,7 @@ $(function () {
              </dtml-in>
            </select>
      </div>
-     <dtml-else>
+     <dtml-elif expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia', 'Revisor Proposicao'])">
        <div class="col-12 col-md-6 mb-3">
          <label for="nom_assessor">Assessor Responsável</label>
          <dtml-in expr="zsql.assessor_parlamentar_obter_zsql(cod_assessor=cod_assessor_sel)">

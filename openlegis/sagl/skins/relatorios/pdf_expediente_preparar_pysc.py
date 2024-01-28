@@ -81,7 +81,7 @@ for sessao in context.zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=cod_sessao
                 lst_qtde_requerimentos.append(materia.cod_materia)
  
 # ordena materias por antiguidade
-lst_requerimentos.sort(key=lambda dic: dic_materia['num_ident_basica'])
+lst_requerimentos.sort(key=lambda dic_materia: dic_materia['num_ident_basica'])
 
 # setar apenas uma ocorrência de nome parlamentar
 lst_autores_requerimentos = [

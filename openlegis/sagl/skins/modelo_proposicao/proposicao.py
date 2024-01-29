@@ -39,7 +39,7 @@ inf_basicas_dic['des_tipo_proposicao'] = ''
 
 for proposicao in context.zsql.proposicao_obter_zsql(cod_proposicao=cod_proposicao):
     inf_basicas_dic['des_tipo_proposicao']= proposicao.des_tipo_proposicao
-    num_proposicao = cod_proposicao
+    num_proposicao = proposicao.cod_proposicao
     nom_arquivo = str(proposicao.cod_proposicao)+'.odt'
     des_tipo_materia = proposicao.des_tipo_proposicao.decode('utf-8').upper()
     num_ident_basica = ''

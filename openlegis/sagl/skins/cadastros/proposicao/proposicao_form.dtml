@@ -1,8 +1,6 @@
 <dtml-var standard_html_header>
 
-<script type="text/javascript">
-<!--
-
+<script>
   function campos_criticar(form){
 
       if (form.lst_tip_proposicao[form.lst_tip_proposicao.selectedIndex].value == "0") {
@@ -406,7 +404,6 @@ $(function () {
     <input type="hidden" name="hdn_url" value="proposicao_mostrar_proc?cod_proposicao=<dtml-var cod_proposicao missing>" />
    <input type="hidden" name="hdn_cod_proposicao" value="<dtml-var cod_proposicao missing>" />
 
-
     <div class="form-row">
        <div class="col-12 col-md-6 mb-3">
          <label for="lst_tip_proposicao" class="required">Tipo de Proposição</label>
@@ -506,7 +503,7 @@ $(function () {
       <label for="lst_assunto">Assunto</label>
           <select class="form-control selectpicker show-tick" data-actions-box="true" data-size="10" data-selected-text-format="count > 4" data-live-search="true" id="lst_assunto" name="lst_assunto" <dtml-if "not _.has_key('cod_assunto_sel') or prop_recebida"> disabled </dtml-if>>
              <option value="0"></option>
-             <dtml-in expr="zsql.assunto_proposicao_obter_zsql(tip_proposicao=_.int(tip_proposicao_sel))">
+             <dtml-in expr="zsql.assunto_proposicao_obter_zsql(tip_proposicao=_.int(tip_proposicao_sel))" mapping>
                 <option
                   <dtml-if cod_assunto_sel>
                      <dtml-if expr="_.int(cod_assunto_sel) == _.int(cod_assunto)">
@@ -524,7 +521,6 @@ $(function () {
     <input type="hidden" name="lst_assunto" value=""> 
     <input type="hidden" name="lst_assessor" value="">
 </dtml-if>
-
 
   <div class="form-row" id="divMat" <dtml-if expr="not _.has_key('cod_proposicao') or ind_mat_ou_doc=='M'">style="display:none;"</dtml-if>>
     <div class="col-12 col-md-6 mb-3">
@@ -579,8 +575,21 @@ $(function () {
 
 <dtml-if cod_proposicao>
 <dtml-if expr="des_tipo_proposicao=='Requerimento'">
+   <div id="accordion" class="maps">
+    <div class="">
+      <div class="" id="headingOne">
+        <p class="h5 mb-3">
+          <a class="d-block text-left collapsed" data-toggle="collapse" data-target="#collapseLeit" aria-expanded="false" aria-controls="collapseLeit"> 
+            <i class="fa float-right pt-1 align-self-center" aria-hidden="true"></i>
+             <span class="h6">Mapa / Fotografias</span>
+          </a>
+        </p>
+      </div>
+      <div id="collapseLeit" class="collapse" aria-labelledby="headingOne" data-parent=".maps" style="">
+        <div class=""> 
+        
     <div class="form-row">
-        <div class="col-12 mb-3">
+        <div class="col-12">
          <iframe
             id="maps"
             width="100%"
@@ -608,7 +617,7 @@ $(function () {
            <input class="form-control form-control-sm" id="lng" name="lng" type="text" value="<dtml-var txt_lng missing>" readonly>
         </div>
     </div>
-    <dtml-comment>
+   
     <div class="form-row">
         <div class="col-12 col-md-6 mb-3">
            <label class="form-label d-block">Fotografia 1</label>
@@ -645,7 +654,10 @@ $(function () {
                  </dtml-if>
             </div>
    </div>
-  </dtml-comment>
+        </div>
+      </div>
+    </div>
+
 </dtml-if>
   <dtml-if expr="AUTHENTICATED_USER.has_role(['Autor', 'Assessor Parlamentar'])">
    <div class="form-row mb-2">  
@@ -778,8 +790,8 @@ $(function () {
      <div class="col-12 col-md-6 mb-3">
            <label for="lst_assessor">Assessor Responsável</label>
            <select class="custom-select custom-select-sm" id="lst_assessor" name="lst_assessor" <dtml-if expr="(prop_enviada)">disabled</dtml-if>>
-             <option value ="">Selecione</option>
-             <dtml-in expr="zsql.assessor_parlamentar_obter_zsql(cod_parlamentar=cod_parlamentar_sel)">
+             <option value =""></option>
+             <dtml-in expr="zsql.assessor_parlamentar_obter_zsql(cod_parlamentar=cod_parlamentar_sel)" mapping>
                <dtml-if expr="dat_exoneracao == None or dat_exoneracao == ''">
                  <option
                  <dtml-if cod_assessor_sel>
@@ -802,7 +814,7 @@ $(function () {
        <input type="hidden" name="lst_assessor" value="<dtml-var cod_assessor_sel missing null>">
     <dtml-else>
        <input type="hidden" name="lst_assessor" value="<dtml-var cod_assessor_sel missing null>">
-    </dtml-if>
+    </dtml-if> 
     </div>
   </dtml-if>
 

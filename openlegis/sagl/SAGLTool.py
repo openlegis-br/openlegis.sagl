@@ -1283,7 +1283,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         opener = urllib.urlopen(url)
         open('/tmp/' + id_image1, 'wb').write(opener.read())
         image_one = open('/tmp/' + id_image1, 'rb').read() 
-        #os.unlink('/tmp/' + id_image1)
+        os.unlink('/tmp/' + id_image1)
         return image_one
 
     def get_proposicao_image_two(self, num_proposicao):
@@ -1294,7 +1294,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         opener = urllib.urlopen(url)
         open('/tmp/' + id_image2, 'wb').write(opener.read())
         image_two = open('/tmp/' + id_image2, 'rb').read() 
-        #os.unlink('/tmp/' + id_image2)
+        os.unlink('/tmp/' + id_image2)
         return image_two
 
     def proposicao_gerar_odt(self, inf_basicas_dic, num_proposicao, nom_arquivo, des_tipo_materia, num_ident_basica, ano_ident_basica, txt_ementa, materia_vinculada, dat_apresentacao, nom_autor, apelido_autor, modelo_proposicao, modelo_path):

@@ -1275,6 +1275,27 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         pdf = getattr(self.sapl_documentos.peticao, nom_arquivo_pdf1)
         pdf.manage_permission('View', roles=['Manager','Authenticated'], acquire=0)
 
+    def get_proposicao_image_one(self, num_proposicao):
+        utool = getToolByName(self, 'portal_url')
+        portal = utool.getPortalObject()
+        id_image1 = str(num_proposicao) + '_image_1.jpg'
+        url = self.url() + '/sapl_documentos/proposicao/'+id_image1
+        opener = urllib.urlopen(url)
+        open('/tmp/' + id_image1, 'wb').write(opener.read())
+        image_one = open('/tmp/' + id_image1, 'rb').read() 
+        #os.unlink('/tmp/' + id_image1)
+        return image_one
+
+    def get_proposicao_image_two(self, num_proposicao):
+        utool = getToolByName(self, 'portal_url')
+        portal = utool.getPortalObject()
+        id_image2 = str(num_proposicao) + '_image_2.jpg'
+        url = self.url() + '/sapl_documentos/proposicao/'+id_image2
+        opener = urllib.urlopen(url)
+        open('/tmp/' + id_image2, 'wb').write(opener.read())
+        image_two = open('/tmp/' + id_image2, 'rb').read() 
+        #os.unlink('/tmp/' + id_image2)
+        return image_two
 
     def proposicao_gerar_odt(self, inf_basicas_dic, num_proposicao, nom_arquivo, des_tipo_materia, num_ident_basica, ano_ident_basica, txt_ementa, materia_vinculada, dat_apresentacao, nom_autor, apelido_autor, modelo_proposicao, modelo_path):
         utool = getToolByName(self, 'portal_url')
@@ -1289,6 +1310,17 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         template_file = cStringIO.StringIO(str(modelo.data))
         brasao_file = self.get_brasao()
         exec 'brasao = brasao_file'
+        if inf_basicas_dic['des_tipo_proposicao'] == 'Requerimento':
+        # atribui imagem1 no locals
+           id_imagem1 = str(num_proposicao)+'_image_1.jpg'
+           if hasattr(self.sapl_documentos.proposicao, id_imagem1):
+              image_one = self.get_proposicao_image_one(num_proposicao=num_proposicao)
+              exec ('image1 = image_one')
+           # atribui imagem2 no locals
+           id_imagem2 = str(num_proposicao)+'_image_2.jpg'
+           if hasattr(self.sapl_documentos.proposicao, id_imagem2):
+              image_two = self.get_proposicao_image_two(num_proposicao=num_proposicao)
+              exec ('image2 = image_two')
         output_file_odt = "%s"%nom_arquivo
         renderer = Renderer(template_file, locals(), output_file_odt, pythonWithUnoPath='/usr/bin/python3',forceOoCall=True)
         renderer.run()

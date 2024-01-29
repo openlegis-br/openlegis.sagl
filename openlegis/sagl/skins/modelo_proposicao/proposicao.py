@@ -39,7 +39,7 @@ inf_basicas_dic['des_tipo_proposicao'] = ''
 
 for proposicao in context.zsql.proposicao_obter_zsql(cod_proposicao=cod_proposicao):
     inf_basicas_dic['des_tipo_proposicao']= proposicao.des_tipo_proposicao
-    num_proposicao = 'PN ' + str(cod_proposicao)
+    num_proposicao = cod_proposicao
     nom_arquivo = str(proposicao.cod_proposicao)+'.odt'
     des_tipo_materia = proposicao.des_tipo_proposicao.decode('utf-8').upper()
     num_ident_basica = ''
@@ -102,7 +102,7 @@ for proposicao in context.zsql.proposicao_obter_zsql(cod_proposicao=cod_proposic
                       partido_autor = nom_cargo
                    autor_dic['nome_autor'] = autor.nom_autor_join.decode('utf-8').upper() + '\n' + partido_autor
                    autor_dic['apelido_autor'] = partido_autor
-            elif autor.des_cargo == 'Prefeito Municipal' or autor.des_cargo == 'Prefeita Municipal':
+            elif autor.des_cargo == 'Prefeito Municipal' or autor.des_cargo == 'Prefeito Municipal':
                for usuario in context.zsql.usuario_obter_zsql(col_username=autor.col_username):
                    autor_dic['nome_autor'] = usuario.nom_completo.decode('utf-8').upper() + '\n' + autor.des_cargo
                    autor_dic['apelido_autor'] = ''

@@ -1313,11 +1313,13 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         if inf_basicas_dic['des_tipo_proposicao'] == 'Requerimento':
         # atribui imagem1 no locals
            id_imagem1 = str(num_proposicao)+'_image_1.jpg'
+           image1 = None
            if hasattr(self.sapl_documentos.proposicao, id_imagem1):
               image_one = self.get_proposicao_image_one(num_proposicao=num_proposicao)
               exec ('image1 = image_one')
            # atribui imagem2 no locals
            id_imagem2 = str(num_proposicao)+'_image_2.jpg'
+           image2 = None
            if hasattr(self.sapl_documentos.proposicao, id_imagem2):
               image_two = self.get_proposicao_image_two(num_proposicao=num_proposicao)
               exec ('image2 = image_two')

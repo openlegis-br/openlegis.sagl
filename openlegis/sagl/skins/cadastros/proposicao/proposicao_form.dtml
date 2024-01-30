@@ -517,9 +517,11 @@ $(function () {
           </select>
     </div>
   </div>
-<dtml-else>
+<dtml-elif expr="not _.has_key('cod_proposicao')">
     <input type="hidden" name="lst_assunto" value=""> 
     <input type="hidden" name="lst_assessor" value="">
+<dtml-else>
+
 </dtml-if>
 
   <div class="form-row" id="divMat" <dtml-if expr="not _.has_key('cod_proposicao') or ind_mat_ou_doc=='M'">style="display:none;"</dtml-if>>

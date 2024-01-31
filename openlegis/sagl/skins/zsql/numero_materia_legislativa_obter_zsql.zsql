@@ -16,6 +16,7 @@ FROM
 <dtml-sqlgroup where>
   <dtml-sqltest tip_id_basica_sel   column="materia_legislativa.tip_id_basica"          op="="  type="int" optional> <dtml-and>
   <dtml-sqltest sigla_tipo_materia  column="tipo_materia_legislativa.sgl_tipo_materia"  op="="  type="nb" optional> <dtml-and>
+  <dtml-sqltest ano_ident_basica    column="materia_legislativa.ano_ident_basica"       op="="  type="int" optional> <dtml-and>
   <dtml-sqltest ind_excluido        column="materia_legislativa.ind_excluido"           op="="  type="int">
   AND materia_legislativa.ano_ident_basica >= YEAR(legislatura.dat_inicio)
   And materia_legislativa.ano_ident_basica <= YEAR(legislatura.dat_fim)

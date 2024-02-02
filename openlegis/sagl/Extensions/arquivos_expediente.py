@@ -10,7 +10,7 @@ def baixar_pdf(context):
        os.makedirs(dirpath)
     orgaos = []
     arquivos = []
-    for item in context.zsql.expediente_materia_obter_zsql(cod_sessao_plen=1361,ind_excluido=0):
+    for item in context.zsql.expediente_materia_obter_zsql(cod_sessao_plen=cod_sessao_plen,ind_excluido=0):
         if item.cod_materia != None:
            for materia in context.zsql.materia_obter_zsql(cod_materia=item.cod_materia,ind_excluido=0):
                if materia.des_tipo_materia == 'Indicação' or materia.des_tipo_materia == 'Requerimento' or materia.des_tipo_materia == 'Pedido de Informação' or materia.des_tipo_materia == 'Moção':

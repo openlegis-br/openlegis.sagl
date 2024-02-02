@@ -35,7 +35,7 @@ for item in cod_materia:
 lst_materias = [(i + 1, j) for i, j in enumerate(lst_materias)]
       
 for i, dic in lst_materias:
-    context.zsql.expediente_materia_incluir_zsql(cod_sessao_plen=cod_sessao_plen, cod_materia=dic.get('cod_materia',dic), dat_ordem=txt_dat_ordem, txt_observacao=dic.get('txt_observacao',dic), num_ordem=i, tip_quorum=lst_tip_quorum, tip_votacao=rad_tip_votacao)
+    context.zsql.expediente_materia_incluir_zsql(cod_sessao_plen=cod_sessao_plen, cod_materia=dic.get('cod_materia',dic), dat_ordem=txt_dat_ordem, txt_observacao=dic.get('txt_observacao',dic), num_ordem=i, tip_quorum=lst_tip_quorum, tip_votacao=rad_tip_votacao, tip_turno=5)
 
 mensagem = 'Pauta gerada com sucesso!'
 mensagem_obs = ''   

@@ -3,8 +3,8 @@ import shutil
 import zipfile
 def baixar_pdf(context):
     cod_sessao_plen = context.REQUEST['cod_sessao_plen']
-    foldername =  str(cod_sessao_plen) + '_ind'
-    zipname =  str(cod_sessao_plen) + '_ind.zip'
+    foldername =  str(cod_sessao_plen) + '_proposicoes'
+    zipname =  str(cod_sessao_plen) + '.zip'
     dirpath = os.path.join('/tmp/', foldername)
     if not os.path.exists(dirpath):
        os.makedirs(dirpath)

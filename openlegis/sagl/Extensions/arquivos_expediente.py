@@ -43,7 +43,7 @@ def baixar_pdf(context):
     for orgao in orgaos:
         os.makedirs(os.path.join(dirpath, orgao))
         for arquivo in arquivos:
-            if arquivo['nom_orgao'] == orgao
+            if arquivo['nom_orgao'] == orgao:
                arq = getattr(context.sapl_documentos.materia, arquivo['id_pdf'])
                f = open(os.path.join(dirpath, orgao) + '/' + str(arquivo['nom_pdf']), 'wb').write(arq.data)
 

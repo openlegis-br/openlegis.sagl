@@ -55,7 +55,7 @@ for sessao in context.zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=cod_sessao
              dic_materia["id_materia"] = '<link href="' + context.sapl_documentos.absolute_url() + '/materia/' + str(materia.cod_materia) + '_texto_integral.pdf' + '">'+materia.des_tipo_materia.decode('utf-8').upper() +' Nº '+ str(materia.num_ident_basica)+'/'+str(materia.ano_ident_basica)+'</link>'
              dic_materia['txt_ementa'] = materia.txt_ementa
 
-             if materia.des_tipo_materia == 'Requerimento' or materia.des_tipo_materia == 'Indicação' or materia.des_tipo_materia == 'Moção':
+             if materia.des_tipo_materia == 'Requerimento' or materia.des_tipo_materia == 'Indicação' or materia.des_tipo_materia == 'Moção' or materia.des_tipo_materia == 'Pedido de Informação' :
                 dic_autores = {}
                 for autoria in context.zsql.autoria_obter_zsql(cod_materia=materia.cod_materia, ind_primeiro_autor = 1):
                     if autoria.ind_primeiro_autor == 1:

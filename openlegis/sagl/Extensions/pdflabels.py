@@ -121,8 +121,8 @@ class LabelGenerator:
         self.horizSpacing = spec.get('horizontalSpacing', 0) * self.un
         
         self.font = "Helvetica"
-        self.size = 8
-	self.leadingFactor = 1.2
+        self.size = 7
+	self.leadingFactor = 1
         
         try:
             self.vertPadding = spec['verticalPadding'] * self.un

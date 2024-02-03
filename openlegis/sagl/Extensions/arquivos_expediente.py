@@ -5,7 +5,7 @@ def baixar_pdf(context):
     cod_sessao_plen = context.REQUEST['cod_sessao_plen']
     for sessao in context.zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=cod_sessao_plen, ind_excluido=0):
         for tipo_sessao in context.zsql.tipo_sessao_plenaria_obter_zsql(tip_sessao=sessao.tip_sessao):
-                zipname =  'materias_lidas-' + str(sessao.num_sessao_plen) + '-' + str(tipo_sessao.nom_sessao).encode('utf-8').decode('utf-8') + '.zip'           
+                zipname =  'materias_lidas-' + str(sessao.num_sessao_plen) + ' Reunião ' + str(tipo_sessao.nom_sessao).encode('utf-8').decode('utf-8') + '.zip'           
     foldername =  'proposicoes'
     dirpath = os.path.join('/tmp/', foldername)
     if not os.path.exists(dirpath):

@@ -7,7 +7,7 @@ def baixar_pdf(context):
     for sessao in context.zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=cod_sessao_plen, ind_excluido=0):
         zipname =  str('materias_lidas-') + str(sessao.num_sessao_plen) + str('a_ReuniaoOrdinaria') + str('.zip')
         #zipname = u'materias_lidas-%sa_ReuniaoOrdinaria.zip' % (sessao.num_sessao_plen)
-    foldername =  'proposicoes'
+    foldername =  'orgaos'
     dirpath = os.path.join('/tmp/', foldername)
     if not os.path.exists(dirpath):
        os.makedirs(dirpath)

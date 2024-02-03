@@ -242,7 +242,7 @@ href="<dtml-var portal_url>/cadastros/proposicao/proposicao_index_html?ind_envia
                     <th width="20%">Tipo de Proposição</th>
                     <th>Ementa</th>
                     <th width="18%">Envio</th>
-                    <th>Incorporada?</th>
+                    <th>Situação</th>
                 </tr>
              </thead>
     </dtml-if sequence-start>
@@ -257,8 +257,32 @@ href="<dtml-var portal_url>/cadastros/proposicao/proposicao_index_html?ind_envia
                         <dtml-if expr="dat_envio==None">Em elaboração<dtml-else><dtml-var dat_envio></dtml-if>
                     </td>
                     <td>
-	                <dtml-if expr="dat_devolucao!=None"><p style="color:#DE1E1E;font-weight:bold">Devolvida</p>
-                          <dtml-else><dtml-if expr="dat_recebimento and not dat_devolucao">Sim<dtml-else>Não</dtml-if>
+	                <dtml-if expr="dat_devolucao!=None">
+                           <p style="color:#DE1E1E;font-weight:bold">Devolvida</p>
+                        <dtml-else>
+                           <dtml-if expr="dat_recebimento and not dat_devolucao">
+                             <dtml-if expr="ind_mat_ou_doc=='D' and cod_emenda==None and cod_substitutivo==None and cod_parecer==None">                    
+                                <dtml-in expr="zsql.documento_acessorio_obter_zsql(cod_documento=cod_mat_ou_doc)">
+                                  <dtml-call expr="REQUEST.set('cod_mat', cod_materia)">
+                                <dtml-else>
+                                  <dtml-var cod_mat_ou_doc>Falha no documento acessório.
+                                </dtml-in>
+                             <dtml-else>
+                                <dtml-call expr="REQUEST.set('cod_mat', cod_mat_ou_doc)">
+                             </dtml-if>
+                             <dtml-if cod_mat>
+                                <dtml-in expr="zsql.materia_obter_zsql(cod_materia=cod_mat, ind_excluido=0)">
+                                       <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia'])">
+                                         <a href="<dtml-var portal_url>/cadastros/materia/materia_mostrar_proc?cod_materia=<dtml-var cod_materia>" target="_blank"><dtml-var sgl_tipo_materia> <dtml-var num_ident_basica>/<dtml-var ano_ident_basica></a>
+                                       <dtml-else>
+                                         <a href="<dtml-var portal_url>/consultas/materia/materia_mostrar_proc?cod_materia=<dtml-var cod_materia>" target="_blank"><dtml-var sgl_tipo_materia> <dtml-var num_ident_basica>/<dtml-var ano_ident_basica></a>
+                                       </dtml-if>
+                                <dtml-else> 
+                                     <dtml-var cod_mat missing> Falha no registro vinculado.
+                                </dtml-in>
+                             </dtml-if>
+                           <dtml-else>Não
+                           </dtml-if>
 	                </dtml-if>
                     </td>
                 </tr>

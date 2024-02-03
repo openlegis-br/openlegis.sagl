@@ -35,14 +35,16 @@ dados = []
 for row in results:
     r=[]
     # Label, Data
-    if row[3]!=None:
-     r.append(row[3])
-    if row[13]!=None:
-     r.append(row[13])
-    if row[14]!=None:
-     r.append(row[14])
-    if row[15]!=None and row[16]!=None:
-     r.append(' CEP '+row[15]+' '+row[16]+ ' ' + row[17])
+    if row.nom_eleitor!=None:
+     r.append(row.nom_eleitor.title())
+    if row.end_residencial!=None and row.end_residencial!='':
+     r.append(str(row.end_residencial).decode('utf-8').title())
+    if row.nom_bairro!=None and row.nom_bairro!='':
+       if row.num_cep==None or row.num_cep=='':
+           r.append(row.nom_bairro.title())
+       else:     
+           r.append('CEP ' + str(row.num_cep) + ' ' + row.nom_bairro.title())
+    if row.nom_localidade!=None:  
+     r.append(str(row.nom_localidade) + ' ' + row.sgl_uf )
     dados.append(r)
 return context.pdflabels(dados)
-

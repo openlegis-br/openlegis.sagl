@@ -5,7 +5,7 @@
 </dtml-comment>
 
 <dtml-in expr="zsql.tipo_sessao_plenaria_obter_zsql(tip_sessao=tip_sessao)">
-<h1 class="firstHeading d-none">Sessão Plenária</h1>
+<h1 class="firstHeading d-none">Reunião Plenária</h1>
 <h2 align="center"><dtml-var sessao_plenaria_header></h2>
 </dtml-in>
 
@@ -16,7 +16,7 @@
    <dtml-call expr="REQUEST.set('id_documento', _.str(cod_sessao_plen)+ '_' + 'ata_sessao.pdf')">
    <dtml-if "_.hasattr(sapl_documentos.ata_sessao,id_documento)">
       <dtml-let documento="_.getattr(sapl_documentos.ata_sessao,id_documento).absolute_url">
-             <a class="btn btn-secondary" href="<dtml-var documento>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fas fa-file-pdf"></i> <span class="">Ata da Sessão</span></a>             
+             <a class="btn btn-secondary" href="<dtml-var documento>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fas fa-file-pdf"></i> <span class="">Ata da Reunião</span></a>             
       </dtml-let>
    </dtml-if>
     <dtml-if url_audio>
@@ -179,7 +179,7 @@
         <p class="h5 mb-0">
           <a href="#" class="d-block text-left collapsed" data-toggle="collapse" data-target="#collapseLeit" aria-expanded="false" aria-controls="collapseLeit"> 
             <i class="fa float-right pt-1 align-self-center" aria-hidden="true"></i>
-             <span class="h6 font-weight-bold">Leitura de Matérias Apresentadas</span>
+             <span class="h6 font-weight-bold">Objeto de Deliberação / Encaminhar para Comissão</span>
           </a>
         </p>
       </div>
@@ -309,7 +309,7 @@
         <p class="h5 mb-0">
           <a href="#" class="d-block text-left collapsed" data-toggle="collapse" data-target="#collapseExp" aria-expanded="false" aria-controls="collapseExp"> 
             <i class="fa float-right pt-1 align-self-center" aria-hidden="true"></i>
-             <span class="h6 font-weight-bold">Matérias do Expediente</span>
+             <span class="h6 font-weight-bold">Listagem de Leitura</span>
           </a>
         </p>
       </div>

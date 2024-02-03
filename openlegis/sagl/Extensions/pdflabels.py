@@ -100,7 +100,7 @@ LABELS = ({'cia':'test',
 	  )
 
 class LabelGenerator:
-    smallestFont = 5
+    smallestFont = 6
     def __init__(self, spec):
         self.cia = spec['cia']
         self.models = spec['models']
@@ -121,9 +121,8 @@ class LabelGenerator:
         self.horizSpacing = spec.get('horizontalSpacing', 0) * self.un
         
         self.font = "Helvetica"
-        self.size = 7
-	self.leadingFactor = 1
-        
+        self.size = 10
+        self.leadingFactor = 1.2
         try:
             self.vertPadding = spec['verticalPadding'] * self.un
         except KeyError: 
@@ -177,7 +176,7 @@ class LabelGenerator:
             except Error2:
                 fontSize = fontSize - 1
         #falha :-(
-        raise Exception(Error, "O texto não coube na etiqueta. Reduza o texto ou use uma etiqueta maior \n" + `text` + " " + `self.smallestFont` + " " + `fontSize`)
+        raise Exception(Error, "Vertical. O texto não coube na etiqueta. Reduza o texto ou use uma etiqueta maior \n" + `text` + " " + `self.smallestFont` + " " + `fontSize`)
 
     def fitHorizontal(self, t, fontSize, debugFile=None):
         modifiedText = []
@@ -206,7 +205,7 @@ class LabelGenerator:
                 return ([string.join(words[:pos], ' ')] +
                         self.adaptHorizontal(string.join(words[pos:], ' '),
 					     fontSize, debugFile))
-        raise Exception(Error, "O texto não coube nas etiquetas. Reduza o texto ou use uma etiqueta maior")
+        raise Exception(Error, "Horizontal. O texto não coube nas etiquetas. Reduza o texto ou use uma etiqueta maior")
 
     def fitVertical(self, text, fontSize):
 	numLines = len(text)
@@ -356,5 +355,3 @@ def gera_etiqueta(self, dados):
     self.REQUEST.RESPONSE.setHeader('Content-Type', 'application/pdf')
     self.REQUEST.RESPONSE.setHeader('Content-disposition','inline; filename="%s"' % filename)
     return content
-
-

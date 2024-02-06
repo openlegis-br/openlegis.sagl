@@ -526,7 +526,7 @@ $(function () {
 
   <div class="form-row" id="divMat" <dtml-if expr="not _.has_key('cod_proposicao') or ind_mat_ou_doc=='M'">style="display:none;"</dtml-if>>
     <div class="col-12 col-md-6 mb-3">
-      <label for="lst_tip_id_basica">Matéria Vinculada</label>
+      <label for="lst_tip_id_basica" class="required">Matéria Vinculada</label>
           <select class="custom-select" id="lst_tip_id_basica" name="lst_tip_id_basica" <dtml-if "not _.has_key('tip_id_basica_sel') or prop_recebida or prop_devolvida"> disabled </dtml-if>>
              <option value="0"></option>
              <dtml-in expr="zsql.tipo_materia_legislativa_obter_zsql(tip_natureza='P')">
@@ -543,14 +543,14 @@ $(function () {
           </select>
     </div>
     <div class="col-4 col-md-2 mb-3">
-      <label for="txt_num_ident_basica">Número</label> 
+      <label for="txt_num_ident_basica" class="required">Número</label> 
       <input class="form-control number" type="number" id="txt_num_ident_basica" name="txt_num_ident_basica" value="<dtml-var num_ident_basica_sel missing null="1">" 
         <dtml-if "not _.has_key('num_ident_basica_sel') or prop_recebida">
            disabled 
         </dtml-if>  />    
     </div>
     <div class="col-4 col-md-2 mb-3">
-      <label for="txt_ano_ident_basica">Ano</label>
+      <label for="txt_ano_ident_basica" class="required">Ano</label>
       <input class="form-control year" type="number" id="txt_ano_ident_basica" name="txt_ano_ident_basica" value="<dtml-var ano_ident_basica_sel missing>" 
         <dtml-if "not _.has_key('ano_ident_basica_sel') or prop_recebida"> 
            disabled

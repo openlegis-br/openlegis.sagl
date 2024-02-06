@@ -14,6 +14,14 @@
     <dtml-call expr="REQUEST.set('cod_materia', '')">
 </dtml-if>
 
+<dtml-if expr="not _.has_key('lst_assunto') or lst_assunto=='0'">
+  <dtml-call expr="REQUEST.set('lst_assunto', '')">
+</dtml-if>
+
+<dtml-if expr="not _.has_key('lst_assessor') or lst_assessor=='0'">
+  <dtml-call expr="REQUEST.set('lst_assessor', '')">
+</dtml-if>
+
 <dtml-if expr="save_ok=='1'">
     <dtml-if hdn_cod_proposicao>
         <dtml-call expr="REQUEST.set('metodo', zsql.proposicao_atualizar_zsql)">
@@ -22,9 +30,6 @@
             <dtml-call expr="REQUEST.set('col_username', col_username)">
             <dtml-call expr="REQUEST.set('dat_envio', dat_envio)">
             <dtml-call expr="REQUEST.set('dat_recebimento', dat_recebimento)">
-            <dtml-if expr="des_tipo_proposicao!='Requerimento' or des_tipo_proposicao!='Indicação' or des_tipo_proposicao!='Moção'">
-              <dtml-call expr="REQUEST.set('cod_assunto', '')">
-            </dtml-if>
         </dtml-in>
       <dtml-comment>
         <dtml-if expr="col_username!=AUTHENTICATED_USER.getUserName()">

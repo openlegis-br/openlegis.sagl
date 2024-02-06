@@ -8,7 +8,7 @@
 <dtml-in expr="zsql.expediente_materia_obter_zsql(cod_sessao_plen = cod_sessao_plen, ind_excluido=0)">
  <dtml-if cod_materia>
   <dtml-in expr="zsql.materia_obter_zsql(cod_materia=cod_materia)">
-   <dtml-if expr="des_tipo_materia=='Requerimento' or des_tipo_materia=='Moção'">
+   <dtml-if expr="des_tipo_materia=='Requerimento' or des_tipo_materia=='Moção' or des_tipo_materia=='Pedido de Informação'">
      <dtml-call expr="REQUEST.set('txt_votos_nao', '0')">
      <dtml-call expr="REQUEST.set('txt_votos_abstencao', '0')">
      <dtml-call expr="REQUEST.set('txa_txt_observacao', '')">

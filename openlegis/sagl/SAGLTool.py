@@ -2749,7 +2749,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         if cod_sessao_plen != '0' and cod_sessao_plen != '':
            for item in self.zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=cod_sessao_plen):
                for tipo in self.zsql.tipo_sessao_plenaria_obter_zsql(tip_sessao=item.tip_sessao):
-                   id_sessao = str(item.num_sessao_plen) + 'ª Sessão ' + tipo.nom_sessao + ' - '
+                   id_sessao = str(item.num_sessao_plen) + 'ª Reunião ' + tipo.nom_sessao + ' - '
                data = item.dat_inicio_sessao
                data1 = self.pysc.data_converter_pysc(data)
                num_legislatura = item.num_legislatura
@@ -2782,8 +2782,8 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         can.drawString(400, 740, texto)
         can.setFont('Arial', 9)
         can.drawString(400, 730, sessao)
-        #can.drawString(400, 730, presidente)
-        #can.drawString(400, 720, cargo)
+        can.drawString(400, 730, presidente)
+        can.drawString(400, 720, cargo)
         can.showPage()
         can.save()
         new_pdf = PdfFileReader(packet)

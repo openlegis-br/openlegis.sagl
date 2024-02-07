@@ -39,8 +39,7 @@ for proposicao in context.zsql.proposicao_obter_zsql(cod_proposicao=cod_proposic
         des_tipo_autor = autor.des_tipo_autor
 
     if proposicao.tip_mat_ou_doc == 'Requerimento' or proposicao.tip_mat_ou_doc == 'Indicação' or proposicao.tip_mat_ou_doc == 'Moção':
-       for numero in context.zsql.numero_reqindmoc_obter_zsql(tip_id_basica_sel = proposicao.tip_mat_ou_doc,
-ano_ident_basica = ano_materia, ind_excluido = 0):
+       for numero in context.zsql.numero_reqindmoc_obter_zsql(ano_ident_basica = ano_materia, ind_excluido = 0):
            num_ident_basica = numero.novo_numero
     else:
        for numero in context.zsql.numero_materia_legislativa_obter_zsql(tip_id_basica_sel = proposicao.tip_mat_ou_doc,

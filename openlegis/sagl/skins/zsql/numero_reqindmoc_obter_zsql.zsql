@@ -13,7 +13,6 @@ FROM
    LEFT JOIN tipo_materia_legislativa ON materia_legislativa.tip_id_basica = tipo_materia_legislativa.tip_materia
 
 <dtml-sqlgroup where>
-  <dtml-sqltest sigla_tipo_materia  column="tipo_materia_legislativa.sgl_tipo_materia"  op="="  type="nb"  optional> <dtml-and>
   <dtml-sqltest ano_ident_basica    column="materia_legislativa.ano_ident_basica"       op="="  type="int" optional> <dtml-and>
   <dtml-sqltest ind_excluido        column="materia_legislativa.ind_excluido"           op="="  type="int">
   AND

@@ -1,7 +1,7 @@
 <dtml-var standard_html_header>
 
-  <script src="<dtml-var portal_url>/js/moment.min.js"></script>
-  <script src="<dtml-var portal_url>/js/datetime-moment.js"></script>
+<script src="<dtml-var portal_url>/js/moment.min.js"></script>
+<script src="<dtml-var portal_url>/js/datetime-moment.js"></script>
 
 <script type="text/javascript">
 $(document).ready(function() {
@@ -52,7 +52,7 @@ $(document).ready(function() {
       <table class="table">
         <thead class="table-secondary">
          <tr>
-           <th>Data da Solicitação</th>
+           <th>Solicitação</th>
            <th>Identificação do Documento</th>
            <th>Ações</th>
          </tr>
@@ -206,12 +206,14 @@ $(document).ready(function() {
                </dtml-if>
            </td>
            <td>
-              <a class="btn btn-sm btn-primary" href="<dtml-var portal_url>/<dtml-var expr="gerar_link_pysc(tipo_doc,codigo)">" target="_blank"><i class="far fa-file-pdf"></i> Visualizar</a>
+             <div class="btn-group">
+              <a class="btn btn-sm btn-secondary" href="<dtml-var portal_url>/<dtml-var expr="gerar_link_pysc(tipo_doc,codigo)">" target="_blank"><i class="far fa-file-pdf"></i> Visualizar</a>
               <button type="button" class="btn btn-sm btn-primary" data-toggle="modal" data-target="#iFrameModal" data-title="Assinar Digitalmente" data-src="<dtml-var portal_url>/generico/assinador/pades-signature_html?codigo=<dtml-var codigo>&tipo_doc=<dtml-var tipo_doc>&modal=1"><i class="fas fa-file-signature"></i> Assinar</button>
              <!-- Modal -->
              <button type="button" class="btn btn-sm btn-danger d-print-none" data-toggle="modal" data-target="#recusaModal<dtml-var formatted_code>">
                 <i class="fas fa-window-close"></i> Recusar
              </button>
+            </div>
              <div class="modal fade" id="recusaModal<dtml-var formatted_code>" tabindex="-1" aria-labelledby="recusaModalLabel" aria-hidden="true">
               <div class="modal-dialog">
                 <div class="modal-content">

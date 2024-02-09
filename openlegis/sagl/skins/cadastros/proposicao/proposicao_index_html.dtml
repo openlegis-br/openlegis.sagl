@@ -152,6 +152,8 @@ $(document).ready(() => {
     <dtml-call expr="REQUEST.set('col_username',AUTHENTICATED_USER.getUserName())">
   </dtml-if>
 
+<div class="row">
+  <div class="col-12">
 <a
  <dtml-if expr="_.has_key('ind_enviado') and ind_enviado=='0'">
     class="btn btn-sm btn-primary mb-3 disabled" 
@@ -191,6 +193,23 @@ href="<dtml-var portal_url>/cadastros/proposicao/proposicao_index_html?ind_envia
      </dtml-if sequence-start>
   </dtml-in>
 </a>
+
+<dtml-if expr="zsql.proposicao_obter_zsql(ind_excluido=0, ind_enviado='0', ind_devolvido='0', col_username=col_username) and AUTHENTICATED_USER.has_role(['Autor'])">
+  <dtml-in expr="zsql.proposicao_obter_zsql(ind_excluido=0, ind_enviado='0', ind_devolvido='0', col_username=col_username)">
+     <dtml-if expr="(des_tipo_proposicao=='Requerimento' or des_tipo_proposicao=='Indicação' or des_tipo_proposicao=='Moção')">
+       <dtml-call expr="REQUEST.set('id_documento', _.str(cod_proposicao)+'.pdf')">
+       <dtml-call expr="REQUEST.set('id_documento_assinado', _.str(cod_proposicao)+'_signed.pdf')">
+       <dtml-if expr="_.hasattr(sapl_documentos.proposicao,id_documento) and not _.hasattr(sapl_documentos.proposicao,id_documento_assinado)">
+          <dtml-call expr="REQUEST.set('assinarLote', '1')">
+       </dtml-if>
+     </dtml-if> 
+  </dtml-in>
+  <dtml-if assinarLote>
+     <a class="btn btn-sm btn-secondary mb-3" href="<dtml-var portal_url>/cadastros/proposicao/assinar_lote_pdf" data-confirm="Confirma a assinatura em lote de Indicações, Moções e Requerimentos?">Assinatura em Lote</a>
+  </dtml-if>
+</dtml-if>
+ </div>
+</div>
 
 <dtml-unless ind_enviado>
   <dtml-call expr="REQUEST.set('ind_enviado', '0')">

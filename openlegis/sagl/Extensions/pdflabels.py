@@ -39,8 +39,22 @@ LABELS = ({'cia':'test',
 	   'verticalPadding': .5,   #defaults to +/- 7% of height
 	   'units': cm,           #defaults to mm
 	   },
+          {'cia':'Pimaco',
+	   'models': ['4354'],
+	   'paper': pagesizes.A4,
+	   'topMargin': 0.88,
+	   'bottomMargin': 0.88,
+	   'lateralMargin': 0.47,
+	   'leftMargin': 0.47,
+	   'rightMargin': 0.47,
+	   'columns': 2,
+	   'rows': 11,
+	   'height': 2.54,
+	   'width': 9.90,
+	   'units': cm,
+	   },
           {'cia':'Pimaco', #veja dimensões para Corel no site www.pimaco.com.br
-	   'models': ['6081','6181','6281','0081','62581','62681',],
+	   'models': ['6081','6181','6281','0081','62581','62681'],
 	   'paper': pagesizes.letter,
 	   'topMargin': 1.27,
 	   'bottomMargin': 1.27,
@@ -345,7 +359,7 @@ def factory(cia, model):
     raise Exception(Error, "Modelo de etiqueta não encontrado")
 
 def gera_etiqueta(self, dados):
-    labels = factory("Pimaco", "6183")
+    labels = factory("Pimaco", "4354")
     filename=str(int(time.time()*100))+".pdf"
     labels.setGrid()
     labels.generate(dados, filename)

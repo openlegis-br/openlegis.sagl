@@ -127,6 +127,22 @@
         </dtml-try>
     </dtml-if>
 
+    <dtml-if file_nom_image3>
+      <dtml-call expr="REQUEST.set('id_image3', _.str(cod_proposicao)+'_image_3.jpg')">
+        <dtml-try>
+            <dtml-call expr="sapl_documentos.proposicao.manage_addImage(id_image3,file=file_nom_image3)">
+        <dtml-except>
+        </dtml-try>
+    </dtml-if>
+
+    <dtml-if file_nom_image4>
+      <dtml-call expr="REQUEST.set('id_image4', _.str(cod_proposicao)+'_image_4.jpg')">
+        <dtml-try>
+            <dtml-call expr="sapl_documentos.proposicao.manage_addImage(id_image4,file=file_nom_image4)">
+        <dtml-except>
+        </dtml-try>
+    </dtml-if>
+
     <dtml-if file_nom_anexo>
        <dtml-try>
         <dtml-in file_nom_anexo prefix="file">

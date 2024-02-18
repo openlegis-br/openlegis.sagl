@@ -112,6 +112,20 @@
        return;
   }
 
+  function fotografia3_excluir(){
+       if (confirm("Deseja realmente excluir a Fotografia 3?")) {
+          location.href="proposicao_excluir_foto3?cod_proposicao=<dtml-var cod_proposicao missing>";
+       }
+       return;
+  }
+  
+  function fotografia4_excluir(){
+       if (confirm("Deseja realmente excluir a Fotografia 4?")) {
+          location.href="proposicao_excluir_foto4?cod_proposicao=<dtml-var cod_proposicao missing>";
+       }
+       return;
+  }
+
   function proposicao_retomar(){
        if (confirm("Deseja reaproveitar esta proposição devolvida?")) {  
           location.href="proposicao_retomar_proc?cod_proposicao=<dtml-var cod_proposicao missing>";
@@ -624,7 +638,7 @@ $(function () {
         </div>
     </div>
 </dtml-comment>   
-    <div class="form-row">
+   <div class="form-row">
         <div class="col-12 col-md-6 mb-3">
            <label class="form-label d-block">Fotografia 1</label>
                  <dtml-call expr="REQUEST.set('id_foto1', _.str(cod_proposicao)+'_image_1.jpg')">
@@ -650,7 +664,7 @@ $(function () {
                       <img align="absmiddle" class="img-fluid img-thumbnail mb-2" src="&dtml-portal_url;/sapl_documentos/proposicao/<dtml-var id_foto2>?<dtml-var expr="ZopeTime().timeTime()">">
                    </div>
                     <div class="text-center">
-                      <input type="button" name="delFoto2" class="btn btn-sm btn-danger" value="Excluir Foto2"    onClick="javascript:fotografia2_excluir()" />
+                      <input type="button" name="delFoto2" class="btn btn-sm btn-danger" value="Excluir Foto2" onClick="javascript:fotografia2_excluir()" />
                     </div>
                  <dtml-else>
                   <div class="custom-file">
@@ -658,7 +672,41 @@ $(function () {
                     <label class="custom-file-label" for="file_nom_image2">Selecione o arquivo</label>
                   </div>
                  </dtml-if>
-            </div>
+        </div>
+        <div class="col-12 col-md-6 mb-3">
+           <label class="form-label d-block">Fotografia 3</label>
+                 <dtml-call expr="REQUEST.set('id_foto3', _.str(cod_proposicao)+'_image_3.jpg')">
+                 <dtml-if "_.hasattr(sapl_documentos.proposicao,id_foto3)">
+                   <div align="center">
+                      <img align="absmiddle" class="img-fluid img-thumbnail mb-2" src="&dtml-portal_url;/sapl_documentos/proposicao/<dtml-var id_foto3>?<dtml-var expr="ZopeTime().timeTime()">">
+                   </div>
+                    <div class="text-center">
+                      <input type="button" name="delFoto3" class="btn btn-sm btn-danger" value="Excluir Foto3" onClick="javascript:fotografia3_excluir()" />
+                    </div>
+                 <dtml-else>
+                  <div class="custom-file">
+                    <input type="file" class="custom-file-input" id="file_nom_image3" name="file_nom_image3" accept="image/jpeg" />
+                    <label class="custom-file-label" for="file_nom_image3">Selecione o arquivo</label>
+                  </div>
+                 </dtml-if>
+        </div>
+        <div class="col-12 col-md-6 mb-3">
+           <label class="form-label d-block">Fotografia 4</label>
+                 <dtml-call expr="REQUEST.set('id_foto4', _.str(cod_proposicao)+'_image_4.jpg')">
+                 <dtml-if "_.hasattr(sapl_documentos.proposicao,id_foto4)">
+                   <div align="center">
+                      <img align="absmiddle" class="img-fluid img-thumbnail mb-2" src="&dtml-portal_url;/sapl_documentos/proposicao/<dtml-var id_foto4>?<dtml-var expr="ZopeTime().timeTime()">">
+                   </div>
+                    <div class="text-center">
+                      <input type="button" name="delFoto4" class="btn btn-sm btn-danger" value="Excluir Foto4" onClick="javascript:fotografia4_excluir()" />
+                    </div>
+                 <dtml-else>
+                  <div class="custom-file">
+                    <input type="file" class="custom-file-input" id="file_nom_image4" name="file_nom_image4" accept="image/jpeg" />
+                    <label class="custom-file-label" for="file_nom_image4">Selecione o arquivo</label>
+                  </div>
+                 </dtml-if>
+        </div>
    </div>
         </div>
       </div>

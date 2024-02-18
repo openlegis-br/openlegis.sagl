@@ -1297,6 +1297,28 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         os.unlink('/tmp/' + id_image2)
         return image_two
 
+    def get_proposicao_image_three(self, num_proposicao):
+        utool = getToolByName(self, 'portal_url')
+        portal = utool.getPortalObject()
+        id_image3 = str(num_proposicao) + '_image_3.jpg'
+        url = self.url() + '/sapl_documentos/proposicao/'+id_image3
+        opener = urllib.urlopen(url)
+        open('/tmp/' + id_image3, 'wb').write(opener.read())
+        image_three = open('/tmp/' + id_image3, 'rb').read() 
+        os.unlink('/tmp/' + id_image3)
+        return image_three
+
+    def get_proposicao_image_four(self, num_proposicao):
+        utool = getToolByName(self, 'portal_url')
+        portal = utool.getPortalObject()
+        id_image4 = str(num_proposicao) + '_image_4.jpg'
+        url = self.url() + '/sapl_documentos/proposicao/'+id_image4
+        opener = urllib.urlopen(url)
+        open('/tmp/' + id_image4, 'wb').write(opener.read())
+        image_four = open('/tmp/' + id_image4, 'rb').read() 
+        os.unlink('/tmp/' + id_image4)
+        return image_four
+
     def proposicao_gerar_odt(self, inf_basicas_dic, num_proposicao, nom_arquivo, des_tipo_materia, num_ident_basica, ano_ident_basica, txt_ementa, materia_vinculada, dat_apresentacao, nom_autor, apelido_autor, modelo_proposicao, modelo_path):
         utool = getToolByName(self, 'portal_url')
         portal = utool.getPortalObject()
@@ -1311,7 +1333,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         brasao_file = self.get_brasao()
         exec 'brasao = brasao_file'
         if inf_basicas_dic['des_tipo_proposicao'] == 'Requerimento':
-        # atribui imagem1 no locals
+           # atribui imagem1 no locals
            id_imagem1 = str(num_proposicao)+'_image_1.jpg'
            image1 = None
            if hasattr(self.sapl_documentos.proposicao, id_imagem1):
@@ -1323,6 +1345,18 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
            if hasattr(self.sapl_documentos.proposicao, id_imagem2):
               image_two = self.get_proposicao_image_two(num_proposicao=num_proposicao)
               exec ('image2 = image_two')
+           # atribui imagem3 no locals
+           id_imagem3 = str(num_proposicao)+'_image_3.jpg'
+           image3 = None
+           if hasattr(self.sapl_documentos.proposicao, id_imagem3):
+              image_three = self.get_proposicao_image_three(num_proposicao=num_proposicao)
+              exec ('image3 = image_three')
+           # atribui imagem4 no locals
+           id_imagem4 = str(num_proposicao)+'_image_4.jpg'
+           image4 = None
+           if hasattr(self.sapl_documentos.proposicao, id_imagem4):
+              image_four = self.get_proposicao_image_four(num_proposicao=num_proposicao)
+              exec ('image4 = image_four')
         output_file_odt = "%s"%nom_arquivo
         renderer = Renderer(template_file, locals(), output_file_odt, pythonWithUnoPath='/usr/bin/python3',forceOoCall=True)
         renderer.run()

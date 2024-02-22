@@ -80,14 +80,14 @@ def criar_materia(hdn_num_protocolo, tip_materia, num_ident_basica, ano_materia,
 
 def inserir_autoria(cod_materia, cod_autor, cod_proposicao, hdn_num_protocolo):
 
-    if des_tipo_autor == 'Parlamentar' and context.zsql.assinatura_documento_obter_zsql(codigo=cod_proposicao, tipo_doc='proposicao', ind_assinado=1):
-       for assinatura in context.zsql.assinatura_documento_obter_zsql(codigo=cod_proposicao, tipo_doc='proposicao', ind_assinado=1):
-           for usuario in context.zsql.usuario_obter_zsql(cod_usuario=assinatura.cod_usuario, ind_excluido=0): 
-               for autor in context.zsql.autor_obter_zsql(col_username=usuario.col_username, ind_excluido=0):
-                   if int(cod_autor) == int(autor.cod_autor):
-                      context.zsql.autoria_incluir_zsql(cod_autor = cod_autor, cod_materia = cod_materia, ind_primeiro_autor = 1)
-                   else:
-                      context.zsql.autoria_incluir_zsql(cod_autor = autor.cod_autor, cod_materia = cod_materia, ind_primeiro_autor = 0) 
+    if des_tipo_autor == 'Parlamentar':
+       context.zsql.autoria_incluir_zsql(cod_autor = cod_autor, cod_materia = cod_materia, ind_primeiro_autor = 1)
+       if context.zsql.assinatura_documento_obter_zsql(codigo=cod_proposicao, tipo_doc='proposicao', ind_assinado=1):      
+          for assinatura in context.zsql.assinatura_documento_obter_zsql(codigo=cod_proposicao, tipo_doc='proposicao', ind_assinado=1):
+              for usuario in context.zsql.usuario_obter_zsql(cod_usuario=assinatura.cod_usuario, ind_excluido=0): 
+                  for autor in context.zsql.autor_obter_zsql(col_username=usuario.col_username, ind_excluido=0):
+                      if int(cod_autor) != int(autor.cod_autor):
+                         context.zsql.autoria_incluir_zsql(cod_autor = autor.cod_autor, cod_materia = cod_materia, ind_primeiro_autor = 0) 
     else:
        context.zsql.autoria_incluir_zsql(cod_autor = cod_autor, cod_materia = cod_materia, ind_primeiro_autor = 1)    
     

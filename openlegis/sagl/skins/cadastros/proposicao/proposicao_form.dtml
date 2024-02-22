@@ -761,8 +761,10 @@ $(function () {
               </a>
             </dtml-let>
              <dtml-if "sapl_documentos.props_sagl.restpki_access_token!=''">                           
-              <dtml-if "AUTHENTICATED_USER.has_role(['Autor'])">
-                <button type="button" class="btn btn-sm btn-secondary" data-toggle="modal" data-target="#iFrameModal" data-title="Assinaturas Digitais" data-src="<dtml-var portal_url>/cadastros/assinatura/assinatura_solicitar_form?codigo=<dtml-var cod_proposicao>&tipo_doc=proposicao&modal=1"><i class="fas fa-file-signature"></i>Assinaturas</button>
+              <dtml-if "AUTHENTICATED_USER.has_role(['Autor','Assessor Parlamentar'])">
+                <dtml-if expr="zsql.assinatura_documento_obter_zsql(codigo=cod_proposicao,tipo_doc='proposicao')">
+                   <button type="button" class="btn btn-sm btn-secondary" data-toggle="modal" data-target="#iFrameModal" data-title="Assinaturas Digitais" data-src="<dtml-var portal_url>/cadastros/assinatura/assinatura_solicitar_form?codigo=<dtml-var cod_proposicao>&tipo_doc=proposicao&modal=1"><i class="fas fa-file-signature"></i>Assinaturas</button>
+                </dtml-if>
               </dtml-if>
              </dtml-if>
             <dtml-if expr="dat_envio==None and not prop_devolvida">

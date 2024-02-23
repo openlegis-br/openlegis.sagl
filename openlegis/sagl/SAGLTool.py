@@ -1934,8 +1934,8 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
             lab = Label()
             lab.setOrigin(0,250)
             lab.angle = 90
-            lab.fontName = 'Times_New_Roman'
-            lab.fontSize = 8
+            lab.fontName = 'Arial'
+            lab.fontSize = 7
             lab.textAnchor = 'start'
             lab.boxAnchor = 'n'
             lab.setText(mensagem)
@@ -2646,7 +2646,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         if tipo_doc == 'parecer_comissao':
            for relat in self.zsql.relatoria_obter_zsql(cod_relatoria=codigo):
                nom_arquivo_pdf = "%s"%relat.cod_relatoria+'_parecer.pdf'
-               if relat.tip_fim_relatoria == '6' and hasattr(self.sapl_documentos.parecer_comissao, nom_arquivo_pdf):
+               if relat.tip_fim_relatoria == '18' and hasattr(self.sapl_documentos.parecer_comissao, nom_arquivo_pdf):
                   pdf = getattr(self.sapl_documentos.parecer_comissao, nom_arquivo_pdf)
                   pdf.manage_permission('View', roles=['Manager','Authenticated'], acquire=0)
 

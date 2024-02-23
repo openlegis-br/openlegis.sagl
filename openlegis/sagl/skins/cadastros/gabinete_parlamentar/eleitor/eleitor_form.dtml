@@ -88,17 +88,16 @@
                             <input class="form-control" type="text" id="txt_doc_identidade" name="txt_doc_identidade" maxlength="50" value="<dtml-var doc_identidade missing null>" />
                           </td>
                           <td>
-       <label for="rad_sex_pessoa" class="d-block required">Sexo</label>
-       <dtml-in expr="[('Masculino', 'M'), ('Feminino', 'F')]">
-          <div class="form-check form-check-inline">
-            <input class="form-check-input" type="radio" name="rad_sex_eleitor" id="rad<dtml-var expr="_['sequence-item']">" value="<dtml-var expr="_['sequence-item']">" 
-            <dtml-if expr="_.has_key('cod_eleitor') and sex_eleitor==_['sequence-item']">
-               checked=1
-            </dtml-if> />            
-            <label class="form-check-label" for="rad<dtml-var expr="_['sequence-item']">"><dtml-var expr="_['sequence-key']"></label>
-          </div>
-       </dtml-in>
-
+			       <label for="rad_sex_pessoa" class="d-block required">Sexo</label>
+			       <dtml-in expr="[('Masculino', 'M'), ('Feminino', 'F')]">
+				  <div class="form-check form-check-inline">
+				    <input class="form-check-input" type="radio" name="rad_sex_eleitor" id="rad<dtml-var expr="_['sequence-item']">" value="<dtml-var expr="_['sequence-item']">" 
+				    <dtml-if expr="_.has_key('cod_eleitor') and sex_eleitor==_['sequence-item']">
+				       checked=1
+				    </dtml-if> />            
+				    <label class="form-check-label" for="rad<dtml-var expr="_['sequence-item']">"><dtml-var expr="_['sequence-key']"></label>
+				  </div>
+			       </dtml-in>
                           </td>
                         </tr>
                         <tr>

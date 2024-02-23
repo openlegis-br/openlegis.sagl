@@ -2484,10 +2484,10 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
               texto = str(metodo.nom_documento) + ' - ' + str(materia)
         elif tipo_doc == 'emenda':
            storage_path = self.sapl_documentos.emenda
-           for metodo in self.zsql.emenda_obter_zsql(cod_emenda=codigp):
+           for metodo in self.zsql.emenda_obter_zsql(cod_emenda=codigo):
                for materia in self.zsql.materia_obter_zsql(cod_materia=metodo.cod_materia):
                    materia = str(materia.sgl_tipo_materia)+' '+ str(materia.num_ident_basica)+'/'+str(materia.ano_ident_basica)
-               texto = 'EMENDA' + str(metodo.des_tipo_emenda())+' Nº '+ str(metodo.num_emenda) + ' - ' + str(materia)
+               texto = str('EMENDA ') + str(metodo.des_tipo_emenda) + str(' Nº ') + str(metodo.num_emenda) + str(' - ') + str(materia)
         elif tipo_doc == 'substitutivo':
            storage_path = self.sapl_documentos.substitutivo
            for metodo in self.zsql.substitutivo_obter_zsql(cod_substitutivo=codigo):

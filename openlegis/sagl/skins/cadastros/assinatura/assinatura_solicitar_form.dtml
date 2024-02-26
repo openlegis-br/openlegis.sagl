@@ -19,7 +19,6 @@ $(document).ready(function() {
         $(".alert").alert('close');
     }, 2000);
 });
-
     
   </script>
   
@@ -74,16 +73,37 @@ $(document).ready(function() {
                         <dtml-in expr="zsql.usuario_obter_zsql(col_username=AUTHENTICATED_USER.getUserName())">
                           <dtml-call expr="REQUEST.set('cod_usuario_atual',cod_usuario)">
                         </dtml-in>
-                     </dtml-if>
                        <dtml-in expr="zsql.autores_obter_zsql(txt_dat_apresentacao=data_atual)">
                         <dtml-in expr="zsql.usuario_obter_zsql(col_username=col_username_autor)">
-                           <dtml-if expr="_.has_key('cod_usuario_atual') and cod_usuario_atual != cod_usuario">
+                           <dtml-if expr="_.has_key('cod_usuario_atual') and int(cod_usuario_atual) != int(cod_usuario)">
                              <option value="<dtml-var cod_usuario>"><dtml-var nom_completo></option>
                            <dtml-else>
                              <option value="<dtml-var cod_usuario>"><dtml-var nom_completo></option>
                            </dtml-if>
                         </dtml-in>
                       </dtml-in>
+                     <dtml-elif expr="AUTHENTICATED_USER.has_role(['Assessor Parlamentar'])">
+                        <dtml-in expr="zsql.assessor_parlamentar_obter_zsql(col_username=AUTHENTICATED_USER.getUserName())">
+                          <dtml-in expr="zsql.autor_obter_zsql(cod_parlamentar=cod_parlamentar)" mapping>
+                            <dtml-in expr="zsql.usuario_obter_zsql(col_username=col_username)" mapping>
+                               <dtml-call expr="REQUEST.set('cod_usuario_atual', int(cod_usuario))">
+                            </dtml-in>
+                          </dtml-in>
+                        </dtml-in>
+                        <dtml-if expr="zsql.assinatura_documento_obter_zsql(codigo=codigo,tipo_doc=tipo_doc,cod_usuario=cod_usuario_atual,ind_assinado=1)">
+                            <dtml-in expr="zsql.autores_obter_zsql(txt_dat_apresentacao=data_atual)">
+                              <dtml-in expr="zsql.usuario_obter_zsql(col_username=col_username_autor)">
+                                   <option value="<dtml-var cod_usuario>"><dtml-var nom_completo></option>
+                              </dtml-in>
+                           </dtml-in>
+                        <dtml-else>
+                           <dtml-in expr="zsql.usuario_obter_zsql(cod_usuario=cod_usuario_atual)">
+                              <dtml-if expr="_.has_key('cod_usuario_atual') and int(cod_usuario_atual) == int(cod_usuario)">
+                                <option value="<dtml-var cod_usuario>"><dtml-var nom_completo></option>
+                              </dtml-if>
+                           </dtml-in>
+                        </dtml-if>
+                     </dtml-if>
                     <dtml-else>
                       <dtml-in expr="zsql.usuario_obter_zsql()">
                         <option value="<dtml-var cod_usuario>"><dtml-var nom_completo></option>

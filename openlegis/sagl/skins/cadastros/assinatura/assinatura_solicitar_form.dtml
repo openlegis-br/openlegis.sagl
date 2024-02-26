@@ -83,8 +83,8 @@ $(document).ready(function() {
                         </dtml-in>
                       </dtml-in>
                      <dtml-elif expr="AUTHENTICATED_USER.has_role(['Assessor Parlamentar'])">
-                        <dtml-in expr="zsql.assessor_parlamentar_obter_zsql(col_username=AUTHENTICATED_USER.getUserName())">
-                          <dtml-in expr="zsql.autor_obter_zsql(cod_parlamentar=cod_parlamentar)" mapping>
+                        <dtml-in expr="zsql.assessor_parlamentar_obter_zsql(col_username=AUTHENTICATED_USER.getUserName())" mapping>
+                          <dtml-in expr="zsql.autor_obter_zsql(cod_parlamentar=cod_parlamentar)">
                             <dtml-in expr="zsql.usuario_obter_zsql(col_username=col_username)" mapping>
                                <dtml-call expr="REQUEST.set('cod_usuario_atual', int(cod_usuario))">
                             </dtml-in>

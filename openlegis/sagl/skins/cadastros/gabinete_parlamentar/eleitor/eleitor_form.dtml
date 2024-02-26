@@ -1,5 +1,17 @@
 <dtml-var standard_html_header>
 
+           <dtml-if expr="AUTHENTICATED_USER.has_role(['Assessor Parlamentar'])">
+              <dtml-in expr="zsql.assessor_parlamentar_obter_zsql(col_username=AUTHENTICATED_USER.getUserName())">
+                 <dtml-call expr="REQUEST.set('cod_parlamentar_corrente', int(cod_parlamentar))">
+              </dtml-in>
+           <dtml-elif expr="AUTHENTICATED_USER.has_role(['Autor'])">
+             <dtml-in expr="zsql.autor_obter_zsql(parlamentar=1,col_username=AUTHENTICATED_USER.getUserName())">
+                <dtml-if cod_parlamentar>
+                   <dtml-call expr="REQUEST.set('cod_parlamentar_corrente', int(cod_parlamentar))">
+               </dtml-if>
+             </dtml-in>
+           </dtml-if>
+
 <script type="text/javascript" src="<dtml-var portal_url>/javascript/email_validar.js"></script>
 
 <script type="text/javascript" src="javascript/data_validar.js"></script>

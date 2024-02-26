@@ -67,7 +67,7 @@ def criar_documento(tip_documento, num_documento, ano_documento, dat_documento, 
 def tramitar_documento(cod_documento, num_protocolo, ano_documento):
 
     for unidade in context.zsql.unidade_tramitacao_obter_zsql(ind_excluido=0):
-        if 'Protocolo' == unidade.nom_unidade_join:
+        if 'Seção de Protocolo, Telefonia e Reprografia' == unidade.nom_unidade_join:
             cod_unid_tram_local =  int(unidade.cod_unid_tramitacao)
     
     cod_unid_tram_dest = int(lst_cod_unid_tram_dest)

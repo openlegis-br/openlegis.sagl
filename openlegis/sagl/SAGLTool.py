@@ -1732,6 +1732,13 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
                dic_anexo["arquivo"] = getattr(self.sapl_documentos.materia, str(anexada.cod_materia_anexada) + '_texto_integral.pdf')
                dic_anexo["id"] = getattr(self.sapl_documentos.materia, str(anexada.cod_materia_anexada) + '_texto_integral.pdf').absolute_url()
                anexos.append(dic_anexo)
+        for anexada in self.zsql.anexada_obter_zsql(cod_materia_anexada=cod_materia,ind_excluido=0):
+            if hasattr(self.sapl_documentos.materia, str(anexada.cod_materia_principal) + '_texto_integral.pdf'):
+               dic_anexo = {}
+               dic_anexo["data"] = DateTime(anexada.dat_anexacao, datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
+               dic_anexo["arquivo"] = getattr(self.sapl_documentos.materia, str(anexada.cod_materia_principal) + '_texto_integral.pdf')
+               dic_anexo["id"] = getattr(self.sapl_documentos.materia, str(anexada.cod_materia_principal) + '_texto_integral.pdf').absolute_url()
+               anexos.append(dic_anexo)
         for docadm in self.zsql.documento_administrativo_materia_obter_zsql(cod_materia=cod_materia, ind_excluido=0):
             if hasattr(self.sapl_documentos.administrativo, str(docadm.cod_documento) + '_texto_integral.pdf'):
                dic_anexo = {}
@@ -1766,7 +1773,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         for norma in self.zsql.materia_buscar_norma_juridica_zsql(cod_materia = cod_materia):
             if hasattr(self.sapl_documentos.norma_juridica, str(norma.cod_norma) + '_texto_integral.pdf'):
                dic_anexo = {}
-               dic_anexo["data"] = DateTime(norma.dat_norma, datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
+               dic_anexo["data"] = DateTime(norma.timestamp, datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
                dic_anexo["arquivo"] = getattr(self.sapl_documentos.norma_juridica, str(norma.cod_norma) + '_texto_integral.pdf')
                dic_anexo["id"] = getattr(self.sapl_documentos.norma_juridica, str(norma.cod_norma) + '_texto_integral.pdf').absolute_url()
                anexos.append(dic_anexo)

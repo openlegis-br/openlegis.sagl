@@ -22,7 +22,8 @@ SELECT
    db.num_protocolo as num_protocolo_vinculado,
    DATE_FORMAT(db.dat_documento, '%d/%m/%Y') as dat_documento_vinculado,
    db.txt_assunto as txt_assunto_vinculado,
-   db.txt_interessado as txt_interessado_vinculado
+   db.txt_interessado as txt_interessado_vinculado,
+   DATE_FORMAT(dav.dat_vinculacao, '%d/%m/%Y %H:%i:%s') as dat_vinculacao
 
 FROM 
   documento_administrativo_vinculado dav
@@ -44,4 +45,3 @@ FROM
 
 ORDER BY
    cod_vinculo
-

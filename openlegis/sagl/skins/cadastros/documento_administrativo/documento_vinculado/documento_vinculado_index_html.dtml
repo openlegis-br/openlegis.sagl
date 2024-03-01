@@ -6,6 +6,7 @@
       <thead class="table-secondary">
        <tr> 
          <th>Identificação do Documento</th>
+         <th>Data de Vinculação</th>
        </tr>
       </thead>
       </dtml-if sequence-start>
@@ -15,6 +16,9 @@
                    <dtml-var sgl_tipo_documento_vinculado> nº <dtml-var num_documento_vinculado>/<dtml-var ano_documento_vinculado>
                  </a> - <dtml-var txt_interessado_vinculado> - <dtml-var txt_assunto_vinculado>
             </td>
+            <td>
+                <dtml-var dat_vinculacao>
+           </td>
         </tr>
     <dtml-if sequence-end>
       </table>
@@ -24,6 +28,8 @@
        <p>Nenhum documento vinculado.</p></fieldset>
    </dtml-in>
 
+   <button type="button" class="btn btn-primary d-print-none mb-3" data-toggle="modal" data-target="#iFrameModal" data-title="Cadastro de Documento Vinculado" data-src="documento_vinculado/documento_vinculado_form?cod_documento=<dtml-var cod_documento>&modal=1">Incluir Vínculo</button>
+
   <dtml-in expr="zsql.documento_administrativo_vinculado_obter_zsql(cod_documento_vinculado=cod_documento)">
     <dtml-if sequence-start>
       <legend>Documentos Vinculantes</legend>
@@ -31,6 +37,7 @@
         <thead class="table-secondary">
          <tr> 
            <th>Identificação do Documento</th>
+           <th>Data de Vinculação</th>
          </tr>
         </thead>
       </dtml-if sequence-start>
@@ -40,12 +47,11 @@
                    <dtml-var des_tipo_documento_vinculante> nº <dtml-var num_documento_vinculante>/<dtml-var ano_documento_vinculante>
                  </a> - <dtml-var txt_assunto_vinculante>
            </td>
+           <td>
+                <dtml-var dat_vinculacao>
+           </td>
         </tr>
     <dtml-if sequence-end>
       </table>
     </dtml-if sequence-end>
    </dtml-in>
-   
-
-<button type="button" class="btn m btn-primary d-print-none" data-toggle="modal" data-target="#iFrameModal" data-title="Cadastro de Documento Vinculado" data-src="documento_vinculado/documento_vinculado_form?cod_documento=<dtml-var cod_documento>&modal=1">Incluir Vínculo</button>
- 

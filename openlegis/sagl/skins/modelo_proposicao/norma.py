@@ -44,6 +44,14 @@ for norma in context.zsql.norma_juridica_obter_zsql(cod_norma=cod_norma):
  data_norma = context.pysc.data_converter_por_extenso_pysc(data=norma.dat_norma).decode('utf-8')
  data_norma2 = context.pysc.data_converter_por_extenso_pysc(data=norma.dat_norma).decode('utf-8')
  txt_ementa = norma.txt_ementa
+ inf_basicas_dic['materia'] = ''
+ inf_basicas_dic['autoria_materia'] = ''
+ if norma.cod_materia != None and norma.cod_materia != '':
+    for materia in context.zsql.materia_obter_zsql(cod_materia=norma.cod_materia,ind_excluido=0):
+        inf_basicas_dic['materia'] = str(materia.sgl_tipo_materia) + ' ' + str(materia.num_ident_basica) + '/' + str(materia.ano_ident_basica)
+        for autoria in context.zsql.autoria_obter_zsql(cod_materia = materia.cod_materia):
+            for autor in context.zsql.autor_obter_zsql(cod_autor = autoria.cod_autor, ind_primeiro_autor=1):
+                inf_basicas_dic['autoria_materia'] = 'Autoria do Projeto: ' + str(autor.nom_autor_join).decode('utf-8').upper()
  for prefeito in context.zsql.prefeito_atual_obter_zsql(data_composicao = norma.dat_norma):
      inf_basicas_dic['nom_prefeito'] = prefeito.nom_completo
      inf_basicas_dic['par_prefeito'] = prefeito.sgl_partido   

@@ -42,7 +42,7 @@ for norma in context.zsql.norma_juridica_obter_zsql(cod_norma=cod_norma):
  ano_norma = norma.ano_norma
  dat_norma = norma.dat_norma
  data_norma = context.pysc.data_converter_por_extenso_pysc(data=norma.dat_norma).decode('utf-8')
- data_norma2 = context.pysc.data_converter_por_extenso_pysc(data=norma.dat_norma).decode('utf-8')
+ data_norma2 = context.pysc.data_converter_por_extenso_pysc(data=norma.dat_norma).decode('utf-8').upper()
  txt_ementa = norma.txt_ementa
  inf_basicas_dic['materia'] = ''
  inf_basicas_dic['autoria_materia'] = ''

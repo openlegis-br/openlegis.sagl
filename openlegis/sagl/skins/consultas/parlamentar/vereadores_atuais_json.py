@@ -34,13 +34,14 @@ for item in context.zsql.autores_obter_zsql(txt_dat_apresentacao=data_atual):
     for filiacao in context.zsql.parlamentar_data_filiacao_obter_zsql(num_legislatura=num_legislatura, cod_parlamentar=item.cod_parlamentar):    
         if filiacao.dat_filiacao != '0' and filiacao.dat_filiacao != None:
             for partido in context.zsql.parlamentar_partido_obter_zsql(dat_filiacao=filiacao.dat_filiacao, cod_parlamentar=item.cod_parlamentar):
-                dic['partido'] = partido.sgl_partido               
+                dic['partido'] = partido.sgl_partido
+    for parlamentar in context.zsql.parlamentar_obter_zsql(cod_parlamentar=item.cod_parlamentar):
+       dic['biografia'] = parlamentar.txt_biografia
+       dic['cod_parlamentar'] = parlamentar.cod_parlamentar              
     lista_exercicio.append(dic)
 
 lista_exercicio.sort(key=lambda dic: dic['nom_completo'])
 
-#listaVereador={}  
-
-#listaVereador.update({'vereadores': lista_exercicio})
-
-return json.dumps(lista_exercicio)
+serialized = json.dumps(lista_exercicio, sort_keys=True, indent=3, ensure_ascii=False).encode('utf8')
+print(serialized.decode())
+return printed

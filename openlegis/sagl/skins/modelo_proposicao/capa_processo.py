@@ -201,7 +201,8 @@ for materia in context.zsql.materia_obter_zsql(cod_materia=cod_materia):
              else:
                 nom_resultado = " (Não votado)"
                 votacao_observacao = ""
-         id_anexada = item.des_tipo_materia + ' nº ' + str(item.num_ident_basica) + '/' + str(item.ano_ident_basica) + nom_resultado
+     id_anexada = item.des_tipo_materia + ' nº ' + str(item.num_ident_basica) + '/' + str(item.ano_ident_basica) + nom_resultado
+     lst_anexada.append(id_anexada)
 
  for anexada in context.zsql.anexada_obter_zsql(cod_materia_principal=materia.cod_materia, ind_excluido=0):
      for item in context.zsql.materia_obter_zsql(cod_materia=anexada.cod_materia_anexada, ind_excluido = 0):
@@ -222,7 +223,8 @@ for materia in context.zsql.materia_obter_zsql(cod_materia=cod_materia):
              else:
                 nom_resultado = " (Não votado)"
                 votacao_observacao = ""
-         id_anexada = item.des_tipo_materia + ' nº ' + str(item.num_ident_basica) + '/' + str(item.ano_ident_basica) + nom_resultado
+     id_anexada = item.des_tipo_materia + ' nº ' + str(item.num_ident_basica) + '/' + str(item.ano_ident_basica) + nom_resultado
+     lst_anexada.append(id_anexada)
 
  capa_dic['anexada'] = ', '.join(['%s' % (value) for (value) in lst_anexada])
 

@@ -72,7 +72,7 @@ if caixa == 'incorporado':
        dic['cod_parecer'] = proposicao.cod_parecer
        
        incorporado.append(dic)
-   incorporado.sort(key=lambda dic: dic['data_recebimento'], reverse=False)
+   incorporado.sort(key=lambda dic: dic['data_recebimento'], reverse=True)
    return incorporado
 
 if caixa == 'devolvido':
@@ -87,7 +87,7 @@ if caixa == 'devolvido':
        dic['dat_devolucao'] = proposicao.dat_devolucao
        dic['data_devolucao'] = DateTime(proposicao.dat_devolucao, datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
        devolvido.append(dic)
-   devolvido.sort(key=lambda dic: dic['data_devolucao'], reverse=False)
+   devolvido.sort(key=lambda dic: dic['data_devolucao'], reverse=True)
    return devolvido
 
 if caixa == 'pedido_devolucao':

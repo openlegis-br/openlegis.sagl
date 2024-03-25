@@ -100,7 +100,7 @@ if caixa == 'pedido_devolucao':
        dic['dat_envio'] = proposicao.dat_envio
        dic['dat_recebimento'] = proposicao.dat_recebimento
        dic['data_envio'] = DateTime(proposicao.dat_envio, datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
-       dic['dat_solicitacao_devolucao'] = proposicao.dat_solicitacao_devolucao,
+       dic['dat_solicitacao_devolucao'] = proposicao.dat_solicitacao_devolucao
        dic['data_solicitacao_devolucao'] = DateTime(proposicao.dat_solicitacao_devolucao, datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
        pedido_devolucao.append(dic)
    pedido_devolucao.sort(key=lambda dic: dic['data_solicitacao_devolucao'], reverse=True)

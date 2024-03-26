@@ -234,11 +234,9 @@ inicio_sessao=<dtml-var dat_inicio_sessao missing>&num_legislatura=<dtml-var num
                  </dtml-if>
 
                  <dtml-if expr="zsql.expediente_materia_obter_zsql(cod_sessao_plen = cod_sessao_plen, ind_excluido=0)">
-                    <dtml-in expr="zsql.tipo_sessao_plenaria_obter_zsql(tip_sessao=tip_sessao)">
-                       <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador','Operador Sessao Plenaria', 'Operador Ordem Dia']) and nom_sessao=='Ordinária' and int(cod_sessao_plen) > 1360">
+                       <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador','Operador Sessao Plenaria', 'Operador Ordem Dia']) and int(cod_sessao_plen) > 1360">
                          <a class="btn btn-link" target="_blank" href="<dtml-var portal_url>/expediente_pdf?cod_sessao_plen=<dtml-var cod_sessao_plen>"><i class="fa fa-download"></i> Proposições Lidas</a>
                        </dtml-if>
-                    </dtml-in>
                  </dtml-if>
          </li>
 

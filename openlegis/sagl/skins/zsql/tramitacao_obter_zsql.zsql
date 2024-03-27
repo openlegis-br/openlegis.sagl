@@ -109,6 +109,10 @@ FROM
 
   <dtml-if expr="rd_ordem == '1' or rd_ordem == 1">
     ORDER BY 
+     tramitacao.cod_tramitacao,
+     tramitacao.dat_tramitacao 
+  <dtml-elif expr="rd_ordem == '2' or rd_ordem == 2">
+    ORDER BY 
      tramitacao.cod_tramitacao DESC,
      tramitacao.dat_tramitacao DESC
   <dtml-else>

@@ -8,6 +8,9 @@ from zope.interface import Interface
 
 import simplejson as json
 
+from DateTime import DateTime
+
+from xml.sax.saxutils import escape
 
 class DadosPMView(grok.View):
     """ sample view class """
@@ -46,7 +49,7 @@ class DadosPMView(grok.View):
                 legislative_board = []
                 ses = {}
                 ses['description'] = ""
-                ses['end_date'] = self.context.pysc.data_converter_dados_pm_pysc(periodo.dat_fim_periodo)
+                ses['end_date'] = DateTime(periodo.dat_fim_periodo).strftime("%Y-%m-%d")
                 ses['id'] = str(periodo.cod_periodo_comp)
                 composicao = self.context.zsql.composicao_mesa_obter_zsql(
                     cod_periodo_comp=periodo.cod_periodo_comp,
@@ -71,7 +74,7 @@ class DadosPMView(grok.View):
                     board['position'] = cargo
                     legislative_board.append(board)
                 ses['legislative_board'] = legislative_board
-                ses['start_date'] = self.context.pysc.data_converter_dados_pm_pysc(periodo.dat_inicio_periodo)
+                ses['start_date'] = DateTime(periodo.dat_inicio_periodo).strftime("%Y-%m-%d")
                 ses['title'] = '%s a %s' % (periodo.dat_inicio_periodo, periodo.dat_fim_periodo)
                 sessions.append(ses)
             leg['sessions'] = sessions
@@ -80,8 +83,12 @@ class DadosPMView(grok.View):
         for parlamentar in parlamentares:
             par = {}
             par['address'] = ""
-            par['birthday'] = self.context.pysc.data_converter_dados_pm_pysc(parlamentar.dat_nascimento)
-            par['description'] = parlamentar.txt_biografia
+            par['birthday'] = DateTime(parlamentar.dat_nascimento).strftime("%Y-%m-%d")
+	    if parlamentar.txt_biografia != None:
+	       par['description'] = escape(parlamentar.txt_biografia)
+	    else:
+	       par['description'] = ''
+           
             par['full_name'] = parlamentar.nom_completo
             par['id'] = str(parlamentar.cod_parlamentar)
             imagem_parlamentar = '%s_foto_parlamentar' % parlamentar.cod_parlamentar
@@ -94,8 +101,8 @@ class DadosPMView(grok.View):
             for item in filiacao:
                 partido = self.context.zsql.partido_obter_zsql(ind_excluido=0, cod_partido=item.cod_partido)[0]
                 fil = {}
-                fil['date_affiliation'] = self.context.pysc.data_converter_dados_pm_pysc(item.dat_filiacao)
-                fil['date_disaffiliation'] = self.context.pysc.data_converter_dados_pm_pysc(item.dat_desfiliacao)
+                fil['date_affiliation'] = DateTime(item.dat_filiacao).strftime("%Y-%m-%d")
+                fil['date_disaffiliation'] = DateTime(item.dat_desfiliacao).strftime("%Y-%m-%d")
                 fil['party'] = partido.sgl_partido
                 party_affiliation.append(fil)
             par['party_affiliation'] = party_affiliation
@@ -106,7 +113,5 @@ class DadosPMView(grok.View):
 
         dados['legislatures'] = legislatures
         dados['parliamentarians'] = parliamentarians
-        pretty = json.dumps(dados, sort_keys=True, indent='    ')
-        self.request.response.setHeader("Content-type", "application/json; charset=utf-8")
-        return pretty
-
+        serialized = json.dumps(dados, sort_keys=True, indent=3, ensure_ascii=False).encode('utf8')
+	return(serialized.decode())

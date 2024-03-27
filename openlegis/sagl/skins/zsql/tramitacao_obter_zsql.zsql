@@ -107,10 +107,10 @@ FROM
     AND <dtml-sqlvar dat_encaminha type="string"> = tramitacao.dat_encaminha
   </dtml-if>   
 
-  <dtml-if expr="rd_ordem == '1'">
+  <dtml-if expr="rd_ordem == '1' or rd_ordem == 1">
     ORDER BY 
-     tramitacao.cod_tramitacao,
-     tramitacao.dat_tramitacao
+     tramitacao.cod_tramitacao DESC,
+     tramitacao.dat_tramitacao DESC
   <dtml-else>
     ORDER BY 
      tipo_materia_legislativa.sgl_tipo_materia, 

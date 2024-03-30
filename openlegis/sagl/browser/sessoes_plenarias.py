@@ -854,7 +854,7 @@ class SessoesPlenarias(grok.View):
 		               dic_expediente["resultado_votacao"] = []
 		               lst_resultado = []
 	 		       # totalização de votos
-			       for votacao in self.context.zsql.votacao_expediente_materia_obter_zsql(cod_materia=expediente.cod_materia, cod_sessao_plen=ordem.cod_sessao_plen, ind_excluido=0)
+			       for votacao in self.context.zsql.votacao_expediente_materia_obter_zsql(cod_materia=expediente.cod_materia, cod_sessao_plen=ordem.cod_sessao_plen, ind_excluido=0):
 			         if votacao.tip_resultado_votacao:
 		                   dic_resultado = {}
 			           dic_resultado["votacao_id"] = str(votacao.cod_votacao)

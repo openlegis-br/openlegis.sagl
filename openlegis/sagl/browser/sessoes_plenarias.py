@@ -543,7 +543,7 @@ class SessoesPlenarias(grok.View):
 		           lst_substitutivos=[]
 		           for substitutivo in self.context.zsql.substitutivo_obter_zsql(cod_materia=ordem.cod_materia, ind_excluido=0):
 		               dic_substitutivo = {}
-		               dic_substitutivo["@id"] = portal_url + '/@@substitutivo?id=' + str(emenda.cod_emenda)
+		               dic_substitutivo["@id"] = portal_url + '/@@substitutivo?id=' + str(substitutivo.cod_substitutivo)
 		               dic_substitutivo["@type"] =  'Substitutivo'
 		               dic_substitutivo["id"] =  str(substitutivo.cod_substitutivo)
 			       dic_substitutivo['title'] = 'Substitutivo' +  ' nº ' + str(substitutivo.num_substitutivo) + ' ao ' + materia.sgl_tipo_materia + ' ' + str(materia.num_ident_basica) + '/' + str(materia.ano_ident_basica)
@@ -854,7 +854,8 @@ class SessoesPlenarias(grok.View):
 		               dic_expediente["resultado_votacao"] = []
 		               lst_resultado = []
 	 		       # totalização de votos
-			       for votacao in self.context.zsql.votacao_expediente_materia_obter_zsql(cod_materia=expediente.cod_materia, cod_sessao_plen=ordem.cod_sessao_plen, ind_excluido=0):
+			       for votacao in self.context.zsql.votacao_expediente_materia_obter_zsql(cod_materia=expediente.cod_materia, cod_sessao_plen=ordem.cod_sessao_plen, ind_excluido=0)
+			         if votacao.tip_resultado_votacao:
 		                   dic_resultado = {}
 			           dic_resultado["votacao_id"] = str(votacao.cod_votacao)
 			           if votacao.tip_votacao == 1 or votacao.tip_votacao == 2:

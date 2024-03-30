@@ -49,6 +49,7 @@ class Comissoes(grok.View):
                   for composicao in self.context.zsql.composicao_comissao_obter_zsql(cod_comissao=item.cod_comissao, cod_periodo_comp=periodo.cod_periodo_comp):
                      dic_membros = {}
                      dic_membros['@id'] =  portal_url + '/@@vereador?id=' + composicao.cod_parlamentar
+                     dic_membros['@type'] = 'Vereador'
 		     dic_membros['id'] = str(composicao.cod_parlamentar)
 		     dic_membros['title'] = composicao.nom_parlamentar
 		     dic_membros['description'] = composicao.nom_completo

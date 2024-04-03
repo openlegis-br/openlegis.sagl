@@ -1732,14 +1732,14 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         for anexada in self.zsql.anexada_obter_zsql(cod_materia_principal=cod_materia,ind_excluido=0):
             if hasattr(self.sapl_documentos.materia, str(anexada.cod_materia_anexada) + '_texto_integral.pdf'):
                dic_anexo = {}
-               dic_anexo["data"] = DateTime(anexada.dat_anexacao, datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
+               dic_anexo["data"] = DateTime(anexada.dat_anexacao, datefmt='international').strftime('%Y-%m-%d 23:58:00')
                dic_anexo["arquivo"] = getattr(self.sapl_documentos.materia, str(anexada.cod_materia_anexada) + '_texto_integral.pdf')
                dic_anexo["id"] = getattr(self.sapl_documentos.materia, str(anexada.cod_materia_anexada) + '_texto_integral.pdf').absolute_url()
                anexos.append(dic_anexo)
         for anexada in self.zsql.anexada_obter_zsql(cod_materia_anexada=cod_materia,ind_excluido=0):
             if hasattr(self.sapl_documentos.materia, str(anexada.cod_materia_principal) + '_texto_integral.pdf'):
                dic_anexo = {}
-               dic_anexo["data"] = DateTime(anexada.dat_anexacao, datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
+               dic_anexo["data"] = DateTime(anexada.dat_anexacao, datefmt='international').strftime('%Y-%m-%d 23:58:00')
                dic_anexo["arquivo"] = getattr(self.sapl_documentos.materia, str(anexada.cod_materia_principal) + '_texto_integral.pdf')
                dic_anexo["id"] = getattr(self.sapl_documentos.materia, str(anexada.cod_materia_principal) + '_texto_integral.pdf').absolute_url()
                anexos.append(dic_anexo)

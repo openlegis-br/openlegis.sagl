@@ -873,7 +873,7 @@ class SessoaoPlenaria(grok.View):
 			 dic_expediente["cod_ordem"] = str(expediente.cod_ordem)
 			 dic_expediente["numero_ordem"] = str(expediente.num_ordem)
 			 dic_expediente["turno"] = ''
-			 dic_expediente["turno_id"] = str(turno.cod_turno)
+			 dic_expediente["turno_id"] = ''
 			 #if expediente.tip_turno != None:
 			 #   for turno in self.context.zsql.turno_discussao_obter_zsql(cod_turno=expediente.tip_turno):
 			 #       dic_expediente["turno"] = turno.des_turno
@@ -925,7 +925,7 @@ class SessoaoPlenaria(grok.View):
 		               dic_expediente["resultado_votacao"] = []
 		               lst_resultado = []
 	 		       # totalização de votos
-			       for votacao in self.context.zsql.votacao_expediente_materia_obter_zsql(cod_materia=expediente.cod_materia, cod_sessao_plen=ordem.cod_sessao_plen, ind_excluido=0):
+			       for votacao in self.context.zsql.votacao_expediente_materia_obter_zsql(cod_materia=expediente.cod_materia, cod_sessao_plen=item.cod_sessao_plen, ind_excluido=0):
 			         if votacao.tip_resultado_votacao:
 		                   dic_resultado = {}
 			           dic_resultado["votacao_id"] = str(votacao.cod_votacao)

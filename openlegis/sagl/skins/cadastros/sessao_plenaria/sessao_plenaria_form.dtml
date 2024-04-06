@@ -4,7 +4,6 @@
 
 <script type="text/javascript">
 
-
 function atualiza_num_leg(num_legislatura,cod_sessao_plen){
     if (cod_sessao_plen=="-1"){
         location.href = "sessao_plenaria_form?num_legislatura_sel="+num_legislatura;
@@ -436,7 +435,9 @@ $(document).ready(function(){
           </dtml-if>
         </div>
      </div>
+
      <dtml-if expr="not _.has_key('ind_audiencia')">
+     <dtml-comment>
      <div class="form-row">
         <div class="col-12 col-md-6 mb-3">     
           <label class="form-label d-block">ODT Lista de Oradores</label>
@@ -477,6 +478,7 @@ $(document).ready(function(){
           </dtml-if>
         </div>
      </div>
+       </dtml-comment>
     </dtml-if>
   </dtml-if>
   
@@ -553,6 +555,7 @@ $(document).ready(function(){
            </div>        
         </dtml-if>
      </div>
+     <dtml-comment>
      <div class="col-12 col-md-12 mb-3">     
        <label class="form-label d-block">PDF Roteiro<dtml-if expr="_.has_key('ind_audiencia')"><dtml-else> da Reunião</dtml-if></label>
        <dtml-if cod_sessao_plen>
@@ -577,11 +580,12 @@ $(document).ready(function(){
           </div>        
        </dtml-if> 
      </div>
+     </dtml-comment>
   </div>
 
   <dtml-if cod_sessao_plen>
   <legend>Multimídia</legend>
-  <div class="row">
+  <div class="form-row">
      <div class="col-12 col-md-6 mb-3"> 
         <label for="txt_url_audio">Arquivo de Áudio</label>
         <div class="input-group">

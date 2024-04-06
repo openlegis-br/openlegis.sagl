@@ -140,6 +140,8 @@
         </li>
        </ul>
       </li>
+      
+   <dtml-comment>
       <li class="nav-item dropdown">
         <a
              <dtml-if expr="_['REQUEST']['ACTUAL_URL']==(portal_url() + '/cadastros/sessao_plenaria/presenca_encerramento/presenca_encerramento_index_html')">
@@ -156,25 +158,37 @@
           </li>
         </ul>
       </li>
+  </dtml-comment>    
+  
       <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <a
+             <dtml-if expr="_['REQUEST']['ACTUAL_URL']==(portal_url() + '/cadastros/sessao_plenaria/anexo_sessao/anexo_sessao_index_html')">
+               class="nav-link dropdown-toggle active"
+            <dtml-else>
+               class="nav-link dropdown-toggle"
+            </dtml-if> 
+          href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
           Documentos
-        </a>      
-        <ul class="dropdown-menu dropdown-menu-right">
+        </a>
+     
+        <ul class="dropdown-menu">
          <li>
-           <a class="dropdown-item" href="<dtml-var portal_url>/modelo_proposicao/iom_gerar?cod_sessao_plen=<dtml-var cod_sessao_plen>">ODT Imprensa Oficial</a>
+           <a class="dropdown-item" href="javascript:submeter('<dtml-var portal_url>/cadastros/sessao_plenaria/anexo_sessao/index_html')">Anexos</a>
+        </li>
+         <li>
+           <a class="dropdown-item" href="<dtml-var portal_url>/modelo_proposicao/iom_gerar?cod_sessao_plen=<dtml-var cod_sessao_plen>">Imprensa Oficial</a>
         </li>
         <li>
-           <a class="dropdown-item" href="<dtml-var portal_url>/modelo_proposicao/materia_apreciada?cod_sessao_plen=<dtml-var cod_sessao_plen>">ODT Matérias Apreciadas</a>
+           <a class="dropdown-item" href="<dtml-var portal_url>/modelo_proposicao/materia_apreciada?cod_sessao_plen=<dtml-var cod_sessao_plen>">Matérias Apreciadas</a>
         </li>
         <li>
-           <a class="dropdown-item" href="<dtml-var portal_url>/modelo_proposicao/materia_apresentada?cod_sessao_plen=<dtml-var cod_sessao_plen>">ODT Matérias Apresentadas</a>
+           <a class="dropdown-item" href="<dtml-var portal_url>/modelo_proposicao/materia_apresentada?cod_sessao_plen=<dtml-var cod_sessao_plen>">Matérias Apresentadas</a>
         </li>
         <li>
-          <a class="dropdown-item" href="<dtml-var portal_url>/modelo_proposicao/resumo_gerar?cod_sessao_plen=<dtml-var cod_sessao_plen>" target="_blank">ODT Resumo</a>
+          <a class="dropdown-item" href="<dtml-var portal_url>/modelo_proposicao/resumo_gerar?cod_sessao_plen=<dtml-var cod_sessao_plen>" target="_blank">Resumo</a>
         </li>
         <li>
-          <a class="dropdown-item" href="<dtml-var portal_url>/modelo_proposicao/oficio_ind_gerar?cod_sessao_plen=<dtml-var cod_sessao_plen>">ODT Remessa Indicações</a>
+          <a class="dropdown-item" href="<dtml-var portal_url>/modelo_proposicao/oficio_ind_gerar?cod_sessao_plen=<dtml-var cod_sessao_plen>">Remessa Indicações</a>
         </li>
       </ul>
     </li>
@@ -185,4 +199,3 @@
    </dtml-in>
  </form>
 </dtml-if>
-

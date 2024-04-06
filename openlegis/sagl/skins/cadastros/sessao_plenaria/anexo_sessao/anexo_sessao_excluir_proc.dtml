@@ -1,19 +1,22 @@
-<dtml-call expr="REQUEST.set('erro', 0)">
-<dtml-call expr="REQUEST.set('id_documento', _.str(cod_sessao_plen)+ '_' + 'texto_anexado.pdf')">
-<dtml-if expr="_.hasattr(sapl_documentos.anexo_sessao,id_documento)">
-  <dtml-try>
-    <dtml-call "sapl_documentos.anexo_sessao.manage_delObjects(id_documento)">
-  <dtml-except>
-    <dtml-call expr="REQUEST.set('erro', 1)">
-  </dtml-try>
- 
-  <dtml-if erro>
-    <dtml-let mensagem="'Ocorreu um erro ao tentar excluir o arquivo Anexo da Sessãoo!'">
-      <dtml-var mensagem_emitir>
-    </dtml-let>
-  <dtml-else>
-    <dtml-let mensagem="'Anexo da Sessão excluído com sucesso!'" url="'index_html?&cod_sessao_leg=' + cod_sessao_leg + '&cod_sessao_plen=' + cod_sessao_plen + '&num_legislatura=' + num_legislatura + '&dat_sessao=' + dat_sessao + '&tip_sessao=' + tip_sessao">
-      <dtml-var mensagem_emitir>
-    </dtml-let>
-  </dtml-if>
+<dtml-try>
+   <dtml-call "sapl_documentos.anexo_sessao.manage_delObjects(anexo)">
+<dtml-except>
+  <dtml-let mensagem="'Houve um erro!'" mensagem_obs="'Anexo não excluído.'" tipo_mensagem="'danger'">
+    <dtml-var mensagem_emitir>
+  </dtml-let>  
+<dtml-else>
+  <dtml-let mensagem="'Anexo excluído com sucesso!'" url="'index_html?cod_sessao_plen=' + str(hdn_cod_sessao_plen)">
+    <dtml-var mensagem_emitir>
+  </dtml-let>
+</dtml-try>
+
+<dtml-comment>LOG DE AUDITORIA</dtml-comment>
+<dtml-if dbcon_logs>
+  <dtml-call expr="zsql.logs_registrar_zsql(
+            usuario      = REQUEST['AUTHENTICATED_USER'].getUserName(), 
+            data         = DateTime().strftime('%Y-%m-%d %H:%M:%S'),
+            modulo       = _.string.split(_['REQUEST']['URL1'],'/')[-1],
+            metodo       = 'anexo_sessao_excluir',
+            IP           = pysc.get_ip(),
+            cod_registro = hdn_cod_sessao_plen)"> 
 </dtml-if>

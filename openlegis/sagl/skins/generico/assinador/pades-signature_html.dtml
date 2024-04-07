@@ -12,6 +12,10 @@
   });
 </script>
 
+<dtml-unless expr="_.has_key('anexo')">
+   <dtml-call expr="REQUEST.set('anexo', '')">
+</dtml-unless>
+
 <dtml-in expr="zsql.usuario_obter_zsql(col_username=AUTHENTICATED_USER.getUserName())">
    <dtml-call expr="REQUEST.set('cod_usuario', int(cod_usuario))">
 </dtml-in>
@@ -37,6 +41,7 @@
     </div>
     <input class="btn btn-primary" type="submit" name="button" value="Prosseguir" />
     <input type="hidden" id="codigo" name="codigo" value="<dtml-var codigo>">
+    <input type="hidden" id="anexo" name="anexo" value="<dtml-var anexo missing null>">
     <input type="hidden" id="tipo_doc" name="tipo_doc" value="<dtml-var tipo_doc>">
     <input type="hidden" id="modal" name="modal" value="1">    
   </form>
@@ -55,7 +60,7 @@
     <input type="hidden" id="token" name="token" value="<dtml-var token>" />
     <input type="hidden" id="crc_arquivo_original" name="crc_arquivo_original" value="<dtml-var crc_arquivo>" />  
     <input type="hidden" id="codigo" name="codigo" value="<dtml-var codigo>">
-    <input type="hidden" id="anexo" name="anexo" value="<dtml-var anexo missing>">
+    <input type="hidden" id="anexo" name="anexo" value="<dtml-var anexo missing null>">
     <input type="hidden" id="cod_usuario" name="cod_usuario" value="<dtml-var cod_usuario>">  
     <input type="hidden" id="tipo_doc" name="tipo_doc" value="<dtml-var tipo_doc>">
     <input type="hidden" id="modal" name="modal" value="1" />

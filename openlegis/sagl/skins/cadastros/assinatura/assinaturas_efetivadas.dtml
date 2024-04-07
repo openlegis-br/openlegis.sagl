@@ -75,6 +75,11 @@ $(document).ready(function() {
                   <dtml-in expr="zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=codigo, ind_audiencia='1', ind_excluido=0)">
                      Ata da Audiência Pública nº <dtml-var num_sessao_plen>/<dtml-var ano_sessao> 
                   </dtml-in> 
+               <dtml-elif expr="tipo_doc == 'anexo_sessao'">
+                  <dtml-call expr="REQUEST.set('file_item', str(codigo) + '_anexo_' + str(anexo) + '.pdf')">
+                  <dtml-let titulo="_.getattr(sapl_documentos.anexo_sessao,file_item).title_or_id">
+                     <dtml-var titulo>
+                  </dtml-let>
                <dtml-elif expr="tipo_doc == 'doc_acessorio'">
                   <dtml-in expr="zsql.documento_acessorio_obter_zsql(cod_documento=codigo, ind_excluido=0)">
                     <dtml-in expr="zsql.materia_obter_zsql(cod_materia=cod_materia, ind_excluido=0)">

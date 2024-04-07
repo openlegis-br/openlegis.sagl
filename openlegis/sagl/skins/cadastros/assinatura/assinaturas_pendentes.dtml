@@ -105,16 +105,26 @@ $(document).ready(() => {
     </dtml-if>
          <tr>
            <td><dtml-var dat_solicitacao></td>         
-           <td>          
+           <td> 
                <dtml-if expr="tipo_doc == 'ata'">
                   <dtml-in expr="zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=codigo, ind_excluido=0)">
                      <dtml-in expr="zsql.tipo_sessao_plenaria_obter_zsql(tip_sessao=tip_sessao)">                  
-                        Ata da <dtml-var num_sessao_plen>ª Sessão <dtml-var nom_sessao> de <dtml-var dat_inicio_sessao>
+                        Ata da <dtml-var num_sessao_plen>ª Reunião <dtml-var nom_sessao> de <dtml-var dat_inicio_sessao>
                      </dtml-in>
                   </dtml-in>
                   <dtml-in expr="zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=codigo, ind_audiencia='1', ind_excluido=0)">
                      Ata da Audiência Pública nº <dtml-var num_sessao_plen>/<dtml-var ano_sessao> 
                   </dtml-in>  
+               <dtml-elif expr="tipo_doc == 'anexo_sessao'">
+                  <dtml-call expr="REQUEST.set('file_item', str(codigo) + '_anexo_' + str(anexo) + '.pdf')">
+                  <dtml-let titulo="_.getattr(sapl_documentos.anexo_sessao,file_item).title_or_id">
+                     <dtml-var titulo>
+                  </dtml-let>
+                  <dtml-in expr="zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=codigo, ind_excluido=0)">
+                     <dtml-in expr="zsql.tipo_sessao_plenaria_obter_zsql(tip_sessao=tip_sessao)">                  
+                        da <dtml-var num_sessao_plen>ª Reunião <dtml-var nom_sessao> de <dtml-var dat_inicio_sessao>
+                     </dtml-in>
+                  </dtml-in>
                <dtml-elif expr="tipo_doc == 'doc_acessorio'">
                   <dtml-in expr="zsql.documento_acessorio_obter_zsql(cod_documento=codigo, ind_excluido=0)">
                     <dtml-in expr="zsql.materia_obter_zsql(cod_materia=cod_materia, ind_excluido=0)">
@@ -175,7 +185,7 @@ $(document).ready(() => {
                <dtml-elif expr="tipo_doc == 'pauta'">
                   <dtml-in expr="zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=codigo, ind_excluido=0)">
                      <dtml-in expr="zsql.tipo_sessao_plenaria_obter_zsql(tip_sessao=tip_sessao)">                  
-                        Pauta da <dtml-var num_sessao_plen>ª Sessão <dtml-var nom_sessao> de <dtml-var dat_inicio_sessao>
+                        Pauta da <dtml-var num_sessao_plen>ª Reunião <dtml-var nom_sessao> de <dtml-var dat_inicio_sessao>
                      </dtml-in>
                   </dtml-in>
                   <dtml-in expr="zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=codigo, ind_audiencia='1', ind_excluido=0)">
@@ -252,9 +262,9 @@ $(document).ready(() => {
            </td>
            <td>
              <div class="btn-group">
-              <a class="btn btn-sm btn-secondary" href="<dtml-var portal_url>/<dtml-var expr="gerar_link_pysc(tipo_doc,codigo)">" target="_blank"><i class="far fa-file-pdf"></i> Visualizar</a>
-              <button type="button" class="btn btn-sm btn-secondary" data-toggle="modal" data-target="#iFrameModal" data-title="Assinar Digitalmente" data-src="<dtml-var portal_url>/generico/assinador/pades-signature_html?codigo=<dtml-var codigo>&tipo_doc=<dtml-var tipo_doc>&modal=1"><i class="fas fa-file-signature"></i> Assinar</button>
-              <a class="btn btn-sm btn-secondary" href="<dtml-var portal_url>/cadastros/assinatura/assinatura_postergar_proc?cod_usuario=<dtml-var cod_usuario_corrente missing>&codigo=<dtml-var codigo missing>&tipo_doc=<dtml-var tipo_doc missing>" data-confirm="Postergar a assinatura?"><i class="fa fa-hourglass-end"></i> Postergar</a>
+              <a class="btn btn-sm btn-secondary" href="<dtml-var portal_url>/<dtml-var expr="gerar_link_pysc(tipo_doc,codigo,anexo)">" target="_blank"><i class="far fa-file-pdf"></i> Visualizar</a>
+              <button type="button" class="btn btn-sm btn-secondary" data-toggle="modal" data-target="#iFrameModal" data-title="Assinar Digitalmente" data-src="<dtml-var portal_url>/generico/assinador/pades-signature_html?codigo=<dtml-var codigo>&anexo=<dtml-var anexo missing null>&tipo_doc=<dtml-var tipo_doc>&modal=1"><i class="fas fa-file-signature"></i> Assinar</button>
+              <a class="btn btn-sm btn-secondary" href="<dtml-var portal_url>/cadastros/assinatura/assinatura_postergar_proc?cod_usuario=<dtml-var cod_usuario_corrente missing>&codigo=<dtml-var codigo missing>&anexo=<dtml-var anexo missing>&tipo_doc=<dtml-var tipo_doc missing>" data-confirm="Postergar a assinatura?"><i class="fa fa-hourglass-end"></i> Postergar</a>
              <!-- Modal -->
              <button type="button" class="btn btn-sm btn-danger d-print-none" data-toggle="modal" data-target="#recusaModal<dtml-var formatted_code>">
                 <i class="fas fa-window-close"></i> Recusar
@@ -274,6 +284,7 @@ $(document).ready(() => {
                      <input type="hidden" name="cod_usuario" value="<dtml-var cod_usuario_corrente missing>" />
                      <input type="hidden" name="tipo_doc" value="<dtml-var tipo_doc missing>" />
                      <input type="hidden" name="codigo" value="<dtml-var codigo missing>" />
+                     <input type="hidden" name="anexo" value="<dtml-var anexo missing null>" />
                      <div class="form-row">
                        <div class="col-12 mb-3">
                         <label for="txa_txt_motivo_recusa" class="required">Motivo da Recusa</label>
@@ -328,12 +339,22 @@ $(document).ready(() => {
                <dtml-if expr="tipo_doc == 'ata'">
                   <dtml-in expr="zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=codigo, ind_excluido=0)">
                      <dtml-in expr="zsql.tipo_sessao_plenaria_obter_zsql(tip_sessao=tip_sessao)">                  
-                        Ata da <dtml-var num_sessao_plen>ª Sessão <dtml-var nom_sessao> de <dtml-var dat_inicio_sessao>
+                        Ata da <dtml-var num_sessao_plen>ª Reunião <dtml-var nom_sessao> de <dtml-var dat_inicio_sessao>
                      </dtml-in>
                   </dtml-in>
                   <dtml-in expr="zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=codigo, ind_audiencia='1', ind_excluido=0)">
                      Ata da Audiência Pública nº <dtml-var num_sessao_plen>/<dtml-var ano_sessao> 
-                  </dtml-in>  
+                  </dtml-in>
+               <dtml-elif expr="tipo_doc == 'anexo_sessao'">
+                  <dtml-call expr="REQUEST.set('file_item', str(codigo) + '_anexo_' + str(anexo) + '.pdf')">
+                  <dtml-let titulo="_.getattr(sapl_documentos.anexo_sessao,file_item).title_or_id">
+                     <dtml-var titulo>
+                  </dtml-let>
+                  <dtml-in expr="zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=codigo, ind_excluido=0)">
+                     <dtml-in expr="zsql.tipo_sessao_plenaria_obter_zsql(tip_sessao=tip_sessao)">                  
+                        da <dtml-var num_sessao_plen>ª Reunião <dtml-var nom_sessao> de <dtml-var dat_inicio_sessao>
+                     </dtml-in>
+                  </dtml-in>
                <dtml-elif expr="tipo_doc == 'doc_acessorio'">
                   <dtml-in expr="zsql.documento_acessorio_obter_zsql(cod_documento=codigo, ind_excluido=0)">
                     <dtml-in expr="zsql.materia_obter_zsql(cod_materia=cod_materia, ind_excluido=0)">
@@ -394,7 +415,7 @@ $(document).ready(() => {
                <dtml-elif expr="tipo_doc == 'pauta'">
                   <dtml-in expr="zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=codigo, ind_excluido=0)">
                      <dtml-in expr="zsql.tipo_sessao_plenaria_obter_zsql(tip_sessao=tip_sessao)">                  
-                        Pauta da <dtml-var num_sessao_plen>ª Sessão <dtml-var nom_sessao> de <dtml-var dat_inicio_sessao>
+                        Pauta da <dtml-var num_sessao_plen>ª Reunião <dtml-var nom_sessao> de <dtml-var dat_inicio_sessao>
                      </dtml-in>
                   </dtml-in>
                   <dtml-in expr="zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=codigo, ind_audiencia='1', ind_excluido=0)">
@@ -471,8 +492,8 @@ $(document).ready(() => {
            </td>
            <td>
              <div class="btn-group">
-              <a class="btn btn-sm btn-secondary" href="<dtml-var portal_url>/<dtml-var expr="gerar_link_pysc(tipo_doc,codigo)">" target="_blank"><i class="far fa-file-pdf"></i> Visualizar</a>
-              <button type="button" class="btn btn-sm btn-secondary" data-toggle="modal" data-target="#iFrameModal" data-title="Assinar Digitalmente" data-src="<dtml-var portal_url>/generico/assinador/pades-signature_html?codigo=<dtml-var codigo>&tipo_doc=<dtml-var tipo_doc>&modal=1"><i class="fas fa-file-signature"></i> Assinar</button>
+              <a class="btn btn-sm btn-secondary" href="<dtml-var portal_url>/<dtml-var expr="gerar_link_pysc(tipo_doc,codigo,anexo)">" target="_blank"><i class="far fa-file-pdf"></i> Visualizar</a>
+              <button type="button" class="btn btn-sm btn-secondary" data-toggle="modal" data-target="#iFrameModal" data-title="Assinar Digitalmente" data-src="<dtml-var portal_url>/generico/assinador/pades-signature_html?codigo=<dtml-var codigo>&anexo=<dtml-var anexo missing null>&tipo_doc=<dtml-var tipo_doc>&modal=1"><i class="fas fa-file-signature"></i> Assinar</button>
              <!-- Modal -->
              <button type="button" class="btn btn-sm btn-danger d-print-none" data-toggle="modal" data-target="#recusaModal<dtml-var formatted_code>">
                 <i class="fas fa-window-close"></i> Recusar
@@ -492,6 +513,7 @@ $(document).ready(() => {
                      <input type="hidden" name="cod_usuario" value="<dtml-var cod_usuario_corrente missing>" />
                      <input type="hidden" name="tipo_doc" value="<dtml-var tipo_doc missing>" />
                      <input type="hidden" name="codigo" value="<dtml-var codigo missing>" />
+                     <input type="hidden" name="anexo" value="<dtml-var anexo missing>" />
                      <div class="form-row">
                        <div class="col-12 mb-3">
                         <label for="txa_txt_motivo_recusa" class="required">Motivo da Recusa</label>

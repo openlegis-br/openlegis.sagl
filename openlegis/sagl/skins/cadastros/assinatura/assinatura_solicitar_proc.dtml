@@ -11,6 +11,7 @@
     <dtml-try>
       <dtml-call expr="metodo(cod_assinatura_doc  = hdn_cod_assinatura_doc,
                               codigo              = hdn_codigo,
+                              anexo               = hdn_anexo,
                               tipo_doc            = hdn_tipo_doc,
                               cod_usuario         = codigo_usuario,
                               ind_prim_assinatura = ind_prim_assinatura)">
@@ -20,11 +21,11 @@
 </dtml-in>
 
 <dtml-if erro>
-     <dtml-let mensagem="'Já existe solicitação de assinatura para esse usuário!'" tipo_mensagem="'warning'" codigo=hdn_codigo tipo_doc=hdn_tipo_doc>
+     <dtml-let mensagem="'Já existe solicitação de assinatura para esse usuário!'" tipo_mensagem="'warning'" codigo=hdn_codigo anexo=hdn_anexo tipo_doc=hdn_tipo_doc>
         <dtml-var assinatura_solicitar_form>
      </dtml-let>
 <dtml-else>
-      <dtml-let mensagem="'Incluída(s) com sucesso!'" sucesso="'1'" codigo=hdn_codigo tipo_doc=hdn_tipo_doc url="'assinatura_solicitar_form?codigo='+hdn_codigo + '&tipo_doc=' + hdn_tipo_doc">
+      <dtml-let mensagem="'Incluída(s) com sucesso!'" sucesso="'1'" codigo=hdn_codigo anexo=hdn_anexo tipo_doc=hdn_tipo_doc url="'assinatura_solicitar_form?codigo='+hdn_codigo + '&anexo=' + hdn_anexo + '&tipo_doc=' + hdn_tipo_doc">
          <dtml-var assinatura_solicitar_form>
       </dtml-let> 
 </dtml-if>

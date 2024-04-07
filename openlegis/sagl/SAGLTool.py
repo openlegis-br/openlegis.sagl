@@ -1791,7 +1791,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         for norma in self.zsql.materia_buscar_norma_juridica_zsql(cod_materia = cod_materia):
             if hasattr(self.sapl_documentos.norma_juridica, str(norma.cod_norma) + '_texto_integral.pdf'):
                dic_anexo = {}
-               dic_anexo["data"] = DateTime(norma.timestamp, datefmt='international').strftime('%Y-%m-%d 23:59:00')
+               dic_anexo["data"] = DateTime(norma.dat_norma, datefmt='international').strftime('%Y-%m-%d 23:59:00')
                dic_anexo["arquivo"] = getattr(self.sapl_documentos.norma_juridica, str(norma.cod_norma) + '_texto_integral.pdf')
                dic_anexo["id"] = getattr(self.sapl_documentos.norma_juridica, str(norma.cod_norma) + '_texto_integral.pdf').absolute_url()
                anexos.append(dic_anexo)

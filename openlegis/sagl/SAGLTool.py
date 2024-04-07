@@ -1736,13 +1736,13 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
                dic_anexo["arquivo"] = getattr(self.sapl_documentos.materia, str(anexada.cod_materia_anexada) + '_texto_integral.pdf')
                dic_anexo["id"] = getattr(self.sapl_documentos.materia, str(anexada.cod_materia_anexada) + '_texto_integral.pdf').absolute_url()
                anexos.append(dic_anexo)
-            for documento in self.zsql.documento_acessorio_obter_zsql(cod_materia = anexada.cod_materia_anexada, ind_excluido=0):
-                if hasattr(self.sapl_documentos.materia, str(documento.cod_documento) + '.pdf'):
-                   dic_anexo = {}
-                   dic_anexo["data"] = DateTime(documento.dat_documento, datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
-                   dic_anexo["arquivo"] = getattr(self.sapl_documentos.materia, str(documento.cod_documento) + '.pdf')
-                   dic_anexo["id"] = getattr(self.sapl_documentos.materia, str(documento.cod_documento) + '.pdf').absolute_url()
-                   anexos.append(dic_anexo)
+               for documento in self.zsql.documento_acessorio_obter_zsql(cod_materia = anexada.cod_materia_anexada, ind_excluido=0):
+                   if hasattr(self.sapl_documentos.materia, str(documento.cod_documento) + '.pdf'):
+                      dic_anexo = {}
+                      dic_anexo["data"] = DateTime(documento.dat_documento, datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
+                      dic_anexo["arquivo"] = getattr(self.sapl_documentos.materia, str(documento.cod_documento) + '.pdf')
+                      dic_anexo["id"] = getattr(self.sapl_documentos.materia, str(documento.cod_documento) + '.pdf').absolute_url()
+                      anexos.append(dic_anexo)
         for anexada in self.zsql.anexada_obter_zsql(cod_materia_anexada=cod_materia,ind_excluido=0):
             if hasattr(self.sapl_documentos.materia, str(anexada.cod_materia_principal) + '_texto_integral.pdf'):
                dic_anexo = {}
@@ -1750,13 +1750,13 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
                dic_anexo["arquivo"] = getattr(self.sapl_documentos.materia, str(anexada.cod_materia_principal) + '_texto_integral.pdf')
                dic_anexo["id"] = getattr(self.sapl_documentos.materia, str(anexada.cod_materia_principal) + '_texto_integral.pdf').absolute_url()
                anexos.append(dic_anexo)
-            for documento in self.zsql.documento_acessorio_obter_zsql(cod_materia = anexada.cod_materia_principal, ind_excluido=0):
-                if hasattr(self.sapl_documentos.materia, str(documento.cod_documento) + '.pdf'):
-                   dic_anexo = {}
-                   dic_anexo["data"] = DateTime(documento.dat_documento, datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
-                   dic_anexo["arquivo"] = getattr(self.sapl_documentos.materia, str(documento.cod_documento) + '.pdf')
-                   dic_anexo["id"] = getattr(self.sapl_documentos.materia, str(documento.cod_documento) + '.pdf').absolute_url()
-                   anexos.append(dic_anexo)
+               for documento in self.zsql.documento_acessorio_obter_zsql(cod_materia = anexada.cod_materia_principal, ind_excluido=0):
+                   if hasattr(self.sapl_documentos.materia, str(documento.cod_documento) + '.pdf'):
+                      dic_anexo = {}
+                      dic_anexo["data"] = DateTime(documento.dat_documento, datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
+                      dic_anexo["arquivo"] = getattr(self.sapl_documentos.materia, str(documento.cod_documento) + '.pdf')
+                      dic_anexo["id"] = getattr(self.sapl_documentos.materia, str(documento.cod_documento) + '.pdf').absolute_url()
+                      anexos.append(dic_anexo)
         for docadm in self.zsql.documento_administrativo_materia_obter_zsql(cod_materia=cod_materia, ind_excluido=0):
             if hasattr(self.sapl_documentos.administrativo, str(docadm.cod_documento) + '_texto_integral.pdf'):
                dic_anexo = {}
@@ -1791,7 +1791,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         for norma in self.zsql.materia_buscar_norma_juridica_zsql(cod_materia = cod_materia):
             if hasattr(self.sapl_documentos.norma_juridica, str(norma.cod_norma) + '_texto_integral.pdf'):
                dic_anexo = {}
-               dic_anexo["data"] = DateTime(norma.dat_norma, datefmt='international').strftime('%Y-%m-%d 23:59:00')
+               dic_anexo["data"] = DateTime(norma.timestamp, datefmt='international').strftime('%Y-%m-%d 23:59:00')
                dic_anexo["arquivo"] = getattr(self.sapl_documentos.norma_juridica, str(norma.cod_norma) + '_texto_integral.pdf')
                dic_anexo["id"] = getattr(self.sapl_documentos.norma_juridica, str(norma.cod_norma) + '_texto_integral.pdf').absolute_url()
                anexos.append(dic_anexo)
@@ -2177,7 +2177,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         restpki_client = RestPkiClient(restpki_url, restpki_access_token)
         return restpki_client
 
-    def get_file_tosign(self, codigo, tipo_doc):
+    def get_file_tosign(self, codigo, anexo, tipo_doc):
         for storage in self.zsql.assinatura_storage_obter_zsql(tip_documento=tipo_doc):
             tipo_doc = storage.tip_documento
             if tipo_doc == 'proposicao':
@@ -2187,8 +2187,16 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
                nom_arquivo_assinado = str(codigo) + str(storage.pdf_signed)
                pdf_file = str(pdf_location) + str(codigo) + str(storage.pdf_file)
                nom_arquivo = str(codigo) + str(storage.pdf_file)
+            if tipo_doc == 'anexo_sessao':
+               storage_path = self.sapl_documentos.anexo_sessao
+               codigo = str(codigo) + '_anexo_' + str(anexo)
+               pdf_location = storage.pdf_location
+               pdf_signed = str(pdf_location) + str(codigo) + str(storage.pdf_signed)
+               nom_arquivo_assinado = str(codigo) + str(storage.pdf_signed)
+               pdf_file = str(pdf_location) + str(codigo) + str(storage.pdf_file)
+               nom_arquivo = str(codigo) + str(storage.pdf_file)
             else:
-               for item in self.zsql.assinatura_documento_obter_zsql(codigo=codigo, tipo_doc=tipo_doc, ind_assinado=1):
+               for item in self.zsql.assinatura_documento_obter_zsql(codigo=codigo, anexo=anexo, tipo_doc=tipo_doc, ind_assinado=1):
                    if len([item]) >= 1:
                       storage_path = self.sapl_documentos.documentos_assinados
                       pdf_location = 'sapl_documentos/documentos_assinados/'
@@ -2250,9 +2258,9 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
 
         return pdf_tosign, storage_path, crc_arquivo
 
-    def pades_signature(self, codigo, tipo_doc, cod_usuario, qtde_assinaturas):
+    def pades_signature(self, codigo, anexo, tipo_doc, cod_usuario, qtde_assinaturas):
         # get file to sign
-        pdf_tosign, storage_path, crc_arquivo = self.get_file_tosign(codigo, tipo_doc)
+        pdf_tosign, storage_path, crc_arquivo = self.get_file_tosign(codigo, anexo, tipo_doc)
         arq = getattr(storage_path, pdf_tosign)
         arquivo = cStringIO.StringIO(str(arq.data))
         arquivo.seek(0)
@@ -2313,11 +2321,11 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
 
         tokenjs = json.dumps(token)
 
-        return token, pdf_path, crc_arquivo, codigo, tipo_doc, cod_usuario, tokenjs
+        return token, pdf_path, crc_arquivo, codigo, anexo, tipo_doc, cod_usuario, tokenjs
 
-    def pades_signature_action(self, token, codigo, tipo_doc, cod_usuario, crc_arquivo_original):
+    def pades_signature_action(self, token, codigo, anexo, tipo_doc, cod_usuario, crc_arquivo_original):
         # checking if file was changed
-        pdf_tosign, storage_path, crc_arquivo = self.get_file_tosign(codigo, tipo_doc)
+        pdf_tosign, storage_path, crc_arquivo = self.get_file_tosign(codigo, anexo, tipo_doc)
         if str(crc_arquivo_original) != str(crc_arquivo):
            msg = 'O arquivo foi modificado durante o procedimento de assinatura! Tente novamente.'
            raise ValueError(msg)
@@ -2325,6 +2333,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         # Get the token for this signature (rendered in a hidden input field)
         token = token
         codigo = codigo
+        anexo = anexo
         tipo_doc = tipo_doc
         cod_usuario = cod_usuario
 
@@ -2343,13 +2352,13 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
 
         # At this point, you'd typically store the signed PDF on your database.
         cod_assinatura_doc = ''
-        for item in self.zsql.assinatura_documento_obter_zsql(codigo=codigo, tipo_doc=tipo_doc):
+        for item in self.zsql.assinatura_documento_obter_zsql(codigo=codigo, anexo=anexo, tipo_doc=tipo_doc):
             cod_assinatura_doc = str(item.cod_assinatura_doc)
             self.zsql.assinatura_documento_registrar_zsql(cod_assinatura_doc=item.cod_assinatura_doc, cod_usuario=cod_usuario)
             break
         else:
             cod_assinatura_doc = str(self.cadastros.assinatura.generate_verification_code())
-            self.zsql.assinatura_documento_incluir_zsql(cod_assinatura_doc=cod_assinatura_doc, codigo=codigo,tipo_doc=tipo_doc, cod_usuario=cod_usuario, ind_prim_assinatura=1)
+            self.zsql.assinatura_documento_incluir_zsql(cod_assinatura_doc=cod_assinatura_doc, codigo=codigo, anexo=anexo, tipo_doc=tipo_doc, cod_usuario=cod_usuario, ind_prim_assinatura=1)
             self.zsql.assinatura_documento_registrar_zsql(cod_assinatura_doc=cod_assinatura_doc, cod_usuario=cod_usuario)
 
         if tipo_doc == 'proposicao':
@@ -2371,7 +2380,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         arq.manage_edit(title=file_hash,filedata=f.getvalue(),content_type='application/pdf')
 
         if tipo_doc != 'proposicao' and tipo_doc != 'peticao':
-           self.margem_direita(codigo, tipo_doc, cod_assinatura_doc, cod_usuario, file_hash)
+           self.margem_direita(codigo, anexo, tipo_doc, cod_assinatura_doc, cod_usuario, file_hash)
 
         if hasattr(storage_path,filename):
            storage_path.manage_delObjects(filename)
@@ -2467,11 +2476,15 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         else:
             return None
 
-    def margem_direita(self, codigo, tipo_doc, cod_assinatura_doc, cod_usuario, file_hash):
+    def margem_direita(self, codigo, anexo, tipo_doc, cod_assinatura_doc, cod_usuario, file_hash):
 
         for storage in self.zsql.assinatura_storage_obter_zsql(tip_documento=tipo_doc):
-            nom_pdf_assinado = str(cod_assinatura_doc) + '.pdf'
-            nom_pdf_documento = str(codigo) + str(storage.pdf_file)
+            if tipo_doc == 'anexo_sessao':
+               nom_pdf_assinado = str(cod_assinatura_doc) + '.pdf'
+               nom_pdf_documento = str(codigo) + '_anexo_' + str(anexo) + '.pdf'        
+            else:
+               nom_pdf_assinado = str(cod_assinatura_doc) + '.pdf'
+               nom_pdf_documento = str(codigo) + str(storage.pdf_file)
 
         outros = ''
         qtde_assinaturas = []
@@ -2537,7 +2550,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
            storage_path = self.sapl_documentos.pauta_sessao
            for metodo in self.zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=codigo):
                for tipo in self.zsql.tipo_sessao_plenaria_obter_zsql(tip_sessao=metodo.tip_sessao):
-                   sessao = str(metodo.num_sessao_plen) +  'ª Sessão ' + str(tipo.nom_sessao)+' - '+ str(metodo.dat_inicio_sessao)
+                   sessao = str(metodo.num_sessao_plen) +  'ª Reunião ' + str(tipo.nom_sessao)+' - '+ str(metodo.dat_inicio_sessao)
            for metodo in self.zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=codigo, ind_audiencia='1'):
                sessao = 'Audiência Pública nº ' + str(metodo.num_sessao_plen) + '/' + str(metodo.ano_sessao)
            texto = 'PAUTA' + ' - ' + str(sessao)
@@ -2545,10 +2558,18 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
            storage_path = self.sapl_documentos.ata_sessao
            for metodo in self.zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=codigo):
                for tipo in self.zsql.tipo_sessao_plenaria_obter_zsql(tip_sessao=metodo.tip_sessao):
-                   sessao = str(metodo.num_sessao_plen) +  'ª Sessão ' + str(tipo.nom_sessao)+' - '+ str(metodo.dat_inicio_sessao)
+                   sessao = str(metodo.num_sessao_plen) +  'ª Reunião ' + str(tipo.nom_sessao)+' - '+ str(metodo.dat_inicio_sessao)
            for metodo in self.zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=codigo, ind_audiencia='1'):
                sessao = 'Audiência Pública nº ' + str(metodo.num_sessao_plen) + '/' + str(metodo.ano_sessao)
            texto = 'ATA' + ' - ' + str(sessao)
+        elif tipo_doc == 'anexo_sessao':
+           storage_path = self.sapl_documentos.anexo_sessao
+           for metodo in self.zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=codigo):
+               for tipo in self.zsql.tipo_sessao_plenaria_obter_zsql(tip_sessao=metodo.tip_sessao):
+                   sessao = str(metodo.num_sessao_plen) +  'ª Reunião ' + str(tipo.nom_sessao)+ ' de ' + str(metodo.dat_inicio_sessao)      
+           file_item =  str(codigo) + '_anexo_' + str(anexo) + '.pdf'        
+           title = getattr(self.sapl_documentos.anexo_sessao,file_item).title_or_id()
+           texto = str(title) + ' da ' + str(sessao)
         elif tipo_doc == 'norma':
            storage_path = self.sapl_documentos.norma_juridica
            for metodo in self.zsql.norma_juridica_obter_zsql(cod_norma=codigo):
@@ -2662,38 +2683,38 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
            storage_path.manage_delObjects(nom_pdf_documento)
            storage_path.manage_addFile(nom_pdf_documento)
            arq=storage_path[nom_pdf_documento]
-           arq.manage_edit(title=nom_pdf_documento,filedata=outputStream.getvalue(),content_type='application/pdf')
+           arq.manage_edit(title=texto,filedata=outputStream.getvalue(),content_type='application/pdf')
         else:
            storage_path.manage_addFile(nom_pdf_documento)
            arq=storage_path[nom_pdf_documento]
-           arq.manage_edit(title=nom_pdf_documento,filedata=outputStream.getvalue(),content_type='application/pdf')
+           arq.manage_edit(title=texto,filedata=outputStream.getvalue(),content_type='application/pdf')
 
         if tipo_doc == 'parecer_comissao':
            for relat in self.zsql.relatoria_obter_zsql(cod_relatoria=codigo):
                nom_arquivo_pdf = "%s"%relat.cod_relatoria+'_parecer.pdf'
                if relat.tip_fim_relatoria == '18' and hasattr(self.sapl_documentos.parecer_comissao, nom_arquivo_pdf):
                   pdf = getattr(self.sapl_documentos.parecer_comissao, nom_arquivo_pdf)
-                  pdf.manage_permission('View', roles=['Manager','Authenticated'], acquire=0)
+                  pdf.manage_permission('View', roles=['Manager','Authenticated'], acquire=1)
 
         if tipo_doc == 'doc_acessorio':
            for documento in self.zsql.documento_acessorio_obter_zsql(cod_documento=codigo):
                nom_arquivo_pdf = "%s"%documento.cod_documento+'.pdf'
                if str(documento.ind_publico) == '1' and hasattr(self.sapl_documentos.materia, nom_arquivo_pdf):
                   pdf = getattr(self.sapl_documentos.materia, nom_arquivo_pdf)
-                  pdf.manage_permission('View', roles=['Anonymous'], acquire=0)
+                  pdf.manage_permission('View', roles=['Anonymous'], acquire=1)
                elif str(documento.ind_publico) == '0' and hasattr(self.sapl_documentos.materia, nom_arquivo_pdf):
                   pdf = getattr(self.sapl_documentos.materia, nom_arquivo_pdf)
-                  pdf.manage_permission('View', roles=['Manager','Authenticated'], acquire=0)
+                  pdf.manage_permission('View', roles=['Manager','Authenticated'], acquire=1)
 
         if tipo_doc == 'documento':
            for documento in self.zsql.documento_administrativo_obter_zsql(cod_documento=codigo):
                nom_arquivo_pdf = "%s"%documento.cod_documento+'_texto_integral.pdf'
                if str(documento.ind_publico) == '1' and hasattr(self.sapl_documentos.administrativo, nom_arquivo_pdf):
                   pdf = getattr(self.sapl_documentos.administrativo, nom_arquivo_pdf)
-                  pdf.manage_permission('View', roles=['Anonymous'], acquire=0)
+                  pdf.manage_permission('View', roles=['Anonymous'], acquire=1)
                elif str(documento.ind_publico) == '0' and hasattr(self.sapl_documentos.administrativo, nom_arquivo_pdf):
                   pdf = getattr(self.sapl_documentos.administrativo, nom_arquivo_pdf)
-                  pdf.manage_permission('View', roles=['Manager','Authenticated'], acquire=0)
+                  pdf.manage_permission('View', roles=['Manager','Authenticated'], acquire=1)
 
         if tipo_doc == 'doc_acessorio_adm':
            for doc in self.zsql.documento_acessorio_administrativo_obter_zsql(cod_documento_acessorio=codigo):
@@ -2701,10 +2722,10 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
                nom_arquivo_pdf = "%s"%doc.cod_documento_acessorio+'.pdf'
                if str(documento.ind_publico) == '1' and hasattr(self.sapl_documentos.administrativo, nom_arquivo_pdf):
                   pdf = getattr(self.sapl_documentos.administrativo, nom_arquivo_pdf)
-                  pdf.manage_permission('View', roles=['Anonymous'], acquire=0)
+                  pdf.manage_permission('View', roles=['Anonymous'], acquire=1)
                if str(documento.ind_publico) == '0' and hasattr(self.sapl_documentos.administrativo, nom_arquivo_pdf):
                   pdf = getattr(self.sapl_documentos.administrativo, nom_arquivo_pdf)
-                  pdf.manage_permission('View', roles=['Manager','Authenticated'], acquire=0)
+                  pdf.manage_permission('View', roles=['Manager','Authenticated'], acquire=1)
 
         return 'ok'
 
@@ -3234,13 +3255,14 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
                    for page_num, i in enumerate(list(range(dic_anexo["paginas_doc"])), start=1):
                        dic_paginas = {}
                        dic_paginas["num_pagina"] = page_num
+                       dic_paginas["indice_geral"] = ''
                        paginas.append(dic_paginas)
                    dic_anexo["paginas"] = paginas
                    dic_anexo["paginas_geral"] = ''
                    pasta.append(dic_anexo)
 
         pasta.sort(key=lambda dic: dic['data'])
-
+   
         total = 0
         for i in pasta:
             total += i['paginas_doc']

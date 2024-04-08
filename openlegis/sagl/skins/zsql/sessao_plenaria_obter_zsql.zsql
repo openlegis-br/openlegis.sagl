@@ -8,10 +8,10 @@ SELECT
        REPLACE(sessao_plenaria.cod_sessao_plen,  'L', '') as cod_sessao_plen,
        sessao_plenaria.cod_sessao_leg,
        DATE_FORMAT(sessao_plenaria.dat_inicio_sessao, '%d/%m/%Y') as dat_inicio_sessao,
-       DATE_FORMAT(sessao_plenaria.dat_inicio_sessao, '%Y%m%d') as dat_inicio,
+       sessao_plenaria.dat_inicio_sessao as dat_inicio,
        DATE_FORMAT(sessao_plenaria.dat_inicio_sessao, '%Y') as ano_sessao,
        DATE_FORMAT(sessao_plenaria.dat_fim_sessao, '%d/%m/%Y') as dat_fim_sessao,
-       DATE_FORMAT(sessao_plenaria.dat_fim_sessao, '%Y%m%d') as dat_fim,
+       sessao_plenaria.dat_fim_sessao as dat_fim,
        sessao_plenaria.dia_sessao,
        sessao_plenaria.hr_inicio_sessao,
        sessao_plenaria.hr_fim_sessao,
@@ -65,4 +65,4 @@ FROM
     sessao_plenaria.ind_excluido = 0 
   </dtml-sqlgroup>
 
-ORDER BY dat_inicio DESC, hr_inicio_sessao DESC, num_sessao_plen DESC
+ORDER BY DATE(sessao_plenaria.dat_inicio_sessao) DESC, hr_inicio_sessao DESC, num_sessao_plen DESC

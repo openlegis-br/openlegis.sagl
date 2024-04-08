@@ -402,7 +402,7 @@ class Materia(grok.View):
 	        tipo_sessao = self.context.zsql.tipo_sessao_plenaria_obter_zsql(tip_sessao=sessao_plenaria.tip_sessao)[0]
 	        votacao = self.context.zsql.votacao_expediente_materia_obter_zsql(cod_sessao_plen=sessao_plenaria.cod_sessao_plen, cod_materia=item.cod_materia, ind_excluido=0)[0]
 		dic_votacao["@id"] = portal_url + '/@@sessao_plenaria?id=' + str(sessao_plenaria.cod_sessao_plen)
-		dic_votacao["data"] = DateTime(sessao_plenaria.dat_inicio_sessao).strftime("%Y-%m-%d")
+		dic_votacao["data"] = DateTime(sessao_plenaria.dat_inicio).strftime("%Y-%m-%d")
 		dic_votacao["turno"] = ''
 		for tip_votacao in self.context.zsql.tipo_votacao_obter_zsql(tip_votacao=registro.tip_votacao):
 		    dic_votacao["tipo_votacao"] = tip_votacao.des_tipo_votacao
@@ -449,7 +449,7 @@ class Materia(grok.View):
 	        tipo_sessao = self.context.zsql.tipo_sessao_plenaria_obter_zsql(tip_sessao=sessao_plenaria.tip_sessao)[0]
 	        votacao = self.context.zsql.votacao_ordem_dia_obter_zsql(cod_sessao_plen=sessao_plenaria.cod_sessao_plen, cod_materia=item.cod_materia, ind_excluido=0)[0]
 		dic_votacao["@id"] = portal_url + '/@@sessao_plenaria?id=' + str(sessao_plenaria.cod_sessao_plen)
-		dic_votacao["data"] = DateTime(sessao_plenaria.dat_inicio_sessao).strftime("%Y-%m-%d")
+		dic_votacao["data"] = DateTime(sessao_plenaria.dat_inicio).strftime("%Y-%m-%d")
 		for tip_votacao in self.context.zsql.tipo_votacao_obter_zsql(tip_votacao=registro.tip_votacao):
 		    dic_votacao["tipo_votacao"] = tip_votacao.des_tipo_votacao
 		for turno in self.context.zsql.turno_discussao_obter_zsql(cod_turno=registro.tip_turno):

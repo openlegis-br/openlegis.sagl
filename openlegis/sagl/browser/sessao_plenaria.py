@@ -31,9 +31,9 @@ class SessoesPlenarias(grok.View):
 	    dic['title'] = str(item.num_sessao_plen) + 'ª ' + 'Reunião ' +  dic['tipo']
 	    dic['numero'] = str(item.num_sessao_plen)
 	    dic['ano'] = item.ano_sessao  
-	    dic['data_abertura'] = DateTime(item.dat_inicio_sessao).strftime("%Y-%m-%d")
+	    dic['data_abertura'] = DateTime(item.dat_inicio).strftime("%Y-%m-%d")
 	    dic['hora_abertura'] = str(item.hr_inicio_sessao)
-	    dic['data_encerramento'] = DateTime(item.dat_fim_sessao).strftime("%Y-%m-%d")
+	    dic['data_encerramento'] = DateTime(item.dat_fim).strftime("%Y-%m-%d")
 	    dic['hora_encerramento'] = str(item.hr_fim_sessao)
 	    dic['description'] = str(item.num_sessao_plen) + 'ª ' + 'Reunião ' +  dic['tipo'] + ' da ' + str(item.num_sessao_leg) + 'ª Sessão Legislativa'
 	    dic['legislatura'] = str(item.num_legislatura) + 'ª Legislatura'
@@ -97,7 +97,7 @@ class SessoaoPlenaria(grok.View):
 	    dic['title'] = str(item.num_sessao_plen) + 'ª ' + 'Reunião ' +  dic['tipo']
 	    dic['numero'] = str(item.num_sessao_plen)
 	    dic['ano'] = item.ano_sessao  
-	    dic['data_abertura'] = DateTime(item.dat_inicio_sessao).strftime("%Y-%m-%d")
+	    dic['data_abertura'] = DateTime(item.dat_inicio).strftime("%Y-%m-%d")
 	    dic['hora_abertura'] = str(item.hr_inicio_sessao)
 	    dic['data_encerramento'] = DateTime(item.dat_fim_sessao).strftime("%Y-%m-%d")
 	    dic['hora_encerramento'] = str(item.hr_fim_sessao)

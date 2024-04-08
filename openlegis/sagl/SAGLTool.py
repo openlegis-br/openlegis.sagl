@@ -2187,7 +2187,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
                nom_arquivo_assinado = str(codigo) + str(storage.pdf_signed)
                pdf_file = str(pdf_location) + str(codigo) + str(storage.pdf_file)
                nom_arquivo = str(codigo) + str(storage.pdf_file)
-            if tipo_doc == 'anexo_sessao':
+            elif tipo_doc == 'anexo_sessao':
                storage_path = self.sapl_documentos.anexo_sessao
                codigo = str(codigo) + '_anexo_' + str(anexo)
                pdf_location = storage.pdf_location

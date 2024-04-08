@@ -433,12 +433,7 @@ $(document).ready(() => {
           <dtml-if "_.hasattr(sapl_documentos.norma_juridica,id_documento)">
             <dtml-let documento="_.getattr(sapl_documentos.norma_juridica,id_documento).absolute_url">
                <a class="btn btn-secondary" target="_blank" href="<dtml-var portal_url>/pysc/download_norma_pysc?cod_norma=<dtml-var cod_norma>&texto_original=1">
-                 <dtml-if expr="zsql.assinatura_documento_obter_zsql(codigo=cod_norma, tipo_doc='norma',ind_assinado=1, cod_usuario=None)">
-                   <i class="fa fa-certificate"></i>
-                 <dtml-else>
-                   <i class="fa fa-fw fa-file-pdf"></i>
-                 </dtml-if>
-		 Visualizar
+                   <i class="fa fa-fw fa-file-pdf"></i> Visualizar
                </a>        
                <dtml-if "sapl_documentos.props_sagl.restpki_access_token!=''">
                  <dtml-in expr="zsql.peticao_obter_zsql(cod_norma=cod_norma, ind_excluido=0)">

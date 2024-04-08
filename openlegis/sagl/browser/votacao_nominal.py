@@ -27,7 +27,7 @@ class votacaoNominal(grok.View):
 	  dic_items["@id"] = portal_url + '/@@votacao_nominal?sessao_id=' + str(sessao_id)
 	  dic_items["title"] = 'Lista de votação nominal por reunião'
  	  dic_items["description"] = str(sessao_plenaria.num_sessao_plen) + 'ª Reunião ' + tipo_sessao.nom_sessao + ' da ' + str(sessao_plenaria.num_sessao_leg) + 'ª Sessão Legislativa'
-	  dic_items["data_votacao"] = DateTime(sessao_plenaria.dat_inicio_sessao).strftime("%Y-%m-%d")
+	  dic_items["data_votacao"] = DateTime(sessao_plenaria.dat_inicio).strftime("%Y-%m-%d")
           dic_items['items'] = lst_materias 
           
 	  if ordem.tip_votacao == 2:     
@@ -83,7 +83,7 @@ class votacaoNominal(grok.View):
 		      dic_item['description'] = 'Parecer ' +  comissao.sgl_comissao + ' nº ' + str(parecer.num_parecer) + '/' + str(parecer.ano_parecer) +  ', com relatoria de '+ relator.nom_parlamentar + ', FAVORÁVEL ao ' + materia.sgl_tipo_materia + ' ' + str(materia.num_ident_basica) + '/' + str(materia.ano_ident_basica)
 		   elif parecer.tip_conclusao == 'C':
 		      dic_item['description'] = 'Parecer ' +  comissao.sgl_comissao + ' nº ' + str(parecer.num_parecer) + '/' + str(parecer.ano_parecer) +  ', com relatoria de '+ relator.nom_parlamentar + ', CONTRÁRIO ao ' + materia.sgl_tipo_materia + ' ' + str(materia.num_ident_basica) + '/' + str(materia.ano_ident_basica)
-	           dic_item["data_votacao"] = DateTime(sessao_plenaria.dat_inicio_sessao).strftime("%Y-%m-%d")	       
+	           dic_item["data_votacao"] = DateTime(sessao_plenaria.dat_inicio).strftime("%Y-%m-%d")	       
 	           for tip_votacao in self.context.zsql.tipo_votacao_obter_zsql(tip_votacao=ordem.tip_votacao):
 		       dic_item["tipo_votacao"] = tip_votacao.des_tipo_votacao
 		   for turno in self.context.zsql.turno_discussao_obter_zsql(cod_turno=ordem.tip_turno):

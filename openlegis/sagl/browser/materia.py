@@ -176,7 +176,7 @@ class Materia(grok.View):
 	    dic_materia['id'] = item.cod_materia
 	    dic_materia['title'] = item.des_tipo_materia + ' nº ' + str(item.num_ident_basica) + '/' + str(item.ano_ident_basica) 
 	    dic_materia['description'] = item.txt_ementa
-	    dic_materia['data_apresentacao'] = DateTime(item.dat_apresentacao).strftime("%Y-%m-%d")
+	    dic_materia['data_apresentacao'] = DateTime(item.dat_apresentacao).strftime("%Y-%d-%m")
 	    lst_arquivo = []
 	    dic_arquivo = {}	    
 	    arquivo = str(item.cod_materia) + "_texto_integral.pdf"

@@ -24,12 +24,12 @@ class Legislaturas(grok.View):
     	    dic['@id'] = portal_url + '/@@legislatura?id=' + str(item.num_legislatura)
 	    dic['@type'] = 'Legislatura'
 	    dic['id'] = item.num_legislatura
-	    dic['start'] = DateTime(item.dat_inicio).strftime("%Y-%m-%d")
-	    dic['end'] = DateTime(item.dat_fim).strftime("%Y-%m-%d")
-	    dic['data_eleicao'] = DateTime(item.dat_eleicao).strftime("%Y-%m-%d")
+	    dic['start'] = DateTime(item.dat_inicio_conv, datefmt='international').strftime("%Y-%m-%d")
+	    dic['end'] = DateTime(item.dat_fim_conv, datefmt='international').strftime("%Y-%m-%d")
+	    dic['data_eleicao'] = DateTime(item.dat_eleicao_conv, datefmt='international').strftime("%Y-%m-%d")
 	    dic['title'] = str(item.num_legislatura) + 'ª Legislatura' 
-	    dic['description'] = DateTime(item.dat_inicio).strftime("%d/%m/%Y") + ' a ' + DateTime(item.dat_fim).strftime("%d/%m/%Y") 
-            if (DateTime().strftime("%Y-%m-%d") > DateTime(item.dat_inicio).strftime("%Y-%m-%d") and DateTime().strftime("%Y-%m-%d") < DateTime(item.dat_fim).strftime("%Y-%m-%d")):
+	    dic['description'] = DateTime(item.dat_inicio_conv).strftime("%d/%m/%Y") + ' a ' + DateTime(item.dat_fim_conv).strftime("%d/%m/%Y") 
+            if (DateTime().strftime("%Y-%m-%d") > DateTime(item.dat_inicio_conv).strftime("%Y-%m-%d") and DateTime().strftime("%Y-%m-%d") < DateTime(item.dat_fim_conv).strftime("%Y-%m-%d")):
                dic['atual'] = True
             else:
                dic['atual'] = False
@@ -63,10 +63,10 @@ class Legislatura(grok.View):
     	    dic['@id'] = portal_url + '/@@legislatura?id=' + str(item.num_legislatura)
 	    dic['@type'] = 'Legislatura'
 	    dic['id'] = item.num_legislatura
-	    dic['description'] = DateTime(item.dat_inicio).strftime("%d/%m/%Y") + ' a ' + DateTime(item.dat_fim).strftime("%d/%m/%Y")
-	    dic['start'] = DateTime(item.dat_inicio).strftime("%Y-%m-%d")
-	    dic['end'] = DateTime(item.dat_fim).strftime("%Y-%m-%d")
-	    dic['data_eleicao'] = DateTime(item.dat_eleicao).strftime("%Y-%m-%d")
+	    dic['description'] = DateTime(item.dat_inicio_conv).strftime("%d/%m/%Y") + ' a ' + DateTime(item.dat_fim_conv).strftime("%d/%m/%Y") 
+	    dic['start'] = DateTime(item.dat_inicio_conv, datefmt='international').strftime("%Y-%m-%d")
+	    dic['end'] = DateTime(item.dat_fim_conv, datefmt='international').strftime("%Y-%m-%d")
+	    dic['data_eleicao'] = DateTime(item.dat_eleicao_conv, datefmt='international').strftime("%Y-%m-%d")
 	    dic['title'] = str(item.num_legislatura) + 'ª Legislatura' 
 
             if id != '':
@@ -120,4 +120,3 @@ class Legislatura(grok.View):
      	
 	serialized = json.dumps(dic, sort_keys=True, indent=3, ensure_ascii=False).encode('utf8')
 	return(serialized.decode())
-

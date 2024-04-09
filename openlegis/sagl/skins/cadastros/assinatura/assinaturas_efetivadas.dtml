@@ -80,6 +80,11 @@ $(document).ready(function() {
                   <dtml-let titulo="_.getattr(sapl_documentos.anexo_sessao,file_item).title_or_id">
                      <dtml-var titulo>
                   </dtml-let>
+                  <dtml-in expr="zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=codigo, ind_excluido=0)">
+                     <dtml-in expr="zsql.tipo_sessao_plenaria_obter_zsql(tip_sessao=tip_sessao)">                  
+                        da <dtml-var num_sessao_plen>ª Reunião <dtml-var nom_sessao> de <dtml-var dat_inicio_sessao>
+                     </dtml-in>
+                  </dtml-in>
                <dtml-elif expr="tipo_doc == 'doc_acessorio'">
                   <dtml-in expr="zsql.documento_acessorio_obter_zsql(cod_documento=codigo, ind_excluido=0)">
                     <dtml-in expr="zsql.materia_obter_zsql(cod_materia=cod_materia, ind_excluido=0)">

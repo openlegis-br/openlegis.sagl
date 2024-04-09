@@ -2187,14 +2187,6 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
                nom_arquivo_assinado = str(codigo) + str(storage.pdf_signed)
                pdf_file = str(pdf_location) + str(codigo) + str(storage.pdf_file)
                nom_arquivo = str(codigo) + str(storage.pdf_file)
-            elif tipo_doc == 'anexo_sessao':
-               storage_path = self.sapl_documentos.anexo_sessao
-               codigo = str(codigo) + '_anexo_' + str(anexo)
-               pdf_location = storage.pdf_location
-               pdf_signed = str(pdf_location) + str(codigo) + str(storage.pdf_signed)
-               nom_arquivo_assinado = str(codigo) + str(storage.pdf_signed)
-               pdf_file = str(pdf_location) + str(codigo) + str(storage.pdf_file)
-               nom_arquivo = str(codigo) + str(storage.pdf_file)
             else:
                for item in self.zsql.assinatura_documento_obter_zsql(codigo=codigo, anexo=anexo, tipo_doc=tipo_doc, ind_assinado=1):
                    if len([item]) >= 1:
@@ -2242,6 +2234,14 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
                    nom_arquivo_assinado = str(codigo) + str(storage.pdf_signed)
                    pdf_file = str(pdf_location) + str(codigo) + str(storage.pdf_file)
                    nom_arquivo = str(codigo) + str(storage.pdf_file)
+                   if tipo_doc == 'anexo_sessao':
+                      storage_path = self.sapl_documentos.anexo_sessao
+                      codigo = str(codigo) + '_anexo_' + str(anexo)
+                      pdf_location = storage.pdf_location
+                      pdf_signed = str(pdf_location) + str(codigo) + str(storage.pdf_signed)
+                      nom_arquivo_assinado = str(codigo) + str(storage.pdf_signed)
+                      pdf_file = str(pdf_location) + str(codigo) + str(storage.pdf_file)
+                      nom_arquivo = str(codigo) + str(storage.pdf_file)
         try:
            arquivo = self.restrictedTraverse(pdf_signed)
            pdf_tosign = nom_arquivo_assinado
@@ -2569,7 +2569,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
                    sessao = str(metodo.num_sessao_plen) +  'ª Reunião ' + str(tipo.nom_sessao)+ ' de ' + str(metodo.dat_inicio_sessao)      
            file_item =  str(codigo) + '_anexo_' + str(anexo) + '.pdf'        
            title = getattr(self.sapl_documentos.anexo_sessao,file_item).title_or_id()
-           texto = str(title) + ' da ' + str(sessao)
+           texto = str(title)
         elif tipo_doc == 'norma':
            storage_path = self.sapl_documentos.norma_juridica
            for metodo in self.zsql.norma_juridica_obter_zsql(cod_norma=codigo):

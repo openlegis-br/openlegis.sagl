@@ -72,7 +72,6 @@ class MesaDiretora(grok.View):
                dic['atual'] = True
             else:
                dic['atual'] = False
-
             if id != '':         
                lst_membros = []
                for composicao in self.context.zsql.composicao_mesa_obter_zsql(cod_periodo_comp=id, ind_excluido=0):
@@ -85,6 +84,22 @@ class MesaDiretora(grok.View):
 		   dic_membros['title'] = parlamentar.nom_parlamentar
 		   dic_membros['description'] = parlamentar.nom_completo
                    dic_membros['cargo'] = cargo.des_cargo
+	           dic_membros['image'] = ''
+                   lst_imagem = []
+	           dic_image = {}
+	           foto = str(parlamentar.cod_parlamentar) + "_foto_parlamentar"
+	           if hasattr(self.context.sapl_documentos.parlamentar.fotos, foto):    
+	              url = portal_url + '/sapl_documentos/parlamentar/fotos/' + foto
+	              response = requests.get(url)
+	              img = Image.open(BytesIO(response.content))
+                      dic_image['content-type'] = 'image/' + str(img.format).lower()
+                      dic_image['download'] = url
+                      dic_image['filename'] = foto
+                      dic_image['width'] = str(img.width)
+                      dic_image['height'] = str(img.height)
+                      dic_image['size'] = str(len(img.fp.read()))
+                      lst_imagem.append(dic_image)
+	           dic_membros['image'] = lst_imagem
 		   lst_partido = []
 		   for filiacao in self.context.zsql.filiacao_obter_zsql(ind_excluido=0, cod_parlamentar=composicao.cod_parlamentar):    
 		       dic_partido = {}

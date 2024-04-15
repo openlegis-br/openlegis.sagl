@@ -150,5 +150,18 @@ class Vereador(grok.View):
                 dic_mandato['legislatura'] = mandato.num_legislatura
 		lst_mandato.append(dic_mandato)
 	    dic_vereador['mandato'] = lst_mandato
+	    
+	    lst_mesa = []
+	    for composicao in self.context.zsql.parlamentar_mesa_obter_zsql(cod_parlamentar=item.cod_parlamentar, ind_excluido=0):
+		dic_mesa = {}
+       	        dic_mesa['@id'] = portal_url + '/@@mesa_diretora?id=' + str(composicao.cod_periodo_comp)
+	        dic_mesa['@type'] = 'ParticipanteMesaDiretora'
+                dic_mesa['title'] = str(composicao.des_cargo)
+                dic_mesa['description'] = DateTime(composicao.sl_dat_inicio, datefmt='international').strftime("%d/%m/%Y") + ' a ' + DateTime(composicao.sl_dat_fim, datefmt='international').strftime("%d/%m/%Y")
+                dic_mesa['start'] = DateTime(composicao.sl_dat_inicio, datefmt='international').strftime("%Y-%m-%d")
+                dic_mesa['end'] = DateTime(composicao.sl_dat_fim, datefmt='international').strftime("%Y-%m-%d")
+		lst_mesa.append(dic_mesa)
+    	    dic_vereador['mesa'] = lst_mesa
+	    
 	serialized = json.dumps(dic_vereador, sort_keys=True, indent=3, ensure_ascii=False).encode('utf8')
 	return(serialized.decode())

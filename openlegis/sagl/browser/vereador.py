@@ -161,7 +161,33 @@ class Vereador(grok.View):
                 dic_mesa['start'] = DateTime(composicao.sl_dat_inicio, datefmt='international').strftime("%Y-%m-%d")
                 dic_mesa['end'] = DateTime(composicao.sl_dat_fim, datefmt='international').strftime("%Y-%m-%d")
 		lst_mesa.append(dic_mesa)
+	    lst_mesa.sort(key=lambda dic_mesa: dic_mesa['start'], reverse=True)
     	    dic_vereador['mesa'] = lst_mesa
-	    
+    	    
+    	    lst_comissao = []
+	    for composicao in self.context.zsql.composicao_comissao_obter_zsql(cod_parlamentar=item.cod_parlamentar, ind_excluido=0):
+                periodo = self.context.zsql.periodo_comp_comissao_obter_zsql(cod_periodo_comp=composicao.cod_periodo_comp, ind_excluido=0)[0]
+                cod_periodo = periodo.dat_fim_periodo
+		dic_comissao = {}
+    	        dic_comissao['@id'] = portal_url + '/@@comissao?id=' + str(composicao.cod_comissao)
+	        dic_comissao['@type'] = 'ParticipanteComissao'
+                dic_comissao['title'] = str(composicao.des_cargo)
+                dic_comissao['start'] = DateTime(composicao.dat_designacao, datefmt='international').strftime("%Y-%m-%d")
+                dic_comissao['end'] = DateTime(composicao.dat_desligamento, datefmt='international').strftime("%Y-%m-%d")
+                dat_designacao = DateTime(composicao.dat_designacao, datefmt='international').strftime("%d/%m/%Y")
+                dat_desligamento = DateTime(composicao.dat_desligamento, datefmt='international').strftime("%d/%m/%Y")
+                if composicao.dat_desligamento == None:
+                   dat_desligamento = DateTime(periodo.dat_fim_periodo, datefmt='international').strftime("%d/%m/%Y")
+                   dic_comissao['end'] = DateTime(periodo.dat_fim_periodo, datefmt='international').strftime("%Y-%m-%d")
+                dic_comissao['description'] = dat_designacao + ' a ' + dat_desligamento
+                dic_comissao['comissao'] = str(composicao.nom_comissao)
+                if composicao.ind_titular == 1:
+                   dic_comissao['mandato'] = 'Titular'
+                else:
+                   dic_comissao['mandato'] = 'Suplente'
+		lst_comissao.append(dic_comissao)
+	    lst_comissao.sort(key=lambda dic_comissao: dic_comissao['start'], reverse=True)
+    	    dic_vereador['comissao'] = lst_comissao
+    	    
 	serialized = json.dumps(dic_vereador, sort_keys=True, indent=3, ensure_ascii=False).encode('utf8')
 	return(serialized.decode())

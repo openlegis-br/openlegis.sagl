@@ -44,7 +44,7 @@ for item in context.zsql.autores_obter_zsql(txt_dat_apresentacao=data_atual):
         dic['cod_parlamentar'] = parlamentar.cod_parlamentar              
     lista_exercicio.append(dic)
 
-lista_exercicio.sort(key=lambda dic: dic['nom_completo'], reverse=True)
+lista_exercicio.sort(key=lambda dic: dic['nom_completo'], reverse=False)
 
 serialized = json.dumps(lista_exercicio, sort_keys=True, indent=3, ensure_ascii=False).encode('utf8')
 print(serialized.decode())

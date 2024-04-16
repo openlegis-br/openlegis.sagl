@@ -37,10 +37,10 @@ for item in context.zsql.autores_obter_zsql(txt_dat_apresentacao=data_atual):
             for partido in context.zsql.parlamentar_partido_obter_zsql(dat_filiacao=filiacao.dat_filiacao, cod_parlamentar=item.cod_parlamentar):
                 dic['partido'] = partido.sgl_partido
     for parlamentar in context.zsql.parlamentar_obter_zsql(cod_parlamentar=item.cod_parlamentar):
-	    if parlamentar.txt_biografia != None:
-	       dic['biografia'] = escape(parlamentar.txt_biografia)
-	    else:
-	       dic['biografia'] = ''
+        if parlamentar.txt_biografia != None:
+           dic['biografia'] = escape(parlamentar.txt_biografia)
+        else:
+           dic['biografia'] = ''
         dic['cod_parlamentar'] = parlamentar.cod_parlamentar              
     lista_exercicio.append(dic)
 

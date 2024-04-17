@@ -2048,20 +2048,21 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
                for documento in self.zsql.documento_administrativo_obter_zsql(cod_documento=peticao.cod_documento):
                    for protocolo in self.zsql.protocolo_obter_zsql(num_protocolo=documento.num_protocolo, ano_protocolo=documento.ano_documento):
                        info_protocolo = ' - Protocolo nº ' + str(protocolo.num_protocolo) + '/' + str(protocolo.ano_protocolo) + ' recebido em ' + self.pysc.iso_to_port_pysc(protocolo.dat_protocolo) + ' ' + protocolo.hor_protocolo + ' - '
-                   texto = str(documento.des_tipo_documento.decode('utf-8').upper())+' Nº '+ str(documento.num_documento)+ '/' +str(documento.ano_documento)
+                   texto = str(documento.des_tipo_documento.decode('utf-8')) + ' nº ' + str(documento.num_documento) + '/' + str(documento.ano_documento)
                    storage_path = self.sapl_documentos.administrativo
                    nom_pdf_saida = str(documento.cod_documento) + "_texto_integral.pdf"
                    caminho = '/sapl_documentos/administrativo/'
             elif peticao.ind_doc_materia == "1":
                for documento in self.zsql.documento_acessorio_obter_zsql(cod_documento=peticao.cod_doc_acessorio):
-                   texto = str(documento.des_tipo_documento.decode('utf-8').upper())+' - ' + str(materia)
+                   materia = self.context.zsql.materia_obter_zsql(cod_materia=documento.cod_materia, ind_excluido=0)[0]
+                   texto = str(documento.des_tipo_documento.decode('utf-8')) + ' - ' + str(materia.sgl_tipo_materia) + ' ' + str(materia.num_ident_basica) + '/' + str(materia.ano_ident_basica)
                    storage_path = self.sapl_documentos.materia
                    nom_pdf_saida = str(documento.cod_documento) + ".pdf"
                    caminho = '/sapl_documentos/materia/'
             elif peticao.ind_norma == "1":
                storage_path = self.sapl_documentos.norma_juridica
                for norma in self.zsql.norma_juridica_obter_zsql(cod_norma=peticao.cod_norma):
-                   texto = str(norma.des_tipo_norma.decode('utf-8').upper())+' Nº '+ str(norma.num_norma) + '/' + str(norma.ano_norma)
+                   texto = str(norma.des_tipo_norma.decode('utf-8')) + ' nº ' + str(norma.num_norma) + '/' + str(norma.ano_norma)
                    nom_pdf_saida = str(norma.cod_norma) + "_texto_integral.pdf"
                    caminho = '/sapl_documentos/norma_juridica/'
         if cod_validacao_doc != '':

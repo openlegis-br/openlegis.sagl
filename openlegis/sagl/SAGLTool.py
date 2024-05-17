@@ -944,7 +944,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         url = self.sapl_documentos.modelo.documento_administrativo.absolute_url() + "/capa_processo_adm.odt"
         template_file = cStringIO.StringIO(urllib.urlopen(url).read())
         brasao_file = self.get_brasao()
-        exec 'brasao = brasao_file'
+        exec 'brasao = brasao_file'      
         output_file_odt = "%s" % capa_dic['nom_arquivo_odt']
         output_file_pdf = "%s" % capa_dic['nom_arquivo_pdf']
         renderer = Renderer(template_file, locals(), output_file_odt, pythonWithUnoPath='/usr/bin/python3',forceOoCall=True)
@@ -954,13 +954,13 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         renderer = Renderer(odtFile,locals(),output_file_pdf,pythonWithUnoPath='/usr/bin/python3',forceOoCall=True)
         renderer.run()
         data = open(output_file_pdf, "rb").read()
-        self.REQUEST.RESPONSE.setHeader('Content-Type', 'application/pdf')
-        self.REQUEST.RESPONSE.setHeader('Content-Disposition','inline; filename=%s' %output_file_pdf)
-        for file in [output_file_odt]:
-            os.unlink(file)
-        for file in [output_file_pdf]:
-            os.unlink(file)
-        return data
+        os.unlink(output_file_odt)
+        if hasattr(self.temp_folder,output_file_pdf):
+           self.temp_folder.manage_delObjects(ids=output_file_pdf)
+        self.temp_folder.manage_addFile(output_file_pdf)
+        arq=self.temp_folder[output_file_pdf]
+        arq.manage_edit(title='Capa do Processo',filedata=data,content_type='application/pdf')
+        os.unlink(output_file_pdf)
 
     def materia_gerar_odt(self, inf_basicas_dic, num_proposicao, nom_arquivo, des_tipo_materia, num_ident_basica, ano_ident_basica, txt_ementa, materia_vinculada, dat_apresentacao, nom_autor, apelido_autor, modelo_proposicao):
         url = self.sapl_documentos.modelo.materia.absolute_url() + "/%s" % modelo_proposicao
@@ -1378,14 +1378,16 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         texto_pdf = PdfReader(os.path.normpath(nom_arquivo_pdf1), decompress=False).pages
         merger.addpages(texto_pdf)
         os.unlink(output_file_pdf)
-
+        utool = getToolByName(self, 'portal_url')
+        portal = utool.getPortalObject()
+        view = portal.restrictedTraverse('@@otimizar_anexos')
+        results = view()
         lst_anexos = []
         for anexo in self.pysc.anexo_proposicao_pysc(cod_proposicao,listar=True):
             arq = getattr(self.sapl_documentos.proposicao, anexo)
             arquivo = cStringIO.StringIO(str(arq.data))
             texto_anexo = PdfReader(arquivo, decompress=False).pages
             merger.addpages(texto_anexo)
-
         final_output_file_pdf = os.path.normpath(nom_arquivo_pdf1)
         merger.write(final_output_file_pdf)
         readin = open(final_output_file_pdf, "r")
@@ -1393,7 +1395,8 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         for file in [final_output_file_pdf]:
             os.unlink(file)
             self.sapl_documentos.proposicao.manage_addFile(id=nom_arquivo_pdf1, file=contents)
-
+        results = view()
+        
     def substitutivo_gerar_odt(self, inf_basicas_dic, num_proposicao, nom_arquivo, des_tipo_materia, num_ident_basica, ano_ident_basica, txt_ementa, materia_vinculada, dat_apresentacao, nom_autor, apelido_autor, modelo_proposicao):
         url = self.sapl_documentos.modelo.materia.substitutivo.absolute_url() + "/%s"%modelo_proposicao
         template_file = cStringIO.StringIO(urllib.urlopen(url).read())

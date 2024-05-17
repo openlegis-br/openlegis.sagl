@@ -70,7 +70,7 @@ def pauta(pauta_dic):
         tmp+='\t\t<condPageBreak height="20mm"/>\n'
         tmp+='\t\t<para style="P1" spaceBefore="10"><b>LISTAGEM DE LEITURA</b></para>\n'
     for dic in pauta_dic["lst_requerimentos_vereadores"]:
-        tmp+='\t\t<para style="P2" spaceBefore="20"><b><u>' + str(dic['vereador']) + ' (' + str(dic['qtde_materias']) + ')</u></b></para>\n'
+        tmp+='\t\t<para style="P2" spaceBefore="20"><b><u>' + str(dic['vereador']) + ' [' + str(dic['qtde_materias']) + ']</u></b></para>\n'
         for item in dic['materias']:
             tmp+='\t\t<para style="P2" spaceBefore="5"><font color="#126e90"><b>' + item['id_materia'] + '</b></font> - ' + item['txt_ementa'] + '</para>\n'
     

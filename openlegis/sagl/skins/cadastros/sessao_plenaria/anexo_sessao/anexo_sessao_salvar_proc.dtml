@@ -1,10 +1,8 @@
 <dtml-try>
-    <dtml-if expr="pysc.arquivo_pdf_validar_pysc(file=file_nom_arquivo)">
-       <dtml-call expr="REQUEST.set('nom_arquivo', anexo_sessao_pysc(hdn_cod_sessao_plen,nomear=True))">
-       <dtml-call expr="sapl_documentos.anexo_sessao.manage_addFile(id=nom_arquivo, file=file_nom_arquivo, title=txt_title)">
-    </dtml-if>
+    <dtml-call expr="REQUEST.set('nom_arquivo', anexo_sessao_pysc(hdn_cod_sessao_plen,nomear=True))">
+    <dtml-call expr="sapl_documentos.anexo_sessao.manage_addFile(id=nom_arquivo,file=pysc.upload_file(file=file_nom_arquivo, title=txt_title), title=txt_title)">         
 <dtml-except>
-  <dtml-let mensagem="'Documento rejeitado !'" mensagem_obs="'O arquivo enviado não é um documento PDF válido.'" tipo_mensagem="'danger'" modal="'1'">
+  <dtml-let mensagem="'Houve um erro !'" mensagem_obs="'Tente novamente.'" tipo_mensagem="'danger'" modal="'1'">
     <dtml-var mensagem_emitir>
   </dtml-let>  
 <dtml-else>
@@ -19,7 +17,7 @@
             usuario      = REQUEST['AUTHENTICATED_USER'].getUserName(), 
             data         = DateTime().strftime('%Y-%m-%d %H:%M:%S'),
             modulo       = _.string.split(_['REQUEST']['URL1'],'/')[-1],
-            metodo       = 'anexo_sessao_salvar',
+            metodo       = 'anexo_sessao_adicionar',
             IP           = pysc.get_ip(),
             cod_registro = hdn_cod_sessao_plen)"> 
 </dtml-if>

@@ -55,7 +55,7 @@ class ProcessoAdm(grok.View):
                dic["data"] = DateTime(documento.dat_documento, datefmt='international').strftime('%Y-%m-%d 00:00:02')
                dic['path'] = self.context.sapl_documentos.administrativo
                dic['file'] = nom_arquivo
-               dic['title'] = documento.des_tipo_documento + ' nº ' + str(documento.num_documento) + '/' +str(documento.ano_documento)
+               dic['title'] = documento.des_tipo_documento + ' ' + str(documento.num_documento) + '/' +str(documento.ano_documento)
                lst_arquivos.append(dic)
 
             for docadm in self.context.zsql.documento_acessorio_administrativo_obter_zsql(cod_documento=documento.cod_documento, ind_excluido=0):

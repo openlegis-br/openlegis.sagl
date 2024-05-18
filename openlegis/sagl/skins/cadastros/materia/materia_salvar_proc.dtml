@@ -210,7 +210,7 @@
           <dtml-call expr="REQUEST.set('existe_arquivo', 1)">
           <dtml-try>
             <dtml-if expr="pysc.arquivo_pdf_validar_pysc(file=file_nom_arquivo)">
-              <dtml-call "documento.manage_upload(file=file_nom_arquivo)">
+              <dtml-call "documento.manage_upload(file=pysc.upload_file(file=file_nom_arquivo, title='Materia'))">
             </dtml-if>
           <dtml-except>
             <dtml-call expr="REQUEST.set('erro', 1)">
@@ -224,9 +224,10 @@
     <dtml-if expr="not existe_arquivo">
       <dtml-call expr="REQUEST.set('erro',0)">
       <dtml-try>
-        <dtml-if expr="pysc.arquivo_pdf_validar_pysc(file=file_nom_arquivo)">
-          <dtml-call expr="sapl_documentos.materia.manage_addFile(id=id_documento,file=file_nom_arquivo)">
-        </dtml-if>
+        <dtml-in expr="zsql.materia_obter_zsql(cod_materia = hdn_cod_materia)">
+          <dtml-call expr="REQUEST.set('titulo', sgl_tipo_materia + ' ' + str(num_ident_basica) + '/' + str(ano_ident_basica))">
+        </dtml-in>
+        <dtml-call expr="sapl_documentos.materia.manage_addFile(id=id_documento,file=pysc.upload_file(file=file_nom_arquivo, title=titulo))">
       <dtml-except> 
       </dtml-try>
     </dtml-if>
@@ -237,9 +238,7 @@
         <dtml-let documento="_.getattr(sapl_documentos.materia,id_redacao) ">
           <dtml-call expr="REQUEST.set('existe_redacao', 1)">
           <dtml-try>
-            <dtml-if expr="pysc.arquivo_pdf_validar_pysc(file=file_redacao)">
-              <dtml-call "documento.manage_upload(file=file_redacao)">
-            </dtml-if>
+              <dtml-call "documento.manage_upload(file=pysc.upload_file(file=file_redacao, title='Redacao Final'))">
           <dtml-except>
             <dtml-call expr="REQUEST.set('erro', 1)">
             <dtml-let mensagem="'Ocorreu erro ao tentar salvar a redação final'+hdn_cod_materia" tipo_mensagem="'danger'">
@@ -252,9 +251,7 @@
     <dtml-if expr="not existe_redacao">
       <dtml-call expr="REQUEST.set('erro',0)">
       <dtml-try>
-         <dtml-if expr="pysc.arquivo_pdf_validar_pysc(file=file_redacao)">
-            <dtml-call expr="sapl_documentos.materia.manage_addFile(id=id_redacao,file=file_redacao)">
-         </dtml-if>
+        <dtml-call expr="sapl_documentos.materia.manage_addFile(id=id_redacao,file=pysc.upload_file(file=file_redacao, title='Redacao Final'))">
       <dtml-except> 
       </dtml-try>
     </dtml-if>

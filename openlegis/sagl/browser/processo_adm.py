@@ -278,13 +278,11 @@ class ProcessoAdm(grok.View):
                dic_indice['id'] = item['id']
                dic_indice['title'] = item['title']
                dic_indice["url"] = str(portal_url) + '/@@pagina_processo_adm_integral?cod_documento=' + str(cod_documento) + '%26pagina=' +  'pg_0001.pdf'
-               #dic_indice["url"] = '#'
                dic_indice["paginas_geral"] = len(page_paths)
                dic_indice['paginas'] = []
                dic_indice['id_paginas'] = []
                for pag in lst_indice:
                    dic_pagina = {}
-                   #dic_id_pagina = {}  
                    if item['id'] == str(pag.get('id',pag)):
                       dic_pagina['num_pagina'] = pag['num_pagina']
                       dic_pagina['id_pagina'] = pag['pagina']

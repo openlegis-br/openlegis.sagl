@@ -1110,6 +1110,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
            arquivo = cStringIO.StringIO(str(arq.data))
            texto_tram = PdfReader(arquivo, decompress=False).pages
            merger.addpages(texto_tram)
+           self.sapl_documentos.materia.tramitacao.manage_delObjects(arquivoPdf)
         if hasattr(self.sapl_documentos.materia.tramitacao,arquivoPdfAnexo):
            arq = getattr(self.sapl_documentos.materia.tramitacao, arquivoPdfAnexo)
            arquivo = cStringIO.StringIO(str(arq.data))
@@ -1117,16 +1118,10 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
            merger.addpages(texto_anexo)
            self.sapl_documentos.materia.tramitacao.manage_delObjects(arquivoPdfAnexo)
         outputStream = cStringIO.StringIO()
-        self.temp_folder.manage_addFile(arquivoPdf)
         merger.write(outputStream)
-        arq=self.temp_folder[arquivoPdf]
+        self.sapl_documentos.materia.tramitacao.manage_addFile(arquivoPdf)
+        arq=self.sapl_documentos.materia.tramitacao[arquivoPdf]
         arq.manage_edit(title=arquivoPdf,filedata=outputStream.getvalue(),content_type='application/pdf')
-        tmp_copy = self.temp_folder.manage_copyObjects(ids=arquivoPdf)
-        if arquivoPdf in self.sapl_documentos.materia.tramitacao:
-           self.sapl_documentos.materia.tramitacao.manage_delObjects(arquivoPdf)
-           tmp_id = self.sapl_documentos.materia.tramitacao.manage_pasteObjects(tmp_copy)[0]['new_id']
-           self.sapl_documentos.materia.tramitacao.manage_renameObjects(ids=list([tmp_id]),new_ids=list([arquivoPdf]))
-        self.temp_folder.manage_delObjects(arquivoPdf)
 
     def documento_assinado_imprimir(self,cod_documento):
         nom_pdf_documento = str(cod_documento) + "_texto_integral_signed.pdf"

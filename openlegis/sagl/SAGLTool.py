@@ -961,6 +961,12 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         arq=self.temp_folder[output_file_pdf]
         arq.manage_edit(title='Capa do Processo',filedata=data,content_type='application/pdf')
         os.unlink(output_file_pdf)
+            
+        #self.REQUEST.RESPONSE.setHeader('Content-Type', 'application/pdf')
+        #self.REQUEST.RESPONSE.setHeader('Content-Disposition','inline; filename=%s' %output_file_pdf)
+        
+        #return data
+        
 
     def materia_gerar_odt(self, inf_basicas_dic, num_proposicao, nom_arquivo, des_tipo_materia, num_ident_basica, ano_ident_basica, txt_ementa, materia_vinculada, dat_apresentacao, nom_autor, apelido_autor, modelo_proposicao):
         url = self.sapl_documentos.modelo.materia.absolute_url() + "/%s" % modelo_proposicao
@@ -1253,7 +1259,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
             os.unlink(file)
             self.sapl_documentos.peticao.manage_addFile(id=nom_arquivo,file=data)
         odt = getattr(self.sapl_documentos.peticao, nom_arquivo)
-        odt.manage_permission('View', roles=['Manager','Owner'], acquire=0)
+        odt.manage_permission('View', roles=['Manager','Owner'], acquire=1)
 
     def peticao_gerar_pdf(self, cod_peticao):
         nom_arquivo_odt = "%s"%cod_peticao+'.odt'
@@ -1268,7 +1274,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
             os.unlink(file)
             self.sapl_documentos.peticao.manage_addFile(id=nom_arquivo_pdf1, file=data)
         pdf = getattr(self.sapl_documentos.peticao, nom_arquivo_pdf1)
-        pdf.manage_permission('View', roles=['Manager','Authenticated'], acquire=0)
+        pdf.manage_permission('View', roles=['Manager','Authenticated'], acquire=1)
 
     def get_proposicao_image_one(self, num_proposicao):
         utool = getToolByName(self, 'portal_url')
@@ -1373,16 +1379,19 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         texto_pdf = PdfReader(os.path.normpath(nom_arquivo_pdf1), decompress=False).pages
         merger.addpages(texto_pdf)
         os.unlink(output_file_pdf)
+
         utool = getToolByName(self, 'portal_url')
         portal = utool.getPortalObject()
         view = portal.restrictedTraverse('@@otimizar_anexos')
         results = view()
+        
         lst_anexos = []
         for anexo in self.pysc.anexo_proposicao_pysc(cod_proposicao,listar=True):
             arq = getattr(self.sapl_documentos.proposicao, anexo)
             arquivo = cStringIO.StringIO(str(arq.data))
             texto_anexo = PdfReader(arquivo, decompress=False).pages
             merger.addpages(texto_anexo)
+
         final_output_file_pdf = os.path.normpath(nom_arquivo_pdf1)
         merger.write(final_output_file_pdf)
         readin = open(final_output_file_pdf, "r")
@@ -1390,8 +1399,8 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         for file in [final_output_file_pdf]:
             os.unlink(file)
             self.sapl_documentos.proposicao.manage_addFile(id=nom_arquivo_pdf1, file=contents)
-        results = view()
-        
+        return results
+
     def substitutivo_gerar_odt(self, inf_basicas_dic, num_proposicao, nom_arquivo, des_tipo_materia, num_ident_basica, ano_ident_basica, txt_ementa, materia_vinculada, dat_apresentacao, nom_autor, apelido_autor, modelo_proposicao):
         url = self.sapl_documentos.modelo.materia.substitutivo.absolute_url() + "/%s"%modelo_proposicao
         template_file = cStringIO.StringIO(urllib.urlopen(url).read())
@@ -2046,21 +2055,20 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
                for documento in self.zsql.documento_administrativo_obter_zsql(cod_documento=peticao.cod_documento):
                    for protocolo in self.zsql.protocolo_obter_zsql(num_protocolo=documento.num_protocolo, ano_protocolo=documento.ano_documento):
                        info_protocolo = ' - Protocolo nº ' + str(protocolo.num_protocolo) + '/' + str(protocolo.ano_protocolo) + ' recebido em ' + self.pysc.iso_to_port_pysc(protocolo.dat_protocolo) + ' ' + protocolo.hor_protocolo + ' - '
-                   texto = str(documento.des_tipo_documento.decode('utf-8')) + ' nº ' + str(documento.num_documento) + '/' + str(documento.ano_documento)
+                   texto = str(documento.des_tipo_documento.decode('utf-8').upper())+' Nº '+ str(documento.num_documento)+ '/' +str(documento.ano_documento)
                    storage_path = self.sapl_documentos.administrativo
                    nom_pdf_saida = str(documento.cod_documento) + "_texto_integral.pdf"
                    caminho = '/sapl_documentos/administrativo/'
             elif peticao.ind_doc_materia == "1":
                for documento in self.zsql.documento_acessorio_obter_zsql(cod_documento=peticao.cod_doc_acessorio):
-                   materia = self.context.zsql.materia_obter_zsql(cod_materia=documento.cod_materia, ind_excluido=0)[0]
-                   texto = str(documento.des_tipo_documento.decode('utf-8')) + ' - ' + str(materia.sgl_tipo_materia) + ' ' + str(materia.num_ident_basica) + '/' + str(materia.ano_ident_basica)
+                   texto = str(documento.des_tipo_documento.decode('utf-8').upper())+' - ' + str(materia)
                    storage_path = self.sapl_documentos.materia
                    nom_pdf_saida = str(documento.cod_documento) + ".pdf"
                    caminho = '/sapl_documentos/materia/'
             elif peticao.ind_norma == "1":
                storage_path = self.sapl_documentos.norma_juridica
                for norma in self.zsql.norma_juridica_obter_zsql(cod_norma=peticao.cod_norma):
-                   texto = str(norma.des_tipo_norma.decode('utf-8')) + ' nº ' + str(norma.num_norma) + '/' + str(norma.ano_norma)
+                   texto = str(norma.des_tipo_norma.decode('utf-8').upper())+' Nº '+ str(norma.num_norma) + '/' + str(norma.ano_norma)
                    nom_pdf_saida = str(norma.cod_norma) + "_texto_integral.pdf"
                    caminho = '/sapl_documentos/norma_juridica/'
         if cod_validacao_doc != '':
@@ -2157,12 +2165,12 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
            storage_path.manage_addFile(nom_pdf_saida)
            arq=storage_path[nom_pdf_saida]
            arq.manage_edit(title=nom_pdf_saida,filedata=outputStream.getvalue(),content_type='application/pdf')
-           arq.manage_permission('View', roles=['Manager','Authenticated'], acquire=0)
+           arq.manage_permission('View', roles=['Manager','Authenticated'], acquire=1)
         else:
            storage_path.manage_addFile(nom_pdf_saida)
            arq=storage_path[nom_pdf_saida]
            arq.manage_edit(title=nom_pdf_saida,filedata=outputStream.getvalue(),content_type='application/pdf')
-           arq.manage_permission('View', roles=['Manager','Authenticated'], acquire=0)
+           arq.manage_permission('View', roles=['Manager','Authenticated'], acquire=1)
 
         if peticao.ind_norma == "1":
            arq=storage_path[nom_pdf_saida]
@@ -2186,6 +2194,14 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
                nom_arquivo_assinado = str(codigo) + str(storage.pdf_signed)
                pdf_file = str(pdf_location) + str(codigo) + str(storage.pdf_file)
                nom_arquivo = str(codigo) + str(storage.pdf_file)
+            #elif tipo_doc == 'anexo_sessao':
+            #   storage_path = self.sapl_documentos.anexo_sessao
+            #   codigo = str(codigo) + '_anexo_' + str(anexo)
+            #   pdf_location = storage.pdf_location
+            #   pdf_signed = str(pdf_location) + str(codigo) + str(storage.pdf_signed)
+            #   nom_arquivo_assinado = str(codigo) + str(storage.pdf_signed)
+            #   pdf_file = str(pdf_location) + str(codigo) + str(storage.pdf_file)
+            #   nom_arquivo = str(codigo) + str(storage.pdf_file)
             else:
                for item in self.zsql.assinatura_documento_obter_zsql(codigo=codigo, anexo=anexo, tipo_doc=tipo_doc, ind_assinado=1):
                    if len([item]) >= 1:
@@ -2710,7 +2726,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
                nom_arquivo_pdf = "%s"%documento.cod_documento+'_texto_integral.pdf'
                if str(documento.ind_publico) == '1' and hasattr(self.sapl_documentos.administrativo, nom_arquivo_pdf):
                   pdf = getattr(self.sapl_documentos.administrativo, nom_arquivo_pdf)
-                  pdf.manage_permission('View', roles=['Anonymous'], acquire=1)
+                  pdf.manage_permission('View', roles=['Manager', 'Anonymous'], acquire=1)
                elif str(documento.ind_publico) == '0' and hasattr(self.sapl_documentos.administrativo, nom_arquivo_pdf):
                   pdf = getattr(self.sapl_documentos.administrativo, nom_arquivo_pdf)
                   pdf.manage_permission('View', roles=['Manager','Authenticated'], acquire=1)
@@ -2721,7 +2737,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
                nom_arquivo_pdf = "%s"%doc.cod_documento_acessorio+'.pdf'
                if str(documento.ind_publico) == '1' and hasattr(self.sapl_documentos.administrativo, nom_arquivo_pdf):
                   pdf = getattr(self.sapl_documentos.administrativo, nom_arquivo_pdf)
-                  pdf.manage_permission('View', roles=['Anonymous'], acquire=1)
+                  pdf.manage_permission('View', roles=['Manager','Anonymous'], acquire=1)
                if str(documento.ind_publico) == '0' and hasattr(self.sapl_documentos.administrativo, nom_arquivo_pdf):
                   pdf = getattr(self.sapl_documentos.administrativo, nom_arquivo_pdf)
                   pdf.manage_permission('View', roles=['Manager','Authenticated'], acquire=1)
@@ -3187,88 +3203,5 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
             i['paginas_geral'] = total
 
         return pasta
-
-
-    def pasta_adm_digital(self, cod_documento):
-
-        for documento in self.zsql.documento_administrativo_obter_zsql(cod_documento=cod_documento):
-            pasta = []
-            if hasattr(self.sapl_documentos.administrativo, str(documento.cod_documento) + '_texto_integral.pdf'):
-               dic_doc = {}
-               dic_doc["id"] = str(documento.sgl_tipo_documento) + ' ' + str(documento.num_documento) + '/' + str(documento.ano_documento)
-               dic_doc["title"] = str(documento.des_tipo_documento) + ' nº ' + str(documento.num_documento) + '/' + str(documento.ano_documento)
-               dic_doc["data"] = DateTime(documento.dat_documento, datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
-               if documento.num_protocolo != None:
-                  for protocolo in self.zsql.protocolo_obter_zsql(num_protocolo=documento.num_protocolo, ano_protocolo=documento.ano_documento):
-                      dic_doc["data"] = DateTime(protocolo.dat_timestamp, datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
-               dic_doc["arquivo"] = getattr(self.sapl_documentos.administrativo, str(documento.cod_documento) + '_texto_integral.pdf')
-               dic_doc["url"] = getattr(self.sapl_documentos.administrativo, str(documento.cod_documento) + '_texto_integral.pdf').absolute_url()
-               arquivo =  cStringIO.StringIO(str(dic_doc["arquivo"].data))
-               existing_pdf = PdfFileReader(arquivo, strict=False)
-               dic_doc["paginas_doc"] = existing_pdf.getNumPages()
-               dic_doc["arquivob64"] = base64.b64encode(str(dic_doc["arquivo"].data))
-               paginas = []
-               for page_num, i in enumerate(list(range(dic_doc["paginas_doc"])), start=1):
-                   dic_paginas = {}
-                   dic_paginas["num_pagina"] = page_num
-                   paginas.append(dic_paginas)
-               dic_doc["paginas"] = paginas
-               dic_doc["paginas_geral"] = paginas
-               pasta.append(dic_doc)
-
-            for doc in self.zsql.documento_acessorio_administrativo_obter_zsql(cod_documento=cod_documento, ind_excluido=0):
-                if hasattr(self.sapl_documentos.administrativo, str(doc.cod_documento_acessorio,) + '.pdf'):
-                   dic_anexo = {}
-                   dic_anexo["id"] = ''
-                   dic_anexo["title"] = doc.nom_documento
-                   dic_anexo["data"] = DateTime(doc.dat_documento, datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
-                   dic_anexo["arquivo"] = getattr(self.sapl_documentos.administrativo, str(doc.cod_documento_acessorio) + '.pdf')
-                   dic_anexo["url"] = getattr(self.sapl_documentos.administrativo, str(doc.cod_documento_acessorio) + '.pdf').absolute_url()
-                   arquivo =  cStringIO.StringIO(str(dic_anexo["arquivo"].data))
-                   existing_pdf = PdfFileReader(arquivo, strict=False)
-                   dic_anexo["paginas_doc"] = existing_pdf.getNumPages()
-                   dic_anexo["arquivob64"] = base64.b64encode(str(dic_anexo["arquivo"].data))
-                   paginas = []
-                   for page_num, i in enumerate(list(range(dic_anexo["paginas_doc"])), start=1):
-                       dic_paginas = {}
-                       dic_paginas["num_pagina"] = page_num
-                       paginas.append(dic_paginas)
-                   dic_anexo["paginas"] = paginas
-                   dic_anexo["paginas_geral"] = ''
-                   pasta.append(dic_anexo)
-
-            for tram in self.zsql.tramitacao_administrativo_obter_zsql(cod_documento=cod_documento, ind_excluido=0):
-                if hasattr(self.sapl_documentos.administrativo.tramitacao, str(tram.cod_tramitacao) + '_tram.pdf'):
-                   dic_anexo = {}
-                   dic_anexo["id"] = ''
-                   dic_anexo["title"] = 'Tramitação (' + str(tram.des_status) + ')'
-                   dic_anexo["data"] = DateTime(tram.dat_tramitacao, datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
-                   dic_anexo["arquivo"] = getattr(self.sapl_documentos.administrativo.tramitacao, str(tram.cod_tramitacao) + '_tram.pdf')
-                   dic_anexo["url"] = getattr(self.sapl_documentos.administrativo.tramitacao, str(tram.cod_tramitacao) + '_tram.pdf').absolute_url()
-                   arquivo =  cStringIO.StringIO(str(dic_anexo["arquivo"].data))
-                   existing_pdf = PdfFileReader(arquivo, strict=False)
-                   dic_anexo["paginas_doc"] = existing_pdf.getNumPages()
-                   dic_anexo["arquivob64"] = base64.b64encode(str(dic_anexo["arquivo"].data))
-                   dic_anexo["paginas_doc"] = existing_pdf.getNumPages()
-                   paginas = []
-                   for page_num, i in enumerate(list(range(dic_anexo["paginas_doc"])), start=1):
-                       dic_paginas = {}
-                       dic_paginas["num_pagina"] = page_num
-                       dic_paginas["indice_geral"] = ''
-                       paginas.append(dic_paginas)
-                   dic_anexo["paginas"] = paginas
-                   dic_anexo["paginas_geral"] = ''
-                   pasta.append(dic_anexo)
-
-        pasta.sort(key=lambda dic: dic['data'])
-   
-        total = 0
-        for i in pasta:
-            total += i['paginas_doc']
-        for i in pasta:
-            i['paginas_geral'] = total
-
-        return pasta
-
 
 InitializeClass(SAGLTool)

@@ -35,9 +35,7 @@
     <dtml-if expr="metodo==zsql.documento_acessorio_incluir_zsql">
       <dtml-if file_nom_arquivo>
          <dtml-call expr="REQUEST.set('id_documento', _.str(hdn_cod_documento)+'.pdf')">
-         <dtml-if expr="pysc.arquivo_pdf_validar_pysc(file=file_nom_arquivo)">
-            <dtml-call expr="sapl_documentos.materia.manage_addFile(id=id_documento,file=file_nom_arquivo)">
-         </dtml-if>
+         <dtml-call expr="sapl_documentos.materia.manage_addFile(id=id_documento,file=pysc.upload_file(file=file_nom_arquivo, title=txt_nom_documento))">
       </dtml-if>
     </dtml-if>
 

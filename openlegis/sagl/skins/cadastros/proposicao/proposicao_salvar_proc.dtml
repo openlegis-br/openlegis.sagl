@@ -146,14 +146,12 @@
     <dtml-if file_nom_anexo>
        <dtml-try>
         <dtml-in file_nom_anexo prefix="file">
-          <dtml-if expr="pysc.arquivo_pdf_validar_pysc(file=file_item)">
-             <dtml-call expr="sapl_documentos.proposicao.manage_addFile(id=pysc.anexo_proposicao_pysc(cod_proposicao, nomear=True), file=file_item)">
-          </dtml-if>
+           <dtml-call expr="REQUEST.set('nom_arquivo', pysc.anexo_proposicao_pysc(cod_proposicao,nomear=True))">
+           <dtml-call expr="sapl_documentos.proposicao.manage_addFile(id=nom_arquivo,file=pysc.upload_file(file=file_item, title=nom_arquivo), title=nom_arquivo)">
         </dtml-in>
        <dtml-except>
-          <dtml-if expr="pysc.arquivo_pdf_validar_pysc(file=file_nom_anexo)">
-             <dtml-call expr="sapl_documentos.proposicao.manage_addFile(id=pysc.anexo_proposicao_pysc(cod_proposicao,nomear=True), file=file_nom_anexo)">
-          </dtml-if>
+           <dtml-call expr="REQUEST.set('nom_arquivo', pysc.anexo_proposicao_pysc(cod_proposicao,nomear=True))">
+           <dtml-call expr="sapl_documentos.proposicao.manage_addFile(id=nom_arquivo,file=pysc.upload_file(file=file_nom_anexo, title=nom_arquivo), title=nom_arquivo)">
        </dtml-try>
     </dtml-if>
 

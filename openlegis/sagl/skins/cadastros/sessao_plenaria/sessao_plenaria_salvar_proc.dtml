@@ -8,7 +8,6 @@
 <dtml-else>
   <dtml-call expr="REQUEST.set('metodo', zsql.sessao_plenaria_incluir_zsql)">
 </dtml-if>
-
 <dtml-unless erro>
     <dtml-try>
         <dtml-call expr="metodo(cod_sessao_plen         = hdn_cod_sessao_plen,
@@ -37,23 +36,17 @@
                 <dtml-call expr="REQUEST.set('hdn_url', hdn_url + cod_sessao_plen)">
             </dtml-in>
         </dtml-if>
-
         <dtml-if file_nom_arquivo_ata>
            <dtml-call expr="REQUEST.set('id_ata', _.str(hdn_cod_sessao_plen)+'_ata_sessao.pdf')">
            <dtml-try>
-             <dtml-if expr="pysc.arquivo_pdf_validar_pysc(file=file_nom_arquivo_ata)">
-                <dtml-call expr="sapl_documentos.ata_sessao.manage_addFile(id=id_ata,file=file_nom_arquivo_ata)">
-             </dtml-if>
+               <dtml-call expr="sapl_documentos.ata_sessao.manage_addFile(id=id_ata,file=pysc.upload_file(file=file_nom_arquivo_ata, title='Ata'))">         
            <dtml-except> 
            </dtml-try>
         </dtml-if>
-
         <dtml-if file_nom_arquivo_roteiro>
            <dtml-call expr="REQUEST.set('id_roteiro', _.str(hdn_cod_sessao_plen)+'_roteiro_sessao.pdf')">
            <dtml-try>
-             <dtml-if expr="pysc.arquivo_pdf_validar_pysc(file=file_nom_arquivo_roteiro)">
-                <dtml-call expr="sapl_documentos.pauta_sessao.manage_addFile(id=id_roteiro, file=file_nom_arquivo_roteiro)">
-             </dtml-if>
+              <dtml-call expr="sapl_documentos.pauta_sessao.manage_addFile(id=id_roteiro,file=pysc.upload_file(file=file_nom_arquivo_roteiro, title='Roteiro'))">         
            <dtml-except> 
            </dtml-try>
         </dtml-if>

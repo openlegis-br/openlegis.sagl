@@ -1139,7 +1139,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         existing_pdf = PdfFileReader(arquivo, strict=False)
         numPages = existing_pdf.getNumPages()
         # cria novo PDF
-        packet = StringIO.StringIO()
+        packet = BytesIO()
         can = canvas.Canvas(packet)
         for page_num, i in enumerate(range(numPages), start=1):
             page = existing_pdf.getPage(i)
@@ -1924,7 +1924,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         numPages = existing_pdf.getNumPages()
 
         # cria novo PDF
-        packet = StringIO.StringIO()
+        packet = BytesIO()
         can = canvas.Canvas(packet)
         for page_num, i in enumerate(range(numPages), start=1):
             page = existing_pdf.getPage(i)
@@ -1964,7 +1964,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         packet.seek(0)
         new_pdf = PdfFileReader(packet)
         # Numero do documento
-        packet2 = StringIO.StringIO()
+        packet2 = BytesIO()
         d = canvas.Canvas(packet2, pagesize=A4)
         d.setFillColorRGB(0,0,0)
         d.setFont("Times_New_Roman_Bold", 13)
@@ -2071,7 +2071,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         numPages = existing_pdf.getNumPages()
 
         # cria novo PDF
-        packet = StringIO.StringIO()
+        packet = BytesIO()
         can = canvas.Canvas(packet)
         for page_num, i in enumerate(range(numPages), start=1):
             page = existing_pdf.getPage(i)
@@ -2114,7 +2114,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         packet.seek(0)
         new_pdf = PdfFileReader(packet)
         # Numero do documento
-        packet2 = StringIO.StringIO()
+        packet2 = BytesIO()
         d = canvas.Canvas(packet2, pagesize=A4)
         d.setFillColorRGB(0,0,0)
         d.setFont("Arial_Bold", 13)
@@ -2622,7 +2622,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         existing_pdf = PdfFileReader(arquivo, strict=False)
         numPages = existing_pdf.getNumPages()
         # cria novo PDF
-        packet = StringIO.StringIO()
+        packet = BytesIO()
         can = canvas.Canvas(packet)
         for page_num, i in enumerate(range(numPages), start=1):
             page = existing_pdf.getPage(i)
@@ -2743,7 +2743,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
            existing_pdf = PdfFileReader(arquivo, strict=False)
            numPages = existing_pdf.getNumPages()
            # cria novo PDF
-           packet = StringIO.StringIO()
+           packet = BytesIO()
            can = canvas.Canvas(packet)
            for page_num, i in enumerate(range(numPages), start=1):
                page = existing_pdf.getPage(i)
@@ -2850,7 +2850,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
            nom_presidente = ''
 
         # prepara carimbo
-        packet = StringIO.StringIO()
+        packet = BytesIO()
         can = canvas.Canvas(packet)
         #can.drawImage(logo, 490, 715,  width=50, height=50, mask='auto')
         texto = "%s" % (str(nom_resultado.decode('utf-8').upper()))

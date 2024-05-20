@@ -7,7 +7,7 @@
 <dtml-if expr="_.has_key('lst_tip_materia') and lst_tip_materia!=''">
     <dtml-in expr="zsql.materia_obter_zsql(tip_id_basica=lst_tip_materia, num_ident_basica=txt_num_materia, ano_ident_basica=txt_ano_materia, ind_excluido=0)">
         <dtml-call expr="REQUEST.set('cod_materia', int(cod_materia))">
-        <dtml-call expr="REQUEST.set('txa_txt_descricao', txt_ementa)">
+        <dtml-call expr="REQUEST.set('txa_txt_descricao', str(txt_ementa).encode('utf-8'))">
     <dtml-else>
         <dtml-call expr="REQUEST.set('erro', 1)">
         <dtml-let mensagem="'A matéria originária informada não existe no sistema!'" tipo_mensagem="'danger'" modal="'1'">

@@ -1420,7 +1420,6 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         output_file_pdf = BytesIO()
         merger.write(output_file_pdf)
         merger.close()
-
         output_file_pdf.seek(0)
         existing_pdf = PdfFileReader(output_file_pdf, strict=False)
         numPages = existing_pdf.getNumPages()
@@ -1456,15 +1455,12 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
                    pdf_page.merge_page(watermark_page)
             output.addPage(pdf_page)
         outputStream = BytesIO()
-        self.temp_folder.manage_addFile(nom_pdf_amigavel)
         output.write(outputStream)
-        arq=self.temp_folder[nom_pdf_amigavel]
-        arq.manage_edit(title=nom_pdf_amigavel,filedata=outputStream.getvalue(),content_type='application/pdf')
-        arq = getattr(self.temp_folder,nom_pdf_amigavel)
+        outputStream.seek(0)
+        data = outputStream.getvalue()      
         self.REQUEST.RESPONSE.setHeader('Content-Type', 'application/pdf')
         self.REQUEST.RESPONSE.setHeader('Content-Disposition','inline; filename=%s' %nom_pdf_amigavel)
-        self.temp_folder.manage_delObjects(nom_pdf_amigavel)
-        return arq
+        return data
 
     def proposicao_autuar(self,cod_proposicao):
         nom_pdf_proposicao = str(cod_proposicao) + "_signed.pdf"
@@ -1546,7 +1542,6 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         arquivo = BytesIO(str(arq.data))
         existing_pdf = PdfFileReader(arquivo, strict=False)
         numPages = existing_pdf.getNumPages()
-
         # cria novo PDF
         packet = BytesIO()
         can = canvas.Canvas(packet)
@@ -1618,6 +1613,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
             output.addPage(pdf_page)
         outputStream = BytesIO()
         output.write(outputStream)
+        outputStream.seek(0)
         content = outputStream.getvalue()
         if nom_pdf_saida in storage_path:
            storage_path.manage_delObjects(nom_pdf_saida)
@@ -1761,6 +1757,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
             output.addPage(pdf_page)
         outputStream = BytesIO()
         output.write(outputStream)
+        outputStream.seek(0)
         content = outputStream.getvalue()
         if nom_pdf_saida in storage_path:
            storage_path.manage_delObjects(nom_pdf_saida)
@@ -1982,10 +1979,8 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
            arq=storage_path[filename]
            arq.manage_upload(file=f.getvalue())
         else:
-           storage_path.manage_addFile(id=filename, file=f.getvalue(), title=filename)
-        
-        content = f.getvalue()
-        
+           storage_path.manage_addFile(id=filename, file=f.getvalue(), title=filename)    
+       
         if tipo_doc != 'proposicao' and tipo_doc != 'peticao':
            self.margem_direita(codigo, anexo, tipo_doc, cod_assinatura_doc, cod_usuario, filename)
        
@@ -2265,6 +2260,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
             output.addPage(pdf_page)
         outputStream = BytesIO()
         output.write(outputStream)
+        outputStream.seek(0)
         content = outputStream.getvalue()
         if hasattr(storage_path,nom_pdf_documento):
            arq=storage_path[nom_pdf_documento]
@@ -2377,6 +2373,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
                output.addPage(pdf_page)
            outputStream = BytesIO()
            output.write(outputStream)
+           outputStream.seek(0)
            content = outputStream.getvalue()
            if hasattr(storage_path,pdf_assinado):
               arq=storage_path[pdf_assinado]
@@ -2448,6 +2445,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         can.drawString(400, 720, cargo)
         can.showPage()
         can.save()
+        packet.seek(0)
         new_pdf = PdfFileReader(packet)
         output = PdfFileWriter()
         # adiciona carimbo aos documentos
@@ -2468,6 +2466,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
                    output.addPage(page_pdf)
                outputStream = BytesIO()
                output.write(outputStream)
+               outputStream.seek(0)
                content = outputStream.getvalue()
                if hasattr(storage_path, nom_pdf_saida):
                   arq=storage_path[nom_pdf_saida]

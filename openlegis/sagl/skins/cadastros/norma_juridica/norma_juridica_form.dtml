@@ -433,7 +433,7 @@ $(document).ready(() => {
           <dtml-if "_.hasattr(sapl_documentos.norma_juridica,id_documento)">
             <dtml-let documento="_.getattr(sapl_documentos.norma_juridica,id_documento).absolute_url">
                <a class="btn btn-secondary" target="_blank" href="<dtml-var portal_url>/pysc/download_norma_pysc?cod_norma=<dtml-var cod_norma>&texto_original=1">
-                 <dtml-if expr="zsql.assinatura_documento_obter_zsql(codigo=cod_norma, anexo='', tipo_doc='norma', ind_assinado=1)">
+                 <dtml-if expr="zsql.assinatura_documento_obter_zsql(codigo=cod_norma, tipo_doc='norma', ind_assinado=1)">
                    <i class="fa fa-certificate"></i>
                  <dtml-else>
                    <i class="fa fa-fw fa-file-pdf"></i>
@@ -663,14 +663,14 @@ $(document).ready(() => {
      </dtml-if>
          <tr>
              <td>
-               <a href="#" data-src="anexo/anexo_norma_juridica_mostrar_proc?cod_norma=<dtml-var cod_norma>&cod_anexo=<dtml-var cod_anexo>&modal=1" data-toggle="modal" data-target="#iFrameModal" data-title="Cadastro de Anexo">
+               <a href="#" data-src="anexos/anexo_norma_juridica_mostrar_proc?cod_norma=<dtml-var cod_norma>&cod_anexo=<dtml-var cod_anexo>&modal=1" data-toggle="modal" data-target="#iFrameModal" data-title="Cadastro de Anexo">
                   <dtml-var txt_descricao>
                </a>
              </td>
              <td>
               <dtml-let id_anexo="_.str(cod_norma)+'_anexo_'+ _.str(cod_anexo)">
                <dtml-if expr="_.hasattr(sapl_documentos.norma_juridica,id_anexo)">
-                  <dtml-let anexo="_.getattr(sapl_documentos.norma_juridica,id_anexo).absolute_url">
+                  <dtml-let arq_anexo="_.getattr(sapl_documentos.norma_juridica,id_anexo).absolute_url">
                     <dtml-call expr="REQUEST.set('nome_anexo',_.str(cod_norma)+'_anexo_'+ _.str(cod_anexo))">
                     <a href="<dtml-var portal_url>/sapl_documentos/norma_juridica/<dtml-var nome_anexo>" target="_blank">
                      <i class="fa fa-fw fa-file"></i>Visualizar
@@ -687,7 +687,7 @@ $(document).ready(() => {
        <p>Nenhum anexo cadastrado.</p>
    </dtml-in> 
 
-  <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#iFrameModal" data-title="Cadastro de Anexo" data-src="anexo/anexo_norma_juridica_form?cod_norma=<dtml-var cod_norma missing>&modal=1" data-toggle="tooltip" data-placement="bottom" title="Cadastro de Anexo">Incluir Anexo</button>
+  <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#iFrameModal" data-title="Cadastro de Anexo" data-src="anexos/anexo_norma_juridica_form?cod_norma=<dtml-var cod_norma missing>&modal=1" data-toggle="tooltip" data-placement="bottom" title="Cadastro de Anexo">Incluir Anexo</button>
 
 </div>
 

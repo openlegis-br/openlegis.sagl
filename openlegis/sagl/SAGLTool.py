@@ -968,6 +968,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
            self.sapl_documentos.administrativo.tramitacao.manage_delObjects(arquivoPdfAnexo)
         outputStream = BytesIO()
         merger.write(outputStream)
+        outputStream.seek(0)
         content = outputStream.getvalue()
         self.sapl_documentos.administrativo.tramitacao.manage_addFile(id=arquivoPdf,file=self.pysc.upload_file(file=content, title='Tramitação'))
 
@@ -989,6 +990,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
            self.sapl_documentos.materia.tramitacao.manage_delObjects(arquivoPdfAnexo)
         outputStream = BytesIO()
         merger.write(outputStream)
+        outputStream.seek(0)
         content = outputStream.getvalue()
         self.sapl_documentos.materia.tramitacao.manage_addFile(id=arquivoPdf,file=self.pysc.upload_file(file=content, title='Tramitação'))
 

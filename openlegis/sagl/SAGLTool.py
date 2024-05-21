@@ -2212,6 +2212,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         pdfmetrics.registerFont(TTFont('Arial_Bold', '/usr/share/fonts/truetype/msttcorefonts/Arial_Bold.ttf'))
         arq = getattr(self.sapl_documentos.documentos_assinados, filename)
         arquivo = BytesIO(str(arq.data))
+        arquivo.seek(0)
         existing_pdf = PdfFileReader(arquivo, strict=False)
         numPages = existing_pdf.getNumPages()
         # cria novo PDF

@@ -957,12 +957,14 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         if hasattr(self.sapl_documentos.administrativo.tramitacao,arquivoPdf):
            arq = getattr(self.sapl_documentos.administrativo.tramitacao, arquivoPdf)
            arquivo = BytesIO(str(arq.data))
+           arquivo.seek(0)
            texto_tram = PdfReader(arquivo, decompress=False).pages
            merger.addpages(texto_tram)
            self.sapl_documentos.administrativo.tramitacao.manage_delObjects(arquivoPdf)
         if hasattr(self.sapl_documentos.administrativo.tramitacao,arquivoPdfAnexo):
            arq = getattr(self.sapl_documentos.administrativo.tramitacao, arquivoPdfAnexo)
            arquivo = BytesIO(str(arq.data))
+           arquivo.seek(0)
            texto_anexo = PdfReader(arquivo, decompress=False).pages
            merger.addpages(texto_anexo)
            self.sapl_documentos.administrativo.tramitacao.manage_delObjects(arquivoPdfAnexo)
@@ -970,7 +972,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         merger.write(outputStream)
         outputStream.seek(0)
         content = outputStream.getvalue()
-        self.sapl_documentos.administrativo.tramitacao.manage_addFile(id=arquivoPdf,file=self.pysc.upload_file(file=content, title='Tramitação'))
+        self.sapl_documentos.administrativo.tramitacao.manage_addFile(id=arquivoPdf,file=content, title='Tramitação')
 
     def tramitacao_materia_juntar(self,cod_tramitacao):
         merger = PdfWriter()
@@ -979,12 +981,14 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         if hasattr(self.sapl_documentos.materia.tramitacao,arquivoPdf):
            arq = getattr(self.sapl_documentos.materia.tramitacao, arquivoPdf)
            arquivo = BytesIO(str(arq.data))
+           arquivo.seek(0)
            texto_tram = PdfReader(arquivo, decompress=False).pages
            merger.addpages(texto_tram)
            self.sapl_documentos.materia.tramitacao.manage_delObjects(arquivoPdf)
         if hasattr(self.sapl_documentos.materia.tramitacao,arquivoPdfAnexo):
            arq = getattr(self.sapl_documentos.materia.tramitacao, arquivoPdfAnexo)
            arquivo = BytesIO(str(arq.data))
+           arquivo.seek(0)
            texto_anexo = PdfReader(arquivo, decompress=False).pages
            merger.addpages(texto_anexo)
            self.sapl_documentos.materia.tramitacao.manage_delObjects(arquivoPdfAnexo)
@@ -992,7 +996,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         merger.write(outputStream)
         outputStream.seek(0)
         content = outputStream.getvalue()
-        self.sapl_documentos.materia.tramitacao.manage_addFile(id=arquivoPdf,file=self.pysc.upload_file(file=content, title='Tramitação'))
+        self.sapl_documentos.materia.tramitacao.manage_addFile(id=arquivoPdf,file=content, title='Tramitação')
 
     # obter altura da pagina
     def getPageSizeH(self, p):
@@ -1130,6 +1134,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         nom_arquivo_pdf = "%s"%cod_proposicao+'.pdf'
         arquivo = getattr(self.sapl_documentos.proposicao, nom_arquivo_odt)
         odtFile = BytesIO(str(arquivo.data))
+        odtFile.seek(0)
         output_file_pdf = os.path.normpath(nom_arquivo_pdf)
         renderer = Renderer(odtFile,locals(),output_file_pdf,pythonWithUnoPath='/usr/bin/python3',forceOoCall=True)
         renderer.run()
@@ -1139,13 +1144,14 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         for anexo in self.pysc.anexo_proposicao_pysc(cod_proposicao,listar=True):
             arq = getattr(self.sapl_documentos.proposicao, anexo)
             arquivo = BytesIO(str(arq.data))
+            arquivo.seek(0)
             texto_anexo = PdfReader(arquivo, decompress=False).pages
             merger.addpages(texto_anexo)
         final_output_file_pdf = BytesIO()
         merger.write(final_output_file_pdf)
         final_output_file_pdf.seek(0)
         content = final_output_file_pdf.getvalue()
-        self.sapl_documentos.proposicao.manage_addFile(id=nom_arquivo_pdf,file=self.pysc.upload_file(file=content, title='Proposição '+ cod_proposicao))
+        self.sapl_documentos.proposicao.manage_addFile(id=nom_arquivo_pdf,file=content, title='Proposição '+ cod_proposicao)
 
     def substitutivo_gerar_odt(self, inf_basicas_dic, num_proposicao, nom_arquivo, des_tipo_materia, num_ident_basica, ano_ident_basica, txt_ementa, materia_vinculada, dat_apresentacao, nom_autor, apelido_autor, modelo_proposicao):
         arq = getattr(self.sapl_documentos.modelo.materia.substitutivo, modelo_proposicao)
@@ -2319,6 +2325,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
            pdfmetrics.registerFont(TTFont('Arial_Bold', '/usr/share/fonts/truetype/msttcorefonts/Arial_Bold.ttf'))
            arq = getattr(storage_path, pdf_proposicao)
            arquivo = BytesIO(str(arq.data))
+           arquivo.seek(0)
            existing_pdf = PdfFileReader(arquivo, strict=False)
            numPages = existing_pdf.getNumPages()
            # cria novo PDF
@@ -2377,9 +2384,9 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
            content = outputStream.getvalue()
            if hasattr(storage_path,pdf_assinado):
               arq=storage_path[pdf_assinado]
-              arq.manage_upload(file=self.pysc.upload_file(file=content, title='Proposição '+ str(item)))     
+              arq.manage_upload(file=content, title='Proposição '+ str(item))     
            else:
-              storage_path.manage_addFile(id=pdf_assinado,file=self.pysc.upload_file(file=content, title='Proposição '+ str(item)))
+              storage_path.manage_addFile(id=pdf_assinado,file=content, title='Proposição '+ str(item))
         if len(lista) == 1:
            redirect_url = self.portal_url()+'/cadastros/proposicao/proposicao_mostrar_proc?cod_proposicao=' + proposicao.cod_proposicao
            REQUEST = self.REQUEST

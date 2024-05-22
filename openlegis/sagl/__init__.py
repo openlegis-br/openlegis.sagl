@@ -18,17 +18,17 @@
 #
 ###############################################################################
 
-import Portal
-from lexml import SAGLOAIServer
+from openlegis.sagl import Portal
+from openlegis.sagl.lexml import SAGLOAIServer
 
-from config import PROJECTNAME
+from openlegis.sagl.config import PROJECTNAME
 
 from AccessControl import ModuleSecurityInfo
 from Products.PythonScripts.Utility import allow_module
 
 from Products.CMFCore.utils import ToolInit
 
-import SAGLTool
+from openlegis.sagl import SAGLTool
 
 def initialize(context):
     # inicializa a instalacao e estrutura do SAGL-OpenLegis

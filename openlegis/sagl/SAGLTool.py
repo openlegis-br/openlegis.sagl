@@ -46,7 +46,7 @@ import base64
 from base64 import b64encode
 from zlib import crc32
 import simplejson as json
-from restpki import *
+from openlegis.sagl.restpki import *
 from zope.testbrowser.browser import Browser
 browser = Browser()
 ## Troca de senha

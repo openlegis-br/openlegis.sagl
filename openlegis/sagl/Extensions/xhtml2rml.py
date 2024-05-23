@@ -35,7 +35,7 @@ def xhtml2rml(self,chaineHtml,chaineStyle):
  "ograve":"ò", "Ograve":"Ò", "oacute":"ó", "Oacute":"Ó", "ocirc":"ô", "Ocirc":"Ô", "ouml":"ö", "Ouml":"Ö",\
  "Otilde":"Õ", "otilde":"õ", "ugrave":"ù", "Ugrave":"Ù", "uacute":"ú", "ordm":"º",  "ordf":"ª", \
  "Uacute":"Ú", "ucirc":"û", "Ucirc":"Û", "uuml":"ü", "Uuml":"Ü", "ntilde":"ñ", "Ntilde":"Ñ", "ccedil":"ç",\
- "Ccedil":"Ç", "yacute":"ý", "Yacute":"Ý", "szlig":"ß", "laquo":"«", "raqo":"»", "para":"§", "copy":"©",\
+ "Ccedil":"Ç", "yacute":"ý", "Yacute":"Ý", "szlig":"ß", "laquo":"«", "raqo":"»", "sect":"§", "copy":"©",\
  "nbsp":" ", "quot": "'" }
        if dEnt.has_key(entite):
          return dEnt[entite]

@@ -45,7 +45,9 @@ for materia in context.zsql.materia_obter_zsql(cod_materia=cod_materia):
     nom_arquivo = str(materia.cod_materia)+'_texto_integral.odt'
     des_tipo_materia = materia.des_tipo_materia.decode('utf-8').upper()
     num_ident_basica = materia.num_ident_basica
+    num_materia = materia.num_ident_basica
     ano_ident_basica = materia.ano_ident_basica
+    ano_materia = materia.ano_ident_basica
     txt_ementa = materia.txt_ementa
     dat_apresentacao = context.pysc.data_converter_por_extenso_pysc(data=materia.dat_apresentacao)
     for prefeito in context.zsql.prefeito_atual_obter_zsql(data_composicao = materia.dat_apresentacao):
@@ -84,4 +86,4 @@ for materia in context.zsql.materia_obter_zsql(cod_materia=cod_materia):
                 autor_dic['cod_autor'] = autor['cod_autor']
         nom_autor.append(autor_dic)
 
-return st.materia_gerar_odt(inf_basicas_dic, num_proposicao, nom_arquivo, des_tipo_materia, num_ident_basica, ano_ident_basica, txt_ementa, materia_vinculada, dat_apresentacao, nom_autor, apelido_autor, modelo_proposicao)
+return st.materia_gerar_odt(inf_basicas_dic, num_proposicao, nom_arquivo, des_tipo_materia, num_ident_basica, num_materia, ano_ident_basica, ano_materia, txt_ementa, materia_vinculada, dat_apresentacao, nom_autor, apelido_autor, modelo_proposicao)

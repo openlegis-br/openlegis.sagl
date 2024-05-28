@@ -2385,7 +2385,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
            content = outputStream.getvalue()
            if hasattr(storage_path,pdf_assinado):
               arq=storage_path[pdf_assinado]
-              arq.manage_upload(file=content, title='Proposição '+ str(item))     
+              arq.manage_upload(file=content)     
            else:
               storage_path.manage_addFile(id=pdf_assinado,file=content, title='Proposição '+ str(item))
         if len(lista) == 1:

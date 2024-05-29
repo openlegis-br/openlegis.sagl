@@ -2478,9 +2478,9 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
                content = outputStream.getvalue()
                if hasattr(storage_path, nom_pdf_saida):
                   arq=storage_path[nom_pdf_saida]
-                  arq.manage_upload(file=self.pysc.upload_file(file=content, title='Matéria com carimbo')) 
+                  arq.manage_upload(file=self.pysc.upload_file(file=content, title='Materia com carimbo')) 
                else:
-                  storage_path.manage_addFile(id=nom_pdf_saida,file=self.pysc.upload_file(file=content, title='Matéria com carimbo'))
+                  storage_path.manage_addFile(id=nom_pdf_saida,file=self.pysc.upload_file(file=content, title='Materia com carimbo'))
 
     def _getValidEmailAddress(self, member):
         email = None

@@ -2150,8 +2150,9 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         for usuario in self.zsql.usuario_obter_zsql(col_username=member):
             email = usuario.end_email
         return email
-        security.declarePublic( 'mailPassword' )
         
+    security.declarePublic('mailPassword')
+
     def mailPassword(self, forgotten_userid, REQUEST):
         membership = getToolByName(self, 'portal_membership')
         member = membership.getMemberById(forgotten_userid)

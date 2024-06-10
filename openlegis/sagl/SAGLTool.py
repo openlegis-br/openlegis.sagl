@@ -2081,11 +2081,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
            content = existing_pdf.tobytes(deflate=True, garbage=3, use_objstms=1)
            if hasattr(storage_path,pdf_assinado):
               arq=storage_path[pdf_assinado]
-<<<<<<< HEAD
-              arq.manage_upload(file=content)     
-=======
               arq.manage_upload(file=content)
->>>>>>> 7ea825a (V5)
            else:
               storage_path.manage_addFile(id=pdf_assinado,file=content, title='Proposição '+ str(item))
         if len(lista) == 1:
@@ -2128,29 +2124,6 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         for materia in self.zsql.materia_obter_zsql(cod_materia=cod_materia):
             storage_path = self.sapl_documentos.materia
             nom_pdf_saida = str(materia.cod_materia) + "_texto_integral.pdf"
-<<<<<<< HEAD
-            if hasattr(storage_path, nom_pdf_saida):
-               arq = getattr(storage_path, nom_pdf_saida)
-               arquivo = BytesIO(str(arq.data))
-               existing_pdf = PdfFileReader(arquivo, strict=False)
-               numPages = existing_pdf.getNumPages()
-               # Mescla canvas
-               for page in range(existing_pdf.getNumPages()):
-                   page_pdf = existing_pdf.getPage(page)
-                   # carimbo na primeira pagina
-                   if page == 0:
-                      page_pdf.merge_page(new_pdf.getPage(0))
-                   output.addPage(page_pdf)
-               outputStream = BytesIO()
-               output.write(outputStream)
-               outputStream.seek(0)
-               content = outputStream.getvalue()
-               if hasattr(storage_path, nom_pdf_saida):
-                  arq=storage_path[nom_pdf_saida]
-                  arq.manage_upload(file=self.pysc.upload_file(file=content, title='Materia com carimbo')) 
-               else:
-                  storage_path.manage_addFile(id=nom_pdf_saida,file=self.pysc.upload_file(file=content, title='Materia com carimbo'))
-=======
         if hasattr(storage_path, nom_pdf_saida):
            arq = getattr(storage_path, nom_pdf_saida)
            arquivo = BytesIO(bytes(arq.data))
@@ -2171,9 +2144,8 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
            shape.commit()
            content = existing_pdf.tobytes(deflate=True, garbage=3, use_objstms=1)
            arq.manage_upload(file=content)
->>>>>>> 7ea825a (V5)
 
-    def _getValidEmailAddress(self, member):
+def _getValidEmailAddress(self, member):
         email = None
         for usuario in self.zsql.usuario_obter_zsql(col_username=member):
             email = usuario.end_email

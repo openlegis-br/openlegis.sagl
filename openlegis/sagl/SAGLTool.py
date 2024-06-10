@@ -2145,12 +2145,13 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
            content = existing_pdf.tobytes(deflate=True, garbage=3, use_objstms=1)
            arq.manage_upload(file=content)
 
-def _getValidEmailAddress(self, member):
+    def _getValidEmailAddress(self, member):
         email = None
         for usuario in self.zsql.usuario_obter_zsql(col_username=member):
             email = usuario.end_email
         return email
-    security.declarePublic( 'mailPassword' )
+        security.declarePublic( 'mailPassword' )
+        
     def mailPassword(self, forgotten_userid, REQUEST):
         membership = getToolByName(self, 'portal_membership')
         member = membership.getMemberById(forgotten_userid)

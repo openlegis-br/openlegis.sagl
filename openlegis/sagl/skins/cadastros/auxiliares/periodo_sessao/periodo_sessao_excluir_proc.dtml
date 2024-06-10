@@ -1,0 +1,12 @@
+<dtml-try>
+  <dtml-call expr="zsql.periodo_sessao_excluir_zsql(cod_periodo = hdn_cod_periodo)">
+<dtml-except>
+  <dtml-let mensagem="'Não foi possível excluir o período. Verifique se foi utilizado em alguma reunião plenária e tente novamente!'">
+     <dtml-var mensagem_emitir>
+  </dtml-let>
+<dtml-else>
+ <dtml-let mensagem="'Período excluído com sucesso!'">
+     <dtml-var mensagem_emitir>
+  </dtml-let>
+
+</dtml-try>

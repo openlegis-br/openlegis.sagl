@@ -1,7 +1,10 @@
 <dtml-try>
-  <dtml-in expr="zsql.proposicao_obter_zsql(cod_proposicao=cod_proposicao, ind_excluido=0)">
+  <dtml-in expr="zsql.proposicao_obter_zsql(cod_proposicao=cod_proposicao, ind_excluido=0)" mapping>
     <dtml-call expr="REQUEST.set('tip_proposicao_sel', tip_proposicao)">          
-    <dtml-call expr="REQUEST.set('col_username_sel', col_username)"> 
+    <dtml-call expr="REQUEST.set('col_username_sel', col_username)">
+    <dtml-call expr="REQUEST.set('cod_assunto_sel', cod_assunto)">
+    <dtml-call expr="REQUEST.set('cod_parlamentar_sel', cod_parlamentar)">
+    <dtml-call expr="REQUEST.set('cod_assessor_sel', cod_assessor)">
      <dtml-if expr="cod_materia and ind_mat_ou_doc=='D'">
       <dtml-in expr="zsql.materia_obter_zsql(cod_materia=cod_materia)">
         <dtml-call expr="REQUEST.set('tip_id_basica_sel', tip_id_basica)">

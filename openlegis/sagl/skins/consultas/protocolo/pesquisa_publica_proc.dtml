@@ -4,9 +4,41 @@
 
 <dtml-in expr="zsql.protocolo_pesquisa_publica_zsql(chave_acesso=txt_chave_acesso)">
   <dtml-call expr="REQUEST.set('resultado', '1')">
-  <legend>Protocolo nº <dtml-var num_protocolo>/<dtml-var ano_protocolo></legend>
   <div class="table-responsive">
     <table class="table">
+      <tr>
+         <th><b>Protocolo</b></th>
+         <td><dtml-var num_protocolo>/<dtml-var ano_protocolo></td>
+      </tr>
+      
+      <tr>
+        <th><b>Processo Administrativo</b></th>
+        <td>
+         <dtml-if cod_documento>
+          <dtml-let isAnon="portal_membership.isAnonymousUser()">
+            <dtml-if expr="not isAnon">   
+             <div class="btn-group" role="group">
+                 <dtml-call expr="REQUEST.set('id_documento', _.str(cod_documento)+'_texto_integral.pdf')">
+                 <dtml-if expr="_.hasattr(sapl_documentos.administrativo,id_documento)">       
+                   <a  href="<dtml-var portal_url>/modelo_proposicao/processo_adm_eletronico?cod_documento=<dtml-var cod_documento>" target="_blank"><i class="far fa-file-pdf"></i> <dtml-var des_tipo_documento> nº <dtml-var num_documento>/<dtml-var ano_documento> (processo integral)</a>
+                 <dtml-else>
+                    <dtml-var des_tipo_documento> nº <dtml-var num_documento>/<dtml-var ano_documento>
+                 </dtml-if>
+             </div>
+            <dtml-else>
+                 <dtml-call expr="REQUEST.set('id_documento', _.str(cod_documento)+'_texto_integral.pdf')">
+                 <dtml-if expr="_.hasattr(sapl_documentos.administrativo,id_documento)">       
+                   <a  href="<dtml-var portal_url>/modelo_proposicao/processo_adm_eletronico?cod_documento=<dtml-var cod_documento>" target="_blank"><i class="far fa-file-pdf"></i> <dtml-var des_tipo_documento> nº <dtml-var num_documento>/<dtml-var ano_documento> (processo integral)</a>
+                 <dtml-else>
+                    <dtml-var des_tipo_documento> nº <dtml-var num_documento>/<dtml-var ano_documento>
+                 </dtml-if>
+            </dtml-if>
+          </dtml-let>           
+         <dtml-else>
+           <i>Aguardando autuação</i>
+         </dtml-if>
+        </td>
+      </tr>
       <tr>
         <th width="25%"><b>Recebido em: </b></th>
         <td><dtml-var "pysc.iso_to_port_pysc(dat_protocolo)"> <dtml-var expr="hor_protocolo[0:2]+':'+hor_protocolo[3:5]"></td>
@@ -19,34 +51,42 @@
         <th><b>Interessado</b></th>
         <td><dtml-var txt_interessado></td>
       </tr>
-      <tr>
-        <th><b>Processo Administrativo</b></th>
-        <td>
-         <dtml-if cod_documento>
-   <dtml-let isAnon="portal_membership.isAnonymousUser()">
-     <dtml-if expr="not isAnon">   
-      <div class="btn-group mb-3" role="group">
-        <dtml-call expr="REQUEST.set('id_documento', _.str(cod_documento)+'_texto_integral.pdf')">
-          <dtml-if expr="_.hasattr(sapl_documentos.administrativo,id_documento) and ind_tramitacao==0 and AUTHENTICATED_USER.has_role(['Operador', 'Operador Arquivo'])">       
-            <a  href="<dtml-var portal_url>/modelo_proposicao/processo_adm_eletronico?cod_documento=<dtml-var cod_documento>" target="_blank"><i class="far fa-file-pdf"></i> <dtml-var des_tipo_documento> nº <dtml-var num_documento>/<dtml-var ano_documento> (processo integral)</a>
-          <dtml-else>
-             <dtml-var des_tipo_documento> nº <dtml-var num_documento>/<dtml-var ano_documento>
-          </dtml-if>
-      </div>
-     <dtml-else>
-        <dtml-var des_tipo_documento> nº <dtml-var num_documento>/<dtml-var ano_documento>
-     </dtml-if>
-   </dtml-let>           
-         <dtml-else>
-           <i>Aguardando autuação</i>
-         </dtml-if>
-        </td>
-      </tr>
     </table>
   </div>
 <dtml-if cod_documento>
+ <dtml-in expr="zsql.documento_acessorio_administrativo_obter_zsql(cod_documento=cod_documento,ind_excluido=0)">
+  <dtml-if sequence-start>
+    <div>
+      <legend>Documentos Acessórios</legend>  
+    </div>
+    <table class="table table-sm mb-3">
+       <thead>
+            <tr>
+               <th>Identificação do Documento</th>
+               <th>Autoria</th>                     
+               <th>Data de Inclusão</th>
+            </tr>
+       </thead>
+  </dtml-if>
+            <tr>
+                <td>
+                    <dtml-var nom_documento>
+                </td>              
+                <td>
+                    <dtml-if expr="nom_autor_documento!=None">
+                       <dtml-var nom_autor_documento>
+                    </dtml-if>
+                </td>
+                <td>
+                    <dtml-var dat_documento>
+                </td>
+            </tr>
+  <dtml-if sequence-end>
+     </table>
+  </dtml-if> 
+ </dtml-in>
   <div>
-    <legend>Movimentações</legend>
+    <legend>Tramitações</legend>
     <dtml-in expr="zsql.tramitacao_administrativo_obter_zsql(cod_documento=cod_documento)">
      <dtml-if sequence-start>
       <table class="table tablep-bordered">
@@ -94,10 +134,11 @@
       </table>
      </dtml-if sequence-end>
     <dtml-else>
-      <p>Nenhuma movimentação registrada.</p>
+      <p>Nenhuma tramitação registrada.</p>
     </dtml-in>
   </div>
 </dtml-if>
+<dtml-call expr="REQUEST.set('cod_documento', cod_documento)">
 <dtml-else>
     <div class="alert alert-danger alert-dismissible fade show" role="alert">
         <h5>A chave de acesso <b><dtml-var txt_chave_acesso></b> não foi localizada!</h5>
@@ -110,9 +151,9 @@
 </div>
 
   <p class="text-center">
-    <button class="btn btn-primary d-print-none" onClick="history.back()"><i class="fas fa-fw fa-undo"></i> Voltar</button>
-    <button class="btn btn-secondary d-print-none" onClick="window.print();return false;"><i class="fas fa-fw fa-print"></i> Imprimir</button>
+    <button class="btn btn-sm btn-primary d-print-none ml-3" onClick="history.back()"><i class="fas fa-fw fa-undo"></i> Voltar</button>
+    <button class="btn btn-sm btn-secondary d-print-none" onClick="window.print();return false;"><i class="fas fa-fw fa-print"></i> Imprimir Consulta</button>
+    <button type="button" class="btn btn-sm btn-secondary d-print-none" data-toggle="modal" data-target="#iFrameModal" data-title="Processo Integral" data-src="<dtml-var portal_url>/modelo_proposicao/processo_adm_eletronico?token=<dtml-var txt_chave_acesso>&modal=1"><i class="fa fa-file-pdf"></i> Processo Integral</button>
   </p>
 
 <dtml-var standard_html_footer>
-

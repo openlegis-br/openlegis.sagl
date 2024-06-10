@@ -39,13 +39,20 @@ inf_basicas_dic['des_tipo_proposicao'] = ''
 
 for proposicao in context.zsql.proposicao_obter_zsql(cod_proposicao=cod_proposicao):
     inf_basicas_dic['des_tipo_proposicao']= proposicao.des_tipo_proposicao
-    num_proposicao = 'PN ' + str(cod_proposicao)
+    num_proposicao = proposicao.cod_proposicao
     nom_arquivo = str(proposicao.cod_proposicao)+'.odt'
     des_tipo_materia = proposicao.des_tipo_proposicao.decode('utf-8').upper()
     num_ident_basica = ''
     ano_ident_basica = DateTime().strftime("%Y")
     txt_ementa = proposicao.txt_descricao
     dat_apresentacao = context.pysc.data_converter_por_extenso_pysc(data=DateTime().strftime("%d/%m/%Y"))
+
+    inf_basicas_dic['des_assunto'] = ''
+    inf_basicas_dic['orgao_responsavel'] = ''
+    if proposicao.cod_assunto != None:
+       for assunto in context.zsql.assunto_proposicao_obter_zsql(cod_assunto = proposicao.cod_assunto):
+           inf_basicas_dic['des_assunto'] = assunto.des_assunto
+           inf_basicas_dic['orgao_responsavel'] = assunto.nom_orgao
 
     materia_vinculada = {}
     if proposicao.cod_materia != None:
@@ -95,7 +102,7 @@ for proposicao in context.zsql.proposicao_obter_zsql(cod_proposicao=cod_proposic
                       partido_autor = nom_cargo
                    autor_dic['nome_autor'] = autor.nom_autor_join.decode('utf-8').upper() + '\n' + partido_autor
                    autor_dic['apelido_autor'] = partido_autor
-            elif autor.des_cargo == 'Prefeito Municipal' or autor.des_cargo == 'Prefeita Municipal':
+            elif autor.des_cargo == 'Prefeito Municipal' or autor.des_cargo == 'Prefeito Municipal':
                for usuario in context.zsql.usuario_obter_zsql(col_username=autor.col_username):
                    autor_dic['nome_autor'] = usuario.nom_completo.decode('utf-8').upper() + '\n' + autor.des_cargo
                    autor_dic['apelido_autor'] = ''

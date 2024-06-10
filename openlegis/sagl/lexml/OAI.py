@@ -7,8 +7,7 @@ import oaipmh.metadata
 import oaipmh.server
 import oaipmh.error
 
-from metadata import OAILEXML
-
+from openlegis.sagl.lexml.metadata import OAILEXML
 
 def get_writer(prefix, config={}):
     writer = OAILEXML

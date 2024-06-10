@@ -4,7 +4,7 @@
 ##bind namespace=
 ##bind script=script
 ##bind subpath=traverse_subpath
-##parameters=cod_documento
+##parameters=cod_documento, nom_arquivo
 ##title=
 ##
 
@@ -92,7 +92,7 @@ for documento in context.zsql.documento_administrativo_obter_zsql(cod_documento=
          unidade_atual = unidade.nom_unidade_join
      capa_dic['situacao'] = 'Último Local: ' + tramitacao.dat_tramitacao + ' - ' + unidade_atual + ' - ' + tramitacao.des_status
 
- capa_dic['nom_arquivo_odt'] = 'capa-'+documento.sgl_tipo_documento.encode('utf-8')+'-'+str(documento.num_documento)+'-'+str(documento.ano_documento)+'.odt'
- capa_dic['nom_arquivo_pdf'] = 'capa-'+documento.sgl_tipo_documento.encode('utf-8')+'-'+str(documento.num_documento)+'-'+str(documento.ano_documento)+'.pdf'
+ capa_dic['nom_arquivo_odt'] = "%s.odt" % nom_arquivo
+ capa_dic['nom_arquivo_pdf'] = "%s.pdf" % nom_arquivo
 
-return st.capa_processo_adm_gerar_odt(capa_dic)
+ return st.capa_processo_adm_gerar_odt(capa_dic)

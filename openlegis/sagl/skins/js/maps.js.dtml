@@ -1,0 +1,123 @@
+<dtml-in expr="zsql.proposicao_geocode_obter_zsql(cod_proposicao=cod_proposicao)">
+    <dtml-call expr="REQUEST.set('txt_lat', lat)">
+    <dtml-call expr="REQUEST.set('txt_lng', lng)">
+</dtml-in>
+
+let map;
+let marker;
+let geocoder;
+let responseDiv;
+let response;
+
+function initMap() {
+  map = new google.maps.Map(document.getElementById("map"), {
+  <dtml-if txt_lat>
+    zoom: 12,
+    center: { lat: <dtml-var txt_lat>, lng: <dtml-var txt_lng> },
+  <dtml-else>
+    zoom:12,
+    center: { lat: -18.91876, lng: -48.276705 },
+  </dtml-if>
+    mapTypeControl: false,
+  });
+
+  <dtml-if txt_lat>
+  const myLatLng = { lat: <dtml-var txt_lat>, lng: <dtml-var txt_lng> };
+  </dtml-if>
+
+  <dtml-if txt_lat>
+  new google.maps.Marker({
+    position: myLatLng,
+    map,
+    title: "Local Marcado",
+  });
+  </dtml-if>
+
+
+  geocoder = new google.maps.Geocoder();
+
+  const inputText = document.createElement("input");
+
+  inputText.type = "text";
+  inputText.id = "endereco";
+  inputText.placeholder = "Preencha o endereço";
+
+  const submitButton = document.createElement("input");
+
+  submitButton.type = "button";
+  submitButton.value = "Localizar";
+  submitButton.classList.add("button", "button-primary");
+
+  const clearButton = document.createElement("input");
+
+  clearButton.type = "button";
+  clearButton.value = "Limpar";
+  clearButton.classList.add("button", "button-secondary");
+  response = document.createElement("pre");
+  response.id = "response";
+  response.innerText = "";
+  responseDiv = document.createElement("div");
+  responseDiv.id = "response-container";
+  responseDiv.appendChild(response);
+
+  const instructionsElement = document.createElement("p");
+
+  instructionsElement.id = "instructions";
+  instructionsElement.innerHTML =
+  "<strong>Instruções</strong>: Informe um endereço ou clique no mapa para obter as coordenadas.";
+  map.controls[google.maps.ControlPosition.TOP_LEFT].push(inputText);
+  map.controls[google.maps.ControlPosition.TOP_LEFT].push(submitButton);
+  map.controls[google.maps.ControlPosition.TOP_LEFT].push(clearButton);
+  map.controls[google.maps.ControlPosition.LEFT_TOP].push(instructionsElement);
+  //map.controls[google.maps.ControlPosition.LEFT_TOP].push(responseDiv);
+  marker = new google.maps.Marker({
+    map,
+  });
+
+  map.addListener("click", (e) => {
+    geocode({ location: e.latLng });
+  });
+  submitButton.addEventListener("click", () =>
+    geocode({ address: inputText.value }),
+  );
+  clearButton.addEventListener("click", () => {
+    clear();
+  });
+  clear();
+}
+
+function clear() {
+  marker.setMap(null);
+  responseDiv.style.display = "none";
+  map.setZoom(12);
+}
+
+function geocode(request) {
+  clear();
+  geocoder
+    .geocode(request)
+    .then((result) => {
+      const { results } = result;
+      map.setZoom(14);
+
+      //window.top.document.getElementById('lat').innerHTML = results[0].geometry.location.lat();
+      //window.top.document.getElementById('lng').innerHTML = results[0].geometry.location.lng();
+
+      window.top.document.getElementById("lat").value = results[0].geometry.location.lat();
+      window.top.document.getElementById("lng").value = results[0].geometry.location.lng();
+      //document.getElementById("lat").value = results[0].geometry.location.lat();
+      //document.getElementById("lng").value = results[0].geometry.location.lng();
+
+      map.setCenter(results[0].geometry.location);
+      marker.setPosition(results[0].geometry.location);
+      marker.setMap(map);
+      responseDiv.style.display = "block";
+      response.innerText = JSON.stringify(result, null, 2);
+      return results;
+    })
+    .catch((e) => {
+      alert("Geocode was not successful for the following reason: " + e);
+    });
+}
+
+window.initMap = initMap;

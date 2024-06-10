@@ -4,7 +4,6 @@
 
 <script type="text/javascript">
 
-
 function atualiza_num_leg(num_legislatura,cod_sessao_plen){
     if (cod_sessao_plen=="-1"){
         location.href = "sessao_plenaria_form?num_legislatura_sel="+num_legislatura;
@@ -124,36 +123,50 @@ function campos_criticar(){
 $(document).ready(function(){
         var tipo = $("#lst_tip_sessao_plen").val();
         var sessao_leg = $("#lst_sessao_leg").val();
-        var legislatura = $("#lst_num_legislatura").val();        
+        var legislatura = $("#lst_num_legislatura").val();
+        var dat_sessao = $("#txt_dat_inicio_sessao").val();
         $.ajax({
             url: 'numero_obter_pysc',
             type: 'post',
-            data: {tvalue:tipo,svalue:sessao_leg},
+            data: {tvalue:tipo, svalue:sessao_leg, dat_sessao:dat_sessao},
             dataType: 'json',
             success:function(response){
                 var len = response.length;
                 $("#txt_num_sessao_plen").empty();
+                $("#hdn_cod_periodo_sessao").empty();
+                $("#txt_periodo").empty();
                 for( var i = 0; i<len; i++){
                     var numero = response[i]['num_sessao_plen'];
+                    var cod_periodo = response[i]['cod_periodo_sessao'];
+                    var nom_periodo = response[i]['nom_periodo'];
                     $("#txt_num_sessao_plen").val(numero);
+                    $("#hdn_cod_periodo_sessao").val(cod_periodo);
+                    $("#txt_periodo").val(nom_periodo);
                 }
             }
         });
-    $("#lst_tip_sessao_plen").change(function(){
+    $("#lst_tip_sessao_plen, #txt_dat_inicio_sessao").change(function(){
         var tipo = $("#lst_tip_sessao_plen").val();
         var sessao_leg = $("#lst_sessao_leg").val();
-        var legislatura = $("#lst_num_legislatura").val();        
+        var legislatura = $("#lst_num_legislatura").val();
+        var dat_sessao = $("#txt_dat_inicio_sessao").val();
         $.ajax({
             url: 'numero_obter_pysc',
             type: 'post',
-            data: {tvalue:tipo,svalue:sessao_leg},
+            data: {tvalue:tipo,svalue:sessao_leg, dat_sessao:dat_sessao},
             dataType: 'json',
             success:function(response){
                 var len = response.length;
                 $("#txt_num_sessao_plen").empty();
+                $("#hdn_cod_periodo_sessao").empty();
+                $("#txt_periodo").empty();
                 for( var i = 0; i<len; i++){
                     var numero = response[i]['num_sessao_plen'];
+                    var cod_periodo = response[i]['cod_periodo_sessao'];
+                    var nom_periodo = response[i]['nom_periodo'];
                     $("#txt_num_sessao_plen").val(numero);
+                    $("#hdn_cod_periodo_sessao").val(cod_periodo);
+                    $("#txt_periodo").val(nom_periodo);
                 }
             }
         });    
@@ -167,7 +180,7 @@ $(document).ready(function(){
 <dtml-elif cod_sessao_plen>
   <dtml-var sessao_plenaria_menu>
 <dtml-else>
-  <h1 class="firstHeading"><dtml-if expr="_.has_key('ind_audiencia')">Cadastro de Audiência Pública<dtml-else>Cadastro de Sessão</dtml-if></h1>
+  <h1 class="firstHeading"><dtml-if expr="_.has_key('ind_audiencia')">Cadastro de Audiência Pública<dtml-else>Cadastro de Reunião</dtml-if></h1>
 </dtml-if>
 
 <div class="tab-content bg-white">
@@ -178,6 +191,7 @@ $(document).ready(function(){
   <input type="hidden" name="hdn_dat_sessao" value="<dtml-var dat_inicio missing>" />
   <input type="hidden" name="dat_sessao" value="<dtml-var dat_inicio_sessao missing>" />
   <input type="hidden" name="hdn_num_legislatura" value="<dtml-var num_legislatura missing>" />
+  <input type="hidden" name="hdn_cod_periodo_sessao" id="hdn_cod_periodo_sessao" value="<dtml-var cod_periodo_sessao missing>" />
   <input type="hidden" name="hdn_url" value="sessao_plenaria_mostrar_proc?cod_sessao_plen=<dtml-var cod_sessao_plen missing>&dat_inicio_sessao=<dtml-var dat_inicio missing>&num_legislatura=<dtml-var num_legislatura missing>" />
   <dtml-if expr="_.has_key('ind_audiencia')">
     <input type="hidden" name="ind_audiencia" value="1" />
@@ -338,6 +352,20 @@ $(document).ready(function(){
   });        
   </script> 
 
+  <div class="form-row">
+     <div class="col-12 mb-3">
+        <label for="txt_periodo" class="required">Período da Reunião</label>
+        <dtml-if expr="_.has_key('cod_sessao_plen') and cod_periodo_sessao != None">
+        <dtml-in expr="zsql.periodo_sessao_obter_zsql(cod_periodo=cod_periodo_sessao)">
+            <dtml-call expr="REQUEST.set('texto_periodo', str(num_periodo) + 'º Período ' + '(' + str(data_inicio) + ' - ' + str(data_fim)+ ')' )">
+        </dtml-in>
+        <dtml-else>
+            <dtml-call expr="REQUEST.set('texto_periodo', '')">
+        </dtml-if>
+           <input class="form-control" type="text" id="txt_periodo" name="txt_periodo" value="<dtml-var texto_periodo missing>" readonly />
+     </div>
+  </div>
+
 <dtml-if expr="_.has_key('ind_audiencia')">
   <div class="form-row">
     <div class="col-12 mb-3">
@@ -352,7 +380,7 @@ $(document).ready(function(){
   <input type="hidden" name="txt_tema" value="" />
 </dtml-if>
 
-  <legend>Documentos<dtml-if expr="_.has_key('ind_audiencia')"><dtml-else> da Sessão</dtml-if></legend>
+  <legend>Documentos<dtml-if expr="_.has_key('ind_audiencia')"><dtml-else> da Reunião</dtml-if></legend>
   <dtml-if cod_sessao_plen>
      <div class="form-row">
         <div class="col-12 col-md-6 mb-3">
@@ -403,14 +431,13 @@ $(document).ready(function(){
           <dtml-else>
              <dtml-if expr="_.has_key('temODT')">
                 <a class="btn btn-sm btn-secondary" href="javascript:pauta_pdf_gerar()">Gerar PDF do ODT</a>
-             <dtml-else>
-                <a class="btn btn-sm btn-secondary" href="<dtml-var portal_url>/relatorios/pdf_ordem_dia_preparar_pysc?data=<dtml-var dat_inicio_sessao>&cod_sessao_plen=<dtml-var cod_sessao_plen><dtml-if expr="_.has_key('ind_audiencia')">&ind_audiencia=1</dtml-if>"
-target="_blank">Gerar PDF</a>
              </dtml-if>
           </dtml-if>
         </div>
      </div>
+
      <dtml-if expr="not _.has_key('ind_audiencia')">
+     <dtml-comment>
      <div class="form-row">
         <div class="col-12 col-md-6 mb-3">     
           <label class="form-label d-block">ODT Lista de Oradores</label>
@@ -451,6 +478,7 @@ target="_blank">Gerar PDF</a>
           </dtml-if>
         </div>
      </div>
+       </dtml-comment>
     </dtml-if>
   </dtml-if>
   
@@ -458,7 +486,7 @@ target="_blank">Gerar PDF</a>
    <dtml-if cod_sessao_plen>
      <div class="col-12 col-md-6 mb-3">
       <dtml-unless ind_audiencia>
-       <label class="form-label d-block">ODT Ata<dtml-if expr="_.has_key('ind_audiencia')"><dtml-else> da Sessão</dtml-if></label>
+       <label class="form-label d-block">ODT Ata<dtml-if expr="_.has_key('ind_audiencia')"><dtml-else> da Reunião</dtml-if></label>
        <dtml-let id_documento_odt="_.str(cod_sessao_plen)+'_ata_sessao.odt'">
           <dtml-if "_.hasattr(sapl_documentos.ata_sessao,id_documento_odt)">
              <dtml-call expr="REQUEST.set('temAtaODT', 1)">
@@ -466,7 +494,7 @@ target="_blank">Gerar PDF</a>
                 <dtml-call expr="REQUEST.set('nome_arquivo_odt',_.str(cod_sessao_plen)+'_ata_sessao.odt')">
                 <button type="button" class="btn btn-sm btn-secondary" data-toggle="modal" data-target="#iFrameModal" data-title="Visualização de Arquivo" data-src="<dtml-var portal_url>/generico/viewerJS/#<dtml-var documento_odt>?<dtml-var expr="ZopeTime().timeTime()">"><i class="fa fa-fw fa-file-alt"></i>Visualizar</button>
                 <button type="button" class="btn btn-sm btn-secondary" onclick="javascript:location.href='&dtml-URL1;/sapl_documentos/ata_sessao/externalEdit_/<dtml-var nome_arquivo_odt>.zem'" data-toggle="tooltip" data-placement="bottom" title="Editar no LibreOffice"><i class="fas fa-fw fa-external-link-alt"></i>LibreOffice</button>
-                <a class="btn btn-sm btn-danger" href="ata_odt_excluir_proc?cod_sessao_plen=<dtml-var cod_sessao_plen missing>" data-confirm="Deseja realmente excluir o arquivo ODT da Ata<dtml-if expr="_.has_key('ind_audiencia')"><dtml-else> da Sessão</dtml-if>?"><i class="fas fa-trash"></i> Excluir</a>                   
+                <a class="btn btn-sm btn-danger" href="ata_odt_excluir_proc?cod_sessao_plen=<dtml-var cod_sessao_plen missing>" data-confirm="Deseja realmente excluir o arquivo ODT da Ata<dtml-if expr="_.has_key('ind_audiencia')"><dtml-else> da Reunião</dtml-if>?"><i class="fas fa-trash"></i> Excluir</a>                   
                </dtml-let>
           <dtml-else>
                <a class="btn btn-sm btn-secondary" href="javascript:ata_odt_gerar();">Gerar ODT</a>
@@ -476,7 +504,7 @@ target="_blank">Gerar PDF</a>
      </div>
     </dtml-if>
      <div class="col-12 <dtml-unless ind_audiencia>col-md-6</dtml-unless> mb-3">
-        <label class="form-label d-block">PDF Ata<dtml-if expr="_.has_key('ind_audiencia')"><dtml-else> da Sessão</dtml-if></label>
+        <label class="form-label d-block">PDF Ata<dtml-if expr="_.has_key('ind_audiencia')"><dtml-else> da Reunião</dtml-if></label>
         <dtml-if cod_sessao_plen>
            <dtml-call expr="REQUEST.set('id_ata', _.str(cod_sessao_plen)+'_ata_sessao.pdf')">
            <dtml-call expr="REQUEST.set('id_ata_assinada', _.str(cod_sessao_plen)+'_ata_sessao_signed.pdf')">
@@ -488,7 +516,7 @@ target="_blank">Gerar PDF</a>
                  <dtml-if "sapl_documentos.props_sagl.restpki_access_token!=''">
                    <button type="button" class="btn btn-sm btn-secondary" data-toggle="modal" data-target="#iFrameModal" data-title="Assinaturas Digitais" data-src="<dtml-var portal_url>/cadastros/assinatura/assinatura_solicitar_form?codigo=<dtml-var cod_sessao_plen>&tipo_doc=ata&modal=1"><i class="fas fa-file-signature"></i>Assinaturas</button>
                  </dtml-if>
-                 <a class="btn btn-sm btn-danger" href="ata_pdf_excluir_proc?cod_sessao_plen=<dtml-var cod_sessao_plen missing><dtml-if expr="_.has_key('ind_audiencia')">&ind_audiencia=1</dtml-if>" data-confirm="Deseja realmente excluir o arquivo PDF da Ata<dtml-if expr="_.has_key('ind_audiencia')"><dtml-else> da Sessão</dtml-if>?"><i class="fas fa-trash"></i> Excluir</a>                                
+                 <a class="btn btn-sm btn-danger" href="ata_pdf_excluir_proc?cod_sessao_plen=<dtml-var cod_sessao_plen missing><dtml-if expr="_.has_key('ind_audiencia')">&ind_audiencia=1</dtml-if>" data-confirm="Deseja realmente excluir o arquivo PDF da Ata<dtml-if expr="_.has_key('ind_audiencia')"><dtml-else> da Reunião</dtml-if>?"><i class="fas fa-trash"></i> Excluir</a>                                
               </dtml-let>
            <dtml-elif "_.hasattr(sapl_documentos.ata_sessao,id_ata_assinada)">
               <dtml-let ata="_.getattr(sapl_documentos.ata_sessao,id_ata_assinada).absolute_url">
@@ -498,7 +526,7 @@ target="_blank">Gerar PDF</a>
                  <dtml-if "sapl_documentos.props_sagl.restpki_access_token!=''">
                    <button type="button" class="btn btn-sm btn-secondary" data-toggle="modal" data-target="#iFrameModal" data-title="Assinaturas Digitais" data-src="<dtml-var portal_url>/cadastros/assinatura/assinatura_solicitar_form?codigo=<dtml-var cod_sessao_plen>&tipo_doc=ata&modal=1"><i class="fas fa-file-signature"></i>Assinaturas</button>
                  </dtml-if>
-                 <a class="btn btn-sm btn-danger" href="ata_pdf_excluir_proc?cod_sessao_plen=<dtml-var cod_sessao_plen missing>" data-confirm="Deseja realmente excluir o arquivo PDF da Ata<dtml-if expr="_.has_key('ind_audiencia')"><dtml-else> da Sessão</dtml-if>?"><i class="fas fa-trash"></i> Excluir</a>                    
+                 <a class="btn btn-sm btn-danger" href="ata_pdf_excluir_proc?cod_sessao_plen=<dtml-var cod_sessao_plen missing>" data-confirm="Deseja realmente excluir o arquivo PDF da Ata<dtml-if expr="_.has_key('ind_audiencia')"><dtml-else> da Reunião</dtml-if>?"><i class="fas fa-trash"></i> Excluir</a>                    
               </dtml-let>
            <dtml-else>
               <div class="input-group">
@@ -527,8 +555,9 @@ target="_blank">Gerar PDF</a>
            </div>        
         </dtml-if>
      </div>
+     <dtml-comment>
      <div class="col-12 col-md-12 mb-3">     
-       <label class="form-label d-block">PDF Roteiro<dtml-if expr="_.has_key('ind_audiencia')"><dtml-else> da Sessão</dtml-if></label>
+       <label class="form-label d-block">PDF Roteiro<dtml-if expr="_.has_key('ind_audiencia')"><dtml-else> da Reunião</dtml-if></label>
        <dtml-if cod_sessao_plen>
           <dtml-call expr="REQUEST.set('id_roteiro', _.str(cod_sessao_plen)+'_roteiro_sessao.pdf')">
           <dtml-if "_.hasattr(sapl_documentos.pauta_sessao,id_roteiro)">
@@ -536,7 +565,7 @@ target="_blank">Gerar PDF</a>
                 <a class="btn btn-sm btn-secondary" target="_blank" href="<dtml-var roteiro>?<dtml-var expr="ZopeTime().timeTime()">">
                   <i class="fa fa-fw fa-file-pdf"></i>Visualizar
                 </a>
-                <a class="btn btn-sm btn-danger" href="roteiro_excluir_proc?cod_sessao_plen=<dtml-var cod_sessao_plen missing><dtml-if expr="_.has_key('ind_audiencia')">&ind_audiencia=1</dtml-if>" data-confirm="Deseja realmente excluir o arquivo PDF do Roteiro<dtml-if expr="_.has_key('ind_audiencia')"><dtml-else> da Sessão</dtml-if>?"><i class="fas fa-trash"></i> Excluir</a> 
+                <a class="btn btn-sm btn-danger" href="roteiro_excluir_proc?cod_sessao_plen=<dtml-var cod_sessao_plen missing><dtml-if expr="_.has_key('ind_audiencia')">&ind_audiencia=1</dtml-if>" data-confirm="Deseja realmente excluir o arquivo PDF do Roteiro<dtml-if expr="_.has_key('ind_audiencia')"><dtml-else> da Reunião</dtml-if>?"><i class="fas fa-trash"></i> Excluir</a> 
              </dtml-let>
           <dtml-else>
              <div class="custom-file">
@@ -551,11 +580,12 @@ target="_blank">Gerar PDF</a>
           </div>        
        </dtml-if> 
      </div>
+     </dtml-comment>
   </div>
 
   <dtml-if cod_sessao_plen>
   <legend>Multimídia</legend>
-  <div class="row">
+  <div class="form-row">
      <div class="col-12 col-md-6 mb-3"> 
         <label for="txt_url_audio">Arquivo de Áudio</label>
         <div class="input-group">

@@ -4,7 +4,7 @@
 ##bind namespace=
 ##bind script=script
 ##bind subpath=traverse_subpath
-##parameters= cod_parlamentar_corrente, txt_nom_eleitor, txt_dat_atendimento, txt_dat_atendimento2, txt_dia_aniversario, lst_mes_aniversario, rad_sex_eleitor, txt_des_estado_civil, rad_filhos, txt_des_profissao, txt_des_local_trabalho, txt_end_residencial, txt_nom_bairro, txt_num_cep, txt_nom_localidade, lst_txt_classe
+##parameters= cod_parlamentar_corrente, txt_nom_eleitor, txt_dat_atendimento, txt_dat_atendimento2, txt_dia_aniversario, lst_mes_aniversario, rad_sex_eleitor, txt_des_estado_civil, rad_filhos, txt_des_profissao, txt_des_local_trabalho, txt_end_residencial, txt_nom_bairro, txt_num_cep, txt_nom_localidade, lst_txt_classe, lst_assessor
 ##title=
 ##
 
@@ -29,20 +29,23 @@ results =  context.zsql.gabinete_eleitor_pesquisar_zsql(
                                                nom_bairro=REQUEST['txt_nom_bairro'],
                                                num_cep=REQUEST['txt_num_cep'],
                                                nom_localidade=REQUEST['txt_nom_localidade'],
-                                               txt_classe=REQUEST['lst_txt_classe']
+                                               txt_classe=REQUEST['lst_txt_classe'],
+                                               cod_assessor=REQUEST['lst_assessor']
                                                )
 dados = []
 for row in results:
     r=[]
     # Label, Data
-    if row[3]!=None:
-     r.append(row[3])
-    if row[13]!=None:
-     r.append(row[13])
-    if row[14]!=None:
-     r.append(row[14])
-    if row[15]!=None and row[16]!=None:
-     r.append(' CEP '+row[15]+' '+row[16]+ ' ' + row[17])
+    if row.nom_eleitor!=None:
+     r.append(row.nom_eleitor.title())
+    if row.end_residencial!=None and row.end_residencial!='':
+     r.append(str(row.end_residencial).decode('utf-8').title())
+    if row.nom_bairro!=None and row.nom_bairro!='':
+       if row.num_cep==None or row.num_cep=='':
+           r.append(row.nom_bairro.title())
+       else:     
+           r.append('CEP ' + str(row.num_cep) + ' ' + row.nom_bairro.title())
+    if row.nom_localidade!=None:  
+     r.append(str(row.nom_localidade) + ' ' + row.sgl_uf )
     dados.append(r)
 return context.pdflabels(dados)
-

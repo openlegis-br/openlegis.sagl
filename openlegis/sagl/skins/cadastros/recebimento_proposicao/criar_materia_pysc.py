@@ -38,9 +38,13 @@ for proposicao in context.zsql.proposicao_obter_zsql(cod_proposicao=cod_proposic
     for autor in context.zsql.autor_obter_zsql(cod_autor=proposicao.cod_autor):
         des_tipo_autor = autor.des_tipo_autor
 
-    for numero in context.zsql.numero_materia_legislativa_obter_zsql(tip_id_basica_sel = proposicao.tip_mat_ou_doc,
+    if proposicao.tip_mat_ou_doc == 6 or proposicao.tip_mat_ou_doc == 7 or proposicao.tip_mat_ou_doc == 8:
+       for numero in context.zsql.numero_reqindmoc_obter_zsql(ano_ident_basica = ano_materia, ind_excluido = 0):
+           num_ident_basica = numero.novo_numero
+    else:
+       for numero in context.zsql.numero_materia_legislativa_obter_zsql(tip_id_basica_sel = proposicao.tip_mat_ou_doc,
 ano_ident_basica = ano_materia, ind_excluido = 0):
-        num_ident_basica = numero.novo_numero
+           num_ident_basica = numero.novo_numero
 
 
 def criar_protocolo(tip_materia, num_ident_basica, ano_materia, dat_apresentacao, txt_ementa, txt_observacao, cod_autor, tip_quorum, ind_complementar, cod_proposicao):
@@ -74,23 +78,21 @@ def criar_materia(hdn_num_protocolo, tip_materia, num_ident_basica, ano_materia,
     return inserir_autoria(cod_materia, cod_autor, cod_proposicao, hdn_num_protocolo)
 
 
-
 def inserir_autoria(cod_materia, cod_autor, cod_proposicao, hdn_num_protocolo):
 
-    if context.sapl_documentos.props_sagl.restpki_access_token != '' and des_tipo_autor == 'Parlamentar':
-       for assinatura in context.zsql.assinatura_documento_obter_zsql(codigo=cod_proposicao, tipo_doc='proposicao', ind_assinado=1):
-           for usuario in context.zsql.usuario_obter_zsql(cod_usuario=assinatura.cod_usuario, ind_excluido=0): 
-               for autor in context.zsql.autor_obter_zsql(col_username=usuario.col_username, ind_excluido=0):
-                   if int(cod_autor) == int(autor.cod_autor):
-                      context.zsql.autoria_incluir_zsql(cod_autor = cod_autor, cod_materia = cod_materia, ind_primeiro_autor = 1)
-                   else:
-                      context.zsql.autoria_incluir_zsql(cod_autor = autor.cod_autor, cod_materia = cod_materia, ind_primeiro_autor = 0)
+    if des_tipo_autor == 'Parlamentar':
+       context.zsql.autoria_incluir_zsql(cod_autor = cod_autor, cod_materia = cod_materia, ind_primeiro_autor = 1)
+       if context.zsql.assinatura_documento_obter_zsql(codigo=cod_proposicao, tipo_doc='proposicao', ind_assinado=1):      
+          for assinatura in context.zsql.assinatura_documento_obter_zsql(codigo=cod_proposicao, tipo_doc='proposicao', ind_assinado=1):
+              for usuario in context.zsql.usuario_obter_zsql(cod_usuario=assinatura.cod_usuario, ind_excluido=0): 
+                  for autor in context.zsql.autor_obter_zsql(col_username=usuario.col_username, ind_excluido=0):
+                      if int(cod_autor) != int(autor.cod_autor):
+                         context.zsql.autoria_incluir_zsql(cod_autor = autor.cod_autor, cod_materia = cod_materia, ind_primeiro_autor = 0) 
     else:
        context.zsql.autoria_incluir_zsql(cod_autor = cod_autor, cod_materia = cod_materia, ind_primeiro_autor = 1)    
     
     return tramitar_materia(cod_materia, cod_proposicao, hdn_num_protocolo)
-
-
+    
 
 def tramitar_materia(cod_materia, cod_proposicao, hdn_num_protocolo):
 
@@ -98,10 +100,10 @@ def tramitar_materia(cod_materia, cod_proposicao, hdn_num_protocolo):
         if 'Protocolo Eletrônico' == unidade.nom_unidade_join:
             cod_unid_tram_local =  int(unidade.cod_unid_tramitacao)
         if des_tipo_proposicao == 'Requerimento' or des_tipo_proposicao == 'Indicação' or des_tipo_proposicao == 'Moção':         
-           if 'Assessoria Legislativa' in unidade.nom_unidade_join:
+           if 'Departamento Técnico Legislativo' in unidade.nom_unidade_join:
                cod_unid_tram_dest = int(unidade.cod_unid_tramitacao)
         else:
-           if 'Departamento Legislativo' in unidade.nom_unidade_join:
+           if 'Departamento Técnico Legislativo' in unidade.nom_unidade_join:
                cod_unid_tram_dest = int(unidade.cod_unid_tramitacao)
             
     for status in context.zsql.status_tramitacao_obter_zsql(sgl_status='PRT'):
@@ -135,6 +137,8 @@ def tramitar_materia(cod_materia, cod_proposicao, hdn_num_protocolo):
        if hasattr(context.sapl_documentos.proposicao,id_proposicao_signed):
           context.modelo_proposicao.proposicao_autuar(cod_proposicao=cod_proposicao)
 
+    context.sapl_documentos.materia.Catalog.atualizarCatalogo(int(cod_materia))
+    
     return context.relatorios.pdf_tramitacao_preparar_pysc(hdn_cod_tramitacao=cod_tramitacao, hdn_url=hdn_url)
 
 

@@ -39,8 +39,22 @@ LABELS = ({'cia':'test',
 	   'verticalPadding': .5,   #defaults to +/- 7% of height
 	   'units': cm,           #defaults to mm
 	   },
+          {'cia':'Pimaco',
+	   'models': ['4354'],
+	   'paper': pagesizes.A4,
+	   'topMargin': 0.88,
+	   'bottomMargin': 0.88,
+	   'lateralMargin': 0.47,
+	   'leftMargin': 0.47,
+	   'rightMargin': 0.47,
+	   'columns': 2,
+	   'rows': 11,
+	   'height': 2.54,
+	   'width': 9.90,
+	   'units': cm,
+	   },
           {'cia':'Pimaco', #veja dimensões para Corel no site www.pimaco.com.br
-	   'models': ['6081','6181','6281','0081','62581','62681',],
+	   'models': ['6081','6181','6281','0081','62581','62681'],
 	   'paper': pagesizes.letter,
 	   'topMargin': 1.27,
 	   'bottomMargin': 1.27,
@@ -100,7 +114,7 @@ LABELS = ({'cia':'test',
 	  )
 
 class LabelGenerator:
-    smallestFont = 5
+    smallestFont = 6
     def __init__(self, spec):
         self.cia = spec['cia']
         self.models = spec['models']
@@ -121,9 +135,8 @@ class LabelGenerator:
         self.horizSpacing = spec.get('horizontalSpacing', 0) * self.un
         
         self.font = "Helvetica"
-        self.size = 10
-	self.leadingFactor = 1.2
-        
+        self.size = 8
+        self.leadingFactor = 1.1
         try:
             self.vertPadding = spec['verticalPadding'] * self.un
         except KeyError: 
@@ -177,7 +190,7 @@ class LabelGenerator:
             except Error2:
                 fontSize = fontSize - 1
         #falha :-(
-        raise Exception(Error, "O texto não coube na etiqueta. Reduza o texto ou use uma etiqueta maior \n" + `text` + " " + `self.smallestFont` + " " + `fontSize`)
+        raise Exception(Error, "Vertical. O texto não coube na etiqueta. Reduza o texto ou use uma etiqueta maior \n" + `text` + " " + `self.smallestFont` + " " + `fontSize`)
 
     def fitHorizontal(self, t, fontSize, debugFile=None):
         modifiedText = []
@@ -206,7 +219,7 @@ class LabelGenerator:
                 return ([string.join(words[:pos], ' ')] +
                         self.adaptHorizontal(string.join(words[pos:], ' '),
 					     fontSize, debugFile))
-        raise Exception(Error, "O texto não coube nas etiquetas. Reduza o texto ou use uma etiqueta maior")
+        raise Exception(Error, "Horizontal. O texto não coube nas etiquetas. Reduza o texto ou use uma etiqueta maior")
 
     def fitVertical(self, text, fontSize):
 	numLines = len(text)
@@ -346,7 +359,7 @@ def factory(cia, model):
     raise Exception(Error, "Modelo de etiqueta não encontrado")
 
 def gera_etiqueta(self, dados):
-    labels = factory("Pimaco", "6183")
+    labels = factory("Pimaco", "4354")
     filename=str(int(time.time()*100))+".pdf"
     labels.setGrid()
     labels.generate(dados, filename)
@@ -356,5 +369,3 @@ def gera_etiqueta(self, dados):
     self.REQUEST.RESPONSE.setHeader('Content-Type', 'application/pdf')
     self.REQUEST.RESPONSE.setHeader('Content-disposition','inline; filename="%s"' % filename)
     return content
-
-

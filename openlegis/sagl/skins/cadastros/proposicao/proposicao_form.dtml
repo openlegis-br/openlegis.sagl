@@ -1,23 +1,22 @@
 <dtml-var standard_html_header>
 
-<script type="text/javascript">
-<!--
-
+<script>
   function campos_criticar(form){
 
       if (form.lst_tip_proposicao[form.lst_tip_proposicao.selectedIndex].value == "0") {
-          alert("Selecione um tipo de Proposição!");
+          alert("Selecione um tipo de proposição!");
           form.lst_tip_proposicao.focus();
           return false;
       }
    
       if (form.txt_descricao.value=="") {
-          alert("Informe a ementa da Proposição!");
+          alert("Informe a ementa da proposição!");
           form.txt_descricao.focus();
           return false;
       }
 
       var tipo_proposicao = form.lst_tip_proposicao[form.lst_tip_proposicao.selectedIndex].value;
+      var des_tipo_proposicao = form.lst_tip_proposicao.options[form.lst_tip_proposicao.selectedIndex].text;
       var separador = tipo_proposicao.indexOf("&");
       var ind_mat_ou_doc = tipo_proposicao.split("&");
       if (ind_mat_ou_doc[1]=='D') {
@@ -28,7 +27,15 @@
               return false;
           }
       }
- 
+      
+      if ((form.lst_tip_proposicao.options[form.lst_tip_proposicao.selectedIndex].text=='Requerimento') || (form.lst_tip_proposicao.options[form.lst_tip_proposicao.selectedIndex].text=='Indicação') || (form.lst_tip_proposicao.options[form.lst_tip_proposicao.selectedIndex].text=='Moção')) {
+          if (form.lst_assunto.selectedIndex=='') {
+              alert("O assunto deve ser selecionado para este tipo de proposição!");
+              form.lst_assunto.focus(); 
+              return false;
+          }
+      }
+
       form.hdn_tip_proposicao.value = tipo_proposicao.substring(0, separador);
       form.submit();
   }
@@ -39,7 +46,6 @@
       var selected = lst_modelo.options[lst_modelo.selectedIndex];
       var path = selected.getAttribute('data-path');
   
-
       if (lst_modelo.selectedIndex == 0) {
          alert("É necessário selecionar um modelo!");
          return false;
@@ -92,11 +98,40 @@
        }
   }
 
+  function fotografia1_excluir(){
+       if (confirm("Deseja realmente excluir a Fotografia 1?")) {
+          location.href="proposicao_excluir_foto1?cod_proposicao=<dtml-var cod_proposicao missing>";
+       }
+       return;
+  }
+
+  function fotografia2_excluir(){
+       if (confirm("Deseja realmente excluir a Fotografia 2?")) {
+          location.href="proposicao_excluir_foto2?cod_proposicao=<dtml-var cod_proposicao missing>";
+       }
+       return;
+  }
+
+  function fotografia3_excluir(){
+       if (confirm("Deseja realmente excluir a Fotografia 3?")) {
+          location.href="proposicao_excluir_foto3?cod_proposicao=<dtml-var cod_proposicao missing>";
+       }
+       return;
+  }
+  
+  function fotografia4_excluir(){
+       if (confirm("Deseja realmente excluir a Fotografia 4?")) {
+          location.href="proposicao_excluir_foto4?cod_proposicao=<dtml-var cod_proposicao missing>";
+       }
+       return;
+  }
+
   function proposicao_retomar(){
        if (confirm("Deseja reaproveitar esta proposição devolvida?")) {  
           location.href="proposicao_retomar_proc?cod_proposicao=<dtml-var cod_proposicao missing>";
        }
   } 
+
 
 $(document).ready(function () {
   bsCustomFileInput.init()
@@ -114,8 +149,10 @@ $(document).ready(function () {
     var form = document.proposicao_form;
     form.hdn_alterou.value=1;
     var tipo_proposicao = form.lst_tip_proposicao[form.lst_tip_proposicao.selectedIndex].value;
+    var des_tipo_proposicao = form.lst_tip_proposicao[form.lst_tip_proposicao.selectedIndex].text;
     var separador = tipo_proposicao.indexOf("&");
     var ind_mat_ou_doc = tipo_proposicao.split("&");
+    
     if (ind_mat_ou_doc[1]=='D') {
       $("#divMat").show();
       form.lst_tip_id_basica.disabled = 0;
@@ -128,7 +165,20 @@ $(document).ready(function () {
       form.txt_num_ident_basica.disabled = 1;
       form.txt_ano_ident_basica.disabled = 1;
     }
+    
+    if ((des_tipo_proposicao=='Requerimento') || (des_tipo_proposicao=='Indicação') || (des_tipo_proposicao=='Moção')) {
+      $("#divAssunto").show();
+      document.getElementById("lst_assunto").setAttribute("enabled", "enabled");
+      document.getElementById("lst_assunto").removeAttribute("disabled");
+    }
+    else {
+      $("#divAssunto").hide();   
+      document.getElementById("lst_assunto").setAttribute("disabled", "disabled");
+      document.getElementById("lst_assunto").removeAttribute("enabled");
+    }
+    
     return;
+    
   }
 
     function addFileField() {
@@ -136,7 +186,7 @@ $(document).ready(function () {
         f.type = "file";
         f.class = "form-control-file";
         f.id = "file_nom_anexo";
-        f.name = "file_nom_anexo";
+        f.name = "file_nom_anexo:list";
         f.accept="application/pdf";
         p = document.getElementById("arquivos_anexos");
         p.appendChild(f);
@@ -295,7 +345,6 @@ $(function () {
   </dtml-if>
 </dtml-if>
 
-
  <div class="row mb-2">
       <div class="col-12 col-md-6 align-self-center">
         <h1 class="firstHeading">Proposição Eletrônica</h1>
@@ -304,7 +353,7 @@ $(function () {
        <dtml-if cod_proposicao>
              <dtml-if expr="(prop_enviada and not prop_devolvida)">           
               <dtml-let cod_doc="pysc.proposicao_calcular_checksum_pysc(cod_proposicao)">
-                <a class="btn btn-primary btn-sm d-print-none" target="_blank" href="proposicao_recibo_imprimir?cod_documento=<dtml-var cod_doc>"><i class="fas fa-print"></i> Imprimir Recibo</a>
+                <a class="btn btn-sm btn-primary btn-sm d-print-none" target="_blank" href="proposicao_recibo_imprimir?cod_documento=<dtml-var cod_doc>"><i class="fas fa-print"></i> Imprimir Recibo</a>
               </dtml-let>                
              </dtml-if>
         <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia', 'Revisor Proposicao']) and not prop_recebida and not prop_devolvida">                         
@@ -332,7 +381,7 @@ $(function () {
                      </div>
                      <div class="form-row">
                        <div class="col-12 mb-2">
-                        <button class="btn btn-primary" method="post" action="proposicao_salvar_devolucao_proc">Devolver ao Autor</button>
+                        <button class="btn btn-sm btn-primary" method="post" action="proposicao_salvar_devolucao_proc">Devolver ao Autor</button>
                        </div>
                      </div>
                      <div class="form-row">
@@ -348,7 +397,7 @@ $(function () {
         </dtml-if>            
         <dtml-if expr="not prop_enviada and AUTHENTICATED_USER.has_role(['Autor', 'Assessor Parlamentar'])">
            <dtml-if cod_proposicao>        
-              <input class="btn btn-danger btn-sm" type="button" value="Excluir Proposição" onClick="proposicao_excluir()" />
+              <input class="btn btn-sm btn-danger btn-sm" type="button" value="Excluir Proposição" onClick="proposicao_excluir()" />
            </dtml-if>
         <dtml-elif expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia', 'Revisor Proposicao'])">
            <a class="btn btn-sm btn-secondary btn-sm" href="<dtml-var portal_url>/cadastros/recebimento_proposicao/"><i class="fas fa-undo"></i> Voltar</a>                        
@@ -378,8 +427,7 @@ $(function () {
     <input type="hidden" name="hdn_alterou" value="0" />                      
     <input type="hidden" name="hdn_tip_proposicao" value="" />
     <input type="hidden" name="hdn_url" value="proposicao_mostrar_proc?cod_proposicao=<dtml-var cod_proposicao missing>" />
-   <input type="hidden" name="hdn_cod_proposicao" value="<dtml-var cod_proposicao missing>" />
-
+    <input type="hidden" name="hdn_cod_proposicao" value="<dtml-var cod_proposicao missing>" />
 
     <div class="form-row">
        <div class="col-12 col-md-6 mb-3">
@@ -414,7 +462,7 @@ $(function () {
                      value="<dtml-var tip_proposicao>&<dtml-var ind_mat_ou_doc>&<dtml-var nom_modelo url_quote>"><dtml-var des_tipo_proposicao></option>
                 </dtml-if>
               </dtml-in>
-         </select>       
+         </select>     
        </div>
   <dtml-if cod_proposicao>       
        <div class="col-12 col-md-6 mb-3"> 
@@ -442,10 +490,10 @@ $(function () {
                <dtml-in expr="zsql.materia_obter_zsql(cod_materia=cod_mat)">
                   <dtml-if expr="(AUTHENTICATED_USER.has_role(['Autor', 'Assessor Parlamentar', 'Revisor Proposicao']))">
                      <label for="txt_materia" class="d-block">Matéria Legislativa</label>       
-                     <a class="btn btn-secondary btn-block" href="<dtml-var portal_url>/consultas/materia/materia_mostrar_proc?cod_materia=<dtml-var cod_mat>" target="_blank"><i class="fas fa-eye"></i> <dtml-var des_tipo_materia> nº <dtml-var num_ident_basica>/<dtml-var ano_ident_basica></a>
+                     <a class="btn btn-sm btn-secondary btn-block" href="<dtml-var portal_url>/consultas/materia/materia_mostrar_proc?cod_materia=<dtml-var cod_mat>" target="_blank"><i class="fas fa-eye"></i> <dtml-var des_tipo_materia> nº <dtml-var num_ident_basica>/<dtml-var ano_ident_basica></a>
                   <dtml-else>
                     <label for="txt_materia" class="d-block">Matéria Legislativa</label>
-                     <a class="btn btn-secondary btn-block" href="<dtml-var portal_url>/cadastros/materia/materia_mostrar_proc?cod_materia=<dtml-var cod_mat>"><i class="fas fa-eye"></i> <dtml-var des_tipo_materia> nº <dtml-var num_ident_basica>/<dtml-var ano_ident_basica></a>
+                     <a class="btn btn-sm btn-secondary btn-block" href="<dtml-var portal_url>/cadastros/materia/materia_mostrar_proc?cod_materia=<dtml-var cod_mat>"><i class="fas fa-eye"></i> <dtml-var des_tipo_materia> nº <dtml-var num_ident_basica>/<dtml-var ano_ident_basica></a>
                   </dtml-if>
                </dtml-in>
             <dtml-else>
@@ -470,14 +518,34 @@ $(function () {
     <div class="form-row">       
       <div class="col-12 mb-3">
         <label for="txt_descricao" class="required">Ementa</label>      
-        <textarea class="form-control auto-resize" id="txt_descricao" name="txt_descricao" rows="2" <dtml-if expr="prop_recebida and AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia', 'Revisor Proposicao'])">readonly</dtml-if><dtml-if expr="(AUTHENTICATED_USER.has_role(['Autor', 'Assessor Parlamentar']) and prop_enviada or prop_devolvida)">readonly</dtml-if>><dtml-var txt_descricao missing></textarea>
+        <textarea class="form-control auto-resize" id="txt_descricao" name="txt_descricao" rows="2" maxlength="500" <dtml-if expr="prop_recebida and AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia', 'Revisor Proposicao'])">readonly</dtml-if><dtml-if expr="(AUTHENTICATED_USER.has_role(['Autor', 'Assessor Parlamentar']) and prop_enviada or prop_devolvida)">readonly</dtml-if>><dtml-var txt_descricao missing></textarea>      
       </div>
     </div>
 
+  <div class="form-row" id="divAssunto" <dtml-if expr="(not _.has_key('cod_proposicao') or ind_mat_ou_doc=='D') or (_.has_key('cod_proposicao') and (des_tipo_proposicao!='Requerimento' and des_tipo_proposicao!='Indicação' and des_tipo_proposicao!='Moção'))">style="display:none;"</dtml-if>>
+    <div class="col-12 mb-3">
+      <label for="lst_assunto" class="required">Assunto</label>
+          <select class="form-control selectpicker show-tick" data-actions-box="true" data-size="10" data-selected-text-format="count > 4" data-live-search="true" id="lst_assunto" name="lst_assunto" <dtml-if "prop_recebida"> disabled </dtml-if>>
+             <option value="0"></option>
+             <dtml-in expr="zsql.assunto_proposicao_obter_zsql()" mapping>
+                <option
+                  <dtml-if cod_assunto_sel>
+                     <dtml-if expr="_.int(cod_assunto_sel) == _.int(cod_assunto)">
+                        selected
+                     </dtml-if>
+                  </dtml-if>
+                  value="<dtml-var cod_assunto>">
+                  <dtml-var des_assunto> (<dtml-var nom_orgao>)
+                </option>
+             </dtml-in>
+          </select>
+    </div>
+  </div>
+
   <div class="form-row" id="divMat" <dtml-if expr="not _.has_key('cod_proposicao') or ind_mat_ou_doc=='M'">style="display:none;"</dtml-if>>
     <div class="col-12 col-md-6 mb-3">
-      <label for="lst_tip_id_basica">Matéria Principal</label>
-          <select class="custom-select" id="lst_tip_id_basica" name="lst_tip_id_basica" <dtml-if "not _.has_key('tip_id_basica_sel') or prop_recebida"> disabled </dtml-if>>
+      <label for="lst_tip_id_basica" class="required">Matéria Vinculada</label>
+          <select class="custom-select" id="lst_tip_id_basica" name="lst_tip_id_basica" <dtml-if "not _.has_key('tip_id_basica_sel') or prop_recebida or prop_devolvida"> disabled </dtml-if>>
              <option value="0"></option>
              <dtml-in expr="zsql.tipo_materia_legislativa_obter_zsql(tip_natureza='P')">
                 <option
@@ -493,14 +561,14 @@ $(function () {
           </select>
     </div>
     <div class="col-4 col-md-2 mb-3">
-      <label for="txt_num_ident_basica">Número</label> 
+      <label for="txt_num_ident_basica" class="required">Número</label> 
       <input class="form-control number" type="number" id="txt_num_ident_basica" name="txt_num_ident_basica" value="<dtml-var num_ident_basica_sel missing null="1">" 
         <dtml-if "not _.has_key('num_ident_basica_sel') or prop_recebida">
            disabled 
         </dtml-if>  />    
     </div>
     <div class="col-4 col-md-2 mb-3">
-      <label for="txt_ano_ident_basica">Ano</label>
+      <label for="txt_ano_ident_basica" class="required">Ano</label>
       <input class="form-control year" type="number" id="txt_ano_ident_basica" name="txt_ano_ident_basica" value="<dtml-var ano_ident_basica_sel missing>" 
         <dtml-if "not _.has_key('ano_ident_basica_sel') or prop_recebida"> 
            disabled
@@ -508,10 +576,9 @@ $(function () {
     </div>
     <div class="col-4 col-md-2 mb-3">
         <label class="label" for="postjq"><span class="text-white">Obter Ementa</span></label>
-        <input id="postjq" type="button" class="btn btn-secondary btn-block" value="Obter Ementa" />
+        <input id="postjq" type="button" class="btn btn-sm btn-secondary btn-block" value="Obter Ementa" />
     </div>
   </div>
-
 
   <dtml-if cod_proposicao>
     <div class="form-row">       
@@ -527,31 +594,156 @@ $(function () {
   </dtml-if>
 
 <dtml-if cod_proposicao>
-  <legend>Textos da Proposição</legend>
+<dtml-if expr="des_tipo_proposicao=='Requerimento'">
+   <div id="accordion" class="maps">
+    <div class="">
+      <div class="" id="headingOne">
+        <p class="h5 mb-3">
+          <a href="" class="d-block text-left collapsed" data-toggle="collapse" data-target="#collapseLeit" aria-expanded="false" aria-controls="collapseLeit"> 
+            <i class="fa float-right pt-1 align-self-center" aria-hidden="true"></i>
+             <span class="h6">Fotografias</span>
+          </a>
+        </p>
+      </div>
+      <div id="collapseLeit" class="collapse" aria-labelledby="headingOne" data-parent=".maps" style="">
+        <div class=""> 
+<dtml-comment>        
+    <div class="form-row">
+        <div class="col-12">
+         <iframe
+            id="maps"
+            width="100%"
+            height="400px"
+            frameborder="0" style="border:0"
+            referrerpolicy="no-referrer-when-downgrade"
+            src="maps_html?cod_proposicao=<dtml-var cod_proposicao>"
+            allowfullscreen>
+          </iframe>
+          <div id="map"></div>
+        </div>
+	<dtml-in expr="zsql.proposicao_geocode_obter_zsql(cod_proposicao=cod_proposicao)">
+	    <dtml-call expr="REQUEST.set('txt_lat', lat)">
+	    <dtml-call expr="REQUEST.set('txt_lng', lng)">
+	    <input type="hidden" name="hdn_id" value="<dtml-var id missing>">
+        <dtml-else>
+            <input type="hidden" name="hdn_id" value="">
+	</dtml-in>
+        <div class="col-12 col-md-6 mb-3">
+           <label for="lat">Latitude</label>
+	   <input class="form-control form-control-sm" id="lat" name="lat" type="text" value="<dtml-var txt_lat missing>" readonly>
+        </div>
+        <div class="col-12 col-md-6 mb-3">
+           <label for="lng">Longitude</label>
+           <input class="form-control form-control-sm" id="lng" name="lng" type="text" value="<dtml-var txt_lng missing>" readonly>
+        </div>
+    </div>
+</dtml-comment>   
+   <div class="form-row">
+        <div class="col-12 col-md-6 mb-3">
+           <label class="form-label d-block">Fotografia 1</label>
+                 <dtml-call expr="REQUEST.set('id_foto1', _.str(cod_proposicao)+'_image_1.jpg')">
+                 <dtml-if "_.hasattr(sapl_documentos.proposicao,id_foto1)">
+                   <div align="center">
+                      <img align="absmiddle" class="img-fluid img-thumbnail mb-2" src="&dtml-portal_url;/sapl_documentos/proposicao/<dtml-var id_foto1>?<dtml-var expr="ZopeTime().timeTime()">">
+                   </div>
+                   <div class="text-center">
+                      <input type="button" name="delFoto1" class="btn btn-sm btn-danger" value="Excluir Foto1" onClick="javascript:fotografia1_excluir()" />
+                   </div>
+                 <dtml-else>
+                  <div class="custom-file">
+                    <input type="file" class="custom-file-input" id="file_nom_image1" name="file_nom_image1" accept="image/jpeg" />
+                    <label class="custom-file-label" for="file_nom_image1">Selecione o arquivo</label>
+                  </div>
+                 </dtml-if>
+        </div>
+        <div class="col-12 col-md-6 mb-3">
+           <label class="form-label d-block">Fotografia 2</label>
+                 <dtml-call expr="REQUEST.set('id_foto2', _.str(cod_proposicao)+'_image_2.jpg')">
+                 <dtml-if "_.hasattr(sapl_documentos.proposicao,id_foto2)">
+                   <div align="center">
+                      <img align="absmiddle" class="img-fluid img-thumbnail mb-2" src="&dtml-portal_url;/sapl_documentos/proposicao/<dtml-var id_foto2>?<dtml-var expr="ZopeTime().timeTime()">">
+                   </div>
+                    <div class="text-center">
+                      <input type="button" name="delFoto2" class="btn btn-sm btn-danger" value="Excluir Foto2" onClick="javascript:fotografia2_excluir()" />
+                    </div>
+                 <dtml-else>
+                  <div class="custom-file">
+                    <input type="file" class="custom-file-input" id="file_nom_image2" name="file_nom_image2" accept="image/jpeg" />
+                    <label class="custom-file-label" for="file_nom_image2">Selecione o arquivo</label>
+                  </div>
+                 </dtml-if>
+        </div>
+        <div class="col-12 col-md-6 mb-3">
+           <label class="form-label d-block">Fotografia 3</label>
+                 <dtml-call expr="REQUEST.set('id_foto3', _.str(cod_proposicao)+'_image_3.jpg')">
+                 <dtml-if "_.hasattr(sapl_documentos.proposicao,id_foto3)">
+                   <div align="center">
+                      <img align="absmiddle" class="img-fluid img-thumbnail mb-2" src="&dtml-portal_url;/sapl_documentos/proposicao/<dtml-var id_foto3>?<dtml-var expr="ZopeTime().timeTime()">">
+                   </div>
+                    <div class="text-center">
+                      <input type="button" name="delFoto3" class="btn btn-sm btn-danger" value="Excluir Foto3" onClick="javascript:fotografia3_excluir()" />
+                    </div>
+                 <dtml-else>
+                  <div class="custom-file">
+                    <input type="file" class="custom-file-input" id="file_nom_image3" name="file_nom_image3" accept="image/jpeg" />
+                    <label class="custom-file-label" for="file_nom_image3">Selecione o arquivo</label>
+                  </div>
+                 </dtml-if>
+        </div>
+        <div class="col-12 col-md-6 mb-3">
+           <label class="form-label d-block">Fotografia 4</label>
+                 <dtml-call expr="REQUEST.set('id_foto4', _.str(cod_proposicao)+'_image_4.jpg')">
+                 <dtml-if "_.hasattr(sapl_documentos.proposicao,id_foto4)">
+                   <div align="center">
+                      <img align="absmiddle" class="img-fluid img-thumbnail mb-2" src="&dtml-portal_url;/sapl_documentos/proposicao/<dtml-var id_foto4>?<dtml-var expr="ZopeTime().timeTime()">">
+                   </div>
+                    <div class="text-center">
+                      <input type="button" name="delFoto4" class="btn btn-sm btn-danger" value="Excluir Foto4" onClick="javascript:fotografia4_excluir()" />
+                    </div>
+                 <dtml-else>
+                  <div class="custom-file">
+                    <input type="file" class="custom-file-input" id="file_nom_image4" name="file_nom_image4" accept="image/jpeg" />
+                    <label class="custom-file-label" for="file_nom_image4">Selecione o arquivo</label>
+                  </div>
+                 </dtml-if>
+        </div>
+   </div>
+        </div>
+      </div>
+    </div>
+
+</dtml-if>
   <dtml-if expr="AUTHENTICATED_USER.has_role(['Autor', 'Assessor Parlamentar'])">
    <div class="form-row mb-2">  
      <div class="col-12 col-lg-6 mb-3">
-       <label class="form-label d-block">Texto Editável (ODT)</label>     
+       <label class="form-label d-block">Texto Editável (ODT)</label>
+         <dtml-let id_original="_.str(cod_proposicao)+'_original.odt'">
+           <dtml-if "_.hasattr(sapl_documentos.proposicao,id_original)">
+             <dtml-let documento="_.getattr(sapl_documentos.proposicao,id_original).absolute_url">
+               <button type="button" class="btn btn-sm btn-secondary" data-toggle="modal" data-target="#iFrameModal" data-title="Visualização de Arquivo" data-src="<dtml-var portal_url>/generico/viewerJS/#<dtml-var documento>?<dtml-var expr="ZopeTime().timeTime()">"><i class="fa fa-fw fa-file-alt"></i>ODT Original</button>
+             </dtml-let>
+           </dtml-if>
+         </dtml-let>  
          <dtml-let id_documento="_.str(cod_proposicao)+'.odt'">
             <dtml-if "_.hasattr(sapl_documentos.proposicao,id_documento)">
                <dtml-let documento="_.getattr(sapl_documentos.proposicao,id_documento).absolute_url">
                   <dtml-call expr="REQUEST.set('nome_arquivo',_.str(cod_proposicao)+'.odt')">
                   <dtml-if prop_enviada>
-                    <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#iFrameModal" data-title="Visualização de Arquivo" data-src="<dtml-var portal_url>/generico/viewerJS/#<dtml-var documento>?<dtml-var expr="ZopeTime().timeTime()">"><i class="fa fa-fw fa-file-alt"></i>Visualizar</button>
+                    <button type="button" class="btn btn-sm btn-secondary" data-toggle="modal" data-target="#iFrameModal" data-title="Visualização de Arquivo" data-src="<dtml-var portal_url>/generico/viewerJS/#<dtml-var documento>?<dtml-var expr="ZopeTime().timeTime()">"><i class="fa fa-fw fa-file-alt"></i>ODT Revisado</button>
                   <dtml-else>
-                    <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#iFrameModal" data-title="Edição de Arquivo ODT" data-src="<dtml-var portal_url>/webeditor/editorProposicao?<dtml-var documento>?<dtml-var expr="ZopeTime().timeTime()">" data-toggle="tooltip" data-placement="bottom" title="Editor Online"><i class="fa fa-fw fa-edit"></i>Editar</button>
-                    <button type="button" class="btn btn-secondary" onclick="javascript:location.href='&dtml-URL1;/sapl_documentos/proposicao/externalEdit_/<dtml-var nome_arquivo>.zem'" data-toggle="tooltip" data-placement="bottom" title="Editar no LibreOffice"><i class="fas fa-fw fa-external-link-alt"></i>LibreOffice</button>
-                    <a class="btn btn-danger" href="<dtml-var portal_url>/cadastros/proposicao/texto_proposicao_excluir_proc?cod_proposicao=<dtml-var cod_proposicao missing>" data-confirm="Deseja realmente excluir o arquivo ODT da Proposição?"><i class="fas fa-trash"></i> Excluir ODT</a>                    
+                    <button type="button" class="btn btn-sm btn-secondary" data-toggle="modal" data-target="#iFrameModal" data-title="Edição de Arquivo ODT" data-src="<dtml-var portal_url>/webeditor/editorProposicao?<dtml-var documento>?<dtml-var expr="ZopeTime().timeTime()">" data-toggle="tooltip" data-placement="bottom" title="Editor Online"><i class="fa fa-fw fa-edit"></i>Editar</button>
+                    <button type="button" class="btn btn-sm btn-secondary" onclick="javascript:location.href='&dtml-URL1;/sapl_documentos/proposicao/externalEdit_/<dtml-var nome_arquivo>.zem'" data-toggle="tooltip" data-placement="bottom" title="Editar no LibreOffice"><i class="fas fa-fw fa-external-link-alt"></i>LibreOffice</button>
+                    <a class="btn btn-sm btn-danger" href="<dtml-var portal_url>/cadastros/proposicao/texto_proposicao_excluir_proc?cod_proposicao=<dtml-var cod_proposicao missing>" data-confirm="Deseja realmente excluir o arquivo ODT da Proposição?"><i class="fas fa-trash"></i> Excluir ODT</a>                    
                   </dtml-if>
                </dtml-let>
              <dtml-else>
                <dtml-if expr="(not prop_devolvida and not prop_recebida)">
                  <div class="input-group">
-                   <select class="custom-select" id="lst_modelo" name="lst_modelo">
+                   <select class="custom-select custom-select-sm" id="lst_modelo" name="lst_modelo">
                       <option value="0">Selecione um modelo</option>
                    </select>
                    <div class="input-group-append">
-                     <input type="button" class="btn btn-secondary" value="Gerar" onclick="javascript:texto_odt_gerar();" />
+                     <input type="button" class="btn btn-sm btn-secondary" value="Gerar" onclick="javascript:texto_odt_gerar();" />
                    </div>
                  </div>
                </dtml-if>             
@@ -564,69 +756,78 @@ $(function () {
        <dtml-call expr="REQUEST.set('id_documento_assinado', _.str(cod_proposicao)+'_signed.pdf')">   
           <dtml-if "_.hasattr(sapl_documentos.proposicao,id_documento_assinado)">
             <dtml-let documento_assinado="_.getattr(sapl_documentos.proposicao,id_documento_assinado).absolute_url">
-              <a class="btn btn-secondary" target="_blank" href="<dtml-var documento_assinado>?<dtml-var expr="ZopeTime().timeTime()">">
+              <a class="btn btn-sm btn-secondary" target="_blank" href="<dtml-var documento_assinado>?<dtml-var expr="ZopeTime().timeTime()">">
                  <i class="fas fa-certificate"></i> Arquivo Assinado
               </a>
             </dtml-let>
              <dtml-if "sapl_documentos.props_sagl.restpki_access_token!=''">                           
-              <dtml-if "AUTHENTICATED_USER.has_role(['Autor'])">
-                <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#iFrameModal" data-title="Assinaturas Digitais" data-src="<dtml-var portal_url>/cadastros/assinatura/assinatura_solicitar_form?codigo=<dtml-var cod_proposicao>&tipo_doc=proposicao&modal=1"><i class="fas fa-file-signature"></i>Assinaturas</button>
+              <dtml-if "AUTHENTICATED_USER.has_role(['Autor','Assessor Parlamentar'])">
+                <dtml-if expr="zsql.assinatura_documento_obter_zsql(codigo=cod_proposicao,tipo_doc='proposicao')">
+                   <button type="button" class="btn btn-sm btn-secondary" data-toggle="modal" data-target="#iFrameModal" data-title="Assinaturas Digitais" data-src="<dtml-var portal_url>/cadastros/assinatura/assinatura_solicitar_form?codigo=<dtml-var cod_proposicao>&tipo_doc=proposicao&modal=1"><i class="fas fa-file-signature"></i>Assinaturas</button>
+                </dtml-if>
               </dtml-if>
              </dtml-if>
             <dtml-if expr="dat_envio==None and not prop_devolvida">
-              <a class="btn btn-danger" href="<dtml-var portal_url>/cadastros/proposicao/texto_pdf_assinado_excluir_proc?cod_proposicao=<dtml-var cod_proposicao missing>" data-confirm="Deseja realmente excluir o arquivo assinado digitalmente?"><i class="fas fa-trash"></i> Excluir PDF Assinado</a>              
+              <a class="btn btn-sm btn-danger" href="<dtml-var portal_url>/cadastros/proposicao/texto_pdf_assinado_excluir_proc?cod_proposicao=<dtml-var cod_proposicao missing>" data-confirm="Deseja realmente excluir o arquivo assinado digitalmente?"><i class="fas fa-trash"></i> Excluir PDF Assinado</a>              
             </dtml-if> 
           <dtml-elif "_.hasattr(sapl_documentos.proposicao,id_documento)">  
             <dtml-let documento="_.getattr(sapl_documentos.proposicao,id_documento).absolute_url">
-               <a class="btn btn-secondary" target="_blank" href="<dtml-var documento>?<dtml-var expr="ZopeTime().timeTime()">">
+               <a class="btn btn-sm btn-secondary" target="_blank" href="<dtml-var documento>?<dtml-var expr="ZopeTime().timeTime()">">
                   <i class="fa fa-fw fa-file-pdf"></i>Visualizar
                </a>
          <dtml-if "sapl_documentos.props_sagl.restpki_access_token!=''">               
                <dtml-if expr="AUTHENTICATED_USER.has_role(['Autor']) and des_tipo_autor != 'Mesa Diretora' and des_tipo_autor != 'Comissao'">
-                  <dtml-if expr="not prop_recebida and not prop_devolvida">               
-                    <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#iFrameModal" data-title="Assinar Digitalmente" data-src="<dtml-var portal_url>/generico/assinador/pades-signature_html?codigo=<dtml-var cod_proposicao missing>&tipo_doc=proposicao&modal=1"><i class="fas fa-file-signature"></i> Assinar</button>
+                  <dtml-if expr="not prop_recebida and not prop_devolvida">
+                     <dtml-if expr="(des_tipo_proposicao=='Requerimento' or des_tipo_proposicao=='Indicação' or des_tipo_proposicao=='Moção' or des_tipo_proposicao=='Pedido de Informação')">                     
+                        <a class="btn btn-sm btn-primary" href="<dtml-var portal_url>/cadastros/proposicao/assinar_pdf?cod_proposicao=<dtml-var cod_proposicao missing>" data-confirm="Confirma a assinatura da proposição?"><i class="fas fa-file-signature"></i> Assinar</a>
+                     </dtml-if>
+                     <button type="button" class="btn btn-sm btn-secondary" data-toggle="modal" data-target="#iFrameModal" data-title="Assinar Digitalmente" data-src="<dtml-var portal_url>/generico/assinador/pades-signature_html?codigo=<dtml-var cod_proposicao missing>&tipo_doc=proposicao&modal=1"><i class="fas fa-file-signature"></i> ICP-Brasil</button>
                   </dtml-if>
                </dtml-if>
                <dtml-if expr="AUTHENTICATED_USER.has_role(['Assessor Parlamentar']) or (des_tipo_autor == 'Mesa Diretora' or des_tipo_autor == 'Comissao')">
-                  <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#iFrameModal" data-title="Assinaturas Digitais" data-src="<dtml-var portal_url>/cadastros/assinatura/assinatura_solicitar_form?codigo=<dtml-var cod_proposicao missing>&tipo_doc=proposicao&modal=1"><i class="fas fa-file-signature"></i> Assinaturas</button>
+                  <button type="button" class="btn btn-sm btn-secondary" data-toggle="modal" data-target="#iFrameModal" data-title="Assinaturas Digitais" data-src="<dtml-var portal_url>/cadastros/assinatura/assinatura_solicitar_form?codigo=<dtml-var cod_proposicao missing>&tipo_doc=proposicao&modal=1"><i class="fas fa-file-signature"></i> Assinaturas</button>
                </dtml-if>
           <dtml-else>
                <dtml-if expr="AUTHENTICATED_USER.has_role(['Autor']) and des_tipo_autor != 'Mesa Diretora' and des_tipo_autor != 'Comissao'">
                   <dtml-if expr="not prop_recebida and not prop_devolvida">
-                    <a class="btn btn-primary" href="<dtml-var portal_url>/cadastros/proposicao/assinar_pdf?cod_proposicao=<dtml-var cod_proposicao missing>" data-confirm="Confirma a assinatura da proposição?"><i class="fas fa-file-signature"></i> Assinar</a> 
+                     <dtml-if expr="(des_tipo_proposicao=='Requerimento' or des_tipo_proposicao=='Indicação' or des_tipo_proposicao=='Moção' or des_tipo_proposicao=='Pedido de Informação')">                     
+                        <a class="btn btn-sm btn-primary" href="<dtml-var portal_url>/cadastros/proposicao/assinar_pdf?cod_proposicao=<dtml-var cod_proposicao missing>" data-confirm="Confirma a assinatura da proposição?"><i class="fas fa-file-signature"></i> Assinar</a>
+                     </dtml-if>
                   </dtml-if>
                </dtml-if>
           </dtml-if>
                <dtml-if expr="not prop_recebida and not prop_devolvida">
-                  <a class="btn btn-danger" href="<dtml-var portal_url>/cadastros/proposicao/texto_pdf_excluir_proc?cod_proposicao=<dtml-var cod_proposicao missing>" data-confirm="Deseja realmente excluir o texto PDF da proposição?"><i class="fas fa-trash"></i> Excluir PDF</a> 
+                  <a class="btn btn-sm btn-danger" href="<dtml-var portal_url>/cadastros/proposicao/texto_pdf_excluir_proc?cod_proposicao=<dtml-var cod_proposicao missing>" data-confirm="Deseja realmente excluir o texto PDF da proposição?"><i class="fas fa-trash"></i> Excluir PDF</a> 
                </dtml-if>                                 
             </dtml-let>
-          <dtml-else>    
+          <dtml-else>
               <div class="input-group">
+               <dtml-comment>
                 <div class="custom-file">
                   <input type="file" class="custom-file-input" id="file_nom_arquivo" name="file_nom_arquivo" accept="application/pdf">
                   <label class="custom-file-label" for="file_nom_arquivo">Selecione o arquivo</label>
                 </div>
+               </dtml-comment>
                 <dtml-let id_documento_odt="_.str(cod_proposicao)+'.odt'">
                    <dtml-if "_.hasattr(sapl_documentos.proposicao,id_documento_odt)">
                       <dtml-call expr="REQUEST.set('temODT', 1)">
                    </dtml-if>
                 </dtml-let>
                 <dtml-if expr="_.has_key('temODT')">
-                   <div class="input-group-append">
-                     <input type="button" class="btn btn-secondary" value="Gerar do ODT" onclick="javascript:texto_pdf_gerar()" />
-                   </div>
+                     <input type="button" class="btn btn-sm btn-secondary" value="Gerar do ODT" onclick="javascript:texto_pdf_gerar()" />
+                <dtml-else>
+                     <input type="button" class="btn btn-sm btn-secondary" value="Gerar do ODT" disabled />
                 </dtml-if>
-              </div>                
+              </div>
           </dtml-if>
      </div>     
    </div>
   </dtml-if>
-
+  <dtml-if expr="(not prop_recebida)">
     <div class="form-row mb-2">
-       <div class="col-12 mb-3">
+       <div class="col-12 col-md-6 mb-3">
          <label class="form-label d-block">Anexos em PDF</label>       
-          <dtml-if expr="not cod_mat_ou_doc and not prop_devolvida and not prop_recebida">  
+          <dtml-if expr="not cod_mat_ou_doc and not prop_devolvida">   
            <small id="link_add_file">
              <a class="btn btn-sm btn-light mb-3" onclick="addFileField(); return false;" href="#"><i class="fa fa-fw fa-plus"></i>Anexar Arquivo</a>
            </small>
@@ -637,15 +838,43 @@ $(function () {
                   <a target="_blank" href="<dtml-var documento>">
                     <i class="fa fa-fw fa-file-pdf"></i><dtml-var file_item>
                   </a>
-                  <dtml-if expr="not prop_recebida">
-                     <a class="btn btn-sm btn-danger" href="javascript:void(0)" onclick="location.href='anexo_excluir?anexo=<dtml-var file_item>&cod_proposicao=<dtml-var cod_proposicao missing>'"> Excluir</a>
-                  </dtml-if>
+                  <a class="btn btn-sm btn-danger" href="javascript:void(0)" onclick="location.href='anexo_excluir?anexo=<dtml-var file_item>&cod_proposicao=<dtml-var cod_proposicao missing>'"> Excluir</a>
                </dtml-let>
             </dtml-if>
          </dtml-in>
          <span class="d-block mb-2" id="arquivos_anexos"></span>	                  
-         </div>
+       </div>
+    <dtml-if expr="AUTHENTICATED_USER.has_role(['Autor', 'Assessor Parlamentar']) and (des_tipo_autor == 'Parlamentar')">
+     <div class="col-12 col-md-6 mb-3">
+           <label for="lst_assessor">Assessor Responsável</label>
+           <select class="custom-select custom-select-sm" id="lst_assessor" name="lst_assessor" <dtml-if expr="(prop_enviada)">disabled</dtml-if>>
+             <option value =""></option>
+             <dtml-in expr="zsql.assessor_parlamentar_obter_zsql(cod_parlamentar=cod_parlamentar_sel)" mapping>
+               <dtml-if expr="dat_exoneracao == None or dat_exoneracao == ''">
+                 <option
+                 <dtml-if cod_assessor_sel>
+                   <dtml-if expr="_.int(cod_assessor) == _.int(cod_assessor_sel)">
+                      selected
+                   </dtml-if>
+                 </dtml-if>
+                 value="<dtml-var cod_assessor>"><dtml-var nom_assessor></option>
+               </dtml-if>
+             </dtml-in>
+           </select>
+     </div>
+     <dtml-elif expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia', 'Revisor Proposicao'])">
+       <div class="col-12 col-md-6 mb-3">
+         <label for="nom_assessor">Assessor Responsável</label>
+         <dtml-in expr="zsql.assessor_parlamentar_obter_zsql(cod_assessor=cod_assessor_sel)">
+           <input class="form-control" type="text" name="nom_assessor" value="<dtml-var nom_assessor missing>" disabled>
+         </dtml-in>
+       </div>
+       <input type="hidden" name="lst_assessor" value="<dtml-var cod_assessor_sel missing null>">
+    <dtml-else>
+       <input type="hidden" name="lst_assessor" value="<dtml-var cod_assessor_sel missing null>">
+    </dtml-if> 
     </div>
+  </dtml-if>
 
    <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia', 'Revisor Proposicao'])">
       <div class="form-row mb-2">
@@ -654,7 +883,7 @@ $(function () {
            <dtml-let id_original="_.str(cod_proposicao)+'_original.odt'">
              <dtml-if "_.hasattr(sapl_documentos.proposicao,id_original)">
                <dtml-let documento="_.getattr(sapl_documentos.proposicao,id_original).absolute_url">
-                 <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#iFrameModal" data-title="Visualização de Arquivo" data-src="<dtml-var portal_url>/generico/viewerJS/#<dtml-var documento>?<dtml-var expr="ZopeTime().timeTime()">"><i class="fa fa-fw fa-file-alt"></i>ODT Original</button>
+                 <button type="button" class="btn btn-sm btn-secondary" data-toggle="modal" data-target="#iFrameModal" data-title="Visualização de Arquivo" data-src="<dtml-var portal_url>/generico/viewerJS/#<dtml-var documento>?<dtml-var expr="ZopeTime().timeTime()">"><i class="fa fa-fw fa-file-alt"></i>ODT Original</button>
                </dtml-let>
              </dtml-if>
            </dtml-let>           
@@ -663,10 +892,10 @@ $(function () {
                  <dtml-let documento="_.getattr(sapl_documentos.proposicao,id_documento).absolute_url">
                    <dtml-call expr="REQUEST.set('nome_arquivo',_.str(cod_proposicao)+'.odt')">
                    <dtml-if expr="(prop_enviada and (dat_recebimento==None)) and (not prop_devolvida)">
-                     <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#iFrameModal" data-title="Edição de Arquivo ODT" data-src="<dtml-var portal_url>/webeditor/editorProposicao?<dtml-var documento>?<dtml-var expr="ZopeTime().timeTime()">" data-toggle="tooltip" data-placement="bottom" title="Editor Online"><i class="fa fa-fw fa-edit"></i>Editar</button> 
-                     <button type="button" class="btn btn-secondary" onclick="javascript:location.href='&dtml-URL1;/sapl_documentos/proposicao/externalEdit_/<dtml-var nome_arquivo>.zem'" data-toggle="tooltip" data-placement="bottom" title="Editar no LibreOffice"><i class="fas fa-fw fa-external-link-alt"></i>LibreOffice</button>                                      
+                     <button type="button" class="btn btn-sm btn-secondary" data-toggle="modal" data-target="#iFrameModal" data-title="Edição de Arquivo ODT" data-src="<dtml-var portal_url>/webeditor/editorProposicao?<dtml-var documento>?<dtml-var expr="ZopeTime().timeTime()">" data-toggle="tooltip" data-placement="bottom" title="Editor Online"><i class="fa fa-fw fa-edit"></i>Editar</button> 
+                     <button type="button" class="btn btn-sm btn-secondary" onclick="javascript:location.href='&dtml-URL1;/sapl_documentos/proposicao/externalEdit_/<dtml-var nome_arquivo>.zem'" data-toggle="tooltip" data-placement="bottom" title="Editar no LibreOffice"><i class="fas fa-fw fa-external-link-alt"></i>LibreOffice</button>                                      
                    <dtml-else>
-                      <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#iFrameModal" data-title="Visualização de Arquivo" data-src="<dtml-var portal_url>/generico/viewerJS/#<dtml-var documento>?<dtml-var expr="ZopeTime().timeTime()">"><i class="fa fa-fw fa-file-alt"></i>ODT Revisado</button>                   
+                      <button type="button" class="btn btn-sm btn-secondary" data-toggle="modal" data-target="#iFrameModal" data-title="Visualização de Arquivo" data-src="<dtml-var portal_url>/generico/viewerJS/#<dtml-var documento>?<dtml-var expr="ZopeTime().timeTime()">"><i class="fa fa-fw fa-file-alt"></i>ODT Revisado</button>                   
                    </dtml-if>
                  </dtml-let>
               </dtml-if>
@@ -678,41 +907,39 @@ $(function () {
            <dtml-call expr="REQUEST.set('id_documento_assinado', _.str(cod_proposicao)+'_signed.pdf')">
            <dtml-if "_.hasattr(sapl_documentos.proposicao,id_documento_assinado)">
               <dtml-let documento_assinado="_.getattr(sapl_documentos.proposicao,id_documento_assinado).absolute_url">
-                 <a class="btn btn-secondary" target="_blank" href="<dtml-var documento_assinado>?<dtml-var expr="ZopeTime().timeTime()">">
+                 <a class="btn btn-sm btn-secondary" target="_blank" href="<dtml-var documento_assinado>?<dtml-var expr="ZopeTime().timeTime()">">
                    <i class="fas fa-certificate"></i> Arquivo Assinado
                  </a>
-                 <dtml-if expr="dat_envio!=None and not prop_recebida">
-                    <a class="btn btn-danger" href="<dtml-var portal_url>/cadastros/proposicao/texto_pdf_assinado_excluir_proc?cod_proposicao=<dtml-var cod_proposicao missing>" data-confirm="Deseja realmente excluir o arquivo assinado digitalmente?"><i class="fas fa-trash"></i> Excluir PDF Assinado</a>
-                 </dtml-if>
               </dtml-let>
               <dtml-if expr="prop_enviada and not prop_devolvida">
                <dtml-if "sapl_documentos.props_sagl.restpki_access_token!=''">                           
-                <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#iFrameModal" data-title="Assinaturas Digitais" data-src="<dtml-var portal_url>/cadastros/assinatura/assinatura_solicitar_form?codigo=<dtml-var cod_proposicao missing>&tipo_doc=proposicao&modal=1"><i class="fas fa-file-signature"></i> Assinaturas</button>         
+                <button type="button" class="btn btn-sm btn-secondary" data-toggle="modal" data-target="#iFrameModal" data-title="Assinaturas Digitais" data-src="<dtml-var portal_url>/cadastros/assinatura/assinatura_solicitar_form?codigo=<dtml-var cod_proposicao missing>&tipo_doc=proposicao&modal=1"><i class="fas fa-file-signature"></i> Assinaturas</button>         
               </dtml-if>    
              </dtml-if>   
           <dtml-elif "_.hasattr(sapl_documentos.proposicao,id_documento)">  
             <dtml-let documento="_.getattr(sapl_documentos.proposicao,id_documento).absolute_url">
-               <a class="btn btn-secondary" target="_blank" href="<dtml-var documento>?<dtml-var expr="ZopeTime().timeTime()">">
+               <a class="btn btn-sm btn-secondary" target="_blank" href="<dtml-var documento>?<dtml-var expr="ZopeTime().timeTime()">">
                   <i class="fa fa-fw fa-file-pdf"></i>Visualizar
                </a>
                <dtml-if expr="not prop_recebida and not prop_devolvida">  
                 <dtml-if "sapl_documentos.props_sagl.restpki_access_token!=''">
-                 <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#iFrameModal" data-title="Assinaturas Digitais" data-src="<dtml-var portal_url>/cadastros/assinatura/assinatura_solicitar_form?codigo=<dtml-var cod_proposicao>&tipo_doc=proposicao&modal=1"><i class="fas fa-file-signature"></i> Assinaturas</button>  
+                 <button type="button" class="btn btn-sm btn-secondary" data-toggle="modal" data-target="#iFrameModal" data-title="Assinaturas Digitais" data-src="<dtml-var portal_url>/cadastros/assinatura/assinatura_solicitar_form?codigo=<dtml-var cod_proposicao>&tipo_doc=proposicao&modal=1"><i class="fas fa-file-signature"></i> Assinaturas</button>  
                 </dtml-if>
                </dtml-if>
                <dtml-if expr="not prop_recebida and not prop_devolvida">
-                  <a class="btn btn-danger" href="<dtml-var portal_url>/cadastros/proposicao/texto_pdf_excluir_proc?cod_proposicao=<dtml-var cod_proposicao missing>" data-confirm="Deseja realmente excluir o texto PDF da proposição?"><i class="fas fa-trash"></i> Excluir PDF</a> 
-               </dtml-if>    
-                                          
+                  <a class="btn btn-sm btn-danger" href="<dtml-var portal_url>/cadastros/proposicao/texto_pdf_excluir_proc?cod_proposicao=<dtml-var cod_proposicao missing>" data-confirm="Deseja realmente excluir o texto PDF da proposição?"><i class="fas fa-trash"></i> Excluir PDF</a> 
+               </dtml-if>                                              
             </dtml-let>              
            <dtml-else>
-              <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia', 'Revisor Proposicao'])">   
+              <dtml-if expr="AUTHENTICATED_USER.has_role(['Autor', 'Assessor Parlamentar', 'Operador', 'Operador Materia', 'Revisor Proposicao'])">   
               <dtml-if expr="not cod_mat_ou_doc and not prop_devolvida">         
                <div class="input-group">
+               <dtml-comment>
                 <div class="custom-file">
                   <input type="file" class="custom-file-input" id="file_nom_arquivo" name="file_nom_arquivo" accept="application/pdf">
                   <label class="custom-file-label" for="file_nom_arquivo">Selecione o arquivo</label>
                 </div>
+               </dtml-comment>
                 <dtml-let id_documento_odt="_.str(cod_proposicao)+'.odt'">
                    <dtml-if "_.hasattr(sapl_documentos.proposicao,id_documento_odt)">
                       <dtml-call expr="REQUEST.set('temODT', 1)">
@@ -720,8 +947,10 @@ $(function () {
                 </dtml-let>
                 <dtml-if expr="_.has_key('temODT')">
                    <div class="input-group-append">
-                     <input type="button" class="btn btn-secondary" value="Gerar do ODT" onclick="javascript:texto_pdf_gerar()" />
+                     <input type="button" class="btn btn-sm btn-secondary" value="Gerar do ODT" onclick="javascript:texto_pdf_gerar()" />
                    </div>
+                <dtml-else>
+                     <input type="button" class="btn btn-sm btn-secondary" value="Gerar do ODT" disabled />
                 </dtml-if>
               </div>    
              </dtml-if>
@@ -756,7 +985,7 @@ $(function () {
         <dtml-call expr="REQUEST.set('id_documento', _.str(cod_proposicao)+'.odt')">
         <dtml-call expr="REQUEST.set('id_pdf', _.str(cod_proposicao)+'.pdf')">                 
         <dtml-call expr="REQUEST.set('id_documento_assinado', _.str(cod_proposicao)+'_signed.pdf')">
-        <dtml-if expr="_.hasattr(sapl_documentos.proposicao,id_documento_assinado) and AUTHENTICATED_USER.has_role(['Autor'])">
+        <dtml-if expr="_.hasattr(sapl_documentos.proposicao,id_documento_assinado) and AUTHENTICATED_USER.has_role(['Autor', 'Assessor Parlamentar'])">
            <input class="btn btn-success" type="button" value="Enviar para Protocolo" onClick="proposicao_enviar()" />
         <dtml-elif expr="_.hasattr(sapl_documentos.proposicao,id_documento) and not _.hasattr(sapl_documentos.proposicao,id_pdf) and AUTHENTICATED_USER.has_role(['Autor', 'Assessor Parlamentar']) and (des_tipo_autor == 'Parlamentar' or des_tipo_autor == 'Mesa Diretora' or des_tipo_autor == 'Comissao')">
            <input class="btn btn-success" type="button" value="Enviar para Revisão" onClick="proposicao_enviar()" />
@@ -777,9 +1006,9 @@ $(function () {
                </dtml-let>                
             <dtml-else>
                <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia'])">
-                  <dtml-unless dat_solicitacao_devolucao>
-                    <input class="btn btn-primary" type="button" value="Incorporar" onClick="proposicao_incorporar(document.proposicao_form)" />
-                  </dtml-unless>
+                <dtml-unless dat_solicitacao_devolucao>
+                  <input class="btn btn-primary" type="button" value="Incorporar" onClick="proposicao_incorporar(document.proposicao_form)" />
+                </dtml-unless>
                </dtml-if>
             </dtml-if>
          </dtml-if>
@@ -788,7 +1017,7 @@ $(function () {
 </dtml-if>
 </form>
 
-<dtml-if expr="_.has_key('cod_proposicao')">
+<dtml-if expr="_.has_key('cod_proposicao') and AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia', 'Revisor Proposicao'])">
   <form name="observacao_form" method="post" action="proposicao_salvar_observacao_proc">
     <input type="hidden" name="hdn_cod_proposicao" value="<dtml-var cod_proposicao missing>" />
     <div class="form-row mt-3">
@@ -796,15 +1025,14 @@ $(function () {
          <dtml-if cod_mat_ou_doc>
             <dtml-var txt_observacao missing null="">
          <dtml-else>
-            <legend>Observações</legend>                               
-            <label for="txa_txt_observacao" class="d-none required">Observações</label>                      
-            <textarea class="form-control" name="txa_txt_observacao" id="txa_txt_observacao" rows="2" <dtml-if expr=" cod_mat_ou_doc or prop_devolvida">readonly</dtml-if>><dtml-if txt_observacao><dtml-var txt_observacao missing></dtml-if></textarea>
+            <label for="txa_txt_observacao" class="">Observações</label>                      
+            <textarea class="form-control" name="txa_txt_observacao" id="txa_txt_observacao" rows="2" <dtml-if expr="cod_mat_ou_doc or prop_devolvida">readonly</dtml-if>><dtml-if txt_observacao><dtml-var txt_observacao missing></dtml-if></textarea>
          </dtml-if cod_mat_ou_doc>	
        </div>
     </div>
 
     <dtml-if expr="not cod_mat_ou_doc and not prop_devolvida">
-       <input class="btn btn-primary" type="button" value="Salvar Observações" onClick="observacao_salvar(document.observacao_form)" />
+       <input class="btn btn-sm btn-primary" type="button" value="Salvar Observações" onClick="observacao_salvar(document.observacao_form)" />
     </dtml-if>
   </form>
 </dtml-if>

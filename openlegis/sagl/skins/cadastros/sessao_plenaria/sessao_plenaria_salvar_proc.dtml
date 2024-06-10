@@ -2,13 +2,12 @@
     <dtml-call expr="REQUEST.set('metodo', zsql.sessao_plenaria_atualizar_zsql)">
 <dtml-elif expr="zsql.sessao_plenaria_obter_zsql(num_sessao_plen=txt_num_sessao_plen,tip_sessao=lst_tip_sessao_plen,dat_inicio_sessao=pysc.data_converter_pysc(data=txt_dat_inicio_sessao))">
     <dtml-call expr="REQUEST.set('erro', 1)">
-    <dtml-let mensagem="'Já existe no cadastro uma sessão com esse tipo e número!'" tipo_mensagem="'warning'">
+    <dtml-let mensagem="'Já existe no cadastro uma reunião com esse tipo e número!'" tipo_mensagem="'warning'">
         <dtml-var mensagem_emitir>
     </dtml-let>
 <dtml-else>
   <dtml-call expr="REQUEST.set('metodo', zsql.sessao_plenaria_incluir_zsql)">
 </dtml-if>
-
 <dtml-unless erro>
     <dtml-try>
         <dtml-call expr="metodo(cod_sessao_plen         = hdn_cod_sessao_plen,
@@ -24,6 +23,7 @@
                                 url_fotos               = txt_url_fotos,
                                 url_audio               = txt_url_audio,
                                 url_video               = txt_url_video,
+                                cod_periodo_sessao	= hdn_cod_periodo_sessao,
                                 tip_expediente		= txt_tema)">
     <dtml-except>
         <dtml-let mensagem="'Não foi possível salvar os dados. Tente novamente!'" tipo_mensagem="'danger'">
@@ -36,23 +36,17 @@
                 <dtml-call expr="REQUEST.set('hdn_url', hdn_url + cod_sessao_plen)">
             </dtml-in>
         </dtml-if>
-
         <dtml-if file_nom_arquivo_ata>
            <dtml-call expr="REQUEST.set('id_ata', _.str(hdn_cod_sessao_plen)+'_ata_sessao.pdf')">
            <dtml-try>
-             <dtml-if expr="pysc.arquivo_pdf_validar_pysc(file=file_nom_arquivo_ata)">
-                <dtml-call expr="sapl_documentos.ata_sessao.manage_addFile(id=id_ata,file=file_nom_arquivo_ata)">
-             </dtml-if>
+               <dtml-call expr="sapl_documentos.ata_sessao.manage_addFile(id=id_ata,file=pysc.upload_file(file=file_nom_arquivo_ata, title='Ata'))">         
            <dtml-except> 
            </dtml-try>
         </dtml-if>
-
         <dtml-if file_nom_arquivo_roteiro>
            <dtml-call expr="REQUEST.set('id_roteiro', _.str(hdn_cod_sessao_plen)+'_roteiro_sessao.pdf')">
            <dtml-try>
-             <dtml-if expr="pysc.arquivo_pdf_validar_pysc(file=file_nom_arquivo_roteiro)">
-                <dtml-call expr="sapl_documentos.pauta_sessao.manage_addFile(id=id_roteiro, file=file_nom_arquivo_roteiro)">
-             </dtml-if>
+              <dtml-call expr="sapl_documentos.pauta_sessao.manage_addFile(id=id_roteiro,file=pysc.upload_file(file=file_nom_arquivo_roteiro, title='Roteiro'))">         
            <dtml-except> 
            </dtml-try>
         </dtml-if>

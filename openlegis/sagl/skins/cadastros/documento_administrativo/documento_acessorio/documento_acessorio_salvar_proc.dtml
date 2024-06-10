@@ -29,7 +29,7 @@
          <dtml-call expr="REQUEST.set('existe_arquivo', 1)">
          <dtml-try>
            <dtml-if expr="pysc.arquivo_pdf_validar_pysc(file=file_nom_arquivo)">
-             <dtml-call "documento.manage_upload(file=file_nom_arquivo)">
+             <dtml-call "documento.manage_upload(file=pysc.upload_file(file=file_nom_arquivo, title='Documento'))">
            </dtml-if>
          <dtml-except>
              <dtml-call expr="REQUEST.set('erro', 1)">
@@ -42,9 +42,7 @@
      <dtml-if expr="not existe_arquivo">
       <dtml-try>
        <dtml-call expr="REQUEST.set('id_documento', _.str(hdn_cod_documento_acessorio)+'.pdf')">
-       <dtml-if expr="pysc.arquivo_pdf_validar_pysc(file=file_nom_arquivo)">
-          <dtml-call expr="sapl_documentos.administrativo.manage_addFile(id=id_documento,file=file_nom_arquivo)">
-       </dtml-if>
+          <dtml-call expr="sapl_documentos.administrativo.manage_addFile(id=id_documento,file=pysc.upload_file(file=file_nom_arquivo, title=txt_nom_documento))">
       </dtml-try>
      </dtml-if>
   </dtml-if>
@@ -75,8 +73,8 @@
    <dtml-if "_.hasattr(sapl_documentos.administrativo, id_documento)">
      <dtml-let documento="_.getattr(sapl_documentos.administrativo, id_documento) ">
        <dtml-if expr="zsql.tipo_documento_administrativo_obter_zsql(tip_documento=lst_tip_documento, ind_publico=1, ind_excluido=0)">
-         <dtml-call "documento.manage_permission('View', roles=['Anonymous', 'Authenticated'], acquire=0)">
-         <dtml-call "documento.manage_permission('Delete objects', roles=['Manager','Authenticated'], acquire=0)">
+         <dtml-call "documento.manage_permission('View', roles=['Manager', 'Anonymous', 'Authenticated'], acquire=1)">
+         <dtml-call "documento.manage_permission('Delete objects', roles=['Manager','Authenticated'], acquire=1)">
        <dtml-else>
          <dtml-call "documento.manage_permission('View', roles=['Manager','Authenticated'], acquire=1)">
          <dtml-call "documento.manage_permission('Delete objects', roles=['Manager','Authenticated'], acquire=1)">

@@ -5,9 +5,7 @@ import six
 import requests
 import base64
 import simplejson as json
-
-import cStringIO
-import StringIO
+from io import BytesIO
 
 class StandardSecurityContexts:
     PKI_BRAZIL = '201856ce-273c-4058-a872-8937bd547d36'
@@ -163,9 +161,10 @@ class PadesSignatureFinisher:
         if not self._done:
             raise Exception(
                 'The method stream_signed_pdf() can only be called after calling the finish() method')
-        f = StringIO.StringIO()
+        f = BytesIO()
         f.write(self._signed_pdf_content)
-
+        f.seek(0)
+        f.getvalue()
         return f
 
 

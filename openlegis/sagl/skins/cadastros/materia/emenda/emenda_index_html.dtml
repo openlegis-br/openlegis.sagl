@@ -98,17 +98,19 @@ $(document).ready(function() {
            </dtml-in>
           </td>
           <td>
-              <dtml-call expr="REQUEST.set('des_tipo_proposicao', 'Emenda')">
-
-                <dtml-let id_emenda="_.str(cod_emenda)+'_emenda.pdf'">
-                  <dtml-if "_.hasattr(sapl_documentos.emenda,id_emenda)">
-                    <dtml-let emenda="_.getattr(sapl_documentos.emenda,id_emenda).absolute_url">
-                      <a target="_blank" href="<dtml-var emenda>" title="Texto Original">
-                        <i class="fa fa-file-pdf" style="font-size: 21px;margin-right: 3px;"></i>
-                      </a>
-                    </dtml-let>
-                  </dtml-if>
-                </dtml-let>
+                <dtml-call expr="REQUEST.set('des_tipo_proposicao', 'Emenda')">
+                <dtml-call expr="REQUEST.set('id_emenda', _.str(cod_emenda)+'_emenda.pdf')">
+                <dtml-if "_.hasattr(sapl_documentos.emenda,id_emenda)">
+                 <dtml-let emenda="_.getattr(sapl_documentos.emenda,id_emenda).absolute_url"> 
+                   <a target="_blank" href="<dtml-var emenda>" title="Texto Integral">
+                     <dtml-if expr="zsql.assinatura_documento_obter_zsql(codigo=cod_emenda, tipo_doc='emenda',ind_assinado=1, cod_usuario=None)">
+                        <i class="fa fa-certificate" style="font-size: 21px; margin-right: 3px;"></i>
+                      <dtml-else>
+                     <i class="fa fa-fw fa-file-pdf" style="font-size: 21px; margin-right: 3px;"></i>
+                     </dtml-if>
+                   </a>
+                 </dtml-let>
+                </dtml-if>
           </td>
             <td>
              <dtml-in expr="zsql.votacao_ordem_dia_obter_zsql(cod_materia=cod_materia,cod_emenda=cod_emenda, ind_excluido=0)">
@@ -137,4 +139,3 @@ $(document).ready(function() {
    </dtml-in>
     
   <button type="button" class="btn m btn-primary d-print-none" data-toggle="modal" data-target="#iFrameModal" data-title="Cadastro de Emenda" data-src="emenda/emenda_form?cod_materia=<dtml-var cod_materia>&modal=1">Incluir Emenda</button>
-

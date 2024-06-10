@@ -73,7 +73,7 @@
               <dtml-call expr="REQUEST.set('cod_usuario_corrente', int(cod_usuario))">
             </dtml-if>
           </dtml-in>
-          <dtml-call expr="REQUEST.set('nom_unidade_origem', 'Protocolo')">
+          <dtml-call expr="REQUEST.set('nom_unidade_origem', 'Protocolo Eletrônico')">
           <dtml-in expr="zsql.unidade_tramitacao_obter_zsql(nom_orgao=nom_unidade_origem)">
             <dtml-call expr="REQUEST.set('cod_unid_tram_local', cod_unid_tramitacao)">
           </dtml-in>
@@ -89,7 +89,7 @@
           <dtml-unless cod_ult_tramitacao>
             <dtml-try> 
                <dtml-call expr="zsql.trans_begin_zsql()">             
-               <dtml-call expr="REQUEST.set('nom_unidade_destino', 'Departamento Legislativo')">
+               <dtml-call expr="REQUEST.set('nom_unidade_destino', 'Departamento Técnico Legislativo')">
                <dtml-in expr="zsql.unidade_tramitacao_obter_zsql(nom_orgao=nom_unidade_destino)">
                  <dtml-call expr="REQUEST.set('cod_unid_tram_dest', cod_unid_tramitacao)">
                </dtml-in>
@@ -144,11 +144,9 @@
                 <dtml-call expr="REQUEST.set('id_substitutivo',_.str(hdn_cod_substitutivo)+'_substitutivo.pdf')">
              <dtml-if "not existe_arquivo">
               <dtml-try>
-                <dtml-if expr="pysc.arquivo_pdf_validar_pysc(file=file_nom_arquivo_substitutivo)">
-                  <dtml-call expr="sapl_documentos.substitutivo.manage_addFile(id=id_substitutivo, file=file_nom_arquivo_substitutivo)">
-                </dtml-if>
+                <dtml-call expr="sapl_documentos.substitutivo.manage_addFile(id=id_substitutivo,file=pysc.upload_file(file=file_nom_arquivo_substitutivo, title='Substitutivo'))">         
               <dtml-except> 
-                     <dtml-call expr="REQUEST.set('erro', 1)">              
+                <dtml-call expr="REQUEST.set('erro', 1)">              
               </dtml-try>      
              </dtml-if>
      </dtml-if>

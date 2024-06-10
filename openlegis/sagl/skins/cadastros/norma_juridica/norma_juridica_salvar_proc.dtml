@@ -30,11 +30,8 @@
             <dtml-call expr="REQUEST.set('rad_ind_complemento', '')">
         </dtml-unless>
         <dtml-if chk_assunto_norma>
-           <dtml-call expr="REQUEST.set('lst_assunto_norma', _.string.join(chk_assunto_norma,','))">
+           <dtml-call expr="REQUEST.set('chk_assunto_norma', ','.join(chk_assunto_norma))">
         </dtml-if>
-        <dtml-unless chk_assunto_norma>
-            <dtml-call expr="REQUEST.set('lst_assunto_norma', '1')">
-        </dtml-unless>
         <dtml-try>
             <dtml-call expr="metodo(cod_norma              = hdn_cod_norma,
                                     tip_norma              = lst_tip_norma,
@@ -51,7 +48,7 @@
                                     txt_indexacao          = txa_txt_indexacao,
                                     txt_observacao         = txa_txt_observacao,
                                     ind_complemento        = rad_ind_complemento,
-                                    cod_assunto            = lst_assunto_norma,
+                                    cod_assunto            = chk_assunto_norma,
                                     cod_situacao           = lst_tip_situacao_norma,
                                     ind_publico            = chk_ind_publico,)">
 
@@ -63,26 +60,21 @@
         <dtml-else>      
             <dtml-call expr="REQUEST.set('erro', 0)">                  
             <dtml-if file_nom_arquivo>
-               <dtml-if hdn_cod_norma>
-                  <dtml-call expr="REQUEST.set('id_documento', _.str(hdn_cod_norma)+'_texto_integral.pdf')">
-                </dtml-if>
-                <dtml-try>
-                  <dtml-call expr="sapl_documentos.norma_juridica.manage_addFile(id=id_documento,file=pysc.upload_file(file=file_nom_arquivo, title='Norma'))">         
-                <dtml-except> 
-                   <dtml-call expr="REQUEST.set('erro', 1)">              
-                </dtml-try>      
+               <dtml-call expr="REQUEST.set('id_documento', str(hdn_cod_norma)+'_texto_integral.pdf')">
+               <dtml-in expr="zsql.norma_juridica_obter_zsql(cod_norma = hdn_cod_norma)">
+                  <dtml-call expr="REQUEST.set('titulo', sgl_tipo_norma + ' ' + str(num_norma) + '/' + str(ano_norma))">
+               </dtml-in>
+               <dtml-call expr="sapl_documentos.norma_juridica.manage_addFile(id=id_documento,file=pysc.upload_file(file=file_nom_arquivo, title=titulo))">            
             </dtml-if>
-            <dtml-call expr="sapl_documentos.norma_juridica.Catalog.atualizarCatalogo(cod_norma=hdn_cod_norma)">
             <dtml-if file_nom_arquivo_compilado>
-               <dtml-if hdn_cod_norma>
-                  <dtml-call expr="REQUEST.set('id_compilado', _.str(hdn_cod_norma)+'_texto_consolidado.pdf')">
-                </dtml-if>
-                <dtml-try>
-                  <dtml-call expr="sapl_documentos.norma_juridica.manage_addFile(id=id_compilado,file=pysc.upload_file(file=file_nom_arquivo_compilado, title='Norma Compilada'))">         
-                <dtml-except> 
-                   <dtml-call expr="REQUEST.set('erro', 1)">              
-                </dtml-try>      
+               <dtml-call expr="REQUEST.set('id_compilado', str(hdn_cod_norma)+'_texto_consolidado.pdf')">
+               <dtml-call expr="sapl_documentos.norma_juridica.manage_addFile(id=id_compilado,file=pysc.upload_file(file=file_nom_arquivo_compilado, title='Norma Compilada'))">              
             </dtml-if>
+            <dtml-try>
+               <dtml-call expr="sapl_documentos.norma_juridica.Catalog.atualizarCatalogo(cod_norma=hdn_cod_norma)">
+            <dtml-except>
+            <dtml-else>
+            </dtml-try>
            <dtml-let mensagem="'Norma jurídica salva com sucesso!'" cod_norma="hdn_cod_norma" url="'norma_juridica_mostrar_proc?cod_norma='+str(hdn_cod_norma)">
                <dtml-var mensagem_emitir>
            </dtml-let>
@@ -94,7 +86,7 @@
     <dtml-call expr="zsql.logs_registrar_zsql(
             usuario      = REQUEST['AUTHENTICATED_USER'].getUserName(), 
             data         = DateTime().strftime('%Y-%m-%d %H:%M:%S'),
-            modulo       = _.string.split(_['REQUEST']['URL1'],'/')[-1],
+            modulo       = str(_['REQUEST']['URL1']).split('/')[-1],
             metodo       = 'norma_juridica_salvar_proc',
             IP           = pysc.get_ip(),
             dados        = REQUEST.form.items(),

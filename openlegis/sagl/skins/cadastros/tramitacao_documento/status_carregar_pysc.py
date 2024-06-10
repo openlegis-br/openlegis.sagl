@@ -7,7 +7,7 @@
 ##parameters= svalue
 ##title=
 ##
-import simplejson as json
+import json
 
 context.REQUEST.RESPONSE.setHeader("Access-Control-Allow-Origin", "*")
 
@@ -15,7 +15,7 @@ status = ''
 
 if svalue != '':
    status = context.zsql.unidade_tramitacao_obter_zsql(cod_unid_tramitacao = svalue)
-   fields = status.data_dictionary().keys()
+   fields = list(status.data_dictionary().keys())
 
 listaDic={}     
 statusArray = []
@@ -37,7 +37,7 @@ if status_permitidos != None:
       dic['name'] = 'Selecione'
       dic['id'] = ''
       statusArray.append(dic)
-   for item in string.split(str(status_permitidos),','):
+   for item in str(status_permitidos).split(','):
        statusDict = {}   
        for status in context.zsql.status_tramitacao_administrativo_obter_zsql(cod_status = item):
            statusDict['name'] = status['sgl_status'] + ' - ' + status['des_status']

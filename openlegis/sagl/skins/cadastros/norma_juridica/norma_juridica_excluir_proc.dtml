@@ -1,6 +1,6 @@
-<dtml-call expr="REQUEST.set('id_documento', _.str(cod_norma)+'_'+sapl_documentos.norma_juridica.nom_documento)">
+<dtml-call expr="REQUEST.set('id_documento', str(cod_norma)+'_'+sapl_documentos.norma_juridica.nom_documento)">
 <dtml-call expr="REQUEST.set('status','D')">
-<dtml-if expr="_.hasattr(sapl_documentos.norma_juridica,id_documento)">
+<dtml-if expr="hasattr(sapl_documentos.norma_juridica,id_documento)">
     <dtml-try>
             <dtml-call expr="sapl_documentos.norma_juridica.Catalog.removerCatalogo(cod_norma=cod_norma)">
 	    <dtml-call expr="sapl_documentos.norma_juridica.manage_delObjects(id_documento)">
@@ -27,13 +27,13 @@
       </dtml-let>
    </dtml-in>
 
-   <dtml-call expr="REQUEST.set('id_pdf_consolidado', _.str(cod_norma)+'_texto_consolidado.pdf')">
-   <dtml-if "_.hasattr(sapl_documentos.norma_juridica,id_pdf_consolidado)">
+   <dtml-call expr="REQUEST.set('id_pdf_consolidado', str(cod_norma)+'_texto_consolidado.pdf')">
+   <dtml-if "hasattr(sapl_documentos.norma_juridica,id_pdf_consolidado)">
       <dtml-call expr="sapl_documentos.norma_juridica.manage_delObjects(id_pdf_consolidado)">
    </dtml-if>
 
-   <dtml-call expr="REQUEST.set('id_odt', _.str(cod_norma)+'_texto_integral.odt')">
-   <dtml-if "_.hasattr(sapl_documentos.norma_juridica,id_odt)">
+   <dtml-call expr="REQUEST.set('id_odt', str(cod_norma)+'_texto_integral.odt')">
+   <dtml-if "hasattr(sapl_documentos.norma_juridica,id_odt)">
       <dtml-call expr="sapl_documentos.norma_juridica.manage_delObjects(id_odt)">
    </dtml-if>
 
@@ -69,13 +69,13 @@
 
 <dtml-comment>LOG DE AUDITORIA</dtml-comment>
 <dtml-if dbcon_logs>
-  <dtml-call expr="REQUEST.set('metodo1', _.string.split(str(metodo),'/')[-1])">
-  <dtml-call expr="REQUEST.set('metodo1', _.string.split(str(metodo1),' at ')[-1])">
-  <dtml-call expr="REQUEST.set('metodo1', _.string.split(str(metodo1),'>')[0])">
+  <dtml-call expr="REQUEST.set('metodo1', str(metodo).split('/')[-1])">
+  <dtml-call expr="REQUEST.set('metodo1', str(metodo1).split(' at ')[-1])">
+  <dtml-call expr="REQUEST.set('metodo1', str(metodo1).split('>')[0])">
   <dtml-call expr="zsql.logs_registrar_zsql(
             usuario      = REQUEST['AUTHENTICATED_USER'].getUserName(), 
             data         = DateTime().strftime('%Y-%m-%d %H:%M:%S'),
-            modulo       = _.string.split(_['REQUEST']['URL1'],'/')[-1],
+            modulo       = str(_['REQUEST']['URL1']).split('/')[-1],
             metodo       = metodo1,
             IP           = pysc.get_ip(),
             dados        = REQUEST.form.items(),

@@ -5,7 +5,7 @@
    OpenLegis
 """
 from trml2pdf import parseString
-from cStringIO import StringIO
+from io import BytesIO
 import time
 
 def cabecalho(inf_basicas_dic,imagem):
@@ -13,15 +13,13 @@ def cabecalho(inf_basicas_dic,imagem):
     Função que gera o código rml do cabeçalho da página
     """
     tmp=''
-    tmp+='\t\t\t\t<image x="4cm" y="26.7cm" width="70" height="70" file="' + imagem + '"/>\n'
+    tmp+='\t\t\t\t<image x="3.1cm" y="26.9cm" width="60" height="60" file="' + imagem + '"/>\n'
     tmp+='\t\t\t\t<lines>3.3cm 26.3cm 19.5cm 26.3cm</lines>\n'
     tmp+='\t\t\t\t<setFont name="Helvetica-Bold" size="15"/>\n'
     tmp+='\t\t\t\t<drawString x="6.7cm" y="28.1cm">' + inf_basicas_dic['nom_camara'] + '</drawString>\n'
     tmp+='\t\t\t\t<setFont name="Helvetica" size="11"/>\n'
     tmp+='\t\t\t\t<drawString x="6.7cm" y="27.6cm">' + inf_basicas_dic['nom_estado'] + '</drawString>\n'
-    if str(inf_basicas_dic['titulo']) != "" and str(inf_basicas_dic['titulo']) != None:
-        tmp+='\t\t\t\t<setFont name="Helvetica-Bold" size="12"/>\n'
-        tmp+='\t\t\t\t<drawCentredString x="11.5cm" y="25.6cm">' + str(inf_basicas_dic['titulo']) + '</drawCentredString>\n'
+
     return tmp
 
 def rodape(dic_rodape):
@@ -48,12 +46,12 @@ def rodape(dic_rodape):
     if dic_rodape['data_emissao']!="" and dic_rodape['data_emissao']!=None:
         data_emissao = dic_rodape['data_emissao']
 
-    tmp+='\t\t\t\t<lines>3.3cm 2.2cm 19.5cm 2.2cm</lines>\n'
+    tmp+='\t\t\t\t<lines>3.3cm 2.0cm 19.5cm 2.0cm</lines>\n'
     tmp+='\t\t\t\t<setFont name="Helvetica" size="8"/>\n'
-    tmp+='\t\t\t\t<drawString x="3.3cm" y="2.4cm">' + data_emissao + '</drawString>\n'
-    tmp+='\t\t\t\t<drawString x="18.4cm" y="2.4cm">Página <pageNumber/></drawString>\n'
-    tmp+='\t\t\t\t<drawCentredString x="11.5cm" y="1.7cm">' + linha1 + '</drawCentredString>\n'
-    tmp+='\t\t\t\t<drawCentredString x="11.5cm" y="1.3cm">' + linha2 + '</drawCentredString>\n'
+    tmp+='\t\t\t\t<drawString x="3.3cm" y="2.2cm">' + data_emissao + '</drawString>\n'
+    tmp+='\t\t\t\t<drawString x="18.4cm" y="2.2cm">Página <pageNumber/></drawString>\n'
+    tmp+='\t\t\t\t<drawCentredString x="11.5cm" y="1.6cm">' + linha1 + '</drawCentredString>\n'
+    tmp+='\t\t\t\t<drawCentredString x="11.5cm" y="1.2cm">' + linha2 + '</drawCentredString>\n'
 
     return tmp
 
@@ -72,6 +70,7 @@ def paraStyle():
     tmp+='\t\t<paraStyle name="style.Title" fontName="Helvetica" fontSize="11" leading="13" spaceAfter="2" alignment="RIGHT"/>\n'
     tmp+='\t\t<paraStyle name="P1" fontName="Helvetica-Bold" fontSize="12.0" textColor="gray" leading="14" spaceAfter="2" spaceBefore="8" alignment="LEFT"/>\n'
     tmp+='\t\t<paraStyle name="P2" fontName="Helvetica" fontSize="10.0" leading="12" spaceAfter="2" alignment="LEFT"/>\n'
+    tmp+='\t\t<paraStyle name="P3" fontName="Helvetica-Bold" fontSize="12.0" leading="12" alignment="CENTER"/>\n'
     tmp+='\t\t<paraStyle name="texto_projeto" fontName="Helvetica" fontSize="11.0" leading="14" spaceAfter="5" alignment="JUSTIFY"/>\n'
     tmp+='\t</stylesheet>\n'
 
@@ -81,11 +80,20 @@ def inf_basicas(inf_basicas_dic):
     """
     Função que gera o código rml das funções básicas do relatório
     """
-
     tmp=''
+    tmp+='\t\t<para style="P2"></para>\n'
+    tmp+='\t\t<para style="P2"></para>\n'
+    tmp+='\t\t<para style="P2"></para>\n'
+    tmp+='\t\t<para style="P3">'+ str(inf_basicas_dic['titulo']) +'</para>\n'
+
     #ementa da norma
     txt_ementa = str(inf_basicas_dic['txt_ementa'])
     if txt_ementa != "" and txt_ementa != None :
+        tmp+='\t\t<para style="P2"></para>\n'
+        tmp+='\t\t<para style="P2"></para>\n'
+        tmp+='\t\t<para style="P2"></para>\n'
+        tmp+='\t\t<para style="P2"></para>\n'
+        tmp+='\t\t<para style="P2"></para>\n'
         tmp+='\t\t<para style="texto_projeto">' + txt_ementa.replace('&','&amp;') + '</para>\n'
 
     indexacao = inf_basicas_dic['indexacao']
@@ -167,7 +175,7 @@ def principal(imagem, dic_rodape,inf_basicas_dic,lst_assuntos,lst_vinculos_ativo
     tmp+=cabecalho(inf_basicas_dic,imagem)
     tmp+=rodape(dic_rodape)
     tmp+='\t\t\t</pageGraphics>\n'
-    tmp+='\t\t\t<frame id="first" x1="3cm" y1="2.6cm" width="16cm" height="23cm"/>\n'
+    tmp+='\t\t\t<frame id="first" x1="3cm" y1="2.6cm" width="16cm" height="23.5cm"/>\n'
     tmp+='\t\t</pageTemplate>\n'
     tmp+='\t</template>\n'
     tmp+=paraStyle()

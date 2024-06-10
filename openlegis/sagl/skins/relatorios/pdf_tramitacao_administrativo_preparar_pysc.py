@@ -55,10 +55,7 @@ for tramitacao in context.zsql.tramitacao_administrativo_obter_zsql(cod_tramitac
   tramitacao_dic['dat_extenso'] = context.pysc.data_converter_por_extenso_pysc(data=dat_tramitacao)
   tramitacao_dic['dat_encaminha'] = tramitacao.dat_encaminha
   tramitacao_dic['des_status'] = tramitacao.des_status
-  if tramitacao.txt_tramitacao != None and tramitacao.txt_tramitacao!='':
-     tramitacao_dic['txt_tramitacao'] = context.extensions.xhtml2rml(tramitacao.txt_tramitacao,'P2')
-  else:
-     tramitacao_dic['txt_tramitacao'] = ''
+  tramitacao_dic['txt_tramitacao'] = tramitacao.txt_tramitacao
   if tramitacao.dat_fim_prazo != None:
     tramitacao_dic['dat_fim_prazo'] = tramitacao.dat_fim_prazo
   else:
@@ -72,7 +69,7 @@ for tramitacao in context.zsql.tramitacao_administrativo_obter_zsql(cod_tramitac
   # dados do documento
   for documento in context.zsql.documento_administrativo_obter_zsql(cod_documento=tramitacao.cod_documento):
    txt_assunto = escape(documento.txt_assunto)  
-   tramitacao_dic['id_documento'] = documento.des_tipo_documento.decode('utf-8').upper() +" N° "+ str(documento.num_documento)+"/"+ str(documento.ano_documento)+" - "+ escape(documento.txt_interessado) +" - "+ escape(documento.txt_assunto)
+   tramitacao_dic['id_documento'] = documento.des_tipo_documento.upper() +" N° "+ str(documento.num_documento)+"/"+ str(documento.ano_documento)+" - "+ escape(documento.txt_interessado) +" - "+ escape(documento.txt_assunto)
 
   # unidade de origem
   for unid_origem in context.zsql.unidade_tramitacao_obter_zsql(cod_unid_tramitacao=tramitacao.cod_unid_tram_local):

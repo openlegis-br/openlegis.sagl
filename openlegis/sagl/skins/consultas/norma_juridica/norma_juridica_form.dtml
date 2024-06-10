@@ -46,8 +46,8 @@
     </dtml-if>
    </div>
       <div class="col-12 col-lg-4 text-left text-lg-right">
-         <dtml-call expr="REQUEST.set('texto_original', _.str(cod_norma)+'_texto_integral.pdf')">
-         <dtml-if "_.hasattr(sapl_documentos.norma_juridica,texto_original)">
+         <dtml-call expr="REQUEST.set('texto_original', str(cod_norma)+'_texto_integral.pdf')">
+         <dtml-if "hasattr(sapl_documentos.norma_juridica,texto_original)">
             <a class="btn btn-sm btn-primary" target="_blank" href="<dtml-var portal_url>/pysc/download_norma_pysc?cod_norma=<dtml-var cod_norma>&texto_original=1">
                  <dtml-if expr="zsql.assinatura_documento_obter_zsql(codigo=cod_norma, tipo_doc='norma',ind_assinado=1, cod_usuario=None)">
                    <i class="fa fa-certificate"></i>
@@ -57,13 +57,13 @@
               Texto Original
             </a>
          </dtml-if>  
-         <dtml-call expr="REQUEST.set('texto_consolidado', _.str(cod_norma)+'_texto_consolidado.pdf')">
-         <dtml-call expr="REQUEST.set('texto_odt', _.str(cod_norma)+'_texto_integral.odt')">                  
-         <dtml-if "_.hasattr(sapl_documentos.norma_juridica,texto_odt) and _.hasattr(sapl_documentos.norma_juridica,texto_consolidado)">
-           <dtml-let documento_odt="_.getattr(sapl_documentos.norma_juridica,texto_odt).absolute_url">         
+         <dtml-call expr="REQUEST.set('texto_consolidado', str(cod_norma)+'_texto_consolidado.pdf')">
+         <dtml-call expr="REQUEST.set('texto_odt', str(cod_norma)+'_texto_integral.odt')">                  
+         <dtml-if "hasattr(sapl_documentos.norma_juridica,texto_odt) and hasattr(sapl_documentos.norma_juridica,texto_consolidado)">
+           <dtml-let documento_odt="getattr(sapl_documentos.norma_juridica,texto_odt).absolute_url">         
                <a class="btn btn-sm btn-primary" target="_blank" href="<dtml-var portal_url>/generico/viewerJS/?cod_norma=<dtml-var cod_norma>#<dtml-var documento_odt>?<dtml-var expr="ZopeTime().timeTime()"> "> <i class="fa fa-fw fa-file-code"></i> Texto Compilado</a>
            </dtml-let>
-         <dtml-elif "not _.hasattr(sapl_documentos.norma_juridica,texto_odt) and _.hasattr(sapl_documentos.norma_juridica,texto_consolidado)">      
+         <dtml-elif "not hasattr(sapl_documentos.norma_juridica,texto_odt) and hasattr(sapl_documentos.norma_juridica,texto_consolidado)">      
             <a class="btn btn-sm btn-primary" href="<dtml-var portal_url>/pysc/download_norma_pysc?cod_norma=<dtml-var cod_norma>&texto_consolidado=1" target="_blank"> <i class="fa fa-fw fa-file-code"></i> Texto Compilado</a>
          </dtml-if>        
       </div>
@@ -88,9 +88,9 @@
 <dtml-if expr="cod_assunto_sel!='1'">
  <div class="row">
     <p class="col-12"><b>Assunto</b>:
-      <dtml-in prefix="loop" expr="_.string.split(cod_assunto_sel,',')">
+      <dtml-in prefix="loop" expr="str(cod_assunto_sel).split(',')">
          <dtml-in expr="zsql.assunto_norma_juridica_obter_zsql(cod_assunto=loop_item)">
-            <dtml-call expr="REQUEST.set('_.str(loop_item)','des_assunto')">
+            <dtml-call expr="REQUEST.set('str(loop_item)','des_assunto')">
                <dtml-var des_assunto><br />
          </dtml-in>
       </dtml-in>
@@ -142,10 +142,10 @@
           </dtml-if>
             <tr>
                 <td>
-                 <dtml-let id_anexo="_.str(cod_norma)+'_anexo_'+ _.str(cod_anexo)">
-                  <dtml-if expr="_.hasattr(sapl_documentos.norma_juridica,id_anexo)">
-                     <dtml-let anexo="_.getattr(sapl_documentos.norma_juridica,id_anexo).absolute_url">
-                       <dtml-call expr="REQUEST.set('nome_anexo',_.str(cod_norma)+'_anexo_'+ _.str(cod_anexo))">
+                 <dtml-let id_anexo="str(cod_norma)+'_anexo_'+ str(cod_anexo)">
+                  <dtml-if expr="hasattr(sapl_documentos.norma_juridica,id_anexo)">
+                     <dtml-let anexo="getattr(sapl_documentos.norma_juridica,id_anexo).absolute_url">
+                       <dtml-call expr="REQUEST.set('nome_anexo',str(cod_norma)+'_anexo_'+ str(cod_anexo))">
                        <a href="<dtml-var portal_url>/sapl_documentos/norma_juridica/<dtml-var nome_anexo>" target="_blank" title="<dtml-var txt_descricao>">
                          <i class="fa fa-fw fa-file"></i>Visualizar
                        </a>

@@ -19,9 +19,6 @@
         num_cep=REQUEST['txt_num_cep'],
         num_tel=REQUEST['txt_num_tel'],
         num_fax=REQUEST['txt_num_fax'],
-	cor_fundo=REQUEST['txt_cor_fundo'],
-	cor_borda=REQUEST['txt_cor_borda'],
-	cor_principal=REQUEST['txt_cor_principal'],
         txt_senha_inicial=REQUEST['txt_txt_senha_inicial'],
         end_email_casa=REQUEST['txt_end_email_casa'],
         end_web_casa=REQUEST['txt_end_web_casa'],
@@ -41,8 +38,8 @@
     <dtml-if expr="(_.int(hdn_file)==1)">
        <dtml-call expr="REQUEST.set('id_logo', 'logo_casa.gif')">
          <dtml-in expr="sapl_documentos.props_sagl.objectValues()"> 
-            <dtml-if expr="id() == 'logo_casa.gif'">
-               <dtml-let logo="_.getattr(sapl_documentos.props_sagl,id_logo) ">
+            <dtml-if expr="id == 'logo_casa.gif'">
+               <dtml-let logo="getattr(sapl_documentos.props_sagl,id_logo) ">
                   <dtml-call expr="REQUEST.set('existe_logo', 1)">    
                   <dtml-try>
                     <dtml-call "logo.manage_upload(file=file_nom_logo)">

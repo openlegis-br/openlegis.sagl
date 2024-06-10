@@ -1,6 +1,6 @@
 <dtml-call expr="REQUEST.set('erro', 0)">
-<dtml-call expr="REQUEST.set('id_texto', _.str(cod_peticao)+'.pdf')">
-<dtml-if expr="_.hasattr(sapl_documentos.peticao,id_texto)">
+<dtml-call expr="REQUEST.set('id_texto', str(cod_peticao)+'.pdf')">
+<dtml-if expr="hasattr(sapl_documentos.peticao,id_texto)">
   <dtml-try>
     <dtml-call expr="sapl_documentos.peticao.manage_delObjects(id_texto)">
   <dtml-except>
@@ -9,7 +9,7 @@
 </dtml-if>
 
 <dtml-in expr="zsql.assinatura_documento_obter_zsql(codigo=cod_peticao,tipo_doc='peticao')">
- <dtml-call expr="REQUEST.set('id_texto_assinado', _.str(cod_assinatura_doc)+'.pdf')">
+ <dtml-call expr="REQUEST.set('id_texto_assinado', str(cod_assinatura_doc)+'.pdf')">
  <dtml-try>
    <dtml-call expr="zsql.assinatura_documento_excluir_zsql(
                             cod_assinatura_doc  = cod_assinatura_doc,
@@ -18,7 +18,7 @@
  <dtml-except>
     <dtml-call expr="REQUEST.set('erro', 1)">
  <dtml-else>
-    <dtml-if expr="_.hasattr(sapl_documentos.peticao,id_texto)">
+    <dtml-if expr="hasattr(sapl_documentos.peticao,id_texto)">
         <dtml-call expr="sapl_documentos.documentos_assinados.manage_delObjects(id_texto_assinado)">
     </dtml-if>
  </dtml-try>
@@ -39,7 +39,7 @@
   <dtml-call expr="zsql.logs_registrar_zsql(
             usuario      = REQUEST['AUTHENTICATED_USER'].getUserName(), 
             data         = DateTime().strftime('%Y-%m-%d %H:%M:%S'),
-            modulo       = _.string.split(_['REQUEST']['URL1'],'/')[-1],
+            modulo       = str(_['REQUEST']['URL1']).split('/')[-1],
             metodo       = 'pdf_excluir',
             IP           = pysc.get_ip(),
             cod_registro = cod_peticao)"> 

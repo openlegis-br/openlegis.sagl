@@ -12,14 +12,14 @@
                   <dtml-if expr="_.has_key('hdn_num_legislatura') and num_legislatura==_.int(hdn_num_legislatura)">
                      selected
                      <dtml-call expr="REQUEST.set('data_fim_leg', dat_fim)">
-                  <dtml-elif expr="not _.has_key('hdn_num_legislatura') and _.DateTime() >= dat_inicio and _.DateTime() <= dat_fim">
+                  <dtml-elif expr="not _.has_key('hdn_num_legislatura') and DateTime() >= DateTime(dat_inicio) and DateTime() <= DateTime(dat_fim)">
                      <dtml-call expr="REQUEST.set('hdn_num_legislatura', num_legislatura)">
                      <dtml-call expr="REQUEST.set('data_fim_leg', dat_fim)">
                      selected
                   </dtml-if>
                   value="<dtml-var ACTUAL_URL>?hdn_num_legislatura=<dtml-var num_legislatura>">
                   <dtml-var expr="pysc.periodo_legislatura_format_pysc(num_legislatura,dat_inicio,dat_fim)">
-                  <dtml-if expr="(_.DateTime() >= dat_inicio and _.DateTime() <= dat_fim)">
+                  <dtml-if expr="(DateTime() >= DateTime(dat_inicio) and DateTime() <= DateTime(dat_fim))">
                      (Atual)
                   </dtml-if>
                </option>
@@ -41,7 +41,7 @@
        <dtml-in expr="zsql.periodo_comp_bancada_obter_zsql(num_legislatura=hdn_num_legislatura)">
           <option
             <dtml-if expr="((not _.has_key('cod_periodo_comp_sel') and not _.has_key('prim_sel') 
-                            and (_.DateTime() >= dat_inicio and _.DateTime() <= dat_fim)))
+                            and (DateTime() >= DateTime(dat_inicio) and DateTime() <= DateTime(dat_fim))))
                             or (not _.has_key('cod_periodo_comp_sel') and not _.has_key('prim_sel')) 
                             or (_.has_key('cod_periodo_comp_sel') and cod_periodo_comp == cod_periodo_comp_sel)">
                  selected
@@ -50,7 +50,7 @@
             </dtml-if>
             value="<dtml-var ACTUAL_URL>?cod_periodo_comp_sel=<dtml-var cod_periodo_comp>&hdn_num_legislatura=<dtml-var num_legislatura>">
             <dtml-var dat_inicio_periodo> a <dtml-var dat_fim_periodo>
-            <dtml-if expr="(_.DateTime() >= dat_inicio) and (_.DateTime() <= dat_fim)">(Atual)</dtml-if>
+            <dtml-if expr="(DateTime() >= DateTime(dat_inicio)) and (DateTime() <= DateTime(dat_fim))">(Atual)</dtml-if>
               </option>
        </dtml-in>
      </select>

@@ -40,9 +40,9 @@
           </td>
           <td>
              <dtml-in expr="zsql.relatoria_obter_zsql(cod_comissao=cod_comissao_sel, cod_materia=cod_materia, num_ordem=num_ordem)">
-                <dtml-let id_parecer="_.str(cod_relatoria)+'_parecer.pdf'">
-                  <dtml-if "_.hasattr(sapl_documentos.parecer_comissao,id_parecer)">
-                    <dtml-let parecer="_.getattr(sapl_documentos.parecer_comissao,id_parecer).absolute_url">
+                <dtml-let id_parecer="str(cod_relatoria)+'_parecer.pdf'">
+                  <dtml-if "hasattr(sapl_documentos.parecer_comissao,id_parecer)">
+                    <dtml-let parecer="getattr(sapl_documentos.parecer_comissao,id_parecer).absolute_url">
                        <a href="<dtml-var parecer>" target="_blank" title="Texto Original">
                          <i class="fa fa-file-pdf" style="font-size: 21px;"></i><span class="d-none">PDF</span>
                        </a>

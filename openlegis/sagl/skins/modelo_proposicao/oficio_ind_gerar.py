@@ -39,7 +39,7 @@ for sessao in context.zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=cod_sessao
       dic_ind['dat_apresentacao'] = materia.dat_apresentacao
       dic_ind["nom_autor"] = ""
       autores = context.zsql.autoria_obter_zsql(cod_materia=materia.cod_materia)
-      fields = autores.data_dictionary().keys()
+      fields = list(autores.data_dictionary().keys())
       lista_autor = []
       for autor in autores:
           for field in fields:

@@ -9,10 +9,10 @@
 ##
 
 dic={}
-dic = dict(zip(cod_parlamentar, tip_frequencia))
+dic = dict(list(zip(cod_parlamentar, tip_frequencia)))
 
 dic2={}
-dic2 = dict(zip(cod_parlamentar, txt_justif_ausencia))
+dic2 = dict(list(zip(cod_parlamentar, txt_justif_ausencia)))
 
 parlamentares=[]
 

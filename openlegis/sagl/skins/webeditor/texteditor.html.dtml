@@ -1,0 +1,55 @@
+<!DOCTYPE HTML>
+<html style="width:100%; height:100%; margin:0px; padding:0px" xml:lang="en" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+
+    <title>Visualizador de arquivos</title>
+
+    <script src="openlegis.texteditor/wodotexteditor.js" type="text/javascript" charset="utf-8"></script>
+    <script type="text/javascript">
+        function createEditor() {
+            var editorOptions = {
+                userData: {
+                    fullName: "admin",
+                    color:    "blue"
+                },
+                 zoomingEnabled:true,  
+                 downloadCallback:true,               
+             
+                 annotationsEnabled: false
+            };
+            function onEditorCreated(err, editor) {
+                if (err) {
+                    // something failed unexpectedly, deal with it (here just a simple alert)
+                    alert(err);
+                    return;
+                }
+                editor.openDocumentFromUrl("http://localhost:8080/sagl/sapl_documentos/materia_odt/63171_texto_integral.odt?", function(err) {
+                    if (err) {
+                        // something failed unexpectedly, deal with it (here just a simple alert)
+                        alert("There was an error on opening the document: " + err);
+                    }
+                });
+            }
+            Wodo.createTextEditor('editorContainer', editorOptions, onEditorCreated);
+        }
+
+    function downloadOdtFile() {
+        editor.getDocumentAsByteArray(function(err, data) {
+            if (err) {
+                elgg.register_error(err);
+                return;
+            }
+            var mimetype = "application/vnd.oasis.opendocument.text",
+                blob = new Blob([data.buffer], {type: mimetype});
+            saveAs(blob, fileName);
+        });
+    };
+    </script>
+  </head>
+
+  <body style="width:100%; height:100%; margin:0px; padding:0px" onload="createEditor();">
+    <div id="editorContainer" style="width:100%; height:100%; margin:0px; padding:0px">
+    </div>
+  </body>
+</html>

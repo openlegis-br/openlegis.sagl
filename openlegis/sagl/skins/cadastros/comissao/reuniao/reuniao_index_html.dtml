@@ -90,9 +90,9 @@ $(document).ready(function() {
              <dtml-var dat_inicio_reuniao>
           </td>
           <td>
-             <dtml-let id_pauta="_.str(cod_reuniao)+'_pauta.pdf'">
-                <dtml-if "_.hasattr(sapl_documentos.reuniao_comissao,id_pauta)">
-                   <dtml-let pauta="_.getattr(sapl_documentos.reuniao_comissao,id_pauta).absolute_url">
+             <dtml-let id_pauta="str(cod_reuniao)+'_pauta.pdf'">
+                <dtml-if "hasattr(sapl_documentos.reuniao_comissao,id_pauta)">
+                   <dtml-let pauta="getattr(sapl_documentos.reuniao_comissao,id_pauta).absolute_url">
                       <a target="_blank" href="<dtml-var pauta>?<dtml-var expr="ZopeTime().timeTime()">"><i class="fa fa-file-pdf" style="font-size: 21px;margin-right: 6px;"></i></a>
                    </dtml-let>
                 <dtml-else>
@@ -101,9 +101,9 @@ $(document).ready(function() {
              </dtml-let>
           </td>
           <td>
-             <dtml-let id_ata="_.str(cod_reuniao)+'_ata.pdf'">
-                <dtml-if "_.hasattr(sapl_documentos.reuniao_comissao,id_ata)">
-                   <dtml-let ata="_.getattr(sapl_documentos.reuniao_comissao,id_ata).absolute_url">
+             <dtml-let id_ata="str(cod_reuniao)+'_ata.pdf'">
+                <dtml-if "hasattr(sapl_documentos.reuniao_comissao,id_ata)">
+                   <dtml-let ata="getattr(sapl_documentos.reuniao_comissao,id_ata).absolute_url">
                       <a target="_blank" href="<dtml-var ata>?<dtml-var expr="ZopeTime().timeTime()">"><i class="fa fa-file-pdf" style="font-size: 21px;margin-right: 6px;"></i></a>
                    </dtml-let>
                 <dtml-else>

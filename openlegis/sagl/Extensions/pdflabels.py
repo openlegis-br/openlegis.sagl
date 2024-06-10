@@ -4,21 +4,21 @@
 ##parameters=dados
 """Gera etiquetas de mala-direta em PDF 
 
-   o O texto será redimensionado(*) para preencher a etiqueta
-     (*)Rdimensionar significa reduzir o tamanho da fonte
+   - O texto será redimensionado(*) para preencher a etiqueta
+     (*)Redimensionar significa reduzir o tamanho da fonte
   
-   o Para adicionar um novo modelo de etiqueta, insira um dicionário com as dimensões na tupla LABELS
+   - Para adicionar um novo modelo de etiqueta, insira um dicionário com as dimensões na tupla LABELS
 
    Author: OpenLegis <contato@openlegis.com.br>
-   Date: 27/agosto/2013
 
 """
 from reportlab.pdfgen import canvas
 from reportlab.lib.units import inch, cm, mm, pica
 from reportlab.lib import pagesizes
-from types import StringType, ListType
-import string, cStringIO
+from types import *
+import string
 import time, os
+from io import BytesIO
 
 Error = "Erro nas etiquetas"
 Error2 = "Erro nas etiquetas"
@@ -51,6 +51,7 @@ LABELS = ({'cia':'test',
 	   'rows': 11,
 	   'height': 2.54,
 	   'width': 9.90,
+	   'verticalPadding': .5,   #defaults to +/- 7% of height
 	   'units': cm,
 	   },
           {'cia':'Pimaco', #veja dimensões para Corel no site www.pimaco.com.br
@@ -78,7 +79,8 @@ LABELS = ({'cia':'test',
 	   'width': 6.67,
 	   'verticalSpacing': 0,
 	   'horizontalSpacing': 0.31,
-	   'horizontalPadding':.25,  
+	   'horizontalPadding':.25,
+	   'verticalPadding': .5,   #defaults to +/- 7% of height
 	   'units': cm,
 	   },
 	  {'cia':'Pimaco',
@@ -113,29 +115,29 @@ LABELS = ({'cia':'test',
 	   },
 	  )
 
-class LabelGenerator:
-    smallestFont = 6
+class LabelGenerator():
+    smallestFont = 8
     def __init__(self, spec):
         self.cia = spec['cia']
         self.models = spec['models']
         self.paper = spec['paper']
-        self.cols = spec['columns'] #colunas
-        self.rows = spec['rows'] #linhas
+        self.cols = spec['columns']
+        self.rows = spec['rows']
 
-        self.un = self.units = spec.get('units', mm) #padrão é mm
+        self.un = self.units = spec.get('units', cm)
 
         self.topMargin = spec['topMargin'] * self.un
         self.leftMargin = spec.get('leftMargin', spec['lateralMargin']) * self.un
         self.rightMargin = spec.get('rightMargin', spec['lateralMargin']) * self.un
 
-        self.height = spec['height']  * self.un
-        self.width = spec['width']  * self.un
+        self.height = spec['height'] * self.un
+        self.width = spec['width'] * self.un
 
         self.vertSpacing = spec.get('verticalSpacing', 0) * self.un
         self.horizSpacing = spec.get('horizontalSpacing', 0) * self.un
         
         self.font = "Helvetica"
-        self.size = 8
+        self.size = 9
         self.leadingFactor = 1.1
         try:
             self.vertPadding = spec['verticalPadding'] * self.un
@@ -149,19 +151,18 @@ class LabelGenerator:
         self.maxTextWidth = self.width - 2 * self.horizPadding
         self.maxTextHeight = self.height - 2 * self.vertPadding
 
-	self.grid = 0
+        self.grid = 0
 
     def start(self, filename):
         self.canvas = canvas.Canvas(filename, self.getPageSize())
-	if hasattr(self, 'compress'):
-	    self.canvas.setPageCompression(self.compress)
+        if hasattr(self, 'compress'):
+           self.canvas.setPageCompression(self.compress)
         self.canvas.setFont(self.font, self.size, 
 			    self.leadingFactor * self.size)
-
         self.pos = 0
         
     def setCompression(self):
-	self.compress = 1
+        self.compress = 1
 
     def setVerticalPadding(self, value):
         self.vertPadding = value
@@ -169,8 +170,8 @@ class LabelGenerator:
         self.horizPadding = value
 
     def fit(self, pdf, text):
-        if type(text) == StringType:
-            t = string.split(text, '\n')
+        if type(text) is str:
+            t = text.split('\n')
         else:
             t = text
         f = None
@@ -182,58 +183,55 @@ class LabelGenerator:
                 pdf.setFont(self.font, fontSize, 
                             self.leadingFactor * fontSize)
                 pdf.moveCursor(0, fontSize) 
-                pdf.moveCursor(0, (self.maxTextHeight - textHeight)/2) #alinhamento vertical
+                pdf.moveCursor(0, (self.maxTextHeight - textHeight)/2)
                 pdf.textLines(modifiedText)
                 return
-            except Error:
-                fontSize = fontSize - 1
-            except Error2:
-                fontSize = fontSize - 1
-        #falha :-(
-        raise Exception(Error, "Vertical. O texto não coube na etiqueta. Reduza o texto ou use uma etiqueta maior \n" + `text` + " " + `self.smallestFont` + " " + `fontSize`)
+            except:
+                fontSize = fontSize -1
+        raise ValueError('Espaço vertical. O texto não coube na etiqueta. Reduza o texto ou use uma etiqueta maior \n' + str(text) + ' ' + str(self.smallestFont) + ' ' + str(fontSize))
 
     def fitHorizontal(self, t, fontSize, debugFile=None):
         modifiedText = []
         for line in t:
-	    if debugFile: 
-		debugFile.write(line+"\n")
-		debugFile.flush()
+            if debugFile: 
+               debugFile.write(line+"\n")
+               debugFile.flush()
             modifiedText = modifiedText + self.adaptHorizontal(line, fontSize, debugFile)
         return modifiedText
 
     def adaptHorizontal(self, line, fontSize, debugFile):
         if line == '': return [''] 
-        words = string.split(line)
+        words = line.split()
         pos = len(words)
         while pos > 0:
-            width = self.canvas.stringWidth(string.join(words[:pos], ' '), 
+            width = self.canvas.stringWidth(' '.join(words[:pos]), 
 					    self.font, fontSize)
-	    if debugFile: 
-		debugFile.write(`width` + ":" + `self.maxTextWidth` +"\n")
-		debugFile.flush()
+            if debugFile: 
+                debugFile.write(width + ":" + self.maxTextWidth +"\n")
+                debugFile.flush()
             if width > self.maxTextWidth:
                 pos = pos - 1
             elif pos == len(words):
-                return [string.join(words[:pos], ' ')]
+                return [' '.join(words[:pos])]
             else:
-                return ([string.join(words[:pos], ' ')] +
-                        self.adaptHorizontal(string.join(words[pos:], ' '),
+                return ([' '.join(words[:pos])] +
+                        self.adaptHorizontal(' '.join(words[:pos]),
 					     fontSize, debugFile))
-        raise Exception(Error, "Horizontal. O texto não coube nas etiquetas. Reduza o texto ou use uma etiqueta maior")
+        raise ValueError('Espaço horizontal. O texto não coube nas etiquetas. Reduza o texto ou use uma etiqueta maior')
 
     def fitVertical(self, text, fontSize):
-	numLines = len(text)
+        numLines = len(text)
         textHeight = (self.leadingFactor * fontSize  * numLines - 
-		      (self.leadingFactor - 1) * fontSize)
-        if textHeight > self.maxTextHeight: 
-            raise Exception(Error2, "Dados excedem a altura das etiquetas")
+                       (self.leadingFactor - 1.1) * fontSize)
+        if textHeight > self.maxTextHeight:
+           raise ValueError('Dados excedem a altura das etiquetas')
         return textHeight
             
     def getPageSize(self):
         try:
             return self.paper
         except KeyError:
-            raise Exception(Error, "Tamanho de página não reconhecido")
+            raise ValueError('Tamanho de página não reconhecido')
         
     def getPageX(self):
         return self.paper[0] 
@@ -245,37 +243,36 @@ class LabelGenerator:
         y0 = self.getPageY() - self.topMargin
 
         col = self.pos % self.cols
-        row = self.pos / self.cols
+        row = self.pos // self.cols
 
         x = x0 + col * (self.width + self.horizSpacing) + self.horizPadding
-        y = y0 - row * (self.height + self.vertSpacing) - self.vertPadding
+        y = y0 - row * (self.height - self.vertSpacing) - self.vertPadding # original
+
         return x, y
         
     def nextPos(self):
-        self.pos = (self.pos + 1)
-        if self.pos != self.pos % (self.cols * self.rows):
-            self.canvas.showPage()
-            self.pos = self.pos % (self.cols * self.rows)
-	    if self.grid:
-		self.drawGrid()
+        self.pos = self.pos + 1
+        #if self.pos != next_pos % (self.cols * self.rows):
+           #self.canvas.showPage()
+           #self.pos = next_pos % (self.cols * self.rows)
 
-    def generate(self, etiquetas, filename):
+    def generate(self, dados, filename):
         self.start(filename)
-	if self.grid:
-	    self.drawGrid()
-        self.drawDistances()
-        for i in etiquetas:
+        if self.grid:
+           self.drawGrid()
+           #self.drawDistances()
+        for i in dados:
+            pos = 0
             x, y = self.getCoordinates()
             t = self.canvas.beginText(x, y)
             self.fit(t, i)
-            print t.getX()/cm, t.getY()/cm, self.paper[1] - t.getY()/cm
+            #print((t.getX()/cm, t.getY()/cm, self.paper[1] - t.getY()/cm))
             self.canvas.drawText(t)
-            self.nextPos()
+            pos = self.nextPos()
         self.canvas.save()
         
     def setGrid(self, turnOn=0):
-	"Se 1, mostra grid na primeira página"
-	self.grid = turnOn
+        self.grid = turnOn
 
     def drawGrid(self):
         borderX = [] 
@@ -294,13 +291,12 @@ class LabelGenerator:
               bx = bx + self.width
               borderX.append(bx)
               bx = bx + self.horizSpacing
-              borderX.append(bx)
-                
+              borderX.append(bx)              
               fx = fx + self.width 
               frameX.append(fx - 2 * self.horizPadding)
-	      if j != self.cols-1:
-		  fx = fx + self.horizSpacing
-		  frameX.append(fx)
+              if j != self.cols-1:
+                 fx = fx + self.horizSpacing
+                 frameX.append(fx)
         for i in range(self.rows):
             by = by - self.height
             borderY.append(by)
@@ -309,9 +305,9 @@ class LabelGenerator:
             
             fy = fy - self.height
             frameY.append(fy + 2 * self.vertPadding)
-	    if i != self.rows - 1:
-		fy = fy - self.vertSpacing
-		frameY.append(fy)
+            if i != self.rows - 1:
+               fy = fy - self.vertSpacing
+               frameY.append(fy)
         self.canvas.grid(borderX, borderY)
         #self.canvas.setStrokeGray(.75)
         #self.canvas.grid(frameX, frameY)
@@ -324,22 +320,22 @@ class LabelGenerator:
         marginY = self.paper[1]-self.topMargin
         marginX = self.leftMargin
         #top border
-        #self.canvas.line(halfX, self.paper[1], halfX, marginY)
-        #self.canvas.line(marginX/2, self.paper[1], marginX/2, marginY)
-        #self.canvas.line(self.paper[0]-marginX/2, self.paper[1], self.paper[0]-marginX/2, marginY)
+        self.canvas.line(halfX, self.paper[1], halfX, marginY)
+        self.canvas.line(marginX/2, self.paper[1], marginX/2, marginY)
+        self.canvas.line(self.paper[0]-marginX/2, self.paper[1], self.paper[0]-marginX/2, marginY)
         #left border
-        #self.canvas.line(0, halfY, marginX, halfY)
-        #self.canvas.line(0, self.paper[1]-self.topMargin/2, marginX, self.paper[1]-self.topMargin/2)
-        #self.canvas.line(0, self.topMargin/2, marginX, self.paper[1]-marginY/2)
+        self.canvas.line(0, halfY, marginX, halfY)
+        self.canvas.line(0, self.paper[1]-self.topMargin/2, marginX, self.paper[1]-self.topMargin/2)
+        self.canvas.line(0, self.topMargin/2, marginX, self.paper[1]-marginY/2)
 
 
 def findLabel(cia, labelsPerPage=None):
     found = []
     for spec in LABELS:
-	if string.lower(spec['cia']) == string.lower(cia):
-	    if ((labelsPerPage is None) or 
-		(labelsPerPage == spec['rows']*spec['columns'])):
-		found.append(spec)
+        if spec['cia'].lower() == cia.lower():
+           if ((labelsPerPage is None) or 
+              (labelsPerPage == spec['rows']*spec['columns'])):
+                 found.append(spec)
     return found
 
 def labelTypes():
@@ -347,25 +343,25 @@ def labelTypes():
     for spec in LABELS:
         t = lt.get(spec['cia'], [])
         for i in spec['models']:
-            t.append((i, `spec['columns']` + 'x' + `spec['rows']`))
+            t.append((i, spec['columns'] + 'x' + spec['rows']))
         lt[spec['cia']] = t
     return lt
 
 def factory(cia, model):
     for spec in LABELS:
-	if string.lower(spec['cia']) == string.lower(cia):
-            if model in spec['models']:
-                return LabelGenerator(spec)
-    raise Exception(Error, "Modelo de etiqueta não encontrado")
+        if spec['cia'].lower() == cia.lower():
+           if model in spec['models']:
+              return LabelGenerator(spec)
+    raise ValueError('Modelo de etiqueta não encontrado')
 
 def gera_etiqueta(self, dados):
     labels = factory("Pimaco", "4354")
     filename=str(int(time.time()*100))+".pdf"
+    packet = BytesIO()
     labels.setGrid()
-    labels.generate(dados, filename)
-    data = open(filename, 'rb')
-    content = data.read()
-    data = os.remove(filename)
+    labels.generate(dados, packet)
+    packet.seek(0)
+    content = packet.getvalue()
     self.REQUEST.RESPONSE.setHeader('Content-Type', 'application/pdf')
     self.REQUEST.RESPONSE.setHeader('Content-disposition','inline; filename="%s"' % filename)
     return content

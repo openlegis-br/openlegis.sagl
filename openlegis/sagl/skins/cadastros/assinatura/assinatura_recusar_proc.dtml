@@ -13,7 +13,7 @@
   <dtml-call expr="zsql.logs_registrar_zsql(
             usuario      = REQUEST['AUTHENTICATED_USER'].getUserName(), 
             data         = DateTime().strftime('%Y-%m-%d %H:%M:%S'),
-            modulo       = _.string.split(_['REQUEST']['URL1'],'/')[-1],
+            modulo       = str(_['REQUEST']['URL1']).split('/')[-1],
             metodo       = 'assinatura_recusar',
             IP           = pysc.get_ip(),
             dados        = REQUEST.form.items(),

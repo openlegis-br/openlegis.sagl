@@ -41,11 +41,11 @@ $(document).ready(() => {
     </h1>
  </div>
  <div class="col-3 text-right align-self-center">
-     <dtml-call expr="REQUEST.set('logo_partido', _.str(cod_partido)+'_logo.png')">
+     <dtml-call expr="REQUEST.set('logo_partido', str(cod_partido)+'_logo.png')">
      <dtml-if expr="cod_partido!=None">
-        <dtml-if expr="_.hasattr(sapl_documentos.partido, logo_partido)">
+        <dtml-if expr="hasattr(sapl_documentos.partido, logo_partido)">
           <img class="img-fluid" alt="<dtml-var cod_partido>" width="80px" src="<dtml-var portal_url>/sapl_documentos/partido/<dtml-var logo_partido>">
-        <dtml-elif expr="_.hasattr(imagens.logo_partido, logo_partido)">
+        <dtml-elif expr="hasattr(imagens.logo_partido, logo_partido)">
           <img class="img-fluid" alt="<dtml-var cod_partido>" width="80px" src="<dtml-var portal_url>/imagens/logo_partido/<dtml-var logo_partido>">
         </dtml-if>
      <dtml-else>
@@ -57,8 +57,8 @@ $(document).ready(() => {
 <div class="card mb-3">
   <div class="row no-gutters">
     <div class="col-12 col-md-3 col-lg-2 bg-light text-center text-md-left">
-           <dtml-call expr="REQUEST.set('id_foto', _.str(cod_parlamentar)+'_foto_parlamentar')">
-           <dtml-if expr="_.hasattr(sapl_documentos.parlamentar.fotos,id_foto)">              
+           <dtml-call expr="REQUEST.set('id_foto', str(cod_parlamentar)+'_foto_parlamentar')">
+           <dtml-if expr="hasattr(sapl_documentos.parlamentar.fotos,id_foto)">              
               <img alt="<dtml-var nom_completo>" src="<dtml-var portal_url>/sapl_documentos/parlamentar/fotos/<dtml-var id_foto>" class="mx-auto img-fluid">
            <dtml-else>
               <img class="mx-auto img-fluid" alt="<dtml-var nom_completo>" src="<dtml-var portal_url>/imagens/avatar.png">
@@ -71,7 +71,7 @@ $(document).ready(() => {
           <dtml-if dat_nascimento>
              <li><b>Data de nascimento:</b> <dtml-var dat_nascimento></li>
            </dtml-if>
-         <dtml-call expr="REQUEST.set('dat_atual', _.DateTime().strftime('%d/%m/%Y'))">                   
+         <dtml-call expr="REQUEST.set('dat_atual', DateTime().strftime('%d/%m/%Y'))">                   
           <dtml-if expr="pysc.autoria_parlamentar_validar_pysc(cod_parlamentar=cod_parlamentar,txt_dat_apresentacao=dat_atual)">
            <dtml-if num_tel_parlamentar>
               <li><b>Telefone: </b><dtml-var num_tel_parlamentar missing></li>

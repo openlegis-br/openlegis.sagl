@@ -268,7 +268,7 @@ $(document).ready(() => {
     <div class="col-6 col-sm-3 mb-3">
       <label for="txt_ano_norma" class="required">Ano</label>
       <dtml-unless ano_norma>
-         <dtml-call expr="REQUEST.set('ano_norma', _.DateTime.year(_.DateTime()))">
+         <dtml-call expr="REQUEST.set('ano_norma', _.DateTime.year(DateTime()))">
       </dtml-unless>
       <input class="form-control year" type="number" id="txt_ano_norma" name="txt_ano_norma" value="<dtml-var ano_norma missing>" autocomplete="off" required />
       <div class="invalid-feedback">
@@ -281,7 +281,7 @@ $(document).ready(() => {
     <div class="col-6 col-lg-3 mb-3">
       <label for="txt_dat_norma" class="required">Data da Norma</label>
       <dtml-unless dat_norma>
-         <dtml-call expr="REQUEST.set('dat_norma', _.DateTime().strftime('%d/%m/%Y'))">
+         <dtml-call expr="REQUEST.set('dat_norma', DateTime().strftime('%d/%m/%Y'))">
       </dtml-unless>
       <input class="form-control date" type="text" id="txt_dat_norma" name="txt_dat_norma" value="<dtml-var dat_norma missing null="">" autocomplete="off" pattern=".{10,}" required />
       <div class="invalid-feedback">
@@ -424,14 +424,14 @@ $(document).ready(() => {
        <label class="form-label d-block">PDF Texto Original</label>
        <input type="hidden" name="hdn_file" value="0"/>
        <dtml-if cod_norma>
-    <dtml-let documento_odt="_.str(cod_norma)+'_texto_integral.odt'">
-       <dtml-if "_.hasattr(sapl_documentos.norma_juridica,documento_odt)">
+    <dtml-let documento_odt="str(cod_norma)+'_texto_integral.odt'">
+       <dtml-if "hasattr(sapl_documentos.norma_juridica,documento_odt)">
           <dtml-call expr="REQUEST.set('temODT', 1)">
        </dtml-if>
     </dtml-let>       
-          <dtml-call expr="REQUEST.set('id_documento', _.str(cod_norma)+'_texto_integral.pdf')">
-          <dtml-if "_.hasattr(sapl_documentos.norma_juridica,id_documento)">
-            <dtml-let documento="_.getattr(sapl_documentos.norma_juridica,id_documento).absolute_url">
+          <dtml-call expr="REQUEST.set('id_documento', str(cod_norma)+'_texto_integral.pdf')">
+          <dtml-if "hasattr(sapl_documentos.norma_juridica,id_documento)">
+            <dtml-let documento="getattr(sapl_documentos.norma_juridica,id_documento).absolute_url">
                <a class="btn btn-secondary" target="_blank" href="<dtml-var portal_url>/pysc/download_norma_pysc?cod_norma=<dtml-var cod_norma>&texto_original=1">
                  <dtml-if expr="zsql.assinatura_documento_obter_zsql(codigo=cod_norma, tipo_doc='norma', ind_assinado=1)">
                    <i class="fa fa-certificate"></i>
@@ -474,17 +474,17 @@ $(document).ready(() => {
   <dtml-if cod_norma>    
     <div class="col-12 col-lg-6 mb-3">
        <label for="txt_texto_odt">ODT Texto da Norma</label><br />
-          <dtml-let id_documento_odt="_.str(cod_norma)+'_texto_integral.odt'">
-             <dtml-if "_.hasattr(sapl_documentos.norma_juridica,id_documento_odt)">
-                <dtml-let documento_odt="_.getattr(sapl_documentos.norma_juridica,id_documento_odt).absolute_url">
-                  <dtml-call expr="REQUEST.set('nome_arquivo_odt',_.str(cod_norma)+'_texto_integral.odt')">
-                  <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#iFrameModal" data-title="Visualização de Arquivo" data-src="<dtml-var portal_url>/generico/viewerJS/#<dtml-var documento_odt>?<dtml-var expr="ZopeTime().timeTime()">"><i class="fa fa-fw fa-file-alt"></i>Visualizar</button>
-                  <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#iFrameModal" data-title="Edição de Arquivo ODT" data-src="<dtml-var portal_url>/webeditor/editorNorma?<dtml-var documento_odt>" data-toggle="tooltip" data-placement="bottom" title="Editar Online"><i class="fa fa-fw fa-edit"></i>Editar</button>                  
+          <dtml-let id_documento_odt="str(cod_norma)+'_texto_integral.odt'">
+             <dtml-if "hasattr(sapl_documentos.norma_juridica,id_documento_odt)">
+                <dtml-let documento_odt="getattr(sapl_documentos.norma_juridica,id_documento_odt).absolute_url">
+                  <dtml-call expr="REQUEST.set('nome_arquivo_odt',str(cod_norma)+'_texto_integral.odt')">
+                  <a type="button" class="btn btn-secondary" href="<dtml-var portal_url>/generico/viewerJS/#<dtml-var documento_odt>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fa fa-fw fa-file-alt"></i>Visualizar</a>
+                  <a class="btn btn-secondary" href="<dtml-var portal_url>/webeditor/editorNorma?<dtml-var documento_odt>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fa fa-fw fa-edit"></i>Editar</a>                  
                    <button type="button" class="btn btn-secondary" onclick="javascript:location.href='&dtml-URL1;/sapl_documentos/norma_juridica/externalEdit_/<dtml-var nome_arquivo_odt>.zem'" data-toggle="tooltip" data-placement="bottom" title="Editar no LibreOffice"><i class="fas fa-fw fa-external-link-alt"></i>LibreOffice</button>
                    <a class="btn btn-danger" href="<dtml-var portal_url>/cadastros/norma_juridica/texto_odt_norma_excluir_proc?cod_norma=<dtml-var cod_norma missing>" data-confirm="Deseja realmente excluir o arquivo ODT do Texto Compilado?"><i class="fas fa-trash"></i> Excluir</a>
                 </dtml-let>
              <dtml-else>
-                  <dtml-call expr="REQUEST.set('prefixo_arquivo', _.str(sgl_tipo_norma)+'-')">
+                  <dtml-call expr="REQUEST.set('prefixo_arquivo', str(sgl_tipo_norma)+'-')">
                   <div class="input-group">                  
                     <select class="custom-select"  id="lst_modelo" name="lst_modelo">
                        <option value="0">Selecione um modelo</option>
@@ -506,10 +506,10 @@ $(document).ready(() => {
 
     <div class="col-12 col-lg-6 mb-3">
       <label for="txt_texto_pdf" class="d-block">PDF Texto Compilado</label>
-      <dtml-let id_documento_pdf="_.str(cod_norma)+'_texto_consolidado.pdf'">
-         <dtml-if "_.hasattr(sapl_documentos.norma_juridica,id_documento_pdf)">
-            <dtml-let documento_pdf="_.getattr(sapl_documentos.norma_juridica,id_documento_pdf).absolute_url">
-               <dtml-call expr="REQUEST.set('nome_arquivo_pdf',_.str(cod_norma)+'_texto_consolidado.pdf')">
+      <dtml-let id_documento_pdf="str(cod_norma)+'_texto_consolidado.pdf'">
+         <dtml-if "hasattr(sapl_documentos.norma_juridica,id_documento_pdf)">
+            <dtml-let documento_pdf="getattr(sapl_documentos.norma_juridica,id_documento_pdf).absolute_url">
+               <dtml-call expr="REQUEST.set('nome_arquivo_pdf',str(cod_norma)+'_texto_consolidado.pdf')">
                <a class="btn btn-secondary" target="_blank" href="<dtml-var portal_url>/sapl_documentos/norma_juridica/<dtml-var nome_arquivo_pdf>?<dtml-var expr="ZopeTime().timeTime()">">              
                   <i class="fa fa-fw fa-file-code"></i>Visualizar
                </a>
@@ -546,18 +546,18 @@ $(document).ready(() => {
         <div class="card-body">      
          <p class="d-none">
            <label for="check_hide">
-            <input type="checkbox" id="check_hide" name="chk_assunto_norma" value="1" checked="checked">
+            <input type="checkbox" id="check_hide" name="chk_assunto_norma:list" value="1" checked="checked">
            </label>
          </p>
         <dtml-in expr="zsql.assunto_norma_juridica_obter_zsql(ind_excluido=0)">
           <dtml-if expr="not _.has_key('cod_norma')">
            <div class="custom-control custom-checkbox">
-              <input type="checkbox" class="custom-control-input" id="chk_assunto_norma-<dtml-var cod_assunto>" name="chk_assunto_norma" value="<dtml-var cod_assunto>">
+              <input type="checkbox" class="custom-control-input" id="chk_assunto_norma-<dtml-var cod_assunto>" name="chk_assunto_norma:list" value="<dtml-var cod_assunto>">
               <label class="custom-control-label" for="chk_assunto_norma-<dtml-var cod_assunto>"><dtml-var des_assunto></label>
            </div>
           <dtml-else>
            <div class="custom-control custom-checkbox">
-             <input class="custom-control-input" type="checkbox" id="chk_assunto_norma-<dtml-var cod_assunto>" name="chk_assunto_norma" value="<dtml-var cod_assunto>"<dtml-if expr="_.str(cod_assunto) in _.string.split(_.str(cod_assunto_sel),',')"> checked</dtml-if>>
+             <input class="custom-control-input" type="checkbox" id="chk_assunto_norma-<dtml-var cod_assunto>" name="chk_assunto_norma:list" value="<dtml-var cod_assunto>"<dtml-if expr="str(cod_assunto) in str(cod_assunto_sel).split(',')"> checked</dtml-if>>
               <label class="custom-control-label" for="chk_assunto_norma-<dtml-var cod_assunto>"><dtml-var des_assunto></label>
            </div>          
           </dtml-if>
@@ -668,10 +668,10 @@ $(document).ready(() => {
                </a>
              </td>
              <td>
-              <dtml-let id_anexo="_.str(cod_norma)+'_anexo_'+ _.str(cod_anexo)">
-               <dtml-if expr="_.hasattr(sapl_documentos.norma_juridica,id_anexo)">
-                  <dtml-let arq_anexo="_.getattr(sapl_documentos.norma_juridica,id_anexo).absolute_url">
-                    <dtml-call expr="REQUEST.set('nome_anexo',_.str(cod_norma)+'_anexo_'+ _.str(cod_anexo))">
+              <dtml-let id_anexo="str(cod_norma)+'_anexo_'+ str(cod_anexo)">
+               <dtml-if expr="hasattr(sapl_documentos.norma_juridica,id_anexo)">
+                  <dtml-let arq_anexo="getattr(sapl_documentos.norma_juridica,id_anexo).absolute_url">
+                    <dtml-call expr="REQUEST.set('nome_anexo',str(cod_norma)+'_anexo_'+ str(cod_anexo))">
                     <a href="<dtml-var portal_url>/sapl_documentos/norma_juridica/<dtml-var nome_anexo>" target="_blank">
                      <i class="fa fa-fw fa-file"></i>Visualizar
                     </a>

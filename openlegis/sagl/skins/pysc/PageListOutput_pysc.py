@@ -91,7 +91,7 @@ try:
     step = int(step)
     page = int(page)
     linkLocation = str(linkLocation)
-    for item, value in extras.items():
+    for item, value in list(extras.items()):
         extras[item] = str(value)
        
 except:
@@ -100,7 +100,7 @@ except:
 # build the format string we'll be using for all page links. The only thing that will change
 # is the page number and the content of the link.
 linkString = '<li class="page-item"><a class="page-link" href="' + linkLocation + "?page=%s&amp;step=" + str(step)
-for item, value in extras.items():
+for item, value in list(extras.items()):
   if item == 'txt_assunto':
     value = '%22'.join(value.split('\"'))
     value = '%2B'.join(value.split('+'))
@@ -154,9 +154,9 @@ if showPrevious:
     else:
         returnString = PreviousString.join(linkStringTemp.split('%s'))
 if DisplayAll:
-    LinkRange = range(1, numPages + 1)
+    LinkRange = list(range(1, numPages + 1))
 else:   
-    LinkRange = range(page - PageRange - max(0, (page + PageRange - numPages)), page + PageRange + 1 - min (0, (page - PageRange - 1)))
+    LinkRange = list(range(page - PageRange - max(0, (page + PageRange - numPages)), page + PageRange + 1 - min (0, (page - PageRange - 1))))
 for index in LinkRange:
     if index > 0 and index < page:
         linkStringTemp = str(index).join(linkString.split('%s'))

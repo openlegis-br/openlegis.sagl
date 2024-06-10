@@ -43,7 +43,7 @@ inf_basicas_dic['orgao_responsavel'] = ''
 for materia in context.zsql.materia_obter_zsql(cod_materia=cod_materia):
     num_proposicao = " "
     nom_arquivo = str(materia.cod_materia)+'_texto_integral.odt'
-    des_tipo_materia = materia.des_tipo_materia.decode('utf-8').upper()
+    des_tipo_materia = materia.des_tipo_materia.upper()
     num_ident_basica = materia.num_ident_basica
     num_materia = materia.num_ident_basica
     ano_ident_basica = materia.ano_ident_basica
@@ -57,7 +57,7 @@ for materia in context.zsql.materia_obter_zsql(cod_materia=cod_materia):
     apelido_autor = ''
     nom_autor = []
     autorias = context.zsql.autoria_obter_zsql(cod_materia=cod_materia)
-    fields = autorias.data_dictionary().keys()
+    fields = list(autorias.data_dictionary().keys())
     for autoria in autorias:
         autores = context.zsql.autor_obter_zsql(cod_autor = autoria.cod_autor)
         for autor in autores:
@@ -78,10 +78,10 @@ for materia in context.zsql.materia_obter_zsql(cod_materia=cod_materia):
                           partido_autor = nom_cargo + ' - ' + parlamentar.sgl_partido
                        else:
                           partido_autor = nom_cargo
-                   autor_dic['nome_autor'] = autor.nom_autor_join.decode('utf-8').upper() + '\n' + partido_autor
+                   autor_dic['nome_autor'] = autor.nom_autor_join.upper() + '\n' + partido_autor
                    autor_dic['apelido_autor'] = partido_autor
                 else:
-                   autor_dic['nome_autor'] = autor.nom_autor_join.decode('utf-8').upper()
+                   autor_dic['nome_autor'] = autor.nom_autor_join.upper()
                    autor_dic['apelido_autor'] = ''
                 autor_dic['cod_autor'] = autor['cod_autor']
         nom_autor.append(autor_dic)

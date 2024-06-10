@@ -122,5 +122,5 @@ for dic in protocolos:
     r.append('PROTOCOLO Nº '+dic['titulo']+'/'+dic['ano']+ ' - ' + dic['num_processo'] + ' - ' + dic['txt_assunto'] + ' ' + dic['tipo_autor']+': ' + dic['nom_autor'])
     dados.append(r)
 
-return context.pdflabels(dados)
+return context.extensions.pdflabels(dados)
 

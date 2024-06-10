@@ -134,14 +134,14 @@ $(document).ready(function () {
 </dtml-in>
 
 <dtml-in expr="zsql.materia_obter_zsql(cod_materia=cod_materia)">
-   <dtml-call expr="REQUEST.set('id_materia', _.str(des_tipo_materia)+ ' nº  ' +_.str(num_ident_basica)+ '/' +_.str(ano_ident_basica))">
-   <dtml-call expr="REQUEST.set('dat_apresentacao', _.str(dat_apresentacao))">
+   <dtml-call expr="REQUEST.set('id_materia', str(des_tipo_materia)+ ' nº  ' +str(num_ident_basica)+ '/' +str(ano_ident_basica))">
+   <dtml-call expr="REQUEST.set('dat_apresentacao', str(dat_apresentacao))">
 </dtml-in>
 
 <dtml-if data>
    <dtml-call expr="REQUEST.set('dat_desig_relator', pysc.iso_to_port_pysc(data))">
 <dtml-else>
-   <dtml-call expr="REQUEST.set('dat_desig_relator', _.DateTime().strftime('%d/%m/%Y'))">
+   <dtml-call expr="REQUEST.set('dat_desig_relator', DateTime().strftime('%d/%m/%Y'))">
 </dtml-if>
 
 <dtml-in expr="zsql.periodo_comp_comissao_obter_zsql(cod_comissao=cod_comissao, data=pysc.data_converter_pysc(data=dat_desig_relator), ind_excluido=0)">
@@ -224,7 +224,7 @@ $(document).ready(function () {
     </script>
     <div class="col-6 col-md-3 mb-3">
        <dtml-unless cod_relatoria>
-          <dtml-call expr="REQUEST.set('ano_parecer', _.DateTime.year(_.DateTime()))">
+          <dtml-call expr="REQUEST.set('ano_parecer', _.DateTime.year(DateTime()))">
           <dtml-in expr="zsql.numero_parecer_obter_zsql(cod_comissao=cod_comissao,ano_parecer=ano_parecer)">
              <dtml-call expr="REQUEST.set('num_parecer', novo_numero)">
           </dtml-in>
@@ -235,7 +235,7 @@ $(document).ready(function () {
     <div class="col-6 col-md-3 mb-3">
        <label for="txt_ano_parecer">Ano do Parecer</label>
        <dtml-unless ano_parecer>
-          <dtml-call expr="REQUEST.set('ano_parecer', _.DateTime.year(_.DateTime()))">
+          <dtml-call expr="REQUEST.set('ano_parecer', _.DateTime.year(DateTime()))">
        </dtml-unless>
        <input class="form-control year" type="number" name="txt_ano_parecer" id="txt_ano_parecer" value="<dtml-var ano_parecer missing null="">" />    
     </div> 
@@ -289,9 +289,9 @@ $(document).ready(function () {
        <label class="d-block">PDF Parecer</label>
        <input type="hidden" name="hdn_file_parecer" value="0"/>
        <dtml-if cod_relatoria>
-          <dtml-call expr="REQUEST.set('id_parecer', _.str(cod_relatoria)+'_parecer.pdf')">
-             <dtml-if "_.hasattr(sapl_documentos.parecer_comissao,id_parecer)">
-                <dtml-let parecer="_.getattr(sapl_documentos.parecer_comissao,id_parecer).absolute_url">
+          <dtml-call expr="REQUEST.set('id_parecer', str(cod_relatoria)+'_parecer.pdf')">
+             <dtml-if "hasattr(sapl_documentos.parecer_comissao,id_parecer)">
+                <dtml-let parecer="getattr(sapl_documentos.parecer_comissao,id_parecer).absolute_url">
                    <dtml-call expr="REQUEST.set('temPDF', 1)">                             
                    <a class="btn btn-secondary" target="_blank" href="<dtml-var parecer>?<dtml-var expr="ZopeTime().timeTime()">"><i class="fa fa-fw fa-file-pdf"></i> Visualizar</a>
                  <dtml-unless expr="zsql.proposicao_obter_zsql(cod_materia=cod_materia, cod_parecer=cod_relatoria)">                      
@@ -321,8 +321,8 @@ $(document).ready(function () {
                      <input type="file" class="custom-file-input" id="file_nom_arquivo_parecer" name="file_nom_arquivo_parecer" accept="application/pdf" lang="pt-br">
                      <label class="custom-file-label" for="file_nom_arquivo_parecer">Selecione o arquivo</label>
                    </div>
-                   <dtml-let id_documento_odt="_.str(cod_relatoria)+'_parecer.odt'">
-                     <dtml-if "_.hasattr(sapl_documentos.parecer_comissao,id_documento_odt)">
+                   <dtml-let id_documento_odt="str(cod_relatoria)+'_parecer.odt'">
+                     <dtml-if "hasattr(sapl_documentos.parecer_comissao,id_documento_odt)">
                         <dtml-call expr="REQUEST.set('temODT', 1)">
                      </dtml-if>
                    </dtml-let>
@@ -342,10 +342,10 @@ $(document).ready(function () {
     <div class="col-12 col-md-6 mb-3">
        <dtml-if expr="_.has_key('cod_relatoria')">
           <label class="d-block">ODT Parecer</label>
-          <dtml-let id_documento_odt="_.str(cod_relatoria)+'_parecer.odt'">
-             <dtml-if "_.hasattr(sapl_documentos.parecer_comissao,id_documento_odt)">
-                <dtml-let documento_odt="_.getattr(sapl_documentos.parecer_comissao,id_documento_odt).absolute_url">
-                   <dtml-call expr="REQUEST.set('nome_arquivo_odt',_.str(cod_relatoria)+'_parecer.odt')">
+          <dtml-let id_documento_odt="str(cod_relatoria)+'_parecer.odt'">
+             <dtml-if "hasattr(sapl_documentos.parecer_comissao,id_documento_odt)">
+                <dtml-let documento_odt="getattr(sapl_documentos.parecer_comissao,id_documento_odt).absolute_url">
+                   <dtml-call expr="REQUEST.set('nome_arquivo_odt',str(cod_relatoria)+'_parecer.odt')">
                    <a class="btn btn-secondary" href="<dtml-var portal_url>/generico/viewerJS/#<dtml-var documento_odt>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fa fa-fw fa-file-alt"></i> Visualizar</a>
                    <button type="button" class="btn btn-secondary" onclick="javascript:location.href='<dtml-var portal_url>/sapl_documentos/parecer_comissao/externalEdit_/<dtml-var nome_arquivo_odt>.zem'" data-toggle="tooltip" data-placement="bottom" title="Editar no LibreOffice"><i class="fas fa-fw fa-external-link-alt"></i>Editar</button>  
 
@@ -380,13 +380,13 @@ $(document).ready(function () {
 
    <dtml-if cod_relatoria>
      <dtml-in expr="zsql.proposicao_obter_zsql(cod_materia=cod_materia, cod_parecer=cod_relatoria)">
-       <dtml-let id_proposicao="_.str(cod_proposicao)+'_signed.pdf'">
-         <dtml-if "_.hasattr(sapl_documentos.proposicao,id_proposicao)">
+       <dtml-let id_proposicao="str(cod_proposicao)+'_signed.pdf'">
+         <dtml-if "hasattr(sapl_documentos.proposicao,id_proposicao)">
              <legend>Processo Eletrônico</legend>
              <div class="card mb-3">
                <div class="row card-body">
                    <div class="col-12 col-md-8">        
-                       <dtml-let proposicao="_.getattr(sapl_documentos.proposicao,id_proposicao).absolute_url">
+                       <dtml-let proposicao="getattr(sapl_documentos.proposicao,id_proposicao).absolute_url">
                           <dtml-call expr="REQUEST.set('cod_documento',pysc.proposicao_calcular_checksum_pysc(cod_proposicao))">
                           <a class="btn btn-secondary" target="_blank" href="<dtml-var proposicao>?<dtml-var expr="ZopeTime().timeTime()">">
                               <i class="fas fa-certificate"></i> Proposição <dtml-var cod_documento>

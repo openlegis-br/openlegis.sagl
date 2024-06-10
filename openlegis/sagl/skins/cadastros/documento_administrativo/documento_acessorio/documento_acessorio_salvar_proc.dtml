@@ -1,5 +1,5 @@
 <dtml-if hdn_cod_documento_acessorio>
-  <dtml-call expr="REQUEST.set('id_documento', _.str(hdn_cod_documento_acessorio)+'.pdf')">
+  <dtml-call expr="REQUEST.set('id_documento', str(hdn_cod_documento_acessorio)+'.pdf')">
   <dtml-call expr="REQUEST.set('metodo', zsql.documento_acessorio_administrativo_atualizar_zsql)">   
 <dtml-else>
   <dtml-call expr="REQUEST.set('metodo', zsql.documento_acessorio_administrativo_incluir_zsql)">
@@ -23,28 +23,11 @@
 
   <dtml-call expr="REQUEST.set('existe_arquivo', 0)">
   <dtml-if file_nom_arquivo>
-     <dtml-call expr="REQUEST.set('id_documento', _.str(hdn_cod_documento_acessorio)+'.pdf')">
-     <dtml-if expr="_.hasattr(sapl_documentos.administrativo,id_documento)">
-         <dtml-let documento="_.getattr(sapl_documentos.administrativo,id_documento) ">
-         <dtml-call expr="REQUEST.set('existe_arquivo', 1)">
-         <dtml-try>
-           <dtml-if expr="pysc.arquivo_pdf_validar_pysc(file=file_nom_arquivo)">
-             <dtml-call "documento.manage_upload(file=pysc.upload_file(file=file_nom_arquivo, title='Documento'))">
-           </dtml-if>
-         <dtml-except>
-             <dtml-call expr="REQUEST.set('erro', 1)">
-             <dtml-let mensagem="'Ocorreu erro ao tentar salvar texto integral'+hdn_cod_documento_acessorio" tipo_mensagem="'danger'">
-                <dtml-var mensagem_emitir>
-             </dtml-let>
-         </dtml-try>
-         </dtml-let>
-     </dtml-if>
-     <dtml-if expr="not existe_arquivo">
-      <dtml-try>
-       <dtml-call expr="REQUEST.set('id_documento', _.str(hdn_cod_documento_acessorio)+'.pdf')">
-          <dtml-call expr="sapl_documentos.administrativo.manage_addFile(id=id_documento,file=pysc.upload_file(file=file_nom_arquivo, title=txt_nom_documento))">
-      </dtml-try>
-     </dtml-if>
+     <dtml-call expr="REQUEST.set('id_documento', str(hdn_cod_documento_acessorio)+'.pdf')">
+     <dtml-in expr="zsql.documento_administrativo_obter_zsql(cod_documento = hdn_cod_documento)">
+       <dtml-call expr="REQUEST.set('titulo', txt_nom_documento + ' - ' + sgl_tipo_documento + ' ' + str(num_documento) + '/' + str(ano_documento))">
+     </dtml-in>
+     <dtml-call expr="sapl_documentos.administrativo.manage_addFile(id=id_documento,file=pysc.upload_file(file=file_nom_arquivo, title=titulo))">
   </dtml-if>
 
 <dtml-if erro>
@@ -69,9 +52,9 @@
     </dtml-in>
   </dtml-if>
   <dtml-if hdn_cod_documento_acessorio>
-   <dtml-call expr="REQUEST.set('id_documento', _.str(hdn_cod_documento_acessorio)+'.pdf')">
-   <dtml-if "_.hasattr(sapl_documentos.administrativo, id_documento)">
-     <dtml-let documento="_.getattr(sapl_documentos.administrativo, id_documento) ">
+   <dtml-call expr="REQUEST.set('id_documento', str(hdn_cod_documento_acessorio)+'.pdf')">
+   <dtml-if "hasattr(sapl_documentos.administrativo, id_documento)">
+     <dtml-let documento="getattr(sapl_documentos.administrativo, id_documento) ">
        <dtml-if expr="zsql.tipo_documento_administrativo_obter_zsql(tip_documento=lst_tip_documento, ind_publico=1, ind_excluido=0)">
          <dtml-call "documento.manage_permission('View', roles=['Manager', 'Anonymous', 'Authenticated'], acquire=1)">
          <dtml-call "documento.manage_permission('Delete objects', roles=['Manager','Authenticated'], acquire=1)">

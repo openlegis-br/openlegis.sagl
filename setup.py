@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 import os
 
-version = '4.3'
+version = '5.0'
 
 setup(name='openlegis.sagl',
       version=version,
@@ -11,7 +11,7 @@ setup(name='openlegis.sagl',
       # Get more strings from
       # http://pypi.python.org/pypi?:action=list_classifiers
       classifiers=[
-        "Programming Language :: Python",
+        "Programming Language :: Python :: 3.12",
         ],
       keywords='',
       author='OpenLegis',
@@ -24,7 +24,7 @@ setup(name='openlegis.sagl',
       zip_safe=False,
       install_requires=[
           'setuptools',
-          'Pillow == 6.2.2',
+          'Pillow',
           'Products.CMFCore',
           'Products.CMFDefault',
           'Products.CMFFormController',
@@ -34,15 +34,11 @@ setup(name='openlegis.sagl',
           'Products.GenericSetup',
           'Products.ZMySQLDA',
           'Products.AdvancedQuery',
-          'Products.TextIndexNG3',
-          'zopyx.txng3.ext',
           'Products.ExtendedPathIndex',
           'z3c.autoinclude',
           'pyoai',
           'appy',
-          'uuid',
           'zope.globalrequest',
-          'simplejson',
           'five.grok',
           'five.formlib',
           'five.localsitemanager',
@@ -56,7 +52,7 @@ setup(name='openlegis.sagl',
           'grokcore.viewlet',
           'martian',
           'reportlab',
-          'trml2pdf==1.2',
+          'trml2pdf',
       ],
       entry_points="""
       # -*- Entry points: -*-

@@ -8,7 +8,7 @@
   </dtml-if>
 </dtml-in> 
 
-<dtml-let cod_proposicao="_.str(cod_documento).split('/')[-1]"
+<dtml-let cod_proposicao="str(cod_documento).split('/')[-1]"
           cod_checagem="pysc.proposicao_calcular_checksum_pysc(cod_proposicao)">
     <dtml-if expr="cod_documento!=cod_checagem">
         <dtml-let mensagem="'O Código do Documento informado é Inválido'">

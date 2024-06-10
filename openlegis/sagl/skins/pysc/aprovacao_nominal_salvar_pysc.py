@@ -27,7 +27,7 @@ for voto in vot_parlamentar:
         votos_abstencao.append(voto)
 
 for n in range(len(cod_parlamentar)):
-    dic = dict(zip(cod_parlamentar, vot_parlamentar))
+    dic = dict(list(zip(cod_parlamentar, vot_parlamentar)))
 
 lst_materias = []       
 for materia in context.zsql.expediente_materia_obter_zsql(cod_sessao_plen=cod_sessao_plen,ind_excluido=0):

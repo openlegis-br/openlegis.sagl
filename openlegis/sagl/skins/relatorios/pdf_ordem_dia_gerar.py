@@ -3,7 +3,7 @@
 """Ordem do Dia
 """
 from trml2pdf import parseString
-from cStringIO import StringIO
+from io import BytesIO
 import time
 import os
 

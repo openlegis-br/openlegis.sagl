@@ -33,7 +33,7 @@
     <dtml-if expr="metodo==zsql.peticao_atualizar_zsql">
        <dtml-call expr="REQUEST.set('cod_peticao', hdn_cod_peticao)">
        <dtml-if file_nom_arquivo>
-          <dtml-call expr="REQUEST.set('id_documento', _.str(cod_peticao)+'.pdf')">
+          <dtml-call expr="REQUEST.set('id_documento', str(cod_peticao)+'.pdf')">
           <dtml-in expr="zsql.peticao_obter_zsql(cod_peticao = cod_peticao)">
              <dtml-call expr="REQUEST.set('titulo', 'Petição Eletrônica' + ' n° ' + str(cod_peticao))">
           </dtml-in>
@@ -50,9 +50,9 @@
      </dtml-let>
 </dtml-try>
 <dtml-if cod_peticao>
- <dtml-call expr="REQUEST.set('id_documento', _.str(cod_peticao)+'.pdf')"> 
- <dtml-if "_.hasattr(sapl_documentos.peticao,id_documento)">
-    <dtml-let arquivo="_.getattr(sapl_documentos.peticao,id_documento)">
+ <dtml-call expr="REQUEST.set('id_documento', str(cod_peticao)+'.pdf')"> 
+ <dtml-if "hasattr(sapl_documentos.peticao,id_documento)">
+    <dtml-let arquivo="getattr(sapl_documentos.peticao,id_documento)">
       <dtml-call "arquivo.manage_permission('View', roles=['Authenticated'], acquire=1)">
     </dtml-let>  
  </dtml-if>

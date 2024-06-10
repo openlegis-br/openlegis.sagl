@@ -142,23 +142,23 @@ $(document).ready(function () {
 </script>
 
 <dtml-in expr="zsql.materia_obter_zsql(cod_materia=cod_materia)">
-   <dtml-call expr="REQUEST.set('id_materia', _.str(sgl_tipo_materia)+ ' ' +_.str(num_ident_basica)+ '/' +_.str(ano_ident_basica))">
+   <dtml-call expr="REQUEST.set('id_materia', str(sgl_tipo_materia)+ ' ' +str(num_ident_basica)+ '/' +str(ano_ident_basica))">
 </dtml-in>
 
 <h1 class="firstHeading">Emenda - <dtml-var id_materia></h1>
 
 <dtml-unless dat_apresentacao>
-   <dtml-call expr="REQUEST.set('dat_apresentacao', _.DateTime().strftime('%d/%m/%Y'))">
+   <dtml-call expr="REQUEST.set('dat_apresentacao', DateTime().strftime('%d/%m/%Y'))">
 </dtml-unless>
 
 <dtml-in expr="zsql.legislatura_obter_zsql(ind_excluido=0)">
-  <dtml-if expr="((_.DateTime(dat_apresentacao) >= dat_inicio and _.DateTime(dat_apresentacao) <= dat_fim))">
+  <dtml-if expr="((DateTime(dat_apresentacao) >= DateTime(dat_inicio) and DateTime(dat_apresentacao) <= DateTime(dat_fim)))">
     <dtml-call expr="REQUEST.set('num_legislatura_sel', num_legislatura)">
   </dtml-if>
 </dtml-in>
 
 <dtml-if expr="not _.has_key('cod_emenda') and _.has_key('num_protocolo')">
-  <dtml-call expr="REQUEST.set('ano', _.DateTime.year(_.DateTime()))">          
+  <dtml-call expr="REQUEST.set('ano', _.DateTime.year(DateTime()))">          
   <dtml-in expr="zsql.protocolo_obter_zsql(num_protocolo=num_protocolo, ano_protocolo=ano)">
      <dtml-if cod_protocolo>
         <dtml-call expr="REQUEST.set('txt_ementa', txt_assunto_ementa)">                   
@@ -364,10 +364,10 @@ $(document).ready(function () {
    <div class="col-12 col-sm-6 mb-3">
         <label class="d-block">PDF Texto Original</label>
         <dtml-if expr="_.has_key('cod_emenda')">
-           <dtml-call expr="REQUEST.set('id_documento', _.str(cod_emenda)+'_emenda.pdf')">
-           <dtml-call expr="REQUEST.set('id_documento_assinado', _.str(cod_emenda)+'_emenda_signed.pdf')">
-           <dtml-if "_.hasattr(sapl_documentos.emenda,id_documento)">
-             <dtml-let documento="_.getattr(sapl_documentos.emenda,id_documento).absolute_url">
+           <dtml-call expr="REQUEST.set('id_documento', str(cod_emenda)+'_emenda.pdf')">
+           <dtml-call expr="REQUEST.set('id_documento_assinado', str(cod_emenda)+'_emenda_signed.pdf')">
+           <dtml-if "hasattr(sapl_documentos.emenda,id_documento)">
+             <dtml-let documento="getattr(sapl_documentos.emenda,id_documento).absolute_url">
                <dtml-if expr="zsql.assinatura_documento_obter_zsql(codigo=cod_emenda, tipo_doc='emenda',ind_assinado=1, cod_usuario=None)">
                   <a class="btn btn-secondary" target="_blank" href="<dtml-var documento>?<dtml-var expr="ZopeTime().timeTime()">"><i class="fa fa-certificate"></i> Visualizar</a>
                <dtml-else>
@@ -380,8 +380,8 @@ $(document).ready(function () {
                 </dtml-if>                 
                 <a class="btn btn-danger" href="javascript:texto_pdf_excluir()">Excluir</a>          
              </dtml-let>
-           <dtml-elif "_.hasattr(sapl_documentos.emenda,id_documento)">
-              <dtml-let documento="_.getattr(sapl_documentos.emenda,id_documento).absolute_url">
+           <dtml-elif "hasattr(sapl_documentos.emenda,id_documento)">
+              <dtml-let documento="getattr(sapl_documentos.emenda,id_documento).absolute_url">
                  <a class="btn btn-secondary" target="_blank" href="<dtml-var documento>?<dtml-var expr="ZopeTime().timeTime()">">
                     <i class="fa fa-fw fa-file-pdf"></i>Visualizar                
                  </a>
@@ -393,8 +393,8 @@ $(document).ready(function () {
                   <input type="file" class="custom-file-input" id="file_nom_arquivo_emenda" name="file_nom_arquivo_emenda" accept="application/pdf">
                   <label class="custom-file-label" for="file_nom_arquivo_emenda">Selecione o arquivo</label>
                 </div>           
-              <dtml-let id_documento_odt="_.str(cod_emenda)+'_emenda.odt'">
-                 <dtml-if "_.hasattr(sapl_documentos.emenda,id_documento_odt)">
+              <dtml-let id_documento_odt="str(cod_emenda)+'_emenda.odt'">
+                 <dtml-if "hasattr(sapl_documentos.emenda,id_documento_odt)">
                     <dtml-call expr="REQUEST.set('temODT', 1)">
                  </dtml-if>
               </dtml-let>
@@ -417,10 +417,10 @@ $(document).ready(function () {
    <div class="col-12 col-sm-6 mb-3">
        <dtml-if cod_emenda>
           <label class="d-block">ODT Texto Original</label>
-          <dtml-let id_documento_odt="_.str(cod_emenda)+'_emenda.odt'">
-             <dtml-if "_.hasattr(sapl_documentos.emenda,id_documento_odt)">
-                <dtml-let documento_odt="_.getattr(sapl_documentos.emenda,id_documento_odt).absolute_url">
-                   <dtml-call expr="REQUEST.set('nome_arquivo_odt',_.str(cod_emenda)+'_emenda.odt')">
+          <dtml-let id_documento_odt="str(cod_emenda)+'_emenda.odt'">
+             <dtml-if "hasattr(sapl_documentos.emenda,id_documento_odt)">
+                <dtml-let documento_odt="getattr(sapl_documentos.emenda,id_documento_odt).absolute_url">
+                   <dtml-call expr="REQUEST.set('nome_arquivo_odt',str(cod_emenda)+'_emenda.odt')">
                    <a class="btn btn-secondary" href="<dtml-var portal_url>/generico/viewerJS/#<dtml-var documento_odt>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fa fa-fw fa-file-alt"></i> Visualizar</a>
                    <button type="button" class="btn btn-secondary" onclick="javascript:location.href='&dtml-URL1;/sapl_documentos/emenda/externalEdit_/<dtml-var nome_arquivo_odt>.zem'" data-toggle="tooltip" data-placement="bottom" title="Editar no LibreOffice"><i class="fas fa-fw fa-external-link-alt"></i>Editar</button>   
                    <a class="btn btn-danger" href="javascript:texto_integral_odt_excluir()"><i class="fas fa-trash"></i> Excluir</a>
@@ -464,12 +464,12 @@ $(document).ready(function () {
 
    <dtml-if cod_emenda>
      <dtml-in expr="zsql.proposicao_obter_zsql(cod_materia=cod_materia, cod_emenda=cod_emenda)">
-       <dtml-let id_proposicao="_.str(cod_proposicao)+'_signed.pdf'">
-         <dtml-if "_.hasattr(sapl_documentos.proposicao,id_proposicao)">
+       <dtml-let id_proposicao="str(cod_proposicao)+'_signed.pdf'">
+         <dtml-if "hasattr(sapl_documentos.proposicao,id_proposicao)">
              <legend>Processo Eletrônico</legend>
              <div class="card mb-3">
                <div class="card-body">          
-                       <dtml-let proposicao="_.getattr(sapl_documentos.proposicao,id_proposicao).absolute_url">
+                       <dtml-let proposicao="getattr(sapl_documentos.proposicao,id_proposicao).absolute_url">
                           <dtml-call expr="REQUEST.set('cod_documento',pysc.proposicao_calcular_checksum_pysc(cod_proposicao))">
                           <a class="btn btn-secondary" target="_blank" href="<dtml-var proposicao>?<dtml-var expr="ZopeTime().timeTime()">">
                               <i class="fas fa-certificate"></i> Proposição <dtml-var cod_documento>

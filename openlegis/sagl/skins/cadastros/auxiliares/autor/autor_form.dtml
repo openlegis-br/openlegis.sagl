@@ -97,13 +97,13 @@
 
 </script>
 
-<dtml-if expr="_.str(REQUEST['HTTP_REFERER']).find('parlamentar/mandato_salvar_proc') > -1">
+<dtml-if expr="str(REQUEST['HTTP_REFERER']).find('parlamentar/mandato_salvar_proc') > -1">
   <dtml-call expr="REQUEST.set('eh_inclusao_de_parlamentar','1')">
   <dtml-in expr="zsql.tipo_autor_obter_zsql(des_tipo_autor='Parlamentar')">
     <dtml-call expr="REQUEST.set('tip_autor',tip_autor)">
     <dtml-call expr="REQUEST.set('des_tipo_autor','Parlamentar')">
   </dtml-in>
-<dtml-elif expr="_.str(REQUEST['HTTP_REFERER']).find('comissao/comissao_salvar_proc') > -1">
+<dtml-elif expr="str(REQUEST['HTTP_REFERER']).find('comissao/comissao_salvar_proc') > -1">
   <dtml-call expr="REQUEST.set('eh_inclusao_de_comissao','1')">
   <dtml-in expr="zsql.tipo_autor_obter_zsql(des_tipo_autor='Comissao')">
     <dtml-call expr="REQUEST.set('tip_autor',tip_autor)">
@@ -180,7 +180,7 @@
                 <dtml-else>
                    <dtml-call expr="REQUEST.set('cod_autor_parlamentar',' ')">
                 </dtml-if>                
-                <dtml-in expr="zsql.parlamentar_nao_autor_obter_zsql(cod_autor_nao_omitir=_.str(REQUEST['cod_autor_parlamentar']).strip)">
+                <dtml-in expr="zsql.parlamentar_nao_autor_obter_zsql(cod_autor_nao_omitir=str(REQUEST['cod_autor_parlamentar']).strip)">
                     <option <dtml-if expr="REQUEST.has_key('cod_parlamentar') and cod_parlamentar==_.int(REQUEST['cod_parlamentar'])">
                              selected</dtml-if>
                              value="<dtml-var cod_parlamentar>">

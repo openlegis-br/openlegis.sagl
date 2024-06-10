@@ -32,7 +32,7 @@ for rc in context.zsql.reuniao_comissao_obter_zsql(cod_reuniao=cod_reuniao,ind_e
     if rc.hr_fim_reuniao != '' and  rc.hr_fim_reuniao != None:
        ata_dic["horafimreuniao"] = context.pysc.hora_formatar_pysc(hora=rc.hr_fim_reuniao)
     ata_dic["data"]= rc.dat_inicio_reuniao
-    ata_dic["datareuniao"] = str(dia).decode('utf-8')
+    ata_dic["datareuniao"] = str(dia)
 
     # obtém os membros da Comissão
     ata_dic["presidente"] = ''
@@ -103,7 +103,7 @@ for rc in context.zsql.reuniao_comissao_obter_zsql(cod_reuniao=cod_reuniao,ind_e
            dic_votacao["nom_relator"] = ''          
            dic_votacao["nom_autor"] = ''
            autores = context.zsql.autoria_obter_zsql(cod_materia=item.cod_materia)
-           fields = autores.data_dictionary().keys()
+           fields = list(autores.data_dictionary().keys())
            lista_autor = []
            for autor in autores:
                for field in fields:
@@ -132,7 +132,7 @@ for rc in context.zsql.reuniao_comissao_obter_zsql(cod_reuniao=cod_reuniao,ind_e
            for substitutivo in context.zsql.substitutivo_obter_zsql(cod_materia=item.cod_materia,ind_excluido=0):
                autores = context.zsql.autoria_substitutivo_obter_zsql(cod_substitutivo=substitutivo.cod_substitutivo, ind_excluido=0)
                dic_substitutivo = {}
-               fields = autores.data_dictionary().keys()
+               fields = list(autores.data_dictionary().keys())
                lista_autor = []
                for autor in autores:
                    for field in fields:
@@ -154,7 +154,7 @@ for rc in context.zsql.reuniao_comissao_obter_zsql(cod_reuniao=cod_reuniao,ind_e
            for emenda in context.zsql.emenda_obter_zsql(cod_materia=item.cod_materia,ind_excluido=0):
                autores = context.zsql.autoria_emenda_obter_zsql(cod_emenda=emenda.cod_emenda,ind_excluido=0)
                dic_emenda = {}
-               fields = autores.data_dictionary().keys()
+               fields = list(autores.data_dictionary().keys())
                lista_autor = []
                for autor in autores:
                    for field in fields:

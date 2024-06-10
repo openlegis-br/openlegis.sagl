@@ -7,13 +7,13 @@
 ##parameters= 
 ##title=
 ##
-import simplejson as json
+import json
 
 context.REQUEST.RESPONSE.setHeader("Access-Control-Allow-Origin", "*")
 
 autores = context.zsql.autor_obter_zsql(nom_autor_match = context.REQUEST.get('nom_autor'))
  
-fields = autores.data_dictionary().keys()
+fields = list(autores.data_dictionary().keys())
 
 listaDic={}     
 autorArray = []

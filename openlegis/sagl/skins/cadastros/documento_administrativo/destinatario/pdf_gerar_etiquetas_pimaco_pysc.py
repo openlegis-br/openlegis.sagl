@@ -38,7 +38,7 @@ for row in results:
 
     nom_cidade = ""
     for localidade in context.zsql.localidade_obter_zsql(cod_localidade=row.cod_localidade):
-        nom_cidade = str(localidade.nom_localidade_pesq).decode('utf-8').upper() + ' - ' + str(localidade.sgl_uf)
+        nom_cidade = str(localidade.nom_localidade_pesq).upper() + ' - ' + str(localidade.sgl_uf)
 
     if row.num_cep != None:
        r.append('CEP '+row.num_cep+' ' +str(nom_cidade))
@@ -47,5 +47,5 @@ for row in results:
 
     dados.append(r)
 
-return context.pdflabels(dados)
+return context.extensions.pdflabels(dados)
 

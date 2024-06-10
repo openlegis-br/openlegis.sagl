@@ -7,7 +7,7 @@
 ##parameters= lst_tip_proposicao, lst_tip_id_basica, txt_num_ident_basica, txt_ano_ident_basica
 ##title=
 ##
-import simplejson as json
+import json
 
 context.REQUEST.RESPONSE.setHeader("Access-Control-Allow-Origin", "*")
 
@@ -17,7 +17,7 @@ for materia in context.zsql.materia_obter_zsql(tip_id_basica = lst_tip_id_basica
    dic = {}
    dic["nom_autor"] = ''
    autores = context.zsql.autoria_obter_zsql(cod_materia=materia.cod_materia)
-   fields = autores.data_dictionary().keys()
+   fields = list(autores.data_dictionary().keys())
    lista_autor = []
    for autor in autores:
        for field in fields:

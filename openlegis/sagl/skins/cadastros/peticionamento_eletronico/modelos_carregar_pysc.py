@@ -7,7 +7,7 @@
 ##parameters = svalue
 ##title=
 ##
-import simplejson as json
+import json
 
 context.REQUEST.RESPONSE.setHeader("Access-Control-Allow-Origin", "*")
 
@@ -39,7 +39,7 @@ if svalue != '0' and svalue != '':
        else:
           dic['titulo_arquivo'] = modelo.getId()              
        dic['id_arquivo'] = modelo.getId()
-       prefixo_arquivo = string.split(dic['id_arquivo'],'-')[0]
+       prefixo_arquivo = str(dic['id_arquivo']).split('-')[0]
        dic['path_arquivo'] = modelo.virtual_url_path() 
        if prefixo == prefixo_arquivo:
           modelos.append(dic)

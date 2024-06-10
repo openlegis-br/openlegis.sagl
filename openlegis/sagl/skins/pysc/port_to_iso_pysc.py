@@ -7,11 +7,17 @@
 ##parameters=data
 ##title=
 ##
-data = string.strip(data)
-if data!='':
- datapart=string.split(data,' ')
- data=string.split(datapart[0],'/')
- if len(datapart) > 1:
-  return data[2]+'-'+data[1]+'-'+data[0]+' '+datapart[1]
- else:
-  return data[2]+'-'+data[1]+'-'+data[0]
+from DateTime import DateTime
+
+data = DateTime(str(data)).strftime('%Y-%m-%d')
+
+return data
+
+#data = str(data).strip()
+#if data!='':
+# datapart=str(data).split(' ')
+# data=str(datapart[0]).split('/')
+# if len(datapart) > 1:
+#  return data[2]+'-'+data[1]+'-'+data[0]+' '+datapart[1]
+# else:
+#  return data[2]+'-'+data[1]+'-'+data[0]

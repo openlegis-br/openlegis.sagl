@@ -13,17 +13,17 @@ if context.REQUEST['cod_reuniao']!='':
         dat_reuniao = context.pysc.data_converter_pysc(rc.dat_inicio_reuniao)
         dicrc = {}
         for comissao in context.zsql.comissao_obter_zsql(cod_comissao=rc.cod_comissao, ind_excluido=0):     
-            dicrc["nom_comissao"] = comissao.nom_comissao.decode('utf-8').upper()
-        dicrc["reuniao"] = 'PAUTA DA ' + str(rc.num_reuniao)+"ª REUNIÃO " + str(rc.des_tipo_reuniao).decode('utf-8').upper()
+            dicrc["nom_comissao"] = comissao.nom_comissao.upper()
+        dicrc["reuniao"] = 'PAUTA DA ' + str(rc.num_reuniao)+"ª REUNIÃO " + str(rc.des_tipo_reuniao).upper()
         dicrc["tema"] =  rc.txt_tema
         dia = context.pysc.data_converter_por_extenso_pysc(data=rc.dat_inicio_reuniao)
         dicrc["horareuniao"] = context.pysc.hora_formatar_pysc(hora=rc.hr_inicio_reuniao)
-        dicrc["datareuniao"] = str(dia).decode('utf-8')
+        dicrc["datareuniao"] = str(dia)
         # obtém o nome do Presidente da Comissão
         dicrc["presidente"] = ''
         for periodo in context.zsql.periodo_comp_comissao_obter_zsql(data=DateTime(rc.dat_inicio_reuniao_ord), ind_excluido=0):
             for cargo in context.zsql.composicao_comissao_obter_zsql(cod_comissao=rc.cod_comissao, cod_periodo_comp=periodo.cod_periodo_comp, cod_cargo=1, ind_excluido=0):
-                dicrc["presidente"] = cargo.nom_completo.decode('utf-8').upper()                 
+                dicrc["presidente"] = cargo.nom_completo.upper()                 
         reuniao.append(dicrc) 
         # seleciona as matérias que compõem a pauta da reuniao
     for item in context.zsql.reuniao_comissao_pauta_obter_zsql(cod_reuniao=cod_reuniao, ind_excluido=0):
@@ -54,12 +54,12 @@ if context.REQUEST['cod_reuniao']!='':
         if item.cod_materia != None:        
            materia = context.zsql.materia_obter_zsql(cod_materia=item.cod_materia)[0]        
            dic["cod_materia"] = item.cod_materia
-           dic["link_materia"] = '<link href="'+context.consultas.absolute_url()+'/materia/materia_mostrar_proc?cod_materia='+str(item.cod_materia)+'">'+materia.des_tipo_materia.decode('utf-8')+' nº '+str(materia.num_ident_basica)+'/'+str(materia.ano_ident_basica)+'</link>'
-           dic["id_materia"] = materia.des_tipo_materia.decode('utf-8').upper()+" nº "+str(materia.num_ident_basica)+"/"+str(materia.ano_ident_basica)
+           dic["link_materia"] = '<link href="'+context.consultas.absolute_url()+'/materia/materia_mostrar_proc?cod_materia='+str(item.cod_materia)+'">'+materia.des_tipo_materia+' nº '+str(materia.num_ident_basica)+'/'+str(materia.ano_ident_basica)+'</link>'
+           dic["id_materia"] = materia.des_tipo_materia.upper()+" nº "+str(materia.num_ident_basica)+"/"+str(materia.ano_ident_basica)
            dic["nom_relator"] = ''          
            dic["nom_autor"] = ''
            autores = context.zsql.autoria_obter_zsql(cod_materia=item.cod_materia)
-           fields = autores.data_dictionary().keys()
+           fields = list(autores.data_dictionary().keys())
            lista_autor = []
            for autor in autores:
                for field in fields:
@@ -76,7 +76,7 @@ if context.REQUEST['cod_reuniao']!='':
            for substitutivo in context.zsql.substitutivo_obter_zsql(cod_materia=item.cod_materia,ind_excluido=0):
                autores = context.zsql.autoria_substitutivo_obter_zsql(cod_substitutivo=substitutivo.cod_substitutivo, ind_excluido=0)
                dic_substitutivo = {}
-               fields = autores.data_dictionary().keys()
+               fields = list(autores.data_dictionary().keys())
                lista_autor = []
                for autor in autores:
                    for field in fields:
@@ -98,14 +98,14 @@ if context.REQUEST['cod_reuniao']!='':
            for emenda in context.zsql.emenda_obter_zsql(cod_materia=item.cod_materia,ind_excluido=0):
                autores = context.zsql.autoria_emenda_obter_zsql(cod_emenda=emenda.cod_emenda,ind_excluido=0)
                dic_emenda = {}
-               fields = autores.data_dictionary().keys()
+               fields = list(autores.data_dictionary().keys())
                lista_autor = []
                for autor in autores:
                    for field in fields:
                        nome_autor = autor['nom_autor_join']
                    lista_autor.append(nome_autor)
                autoria = ', '.join(['%s' % (value) for (value) in lista_autor])
-               dic_emenda["id_emenda"] = '<link href="' + context.sapl_documentos.absolute_url() + '/emenda/' + str(emenda.cod_emenda) + '_emenda.pdf' + '">' + 'Emenda nº ' + str(emenda.num_emenda) + ' (' + emenda.des_tipo_emenda.decode('utf-8') + ')</link>'
+               dic_emenda["id_emenda"] = '<link href="' + context.sapl_documentos.absolute_url() + '/emenda/' + str(emenda.cod_emenda) + '_emenda.pdf' + '">' + 'Emenda nº ' + str(emenda.num_emenda) + ' (' + emenda.des_tipo_emenda + ')</link>'
                dic_emenda["txt_ementa"] = emenda.txt_ementa
                dic_emenda["autoria"] = autoria
                lst_emendas.append(dic_emenda)

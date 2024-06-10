@@ -7,9 +7,9 @@
 <dtml-if expr="dat_fim_prazo==None or dat_fim_prazo==''">
 <dtml-in expr="zsql.status_tramitacao_administrativo_obter_zsql(cod_status=cod_status)">
   <dtml-if num_dias_prazo>
-   <dtml-let data_atual="_.DateTime()">
+   <dtml-let data_atual="DateTime()">
      <dtml-call expr="REQUEST.set('data_calculada', data_atual+num_dias_prazo)">
-     <dtml-call expr="REQUEST.set('dat_fim_prazo', _.DateTime(data_calculada).strftime('%d/%m/%Y'))">
+     <dtml-call expr="REQUEST.set('dat_fim_prazo', DateTime(data_calculada).strftime('%d/%m/%Y'))">
    </dtml-let>
   <dtml-else>
      <dtml-call expr="REQUEST.set('dat_fim_prazo', '')">
@@ -33,9 +33,9 @@
 </dtml-try>
 
 <dtml-if dbcon_logs>
-  <dtml-call expr="REQUEST.set('metodo1', _.string.split(str(metodo),'/')[-1])">
-  <dtml-call expr="REQUEST.set('metodo1', _.string.split(str(metodo1),' at ')[-1])">
-  <dtml-call expr="REQUEST.set('metodo1', _.string.split(str(metodo1),'>')[0])">
+  <dtml-call expr="REQUEST.set('metodo1', str(metodo).split('/')[-1])">
+  <dtml-call expr="REQUEST.set('metodo1', str(metodo1).split(' at ')[-1])">
+  <dtml-call expr="REQUEST.set('metodo1', str(metodo1).split('>')[0])">
   <dtml-call expr="zsql.logs_registrar_zsql(
             usuario      = REQUEST['AUTHENTICATED_USER'].getUserName(), 
             data         = DateTime().strftime('%Y-%m-%d %H:%M:%S'),

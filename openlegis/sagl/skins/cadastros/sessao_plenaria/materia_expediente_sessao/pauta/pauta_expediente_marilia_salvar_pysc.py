@@ -60,7 +60,7 @@ for sessao in context.zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=cod_sessao
        dic_ind['txt_observacao'] = materia.txt_exibicao
        dic_ind["nom_autor"] = ""
        autores = context.zsql.autoria_obter_zsql(cod_materia=materia.cod_materia)
-       fields = autores.data_dictionary().keys()
+       fields = list(autores.data_dictionary().keys())
        lista_autor = []
        for autor in autores:
            for field in fields:
@@ -86,7 +86,7 @@ for sessao in context.zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=cod_sessao
          dic_requerimentos_pesar['txt_observacao'] = materia.txt_exibicao
          dic_requerimentos_pesar["nom_autor"] = ""
          autores = context.zsql.autoria_obter_zsql(cod_materia=materia.cod_materia)
-         fields = autores.data_dictionary().keys()
+         fields = list(autores.data_dictionary().keys())
          lista_autor = []
          for autor in autores:
            for field in fields:
@@ -103,7 +103,7 @@ for sessao in context.zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=cod_sessao
          dic_requerimentos_congratulacoes['txt_observacao'] = materia.txt_exibicao
          dic_requerimentos_congratulacoes["nom_autor"] = ""
          autores = context.zsql.autoria_obter_zsql(cod_materia=materia.cod_materia)
-         fields = autores.data_dictionary().keys()
+         fields = list(autores.data_dictionary().keys())
          lista_autor = []
          for autor in autores:
            for field in fields:
@@ -120,7 +120,7 @@ for sessao in context.zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=cod_sessao
          dic_requerimentos['txt_observacao'] = materia.txt_exibicao
          dic_requerimentos["nom_autor"] = ""
          autores = context.zsql.autoria_obter_zsql(cod_materia=materia.cod_materia)
-         fields = autores.data_dictionary().keys()
+         fields = list(autores.data_dictionary().keys())
          lista_autor = []
          for autor in autores:
            for field in fields:
@@ -173,7 +173,7 @@ for sessao in context.zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=cod_sessao
   listap15 = []
 
   for autor in vereadores:
-    materias = filter(lambda nome: nome['nom_autor'] == autor.get('txt_autoria',autor), pesar)
+    materias = [nome for nome in pesar if nome['nom_autor'] == autor.get('txt_autoria',autor)]
     for materia in materias[0:1]:
       listap1.append(materia)
     for materia in materias[1:2]:
@@ -211,7 +211,7 @@ for sessao in context.zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=cod_sessao
   listac1 = []
   listac2 = []
   for autor in vereadores:
-    materias = filter(lambda nome: nome['nom_autor'] == autor.get('txt_autoria',autor), congrat)
+    materias = [nome for nome in congrat if nome['nom_autor'] == autor.get('txt_autoria',autor)]
     for materia in materias[0:1]:
       listac1.append(materia)
     for materia in materias[1:2]:
@@ -224,7 +224,7 @@ for sessao in context.zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=cod_sessao
   listar3 = []
 
   for autor in vereadores:
-   materias = filter(lambda nome: nome['nom_autor'] == autor.get('txt_autoria',autor), demais)
+   materias = [nome for nome in demais if nome['nom_autor'] == autor.get('txt_autoria',autor)]
    for materia in materias[0:1]:
      if materia['nom_autor'] != str(lst_presidente):
        listar1.append(materia)

@@ -1,5 +1,5 @@
 <dtml-comment>
-connection_id : dbcon_interlegis
+connection_id : dbcon_sagl
 arguments : cod_periodo_comp="" num_legislatura="" data="" ind_excluido=0
 max_rows : 1000
 max_cache : 100
@@ -10,8 +10,8 @@ SELECT
      REPLACE(num_legislatura, 'L', '') as num_legislatura,
      DATE_FORMAT(dat_inicio_periodo, '%d/%m/%Y') as dat_inicio_periodo,
      DATE_FORMAT(dat_fim_periodo, '%d/%m/%Y') as dat_fim_periodo,
-     dat_fim_periodo as dat_fim,
-     dat_inicio_periodo as dat_inicio
+     DATE_FORMAT(dat_inicio_periodo, '%Y/%m/%d') as dat_inicio,
+     DATE_FORMAT(dat_fim_periodo, '%Y/%m/%d') as dat_fim
 FROM
      periodo_comp_bancada
 

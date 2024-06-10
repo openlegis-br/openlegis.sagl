@@ -105,12 +105,12 @@
 <dtml-if expr="save_ok=='1'">
 
     <dtml-if file_nom_arquivo>
-      <dtml-call expr="REQUEST.set('id_documento', _.str(cod_proposicao)+'.pdf')">
+      <dtml-call expr="REQUEST.set('id_documento', str(cod_proposicao)+'.pdf')">
       <dtml-call expr="sapl_documentos.proposicao.manage_addFile(id=id_documento,file=pysc.upload_file(file=file_nom_arquivo, title='Proposicao'))">
     </dtml-if>
 
     <dtml-if file_nom_image1>
-      <dtml-call expr="REQUEST.set('id_image1', _.str(cod_proposicao)+'_image_1.jpg')">
+      <dtml-call expr="REQUEST.set('id_image1', str(cod_proposicao)+'_image_1.jpg')">
         <dtml-try>
             <dtml-call expr="sapl_documentos.proposicao.manage_addImage(id_image1,file=file_nom_image1)">
         <dtml-except> 
@@ -118,7 +118,7 @@
     </dtml-if>
 
     <dtml-if file_nom_image2>
-      <dtml-call expr="REQUEST.set('id_image2', _.str(cod_proposicao)+'_image_2.jpg')">
+      <dtml-call expr="REQUEST.set('id_image2', str(cod_proposicao)+'_image_2.jpg')">
         <dtml-try>
             <dtml-call expr="sapl_documentos.proposicao.manage_addImage(id_image2,file=file_nom_image2)">
         <dtml-except>
@@ -126,7 +126,7 @@
     </dtml-if>
 
     <dtml-if file_nom_image3>
-      <dtml-call expr="REQUEST.set('id_image3', _.str(cod_proposicao)+'_image_3.jpg')">
+      <dtml-call expr="REQUEST.set('id_image3', str(cod_proposicao)+'_image_3.jpg')">
         <dtml-try>
             <dtml-call expr="sapl_documentos.proposicao.manage_addImage(id_image3,file=file_nom_image3)">
         <dtml-except>
@@ -134,7 +134,7 @@
     </dtml-if>
 
     <dtml-if file_nom_image4>
-      <dtml-call expr="REQUEST.set('id_image4', _.str(cod_proposicao)+'_image_4.jpg')">
+      <dtml-call expr="REQUEST.set('id_image4', str(cod_proposicao)+'_image_4.jpg')">
         <dtml-try>
             <dtml-call expr="sapl_documentos.proposicao.manage_addImage(id_image4,file=file_nom_image4)">
         <dtml-except>
@@ -179,7 +179,7 @@
   <dtml-call expr="zsql.logs_registrar_zsql(
             usuario      = REQUEST['AUTHENTICATED_USER'].getUserName(), 
             data         = DateTime().strftime('%Y-%m-%d %H:%M:%S'),
-            modulo       = _.string.split(_['REQUEST']['URL1'],'/')[-1],
+            modulo       = str(_['REQUEST']['URL1']).split('/')[-1],
             metodo       = 'proposicao_salvar_proc',
             IP           = pysc.get_ip(),
             dados        = REQUEST.form.items(),

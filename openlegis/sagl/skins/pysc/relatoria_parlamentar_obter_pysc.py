@@ -16,7 +16,7 @@
 
 import string
 
-x=string.split(dados)
+x=str(dados).split()
 
 if parm!='1':
    return x[0]

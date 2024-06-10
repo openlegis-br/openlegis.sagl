@@ -32,9 +32,9 @@
         <dtml-call expr="REQUEST.set('existe_arquivo', 0)">        
         <dtml-if expr="(_.int(hdn_file_pauta)==1)">
             <dtml-if hdn_cod_reuniao>
-                <dtml-call expr="REQUEST.set('id_pauta', _.str(hdn_cod_reuniao)+'_pauta.pdf')">
-                <dtml-if "_.hasattr(sapl_documentos.reuniao_comissao,id_pauta)">
-                    <dtml-let documento="_.getattr(sapl_documentos.reuniao_comissao,id_pauta) ">
+                <dtml-call expr="REQUEST.set('id_pauta', str(hdn_cod_reuniao)+'_pauta.pdf')">
+                <dtml-if "hasattr(sapl_documentos.reuniao_comissao,id_pauta)">
+                    <dtml-let documento="getattr(sapl_documentos.reuniao_comissao,id_pauta) ">
                         <dtml-call expr="REQUEST.set('existe_arquivo', 1)">
                         <dtml-try>
                             <dtml-call "documento.manage_upload(file=file_nom_arquivo_pauta)">
@@ -57,7 +57,7 @@
                 <dtml-in expr="zsql.reuniao_comissao_incluida_codigo_obter_zsql()">
                  <dtml-call "REQUEST.set('ult_reuniao_incluida',cod_reuniao)">
                 </dtml-in>
-               <dtml-call expr="REQUEST.set('id_pauta',_.str(ult_reuniao_incluida)+'_pauta.pdf')">
+               <dtml-call expr="REQUEST.set('id_pauta',str(ult_reuniao_incluida)+'_pauta.pdf')">
              </dtml-if>
              <dtml-if "not existe_arquivo">
           <dtml-try>            
@@ -69,7 +69,7 @@
          </dtml-if>
      <dtml-elif expr="radTI=='E'">
          <dtml-if hdn_cod_reuniao>
-             <dtml-call expr="REQUEST.set('id_pauta', _.str(hdn_cod_reuniao)+'_pauta.pdf')">
+             <dtml-call expr="REQUEST.set('id_pauta', str(hdn_cod_reuniao)+'_pauta.pdf')">
              <dtml-call "sapl_documentos.reuniao_comissao.manage_delObjects(id_pauta)">
              <dtml-in expr="zsql.assinatura_documento_obter_zsql(codigo=hdn_cod_reuniao,tipo_doc='pauta_comissao')">
                 <dtml-try>
@@ -94,9 +94,9 @@
         <dtml-call expr="REQUEST.set('existe_arquivo', 0)">        
         <dtml-if expr="(_.int(hdn_file_ata)==1)">
             <dtml-if hdn_cod_reuniao>
-                <dtml-call expr="REQUEST.set('id_ata', _.str(hdn_cod_reuniao)+'_ata.pdf')">
-                <dtml-if "_.hasattr(sapl_documentos.reuniao_comissao,id_ata)">
-                    <dtml-let documento="_.getattr(sapl_documentos.reuniao_comissao,id_ata) ">
+                <dtml-call expr="REQUEST.set('id_ata', str(hdn_cod_reuniao)+'_ata.pdf')">
+                <dtml-if "hasattr(sapl_documentos.reuniao_comissao,id_ata)">
+                    <dtml-let documento="getattr(sapl_documentos.reuniao_comissao,id_ata) ">
                         <dtml-call expr="REQUEST.set('existe_arquivo', 1)">
                         <dtml-try>
                             <dtml-call "documento.manage_upload(file=file_nom_arquivo_ata)">
@@ -119,7 +119,7 @@
                 <dtml-in expr="zsql.reuniao_comissao_incluida_codigo_obter_zsql()">
                  <dtml-call "REQUEST.set('ult_reuniao_incluida',cod_reuniao)">
                 </dtml-in>
-               <dtml-call expr="REQUEST.set('id_ata',_.str(ult_reuniao_incluida)+'_ata.pdf')">
+               <dtml-call expr="REQUEST.set('id_ata',str(ult_reuniao_incluida)+'_ata.pdf')">
              </dtml-if>
              <dtml-if "not existe_arquivo">
           <dtml-try>            
@@ -131,7 +131,7 @@
          </dtml-if>
      <dtml-elif expr="radTI2=='E'">
          <dtml-if hdn_cod_reuniao>
-             <dtml-call expr="REQUEST.set('id_ata', _.str(hdn_cod_reuniao)+'_ata.pdf')">
+             <dtml-call expr="REQUEST.set('id_ata', str(hdn_cod_reuniao)+'_ata.pdf')">
              <dtml-call "sapl_documentos.reuniao_comissao.manage_delObjects(id_ata)">
              <dtml-in expr="zsql.assinatura_documento_obter_zsql(codigo=hdn_cod_reuniao,tipo_doc='ata_comissao')">
                 <dtml-try>
@@ -168,7 +168,7 @@
   <dtml-call expr="zsql.logs_registrar_zsql(
             usuario      = REQUEST['AUTHENTICATED_USER'].getUserName(), 
             data         = DateTime().strftime('%Y-%m-%d %H:%M:%S'),
-            modulo       = _.string.split(_['REQUEST']['URL1'],'/')[-1],
+            modulo       = str(_['REQUEST']['URL1']).split('/')[-1],
             metodo       = 'reuniao_comissao_salvar_proc',
             IP           = pysc.get_ip(),
             dados        = REQUEST.form.items(),

@@ -5,7 +5,7 @@ if request.ACTUAL_URL == context.portal_url() or request.ACTUAL_URL == context.p
 else:
     redirect_url=request['URL1']+'/'+context.id+'_index_html'
 
-if request.has_key('QUERY_STRING') and request['QUERY_STRING'] != '':
+if 'QUERY_STRING' in request and request['QUERY_STRING'] != '':
     redirect_url+='?%s'%request['QUERY_STRING']
 
 request.RESPONSE.redirect(redirect_url)

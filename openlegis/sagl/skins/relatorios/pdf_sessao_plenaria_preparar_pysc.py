@@ -16,7 +16,7 @@ if context.REQUEST['data']!='':
         # seleciona o tipo da sessao plenaria
         tipo_sessao = context.zsql.tipo_sessao_plenaria_obter_zsql(tip_sessao=sessao.tip_sessao,ind_excluido=0)[0]
         inf_basicas_dic["num_sessao_plen"] = sessao.num_sessao_plen
-        inf_basicas_dic["nom_sessao"] = tipo_sessao.nom_sessao.decode('utf-8').upper()
+        inf_basicas_dic["nom_sessao"] = tipo_sessao.nom_sessao.upper()
         inf_basicas_dic["num_legislatura"] = sessao.num_legislatura
         inf_basicas_dic["num_sessao_leg"] = sessao.num_sessao_leg
         inf_basicas_dic["dat_inicio_sessao"] = sessao.dat_inicio_sessao
@@ -52,7 +52,7 @@ if context.REQUEST['data']!='':
             for expediente in context.zsql.expediente_obter_zsql(cod_sessao_plen=sessao.cod_sessao_plen,cod_expediente=tip_expediente.cod_expediente, ind_excluido=0):
                 dic_expedientes = {}
                 dic_expedientes["nom_expediente"] = tip_expediente.nom_expediente
-                dic_expedientes["txt_expediente"] = context.extensions.xhtml2rml(expediente.txt_expediente,'P2')
+                dic_expedientes["txt_expediente"] = expediente.txt_expediente
             if dic_expedientes:
                 lst_expedientes.append(dic_expedientes)
         
@@ -66,10 +66,10 @@ if context.REQUEST['data']!='':
                materia = context.zsql.materia_obter_zsql(cod_materia=materia_apresentada.cod_materia)[0]
                dic_materia_apresentada["num_ordem"] = materia_apresentada.num_ordem
                dic_materia_apresentada["txt_ementa"] = materia.txt_ementa
-               dic_materia_apresentada["id_materia"] = materia.des_tipo_materia.decode('utf-8').upper()+ ' Nº ' +str(materia.num_ident_basica)+"/"+str(materia.ano_ident_basica)
+               dic_materia_apresentada["id_materia"] = materia.des_tipo_materia.upper()+ ' Nº ' +str(materia.num_ident_basica)+"/"+str(materia.ano_ident_basica)
                dic_materia_apresentada["nom_autor"] = ""
                autores = context.zsql.autoria_obter_zsql(cod_materia=materia_apresentada.cod_materia)
-               fields = autores.data_dictionary().keys()
+               fields = list(autores.data_dictionary().keys())
                lista_autor = []
                for autor in autores:
                    for field in fields:
@@ -83,10 +83,10 @@ if context.REQUEST['data']!='':
                    materia = context.zsql.materia_obter_zsql(cod_materia=emenda.cod_materia)[0]
                    dic_materia_apresentada["num_ordem"] = materia_apresentada.num_ordem
                    dic_materia_apresentada["txt_ementa"] = emenda.txt_ementa
-                   dic_materia_apresentada["id_materia"] = 'EMENDA ' + emenda.des_tipo_emenda.decode('utf-8').upper() + ' Nº ' + str(emenda.num_emenda) + " - " + materia.sgl_tipo_materia.decode('utf-8').upper() + str(materia.num_ident_basica) + "/" + str(materia.ano_ident_basica)
+                   dic_materia_apresentada["id_materia"] = 'EMENDA ' + emenda.des_tipo_emenda.upper() + ' Nº ' + str(emenda.num_emenda) + " - " + materia.sgl_tipo_materia.upper() + str(materia.num_ident_basica) + "/" + str(materia.ano_ident_basica)
                    dic_materia_apresentada["nom_autor"] = ""
                    autores = context.zsql.autoria_emenda_obter_zsql(cod_emenda=emenda.cod_emenda)
-                   fields = autores.data_dictionary().keys()
+                   fields = list(autores.data_dictionary().keys())
                    lista_autor = []
                    for autor in autores:
                        for field in fields:
@@ -100,10 +100,10 @@ if context.REQUEST['data']!='':
                    materia = context.zsql.materia_obter_zsql(cod_materia=substitutivo.cod_materia)[0]
                    dic_materia_apresentada["num_ordem"] = materia_apresentada.num_ordem
                    dic_materia_apresentada["txt_ementa"] = substitutivo.txt_ementa
-                   dic_materia_apresentada["id_materia"] = 'SUBSTITUTIVO ' + ' Nº ' + str(substitutivo.num_substitutivo) + " - " + materia.sgl_tipo_materia.decode('utf-8').upper() + str(materia.num_ident_basica) + "/" + str(materia.ano_ident_basica)
+                   dic_materia_apresentada["id_materia"] = 'SUBSTITUTIVO ' + ' Nº ' + str(substitutivo.num_substitutivo) + " - " + materia.sgl_tipo_materia.upper() + str(materia.num_ident_basica) + "/" + str(materia.ano_ident_basica)
                    dic_materia_apresentada["nom_autor"] = ""
                    autores = context.zsql.autoria_substitutivo_obter_zsql(cod_substitutivo=substitutivo.cod_substitutivo)
-                   fields = autores.data_dictionary().keys()
+                   fields = list(autores.data_dictionary().keys())
                    lista_autor = []
                    for autor in autores:
                        for field in fields:
@@ -120,15 +120,15 @@ if context.REQUEST['data']!='':
                    for comissao in context.zsql.comissao_obter_zsql(cod_comissao=parecer.cod_comissao):
                        sgl_comissao = comissao.sgl_comissao
                        nom_comissao = comissao.nom_comissao
-                   dic_materia_apresentada["id_materia"] = 'PARECER ' + sgl_comissao + ' Nº ' + str(parecer.num_parecer) + '/' + str(parecer.ano_parecer) + " - " +  materia.sgl_tipo_materia.decode('utf-8').upper() +' ' + str(materia.num_ident_basica) + '/' + str(materia.ano_ident_basica)
-                   dic_materia_apresentada["nom_autor"] = nom_comissao.decode('utf-8').upper()
+                   dic_materia_apresentada["id_materia"] = 'PARECER ' + sgl_comissao + ' Nº ' + str(parecer.num_parecer) + '/' + str(parecer.ano_parecer) + " - " +  materia.sgl_tipo_materia.upper() +' ' + str(materia.num_ident_basica) + '/' + str(materia.ano_ident_basica)
+                   dic_materia_apresentada["nom_autor"] = nom_comissao.upper()
                lst_materia_apresentada.append(dic_materia_apresentada)
             # seleciona os detalhes de um documento acessório
             elif materia_apresentada.cod_documento != None:
                materia = context.zsql.documento_administrativo_obter_zsql(cod_documento=materia_apresentada.cod_documento)[0]
                dic_materia_apresentada["num_ordem"] = materia_apresentada.num_ordem
                dic_materia_apresentada["txt_ementa"] = materia.txt_assunto
-               dic_materia_apresentada["id_materia"] = materia.des_tipo_documento.decode('utf-8').upper() + " Nº " +str(materia.num_documento)+"/"+str(materia.ano_documento)
+               dic_materia_apresentada["id_materia"] = materia.des_tipo_documento.upper() + " Nº " +str(materia.num_documento)+"/"+str(materia.ano_documento)
                dic_materia_apresentada["nom_autor"] = materia.txt_interessado
                lst_materia_apresentada.append(dic_materia_apresentada)
       
@@ -140,12 +140,12 @@ if context.REQUEST['data']!='':
                dic_expediente_materia = {}
                for materia in context.zsql.materia_obter_zsql(cod_materia=item.cod_materia):
                    dic_expediente_materia["num_ordem"] = item.num_ordem
-                   dic_expediente_materia["id_materia"] = materia.des_tipo_materia.decode('utf-8').upper() +  " Nº "  + str(materia.num_ident_basica)+ "/" +str(materia.ano_ident_basica)
+                   dic_expediente_materia["id_materia"] = materia.des_tipo_materia.upper() +  " Nº "  + str(materia.num_ident_basica)+ "/" +str(materia.ano_ident_basica)
                    dic_expediente_materia["txt_ementa"] = materia.txt_ementa
                    dic_expediente_materia["ordem_observacao"] = item.txt_observacao
                    dic_expediente_materia["nom_autor"] = ""
                    autores = context.zsql.autoria_obter_zsql(cod_materia=item.cod_materia)
-                   fields = autores.data_dictionary().keys()
+                   fields = list(autores.data_dictionary().keys())
                    lista_autor = []
                    for autor in autores:
                        for field in fields:
@@ -174,7 +174,7 @@ if context.REQUEST['data']!='':
                        num_ident_basica = materia.num_ident_basica
                        ano_ident_basica = materia.ano_ident_basica
                    for comissao in context.zsql.comissao_obter_zsql(cod_comissao=parecer.cod_comissao):
-                       nom_comissao = comissao.nom_comissao.decode('utf-8').upper()
+                       nom_comissao = comissao.nom_comissao.upper()
                        sgl_comissao = comissao.sgl_comissao
                    dic_expediente_materia["id_materia"] = 'PARECER '+str(sgl_comissao)+ ' Nº ' +str(parecer.num_parecer)+ '/' +str(parecer.ano_parecer)+' - '+str(sgl_tipo_materia)+' '+str(num_ident_basica)+'/'+str(ano_ident_basica)
                    dic_expediente_materia["txt_ementa"] = item.txt_observacao
@@ -217,13 +217,13 @@ if context.REQUEST['data']!='':
             materia = context.zsql.materia_obter_zsql(cod_materia=ordem.cod_materia)[0]
             dic_votacao = {}
             dic_votacao["num_ordem"] = ordem.num_ordem
-            dic_votacao["id_materia"] = materia.des_tipo_materia.decode('utf-8').upper() +" Nº " + str(materia.num_ident_basica) + "/" + str(materia.ano_ident_basica)
+            dic_votacao["id_materia"] = materia.des_tipo_materia.upper() +" Nº " + str(materia.num_ident_basica) + "/" + str(materia.ano_ident_basica)
             dic_votacao["des_numeracao"]=""
             dic_votacao["txt_ementa"] = materia.txt_ementa
             dic_votacao["ordem_observacao"] = ordem.txt_observacao
             dic_votacao["nom_autor"] = ""
             autores = context.zsql.autoria_obter_zsql(cod_materia=ordem.cod_materia)
-            fields = autores.data_dictionary().keys()
+            fields = list(autores.data_dictionary().keys())
             lista_autor = []
             for autor in autores:
                 for field in fields:
@@ -252,7 +252,7 @@ if context.REQUEST['data']!='':
             for substitutivo in context.zsql.substitutivo_obter_zsql(cod_materia=ordem.cod_materia,ind_excluido=0):
                 autores = context.zsql.autoria_substitutivo_obter_zsql(cod_substitutivo=substitutivo.cod_substitutivo, ind_excluido=0)
                 dic_substitutivo = {}
-                fields = autores.data_dictionary().keys()
+                fields = list(autores.data_dictionary().keys())
                 lista_autor = []
                 for autor in autores:
                     for field in fields:
@@ -291,14 +291,14 @@ if context.REQUEST['data']!='':
             for emenda in context.zsql.emenda_obter_zsql(cod_materia=ordem.cod_materia,ind_excluido=0,exc_pauta=0):
                 autores = context.zsql.autoria_emenda_obter_zsql(cod_emenda=emenda.cod_emenda,ind_excluido=0)
                 dic_emenda = {}
-                fields = autores.data_dictionary().keys()
+                fields = list(autores.data_dictionary().keys())
                 lista_autor = []
                 for autor in autores:
                     for field in fields:
                         nome_autor = autor['nom_autor_join']
                 lista_autor.append(nome_autor)
                 autoria = ', '.join(['%s' % (value) for (value) in lista_autor])
-                dic_emenda["id_emenda"] = '<link href="' + context.sapl_documentos.absolute_url() + '/emenda/' + str(emenda.cod_emenda) + '_emenda.pdf' + '">' + 'EMENDA Nº ' + str(emenda.num_emenda) + ' (' + emenda.des_tipo_emenda.decode('utf-8').upper() + ')</link>'
+                dic_emenda["id_emenda"] = '<link href="' + context.sapl_documentos.absolute_url() + '/emenda/' + str(emenda.cod_emenda) + '_emenda.pdf' + '">' + 'EMENDA Nº ' + str(emenda.num_emenda) + ' (' + emenda.des_tipo_emenda.upper() + ')</link>'
                 dic_emenda["txt_ementa"] = emenda.txt_ementa
                 dic_emenda["autoria"] = autoria
                 dic_emenda["nom_resultado"] = ''

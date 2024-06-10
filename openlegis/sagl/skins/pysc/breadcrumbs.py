@@ -10,7 +10,7 @@
 root = ('',)
 breadcrumbs = []
 request = context.REQUEST
-vRoot = request.has_key('VirtualRootPhysicalPath')
+vRoot = 'VirtualRootPhysicalPath' in request
 
 PARENTS = context.REQUEST.PARENTS[:-1]
 

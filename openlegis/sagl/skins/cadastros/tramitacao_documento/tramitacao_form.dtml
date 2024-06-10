@@ -178,7 +178,7 @@ $(document).ready(function(){
     <div class="col-12 col-sm-3 mb-3">
        <label for="txt_dat_tramitacao" class="required">Data da Tramitação</label>
        <dtml-unless dat_tramitacao>
-         <dtml-call expr="REQUEST.set('dat_tramitacao', _.DateTime().strftime('%d/%m/%Y %H:%M'))">
+         <dtml-call expr="REQUEST.set('dat_tramitacao', DateTime().strftime('%d/%m/%Y %H:%M'))">
        </dtml-unless>
        <input type="hidden" name="hdn_dat_tramitacao" value="<dtml-var dat_tramitacao missing>" />       
        <input class="form-control" type="text" name="txt_dat_tramitacao" id="txt_dat_tramitacao" value="<dtml-var dat_tramitacao missing>" readonly required />
@@ -319,7 +319,7 @@ $(document).ready(function(){
          </dtml-in>
              <option value="">Selecione</option>
              <dtml-in expr="zsql.status_tramitacao_administrativo_obter_zsql(ind_excluido=0)">
-              <dtml-if expr="_.str(cod_status) in _.string.split(_.str(status_permitidos),',')">
+              <dtml-if expr="str(cod_status) in str(status_permitidos).split(',')">
                 <option 
                    <dtml-if expr="_.has_key('hdn_cod_status') and int(hdn_cod_status)==int(cod_status)"> selected
                    </dtml-if>
@@ -354,14 +354,14 @@ $(document).ready(function(){
 
   <div class="form-row">
    <dtml-if hdn_cod_tramitacao>
-    <dtml-call expr="REQUEST.set('pdf', _.str(hdn_cod_tramitacao)+'_tram.pdf')">
-    <dtml-call expr="REQUEST.set('pdf_assinado', _.str(hdn_cod_tramitacao)+'_tram_signed.pdf')">
-    <dtml-if "_.hasattr(sapl_documentos.administrativo.tramitacao,pdf)"> 
+    <dtml-call expr="REQUEST.set('pdf', str(hdn_cod_tramitacao)+'_tram.pdf')">
+    <dtml-call expr="REQUEST.set('pdf_assinado', str(hdn_cod_tramitacao)+'_tram_signed.pdf')">
+    <dtml-if "hasattr(sapl_documentos.administrativo.tramitacao,pdf)"> 
       <div class="col-12 col-sm-4 col-lg-4 mb-3">
         <label class="d-block">Despacho em PDF</label>
        
         <div class="btn-group" role="group" aria-label="tram_button">
-          <dtml-let pdf="_.getattr(sapl_documentos.administrativo.tramitacao,pdf).absolute_url">
+          <dtml-let pdf="getattr(sapl_documentos.administrativo.tramitacao,pdf).absolute_url">
              <a class="btn btn-secondary" target="_blank" href="<dtml-var pdf>?<dtml-var expr="ZopeTime().timeTime()">">
                 <i class="far fa-file-pdf"></i> Visualizar
              </a>

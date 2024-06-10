@@ -34,8 +34,8 @@ $(function () {
    <dtml-let isAnon="portal_membership.isAnonymousUser()">
      <dtml-if expr="not isAnon">   
       <div class="btn-group mb-3" role="group">
-        <dtml-call expr="REQUEST.set('id_documento', _.str(cod_documento)+'_texto_integral.pdf')">
-          <dtml-if expr="_.hasattr(sapl_documentos.administrativo,id_documento) and AUTHENTICATED_USER.has_role(['Operador', 'Operador Modulo Administrativo', 'Geracao Processos Integrais'])">       
+        <dtml-call expr="REQUEST.set('id_documento', str(cod_documento)+'_texto_integral.pdf')">
+          <dtml-if expr="hasattr(sapl_documentos.administrativo,id_documento) and AUTHENTICATED_USER.has_role(['Operador', 'Operador Modulo Administrativo', 'Geracao Processos Integrais'])">       
             <a class="btn btn-sm btn-link block" href="<dtml-var portal_url>/consultas/documento_administrativo/pasta_digital/pastadigital?cod_documento=<dtml-var cod_documento>&action=download" target="_blank"><i class="far fa-file-pdf"></i> Processo Integral</a>
           </dtml-if>
       </div>
@@ -61,16 +61,16 @@ $(function () {
         <dtml-in expr="zsql.assinatura_documento_obter_zsql(codigo=cod_documento, tipo_doc='documento',cod_usuario=None)">
           <dtml-call "REQUEST.set('cod_assinatura_doc', cod_assinatura_doc)">
         </dtml-in>
-        <dtml-call expr="REQUEST.set('id_documento', _.str(cod_documento)+'_texto_integral.pdf')">
-        <dtml-if expr="_.hasattr(sapl_documentos.administrativo,id_documento)">
+        <dtml-call expr="REQUEST.set('id_documento', str(cod_documento)+'_texto_integral.pdf')">
+        <dtml-if expr="hasattr(sapl_documentos.administrativo,id_documento)">
           <dtml-let isAnon="portal_membership.isAnonymousUser()">
             <dtml-if expr="not isAnon">  
                <a class="btn btn-sm btn-primary" href="<dtml-var portal_url>/consultas/documento_administrativo/pasta_digital/?cod_documento=<dtml-var cod_documento>&action=pasta" target="_blank"><i class="far fa-folder"></i> Pasta Digital</a>
            </dtml-if>
           </dtml-let>
-          <dtml-let documento="_.getattr(sapl_documentos.administrativo,id_documento).absolute_url">        
+          <dtml-let documento="getattr(sapl_documentos.administrativo,id_documento).absolute_url">        
              <a class="btn btn-sm btn-primary" target="_blank" href="<dtml-var documento>">
-               <dtml-if expr="_.has_key('cod_assinatura_doc') and _.hasattr(sapl_documentos.documentos_assinados, cod_assinatura_doc+'.pdf')">
+               <dtml-if expr="_.has_key('cod_assinatura_doc') and hasattr(sapl_documentos.documentos_assinados, cod_assinatura_doc+'.pdf')">
                  <i class="fa fa-certificate"></i> Texto Integral
                <dtml-else>
                  <i class="fa fa-fw fa-file-pdf"></i> Texto Integral
@@ -182,9 +182,9 @@ $(function () {
              </dtml-in>
            </dtml-if>
            <dtml-if expr="dat_encaminha!=None">
-              <dtml-call expr="REQUEST.set('pdf', _.str(cod_tramitacao)+'_tram.pdf')">
-              <dtml-if "_.hasattr(sapl_documentos.administrativo.tramitacao,pdf)">
-                 <dtml-let pdf="_.getattr(sapl_documentos.administrativo.tramitacao,pdf).absolute_url">
+              <dtml-call expr="REQUEST.set('pdf', str(cod_tramitacao)+'_tram.pdf')">
+              <dtml-if "hasattr(sapl_documentos.administrativo.tramitacao,pdf)">
+                 <dtml-let pdf="getattr(sapl_documentos.administrativo.tramitacao,pdf).absolute_url">
                    - <a href="<dtml-var pdf>" target="_blank"><dtml-var expr="des_status"></a>
                  </dtml-let>
               <dtml-else>
@@ -293,9 +293,9 @@ $(function () {
             </dtml-if>
                  <tr>
                    <td>
-                    <dtml-call expr="REQUEST.set('id_documento', _.str(cod_documento_acessorio)+'.pdf')">
-                    <dtml-if expr="_.hasattr(sapl_documentos.administrativo,id_documento)">
-                      <dtml-let documento="_.getattr(sapl_documentos.administrativo,id_documento).absolute_url">
+                    <dtml-call expr="REQUEST.set('id_documento', str(cod_documento_acessorio)+'.pdf')">
+                    <dtml-if expr="hasattr(sapl_documentos.administrativo,id_documento)">
+                      <dtml-let documento="getattr(sapl_documentos.administrativo,id_documento).absolute_url">
                         <a target="_blank" href="<dtml-var documento>" target="_blank">
                          <dtml-if expr="zsql.assinatura_documento_obter_zsql(codigo=cod_documento_acessorio, tipo_doc='doc_acessorio_adm',ind_assinado=1, cod_usuario=None)">
                             <i class="fa fa-certificate"></i>
@@ -383,9 +383,9 @@ $(function () {
                  - <dtml-var txt_ementa>
                </td>
                <td>
-                 <dtml-call expr="REQUEST.set('id_materia', _.str(cod_materia)+'_texto_integral.pdf')">
-                 <dtml-if "_.hasattr(sapl_documentos.materia,id_materia)">
-                    <dtml-let materia="_.getattr(sapl_documentos.materia,id_materia).absolute_url">
+                 <dtml-call expr="REQUEST.set('id_materia', str(cod_materia)+'_texto_integral.pdf')">
+                 <dtml-if "hasattr(sapl_documentos.materia,id_materia)">
+                    <dtml-let materia="getattr(sapl_documentos.materia,id_materia).absolute_url">
                       <a target="_blank" href="<dtml-var materia>">
                         <i class="fa fa-file-pdf" style="font-size: 21px;margin-right: 6px;"></i>Texto Integral
                       </a>
@@ -446,24 +446,24 @@ $(function () {
                       </td>
                       <td>
                         <dtml-if expr="dat_encaminha!=None">
-                         <dtml-call expr="REQUEST.set('pdf', _.str(cod_tramitacao)+'_tram.pdf')">
-                         <dtml-call expr="REQUEST.set('pdf_assinado', _.str(cod_tramitacao)+'_tram_signed.pdf')">
-                         <dtml-if "_.hasattr(sapl_documentos.administrativo.tramitacao,pdf_assinado)">
-                           <dtml-let pdf_assinado="_.getattr(sapl_documentos.administrativo.tramitacao,pdf_assinado).absolute_url">
+                         <dtml-call expr="REQUEST.set('pdf', str(cod_tramitacao)+'_tram.pdf')">
+                         <dtml-call expr="REQUEST.set('pdf_assinado', str(cod_tramitacao)+'_tram_signed.pdf')">
+                         <dtml-if "hasattr(sapl_documentos.administrativo.tramitacao,pdf_assinado)">
+                           <dtml-let pdf_assinado="getattr(sapl_documentos.administrativo.tramitacao,pdf_assinado).absolute_url">
                              <a href="<dtml-var pdf_assinado>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fas fa-certificate"></i> <dtml-var expr="des_status"></a>
                            </dtml-let>
                          <dtml-elif expr="zsql.assinatura_documento_obter_zsql(codigo=cod_tramitacao,tipo_doc='tramitacao_adm', ind_assinado=1)">
                             <dtml-in expr="zsql.assinatura_documento_obter_zsql(codigo=cod_tramitacao,tipo_doc='tramitacao_adm', ind_assinado=1, ind_prim_assinatura=1)"> 
-                              <dtml-if "_.hasattr(sapl_documentos.administrativo.tramitacao,pdf)">
-                                 <dtml-let pdf="_.getattr(sapl_documentos.administrativo.tramitacao,pdf).absolute_url">
+                              <dtml-if "hasattr(sapl_documentos.administrativo.tramitacao,pdf)">
+                                 <dtml-let pdf="getattr(sapl_documentos.administrativo.tramitacao,pdf).absolute_url">
                                     <a href="<dtml-var pdf>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fas fa-certificate"></i> <dtml-var expr="des_status"></a>
                                 </dtml-let>
                               <dtml-else>             
                                  <a href="<dtml-var portal_url>/sapl_documentos/documentos_assinados/<dtml-var cod_assinatura_doc>.pdf?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fas fa-certificate"></i>  <dtml-var expr="des_status"></a>
                               </dtml-if>
                             </dtml-in>        
-                         <dtml-elif "_.hasattr(sapl_documentos.administrativo.tramitacao,pdf)">
-                           <dtml-let pdf="_.getattr(sapl_documentos.administrativo.tramitacao,pdf).absolute_url">
+                         <dtml-elif "hasattr(sapl_documentos.administrativo.tramitacao,pdf)">
+                           <dtml-let pdf="getattr(sapl_documentos.administrativo.tramitacao,pdf).absolute_url">
                                <a href="<dtml-var pdf>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fa fa-file-pdf"></i> <dtml-var expr="des_status"></a>
                            </dtml-let>
                          <dtml-else>

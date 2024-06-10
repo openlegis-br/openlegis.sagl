@@ -1,0 +1,17 @@
+<dtml-call expr="REQUEST.set('url', _['REQUEST']['name'])">
+
+<dtml-call expr="REQUEST.set('id_doc', url.split('?')[-2])">
+
+<dtml-call expr="REQUEST.set('id_documento', id_doc.split('/')[-1])">
+
+<dtml-call expr="REQUEST.set('arquivo', _['REQUEST']['data'])">
+
+  <dtml-let documento="getattr(sapl_documentos.proposicao,id_documento) ">
+    <dtml-try>
+        <dtml-call "documento.manage_upload(file=arquivo)">
+    <dtml-except>
+    </dtml-try>
+  </dtml-let>
+
+
+<dtml-var url>

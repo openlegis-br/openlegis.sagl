@@ -7,13 +7,13 @@
 ##parameters=file
 ##title=
 ##
-from PyPDF4 import PdfFileReader
-from PyPDF4.utils import PdfReadError
+from pypdf import PdfReader
+from pypdf.utils import PdfReadError
 request = container.REQUEST
 response =  request.response
 
 try:
-    pdf = PdfFileReader(file)
+    pdf = PdfReader(file)
 except PdfReadError:
     raise ValueError('O arquivo enviado não é um documento PDF válido.')
 

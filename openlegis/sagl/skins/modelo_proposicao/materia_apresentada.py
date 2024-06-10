@@ -39,10 +39,10 @@ for sessao in context.zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=cod_sessao
          dic_materia_apresentada["num_ordem"] = materia_apresentada.num_ordem
          dic_materia_apresentada["txt_ementa"] = materia.txt_ementa
          dic_materia_apresentada["id_materia"] = materia.des_tipo_materia+" "+str(materia.num_ident_basica)+"/"+str(materia.ano_ident_basica)
-         dic_materia_apresentada["link_materia"] = '<link href="'+context.sapl_documentos.absolute_url()+'/materia/'+ str(materia_apresentada.cod_materia) + '_texto_integral.pdf' +'">'+materia.des_tipo_materia.decode('utf-8').upper()+' Nº '+str(materia.num_ident_basica)+'/'+str(materia.ano_ident_basica)+'</link>'
+         dic_materia_apresentada["link_materia"] = '<link href="'+context.sapl_documentos.absolute_url()+'/materia/'+ str(materia_apresentada.cod_materia) + '_texto_integral.pdf' +'">'+materia.des_tipo_materia.upper()+' Nº '+str(materia.num_ident_basica)+'/'+str(materia.ano_ident_basica)+'</link>'
          dic_materia_apresentada["nom_autor"] = ""
          autores = context.zsql.autoria_obter_zsql(cod_materia=materia_apresentada.cod_materia)
-         fields = autores.data_dictionary().keys()
+         fields = list(autores.data_dictionary().keys())
          lista_autor = []
          for autor in autores:
              for field in fields:
@@ -57,10 +57,10 @@ for sessao in context.zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=cod_sessao
              dic_materia_apresentada["num_ordem"] = materia_apresentada.num_ordem
              dic_materia_apresentada["txt_ementa"] = emenda.txt_ementa
              dic_materia_apresentada["id_materia"] = 'Emenda ' + emenda.des_tipo_emenda + ' nº ' + str(emenda.num_emenda) + " ao " + materia.sgl_tipo_materia + str(materia.num_ident_basica) + "/" + str(materia.ano_ident_basica)
-             dic_materia_apresentada["link_materia"] = '<link href="' + context.sapl_documentos.absolute_url() + '/emenda/' + str(materia_apresentada.cod_emenda) + '_emenda.pdf' + '">' + 'EMENDA ' + emenda.des_tipo_emenda.decode('utf-8').upper() + ' Nº ' + str(emenda.num_emenda) + " - " +  materia.sgl_tipo_materia +' ' + str(materia.num_ident_basica) + '/' + str(materia.ano_ident_basica) + '</link>'
+             dic_materia_apresentada["link_materia"] = '<link href="' + context.sapl_documentos.absolute_url() + '/emenda/' + str(materia_apresentada.cod_emenda) + '_emenda.pdf' + '">' + 'EMENDA ' + emenda.des_tipo_emenda.upper() + ' Nº ' + str(emenda.num_emenda) + " - " +  materia.sgl_tipo_materia +' ' + str(materia.num_ident_basica) + '/' + str(materia.ano_ident_basica) + '</link>'
              dic_materia_apresentada["nom_autor"] = ""
              autores = context.zsql.autoria_emenda_obter_zsql(cod_emenda=emenda.cod_emenda)
-             fields = autores.data_dictionary().keys()
+             fields = list(autores.data_dictionary().keys())
              lista_autor = []
              for autor in autores:
                  for field in fields:
@@ -78,7 +78,7 @@ for sessao in context.zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=cod_sessao
              dic_materia_apresentada["link_materia"] = '<link href="' + context.sapl_documentos.absolute_url() + '/substitutivo/' + str(materia_apresentada.cod_substitutivo) + '_substitutivo.pdf' + '">' + 'SUBSTITUTIVO Nº ' + str(substitutivo.num_substitutivo) + " - " +  materia.sgl_tipo_materia + ' ' + str(materia.num_ident_basica) + '/' + str(materia.ano_ident_basica) + '</link>'
              dic_materia_apresentada["nom_autor"] = ""
              autores = context.zsql.autoria_substitutivo_obter_zsql(cod_substitutivo=substitutivo.cod_substitutivo)
-             fields = autores.data_dictionary().keys()
+             fields = list(autores.data_dictionary().keys())
              lista_autor = []
              for autor in autores:
                  for field in fields:
@@ -96,7 +96,7 @@ for sessao in context.zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=cod_sessao
                  sgl_comissao = comissao.sgl_comissao
                  nom_comissao = comissao.nom_comissao
              dic_materia_apresentada["link_materia"] = '<link href="' + context.sapl_documentos.absolute_url() + '/parecer_comissao/' + str(materia_apresentada.cod_parecer) + '_parecer.pdf' + '">' + 'PARECER ' + sgl_comissao+ ' Nº ' + str(parecer.num_parecer) + '/' + str(parecer.ano_parecer) + " - " +  materia.sgl_tipo_materia +' ' + str(materia.num_ident_basica) + '/' + str(materia.ano_ident_basica) + '</link>'
-             dic_materia_apresentada["nom_autor"] = nom_comissao.decode('utf-8').upper()
+             dic_materia_apresentada["nom_autor"] = nom_comissao.upper()
              lst_materia_apresentada.append(dic_materia_apresentada)
 
       elif materia_apresentada.cod_documento != None:
@@ -104,7 +104,7 @@ for sessao in context.zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=cod_sessao
          dic_materia_apresentada["num_ordem"] = materia_apresentada.num_ordem
          dic_materia_apresentada["txt_ementa"] = materia.txt_assunto
          dic_materia_apresentada["id_materia"] = materia.des_tipo_documento+" "+str(materia.num_documento)+"/"+str(materia.ano_documento)
-         dic_materia_apresentada["link_materia"] = '<link href="'+context.sapl_documentos.absolute_url()+'/administrativo/'+ str(materia_apresentada.cod_documento) + '_texto_integral.pdf' +'">'+materia.des_tipo_documento.decode('utf-8').upper()+' Nº '+str(materia.num_documento)+'/'+str(materia.ano_documento)+'</link>'
+         dic_materia_apresentada["link_materia"] = '<link href="'+context.sapl_documentos.absolute_url()+'/administrativo/'+ str(materia_apresentada.cod_documento) + '_texto_integral.pdf' +'">'+materia.des_tipo_documento.upper()+' Nº '+str(materia.num_documento)+'/'+str(materia.ano_documento)+'</link>'
          dic_materia_apresentada["nom_autor"] = materia.txt_interessado
          lst_materia_apresentada.append(dic_materia_apresentada)
 

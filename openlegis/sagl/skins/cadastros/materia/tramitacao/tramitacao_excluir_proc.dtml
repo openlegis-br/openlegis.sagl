@@ -11,13 +11,13 @@
   <dtml-call expr="REQUEST.set('metodo', zsql.tramitacao_excluir_zsql)">  
   <dtml-call expr="metodo(cod_tramitacao = cod_tramitacao)">
 
-   <dtml-call expr="REQUEST.set('pdf', _.str(cod_tramitacao)+'_tram.pdf')">
-   <dtml-if "_.hasattr(sapl_documentos.materia.tramitacao,pdf)">
+   <dtml-call expr="REQUEST.set('pdf', str(cod_tramitacao)+'_tram.pdf')">
+   <dtml-if "hasattr(sapl_documentos.materia.tramitacao,pdf)">
       <dtml-call expr="sapl_documentos.materia.tramitacao.manage_delObjects(pdf)">
    </dtml-if>
 
-   <dtml-call expr="REQUEST.set('pdf_assinado', _.str(cod_tramitacao)+'_tram_signed.pdf')">
-   <dtml-if "_.hasattr(sapl_documentos.materia.tramitacao,pdf_assinado)">
+   <dtml-call expr="REQUEST.set('pdf_assinado', str(cod_tramitacao)+'_tram_signed.pdf')">
+   <dtml-if "hasattr(sapl_documentos.materia.tramitacao,pdf_assinado)">
       <dtml-call expr="sapl_documentos.materia.tramitacao.manage_delObjects(pdf_assinado)">
    </dtml-if>
 

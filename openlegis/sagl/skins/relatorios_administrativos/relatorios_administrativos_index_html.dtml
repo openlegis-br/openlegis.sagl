@@ -12,7 +12,7 @@
      </thead>
 <dtml-in expr="objectValues('Filesystem Directory View')" sort="id">
   <dtml-if expr="propriedades.nome_relatorio">
-    <dtml-if expr="(propriedades.acesso_publico and _.str(AUTHENTICATED_USER)=='Anonymous User') or not _.str(AUTHENTICATED_USER)=='Anonymous User'">
+    <dtml-if expr="(propriedades.acesso_publico and str(AUTHENTICATED_USER)=='Anonymous User') or not str(AUTHENTICATED_USER)=='Anonymous User'">
        <tr>
          <td>
             <a href="<dtml-var portal_url>/relatorios_administrativos/<dtml-var id>">

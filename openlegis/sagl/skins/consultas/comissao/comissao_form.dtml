@@ -61,7 +61,7 @@
    <div class="row">
       <div class="col-12 mb-4">
         <dtml-in expr="zsql.periodo_comp_comissao_obter_zsql(ind_excluido=0)">
-           <dtml-if expr="(_.DateTime() >= dat_inicio) and (_.DateTime() <= dat_fim)">
+           <dtml-if expr="(DateTime() >= DateTime(dat_inicio)) and (DateTime() <= DateTime(dat_fim))">
               <div class="card">
                 <h6 class="card-header">Composição Atual</h6>
                 <ul class="list-group list-group-flush">
@@ -87,16 +87,16 @@
                 <li class="list-group-item">
                   <dtml-var num_reuniao>ª Reunião <dtml-var des_tipo_reuniao> em <dtml-var dat_inicio_reuniao><dtml-if hr_inicio_reuniao>, às <dtml-var hr_inicio_reuniao missing null=""></dtml-if>
                 <div class="float-right">
-                 <dtml-let id_pauta="_.str(cod_reuniao)+'_pauta.pdf'">
-                  <dtml-if "_.hasattr(sapl_documentos.reuniao_comissao,id_pauta)">
-                    <dtml-let pauta="_.getattr(sapl_documentos.reuniao_comissao,id_pauta).absolute_url">
+                 <dtml-let id_pauta="str(cod_reuniao)+'_pauta.pdf'">
+                  <dtml-if "hasattr(sapl_documentos.reuniao_comissao,id_pauta)">
+                    <dtml-let pauta="getattr(sapl_documentos.reuniao_comissao,id_pauta).absolute_url">
                       <a class="btn btn-sm btn-secondary" href="<dtml-var pauta>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fas fa-file-pdf"></i> <span class="">Pauta</span></a>
                     </dtml-let>
                   </dtml-if>
                 </dtml-let>
-                <dtml-let id_ata="_.str(cod_reuniao)+'_ata.pdf'">
-                  <dtml-if "_.hasattr(sapl_documentos.reuniao_comissao,id_ata)">
-                    <dtml-let ata="_.getattr(sapl_documentos.reuniao_comissao,id_ata).absolute_url">
+                <dtml-let id_ata="str(cod_reuniao)+'_ata.pdf'">
+                  <dtml-if "hasattr(sapl_documentos.reuniao_comissao,id_ata)">
+                    <dtml-let ata="getattr(sapl_documentos.reuniao_comissao,id_ata).absolute_url">
                       <a class="btn btn-sm btn-secondary" href="<dtml-var ata>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fas fa-file-pdf"></i> <span class="">Ata</span></a>
                     </dtml-let>
                   </dtml-if>
@@ -120,9 +120,9 @@
            <ul class="list-group list-group-flush">
               <dtml-in expr="zsql.documento_comissao_obter_zsql(cod_comissao=cod_comissao,ind_excluido=0)" size=3>
                 <li class="list-group-item">
-                 <dtml-let id_documento="_.str(cod_documento)+'_documento.pdf'">
-                  <dtml-if "_.hasattr(sapl_documentos.documento_comissao,id_documento)">
-                    <dtml-let documento="_.getattr(sapl_documentos.documento_comissao,id_documento).absolute_url">
+                 <dtml-let id_documento="str(cod_documento)+'_documento.pdf'">
+                  <dtml-if "hasattr(sapl_documentos.documento_comissao,id_documento)">
+                    <dtml-let documento="getattr(sapl_documentos.documento_comissao,id_documento).absolute_url">
                       <a target="_blank" href="<dtml-var documento>"><dtml-var dat_documento> - <dtml-var txt_descricao></a>
                     </dtml-let>
                   <dtml-else>

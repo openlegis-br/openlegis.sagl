@@ -41,7 +41,7 @@ for proposicao in context.zsql.proposicao_obter_zsql(cod_proposicao=cod_proposic
     inf_basicas_dic['des_tipo_proposicao']= proposicao.des_tipo_proposicao
     num_proposicao = proposicao.cod_proposicao
     nom_arquivo = str(proposicao.cod_proposicao)+'.odt'
-    des_tipo_materia = proposicao.des_tipo_proposicao.decode('utf-8').upper()
+    des_tipo_materia = proposicao.des_tipo_proposicao.upper()
     num_ident_basica = ''
     ano_ident_basica = DateTime().strftime("%Y")
     txt_ementa = proposicao.txt_descricao
@@ -58,16 +58,16 @@ for proposicao in context.zsql.proposicao_obter_zsql(cod_proposicao=cod_proposic
     if proposicao.cod_materia != None:
        for materia in context.zsql.materia_obter_zsql(cod_materia = proposicao.cod_materia):
            materia_vinculada['id_materia'] = materia.des_tipo_materia + ' nº ' + str(materia.num_ident_basica) + '/' + str(materia.ano_ident_basica)
-           materia_vinculada['txt_ementa'] = materia.txt_ementa.decode('utf-8')
+           materia_vinculada['txt_ementa'] = materia.txt_ementa
            materia_vinculada['autoria'] = ''
            autores = context.zsql.autoria_obter_zsql(cod_materia=materia.cod_materia)
-           fields = autores.data_dictionary().keys()
+           fields = list(autores.data_dictionary().keys())
            lista_autor = []
            for autor in autores:
                for field in fields:
                    nome_autor = autor['nom_autor_join']
                lista_autor.append(nome_autor)
-           inf_basicas_dic['nome_autor'] = autor.nom_autor_join.decode('utf-8').upper()               
+           inf_basicas_dic['nome_autor'] = autor.nom_autor_join.upper()               
            materia_vinculada['autoria'] = ', '.join(['%s' % (value) for (value) in lista_autor]) 
        
        if proposicao.des_tipo_proposicao == 'Parecer' or proposicao.des_tipo_proposicao == 'Parecer de Comissão':
@@ -81,7 +81,7 @@ for proposicao in context.zsql.proposicao_obter_zsql(cod_proposicao=cod_proposic
     apelido_autor = ''
     nom_autor = []
     autores = context.zsql.autor_obter_zsql(cod_autor = proposicao.cod_autor)
-    fields = autores.data_dictionary().keys()
+    fields = list(autores.data_dictionary().keys())
     for autor in autores:
         autor_dic = {}
         for field in fields:
@@ -100,15 +100,15 @@ for proposicao in context.zsql.proposicao_obter_zsql(cod_proposicao=cod_proposic
                       partido_autor = nom_cargo + ' - ' + parlamentar.sgl_partido
                    else:
                       partido_autor = nom_cargo
-                   autor_dic['nome_autor'] = autor.nom_autor_join.decode('utf-8').upper() + '\n' + partido_autor
+                   autor_dic['nome_autor'] = autor.nom_autor_join.upper() + '\n' + partido_autor
                    autor_dic['apelido_autor'] = partido_autor
             elif autor.des_cargo == 'Prefeito Municipal' or autor.des_cargo == 'Prefeito Municipal':
                for usuario in context.zsql.usuario_obter_zsql(col_username=autor.col_username):
-                   autor_dic['nome_autor'] = usuario.nom_completo.decode('utf-8').upper() + '\n' + autor.des_cargo
+                   autor_dic['nome_autor'] = usuario.nom_completo.upper() + '\n' + autor.des_cargo
                    autor_dic['apelido_autor'] = ''
                    autor_dic['cod_autor'] = autor['cod_autor']
             else:
-               autor_dic['nome_autor'] = autor.nom_autor_join.decode('utf-8').upper()
+               autor_dic['nome_autor'] = autor.nom_autor_join.upper()
                autor_dic['apelido_autor'] = ''
                autor_dic['cod_autor'] = autor['cod_autor']
         nom_autor.append(autor_dic)

@@ -1,18 +1,16 @@
 ##parameters=rodape_dic, imagem, inf_basicas_dic, lst_mesa, lst_presenca_sessao, lst_materia_apresentada, lst_expedientes, lst_expediente_materia, lst_oradores_expediente, lst_presenca_ordem_dia, lst_votacao, lst_presenca_expediente, lst_oradores, lst_presenca_encerramento, lst_presidente, sessao=''
 """Script para geração do PDF das sessoes plenarias
-   Autor: Gustavo Lepri
-   Atualizado por Luciano De Fázio - 22/03/2012
-   versão: 1.0
 """
 from trml2pdf import parseString
-from cStringIO import StringIO
+from io import BytesIO
 import time
+from html2rml import html2rml
 
 def cabecalho(inf_basicas_dic,imagem):
     """
     """
     tmp=''
-    tmp+='\t\t\t\t<image x="4.1cm" y="26.9cm" width="74" height="60" file="' + imagem + '"/>\n'
+    tmp+='\t\t\t\t<image x="3.1cm" y="26.9cm" width="74" height="60" file="' + imagem + '"/>\n'
     tmp+='\t\t\t\t<lines>3.3cm 26.3cm 19.5cm 26.3cm</lines>\n'
     tmp+='\t\t\t\t<setFont name="Helvetica" size="11"/>\n'
     tmp+='\t\t\t\t<drawString x="6.7cm" y="27.6cm">Estado de ' + str(inf_basicas_dic['nom_estado']) + '</drawString>\n'
@@ -81,6 +79,7 @@ def paraStyle():
     tmp+='\t\t\t<paraStyle name="all" alignment="justify"/>\n'
     tmp+='\t\t</initialize>\n'
     tmp+='\t\t<paraStyle name="style.Title" fontName="Helvetica" fontSize="11" leading="13" alignment="RIGHT"/>\n'
+    tmp+='\t\t<paraStyle name="p" fontName="Helvetica" fontSize="10.0" leading="10" alignment="JUSTIFY"/>\n'
     tmp+='\t\t<paraStyle name="P0" fontName="Helvetica-Bold" fontSize="12.0" leading="17" alignment="CENTER"/>\n'
     tmp+='\t\t<paraStyle name="P01" fontName="Helvetica" fontSize="10.0" leading="12" alignment="CENTER"/>\n'
     tmp+='\t\t<paraStyle name="P1" fontName="Helvetica-Bold" fontSize="11.0" textColor="#333333" leading="14" spaceBefore="12" alignment="LEFT"/>\n'
@@ -200,10 +199,13 @@ def expedientes(lst_expedientes):
     tmp+='\t\t\t<font color="white"> </font>\n'
     tmp+='\t\t</para>\n'
     for expediente in lst_expedientes:
-        tmp+='\t\t<para style="P3"><b>' + expediente['nom_expediente'] +': </b> <br />\n' + str(expediente['txt_expediente']) +'</para>\n'
+        tmp+='\t\t<para style="P3"><b>' + expediente['nom_expediente'] +'</b>' +'</para>\n'
         tmp+='\t\t<para style="P3">\n'
         tmp+='\t\t\t<font color="white">\n</font>\n'
         tmp+='\t\t</para>\n'
+        tmp+=html2rml(expediente['txt_expediente'])
+        tmp+='\t\t<para style="P3">\n'
+        tmp+='\t\t\t<font color="white">\n</font>\n'
     return tmp
 
 def presenca_ordem_dia(lst_presenca_ordem_dia):
@@ -342,7 +344,9 @@ def principal(cabecalho, rodape, sessao, imagem, inf_basicas_dic):
     tmp+=presidente(lst_presidente)
     tmp+='\t</story>\n'
     tmp+='</document>\n'
-    tmp_pdf=parseString(tmp)
+    tmp_pdf=parseString(tmp) 
+
+    packet = BytesIO(temp_pdf)
 
     if hasattr(context.temp_folder,arquivoPdf):
         context.temp_folder.manage_delObjects(ids=arquivoPdf)

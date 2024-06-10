@@ -96,7 +96,7 @@ function tipo_autor_excluir() {
       </div>
       <dtml-in expr="zsql.tipo_proposicao_obter_zsql(ind_excluido=0)">   
         <div class="form-check">
-          <input class="form-check-input" type="checkbox" id="chk_tip_proposicao-<dtml-var tip_proposicao>" name="chk_tip_proposicao" value="<dtml-var tip_proposicao>"<dtml-if expr="_.has_key('tip_proposicao_sel') and _.str(tip_proposicao) in _.string.split(_.str(tip_proposicao_sel),',')"> checked="1"</dtml-if>>
+          <input class="form-check-input" type="checkbox" id="chk_tip_proposicao-<dtml-var tip_proposicao>" name="chk_tip_proposicao" value="<dtml-var tip_proposicao>"<dtml-if expr="_.has_key('tip_proposicao_sel') and str(tip_proposicao) in str(tip_proposicao_sel).split(',')"> checked="1"</dtml-if>>
           <label class="form-check-label" for="chk_tip_proposicao-<dtml-var tip_proposicao>"><dtml-var des_tipo_proposicao></label>                
         </div>
       </dtml-in>

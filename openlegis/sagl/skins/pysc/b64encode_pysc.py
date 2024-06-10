@@ -10,6 +10,8 @@
 
 import base64
 
-codigo = base64.b64encode(str(codigo))
+codigo = str(codigo).encode()
+
+codigo = base64.b64encode(bytes(codigo))
 
 return codigo

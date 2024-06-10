@@ -1,5 +1,5 @@
 <dtml-in expr="zsql.periodo_comp_mesa_obter_zsql(cod_periodo_comp=hdn_cod_periodo_comp)">
-  <dtml-call expr="REQUEST.set('hdn_dat_inicio', _.DateTime(dat_inicio_periodo).strftime('%Y/%m/%d'))">
+  <dtml-call expr="REQUEST.set('hdn_dat_inicio', DateTime(dat_inicio_periodo).strftime('%Y/%m/%d'))">
 </dtml-in>
 
 <dtml-in expr="zsql.sessao_legislativa_obter_zsql(data=hdn_dat_inicio)">
@@ -67,13 +67,13 @@
 
 <dtml-comment>LOG DE AUDITORIA</dtml-comment>
 <dtml-if dbcon_logs>
-  <dtml-call expr="REQUEST.set('metodo1', _.string.split(str(metodo),'/')[-1])">
-  <dtml-call expr="REQUEST.set('metodo1', _.string.split(str(metodo1),' at ')[-1])">
-  <dtml-call expr="REQUEST.set('metodo1', _.string.split(str(metodo1),'>')[0])">
+  <dtml-call expr="REQUEST.set('metodo1', str(metodo).split('/')[-1])">
+  <dtml-call expr="REQUEST.set('metodo1', str(metodo1).split(' at ')[-1])">
+  <dtml-call expr="REQUEST.set('metodo1', str(metodo1).split('>')[0])">
   <dtml-call expr="zsql.logs_registrar_zsql(
             usuario      = REQUEST['AUTHENTICATED_USER'].getUserName(), 
             data         = DateTime().strftime('%Y-%m-%d %H:%M:%S'),
-            modulo       = _.string.split(_['REQUEST']['URL1'],'/')[-1],
+            modulo       = str(_['REQUEST']['URL1']).split('/')[-1],
             metodo       = metodo1,
             IP           = pysc.get_ip(),
             dados        = REQUEST.form.items(),

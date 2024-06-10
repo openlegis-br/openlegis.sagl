@@ -1,14 +1,14 @@
 <dtml-call expr="REQUEST.set('erro', 0)">
 
-<dtml-call expr="REQUEST.set('id_documento', _.str(cod_documento_acessorio)+'.pdf')">
-<dtml-if expr="_.hasattr(sapl_documentos.administrativo,id_documento)">
+<dtml-call expr="REQUEST.set('id_documento', str(cod_documento_acessorio)+'.pdf')">
+<dtml-if expr="hasattr(sapl_documentos.administrativo,id_documento)">
     <dtml-try>
       <dtml-call "sapl_documentos.administrativo.manage_delObjects(id_documento)">
     </dtml-try>
 </dtml-if>
 
-<dtml-call expr="REQUEST.set('id_documento_asinado', _.str(cod_documento_acessorio)+'_signed.pdf')">
-<dtml-if expr="_.hasattr(sapl_documentos.administrativo,id_documento_asinado)">
+<dtml-call expr="REQUEST.set('id_documento_asinado', str(cod_documento_acessorio)+'_signed.pdf')">
+<dtml-if expr="hasattr(sapl_documentos.administrativo,id_documento_asinado)">
     <dtml-try>
       <dtml-call "sapl_documentos.administrativo.manage_delObjects(id_documento_asinado)">
     </dtml-try>
@@ -55,9 +55,9 @@
   </dtml-if>
 
 <dtml-if expr="dbcon_logs and cod_documento_acessorio">
-  <dtml-call expr="REQUEST.set('metodo1', _.string.split(str(metodo),'/')[-1])">
-  <dtml-call expr="REQUEST.set('metodo1', _.string.split(str(metodo1),' at ')[-1])">
-  <dtml-call expr="REQUEST.set('metodo1', _.string.split(str(metodo1),'>')[0])">
+  <dtml-call expr="REQUEST.set('metodo1', str(metodo).split('/')[-1])">
+  <dtml-call expr="REQUEST.set('metodo1', str(metodo1).split(' at ')[-1])">
+  <dtml-call expr="REQUEST.set('metodo1', str(metodo1).split('>')[0])">
   <dtml-call expr="zsql.logs_registrar_zsql(
             usuario      = REQUEST['AUTHENTICATED_USER'].getUserName(), 
             data         = DateTime().strftime('%Y-%m-%d %H:%M:%S'),

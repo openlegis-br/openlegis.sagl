@@ -54,9 +54,9 @@ location.href = endereco;
              <td><strong><dtml-var num_reuniao></strong></td>
              <td><strong><dtml-var dat_inicio_reuniao> <dtml-if hr_inicio_reuniao>- <dtml-var hr_inicio_reuniao missing null=""></strong></dtml-if></td>
               <td>
-                <dtml-let id_pauta="_.str(cod_reuniao)+'_pauta.pdf'">
-                  <dtml-if "_.hasattr(sapl_documentos.reuniao_comissao,id_pauta)">
-                    <dtml-let pauta="_.getattr(sapl_documentos.reuniao_comissao,id_pauta).absolute_url">
+                <dtml-let id_pauta="str(cod_reuniao)+'_pauta.pdf'">
+                  <dtml-if "hasattr(sapl_documentos.reuniao_comissao,id_pauta)">
+                    <dtml-let pauta="getattr(sapl_documentos.reuniao_comissao,id_pauta).absolute_url">
                       <a target="_blank" href="<dtml-var pauta>?<dtml-var expr="ZopeTime().timeTime()">"><img align="middle" border="0" src="<dtml-var portal_url>/imagens/archiv.gif" alt="Texto Integral" title="Texto Integral"></a>
                     </dtml-let>
                   <dtml-else>
@@ -65,9 +65,9 @@ location.href = endereco;
                 </dtml-let>
               </td>
               <td>
-                <dtml-let id_ata="_.str(cod_reuniao)+'_ata.pdf'">
-                  <dtml-if "_.hasattr(sapl_documentos.reuniao_comissao,id_ata)">
-                    <dtml-let ata="_.getattr(sapl_documentos.reuniao_comissao,id_ata).absolute_url">
+                <dtml-let id_ata="str(cod_reuniao)+'_ata.pdf'">
+                  <dtml-if "hasattr(sapl_documentos.reuniao_comissao,id_ata)">
+                    <dtml-let ata="getattr(sapl_documentos.reuniao_comissao,id_ata).absolute_url">
                       <a target="_blank" href="<dtml-var ata>?<dtml-var expr="ZopeTime().timeTime()">"><img align="middle" border="0" src="<dtml-var portal_url>/imagens/archiv.gif" alt="Texto Integral" title="Texto Integral"></a>
                     </dtml-let>
                   <dtml-else>

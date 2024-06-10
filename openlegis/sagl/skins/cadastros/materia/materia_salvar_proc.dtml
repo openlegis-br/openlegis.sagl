@@ -100,7 +100,7 @@
         <dtml-in expr="zsql.proposicao_obter_zsql(cod_proposicao=hdn_cod_proposicao)">
           <dtml-call expr="REQUEST.set('des_tipo_proposicao', des_tipo_proposicao)">
           <dtml-call expr="REQUEST.set('cod_documento',pysc.proposicao_calcular_checksum_pysc(cod_proposicao))">
-          <dtml-call expr="REQUEST.set('hdn_hor_tramitacao', _.DateTime().strftime('%d/%m/%Y às %H:%M'))">
+          <dtml-call expr="REQUEST.set('hdn_hor_tramitacao', DateTime().strftime('%d/%m/%Y às %H:%M'))">
           <dtml-call expr="REQUEST.set('txt_tramitacao', 'Proposição Eletrônica ' + cod_documento + ' incorporada como matéria principal em ' + hdn_hor_tramitacao)">
           <dtml-comment>
             <dtml-call expr="zsql.autoria_incluir_zsql(cod_autor = cod_autor, cod_materia = codigo, ind_primeiro_autor = 0)">
@@ -110,8 +110,8 @@
                                                                  dat_recebimento = pysc.data_atual_iso_pysc(),
                                                                  cod_mat_ou_doc = _.int(hdn_cod_materia))">
         <dtml-call expr="pysc.proposicao_salvar_como_texto_integral_materia_pysc(hdn_cod_proposicao,hdn_cod_materia,0)">
-        <dtml-call expr="REQUEST.set('hdn_dat_tramitacao', _.DateTime().strftime('%d/%m/%Y'))">
-        <dtml-call expr="REQUEST.set('hdn_dat_encaminha', _.DateTime().strftime('%Y-%m-%d %H:%M:%S'))">
+        <dtml-call expr="REQUEST.set('hdn_dat_tramitacao', DateTime().strftime('%d/%m/%Y'))">
+        <dtml-call expr="REQUEST.set('hdn_dat_encaminha', DateTime().strftime('%Y-%m-%d %H:%M:%S'))">
         <dtml-call expr="REQUEST.set('nom_unidade_origem', 'Protocolo Eletrônico')">
         <dtml-in expr="zsql.unidade_tramitacao_obter_zsql(nom_orgao=nom_unidade_origem)">
            <dtml-call expr="REQUEST.set('cod_unid_tram_local', cod_unid_tramitacao)">
@@ -153,8 +153,8 @@
            </dtml-if>
         </dtml-in>
         <dtml-if cod_protocolo>
-            <dtml-call expr="REQUEST.set('id_protocolo', _.str(cod_protocolo)+'_protocolo.pdf')">
-            <dtml-if "_.hasattr(sapl_documentos.protocolo,id_protocolo)">
+            <dtml-call expr="REQUEST.set('id_protocolo', str(cod_protocolo)+'_protocolo.pdf')">
+            <dtml-if "hasattr(sapl_documentos.protocolo,id_protocolo)">
                <dtml-call expr="pysc.protocolo_salvar_como_texto_integral_materia_pysc(cod_protocolo,codigo)">
             </dtml-if>
             <dtml-in expr="zsql.usuario_obter_zsql(col_username=AUTHENTICATED_USER.getUserName())">
@@ -162,10 +162,10 @@
                  <dtml-call expr="REQUEST.set('cod_usuario_corrente', int(cod_usuario))">
               </dtml-if>
             </dtml-in>
-            <dtml-call expr="REQUEST.set('hdn_hor_tramitacao', _.DateTime().strftime('%d/%m/%Y às %H:%M'))">
+            <dtml-call expr="REQUEST.set('hdn_hor_tramitacao', DateTime().strftime('%d/%m/%Y às %H:%M'))">
             <dtml-call expr="REQUEST.set('txt_tramitacao', 'Matéria incorporada em ' + hdn_hor_tramitacao)">
-            <dtml-call expr="REQUEST.set('hdn_dat_tramitacao', _.DateTime().strftime('%d/%m/%Y'))">
-            <dtml-call expr="REQUEST.set('hdn_dat_encaminha', _.DateTime().strftime('%Y-%m-%d %H:%M:%S'))">
+            <dtml-call expr="REQUEST.set('hdn_dat_tramitacao', DateTime().strftime('%d/%m/%Y'))">
+            <dtml-call expr="REQUEST.set('hdn_dat_encaminha', DateTime().strftime('%Y-%m-%d %H:%M:%S'))">
             <dtml-call expr="REQUEST.set('nom_unidade_origem', 'Protocolo')">
             <dtml-in expr="zsql.unidade_tramitacao_obter_zsql(nom_orgao=nom_unidade_origem)">
                <dtml-call expr="REQUEST.set('cod_unid_tram_local', cod_unid_tramitacao)">
@@ -201,75 +201,29 @@
 
   <dtml-unless temProposicao>
    <dtml-unless cod_protocolo>
-    <dtml-call expr="REQUEST.set('erro', 0)">
-    <dtml-call expr="REQUEST.set('existe_arquivo', 0)">
+    
     <dtml-if file_nom_arquivo>
-      <dtml-call expr="REQUEST.set('id_documento', _.str(hdn_cod_materia)+'_texto_integral.pdf')">
-      <dtml-if expr="_.hasattr(sapl_documentos.materia,id_documento)">
-        <dtml-let documento="_.getattr(sapl_documentos.materia,id_documento) ">
-          <dtml-call expr="REQUEST.set('existe_arquivo', 1)">
-          <dtml-try>
-            <dtml-if expr="pysc.arquivo_pdf_validar_pysc(file=file_nom_arquivo)">
-              <dtml-call "documento.manage_upload(file=pysc.upload_file(file=file_nom_arquivo, title='Materia'))">
-            </dtml-if>
-          <dtml-except>
-            <dtml-call expr="REQUEST.set('erro', 1)">
-            <dtml-let mensagem="'Ocorreu erro ao tentar salvar o texto integral'+hdn_cod_materia" tipo_mensagem="'danger'">
-               <dtml-var mensagem_emitir>
-            </dtml-let>
-          </dtml-try>
-        </dtml-let>
-      </dtml-if>
+      <dtml-call expr="REQUEST.set('id_documento', str(hdn_cod_materia)+'_texto_integral.pdf')">
+      <dtml-in expr="zsql.materia_obter_zsql(cod_materia = hdn_cod_materia)">
+        <dtml-call expr="REQUEST.set('titulo', sgl_tipo_materia + ' ' + str(num_ident_basica) + '/' + str(ano_ident_basica))">
+      </dtml-in>
+      <dtml-call expr="sapl_documentos.materia.manage_addFile(id=id_documento,file=pysc.upload_file(file=file_nom_arquivo, title=titulo))">
     </dtml-if>
-    <dtml-if expr="not existe_arquivo">
-      <dtml-call expr="REQUEST.set('erro',0)">
-      <dtml-try>
-        <dtml-in expr="zsql.materia_obter_zsql(cod_materia = hdn_cod_materia)">
-          <dtml-call expr="REQUEST.set('titulo', sgl_tipo_materia + ' ' + str(num_ident_basica) + '/' + str(ano_ident_basica))">
-        </dtml-in>
-        <dtml-call expr="sapl_documentos.materia.manage_addFile(id=id_documento,file=pysc.upload_file(file=file_nom_arquivo, title=titulo))">
-      <dtml-except> 
-      </dtml-try>
-    </dtml-if>
-    <dtml-call expr="REQUEST.set('existe_redacao', 0)">
+    
     <dtml-if file_redacao>
-      <dtml-call expr="REQUEST.set('id_redacao', _.str(hdn_cod_materia)+'_redacao_final.pdf')">
-      <dtml-if expr="_.hasattr(sapl_documentos.materia,id_redacao)">
-        <dtml-let documento="_.getattr(sapl_documentos.materia,id_redacao) ">
-          <dtml-call expr="REQUEST.set('existe_redacao', 1)">
-          <dtml-try>
-              <dtml-call "documento.manage_upload(file=pysc.upload_file(file=file_redacao, title='Redacao Final'))">
-          <dtml-except>
-            <dtml-call expr="REQUEST.set('erro', 1)">
-            <dtml-let mensagem="'Ocorreu erro ao tentar salvar a redação final'+hdn_cod_materia" tipo_mensagem="'danger'">
-               <dtml-var mensagem_emitir>
-            </dtml-let>
-          </dtml-try>
-        </dtml-let>
-      </dtml-if>
+      <dtml-call expr="REQUEST.set('id_redacao', str(hdn_cod_materia)+'_redacao_final.pdf')">
+      <dtml-call expr="sapl_documentos.materia.manage_addFile(id=id_redacao,file=pysc.upload_file(file=file_redacao, title='Redacao Final'))">
     </dtml-if>
-    <dtml-if expr="not existe_redacao">
-      <dtml-call expr="REQUEST.set('erro',0)">
-      <dtml-try>
-        <dtml-call expr="sapl_documentos.materia.manage_addFile(id=id_redacao,file=pysc.upload_file(file=file_redacao, title='Redacao Final'))">
-      <dtml-except> 
-      </dtml-try>
-    </dtml-if>
+
    </dtml-unless>
   </dtml-unless>
 
- <dtml-if erro_autor>
-   <dtml-let mensagem="'Matéria salva com sucesso! Mas não foi possível salvar os dados da autoria. Faça inclusão dos autores manualmente.'" tipo_mensagem="'warning'">
-     <dtml-var mensagem_emitir>
-   </dtml-let>
- <dtml-else>
-   <dtml-call expr="sapl_documentos.materia.Catalog.atualizarCatalogo(hdn_cod_materia)">
    <dtml-if expr="txt_num_protocolo and txt_num_protocolo!=''">
        <dtml-in expr="zsql.protocolo_obter_zsql(num_protocolo=txt_num_protocolo,ano_protocolo=txt_ano_ident_basica)">
         <dtml-if cod_protocolo>
           <dtml-call expr="REQUEST.set('cod_protocolo', cod_protocolo)">
-          <dtml-let id_documento="_.str(cod_protocolo)+'_protocolo.pdf'">
-            <dtml-if "_.hasattr(sapl_documentos.protocolo,id_documento)">
+          <dtml-let id_documento="str(cod_protocolo)+'_protocolo.pdf'">
+            <dtml-if "hasattr(sapl_documentos.protocolo,id_documento)">
               <dtml-call expr="pysc.protocolo_salvar_como_texto_integral_materia_pysc(cod_protocolo,hdn_cod_materia,0)">
             </dtml-if>
           </dtml-let>
@@ -292,7 +246,13 @@
         <dtml-call expr="modelo_proposicao.proposicao_autuar(cod_proposicao=hdn_cod_proposicao)">      
       </dtml-if>
    </dtml-if>
- </dtml-if>
+
+   <dtml-try>
+      <dtml-call expr="sapl_documentos.materia.Catalog.atualizarCatalogo(hdn_cod_materia)">
+   <dtml-except>
+   <dtml-else>
+   </dtml-try>
+
  </dtml-try>
 </dtml-unless>
 
@@ -301,7 +261,7 @@
   <dtml-call expr="zsql.logs_registrar_zsql(
             usuario      = REQUEST['AUTHENTICATED_USER'].getUserName(), 
             data         = DateTime().strftime('%Y-%m-%d %H:%M:%S'),
-            modulo       = _.string.split(_['REQUEST']['URL1'],'/')[-1],
+            modulo       = str(_['REQUEST']['URL1']).split('/')[-1],
             metodo       = 'materia_salvar_proc',
             IP           = pysc.get_ip(),
             dados        = REQUEST.form.items(),

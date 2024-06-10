@@ -55,10 +55,7 @@ for tramitacao in context.zsql.tramitacao_obter_zsql(cod_tramitacao=hdn_cod_tram
   tramitacao_dic['dat_extenso'] = context.pysc.data_converter_por_extenso_pysc(data=dat_tramitacao)
   tramitacao_dic['dat_encaminha'] = tramitacao.dat_encaminha
   tramitacao_dic['des_status'] = tramitacao.des_status
-  if tramitacao.txt_tramitacao != None and tramitacao.txt_tramitacao!='':
-    tramitacao_dic['txt_tramitacao'] = context.extensions.xhtml2rml(tramitacao.txt_tramitacao,'P2')
-  else:
-    tramitacao_dic['txt_tramitacao'] = ''
+  tramitacao_dic['txt_tramitacao'] = tramitacao.txt_tramitacao
   if tramitacao.dat_fim_prazo != None:
     tramitacao_dic['dat_fim_prazo'] = tramitacao.dat_fim_prazo
   else:
@@ -75,14 +72,14 @@ for tramitacao in context.zsql.tramitacao_obter_zsql(cod_tramitacao=hdn_cod_tram
   for materia in context.zsql.materia_obter_zsql(cod_materia=tramitacao.cod_materia):
    txt_ementa = escape(materia.txt_ementa)
    autores = context.zsql.autoria_obter_zsql(cod_materia=materia.cod_materia)
-   fields = autores.data_dictionary().keys()
+   fields = list(autores.data_dictionary().keys())
    lista_autor = []
    for autor in autores:
      for field in fields:
        nome_autor = autor['nom_autor_join']
      lista_autor.append(nome_autor)
      autoria = ', '.join(['%s' % (value) for (value) in lista_autor])
-   tramitacao_dic['id_materia'] = materia.des_tipo_materia.decode('utf-8').upper()+" N° "+ str(materia.num_ident_basica)+"/"+ str(materia.ano_ident_basica)+" - "+ str(autoria)+" - "+ txt_ementa
+   tramitacao_dic['id_materia'] = materia.des_tipo_materia.upper()+" N° "+ str(materia.num_ident_basica)+"/"+ str(materia.ano_ident_basica)+" - "+ str(autoria)+" - "+ txt_ementa
 
   # unidade de origem
   for unid_origem in context.zsql.unidade_tramitacao_obter_zsql(cod_unid_tramitacao=tramitacao.cod_unid_tram_local):

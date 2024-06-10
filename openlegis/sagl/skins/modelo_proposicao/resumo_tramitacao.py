@@ -52,7 +52,7 @@ for materia in context.zsql.materia_obter_zsql(cod_materia=cod_materia):
  txt_ementa = materia.txt_ementa
  nom_autor = ""
  autores = context.zsql.autoria_obter_zsql(cod_materia=cod_materia)
- fields = autores.data_dictionary().keys()
+ fields = list(autores.data_dictionary().keys())
  lista_autor = []
  for autor in autores:
    for field in fields:

@@ -105,9 +105,9 @@ $(document).ready(function() {
        </td>
        <td><dtml-var txt_descricao></td>
        <td>
-         <dtml-let id_documento="_.str(cod_documento)+'_documento.pdf'">
-            <dtml-if "_.hasattr(sapl_documentos.documento_comissao,id_documento)">
-               <dtml-let documento="_.getattr(sapl_documentos.documento_comissao,id_documento).absolute_url">
+         <dtml-let id_documento="str(cod_documento)+'_documento.pdf'">
+            <dtml-if "hasattr(sapl_documentos.documento_comissao,id_documento)">
+               <dtml-let documento="getattr(sapl_documentos.documento_comissao,id_documento).absolute_url">
                     <a target="_blank" href="<dtml-var documento>"><i class="fa fa-file-pdf" style="font-size: 21px;margin-right: 6px;"></i></a>
                </dtml-let>
             <dtml-else>

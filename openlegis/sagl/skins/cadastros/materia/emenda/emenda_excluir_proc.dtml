@@ -1,7 +1,7 @@
-<dtml-call expr="REQUEST.set('id_emenda', _.str(cod_emenda)+'_emenda.pdf')">
-<dtml-call expr="REQUEST.set('id_emenda_assinada', _.str(cod_emenda)+'_emenda_signed.pdf')">
+<dtml-call expr="REQUEST.set('id_emenda', str(cod_emenda)+'_emenda.pdf')">
+<dtml-call expr="REQUEST.set('id_emenda_assinada', str(cod_emenda)+'_emenda_signed.pdf')">
 
-<dtml-if expr="_.hasattr(sapl_documentos.emenda,id_emenda)">
+<dtml-if expr="hasattr(sapl_documentos.emenda,id_emenda)">
     <dtml-try>
 	  <dtml-call expr="sapl_documentos.emenda.manage_delObjects(id_emenda)">
 	  <dtml-except>
@@ -9,7 +9,7 @@
     </dtml-try>
 </dtml-if>
 
-<dtml-if expr="_.hasattr(sapl_documentos.emenda,id_emenda_assinada)">
+<dtml-if expr="hasattr(sapl_documentos.emenda,id_emenda_assinada)">
     <dtml-try>
 	  <dtml-call expr="sapl_documentos.emenda.manage_delObjects(id_emenda_assinada)">
 	  <dtml-except>
@@ -53,13 +53,13 @@
 
 <dtml-comment>LOG DE AUDITORIA</dtml-comment>
 <dtml-if dbcon_logs>
-  <dtml-call expr="REQUEST.set('metodo1', _.string.split(str(metodo),'/')[-1])">
-  <dtml-call expr="REQUEST.set('metodo1', _.string.split(str(metodo1),' at ')[-1])">
-  <dtml-call expr="REQUEST.set('metodo1', _.string.split(str(metodo1),'>')[0])">
+  <dtml-call expr="REQUEST.set('metodo1', str(metodo).split('/')[-1])">
+  <dtml-call expr="REQUEST.set('metodo1', str(metodo1).split(' at ')[-1])">
+  <dtml-call expr="REQUEST.set('metodo1', str(metodo1).split('>')[0])">
   <dtml-call expr="zsql.logs_registrar_zsql(
             usuario      = REQUEST['AUTHENTICATED_USER'].getUserName(), 
             data         = DateTime().strftime('%Y-%m-%d %H:%M:%S'),
-            modulo       = _.string.split(_['REQUEST']['URL1'],'/')[-1],
+            modulo       = str(_['REQUEST']['URL1']).split('/')[-1],
             metodo       = metodo1,
             IP           = pysc.get_ip(),
             dados        = REQUEST.form.items(),

@@ -39,7 +39,7 @@ for row in results:
     if row.nom_eleitor!=None:
      r.append(row.nom_eleitor.title())
     if row.end_residencial!=None and row.end_residencial!='':
-     r.append(str(row.end_residencial).decode('utf-8').title())
+     r.append(str(row.end_residencial).title())
     if row.nom_bairro!=None and row.nom_bairro!='':
        if row.num_cep==None or row.num_cep=='':
            r.append(row.nom_bairro.title())
@@ -48,4 +48,4 @@ for row in results:
     if row.nom_localidade!=None:  
      r.append(str(row.nom_localidade) + ' ' + row.sgl_uf )
     dados.append(r)
-return context.pdflabels(dados)
+return context.extensions.pdflabels(dados)

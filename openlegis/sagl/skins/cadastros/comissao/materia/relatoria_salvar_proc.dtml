@@ -1,7 +1,7 @@
 <dtml-if hdn_cod_proposicao>
    <dtml-call expr="REQUEST.set('temProposicao',hdn_cod_proposicao!='')">
    <dtml-if expr="sapl_documentos.props_sagl.numero_protocolo_anual == 1">
-      <dtml-in expr="zsql.protocolo_numero_obter_zsql(ano_protocolo = _.DateTime().strftime('%Y'))">
+      <dtml-in expr="zsql.protocolo_numero_obter_zsql(ano_protocolo = DateTime().strftime('%Y'))">
          <dtml-call expr="REQUEST.set('txt_num_protocolo', int(novo_numero))">
       </dtml-in>
    <dtml-else>
@@ -101,8 +101,8 @@
            </dtml-if>
         </dtml-in>
         <dtml-if cod_protocolo>
-          <dtml-call expr="REQUEST.set('id_protocolo', _.str(cod_protocolo)+'_protocolo.pdf')">
-          <dtml-if "_.hasattr(sapl_documentos.protocolo,id_protocolo)">
+          <dtml-call expr="REQUEST.set('id_protocolo', str(cod_protocolo)+'_protocolo.pdf')">
+          <dtml-if "hasattr(sapl_documentos.protocolo,id_protocolo)">
              <dtml-call expr="pysc.protocolo_salvar_como_texto_integral_parecer_pysc(cod_protocolo, ult_relatoria_incluida)">
           </dtml-if>
           <dtml-in expr="zsql.usuario_obter_zsql(col_username=AUTHENTICATED_USER.getUserName())">
@@ -131,10 +131,10 @@
           <dtml-in expr="zsql.comissao_obter_zsql(cod_comissao=hdn_cod_comissao)">
                 <dtml-call expr="REQUEST.set('sgl_comissao', sgl_comissao)">
           </dtml-in>
-          <dtml-call expr="REQUEST.set('hdn_hor_tramitacao', _.DateTime().strftime('%d/%m/%Y as %H:%M'))">
+          <dtml-call expr="REQUEST.set('hdn_hor_tramitacao', DateTime().strftime('%d/%m/%Y as %H:%M'))">
           <dtml-call expr="REQUEST.set('txt_tramitacao', '<p>Parecer ' + str(sgl_comissao) + ' ' + str(txt_num_parecer) +'/' + str(txt_ano_parecer) + ' incorporado em ' + str(hdn_hor_tramitacao) + '</p>')">
-          <dtml-call expr="REQUEST.set('hdn_dat_tramitacao', _.DateTime().strftime('%Y-%m-%d %H:%M:%S'))">
-          <dtml-call expr="REQUEST.set('hdn_dat_encaminha', _.DateTime().strftime('%Y-%m-%d %H:%M:%S'))">
+          <dtml-call expr="REQUEST.set('hdn_dat_tramitacao', DateTime().strftime('%Y-%m-%d %H:%M:%S'))">
+          <dtml-call expr="REQUEST.set('hdn_dat_encaminha', DateTime().strftime('%Y-%m-%d %H:%M:%S'))">
           <dtml-call expr="REQUEST.set('sgl_status', 'PAR')">
           <dtml-in expr="zsql.status_tramitacao_obter_zsql(sgl_status=sgl_status)">
             <dtml-call expr="REQUEST.set('cod_status', cod_status)">
@@ -176,9 +176,9 @@
         <dtml-call expr="REQUEST.set('existe_arquivo', 0)">        
         <dtml-if expr="(_.int(hdn_file_parecer)==1)">
             <dtml-if hdn_cod_relatoria>
-                <dtml-call expr="REQUEST.set('id_parecer', _.str(hdn_cod_relatoria)+'_parecer.pdf')">
-                <dtml-if "_.hasattr(sapl_documentos.parecer_comissao,id_parecer)">
-                    <dtml-let parecer="_.getattr(sapl_documentos.parecer_comissao,id_parecer) ">
+                <dtml-call expr="REQUEST.set('id_parecer', str(hdn_cod_relatoria)+'_parecer.pdf')">
+                <dtml-if "hasattr(sapl_documentos.parecer_comissao,id_parecer)">
+                    <dtml-let parecer="getattr(sapl_documentos.parecer_comissao,id_parecer) ">
                         <dtml-call expr="REQUEST.set('existe_arquivo', 1)">
                         <dtml-try>
                             <dtml-call "parecer.manage_upload(file=pysc.upload_file(file=file_nom_arquivo_parecer, title='Parecer'))">
@@ -191,7 +191,7 @@
                 <dtml-in expr="zsql.relatoria_incluida_codigo_obter_zsql()">
                  <dtml-call "REQUEST.set('ult_relatoria_incluida',cod_relatoria)">
                 </dtml-in>
-               <dtml-call expr="REQUEST.set('id_parecer',_.str(ult_relatoria_incluida)+'_parecer.pdf')">
+               <dtml-call expr="REQUEST.set('id_parecer',str(ult_relatoria_incluida)+'_parecer.pdf')">
              </dtml-if>
              <dtml-if "not existe_arquivo">
               <dtml-try>
@@ -203,7 +203,7 @@
          </dtml-if>
      <dtml-elif expr="radTI=='E'">
          <dtml-if hdn_cod_relatoria>
-             <dtml-call expr="REQUEST.set('id_parecer', _.str(hdn_cod_relatoria)+'_parecer.pdf')">
+             <dtml-call expr="REQUEST.set('id_parecer', str(hdn_cod_relatoria)+'_parecer.pdf')">
              <dtml-call "sapl_documentos.parecer_comissao.manage_delObjects(id_parecer)">
              <dtml-in expr="zsql.assinatura_documento_obter_zsql(codigo=hdn_cod_relatoria,tipo_doc='parecer_comissao')">
                 <dtml-try>
@@ -242,9 +242,9 @@
     </dtml-let>
   </dtml-if>
   <dtml-if hdn_cod_relatoria>
-     <dtml-call expr="REQUEST.set('id_parecer', _.str(hdn_cod_relatoria)+'_parecer.pdf')">
-        <dtml-if "_.hasattr(sapl_documentos.parecer_comissao,id_parecer)">
-           <dtml-let parecer="_.getattr(sapl_documentos.parecer_comissao,id_parecer)">
+     <dtml-call expr="REQUEST.set('id_parecer', str(hdn_cod_relatoria)+'_parecer.pdf')">
+        <dtml-if "hasattr(sapl_documentos.parecer_comissao,id_parecer)">
+           <dtml-let parecer="getattr(sapl_documentos.parecer_comissao,id_parecer)">
               <dtml-if expr="lst_tip_fim_relatoria=='18'">
                  <dtml-call expr="parecer.manage_permission('View', roles=['Manager','Authenticated'], acquire=1)">
               <dtml-else>
@@ -259,7 +259,7 @@
   <dtml-call expr="zsql.logs_registrar_zsql(
             usuario      = REQUEST['AUTHENTICATED_USER'].getUserName(), 
             data         = DateTime().strftime('%Y-%m-%d %H:%M:%S'),
-            modulo       = _.string.split(_['REQUEST']['URL1'],'/')[-1],
+            modulo       = str(_['REQUEST']['URL1']).split('/')[-1],
             metodo       = 'relatoria_salvar_proc',
             IP           = pysc.get_ip(),
             dados        = REQUEST.form.items(),

@@ -125,9 +125,9 @@ $(document).ready(function() {
   <dtml-in expr="pareceres(listar='pareceres', cod_comissao=cod_comissao, ano_parecer=ano)" mapping>
         <tr>
           <td>
-               <dtml-call expr="REQUEST.set('texto_parecer', _.str(cod_relatoria)+'_parecer.pdf')">
-               <dtml-if "_.hasattr(sapl_documentos.parecer_comissao,texto_parecer)">  
-                 <dtml-let parecer="_.getattr(sapl_documentos.parecer_comissao,texto_parecer).absolute_url">
+               <dtml-call expr="REQUEST.set('texto_parecer', str(cod_relatoria)+'_parecer.pdf')">
+               <dtml-if "hasattr(sapl_documentos.parecer_comissao,texto_parecer)">  
+                 <dtml-let parecer="getattr(sapl_documentos.parecer_comissao,texto_parecer).absolute_url">
                     <a target="_blank" href="<dtml-var parecer>">        
                        <dtml-var num_parecer>
                     </a>

@@ -1,10 +1,9 @@
 # REST PKI client lib for Python
 # This file contains classes that encapsulate the calls to the REST PKI API.
-import sys
 import six
 import requests
 import base64
-import simplejson as json
+import json
 from io import BytesIO
 
 class StandardSecurityContexts:
@@ -106,7 +105,7 @@ class PadesSignatureStarter:
             raise Exception('The signature policy was not set')
 
         data = dict()
-        data['pdfToSign'] = base64.b64encode(self.pdf_content)
+        data['pdfToSign'] = self.pdf_content
         data['signaturePolicyId'] = self.signature_policy_id
         data['securityContextId'] = self.security_context_id
         data['visualRepresentation'] = self.visual_representation

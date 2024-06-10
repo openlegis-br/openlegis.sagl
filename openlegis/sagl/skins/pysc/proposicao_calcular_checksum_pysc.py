@@ -18,7 +18,7 @@ try:
     x = txtint.checksum()
   else:
     from zlib import crc32
-    x = crc32(str(txtint))
+    x = crc32(bytes(txtint))
 
   if (x>=0):
     c='P' + str(x)

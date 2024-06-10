@@ -9,7 +9,7 @@ from five import grok
 from zope.interface import Interface
 import requests
 import MySQLdb
-from PyPDF4 import PdfFileReader, PdfFileWriter
+from pypdf import PdfReader, PdfWriter
 
 class otimizarADM(grok.View):
     grok.context(Interface)
@@ -93,8 +93,8 @@ class otimizarADM(grok.View):
                filepath = os.path.join(dirtemp, nom_saida)
                arq2 = open(filepath, 'rb')
                arquivo2 = BytesIO(str(arq2.read()))
-               reader = PdfFileReader(arquivo2)
-               writer = PdfFileWriter()
+               reader = PdfReader(arquivo2)
+               writer = PdfWriter()
                for page in reader.pages:
                    writer.addPage(page)
                writer.addMetadata({"/Title": item["title"]})
@@ -168,8 +168,8 @@ class otimizarTramADM(grok.View):
                filepath = os.path.join(dirtemp, nom_saida)
                arq2 = open(filepath, 'rb')
                arquivo2 = BytesIO(str(arq2.read()))
-               reader = PdfFileReader(arquivo2)
-               writer = PdfFileWriter()
+               reader = PdfReader(arquivo2)
+               writer = PdfWriter()
                for page in reader.pages:
                    writer.addPage(page)
                writer.addMetadata({"/Title": item["title"]})

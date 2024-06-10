@@ -19,8 +19,8 @@
                 <select id="lst_ano_sessao" name="lst_ano_sessao" size="1" onChange="atualiza_ano_sessao(document.ata_form.lst_ano_sessao[document.ata_form.lst_ano_sessao.selectedIndex].value)">
                     <dtml-in expr="zsql.sessao_plenaria_listar_ano_zsql()">
                         <option value="<dtml-var ano_sessao missing>" 
-                          <dtml-if expr="((not _.has_key('ano_sessao_sel') and (_.DateTime().year() == ano_sessao)))
-                                           or (not _.has_key('ano_sessao_sel') and (_.DateTime().year() > ano_sessao))
+                          <dtml-if expr="((not _.has_key('ano_sessao_sel') and (DateTime().year() == ano_sessao)))
+                                           or (not _.has_key('ano_sessao_sel') and (DateTime().year() > ano_sessao))
                                            or (_.has_key('ano_sessao_sel') and ano_sessao == _.int(ano_sessao_sel))">
                             selected
                           <dtml-call expr="REQUEST.set('ano_sessao_sel', ano_sessao)">
@@ -86,9 +86,9 @@
             <dtml-var nom_sessao>
           </td>
               <td width="10%">
-                <dtml-let id_pauta="_.str(cod_sessao_plen)+'_pauta_sessao.pdf'">
-                  <dtml-if "_.hasattr(sapl_documentos.pauta_sessao,id_pauta)">
-                    <dtml-let pauta="_.getattr(sapl_documentos.pauta_sessao,id_pauta).absolute_url">
+                <dtml-let id_pauta="str(cod_sessao_plen)+'_pauta_sessao.pdf'">
+                  <dtml-if "hasattr(sapl_documentos.pauta_sessao,id_pauta)">
+                    <dtml-let pauta="getattr(sapl_documentos.pauta_sessao,id_pauta).absolute_url">
                       <a target="_blank" href="<dtml-var pauta>"><img align="middle" border="0" src="<dtml-var portal_url>/imagens/archiv.gif" alt="Texto Integral" title="Texto Integral"></a>
                     </dtml-let>
                   <dtml-else>
@@ -102,9 +102,9 @@ target="_blank">Gerar PDF</a>
               </td>
           </td>
               <td width="10%">
-                <dtml-let id_ata="_.str(cod_sessao_plen)+'_ata_sessao.pdf'">
-                  <dtml-if "_.hasattr(sapl_documentos.ata_sessao,id_ata)">
-                    <dtml-let ata="_.getattr(sapl_documentos.ata_sessao,id_ata).absolute_url">
+                <dtml-let id_ata="str(cod_sessao_plen)+'_ata_sessao.pdf'">
+                  <dtml-if "hasattr(sapl_documentos.ata_sessao,id_ata)">
+                    <dtml-let ata="getattr(sapl_documentos.ata_sessao,id_ata).absolute_url">
                       <a target="_blank" href="<dtml-var ata>"><img align="middle" border="0" src="<dtml-var portal_url>/imagens/archiv.gif" alt="Texto Integral" title="Texto Integral"></a>
                     </dtml-let>
                   <dtml-else>

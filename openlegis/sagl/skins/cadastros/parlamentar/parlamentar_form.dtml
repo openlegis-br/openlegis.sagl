@@ -425,8 +425,8 @@ jQuery(function($){
     <div class="col-12 col-md-4 mb-3 align-self-stretch">
        <label>Fotografia</label>
               <dtml-if cod_parlamentar>
-                 <dtml-call expr="REQUEST.set('id_foto', _.str(cod_parlamentar)+'_foto_parlamentar')">
-                 <dtml-if "_.hasattr(sapl_documentos.parlamentar.fotos,id_foto)">    
+                 <dtml-call expr="REQUEST.set('id_foto', str(cod_parlamentar)+'_foto_parlamentar')">
+                 <dtml-if "hasattr(sapl_documentos.parlamentar.fotos,id_foto)">    
                    <div class="item text-center py-4 px-4 bg-light border">                 
                       <img class="img-fluid mb-3 img-thumbnail shadow-sm" src="<dtml-var portal_url>/sapl_documentos/parlamentar/fotos/<dtml-var id_foto>?<dtml-var expr="ZopeTime().timeTime()">">
                     <a class="btn btn-sm btn-primary mb-2" href="<dtml-var portal_url>/cadastros/parlamentar/parlamentar_ajustar_foto?cod_parlamentar=<dtml-var cod_parlamentar>" data-confirm="Deseja ajustar automaticamente as dimensões da fotografia?"><i class="fas fa-arrows-alt"></i> Autoajustar</a>

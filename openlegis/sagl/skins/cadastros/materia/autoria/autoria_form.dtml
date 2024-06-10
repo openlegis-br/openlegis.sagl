@@ -70,7 +70,7 @@
 <h1 class="firstHeading">Cadastro de Autor</h1>
 
 <dtml-in expr="zsql.legislatura_obter_zsql(ind_excluido=0)">
-  <dtml-if expr="((_.DateTime(dat_apresentacao) >= dat_inicio and _.DateTime(dat_apresentacao) <= dat_fim))">
+  <dtml-if expr="((DateTime(dat_apresentacao) >= DateTime(dat_inicio) and DateTime(dat_apresentacao) <= DateTime(dat_fim)))">
     <dtml-call expr="REQUEST.set('num_legislatura_sel', num_legislatura)">
   </dtml-if>
 </dtml-in>

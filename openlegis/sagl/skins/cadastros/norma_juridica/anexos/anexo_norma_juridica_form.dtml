@@ -36,9 +36,9 @@
       <td>
          <label for="file_nom_anexo" class="required d-block">Texto Integral</label>
            <dtml-if expr="_.has_key('cod_anexo')"> 
-             <dtml-call expr="REQUEST.set('id_anexo', _.str(cod_norma)+'_anexo_'+ _.str(cod_anexo))">
-             <dtml-if "_.hasattr(sapl_documentos.norma_juridica,id_anexo)">
-               <dtml-let arq_anexo="_.getattr(sapl_documentos.norma_juridica,id_anexo).absolute_url">
+             <dtml-call expr="REQUEST.set('id_anexo', str(cod_norma)+'_anexo_'+ str(cod_anexo))">
+             <dtml-if "hasattr(sapl_documentos.norma_juridica,id_anexo)">
+               <dtml-let arq_anexo="getattr(sapl_documentos.norma_juridica,id_anexo).absolute_url">
                  <a target="_blank" href="<dtml-var arq_anexo>">
                     <i class="fa fa-fw fa-file"></i>Visualizar
                  </a>

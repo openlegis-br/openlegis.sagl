@@ -187,7 +187,7 @@ $(document).ready(function () {
 
 <dtml-if tip_peticionamento>
     <legend>Modelos ODT</legend>
-    <dtml-call expr="REQUEST.set('prefixo_arquivo', _.str(tip_peticionamento)+'-')">
+    <dtml-call expr="REQUEST.set('prefixo_arquivo', str(tip_peticionamento)+'-')">
       <dtml-with expr="sapl_documentos.modelo.peticionamento">
        <dtml-in expr="objectValues('File')" sort="title_or_id">
         <dtml-if sequence-start>

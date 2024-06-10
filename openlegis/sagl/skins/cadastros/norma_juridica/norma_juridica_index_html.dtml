@@ -44,9 +44,9 @@
 
         <tr> 
           <td width="10%">
-             <dtml-call expr="REQUEST.set('id_documento', _.str(cod_norma)+'_'+sapl_documentos.norma_juridica.nom_documento)">
-             <dtml-if "_.hasattr(sapl_documentos.norma_juridica,id_documento)">
-               <dtml-let documento="_.getattr(sapl_documentos.norma_juridica,id_documento).absolute_url">
+             <dtml-call expr="REQUEST.set('id_documento', str(cod_norma)+'_'+sapl_documentos.norma_juridica.nom_documento)">
+             <dtml-if "hasattr(sapl_documentos.norma_juridica,id_documento)">
+               <dtml-let documento="getattr(sapl_documentos.norma_juridica,id_documento).absolute_url">
                  <a href="<dtml-var documento>">
                  <img align=middle border=0 src="<dtml-var portal_url>/imagens/archiv.gif></a>
                </dtml-let>
@@ -55,7 +55,7 @@
 <dtml-comment> comentada pela Man Qi em 10/12/03. </dtml-comment>
 <dtml-comment> 
              <dtml-in expr="sapl_documentos.norma_juridica.objectValues('File')"> 
-                  <dtml-if expr=" _.str(cod_norma)+'_'+sapl_documentos.norma_juridica.nom_documento == id() ">
+                  <dtml-if expr=" str(cod_norma)+'_'+sapl_documentos.norma_juridica.nom_documento == id() ">
                     <a href="<dtml-var absolute_url>">
                     <img align=middle border=0 src=<dtml-var portal_url>/imagens/archiv.gif></a>
                   </dtml-if>

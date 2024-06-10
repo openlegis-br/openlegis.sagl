@@ -99,9 +99,9 @@ $(document).ready(function() {
           </td>
           <td>
                 <dtml-call expr="REQUEST.set('des_tipo_proposicao', 'Emenda')">
-                <dtml-call expr="REQUEST.set('id_emenda', _.str(cod_emenda)+'_emenda.pdf')">
-                <dtml-if "_.hasattr(sapl_documentos.emenda,id_emenda)">
-                 <dtml-let emenda="_.getattr(sapl_documentos.emenda,id_emenda).absolute_url"> 
+                <dtml-call expr="REQUEST.set('id_emenda', str(cod_emenda)+'_emenda.pdf')">
+                <dtml-if "hasattr(sapl_documentos.emenda,id_emenda)">
+                 <dtml-let emenda="getattr(sapl_documentos.emenda,id_emenda).absolute_url"> 
                    <a target="_blank" href="<dtml-var emenda>" title="Texto Integral">
                      <dtml-if expr="zsql.assinatura_documento_obter_zsql(codigo=cod_emenda, tipo_doc='emenda',ind_assinado=1, cod_usuario=None)">
                         <i class="fa fa-certificate" style="font-size: 21px; margin-right: 3px;"></i>

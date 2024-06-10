@@ -11,13 +11,13 @@
                <option 
                   <dtml-if expr="_.has_key('hdn_num_legislatura') and num_legislatura==_.int(hdn_num_legislatura)">
                      selected
-                  <dtml-elif expr="not _.has_key('hdn_num_legislatura') and _.DateTime() >= dat_inicio and _.DateTime() <= dat_fim">
+                  <dtml-elif expr="not _.has_key('hdn_num_legislatura') and DateTime() >= DateTime(dat_inicio) and DateTime() <= DateTime(dat_fim)">
                      <dtml-call expr="REQUEST.set('hdn_num_legislatura', num_legislatura)">
                      selected
                   </dtml-if>
                   value="<dtml-var ACTUAL_URL>?hdn_num_legislatura=<dtml-var num_legislatura>">
                   <dtml-var expr="pysc.periodo_legislatura_format_pysc(num_legislatura,dat_inicio,dat_fim)">
-                  <dtml-if expr="(_.DateTime() >= dat_inicio and _.DateTime() <= dat_fim)">
+                  <dtml-if expr="(DateTime() >= DateTime(dat_inicio) and DateTime() <= DateTime(dat_fim))">
                      (Atual)
                   </dtml-if>
                </option>
@@ -51,8 +51,8 @@
 <dtml-call expr="REQUEST.set('primeiro_listado', 1)">
 <dtml-call expr="REQUEST.set('legislatura_atual', 0)">
 <dtml-in expr="zsql.legislatura_obter_zsql(num_legislatura=hdn_num_legislatura)">
-  <dtml-if expr="(_.DateTime() >= dat_inicio and _.DateTime() <= dat_fim)">
-    <dtml-call expr="REQUEST.set('data_atual', _.DateTime().strftime('%d/%m/%Y'))">
+  <dtml-if expr="(DateTime() >= DateTime(dat_inicio) and DateTime() <= DateTime(dat_fim))">
+    <dtml-call expr="REQUEST.set('data_atual', DateTime().strftime('%d/%m/%Y'))">
     <dtml-call expr="REQUEST.set('legislatura_atual', 1)">
   </dtml-if>
 </dtml-in>
@@ -75,8 +75,8 @@
           </dtml-if>  
             <div class="vereador py-4 px-4 border rounded bg-light">
                <div class="item">
-                 <dtml-call expr="REQUEST.set('id_foto', _.str(cod_parlamentar)+'_foto_parlamentar')">
-                 <dtml-if expr="_.hasattr(sapl_documentos.parlamentar.fotos,id_foto)">
+                 <dtml-call expr="REQUEST.set('id_foto', str(cod_parlamentar)+'_foto_parlamentar')">
+                 <dtml-if expr="hasattr(sapl_documentos.parlamentar.fotos,id_foto)">
                     <img alt="<dtml-var nom_completo>" src="<dtml-var portal_url>/sapl_documentos/parlamentar/fotos/<dtml-var id_foto>" width="140" class="img-fluid mb-2 img-thumbnail shadow-sm">
                  <dtml-else>
                     <img alt="<dtml-var nom_completo>" src="<dtml-var portal_url>/imagens/avatar.png" width="140" class="img-fluid mb-2 img-thumbnail shadow-sm"">
@@ -119,8 +119,8 @@
           </dtml-if>  
             <div class="vereador py-4 px-4 border rounded bg-light">
                <div class="item">
-                 <dtml-call expr="REQUEST.set('id_foto', _.str(cod_parlamentar)+'_foto_parlamentar')">
-                 <dtml-if expr="_.hasattr(sapl_documentos.parlamentar.fotos,id_foto)">
+                 <dtml-call expr="REQUEST.set('id_foto', str(cod_parlamentar)+'_foto_parlamentar')">
+                 <dtml-if expr="hasattr(sapl_documentos.parlamentar.fotos,id_foto)">
                     <img alt="<dtml-var nom_completo>" src="<dtml-var portal_url>/sapl_documentos/parlamentar/fotos/<dtml-var id_foto>" width="140" class="img-fluid mb-2 img-thumbnail shadow-sm">
                  <dtml-else>
                     <img alt="<dtml-var nom_completo>" src="<dtml-var portal_url>/imagens/avatar.png" width="140" class="img-fluid mb-2 img-thumbnail shadow-sm"">
@@ -139,7 +139,7 @@
                      </dtml-in>
                 </span>
                   <p class="card-text small text-muted mt-0">
-                     <dtml-call expr="REQUEST.set('data_atual', _.DateTime().strftime('%Y/%m/%d'))">                  
+                     <dtml-call expr="REQUEST.set('data_atual', DateTime().strftime('%Y/%m/%d'))">                  
                      <dtml-in expr="zsql.afastamento_obter_zsql(cod_parlamentar=cod_parlamentar,data=data_atual)">
                        <dtml-if sequence-end>
                          Motivo do afastamento: <dtml-var des_afastamento>
@@ -174,8 +174,8 @@
           </dtml-if>  
             <div class="vereador py-4 px-4 border rounded bg-light">
                <div class="item">
-                 <dtml-call expr="REQUEST.set('id_foto', _.str(cod_parlamentar)+'_foto_parlamentar')">
-                 <dtml-if expr="_.hasattr(sapl_documentos.parlamentar.fotos,id_foto)">
+                 <dtml-call expr="REQUEST.set('id_foto', str(cod_parlamentar)+'_foto_parlamentar')">
+                 <dtml-if expr="hasattr(sapl_documentos.parlamentar.fotos,id_foto)">
                     <img alt="<dtml-var nom_completo>" src="<dtml-var portal_url>/sapl_documentos/parlamentar/fotos/<dtml-var id_foto>" width="140" class="img-fluid mb-2 img-thumbnail shadow-sm">
                  <dtml-else>
                     <img alt="<dtml-var nom_completo>" src="<dtml-var portal_url>/imagens/avatar.png" width="140" class="img-fluid mb-2 img-thumbnail shadow-sm"">
@@ -239,8 +239,8 @@
           </dtml-if>  
             <div class="vereador py-4 px-4 border rounded bg-light">
                <div class="item">
-                 <dtml-call expr="REQUEST.set('id_foto', _.str(cod_parlamentar)+'_foto_parlamentar')">
-                 <dtml-if expr="_.hasattr(sapl_documentos.parlamentar.fotos,id_foto)">
+                 <dtml-call expr="REQUEST.set('id_foto', str(cod_parlamentar)+'_foto_parlamentar')">
+                 <dtml-if expr="hasattr(sapl_documentos.parlamentar.fotos,id_foto)">
                     <img alt="<dtml-var nom_completo>" src="<dtml-var portal_url>/sapl_documentos/parlamentar/fotos/<dtml-var id_foto>" width="140" class="img-fluid mb-2 img-thumbnail shadow-sm">
                  <dtml-else>
                     <img alt="<dtml-var nom_completo>" src="<dtml-var portal_url>/imagens/avatar.png" width="140" class="img-fluid mb-2 img-thumbnail shadow-sm"">
@@ -308,8 +308,8 @@
           </dtml-if>
             <div class="vereador py-4 px-4 border rounded bg-light">
               <div class="item">
-                 <dtml-call expr="REQUEST.set('id_foto', _.str(cod_parlamentar)+'_foto_parlamentar')">
-                 <dtml-if expr="_.hasattr(sapl_documentos.parlamentar.fotos,id_foto)">
+                 <dtml-call expr="REQUEST.set('id_foto', str(cod_parlamentar)+'_foto_parlamentar')">
+                 <dtml-if expr="hasattr(sapl_documentos.parlamentar.fotos,id_foto)">
                      <img alt="<dtml-var nom_completo>" src="<dtml-var portal_url>/sapl_documentos/parlamentar/fotos/<dtml-var id_foto>" width="140" class="img-fluid mb-2 img-thumbnail shadow-sm">
                  <dtml-else>
                      <img alt="<dtml-var nom_completo>" src="<dtml-var portal_url>/imagens/avatar.png" width="140" class="img-fluid mb-2 img-thumbnail shadow-sm"">

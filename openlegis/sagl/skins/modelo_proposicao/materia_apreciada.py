@@ -32,11 +32,11 @@ for sessao in context.zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=cod_sessao
   # Lista das materias da Ordem do Dia
   lst_votacao=[]
   for votacao in context.zsql.ordem_dia_obter_zsql(cod_sessao_plen=sessao.cod_sessao_plen, ind_excluido=0):  
-     # Seleciona os detalhes de uma matéria
+     # Seleciona os detalhes de uma matÃ©ria
       materia = context.zsql.materia_obter_zsql(cod_materia=votacao.cod_materia)[0]
       dic_votacao = {}
       dic_votacao["num_ordem"] = votacao.num_ordem
-      dic_votacao["tip_materia"] = materia.des_tipo_materia.decode('utf-8').upper()
+      dic_votacao["tip_materia"] = materia.des_tipo_materia.upper()
       dic_votacao["num_ident_basica"] = materia.num_ident_basica
       dic_votacao["ano_ident_basica"] = materia.ano_ident_basica
       dic_votacao["des_numeracao"]=""
@@ -50,7 +50,7 @@ for sessao in context.zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=cod_sessao
       dic_votacao["txt_ementa"] = materia.txt_ementa
       dic_votacao["nom_autor"] = ''
       autores = context.zsql.autoria_obter_zsql(cod_materia=votacao.cod_materia)
-      fields = autores.data_dictionary().keys()
+      fields = list(autores.data_dictionary().keys())
       lista_autor = []
       for autor in autores:
           for field in fields:
@@ -66,21 +66,21 @@ for sessao in context.zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=cod_sessao
               if votacao.num_votos_sim == 0:
                  votos_favoraveis = ''
               elif votacao.num_votos_sim == 1:
-                 votos_favoraveis = ' - ' +str(votacao.num_votos_sim) + " voto favorável"
+                 votos_favoraveis = ' - ' +str(votacao.num_votos_sim) + " voto favorÃ¡vel"
               elif votacao.num_votos_sim > 1:
-                 votos_favoraveis = ' - ' + str(votacao.num_votos_sim) + " votos favoráveis"
+                 votos_favoraveis = ' - ' + str(votacao.num_votos_sim) + " votos favorÃ¡veis"
               if votacao.num_votos_nao == 0:
                  votos_contrarios = ''
               elif votacao.num_votos_nao == 1:
-                 votos_contrarios = ' - ' + str(votacao.num_votos_nao) + " voto contrário"
+                 votos_contrarios = ' - ' + str(votacao.num_votos_nao) + " voto contrÃ¡rio"
               elif votacao.num_votos_nao > 1:
-                 votos_contrarios = ' - ' + str(votacao.num_votos_nao) + " votos contrários"
+                 votos_contrarios = ' - ' + str(votacao.num_votos_nao) + " votos contrÃ¡rios"
               if votacao.num_abstencao == 0:
                  abstencoes = ''
               elif votacao.num_abstencao == 1:
-                 abstencoes = ' - ' + str(votacao.num_abstencao) + " abstenção"
+                 abstencoes = ' - ' + str(votacao.num_abstencao) + " abstenÃ§Ã£o"
               elif votacao.num_abstencao > 1:
-                 abstencoes =  ' - ' + str(votacao.num_abstencao) + " abstenções"
+                 abstencoes =  ' - ' + str(votacao.num_abstencao) + " abstenÃ§Ãµes"
               contagem_votos = votos_favoraveis.decode('iso-8859-1').encode('utf-8') + votos_contrarios.decode('iso-8859-1').encode('utf-8') + abstencoes.decode('iso-8859-1').encode('utf-8')
           if votacao.votacao_observacao != '':
              votacao_observacao = ' - ' + votacao.votacao_observacao.encode('utf-8')
@@ -93,7 +93,7 @@ for sessao in context.zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=cod_sessao
              for i in resultado:
                  nom_resultado= ' (' + i.nom_resultado+ ' em ' + turno_discussao + contagem_votos + votacao_observacao + ')'
           else:
-             nom_resultado = " (Matéria não votada)"
+             nom_resultado = " (MatÃ©ria nÃ£o votada)"
              votacao_observacao = ""
       dic_votacao["nom_resultado"] = nom_resultado.encode('utf-8')
       dic_votacao["ordem_observacao"] = votacao_observacao           

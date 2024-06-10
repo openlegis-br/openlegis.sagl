@@ -12,9 +12,7 @@ RESPONSE =  REQUEST.RESPONSE
 session = REQUEST.SESSION
 
 itens = []
-
 cod_sessao_plen = int(context.REQUEST['cod_sessao_plen'])
-
 for sessao in context.zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=cod_sessao_plen, ind_excluido=0):
   tipo_sessao = context.zsql.tipo_sessao_plenaria_obter_zsql(tip_sessao=sessao.tip_sessao,ind_excluido=0)[0]
   dic_sessao = {}
@@ -27,7 +25,6 @@ for sessao in context.zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=cod_sessao
   dic_sessao["ind_extrapauta"] = 0
   dic_sessao["ind_exibicao"] = 0
   itens.append(dic_sessao)
-
 dic_correspondencias = {}
 dic_correspondencias["tipo_item"] = 'Mensagem'
 dic_correspondencias["nom_fase"] = 'Expediente'
@@ -38,7 +35,6 @@ dic_correspondencias["txt_turno"] = ''
 dic_correspondencias["ind_extrapauta"] = 0
 dic_correspondencias["ind_exibicao"] = 0
 itens.append(dic_correspondencias)
-
 lst_indicacoes = [] 
 for indicacoes in context.zsql.expediente_materia_obter_zsql(cod_sessao_plen=int(context.REQUEST['cod_sessao_plen']),ind_excluido=0):
   dic_indicacoes = {}
@@ -55,7 +51,6 @@ for indicacoes in context.zsql.expediente_materia_obter_zsql(cod_sessao_plen=int
   dic_indicacoes["ind_extrapauta"] = 0
   dic_indicacoes["ind_exibicao"] = 0
   itens.append(dic_indicacoes)
-
 for requerimentos in context.zsql.expediente_materia_obter_zsql(cod_sessao_plen=cod_sessao_plen,ind_excluido=0):
   dic_requerimentos = {}
   for materia in context.zsql.materia_obter_zsql(cod_materia=requerimentos.cod_materia, des_tipo_materia='Requerimento', ind_excluido=0):
@@ -65,18 +60,17 @@ for requerimentos in context.zsql.expediente_materia_obter_zsql(cod_sessao_plen=
     dic_requerimentos["cod_materia"] = materia.cod_materia
     dic_requerimentos["txt_autoria"] = ''
     autores = context.zsql.autoria_obter_zsql(cod_materia=materia.cod_materia)
-    fields = autores.data_dictionary().keys()
+    fields = list(autores.data_dictionary().keys())
     lista_autor = []
     for autor in autores:
       for field in fields:
-        nome_autor = autor['nom_autor_join']
+          nome_autor = autor['nom_autor_join']
       lista_autor.append(nome_autor)
     dic_requerimentos["txt_autoria"] = ', '.join(['%s' % (value) for (value) in lista_autor])
     dic_requerimentos["txt_turno"] = ''
     dic_requerimentos["ind_extrapauta"] = 0
     dic_requerimentos["ind_exibicao"] = 0
     itens.append(dic_requerimentos)
-
 dic_peq_expediente = {}
 dic_peq_expediente["tipo_item"] = 'Mensagem'
 dic_peq_expediente["nom_fase"] = 'Expediente'
@@ -87,7 +81,6 @@ dic_peq_expediente["txt_turno"] = ''
 dic_peq_expediente["ind_extrapauta"] = 0
 dic_peq_expediente["ind_exibicao"] = 0
 itens.append(dic_peq_expediente)
-
 for ordem_dia in context.zsql.ordem_dia_obter_zsql(cod_sessao_plen=cod_sessao_plen,ind_excluido=0):
   dic_ordem_dia = {}
   materia = context.zsql.materia_obter_zsql(cod_materia=ordem_dia.cod_materia)[0]
@@ -98,18 +91,17 @@ for ordem_dia in context.zsql.ordem_dia_obter_zsql(cod_sessao_plen=cod_sessao_pl
   dic_ordem_dia["cod_materia"] = ordem_dia.cod_materia
   dic_ordem_dia["txt_autoria"] = ''
   autores = context.zsql.autoria_obter_zsql(cod_materia=ordem_dia.cod_materia)
-  fields = autores.data_dictionary().keys()
+  fields = list(autores.data_dictionary().keys())
   lista_autor = []
   for autor in autores:
     for field in fields:
-      nome_autor = autor['nom_autor_join']
+       nome_autor = autor['nom_autor_join']
     lista_autor.append(nome_autor)
   dic_ordem_dia["txt_autoria"] = ', '.join(['%s' % (value) for (value) in lista_autor])
   dic_ordem_dia["txt_turno"] = turno.des_turno
   dic_ordem_dia["ind_extrapauta"] = 0
   dic_ordem_dia["ind_exibicao"] = 0
   itens.append(dic_ordem_dia)
-
 dic_exp_pessoais = {}
 dic_exp_pessoais["tipo_item"] = 'Mensagem'
 dic_exp_pessoais["nom_fase"] = 'Explicações Pessoais'
@@ -120,9 +112,7 @@ dic_exp_pessoais["txt_turno"] = ''
 dic_exp_pessoais["ind_extrapauta"] = 0
 dic_exp_pessoais["ind_exibicao"] = 0
 itens.append(dic_exp_pessoais)
-
 itens = [(i + 1, j) for i, j in enumerate(itens)]
-
 for i, dic in itens:
   context.zsql.sessao_plenaria_painel_incluir_zsql(tip_item=dic.get('tipo_item',dic), nom_fase=dic.get('nom_fase',dic), num_ordem=i, txt_exibicao=dic.get('txt_exibicao',dic), cod_materia=dic.get('cod_materia',dic), txt_autoria=dic.get('txt_autoria',dic), txt_turno=dic.get('txt_turno',dic), ind_extrapauta=dic.get('ind_extrapauta',dic), ind_exibicao=dic.get('ind_exibicao',dic))
 #   return  i, dic.get('tipo_item',dic), dic.get('nom_fase',dic), dic.get('txt_exibicao',dic), dic.get('cod_materia',dic), dic.get('txt_autoria',dic), dic.get('txt_turno',dic), dic.get('ind_extrapauta',dic), dic.get('ind_exibicao',dic)

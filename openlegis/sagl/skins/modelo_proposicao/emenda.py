@@ -7,10 +7,8 @@
 ##parameters=cod_emenda, modelo_proposicao
 ##title=
 ##
-
 from Products.CMFCore.utils import getToolByName
 st = getToolByName(context, 'portal_sagl')
-
 REQUEST = context.REQUEST
 RESPONSE =  REQUEST.RESPONSE
 session = REQUEST.SESSION
@@ -36,21 +34,21 @@ inf_basicas_dic['url_validacao'] = "" + context.generico.absolute_url()+"/propos
 
 for emenda in context.zsql.emenda_obter_zsql(cod_emenda=cod_emenda):
  num_proposicao = " "
- des_tipo_materia = emenda.des_tipo_emenda.decode('utf-8').upper()
+ des_tipo_materia = emenda.des_tipo_emenda.upper()
  num_ident_basica = emenda.num_emenda
  ano_ident_basica = DateTime().strftime("%Y")
  txt_ementa = emenda.txt_ementa
  dat_apresentacao = context.pysc.data_converter_por_extenso_pysc(data=emenda.dat_apresentacao)
 
  for materia_vinculada in context.zsql.materia_obter_zsql(cod_materia = emenda.cod_materia):
-  materia_vinculada = ' - ' +materia_vinculada.des_tipo_materia.decode('utf-8').upper() + '  ' + str(materia_vinculada.num_ident_basica) + '/' + str(materia_vinculada.ano_ident_basica)
+  materia_vinculada = ' - ' +materia_vinculada.des_tipo_materia.upper() + '  ' + str(materia_vinculada.num_ident_basica) + '/' + str(materia_vinculada.ano_ident_basica)
   nom_arquivo = str(emenda.cod_emenda)+ '_emenda.odt'
 
  nom_autor = []
  apelido_autor = " "
  for autoria in context.zsql.autoria_emenda_obter_zsql(cod_emenda = emenda.cod_emenda):
      autor_dic = {}
-     autor_dic['nome_autor'] = autoria.nom_autor_join.decode('utf-8').upper()
+     autor_dic['nome_autor'] = autoria.nom_autor_join.upper()
      nom_autor.append(autor_dic)     
 
 return st.emenda_gerar_odt(inf_basicas_dic, num_proposicao, nom_arquivo, des_tipo_materia, num_ident_basica, ano_ident_basica, txt_ementa, materia_vinculada, dat_apresentacao, nom_autor, apelido_autor, modelo_proposicao)

@@ -40,5 +40,5 @@ for row in results:
     if row[15]!=None and row[16]!=None:
      r.append(row[15]+' - '+row[16])
     dados.append(r)
-return context.pdflabels(dados)
+return context.extensions.pdflabels(dados)
 

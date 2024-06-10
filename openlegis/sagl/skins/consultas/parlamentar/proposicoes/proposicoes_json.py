@@ -9,7 +9,7 @@
 ##
 
 import collections 
-import simplejson as json
+import json
 
 context.REQUEST.RESPONSE.setHeader("Access-Control-Allow-Origin", "*")
 
@@ -26,7 +26,7 @@ for materia in context.zsql.materia_pesquisar_zsql(tip_id_basica=tip_materia,
            dic['sgl_status'] = str(tramitacao.sgl_status)
            dic['des_status'] = str(tramitacao.des_status)
     dic['cod_materia'] = int(materia.cod_materia)
-    dic['titulo'] = materia.des_tipo_materia.decode('utf-8').upper()+" N° "+str(materia.num_ident_basica) + '/' + str(materia.ano_ident_basica)
+    dic['titulo'] = materia.des_tipo_materia.upper()+" N° "+str(materia.num_ident_basica) + '/' + str(materia.ano_ident_basica)
     materias.append(dic)
 
 count = collections.Counter([d['des_status'] for d in materias])
@@ -42,5 +42,5 @@ for key in counts:
        results.append(dic)
 
 serialized = json.dumps(results, sort_keys=True, indent=3, ensure_ascii=False).encode('utf8')
-print(serialized.decode())
+print((serialized.decode()))
 return printed

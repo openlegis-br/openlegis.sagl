@@ -6,7 +6,6 @@ def baixar_pdf(context):
     cod_sessao_plen = context.REQUEST['cod_sessao_plen']
     for sessao in context.zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=cod_sessao_plen, ind_excluido=0):
         zipname =  str('materias_lidas-') + str(sessao.num_sessao_plen) + str('a_ReuniaoOrdinaria') + str('.zip')
-        #zipname = u'materias_lidas-%sa_ReuniaoOrdinaria.zip' % (sessao.num_sessao_plen)
     foldername =  'orgaos'
     dirpath = os.path.join('/tmp/', foldername)
     if not os.path.exists(dirpath):
@@ -19,16 +18,16 @@ def baixar_pdf(context):
                if materia.des_tipo_materia == 'Indicação' or materia.des_tipo_materia == 'Requerimento' or materia.des_tipo_materia == 'Pedido de Informação' or materia.des_tipo_materia == 'Moção':
                   dic = {}
                   dic['id_pdf'] = str(materia.cod_materia) + "_texto_integral.pdf"
-                  dic['nom_pdf'] = str(materia.sgl_tipo_materia).decode('utf-8') + '-' + str(materia.num_ident_basica) + '-' + str(materia.ano_ident_basica) + '.pdf'
+                  dic['nom_pdf'] = str(materia.sgl_tipo_materia) + '-' + str(materia.num_ident_basica) + '-' + str(materia.ano_ident_basica) + '.pdf'
                   id_pdf = str(materia.cod_materia) + "_texto_integral.pdf"
                   if hasattr(context.sapl_documentos.materia, id_pdf):
                      dic['nom_orgao'] = 'OUTROS'
                      for proposicao in context.zsql.proposicao_obter_zsql(ind_mat_ou_doc='M',cod_mat_ou_doc=materia.cod_materia):
                          if proposicao.cod_assunto != None:
                             for assunto in context.zsql.assunto_proposicao_obter_zsql(cod_assunto = proposicao.cod_assunto):
-                                dic['nom_orgao'] = str(assunto.nom_orgao).decode('utf-8')
+                                dic['nom_orgao'] = str(assunto.nom_orgao)
                                 cod_assunto = assunto.cod_assunto
-                                nom_orgao = str(assunto.nom_orgao).decode('utf-8')
+                                nom_orgao = str(assunto.nom_orgao)
                                 orgaos.append(nom_orgao)
                                 arquivos.append(dic)
                          else:
@@ -48,7 +47,12 @@ def baixar_pdf(context):
         for arquivo in arquivos:
             if arquivo['nom_orgao'] == orgao:
                arq = getattr(context.sapl_documentos.materia, arquivo['id_pdf'])
+<<<<<<< HEAD
                f = open(os.path.join(dirpath, orgao) + '/' + str(arquivo['nom_pdf']), 'wb').write(str(arq.data))
+=======
+               f = open(os.path.join(dirpath, orgao) + '/' + str(arquivo['nom_pdf']), 'wb').write(bytes(arq.data))
+               f.close()
+>>>>>>> 7ea825a (V5)
 
     if os.path.exists(dirpath):
        file_paths = []
@@ -62,6 +66,7 @@ def baixar_pdf(context):
               
        download = open('/tmp/' + zipname, 'rb')
        arquivo = download.read()
+       download.close()
        context.REQUEST.RESPONSE.headers['Content-Type'] = 'application/zip'
        context.REQUEST.RESPONSE.headers['Content-Disposition'] = 'attachment; filename="%s"'%zipname
 

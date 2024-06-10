@@ -41,7 +41,7 @@ for substitutivo in context.zsql.substitutivo_obter_zsql(cod_substitutivo=cod_su
  dat_apresentacao = context.pysc.data_converter_por_extenso_pysc(data=substitutivo.dat_apresentacao)
 
  for materia_vinculada in context.zsql.materia_obter_zsql(cod_materia = substitutivo.cod_materia):
-  materia_vinculada = ' - ' +materia_vinculada.des_tipo_materia.decode('utf-8').upper() + '  ' + str(materia_vinculada.num_ident_basica) + '/' + str(materia_vinculada.ano_ident_basica)
+  materia_vinculada = ' - ' +materia_vinculada.des_tipo_materia.upper() + '  ' + str(materia_vinculada.num_ident_basica) + '/' + str(materia_vinculada.ano_ident_basica)
   nom_arquivo = str(substitutivo.cod_substitutivo) + '_substitutivo.odt'
 
  nom_autor = []

@@ -229,8 +229,8 @@ $(document).ready(() => {
         <i class="fas fa-fw fa-file-export"></i>Gerar
       </button>
       <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
-        <a class="dropdown-item" href="<dtml-var portal_url>/relatorios/pdf_detalhe_materia_preparar_pysc?cod_materia=<dtml-var expr="pysc.b64encode_pysc(codigo=cod_materia)">" target="_blank"><i class="far fa-file-pdf"></i> Ficha Textual</a>
-        <a class="dropdown-item block" href="<dtml-var portal_url>/modelo_proposicao/processo_eletronico?cod_materia=<dtml-var expr="pysc.b64encode_pysc(codigo=cod_materia)">" target="_blank"><i class="far fa-file-pdf"></i> Processo Integral</a>
+        <a class="dropdown-item" href="<dtml-var portal_url>/relatorios/pdf_detalhe_materia_preparar_pysc?cod_materia=<dtml-var cod_materia>" target="_blank"><i class="far fa-file-pdf"></i> Ficha Textual</a>
+        <a class="dropdown-item block" href="<dtml-var portal_url>/modelo_proposicao/processo_eletronico?cod_materia=<dtml-var cod_materia>" target="_blank"><i class="far fa-file-pdf"></i> Processo Integral</a>
         <a class="dropdown-item" href="<dtml-var portal_url>/modelo_proposicao/resumo_tramitacao?cod_materia=<dtml-var cod_materia>" target="_blank"><i class="far fa-file-alt"></i> Ficha de Tramitação</a>
         <a class="dropdown-item" href="<dtml-var portal_url>/modelo_proposicao/capa_processo?cod_materia=<dtml-var cod_materia>" target="_blank"><i class="far fa-file-alt"></i> Capa do Processo</a>
      </div>
@@ -241,7 +241,7 @@ $(document).ready(() => {
 <dtml-call expr="REQUEST.set('temProposicao',REQUEST.has_key('hdnCodProposicao'))">
 <dtml-if temProposicao>
   <dtml-in expr="zsql.proposicao_obter_zsql(cod_proposicao=hdnCodProposicao)">
-    <dtml-call expr="REQUEST.set('propTipoMat',_.str(tip_mat_ou_doc))">
+    <dtml-call expr="REQUEST.set('propTipoMat',str(tip_mat_ou_doc))">
   </dtml-in>
 </dtml-if>
 
@@ -385,7 +385,7 @@ $(document).ready(() => {
     <div class="col-6 col-sm-3 mb-3">
       <label for="txt_ano_ident_basica" class="required">Ano</label>
       <dtml-unless ano_ident_basica>
-         <dtml-call expr="REQUEST.set('ano_ident_basica', _.DateTime.year(_.DateTime()))">
+         <dtml-call expr="REQUEST.set('ano_ident_basica', _.DateTime.year(DateTime()))">
       </dtml-unless>
       <input class="form-control year" type="number" id="txt_ano_ident_basica" name="txt_ano_ident_basica" value="<dtml-var ano_ident_basica missing>" autocomplete="off" required />
       <div class="invalid-feedback">
@@ -398,7 +398,7 @@ $(document).ready(() => {
     <div class="col-6 col-lg-3 mb-3">
       <label for="txt_dat_apresentacao" class="required">Data de Apresentação</label>
       <dtml-unless dat_apresentacao>
-         <dtml-call expr="REQUEST.set('dat_apresentacao', _.DateTime().strftime('%d/%m/%Y'))">
+         <dtml-call expr="REQUEST.set('dat_apresentacao', DateTime().strftime('%d/%m/%Y'))">
       </dtml-unless>
       <input class="form-control date" type="text" id="txt_dat_apresentacao" name="txt_dat_apresentacao" value="<dtml-var dat_apresentacao missing null="">" autocomplete="off" pattern=".{10,}" required />
       <div class="invalid-feedback">
@@ -545,18 +545,18 @@ $(document).ready(() => {
     <div class="col-12 col-lg-6 mb-3">
        <dtml-if expr="_.has_key('cod_materia')">
           <label class="form-label d-block" for="lst_modelo">ODT Texto Original</label>
-          <dtml-let id_documento_odt="_.str(cod_materia)+'_texto_integral.odt'">
-             <dtml-if "_.hasattr(sapl_documentos.materia_odt,id_documento_odt)">
+          <dtml-let id_documento_odt="str(cod_materia)+'_texto_integral.odt'">
+             <dtml-if "hasattr(sapl_documentos.materia_odt,id_documento_odt)">
                 <dtml-call expr="REQUEST.set('temODT', 1)">
-                <dtml-let documento_odt="_.getattr(sapl_documentos.materia_odt,id_documento_odt).absolute_url">
-                   <dtml-call expr="REQUEST.set('nome_arquivo_odt',_.str(cod_materia)+'_texto_integral.odt')">
-                   <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#iFrameModal" data-title="Visualização de Arquivo" data-src="<dtml-var portal_url>/generico/viewerJS/#<dtml-var documento_odt>?<dtml-var expr="ZopeTime().timeTime()">"><i class="fa fa-fw fa-file-alt"></i>Visualizar</button>
-                   <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#iFrameModal" data-title="Edição de Arquivo ODT" data-src="<dtml-var portal_url>/webeditor/editorMateria?<dtml-var documento_odt>" data-toggle="tooltip" data-placement="bottom" title="Editar Online"><i class="fa fa-fw fa-edit"></i>Editar</button>
+                <dtml-let documento_odt="getattr(sapl_documentos.materia_odt,id_documento_odt).absolute_url">
+                   <dtml-call expr="REQUEST.set('nome_arquivo_odt',str(cod_materia)+'_texto_integral.odt')">
+                   <a class="btn btn-secondary" href="<dtml-var portal_url>/generico/viewerJS/#<dtml-var documento_odt>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fa fa-fw fa-file-alt"></i>Visualizar</a>
+                   <a class="btn btn-secondary" href="<dtml-var portal_url>/webeditor/editorMateria?<dtml-var documento_odt>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fa fa-fw fa-edit"></i>Editar</a>
                    <button type="button" class="btn btn-secondary" onclick="javascript:location.href='&dtml-URL1;/sapl_documentos/materia_odt/externalEdit_/<dtml-var nome_arquivo_odt>.zem'" data-toggle="tooltip" data-placement="bottom" title="Editar no LibreOffice"><i class="fas fa-fw fa-external-link-alt"></i>LibreOffice</button>
                    <a class="btn btn-danger" href="<dtml-var portal_url>/cadastros/materia/texto_odt_materia_excluir_proc?cod_materia=<dtml-var cod_materia missing>" data-confirm="Deseja realmente excluir o arquivo ODT do Texto Original?"><i class="fas fa-trash"></i> Excluir</a>
                 </dtml-let>
              <dtml-else>
-                <dtml-call expr="REQUEST.set('prefixo_arquivo', _.str(sgl_tipo_materia)+'-')">
+                <dtml-call expr="REQUEST.set('prefixo_arquivo', str(sgl_tipo_materia)+'-')">
                 <div class="input-group">
                   <select class="custom-select" id="lst_modelo" name="lst_modelo">
                    <option value="0">Selecione um modelo</option>
@@ -579,10 +579,10 @@ $(document).ready(() => {
     <div class="col-12 col-lg-6 mb-3">
        <label class="form-label d-block">PDF Texto Original</label>
        <dtml-if expr="_.has_key('cod_materia')">
-          <dtml-call expr="REQUEST.set('id_documento', _.str(cod_materia)+'_texto_integral.pdf')">
-          <dtml-call expr="REQUEST.set('id_documento_assinado', _.str(cod_materia)+'_texto_integral_signed.pdf')">
-          <dtml-if "_.hasattr(sapl_documentos.materia,id_documento) and not _.hasattr(sapl_documentos.materia,id_documento_assinado)">
-             <dtml-let documento="_.getattr(sapl_documentos.materia,id_documento).absolute_url">
+          <dtml-call expr="REQUEST.set('id_documento', str(cod_materia)+'_texto_integral.pdf')">
+          <dtml-call expr="REQUEST.set('id_documento_assinado', str(cod_materia)+'_texto_integral_signed.pdf')">
+          <dtml-if "hasattr(sapl_documentos.materia,id_documento) and not hasattr(sapl_documentos.materia,id_documento_assinado)">
+             <dtml-let documento="getattr(sapl_documentos.materia,id_documento).absolute_url">
                 <dtml-call expr="REQUEST.set('temPDF', 1)">             
                 <a class="btn btn-secondary" target="_blank" href="<dtml-var documento>?<dtml-var expr="ZopeTime().timeTime()">">
                   <i class="fa fa-fw fa-file-pdf"></i>Visualizar
@@ -594,8 +594,8 @@ $(document).ready(() => {
                 </dtml-if>                 
                 <a class="btn btn-danger" href="<dtml-var portal_url>/cadastros/materia/texto_materia_excluir_proc?cod_materia=<dtml-var cod_materia missing>" data-confirm="Deseja realmente excluir o arquivo PDF do Texto Original?"><i class="fas fa-trash"></i> Excluir</a>           
              </dtml-let>
-          <dtml-elif "_.hasattr(sapl_documentos.materia,id_documento_assinado)">
-             <dtml-let documento="_.getattr(sapl_documentos.materia,id_documento_assinado).absolute_url">
+          <dtml-elif "hasattr(sapl_documentos.materia,id_documento_assinado)">
+             <dtml-let documento="getattr(sapl_documentos.materia,id_documento_assinado).absolute_url">
                 <a class="btn btn-secondary" target="_blank" href="<dtml-var documento>?<dtml-var expr="ZopeTime().timeTime()">">
                    <i class="fas fa-certificate"></i> PDF Assinado
                 </a>
@@ -607,8 +607,8 @@ $(document).ready(() => {
                <input type="file" class="custom-file-input" id="file_nom_arquivo" name="file_nom_arquivo" accept="application/pdf">
                <label class="custom-file-label" for="file_nom_arquivo">Selecione o arquivo</label>
              </div>
-             <dtml-let id_documento_odt="_.str(cod_materia)+'_texto_integral.odt'">
-                <dtml-if "_.hasattr(sapl_documentos.materia_odt,id_documento_odt)">
+             <dtml-let id_documento_odt="str(cod_materia)+'_texto_integral.odt'">
+                <dtml-if "hasattr(sapl_documentos.materia_odt,id_documento_odt)">
                    <dtml-call expr="REQUEST.set('temODT', 1)">
                 </dtml-if>
              </dtml-let>
@@ -627,8 +627,8 @@ $(document).ready(() => {
             <label class="custom-file-label" for="file_nom_arquivo">Selecione o arquivo</label>
           </div>
           <dtml-if expr="_.has_key('cod_materia')">
-             <dtml-let id_documento_odt="_.str(cod_materia)+'_texto_integral.odt'">
-                <dtml-if "_.hasattr(sapl_documentos.materia_odt,id_documento_odt)">
+             <dtml-let id_documento_odt="str(cod_materia)+'_texto_integral.odt'">
+                <dtml-if "hasattr(sapl_documentos.materia_odt,id_documento_odt)">
                   <dtml-call expr="REQUEST.set('temODT', 1)">
                 </dtml-if>
              </dtml-let>
@@ -646,19 +646,19 @@ $(document).ready(() => {
     <div class="col-12 col-lg-6 mb-3">
        <dtml-if expr="_.has_key('cod_materia')">
           <label class="d-block">ODT Redação Final</label>
-          <dtml-let id_documento_odt="_.str(cod_materia)+'_redacao_final.odt'">
-             <dtml-if "_.hasattr(sapl_documentos.materia_odt,id_documento_odt)">
+          <dtml-let id_documento_odt="str(cod_materia)+'_redacao_final.odt'">
+             <dtml-if "hasattr(sapl_documentos.materia_odt,id_documento_odt)">
                 <dtml-call expr="REQUEST.set('temODT', 1)">
-                <dtml-let documento_odt="_.getattr(sapl_documentos.materia_odt,id_documento_odt).absolute_url">
-                   <dtml-call expr="REQUEST.set('nome_arquivo_odt',_.str(cod_materia)+'_redacao_final.odt')">
-                   <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#iFrameModal" data-title="Visualização de Arquivo" data-src="<dtml-var portal_url>/generico/viewerJS/#<dtml-var documento_odt>?<dtml-var expr="ZopeTime().timeTime()">"><i class="fa fa-fw fa-file-alt"></i>Visualizar</button>
-                   <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#iFrameModal" data-title="Edição de Arquivo ODT" data-src="<dtml-var portal_url>/webeditor/editorMateria?<dtml-var documento_odt>" data-toggle="tooltip" data-placement="bottom" title="Editar Online"><i class="fa fa-fw fa-edit"></i>Editar</button>
+                <dtml-let documento_odt="getattr(sapl_documentos.materia_odt,id_documento_odt).absolute_url">
+                   <dtml-call expr="REQUEST.set('nome_arquivo_odt',str(cod_materia)+'_redacao_final.odt')">
+                   <a class="btn btn-secondary" href="<dtml-var portal_url>/generico/viewerJS/#<dtml-var documento_odt>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fa fa-fw fa-file-alt"></i>Visualizar</a>
+                   <a class="btn btn-secondary" href="<dtml-var portal_url>/webeditor/editorMateria?<dtml-var documento_odt>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fa fa-fw fa-edit"></i>Editar</a>
                    <button type="button" class="btn btn-secondary" onclick="javascript:location.href='&dtml-URL1;/sapl_documentos/materia_odt/externalEdit_/<dtml-var nome_arquivo_odt>.zem'" data-toggle="tooltip" data-placement="bottom" title="Editar no LibreOffice"><i class="fas fa-fw fa-external-link-alt"></i>LibreOffice</button>
                    <a class="btn btn-danger" href="<dtml-var portal_url>/cadastros/materia/redacao_final_odt_excluir_proc?cod_materia=<dtml-var cod_materia missing>" data-confirm="Deseja realmente excluir o arquivo ODT da Redação Final?"><i class="fas fa-trash"></i> Excluir</a>
                 </dtml-let>
              <dtml-else>
-                <dtml-let id_documento_odt="_.str(cod_materia)+'_texto_integral.odt'">
-                   <dtml-if "_.hasattr(sapl_documentos.materia_odt,id_documento_odt)">
+                <dtml-let id_documento_odt="str(cod_materia)+'_texto_integral.odt'">
+                   <dtml-if "hasattr(sapl_documentos.materia_odt,id_documento_odt)">
                       <input class="btn btn-secondary"  type="button" value="Obter Texto Original" onclick="javascript:texto_original_materia_obter()" />
                    <dtml-else>
                       <i>Não disponível</i>
@@ -671,10 +671,10 @@ $(document).ready(() => {
     <div class="col-12 col-lg-6 mb-3">
        <label class="form-label d-block">PDF Redação Final</label>
        <dtml-if expr="_.has_key('cod_materia')">
-          <dtml-call expr="REQUEST.set('id_documento', _.str(cod_materia)+'_redacao_final.pdf')">
-          <dtml-call expr="REQUEST.set('id_documento_assinado', _.str(cod_materia)+'_redacao_final_signed.pdf')">
-          <dtml-if "_.hasattr(sapl_documentos.materia,id_documento) and not _.hasattr(sapl_documentos.materia,id_documento_assinado)">
-             <dtml-let documento="_.getattr(sapl_documentos.materia,id_documento).absolute_url">
+          <dtml-call expr="REQUEST.set('id_documento', str(cod_materia)+'_redacao_final.pdf')">
+          <dtml-call expr="REQUEST.set('id_documento_assinado', str(cod_materia)+'_redacao_final_signed.pdf')">
+          <dtml-if "hasattr(sapl_documentos.materia,id_documento) and not hasattr(sapl_documentos.materia,id_documento_assinado)">
+             <dtml-let documento="getattr(sapl_documentos.materia,id_documento).absolute_url">
                 <a class="btn btn-secondary" target="_blank" href="<dtml-var documento>?<dtml-var expr="ZopeTime().timeTime()">">
                   <i class="fa fa-fw fa-file-pdf"></i>Visualizar
                 </a>
@@ -683,8 +683,8 @@ $(document).ready(() => {
                 <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#iFrameModal" data-title="Assinaturas Digitais" data-src="<dtml-var portal_url>/cadastros/assinatura/assinatura_solicitar_form?codigo=<dtml-var cod_materia>&tipo_doc=redacao_final&modal=1"><i class="fas fa-file-signature"></i>Assinaturas</button>
               </dtml-if>
                  <a class="btn btn-danger" href="<dtml-var portal_url>/cadastros/materia/redacao_final_excluir_proc?cod_materia=<dtml-var cod_materia missing>" data-confirm="Deseja realmente excluir o arquivo PDF da Redação Final?"><i class="fas fa-trash"></i> Excluir</a>
-             <dtml-elif "_.hasattr(sapl_documentos.materia,id_documento_assinado)">
-                <dtml-let documento="_.getattr(sapl_documentos.materia,id_documento_assinado).absolute_url">
+             <dtml-elif "hasattr(sapl_documentos.materia,id_documento_assinado)">
+                <dtml-let documento="getattr(sapl_documentos.materia,id_documento_assinado).absolute_url">
                    <a class="btn btn-secondary" target="_blank" href="<dtml-var documento>?<dtml-var expr="ZopeTime().timeTime()">">
                      <i class="fas fa-certificate"></i> Documento Assinado
                    </a>
@@ -697,8 +697,8 @@ $(document).ready(() => {
                   <input type="file" class="custom-file-input" id="file_redacao" name="file_redacao" accept="application/pdf">
                   <label class="custom-file-label" for="file_redacao">Selecione o arquivo</label>
                 </div>
-                <dtml-let id_documento_odt="_.str(cod_materia)+'_redacao_final.odt'">
-                   <dtml-if "_.hasattr(sapl_documentos.materia_odt,id_documento_odt)">
+                <dtml-let id_documento_odt="str(cod_materia)+'_redacao_final.odt'">
+                   <dtml-if "hasattr(sapl_documentos.materia_odt,id_documento_odt)">
                       <dtml-call expr="REQUEST.set('temODTred', 1)">
                    </dtml-if>
                 </dtml-let>
@@ -716,8 +716,8 @@ $(document).ready(() => {
             <label class="custom-file-label" for="file_redacao">Selecione o arquivo</label>
           </div>
           <dtml-if expr="_.has_key('cod_materia')">
-             <dtml-let id_documento_odt="_.str(cod_materia)+'_redacao_final.odt'">
-                <dtml-if "_.hasattr(sapl_documentos.materia_odt,id_documento_odt)">
+             <dtml-let id_documento_odt="str(cod_materia)+'_redacao_final.odt'">
+                <dtml-if "hasattr(sapl_documentos.materia_odt,id_documento_odt)">
                    <dtml-call expr="REQUEST.set('temODTred', 1)">
                 </dtml-if>
              </dtml-let>
@@ -831,13 +831,13 @@ $(document).ready(() => {
 
   <dtml-if expr="_.has_key('cod_materia')">       
      <dtml-in expr="zsql.proposicao_obter_zsql(ind_mat_ou_doc='M',cod_mat_ou_doc=cod_materia)">
-       <dtml-let id_proposicao="_.str(cod_proposicao)+'_signed.pdf'">
-         <dtml-if "_.hasattr(sapl_documentos.proposicao,id_proposicao)">
+       <dtml-let id_proposicao="str(cod_proposicao)+'_signed.pdf'">
+         <dtml-if "hasattr(sapl_documentos.proposicao,id_proposicao)">
              <legend>Processo Eletrônico</legend>
              <div class="card mb-3">
                <div class="row card-body">
                    <div class="col-12 col-md-8">
-                       <dtml-let proposicao="_.getattr(sapl_documentos.proposicao,id_proposicao).absolute_url">
+                       <dtml-let proposicao="getattr(sapl_documentos.proposicao,id_proposicao).absolute_url">
                           <dtml-call expr="REQUEST.set('cod_documento',pysc.proposicao_calcular_checksum_pysc(cod_proposicao))">
                           <a class="btn btn-secondary" target="_blank" href="<dtml-var proposicao>?<dtml-var expr="ZopeTime().timeTime()">">
                               <i class="fas fa-certificate"></i> Proposição <dtml-var cod_documento>

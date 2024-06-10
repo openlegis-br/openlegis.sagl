@@ -29,9 +29,9 @@
 <dtml-if expr="txt_dat_fim_prazo==None or txt_dat_fim_prazo==''">
  <dtml-in expr="zsql.status_tramitacao_obter_zsql(cod_status=lst_cod_status)">
   <dtml-if num_dias_prazo>
-   <dtml-let data_atual="_.DateTime()">
+   <dtml-let data_atual="DateTime()">
      <dtml-call expr="REQUEST.set('data_calculada', data_atual+num_dias_prazo)">
-     <dtml-call expr="REQUEST.set('txt_dat_fim_prazo', _.DateTime(data_calculada).strftime('%d/%m/%Y'))">
+     <dtml-call expr="REQUEST.set('txt_dat_fim_prazo', DateTime(data_calculada).strftime('%d/%m/%Y'))">
    </dtml-let>
   <dtml-else>
      <dtml-call expr="REQUEST.set('txt_dat_fim_prazo', '')">
@@ -94,9 +94,9 @@
                   <dtml-call expr="REQUEST.set('erro', 1)">
                 </dtml-try>
               </dtml-in>           
-              <dtml-call expr="REQUEST.set('id_documento', _.str(hdn_cod_tramitacao)+'_tram_anexo1.pdf')">
-              <dtml-if "_.hasattr(sapl_documentos.materia.tramitacao,id_documento)">
-                  <dtml-let documento="_.getattr(sapl_documentos.materia.tramitacao,id_documento) ">
+              <dtml-call expr="REQUEST.set('id_documento', str(hdn_cod_tramitacao)+'_tram_anexo1.pdf')">
+              <dtml-if "hasattr(sapl_documentos.materia.tramitacao,id_documento)">
+                  <dtml-let documento="getattr(sapl_documentos.materia.tramitacao,id_documento) ">
                       <dtml-call expr="REQUEST.set('existe_arquivo', 1)">
                       <dtml-try>
                           <dtml-call "documento.manage_upload(file=pysc.upload_file(file=file_nom_arquivo, title='Tramitacao'))">
@@ -119,7 +119,7 @@
       <dtml-else>
          <dtml-call expr="REQUEST.set('hdn_url', 'tramitacao_mostrar_proc?hdn_cod_tramitacao=' + str(hdn_cod_tramitacao) + '&hdn_cod_materia=' + str(hdn_cod_materia))">             
       </dtml-if> 
-      <dtml-call expr="REQUEST.set('pdf', _.str(hdn_cod_tramitacao)+'_tram.pdf')">
+      <dtml-call expr="REQUEST.set('pdf', str(hdn_cod_tramitacao)+'_tram.pdf')">
       <dtml-call expr="relatorios.pdf_tramitacao_preparar_pysc(hdn_cod_tramitacao=hdn_cod_tramitacao, hdn_url=hdn_url)"> 
   </dtml-if>
 
@@ -148,8 +148,8 @@
 </dtml-try>
 
 <dtml-if expr="radTI=='S'">
-  <dtml-call expr="REQUEST.set('pdf_anexo', _.str(hdn_cod_tramitacao)+'_tram_anexo1.pdf')">
-  <dtml-if "_.hasattr(sapl_documentos.materia.tramitacao,pdf_anexo)">
+  <dtml-call expr="REQUEST.set('pdf_anexo', str(hdn_cod_tramitacao)+'_tram_anexo1.pdf')">
+  <dtml-if "hasattr(sapl_documentos.materia.tramitacao,pdf_anexo)">
     <dtml-call expr="cadastros.tramitacao_materia.tramitacao_juntar_pdf(cod_tramitacao=hdn_cod_tramitacao)">
   </dtml-if>
 </dtml-if>

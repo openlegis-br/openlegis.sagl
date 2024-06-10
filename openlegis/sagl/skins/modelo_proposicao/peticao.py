@@ -69,7 +69,7 @@ for peticao in context.zsql.peticao_obter_zsql(cod_peticao=cod_peticao):
            materia_vinculada['txt_ementa'] = materia.txt_ementa
            materia_vinculada['autoria'] = ''
            autores = context.zsql.autoria_obter_zsql(cod_materia=materia.cod_materia,)
-           fields = autores.data_dictionary().keys()
+           fields = list(autores.data_dictionary().keys())
            lista_autor = []
            for autor in autores:
                for field in fields:

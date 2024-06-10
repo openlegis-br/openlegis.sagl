@@ -29,9 +29,9 @@
           </td>
           <td><dtml-var nom_autor_documento missing null=""></td>                 
           <td>
-             <dtml-call expr="REQUEST.set('id_documento', _.str(cod_documento_acessorio)+'.pdf')">
-             <dtml-if "_.hasattr(sapl_documentos.administrativo,id_documento)">
-               <dtml-let documento="_.getattr(sapl_documentos.administrativo,id_documento).absolute_url">
+             <dtml-call expr="REQUEST.set('id_documento', str(cod_documento_acessorio)+'.pdf')">
+             <dtml-if "hasattr(sapl_documentos.administrativo,id_documento)">
+               <dtml-let documento="getattr(sapl_documentos.administrativo,id_documento).absolute_url">
                  <a href="<dtml-var documento>" target="_blank">
                   <dtml-if expr="zsql.assinatura_documento_obter_zsql(codigo=cod_documento_acessorio, tipo_doc='doc_acessorio_adm',ind_assinado=1, cod_usuario=None)">
                      <i class="fa fa-certificate" style="font-size: 21px;margin-right: 3px;"></i>

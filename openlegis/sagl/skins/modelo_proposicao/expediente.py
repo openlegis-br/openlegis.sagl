@@ -7,10 +7,8 @@
 ##parameters=cod_sessao_plen
 ##title=
 ##
-
 from Products.CMFCore.utils import getToolByName
 st = getToolByName(context, 'portal_sagl')
-
 REQUEST = context.REQUEST
 RESPONSE =  REQUEST.RESPONSE
 session = REQUEST.SESSION
@@ -30,7 +28,6 @@ for sessao in context.zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=cod_sessao
   inf_basicas_dic["hr_fim_sessao"] = sessao.hr_fim_sessao
   data = context.pysc.data_converter_pysc(sessao.dat_inicio_sessao)
   nom_arquivo = str(sessao.cod_sessao_plen)+ '_expediente.odt'
-
   # Presidente
   lst_presidente = []
   for dat_sessao in context.zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=cod_sessao_plen,ind_excluido=0):
@@ -39,26 +36,20 @@ for sessao in context.zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=cod_sessao
     for cod_presidente in context.zsql.composicao_mesa_obter_zsql(cod_periodo_comp=sleg.cod_periodo_comp,cod_cargo=1):
       for presidencia in context.zsql.parlamentar_obter_zsql(cod_parlamentar=cod_presidente.cod_parlamentar):
         lst_presidente = presidencia.nom_completo
-
   # Correspondencias
   inf_basicas_dic["correspondencias"] = ""
   for item in context.zsql.expediente_obter_zsql(cod_sessao_plen=cod_sessao_plen,cod_expediente=1,ind_excluido=0):
     inf_basicas_dic["correspondencias"] = item.txt_expediente
-
   # Tribuna Livre
   inf_basicas_dic["tribuna"] = ""
   for item in context.zsql.expediente_obter_zsql(cod_sessao_plen=cod_sessao_plen,cod_expediente=3,ind_excluido=0):
     inf_basicas_dic["tribuna"] = item.txt_expediente
-
- 
   # Materias do Expediente
   lst_indicacoes = []
-  lst_requerimentos = [] 
-  lst_mocoes = [] 
-  
+  lst_requerimentos = []
+  lst_mocoes = []
   for item in context.zsql.expediente_materia_obter_zsql(cod_sessao_plen=cod_sessao_plen,ind_excluido=0):
-  
-    # Indicacoes  
+    # Indicacoes
     for materia in context.zsql.materia_obter_zsql(cod_materia=item.cod_materia,des_tipo_materia='Indicação',ind_excluido=0):
       dic_indicacoes = {}
       dic_indicacoes['txt_ementa'] = materia.txt_ementa
@@ -67,15 +58,14 @@ for sessao in context.zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=cod_sessao
       dic_indicacoes['dat_apresentacao'] = materia.dat_apresentacao
       dic_indicacoes["nom_autor"] = ""
       autores = context.zsql.autoria_obter_zsql(cod_materia=item.cod_materia)
-      fields = autores.data_dictionary().keys()
+      fields = list(autores.data_dictionary().keys())
       lista_autor = []
       for autor in autores:
-	for field in fields:
-                nome_autor = autor['nom_autor_join']
-	lista_autor.append(nome_autor)
+        for field in fields:
+            nome_autor = autor['nom_autor_join']
+        lista_autor.append(nome_autor)
       dic_indicacoes["nom_autor"] = ', '.join(['%s' % (value) for (value) in lista_autor]) 
       lst_indicacoes.append(dic_indicacoes)
-
     # Requerimentos
     for materia in context.zsql.materia_obter_zsql(cod_materia=item.cod_materia,des_tipo_materia='Requerimento',ind_excluido=0):
       dic_requerimentos = {}
@@ -85,15 +75,14 @@ for sessao in context.zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=cod_sessao
       dic_requerimentos['dat_apresentacao'] = materia.dat_apresentacao
       dic_requerimentos["nom_autor"] = ""
       autores = context.zsql.autoria_obter_zsql(cod_materia=item.cod_materia)
-      fields = autores.data_dictionary().keys()
+      fields = list(autores.data_dictionary().keys())
       lista_autor = []
       for autor in autores:
-	for field in fields:
-                nome_autor = autor['nom_autor_join']
-	lista_autor.append(nome_autor)
-      dic_requerimentos["nom_autor"] = ', '.join(['%s' % (value) for (value) in lista_autor]) 
+        for field in fields:
+            nome_autor = autor['nom_autor_join']
+        lista_autor.append(nome_autor)
+      dic_requerimentos["nom_autor"] = ', '.join(['%s' % (value) for (value) in lista_autor])
       lst_requerimentos.append(dic_requerimentos)
-
     # Mocoes
     for materia in context.zsql.materia_obter_zsql(cod_materia=item.cod_materia, des_tipo_materia='Moção',ind_excluido=0):
       dic_mocoes = {}
@@ -103,15 +92,14 @@ for sessao in context.zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=cod_sessao
       dic_mocoes['dat_apresentacao'] = materia.dat_apresentacao
       dic_mocoes["nom_autor"] = ""
       autores = context.zsql.autoria_obter_zsql(cod_materia=item.cod_materia)
-      fields = autores.data_dictionary().keys()
+      fields = list(autores.data_dictionary().keys())
       lista_autor = []
       for autor in autores:
-	for field in fields:
-                nome_autor = autor['nom_autor_join']
-	lista_autor.append(nome_autor)
-      dic_mocoes["nom_autor"] = ', '.join(['%s' % (value) for (value) in lista_autor]) 
+        for field in fields:
+            nome_autor = autor['nom_autor_join']
+        lista_autor.append(nome_autor)
+      dic_mocoes["nom_autor"] = ', '.join(['%s' % (value) for (value) in lista_autor])
       lst_mocoes.append(dic_mocoes)
-
   # Oradores
   lst_oradores = []
   for orador in context.zsql.oradores_expediente_obter_zsql(cod_sessao_plen=sessao.cod_sessao_plen, ind_excluido=0):
@@ -120,7 +108,6 @@ for sessao in context.zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=cod_sessao
           nom_completo = parlamentar.nom_parlamentar
           lst_oradores.append(nom_completo)
   lst_oradores = ', '.join(['%s' % (value) for (value) in lst_oradores])
-
   casa={}
   aux=context.sapl_documentos.props_sagl.propertyItems()
   for item in aux:
@@ -136,5 +123,4 @@ for sessao in context.zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=cod_sessao
   for local in context.zsql.localidade_obter_zsql(cod_localidade = casa['cod_localidade']):
       inf_basicas_dic['nom_localidade']= local.nom_localidade
       inf_basicas_dic['sgl_uf']= local.sgl_uf
-
 return st.expediente_gerar_odt(inf_basicas_dic, lst_indicacoes, lst_requerimentos, lst_mocoes, lst_oradores, lst_presidente, nom_arquivo)

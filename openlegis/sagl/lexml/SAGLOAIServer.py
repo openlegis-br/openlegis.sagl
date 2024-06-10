@@ -31,8 +31,8 @@ def manage_addSAGLOAIServer(self, email, titulo, batch_size, base_url, id='oai',
         u = self.DestinationURL()
     except:
         u = REQUEST['URL1']
-    if REQUEST.has_key('submit_edit'):
-        u = "%s/%s" % (u, urllib.quote(id))
+    if 'submit_edit' in REQUEST:
+        u = "%s/%s" % (u, urllib.parse.quote(id))
     REQUEST.RESPONSE.redirect(u+'/manage_main')
 
 class SAGLOAIServer(SimpleItem.SimpleItem,Persistent):
@@ -120,12 +120,12 @@ class SAGLOAIServer(SimpleItem.SimpleItem,Persistent):
         """
         req.RESPONSE.setHeader('Content-Type' , mimetype)
         req.RESPONSE.setHeader('Content-Length' ,len(data))
-        return data.decode('utf-8').encode('ascii', 'xmlcharrefreplace')
+        return data.encode('ascii', 'xmlcharrefreplace')
 
     def handle_request(self, req,RESPONSE=None):
         if not req.URL.startswith(self._base_url):
             return req.RESPONSE.setStatus('500 Internal Server Error',
-                 u'The url "%s" does not start with base url "%s".' % (req.URL,
+                 'The url "%s" does not start with base url "%s".' % (req.URL,
                                                                       self._base_url))
         sagl_tool = getToolByName(self,'portal_sagl')
         oai_server = OAIServerFactory(sagl_tool, self.config())

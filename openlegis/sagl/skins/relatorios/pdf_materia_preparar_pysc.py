@@ -74,12 +74,12 @@ for materia in context.zsql.materia_pesquisar_zsql(tip_id_basica=tipo_materia,
                                                    cod_unid_tramitacao2=REQUEST['lst_tramitou'],
                                                    rd_ordem=REQUEST['rd_ordenacao']):
     dic={}
-    dic['titulo'] = materia.des_tipo_materia.decode('utf-8').upper()+" N° "+str(materia.num_ident_basica) + '/' + str(materia.ano_ident_basica)
+    dic['titulo'] = materia.des_tipo_materia.upper()+" N° "+str(materia.num_ident_basica) + '/' + str(materia.ano_ident_basica)
     dic['txt_ementa']= materia.txt_ementa
     dic["dat_apresentacao"] = context.pysc.iso_to_port_pysc(materia.dat_apresentacao)
     dic["nom_autor"] = ''
     autores = context.zsql.autoria_obter_zsql(cod_materia=materia.cod_materia)
-    fields = autores.data_dictionary().keys()
+    fields = list(autores.data_dictionary().keys())
     lista_autor = []
     for autor in autores:
         for field in fields:

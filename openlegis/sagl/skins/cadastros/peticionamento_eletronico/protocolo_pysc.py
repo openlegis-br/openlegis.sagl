@@ -80,7 +80,7 @@ def criar_documento(numero,ano,data,tip_documento,hdn_num_protocolo,txt_interess
 
     anexos = context.pysc.anexo_peticao_pysc(str(cod_peticao),listar=True)
     for item in anexos:
-        id_anexo = string.split(item,'.')[0] + '.pdf'
+        id_anexo = str(item).split('.')[0] + '.pdf'
         arquivo = context.sapl_documentos.peticao[id_anexo]
         nom_doc = arquivo.title
         data_doc = container.last_modified(arquivo)

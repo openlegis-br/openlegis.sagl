@@ -42,12 +42,12 @@
       <dtml-in expr="zsql.documento_acessorio_obter_zsql(cod_materia = cod_materia, ind_excluido=0)">
          <dtml-let silent="1">
            <dtml-call expr="documento_acessorio.documento_acessorio_excluir_proc(cod_documento=cod_documento)">
-           <dtml-call expr="REQUEST.set('id_doc', _.str(cod_documento)+'.pdf')">
-           <dtml-if "_.hasattr(sapl_documentos.materia,id_doc)">
+           <dtml-call expr="REQUEST.set('id_doc', str(cod_documento)+'.pdf')">
+           <dtml-if "hasattr(sapl_documentos.materia,id_doc)">
               <dtml-call expr="sapl_documentos.materia.manage_delObjects(id_doc)">
            </dtml-if>
-           <dtml-call expr="REQUEST.set('id_doc_assinado', _.str(cod_documento)+'_signed.pdf')">
-           <dtml-if "_.hasattr(sapl_documentos.materia,id_doc_assinado)">
+           <dtml-call expr="REQUEST.set('id_doc_assinado', str(cod_documento)+'_signed.pdf')">
+           <dtml-if "hasattr(sapl_documentos.materia,id_doc_assinado)">
               <dtml-call expr="sapl_documentos.materia.manage_delObjects(id_doc_assinado)">
               <dtml-in expr="zsql.assinatura_documento_obter_zsql(codigo=cod_documento,tipo_doc='doc_acessorio')">
                  <dtml-try>
@@ -75,12 +75,12 @@
       <dtml-call expr="sapl_documentos.materia.Catalog.removerCatalogo(cod_materia)">
       <dtml-call expr="REQUEST.set('metodo', zsql.materia_excluir_zsql)">      
       <dtml-call expr="metodo(cod_materia = cod_materia)">
-      <dtml-call expr="REQUEST.set('id_pdf', _.str(cod_materia)+'_texto_integral.pdf')">
-      <dtml-if "_.hasattr(sapl_documentos.materia,id_pdf)">
+      <dtml-call expr="REQUEST.set('id_pdf', str(cod_materia)+'_texto_integral.pdf')">
+      <dtml-if "hasattr(sapl_documentos.materia,id_pdf)">
          <dtml-call expr="sapl_documentos.materia.manage_delObjects(id_pdf)">
       </dtml-if>
-      <dtml-call expr="REQUEST.set('id_pdf_assinado', _.str(cod_materia)+'_texto_integral_signed.pdf')">
-      <dtml-if "_.hasattr(sapl_documentos.materia,id_pdf_assinado)">
+      <dtml-call expr="REQUEST.set('id_pdf_assinado', str(cod_materia)+'_texto_integral_signed.pdf')">
+      <dtml-if "hasattr(sapl_documentos.materia,id_pdf_assinado)">
          <dtml-call expr="sapl_documentos.materia.manage_delObjects(id_pdf_assinado)">
          <dtml-in expr="zsql.assinatura_documento_obter_zsql(codigo=cod_materia,tipo_doc='materia')">
           <dtml-try>
@@ -93,17 +93,17 @@
             </dtml-try>
          </dtml-in>
       </dtml-if>
-      <dtml-call expr="REQUEST.set('id_odt', _.str(cod_materia)+'_texto_integral.odt')">
-      <dtml-if "_.hasattr(sapl_documentos.materia_odt,id_odt)">
+      <dtml-call expr="REQUEST.set('id_odt', str(cod_materia)+'_texto_integral.odt')">
+      <dtml-if "hasattr(sapl_documentos.materia_odt,id_odt)">
          <dtml-call expr="sapl_documentos.materia_odt.manage_delObjects(id_odt)">
       </dtml-if>
-      <dtml-call expr="REQUEST.set('id_pdf', _.str(cod_materia)+'_texto_integral.pdf')">   
-      <dtml-call expr="REQUEST.set('id_redacao', _.str(cod_materia)+'_redacao_final.pdf')">
-      <dtml-if "_.hasattr(sapl_documentos.materia,id_redacao)">
+      <dtml-call expr="REQUEST.set('id_pdf', str(cod_materia)+'_texto_integral.pdf')">   
+      <dtml-call expr="REQUEST.set('id_redacao', str(cod_materia)+'_redacao_final.pdf')">
+      <dtml-if "hasattr(sapl_documentos.materia,id_redacao)">
          <dtml-call expr="sapl_documentos.materia.manage_delObjects(id_redacao)">
       </dtml-if>
-      <dtml-call expr="REQUEST.set('id_redacao_assinada', _.str(cod_materia)+'_redacao_final_signed.pdf')">
-      <dtml-if "_.hasattr(sapl_documentos.materia,id_redacao_assinada)">
+      <dtml-call expr="REQUEST.set('id_redacao_assinada', str(cod_materia)+'_redacao_final_signed.pdf')">
+      <dtml-if "hasattr(sapl_documentos.materia,id_redacao_assinada)">
          <dtml-call expr="sapl_documentos.materia.manage_delObjects(id_redacao_assinada)">
          <dtml-in expr="zsql.assinatura_documento_obter_zsql(codigo=cod_materia,tipo_doc='redacao_final')">
           <dtml-try>
@@ -133,7 +133,7 @@
   <dtml-call expr="zsql.logs_registrar_zsql(
             usuario      = REQUEST['AUTHENTICATED_USER'].getUserName(), 
             data         = DateTime().strftime('%Y-%m-%d %H:%M:%S'),
-            modulo       = _.string.split(_['REQUEST']['URL1'],'/')[-1],
+            modulo       = str(_['REQUEST']['URL1']).split('/')[-1],
             metodo       = 'materia_excluir_proc',
             IP           = pysc.get_ip(),
             cod_registro = cod_materia)"> 

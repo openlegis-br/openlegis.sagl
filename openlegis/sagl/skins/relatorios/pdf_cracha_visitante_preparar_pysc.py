@@ -12,7 +12,7 @@ casa={}
 aux=context.sapl_documentos.props_sagl.propertyItems()
 for item in aux:
  casa[item[0]]=item[1]
-nom_casa = casa["nom_casa"].decode('utf-8')
+nom_casa = casa["nom_casa"]
 
 # tenta buscar o logotipo da casa LOGO_CASA
 if hasattr(context.sapl_documentos.props_sagl,'logo_casa.gif'):

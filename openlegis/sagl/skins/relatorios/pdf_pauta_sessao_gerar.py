@@ -4,7 +4,7 @@
    versão: 1.0
 """
 from trml2pdf import parseString
-from cStringIO import StringIO
+from io import BytesIO
 import time
 
 def cabecalho(inf_basicas_dic,imagem):

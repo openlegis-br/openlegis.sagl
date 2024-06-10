@@ -206,16 +206,16 @@
         <dtml-in expr="zsql.arquivo_recipiente_listar_conteudo_zsql(cod_documento=cod_documento)" mapping>
           <b>Arquivo Permanente:</b> <dtml-var num_recipiente>
         </dtml-in>
-        <dtml-call expr="REQUEST.set('texto_assinado', _.str(cod_documento)+'_texto_integral_signed.pdf')">
-        <dtml-call expr="REQUEST.set('texto_original', _.str(cod_documento)+'_texto_integral.pdf')">
-        <dtml-if "_.hasattr(sapl_documentos.administrativo,texto_assinado) or _.hasattr(sapl_documentos.administrativo,texto_original)">
+        <dtml-call expr="REQUEST.set('texto_assinado', str(cod_documento)+'_texto_integral_signed.pdf')">
+        <dtml-call expr="REQUEST.set('texto_original', str(cod_documento)+'_texto_integral.pdf')">
+        <dtml-if "hasattr(sapl_documentos.administrativo,texto_assinado) or hasattr(sapl_documentos.administrativo,texto_original)">
            <div class="row d-print-none">
              <div class="col-12 text-left mt-1"> 
                 <div class="btn-group btn-group-sm">
-                  <dtml-if "_.hasattr(sapl_documentos.administrativo,texto_assinado)">
+                  <dtml-if "hasattr(sapl_documentos.administrativo,texto_assinado)">
                      <a class="btn btn-primary" href="<dtml-var portal_url>/sapl_documentos/administrativo/<dtml-var texto_assinado>" target="_blank"><i class="far fa-file-pdf"></i> Documento Assinado</a>
                   </dtml-if>
-                  <dtml-if "_.hasattr(sapl_documentos.administrativo,texto_original)">
+                  <dtml-if "hasattr(sapl_documentos.administrativo,texto_original)">
                        <dtml-let isAnon="portal_membership.isAnonymousUser()">
                         <dtml-if expr="not isAnon">
                          <form action="pasta_digital" method="post" target="_blank">

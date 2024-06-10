@@ -31,8 +31,8 @@ function campos_criticar(form){
                  <dtml-in expr="listar_ano_zsql()">
                      <option value="<dtml-var ano_sessao missing>" 
                         <option value="<dtml-var ano_sessao missing>" 
-                          <dtml-if expr="((not _.has_key('ano_sessao_sel') and (_.DateTime().year() == ano_sessao)))
-                                           or (not _.has_key('ano_sessao_sel') and (_.DateTime().year() > ano_sessao))
+                          <dtml-if expr="((not _.has_key('ano_sessao_sel') and (DateTime().year() == ano_sessao)))
+                                           or (not _.has_key('ano_sessao_sel') and (DateTime().year() > ano_sessao))
                                            or (_.has_key('ano_sessao_sel') and ano_sessao == _.int(ano_sessao_sel))">
                             selected
                           <dtml-call expr="REQUEST.set('ano_sessao_sel', ano_sessao)">

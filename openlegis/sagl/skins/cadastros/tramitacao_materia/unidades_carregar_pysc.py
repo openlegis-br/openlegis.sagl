@@ -7,7 +7,7 @@
 ##parameters= svalue
 ##title=
 ##
-import simplejson as json
+import json
 
 context.REQUEST.RESPONSE.setHeader("Access-Control-Allow-Origin", "*")
 
@@ -15,7 +15,7 @@ unidades = ''
 
 if svalue != '':
    unidades = context.zsql.unidade_tramitacao_obter_zsql(cod_unid_tramitacao = svalue)
-   fields = unidades.data_dictionary().keys()
+   fields = list(unidades.data_dictionary().keys())
 
 listaDic={}     
 unidadeArray = []
@@ -37,7 +37,7 @@ if unidades_destino != None:
       dic['name'] = 'Selecione'
       dic['id'] = ''
       unidadeArray.append(dic)
-   for item in string.split(str(unidades_destino),','):
+   for item in str(unidades_destino).split(','):
        unidadeDict = {}
        for unidade in context.zsql.unidade_tramitacao_obter_zsql(cod_unid_tramitacao = item):
            if unidade.ind_leg == 1:

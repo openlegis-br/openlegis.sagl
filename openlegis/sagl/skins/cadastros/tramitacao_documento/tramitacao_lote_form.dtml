@@ -230,7 +230,7 @@ $(document).ready(function(){
  </dtml-if sequence-start>
 
  <dtml-in expr="zsql.tramitacao_administrativo_obter_zsql(cod_tramitacao=_['sequence-item'], ind_excluido=0)">
-  <dtml-call expr="REQUEST.set('prazo_a_vencer', _.DateTime()+3)">
+  <dtml-call expr="REQUEST.set('prazo_a_vencer', DateTime()+3)">
   <dtml-in expr="zsql.documento_administrativo_obter_zsql(cod_documento=cod_documento, ind_excluido=0)">
        <tr>
           <td>
@@ -265,9 +265,9 @@ $(document).ready(function(){
             </dtml-if>
           </td>              
           <td>
-            <dtml-call expr="REQUEST.set('pdf', _.str(cod_tramitacao)+'_tram.pdf')">
-            <dtml-if "_.hasattr(sapl_documentos.administrativo.tramitacao,pdf)">
-              <dtml-let arquivo_pdf="_.getattr(sapl_documentos.administrativo.tramitacao,pdf).absolute_url">
+            <dtml-call expr="REQUEST.set('pdf', str(cod_tramitacao)+'_tram.pdf')">
+            <dtml-if "hasattr(sapl_documentos.administrativo.tramitacao,pdf)">
+              <dtml-let arquivo_pdf="getattr(sapl_documentos.administrativo.tramitacao,pdf).absolute_url">
                  <a href="<dtml-var arquivo_pdf>" target="_blank"><dtml-var expr="des_status"></a>
               </dtml-let>
             <dtml-else>
@@ -276,8 +276,8 @@ $(document).ready(function(){
           </td>
           <td>
             <dtml-if prazo_tramitacao>                             
-              <dtml-var expr="_.DateTime(prazo_tramitacao).strftime('%d/%m/%Y')">
-              <dtml-if expr="(_.DateTime().strftime('%Y/%m/%d') > _.DateTime(prazo_tramitacao).strftime('%Y/%m/%d'))">
+              <dtml-var expr="DateTime(prazo_tramitacao).strftime('%d/%m/%Y')">
+              <dtml-if expr="(DateTime().strftime('%Y/%m/%d') > DateTime(prazo_tramitacao).strftime('%Y/%m/%d'))">
                  <p class="text-danger small"><i class="fas fa-exclamation-triangle"></i> Vencido</p>
               </dtml-if>
             </dtml-if> 
@@ -323,7 +323,7 @@ $(document).ready(function(){
     <div class="col-12 col-md-3 mb-3">
        <label for="txt_dat_tramitacao" class="required">Data da Tramitação</label>
        <dtml-unless dat_tramitacao>
-          <dtml-call expr="REQUEST.set('dat_tramitacao', _.DateTime().strftime('%d/%m/%Y %H:%M'))">
+          <dtml-call expr="REQUEST.set('dat_tramitacao', DateTime().strftime('%d/%m/%Y %H:%M'))">
        </dtml-unless>
        <input type="hidden" name="hdn_dat_tramitacao" value="<dtml-var dat_tramitacao missing>" />       
        <input class="form-control" type="text" name="txt_dat_tramitacao" id="txt_dat_tramitacao" value="<dtml-var dat_tramitacao missing>" readonly required autocomplete="off" />

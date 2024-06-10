@@ -72,10 +72,10 @@ $(function () {
 	</dtml-if>
        </div>
       <div class="col-12 col-lg-4">
-         <dtml-call expr="REQUEST.set('id_documento', _.str(cod_protocolo)+'_protocolo.pdf')">
-         <dtml-if "_.hasattr(sapl_documentos.protocolo,id_documento)">
+         <dtml-call expr="REQUEST.set('id_documento', str(cod_protocolo)+'_protocolo.pdf')">
+         <dtml-if "hasattr(sapl_documentos.protocolo,id_documento)">
             <div class="btn-group float-right">
-            <dtml-let documento="_.getattr(sapl_documentos.protocolo,id_documento).absolute_url">
+            <dtml-let documento="getattr(sapl_documentos.protocolo,id_documento).absolute_url">
                <a class="btn btn-sm btn-primary" target="_blank" href="<dtml-var documento>?<dtml-var expr="ZopeTime().timeTime()">"><i class="fa fa-file-pdf"></i> Arquivo Digitalizado</a>
             </dtml-let>
             <dtml-if expr="ind_anulado==0 and AUTHENTICATED_USER.has_role(['Operador', 'Operador Protocolo'])">
@@ -106,7 +106,7 @@ $(function () {
 
  <div class="row">
     <p class="col-12"><b>Data de Entrada</b>: 
-       <dtml-var "pysc.iso_to_port_pysc(dat_protocolo)">  <dtml-var expr="hor_protocolo[0:2]+':'+hor_protocolo[3:5]">
+       <dtml-var data_protocolo> - <dtml-var hor_protocolo>
     </p>
  </div>
 
@@ -170,8 +170,8 @@ $(function () {
                     </dtml-if>
                  </dtml-if>
              <dtml-else> 
-              <dtml-call expr="REQUEST.set('id_documento', _.str(cod_protocolo)+'_protocolo.pdf')">
-                <dtml-if "_.hasattr(sapl_documentos.protocolo,id_documento)">             
+              <dtml-call expr="REQUEST.set('id_documento', str(cod_protocolo)+'_protocolo.pdf')">
+                <dtml-if "hasattr(sapl_documentos.protocolo,id_documento)">             
                  <button type="button" class="btn btn-sm btn-secondary" data-toggle="popover" title="Unidade de Destino"><i class="fas fa-plus-circle"></i> Criar Processo</button>
                  <div id="PopoverContent" class="d-none">
                    <form id="myform" class="form-inline" role="form" method="post" action="criar_documento_pysc" onSubmit="return confirm('Confirma a criação do processo administrativo?');" class="was-validated">

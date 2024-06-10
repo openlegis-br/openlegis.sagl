@@ -124,9 +124,9 @@ $(document).ready(function () {
      <div class="col-12 col-sm-6 mb-3">
         <label class="d-block">PDF Texto Integral</label>
         <dtml-if expr="_.has_key('cod_documento_acessorio')"> 
-           <dtml-call expr="REQUEST.set('id_documento', _.str(cod_documento_acessorio)+'.pdf')">
-           <dtml-if "_.hasattr(sapl_documentos.administrativo,id_documento)">
-              <dtml-let documento="_.getattr(sapl_documentos.administrativo,id_documento).absolute_url">
+           <dtml-call expr="REQUEST.set('id_documento', str(cod_documento_acessorio)+'.pdf')">
+           <dtml-if "hasattr(sapl_documentos.administrativo,id_documento)">
+              <dtml-let documento="getattr(sapl_documentos.administrativo,id_documento).absolute_url">
                  <a class="btn btn-secondary" target="_blank" href="<dtml-var documento>">
                     <dtml-if expr="zsql.assinatura_documento_obter_zsql(codigo=cod_documento_acessorio, tipo_doc='doc_acessorio_adm',ind_assinado=1, cod_usuario=None)">
                       <i class="fa fa-certificate"></i>

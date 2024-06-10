@@ -15,9 +15,9 @@
 <dtml-if expr="txt_dat_fim_prazo==None or txt_dat_fim_prazo==''">
  <dtml-in expr="zsql.status_tramitacao_administrativo_obter_zsql(cod_status=lst_cod_status)">
   <dtml-if num_dias_prazo>
-   <dtml-let data_atual="_.DateTime()">
+   <dtml-let data_atual="DateTime()">
      <dtml-call expr="REQUEST.set('data_calculada', data_atual+num_dias_prazo)">
-     <dtml-call expr="REQUEST.set('txt_dat_fim_prazo', _.DateTime(data_calculada).strftime('%d/%m/%Y'))">
+     <dtml-call expr="REQUEST.set('txt_dat_fim_prazo', DateTime(data_calculada).strftime('%d/%m/%Y'))">
    </dtml-let>
   <dtml-else>
      <dtml-call expr="REQUEST.set('txt_dat_fim_prazo', '')">
@@ -25,7 +25,7 @@
  </dtml-in>
 </dtml-if>
 
-<dtml-call expr="REQUEST.set('hdn_dat_encaminha', _.DateTime().strftime('%Y-%m-%d %H:%M:%S'))">
+<dtml-call expr="REQUEST.set('hdn_dat_encaminha', DateTime().strftime('%Y-%m-%d %H:%M:%S'))">
 
 <dtml-try>
   <dtml-call expr="metodo(   
@@ -77,64 +77,54 @@
                 <dtml-except>
                   <dtml-call expr="REQUEST.set('erro', 1)">
                 </dtml-try>
-              </dtml-in>           
-              <dtml-call expr="REQUEST.set('id_documento', _.str(hdn_cod_tramitacao)+'_tram_anexo1.pdf')">
-              <dtml-if "_.hasattr(sapl_documentos.administrativo.tramitacao,id_documento)">
-                  <dtml-let documento="_.getattr(sapl_documentos.administrativo.tramitacao,id_documento) ">
-                      <dtml-call expr="REQUEST.set('existe_arquivo', 1)">
-                      <dtml-try>
-                           <dtml-call "documento.manage_upload(file=pysc.upload_file(file=file_nom_arquivo, title='Tramitacao'))">
-                      <dtml-except>
-                          <dtml-call expr="REQUEST.set('erro', 1)">              
-                      </dtml-try>
-                  </dtml-let>
+              </dtml-in>
+              <dtml-if file_nom_arquivo>
+                 <dtml-call expr="REQUEST.set('id_documento', str(hdn_cod_tramitacao)+'_tram_anexo1.pdf')">
+                 <dtml-in expr="zsql.documento_administrativo_obter_zsql(cod_documento = hdn_cod_documento)">
+                   <dtml-call expr="REQUEST.set('titulo', 'Tramitação - ' +  sgl_tipo_documento + ' ' + str(num_documento) + '/' + str(ano_documento))">
+                 </dtml-in>
+                 <dtml-call expr="sapl_documentos.administrativo.tramitacao.manage_addFile(id=id_documento,file=pysc.upload_file(file=file_nom_arquivo, title=titulo))">
               </dtml-if>
           </dtml-if>
-          <dtml-if "not existe_arquivo">
-              <dtml-try>
-                <dtml-call expr="sapl_documentos.administrativo.tramitacao.manage_addFile(id=id_documento,file=pysc.upload_file(file=file_nom_arquivo, title='Tramitacao'))">
-              <dtml-except> 
-                  <dtml-call expr="REQUEST.set('erro', 1)">              
-              </dtml-try>      
-          </dtml-if>
       </dtml-if>
-       <dtml-call expr="REQUEST.set('hdn_url', 'tramitacao_mostrar_proc?hdn_cod_tramitacao=' + str(hdn_cod_tramitacao) + '&cod_documento=' + str(hdn_cod_documento)+ '&modal=1')">
-      <dtml-call expr="REQUEST.set('pdf', _.str(hdn_cod_tramitacao)+'_tram.pdf')">
-      <dtml-if "not _.hasattr(sapl_documentos.administrativo.tramitacao,pdf)">           
+      <dtml-call expr="REQUEST.set('hdn_url', 'tramitacao_mostrar_proc?hdn_cod_tramitacao=' + str(hdn_cod_tramitacao) + '&cod_documento=' + str(hdn_cod_documento)+ '&modal=1')">
+      <dtml-call expr="REQUEST.set('pdf', str(hdn_cod_tramitacao)+'_tram.pdf')">
+      <dtml-if "not hasattr(sapl_documentos.administrativo.tramitacao,pdf)">           
          <dtml-call expr="relatorios.pdf_tramitacao_administrativo_preparar_pysc(hdn_cod_tramitacao=hdn_cod_tramitacao,hdn_url=hdn_url)"> 
-      </dtml-if>       
+      </dtml-if>
+  </dtml-if>
+
+  <dtml-if expr="radTI=='G'">
+     <dtml-in expr="zsql.assinatura_documento_obter_zsql(codigo=hdn_cod_tramitacao,tipo_doc='tramitacao')">
+       <dtml-try>
+         <dtml-call expr="zsql.assinatura_documento_excluir_zsql(
+                 cod_assinatura_doc  = cod_assinatura_doc,
+                 codigo              = codigo,
+                 tipo_doc            = tipo_doc)">
+       <dtml-except>
+         <dtml-call expr="REQUEST.set('erro', 1)">
+       </dtml-try>
+     </dtml-in>             
+     <dtml-call expr="REQUEST.set('hdn_url', 'tramitacao_mostrar_proc?hdn_cod_tramitacao=' + str(hdn_cod_tramitacao) + '&cod_documento=' + str(hdn_cod_documento)+ '&modal=1')">
+     <dtml-call expr="relatorios.pdf_tramitacao_administrativo_preparar_pysc(hdn_cod_tramitacao = hdn_cod_tramitacao, hdn_url = hdn_url)">
   </dtml-if>
     
   <dtml-let mensagem="'Tramitação salva com sucesso!'" cod_documento=hdn_cod_documento cod_tramitacao=hdn_cod_tramitacao>
-        <dtml-var tramitacao_mostrar_proc>
-        <dtml-call expr="REQUEST.set('hdn_url', 'tramitacao_mostrar_proc?hdn_cod_tramitacao=' + str(hdn_cod_tramitacao) + '&cod_documento=' + str(hdn_cod_documento)+ '&modal=1')">
-        <dtml-if expr="radTI=='G'">
-           <dtml-in expr="zsql.assinatura_documento_obter_zsql(codigo=hdn_cod_tramitacao,tipo_doc='tramitacao')">
-             <dtml-try>
-               <dtml-call expr="zsql.assinatura_documento_excluir_zsql(
-                       cod_assinatura_doc  = cod_assinatura_doc,
-                       codigo              = codigo,
-                       tipo_doc            = tipo_doc)">
-             <dtml-except>
-               <dtml-call expr="REQUEST.set('erro', 1)">
-             </dtml-try>
-           </dtml-in>             
-           <dtml-call expr="relatorios.pdf_tramitacao_administrativo_preparar_pysc(hdn_cod_tramitacao = hdn_cod_tramitacao, hdn_url = hdn_url)">
-        </dtml-if>
+     <dtml-var tramitacao_mostrar_proc>
   </dtml-let>
 </dtml-try>
 
 <dtml-if expr="radTI=='S'">
-  <dtml-call expr="REQUEST.set('pdf_anexo', _.str(hdn_cod_tramitacao)+'_tram_anexo1.pdf')">
-  <dtml-if "_.hasattr(sapl_documentos.administrativo.tramitacao,pdf_anexo)">
+  <dtml-call expr="REQUEST.set('pdf_anexo', str(hdn_cod_tramitacao)+'_tram_anexo1.pdf')">
+  <dtml-if "hasattr(sapl_documentos.administrativo.tramitacao,pdf_anexo)">
     <dtml-call expr="cadastros.tramitacao_documento.tramitacao_juntar_pdf(cod_tramitacao=hdn_cod_tramitacao)">
   </dtml-if>
 </dtml-if>
 
 <dtml-if dbcon_logs>
-  <dtml-call expr="REQUEST.set('metodo1', _.string.split(str(metodo),'/')[-1])">
-  <dtml-call expr="REQUEST.set('metodo1', _.string.split(str(metodo1),' at ')[-1])">
-  <dtml-call expr="REQUEST.set('metodo1', _.string.split(str(metodo1),'>')[0])">
+  <dtml-call expr="REQUEST.set('metodo1', str(metodo).split('/')[-1])">
+  <dtml-call expr="REQUEST.set('metodo1', str(metodo1).split(' at ')[-1])">
+  <dtml-call expr="REQUEST.set('metodo1', str(metodo1).split('>')[0])">
   <dtml-call expr="zsql.logs_registrar_zsql(
             usuario      = REQUEST['AUTHENTICATED_USER'].getUserName(), 
             data         = DateTime().strftime('%Y-%m-%d %H:%M:%S'),

@@ -7,7 +7,7 @@
 ##parameters=
 ##title=
 ##
-import simplejson as json
+import json
 from xml.sax.saxutils import escape
 
 context.REQUEST.RESPONSE.setHeader("Access-Control-Allow-Origin", "*")
@@ -47,5 +47,5 @@ for item in context.zsql.autores_obter_zsql(txt_dat_apresentacao=data_atual):
 lista_exercicio.sort(key=lambda dic: dic['nom_completo'], reverse=False)
 
 serialized = json.dumps(lista_exercicio, sort_keys=True, indent=3, ensure_ascii=False).encode('utf8')
-print(serialized.decode())
+print((serialized.decode()))
 return printed

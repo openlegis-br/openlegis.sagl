@@ -46,7 +46,7 @@ if context.REQUEST['data']!='':
 
             dic_expediente_materia["nom_autor"] = ""
             autores = context.zsql.autoria_obter_zsql(cod_materia=expediente_materia.cod_materia)
-            fields = autores.data_dictionary().keys()
+            fields = list(autores.data_dictionary().keys())
             lista_autor = []
             for autor in autores:
                 for field in fields:
@@ -91,7 +91,7 @@ if context.REQUEST['data']!='':
 
             dic_votacao["nom_autor"] = ""
             autores = context.zsql.autoria_obter_zsql(cod_materia=votacao.cod_materia)
-            fields = autores.data_dictionary().keys()
+            fields = list(autores.data_dictionary().keys())
             lista_autor = []
             for autor in autores:
                 for field in fields:

@@ -9,4 +9,4 @@
 ##
 '''Esse script tem como finalidade formatar a data que ira aparecer nas
 datas possiveis para Legislatura Inicial e Final'''
-return str(num_legislatura) + "ª (" + str(dat_inicio.year()) + " - " + str(dat_fim.year()) + ")"
+return str(num_legislatura) + "ª (" + DateTime(dat_inicio, datefmt='international').strftime('%Y') + " - " + DateTime(dat_fim, datefmt='international').strftime('%Y') + ")"

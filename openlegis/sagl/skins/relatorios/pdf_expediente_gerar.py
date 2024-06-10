@@ -3,9 +3,6 @@
 """Expediente
 """
 from trml2pdf import parseString
-from cStringIO import StringIO
-import time
-import os
 
 def cabecalho(dic_cabecalho, imagem):
     """Gera o codigo rml do cabecalho"""
@@ -22,12 +19,12 @@ def rodape(dic_rodape):
     """ Gera o codigo rml do rodape"""
     tmp=''
     tmp=''
-    tmp+='\t\t\t\t<lines>1.7cm 1.3cm 19.3cm 1.3cm</lines>\n'
+    tmp+='\t\t\t\t<lines>1.7cm 1.2cm 19.3cm 1.2cm</lines>\n'
     tmp+='\t\t\t\t<setFont name="Helvetica" size="8"/>\n'
     tmp+='\t\t\t\t<drawString x="1.7cm" y="1.4cm">' + dic_rodape[2] + '</drawString>\n'
     tmp+='\t\t\t\t<drawString x="18.1cm" y="1.4cm">Página <pageNumber/></drawString>\n'
-    tmp+='\t\t\t\t<drawCentredString x="10.5cm" y="0.9cm">' + dic_rodape[0] + '</drawCentredString>\n'
-    tmp+='\t\t\t\t<drawCentredString x="10.5cm" y="0.6cm">' + dic_rodape[1] + '</drawCentredString>\n'
+    tmp+='\t\t\t\t<drawCentredString x="10.5cm" y="0.8cm">' + dic_rodape[0] + '</drawCentredString>\n'
+    tmp+='\t\t\t\t<drawCentredString x="10.5cm" y="0.5cm">' + dic_rodape[1] + '</drawCentredString>\n'
 
     return tmp
 
@@ -84,7 +81,7 @@ def principal(dic_cabecalho, dic_rodape, imagem, pauta_dic):
     tmp+='<?xml version="1.0" encoding="utf-8" standalone="no" ?>\n'
     tmp+='<!DOCTYPE document SYSTEM "rml_1_0.dtd">\n'
     tmp+='<document filename="pauta_expediente.pdf">\n'
-    tmp+='\t<template pageSize="(21cm, 29.7cm)" title="Pauta de Leitura" author="OpenLegis" allowSplitting="20">\n'
+    tmp+='\t<template pageSize="(21cm, 29.7cm)" title="Pauta de Leitura no Expediente" author="SAGL" allowSplitting="20">\n'
     tmp+='\t\t<pageTemplate id="first">\n'
     tmp+='\t\t\t<pageGraphics>\n'
     tmp+=cabecalho(dic_cabecalho,imagem)
@@ -102,7 +99,7 @@ def principal(dic_cabecalho, dic_rodape, imagem, pauta_dic):
         context.sapl_documentos.pauta_sessao.manage_delObjects(ids=arquivoPdf)
     context.sapl_documentos.pauta_sessao.manage_addFile(arquivoPdf)
     arq=context.sapl_documentos.pauta_sessao[arquivoPdf]
-    arq.manage_edit(title='Expediente',filedata=tmp_pdf,content_type='application/pdf')
+    arq.manage_edit(title='Pauta do Expediente',filedata=tmp_pdf,content_type='application/pdf')
    
     return "sapl_documentos/pauta_sessao/"+arquivoPdf
 

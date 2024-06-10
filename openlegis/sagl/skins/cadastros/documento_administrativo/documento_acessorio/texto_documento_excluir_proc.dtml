@@ -1,6 +1,6 @@
 <dtml-call expr="REQUEST.set('erro', 0)">
-<dtml-call expr="REQUEST.set('id_documento', _.str(cod_documento)+'.pdf')">
-<dtml-if expr="_.hasattr(sapl_documentos.administrativo,id_documento)">
+<dtml-call expr="REQUEST.set('id_documento', str(cod_documento)+'.pdf')">
+<dtml-if expr="hasattr(sapl_documentos.administrativo,id_documento)">
   <dtml-try>
     <dtml-call "sapl_documentos.administrativo.manage_delObjects(id_documento)">
   <dtml-except>

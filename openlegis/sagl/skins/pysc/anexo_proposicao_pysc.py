@@ -14,8 +14,8 @@ if listar:
         if documento.startswith(cod_proposicao) and len(documento) == len(cod_proposicao) or documento.startswith(cod_proposicao + '_anexo_'):
            dic = {}
            dic['nom_documento'] = documento
-           nome_arquivo = string.split(documento,'.')[0]
-           dic['sequencia'] = string.split(nome_arquivo,'_')[2].zfill(2)
+           nome_arquivo = str(documento).split('.')[0]
+           dic['sequencia'] = str(nome_arquivo).split('_')[2].zfill(2)
            existentes.append(dic)
     existentes.sort(key=lambda dic: dic['sequencia'])
     lista = []

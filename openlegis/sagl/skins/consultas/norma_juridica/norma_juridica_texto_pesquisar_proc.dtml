@@ -85,7 +85,7 @@
  </dtml-if sequence-start>
 
 <li class="list-group-item">
- <dtml-let cod_norma="_.str(id).split('_')[0]">
+ <dtml-let cod_norma="str(id).split('_')[0]">
  <dtml-in expr="zsql.norma_juridica_obter_zsql(cod_norma=cod_norma)">
  <div class="row">
    <div class="col-12">
@@ -137,22 +137,22 @@
  </div>
 </dtml-if>
 
- <dtml-call expr="REQUEST.set('texto_consolidado', _.str(cod_norma)+'_texto_consolidado.pdf')">
- <dtml-call expr="REQUEST.set('texto_original', _.str(cod_norma)+'_texto_integral.pdf')">
-<dtml-if "_.hasattr(sapl_documentos.norma_juridica,texto_original) or _.hasattr(sapl_documentos.norma_juridica,texto_consolidado)">
+ <dtml-call expr="REQUEST.set('texto_consolidado', str(cod_norma)+'_texto_consolidado.pdf')">
+ <dtml-call expr="REQUEST.set('texto_original', str(cod_norma)+'_texto_integral.pdf')">
+<dtml-if "hasattr(sapl_documentos.norma_juridica,texto_original) or hasattr(sapl_documentos.norma_juridica,texto_consolidado)">
  <div class="row d-print-none">
     <div class="col-12 text-left mt-1"> 
      <div class="btn-group btn-group-sm">
-      <dtml-if "_.hasattr(sapl_documentos.norma_juridica,texto_original)">
+      <dtml-if "hasattr(sapl_documentos.norma_juridica,texto_original)">
           <a class="btn btn-primary" href="<dtml-var portal_url>/pysc/download_norma_pysc?cod_norma=<dtml-var cod_norma>&texto_original=1" target="_blank"><i class="far fa-file-pdf"></i> Texto Original</a>
       </dtml-if>
-         <dtml-call expr="REQUEST.set('texto_consolidado', _.str(cod_norma)+'_texto_consolidado.pdf')">
-         <dtml-call expr="REQUEST.set('texto_odt', _.str(cod_norma)+'_texto_integral.odt')">        
-      <dtml-if "_.hasattr(sapl_documentos.norma_juridica,texto_odt) and _.hasattr(sapl_documentos.norma_juridica,texto_consolidado)">
-           <dtml-let documento_odt="_.getattr(sapl_documentos.norma_juridica,texto_odt).absolute_url">         
+         <dtml-call expr="REQUEST.set('texto_consolidado', str(cod_norma)+'_texto_consolidado.pdf')">
+         <dtml-call expr="REQUEST.set('texto_odt', str(cod_norma)+'_texto_integral.odt')">        
+      <dtml-if "hasattr(sapl_documentos.norma_juridica,texto_odt) and hasattr(sapl_documentos.norma_juridica,texto_consolidado)">
+           <dtml-let documento_odt="getattr(sapl_documentos.norma_juridica,texto_odt).absolute_url">         
                <a class="btn btn-sm btn-primary" target="_blank" href="<dtml-var portal_url>/generico/viewerJS/?cod_norma=<dtml-var cod_norma>#<dtml-var documento_odt>?<dtml-var expr="ZopeTime().timeTime()"> "> <i class="fa fa-fw fa-file-code"></i> Texto Compilado</a>     
            </dtml-let>
-      <dtml-elif "not _.hasattr(sapl_documentos.norma_juridica,texto_odt) and _.hasattr(sapl_documentos.norma_juridica,texto_consolidado)">
+      <dtml-elif "not hasattr(sapl_documentos.norma_juridica,texto_odt) and hasattr(sapl_documentos.norma_juridica,texto_consolidado)">
          <a class="btn btn-primary" href="<dtml-var portal_url>/pysc/download_norma_pysc?cod_norma=<dtml-var cod_norma>&texto_consolidado=1" target="_blank"> <i class="fa fa-fw fa-file-code"></i> Texto Compilado</a>
       </dtml-if>    
      </div>

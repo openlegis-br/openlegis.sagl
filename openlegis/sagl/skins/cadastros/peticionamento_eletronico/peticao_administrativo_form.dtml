@@ -254,7 +254,7 @@ $(document).ready(function(){
                    <option 
                      value="<dtml-var tip_peticionamento>"
                      <dtml-if expr="REQUEST.has_key('tip_peticionamento_sel')">
-                       <dtml-if expr="_.str(tip_peticionamento_sel) ==_.str(tip_peticionamento)">selected</dtml-if>
+                       <dtml-if expr="str(tip_peticionamento_sel) ==str(tip_peticionamento)">selected</dtml-if>
                      </dtml-if> >
                       <dtml-var des_tipo_peticionamento>
                    </option>
@@ -270,7 +270,7 @@ $(document).ready(function(){
                <dtml-in expr="zsql.unidade_tramitacao_obter_zsql(cod_unid_tramitacao=cod_unid_tram_dest,ind_adm=1)">
                    <option 
                      value="<dtml-var cod_unid_tramitacao>"
-                     <dtml-if expr="_.has_key('cod_unid_tram_dest') and _.str(cod_unid_tram_dest)==_.str(cod_unid_tramitacao)">selected</dtml-if> >  
+                     <dtml-if expr="_.has_key('cod_unid_tram_dest') and str(cod_unid_tram_dest)==str(cod_unid_tramitacao)">selected</dtml-if> >  
                       <dtml-var nom_unidade_join>
                    </option>
                </dtml-in>
@@ -278,7 +278,7 @@ $(document).ready(function(){
                <dtml-in expr="zsql.unidade_tramitacao_obter_zsql(ind_adm=1)">
                    <option 
                      value="<dtml-var cod_unid_tramitacao>"
-                     <dtml-if expr="_.has_key('cod_peticao') and  _.str(cod_unid_tram_dest)==_.str(cod_unid_tramitacao)">selected</dtml-if> >  
+                     <dtml-if expr="_.has_key('cod_peticao') and  str(cod_unid_tram_dest)==str(cod_unid_tramitacao)">selected</dtml-if> >  
                       <dtml-var nom_unidade_join>
                    </option>
                </dtml-in>
@@ -297,10 +297,10 @@ $(document).ready(function(){
    <div class="form-row">  
      <div class="col-12 col-md-6 mb-3">
        <label for="lst_modelo" class="form-label d-block">Texto Editável</label>     
-         <dtml-let id_documento="_.str(cod_peticao)+'.odt'">
-            <dtml-if "_.hasattr(sapl_documentos.peticao,id_documento)">
-               <dtml-let documento="_.getattr(sapl_documentos.peticao,id_documento).absolute_url">
-                  <dtml-call expr="REQUEST.set('nome_arquivo',_.str(cod_peticao)+'.odt')">
+         <dtml-let id_documento="str(cod_peticao)+'.odt'">
+            <dtml-if "hasattr(sapl_documentos.peticao,id_documento)">
+               <dtml-let documento="getattr(sapl_documentos.peticao,id_documento).absolute_url">
+                  <dtml-call expr="REQUEST.set('nome_arquivo',str(cod_peticao)+'.odt')">
                     <button type="button" class="btn btn-sm btn-secondary" onclick="javascript:location.href='&dtml-URL1;/sapl_documentos/peticao/externalEdit_/<dtml-var nome_arquivo>.zem'" data-toggle="tooltip" data-placement="bottom" title="Editar no LibreOffice"><i class="fas fa-fw fa-external-link-alt"></i>LibreOffice</button>
                     <a class="btn btn-sm btn-danger" href="<dtml-var portal_url>/cadastros/peticionamento_eletronico/texto_peticao_excluir_proc?modal=1&cod_peticao=<dtml-var cod_peticao missing>" data-confirm="Deseja realmente excluir o arquivo ODT?"><i class="fas fa-trash"></i> Excluir ODT</a>                    
                </dtml-let>
@@ -321,13 +321,13 @@ $(document).ready(function(){
 
      <div class="col-12 col-md-6 mb-3">
        <label for="file_nom_arquivo" class="form-label d-block">Texto PDF</label>
-       <dtml-call expr="REQUEST.set('id_documento', _.str(cod_peticao)+'.pdf')">
+       <dtml-call expr="REQUEST.set('id_documento', str(cod_peticao)+'.pdf')">
        <dtml-in expr="zsql.assinatura_documento_obter_zsql(codigo=cod_peticao, tipo_doc='peticao',cod_usuario=None)">
           <dtml-call "REQUEST.set('cod_assinatura_doc', cod_assinatura_doc)">
        </dtml-in>
-       <dtml-if expr="_.has_key('cod_assinatura_doc') and _.hasattr(sapl_documentos.documentos_assinados, cod_assinatura_doc+'.pdf')">
+       <dtml-if expr="_.has_key('cod_assinatura_doc') and hasattr(sapl_documentos.documentos_assinados, cod_assinatura_doc+'.pdf')">
          <dtml-call expr="REQUEST.set('temPDFAssinado', 1)">
-         <dtml-let filename="_.getattr(sapl_documentos.documentos_assinados, str(cod_assinatura_doc)+'.pdf').absolute_url">
+         <dtml-let filename="getattr(sapl_documentos.documentos_assinados, str(cod_assinatura_doc)+'.pdf').absolute_url">
           <a class="btn btn-sm btn-secondary" href="<dtml-var filename>" target="_blank">
              <i class="fa fa-certificate"></i> Arquivo Assinado
           </a>
@@ -335,9 +335,9 @@ $(document).ready(function(){
           <button type="button" class="btn btn-sm btn-primary" data-toggle="modal" data-target="#iFrameModal" data-title="Assinaturas Digitais" data-src="<dtml-var portal_url>/cadastros/assinatura/assinatura_solicitar_form?codigo=<dtml-var cod_peticao missing>&tipo_doc=peticao&modal=1"><i class="fas fa-file-signature"></i> Assinaturas</button>
            <a class="btn btn-sm btn-danger" href="<dtml-var portal_url>/cadastros/peticionamento_eletronico/texto_pdf_excluir_proc?cod_peticao=<dtml-var cod_peticao>&modal=1" data-confirm="Deseja realmente excluir o texto PDF?"><i class="fas fa-trash"></i> Excluir PDF</a> 
 
-       <dtml-elif expr="_.hasattr(sapl_documentos.peticao,id_documento)">
+       <dtml-elif expr="hasattr(sapl_documentos.peticao,id_documento)">
          <dtml-call expr="REQUEST.set('temPDF', 1)">
-         <dtml-let filename="_.getattr(sapl_documentos.peticao,id_documento).absolute_url">
+         <dtml-let filename="getattr(sapl_documentos.peticao,id_documento).absolute_url">
           <a class="btn btn-sm btn-secondary" href="<dtml-var filename>" target="_blank">
              <i class="fa fa-file-pdf"></i> Visualizar
           </a>
@@ -353,8 +353,8 @@ $(document).ready(function(){
               <input type="file" class="custom-file-input form-control-sm" id="file_nom_arquivo" name="file_nom_arquivo" accept="application/pdf">
               <label class="custom-file-label" for="file_nom_arquivo">Selecione o arquivo</label>
             </div>
-            <dtml-let id_documento_odt="_.str(cod_peticao)+'.odt'">
-               <dtml-if "_.hasattr(sapl_documentos.peticao,id_documento_odt)">
+            <dtml-let id_documento_odt="str(cod_peticao)+'.odt'">
+               <dtml-if "hasattr(sapl_documentos.peticao,id_documento_odt)">
                   <dtml-call expr="REQUEST.set('temODT', 1)">
                </dtml-if>
             </dtml-let>
@@ -449,13 +449,13 @@ $(document).ready(function(){
             </tr>
           </thead>
        </dtml-if>
-     <dtml-if expr="_.hasattr(sapl_documentos.peticao, file_item)">
+     <dtml-if expr="hasattr(sapl_documentos.peticao, file_item)">
         <tr>
           <td>         
-            <dtml-let documento="_.getattr(sapl_documentos.peticao,file_item).absolute_url">
+            <dtml-let documento="getattr(sapl_documentos.peticao,file_item).absolute_url">
                <a target="_blank" href="<dtml-var documento>">
                  <i class="fa fa-fw fa-file-pdf"></i>
-                 <dtml-let titulo="_.getattr(sapl_documentos.peticao,file_item).title_or_id">
+                 <dtml-let titulo="getattr(sapl_documentos.peticao,file_item).title_or_id">
                     <dtml-var titulo>
                  </dtml-let>
                </a>

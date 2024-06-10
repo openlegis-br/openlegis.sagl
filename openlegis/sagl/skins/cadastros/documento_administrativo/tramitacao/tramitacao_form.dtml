@@ -224,7 +224,7 @@ $(document).ready(function(){
     <div class="col-12 col-md-3 mb-3">
        <label for="txt_dat_tramitacao" class="required">Data da Tramitação</label>
        <dtml-unless dat_tramitacao>
-          <dtml-call expr="REQUEST.set('dat_tramitacao', _.DateTime().strftime('%d/%m/%Y %H:%M:%S'))">
+          <dtml-call expr="REQUEST.set('dat_tramitacao', DateTime().strftime('%d/%m/%Y %H:%M:%S'))">
        </dtml-unless>
        <input class="form-control" type="text" name="txt_dat_tramitacao" id="txt_dat_tramitacao" value="<dtml-var dat_tramitacao missing>" required />
  <script>
@@ -296,7 +296,7 @@ $(document).ready(function(){
     <div class="col-12 col-md-3 mb-3">
       <label for="txt_dat_encaminha" class="required">Encaminhamento</label>
       <dtml-unless dat_encaminha>
-         <dtml-call expr="REQUEST.set('dat_encaminha', _.DateTime().strftime('%d/%m/%Y %H:%M:%S'))">
+         <dtml-call expr="REQUEST.set('dat_encaminha', DateTime().strftime('%d/%m/%Y %H:%M:%S'))">
       </dtml-unless>
       <input class="form-control" type="text" name="txt_dat_encaminha" id="txt_dat_encaminha" value="<dtml-var dat_encaminha missing null="">" required/> 
       <div class="invalid-feedback">
@@ -381,19 +381,19 @@ $(document).ready(function(){
 
   <div class="form-row">
    <dtml-if hdn_cod_tramitacao>
-    <dtml-call expr="REQUEST.set('pdf', _.str(hdn_cod_tramitacao)+'_tram.pdf')">
-    <dtml-call expr="REQUEST.set('pdf_assinado', _.str(hdn_cod_tramitacao)+'_tram_signed.pdf')">
-    <dtml-if "_.hasattr(sapl_documentos.administrativo.tramitacao,pdf)"> 
+    <dtml-call expr="REQUEST.set('pdf', str(hdn_cod_tramitacao)+'_tram.pdf')">
+    <dtml-call expr="REQUEST.set('pdf_assinado', str(hdn_cod_tramitacao)+'_tram_signed.pdf')">
+    <dtml-if "hasattr(sapl_documentos.administrativo.tramitacao,pdf)"> 
       <div class="col-12 col-sm-4 col-lg-3 mb-3">
         <label class="d-block">Despacho em PDF</label>
        
         <div class="btn-group" role="group" aria-label="tram_button">
-          <dtml-let pdf="_.getattr(sapl_documentos.administrativo.tramitacao,pdf).absolute_url">
+          <dtml-let pdf="getattr(sapl_documentos.administrativo.tramitacao,pdf).absolute_url">
              <a class="btn btn-secondary" target="_blank" href="<dtml-var pdf>?<dtml-var expr="ZopeTime().timeTime()">">
                 <i class="far fa-file-pdf"></i> Visualizar
              </a>
           </dtml-let>
-          <dtml-if "_.hasattr(sapl_documentos.administrativo.tramitacao,pdf) and sapl_documentos.props_sagl.restpki_access_token!=''">
+          <dtml-if "hasattr(sapl_documentos.administrativo.tramitacao,pdf) and sapl_documentos.props_sagl.restpki_access_token!=''">
              <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#iFrameModal" data-title="Assinar Digitalmente" data-src="<dtml-var portal_url>/generico/assinador/pades-signature_html?codigo=<dtml-var hdn_cod_tramitacao>&tipo_doc=tramitacao_adm&modal=1"><i class="fas fa-file-signature"></i> Assinar</button>
           </dtml-if>
         </div>

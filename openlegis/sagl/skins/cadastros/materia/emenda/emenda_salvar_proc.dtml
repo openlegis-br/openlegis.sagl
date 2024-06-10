@@ -1,7 +1,7 @@
 <dtml-if hdn_cod_proposicao>
    <dtml-call expr="REQUEST.set('temProposicao',hdn_cod_proposicao!='')">
    <dtml-if expr="sapl_documentos.props_sagl.numero_protocolo_anual == 1">
-      <dtml-in expr="zsql.protocolo_numero_obter_zsql(ano_protocolo = _.DateTime().strftime('%Y'))">
+      <dtml-in expr="zsql.protocolo_numero_obter_zsql(ano_protocolo = DateTime().strftime('%Y'))">
          <dtml-call expr="REQUEST.set('txt_num_protocolo', int(novo_numero))">
       </dtml-in>
    <dtml-else>
@@ -65,15 +65,15 @@
    <dtml-if expr="metodo==zsql.emenda_incluir_zsql">
      <dtml-call expr="zsql.autoria_emenda_incluir_zsql(cod_autor=lst_cod_autor, cod_emenda=hdn_cod_emenda)">
      <dtml-if expr="txt_num_protocolo and txt_num_protocolo!=''">
-        <dtml-call expr="REQUEST.set('ano', _.DateTime().strftime('%Y'))">
+        <dtml-call expr="REQUEST.set('ano', DateTime().strftime('%Y'))">
         <dtml-in expr="zsql.protocolo_obter_zsql(num_protocolo=txt_num_protocolo, ano_protocolo=ano)">
            <dtml-if sequence-start>
              <dtml-call expr="REQUEST.set('cod_protocolo', cod_protocolo)">
            </dtml-if>
         </dtml-in>
         <dtml-if cod_protocolo>
-          <dtml-call expr="REQUEST.set('id_protocolo', _.str(cod_protocolo)+'_protocolo.pdf')">
-          <dtml-if "_.hasattr(sapl_documentos.protocolo,id_protocolo)">
+          <dtml-call expr="REQUEST.set('id_protocolo', str(cod_protocolo)+'_protocolo.pdf')">
+          <dtml-if "hasattr(sapl_documentos.protocolo,id_protocolo)">
              <dtml-call expr="pysc.protocolo_salvar_como_texto_integral_emenda_pysc(cod_protocolo,hdn_cod_emenda)">
           </dtml-if>
           <dtml-in expr="zsql.usuario_obter_zsql(col_username=AUTHENTICATED_USER.getUserName())">
@@ -100,10 +100,10 @@
                 <dtml-call expr="REQUEST.set('cod_unid_tram_dest', cod_unid_tramitacao)">
               </dtml-in>
           </dtml-unless>
-          <dtml-call expr="REQUEST.set('hdn_hor_tramitacao', _.DateTime().strftime('%d/%m/%Y às %H:%M'))">
+          <dtml-call expr="REQUEST.set('hdn_hor_tramitacao', DateTime().strftime('%d/%m/%Y às %H:%M'))">
           <dtml-call expr="REQUEST.set('txt_tramitacao', '<p>Emenda nº ' + str(txt_num_emenda) + ' incorporada em ' + str(hdn_hor_tramitacao) + '</p>')">
-          <dtml-call expr="REQUEST.set('hdn_dat_tramitacao', _.DateTime().strftime('%Y-%m-%d %H:%M:%S'))">
-          <dtml-call expr="REQUEST.set('hdn_dat_encaminha', _.DateTime().strftime('%Y-%m-%d %H:%M:%S'))">
+          <dtml-call expr="REQUEST.set('hdn_dat_tramitacao', DateTime().strftime('%Y-%m-%d %H:%M:%S'))">
+          <dtml-call expr="REQUEST.set('hdn_dat_encaminha', DateTime().strftime('%Y-%m-%d %H:%M:%S'))">
           <dtml-call expr="REQUEST.set('sgl_status', 'EME')">
           <dtml-in expr="zsql.status_tramitacao_obter_zsql(sgl_status=sgl_status)">
             <dtml-call expr="REQUEST.set('cod_status', cod_status)">
@@ -143,7 +143,7 @@
     <dtml-call expr="REQUEST.set('erro', 0)">              
     <dtml-call expr="REQUEST.set('existe_arquivo', 0)">        
     <dtml-if file_nom_arquivo_emenda>
-       <dtml-call expr="REQUEST.set('id_emenda',_.str(hdn_cod_emenda)+'_emenda.pdf')">
+       <dtml-call expr="REQUEST.set('id_emenda',str(hdn_cod_emenda)+'_emenda.pdf')">
        <dtml-if "not existe_arquivo">
          <dtml-try>
            <dtml-call expr="sapl_documentos.emenda.manage_addFile(id=id_emenda,file=pysc.upload_file(file=file_nom_arquivo_emenda, title='Emenda'))">         
@@ -170,7 +170,7 @@
   <dtml-call expr="zsql.logs_registrar_zsql(
             usuario      = REQUEST['AUTHENTICATED_USER'].getUserName(), 
             data         = DateTime().strftime('%Y-%m-%d %H:%M:%S'),
-            modulo       = _.string.split(_['REQUEST']['URL1'],'/')[-1],
+            modulo       = str(_['REQUEST']['URL1']).split('/')[-1],
             metodo       = 'emenda_salvar_proc',
             IP           = pysc.get_ip(),
             dados        = REQUEST.form.items(),

@@ -10,8 +10,8 @@
      <select class="custom-select jumpmenu" id="lst_ano_sessao" name="lst_ano_sessao">
          <dtml-in expr="zsql.sessao_plenaria_listar_ano_zsql()">
              <option value="<dtml-var ACTUAL_URL>?ano_sessao_sel=<dtml-var ano_sessao missing>" 
-               <dtml-if expr="((not _.has_key('ano_sessao_sel') and (_.DateTime().year() == ano_sessao)))
-                                or (not _.has_key('ano_sessao_sel') and (_.DateTime().year() > ano_sessao))
+               <dtml-if expr="((not _.has_key('ano_sessao_sel') and (DateTime().year() == ano_sessao)))
+                                or (not _.has_key('ano_sessao_sel') and (DateTime().year() > ano_sessao))
                                 or (_.has_key('ano_sessao_sel') and ano_sessao == _.int(ano_sessao_sel))">
                  selected
                  <dtml-call expr="REQUEST.set('ano_sessao_sel', ano_sessao)">
@@ -85,8 +85,8 @@
              <b><i class="fas fa-caret-right"></i> <dtml-var num_sessao_plen>ª <dtml-if expr="nom_sessao!='Audiência Pública'">Reunião</dtml-if> <dtml-var nom_sessao> <dtml-if expr="cod_periodo_sessao != None"><dtml-in expr="zsql.periodo_sessao_obter_zsql(cod_periodo=cod_periodo_sessao)"> do <dtml-var num_periodo>º Período</dtml-in></dtml-if> - <dtml-var dat_inicio_sessao></b></a>
          </dtml-in>
          <dtml-else>
-            <dtml-let id_pauta="_.str(cod_sessao_plen)+'_pauta_sessao.pdf'">
-               <dtml-if "_.hasattr(sapl_documentos.pauta_sessao,id_pauta)">              
+            <dtml-let id_pauta="str(cod_sessao_plen)+'_pauta_sessao.pdf'">
+               <dtml-if "hasattr(sapl_documentos.pauta_sessao,id_pauta)">              
                   <a href="<dtml-var portal_url>/consultas/sessao_plenaria/agenda_sessao_plen_mostrar_proc?cod_sessao_plen=<dtml-var cod_sessao_plen>&dat_sessao=<dtml-var dat_inicio_sessao>">
                    <dtml-in expr="zsql.tipo_sessao_plenaria_obter_zsql(tip_sessao=tip_sessao)">
                       <b><i class="fas fa-caret-right"></i> <dtml-var num_sessao_plen>ª <dtml-if expr="nom_sessao!='Audiência Pública'">Reunião</dtml-if> <dtml-var nom_sessao> <dtml-if expr="cod_periodo_sessao != None"><dtml-in expr="zsql.periodo_sessao_obter_zsql(cod_periodo=cod_periodo_sessao)"> do <dtml-var num_periodo>º Período</dtml-in></dtml-if> - <dtml-var dat_inicio_sessao></b></a>
@@ -100,9 +100,9 @@
          </dtml-if> 
        </div>
        <div class="col-12 col-md-5 mt-1 mb-sm-0 text-left text-md-right">
-         <dtml-let id_ata="_.str(cod_sessao_plen)+'_ata_sessao.pdf'">
-            <dtml-if "_.hasattr(sapl_documentos.ata_sessao,id_ata)">
-               <dtml-let ata="_.getattr(sapl_documentos.ata_sessao,id_ata).absolute_url">
+         <dtml-let id_ata="str(cod_sessao_plen)+'_ata_sessao.pdf'">
+            <dtml-if "hasattr(sapl_documentos.ata_sessao,id_ata)">
+               <dtml-let ata="getattr(sapl_documentos.ata_sessao,id_ata).absolute_url">
                   <a class="btn btn-sm btn-link" href="<dtml-var ata>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fas fa-file-pdf"></i> <span class="">Ata</span></a>
                </dtml-let>
             </dtml-if>

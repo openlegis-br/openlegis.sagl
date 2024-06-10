@@ -44,25 +44,25 @@
                    <br /><br />                
                    <dtml-in expr="zsql.tipo_resultado_votacao_obter_zsql(tip_resultado_votacao=tip_resultado_votacao, ind_excluido=0)">
                       <dtml-if expr="tip_votacao == 2 ">
-                         <dtml-call expr="REQUEST.set('votoSim', _.str('Sim'))">
+                         <dtml-call expr="REQUEST.set('votoSim', str('Sim'))">
                          <dtml-in expr="zsql.votacao_parlamentar_obter_zsql(cod_votacao = cod_votacao, vot_parlamentar=votoSim,ind_excluido=0)">
                            <dtml-if sequence-start>
                             <b>SIM: </b><dtml-var expr="_['sequence-length']"> votos (</dtml-if><dtml-in expr="zsql.parlamentar_obter_zsql(cod_parlamentar = cod_parlamentar, ind_excluido=0)"><dtml-var nom_parlamentar></dtml-in><dtml-if sequence-end>)<br /><br /><dtml-else>,</dtml-if>
                          </dtml-in>
 
-                         <dtml-call expr="REQUEST.set('votoNao', _.str('Não'))">
+                         <dtml-call expr="REQUEST.set('votoNao', str('Não'))">
                          <dtml-in expr="zsql.votacao_parlamentar_obter_zsql(cod_votacao = cod_votacao, vot_parlamentar=votoNao,ind_excluido=0)">
                            <dtml-if sequence-start>
                             <b>NÃO: </b><dtml-var expr="_['sequence-length']"> votos (</dtml-if><dtml-in expr="zsql.parlamentar_obter_zsql(cod_parlamentar = cod_parlamentar, ind_excluido=0)"><dtml-var nom_parlamentar></dtml-in><dtml-if sequence-end>)<br /><br /><dtml-else>,</dtml-if>
                          </dtml-in>
 
-                         <dtml-call expr="REQUEST.set('Abstencao', _.str('Abstenção'))">
+                         <dtml-call expr="REQUEST.set('Abstencao', str('Abstenção'))">
                          <dtml-in expr="zsql.votacao_parlamentar_obter_zsql(cod_votacao = cod_votacao, vot_parlamentar=Abstencao,ind_excluido=0)">
                            <dtml-if sequence-start>
                             <b>Abstenções: </b><dtml-var expr="_['sequence-length']"> (</dtml-if><dtml-in expr="zsql.parlamentar_obter_zsql(cod_parlamentar = cod_parlamentar, ind_excluido=0)"><dtml-var nom_parlamentar></dtml-in><dtml-if sequence-end>)<br /><br /><dtml-else>,</dtml-if>
                          </dtml-in>
 
-                         <dtml-call expr="REQUEST.set('Ausente', _.str('Ausente'))">
+                         <dtml-call expr="REQUEST.set('Ausente', str('Ausente'))">
                          <dtml-in expr="zsql.votacao_parlamentar_obter_zsql(cod_votacao = cod_votacao, vot_parlamentar=Ausente,ind_excluido=0)">
                            <dtml-if sequence-start>
                             <b>Ausências: </b><dtml-var expr="_['sequence-length']"> (</dtml-if><dtml-in expr="zsql.parlamentar_obter_zsql(cod_parlamentar = cod_parlamentar, ind_excluido=0)"><dtml-var nom_parlamentar></dtml-in><dtml-if sequence-end>)<br /><br /><dtml-else>,</dtml-if>
@@ -116,22 +116,22 @@
                  <br /><br />
                  <dtml-in expr="zsql.tipo_resultado_votacao_obter_zsql(tip_resultado_votacao=tip_resultado_votacao, ind_excluido=0)">
                     <dtml-if expr="tip_votacao == 2 ">
-                       <dtml-call expr="REQUEST.set('votoSim', _.str('Sim'))">
+                       <dtml-call expr="REQUEST.set('votoSim', str('Sim'))">
                        <dtml-in expr="zsql.votacao_parlamentar_obter_zsql(cod_votacao = cod_votacao, vot_parlamentar=votoSim,ind_excluido=0)">
                            <dtml-if sequence-start>
                             <b>SIM: </b><dtml-var expr="_['sequence-length']"> votos (</dtml-if><dtml-in expr="zsql.parlamentar_obter_zsql(cod_parlamentar = cod_parlamentar, ind_excluido=0)"><dtml-var nom_parlamentar></dtml-in><dtml-if sequence-end>)<br /><br /><dtml-else>,</dtml-if>
                        </dtml-in>
-                       <dtml-call expr="REQUEST.set('votoNao', _.str('Não'))">
+                       <dtml-call expr="REQUEST.set('votoNao', str('Não'))">
                        <dtml-in expr="zsql.votacao_parlamentar_obter_zsql(cod_votacao = cod_votacao, vot_parlamentar=votoNao, ind_excluido=0)">
                           <dtml-if sequence-start>
                             <b>NÃO: </b><dtml-var expr="_['sequence-length']"> votos (</dtml-if><dtml-in expr="zsql.parlamentar_obter_zsql(cod_parlamentar = cod_parlamentar, ind_excluido=0)"><dtml-var nom_parlamentar></dtml-in><dtml-if sequence-end>)<br /><br /><dtml-else>,</dtml-if>
                        </dtml-in>
-                       <dtml-call expr="REQUEST.set('Abstencao', _.str('Abstenção'))">
+                       <dtml-call expr="REQUEST.set('Abstencao', str('Abstenção'))">
                        <dtml-in expr="zsql.votacao_parlamentar_obter_zsql(cod_votacao = cod_votacao, vot_parlamentar=Abstencao,ind_excluido=0)">
                          <dtml-if sequence-start>
                            <b>Abstenções: </b><dtml-var expr="_['sequence-length']"> (</dtml-if><dtml-in expr="zsql.parlamentar_obter_zsql(cod_parlamentar = cod_parlamentar, ind_excluido=0)"><dtml-var nom_parlamentar></dtml-in><dtml-if sequence-end>)<br /><br /><dtml-else>,</dtml-if>
                        </dtml-in>
-                       <dtml-call expr="REQUEST.set('Ausente', _.str('Ausente'))">
+                       <dtml-call expr="REQUEST.set('Ausente', str('Ausente'))">
                        <dtml-in expr="zsql.votacao_parlamentar_obter_zsql(cod_votacao = cod_votacao, vot_parlamentar=Ausente,ind_excluido=0)">
                          <dtml-if sequence-start>
                            <b>Ausências: </b><dtml-var expr="_['sequence-length']"> (</dtml-if><dtml-in expr="zsql.parlamentar_obter_zsql(cod_parlamentar = cod_parlamentar, ind_excluido=0)"><dtml-var nom_parlamentar></dtml-in><dtml-if sequence-end>)<br /><br /><dtml-else>,</dtml-if>
@@ -187,22 +187,22 @@
                  <br /><br />
                  <dtml-in expr="zsql.tipo_resultado_votacao_obter_zsql(tip_resultado_votacao=tip_resultado_votacao, ind_excluido=0)">
                     <dtml-if expr="tip_votacao == 2 ">
-                       <dtml-call expr="REQUEST.set('votoSim', _.str('Sim'))">
+                       <dtml-call expr="REQUEST.set('votoSim', str('Sim'))">
                        <dtml-in expr="zsql.votacao_parlamentar_obter_zsql(cod_votacao = cod_votacao, vot_parlamentar=votoSim,ind_excluido=0)">
                            <dtml-if sequence-start>
                             <b>SIM: </b><dtml-var expr="_['sequence-length']"> votos (</dtml-if><dtml-in expr="zsql.parlamentar_obter_zsql(cod_parlamentar = cod_parlamentar, ind_excluido=0)"><dtml-var nom_parlamentar></dtml-in><dtml-if sequence-end>)<br /><br /><dtml-else>,</dtml-if>
                        </dtml-in>
-                       <dtml-call expr="REQUEST.set('votoNao', _.str('Não'))">
+                       <dtml-call expr="REQUEST.set('votoNao', str('Não'))">
                        <dtml-in expr="zsql.votacao_parlamentar_obter_zsql(cod_votacao = cod_votacao, vot_parlamentar=votoNao, ind_excluido=0)">
                           <dtml-if sequence-start>
                             <b>NÃO: </b><dtml-var expr="_['sequence-length']"> votos (</dtml-if><dtml-in expr="zsql.parlamentar_obter_zsql(cod_parlamentar = cod_parlamentar, ind_excluido=0)"><dtml-var nom_parlamentar></dtml-in><dtml-if sequence-end>)<br /><br /><dtml-else>,</dtml-if>
                        </dtml-in>
-                       <dtml-call expr="REQUEST.set('Abstencao', _.str('Abstenção'))">
+                       <dtml-call expr="REQUEST.set('Abstencao', str('Abstenção'))">
                        <dtml-in expr="zsql.votacao_parlamentar_obter_zsql(cod_votacao = cod_votacao, vot_parlamentar=Abstencao,ind_excluido=0)">
                          <dtml-if sequence-start>
                            <b>Abstenções: </b><dtml-var expr="_['sequence-length']"> (</dtml-if><dtml-in expr="zsql.parlamentar_obter_zsql(cod_parlamentar = cod_parlamentar, ind_excluido=0)"><dtml-var nom_parlamentar></dtml-in><dtml-if sequence-end>)<br /><br /><dtml-else>,</dtml-if>
                        </dtml-in>
-                       <dtml-call expr="REQUEST.set('Ausente', _.str('Ausente'))">
+                       <dtml-call expr="REQUEST.set('Ausente', str('Ausente'))">
                        <dtml-in expr="zsql.votacao_parlamentar_obter_zsql(cod_votacao = cod_votacao, vot_parlamentar=Ausente,ind_excluido=0)">
                          <dtml-if sequence-start>
                            <b>Ausências: </b><dtml-var expr="_['sequence-length']"> (</dtml-if><dtml-in expr="zsql.parlamentar_obter_zsql(cod_parlamentar = cod_parlamentar, ind_excluido=0)"><dtml-var nom_parlamentar></dtml-in><dtml-if sequence-end>)<br /><br /><dtml-else>,</dtml-if>

@@ -16,7 +16,7 @@ presidente = ''
 cod_parlamentar_presidente = ''
 for periodo in context.zsql.periodo_comp_comissao_obter_zsql(data=DateTime().strftime("%Y/%m/%d"), ind_excluido=0):
     for cargo in context.zsql.composicao_comissao_obter_zsql(cod_comissao=cod_comissao, cod_periodo_comp=periodo.cod_periodo_comp, cod_cargo=1, ind_excluido=0):
-        presidente = cargo.nom_completo.decode('utf-8').upper()
+        presidente = cargo.nom_completo.upper()
         cod_parlamentar_presidente = cargo.cod_parlamentar
 
 temPermissao = 0

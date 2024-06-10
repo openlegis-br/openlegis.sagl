@@ -57,14 +57,14 @@ location.href="composicao_mesa_excluir_proc?hdn_num_legislatura="+ num_legislatu
         <select class="form-control selectpicker show-tick" data-size="6" id="lst_num_legislatura" name="lst_num_legislatura" size="1" onChange="atualiza_num_leg(form.lst_num_legislatura [form.lst_num_legislatura.selectedIndex].value)">
           <dtml-in expr="zsql.legislatura_obter_zsql(ind_excluido=0)">
              <option
-               <dtml-if expr="(not _.has_key('num_legislatura_sel') and (_.DateTime() >= dat_inicio and _.DateTime() <= dat_fim))
+               <dtml-if expr="(not _.has_key('num_legislatura_sel') and (DateTime() >= DateTime(dat_inicio) and DateTime() <= DateTime(dat_fim)))
                            or (_.has_key('num_legislatura_sel') and num_legislatura == _.int(num_legislatura_sel))">
                  selected
                  <dtml-call expr="REQUEST.set('num_legislatura_sel', num_legislatura)">
                </dtml-if>
                  value="<dtml-var num_legislatura>">
                <dtml-var expr="pysc.periodo_legislatura_format_pysc(num_legislatura, dat_inicio, dat_fim)">
-               <dtml-if expr="(_.DateTime() >= dat_inicio) and (_.DateTime() <= dat_fim)">(Atual)</dtml-if>
+               <dtml-if expr="(DateTime() >= DateTime(dat_inicio)) and (DateTime() <= DateTime(dat_fim))">(Atual)</dtml-if>
              </option>
           <dtml-else>
              <option selected value="-1"></option>
@@ -85,7 +85,7 @@ location.href="composicao_mesa_excluir_proc?hdn_num_legislatura="+ num_legislatu
            <dtml-in expr="zsql.periodo_comp_mesa_obter_zsql(num_legislatura=num_legislatura_sel)">
               <option
                 <dtml-if expr="((not _.has_key('cod_periodo_comp_sel') and not _.has_key('prim_sel') 
-                                and (_.DateTime() >= dat_inicio and _.DateTime() <= dat_fim)))
+                                and (DateTime() >= DateTime(dat_inicio) and DateTime() <= DateTime(dat_fim))))
                                 or (not _.has_key('cod_periodo_comp_sel') and not _.has_key('prim_sel')) 
                                 or (_.has_key('cod_periodo_comp_sel') and cod_periodo_comp == cod_periodo_comp_sel)">
                      selected
@@ -94,7 +94,7 @@ location.href="composicao_mesa_excluir_proc?hdn_num_legislatura="+ num_legislatu
                 </dtml-if>
                 value="<dtml-var cod_periodo_comp>">
                 <dtml-var dat_inicio_periodo> a <dtml-var dat_fim_periodo>
-		<dtml-if expr="(_.DateTime() >= dat_inicio) and (_.DateTime() <= dat_fim)">(Atual)</dtml-if>
+		<dtml-if expr="(DateTime() >= DateTime(dat_inicio)) and (DateTime() <= DateTime(dat_fim))">(Atual)</dtml-if>
               </option>
            </dtml-in>
          </select>

@@ -1,5 +1,5 @@
 """
-SAGL - OpenLegis setup handlers.
+SAGL setup handlers.
 """
 
 def setupMountPoint(portal):
@@ -9,7 +9,16 @@ def setupMountPoint(portal):
         try:
             portal.manage_addProduct['ZODBMountPoint'].manage_addMounts(paths=["/%s/sapl_documentos" % path_sagl],create_mount_points=1)
         except:
-            portal.manage_addProduct['OFSP'].manage_addFolder(id='sapl_documentos')
+            pass
+            #portal.manage_addProduct['OFSP'].manage_addFolder(id='sapl_documentos')
+
+def setupCache(portal):
+    # Metodo para adicionar cache HTTP
+    if not hasattr(portal, 'HTTPCache'):
+        try:
+            portal.manage_addProduct['StandardCacheManagers'].manage_addAcceleratedHTTPCacheManager(id='HTTPCache')
+        except:
+            pass
 
 def setupConteudo(portal):
     # Metodo para a importacao do SAGL-OpenLegis
@@ -17,6 +26,7 @@ def setupConteudo(portal):
     if hasattr(portal, 'sapl_documentos'):
         for o in [
             'administrativo.zexp',
+            'anexo_sessao.zexp',
             'ata_sessao.zexp',
             'documento_comissao.zexp',
             'documentos_assinados.zexp',
@@ -29,8 +39,8 @@ def setupConteudo(portal):
             'oradores_expediente.zexp',
             'parecer_comissao.zexp',
             'parlamentar.zexp',
-            'pauta_sessao.zexp',
             'partido.zexp',
+            'pauta_sessao.zexp',
             'pessoa.zexp',
             'peticao.zexp',
             'proposicao.zexp',
@@ -42,8 +52,8 @@ def setupConteudo(portal):
             if o[:len(o)-5] not in portal.sapl_documentos.objectIds():
                 portal.sapl_documentos.manage_importObject(o)
 
-    # importar conteudos na raiz do SAGL - OpenLegis
-    for o in ['extensions.zexp', 'webeditor.zexp', 'pdflabels.zexp', 'gerar_etiquetas_pdf.zexp', 'upload_form.zexp', 'trigger_upload.zexp']:
+    # importar conteudos na raiz do SAGL
+    for o in ['extensions.zexp']:
         if o[:len(o)-5] not in portal.objectIds():
             portal.manage_importObject(o)
 
@@ -55,19 +65,12 @@ def setupAdicionarUsuarios(portal):
     except:
         pass
 
-def setupAdicionaAcomp(portal):
-    props = portal.sapl_documentos.props_sagl
-    try:
-        props.manage_addProperty('acompanhamento_materia', '1', 'int')
-    except:
-        pass
-
 
 def importar_estrutura(context):
     if context.readDataFile('sagl-final.txt') is None:
         return
     site = context.getSite()
-    setupMountPoint(site)
+#    setupMountPoint(site)
+    setupCache(site)
     setupConteudo(site)
     setupAdicionarUsuarios(site)
-    setupAdicionaAcomp(site)

@@ -100,24 +100,24 @@ $("#txa_txt_tramitacao").cleditor()[0].disable("true");;
             </dtml-in>
        </td>
     </tr>
-      <dtml-call expr="REQUEST.set('pdf', _.str(hdn_cod_tramitacao)+'_tram.pdf')">
-      <dtml-call expr="REQUEST.set('pdf_assinado', _.str(hdn_cod_tramitacao)+'_tram_signed.pdf')">
-      <dtml-if "_.hasattr(sapl_documentos.materia.tramitacao,pdf) or _.hasattr(sapl_documentos.materia.tramitacao,pdf_assinado)">
+      <dtml-call expr="REQUEST.set('pdf', str(hdn_cod_tramitacao)+'_tram.pdf')">
+      <dtml-call expr="REQUEST.set('pdf_assinado', str(hdn_cod_tramitacao)+'_tram_signed.pdf')">
+      <dtml-if "hasattr(sapl_documentos.materia.tramitacao,pdf) or hasattr(sapl_documentos.materia.tramitacao,pdf_assinado)">
          <tr>
            <td>
                 Texto PDF
            </td>
            <td colspan="2">
-                 <dtml-if "_.hasattr(sapl_documentos.materia.tramitacao,pdf)">
-                   <dtml-let pdf="_.getattr(sapl_documentos.materia.tramitacao,pdf).absolute_url">
+                 <dtml-if "hasattr(sapl_documentos.materia.tramitacao,pdf)">
+                   <dtml-let pdf="getattr(sapl_documentos.materia.tramitacao,pdf).absolute_url">
                      <a class="popup1" href="<dtml-var pdf>?<dtml-var expr="ZopeTime().timeTime()">" data-fancybox-type="iframe">
                        <img align="top" style="float: left; margin-right: 8px;" src="<dtml-var portal_url>/imagens/archiv.gif" alt="Arquivo PDF" title="Visualizar PDF">
                      
                    </dtml-let>
                  </dtml-if>
 
-                 <dtml-if "_.hasattr(sapl_documentos.materia.tramitacao,pdf_assinado)">
-                   <dtml-let pdf_assinado="_.getattr(sapl_documentos.materia.tramitacao,pdf_assinado).absolute_url">
+                 <dtml-if "hasattr(sapl_documentos.materia.tramitacao,pdf_assinado)">
+                   <dtml-let pdf_assinado="getattr(sapl_documentos.materia.tramitacao,pdf_assinado).absolute_url">
                      <a class="popup1" href="<dtml-var pdf_assinado>?<dtml-var expr="ZopeTime().timeTime()">" data-fancybox-type="iframe">
                        <img height="22" style="float: left; margin-right: 8px;" src="<dtml-var portal_url>/imagens/pdf_signed.gif" alt="PDF - Tramitação assinada" title="Visualizar PDF - Tramitação assinada">Tramitação com Assinatura Digital
                      </a>

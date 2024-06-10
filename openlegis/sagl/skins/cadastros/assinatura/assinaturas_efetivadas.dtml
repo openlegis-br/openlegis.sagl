@@ -77,7 +77,7 @@ $(document).ready(function() {
                   </dtml-in> 
                <dtml-elif expr="tipo_doc == 'anexo_sessao'">
                   <dtml-call expr="REQUEST.set('file_item', str(codigo) + '_anexo_' + str(anexo) + '.pdf')">
-                  <dtml-let titulo="_.getattr(sapl_documentos.anexo_sessao,file_item).title_or_id">
+                  <dtml-let titulo="getattr(sapl_documentos.anexo_sessao,file_item).title_or_id">
                      <dtml-var titulo>
                   </dtml-let>
                   <dtml-in expr="zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=codigo, ind_excluido=0)">

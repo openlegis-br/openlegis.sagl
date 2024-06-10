@@ -6,7 +6,7 @@
    versão: 1.1
 """
 from trml2pdf import parseString
-from cStringIO import StringIO
+from io import BytesIO
 import time
 
 def paraStyle():

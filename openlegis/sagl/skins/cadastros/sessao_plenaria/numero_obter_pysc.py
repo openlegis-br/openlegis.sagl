@@ -7,7 +7,7 @@
 ##parameters=tvalue, svalue, dat_sessao=""
 ##title=
 ##
-import simplejson as json
+import json
 
 context.REQUEST.RESPONSE.setHeader("Access-Control-Allow-Origin", "*")
 

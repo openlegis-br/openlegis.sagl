@@ -2,7 +2,6 @@
 
 import csv
 
-#from zope.site.hooks import setSite
 from zope.component.hooks import setSite
 
 from Products.GenericSetup.tool import SetupTool
@@ -19,7 +18,7 @@ _DEFAULT_PROFILE = 'openlegis.sagl:default'
 
 
 class SAGL(CMFSite):
-    """ Inicia um novo SAGL - OpenLegis baseado em um CMFSite.
+    """ Inicia um novo SAGL baseado em um CMFSite.
     """
     security=ClassSecurityInfo()
     meta_type = portal_type = 'SAGL'
@@ -31,7 +30,7 @@ class SAGL(CMFSite):
         reader = csv.reader(file)
         output_list = []
         if as_dict:
-            headerList = reader.next()
+            headerList = next(reader)
             for line in reader:
                 if line:
                     dd = {}
@@ -53,9 +52,9 @@ manage_addSAGLForm = PageTemplateFile('www/addSAGL', globals())
 manage_addSAGLForm.__name__ = 'addSAGL'
 
 
-def manage_addSAGL(context, id, title='OpenLegis - Processo Legislativo Eletrônico', description='',
+def manage_addSAGL(context, id, title='SAGL', description='',
                    database='MySQL', profile_id=_DEFAULT_PROFILE, RESPONSE=None):
-    """ Adicionar uma instancia do SAGL-OpenLegis.
+    """ Adicionar uma instancia do SAGL.
     """
 
     context._setObject(id, SAGL(id))
@@ -80,18 +79,31 @@ def manage_addSAGL(context, id, title='OpenLegis - Processo Legislativo Eletrôn
 
     if database == 'MySQL':
         site.manage_addProduct['ZMySQLDA'].manage_addZMySQLConnection(
-            id='dbcon_interlegis',
-            title='Banco de Dados do SAGL - OpenLegis (MySQL)',
+            id='dbcon_sagl',
+            title='dbcon_sagl (MySQL)',
             use_unicode=True,
-            connection_string='openlegis sagl sagl'
+            connection_string='*lock_name openlegis sagl sagl'
+        )
+        site.manage_addProduct['ZMySQLDA'].manage_addZMySQLConnection(
+            id='dbcon_logs',
+            title='dbcon_logs (MySQL)',
+            use_unicode=True,
+            connection_string='*lock_name openlegis_logs sagl sagl'
         )
     else:
         site.manage_addProduct['ZPsycopgDA'].manage_addZPsycopgConnection(
-            id='dbcon_interlegis',
-            title='Banco de Dados do SAGL - OpenLegis (PostgreSQL)',
-            connection_string='dbname=interlegis user=sagl password=sagl host=localhost'
+            id='dbcon_sagl',
+            title='dbcon_sagl (PostgreSQL)',
+            connection_string='postgres://postgres:postgres@127.0.0.1:5432/openlegis'
         )
 
+    if not hasattr(site, 'sapl_documentos'):
+       path_sagl = site.getId()
+       try:
+          site.manage_addProduct['ZODBMountPoint'].manage_addMounts(paths=['/%s/sapl_documentos' % path_sagl], create_mount_points=True)
+       except:
+          pass
+    
     if RESPONSE is not None:
         RESPONSE.redirect( '%s/%s/manage_main?update_menu=1'
                            % (context.absolute_url(), id) )

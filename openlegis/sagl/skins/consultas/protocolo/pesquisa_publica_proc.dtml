@@ -18,16 +18,16 @@
           <dtml-let isAnon="portal_membership.isAnonymousUser()">
             <dtml-if expr="not isAnon">   
              <div class="btn-group" role="group">
-                 <dtml-call expr="REQUEST.set('id_documento', _.str(cod_documento)+'_texto_integral.pdf')">
-                 <dtml-if expr="_.hasattr(sapl_documentos.administrativo,id_documento)">       
+                 <dtml-call expr="REQUEST.set('id_documento', str(cod_documento)+'_texto_integral.pdf')">
+                 <dtml-if expr="hasattr(sapl_documentos.administrativo,id_documento)">       
                    <a  href="<dtml-var portal_url>/modelo_proposicao/processo_adm_eletronico?cod_documento=<dtml-var cod_documento>" target="_blank"><i class="far fa-file-pdf"></i> <dtml-var des_tipo_documento> nº <dtml-var num_documento>/<dtml-var ano_documento> (processo integral)</a>
                  <dtml-else>
                     <dtml-var des_tipo_documento> nº <dtml-var num_documento>/<dtml-var ano_documento>
                  </dtml-if>
              </div>
             <dtml-else>
-                 <dtml-call expr="REQUEST.set('id_documento', _.str(cod_documento)+'_texto_integral.pdf')">
-                 <dtml-if expr="_.hasattr(sapl_documentos.administrativo,id_documento)">       
+                 <dtml-call expr="REQUEST.set('id_documento', str(cod_documento)+'_texto_integral.pdf')">
+                 <dtml-if expr="hasattr(sapl_documentos.administrativo,id_documento)">       
                    <a  href="<dtml-var portal_url>/modelo_proposicao/processo_adm_eletronico?cod_documento=<dtml-var cod_documento>" target="_blank"><i class="far fa-file-pdf"></i> <dtml-var des_tipo_documento> nº <dtml-var num_documento>/<dtml-var ano_documento> (processo integral)</a>
                  <dtml-else>
                     <dtml-var des_tipo_documento> nº <dtml-var num_documento>/<dtml-var ano_documento>

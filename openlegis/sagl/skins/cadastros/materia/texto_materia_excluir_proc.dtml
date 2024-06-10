@@ -1,8 +1,8 @@
 <dtml-call expr="REQUEST.set('erro', 0)">
 
-<dtml-call expr="REQUEST.set('id_texto', _.str(cod_materia)+'_texto_integral.pdf')">
-<dtml-if expr="_.hasattr(sapl_documentos.materia,id_texto)">
- <dtml-let documento="_.getattr(sapl_documentos.materia,id_texto) ">
+<dtml-call expr="REQUEST.set('id_texto', str(cod_materia)+'_texto_integral.pdf')">
+<dtml-if expr="hasattr(sapl_documentos.materia,id_texto)">
+ <dtml-let documento="getattr(sapl_documentos.materia,id_texto) ">
   <dtml-try>
     <dtml-call "sapl_documentos.materia.manage_delObjects(id_texto)">
     <dtml-call expr="sapl_documentos.materia.Catalog.removerCatalogo(cod_materia)">
@@ -12,11 +12,11 @@
  </dtml-let>
 </dtml-if>
 
-<dtml-call expr="REQUEST.set('id_texto_assinado', _.str(cod_materia)+'_texto_integral_signed.pdf')">
-<dtml-if expr="_.hasattr(sapl_documentos.materia,id_texto_assinado)">
- <dtml-let documento="_.getattr(sapl_documentos.materia,id_texto_assinado) ">
+<dtml-call expr="REQUEST.set('id_texto_assinado', str(cod_materia)+'_texto_integral_signed.pdf')">
+<dtml-if expr="hasattr(sapl_documentos.materia,id_texto_assinado)">
+ <dtml-let documento="getattr(sapl_documentos.materia,id_texto_assinado) ">
   <dtml-try>
-    <dtml-call "sapl_documentos.materia.manage_delObjects(id_texto_assinado)">
+    <dtml-call expr="sapl_documentos.materia.manage_delObjects(id_texto_assinado)">
     <dtml-call expr="sapl_documentos.materia.Catalog.removerCatalogo(cod_materia)">
   <dtml-except>
     <dtml-call expr="REQUEST.set('erro', 1)">
@@ -36,12 +36,12 @@
     </dtml-in>
 
   <dtml-if erro>
-    <dtml-let mensagem="'Ocorreu um erro ao excluir o texto original em PDF!'" tipo_mensagem="'danger'">
+    <dtml-let mensagem="'Ocorreu um erro ao excluir o arquivo PDF!'" tipo_mensagem="'danger'">
       <dtml-var mensagem_emitir>
     </dtml-let>
   <dtml-else>
     <dtml-call expr="sapl_documentos.materia.Catalog.atualizarCatalogo(cod_materia)">
-    <dtml-let mensagem="'Texto original em PDF excluído com sucesso!'" url="'materia_mostrar_proc?cod_materia='+cod_materia">
+    <dtml-let mensagem="'Arquivo PDF excluído com sucesso!'" url="'materia_mostrar_proc?cod_materia='+cod_materia">
       <dtml-var mensagem_emitir>
     </dtml-let>
   </dtml-if>
@@ -51,7 +51,7 @@
   <dtml-call expr="zsql.logs_registrar_zsql(
             usuario      = REQUEST['AUTHENTICATED_USER'].getUserName(), 
             data         = DateTime().strftime('%Y-%m-%d %H:%M:%S'),
-            modulo       = _.string.split(_['REQUEST']['URL1'],'/')[-1],
+            modulo       = str(_['REQUEST']['URL1']).split('/')[-1],
             metodo       = 'pdf_materia_excluir',
             IP           = pysc.get_ip(),
             cod_registro = cod_materia)"> 

@@ -38,7 +38,7 @@
                          <option
                            <dtml-in expr="zsql.presenca_ordem_dia_obter_zsql(cod_sessao_plen=cod_sessao_plen,cod_parlamentar=cod_parlamentar, ind_excluido=0)">
                              <dtml-if expr="_.has_key('tip_frequencia')">
-                                <dtml-call expr="REQUEST.set('tip_frequencia',_.str(tip_frequencia))">
+                                <dtml-call expr="REQUEST.set('tip_frequencia',str(tip_frequencia))">
                              </dtml-if>
                            </dtml-in>
                              <dtml-if expr="_.has_key('tip_frequencia') and tip_frequencia==_['sequence-item'][0]">

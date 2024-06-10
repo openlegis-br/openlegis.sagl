@@ -57,7 +57,7 @@ for materia in context.zsql.materia_obter_zsql(cod_materia=cod_materia):
  inf_basicas_dic['formato']= materia.tip_apresentacao
  inf_basicas_dic['publicada']= materia.dat_publicacao
  inf_basicas_dic['tramitacao']= materia.ind_tramitacao
- inf_basicas_dic['cod_projeto']= materia.des_tipo_materia.decode('utf-8').upper()+" N° "+ str(materia.num_ident_basica)+"/"+ str(materia.ano_ident_basica)
+ inf_basicas_dic['cod_projeto']= materia.des_tipo_materia.upper()+" N° "+ str(materia.num_ident_basica)+"/"+ str(materia.ano_ident_basica)
 
  inf_basicas_dic['reg_tramitacao'] = ""
  
@@ -142,10 +142,7 @@ for materia in context.zsql.materia_obter_zsql(cod_materia=cod_materia):
    dic_tramitacoes['status']= tramitacao.des_status
    dic_tramitacoes['urgente']= tramitacao.ind_urgencia
    dic_tramitacoes['data_fim']= tramitacao.dat_fim_prazo
-   if tramitacao.txt_tramitacao != None and tramitacao.txt_tramitacao!='':
-      dic_tramitacoes['texto_acao'] = context.extensions.xhtml2rml(tramitacao.txt_tramitacao,'P2')
-   else:
-      dic_tramitacoes['texto_acao'] = ''   
+   dic_tramitacoes['texto_acao'] = tramitacao.txt_tramitacao 
    for unidade in context.zsql.unidade_tramitacao_obter_zsql(cod_unid_tramitacao = tramitacao.cod_unid_tram_local):
      if unidade.cod_orgao==None:
        for comissao in context.zsql.comissao_obter_zsql(cod_comissao = unidade.cod_comissao):

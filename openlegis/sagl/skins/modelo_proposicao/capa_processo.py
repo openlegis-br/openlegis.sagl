@@ -57,7 +57,7 @@ for materia in context.zsql.materia_obter_zsql(cod_materia=cod_materia):
  capa_dic['txt_ementa'] = materia.txt_ementa
  capa_dic['nom_autor'] = ""
  autores = context.zsql.autoria_obter_zsql(cod_materia=cod_materia)
- fields = autores.data_dictionary().keys()
+ fields = list(autores.data_dictionary().keys())
  lista_autor = []
  for autor in autores:
    for field in fields:
@@ -139,7 +139,7 @@ for materia in context.zsql.materia_obter_zsql(cod_materia=cod_materia):
         else:
            nom_resultado = " (Não votada)"
            votacao_observacao = ""
-     id_emenda = 'Emenda ' + emenda.des_tipo_emenda.decode('utf-8')  + ' nº ' + str(emenda.num_emenda) + nom_resultado
+     id_emenda = 'Emenda ' + emenda.des_tipo_emenda  + ' nº ' + str(emenda.num_emenda) + nom_resultado
      lst_acessorios.append(id_emenda)
 
  capa_dic['acessorios'] = ', '.join(['%s' % (value) for (value) in lst_acessorios])
@@ -232,8 +232,8 @@ for materia in context.zsql.materia_obter_zsql(cod_materia=cod_materia):
  for norma in context.zsql.materia_buscar_norma_juridica_zsql(cod_materia=materia.cod_materia):
       dat_publicacao = ''
       if norma.dat_publicacao != '' and norma.dat_publicacao != None:
-         dat_publicacao = '. Publicação no Diário Oficial: ' + norma.dat_publicacao
-      capa_dic['norma'] = norma.des_norma + ' nº ' + str(norma.num_norma) + ' de ' + str(norma.dat_norma) + dat_publicacao
+         dat_publicacao = '. Publicação no Diário Oficial: ' + str(norma.dat_publicacao)
+      capa_dic['norma'] = norma.des_norma + ' nº ' + str(norma.num_norma) + ' de ' + str(norma.dat_norma) + str(dat_publicacao)
  capa_dic['observacoes'] = materia.txt_observacao
  capa_dic['situacao'] = None
  for tramitacao in context.zsql.tramitacao_obter_zsql(cod_materia=materia.cod_materia, ind_ult_tramitacao=1):
@@ -241,7 +241,7 @@ for materia in context.zsql.materia_obter_zsql(cod_materia=cod_materia):
          unidade_atual = unidade.nom_unidade_join
      capa_dic['situacao'] = 'Último Local: ' + tramitacao.dat_tramitacao + ' - ' + unidade_atual + ' - ' + tramitacao.des_status
 
- capa_dic['nom_arquivo_odt'] = 'capa-'+materia.sgl_tipo_materia.encode('utf-8')+'-'+str(materia.num_ident_basica)+'-'+str(materia.ano_ident_basica)+'.odt'
- capa_dic['nom_arquivo_pdf'] = 'capa-'+materia.sgl_tipo_materia.encode('utf-8')+'-'+str(materia.num_ident_basica)+'-'+str(materia.ano_ident_basica)+'.pdf'
+ capa_dic['nom_arquivo_odt'] = 'capa-'+materia.sgl_tipo_materia+'-'+str(materia.num_ident_basica)+'-'+str(materia.ano_ident_basica)+'.odt'
+ capa_dic['nom_arquivo_pdf'] = 'capa-'+materia.sgl_tipo_materia+'-'+str(materia.num_ident_basica)+'-'+str(materia.ano_ident_basica)+'.pdf'
 
 return st.capa_processo_gerar_odt(capa_dic)

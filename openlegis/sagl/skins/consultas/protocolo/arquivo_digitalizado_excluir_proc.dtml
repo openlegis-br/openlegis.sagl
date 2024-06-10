@@ -1,8 +1,8 @@
 <dtml-call expr="REQUEST.set('erro', 0)">
 
-<dtml-call expr="REQUEST.set('id_texto', _.str(cod_protocolo)+'_protocolo.pdf')">
-<dtml-if expr="_.hasattr(sapl_documentos.protocolo,id_texto)">
- <dtml-let documento="_.getattr(sapl_documentos.protocolo,id_texto) ">
+<dtml-call expr="REQUEST.set('id_texto', str(cod_protocolo)+'_protocolo.pdf')">
+<dtml-if expr="hasattr(sapl_documentos.protocolo,id_texto)">
+ <dtml-let documento="getattr(sapl_documentos.protocolo,id_texto) ">
   <dtml-try>
     <dtml-call "sapl_documentos.protocolo.manage_delObjects(id_texto)">
   <dtml-except>
@@ -11,9 +11,9 @@
  </dtml-let>
 </dtml-if>
 
-<dtml-call expr="REQUEST.set('id_texto_assinado', _.str(cod_protocolo)+'_protocolo_signed.pdf')">
-<dtml-if expr="_.hasattr(sapl_documentos.protocolo,id_texto_assinado)">
- <dtml-let documento="_.getattr(sapl_documentos.protocolo,id_texto_assinado) ">
+<dtml-call expr="REQUEST.set('id_texto_assinado', str(cod_protocolo)+'_protocolo_signed.pdf')">
+<dtml-if expr="hasattr(sapl_documentos.protocolo,id_texto_assinado)">
+ <dtml-let documento="getattr(sapl_documentos.protocolo,id_texto_assinado) ">
   <dtml-try>
     <dtml-call "sapl_documentos.protocolo.manage_delObjects(id_texto_assinado)">
   <dtml-except>

@@ -41,7 +41,7 @@ for item in context.zsql.materia_pesquisar_zsql(
 
     materia["nom_autor"] = ""
     autores = context.zsql.autoria_obter_zsql(cod_materia=item.cod_materia)
-    fields = autores.data_dictionary().keys()
+    fields = list(autores.data_dictionary().keys())
     lista_autor = []
     for autor in autores:
         for field in fields:

@@ -23,7 +23,7 @@
       }
       
    <dtml-if codigo>
-     <dtml-if expr="not _.hasattr(sapl_documentos.administrativo,codigo+'.pdf')">
+     <dtml-if expr="not hasattr(sapl_documentos.administrativo,codigo+'.pdf')">
        if (document.getElementById("anexo").value != "") {
          $.showAlert({title: "Mensagem do Sistema", body: "Um arquivo PDF foi selecionado mas ainda foi não carregado no sistema! Se deseja anexar o arquivo, antes de protocolar a petição, clique no botão Carregar."});           
          form.anexo.focus();
@@ -109,7 +109,7 @@
    <form enctype="multipart/form-data" id="peticionamento_form" name="peticionamento_form" method="post" action="protocolo_pysc">
 
 <dtml-unless codigo>
-  <dtml-call expr="REQUEST.set('codigo', _.DateTime().strftime('%s'))">
+  <dtml-call expr="REQUEST.set('codigo', DateTime().strftime('%s'))">
 </dtml-unless>
 
 
@@ -129,7 +129,7 @@
 	      <option></option>
                 <dtml-in expr="['Adiantamento de 13º salário', 'Adiantamento de despesas de viagem', 'Compra de produto ou serviço', 'Férias', 'Justificativa de falta', 'Licença-prêmio', 'Outros assuntos']">
                    <option value="<dtml-var expr="_['sequence-item']">"
-                     <dtml-if expr="_.has_key('hdn_lst_assunto') and hdn_lst_assunto==_.str(_['sequence-item'])">selected</dtml-if> >
+                     <dtml-if expr="_.has_key('hdn_lst_assunto') and hdn_lst_assunto==str(_['sequence-item'])">selected</dtml-if> >
                      <dtml-var expr="_['sequence-item']"> </option>
                 </dtml-in>
 	 </select>     
@@ -141,7 +141,7 @@
                <dtml-in expr="zsql.unidade_tramitacao_obter_zsql(ind_adm=1)">
                    <option 
                      value="<dtml-var cod_unid_tramitacao>"
-                     <dtml-if expr="_.has_key('hdn_lst_cod_unid_tram_dest') and hdn_lst_cod_unid_tram_dest==_.str(cod_unid_tramitacao)">selected</dtml-if> >  
+                     <dtml-if expr="_.has_key('hdn_lst_cod_unid_tram_dest') and hdn_lst_cod_unid_tram_dest==str(cod_unid_tramitacao)">selected</dtml-if> >  
                       <dtml-var nom_unidade_join>
                    </option>
                </dtml-in>
@@ -164,12 +164,12 @@
                  <dtml-call "REQUEST.set('cod_assinatura_doc', cod_assinatura_doc)">
               </dtml-in>
            </dtml-if>
-           <dtml-if expr="_.has_key('cod_assinatura_doc') and _.hasattr(sapl_documentos.documentos_assinados,cod_assinatura_doc+'.pdf')">
+           <dtml-if expr="_.has_key('cod_assinatura_doc') and hasattr(sapl_documentos.documentos_assinados,cod_assinatura_doc+'.pdf')">
              <a class="btn btn-secondary" href="<dtml-var portal_url>/sapl_documentos/documentos_assinados/<dtml-var cod_assinatura_doc>.pdf" target="_blank">
                 <i class="fas fa-certificate"></i> <dtml-var cod_assinatura_doc>.pdf
              </a>
              <input class="btn btn-primary" type="button" id="excluir" name="excluir" value="Excluir"  onClick="arquivo_excluir(<dtml-var codigo>)"/>
-           <dtml-elif expr="_.has_key('codigo') and _.hasattr(sapl_documentos.administrativo,codigo+'.pdf')">
+           <dtml-elif expr="_.has_key('codigo') and hasattr(sapl_documentos.administrativo,codigo+'.pdf')">
               <a class="btn btn-secondary" href="<dtml-var portal_url>/sapl_documentos/administrativo/<dtml-var filename>" target="_blank">
                  <i class="fa fa-file-pdf"></i> Visualizar
               </a>

@@ -7,7 +7,7 @@
 ##parameters=cod_materia
 ##title=
 ##
-import simplejson as json
+import json
 from base64 import b64encode
 data = {}
 for materia in context.zsql.materia_obter_zsql(cod_materia=cod_materia, ind_excluido=0):
@@ -18,7 +18,7 @@ for materia in context.zsql.materia_obter_zsql(cod_materia=cod_materia, ind_excl
     data['ementa'] = materia.txt_ementa
     data['autoria'] = ''
     autores = context.zsql.autoria_obter_zsql(cod_materia=materia.cod_materia, ind_excluido=0)
-    fields = autores.data_dictionary().keys()
+    fields = list(autores.data_dictionary().keys())
     lista_autor = []
     for autor in autores:
         for field in fields:
@@ -45,5 +45,5 @@ for materia in context.zsql.materia_obter_zsql(cod_materia=cod_materia, ind_excl
         if tram.dat_fim_prazo != None:
            data['prazo'] = tram.dat_fim_prazo
 serialized = json.dumps(data, sort_keys=True, indent=3, ensure_ascii=False).encode('utf8')
-print(serialized.decode())
+print((serialized.decode()))
 return printed

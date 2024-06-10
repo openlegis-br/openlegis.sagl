@@ -3555,7 +3555,7 @@ class PDFDocument {
     if (this.catalog.hasActualNumPages) {
       num = this.catalog.numPages;
     } else if (this.xfaFactory) {
-      num = this.xfaFactory.getNumPages();
+      num = this.xfaFactory.get_num_pages();
     } else if (this.linearization) {
       num = this.linearization.numPages;
     } else {
@@ -52601,7 +52601,7 @@ class XFAFactory {
   getBoundingBox(pageIndex) {
     return this.dims[pageIndex];
   }
-  async getNumPages() {
+  async get_num_pages() {
     if (!this.pages) {
       await this._createPages();
     }

@@ -36,7 +36,7 @@
 
     <dtml-if expr="hdn_url[-1:]=='='">
         <dtml-in expr="zsql.documento_administrativo_incluido_codigo_obter_zsql()">
-          <dtml-call expr="REQUEST.set('hdn_url', hdn_url + _.str(cod_documento))">
+          <dtml-call expr="REQUEST.set('hdn_url', hdn_url + str(cod_documento))">
           <dtml-call expr="REQUEST.set('hdn_cod_documento', cod_documento)">
         </dtml-in>
         <dtml-if expr="txt_num_protocolo and txt_num_protocolo!=''">
@@ -46,12 +46,12 @@
              </dtml-if>
           </dtml-in>
           <dtml-if cod_protocolo>
-            <dtml-call expr="REQUEST.set('id_protocolo', _.str(cod_protocolo)+'_protocolo.pdf')">
-            <dtml-call expr="REQUEST.set('id_protocolo_assinado', _.str(cod_protocolo)+'_protocolo_signed.pdf')">
-              <dtml-if "_.hasattr(sapl_documentos.protocolo,id_protocolo_assinado)">
+            <dtml-call expr="REQUEST.set('id_protocolo', str(cod_protocolo)+'_protocolo.pdf')">
+            <dtml-call expr="REQUEST.set('id_protocolo_assinado', str(cod_protocolo)+'_protocolo_signed.pdf')">
+              <dtml-if "hasattr(sapl_documentos.protocolo,id_protocolo_assinado)">
                 <dtml-call expr="pysc.protocolo_salvar_como_texto_integral_documento1_pysc(cod_protocolo,hdn_cod_documento)">
                 <dtml-call expr="pysc.assinaturas_obter_pysc(codigo_origem=cod_protocolo, tipo_doc_origem='protocolo', codigo_destino=hdn_cod_documento, tipo_doc_destino='documento')">
-              <dtml-elif "_.hasattr(sapl_documentos.protocolo,id_protocolo) and not _.hasattr(sapl_documentos.protocolo,id_protocolo_assinado)">
+              <dtml-elif "hasattr(sapl_documentos.protocolo,id_protocolo) and not hasattr(sapl_documentos.protocolo,id_protocolo_assinado)">
                 <dtml-call expr="pysc.protocolo_salvar_como_texto_integral_documento_pysc(cod_protocolo,hdn_cod_documento)">
               </dtml-if>        
           </dtml-if>
@@ -62,9 +62,9 @@
 
     <dtml-call expr="REQUEST.set('existe_arquivo', 0)">
     <dtml-if file_nom_arquivo>
-       <dtml-call expr="REQUEST.set('id_documento', _.str(hdn_cod_documento)+ '_' + 'texto_integral.pdf')">
-       <dtml-if expr="_.hasattr(sapl_documentos.administrativo,id_documento)">
-           <dtml-let documento="_.getattr(sapl_documentos.administrativo,id_documento) ">
+       <dtml-call expr="REQUEST.set('id_documento', str(hdn_cod_documento)+ '_' + 'texto_integral.pdf')">
+       <dtml-if expr="hasattr(sapl_documentos.administrativo,id_documento)">
+           <dtml-let documento="getattr(sapl_documentos.administrativo,id_documento) ">
            <dtml-call expr="REQUEST.set('existe_arquivo', 1)">
            <dtml-try>
              <dtml-if expr="pysc.arquivo_pdf_validar_pysc(file=file_nom_arquivo)">
@@ -80,10 +80,11 @@
        </dtml-if>
        <dtml-if expr="not existe_arquivo">
         <dtml-try>
-         <dtml-call expr="REQUEST.set('id_documento', _.str(hdn_cod_documento)+ '_' + 'texto_integral.pdf')">
-         <dtml-if expr="pysc.arquivo_pdf_validar_pysc(file=file_nom_arquivo)">
-            <dtml-call expr="sapl_documentos.administrativo.manage_addFile(id=id_documento,file=file_nom_arquivo)">
-         </dtml-if>
+          <dtml-call expr="REQUEST.set('id_documento', str(hdn_cod_documento)+ '_' + 'texto_integral.pdf')">
+          <dtml-in expr="zsql.documento_administrativo_obter_zsql(cod_documento = hdn_cod_documento)">
+            <dtml-call expr="REQUEST.set('titulo', sgl_tipo_documento + ' ' + str(num_documento) + '/' + str(ano_documento))">
+          </dtml-in>
+          <dtml-call expr="sapl_documentos.administrativo.manage_addFile(id=id_documento,file=pysc.upload_file(file=file_nom_arquivo, title=titulo))">
         </dtml-try>
        </dtml-if>
     </dtml-if>
@@ -92,14 +93,14 @@
         <dtml-in expr="zsql.protocolo_obter_zsql(num_protocolo=txt_num_protocolo,ano_protocolo=txt_ano_documento)">
          <dtml-if cod_protocolo>
             <dtml-call expr="REQUEST.set('cod_protocolo', int(cod_protocolo))">
-            <dtml-call expr="REQUEST.set('id_protocolo', _.str(cod_protocolo)+'_protocolo.pdf')">
-            <dtml-call expr="REQUEST.set('id_protocolo_assinado', _.str(cod_protocolo)+'_protocolo_signed.pdf')">
-            <dtml-call expr="REQUEST.set('id_documento', _.str(hdn_cod_documento)+ '_' + 'texto_integral.pdf')">
-            <dtml-unless expr="_.hasattr(sapl_documentos.administrativo,id_documento)">
-              <dtml-if "_.hasattr(sapl_documentos.protocolo,id_protocolo_assinado)">
+            <dtml-call expr="REQUEST.set('id_protocolo', str(cod_protocolo)+'_protocolo.pdf')">
+            <dtml-call expr="REQUEST.set('id_protocolo_assinado', str(cod_protocolo)+'_protocolo_signed.pdf')">
+            <dtml-call expr="REQUEST.set('id_documento', str(hdn_cod_documento)+ '_' + 'texto_integral.pdf')">
+            <dtml-unless expr="hasattr(sapl_documentos.administrativo,id_documento)">
+              <dtml-if "hasattr(sapl_documentos.protocolo,id_protocolo_assinado)">
                 <dtml-call expr="pysc.protocolo_salvar_como_texto_integral_documento1_pysc(cod_protocolo,hdn_cod_documento)">
                 <dtml-call expr="pysc.assinaturas_obter_pysc(codigo_origem=cod_protocolo, tipo_doc_origem='protocolo', codigo_destino=hdn_cod_documento, tipo_doc_destino='documento')">
-              <dtml-elif "_.hasattr(sapl_documentos.protocolo,id_protocolo) and not _.hasattr(sapl_documentos.protocolo,id_protocolo_assinado)">
+              <dtml-elif "hasattr(sapl_documentos.protocolo,id_protocolo) and not hasattr(sapl_documentos.protocolo,id_protocolo_assinado)">
                 <dtml-call expr="pysc.protocolo_salvar_como_texto_integral_documento_pysc(cod_protocolo,hdn_cod_documento)">              
               </dtml-if>
             </dtml-unless>                                   
@@ -123,9 +124,9 @@
 </dtml-try>
 
  <dtml-if hdn_cod_documento>
-   <dtml-call expr="REQUEST.set('id_documento', _.str(hdn_cod_documento)+ '_' + 'texto_integral.pdf')">
-   <dtml-if "_.hasattr(sapl_documentos.administrativo,id_documento)">
-     <dtml-let documento="_.getattr(sapl_documentos.administrativo,id_documento) ">
+   <dtml-call expr="REQUEST.set('id_documento', str(hdn_cod_documento)+ '_' + 'texto_integral.pdf')">
+   <dtml-if "hasattr(sapl_documentos.administrativo,id_documento)">
+     <dtml-let documento="getattr(sapl_documentos.administrativo,id_documento) ">
        <dtml-if expr="zsql.tipo_documento_administrativo_obter_zsql(tip_documento=lst_tip_documento, ind_publico=1, ind_excluido=0)">
          <dtml-call "documento.manage_permission('View', roles=['Anonymous', 'Manager', 'Authenticated'], acquire=1)">
          <dtml-call "documento.manage_permission('Delete objects', roles=['Manager','Authenticated'], acquire=1)">
@@ -135,9 +136,9 @@
        </dtml-if>
      </dtml-let>
    </dtml-if>
-   <dtml-call expr="REQUEST.set('id_documento_assinado', _.str(hdn_cod_documento)+ '_' + 'texto_integral_signed.pdf')">
-   <dtml-if "_.hasattr(sapl_documentos.administrativo,id_documento_assinado)">
-     <dtml-let documento_assinado="_.getattr(sapl_documentos.administrativo,id_documento_assinado) ">
+   <dtml-call expr="REQUEST.set('id_documento_assinado', str(hdn_cod_documento)+ '_' + 'texto_integral_signed.pdf')">
+   <dtml-if "hasattr(sapl_documentos.administrativo,id_documento_assinado)">
+     <dtml-let documento_assinado="getattr(sapl_documentos.administrativo,id_documento_assinado) ">
        <dtml-if expr="zsql.tipo_documento_administrativo_obter_zsql(tip_documento=lst_tip_documento, ind_publico=1, ind_excluido=0)">
          <dtml-call "documento_assinado.manage_permission('View', roles=['Anonymous', 'Manager', 'Authenticated'], acquire=1)">
          <dtml-call "documento_assinado.manage_permission('Delete objects', roles=['Manager','Authenticated'], acquire=1)">

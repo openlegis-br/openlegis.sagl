@@ -7,7 +7,7 @@
 ##parameters=cod_materia_respondida
 ##title=
 ##
-import simplejson as json
+import json
 
 REQUEST = context.REQUEST
 RESPONSE = REQUEST.RESPONSE

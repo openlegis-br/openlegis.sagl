@@ -51,10 +51,6 @@
   </thead>
   <tr>
    <td width="30%">
-     <div>
-       <dtml-call expr="REQUEST.set('barcode', modelo_proposicao.protocolo_barcode_png(cod_protocolo))">
-       <img src="data:image/png;base64,<dtml-var barcode>" width="140" height="30">
-     </div>
    </td>
    <td width="70%">Código de Autenticidade: 
    <dtml-if expr="ind_anulado==1"> <span class="anulado"> ** NULO **</span>
@@ -70,7 +66,7 @@
   </tr>
   <tr>
    <td><b>Data / Horário</b></td>
-   <td><dtml-var "pysc.iso_to_port_pysc(dat_protocolo)"> - <dtml-var expr="hor_protocolo[0:2]+':'+hor_protocolo[3:5]"></td>
+   <td><dtml-var data_protocolo> - <dtml-var hor_protocolo></td>
   </tr>
   <tr>
 <dtml-if expr="tip_processo==''">

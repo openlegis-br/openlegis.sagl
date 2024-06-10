@@ -55,8 +55,8 @@
                 <select class="custom-select" id="lst_ano_sessao" name="lst_ano_sessao"  onChange="atualiza_ano_sessao(document.sessao_plen_form.lst_ano_sessao[document.sessao_plen_form.lst_ano_sessao.selectedIndex].value)">
                     <dtml-in expr="zsql.sessao_plenaria_listar_ano_zsql(ind_audiencia='1')">
                         <option value="<dtml-var ano_sessao missing>" 
-                          <dtml-if expr="((not _.has_key('ano_sessao_sel') and (_.DateTime().year() == ano_sessao)))
-                                           or (not _.has_key('ano_sessao_sel') and (_.DateTime().year() > ano_sessao))
+                          <dtml-if expr="((not _.has_key('ano_sessao_sel') and (DateTime().year() == ano_sessao)))
+                                           or (not _.has_key('ano_sessao_sel') and (DateTime().year() > ano_sessao))
                                            or (_.has_key('ano_sessao_sel') and ano_sessao == _.int(ano_sessao_sel))">
                             selected
                           <dtml-call expr="REQUEST.set('ano_sessao_sel', ano_sessao)">
@@ -156,31 +156,31 @@ inicio_sessao=<dtml-var dat_inicio_sessao missing>&num_legislatura=<dtml-var num
        <ul class="list-group list-group-flush">
          <li class="list-group-item">
 
-                 <dtml-let id_roteiro="_.str(cod_sessao_plen)+'_roteiro_sessao.pdf'">
-                    <dtml-if "_.hasattr(sapl_documentos.pauta_sessao,id_roteiro)">
-                      <dtml-let roteiro="_.getattr(sapl_documentos.pauta_sessao,id_roteiro).absolute_url">
+                 <dtml-let id_roteiro="str(cod_sessao_plen)+'_roteiro_sessao.pdf'">
+                    <dtml-if "hasattr(sapl_documentos.pauta_sessao,id_roteiro)">
+                      <dtml-let roteiro="getattr(sapl_documentos.pauta_sessao,id_roteiro).absolute_url">
                              <a target="_blank" href="<dtml-var roteiro>" class="btn btn-link" target="_blank"><i class="fa fa-fw fa-file-pdf"></i>Roteiro</a>    
                       </dtml-let>
                     </dtml-if>
                  </dtml-let>    
 
-                 <dtml-let id_pauta="_.str(cod_sessao_plen)+'_pauta_sessao.pdf'">
-                 <dtml-let id_pauta_completa="_.str(cod_sessao_plen)+'_pauta_completa.pdf'">   
-                   <dtml-if "_.hasattr(sapl_documentos.pauta_sessao,id_pauta_completa)">
-                      <dtml-let pauta_completa="_.getattr(sapl_documentos.pauta_sessao,id_pauta_completa).absolute_url">
+                 <dtml-let id_pauta="str(cod_sessao_plen)+'_pauta_sessao.pdf'">
+                 <dtml-let id_pauta_completa="str(cod_sessao_plen)+'_pauta_completa.pdf'">   
+                   <dtml-if "hasattr(sapl_documentos.pauta_sessao,id_pauta_completa)">
+                      <dtml-let pauta_completa="getattr(sapl_documentos.pauta_sessao,id_pauta_completa).absolute_url">
                         <a class="btn btn-link" href="<dtml-var pauta_completa>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fas fa-file-pdf"></i> <span class="">Pauta</span></a>
                       </dtml-let>               
-                   <dtml-elif "_.hasattr(sapl_documentos.pauta_sessao,id_pauta)">
-                      <dtml-let pauta="_.getattr(sapl_documentos.pauta_sessao,id_pauta).absolute_url">
+                   <dtml-elif "hasattr(sapl_documentos.pauta_sessao,id_pauta)">
+                      <dtml-let pauta="getattr(sapl_documentos.pauta_sessao,id_pauta).absolute_url">
                         <a class="btn btn-link" href="<dtml-var pauta>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fas fa-file-pdf"></i> <span class="">Pauta</span></a>
                       </dtml-let>
                   </dtml-if>
                  </dtml-let>  
                  </dtml-let>
                           
-                 <dtml-let id_ata="_.str(cod_sessao_plen)+'_ata_sessao.pdf'">
-                   <dtml-if "_.hasattr(sapl_documentos.ata_sessao,id_ata)">
-                      <dtml-let ata="_.getattr(sapl_documentos.ata_sessao,id_ata).absolute_url">
+                 <dtml-let id_ata="str(cod_sessao_plen)+'_ata_sessao.pdf'">
+                   <dtml-if "hasattr(sapl_documentos.ata_sessao,id_ata)">
+                      <dtml-let ata="getattr(sapl_documentos.ata_sessao,id_ata).absolute_url">
                            <a target="_blank" href="<dtml-var ata>?<dtml-var expr="ZopeTime().timeTime()">" class="btn btn-link"><i class="fa fa-fw fa-file-pdf"></i>Ata</a>    
                        </dtml-let>
                    </dtml-if>

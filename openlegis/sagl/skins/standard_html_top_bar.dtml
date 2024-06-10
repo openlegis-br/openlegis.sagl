@@ -125,8 +125,8 @@
                                 <div class="col-4">
                                     <div class="text-center">
                                         <dtml-if cod_parlamentar_corrente>
-                                          <dtml-call expr="REQUEST.set('id_foto', _.str(cod_parlamentar_corrente)+'_foto_parlamentar')">
-                                          <dtml-if expr="_.hasattr(sapl_documentos.parlamentar.fotos,id_foto)">
+                                          <dtml-call expr="REQUEST.set('id_foto', str(cod_parlamentar_corrente)+'_foto_parlamentar')">
+                                          <dtml-if expr="hasattr(sapl_documentos.parlamentar.fotos,id_foto)">
                                              <img src="<dtml-var portal_url>/sapl_documentos/parlamentar/fotos/<dtml-var id_foto>" alt="<dtml-var id_foto>" width="100" class="img-fluid rounded-circle img-thumbnail shadow-sm">
                                           <dtml-else>
                                               <i class="fas fa-user-tie" style="font-size: 65px;"></i>
@@ -203,7 +203,7 @@
 
   <dtml-call expr="REQUEST.set('existe_logo', 0)">
   <dtml-call expr="REQUEST.set('id_logo', 'logo_casa.gif')">
-  <dtml-if expr="_.hasattr(sapl_documentos.props_sagl,id_logo)">
+  <dtml-if expr="hasattr(sapl_documentos.props_sagl,id_logo)">
         <dtml-call expr="REQUEST.set('existe_logo', 1)">
   </dtml-if>
 

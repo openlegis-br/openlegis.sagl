@@ -45,8 +45,8 @@
       <option value="">Todos</option>    
       <dtml-in expr="zsql.ano_reuniao_comissao_obter_zsql()">
         <option value="<dtml-var ano_reuniao missing>" 
-          <dtml-if expr="((not _.has_key('ano_reuniao_sel') and (_.DateTime().year() == ano_reuniao)))
-                           or (not _.has_key('ano_reuniao_sel') and (_.DateTime().year() > ano_reuniao))
+          <dtml-if expr="((not _.has_key('ano_reuniao_sel') and (DateTime().year() == ano_reuniao)))
+                           or (not _.has_key('ano_reuniao_sel') and (DateTime().year() > ano_reuniao))
                            or (_.has_key('ano_reuniao_sel') and str(ano_reuniao) == str(ano_reuniao_sel))">
                             selected
                           <dtml-call expr="REQUEST.set('ano_reuniao_sel', ano_reuniao)">
@@ -145,16 +145,16 @@
                 <p class=""><i class="fa fa-calendar-alt"></i> <dtml-var dat_inicio_reuniao><dtml-if hr_inicio_reuniao>, às <dtml-var hr_inicio_reuniao missing null=""></p></dtml-if>
          </dtml-if>
   <p>
-                <dtml-let id_pauta="_.str(cod_reuniao)+'_pauta.pdf'">
-                  <dtml-if "_.hasattr(sapl_documentos.reuniao_comissao,id_pauta)">
-                    <dtml-let pauta="_.getattr(sapl_documentos.reuniao_comissao,id_pauta).absolute_url">
+                <dtml-let id_pauta="str(cod_reuniao)+'_pauta.pdf'">
+                  <dtml-if "hasattr(sapl_documentos.reuniao_comissao,id_pauta)">
+                    <dtml-let pauta="getattr(sapl_documentos.reuniao_comissao,id_pauta).absolute_url">
                       <a class="btn btn-sm btn-secondary" href="<dtml-var pauta>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fas fa-file-pdf"></i> <span class="">Pauta</span></a>
                     </dtml-let>
                   </dtml-if>
                 </dtml-let>
-                <dtml-let id_ata="_.str(cod_reuniao)+'_ata.pdf'">
-                  <dtml-if "_.hasattr(sapl_documentos.reuniao_comissao,id_ata)">
-                    <dtml-let ata="_.getattr(sapl_documentos.reuniao_comissao,id_ata).absolute_url">
+                <dtml-let id_ata="str(cod_reuniao)+'_ata.pdf'">
+                  <dtml-if "hasattr(sapl_documentos.reuniao_comissao,id_ata)">
+                    <dtml-let ata="getattr(sapl_documentos.reuniao_comissao,id_ata).absolute_url">
                       <a class="btn btn-sm btn-secondary" href="<dtml-var ata>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fas fa-file-pdf"></i> <span class="">Ata</span></a>
                     </dtml-let>
                   </dtml-if>

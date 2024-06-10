@@ -7,13 +7,13 @@
 ##parameters= svalue
 ##title=
 ##
-import simplejson as json
+import json
 
 context.REQUEST.RESPONSE.setHeader("Access-Control-Allow-Origin", "*")
 
 usuarios = context.zsql.usuario_unid_tram_obter_zsql(cod_unid_tramitacao = svalue)
  
-fields = usuarios.data_dictionary().keys()
+fields = list(usuarios.data_dictionary().keys())
 
 listaDic={}     
 usuarioArray = []

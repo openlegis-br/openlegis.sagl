@@ -60,10 +60,10 @@
 	</dtml-if>
        </div>
       <div class="col-12 col-lg-4">
-         <dtml-call expr="REQUEST.set('id_documento', _.str(cod_protocolo)+'_protocolo.pdf')">
-         <dtml-if "_.hasattr(sapl_documentos.protocolo,id_documento)">
+         <dtml-call expr="REQUEST.set('id_documento', str(cod_protocolo)+'_protocolo.pdf')">
+         <dtml-if "hasattr(sapl_documentos.protocolo,id_documento)">
             <div class="btn-group float-right">
-            <dtml-let documento="_.getattr(sapl_documentos.protocolo,id_documento).absolute_url">
+            <dtml-let documento="getattr(sapl_documentos.protocolo,id_documento).absolute_url">
                <a class="btn btn-sm btn-primary" target="_blank" href="<dtml-var documento>?<dtml-var expr="ZopeTime().timeTime()">"><i class="fa fa-file-pdf"></i> Arquivo Digitalizado</a>
             </dtml-let>
             <dtml-if expr="ind_anulado==0 and AUTHENTICATED_USER.has_role(['Operador', 'Operador Protocolo'])">

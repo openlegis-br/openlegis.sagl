@@ -78,7 +78,7 @@ $(document).ready(function() {
                <div class="input-group">
                 <select class="form-control selectpicker" name="lst_cod_usuario:list:int" id="lst_cod_usuario" multiple="multiple" data-selected-text-format="count > 3" data-size="6" data-actions-box="true" data-live-search="true" required>
                     <dtml-if expr="tipo_doc=='proposicao'">
-                     <dtml-call expr="REQUEST.set('data_atual', _.DateTime().strftime('%d/%m/%Y'))">
+                     <dtml-call expr="REQUEST.set('data_atual', DateTime().strftime('%d/%m/%Y'))">
                      <dtml-if expr="AUTHENTICATED_USER.has_role(['Autor'])">
                         <dtml-in expr="zsql.usuario_obter_zsql(col_username=AUTHENTICATED_USER.getUserName())">
                           <dtml-call expr="REQUEST.set('cod_usuario_atual',cod_usuario)">

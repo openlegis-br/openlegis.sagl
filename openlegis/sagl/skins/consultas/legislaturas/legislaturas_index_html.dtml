@@ -33,13 +33,13 @@ $(document).ready(function() {
                <option 
                   <dtml-if expr="_.has_key('hdn_num_legislatura') and num_legislatura==_.int(hdn_num_legislatura)">
                      selected
-                  <dtml-elif expr="not _.has_key('hdn_num_legislatura') and _.DateTime() >= dat_inicio and _.DateTime() <= dat_fim">
+                  <dtml-elif expr="not _.has_key('hdn_num_legislatura') and DateTime() >= DateTime(dat_inicio) and DateTime() <= DateTime(dat_fim)">
                      <dtml-call expr="REQUEST.set('hdn_num_legislatura', num_legislatura)">
                      selected
                   </dtml-if>
                   value="<dtml-var ACTUAL_URL>?hdn_num_legislatura=<dtml-var num_legislatura>">
                   <dtml-var expr="pysc.periodo_legislatura_format_pysc(num_legislatura,dat_inicio,dat_fim)">
-                  <dtml-if expr="(_.DateTime() >= dat_inicio and _.DateTime() <= dat_fim)">
+                  <dtml-if expr="(DateTime() >= DateTime(dat_inicio) and DateTime() <= DateTime(dat_fim))">
                      (Atual)
                   </dtml-if>
                </option>
@@ -82,7 +82,7 @@ $(document).ready(function() {
     <dtml-if primeiro_listado>
       <dtml-call expr="REQUEST.set('primeiro_listado', 0)">          
           <dtml-in expr="zsql.legislatura_obter_zsql(num_legislatura=hdn_num_legislatura)">
-        <dtml-if expr="(_.DateTime() >= dat_inicio and _.DateTime() <= dat_fim)">
+        <dtml-if expr="(DateTime() >= DateTime(dat_inicio) and DateTime() <= DateTime(dat_fim))">
            <dtml-call expr="REQUEST.set('legislatura_atual', 1)">
         </dtml-if>
      </dtml-in>

@@ -79,7 +79,7 @@
         </dtml-if>
         <dtml-if expr="ind_anulado==1"> <span class="anulado">** NULO **</span></dtml-if><br>
         <dtml-var txt_assunto_ementa missing><br>
-        <b>Data Protocolo: </b> <dtml-var "pysc.iso_to_port_pysc(dat_protocolo)"> - <b>Horário: </b> <dtml-var expr="hor_protocolo[0:2]+':'+hor_protocolo[3:5]"><br />
+        <b>Data Protocolo: </b> <dtml-var "pysc.iso_to_port_pysc(dat_protocolo)"> - <b>Horário: </b> <dtml-var hor_protocolo><br />
         <dtml-if cod_autor>
            <b>Autoria: </b>
            <dtml-in expr="zsql.autor_obter_zsql(cod_autor=cod_autor)">
@@ -202,11 +202,11 @@
 
       </div>
     </div>
-        <dtml-let id_documento="_.str(cod_protocolo)+'_protocolo.pdf'">
-           <dtml-if "_.hasattr(sapl_documentos.protocolo,id_documento)">
+        <dtml-let id_documento="str(cod_protocolo)+'_protocolo.pdf'">
+           <dtml-if "hasattr(sapl_documentos.protocolo,id_documento)">
               <div class="row">
                 <div class="col-12">
-                  <dtml-let documento="_.getattr(sapl_documentos.protocolo,id_documento).absolute_url">
+                  <dtml-let documento="getattr(sapl_documentos.protocolo,id_documento).absolute_url">
                     <a class="btn btn-sm btn-primary mt-2" target="_blank" href="<dtml-var documento>?<dtml-var expr="ZopeTime().timeTime()">"><i class="fa fa-file-pdf"></i> Arquivo Digitalizado</a>
                   </dtml-let>
                 </div>

@@ -34,7 +34,7 @@ options = {}
 options['password'] = password
 
 headers = {}
-headers['Subject'] = _(u'${portal_title}: Lembrete de senha',
+headers['Subject'] = _('${portal_title}: Lembrete de senha',
                       mapping={'portal_title': decode(ptool.title(), script)})
 headers['From'] = '%s <%s>' % (casa_legislativa,
                                email_casa)

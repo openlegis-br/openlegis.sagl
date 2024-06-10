@@ -1,19 +1,17 @@
 ##parameters=imagem,dic_rodape,inf_basicas_dic,cod_tramitacao,tramitacao_dic,hdn_url,sessao=''
 
-"""pdf_tramitacao_gerar.py
+"""
    Script python para gerar o PDF da tramitação
-   OpenLegis
 """
 from trml2pdf import parseString
-from cStringIO import StringIO
-import time
+from html2rml import html2rml
 
 def cabecalho(inf_basicas_dic,imagem):
     """
     Função que gera o código rml do cabeçalho da página
     """
     tmp=''
-    tmp+='\t\t\t\t<image x="4.1cm" y="26.9cm" width="74" height="60" file="' + imagem + '"/>\n'
+    tmp+='\t\t\t\t<image x="3.1cm" y="26.9cm" width="74" height="60" file="' + imagem + '"/>\n'
     tmp+='\t\t\t\t<setFont name="Helvetica-Bold" size="15"/>\n'
     tmp+='\t\t\t\t<drawString x="6.7cm" y="28.1cm">' + inf_basicas_dic['nom_camara'] + '</drawString>\n'
     tmp+='\t\t\t\t<setFont name="Helvetica" size="11"/>\n'
@@ -81,6 +79,7 @@ def paraStyle():
     tmp+='\t\t\t<paraStyle name="all" alignment="justify"/>\n'
     tmp+='\t\t</initialize>\n'
     tmp+='\t\t<paraStyle name="style.Title" fontName="Helvetica" fontSize="11" leading="13" spaceAfter="2" alignment="RIGHT"/>\n'
+    tmp+='\t\t<paraStyle name="p" fontName="Helvetica" fontSize="10.0" leading="14" spaceAfter="1" alignment="JUSTIFY"/>\n'
     tmp+='\t\t<paraStyle name="P1" fontName="Helvetica-Bold" fontSize="12.0" textColor="gray" leading="13" spaceAfter="2" spaceBefore="8" alignment="LEFT"/>\n'
     tmp+='\t\t<paraStyle name="P2" fontName="Helvetica" fontSize="10.0" leading="14" spaceAfter="1" alignment="JUSTIFY"/>\n'
     tmp+='\t\t<paraStyle name="P3" fontName="Helvetica" fontSize="10.0" leading="12" spaceAfter="2" alignment="CENTER"/>\n'
@@ -144,7 +143,10 @@ def tramitacao(tramitacao_dic):
       tmp+='\t\t<para style="P2">\n'
       tmp+='\t\t</para>\n'
 
-      tmp+='\t\t<para style="P2">' + str(tramitacao_dic['txt_tramitacao']) + '</para>\n\n'
+      tmp+='\t\t<para style="P2">\n'
+      tmp+='\t\t\t<font color="white">-</font>\n'
+      tmp+='\t\t</para>\n'
+      tmp+=html2rml(tramitacao_dic['txt_tramitacao'])
       tmp+='\t\t<para style="P2">\n'
       tmp+='\t\t\t<font color="white">-</font>\n'
       tmp+='\t\t</para>\n'
@@ -168,7 +170,6 @@ def principal(imagem,dic_rodape,inf_basicas_dic,tramitacao_dic,hdn_url,sessao=''
     """
 
     arquivoPdf=str(cod_tramitacao)+"_tram.pdf"
-    arquivoAssinado=str(cod_tramitacao)+"_tram_signed.pdf"
 
     tmp=''
     tmp+='<?xml version="1.0" encoding="utf-8" standalone="no" ?>\n'
@@ -191,15 +192,12 @@ def principal(imagem,dic_rodape,inf_basicas_dic,tramitacao_dic,hdn_url,sessao=''
     tmp_pdf=parseString(tmp)
 
     if hasattr(context.sapl_documentos.administrativo.tramitacao,arquivoPdf):
-        context.sapl_documentos.administrativo.tramitacao.manage_delObjects(ids=arquivoPdf)
-    if hasattr(context.sapl_documentos.administrativo.tramitacao,arquivoAssinado):
-        context.sapl_documentos.administrativo.tramitacao.manage_delObjects(ids=arquivoAssinado)
-    context.sapl_documentos.administrativo.tramitacao.manage_addFile(arquivoPdf)
-    arq=context.sapl_documentos.administrativo.tramitacao[arquivoPdf]
-    arq.manage_edit(title='PDF Tramitação Documento',filedata=tmp_pdf,content_type='application/pdf')
+        arq=context.sapl_documentos.administrativo.tramitacao[arquivoPdf]
+        arq.manage_upload(file=tmp_pdf)
+    else:       
+        context.sapl_documentos.administrativo.tramitacao.manage_addFile(id=arquivoPdf,file=tmp_pdf,content_type='application/pdf',title='Tramitação de processo administrativo')
 
     return hdn_url
-    #return "tramitacao_mostrar_proc?cod_tramitacao="+str(cod_tramitacao)
 
 return principal(imagem, dic_rodape,inf_basicas_dic,tramitacao_dic,hdn_url,sessao)
 

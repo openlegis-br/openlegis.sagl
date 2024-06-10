@@ -132,11 +132,11 @@ $(document).ready(function () {
 <h1 class="firstHeading">Cadastro de Matéria</h1> 
 
 <dtml-unless dat_apresentacao>
-   <dtml-call expr="REQUEST.set('dat_apresentacao', _.DateTime().strftime('%d/%m/%Y'))">
+   <dtml-call expr="REQUEST.set('dat_apresentacao', DateTime().strftime('%d/%m/%Y'))">
 </dtml-unless>
 
 <dtml-in expr="zsql.legislatura_obter_zsql(ind_excluido=0)">
-  <dtml-if expr="((_.DateTime(dat_apresentacao) >= dat_inicio and _.DateTime(dat_apresentacao) <= dat_fim))">
+  <dtml-if expr="((DateTime(dat_apresentacao) >= DateTime(dat_inicio) and DateTime(dat_apresentacao) <= DateTime(dat_fim)))">
     <dtml-call expr="REQUEST.set('num_legislatura_sel', num_legislatura)">
   </dtml-if>
 </dtml-in>
@@ -210,7 +210,7 @@ $(document).ready(function () {
     <div class="col-6 col-sm-3 mb-3">
       <label for="txt_ano_ident_basica" class="required">Ano</label>
       <dtml-unless ano_ident_basica>
-         <dtml-call expr="REQUEST.set('ano_ident_basica', _.DateTime.year(_.DateTime()))">
+         <dtml-call expr="REQUEST.set('ano_ident_basica', _.DateTime.year(DateTime()))">
       </dtml-unless>
       <input class="form-control year" type="number" id="txt_ano_ident_basica" name="txt_ano_ident_basica" value="<dtml-var ano_ident_basica missing>" required />
       <div class="invalid-feedback">
@@ -223,7 +223,7 @@ $(document).ready(function () {
     <div class="col-6 col-lg-3 mb-3">
       <label for="txt_dat_apresentacao" class="required">Data de Apresentação</label>
       <dtml-unless dat_apresentacao>
-         <dtml-call expr="REQUEST.set('dat_apresentacao', _.DateTime().strftime('%d/%m/%Y'))">
+         <dtml-call expr="REQUEST.set('dat_apresentacao', DateTime().strftime('%d/%m/%Y'))">
       </dtml-unless>
       <input class="form-control date" type="text" id="txt_dat_apresentacao" name="txt_dat_apresentacao" value="<dtml-var dat_apresentacao missing null="">" autocomplete="off" pattern=".{10,}" required />
       <div class="invalid-feedback">

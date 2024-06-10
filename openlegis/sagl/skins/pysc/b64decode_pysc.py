@@ -10,6 +10,9 @@
 
 import base64
 
+codigo = str(codigo)
+
 codigo = base64.b64decode(codigo)
 
-return codigo
+
+return int(codigo)

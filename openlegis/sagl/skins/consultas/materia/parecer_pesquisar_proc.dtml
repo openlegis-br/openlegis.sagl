@@ -58,9 +58,9 @@
     <li class="list-group-item">
       <div class="row">
         <div class="col-12">
-          <dtml-let id_parecer="_.str(cod_relatoria)+'_parecer.pdf'">
-            <dtml-if "_.hasattr(sapl_documentos.parecer_comissao,id_parecer)">
-                  <dtml-let parecer="_.getattr(sapl_documentos.parecer_comissao,id_parecer).absolute_url">
+          <dtml-let id_parecer="str(cod_relatoria)+'_parecer.pdf'">
+            <dtml-if "hasattr(sapl_documentos.parecer_comissao,id_parecer)">
+                  <dtml-let parecer="getattr(sapl_documentos.parecer_comissao,id_parecer).absolute_url">
                       <a href="<dtml-var parecer>" target="_blank"><span class="h6 font-weight-bold text-uppercase"><i class="fas fa-caret-right"></i> PARECER <dtml-in expr="zsql.comissao_obter_zsql(cod_comissao=cod_comissao)"><dtml-var sgl_comissao></dtml-in> Nº <dtml-var num_parecer missing>/<dtml-var ano_parecer missing></span></a>
                   </dtml-let>
             <dtml-else>

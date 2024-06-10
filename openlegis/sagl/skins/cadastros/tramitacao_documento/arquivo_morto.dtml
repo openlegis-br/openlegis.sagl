@@ -99,7 +99,7 @@ $(document).ready(function() {
              <tbody>
               <dtml-in expr="arquivo_morto_pysc(cod_usuario=cod_usuario_corrente)">
               <dtml-in expr="zsql.tramitacao_administrativo_obter_zsql(cod_tramitacao=_['sequence-item'])">
-                   <dtml-call expr="REQUEST.set('prazo_a_vencer', _.DateTime()+3)">
+                   <dtml-call expr="REQUEST.set('prazo_a_vencer', DateTime()+3)">
                    <tr>
                    <form name="inbox_form_<dtml-var cod_tramitacao>" method="post" action="tramitacao_mostrar_proc"> 
                    <input type="hidden" name="hdn_cod_tramitacao" value="<dtml-var cod_tramitacao>" />

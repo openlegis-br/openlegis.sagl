@@ -27,7 +27,7 @@ for materia in context.zsql.materia_obter_zsql(cod_materia=cod_materia):
 
  nom_autor = ""
  autorias = context.zsql.autoria_obter_zsql(cod_materia=materia.cod_materia)
- fields = autorias.data_dictionary().keys()
+ fields = list(autorias.data_dictionary().keys())
  lista_autor = []
  lista_codigo = []
  for autor in autorias:

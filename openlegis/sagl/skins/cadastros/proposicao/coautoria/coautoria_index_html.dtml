@@ -40,10 +40,10 @@
   </dtml-in>
 </dtml-in>
 
-<dtml-call expr="REQUEST.set('data_atual', _.DateTime().strftime('%d/%m/%Y'))">
+<dtml-call expr="REQUEST.set('data_atual', DateTime().strftime('%d/%m/%Y'))">
 
 <dtml-in expr="zsql.legislatura_obter_zsql(ind_excluido=0)">
-  <dtml-if expr="((_.DateTime() >= dat_inicio and _.DateTime() <= dat_fim))">
+  <dtml-if expr="((DateTime() >= DateTime(dat_inicio) and DateTime() <= DateTime(dat_fim)))">
     <dtml-call expr="REQUEST.set('num_legislatura_sel', num_legislatura)">
   </dtml-if>
 </dtml-in>

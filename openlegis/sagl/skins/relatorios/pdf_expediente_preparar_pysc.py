@@ -4,12 +4,10 @@
 ##bind namespace=
 ##bind script=script
 ##bind subpath=traverse_subpath
-##parameters= 
+##parameters=cod_sessao_plen
 ##title=
 ##
-
-import os
-
+from io import BytesIO
 request=context.REQUEST
 response=request.RESPONSE
 
@@ -52,7 +50,7 @@ for sessao in context.zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=cod_sessao
              dic_materia = {}
              dic_materia['cod_materia']= str(materia.cod_materia)
              dic_materia['num_ident_basica']= str(materia.num_ident_basica)
-             dic_materia["id_materia"] = '<link href="' + context.sapl_documentos.absolute_url() + '/materia/' + str(materia.cod_materia) + '_texto_integral.pdf' + '">'+materia.des_tipo_materia.decode('utf-8').upper() +' Nº '+ str(materia.num_ident_basica)+'/'+str(materia.ano_ident_basica)+'</link>'
+             dic_materia["id_materia"] = '<link href="' + context.sapl_documentos.absolute_url() + '/materia/' + str(materia.cod_materia) + '_texto_integral.pdf' + '">'+materia.des_tipo_materia.upper() +' Nº '+ str(materia.num_ident_basica)+'/'+str(materia.ano_ident_basica)+'</link>'
              dic_materia['txt_ementa'] = materia.txt_ementa
 
              if materia.des_tipo_materia == 'Requerimento' or materia.des_tipo_materia == 'Indicação' or materia.des_tipo_materia == 'Moção' or materia.des_tipo_materia == 'Pedido de Informação' :
@@ -64,18 +62,18 @@ for sessao in context.zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=cod_sessao
                        for autor in context.zsql.autor_obter_zsql(cod_autor = autoria.cod_autor):
                            for parlamentar in context.zsql.parlamentar_obter_zsql(cod_parlamentar=autor.cod_parlamentar):
                                if parlamentar.sex_parlamentar == 'M':
-                                  dic_autores["nom_parlamentar"] = autoria['nom_autor_join'].decode('utf-8').upper()
+                                  dic_autores["nom_parlamentar"] = autoria['nom_autor_join'].upper()
                                if parlamentar.sex_parlamentar == 'F':
-                                  dic_autores["nom_parlamentar"] = autoria['nom_autor_join'].decode('utf-8').upper()
+                                  dic_autores["nom_parlamentar"] = autoria['nom_autor_join'].upper()
                     else:
                        dic_materia["cod_autor"] = int(autoria.cod_autor)
                        dic_autores["cod_autor"] = int(autoria.cod_autor)
                        for autor in context.zsql.autor_obter_zsql(cod_autor = autoria.cod_autor):
                            for parlamentar in context.zsql.parlamentar_obter_zsql(cod_parlamentar=autor.cod_parlamentar):
                                if parlamentar.sex_parlamentar == 'M':
-                                  dic_autores["nom_parlamentar"] = autoria['nom_autor_join'].decode('utf-8').upper()
+                                  dic_autores["nom_parlamentar"] = autoria['nom_autor_join'].upper()
                                if parlamentar.sex_parlamentar == 'F':
-                                  dic_autores["nom_parlamentar"] = autoria['nom_autor_join'].decode('utf-8').upper()
+                                  dic_autores["nom_parlamentar"] = autoria['nom_autor_join'].upper()
                 lst_autores_requerimentos.append(dic_autores)
                 lst_requerimentos.append(dic_materia)
                 lst_qtde_requerimentos.append(materia.cod_materia)
@@ -127,7 +125,7 @@ cabecalho = {}
 estado = context.zsql.localidade_obter_zsql(tip_localidade="U")
 for uf in estado:
     if localidade[0].sgl_uf == uf.sgl_uf:
-       nom_estado = uf.nom_localidade.encode('utf-8')
+       nom_estado = uf.nom_localidade
        break
 cabecalho["nom_casa"] = casa["nom_casa"]
 cabecalho["nom_estado"] = nom_estado

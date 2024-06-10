@@ -64,7 +64,7 @@
                    </dtml-in>
                <dtml-elif expr="tipo_doc == 'anexo_sessao'">
                   <dtml-call expr="REQUEST.set('file_item', str(codigo) + '_anexo_' + str(anexo) + '.pdf')">
-                  <dtml-let titulo="_.getattr(sapl_documentos.anexo_sessao,file_item).title_or_id">
+                  <dtml-let titulo="getattr(sapl_documentos.anexo_sessao,file_item).title_or_id">
                     <a target="_blank" href="<dtml-var portal_url>/sapl_documentos/anexo_sessao/<dtml-var file_item>">
                        <dtml-var titulo>
                     </a>

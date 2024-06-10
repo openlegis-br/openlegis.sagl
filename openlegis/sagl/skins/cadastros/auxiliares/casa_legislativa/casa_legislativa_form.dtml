@@ -226,9 +226,9 @@
         <div class="row">
           <input type="hidden" name="hdn_file" value="0"/>
           <dtml-call expr="REQUEST.set('id_logo', 'logo_casa.gif')">
-          <dtml-if "_.hasattr(sapl_documentos.props_sagl,id_logo)">
+          <dtml-if "hasattr(sapl_documentos.props_sagl,id_logo)">
            <div class="col-6 mb-3">
-             <dtml-let logo="_.getattr(sapl_documentos.props_sagl,'logo_casa.gif').absolute_url">
+             <dtml-let logo="getattr(sapl_documentos.props_sagl,'logo_casa.gif').absolute_url">
                 <img class="image-fluid" src="<dtml-var logo>?<dtml-var expr="ZopeTime().timeTime()">" alt="Brasão da Casa Legislativa"></a>
              </dtml-let>
              <div class="form-check form-check-inline">                           
@@ -270,10 +270,6 @@
 
 
   <input class="btn btn-primary" type="button" name="btn_casa_salvar" value="Salvar" onClick="campos_criticar(document.casa_legislativa_form)" />
-
- <input type="hidden" name="txt_cor_fundo" value="<dtml-var expr="sapl_documentos.props_sagl.cor_fundo" missing>">
- <input type="hidden" name="txt_cor_borda" value="<dtml-var expr="sapl_documentos.props_sagl.cor_borda" missing>">
- <input type="hidden" name="txt_cor_principal" value="<dtml-var expr="sapl_documentos.props_sagl.cor_principal" missing>">
 
    <div class="row">
       <div class="col-md-12 mt-2">

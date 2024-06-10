@@ -1,4 +1,4 @@
-<dtml-in expr="zsql.proposicao_obter_zsql(cod_proposicao=hdn_cod_proposicao, ind_excluido=0)">
+<dtml-in expr="zsql.proposicao_obter_zsql(cod_proposicao=hdn_cod_proposicao, ind_excluido=0)" mapping>
   <dtml-call expr="REQUEST.set('col_username_sel', col_username)">   
   <dtml-if expr="_.has_key('hdn_cod_proposicao') and AUTHENTICATED_USER.has_role(['Autor'])">
     <dtml-call expr="REQUEST.set('prop_enviada',(dat_envio!=None))">

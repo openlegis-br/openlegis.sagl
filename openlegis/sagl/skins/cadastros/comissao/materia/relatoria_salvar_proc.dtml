@@ -58,7 +58,7 @@
                           cod_comissao       = hdn_cod_comissao,
                           num_ordem          = hdn_num_ordem,
                           dat_desig_relator  = pysc.data_converter_pysc(data=txt_dat_desig_relator),
-                          dat_destit_relator = pysc.data_converter_pysc(data=txt_dat_destit_relator),
+                          dat_destit_relator = DateTime(txt_dat_destit_relator, datefmt='international').strftime('%Y/%m/%d %H:%M:%S'),
                           tip_fim_relatoria  = lst_tip_fim_relatoria,
                           tip_apresentacao   = rad_tip_apresentacao,
                           num_protocolo      = txt_num_protocolo,
@@ -110,7 +110,7 @@
               <dtml-call expr="REQUEST.set('cod_usuario_corrente', int(cod_usuario))">
             </dtml-if>
           </dtml-in>
-          <dtml-call expr="REQUEST.set('nom_unidade_origem', 'Protocolo')">
+          <dtml-call expr="REQUEST.set('nom_unidade_origem', 'Protocolo Eletrônico')">
           <dtml-in expr="zsql.unidade_tramitacao_obter_zsql(nom_orgao=nom_unidade_origem)">
             <dtml-call expr="REQUEST.set('cod_unid_tram_local', cod_unid_tramitacao)">
           </dtml-in>
@@ -123,7 +123,7 @@
                <dtml-call expr="zsql.tramitacao_registrar_recebimento_zsql(cod_tramitacao=cod_ult_tramitacao, cod_usuario_corrente=cod_usuario_corrente)">
           </dtml-if>          
           <dtml-unless cod_ult_tramitacao>
-              <dtml-call expr="REQUEST.set('nom_unidade_destino', 'Departamento Legislativo')">
+              <dtml-call expr="REQUEST.set('nom_unidade_destino', 'Departamento Técnico Legislativo')">
               <dtml-in expr="zsql.unidade_tramitacao_obter_zsql(nom_orgao=nom_unidade_destino)">
                 <dtml-call expr="REQUEST.set('cod_unid_tram_dest', cod_unid_tramitacao)">
               </dtml-in>
@@ -181,9 +181,7 @@
                     <dtml-let parecer="_.getattr(sapl_documentos.parecer_comissao,id_parecer) ">
                         <dtml-call expr="REQUEST.set('existe_arquivo', 1)">
                         <dtml-try>
-                            <dtml-if expr="pysc.arquivo_pdf_validar_pysc(file=file_nom_arquivo_parecer)">
-                               <dtml-call "parecer.manage_upload(file=file_nom_arquivo_parecer)">
-                            </dtml-if>
+                            <dtml-call "parecer.manage_upload(file=pysc.upload_file(file=file_nom_arquivo_parecer, title='Parecer'))">
                         <dtml-except>
                             <dtml-call expr="REQUEST.set('erro', 1)">              
                         </dtml-try>
@@ -196,13 +194,11 @@
                <dtml-call expr="REQUEST.set('id_parecer',_.str(ult_relatoria_incluida)+'_parecer.pdf')">
              </dtml-if>
              <dtml-if "not existe_arquivo">
-          <dtml-try>
-              <dtml-if expr="pysc.arquivo_pdf_validar_pysc(file=file_nom_arquivo_parecer)">
-                 <dtml-call expr="sapl_documentos.parecer_comissao.manage_addFile(id=id_parecer, file=file_nom_arquivo_parecer)">
-              </dtml-if>
-                 <dtml-except> 
-                     <dtml-call expr="REQUEST.set('erro', 1)">              
-                 </dtml-try>      
+              <dtml-try>
+                 <dtml-call expr="sapl_documentos.parecer_comissao.manage_addFile(id=id_parecer,file=pysc.upload_file(file=file_nom_arquivo_parecer, title='Parecer'))">         
+              <dtml-except> 
+                 <dtml-call expr="REQUEST.set('erro', 1)">              
+              </dtml-try>      
              </dtml-if>
          </dtml-if>
      <dtml-elif expr="radTI=='E'">
@@ -249,10 +245,10 @@
      <dtml-call expr="REQUEST.set('id_parecer', _.str(hdn_cod_relatoria)+'_parecer.pdf')">
         <dtml-if "_.hasattr(sapl_documentos.parecer_comissao,id_parecer)">
            <dtml-let parecer="_.getattr(sapl_documentos.parecer_comissao,id_parecer)">
-              <dtml-if expr="lst_tip_fim_relatoria=='3'">
-                 <dtml-call expr="parecer.manage_permission('View', roles=['Manager','Authenticated'], acquire=0)">
+              <dtml-if expr="lst_tip_fim_relatoria=='18'">
+                 <dtml-call expr="parecer.manage_permission('View', roles=['Manager','Authenticated'], acquire=1)">
               <dtml-else>
-                 <dtml-call expr="parecer.manage_permission('View', roles=['Manager','Anonymous'], acquire=0)">
+                 <dtml-call expr="parecer.manage_permission('View', roles=['Manager','Anonymous'], acquire=1)">
               </dtml-if>
             </dtml-let>
         </dtml-if>

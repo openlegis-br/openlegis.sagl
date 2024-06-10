@@ -1,0 +1,24 @@
+<dtml-comment>
+connection_id : dbcon_interlegis
+arguments : cod_assunto="" tip_proposicao="" ind_excluido=0
+max_rows : 500
+max_cache : 100
+</dtml-comment>
+SELECT    
+     cod_assunto,
+     tip_proposicao,
+     des_assunto,
+     nom_orgao,
+     end_orgao
+
+FROM 
+     assunto_proposicao
+
+<dtml-sqlgroup where>
+  <dtml-sqltest cod_assunto     op="=" type="int" optional><dtml-and>
+  <dtml-sqltest tip_proposicao  op="=" type="int" optional><dtml-and>
+  <dtml-sqltest ind_excluido    op="=" type="int">
+</dtml-sqlgroup>
+
+ORDER BY
+des_assunto, nom_orgao

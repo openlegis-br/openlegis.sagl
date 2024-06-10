@@ -1,0 +1,17 @@
+<dtml-comment>
+connection_id : dbcon_interlegis
+arguments : cod_proposicao endereco lat lng
+max_rows : 1
+max_cache : 100
+</dtml-comment>
+INSERT INTO  proposicao_geocode
+               (cod_proposicao,
+		endereco,
+                lat,
+                lng)
+VALUES
+
+  ( <dtml-sqlvar      cod_proposicao  type="int">,
+    <dtml-sqlvar      endereco        type="string">,
+    <dtml-sqlvar      lat             type="string">,
+    <dtml-sqlvar      lng             type="string">)

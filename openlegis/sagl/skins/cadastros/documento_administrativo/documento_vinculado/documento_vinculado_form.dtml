@@ -1,5 +1,7 @@
 <dtml-var standard_html_header>
 
+<script src="javascript/data_validar.js"></script>
+
 <script type="text/javascript">
 
 function vinculado_criticar(){
@@ -44,8 +46,15 @@ function vinculado_criticar(){
        return false;
     }
 
+    if (form.txt_dat_vinculacao.value==""){
+        $('#txt_dat_vinculacao').addClass('is-invalid');          
+        alert('A data de vinculação deve ser preenchida!');
+        form.txt_dat_vinculacao.focus();
+        return false;
+    }
 
  form.submit();
+ 
 }
 
   function ementa_buscar(form){
@@ -107,6 +116,28 @@ function vinculado_criticar(){
      </div>
   </div>
 
+  <div class="form-row">
+     <div class="col-12 mb-3">
+          <label for="txt_dat_vinculacao" class="required">Data de Vinculação</label>
+          <dtml-unless dat_vinculacao>
+             <dtml-call expr="REQUEST.set('dat_vinculacao', DateTime().strftime('%d/%m/%Y %H:%M:%S'))">
+          </dtml-unless>
+          <input class="form-control" type="text" name="txt_dat_vinculacao" id ="txt_dat_vinculacao" value="<dtml-var dat_vinculacao missing>" required <dtml-if cod_vinculo>disabled</dtml-if> /> 
+          <div class="invalid-feedback">
+             Este campo é obrigatório!
+          </div>
+     <script>
+        $('#txt_dat_vinculacao').datetimepicker({
+            locale: 'pt-br',
+            format: 'dd/mm/yyyy HH:MM:SS',
+            uiLibrary: 'bootstrap4',
+            modal: true,
+            footer: true,
+            showOtherMonths: true, calendarWeeks: true
+        });
+     </script>
+     </div>
+  </div>
 
  <div class="text-left">
     <dtml-unless cod_vinculo>

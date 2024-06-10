@@ -9,6 +9,7 @@
 ##
 
 from Products.CMFCore.utils import getToolByName
+from xml.sax.saxutils import escape
 st = getToolByName(context, 'portal_sagl')
 
 REQUEST = context.REQUEST
@@ -65,7 +66,7 @@ for rc in context.zsql.reuniao_comissao_obter_zsql(cod_reuniao=cod_reuniao,ind_e
         # seleciona os detalhes dos itens da pauta
         dic_votacao = {} 
         dic_votacao["num_ordem"] = item.num_ordem
-        dic_votacao["txt_ementa"] = item.txt_observacao
+        dic_votacao["txt_ementa"] =  escape(item.txt_observacao)
         dic_votacao["nom_relator"] = ''
         
         if item.cod_parecer != None: 
@@ -75,7 +76,7 @@ for rc in context.zsql.reuniao_comissao_obter_zsql(cod_reuniao=cod_reuniao,ind_e
                sgl_tipo_materia = materia.sgl_tipo_materia
                num_ident_basica = materia.num_ident_basica
                ano_ident_basica = materia.ano_ident_basica
-               ementa_materia = materia.txt_ementa               
+               ementa_materia = escape(materia.txt_ementa)
            for comissao in context.zsql.comissao_obter_zsql(cod_comissao=parecer.cod_comissao, ind_excluido=0):
                sgl_comissao = comissao.sgl_comissao
            for relator in context.zsql.parlamentar_obter_zsql(cod_parlamentar=parecer.cod_parlamentar):
@@ -109,7 +110,7 @@ for rc in context.zsql.reuniao_comissao_obter_zsql(cod_reuniao=cod_reuniao,ind_e
                    nome_autor = autor['nom_autor_join']
                lista_autor.append(nome_autor)
            dic_votacao["nom_autor"] = ', '.join(['%s' % (value) for (value) in lista_autor])
-           dic_votacao["materia"] = '<span><b>' + str(item.num_ordem) + '</b>) <a href="'+context.consultas.absolute_url()+'/materia/materia_mostrar_proc?cod_materia='+str(item.cod_materia)+'"><b>'+materia.des_tipo_materia+' nº '+str(materia.num_ident_basica)+'/'+str(materia.ano_ident_basica)+'</b></a> - Autoria: ' + dic_votacao["nom_autor"] + ' - ' + item.txt_observacao + '</span>'
+           dic_votacao["materia"] = '<span><b>' + str(item.num_ordem) + '</b>) <a href="'+context.consultas.absolute_url()+'/materia/materia_mostrar_proc?cod_materia='+str(item.cod_materia)+'"><b>'+materia.des_tipo_materia+' nº '+str(materia.num_ident_basica)+'/'+str(materia.ano_ident_basica)+'</b></a> - Autoria: ' + dic_votacao["nom_autor"] + ' - ' + escape(item.txt_observacao) + '</span>'
            if item.cod_relator != '' and item.cod_relator != None:
               for relator in context.zsql.parlamentar_obter_zsql(cod_parlamentar=item.cod_relator):
                   dic_votacao["nom_relator"] = 'Relatoria: ' + relator.nom_parlamentar

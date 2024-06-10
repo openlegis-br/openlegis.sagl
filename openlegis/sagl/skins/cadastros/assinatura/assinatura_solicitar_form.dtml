@@ -19,7 +19,6 @@ $(document).ready(function() {
         $(".alert").alert('close');
     }, 2000);
 });
-
     
   </script>
   
@@ -42,7 +41,13 @@ $(document).ready(function() {
      </dtml-if>
    </dtml-if>
 
-  <dtml-in expr="zsql.assinatura_documento_obter_zsql(codigo=codigo,tipo_doc=tipo_doc)">
+  <dtml-if expr="str(tipo_doc) == 'anexo_sessao'">
+     <dtml-call expr="REQUEST.set('metodo', zsql.assinatura_documento_obter_zsql(codigo=codigo, anexo=anexo, tipo_doc=tipo_doc))">
+  <dtml-else>
+     <dtml-call expr="REQUEST.set('metodo', zsql.assinatura_documento_obter_zsql(codigo=codigo, tipo_doc=tipo_doc))">
+  </dtml-if>
+
+  <dtml-in expr="metodo">
     <dtml-if cod_assinatura_doc>
        <dtml-call expr="REQUEST.set('temCodigo', 1)">
        <dtml-call expr="REQUEST.set('cod_assinatura_doc', cod_assinatura_doc)">
@@ -57,10 +62,14 @@ $(document).ready(function() {
        <dtml-call expr="REQUEST.set('prop_recebida',(dat_recebimento!=None))">
     </dtml-in>
   </dtml-if>
+  
    <dtml-unless prop_recebida>
       <form id="assinatura_solicitar" name="assinatura_solicitar" method="post" action="assinatura_solicitar_proc">
           <input type="hidden" name="hdn_cod_assinatura_doc" value="<dtml-var cod_assinatura_doc>" />
           <input type="hidden" name="hdn_codigo" value="<dtml-var codigo>" />
+          <dtml-if expr="str(tipo_doc) == 'anexo_sessao'">
+             <input type="hidden" name="hdn_anexo" value="<dtml-var anexo missing>" />
+          </dtml-if>
           <input type="hidden" name="hdn_tipo_doc" value="<dtml-var tipo_doc>" />
           <input type="hidden" name="modal" value="1" />
           <div class="row">
@@ -68,22 +77,43 @@ $(document).ready(function() {
              <label for="lst_cod_usuario" class="required">Selecione o Usuário</label>
                <div class="input-group">
                 <select class="form-control selectpicker" name="lst_cod_usuario:list:int" id="lst_cod_usuario" multiple="multiple" data-selected-text-format="count > 3" data-size="6" data-actions-box="true" data-live-search="true" required>
-                    <dtml-if expr="tipo_doc=='proposicao' or tipo_doc=='pauta_comissao' or tipo_doc=='ata_comissao' or tipo_doc=='parecer_comissao'">
+                    <dtml-if expr="tipo_doc=='proposicao'">
                      <dtml-call expr="REQUEST.set('data_atual', _.DateTime().strftime('%d/%m/%Y'))">
                      <dtml-if expr="AUTHENTICATED_USER.has_role(['Autor'])">
                         <dtml-in expr="zsql.usuario_obter_zsql(col_username=AUTHENTICATED_USER.getUserName())">
                           <dtml-call expr="REQUEST.set('cod_usuario_atual',cod_usuario)">
                         </dtml-in>
-                     </dtml-if>
                        <dtml-in expr="zsql.autores_obter_zsql(txt_dat_apresentacao=data_atual)">
                         <dtml-in expr="zsql.usuario_obter_zsql(col_username=col_username_autor)">
-                           <dtml-if expr="_.has_key('cod_usuario_atual') and cod_usuario_atual != cod_usuario">
+                           <dtml-if expr="_.has_key('cod_usuario_atual') and int(cod_usuario_atual) != int(cod_usuario)">
                              <option value="<dtml-var cod_usuario>"><dtml-var nom_completo></option>
                            <dtml-else>
                              <option value="<dtml-var cod_usuario>"><dtml-var nom_completo></option>
                            </dtml-if>
                         </dtml-in>
                       </dtml-in>
+                     <dtml-elif expr="AUTHENTICATED_USER.has_role(['Assessor Parlamentar'])">
+                        <dtml-in expr="zsql.assessor_parlamentar_obter_zsql(col_username=AUTHENTICATED_USER.getUserName())" mapping>
+                          <dtml-in expr="zsql.autor_obter_zsql(cod_parlamentar=cod_parlamentar)">
+                            <dtml-in expr="zsql.usuario_obter_zsql(col_username=col_username)" mapping>
+                               <dtml-call expr="REQUEST.set('cod_usuario_atual', int(cod_usuario))">
+                            </dtml-in>
+                          </dtml-in>
+                        </dtml-in>
+                        <dtml-if expr="zsql.assinatura_documento_obter_zsql(codigo=codigo,tipo_doc=tipo_doc,cod_usuario=cod_usuario_atual,ind_assinado=1)">
+                            <dtml-in expr="zsql.autores_obter_zsql(txt_dat_apresentacao=data_atual)">
+                              <dtml-in expr="zsql.usuario_obter_zsql(col_username=col_username_autor)">
+                                   <option value="<dtml-var cod_usuario>"><dtml-var nom_completo></option>
+                              </dtml-in>
+                           </dtml-in>
+                        <dtml-else>
+                           <dtml-in expr="zsql.usuario_obter_zsql(cod_usuario=cod_usuario_atual)">
+                              <dtml-if expr="_.has_key('cod_usuario_atual') and int(cod_usuario_atual) == int(cod_usuario)">
+                                <option value="<dtml-var cod_usuario>"><dtml-var nom_completo></option>
+                              </dtml-if>
+                           </dtml-in>
+                        </dtml-if>
+                     </dtml-if>
                     <dtml-else>
                       <dtml-in expr="zsql.usuario_obter_zsql()">
                         <option value="<dtml-var cod_usuario>"><dtml-var nom_completo></option>
@@ -101,7 +131,7 @@ $(document).ready(function() {
    </dtml-unless>
 
   <dtml-if temCodigo>
-      <dtml-in expr="zsql.assinatura_documento_obter_zsql(codigo=codigo,tipo_doc=tipo_doc)">
+      <dtml-in expr="metodo">
          <dtml-if sequence-start>
             <table class="table">
               <thead class="table-secondary">
@@ -122,7 +152,11 @@ $(document).ready(function() {
                         <span style="color: #5d2b31">Recusada em <dtml-var dat_recusa></span>
                         <dtml-if expr="txt_motivo_recusa != None"><br /><span class="small"><b>Motivo:</b> <dtml-var txt_motivo_recusa></span></dtml-if>
                       <dtml-else>
-                          <span class="anulado">Não assinou</span> <span style="color: #5d2b31"><i class="fas fa-times"></i> | <a class="btn btn-sm btn-danger" href="assinatura_excluir_proc?hdn_cod_assinatura_doc=<dtml-var cod_assinatura_doc>&hdn_cod_usuario=<dtml-var cod_usuario>&hdn_codigo=<dtml-var codigo>&hdn_tipo_doc=<dtml-var tipo_doc>&modal=1">Excluir</a>
+                          <dtml-if expr="str(tipo_doc) == 'anexo_sessao'">
+                             <span class="anulado">Não assinou</span> <span style="color: #5d2b31"><i class="fas fa-times"></i> | <a class="btn btn-sm btn-danger" href="assinatura_excluir_proc?hdn_cod_assinatura_doc=<dtml-var cod_assinatura_doc>&hdn_cod_usuario=<dtml-var cod_usuario>&hdn_codigo=<dtml-var codigo>&hdn_anexo=<dtml-var anexo missing>&hdn_tipo_doc=<dtml-var tipo_doc>&modal=1">Excluir</a>
+                          <dtml-else>
+                             <span class="anulado">Não assinou</span> <span style="color: #5d2b31"><i class="fas fa-times"></i> | <a class="btn btn-sm btn-danger" href="assinatura_excluir_proc?hdn_cod_assinatura_doc=<dtml-var cod_assinatura_doc>&hdn_cod_usuario=<dtml-var cod_usuario>&hdn_codigo=<dtml-var codigo>&hdn_tipo_doc=<dtml-var tipo_doc>&modal=1">Excluir</a>
+                          </dtml-if>
                       </dtml-if>
                   </td>
                </tr>

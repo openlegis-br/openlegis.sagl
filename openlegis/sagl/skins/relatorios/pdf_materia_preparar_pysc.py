@@ -87,6 +87,10 @@ for materia in context.zsql.materia_pesquisar_zsql(tip_id_basica=tipo_materia,
         lista_autor.append(nome_autor)
     dic["nom_autor"] = ', '.join(['%s' % (value) for (value) in lista_autor])
     dic['localizacao_atual'] = ''
+    dic['prazo'] = ''
+    dic['des_situacao'] = ''
+    dic['ultima_acao'] = ''
+    dic['dat_tramitacao'] = ''
     for tramitacao in context.zsql.tramitacao_obter_zsql(cod_materia=materia.cod_materia,ind_ult_tramitacao=1):
         if tramitacao.cod_unid_tram_dest:
            cod_unid_tram = tramitacao.cod_unid_tram_dest

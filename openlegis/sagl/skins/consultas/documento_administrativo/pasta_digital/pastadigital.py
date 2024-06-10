@@ -4,12 +4,16 @@
 ##bind namespace=
 ##bind script=script
 ##bind subpath=traverse_subpath
-##parameters=cod_documento
+##parameters=cod_documento, action=''
 ##title=
 ##
 
 from Products.CMFCore.utils import getToolByName
+utool = getToolByName(context, 'portal_url')
+portal = utool.getPortalObject()
 
-st = getToolByName(context, 'portal_sagl')
+view = portal.restrictedTraverse('@@processo_adm_integral')
 
-return st.pasta_adm_digital(cod_documento)
+results = view()
+
+return results

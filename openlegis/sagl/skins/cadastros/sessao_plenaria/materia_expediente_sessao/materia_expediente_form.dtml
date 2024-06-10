@@ -48,6 +48,12 @@
          return false;
       }
 
+     if (form.lst_tip_turno.selectedIndex==0){
+         alert("O turno deve ser informado!");
+         form.lst_tip_turno.focus();
+         return false;
+      }
+
      if (form.lst_tip_quorum.selectedIndex==0){
          alert("O quórum de votação deve ser informado");
          form.lst_tip_quorum.focus();
@@ -125,7 +131,6 @@
               <select class="custom-select" id="lst_tip_id_basica" name="lst_tip_id_basica" onChange="ementa_buscar(document.materia_expediente_form)" required>
                <option>Selecione</option>
                   <dtml-in expr="zsql.tipo_materia_legislativa_obter_zsql(ind_excluido=0)">
-                    <dtml-if expr="des_tipo_materia=='Requerimento' or des_tipo_materia=='Indicação' or des_tipo_materia=='Moção'">
                      <option
                        <dtml-if cod_materia>
                           <dtml-in expr="zsql.materia_obter_zsql(cod_materia = cod_materia)">
@@ -139,7 +144,6 @@
                        value="<dtml-var tip_materia>">
                         <dtml-var des_tipo_materia missing>
                       </option>
-                     </dtml-if>
                   </dtml-in>
               </select>
           </div>
@@ -174,7 +178,16 @@
        <tr>
           <td colspan="3">
            <div class="form-row">
-              <div class="col-8">
+              <div class="col-4">
+                <label for="lst_tip_turno" class="required">Turno</label>
+                <select class="custom-select" id="lst_turno" name="lst_tip_turno">
+                  <option value="0"></option>
+                  <dtml-in expr="zsql.turno_discussao_obter_zsql()">
+                    <option <dtml-if expr="_.has_key('tip_turno') and _.int(cod_turno)==_.int(materia_expediente_form.tip_turno)"> selected</dtml-if> value="<dtml-var cod_turno>"><dtml-var des_turno></option>
+                  </dtml-in>
+                </select>
+              </div>  
+              <div class="col-4">
                 <label for="lst_tip_quorum" class="required">Quórum de Votação</label>
                 <select class="custom-select" id="lst_tip_quorum" name="lst_tip_quorum" required>
                   <option value="0"></option>

@@ -2,6 +2,37 @@
  
   <h1 class="firstHeading">Incorporação de Proposição</h1> 
 
+        <dtml-if txtCodDoc>
+          <dtml-in expr="zsql.autor_obter_zsql(cod_autor=cod_autor)">
+             <dtml-call expr="REQUEST.set('tip_autor', tip_autor)">
+             <dtml-in expr="zsql.tipo_autor_obter_zsql(tip_autor=tip_autor)">
+                 <dtml-call expr="REQUEST.set('des_tipo_autor', des_tipo_autor)">
+             </dtml-in>
+          </dtml-in>
+          <dtml-in expr="zsql.tipo_proposicao_obter_zsql(tip_proposicao=tip_proposicao)">
+              <dtml-call expr="REQUEST.set('des_tipo_proposicao', des_tipo_proposicao)">
+              <dtml-call expr="REQUEST.set('tip_mat_ou_doc,', tip_mat_ou_doc)">
+          </dtml-in>
+          <dtml-if expr="des_tipo_proposicao == 'Moção'">
+             <dtml-call expr="REQUEST.set('ano_corrente', DateTime().strftime('%Y'))">
+             <dtml-in expr="zsql.materia_pesquisar_zsql(cod_autor=cod_autor,tip_id_basica=tip_mat_ou_doc, ano_ident_basica=ano_corrente)">
+                 <dtml-if sequence-start>
+                    <dtml-if expr="_['sequence-length'] < 50">
+                       <div class="alert alert-success alert-dismissible fade show" role="alert">
+                         <h5>Contador de Moções</h5>
+                         <p class="mb-0">O autor apresentou <b><dtml-var sequence-length> proposições</b> no exercício de <dtml-var ano_corrente>.</p>
+                       </div>
+                     <dtml-else>
+                       <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                         <h5>Controle de Moções</h5>
+                         <p class="mb-0">O autor apresentou <b><dtml-var sequence-length> proposições</b> no exercício de <dtml-var ano_corrente>.</p>
+                       </div>
+                     </dtml-if>
+                 </dtml-if>
+             </dtml-in>
+          </dtml-if>
+        </dtml-if>
+          
         <table class="table table-bordered">
             <thead class="table-secondary">
         	<tr>
@@ -50,15 +81,6 @@
         </table>
 
       <dtml-if txtCodDoc>
-          <dtml-in expr="zsql.autor_obter_zsql(cod_autor=cod_autor)">
-             <dtml-call expr="REQUEST.set('tip_autor', tip_autor)">
-             <dtml-in expr="zsql.tipo_autor_obter_zsql(tip_autor=tip_autor)">
-                 <dtml-call expr="REQUEST.set('des_tipo_autor', des_tipo_autor)">
-             </dtml-in>
-          </dtml-in>
-          <dtml-in expr="zsql.tipo_proposicao_obter_zsql(tip_proposicao=tip_proposicao)">
-              <dtml-call expr="REQUEST.set('des_tipo_proposicao', des_tipo_proposicao)">
-          </dtml-in>
         <dtml-if expr="ind_mat_ou_doc=='M'">
             <form name="materia_form" method="post" action="criar_materia_pysc" onSubmit="return confirm('Confirma a criação da matéria legislativa?');">
                <dtml-call expr="REQUEST.set('txt_user', AUTHENTICATED_USER.getUserName())">            

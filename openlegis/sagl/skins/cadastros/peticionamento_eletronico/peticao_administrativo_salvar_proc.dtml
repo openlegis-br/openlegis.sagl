@@ -3,7 +3,6 @@
  <dtml-else>
    <dtml-call expr="REQUEST.set('metodo', zsql.peticao_incluir_zsql)">
 </dtml-if>
-
 <dtml-if expr="_.has_key('chk_consulta_externa') and chk_consulta_externa == 'on' and lst_tip_documento">
     <dtml-in expr="zsql.documento_administrativo_obter_zsql(tip_documento=lst_tip_documento, num_documento=txt_num_documento, ano_documento=txt_ano_documento, ind_excluido=0)">
         <dtml-call expr="REQUEST.set('cod_documento_vinculado', int(cod_documento))">
@@ -16,7 +15,6 @@
 <dtml-else>
     <dtml-call expr="REQUEST.set('cod_documento_vinculado', 'Nulo')">
 </dtml-if>
-
 <dtml-unless erro>
 <dtml-try>
     <dtml-call expr="metodo(
@@ -36,9 +34,10 @@
        <dtml-call expr="REQUEST.set('cod_peticao', hdn_cod_peticao)">
        <dtml-if file_nom_arquivo>
           <dtml-call expr="REQUEST.set('id_documento', _.str(cod_peticao)+'.pdf')">
-          <dtml-if expr="pysc.arquivo_pdf_validar_pysc(file=file_nom_arquivo)">
-              <dtml-call expr="sapl_documentos.peticao.manage_addFile(id=id_documento,file=file_nom_arquivo)">
-          </dtml-if>
+          <dtml-in expr="zsql.peticao_obter_zsql(cod_peticao = cod_peticao)">
+             <dtml-call expr="REQUEST.set('titulo', 'Petição Eletrônica' + ' n° ' + str(cod_peticao))">
+          </dtml-in>
+          <dtml-call expr="sapl_documentos.peticao.manage_addFile(id=id_documento,file=pysc.upload_file(file=file_nom_arquivo, title=titulo))">
        </dtml-if>
     <dtml-elif expr="zsql.peticao_incluir_zsql">
        <dtml-in expr="zsql.peticao_incluida_codigo_obter_zsql()">
@@ -54,22 +53,8 @@
  <dtml-call expr="REQUEST.set('id_documento', _.str(cod_peticao)+'.pdf')"> 
  <dtml-if "_.hasattr(sapl_documentos.peticao,id_documento)">
     <dtml-let arquivo="_.getattr(sapl_documentos.peticao,id_documento)">
-        <dtml-call "arquivo.manage_permission('View', roles=['Manager','Authenticated'], acquire=0)">
+      <dtml-call "arquivo.manage_permission('View', roles=['Authenticated'], acquire=1)">
     </dtml-let>  
  </dtml-if>
-  <dtml-if file_nom_anexo>
-     <dtml-try>
-      <dtml-in file_nom_anexo prefix="file">
-        <dtml-if expr="pysc.arquivo_pdf_validar_pysc(file=file_item)">
-           <dtml-call expr="sapl_documentos.peticao.manage_addFile(id=pysc.anexo_peticao_pysc(cod_peticao,nomear=True), file=file_item)">
-        </dtml-if>
-      </dtml-in>
-     <dtml-except>
-       <dtml-if expr="pysc.arquivo_pdf_validar_pysc(file=file_nom_anexo)">
-          <dtml-call expr="sapl_documentos.peticao.manage_addFile(id=pysc.anexo_peticao_pysc(cod_peticao,nomear=True), file=file_nom_anexo)">
-       </dtml-if>
-     </dtml-try>
-  </dtml-if>
 </dtml-if>
 </dtml-unless>
-

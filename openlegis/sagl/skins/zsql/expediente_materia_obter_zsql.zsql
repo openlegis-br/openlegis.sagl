@@ -1,6 +1,6 @@
 <dtml-comment>
 connection_id : dbcon_interlegis
-arguments : cod_ordem="" ind_excluido=0 cod_materia="" cod_parecer="" num_ordem="" dat_ordem="" cod_sessao_plen=""
+arguments : cod_ordem="" ind_excluido=0 cod_materia="" cod_parecer="" num_ordem="" dat_ordem="" cod_sessao_plen="" tip_turno tip_quorum tip_votacao
 max_rows : 1000
 max_cache : 100
 </dtml-comment>
@@ -16,6 +16,7 @@ SELECT
        expediente_materia.txt_resultado,
        expediente_materia.tip_votacao,
        expediente_materia.tip_quorum,
+       expediente_materia.tip_turno,
        expediente_materia.ind_excluido,
        sessao_plenaria.tip_sessao as tip_sessao,
        sessao_plenaria.cod_sessao_plen as cod_sessao
@@ -31,7 +32,11 @@ FROM
     <dtml-sqltest cod_ordem       column="expediente_materia.cod_ordem"       op="=" type="int" optional><dtml-and>
     <dtml-sqltest ind_excluido    column="expediente_materia.ind_excluido"    op="=" type="int" optional><dtml-and>
     <dtml-sqltest num_ordem                                                   op="=" type="int" optional><dtml-and>
-    <dtml-sqltest dat_ordem                                                   op="=" type="nb"  optional>
+    <dtml-sqltest dat_ordem                                                   op="=" type="nb"  optional><dtml-and>
+    <dtml-sqltest tip_turno                                                   op="=" type="int" optional><dtml-and>
+    <dtml-sqltest tip_quorum                                                  op="=" type="int" optional><dtml-and>
+    <dtml-sqltest tip_votacao                                                 op="=" type="int" optional>
+
   </dtml-sqlgroup>
 
 ORDER BY dat_ordem, num_ordem

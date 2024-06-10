@@ -21,7 +21,7 @@
 <dtml-try>
   <dtml-call expr="metodo(
         num_protocolo            = hdn_num_protocolo,
-        tip_protocolo		 = rad_tip_protocolo,
+        tip_protocolo            = rad_tip_protocolo,
         tip_documento            = lst_tip_documento,
         num_paginas              = txt_num_paginas,
         txt_assunto_ementa       = txa_txt_assunto,
@@ -36,9 +36,7 @@
     <dtml-if file_nom_arquivo>
       <dtml-call expr="REQUEST.set('id_documento', _.str(codigo)+'_protocolo.pdf')">
       <dtml-try>
-        <dtml-if expr="pysc.arquivo_pdf_validar_pysc(file=file_nom_arquivo)">
-           <dtml-call expr="sapl_documentos.protocolo.manage_addFile(id=id_documento,file=file_nom_arquivo)">
-        </dtml-if>
+        <dtml-call expr="sapl_documentos.protocolo.manage_addFile(id=id_documento,file=pysc.upload_file(file=file_nom_arquivo, title=txa_txt_assunto))">
       <dtml-except>
             <dtml-let mensagem="'Ocorreu erro ao salvar o documento digitalizado'+codigo" tipo_mensagem="'danger'">
                <dtml-var mensagem_emitir>

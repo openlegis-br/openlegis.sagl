@@ -16,7 +16,7 @@ function refreshPage() {
 </style>
 
 <dtml-if expr="envrec=='E' and AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia', 'Revisor Proposicao'])">
-    <dtml-in expr="zsql.proposicao_obter_zsql(ind_excluido=0, ind_pendente=1, ind_pedido_devolucao=0, ind_devolvido=0)">  
+    <dtml-in expr="proposicoes_contar_pysc(caixa='revisao')" mapping>
        <dtml-if sequence-start>
          <p class="text-muted font-weight-bold">Proposições em elaboração ou revisão textual</p>
 	  <table class="table table-striped display" id="pendentes">
@@ -30,13 +30,6 @@ function refreshPage() {
                </thead>
                </tbody>
        </dtml-if sequence-start>
-       <dtml-call expr="REQUEST.set('id_odt', _.str(cod_proposicao)+'.odt')"> 
-       <dtml-call expr="REQUEST.set('id_pdf', _.str(cod_proposicao)+'.pdf')">              
-       <dtml-call expr="REQUEST.set('id_documento_assinado', _.str(cod_proposicao)+'_signed.pdf')">          
-       <dtml-if expr="(dat_envio!='')">
-        <dtml-if expr="not zsql.assinatura_documento_obter_zsql(tipo_doc='proposicao',codigo=cod_proposicao)">       
-           <dtml-if expr="(dat_recebimento==None and _.hasattr(sapl_documentos.proposicao,id_odt) and not _.hasattr(sapl_documentos.proposicao,id_pdf) and not _.hasattr(sapl_documentos.proposicao,id_documento_assinado))">
-
             <dtml-if sequence-even>
               <tr>
             <dtml-else>
@@ -51,9 +44,6 @@ function refreshPage() {
             <td><dtml-var txt_descricao> [NPE<dtml-var cod_proposicao missing>]</td>
             <td><dtml-var nom_autor></td>
             </tr>
-          </dtml-if>
-         </dtml-if>
-       </dtml-if>
        <dtml-if sequence-end>
           </tbody>
               <tfoot>
@@ -71,7 +61,7 @@ function refreshPage() {
     </dtml-in>
 
 <dtml-elif expr="envrec=='P' and AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia', 'Revisor Proposicao'])">
-    <dtml-in expr="zsql.proposicao_obter_zsql(ind_excluido=0, ind_pendente=1, ind_pedido_devolucao=0, ind_devolvido=0)">  
+    <dtml-in expr="proposicoes_contar_pysc(caixa='assinatura')" mapping>
        <dtml-if sequence-start>
          <p class="text-muted font-weight-bold">Proposições revisadas e aguardando assinatura digital</p>
 	  <table class="table table-striped display" id="assinatura">
@@ -85,9 +75,6 @@ function refreshPage() {
                </thead>
                <tbody>
        </dtml-if sequence-start>
-       <dtml-call expr="REQUEST.set('id_documento', _.str(cod_proposicao)+'.pdf')">
-       <dtml-call expr="REQUEST.set('id_documento_assinado', _.str(cod_proposicao)+'_signed.pdf')">          
-          <dtml-if expr="(dat_recebimento==None and _.hasattr(sapl_documentos.proposicao,id_documento)) and not _.hasattr(sapl_documentos.proposicao,id_documento_assinado)">
             <dtml-if sequence-even>
               <tr>
             <dtml-else>
@@ -102,7 +89,6 @@ function refreshPage() {
             <td><dtml-var txt_descricao> [NPE<dtml-var cod_proposicao missing>]</td>
             <td><dtml-var nom_autor></td>
             </tr>
-          </dtml-if>         
        <dtml-if sequence-end>
           </tbody>
               <tfoot>
@@ -120,7 +106,7 @@ function refreshPage() {
     </dtml-in>
 
 <dtml-elif expr="envrec=='S' and AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia'])">
-    <dtml-in expr="zsql.proposicao_obter_zsql(ind_excluido=0, ind_pedido_devolucao='1')">  
+    <dtml-in expr="proposicoes_contar_pysc(caixa='pedido_devolucao')" mapping>
        <dtml-if sequence-start>
          <p class="text-muted font-weight-bold">Proposições com devolução solicitada pelo autor</p>
 		    <table class="table table-striped display" id="pedido_devolucao">
@@ -134,8 +120,6 @@ function refreshPage() {
                        </thead>
                        <tbody>
        </dtml-if sequence-start>
-       <dtml-if expr="(dat_envio!='')">
-             <dtml-if expr="(dat_recebimento==None)">
                <dtml-if sequence-even>
                  <tr>
                <dtml-else>
@@ -150,9 +134,6 @@ function refreshPage() {
                <td><dtml-var txt_descricao> [NPE<dtml-var cod_proposicao missing>]</td>
                <td><dtml-var nom_autor></td>
                </tr>
-             </dtml-if>
-
-       </dtml-if>
        <dtml-if sequence-end>
           </tbody>
               <tfoot>
@@ -170,7 +151,7 @@ function refreshPage() {
     </dtml-in>
 
 <dtml-elif expr="envrec=='A' and AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia'])">
-    <dtml-in expr="zsql.proposicao_obter_zsql(ind_excluido=0, ind_pendente=1, ind_pedido_devolucao=0, ind_devolvido='0')">  
+    <dtml-in expr="proposicoes_contar_pysc(caixa='protocolo')" mapping>
        <dtml-if sequence-start>
          <p class="text-muted font-weight-bold">Proposições assinadas e prontas para incorporação</p>
 		    <table class="table table-striped display" id="pendentes">
@@ -184,10 +165,6 @@ function refreshPage() {
                        </thead>
                        <tbody>
        </dtml-if sequence-start>
-       <dtml-call expr="REQUEST.set('id_documento_assinado', _.str(cod_proposicao)+'_signed.pdf')">          
-       <dtml-if expr="(dat_envio!='')">
-
-             <dtml-if expr="(dat_recebimento==None and _.hasattr(sapl_documentos.proposicao,id_documento_assinado))">
                <dtml-if sequence-even>
                  <tr>
                <dtml-else>
@@ -199,12 +176,9 @@ function refreshPage() {
                   </a>
                </td>
                <td><dtml-var des_tipo_proposicao></td>
-               <td><dtml-var txt_descricao> [NPE<dtml-var cod_proposicao missing>]</td>
+               <td><dtml-var txt_descricao> [NPE<dtml-var cod_proposicao>]</td>
                <td><dtml-var nom_autor></td>
                </tr>
-             </dtml-if>
-
-       </dtml-if>
        <dtml-if sequence-end>
           </tbody>
               <tfoot>
@@ -222,7 +196,7 @@ function refreshPage() {
     </dtml-in>
 
    <dtml-elif expr="envrec=='I' and AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia', 'Revisor Proposicao'])">
-        <dtml-in expr="zsql.proposicao_obter_zsql(ind_excluido=0, ind_incorporado=1)" size=300>
+        <dtml-in expr="proposicoes_contar_pysc(caixa='incorporado')" mapping>
         <dtml-if sequence-start>
             <p class="text-muted font-weight-bold">Histórico das últimas proposições incorporadas</p>        
             <table id="incorporadas" class="table table-striped display">
@@ -237,7 +211,6 @@ function refreshPage() {
               </thead>
               <tbody>
         </dtml-if sequence-start>
-                <dtml-if expr="(dat_envio!='')">
                 <dtml-if sequence-even>
                    <tr>
                 <dtml-else>
@@ -273,9 +246,8 @@ function refreshPage() {
                           <td><i>Não incorporada</i></td>
                   <dtml-else>
                           <td><b><dtml-var cod_mat missing></b>Falha na identificação da matéria!</td>
-                </dtml-if>
+                  </dtml-if>
                 </tr>
-             </dtml-if>
         <dtml-if sequence-end>
              </tbody>
               <tfoot>
@@ -294,7 +266,7 @@ function refreshPage() {
         </dtml-in>
 
   <dtml-elif expr="envrec=='R' and AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia', 'Revisor Proposicao'])">
-        <dtml-in expr="zsql.proposicao_obter_zsql(ind_excluido=0, ind_devolvido='1')" size=100>
+        <dtml-in expr="proposicoes_contar_pysc(caixa='devolvido')" mapping>
         <dtml-if sequence-start>
             <p class="text-muted font-weight-bold">Proposições devolvidas ao autor</p>
             <table id="devolvidas" class="table table-striped display">
@@ -308,7 +280,6 @@ function refreshPage() {
              </thead>
              <tbody>
         </dtml-if sequence-start>
-         <dtml-if expr="(dat_envio!='')">
          <dtml-if sequence-even>
             <tr>
          <dtml-else>
@@ -319,7 +290,6 @@ function refreshPage() {
             <td><dtml-var txt_descricao> [NPE<dtml-var cod_proposicao missing>]</td>
             <td><dtml-var nom_autor></td>
           </tr>
-       </dtml-if>
         <dtml-if sequence-end>
              </tbody>
               <tfoot>

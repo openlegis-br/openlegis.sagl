@@ -142,8 +142,17 @@
                 return $('#txt_dat_atendimento').val();
             }
         });
-    </script>    
-   <div class="col-12 col-lg-6 mb-3">
+    </script>
+   <div class="col-6 col-lg-3 mb-3">
+      <label for="lst_assessor">Assessor Responsável</label>
+      <select class="custom-select" id="lst_assessor" name="lst_assessor">
+         <option value =""></option>
+         <dtml-in expr="zsql.assessor_parlamentar_obter_zsql(cod_parlamentar=cod_parlamentar_corrente)" mapping>
+              <option value="<dtml-var cod_assessor>"><dtml-var nom_assessor></option>
+         </dtml-in>
+      </select>
+   </div>
+   <div class="col-6 col-lg-3 mb-3">
         <label for="lst_txt_classe"><span class="pf-label">Classificação</span></label>
         <select class="custom-select"  id="lst_txt_classe" name="lst_txt_classe">
             <option value=""></option>

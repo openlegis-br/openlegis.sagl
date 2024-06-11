@@ -70,7 +70,7 @@
             a.addClass('pagina-atual');
             var link = a.attr('href');
             if (!link) {
-                alert('Página inválida!');
+                alert('Folha inválida!');
                 return;
             }
             $('#iframeViewer').attr('src', link);
@@ -131,7 +131,7 @@
                             <div class="form-group col-md-9">
                                 <div class="input-group">
                                     <div class="input-group-addon">
-                                        Página
+                                        Folha
                                     </div>
                                     <input type="text" class="form-control" id="pagina" placeholder="Documento" value="1" autocomplete="off">
                                     <div class="input-group-btn">
@@ -142,40 +142,39 @@
                             <div class="form-group text-center col-md-3">
                                 <div class="input-group">
                                     <div class="input-group-btn">
-                                        <a class="btn btn-success" href="javascript: prevPagina()" title="Página anterior"><span class="fa fa-backward"></span></a>
+                                        <a class="btn btn-success" href="javascript: prevPagina()" title="Folha anterior"><span class="fa fa-backward"></span></a>
                                     </div>
                                     <div class="input-group-btn">
-                                        <a class="btn btn-success" href="javascript: nextPagina()" title="Próxima página"><span class="fa fa-forward"></span></a>
+                                        <a class="btn btn-success" href="javascript: nextPagina()" title="Próxima folha"><span class="fa fa-forward"></span></a>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <dtml-in expr="pastadigital(cod_materia=str(cod_materia))" mapping>
+                    <dtml-call expr="REQUEST.set('pasta', consultas.materia.pasta_digital.pastadigital(cod_materia=cod_materia,action='pasta'))">
+                    <dtml-in pasta mapping>
                        <dtml-if sequence-start>
                          <div id="navbar" class="navbar-collapse collapse">
                            <ol>
                        </dtml-if>
                            <li>
                             <i aria-hidden="true" class="fa fa-file-pdf"></i>
-                            <a data-id="<dtml-var cod_materia>" data-pagina="<dtml-var sequence-number>" data-pagina-geral="<dtml-var sequence-number>" href="<dtml-var portal_url>/js/pdfjs/web/viewer?file=<dtml-var url>" target="iframeViewer" title="<dtml-var title> - <dtml-var data>" class="link-pagina titulo <dtml-if sequence-start>pagina-atual</dtml-if>"><dtml-var title> </a> 
-                            <dtml-comment><span class="badge"><dtml-var paginas_doc> pág.</span></dtml-comment>
-                            <dtml-call expr="REQUEST.set('id_doc', _['sequence-number'])">
+                            <span data-id="<dtml-var id>" data-pagina="<dtml-var id>" data-pagina-geral="<dtml-var id>" title="<dtml-var title>" class="link-pagina titulo <dtml-if sequence-start>pagina-atual</dtml-if>"><dtml-var title> </span> 
                             <dtml-in expr="paginas" mapping>
                               <ul>
-                                 <li>
-                                    <a data-pagina="<dtml-var sequence-number>" data-pagina-geral="<dtml-var id_doc>.<dtml-var num_pagina>" href="<dtml-var portal_url>/js/pdfjs/web/viewer?file=<dtml-var url>#page=<dtml-var sequence-number>" target="iframeViewer" class="link-pagina">
-                                    <i aria-hidden="true" class="fa fa-file"></i>
-                                       Página <dtml-var id_doc>.<dtml-var num_pagina> </a>
-                                 </li>
+                                   <li>
+                                      <a data-pagina="<dtml-var num_pagina missing>" data-pagina-geral="<dtml-var num_pagina missing>" href="<dtml-var portal_url>/js/pdfjs/web/viewer?file=<dtml-var url>" target="iframeViewer" class="link-pagina">
+                                      <i aria-hidden="true" class="fa fa-file"></i>
+                                         Folhas <dtml-var num_pagina missing> </a>
+                                   </li>
                               </ul>
                             </dtml-in>
                            </li>
                        <dtml-if sequence-end>
                          </ol>
-                         <p class="h4 text-center">Total de páginas: <dtml-var paginas_geral></p>
+                         <p class="h4 text-center">Total de Folhas: <dtml-var paginas_geral></p>
                         </div>
-                        <div class="form-group col-lg-12"><input type="hidden" name="cod_materia" value="<dtml-var cod_materia>" /><button type="submit" class="btn btn-primary btn-block" value="Processo Integral" title="Processo Integral"><i aria-hidden="true" class="fa fa-print fa-lg"></i> Processo Integral</button></div>
+                    <div class="form-group col-lg-12"><a class="btn btn-primary btn-block" href="<dtml-var portal_url>/consultas/materia/pasta_digital/pastadigital?cod_materia=<dtml-var cod_materia>&action=download" target="_blank"><i class="fa fa-print-pdf fa-lg"></i> Processo Integral</a></div>
 
                         <dtml-in expr="zsql.anexada_obter_zsql(cod_materia_anexada=cod_materia, ind_excluido=0)">
                            <dtml-call expr="REQUEST.set('temAnexadora', cod_materia_principal)">
@@ -197,7 +196,7 @@
                               <p><span class="h5 text-secondary"><strong>Matérias Relacionadas: </strong></span></p>
                               <dtml-in expr="zsql.anexada_obter_zsql(cod_materia_principal=cod_materia, ind_excluido=0)">
                                    <dtml-in expr="zsql.materia_obter_zsql(cod_materia=cod_materia_anexada, ind_excluido = 0)">
-                                     <a class="text-info" href="pasta_digital?cod_materia=<dtml-var cod_materia_anexada>" target="_blank"><dtml-var sgl_tipo_materia>-<dtml-var num_ident_basica missing null="">/<dtml-var ano_ident_basica missing null=""></a>
+                                     <a class="text-info" href="pasta_digital?cod_materia=<dtml-var cod_materia_anexada>?action='pasta'" target="_blank"><dtml-var sgl_tipo_materia>-<dtml-var num_ident_basica missing null="">/<dtml-var ano_ident_basica missing null=""></a>
                                    </dtml-in><dtml-unless sequence-end>,</dtml-unless><dtml-if sequence-end></dtml-if>
                                  </dtml-in>
                                  <dtml-in expr="zsql.anexada_obter_zsql(cod_materia_anexada=cod_materia, ind_excluido=0)">
@@ -243,9 +242,9 @@
    </div>
 
   <main>
-    <dtml-in expr="pastadigital(cod_materia=str(cod_materia))" mapping>
+    <dtml-in pasta mapping>
        <dtml-if sequence-start>     
-         <iframe onload="load(this)" id="iframeViewer" name="iframeViewer" src="<dtml-var portal_url>/js/pdfjs/web/viewer?file=<dtml-var url>#page=1" allowfullscreen=""></iframe>
+         <iframe onload="load(this)" id="iframeViewer" name="iframeViewer" src="<dtml-var portal_url>/js/pdfjs/web/viewer?file=<dtml-var url>" allowfullscreen=""></iframe>
        </dtml-if>
     </dtml-in>
   </main>

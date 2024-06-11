@@ -13,7 +13,7 @@ class ProcessoAdm(grok.View):
     grok.context(Interface)
     grok.require('zope2.View')
     grok.name('processo_adm_integral')
-    install_home = os.environ.get('PWD')
+    install_home = os.environ.get('INSTALL_HOME')
 
     def download_files(self, cod_documento):       
         dirpath = os.path.join(self.install_home, 'var/tmp/processo_adm_integral_' + str(cod_documento))
@@ -213,11 +213,12 @@ class LimparPasta(grok.View):
     grok.context(Interface)
     grok.require('zope2.View')
     grok.name('processo_adm_integral_limpar')
+    install_home = os.environ.get('INSTALL_HOME')
 
     def render(self, cod_documento):
         portal_url = self.context.portal_url.portal_url()
         portal = self.context.portal_url.getPortalObject()
-        dirpath = os.path.join(self.install_home, '/var/tmp/processo_adm_integral_' + str(cod_documento))
+        dirpath = os.path.join(self.install_home, 'var/tmp/processo_adm_integral_' + str(cod_documento))
         if os.path.exists(dirpath) and os.path.isdir(dirpath):
            shutil.rmtree(dirpath)      
            return 'Diretório temporário "' + dirpath + '" removido com sucesso.'
@@ -229,8 +230,7 @@ class PaginaProcessoAdm(grok.View):
     grok.context(Interface)
     grok.require('zope2.View')
     grok.name('pagina_processo_adm_integral')
-
-    install_home = os.environ.get('PWD')
+    install_home = os.environ.get('INSTALL_HOME')
 
     def render(self, cod_documento, pagina):
         portal_url = self.context.portal_url.portal_url()

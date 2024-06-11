@@ -218,11 +218,7 @@
                   <dtml-if "hasattr(sapl_documentos.administrativo,texto_original)">
                        <dtml-let isAnon="portal_membership.isAnonymousUser()">
                         <dtml-if expr="not isAnon">
-                         <form action="pasta_digital" method="post" target="_blank">
-                           <input type="hidden" name="cod_documento" value="<dtml-var cod_documento>" />
-	                   <input type="hidden" name="action" value="pasta" />
-                           <button type="submit" class="btn btn-sm btn-primary"><i class="fa fa-folder"></i> Pasta Digital</button>
-                         </form>
+                          <a class="btn btn-sm btn-primary" href="<dtml-var portal_url>/consultas/documento_administrativo/pasta_digital/?cod_documento=<dtml-var cod_documento>&action=pasta" target="_blank"><i class="far fa-folder"></i> Pasta Digital</a>
                         </dtml-if>
                        </dtml-let>
                     <a class="btn btn-primary" href="<dtml-var portal_url>/sapl_documentos/administrativo/<dtml-var texto_original>" target="_blank"><i class="fas fa-file-pdf"></i> Texto Integral</a>

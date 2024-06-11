@@ -2,8 +2,8 @@
 import re
 import os
 import requests
-import time
-import pickle
+#import time
+#import pickle
 from lxml.builder import ElementMaker
 from lxml import etree
 from datetime import datetime
@@ -19,14 +19,13 @@ from io import BytesIO
 from PIL import Image
 from appy.pod.renderer import Renderer
 import pymupdf
-import pypdf
 pymupdf.TOOLS.set_aa_level(0)
+#import pypdf
 import qrcode
 from barcode import generate
 from barcode.writer import ImageWriter
 #imports para assinatura digital
 import base64
-from base64 import b64encode
 from zlib import crc32
 import json
 from openlegis.sagl.restpki import *
@@ -766,15 +765,11 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         renderer = Renderer(odtFile,locals(),output_file_pdf,pythonWithUnoPath='/usr/bin/python3',forceOoCall=True)
         renderer.run()
         with open(output_file_pdf, 'rb') as dados:
-           arquivo = BytesIO(dados.read())
+           data = BytesIO(dados.read())
         os.unlink(output_file_pdf)
-        # Aguardar nova pasta digital legislativo
-        #if hasattr(self.temp_folder,output_file_pdf):
-        #   self.temp_folder.manage_delObjects(ids=output_file_pdf)
-        #self.temp_folder.manage_addFile(id=output_file_pdf, file=data)
-        self.REQUEST.RESPONSE.setHeader('Content-Type', 'application/pdf')
-        self.REQUEST.RESPONSE.setHeader('Content-Disposition','inline; filename=%s' %output_file_pdf)
-        return arquivo
+        if hasattr(self.temp_folder,output_file_pdf):
+           self.temp_folder.manage_delObjects(ids=output_file_pdf)
+        self.temp_folder.manage_addFile(id=output_file_pdf, file=data)
 
     def capa_processo_adm_gerar_odt(self, capa_dic):
         arq = getattr(self.sapl_documentos.modelo.documento_administrativo, "capa_processo_adm.odt")
@@ -1223,146 +1218,6 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
            documento.manage_upload(file=content)
         else:
            self.sapl_documentos.protocolo.manage_addFile(id=nom_pdf_protocolo,file=content,title='Protocolo')
-
-    def processo_eletronico_gerar_pdf(self, cod_materia):
-        utool = getToolByName(self, 'portal_url')
-        merger = pymupdf.open()
-        portal = utool.getPortalObject()
-        if cod_materia.isdigit():
-           cod_materia = cod_materia
-        else:
-           cod_materia = self.pysc.b64decode_pysc(codigo=str(cod_materia))
-        for materia in self.zsql.materia_obter_zsql(cod_materia=cod_materia):
-           nom_pdf_amigavel = materia.sgl_tipo_materia+'-'+str(materia.num_ident_basica)+'-'+str(materia.ano_ident_basica)+'.pdf'
-           nom_pdf_amigavel = nom_pdf_amigavel
-           id_processo = materia.sgl_tipo_materia+' '+str(materia.num_ident_basica)+'/'+str(materia.ano_ident_basica)
-        capa = self.modelo_proposicao.capa_processo(cod_materia=cod_materia)
-        texto_capa = pymupdf.open(stream=capa)
-        merger.insert_pdf(texto_capa)
-        texto_capa.close()
-        if hasattr(self.sapl_documentos.materia, str(cod_materia) + '_texto_integral.pdf'):
-           arq = getattr(self.sapl_documentos.materia, str(cod_materia) + '_texto_integral.pdf')
-           arquivo = BytesIO(bytes(arq.data))
-           texto_materia = pymupdf.open(stream=arquivo)
-           merger.insert_pdf(texto_materia)
-           texto_materia.close()
-        anexos = []
-        for substitutivo in self.zsql.substitutivo_obter_zsql(cod_materia=cod_materia,ind_excluido=0):
-            if hasattr(self.sapl_documentos.substitutivo, str(substitutivo.cod_substitutivo) + '_substitutivo.pdf'):
-               dic_anexo = {}
-               dic_anexo["data"] = DateTime(substitutivo.dat_apresentacao, datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
-               dic_anexo["arquivo"] = getattr(self.sapl_documentos.substitutivo, str(substitutivo.cod_substitutivo) + '_substitutivo.pdf')
-               dic_anexo["id"] = getattr(self.sapl_documentos.substitutivo, str(substitutivo.cod_substitutivo) + '_substitutivo.pdf').absolute_url()
-               anexos.append(dic_anexo)
-        for eme in self.zsql.emenda_obter_zsql(cod_materia=cod_materia,ind_excluido=0):
-            if hasattr(self.sapl_documentos.emenda, str(eme.cod_emenda) + '_emenda.pdf'):
-               dic_anexo = {}
-               dic_anexo["data"] = DateTime(eme.dat_apresentacao, datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
-               dic_anexo["arquivo"] = getattr(self.sapl_documentos.emenda, str(eme.cod_emenda) + '_emenda.pdf')
-               dic_anexo["id"] = getattr(self.sapl_documentos.emenda, str(eme.cod_emenda) + '_emenda.pdf').absolute_url()
-               anexos.append(dic_anexo)
-        for relat in self.zsql.relatoria_obter_zsql(cod_materia=cod_materia,ind_excluido=0):
-            if hasattr(self.sapl_documentos.parecer_comissao, str(relat.cod_relatoria) + '_parecer.pdf'):
-               dic_anexo = {}
-               dic_anexo["data"] = DateTime(relat.dat_destit_relator, datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
-               for proposicao in self.zsql.proposicao_obter_zsql(cod_parecer=relat.cod_relatoria):
-                   dic_anexo["data"] = DateTime(proposicao.dat_recebimento, datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
-               dic_anexo["arquivo"] = getattr(self.sapl_documentos.parecer_comissao, str(relat.cod_relatoria) + '_parecer.pdf')
-               dic_anexo["id"] = getattr(self.sapl_documentos.parecer_comissao, str(relat.cod_relatoria) + '_parecer.pdf').absolute_url()
-               anexos.append(dic_anexo)
-        for anexada in self.zsql.anexada_obter_zsql(cod_materia_principal=cod_materia,ind_excluido=0):
-            if hasattr(self.sapl_documentos.materia, str(anexada.cod_materia_anexada) + '_texto_integral.pdf'):
-               dic_anexo = {}
-               dic_anexo["data"] = DateTime(anexada.dat_anexacao, datefmt='international').strftime('%Y-%m-%d 23:58:00')
-               dic_anexo["arquivo"] = getattr(self.sapl_documentos.materia, str(anexada.cod_materia_anexada) + '_texto_integral.pdf')
-               dic_anexo["id"] = getattr(self.sapl_documentos.materia, str(anexada.cod_materia_anexada) + '_texto_integral.pdf').absolute_url()
-               anexos.append(dic_anexo)
-               for documento in self.zsql.documento_acessorio_obter_zsql(cod_materia = anexada.cod_materia_anexada, ind_excluido=0):
-                   if hasattr(self.sapl_documentos.materia, str(documento.cod_documento) + '.pdf'):
-                      dic_anexo = {}
-                      dic_anexo["data"] = DateTime(documento.dat_documento, datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
-                      dic_anexo["arquivo"] = getattr(self.sapl_documentos.materia, str(documento.cod_documento) + '.pdf')
-                      dic_anexo["id"] = getattr(self.sapl_documentos.materia, str(documento.cod_documento) + '.pdf').absolute_url()
-                      anexos.append(dic_anexo)
-        for anexada in self.zsql.anexada_obter_zsql(cod_materia_anexada=cod_materia,ind_excluido=0):
-            if hasattr(self.sapl_documentos.materia, str(anexada.cod_materia_principal) + '_texto_integral.pdf'):
-               dic_anexo = {}
-               dic_anexo["data"] = DateTime(anexada.dat_anexacao, datefmt='international').strftime('%Y-%m-%d 23:58:00')
-               dic_anexo["arquivo"] = getattr(self.sapl_documentos.materia, str(anexada.cod_materia_principal) + '_texto_integral.pdf')
-               dic_anexo["id"] = getattr(self.sapl_documentos.materia, str(anexada.cod_materia_principal) + '_texto_integral.pdf').absolute_url()
-               anexos.append(dic_anexo)
-               for documento in self.zsql.documento_acessorio_obter_zsql(cod_materia = anexada.cod_materia_principal, ind_excluido=0):
-                   if hasattr(self.sapl_documentos.materia, str(documento.cod_documento) + '.pdf'):
-                      dic_anexo = {}
-                      dic_anexo["data"] = DateTime(documento.dat_documento, datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
-                      dic_anexo["arquivo"] = getattr(self.sapl_documentos.materia, str(documento.cod_documento) + '.pdf')
-                      dic_anexo["id"] = getattr(self.sapl_documentos.materia, str(documento.cod_documento) + '.pdf').absolute_url()
-                      anexos.append(dic_anexo)
-        for docadm in self.zsql.documento_administrativo_materia_obter_zsql(cod_materia=cod_materia, ind_excluido=0):
-            if hasattr(self.sapl_documentos.administrativo, str(docadm.cod_documento) + '_texto_integral.pdf'):
-               dic_anexo = {}
-               if docadm.num_protocolo_documento != '' and docadm.num_protocolo_documento != None:
-                  for protocolo in self.zsql.protocolo_obter_zsql(num_protocolo=docadm.num_protocolo_documento, ano_protocolo=docadm.ano_documento):
-                      dic_anexo["data"] = DateTime(protocolo.dat_timestamp, datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
-               else:
-                  dic_anexo["data"] = DateTime(docadm.data_documento, datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
-                  dic_anexo["arquivo"] = getattr(self.sapl_documentos.administrativo, str(docadm.cod_documento) + '_texto_integral.pdf')
-               dic_anexo["id"] = getattr(self.sapl_documentos.administrativo, str(docadm.cod_documento) + '_texto_integral.pdf').absolute_url()
-               anexos.append(dic_anexo)
-        for documento in self.zsql.documento_acessorio_obter_zsql(cod_materia = cod_materia, ind_excluido=0):
-            if hasattr(self.sapl_documentos.materia, str(documento.cod_documento) + '.pdf'):
-               dic_anexo = {}
-               dic_anexo["data"] = DateTime(documento.dat_documento, datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
-               dic_anexo["arquivo"] = getattr(self.sapl_documentos.materia, str(documento.cod_documento) + '.pdf')
-               dic_anexo["id"] = getattr(self.sapl_documentos.materia, str(documento.cod_documento) + '.pdf').absolute_url()
-               anexos.append(dic_anexo)
-        for tram in self.zsql.tramitacao_obter_zsql(cod_materia=cod_materia, rd_ordem='1', ind_excluido=0):
-            if hasattr(self.sapl_documentos.materia.tramitacao, str(tram.cod_tramitacao) + '_tram.pdf'):
-               dic_anexo = {}
-               dic_anexo["data"] = DateTime(tram.dat_tramitacao, datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
-               dic_anexo["arquivo"] = getattr(self.sapl_documentos.materia.tramitacao, str(tram.cod_tramitacao) + '_tram.pdf')
-               dic_anexo["id"] = getattr(self.sapl_documentos.materia.tramitacao, str(tram.cod_tramitacao) + '_tram.pdf').absolute_url()
-               anexos.append(dic_anexo)
-            elif hasattr(self.sapl_documentos.materia.tramitacao, str(tram.cod_tramitacao) + '_tram_signed.pdf'):
-               dic_anexo = {}
-               dic_anexo["data"] = DateTime(tram.dat_tramitacao, datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
-               dic_anexo["arquivo"] = getattr(self.sapl_documentos.materia.tramitacao, str(tram.cod_tramitacao) + '_tram_signed.pdf')
-               dic_anexo["id"] = getattr(self.sapl_documentos.materia.tramitacao, str(tram.cod_tramitacao) + '_tram_signed.pdf').absolute_url()
-               anexos.append(dic_anexo)
-        for norma in self.zsql.materia_buscar_norma_juridica_zsql(cod_materia = cod_materia):
-            if hasattr(self.sapl_documentos.norma_juridica, str(norma.cod_norma) + '_texto_integral.pdf'):
-               dic_anexo = {}
-               dic_anexo["data"] = DateTime(norma.dat_norma, datefmt='international').strftime('%Y-%m-%d 23:59:00')
-               dic_anexo["arquivo"] = getattr(self.sapl_documentos.norma_juridica, str(norma.cod_norma) + '_texto_integral.pdf')
-               dic_anexo["id"] = getattr(self.sapl_documentos.norma_juridica, str(norma.cod_norma) + '_texto_integral.pdf').absolute_url()
-               anexos.append(dic_anexo)
-        anexos.sort(key=lambda dic: dic['data'])
-        for dic in anexos:
-            arquivo_doc = BytesIO(bytes(dic['arquivo'].data))
-            with pymupdf.open(stream=arquivo_doc) as texto_anexo:
-               texto_anexo = pymupdf.open(stream=arquivo_doc)
-               merger.insert_pdf(texto_anexo)
-               texto_anexo.close()
-        merged_pdf = merger.tobytes(linear=True)
-        existing_pdf = pymupdf.open(stream=merged_pdf)
-        numPages = existing_pdf.page_count
-        for page_index, i in enumerate(range(len(existing_pdf))):
-            w = existing_pdf[page_index].rect.width
-            h = existing_pdf[page_index].rect.height
-            margin = 5
-            left = 10 - margin
-            bottom = h - 60 - margin
-            black = pymupdf.pdfcolor["black"]
-            text = "Fls. %s/%s" % (i+1, numPages)
-            p1 = pymupdf.Point(w - 70 - margin, margin + 20) # numero de pagina
-            shape = existing_pdf[page_index].new_shape()
-            shape.draw_circle(p1,1)
-            shape.insert_text(p1, id_processo+'\n'+text, fontname = "helv", fontsize = 8)
-            shape.commit()
-        data = existing_pdf.tobytes(deflate=True, garbage=3, use_objstms=1)
-        self.REQUEST.RESPONSE.setHeader('Content-Type', 'application/pdf')
-        self.REQUEST.RESPONSE.setHeader('Content-Disposition','inline; filename=%s' %nom_pdf_amigavel)
-        return data
 
     def proposicao_autuar(self,cod_proposicao):
         nom_pdf_proposicao = str(cod_proposicao) + "_signed.pdf"
@@ -2234,172 +2089,6 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
            cepDict['estado'] = dic_requisicao['uf']
            cepArray.append(cepDict)
            return json.dumps(cepDict)
-
-    def pasta_digital(self, cod_materia):
-        if cod_materia.isdigit():
-           cod_materia = cod_materia
-        else:
-           cod_materia = self.pysc.b64decode_pysc(codigo=str(cod_materia))
-        for materia in self.zsql.materia_obter_zsql(cod_materia=cod_materia):
-            pasta = []
-            if hasattr(self.sapl_documentos.materia, str(materia.cod_materia) + '_texto_integral.pdf'):
-               dic_doc = {}
-               dic_doc["id"] = str(materia.sgl_tipo_materia) + ' ' + str(materia.num_ident_basica) + '/' + str(materia.ano_ident_basica)
-               dic_doc["title"] = str(materia.des_tipo_materia) + ' nº ' + str(materia.num_ident_basica) + '/' + str(materia.ano_ident_basica)
-               dic_doc["data"] = DateTime(materia.dat_apresentacao, datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
-               for proposicao in self.zsql.proposicao_obter_zsql(ind_mat_ou_doc='M', cod_mat_ou_doc=materia.cod_materia):
-                   dic_doc["data"] = DateTime(proposicao.dat_recebimento, datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
-               if materia.num_protocolo != None:
-                  for protocolo in self.zsql.protocolo_obter_zsql(num_protocolo=materia.num_protocolo, ano_protocolo=materia.ano_ident_basica):
-                      dic_doc["data"] = DateTime(protocolo.dat_timestamp, datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
-               dic_doc["arquivo"] = getattr(self.sapl_documentos.materia, str(materia.cod_materia) + '_texto_integral.pdf')
-               dic_doc["url"] = getattr(self.sapl_documentos.materia, str(materia.cod_materia) + '_texto_integral.pdf').absolute_url()
-               arquivo =  BytesIO(bytes(dic_doc["arquivo"].data))
-               existing_pdf = pypdf.PdfReader(arquivo, strict=False)
-               dic_doc["paginas_doc"] = existing_pdf.get_num_pages()
-               dic_doc["arquivob64"] = base64.b64encode(bytes(dic_doc["arquivo"].data))
-               paginas = []
-               for page_num, i in enumerate(list(range(dic_doc["paginas_doc"])), start=1):
-                   dic_paginas = {}
-                   dic_paginas["num_pagina"] = page_num
-                   paginas.append(dic_paginas)
-               dic_doc["paginas"] = paginas
-               dic_doc["paginas_geral"] = paginas
-               pasta.append(dic_doc)
-            for substitutivo in self.zsql.substitutivo_obter_zsql(cod_materia=cod_materia,ind_excluido=0):
-                if hasattr(self.sapl_documentos.substitutivo, str(substitutivo.cod_substitutivo) + '_substitutivo.pdf'):
-                   dic_anexo = {}
-                   dic_anexo["id"] = ''
-                   dic_anexo["title"] = 'Substitutivo nº ' + str(substitutivo.num_substitutivo)
-                   dic_anexo["data"] = DateTime(substitutivo.dat_apresentacao, datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
-                   for proposicao in self.zsql.proposicao_obter_zsql(cod_substitutivo=substitutivo.cod_substitutivo):
-                       dic_anexo["data"] = DateTime(proposicao.dat_recebimento, datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
-                   dic_anexo["arquivo"] = getattr(self.sapl_documentos.substitutivo, str(substitutivo.cod_substitutivo) + '_substitutivo.pdf')
-                   dic_anexo["url"] = getattr(self.sapl_documentos.substitutivo, str(substitutivo.cod_substitutivo) + '_substitutivo.pdf').absolute_url()
-                   arquivo =  BytesIO(bytes(dic_anexo["arquivo"].data))
-                   existing_pdf = pypdf.PdfReader(arquivo, strict=False)
-                   dic_anexo["arquivob64"] = base64.b64encode(bytes(dic_anexo["arquivo"].data))
-                   dic_anexo["paginas_doc"] = existing_pdf.get_num_pages()
-                   paginas = []
-                   for page_num, i in enumerate(list(range(dic_anexo["paginas_doc"])), start=1):
-                       dic_paginas = {}
-                       dic_paginas["num_pagina"] = page_num
-                       paginas.append(dic_paginas)
-                   dic_anexo["paginas"] = paginas
-                   dic_anexo["paginas_geral"] = ''
-                   pasta.append(dic_anexo)
-            for eme in self.zsql.emenda_obter_zsql(cod_materia=cod_materia,ind_excluido=0):
-                if hasattr(self.sapl_documentos.emenda, str(eme.cod_emenda) + '_emenda.pdf'):
-                   dic_anexo = {}
-                   dic_anexo["id"] = ''
-                   dic_anexo["title"] = 'Emenda ' + eme.des_tipo_emenda +' nº ' + str(eme.num_emenda)
-                   dic_anexo["data"] = DateTime(eme.dat_apresentacao, datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
-                   for proposicao in self.zsql.proposicao_obter_zsql(cod_emenda=eme.cod_emenda):
-                       dic_anexo["data"] = DateTime(proposicao.dat_recebimento, datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
-                   dic_anexo["arquivo"] = getattr(self.sapl_documentos.emenda, str(eme.cod_emenda) + '_emenda.pdf')
-                   dic_anexo["url"] = getattr(self.sapl_documentos.emenda, str(eme.cod_emenda) + '_emenda.pdf').absolute_url()
-                   arquivo = BytesIO(bytes(dic_anexo["arquivo"].data))
-                   existing_pdf = pypdf.PdfReader(arquivo, strict=False)
-                   dic_anexo["paginas_doc"] = existing_pdf.get_num_pages()
-                   dic_anexo["arquivob64"] = base64.b64encode(bytes(dic_anexo["arquivo"].data))
-                   dic_anexo["paginas_doc"] = existing_pdf.get_num_pages()
-                   paginas = []
-                   for page_num, i in enumerate(list(range(dic_anexo["paginas_doc"])), start=1):
-                       dic_paginas = {}
-                       dic_paginas["num_pagina"] = page_num
-                       paginas.append(dic_paginas)
-                   dic_anexo["paginas"] = paginas
-                   dic_anexo["paginas_geral"] = ''
-                   pasta.append(dic_anexo)
-            for relat in self.zsql.relatoria_obter_zsql(cod_materia=cod_materia,ind_excluido=0):
-                if hasattr(self.sapl_documentos.parecer_comissao, str(relat.cod_relatoria) + '_parecer.pdf'):
-                   dic_relat = {}
-                   dic_relat["id"] = ''
-                   for comissao in self.zsql.comissao_obter_zsql(cod_comissao=relat.cod_comissao):
-                       sgl_comissao = comissao.sgl_comissao
-                   dic_relat["title"] = 'Parecer ' + str(sgl_comissao) + ' nº ' + str(relat.num_parecer) + '/' + str(relat.ano_parecer)
-                   dic_relat["data"] = DateTime(relat.dat_destit_relator, datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
-                   for proposicao in self.zsql.proposicao_obter_zsql(cod_parecer=relat.cod_relatoria):
-                       dic_relat["data"] = DateTime(proposicao.dat_recebimento, datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
-                   dic_relat["arquivo"] = getattr(self.sapl_documentos.parecer_comissao, str(relat.cod_relatoria) + '_parecer.pdf')
-                   dic_relat["url"] = getattr(self.sapl_documentos.parecer_comissao, str(relat.cod_relatoria) + '_parecer.pdf').absolute_url()
-                   arquivo =  BytesIO(bytes(dic_relat["arquivo"].data))
-                   existing_pdf = pypdf.PdfReader(arquivo, strict=False)
-                   dic_relat["paginas_doc"] = existing_pdf.get_num_pages()
-                   dic_relat["arquivob64"] = base64.b64encode(bytes(dic_relat["arquivo"].data))
-                   dic_relat["paginas_doc"] = existing_pdf.get_num_pages()
-                   paginas = []
-                   for page_num, i in enumerate(list(range(dic_relat["paginas_doc"])), start=1):
-                       dic_paginas = {}
-                       dic_paginas["num_pagina"] = page_num
-                       paginas.append(dic_paginas)
-                   dic_relat["paginas"] = paginas
-                   dic_relat["paginas_geral"] = ''
-                   pasta.append(dic_relat)
-            for documento in self.zsql.documento_acessorio_obter_zsql(cod_materia = cod_materia, ind_excluido=0):
-                anon = getSecurityManager().getUser()
-                if hasattr(self.sapl_documentos.materia, str(documento.cod_documento) + '.pdf'):
-                   dic_anexo = {}
-                   dic_anexo["id"] = ''
-                   dic_anexo["title"] = documento.des_tipo_documento + ' - ' + documento.nom_documento
-                   dic_anexo["data"] = DateTime(documento.dat_documento, datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
-                   if documento.ind_publico == 1:
-                      dic_anexo["arquivo"] = getattr(self.sapl_documentos.materia, str(documento.cod_documento) + '.pdf')
-                      dic_anexo["url"] = getattr(self.sapl_documentos.materia, str(documento.cod_documento) + '.pdf').absolute_url()
-                   elif documento.ind_publico == 0:
-                      if (str(anon) == 'Anonymous User'):
-                         dic_anexo["arquivo"] = getattr(self.sapl_documentos.modelo, 'lgpd-page.pdf')
-                         dic_anexo["url"] = getattr(self.sapl_documentos.modelo, 'lgpd-page.pdf').absolute_url()
-                      else:
-                         dic_anexo["arquivo"] = getattr(self.sapl_documentos.materia, str(documento.cod_documento) + '.pdf')
-                         dic_anexo["url"] = getattr(self.sapl_documentos.materia, str(documento.cod_documento) + '.pdf').absolute_url()
-                   arquivo = BytesIO(bytes(dic_anexo["arquivo"].data))
-                   existing_pdf = pypdf.PdfReader(arquivo, strict=False)
-                   dic_anexo["paginas_doc"] = existing_pdf.get_num_pages()
-                   if documento.ind_publico == 1:
-                      dic_anexo["arquivob64"] = base64.b64encode(bytes(dic_anexo["arquivo"].data))
-                   elif documento.ind_publico == 0:
-                      if (str(anon) == 'Anonymous User'):
-                         lgpd_page = getattr(self.sapl_documentos.modelo, 'lgpd-page.pdf')
-                         dic_anexo["arquivob64"] = base64.b64encode(bytes(lgpd_page.data))
-                      else:
-                         dic_anexo["arquivob64"] = base64.b64encode(bytes(dic_anexo["arquivo"].data))
-                   paginas = []
-                   for page_num, i in enumerate(list(range(dic_anexo["paginas_doc"])), start=1):
-                       dic_paginas = {}
-                       dic_paginas["num_pagina"] = page_num
-                       paginas.append(dic_paginas)
-                   dic_anexo["paginas"] = paginas
-                   dic_anexo["paginas_geral"] = ''
-                   pasta.append(dic_anexo)
-            for tram in self.zsql.tramitacao_obter_zsql(cod_materia=cod_materia, rd_ordem='1', ind_excluido=0):
-                if hasattr(self.sapl_documentos.materia.tramitacao, str(tram.cod_tramitacao) + '_tram.pdf'):
-                   dic_anexo = {}
-                   dic_anexo["id"] = ''
-                   dic_anexo["title"] = 'Tramitação (' + str(tram.des_status) + ')'
-                   dic_anexo["data"] = DateTime(tram.dat_tramitacao, datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
-                   dic_anexo["arquivo"] = getattr(self.sapl_documentos.materia.tramitacao, str(tram.cod_tramitacao) + '_tram.pdf')
-                   dic_anexo["url"] = getattr(self.sapl_documentos.materia.tramitacao, str(tram.cod_tramitacao) + '_tram.pdf').absolute_url()
-                   arquivo =  BytesIO(bytes(dic_anexo["arquivo"].data))
-                   existing_pdf = pypdf.PdfReader(arquivo, strict=False)
-                   dic_anexo["paginas_doc"] = existing_pdf.get_num_pages()
-                   dic_anexo["arquivob64"] = base64.b64encode(bytes(dic_anexo["arquivo"].data))
-                   dic_anexo["paginas_doc"] = existing_pdf.get_num_pages()
-                   paginas = []
-                   for page_num, i in enumerate(list(range(dic_anexo["paginas_doc"])), start=1):
-                       dic_paginas = {}
-                       dic_paginas["num_pagina"] = page_num
-                       paginas.append(dic_paginas)
-                   dic_anexo["paginas"] = paginas
-                   dic_anexo["paginas_geral"] = ''
-                   pasta.append(dic_anexo)
-        pasta.sort(key=lambda dic: dic['data'])
-        total = 0
-        for i in pasta:
-            total += i['paginas_doc']
-        for i in pasta:
-            i['paginas_geral'] = total
-        return pasta
 
     def index_file(self, url):
         text = ''

@@ -4,7 +4,7 @@
 ##bind namespace=
 ##bind script=script
 ##bind subpath=traverse_subpath
-##parameters=cod_materia
+##parameters=cod_materia, nom_arquivo
 ##title=
 ##
 
@@ -241,7 +241,7 @@ for materia in context.zsql.materia_obter_zsql(cod_materia=cod_materia):
          unidade_atual = unidade.nom_unidade_join
      capa_dic['situacao'] = 'Último Local: ' + tramitacao.dat_tramitacao + ' - ' + unidade_atual + ' - ' + tramitacao.des_status
 
- capa_dic['nom_arquivo_odt'] = 'capa-'+materia.sgl_tipo_materia+'-'+str(materia.num_ident_basica)+'-'+str(materia.ano_ident_basica)+'.odt'
- capa_dic['nom_arquivo_pdf'] = 'capa-'+materia.sgl_tipo_materia+'-'+str(materia.num_ident_basica)+'-'+str(materia.ano_ident_basica)+'.pdf'
+ capa_dic['nom_arquivo_odt'] = "%s.odt" % nom_arquivo
+ capa_dic['nom_arquivo_pdf'] = "%s.pdf" % nom_arquivo
 
 return st.capa_processo_gerar_odt(capa_dic)

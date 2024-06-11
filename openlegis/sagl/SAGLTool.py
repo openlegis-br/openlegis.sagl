@@ -2,8 +2,6 @@
 import re
 import os
 import requests
-#import time
-#import pickle
 from lxml.builder import ElementMaker
 from lxml import etree
 from datetime import datetime

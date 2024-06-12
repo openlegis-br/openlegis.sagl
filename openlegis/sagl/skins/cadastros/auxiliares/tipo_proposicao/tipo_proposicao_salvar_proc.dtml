@@ -18,6 +18,11 @@
      <dtml-var mensagem_emitir>
   </dtml-let>
 <dtml-else>
+ <dtml-unless tip_proposicao>
+   <dtml-in expr="tipo_proposicao_incluido_codigo_obter_zsql()">
+      <dtml-call expr="REQUEST.set('tip_proposicao', str(tip_proposicao))">
+   </dtml-in>
+ </dtml-unless>
   <dtml-call expr="REQUEST.set('hdn_url', 'tipo_proposicao_mostrar_proc?tip_proposicao=' + tip_proposicao + '&tip_mat_ou_doc=' + tip_mat_ou_doc + '&escolha=' + ind_mat_ou_doc)">
   <dtml-let mensagem="'Tipo de proposição eletrônica salvo com sucesso!'" tipo_mensagem="'success'" url=hdn_url>
      <dtml-var mensagem_emitir>

@@ -47,12 +47,8 @@ def baixar_pdf(context):
         for arquivo in arquivos:
             if arquivo['nom_orgao'] == orgao:
                arq = getattr(context.sapl_documentos.materia, arquivo['id_pdf'])
-<<<<<<< HEAD
-               f = open(os.path.join(dirpath, orgao) + '/' + str(arquivo['nom_pdf']), 'wb').write(str(arq.data))
-=======
                f = open(os.path.join(dirpath, orgao) + '/' + str(arquivo['nom_pdf']), 'wb').write(bytes(arq.data))
                f.close()
->>>>>>> 7ea825a (V5)
 
     if os.path.exists(dirpath):
        file_paths = []

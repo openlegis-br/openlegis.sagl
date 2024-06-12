@@ -1,7 +1,8 @@
 <dtml-var standard_html_header>
 
+<script src="<dtml-var portal_url>/js/jquery.jeditable.js"></script>
+
 <script type="text/javascript">
-<!--
   function campos_criticar(form){  
 
      if (form.des_tipo_proposicao.value == "") {
@@ -28,7 +29,44 @@
        location.href = "tipo_proposicao_form?escolha="+valor+'&tip_mat_ou_doc='+document.tip_proposicao_form.tip_mat_ou_doc.value+ '&des_tipo_proposicao='+document.tip_proposicao_form.des_tipo_proposicao.value+'&tip_proposicao='+'<dtml-var tip_proposicao missing>';
   }
 
-//-->
+  function assunto_criticar(form){
+  
+    if (form.txt_assunto.value == "") {
+      alert("O assunto deve ser preenchido!");
+      form.txt_assunto.focus();
+      return false;
+    }
+
+    if (form.txt_orgao.value == "") {
+      alert("O destinatário deve preenchido!");
+      form.txt_orgao.focus();
+      return false;
+    }
+
+    form.submit();
+  }
+
+ $(document).ready(function() {
+     $('.edit_assunto').editable('assunto_atualizar_proc', {
+         id   :'cod_assunto',
+         title : 'txt_assunto',
+         submit  : 'Salvar',
+         submitcssclass : 'btn btn-sm btn-success ml-1',
+         tooltip : "Clique para editar o assunto",                   
+         maxlength : 250,
+         width : 400
+     });
+     $('.edit_orgao').editable('assunto_orgao_atualizar_proc', { 
+         id   : 'cod_assunto',
+         title : 'txt_orgao',
+         submit  : 'Salvar',
+         submitcssclass : 'btn btn-sm btn-success ml-1',
+         tooltip : "Clique para editar o destinatário",                   
+         maxlength : 250,
+         width : 300
+     });
+ });
+ 
 </script>
 
  <div class="row mb-2">
@@ -93,12 +131,58 @@
            </dtml-if>   
     </div>
   </div>
-
   <input class="btn btn-primary" type="button" name="btn_tip_proposicao_salvar" value="Salvar" onClick="campos_criticar(window.document.tip_proposicao_form)" />
   <dtml-if tip_proposicao>
     <input class="btn btn-danger" type="button" name="btn_tip_proposicao_excluir" value="Excluir" onClick="tip_proposicao_excluir(window.document.tip_proposicao_form)" />
   </dtml-if>
-
+   <div class="row">
+      <div class="col-md-12 mt-2">
+         <p class="text-muted small"><i class="fas fa-asterisk text-danger"></i> Campos obrigatórios</p>
+      </div>
+   </div> 
 </form>
+
+<dtml-if expr="tip_proposicao and (des_tipo_proposicao=='Requerimento' or des_tipo_proposicao=='Indicação') or des_tipo_proposicao=='Moção'">
+    <legend>Cadastro de Assuntos</legend>
+    <form name="assunto_form" method="post" action="assunto_incluir_proc">
+    <input type="hidden" name="tip_proposicao" value="<dtml-var tip_proposicao>">
+    <input type="hidden" name="tip_mat_ou_doc" value="<dtml-var tip_mat_ou_doc>">
+    <input type="hidden" name="escolha" value="<dtml-var escolha>">
+    <div class="form-row">
+      <div class="col-12 mb-3">
+         <div class="input-group">
+         <input class="form-control" type="text" id="txt_assunto" name="txt_assunto" maxlength="250" placeholder="Assunto" />          
+         <input class="form-control" type="text" id="txt_orgao" name="txt_orgao" maxlength="250" placeholder="Destinatário" />
+           <div class="input-group-append">
+             <input class="btn btn-primary" type="button" class="btn btn-sm btn-secondary" value="Incluir" onClick="assunto_criticar(window.document.assunto_form)" />          
+           </div>
+         </div>
+      </div>
+    </div>
+    </form>
+    <dtml-in expr="zsql.assunto_proposicao_obter_zsql(tip_proposicao=tip_proposicao)" mapping>
+        <dtml-if sequence-start>
+           <table class="table">
+            <thead class="table-secondary">       
+              <tr>
+                <th width="50%">Assunto</th>
+                <th width="40%">Destinatário</th>
+                <th width="10%"></th>
+              </tr>
+            </thead>
+        </dtml-if>
+           <tr>
+            <td class="edit_assunto" style="cursor: pointer" id="<dtml-var cod_assunto>" title="<dtml-var title>"><dtml-var des_assunto></td>
+            <td class="edit_orgao" style="cursor: pointer" id="<dtml-var cod_assunto>" title="<dtml-var cod_assunto>"><dtml-var nom_orgao></td>
+            <td>
+              <a class="btn btn-sm btn-danger" href="assunto_excluir_proc?cod_assunto=<dtml-var cod_assunto>&tip_proposicao=<dtml-var tip_proposicao>&tip_mat_ou_doc=<dtml-var tip_mat_ou_doc>&escolha=<dtml-var ind_mat_ou_doc>" data-confirm="Deseja realmente excluir o assunto?" title="Excluir"><i class="fa fa-fw fa-trash"></i></a>
+            </td>
+        <dtml-if sequence-end>
+           </table>
+        </dtml-if> 
+    <dtml-else>
+       <p>Nenhum assunto cadastrado.</p>  
+    </dtml-in>
+</dtml-if>
 
 <dtml-var standard_html_footer>

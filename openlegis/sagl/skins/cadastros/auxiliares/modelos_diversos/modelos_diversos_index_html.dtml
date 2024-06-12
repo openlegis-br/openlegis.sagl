@@ -77,7 +77,6 @@ $(document).ready(function () {
 
 </script>
 
-
 <h1 class="firstHeading">Modelos Diversos</h1> 
 
   <legend>Documento Acessórios</legend>
@@ -204,14 +203,7 @@ $(document).ready(function () {
         <div class="input-group-append">
           <input class="btn btn-primary" type="button" class="btn btn-sm btn-secondary" value="Incluir" onClick="modelo_criticar(document.modelo_form)" />
           <input type="hidden" name="hdn_url" value="modelos_diversos_index_html">
-
-         <dtml-let s="_.string.letters + _.string.digits">
-           <dtml-call "REQUEST.set('id_documento',_.whrandom.choice(s))"> 
-           <dtml-in "_.range(_.whrandom.choice([14,19]))">
-             <dtml-call "REQUEST.set('id_documento',id_documento + _.whrandom.choice(s))">
-           </dtml-in>
-          </dtml-let>
-            
+           <dtml-call "REQUEST.set('id_documento',ZopeTime().timeTime())">          
           <input type="hidden" name="id_documento" value="<dtml-var id_documento>.odt">                      
         </div>
       </div>

@@ -390,8 +390,8 @@ $(document).ready(function(){
   <input type="hidden" name="txt_tema" value="" />
 </dtml-if>
 
+<dtml-if cod_sessao_plen> 
   <legend>Documentos</legend>
-  <dtml-if cod_sessao_plen>
      <div class="form-row">
         <div class="col-12 col-md-6 mb-3">
            <label class="form-label d-block">ODT Pauta</label>
@@ -493,10 +493,8 @@ target="_blank">Gerar PDF</a>
      </div>
        </dtml-comment>
     </dtml-if>
-  </dtml-if>
-  
+
   <div class="form-row">
-   <dtml-if cod_sessao_plen>
      <div class="col-4 col-md-1 mb-3">
        <label class="form-label d-block">Nº da Ata</label>
        <input class="form-control form-control-sm number" type="number" id="txt_numero_ata" name="txt_numero_ata" value="<dtml-var numero_ata missing>" autocomplete="off"  maxlength="3">
@@ -517,7 +515,6 @@ target="_blank">Gerar PDF</a>
           </dtml-if>
        </dtml-let>
      </div>
-   </dtml-if>
      <div class="col-12 col-md-6 mb-3">
         <label class="form-label d-block">PDF Ata</label>
         <dtml-if cod_sessao_plen>
@@ -597,6 +594,7 @@ target="_blank">Gerar PDF</a>
        </dtml-if> 
      </div>
   </div>
+</dtml-if>
 
   <dtml-if cod_sessao_plen>
   <legend>Multimídia</legend>

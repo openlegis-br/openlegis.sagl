@@ -7,6 +7,7 @@
 ##parameters=tvalue, svalue, dat_sessao=""
 ##title=
 ##
+from DateTime import DateTime
 import json
 
 context.REQUEST.RESPONSE.setHeader("Access-Control-Allow-Origin", "*")
@@ -15,6 +16,7 @@ cod_periodo = ''
 nom_periodo = 'Periodo não cadastrado.'
 
 if dat_sessao != '':
+   dat_sessao = DateTime(dat_sessao, datefmt='international').strftime('%Y/%m/%d')
    for periodo in context.zsql.periodo_sessao_obter_zsql(tip_sessao = tvalue, data_sessao = dat_sessao):
        cod_periodo = periodo.cod_periodo
        nom_periodo = str(periodo.num_periodo) + 'º Período' + ' (' + str(periodo.data_inicio) + ' - ' + str(periodo.data_fim) + ')'
@@ -22,11 +24,18 @@ if dat_sessao != '':
 
 numeroArray = []
 numero = ""
-if tvalue != None:
+if tvalue != None and cod_periodo != None:
    for item in context.zsql.numero_sessao_plenaria_obter_zsql(tip_sessao = tvalue, cod_sessao_leg = svalue, cod_periodo=cod_periodo):
        dic = {}
        dic['num_sessao_plen'] = item.novo_numero_sessao
        dic['cod_periodo_sessao'] = cod_periodo
+       dic['nom_periodo'] = nom_periodo
+       numeroArray.append(dic)
+elif tvalue != None and cod_periodo == None:
+   for item in context.zsql.numero_sessao_plenaria_obter_zsql(tip_sessao = tvalue, cod_sessao_leg = svalue):
+       dic = {}
+       dic['num_sessao_plen'] = item.novo_numero_sessao
+       dic['cod_periodo_sessao'] = None
        dic['nom_periodo'] = nom_periodo
        numeroArray.append(dic)
      

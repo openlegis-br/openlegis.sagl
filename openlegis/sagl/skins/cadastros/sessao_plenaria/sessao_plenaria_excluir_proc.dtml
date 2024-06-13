@@ -1,0 +1,30 @@
+<dtml-try>
+    <dtml-call expr="zsql.sessao_plenaria_excluir_zsql(cod_sessao_plen=cod_sessao_plen)">
+<dtml-except>
+    <dtml-let mensagem="'Não foi possível excluir. Tente novamente!'" tipo_mensagem="'danger'">
+       <dtml-var mensagem_emitir>
+    </dtml-let>
+<dtml-else>
+    <dtml-if ind_audiencia>
+      <dtml-call expr="REQUEST.set('metodo', 'audiencia_publica_excluir')">
+      <dtml-let mensagem="'Audiência pública excluída com sucesso!'" url="'../../consultas/audiencia_publica'">
+        <dtml-var mensagem_emitir>
+      </dtml-let>
+    <dtml-else>
+      <dtml-call expr="REQUEST.set('metodo', 'sessao_plenaria_excluir')">
+      <dtml-let mensagem="'Sessão plenária excluída com sucesso!'" url="'../../consultas/sessao_plenaria'">
+        <dtml-var mensagem_emitir>
+      </dtml-let>
+    </dtml-if>
+</dtml-try>
+
+<dtml-comment>LOG DE AUDITORIA</dtml-comment>
+<dtml-if expr="dbcon_logs and cod_sessao_plen">
+  <dtml-call expr="zsql.logs_registrar_zsql(
+            usuario      = REQUEST['AUTHENTICATED_USER'].getUserName(), 
+            data         = DateTime().strftime('%Y-%m-%d %H:%M:%S'),
+            modulo       = str(_['REQUEST']['URL1']).split('/')[-1],
+            metodo       = metodo,
+            IP           = pysc.get_ip(),
+            cod_registro = cod_sessao_plen)"> 
+</dtml-if>

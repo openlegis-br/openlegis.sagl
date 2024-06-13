@@ -1,4 +1,4 @@
-##parameters=sessao,imagem,dat_ordem,cod_sessao_plen,lst_splen,lst_pauta,dic_cabecalho,lst_rodape,lst_presidente
+##parameters=dic_cabecalho, dic_rodape, imagem, pauta_dic
 
 """Ordem do Dia
 """
@@ -7,36 +7,33 @@ from io import BytesIO
 import time
 import os
 
-def cabecalho(dic_cabecalho,dat_ordem,imagem):
+def cabecalho(dic_cabecalho, imagem):
     """Gera o codigo rml do cabecalho"""
-
     tmp=''
-    tmp+='\t\t\t\t<image x="4.1cm" y="26.9cm" width="74" height="60" file="' + imagem + '"/>\n'
-    tmp+='\t\t\t\t<lines>3.3cm 26.3cm 19.5cm 26.3cm</lines>\n'
+    tmp+='\t\t\t\t<image x="3.1cm" y="27.4cm" width="60" height="60" file="' + imagem + '"/>\n'
+    tmp+='\t\t\t\t<lines>1.7cm 27.1cm 19.3cm 27.1cm</lines>\n'
     tmp+='\t\t\t\t<setFont name="Helvetica-Bold" size="15"/>\n'
-    tmp+='\t\t\t\t<drawString x="6.7cm" y="28.1cm">' + dic_cabecalho['nom_casa'] + '</drawString>\n'
+    tmp+='\t\t\t\t<drawString x="6cm" y="28.5cm">' + dic_cabecalho["nom_casa"] + '</drawString>\n'
     tmp+='\t\t\t\t<setFont name="Helvetica" size="11"/>\n'
-    tmp+='\t\t\t\t<drawString x="6.7cm" y="27.6cm">' + 'Estado de ' + dic_cabecalho['nom_estado'] + '</drawString>\n'
+    tmp+='\t\t\t\t<drawString x="6cm" y="28cm">' + 'Estado de ' + dic_cabecalho["nom_estado"] + '</drawString>\n'
     return tmp
 
-def rodape(lst_rodape):
+def rodape(dic_rodape):
     """ Gera o codigo rml do rodape"""
-
     tmp=''
     tmp=''
-    tmp+='\t\t\t\t<lines>3.3cm 2.2cm 19.5cm 2.2cm</lines>\n'
+    tmp+='\t\t\t\t<lines>1.7cm 1.3cm 19.3cm 1.3cm</lines>\n'
     tmp+='\t\t\t\t<setFont name="Helvetica" size="8"/>\n'
-    tmp+='\t\t\t\t<drawString x="3.3cm" y="2.4cm">' + lst_rodape[2] + '</drawString>\n'
-    tmp+='\t\t\t\t<drawString x="18.4cm" y="2.4cm">Página <pageNumber/></drawString>\n'
-    tmp+='\t\t\t\t<drawCentredString x="11.5cm" y="1.7cm">' + lst_rodape[0] + '</drawCentredString>\n'
-    tmp+='\t\t\t\t<drawCentredString x="11.5cm" y="1.3cm">' + lst_rodape[1] + '</drawCentredString>\n'
+    tmp+='\t\t\t\t<drawString x="1.7cm" y="1.4cm">' + dic_rodape[2] + '</drawString>\n'
+    tmp+='\t\t\t\t<drawString x="18.1cm" y="1.4cm">Página <pageNumber/></drawString>\n'
+    tmp+='\t\t\t\t<drawCentredString x="10.5cm" y="0.9cm">' + dic_rodape[0] + '</drawCentredString>\n'
+    tmp+='\t\t\t\t<drawCentredString x="10.5cm" y="0.6cm">' + dic_rodape[1] + '</drawCentredString>\n'
 
     return tmp
 
 
 def paraStyle():
     """ Gera o codigo rml que define o estilo dos paragrafos"""
-
     tmp=''
     tmp+='\t<stylesheet>\n'
     tmp+='\t\t<blockTableStyle id="Standard_Outline">\n'
@@ -46,169 +43,182 @@ def paraStyle():
     tmp+='\t\t<initialize>\n'
     tmp+='\t\t\t<paraStyle name="all" alignment="justify"/>\n'
     tmp+='\t\t</initialize>\n'
-    tmp+='\t\t<paraStyle name="P0" fontName="Helvetica-Bold" fontSize="11" leading="13" alignment="CENTER"/>\n'
-    tmp+='\t\t<paraStyle name="P1" fontName="Helvetica" fontSize="10.0" leading="11" alignment="CENTER"/>\n'
-    tmp+='\t\t<paraStyle name="P2" fontName="Helvetica" fontSize="9.0" leading="10" alignment="LEFT"/>\n'
-    tmp+='\t\t<paraStyle name="P3" fontName="Helvetica" fontSize="10" leading="12" alignment="JUSTIFY"/>\n'
-    tmp+='\t\t<paraStyle name="P4" fontName="Helvetica" fontSize="10.0" leading="13" alignment="CENTER"/>\n'
+    tmp+='\t\t<paraStyle name="P0" fontName="Helvetica-Bold" fontSize="12" leading="14" alignment="CENTER"/>\n'
+    tmp+='\t\t<paraStyle name="P1" fontName="Helvetica" fontSize="12" leading="14" alignment="CENTER"/>\n'
+    tmp+='\t\t<paraStyle name="P2" fontName="Helvetica" fontSize="12" leading="14" alignment="JUSTIFY"/>\n'
+    tmp+='\t\t<paraStyle name="P3" fontName="Helvetica" fontSize="11" leading="13" alignment="JUSTIFY"/>\n'
+    tmp+='\t\t<paraStyle name="P4" fontName="Helvetica" fontSize="11" leading="13" alignment="CENTER"/>\n'
     tmp+='\t</stylesheet>\n'
     return tmp
 
-#def splen(lst_splen):
-def pauta(lst_splen, lst_pauta):
+def pauta(pauta_dic):
     """ Funcao que gera o codigo rml da sessao plenaria """
-
     tmp=''
-
-    #inicio do bloco 
+    # inicio do bloco 
     tmp+='\t<story>\n'
+    # dados da sessao
+    if pauta_dic["nom_sessao"] == 'AUDIÊNCIA PÚBLICA':
+       tmp+='\t\t<para style="P0">'+ str(pauta_dic["num_sessao_plen"]) +'ª '+ pauta_dic["nom_sessao"] + ' DA ' + str(pauta_dic["num_legislatura"]) + 'ª LEGISLATURA,' + '</para>\n'
+       tmp+='\t\t<para style="P2" spaceAfter="4">\n'
+       tmp+='\t\t\t<font color="white"> </font>\n'
+       tmp+='\t\t</para>\n'
+       tmp+='\t\t<para style="P0">EM ' + str(pauta_dic["dia_sessao"]) + ', ÀS ' + str(pauta_dic["hr_inicio_sessao"]) + 'HS' + '</para>\n'
+       tmp+='\t\t<para style="P2" spaceAfter="4" spaceBefore="10">\n'
+       tmp+='\t\t\t<font color="white"> </font>\n'
+       tmp+='\t\t</para>\n'
+    else:
+       tmp+='\t\t<para style="P0">'+ str(pauta_dic["num_sessao_plen"]) +'ª REUNIÃO ' + pauta_dic["nom_sessao"] + ', EM ' + pauta_dic["dia_sessao"] + ', ÀS ' + str(pauta_dic["hr_inicio_sessao"]) + 'HS' + '</para>\n'
+       tmp+='\t\t<para style="P2" spaceAfter="4">\n'
+       tmp+='\t\t\t<font color="white"> </font>\n'
+       tmp+='\t\t</para>\n'
+       tmp+='\t\t<para style="P0">' + str(pauta_dic["num_sessao_leg"]) +'ª SESSÃO LEGISLATIVA' + ' - ' + str(pauta_dic["num_legislatura"]) + 'ª LEGISLATURA' + '</para>\n'
+       tmp+='\t\t<para style="P2" spaceAfter="4" spaceBefore="10">\n'
+       tmp+='\t\t\t<font color="white"> </font>\n'
+       tmp+='\t\t</para>\n'
 
-    for dicsp in lst_splen:
-
-        #sessao plenaria
-        if dicsp['sessao']!=None:
-           tmp+='\t\t<para style="P0">' + dicsp['sessao'].replace('&','&amp;') +', EM ' + dicsp['datasessao'].replace('&','&amp;')+ '</para>\n'
-           tmp+='\t\t<para style="P2" spaceAfter="4">\n'
-           tmp+='\t\t\t<font color="white"> </font>\n'
-           tmp+='\t\t</para>\n'
-           if dicsp['ind_audiencia'] == 1:
-              tmp+='\t\t<para style="P1"></para>\n'
-           else:
-              tmp+='\t\t<para style="P1">(Pauta da Ordem do Dia)</para>\n'
-           tmp+='\t\t<para style="P2" spaceAfter="12">\n'
-           tmp+='\t\t\t<font color="white"> </font>\n'
-           tmp+='\t\t</para>\n'
+    if pauta_dic["txt_tema"] != None:
+       tmp+='\t\t<para style="P1" spaceBefore="20"><b><u>TEMA</u></b></para>\n\n'
+       tmp+='\t\t<para style="P2" spaceAfter="5">\n'
+       tmp+='\t\t\t<font color="white"> </font>\n'
+       tmp+='\t\t</para>\n'
+       #condicao para a quebra de pagina
+       tmp+='\t\t<para style="P1" spaceBefore="20" spaceAfter="20">' + pauta_dic["txt_tema"] + '</para>\n'
 
 
-    #inicio do bloco que contem os flowables
-    
-    for dic in lst_pauta:
+    if pauta_dic["lst_expedientes"] != [] or pauta_dic["lst_materia_apresentada"] or pauta_dic["lst_materia_apresentada"] != [] or pauta_dic["lst_requerimentos_vereadores"] != [] or pauta_dic["lst_mocoes_vereadores"] != []:
+       tmp+='\t\t<para style="P0"><b><u>EXPEDIENTE</u></b></para>\n\n'
+    for dic in pauta_dic["lst_expedientes"]:
         #espaco inicial
-        tmp+='\t\t<para style="P2" spaceAfter="10">\n'
+        tmp+='\t\t<para style="P2" spaceAfter="5">\n'
         tmp+='\t\t\t<font color="white"> </font>\n'
         tmp+='\t\t</para>\n'
-
         #condicao para a quebra de pagina
-        tmp+='\t\t<condPageBreak height="5mm"/>\n'
+        tmp+='\t\t<condPageBreak height="18mm"/>\n'
+        tmp+='\t\t<para style="P1" spaceBefore="10" spaceAfter="10"><b>' + dic['nom_expediente'].upper() + '</b></para>\n'
+        tmp+='\t\t<para style="P2" spaceBefore="5" spaceAfter="2">' + dic['conteudo'] + '</para>\n'
 
-        #pauta
-        if dic['num_ordem']!=None:
-            tmp+='\t\t<para style="P4"><font color="#222"><b>Item nº ' + str(dic['num_ordem']) + '</b></font></para>\n'
-            tmp+='\t\t<para style="P2" spaceAfter="4">\n'
-            tmp+='\t\t\t<font color="white"> </font>\n'
-            tmp+='\t\t</para>\n'
-        if dic['id_materia']!=None:
-            if dic['cod_materia']!='':
-               tmp+='\t\t<para style="P4"><b><font color="#126e90"><u>' + dic['link_materia']+'</u></font> - '+ dic['nom_autor'] + '</b></para>\n'
-            if dic['cod_parecer']!='':               
-               tmp+='\t\t<para style="P4"><b><font color="#126e90"><u>' + dic['link_materia']+'</u></font> - '+ dic['nom_autor'] + ', que '+ dic['txt_materia'] + '</b></para>\n'
-            tmp+='\t\t<para style="P3" spaceAfter="4">\n'
-            tmp+='\t\t\t<font color="white"> </font>\n'
-            tmp+='\t\t</para>\n'
-        if dic['txt_ementa']!=None:
-            tmp+='\t\t<para style="P3">' + dic['txt_ementa'].replace('&','&amp;') + '</para>\n'
-            tmp+='\t\t<para style="P2" spaceAfter="4">\n'
-            tmp+='\t\t\t<font color="white"> </font>\n'
-            tmp+='\t\t</para>\n'
+    if pauta_dic["lst_materia_apresentada"] != []:
+        tmp+='\t\t<para style="P1" spaceBefore="20" spaceAfter="10"><b>LEITURA DE MATÉRIAS</b></para>\n'
+    for dic in pauta_dic["lst_materia_apresentada"]:
+        tmp+='\t\t<condPageBreak height="20mm"/>\n'
+        tmp+='\t\t<para style="P2" spaceAfter="2">' + str(dic['num_ordem']) +') <font color="#126e90"><b>' + dic['id_materia'] + '</b></font> - Autoria: ' + dic['autoria'] + '</para>\n'
+        tmp+='\t\t<para style="P2" spaceAfter="10">' + dic['txt_ementa'] + '</para>\n'
 
-        if dic['des_turno']!='':
-           tmp+='\t\t<para style="P3"><b>Turno</b>: '+ dic['des_turno'] +' | <b>Quorum</b>: '+ dic['des_quorum']+' | <b>Tipo de Votação</b>: '+ dic['tip_votacao'] + '' + '</para>\n'
-           tmp+='\t\t<para style="P2" spaceAfter="8">\n'
-           tmp+='\t\t\t<font color="white"> </font>\n'
-           tmp+='\t\t</para>\n'
+    if pauta_dic["lst_indicacoes_vereadores"] != []:
+        tmp+='\t\t<condPageBreak height="20mm"/>\n'
+        tmp+='\t\t<para style="P1" spaceBefore="20"><b>LEITURA DE INDICAÇÕES</b></para>\n'
+    for dic in pauta_dic["lst_indicacoes_vereadores"]:
+        tmp+='\t\t<para style="P2" spaceBefore="10"><b><u>' + dic['vereador'] + '</u></b>:</para>\n'
+        for item in dic['materias']:
+            tmp+='\t\t<para style="P2" spaceBefore="5"><font color="#126e90"><b>' + item['id_materia'] + '</b></font> - ' + item['txt_ementa'] + '</para>\n'
+
+    if pauta_dic["lst_requerimentos_vereadores"] != []:
+        tmp+='\t\t<condPageBreak height="20mm"/>\n'
+        tmp+='\t\t<para style="P1" spaceBefore="20"><b>DISCUSSÃO E VOTAÇÃO DE REQUERIMENTOS</b></para>\n'
+    for dic in pauta_dic["lst_requerimentos_vereadores"]:
+        tmp+='\t\t<para style="P2" spaceBefore="10"><b><u>' + dic['vereador'] + '</u></b>:</para>\n'
+        for item in dic['materias']:
+            tmp+='\t\t<para style="P2" spaceBefore="5"><font color="#126e90"><b>' + item['id_materia'] + '</b></font> - ' + item['txt_ementa'] + '</para>\n'
+
+    if pauta_dic["lst_mocoes_vereadores"] != []:
+        tmp+='\t\t<condPageBreak height="20mm"/>\n'
+        tmp+='\t\t<para style="P1" spaceBefore="20"><b>DISCUSSÃO E VOTAÇÃO DE MOÇÕES</b></para>\n'
+    for dic in pauta_dic["lst_mocoes_vereadores"]:
+        tmp+='\t\t<para style="P2" spaceBefore="10"><b><u>' + dic['vereador'] + '</u></b>:</para>\n'
+        for item in dic['materias']:
+            tmp+='\t\t<para style="P2" spaceBefore="5"><font color="#126e90"><b>' + item['id_materia'] + '</b></font> - ' + item['txt_ementa'] + '</para>\n'
+
+
+    if pauta_dic["lst_urgencia"] != []:
+        tmp+='\t\t<condPageBreak height="20mm"/>\n'
+        if pauta_dic["nom_sessao"] == 'AUDIÊNCIA PÚBLICA':
+           tmp+='\t\t<para style="P0" spaceBefore="20" spaceAfter="10"><b><u>PAUTA - URGÊNCIA ESPECIAL</u></b></para>\n\n'
+        else:
+           tmp+='\t\t<para style="P0" spaceBefore="20" spaceAfter="10"><b><u>PAUTA - URGÊNCIA ESPECIAL</u></b></para>\n\n'
+    for dic in pauta_dic["lst_urgencia"]:
+        tmp+='\t\t<para style="P2" spaceBefore="15" spaceAfter="3"><b>' + str(dic['num_ordem']) +'</b>) <font color="#126e90"><b>' + dic['id_materia'] + '</b></font> - Autoria: ' + dic['nom_autor'] + '</para>\n'
+        tmp+='\t\t<para style="P2" spaceAfter="3">' + dic['txt_ementa'] + '</para>\n'
+
+        tmp+='\t\t<para style="P3" spaceAfter="3"><b>Turno</b>: '+ dic["des_turno"] +' | <b>Quorum</b>: '+ dic['des_quorum']+' | <b>Tipo de Votação</b>: '+ dic['tip_votacao'] + '' + '</para>\n'
 
         if dic['parecer']!= 0 and dic['parecer']!= '':
-            tmp+='\t\t<para style="P3"><b><u>PARECERES:</u></b></para>\n\n'
-            tmp+='\t\t<para style="P2" spaceAfter="4">\n'
-            tmp+='\t\t\t<font color="white"> </font>\n'
-            tmp+='\t\t</para>\n'
+            tmp+='\t\t<para style="P3" spaceAfter="3"><b>Pareceres de Comissões Permanentes:</b></para>\n\n'
             for item in dic['pareceres']:
-                tmp+='\t\t<para style="P3"><b><font color="#126e90">' + item["link_materia"] + '</font> - ' + item["conclusao"] + '</b> ' + item["relatoria"] + '</para>\n'
-                tmp+='\t\t<para style="P2" spaceAfter="4">\n'
-                tmp+='\t\t\t<font color="white"> </font>\n'
-                tmp+='\t\t</para>\n'
+                tmp+='\t\t<para style="P3" spaceAfter="2"><font color="#126e90">' + item["id_parecer"] + '</font> - ' + item["conclusao"] + ' ' + item["relatoria"] + '</para>\n'
 
         if dic['substitutivo']!= 0 and dic['substitutivo']!= '':
-            tmp+='\t\t<para style="P3"><b><u>SUBSTITUTIVOS:</u></b></para>\n\n'
-            tmp+='\t\t<para style="P2" spaceAfter="4">\n'
-            tmp+='\t\t\t<font color="white"> </font>\n'
-            tmp+='\t\t</para>\n'        
+            tmp+='\t\t<para style="P3" spaceAfter="3"><b>Substitutivo:</b></para>\n\n'     
             for substitutivo in dic['substitutivos']:
-                tmp+='\t\t<para style="P3"><b><font color="#126e90">' + substitutivo["id_substitutivo"] + '</font> - ' + substitutivo["autoria"] + '</b> - ' + substitutivo["txt_ementa"] + '</para>\n'
-                tmp+='\t\t<para style="P2" spaceAfter="4">\n'
-                tmp+='\t\t\t<font color="white"> </font>\n'
-                tmp+='\t\t</para>\n'
+                tmp+='\t\t<para style="P3" spaceAfter="3"><b><font color="#126e90">' + substitutivo["id_substitutivo"] + '</font> - ' + substitutivo["autoria"] + '</b> - ' + substitutivo["txt_ementa"] + '</para>\n'
 
         if dic['emenda']!= 0 and dic['emenda']!= '':
-            tmp+='\t\t<para style="P3"><b><u>EMENDAS:</u></b></para>\n\n'
-            tmp+='\t\t<para style="P2" spaceAfter="4">\n'
-            tmp+='\t\t\t<font color="white"> </font>\n'
-            tmp+='\t\t</para>\n'             
+            tmp+='\t\t<para style="P3" spaceAfter="3"><b>Emendas:</b></para>\n\n'
             for emenda in dic['emendas']:
-                tmp+='\t\t<para style="P3"><b><font color="#126e90">' + emenda["id_emenda"] + '</font> - ' + emenda["autoria"] + '</b> - ' + emenda["txt_ementa"] + '</para>\n'
-                tmp+='\t\t<para style="P2" spaceAfter="4">\n'
-                tmp+='\t\t\t<font color="white"> </font>\n'
-                tmp+='\t\t</para>\n'
-    return tmp
+                tmp+='\t\t<para style="P3" spaceAfter="3"><b><font color="#126e90">' + emenda["id_emenda"] + '</font> - ' + emenda["autoria"] + '</b> - ' + emenda["txt_ementa"] + '</para>\n'
 
-def presidente(lst_presidente):
-    """ Gera o codigo rml da assinatura"""
-    tmp=''
-    tmp+='\t\t<para style="P3">\n'
-    tmp+='\t\t\t<font color="white"> </font>\n'
-    tmp+='\t\t</para>\n'
-    tmp+='\t\t<para style="P3">\n'
-    tmp+='\t\t\t<font color="white"> </font>\n'
-    tmp+='\t\t</para>\n'
-    tmp+='\t\t<para style="P3" spaceAfter="40">\n'
-    tmp+='\t\t\t<font color="white"> </font>\n'
-    tmp+='\t\t</para>\n'
-    tmp+='\t\t<para style="P1"><b>' + str(lst_presidente) + '</b></para>\n'
-    tmp+='\t\t<para style="P4">Presidente </para>\n'
+
+    if pauta_dic["lst_pauta"] != []:
+        tmp+='\t\t<condPageBreak height="20mm"/>\n'
+        if pauta_dic["nom_sessao"] == 'AUDIÊNCIA PÚBLICA':
+           tmp+='\t\t<para style="P0" spaceBefore="20" spaceAfter="10"><b><u>PAUTA</u></b></para>\n\n'
+        else:
+           tmp+='\t\t<para style="P0" spaceBefore="20" spaceAfter="10"><b><u>ORDEM DO DIA</u></b></para>\n\n'
+    for dic in pauta_dic["lst_pauta"]:
+        tmp+='\t\t<para style="P2" spaceBefore="15" spaceAfter="3"><b>' + str(dic['num_ordem']) +'</b>) <font color="#126e90"><b>' + dic['id_materia'] + '</b></font> - Autoria: ' + dic['nom_autor'] + '</para>\n'
+        tmp+='\t\t<para style="P2" spaceAfter="3">' + dic['txt_ementa'] + '</para>\n'
+
+        tmp+='\t\t<para style="P3" spaceAfter="3"><b>Turno</b>: '+ dic["des_turno"] +' | <b>Quorum</b>: '+ dic['des_quorum']+' | <b>Tipo de Votação</b>: '+ dic['tip_votacao'] + '' + '</para>\n'
+
+        if dic['parecer']!= 0 and dic['parecer']!= '':
+            tmp+='\t\t<para style="P3" spaceAfter="3"><b>Pareceres de Comissões Permanentes:</b></para>\n\n'
+            for item in dic['pareceres']:
+                tmp+='\t\t<para style="P3" spaceAfter="2"><font color="#126e90">' + item["id_parecer"] + '</font> - ' + item["conclusao"] + ' ' + item["relatoria"] + '</para>\n'
+
+        if dic['substitutivo']!= 0 and dic['substitutivo']!= '':
+            tmp+='\t\t<para style="P3" spaceAfter="3"><b>Substitutivo:</b></para>\n\n'     
+            for substitutivo in dic['substitutivos']:
+                tmp+='\t\t<para style="P3" spaceAfter="3"><b><font color="#126e90">' + substitutivo["id_substitutivo"] + '</font> - ' + substitutivo["autoria"] + '</b> - ' + substitutivo["txt_ementa"] + '</para>\n'
+
+        if dic['emenda']!= 0 and dic['emenda']!= '':
+            tmp+='\t\t<para style="P3" spaceAfter="3"><b>Emendas:</b></para>\n\n'           
+            for emenda in dic['emendas']:
+                tmp+='\t\t<para style="P3" spaceAfter="3"><b><font color="#126e90">' + emenda["id_emenda"] + '</font> - ' + emenda["autoria"] + '</b> - ' + emenda["txt_ementa"] + '</para>\n'
+
+    if pauta_dic["nom_sessao"] != 'AUDIÊNCIA PÚBLICA':
+       tmp+='\t\t<para style="P4" spaceBefore="40" spaceAfter="2"><b>' + pauta_dic["presidente"] + '</b></para>\n'
+       tmp+='\t\t<para style="P4">Presidente </para>\n'
+    
+    # fim do bloco 
     tmp+='\t</story>\n'
     return tmp
 
-def principal(sessao,imagem,dat_ordem,lst_splen,lst_pauta,dic_cabecalho,lst_rodape,lst_presidente):
-    """Funcao principal que gera a estrutura global do arquivo rml contendo o relatorio de uma ordem do dia.
-    ordem_dia_[data da ordem do dia do relatório].pdf
-    Retorna:
-    Parâmetros:
-    dat_ordem       => A data da ordem do dia.
-        splen       => Uma lista de dicionários contendo as sessões plenárias do dia.
-        pauta       => Uma lista de dicionários contendo a pauta da ordem do dia numa sessão plenária.
-        cabecalho   => Um dicionário contendo informações para o Cabeçalho do relatório, incluindo a imagem.
-        rodapé      => Uma lista contendo informações para o Rodapé do relatório.
-    """
-
-    #arquivoTemporario=str(cod_sessao_plen)+"_pauta_sessao.pdf"
-    arquivoPdf=str(cod_sessao_plen)+"_pauta_sessao.pdf"
-
+def principal(dic_cabecalho, dic_rodape, imagem, pauta_dic):
+    arquivoPdf=str(pauta_dic["cod_sessao_plen"])+"_pauta_sessao.pdf"
     tmp=''
     tmp+='<?xml version="1.0" encoding="utf-8" standalone="no" ?>\n'
     tmp+='<!DOCTYPE document SYSTEM "rml_1_0.dtd">\n'
-    tmp+='<document filename="relatorio.pdf">\n'
-    tmp+='\t<template pageSize="(21cm, 29.7cm)" title="Pauta" author="SAGL/OpenLegis" allowSplitting="20">\n'
+    tmp+='<document filename="pauta.pdf">\n'
+    tmp+='\t<template pageSize="(21cm, 29.7cm)" title="Pauta" author="OpenLegis" allowSplitting="20">\n'
     tmp+='\t\t<pageTemplate id="first">\n'
     tmp+='\t\t\t<pageGraphics>\n'
-    tmp+=cabecalho(dic_cabecalho,dat_ordem,imagem)
-    tmp+=rodape(lst_rodape)
+    tmp+=cabecalho(dic_cabecalho,imagem)
+    tmp+=rodape(dic_rodape)
     tmp+='\t\t\t</pageGraphics>\n'
-    tmp+='\t\t\t<frame id="first" x1="3cm" y1="3cm" width="16cm" height="23cm"/>\n'
+    tmp+='\t\t\t<frame id="first" x1="1.5cm" y1="1.5cm" width="18cm" height="25.2cm"/>\n'
     tmp+='\t\t</pageTemplate>\n'
     tmp+='\t</template>\n'
     tmp+=paraStyle()
-#   tmp+=splen(lst_splen)
-    tmp+=pauta(lst_splen, lst_pauta)
-    tmp+=presidente(lst_presidente)    
+    tmp+=pauta(pauta_dic)
     tmp+='</document>\n'
     tmp_pdf=parseString(tmp)   
 
     if hasattr(context.sapl_documentos.pauta_sessao,arquivoPdf):
-        context.sapl_documentos.pauta_sessao.manage_delObjects(ids=arquivoPdf)
-    context.sapl_documentos.pauta_sessao.manage_addFile(arquivoPdf)
-    arq=context.sapl_documentos.pauta_sessao[arquivoPdf]
-    arq.manage_edit(title='Ordem do Dia',filedata=tmp_pdf,content_type='application/pdf')
+        arq=getattr(context.sapl_documentos.pauta_sessao, arquivoPdf)
+        arq.manage_upload(file=tmp_pdf)
+    else:
+       context.sapl_documentos.pauta_sessao.manage_addFile(id=arquivoPdf,file=tmp_pdf, title=arquivoPdf)
    
     return "sapl_documentos/pauta_sessao/"+arquivoPdf
 
-return principal(sessao,imagem,dat_ordem,lst_splen,lst_pauta,dic_cabecalho,lst_rodape,lst_presidente)
+return principal(dic_cabecalho, dic_rodape, imagem, pauta_dic)
+

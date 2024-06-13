@@ -24,8 +24,7 @@ FROM
   <dtml-sqltest cod_sessao_leg  op="=" type="int" optional><dtml-and>
   <dtml-sqltest tip_sessao      op="=" type="int" optional><dtml-and>
   <dtml-if data_sessao>
-   <dtml-sqlvar "pysc.port_to_iso_pysc(data_sessao)" type="nb"> BETWEEN DATE(dat_inicio)  AND
-DATE(dat_fim)
+      <dtml-sqlvar data_sessao type="nb"> BETWEEN DATE(dat_inicio) AND DATE(dat_fim)
   </dtml-if>
 </dtml-sqlgroup>
 

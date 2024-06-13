@@ -22,7 +22,7 @@
     </script>
 
     <h1 class="firstHeading">
-       Audiência Pública nº <dtml-var num_sessao_plen missing>/<dtml-var ano_sessao>
+        <dtml-var num_sessao_plen missing>ª <dtml-var nom_sessao> - <dtml-var dat_inicio_sessao> às <dtml-var expr="pysc.hora_formatar_pysc(hora=hr_inicio_sessao)">
     </h1>  
 
 <nav class="navbar navbar-expand navbar-light bg-white menu-sessao mb-0 mt-4">
@@ -46,14 +46,6 @@
         <a
             <dtml-if expr="_['REQUEST']['ACTUAL_URL']==(portal_url() + '/cadastros/sessao_plenaria/expedientes/expedientes_index_html')">
                class="nav-link dropdown-toggle active"
-             <dtml-elif expr="_['REQUEST']['ACTUAL_URL']==(portal_url() + '/cadastros/sessao_plenaria/materia_apresentada/materia_apresentada_index_html')">
-               class="nav-link dropdown-toggle active"
-             <dtml-elif expr="_['REQUEST']['ACTUAL_URL']==(portal_url() + '/cadastros/sessao_plenaria/materia_expediente_sessao/materia_expediente_sessao_index_html')">
-               class="nav-link dropdown-toggle active"
-             <dtml-elif expr="_['REQUEST']['ACTUAL_URL']==(portal_url() + '/cadastros/sessao_plenaria/liderancas_partidarias/liderancas_partidarias_index_html')">
-               class="nav-link dropdown-toggle active"
-             <dtml-elif expr="_['REQUEST']['ACTUAL_URL']==(portal_url() + '/cadastros/sessao_plenaria/oradores_expediente/oradores_expediente_index_html')">
-               class="nav-link dropdown-toggle active"
             <dtml-else>
                class="nav-link dropdown-toggle"
             </dtml-if>
@@ -66,11 +58,10 @@
          </li>
        </ul>
       </li>
+      
       <li class="nav-item dropdown">
         <a 
-             <dtml-if expr="_['REQUEST']['ACTUAL_URL']==(portal_url() + '/cadastros/sessao_plenaria/presenca_ordem_dia/presenca_ordem_dia_index_html')">
-               class="nav-link dropdown-toggle active"
-             <dtml-elif expr="_['REQUEST']['ACTUAL_URL']==(portal_url() + '/cadastros/sessao_plenaria/ordem_dia_sessao/ordem_dia_sessao_index_html')">
+             <dtml-if expr="_['REQUEST']['ACTUAL_URL']==(portal_url() + '/cadastros/sessao_plenaria/ordem_dia_sessao/ordem_dia_sessao_index_html')">
                class="nav-link dropdown-toggle active"
             <dtml-else>
                class="nav-link dropdown-toggle"
@@ -84,6 +75,26 @@
         </li>
        </ul>
       </li>
+
+      <li class="nav-item dropdown">
+        <a
+             <dtml-if expr="_['REQUEST']['ACTUAL_URL']==(portal_url() + '/cadastros/sessao_plenaria/anexo_sessao/anexo_sessao_index_html')">
+               class="nav-link dropdown-toggle active"
+            <dtml-else>
+               class="nav-link dropdown-toggle"
+            </dtml-if> 
+          href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          Documentos
+        </a>
+        <ul class="dropdown-menu">
+         <li>
+           <a class="dropdown-item" href="javascript:submeter('<dtml-var portal_url>/cadastros/sessao_plenaria/anexo_sessao/index_html')">Anexos</a>
+        </li>
+         <li>
+           <a class="dropdown-item" href="<dtml-var portal_url>/modelo_proposicao/resumo_gerar?cod_sessao_plen=<dtml-var cod_sessao_plen>&ind_audiencia=1">ODT Roteiro Presidente</a>
+        </li>
+      </ul>
+    </li>
     </li>
 </ul>
 </div>

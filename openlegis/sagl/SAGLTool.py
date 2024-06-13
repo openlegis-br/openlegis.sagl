@@ -332,8 +332,8 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         brasao = image
         return brasao
 
-    def ata_gerar_odt(self, ata_dic, nom_arquivo):
-        arq = getattr(self.sapl_documentos.modelo.sessao_plenaria, "ata.odt")
+    def ata_gerar_odt(self, ata_dic, nom_arquivo, nom_modelo):
+        arq = getattr(self.sapl_documentos.modelo.sessao_plenaria, nom_modelo)
         template_file = BytesIO(bytes(arq.data))
         brasao_file = self.get_brasao()
         exec('brasao = brasao_file')
@@ -418,8 +418,8 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         self.REQUEST.RESPONSE.headers['Content-Disposition'] = 'attachment; filename="%s"'%output_file_odt
         return data 
 
-    def ordem_dia_gerar_odt(self, inf_basicas_dic, lst_pdiscussao, lst_sdiscussao, lst_discussao_unica, lst_presidente, nom_arquivo):
-        arq = getattr(self.sapl_documentos.modelo.sessao_plenaria, "ordem_dia.odt")
+    def ordem_dia_gerar_odt(self, inf_basicas_dic, lst_pdiscussao, lst_sdiscussao, lst_discussao_unica, lst_presidente, nom_arquivo, nom_modelo):
+        arq = getattr(self.sapl_documentos.modelo.sessao_plenaria, nom_modelo)
         template_file = BytesIO(bytes(arq.data))
         brasao_file = self.get_brasao()
         exec('brasao = brasao_file')
@@ -646,8 +646,8 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         os.unlink(nom_arquivo_pdf)
         self.sapl_documentos.pauta_sessao.manage_addFile(id=nom_arquivo_pdf,file=self.pysc.upload_file(file=content, title='Pauta do Expediente'))
 
-    def resumo_gerar_odt(self, resumo_dic, nom_arquivo):
-        arq = getattr(self.sapl_documentos.modelo.sessao_plenaria, "resumo.odt")
+    def resumo_gerar_odt(self, resumo_dic, nom_arquivo, nom_modelo):
+        arq = getattr(self.sapl_documentos.modelo.sessao_plenaria, nom_modelo)
         template_file = BytesIO(bytes(arq.data))
         brasao_file = self.get_brasao()
         exec('brasao = brasao_file')

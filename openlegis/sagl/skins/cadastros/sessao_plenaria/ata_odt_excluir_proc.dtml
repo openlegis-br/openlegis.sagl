@@ -6,14 +6,19 @@
   <dtml-except>
     <dtml-call expr="REQUEST.set('erro', 1)">
   </dtml-try>
-  
   <dtml-if erro>
-    <dtml-let mensagem="'Ocorreu um erro ao tentar excluir a ata em formato ODT!'" tipo_mensagem="'danger'">
+    <dtml-let mensagem="'Ocorreu um erro ao tentar excluir a ata em ODT!'" tipo_mensagem="'danger'">
       <dtml-var mensagem_emitir>
     </dtml-let>
   <dtml-else>
-    <dtml-let mensagem="'Ata em formato ODT excluída com sucesso!'" url="'sessao_plenaria_mostrar_proc?cod_sessao_plen='+cod_sessao_plen">
-      <dtml-var mensagem_emitir>
-    </dtml-let>
+    <dtml-if ind_audiencia>
+      <dtml-let mensagem="'Ata em ODT excluída com sucesso!'" url="'audiencia_publica_mostrar_proc?cod_sessao_plen='+cod_sessao_plen+'&ind_audiencia=1'">
+        <dtml-var mensagem_emitir>
+      </dtml-let>
+    <dtml-else>
+      <dtml-let mensagem="'Ata em ODT excluída com sucesso!'" url="'sessao_plenaria_mostrar_proc?cod_sessao_plen='+cod_sessao_plen">
+        <dtml-var mensagem_emitir>
+      </dtml-let>
+    </dtml-if>
   </dtml-if>
 </dtml-if>

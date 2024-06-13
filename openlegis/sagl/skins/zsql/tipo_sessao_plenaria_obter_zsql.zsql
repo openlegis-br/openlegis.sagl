@@ -18,9 +18,9 @@ FROM
   <dtml-sqltest num_minimo   op="=" type="int" optional> <dtml-and>
   <dtml-sqltest ind_excluido op="=" type="int" optional>
   <dtml-if expr="_.has_key('ind_audiencia') and (ind_audiencia=='1' or ind_audiencia==1)">
-    AND nom_sessao = 'Audiencia Pública'
+    AND (nom_sessao = 'Audiencia Pública' OR nom_sessao = 'Audiência Pública')
   <dtml-else>
-    AND nom_sessao != 'Audiencia Pública'
+    AND (nom_sessao != 'Audiencia Pública' OR nom_sessao != 'Audiência Pública')
   </dtml-if>
 </dtml-sqlgroup>
 

@@ -7,7 +7,7 @@
 ##parameters=cod_documento, nom_arquivo
 ##title=
 ##
-
+from DateTime import DateTime
 from Products.CMFCore.utils import getToolByName
 st = getToolByName(context, 'portal_sagl')
 
@@ -67,7 +67,10 @@ for documento in context.zsql.documento_administrativo_obter_zsql(cod_documento=
  for acessorio in context.zsql.documento_acessorio_administrativo_obter_zsql(cod_documento=documento.cod_documento, ind_excluido=0):
      dic_acessorio = {}
      dic_acessorio['id_acessorio'] = acessorio.nom_documento
+     dic_acessorio["data"] = DateTime(acessorio.dat_documento, datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
      lst_acessorios.append(dic_acessorio)
+ lst_acessorios.sort(key=lambda dic_acessorio: dic_acessorio['data'])
+
  if len(lst_acessorios) > 0:
     capa_dic['acessorios'] = lst_acessorios
  

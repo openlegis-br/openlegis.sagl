@@ -6,7 +6,7 @@ function anexo_criticar(form){
 
   var form = document.anexo_sessao_form;
   if (form.txt_title.value == "") {
-    alert("A descrição do Anexo deve ser preenchida!");
+    alert("A descrição do anexo deve ser preenchida!");
     form.txt_title.focus();
     return false;
   }
@@ -20,9 +20,8 @@ function anexo_criticar(form){
   form.submit();
 }
 
-
 function anexo_excluir(){
-     if (confirm("Deseja realmente excluir o arquivo Anexo ?")) {
+     if (confirm("Deseja realmente excluir o Anexo ?")) {
         location.href="anexo_sessao_excluir_proc?<dtml-var "REQUEST.get('QUERY_STRING','')">";
      }
      return;
@@ -34,7 +33,11 @@ $(document).ready(function () {
 
 </script>
 
-<dtml-var sessao_plenaria_menu>
+<dtml-if expr="_.has_key('ind_audiencia')">
+  <dtml-var audiencia_publica_menu>
+<dtml-elif cod_sessao_plen>
+  <dtml-var sessao_plenaria_menu>
+</dtml-if>
 
 <div class="tab-content bg-white">
  <div class="tab-pane p-3 border fade show active">
@@ -44,7 +47,7 @@ $(document).ready(function () {
   <form method="post" enctype="multipart/form-data" name="anexo_sessao_form" id="anexo_sessao_form" action="anexo_sessao_salvar_proc">
 
   <dtml-if cod_sessao_plen>
-     <input type="hidden" name="hdn_url" value="index_html?cod_sessao_plen=<dtml-var cod_sessao_plen missing>&num_legislatura=<dtml-var num_legislatura missing>&cod_sessao_leg=<dtml-var cod_sessao_leg missing>&dat_sessao=<dtml-var dat_sessao missing>&tip_sessao=<dtml-var tip_sessao missing>" />
+     <input type="hidden" name="hdn_url" value="index_html?cod_sessao_plen=<dtml-var cod_sessao_plen missing>&num_legislatura=<dtml-var num_legislatura missing>&cod_sessao_leg=<dtml-var cod_sessao_leg missing>&dat_sessao=<dtml-var dat_sessao missing>&tip_sessao=<dtml-var tip_sessao missing><dtml-if expr="_.has_key('ind_audiencia')">&ind_audiencia=1</dtml-if>" />
     <input type="hidden" name="hdn_cod_sessao_plen" value="<dtml-var cod_sessao_plen missing>" />
     <div class="form-row mb-2">
       <div class="col-6"> 
@@ -100,7 +103,7 @@ $(document).ready(function () {
            <dtml-if "sapl_documentos.props_sagl.restpki_access_token!=''">
              <button type="button" class="btn btn-sm btn-secondary" data-toggle="modal" data-target="#iFrameModal" data-title="Assinaturas Digitais" data-src="<dtml-var portal_url>/cadastros/assinatura/assinatura_solicitar_form?codigo=<dtml-var cod_sessao_plen>&anexo=<dtml-var cod_anexo missing>&tipo_doc=anexo_sessao&modal=1"><i class="fas fa-file-signature"></i>Assinaturas</button>
            </dtml-if>
-             <a class="btn btn-sm btn-danger" href="anexo_sessao_excluir_proc?anexo=<dtml-var file_item>&hdn_cod_sessao_plen=<dtml-var cod_sessao_plen missing>&hdn_cod_anexo=<dtml-var cod_anexo missing>" data-confirm="Deseja realmente excluir o Anexo?"><i class="fas fa-trash"></i> Excluir</a>
+             <a class="btn btn-sm btn-danger" href="anexo_sessao_excluir_proc?anexo=<dtml-var file_item>&hdn_cod_sessao_plen=<dtml-var cod_sessao_plen missing>&hdn_cod_anexo=<dtml-var cod_anexo missing><dtml-if expr="_.has_key('ind_audiencia')">&ind_audiencia=1</dtml-if>" data-confirm="Deseja realmente excluir o anexo?"><i class="fas fa-trash"></i> Excluir</a>
           </td>
         </tr>
       <dtml-if sequence-end>

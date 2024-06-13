@@ -78,10 +78,12 @@
      if ((form.lst_tip_id_basica.selectedIndex != 0) &&
 	 (form.txt_num_ident_basica.value!="") && 
 	 (form.txt_ano_ident_basica.value!="")){
-	location.href="ementa_buscar_proc?tip_ident_basica="+form.lst_tip_id_basica[form.lst_tip_id_basica.selectedIndex].value+
-          "&num_ident_basica="+form.txt_num_ident_basica.value+"&ano_ident_basica="+
-          form.txt_ano_ident_basica.value+"&cod_ordem="+form.cod_ordem.value+
-          "&dat_ordem="+form.txt_dat_ordem.value+"&num_ordem="+form.txt_num_ordem.value+"&tip_votacao="+form.rad_tip_votacao.value+"&tip_sessao_plen="+form.lst_tip_sessao[form.lst_tip_sessao.selectedIndex].value+"&cod_sessao_plen=<dtml-var cod_sessao_plen><dtml-if expr="_.has_key('ind_audiencia')">&ind_audiencia=1</dtml-if>&modal=1";
+	 location.href="ementa_buscar_proc?tip_ident_basica="+form.lst_tip_id_basica[form.lst_tip_id_basica.selectedIndex].value+
+          "&num_ident_basica="+form.txt_num_ident_basica.value+"&ano_ident_basica="+form.txt_ano_ident_basica.value+
+          "&cod_ordem="+form.hdn_cod_ordem.value+"&dat_ordem="+form.txt_dat_ordem.value+"&num_ordem="+form.txt_num_ordem.value+
+          "&tip_votacao="+form.rad_tip_votacao.value+"&urgencia="+form.rad_urgencia.value+
+          "&tip_sessao_plen="+form.lst_tip_sessao[form.lst_tip_sessao.selectedIndex].value+
+          "&cod_sessao_plen=<dtml-var cod_sessao_plen><dtml-if expr="_.has_key('ind_audiencia')">&ind_audiencia=1</dtml-if>&modal=1";
      }
   }
 
@@ -214,7 +216,7 @@
        <tr>
           <td colspan="3">
            <div class="form-row">
-              <div class="col-4">
+              <div class="col-3">
                 <label for="lst_tip_turno" class="required">Turno</label>
                 <select class="custom-select" id="lst_turno" name="lst_tip_turno">
                   <option value="0"></option>
@@ -223,7 +225,7 @@
                   </dtml-in>
                 </select>
               </div>       
-              <div class="col-4">
+              <div class="col-3">
                 <label for="lst_tip_quorum" class="required">Quórum de Votação</label>
                 <select class="custom-select" id="lst_tip_quorum" name="lst_tip_quorum" required>
                   <option value="0"></option>
@@ -232,7 +234,7 @@
                    </dtml-in>
                 </select>              
               </div>
-              <div class="col-4">
+              <div class="col-3">
                 <label for="rad_tip_votacao" class="required d-block">Tipo de Votação</label>
                 <dtml-in expr="zsql.tipo_votacao_obter_zsql(tip_votacao='')">
                   <div class="form-check form-check-inline">
@@ -241,10 +243,24 @@
                       <dtml-if expr="_.int(ordem_dia_form.tip_votacao)==_.int(tip_votacao_sel)">
                        checked=1
                       </dtml-if>
-                    <dtml-elif expr="des_tipo_votacao == 'Nominal'">checked=1
+                    <dtml-elif expr="des_tipo_votacao == 'Simbólica'">checked=1
                     </dtml-if>>
                     <label class="form-check-label" for="<dtml-var tip_votacao_sel>"><dtml-var des_tipo_votacao></label>
                    </div>
+                </dtml-in>
+              </div>
+              <div class="col-3">
+                <label for="rad_urgencia" class="required d-block">Urgência Especial</label>
+                <dtml-in expr="[(0,'Não'), (1,'Sim')]">
+                 <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" id="rad<dtml-var expr="_['sequence-key']">" name="rad_urgencia" value="<dtml-var expr="_['sequence-key']">"
+                    <dtml-if expr="_.has_key('cod_ordem') and _.has_key('urgencia') and urgencia==_['sequence-key']">checked
+                    <dtml-elif expr="_.has_key('cod_ordem') and _.has_key('urgencia') and urgencia ==_['sequence-item']">checked
+                    <dtml-elif expr="_.has_key('cod_ordem') and _.has_key('urgencia') and urgencia==None and _['sequence-item']=='Não'">checked
+                    <dtml-elif expr="not _.has_key('cod_ordem') and not _.has_key('urgencia') and _['sequence-item']=='Não'">checked
+                    <dtml-elif expr="_['sequence-item'] == 'Não'">checked=1 </dtml-if> />
+                    <label class="form-check-label" for="rad<dtml-var expr="_['sequence-key']">"><dtml-var expr="_['sequence-item']"></label>
+		  </div>
                 </dtml-in>
               </div>
            </div>        
@@ -261,7 +277,6 @@
 <div class="text-center">
    <input class="btn btn-primary" type="button" value="Salvar" onClick="campos_criticar(document.ordem_dia_form)" />
    <dtml-if cod_ordem>
-      <input type="hidden" name="flag_atualizar" value="<dtml-var cod_ordem missing>" />
       <input class="btn btn-danger" type="button" value="Excluir" onClick="ordem_dia_excluir()" />
    </dtml-if>
    <dtml-if expr="_.has_key('ind_audiencia')">
@@ -273,7 +288,7 @@
 </div>
 
 <input type="hidden" name="modal" value="1" />
-<input type="hidden" name="cod_ordem" value="<dtml-var cod_ordem missing>" />
+<input type="hidden" name="hdn_cod_ordem" value="<dtml-var cod_ordem missing>" />
 <input type="hidden" name="cod_materia" value="<dtml-var cod_materia missing>" />
 <input type="hidden" name="cod_sessao_plen" value="<dtml-var cod_sessao_plen missing>" />
 <dtml-unless cod_ordem>

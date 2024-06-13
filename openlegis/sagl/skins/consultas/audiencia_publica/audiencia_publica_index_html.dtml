@@ -143,13 +143,13 @@
                <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Sessao Plenaria', 'Operador Ordem Dia'])">
                  <a href="<dtml-var portal_url>/cadastros/sessao_plenaria/audiencia_publica_mostrar_proc?cod_sessao_plen=<dtml-var cod_sessao_plen>&dat_
 inicio_sessao=<dtml-var dat_inicio_sessao missing>&num_legislatura=<dtml-var num_legislatura missing>&ind_audiencia=1">
-                   <p class="h4 card-title"><dtml-if expr="nom_sessao!='Audiência Pública'">Sessão</dtml-if> <dtml-var nom_sessao> nº <dtml-var num_sessao_plen>/<dtml-var ano_sessao></p>
+                   <p class="h4 card-title"><dtml-var num_sessao_plen>ª <dtml-var nom_sessao> da <dtml-var num_legislatura>ª Legislatura</p>
                  </a>
                <dtml-else>
                    <p class="h4 card-title"><dtml-if expr="nom_sessao!='Audiência Pública'">Sessão</dtml-if> <dtml-var nom_sessao> nº <dtml-var num_sessao_plen>/<dtml-var ano_sessao></p>
                </dtml-if> 
                <p class="h6 card-text mb-3"> <dtml-var tip_expediente missing null=""></p>  
-               <p class="h6 card-text mb-2"><i class="fa fa-calendar-alt"></i> <dtml-var expr="pysc.data_converter_por_extenso_pysc(data=dat_inicio_sessao)"><span class="d-none d-sm-inline"> (<dtml-var dia_sessao>) </span> - Início: <dtml-var expr="pysc.hora_formatar_pysc(hora=hr_inicio_sessao)"> <dtml-if hr_fim_sessao> - Fim: <dtml-var expr="pysc.hora_formatar_pysc(hora=hr_fim_sessao)"></dtml-if></p>
+               <p class="h6 card-text mb-2"><i class="fa fa-calendar-alt"></i> <dtml-var expr="pysc.data_converter_por_extenso_pysc(data=dat_inicio_sessao)"><span class="d-none d-sm-inline"> (<dtml-var dia_sessao>) </span> - Abertura: <dtml-var expr="pysc.hora_formatar_pysc(hora=hr_inicio_sessao)"> <dtml-if hr_fim_sessao> / Encerramento: <dtml-var expr="pysc.hora_formatar_pysc(hora=hr_fim_sessao)"></dtml-if></p>
             </dtml-in>
           </div>
        </div>

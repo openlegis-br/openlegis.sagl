@@ -46,6 +46,8 @@ class ProcessoLeg(grok.View):
             if hasattr(self.context.sapl_documentos.materia, nom_arquivo):
                dic = {}
                dic["data"] = DateTime(materia.dat_apresentacao, datefmt='international').strftime('%Y-%m-%d 00:00:02')
+               for proposicao in self.context.zsql.proposicao_obter_zsql(cod_mat_ou_doc=materia.cod_materia,ind_mat_ou_doc='M'):
+                   dic["data"] = DateTime(proposicao.dat_recebimento, datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
                dic['path'] = self.context.sapl_documentos.materia
                dic['file'] = nom_arquivo
                dic['title'] = materia.des_tipo_materia + ' nº ' + str(materia.num_ident_basica) + '/' +str(materia.ano_ident_basica)
@@ -54,6 +56,8 @@ class ProcessoLeg(grok.View):
                 if hasattr(self.context.sapl_documentos.substitutivo, str(substitutivo.cod_substitutivo) + '_substitutivo.pdf'):
                    dic = {}
                    dic["data"] = DateTime(substitutivo.dat_apresentacao, datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
+                   for proposicao in self.context.zsql.proposicao_obter_zsql(cod_substitutivo=substitutivo.cod_substitutivo):
+                       dic["data"] = DateTime(proposicao.dat_recebimento, datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
                    dic['path'] = self.context.sapl_documentos.substitutivo
                    dic["file"] = str(substitutivo.cod_substitutivo) + '_substitutivo.pdf'
                    dic['title'] = 'Substitutivo nº ' + str(substitutivo.num_substitutivo)
@@ -62,6 +66,8 @@ class ProcessoLeg(grok.View):
                 if hasattr(self.context.sapl_documentos.emenda, str(eme.cod_emenda) + '_emenda.pdf'):
                    dic = {}
                    dic["data"] = DateTime(eme.dat_apresentacao, datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
+                   for proposicao in self.context.zsql.proposicao_obter_zsql(cod_emenda=eme.cod_emenda):
+                       dic["data"] = DateTime(proposicao.dat_recebimento, datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
                    dic['path'] = self.context.sapl_documentos.emenda
                    dic["file"] = str(eme.cod_emenda) + '_emenda.pdf'
                    dic["title"] = 'Emenda ' + eme.des_tipo_ementa +  ' nº ' + str(eme.num_emenda)
@@ -81,35 +87,43 @@ class ProcessoLeg(grok.View):
                 if hasattr(self.context.sapl_documentos.materia, str(anexada.cod_materia_anexada) + '_texto_integral.pdf'):
                    dic = {}
                    dic["data"] = DateTime(anexada.dat_anexacao, datefmt='international').strftime('%Y-%m-%d 23:58:00')
+                   for proposicao in self.context.zsql.proposicao_obter_zsql(cod_mat_ou_doc=anexada.cod_materia_anexada,ind_mat_ou_doc='M'):
+                       dic["data"] = DateTime(proposicao.dat_recebimento, datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
                    dic['path'] = self.context.sapl_documentos.materia
                    dic["file"] = str(anexada.cod_materia_anexada) + '_texto_integral.pdf'
                    tipo = self.context.zsql.tipo_materia_legislativa_obter_zsql(tip_materia=anexada.tip_materia_anexada,ind_excluido=0)[0]
-                   dic["title"] = tipo.sgl_tipo_materia + ' ' + str(anexada.num_materia_anexada) + '/' +str(anexada.ano_materia_anexada)
+                   dic["title"] = tipo.sgl_tipo_materia + ' ' + str(anexada.num_materia_anexada) + '/' +str(anexada.ano_materia_anexada) + ' (anexada)'
                    lst_arquivos.append(dic)
                    for documento in self.context.zsql.documento_acessorio_obter_zsql(cod_materia=anexada.cod_materia_anexada, ind_excluido=0):
                        if hasattr(self.context.sapl_documentos.materia, str(documento.cod_documento) + '.pdf'):
                           dic = {}
                           dic["data"] = DateTime(documento.dat_documento, datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
+                          for proposicao in self.context.zsql.proposicao_obter_zsql(cod_mat_ou_doc=documento.cod_documento,ind_mat_ou_doc='D'):
+                              dic["data"] = DateTime(proposicao.dat_recebimento, datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
                           dic['path'] = self.context.sapl_documentos.materia
                           dic["file"] = str(documento.cod_documento) + '.pdf'
-                          dic["title"] = documento.nom_documento
+                          dic["title"] = documento.nom_documento + ' (acess. de anexada)'
                           lst_arquivos.append(dic)
             for anexada in self.context.zsql.anexada_obter_zsql(cod_materia_anexada=materia.cod_materia,ind_excluido=0):
                 if hasattr(self.context.sapl_documentos.materia, str(anexada.cod_materia_principal) + '_texto_integral.pdf'):
                    dic = {}
                    dic["data"] = DateTime(anexada.dat_anexacao, datefmt='international').strftime('%Y-%m-%d 23:58:00')
+                   for proposicao in self.context.zsql.proposicao_obter_zsql(cod_mat_ou_doc=anexada.cod_materia_principal,ind_mat_ou_doc='M'):
+                       dic["data"] = DateTime(proposicao.dat_recebimento, datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
                    dic['path'] = self.context.sapl_documentos.materia
                    dic["file"] = str(anexada.cod_materia_principal) + '_texto_integral.pdf'
                    tipo = self.context.zsql.tipo_materia_legislativa_obter_zsql(tip_materia=anexada.tip_materia_principal,ind_excluido=0)[0]
-                   dic["title"] = tipo.sgl_tipo_materia + ' ' + str(anexada.num_materia_principal) + '/' +str(anexada.ano_materia_principal)
+                   dic["title"] = tipo.sgl_tipo_materia + ' ' + str(anexada.num_materia_principal) + '/' +str(anexada.ano_materia_principal) + ' (anexadora)'
                    lst_arquivos.append(dic)
                    for documento in self.context.zsql.documento_acessorio_obter_zsql(cod_materia=anexada.cod_materia_principal, ind_excluido=0):
                        if hasattr(self.context.sapl_documentos.materia, str(documento.cod_documento) + '.pdf'):
                           dic = {}
                           dic["data"] = DateTime(documento.dat_documento, datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
+                          for proposicao in self.context.zsql.proposicao_obter_zsql(cod_mat_ou_doc=documento.cod_documento,ind_mat_ou_doc='D'):
+                              dic["data"] = DateTime(proposicao.dat_recebimento, datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
                           dic['path'] = self.context.sapl_documentos.materia
                           dic["file"] = str(documento.cod_documento) + '.pdf'
-                          dic["title"] = documento.nom_documento
+                          dic["title"] = documento.nom_documento + ' (acess. de anexadora)'
                           lst_arquivos.append(dic)
             for docadm in self.context.zsql.documento_administrativo_materia_obter_zsql(cod_materia=materia.cod_materia, ind_excluido=0):
                 if hasattr(self.context.sapl_documentos.administrativo, str(docadm.cod_documento) + '_texto_integral.pdf'):
@@ -122,12 +136,14 @@ class ProcessoLeg(grok.View):
                    dic['path'] = self.context.sapl_documentos.administrativo
                    dic["file"] = str(docadm.cod_documento) + '_texto_integral.pdf'
                    doc = self.context.zsql.documento_admnistrativo_obter_zsql(cod_documento=docadm.cod_documento,ind_excluido=0)[0]
-                   dic["title"] = doc.sgl_tipo_documento + ' nº ' + str(doc.num_documento) + '/' + str(doc.ano_documento)
+                   dic["title"] = doc.sgl_tipo_documento + ' nº ' + str(doc.num_documento) + '/' + str(doc.ano_documento) + '(doc. vinculado)'
                 lst_arquivos.append(dic)
             for documento in self.context.zsql.documento_acessorio_obter_zsql(cod_materia=materia.cod_materia, ind_excluido=0):
                 if hasattr(self.context.sapl_documentos.materia, str(documento.cod_documento) + '.pdf'):
                    dic = {}
                    dic["data"] = DateTime(documento.dat_documento, datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
+                   for proposicao in self.context.zsql.proposicao_obter_zsql(cod_mat_ou_doc=documento.cod_documento,ind_mat_ou_doc='D'):
+                       dic["data"] = DateTime(proposicao.dat_recebimento, datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
                    dic['path'] = self.context.sapl_documentos.materia
                    dic["file"] = str(documento.cod_documento) + '.pdf'
                    dic["title"] = documento.nom_documento

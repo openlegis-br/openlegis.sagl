@@ -15,15 +15,39 @@ REQUEST = context.REQUEST
 RESPONSE =  REQUEST.RESPONSE
 session = REQUEST.SESSION
 
-for sessao in context.zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=cod_sessao_plen, ind_excluido=0):
-  nom_arquivo = str(cod_sessao_plen)+'_resumo_sessao.odt'
+lst_autores_requerimentos = []
+lst_requerimentos = []
+lst_qtde_requerimentos = []
+
+lst_qtde_indicacoes = []
+
+lst_autores_mocoes = []
+lst_mocoes = []
+lst_qtde_mocoes = []
+
+lst_pauta = []
+lst_urgencia = []
+
+if 'ind_audiencia' in REQUEST:
+   nom_modelo = 'resumo_audiencia.odt'
+   metodo = context.zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=cod_sessao_plen, ind_audiencia=1, ind_excluido=0)
+   for item in metodo:
+       for nome in context.zsql.tipo_sessao_plenaria_obter_zsql(tip_sessao=item.tip_sessao,ind_audiencia=1,ind_excluido=0):
+           nom_sessao = nome.nom_sessao
+else:
+   nom_modelo = 'resumo.odt'
+   metodo = context.zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=cod_sessao_plen, ind_excluido=0)
+   for item in metodo:
+       for nome in context.zsql.tipo_sessao_plenaria_obter_zsql(tip_sessao=item.tip_sessao,ind_excluido=0):
+           nom_sessao = nome.nom_sessao
+
+for sessao in metodo:
+  data = context.pysc.data_converter_pysc(sessao.dat_inicio_sessao)
+  dat_ordem = context.pysc.data_converter_pysc(sessao.dat_inicio_sessao)
   resumo_dic = {}
-  tipo_sessao = context.zsql.tipo_sessao_plenaria_obter_zsql(tip_sessao=sessao.tip_sessao,ind_excluido=0)[0]
   resumo_dic["cod_sessao_plen"] = sessao.cod_sessao_plen
   resumo_dic["num_sessao_plen"] = sessao.num_sessao_plen
-  # CM Jaboticabal
-  #resumo_dic["num_tip_sessao"] = sessao.num_tip_sessao
-  resumo_dic["nom_sessao"] = tipo_sessao.nom_sessao
+  resumo_dic["nom_sessao"] = nom_sessao
   resumo_dic["num_legislatura"] = sessao.num_legislatura
   resumo_dic["num_sessao_leg"] = sessao.num_sessao_leg
   resumo_dic["dat_inicio_sessao"] = sessao.dat_inicio_sessao
@@ -31,478 +55,14 @@ for sessao in context.zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=cod_sessao
   resumo_dic["hr_inicio_sessao"] = sessao.hr_inicio_sessao
   resumo_dic["dat_fim_sessao"] = sessao.dat_fim_sessao
   resumo_dic["hr_fim_sessao"] = sessao.hr_fim_sessao
+  if nom_sessao == 'Audiência Pública':
+     resumo_dic["txt_tema"] = sessao.tip_expediente
+     nom_arquivo = 'Roteiro-' + str(sessao.num_sessao_plen) + '-audiencia' +'.odt'
+  else:
+     resumo_dic["txt_tema"] = ''
+     nom_arquivo = 'Roteiro-' + str(sessao.num_sessao_plen) + '-sessao' +'.odt'
 
-  # Mesa Diretora da Sessao
-  lst_mesa = []
-  for composicao in context.zsql.composicao_mesa_sessao_obter_zsql(cod_sessao_plen=sessao.cod_sessao_plen,ind_excluido=0):
-      for parlamentar in context.zsql.parlamentar_obter_zsql(cod_parlamentar=composicao.cod_parlamentar,ind_excluido=0):
-          for cargo in context.zsql.cargo_mesa_obter_zsql(cod_cargo=composicao.cod_cargo, ind_excluido=0):
-              dic_mesa = {}
-              dic_mesa['nom_completo'] = parlamentar.nom_parlamentar
-              dic_mesa['sgl_partido'] = parlamentar.sgl_partido
-              dic_mesa['des_cargo'] = cargo.des_cargo
-              lst_mesa.append(dic_mesa)
-
-  resumo_dic["lst_mesa"] = lst_mesa
-
-  # Presenca na Sessao
-  resumo_dic["qtde_presenca_sessao"] = ""
-  resumo_dic["lst_presenca_sessao"] = ""  
-  lst_presenca_sessao = []
-  for presenca in context.zsql.presenca_sessao_obter_zsql(cod_sessao_plen=sessao.cod_sessao_plen, tip_frequencia='P', ind_excluido=0):
-      for parlamentar in context.zsql.parlamentar_obter_zsql(cod_parlamentar=presenca.cod_parlamentar,ind_excluido=0):
-          nom_completo = parlamentar.nom_completo
-          lst_presenca_sessao.append(nom_completo)
-
-  resumo_dic["qtde_presenca_sessao"] = len(lst_presenca_sessao)
-  resumo_dic["lst_presenca_sessao"] = ', '.join(['%s' % (value) for (value) in lst_presenca_sessao])
-
-  # Materias Apresentadas
-  lst_materia_apresentada=[]
-  for materia_apresentada in context.zsql.materia_apresentada_sessao_obter_zsql(cod_sessao_plen=cod_sessao_plen,ind_excluido=0):
-      if materia_apresentada.cod_materia != None:
-         materia = context.zsql.materia_obter_zsql(cod_materia=materia_apresentada.cod_materia)[0]
-         autores = context.zsql.autoria_obter_zsql(cod_materia=materia_apresentada.cod_materia)
-         fields = list(autores.data_dictionary().keys())
-         lista_autor = []
-         for autor in autores:
-   	     for field in fields:
-                 nome_autor = autor['nom_autor_join']
-	     lista_autor.append(nome_autor)
-         autoria = ', '.join(['%s' % (value) for (value) in lista_autor]) 
-         materia = str(materia.des_tipo_materia).upper()+ ' Nº ' +str(materia.num_ident_basica)+"/"+str(context.pysc.ano_abrevia_pysc(ano=str(materia.ano_ident_basica)))+" - "+ autoria +" - " +materia.txt_ementa
-         lst_materia_apresentada.append(materia)
-      elif materia_apresentada.cod_emenda != None:
-           for emenda in context.zsql.emenda_obter_zsql(cod_emenda=materia_apresentada.cod_emenda):
-               materia = context.zsql.materia_obter_zsql(cod_materia=emenda.cod_materia)[0]
-               autores = context.zsql.autoria_emenda_obter_zsql(cod_emenda=emenda.cod_emenda)
-               fields = list(autores.data_dictionary().keys())
-               lista_autor = []
-               for autor in autores:
-	           for field in fields:
-                       nome_autor = autor['nom_autor_join']
-	           lista_autor.append(nome_autor)
-               autoria = ', '.join(['%s' % (value) for (value) in lista_autor])
-               materia = 'Emenda ' + str(emenda.des_tipo_emenda).upper() + ' Nº ' + str(emenda.num_emenda) + " - " + materia.sgl_tipo_materia + str(materia.num_ident_basica) + "/" + str(materia.ano_ident_basica) +" - "+ autoria +" - " +emenda.txt_ementa
-           lst_materia_apresentada.append(materia)
-      elif materia_apresentada.cod_substitutivo != None:
-           for substitutivo in context.zsql.substitutivo_obter_zsql(cod_substitutivo=materia_apresentada.cod_substitutivo):
-               materia = context.zsql.materia_obter_zsql(cod_materia=substitutivo.cod_materia)[0]
-               autores = context.zsql.autoria_substitutivo_obter_zsql(cod_substitutivo=substitutivo.cod_substitutivo)
-               fields = list(autores.data_dictionary().keys())
-               lista_autor = []
-               for autor in autores:
-	           for field in fields:
-                       nome_autor = autor['nom_autor_join']
-	           lista_autor.append(nome_autor)
-               autoria = ', '.join(['%s' % (value) for (value) in lista_autor])
-               materia = 'SUBSTITUTIVO ' + ' Nº ' + str(substitutivo.num_substitutivo) + " - " + materia.sgl_tipo_materia + str(materia.num_ident_basica) + "/" + str(materia.ano_ident_basica)  +" - "+ autoria +" - " +substitutivo.txt_ementa
-           lst_materia_apresentada.append(materia)
-      elif materia_apresentada.cod_parecer != None:
-           for parecer in context.zsql.relatoria_obter_zsql(cod_relatoria=materia_apresentada.cod_parecer):
-               materia = context.zsql.materia_obter_zsql(cod_materia=parecer.cod_materia)[0]
-               for comissao in context.zsql.comissao_obter_zsql(cod_comissao=parecer.cod_comissao):
-                   sgl_comissao = comissao.sgl_comissao
-                   nom_comissao = comissao.nom_comissao
-               autoria = nom_comissao.upper()
-               materia = 'PARECER ' + str(sgl_comissao) + ' Nº ' + str(parecer.num_parecer) + '/' + str(parecer.ano_parecer) + " - " +  str(materia.sgl_tipo_materia) +' ' + str(materia.num_ident_basica) + '/' + str(materia.ano_ident_basica)  + " - " + autoria + " - " + materia_apresentada.txt_observacao
-           lst_materia_apresentada.append(materia)
-      elif materia_apresentada.cod_documento != None:
-           materia = context.zsql.documento_administrativo_obter_zsql(cod_documento=materia_apresentada.cod_documento)[0]
-           materia = str(materia.des_tipo_documento).upper() + ' Nº ' +str(materia.num_documento)+"/"+str(context.pysc.ano_abrevia_pysc(ano=str(materia.ano_documento)))+" - "+ materia.txt_interessado + " - " + materia.txt_assunto
-           lst_materia_apresentada.append(materia)
-
-  resumo_dic["lst_materia_apresentada"] = '; '.join(['%s' % (value) for (value) in lst_materia_apresentada])
-
-  # Correspondencias recebidas
-  resumo_dic["correspondencias"] = ''
-  for item in context.zsql.expediente_obter_zsql(cod_sessao_plen=cod_sessao_plen,cod_expediente=1,ind_excluido=0):
-      resumo_dic["correspondencias"] = item.txt_expediente
-
-  # Tribuna Livre
-  resumo_dic["tribuna"] = ''
-  for item in context.zsql.expediente_obter_zsql(cod_sessao_plen=cod_sessao_plen,cod_expediente=3,ind_excluido=0):
-      resumo_dic["tribuna"] = item.txt_expediente
-
-  # Biblia
-  resumo_dic["biblia"] = ""
-  for item in context.zsql.expediente_obter_zsql(cod_sessao_plen=cod_sessao_plen,cod_expediente=4,ind_excluido=0):
-    resumo_dic["biblia"] = item.txt_expediente
-
-  # Descontinuado
-  lst_reqplen = ''
-  lst_reqpres = ''
-
-  # Indicacoes
-  lst_indicacao = []
-  lst_num_ind = []
-
-  # Requerimentos
-  lst_requerimento = []
-  lst_num_req = []
-
-  # Mocoes
-  lst_mocao=[]
-
-  # Pareceres
-  lst_parecer = []
-
-  for item in context.zsql.expediente_materia_obter_zsql(cod_sessao_plen=cod_sessao_plen,ind_excluido=0):
-      # Materias Legislativas
-      if item.cod_materia != None:
-         for materia in context.zsql.materia_obter_zsql(cod_materia=item.cod_materia,ind_excluido=0):
-             # Indicações
-             if materia.des_tipo_materia == 'Indicação':
-                autores = context.zsql.autoria_obter_zsql(cod_materia=item.cod_materia)
-                fields = list(autores.data_dictionary().keys())
-                lista_autor = []
-                for autor in autores:
-                    for field in fields:
-                        nome_autor = autor['nom_autor_join']
-	            lista_autor.append(nome_autor)
-                autoria = ', '.join(['%s' % (value) for (value) in lista_autor])
-                for votacao in context.zsql.votacao_expediente_materia_obter_zsql(cod_materia=item.cod_materia, cod_sessao_plen=cod_sessao_plen, ind_excluido=0):
-                    if votacao.tip_resultado_votacao:
-                       resultado = context.zsql.tipo_resultado_votacao_obter_zsql(tip_resultado_votacao = votacao.tip_resultado_votacao, ind_excluido=0)
-                       for i in resultado:
-                           votacao_observacao = ""
-                           if votacao.votacao_observacao:
-                              votacao_observacao = ' - ' + votacao.votacao_observacao
-                           nom_resultado = ' (' + i.nom_resultado + votacao_observacao + ')'
-                    else:
-                       nom_resultado = "(Matéria não votada)"
-                       votacao_observacao = ""
-                num_ident_basica = materia.num_ident_basica
-                materia = str(materia.des_tipo_materia).upper() + ' Nº ' +str(materia.num_ident_basica)+"/"+str(context.pysc.ano_abrevia_pysc(ano=str(materia.ano_ident_basica))) + " - " + autoria + " - " + materia.txt_ementa + nom_resultado
-                lst_indicacao.append(materia)
-                lst_num_ind.append(num_ident_basica)                
-             # Requerimentos
-             elif materia.des_tipo_materia == 'Requerimento':
-                autores = context.zsql.autoria_obter_zsql(cod_materia=item.cod_materia)
-                fields = list(autores.data_dictionary().keys())
-                lista_autor = []
-                for autor in autores:
-                    for field in fields:
-                        nome_autor = autor['nom_autor_join']
-	            lista_autor.append(nome_autor)
-                autoria = ', '.join(['%s' % (value) for (value) in lista_autor])
-                for votacao in context.zsql.votacao_expediente_materia_obter_zsql(cod_materia=item.cod_materia, cod_sessao_plen=cod_sessao_plen, ind_excluido=0):
-                    if votacao.tip_resultado_votacao:
-                       resultado = context.zsql.tipo_resultado_votacao_obter_zsql(tip_resultado_votacao = votacao.tip_resultado_votacao, ind_excluido=0)
-                       for i in resultado:
-                           votacao_observacao = ""
-                           if votacao.votacao_observacao:
-                              votacao_observacao = ' - ' + votacao.votacao_observacao
-                           nom_resultado = ' (' + i.nom_resultado + votacao_observacao + ')'
-                    else:
-                       nom_resultado = "(Matéria não votada)"
-                       votacao_observacao = ""
-                num_ident_basica = materia.num_ident_basica                
-                materia = str(materia.des_tipo_materia).upper() + ' Nº ' +str(materia.num_ident_basica)+"/"+str(context.pysc.ano_abrevia_pysc(ano=str(materia.ano_ident_basica))) + " - " + autoria + " - " + materia.txt_ementa  + nom_resultado
-                lst_requerimento.append(materia)
-                lst_num_req.append(num_ident_basica)                                
-             # Moções
-             elif materia.des_tipo_materia == 'Moção':
-                autores = context.zsql.autoria_obter_zsql(cod_materia=item.cod_materia)
-                fields = list(autores.data_dictionary().keys())
-                lista_autor = []
-                for autor in autores:
-                    for field in fields:
-                        nome_autor = autor['nom_autor_join']
-	            lista_autor.append(nome_autor)
-                autoria = ', '.join(['%s' % (value) for (value) in lista_autor])
-                for votacao in context.zsql.votacao_expediente_materia_obter_zsql(cod_materia=item.cod_materia, cod_sessao_plen=cod_sessao_plen, ind_excluido=0):
-                    if votacao.tip_resultado_votacao:
-                       resultado = context.zsql.tipo_resultado_votacao_obter_zsql(tip_resultado_votacao = votacao.tip_resultado_votacao, ind_excluido=0)
-                       for i in resultado:
-                           votacao_observacao = ""
-                           if votacao.votacao_observacao:
-                              votacao_observacao = ' - ' + votacao.votacao_observacao
-                           nom_resultado = ' (' + i.nom_resultado + votacao_observacao + ')'
-                    else:
-                       nom_resultado = ""
-                       votacao_observacao = ""
-                materia = str(materia.des_tipo_materia).upper() + ' Nº ' +str(materia.num_ident_basica)+"/"+str(context.pysc.ano_abrevia_pysc(ano=str(materia.ano_ident_basica))) + " - " + autoria + " - " + materia.txt_ementa + nom_resultado
-                lst_mocao.append(materia)
-      # Pareceres
-      elif item.cod_parecer != None:
-           for parecer in context.zsql.relatoria_obter_zsql(cod_relatoria=item.cod_parecer,ind_excluido=0):
-               for materia in context.zsql.materia_obter_zsql(cod_materia=parecer.cod_materia, ind_excluido=0):
-                   sgl_tipo_materia = materia.sgl_tipo_materia
-                   num_ident_basica = materia.num_ident_basica
-                   ano_ident_basica = materia.ano_ident_basica
-               for comissao in context.zsql.comissao_obter_zsql(cod_comissao=parecer.cod_comissao):
-                   nom_comissao = comissao.nom_comissao.upper()
-                   sgl_comissao = comissao.sgl_comissao
-               for votacao in context.zsql.votacao_expediente_materia_obter_zsql(cod_materia=item.cod_parecer, cod_sessao_plen=cod_sessao_plen, ind_excluido=0):
-                   if votacao.tip_resultado_votacao:
-                      resultado = context.zsql.tipo_resultado_votacao_obter_zsql(tip_resultado_votacao = votacao.tip_resultado_votacao, ind_excluido=0)
-                      for i in resultado:
-                          votacao_observacao = ""
-                          if votacao.votacao_observacao:
-                             votacao_observacao = ' - ' + votacao.votacao_observacao
-                          nom_resultado = ' (' + i.nom_resultado + votacao_observacao + ')'
-                   else:
-                      nom_resultado = "(Parecer não votado)"
-                      votacao_observacao = ""
-               materia = 'PARECER ' + str(sgl_comissao) + ' Nº ' + str(parecer.num_parecer) + '/' + str(parecer.ano_parecer)+' ao '+str(sgl_tipo_materia) + ' ' + str(num_ident_basica) + '/' + str(ano_ident_basica) + ' - ' + nom_comissao + ' - ' + item.txt_observacao  + nom_resultado
-               lst_parecer.append(materia)
-
-  # Juntar Indicações
-  resumo_dic["indicacao"] = '; '.join(['%s' % (value) for (value) in lst_indicacao])
-  if lst_num_ind != []:
-     resumo_dic["min_ind"] = min(lst_num_ind)
-     resumo_dic["max_ind"] = max(lst_num_ind)  
-
-  # Juntar Requerimentos
-  resumo_dic["requerimento"] = '; '.join(['%s' % (value) for (value) in lst_requerimento])
-  if lst_num_req != []:
-     resumo_dic["min_req"] = min(lst_num_req)
-     resumo_dic["max_req"] = max(lst_num_req)   
-
-  # Juntar Mocoes
-  resumo_dic["mocao"] = '; '.join(['%s' % (value) for (value) in lst_mocao])
-
-  # Juntar Pareceres
-  resumo_dic["parecer"] = '; '.join(['%s' % (value) for (value) in lst_parecer])
-
-  # Lista de oradores
-  lst_oradores = []
-  for orador in context.zsql.oradores_expediente_obter_zsql(cod_sessao_plen=sessao.cod_sessao_plen, ind_excluido=0):
-      for parlamentar in context.zsql.parlamentar_obter_zsql(cod_parlamentar=orador.cod_parlamentar,ind_excluido=0):
-          num_ordem = orador.num_ordem
-          nom_completo = parlamentar.nom_parlamentar
-          lst_oradores.append(nom_completo)
-
-  resumo_dic["lst_oradores"] = ', '.join(['%s' % (value) for (value) in lst_oradores])
-
-  # Lista presenca na ordem do dia
-  lst_presenca_ordem_dia = []
-  for presenca_ordem_dia in context.zsql.presenca_ordem_dia_obter_zsql(cod_sessao_plen=sessao.cod_sessao_plen, tip_frequencia='P', ind_excluido=0):
-      for parlamentar in context.zsql.parlamentar_obter_zsql(cod_parlamentar=presenca_ordem_dia.cod_parlamentar,ind_excluido=0):
-          nom_completo = parlamentar.nom_completo
-          lst_presenca_ordem_dia.append(nom_completo)
-
-  resumo_dic["qtde_presenca_ordem_dia"] = len(lst_presenca_ordem_dia)
-  resumo_dic["lst_presenca_ordem_dia"] = ', '.join(['%s' % (value) for (value) in lst_presenca_ordem_dia])
-
-  # Matérias da Ordem do Dia, incluindo resultados das votacoes
-  lst_votacao=[]
-  for ordem in context.zsql.ordem_dia_obter_zsql(cod_sessao_plen=sessao.cod_sessao_plen, ind_excluido=0):
-      materia = context.zsql.materia_obter_zsql(cod_materia=ordem.cod_materia)[0]
-      dic_votacao = {}
-      dic_votacao["num_ordem"] = ordem.num_ordem
-      autores = context.zsql.autoria_obter_zsql(cod_materia=ordem.cod_materia)
-      fields = list(autores.data_dictionary().keys())
-      lista_autor = []
-      for autor in autores:
-          for field in fields:
-              nome_autor = autor['nom_autor_join']
-	  lista_autor.append(nome_autor)
-      autoria = ', '.join(['%s' % (value) for (value) in lista_autor])
-      nom_resultado = ''
-      for votacao in context.zsql.votacao_ordem_dia_obter_zsql(cod_materia=ordem.cod_materia, cod_sessao_plen=sessao.cod_sessao_plen, ind_excluido=0):
-          contagem_votos = ''
-          if votacao.tip_votacao == 2:
-              if votacao.num_votos_sim == 0:
-                 votos_favoraveis = ''
-              elif votacao.num_votos_sim == 1:
-                 votos_favoraveis = ' - ' +str(votacao.num_votos_sim) + " voto favorável"
-              elif votacao.num_votos_sim > 1:
-                 votos_favoraveis = ' - ' + str(votacao.num_votos_sim) + " votos favoráveis"
-              if votacao.num_votos_nao == 0:
-                 votos_contrarios = ''
-              elif votacao.num_votos_nao == 1:
-                 votos_contrarios = ' - ' + str(votacao.num_votos_nao) + " voto contrário"
-              elif votacao.num_votos_nao > 1:
-                 votos_contrarios = ' - ' + str(votacao.num_votos_nao) + " votos contrários"
-              if votacao.num_abstencao == 0:
-                 abstencoes = ''
-              elif votacao.num_abstencao == 1:
-                 abstencoes = ' - ' + str(votacao.num_abstencao) + " abstenção"
-              elif votacao.num_abstencao > 1:
-                 abstencoes =  ' - ' + str(votacao.num_abstencao) + " abstenções"
-              contagem_votos = votos_favoraveis + votos_contrarios + abstencoes
-          if votacao.votacao_observacao != '':
-             votacao_observacao = ' - ' + votacao.votacao_observacao
-          else:
-             votacao_observacao = ''
-          if votacao.tip_resultado_votacao:
-             for turno in context.zsql.turno_discussao_obter_zsql(cod_turno=votacao.tip_turno):
-                 turno_discussao = turno.des_turno
-             resultado = context.zsql.tipo_resultado_votacao_obter_zsql(tip_resultado_votacao=votacao.tip_resultado_votacao, ind_excluido=0)
-             for i in resultado:
-                 nom_resultado= ' (' + i.nom_resultado+ ' em ' + turno_discussao + contagem_votos + votacao_observacao + ')'
-          else:
-             nom_resultado = " (Matéria não votada)"
-             votacao_observacao = ""
-      dic_votacao["materia"] = materia.des_tipo_materia.upper() +" Nº " + str(materia.num_ident_basica) + "/" + str(materia.ano_ident_basica) + ' - ' + autoria + ' - ' + materia.txt_ementa + nom_resultado
-
-      lst_qtde_substitutivos=[]
-      lst_substitutivos=[]
-      for substitutivo in context.zsql.substitutivo_obter_zsql(cod_materia=ordem.cod_materia,ind_excluido=0):
-          autores = context.zsql.autoria_substitutivo_obter_zsql(cod_substitutivo=substitutivo.cod_substitutivo, ind_excluido=0)
-          dic_substitutivo = {}
-          fields = list(autores.data_dictionary().keys())
-          lista_autor = []
-          for autor in autores:
-              for field in fields:
-                  nome_autor = autor['nom_autor_join']
-	      lista_autor.append(nome_autor)
-          autoria = ', '.join(['%s' % (value) for (value) in lista_autor])
-          nom_resultado = ''
-          for votacao in context.zsql.votacao_ordem_dia_obter_zsql(cod_substitutivo=substitutivo.cod_substitutivo, cod_sessao_plen=sessao.cod_sessao_plen, ind_excluido=0):
-             if votacao.votacao_observacao != '':
-                votacao_observacao = ' - ' + votacao.votacao_observacao
-             else:
-                votacao_observacao = ''
-             if votacao.tip_resultado_votacao:
-                for turno in context.zsql.turno_discussao_obter_zsql(cod_turno=votacao.tip_turno):
-                    turno_discussao = turno.des_turno
-                resultado = context.zsql.tipo_resultado_votacao_obter_zsql(tip_resultado_votacao=votacao.tip_resultado_votacao, ind_excluido=0)
-                for i in resultado:
-                    nom_resultado = ' (' + i.nom_resultado+ ' em ' + turno_discussao + votacao_observacao + ')'
-                    if votacao.votacao_observacao:
-                       votacao_observacao = votacao.ordem_observacao
-             else:
-                nom_resultado = " (Substitutivo não votado)"
-                votacao_observacao = ""
-
-          dic_substitutivo["materia"] = 'SUBSTITUTIVO Nº ' + str(substitutivo.num_substitutivo) + ' - ' +  autoria + ' - ' + substitutivo.txt_ementa + nom_resultado
-
-          lst_substitutivos.append(dic_substitutivo)
-          cod_substitutivo = substitutivo.cod_substitutivo
-          lst_qtde_substitutivos.append(cod_substitutivo)
-      dic_votacao["substitutivos"] = lst_substitutivos
-      dic_votacao["qtde_substitutivos"] = len(lst_qtde_substitutivos)
-
-      lst_qtde_emendas=[]
-      lst_emendas=[]
-      for emenda in context.zsql.emenda_obter_zsql(cod_materia=ordem.cod_materia,ind_excluido=0,exc_pauta=0):
-          autores = context.zsql.autoria_emenda_obter_zsql(cod_emenda=emenda.cod_emenda,ind_excluido=0)
-          dic_emenda = {}
-          fields = list(autores.data_dictionary().keys())
-          lista_autor = []
-          for autor in autores:
-              for field in fields:
-                  nome_autor = autor['nom_autor_join']
-	      lista_autor.append(nome_autor)
-          autoria = ', '.join(['%s' % (value) for (value) in lista_autor])
-          nom_resultado = ''
-          for votacao in context.zsql.votacao_ordem_dia_obter_zsql(cod_emenda=emenda.cod_emenda, cod_sessao_plen=sessao.cod_sessao_plen, ind_excluido=0):
-             if votacao.votacao_observacao != '':
-                votacao_observacao = ' - ' + votacao.votacao_observacao
-             else:
-                votacao_observacao = ''
-             if votacao.tip_resultado_votacao:
-                for turno in context.zsql.turno_discussao_obter_zsql(cod_turno=votacao.tip_turno):
-                    turno_discussao = turno.des_turno
-                resultado = context.zsql.tipo_resultado_votacao_obter_zsql(tip_resultado_votacao=votacao.tip_resultado_votacao, ind_excluido=0)
-                for i in resultado:
-                    nom_resultado = ' (' + i.nom_resultado+ ' em ' + turno_discussao + votacao_observacao + ')'
-                    if votacao.votacao_observacao:
-                        votacao_observacao = votacao.ordem_observacao
-             else:
-                nom_resultado = " (Emenda não votada)"
-                votacao_observacao = ""
-          dic_emenda["materia"] = 'EMENDA Nº ' + str(emenda.num_emenda) + ' (' + emenda.des_tipo_emenda.upper() + ') - ' +  autoria + ' - ' + emenda.txt_ementa + nom_resultado
-          lst_emendas.append(dic_emenda)
-          cod_emenda = emenda.cod_emenda
-          lst_qtde_emendas.append(cod_emenda)
-      dic_votacao["emendas"] = lst_emendas
-      dic_votacao["qtde_emenda"] = len(lst_qtde_emendas)
-
-      lst_votacao.append(dic_votacao)
-      resumo_dic["votacao"] = '; '.join(['%s' % (value) for (value) in lst_votacao])      
-
-  resumo_dic["lst_votacao"] = lst_votacao
-
-  # Lista das materias em 1a discussao
-  lst_pdiscussao=[]
-  for pdiscussao in context.zsql.ordem_dia_obter_zsql(cod_sessao_plen=sessao.cod_sessao_plen, tip_turno=1, ind_excluido=0):  
-      materia = context.zsql.materia_obter_zsql(cod_materia=pdiscussao.cod_materia)[0]
-      autores = context.zsql.autoria_obter_zsql(cod_materia=pdiscussao.cod_materia)
-      fields = list(autores.data_dictionary().keys())
-      lista_autor = []
-      for autor in autores:
-	for field in fields:
-                nome_autor = autor['nom_autor_join']
-	lista_autor.append(nome_autor)
-      autoria = ', '.join(['%s' % (value) for (value) in lista_autor])
-      materia = str(materia.num_ident_basica)+"/"+str(context.pysc.ano_abrevia_pysc(ano=str(materia.ano_ident_basica)))+" - "+ materia.txt_ementa + " Autoria: "+ autoria
-      lst_pdiscussao.append(materia)
-  resumo_dic["pdiscussao"] = '; '.join(['%s' % (value) for (value) in lst_pdiscussao])
-
-  # Lista das materias em 2a discussao
-  lst_sdiscussao=[]
-  for sdiscussao in context.zsql.ordem_dia_obter_zsql(cod_sessao_plen=sessao.cod_sessao_plen, tip_turno=2, ind_excluido=0):    
-      materia = context.zsql.materia_obter_zsql(cod_materia=sdiscussao.cod_materia)[0]
-      autores = context.zsql.autoria_obter_zsql(cod_materia=sdiscussao.cod_materia)
-      fields = list(autores.data_dictionary().keys())
-      lista_autor = []
-      for autor in autores:
-	for field in fields:
-                nome_autor = autor['nom_autor_join']
-	lista_autor.append(nome_autor)
-      autoria = ', '.join(['%s' % (value) for (value) in lista_autor])
-      materia = str(materia.num_ident_basica)+"/"+str(context.pysc.ano_abrevia_pysc(ano=str(materia.ano_ident_basica)))+" - "+ materia.txt_ementa + " Autoria: "+ autoria
-      lst_sdiscussao.append(materia)
-  resumo_dic["sdiscussao"] = '; '.join(['%s' % (value) for (value) in lst_sdiscussao])
-
-  # Lista das materias em discussao unica
-  lst_discussao_unica=[]
-  for discussao_unica in context.zsql.ordem_dia_obter_zsql(cod_sessao_plen=sessao.cod_sessao_plen, tip_turno=3, ind_excluido=0):  
-      materia = context.zsql.materia_obter_zsql(cod_materia=discussao_unica.cod_materia)[0]
-      autores = context.zsql.autoria_obter_zsql(cod_materia=discussao_unica.cod_materia)
-      fields = list(autores.data_dictionary().keys())
-      lista_autor = []
-      for autor in autores:
-	for field in fields:
-                nome_autor = autor['nom_autor_join']
-	lista_autor.append(nome_autor)
-      autoria = ', '.join(['%s' % (value) for (value) in lista_autor])
-      materia = str(materia.num_ident_basica)+"/"+str(context.pysc.ano_abrevia_pysc(ano=str(materia.ano_ident_basica)))+" - "+ materia.txt_ementa + " Autoria: "+ autoria
-      lst_discussao_unica.append(materia)
-  resumo_dic["discussao_unica"] = '; '.join(['%s' % (value) for (value) in lst_discussao_unica])
-
-  # Lista de oradores nas Explicacoes Pessoais
-  lst_explicacoes_pessoais = []
-  for orador in context.zsql.oradores_obter_zsql(cod_sessao_plen=sessao.cod_sessao_plen, ind_excluido=0):
-      for parlamentar in context.zsql.parlamentar_obter_zsql(cod_parlamentar=orador.cod_parlamentar,ind_excluido=0):
-          num_ordem = orador.num_ordem
-          nom_completo = parlamentar.nom_parlamentar
-          lst_explicacoes_pessoais.append(nom_completo)
-  resumo_dic['explicacoes_pessoais'] = ', '.join(['%s' % (value) for (value) in lst_explicacoes_pessoais])
-
-  # Presidente
-  for dat_sessao in context.zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=cod_sessao_plen,ind_excluido=0):
-    data = context.pysc.data_converter_pysc(dat_sessao.dat_inicio_sessao)
-  resumo_dic['presidente'] = ''
-  for sleg in context.zsql.periodo_comp_mesa_obter_zsql(num_legislatura=sessao.num_legislatura,data=data):
-    for cod_presidente in context.zsql.composicao_mesa_obter_zsql(cod_periodo_comp=sleg.cod_periodo_comp,cod_cargo=1):
-      for presidencia in context.zsql.parlamentar_obter_zsql(cod_parlamentar=cod_presidente.cod_parlamentar):
-        resumo_dic['presidente'] = presidencia.nom_completo
-  # Vice-Presidente
-  for dat_sessao in context.zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=cod_sessao_plen,ind_excluido=0):
-    data = context.pysc.data_converter_pysc(dat_sessao.dat_inicio_sessao)
-  resumo_dic['vice_presidente'] = ''
-  for sleg in context.zsql.periodo_comp_mesa_obter_zsql(num_legislatura=sessao.num_legislatura,data=data):
-    for cod_presidente in context.zsql.composicao_mesa_obter_zsql(cod_periodo_comp=sleg.cod_periodo_comp,cod_cargo=2):
-      for vice_presidencia in context.zsql.parlamentar_obter_zsql(cod_parlamentar=cod_presidente.cod_parlamentar):
-        resumo_dic['vice_presidente'] = vice_presidencia.nom_completo        
-  # 1o. Secretario
-  resumo_dic['1secretario'] = ''
-  for dat_sessao in context.zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=cod_sessao_plen,ind_excluido=0):
-    for cod_psecretario in context.zsql.composicao_mesa_obter_zsql(cod_periodo_comp=sleg.cod_periodo_comp,cod_cargo=3):
-      for psecretaria in context.zsql.parlamentar_obter_zsql(cod_parlamentar=cod_psecretario.cod_parlamentar):
-        resumo_dic['1secretario'] = psecretaria.nom_completo
-  # 2o. Secretario
-  resumo_dic['2secretario'] = ''
-  for dat_sessao in context.zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=cod_sessao_plen,ind_excluido=0):
-    for cod_ssecretario in context.zsql.composicao_mesa_obter_zsql(cod_periodo_comp=sleg.cod_periodo_comp,cod_cargo=4):
-      for ssecretaria in context.zsql.parlamentar_obter_zsql(cod_parlamentar=cod_ssecretario.cod_parlamentar):
-        resumo_dic['2secretario'] = ssecretaria.nom_completo
-
+  # dados da casa
   casa={}
   aux=context.sapl_documentos.props_sagl.propertyItems()
   for item in aux:
@@ -520,4 +80,333 @@ for sessao in context.zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=cod_sessao
       resumo_dic['nom_localidade']= local.nom_localidade
       resumo_dic['sgl_uf']= local.sgl_uf
 
-return st.resumo_gerar_odt(resumo_dic, nom_arquivo)      
+  # Materias Apresentadas
+  lst_materia_apresentada=[]
+  for materia_apresentada in context.zsql.materia_apresentada_sessao_obter_zsql(cod_sessao_plen=cod_sessao_plen,ind_excluido=0):
+  
+      # materias principais
+      if materia_apresentada.cod_materia != None:
+         materia = context.zsql.materia_obter_zsql(cod_materia=materia_apresentada.cod_materia)[0]
+         autores = context.zsql.autoria_obter_zsql(cod_materia=materia_apresentada.cod_materia)
+         fields = autores.data_dictionary().keys()
+         lista_autor = []
+         for autor in autores:
+             for field in fields:
+                 nome_autor = autor['nom_autor_join']
+             lista_autor.append(nome_autor)
+         dic_materia = {}
+         dic_materia['materia'] = str(materia.des_tipo_materia)+ ' nº ' +str(materia.num_ident_basica)+"/"+str(materia.ano_ident_basica)
+         dic_materia['autoria'] = ', '.join(['%s' % (value) for (value) in lista_autor]) 
+         dic_materia['ementa'] = materia.txt_ementa
+         lst_materia_apresentada.append(dic_materia)
+         
+      # emendas
+      elif materia_apresentada.cod_emenda != None:
+           for emenda in context.zsql.emenda_obter_zsql(cod_emenda=materia_apresentada.cod_emenda):
+               materia = context.zsql.materia_obter_zsql(cod_materia=emenda.cod_materia)[0]
+               autores = context.zsql.autoria_emenda_obter_zsql(cod_emenda=emenda.cod_emenda)
+               fields = autores.data_dictionary().keys()
+               lista_autor = []
+               for autor in autores:
+                   for field in fields:
+                       nome_autor = autor['nom_autor_join']
+                   lista_autor.append(nome_autor)
+               dic_materia = {}
+               dic_materia['materia'] = 'Emenda ' + str(emenda.des_tipo_emenda) + ' nº ' + str(emenda.num_emenda) + " ao " + materia.sgl_tipo_materia + str(materia.num_ident_basica) + "/" + str(materia.ano_ident_basica)
+               dic_materia['autoria'] = ', '.join(['%s' % (value) for (value) in lista_autor]) 
+               dic_materia['ementa'] = emenda.txt_ementa
+           lst_materia_apresentada.append(dic_materia)
+
+      # substitutivos
+      elif materia_apresentada.cod_substitutivo != None:
+           for substitutivo in context.zsql.substitutivo_obter_zsql(cod_substitutivo=materia_apresentada.cod_substitutivo):
+               materia = context.zsql.materia_obter_zsql(cod_materia=substitutivo.cod_materia)[0]
+               autores = context.zsql.autoria_substitutivo_obter_zsql(cod_substitutivo=substitutivo.cod_substitutivo)
+               fields = autores.data_dictionary().keys()
+               lista_autor = []
+               for autor in autores:
+                   for field in fields:
+                       nome_autor = autor['nom_autor_join']
+                   lista_autor.append(nome_autor)
+               dic_materia = {}
+               dic_materia['materia'] = 'Substitutivo ' + ' nº ' + str(substitutivo.num_substitutivo) + " ao " + materia.sgl_tipo_materia + str(materia.num_ident_basica) + "/" + str(materia.ano_ident_basica)
+               dic_materia['autoria'] = ', '.join(['%s' % (value) for (value) in lista_autor]) 
+               dic_materia['ementa'] = substitutivo.txt_ementa
+           lst_materia_apresentada.append(dic_materia)
+
+      # pareceres
+      elif materia_apresentada.cod_parecer != None:
+           for parecer in context.zsql.relatoria_obter_zsql(cod_relatoria=materia_apresentada.cod_parecer):
+               materia = context.zsql.materia_obter_zsql(cod_materia=parecer.cod_materia)[0]
+               for comissao in context.zsql.comissao_obter_zsql(cod_comissao=parecer.cod_comissao):
+                   sgl_comissao = comissao.sgl_comissao
+                   nom_comissao = comissao.nom_comissao
+               autoria = nom_comissao.upper()
+               dic_materia = {}
+               dic_materia['materia'] = 'Parecer ' + str(sgl_comissao) + ' nº ' + str(parecer.num_parecer) + '/' + str(parecer.ano_parecer) + " ao " +  str(materia.sgl_tipo_materia) +' ' + str(materia.num_ident_basica) + '/' + str(materia.ano_ident_basica)
+               dic_materia['autoria'] = nom_comissao.upper() 
+               dic_materia['ementa'] = ''
+           lst_materia_apresentada.append(dic_materia)
+           
+      # documentos administrativos
+      elif materia_apresentada.cod_documento != None:
+           materia = context.zsql.documento_administrativo_obter_zsql(cod_documento=materia_apresentada.cod_documento)[0]
+           dic_materia = {}
+           dic_materia['materia'] = str(materia.des_tipo_documento) + ' nº ' +str(materia.num_documento)+"/"+str(materia.ano_documento)
+           dic_materia['autoria'] = materia.txt_interessado
+           dic_materia['ementa'] = materia.txt_assunto
+           lst_materia_apresentada.append(materia)
+
+  # Ata Sessao Anterior
+  resumo_dic["ata_anterior"] = ''
+  for item in context.zsql.expediente_obter_zsql(cod_sessao_plen=cod_sessao_plen,cod_expediente=6,ind_excluido=0):
+      resumo_dic["ata_anterior"] = item.txt_expediente
+
+  # Insercoes em Ata
+  resumo_dic["insercao"] = ''
+  for item in context.zsql.expediente_obter_zsql(cod_sessao_plen=cod_sessao_plen,cod_expediente=9,ind_excluido=0):
+      resumo_dic["insercao"] = item.txt_expediente
+
+  # Expedientes Executivo
+  resumo_dic["expedientes_executivo"] = ""
+  for item in context.zsql.expediente_obter_zsql(cod_sessao_plen=cod_sessao_plen,cod_expediente=1,ind_excluido=0):
+    resumo_dic["expedientes_executivo"] = item.txt_expediente
+
+  # Expedientes Diversos
+  resumo_dic["expedientes_diversos"] = ""
+  for item in context.zsql.expediente_obter_zsql(cod_sessao_plen=cod_sessao_plen,cod_expediente=2,ind_excluido=0):
+    resumo_dic["expedientes_diversos"] = item.txt_expediente
+
+  # Expedientes acessorios
+  resumo_dic["expedientes_acessorios"] = ""
+  for item in context.zsql.expediente_obter_zsql(cod_sessao_plen=cod_sessao_plen,cod_expediente=8,ind_excluido=0):
+    resumo_dic["expedientes_acessorios"] = item.txt_expediente
+    
+  # Tribuna do Cidadão
+  resumo_dic["tribuna"] = ''
+  for item in context.zsql.expediente_obter_zsql(cod_sessao_plen=cod_sessao_plen,cod_expediente=10,ind_excluido=0):
+      resumo_dic["tribuna"] = item.txt_expediente
+
+  for item in context.zsql.expediente_materia_obter_zsql(cod_sessao_plen=sessao.cod_sessao_plen,ind_excluido=0):
+      if item.cod_materia != None:
+         for materia in context.zsql.materia_obter_zsql(cod_materia=item.cod_materia,ind_excluido=0):
+             dic_materia = {}
+             dic_materia['cod_materia']= str(materia.cod_materia)
+             dic_materia['id_materia'] = materia.des_tipo_materia + ' nº ' + str(materia.num_ident_basica) + '/' + str(materia.ano_ident_basica)
+             dic_materia['txt_ementa'] = materia.txt_ementa 
+             if materia.des_tipo_materia == 'Indicação':
+                lst_qtde_indicacoes.append(materia.cod_materia)
+             if materia.des_tipo_materia == 'Requerimento':
+                dic_autores = {}
+                for autoria in context.zsql.autoria_obter_zsql(cod_materia=materia.cod_materia, ind_primeiro_autor = 1):
+                    if autoria.ind_primeiro_autor == 1:
+                       dic_materia["cod_autor"] = int(autoria.cod_autor)
+                       dic_autores["cod_autor"] = int(autoria.cod_autor)
+                       for autor in context.zsql.autor_obter_zsql(cod_autor = autoria.cod_autor):
+                           for parlamentar in context.zsql.parlamentar_obter_zsql(cod_parlamentar=autor.cod_parlamentar):
+                               if parlamentar.sex_parlamentar == 'M':
+                                  dic_autores["nom_parlamentar"] = 'Do Vereador' + ' ' + autoria['nom_autor_join']
+                               if parlamentar.sex_parlamentar == 'F':
+                                  dic_autores["nom_parlamentar"] = 'Da Vereadora' + ' ' + autoria['nom_autor_join']
+                    else:
+                       dic_materia["cod_autor"] = int(autoria.cod_autor)
+                       dic_autores["cod_autor"] = int(autoria.cod_autor)
+                       for autor in context.zsql.autor_obter_zsql(cod_autor = autoria.cod_autor):
+                           for parlamentar in context.zsql.parlamentar_obter_zsql(cod_parlamentar=autor.cod_parlamentar):
+                               if parlamentar.sex_parlamentar == 'M':
+                                  dic_autores["nom_parlamentar"] = 'Do Vereador' + ' ' + autoria['nom_autor_join']
+                               if parlamentar.sex_parlamentar == 'F':
+                                  dic_autores["nom_parlamentar"] = 'Da Vereadora' + ' ' + autoria['nom_autor_join']
+                lst_autores_requerimentos.append(dic_autores)
+                lst_requerimentos.append(dic_materia)
+                lst_qtde_requerimentos.append(materia.cod_materia)
+             if materia.des_tipo_materia == 'Moção':
+                dic_autores = {}
+                for autoria in context.zsql.autoria_obter_zsql(cod_materia=materia.cod_materia, ind_primeiro_autor = 1):
+                    if autoria.ind_primeiro_autor == 1:
+                       dic_materia["cod_autor"] = int(autoria.cod_autor)
+                       dic_autores["cod_autor"] = int(autoria.cod_autor)
+                       for autor in context.zsql.autor_obter_zsql(cod_autor = autoria.cod_autor):
+                           for parlamentar in context.zsql.parlamentar_obter_zsql(cod_parlamentar=autor.cod_parlamentar):
+                               if parlamentar.sex_parlamentar == 'M':
+                                  dic_autores["nom_parlamentar"] = 'Do Vereador' + ' ' + autoria['nom_autor_join']
+                               if parlamentar.sex_parlamentar == 'F':
+                                  dic_autores["nom_parlamentar"] = 'Da Vereadora' + ' ' + autoria['nom_autor_join']
+                    else:
+                       dic_materia["cod_autor"] = int(autoria.cod_autor)
+                       dic_autores["cod_autor"] = int(autoria.cod_autor)
+                       for autor in context.zsql.autor_obter_zsql(cod_autor = autoria.cod_autor):
+                           for parlamentar in context.zsql.parlamentar_obter_zsql(cod_parlamentar=autor.cod_parlamentar):
+                               if parlamentar.sex_parlamentar == 'M':
+                                  dic_autores["nom_parlamentar"] = 'Do Vereador' + ' ' + autoria['nom_autor_join']
+                               if parlamentar.sex_parlamentar == 'F':
+                                  dic_autores["nom_parlamentar"] = 'Da Vereadora' + ' ' + autoria['nom_autor_join']
+                lst_autores_mocoes.append(dic_autores)
+                lst_mocoes.append(dic_materia)
+                lst_qtde_mocoes.append(materia.cod_materia)
+
+  # Ordem do Dia
+  for ordem in context.zsql.ordem_dia_obter_zsql(dat_ordem=data, cod_sessao_plen=sessao.cod_sessao_plen, ind_excluido=0):
+    dic = {} 
+    dic["num_ordem"] = ordem.num_ordem
+    if ordem.cod_materia != None: 
+      materia = context.zsql.materia_obter_zsql(cod_materia=ordem.cod_materia)[0]
+      dic["cod_materia"] = ordem.cod_materia
+      dic["cod_parecer"] = ''
+      dic["id_materia"] = materia.des_tipo_materia+" nº "+str(materia.num_ident_basica)+"/"+str(materia.ano_ident_basica) 
+      dic["txt_ementa"] = ordem.txt_observacao
+      dic["des_turno"]=""
+      for turno in context.zsql.turno_discussao_obter_zsql(cod_turno=ordem.tip_turno):
+         dic["des_turno"] = turno.des_turno
+      dic["des_quorum"]=""
+      for quorum in context.zsql.quorum_votacao_obter_zsql(cod_quorum=ordem.tip_quorum):
+         dic["des_quorum"] = quorum.des_quorum
+      dic["tip_votacao"]=""
+      for tip_votacao in context.zsql.tipo_votacao_obter_zsql(tip_votacao=ordem.tip_votacao):
+         dic["tip_votacao"] = tip_votacao.des_tipo_votacao
+      dic["nom_autor"] = ""
+      autores = context.zsql.autoria_obter_zsql(cod_materia=ordem.cod_materia)
+      fields = autores.data_dictionary().keys()
+      lista_autor = []
+      for autor in autores:
+          for field in fields:
+              nome_autor = autor['nom_autor_join']
+          lista_autor.append(nome_autor)
+      dic["nom_autor"] = ', '.join(['%s' % (value) for (value) in lista_autor])
+      dic["parecer"] = ''
+      lst_qtde_pareceres = []
+      lst_pareceres = []
+      for relatoria in context.zsql.relatoria_obter_zsql(cod_materia=ordem.cod_materia):
+          dic_parecer = {}
+          comissao = context.zsql.comissao_obter_zsql(cod_comissao=relatoria.cod_comissao)[0]
+          relator = context.zsql.parlamentar_obter_zsql(cod_parlamentar=relatoria.cod_parlamentar)[0]
+          dic_parecer['relatoria'] = 'Relatoria: ' + relator.nom_parlamentar
+          dic_parecer['comissao'] = comissao.nom_comissao
+          dic_parecer['conclusao'] = ''
+          if relatoria.tip_conclusao == 'F':
+             dic_parecer['conclusao'] = 'Favorável à aprovação da matéria.'
+          elif relatoria.tip_conclusao == 'C':
+             dic_parecer['conclusao'] = 'Contrário à aprovação da matéria.'
+          dic_parecer["id_parecer"] = 'Parecer da ' + comissao.nom_comissao + ' nº ' + str(relatoria.num_parecer) + '/' + str(relatoria.ano_parecer)
+          lst_pareceres.append(dic_parecer)
+          lst_qtde_pareceres.append(relatoria.cod_relatoria)
+      dic["pareceres"] = lst_pareceres
+      dic["parecer"] = len(lst_qtde_pareceres)
+
+      dic["substitutivo"] = ''
+      lst_qtde_substitutivos=[]
+      lst_substitutivos=[]
+      for substitutivo in context.zsql.substitutivo_obter_zsql(cod_materia=ordem.cod_materia,ind_excluido=0):
+          autores = context.zsql.autoria_substitutivo_obter_zsql(cod_substitutivo=substitutivo.cod_substitutivo, ind_excluido=0)
+          dic_substitutivo = {}
+          fields = autores.data_dictionary().keys()
+          lista_autor = []
+          for autor in autores:
+              for field in fields:
+                  nome_autor = autor['nom_autor_join']
+              lista_autor.append(nome_autor)
+          autoria = ', '.join(['%s' % (value) for (value) in lista_autor])
+          dic_substitutivo["id_substitutivo"] = 'Substitutivo nº ' + str(substitutivo.num_substitutivo)
+          dic_substitutivo["txt_ementa"] = substitutivo.txt_ementa
+          dic_substitutivo["autoria"] = autoria
+          lst_substitutivos.append(dic_substitutivo)
+          cod_substitutivo = substitutivo.cod_substitutivo
+          lst_qtde_substitutivos.append(cod_substitutivo)
+      dic["substitutivos"] = lst_substitutivos
+      dic["substitutivo"] = len(lst_qtde_substitutivos)
+
+      dic["emenda"] = ''
+      dic["emendas"] = ''
+      lst_qtde_emendas=[]
+      lst_emendas=[]
+      for emenda in context.zsql.emenda_obter_zsql(cod_materia=ordem.cod_materia,ind_excluido=0,exc_pauta=0):
+          autores = context.zsql.autoria_emenda_obter_zsql(cod_emenda=emenda.cod_emenda,ind_excluido=0)
+          dic_emenda = {}
+          fields = autores.data_dictionary().keys()
+          lista_autor = []
+          for autor in autores:
+              for field in fields:
+                  nome_autor = autor['nom_autor_join']
+              lista_autor.append(nome_autor)
+          autoria = ', '.join(['%s' % (value) for (value) in lista_autor])
+          dic_emenda["id_emenda"] = 'Emenda nº ' + str(emenda.num_emenda) + ' (' + emenda.des_tipo_emenda + ')'
+          dic_emenda["txt_ementa"] = str(emenda.txt_ementa)
+          dic_emenda["autoria"] = autoria
+          lst_emendas.append(dic_emenda)
+          cod_emenda = emenda.cod_emenda
+          lst_qtde_emendas.append(cod_emenda)
+      dic["emendas"] = lst_emendas
+      dic["emenda"] = len(lst_qtde_emendas)
+    if ordem.urgencia == 1:     
+       lst_urgencia.append(dic) 
+    else:
+       lst_pauta.append(dic)      
+
+# ordena requerimentos por antiguidade
+lst_requerimentos.sort(key=lambda dic: dic_materia['cod_materia'])
+lst_mocoes.sort(key=lambda dic: dic_materia['cod_materia'])
+
+# setar apenas uma ocorrência de nome parlamentar
+lst_autores_requerimentos = [
+    e
+    for i, e in enumerate(lst_autores_requerimentos)
+    if lst_autores_requerimentos.index(e) == i
+]
+lst_autores_mocoes = [
+    e
+    for i, e in enumerate(lst_autores_mocoes)
+    if lst_autores_mocoes.index(e) == i
+]
+
+lst_requerimentos_vereadores = []
+for autor in lst_autores_requerimentos:
+    dic_vereador = {}
+    dic_vereador['vereador'] = autor.get('nom_parlamentar',autor)
+    lst_materias=[]
+    lst_qtde_materias=[]
+    for materia in lst_requerimentos:
+        dic_materias = {}
+        if materia.get('cod_autor',materia) == autor.get('cod_autor',autor):
+           dic_materias['id_materia'] = materia.get('id_materia',materia)
+           dic_materias['txt_ementa'] = materia.get('txt_ementa',materia)
+           lst_materias.append(dic_materias)
+           lst_qtde_materias.append(materia.get('cod_materia',materia))
+
+    dic_vereador['materias'] = lst_materias
+    dic_vereador['qtde_materias'] = len(lst_qtde_materias)
+    lst_requerimentos_vereadores.append(dic_vereador)
+
+lst_mocoes_vereadores = []
+for autor in lst_autores_mocoes:
+    dic_vereador = {}
+    dic_vereador['vereador'] = autor.get('nom_parlamentar',autor)
+    lst_materias=[]
+    lst_qtde_materias=[]
+    for materia in lst_mocoes:
+        dic_materias = {}
+        if materia.get('cod_autor',materia) == autor.get('cod_autor',autor):
+           dic_materias['id_materia'] = materia.get('id_materia',materia)
+           dic_materias['txt_ementa'] = materia.get('txt_ementa',materia)
+           lst_materias.append(dic_materias)
+           lst_qtde_materias.append(materia.get('cod_materia',materia))
+
+    dic_vereador['materias'] = lst_materias
+    dic_vereador['qtde_materias'] = len(lst_qtde_materias)
+    lst_mocoes_vereadores.append(dic_vereador)
+
+# quantidade total de requerimentos
+resumo_dic["lst_qtde_requerimentos"] = len(lst_qtde_requerimentos)
+resumo_dic["lst_materia_apresentada"] = lst_materia_apresentada
+resumo_dic["lst_autores_requerimentos"] = lst_autores_requerimentos 
+resumo_dic["lst_requerimentos_vereadores"] = lst_requerimentos_vereadores
+
+resumo_dic["lst_qtde_mocoes"] = len(lst_qtde_mocoes)
+resumo_dic["lst_autores_mocoes"] = lst_autores_mocoes 
+resumo_dic["lst_mocoes_vereadores"] = lst_mocoes_vereadores
+
+resumo_dic["lst_qtde_indicacoes"] = len(lst_qtde_indicacoes)
+
+resumo_dic["lst_pauta"] = lst_pauta
+resumo_dic["lst_urgencia"] = lst_urgencia
+
+return st.resumo_gerar_odt(resumo_dic, nom_arquivo, nom_modelo)

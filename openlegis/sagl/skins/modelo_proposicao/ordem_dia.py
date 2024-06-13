@@ -13,15 +13,31 @@ from DateTime import DateTime
 request = context.REQUEST
 response =  request.RESPONSE
 
+inf_basicas_dic = {}
+casa={}
+aux=context.sapl_documentos.props_sagl.propertyItems()
+for item in aux:
+    casa[item[0]]=item[1]
+localidade=context.zsql.localidade_obter_zsql(cod_localidade=casa["cod_localidade"])
+estado = context.zsql.localidade_obter_zsql(tip_localidade="U")
+for uf in estado:
+    if localidade[0].sgl_uf == uf.sgl_uf:
+        nom_estado = uf.nom_localidade
+        break
+inf_basicas_dic['nom_camara']= casa['nom_casa']
+inf_basicas_dic["nom_estado"] = nom_estado
+for local in context.zsql.localidade_obter_zsql(cod_localidade = casa['cod_localidade']):
+    inf_basicas_dic['nom_localidade']= local.nom_localidade
+    inf_basicas_dic['sgl_uf']= local.sgl_uf
+
 if 'ind_audiencia' in request:
    for sessao in context.zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=cod_sessao_plen, ind_audiencia=1, ind_excluido=0):
-       inf_basicas_dic = {}
        tipo_sessao = context.zsql.tipo_sessao_plenaria_obter_zsql(tip_sessao=sessao.tip_sessao,ind_audiencia='1',ind_excluido=0)[0]
        inf_basicas_dic["cod_sessao_plen"] = sessao.cod_sessao_plen
        # CM Jaboticabal
        #inf_basicas_dic["num_tip_sessao"] = sessao.num_tip_sessao
        inf_basicas_dic["num_sessao_plen"] = sessao.num_sessao_plen
-       inf_basicas_dic["nom_sessao"] = tipo_sessao.nom_sessao
+       inf_basicas_dic["nom_sessao"] = tipo_sessao.nom_sessao.upper()
        inf_basicas_dic["num_legislatura"] = sessao.num_legislatura
        inf_basicas_dic["num_sessao_leg"] = sessao.num_sessao_leg
        inf_basicas_dic["dat_inicio_sessao"] = sessao.dat_inicio_sessao
@@ -30,9 +46,11 @@ if 'ind_audiencia' in request:
        inf_basicas_dic["hr_inicio_sessao"] = sessao.hr_inicio_sessao
        inf_basicas_dic["dat_fim_sessao"] = sessao.dat_fim_sessao
        inf_basicas_dic["hr_fim_sessao"] = sessao.hr_fim_sessao
+       inf_basicas_dic["txt_tema"] = sessao.tip_expediente
        inf_basicas_dic["num_periodo"] = ''
-       for periodo in context.zsql.periodo_sessao_obter_zsql(cod_periodo=sessao.cod_periodo_sessao):
-           inf_basicas_dic["num_periodo"] = periodo.num_periodo
+       if sessao.cod_periodo_sessao != None:
+          for periodo in context.zsql.periodo_sessao_obter_zsql(cod_periodo=sessao.cod_periodo_sessao):
+              inf_basicas_dic["num_periodo"] = periodo.num_periodo
        data = context.pysc.data_converter_pysc(sessao.dat_inicio_sessao)
        nom_arquivo = str(cod_sessao_plen)+'_pauta_sessao.odt'
        # Presidente
@@ -73,10 +91,19 @@ if 'ind_audiencia' in request:
            lst_pdiscussao.append(dic_pdiscussao)
        lst_sdiscussao=[]
        lst_discussao_unica=[]
+       inf_basicas_dic["apresentada"] = []
+       inf_basicas_dic["pdiscussao"] = []
+       inf_basicas_dic["sdiscussao"] = []
+       inf_basicas_dic["dunica"] = []
+       inf_basicas_dic["pcontrario"] = []
+       inf_basicas_dic["veto"] = []
+       inf_basicas_dic["contra"] = []
+       inf_basicas_dic["devolucao"] = []
+   nom_modelo = 'pauta_audiencia.odt'
+   return st.ordem_dia_gerar_odt(inf_basicas_dic, lst_pdiscussao, lst_sdiscussao, lst_discussao_unica, lst_presidente, nom_arquivo, nom_modelo)
 else:
    for sessao in context.zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=cod_sessao_plen, ind_excluido=0):
        data = context.pysc.data_converter_pysc(sessao.dat_inicio_sessao)
-       inf_basicas_dic = {} # dicionário que armazenará as informacoes basicas da sessao plenaria
        # seleciona o tipo da sessao plenaria
        tipo_sessao = context.zsql.tipo_sessao_plenaria_obter_zsql(tip_sessao=sessao.tip_sessao,ind_excluido=0)[0]
        inf_basicas_dic["cod_sessao_plen"] = sessao.cod_sessao_plen
@@ -90,8 +117,9 @@ else:
        inf_basicas_dic["dat_fim_sessao"] = sessao.dat_fim_sessao
        inf_basicas_dic["hr_fim_sessao"] = sessao.hr_fim_sessao
        inf_basicas_dic["num_periodo"] = ''
-       for periodo in context.zsql.periodo_sessao_obter_zsql(cod_periodo=sessao.cod_periodo_sessao):
-           inf_basicas_dic["num_periodo"] = periodo.num_periodo
+       if sessao.cod_periodo_sessao != None:
+          for periodo in context.zsql.periodo_sessao_obter_zsql(cod_periodo=sessao.cod_periodo_sessao):
+              inf_basicas_dic["num_periodo"] = periodo.num_periodo
        nom_arquivo = str(cod_sessao_plen)+'_pauta_sessao.odt'
        # obtém o nome do Presidente da Câmara titular
        inf_basicas_dic["lst_presidente"] = ''
@@ -217,23 +245,9 @@ else:
               inf_basicas_dic["contra"].append(dic)
            if item.tip_turno == 9:
               inf_basicas_dic["devolucao"].append(dic)
-lst_pdiscussao = ''
-lst_sdiscussao = ''
-lst_discussao_unica = ''
-lst_presidente = ''
-casa={}
-aux=context.sapl_documentos.props_sagl.propertyItems()
-for item in aux:
-    casa[item[0]]=item[1]
-localidade=context.zsql.localidade_obter_zsql(cod_localidade=casa["cod_localidade"])
-estado = context.zsql.localidade_obter_zsql(tip_localidade="U")
-for uf in estado:
-    if localidade[0].sgl_uf == uf.sgl_uf:
-        nom_estado = uf.nom_localidade
-        break
-inf_basicas_dic['nom_camara']= casa['nom_casa']
-inf_basicas_dic["nom_estado"] = nom_estado
-for local in context.zsql.localidade_obter_zsql(cod_localidade = casa['cod_localidade']):
-    inf_basicas_dic['nom_localidade']= local.nom_localidade
-    inf_basicas_dic['sgl_uf']= local.sgl_uf
-return st.ordem_dia_gerar_odt(inf_basicas_dic, lst_pdiscussao, lst_sdiscussao, lst_discussao_unica, lst_presidente, nom_arquivo)
+   lst_pdiscussao = ''
+   lst_sdiscussao = ''
+   lst_discussao_unica = ''
+   lst_presidente = ''
+   nom_modelo = 'ordem_dia.odt'
+   return st.ordem_dia_gerar_odt(inf_basicas_dic, lst_pdiscussao, lst_sdiscussao, lst_discussao_unica, lst_presidente, nom_arquivo, nom_modelo)

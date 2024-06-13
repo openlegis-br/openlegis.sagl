@@ -35,7 +35,9 @@
     </div>
 </dtml-comment>
   <dtml-in expr="zsql.presidentes_obter_zsql()">     
-    <div class="row text-center">  
+   <dtml-if sequence-start>
+     <div class="row text-center">  
+   </dtml-if>
         <div class="col-6 col-md-4 col-lg-3 mb-4">
            <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia'])">
                   <a href="<dtml-var portal_url>/cadastros/parlamentar/parlamentar_mostrar_proc?cod_parlamentar=<dtml-var cod_parlamentar>" title="<dtml-var nom_parlamentar>" style="color: #333;">
@@ -59,7 +61,9 @@
                 </span>
             </div></a>
         </div>
-    </div>
+   <dtml-if sequence-end>
+     </div>
+   </dtml-if>
   <dtml-else>
     <div class="row">
       <div class="col-12 mb-4">

@@ -325,9 +325,9 @@ for sessao in metodo:
        lst_pauta.append(dic)
 
 # ordena materias por antiguidade
-lst_indicacoes.sort(key=lambda dic: dic_materia['num_ident_basica'])
-lst_requerimentos.sort(key=lambda dic: dic_materia['num_ident_basica'])
-lst_mocoes.sort(key=lambda dic: dic_materia['num_ident_basica'])
+lst_indicacoes.sort(key=lambda dic: dic['num_ident_basica'])
+lst_requerimentos.sort(key=lambda dic: dic['num_ident_basica'])
+lst_mocoes.sort(key=lambda dic: dic['num_ident_basica'])
 
 # setar apenas uma ocorrência de nome parlamentar
 lst_autores_indicacoes = [

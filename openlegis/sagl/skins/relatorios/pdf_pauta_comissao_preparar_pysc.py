@@ -131,7 +131,7 @@ if context.REQUEST['cod_reuniao']!='':
     estado = context.zsql.localidade_obter_zsql(tip_localidade="U")
     for uf in estado:
         if localidade[0].sgl_uf == uf.sgl_uf:
-            nom_estado = uf.nom_localidade.encode('utf-8')
+            nom_estado = uf.nom_localidade
             break
 
     cabecalho["nom_casa"] = casa["nom_casa"]

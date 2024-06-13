@@ -77,6 +77,8 @@ def initialize(context):
     allow_module('reportlab')
     allow_module('reportlab.lib')
     allow_module('reportlab.lib.utils')
+    allow_module('operator')
+
 
     tools = (SAGLTool.SAGLTool,)
     ToolInit('SAGL Tool',

@@ -22,7 +22,7 @@ def obter_materia(cod_materia_respondida):
             autoria = autor.nom_autor_join    
         id_materia = 'Resposta - ' + materia.sgl_tipo_materia + ' ' + str(materia.num_ident_basica) + '/' + str(materia.ano_ident_basica) +' - '+ autoria        
 
-    return id_materia.encode('utf-8')
+    return id_materia
 
 def numero_protocolo():
     if context.sapl_documentos.props_sagl.numero_protocolo_anual == 1:

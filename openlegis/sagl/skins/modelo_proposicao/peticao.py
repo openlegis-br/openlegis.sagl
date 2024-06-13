@@ -81,4 +81,3 @@ for peticao in context.zsql.peticao_obter_zsql(cod_peticao=cod_peticao):
     inf_basicas_dic['materia_vinculada'] = materia_vinculada
 
 return st.peticao_gerar_odt(inf_basicas_dic, nom_arquivo, modelo_path)
-

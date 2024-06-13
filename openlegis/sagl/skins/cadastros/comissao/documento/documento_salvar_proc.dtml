@@ -86,11 +86,11 @@
                 <dtml-if expr="hasattr(sapl_documentos.documento_comissao,id_documento)">
                   <dtml-if expr="rad_ind_publico=='0'">
                     <dtml-let arquivo="getattr(sapl_documentos.documento_comissao,id_documento)">
-                      <dtml-call "arquivo.manage_permission('View', roles=['Manager','Authenticated'], acquire=0)">
+                      <dtml-call "arquivo.manage_permission('View', roles=['Manager','Authenticated'], acquire=1)">
                     </dtml-let>
                   <dtml-elif expr="rad_ind_publico=='1'">
                     <dtml-let arquivo="getattr(sapl_documentos.documento_comissao,id_documento)">     
-                      <dtml-call "arquivo.manage_permission('View', roles=['Manager','Authenticated', 'Anonymous'], acquire=0)">
+                      <dtml-call "arquivo.manage_permission('View', roles=['Manager','Authenticated', 'Anonymous'], acquire=1)">
                     </dtml-let>
                   </dtml-if>
                 </dtml-if>

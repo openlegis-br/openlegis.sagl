@@ -114,5 +114,3 @@ for proposicao in context.zsql.proposicao_obter_zsql(cod_proposicao=cod_proposic
         nom_autor.append(autor_dic)
 
 return st.proposicao_gerar_odt(inf_basicas_dic, num_proposicao, nom_arquivo, des_tipo_materia, num_ident_basica, ano_ident_basica, txt_ementa, materia_vinculada, dat_apresentacao, nom_autor, apelido_autor, modelo_proposicao, modelo_path)
-
-#return inf_basicas_dic['id_materia']

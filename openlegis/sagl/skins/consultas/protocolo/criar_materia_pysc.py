@@ -17,7 +17,7 @@ for protocolo in context.zsql.protocolo_obter_zsql(cod_protocolo=cod_protocolo):
     ano_materia = protocolo.ano_protocolo
     dat_apresentacao = DateTime().strftime("%Y-%m-%d")
     num_protocolo = protocolo.num_protocolo
-    txt_ementa = protocolo.txt_assunto_ementa.encode('utf-8')
+    txt_ementa = protocolo.txt_assunto_ementa
     txt_observacao = protocolo.txt_observacao
     cod_autor = protocolo.cod_autor
 

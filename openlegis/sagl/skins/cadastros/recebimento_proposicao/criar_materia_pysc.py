@@ -25,7 +25,7 @@ for proposicao in context.zsql.proposicao_obter_zsql(cod_proposicao=cod_proposic
     cod_mat = proposicao.cod_mat_ou_doc
     dat_apresentacao = DateTime().strftime("%Y-%m-%d")
     dat_envio = proposicao.dat_envio
-    txt_ementa = proposicao.txt_descricao.encode('utf-8')
+    txt_ementa = proposicao.txt_descricao
     txt_observacao = proposicao.txt_observacao
     cod_autor = proposicao.cod_autor
     if proposicao.tip_mat_ou_doc == 'Projeto de Lei Complementar':

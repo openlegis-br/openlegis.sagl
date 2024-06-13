@@ -72,7 +72,7 @@ if context.REQUEST['data']!='':
     estado = context.zsql.localidade_obter_zsql(tip_localidade="U")
     for uf in estado:
         if localidade[0].sgl_uf == uf.sgl_uf:
-            nom_estado = uf.nom_localidade.encode('utf-8')
+            nom_estado = uf.nom_localidade
             break
 
     inf_basicas_dic['nom_camara']= casa['nom_casa']
@@ -84,7 +84,7 @@ if context.REQUEST['data']!='':
 
     REQUEST=context.REQUEST
     for local in context.zsql.localidade_obter_zsql(cod_localidade = casa['cod_localidade']):
-        rodape['nom_localidade']= local.nom_localidade.encode('utf-8')
+        rodape['nom_localidade']= local.nom_localidade
         rodape['sgl_uf']= local.sgl_uf
 
 #   return lst_votacao

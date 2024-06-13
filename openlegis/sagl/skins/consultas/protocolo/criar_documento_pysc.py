@@ -17,9 +17,9 @@ for protocolo in context.zsql.protocolo_obter_zsql(cod_protocolo=cod_protocolo):
     ano_documento = protocolo.ano_protocolo
     dat_documento = DateTime().strftime("%Y-%m-%d")
     num_protocolo = protocolo.num_protocolo
-    txt_assunto = protocolo.txt_assunto_ementa.encode('utf-8')
+    txt_assunto = protocolo.txt_assunto_ementa
     txt_observacao = protocolo.txt_observacao
-    txt_interessado = protocolo.txt_interessado.encode('utf-8')
+    txt_interessado = protocolo.txt_interessado
 
     for numero in context.zsql.numero_documento_administrativo_obter_zsql(tip_documento = protocolo.tip_documento,
 ano_documento = protocolo.ano_protocolo):
@@ -45,7 +45,7 @@ def criar_documento(tip_documento, num_documento, ano_documento, dat_documento, 
        context.sapl_documentos.administrativo.manage_renameObjects(ids=list([tmp_id]),new_ids=list([id_documento]))
        documento = getattr(context.sapl_documentos.administrativo,id_documento)
        if tipo_doc.ind_publico == 0:
-          documento.manage_permission('View', roles=['Authenticated', 'Manager'], acquire=0)
+          documento.manage_permission('View', roles=['Authenticated', 'Manager'], acquire=1)
        elif tipo_doc.ind_publico == 1:
           documento.manage_permission('View', roles=['Anonymous','Manager'], acquire=1)
     elif hasattr(context.sapl_documentos.protocolo,id_protocolo):
@@ -54,7 +54,7 @@ def criar_documento(tip_documento, num_documento, ano_documento, dat_documento, 
        context.sapl_documentos.administrativo.manage_renameObjects(ids=list([tmp_id]),new_ids=list([id_documento]))
        documento = getattr(context.sapl_documentos.administrativo,id_documento)
        if tipo_doc.ind_publico == 0:
-          documento.manage_permission('View', roles=['Authenticated', 'Manager'], acquire=0)
+          documento.manage_permission('View', roles=['Authenticated', 'Manager'], acquire=1)
        elif tipo_doc.ind_publico == 1:
           documento.manage_permission('View', roles=['Anonymous','Manager'], acquire=1)
 

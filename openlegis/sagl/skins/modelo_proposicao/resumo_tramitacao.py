@@ -63,7 +63,7 @@ for materia in context.zsql.materia_obter_zsql(cod_materia=cod_materia):
  if materia.cod_regime_tramitacao != None:
    for regime in context.zsql.regime_tramitacao_obter_zsql(cod_regime_tramitacao=materia.cod_regime_tramitacao):
      regime_tramitacao = regime.des_regime_tramitacao
- nom_arquivo = 'resumo-tramitacao-'+materia.sgl_tipo_materia.encode('utf-8')+'-'+str(materia.num_ident_basica)+'-'+str(materia.ano_ident_basica)+'.odt'
+ nom_arquivo = 'resumo-tramitacao-'+materia.sgl_tipo_materia+'-'+str(materia.num_ident_basica)+'-'+str(materia.ano_ident_basica)+'.odt'
  nom_arquivo = nom_arquivo
 
 return st.resumo_tramitacao_gerar_odt(inf_basicas_dic, num_protocolo, dat_protocolo, hor_protocolo, dat_vencimento, num_proposicao, des_tipo_materia, nom_autor, txt_ementa, regime_tramitacao, nom_arquivo)

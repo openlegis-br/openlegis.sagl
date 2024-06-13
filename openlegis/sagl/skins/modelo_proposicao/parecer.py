@@ -43,13 +43,12 @@ for relatoria in context.zsql.relatoria_obter_zsql(cod_relatoria=cod_relatoria, 
        tip_apresentacao = 'Verbal'
     else:
        tip_apresentacao = ""
+       
     tip_conclusao = ""
-
     if relatoria.tip_conclusao == 'F':
        tip_conclusao = 'Favoravel'
     elif relatoria.tip_conclusao == 'C':
        tip_conclusao = 'Contrario'
-
 
     tip_resultado = ""
     if relatoria.tip_fim_relatoria != None:

@@ -36,7 +36,7 @@ for substitutivo in context.zsql.substitutivo_obter_zsql(cod_substitutivo=cod_su
  num_proposicao = " "
  des_tipo_materia = 'SUBSTITUTIVO'
  num_ident_basica = substitutivo.num_substitutivo
- ano_ident_basica = DateTime().strftime("%Y")
+ ano_ident_basica = DateTime(substitutivo.dat_apresentacao).strftime("%Y")
  txt_ementa = substitutivo.txt_ementa
  dat_apresentacao = context.pysc.data_converter_por_extenso_pysc(data=substitutivo.dat_apresentacao)
 

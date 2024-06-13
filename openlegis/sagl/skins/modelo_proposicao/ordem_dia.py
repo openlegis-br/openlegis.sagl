@@ -34,8 +34,7 @@ if 'ind_audiencia' in request:
    for sessao in context.zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=cod_sessao_plen, ind_audiencia=1, ind_excluido=0):
        tipo_sessao = context.zsql.tipo_sessao_plenaria_obter_zsql(tip_sessao=sessao.tip_sessao,ind_audiencia='1',ind_excluido=0)[0]
        inf_basicas_dic["cod_sessao_plen"] = sessao.cod_sessao_plen
-       # CM Jaboticabal
-       #inf_basicas_dic["num_tip_sessao"] = sessao.num_tip_sessao
+       #inf_basicas_dic["num_tip_sessao"] = sessao.num_tip_sessao # CM Jaboticabal
        inf_basicas_dic["num_sessao_plen"] = sessao.num_sessao_plen
        inf_basicas_dic["nom_sessao"] = tipo_sessao.nom_sessao.upper()
        inf_basicas_dic["num_legislatura"] = sessao.num_legislatura

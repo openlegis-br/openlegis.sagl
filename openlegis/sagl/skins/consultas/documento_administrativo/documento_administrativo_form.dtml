@@ -69,7 +69,7 @@ $(function () {
            </dtml-if>
           </dtml-let>
           <dtml-let documento="getattr(sapl_documentos.administrativo,id_documento).absolute_url">        
-             <a class="btn btn-sm btn-primary" target="_blank" href="<dtml-var documento>">
+             <a class="btn btn-sm btn-primary" target="_blank" href="<dtml-var portal_url>/pysc/download_documento_pysc?cod_documento=<dtml-var cod_documento>">
                <dtml-if expr="_.has_key('cod_assinatura_doc') and hasattr(sapl_documentos.documentos_assinados, cod_assinatura_doc+'.pdf')">
                  <i class="fa fa-certificate"></i> Texto Integral
                <dtml-else>

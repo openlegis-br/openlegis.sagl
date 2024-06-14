@@ -1,7 +1,7 @@
 <dtml-try>
  <dtml-in expr="zsql.documento_administrativo_obter_zsql(cod_documento=cod_documento,ind_excluido=0)">
   <dtml-if expr="AUTHENTICATED_USER.has_role(['Authenticated'])">
-     <dtml-var documento_administrativo_form>
+    <dtml-var documento_administrativo_form>
   <dtml-elif expr="ind_publico==1">
      <dtml-var documento_administrativo_form>
   <dtml-else>
@@ -10,8 +10,19 @@
     </dtml-let>
   </dtml-if>
  </dtml-in>
+ <dtml-if expr="dbcon_logs and cod_documento">
+   <dtml-call expr="zsql.logs_registrar_zsql(
+         usuario      = REQUEST['AUTHENTICATED_USER'].getUserName(), 
+         data         = DateTime().strftime('%Y-%m-%d %H:%M:%S'),
+         modulo       = str(_['REQUEST']['URL1']).split('/')[-1],
+         metodo       = 'consultas/documento_administrativo_mostrar_proc',
+         IP           = pysc.get_ip(),
+         dados        = 'acessou form de consulta',
+         cod_registro = cod_documento)"> 
+ </dtml-if>
 <dtml-except>
   <dtml-let mensagem="'Houve um erro!'" tipo_mensagem="'danger'">
      <dtml-var mensagem_emitir>
   </dtml-let>
 </dtml-try>
+

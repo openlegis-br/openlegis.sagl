@@ -15,8 +15,19 @@
           </dtml-let>   
       </dtml-if>
     </dtml-in>
+    <dtml-if expr="dbcon_logs and cod_documento">
+      <dtml-call expr="zsql.logs_registrar_zsql(
+            usuario      = REQUEST['AUTHENTICATED_USER'].getUserName(), 
+            data         = DateTime().strftime('%Y-%m-%d %H:%M:%S'),
+            modulo       = str(_['REQUEST']['URL1']).split('/')[-1],
+            metodo       = 'cadastros/documento_administrativo_mostrar_proc',
+            IP           = pysc.get_ip(),
+            dados        = 'acessou form de cadastro',
+            cod_registro = cod_documento)"> 
+    </dtml-if>
 <dtml-except>
   <dtml-let mensagem="'Houve um erro!'" tipo_mensagem="'danger'">
      <dtml-var mensagem_emitir>
   </dtml-let>
 </dtml-try>
+

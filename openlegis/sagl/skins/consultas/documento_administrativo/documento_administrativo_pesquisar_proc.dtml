@@ -216,12 +216,12 @@
                      <a class="btn btn-primary" href="<dtml-var portal_url>/sapl_documentos/administrativo/<dtml-var texto_assinado>" target="_blank"><i class="far fa-file-pdf"></i> Documento Assinado</a>
                   </dtml-if>
                   <dtml-if "hasattr(sapl_documentos.administrativo,texto_original)">
-                       <dtml-let isAnon="portal_membership.isAnonymousUser()">
-                        <dtml-if expr="not isAnon">
-                          <a class="btn btn-sm btn-primary" href="<dtml-var portal_url>/consultas/documento_administrativo/pasta_digital/?cod_documento=<dtml-var cod_documento>&action=pasta" target="_blank"><i class="far fa-folder"></i> Pasta Digital</a>
-                        </dtml-if>
-                       </dtml-let>
-                    <a class="btn btn-primary" href="<dtml-var portal_url>/sapl_documentos/administrativo/<dtml-var texto_original>" target="_blank"><i class="fas fa-file-pdf"></i> Texto Integral</a>
+                    <dtml-let isAnon="portal_membership.isAnonymousUser()">
+                     <dtml-if expr="not isAnon">
+                       <a class="btn btn-sm btn-primary" href="<dtml-var portal_url>/consultas/documento_administrativo/pasta_digital/?cod_documento=<dtml-var cod_documento>&action=pasta" target="_blank"><i class="far fa-folder"></i> Pasta Digital</a>
+                     </dtml-if>
+                    </dtml-let>
+                    <a class="btn btn-primary" href="<dtml-var portal_url>/pysc/download_documento_pysc?cod_documento=<dtml-var cod_documento>" target="_blank"><i class="fas fa-file-pdf"></i> Texto Integral</a>
                  </dtml-if>    
                 </div>
              </div>

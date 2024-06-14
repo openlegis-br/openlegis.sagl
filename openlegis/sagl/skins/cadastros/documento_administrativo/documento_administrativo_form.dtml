@@ -407,7 +407,7 @@ $(document).ready(() => {
         </dtml-in>
         <dtml-if "hasattr(sapl_documentos.administrativo,id_documento)">
           <dtml-let documento="getattr(sapl_documentos.administrativo,id_documento).absolute_url">
-             <a class="btn btn-secondary" target="_blank" href="<dtml-var documento>?<dtml-var expr="ZopeTime().timeTime()">">
+             <a class="btn btn-secondary" target="_blank" href="<dtml-var portal_url>/pysc/download_documento_pysc?cod_documento=<dtml-var cod_documento>">
                <dtml-if expr="_.has_key('cod_assinatura_doc') and hasattr(sapl_documentos.documentos_assinados, cod_assinatura_doc+'.pdf')">
                  <i class="fa fa-certificate"></i> Visualizar
                <dtml-else>
@@ -600,6 +600,17 @@ $(document).ready(() => {
 </dtml-if>
 
 </div>
+
+<dtml-if expr="_.has_key('cod_documento')">
+  <dtml-if dbcon_logs>
+    <div class="row">
+      <div class="col-12 text-right">
+        <i class="fa fa-clock small"></i>      
+        <a href="#" class="text-muted small" data-toggle="modal" data-target="#iFrameModal" data-title="Histórico" data-src="<dtml-var portal_url>/historico?cod_registro=<dtml-var cod_documento>&modulo=documento_administrativo&modal=1">Histórico</a>  
+      </div>
+    </div>
+  </dtml-if>
+</dtml-if>
 
 <script>
 autosize(document.querySelectorAll('textarea'));

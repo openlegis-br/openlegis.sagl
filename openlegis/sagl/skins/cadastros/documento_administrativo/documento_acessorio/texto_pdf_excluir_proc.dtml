@@ -1,0 +1,42 @@
+<dtml-call expr="REQUEST.set('erro', 0)">
+<dtml-call expr="REQUEST.set('id_texto', str(cod_documento_acessorio)+'.pdf')">
+
+<dtml-try>
+  <dtml-if expr="hasattr(sapl_documentos.administrativo,id_texto)">
+     <dtml-call "sapl_documentos.administrativo.manage_delObjects(id_texto)">
+  </dtml-if>
+<dtml-except>
+  <dtml-call expr="REQUEST.set('erro', 1)">
+</dtml-try>
+
+<dtml-in expr="zsql.assinatura_documento_obter_zsql(codigo=cod_documento_acessorio,tipo_doc='doc_acessorio_adm')">
+ <dtml-try>
+   <dtml-call expr="zsql.assinatura_documento_excluir_zsql(
+                            cod_assinatura_doc  = cod_assinatura_doc,
+                            codigo              = codigo,
+                            tipo_doc            = tipo_doc)">
+ <dtml-except>
+    <dtml-call expr="REQUEST.set('erro', 1)">
+ </dtml-try>
+</dtml-in>
+
+<dtml-if erro>
+  <dtml-let mensagem="'Ocorreu um erro ao excluir o arquivo PDF!'" tipo_mensagem="'danger'">
+    <dtml-var mensagem_emitir>
+  </dtml-let>
+<dtml-else>
+  <dtml-let mensagem="'Arquivo PDF excluído com sucesso!'" url="'documento_acessorio_mostrar_proc?cod_documento_acessorio='+cod_documento_acessorio+'&modal=1'">
+    <dtml-var mensagem_emitir>
+  </dtml-let>
+</dtml-if>
+
+<dtml-comment>LOG DE AUDITORIA</dtml-comment>
+<dtml-if dbcon_logs>
+  <dtml-call expr="zsql.logs_registrar_zsql(
+            usuario      = REQUEST['AUTHENTICATED_USER'].getUserName(), 
+            data         = DateTime().strftime('%Y-%m-%d %H:%M:%S'),
+            modulo       = str(_['REQUEST']['URL1']).split('/')[-1],
+            metodo       = 'pdf_documento_excluir',
+            IP           = pysc.get_ip(),
+            cod_registro = cod_documento_acessorio)"> 
+</dtml-if>

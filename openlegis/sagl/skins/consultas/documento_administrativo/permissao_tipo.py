@@ -20,7 +20,7 @@ if request['AUTHENTICATED_USER'].has_role(['Authenticated']):
 
 lst_tipo=[]
 
-for tipo in context.zsql.tipo_documento_administrativo_obter_zsql(ind_escluido=0):
+for tipo in context.zsql.tipo_documento_administrativo_obter_zsql(tip_natureza='P', ind_excluido=0):
     if request['AUTHENTICATED_USER'].has_role(['Manager', 'Operador', 'Operador Modulo Administrativo', 'Consulta Modulo Administrativo']):
        dic_tipo= {}
        dic_tipo['tip_documento']= tipo.tip_documento

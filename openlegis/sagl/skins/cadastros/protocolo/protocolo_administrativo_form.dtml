@@ -100,7 +100,7 @@ $(document).ready(function () {
          <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Protocolo'])">
            <select class="custom-select" id="lst_tip_documento" name="lst_tip_documento" required>
             <option>Selecione</option>
-            <dtml-in expr="zsql.tipo_documento_administrativo_obter_zsql(ind_excluido=0)">
+            <dtml-in expr="zsql.tipo_documento_administrativo_obter_zsql(tip_natureza='P',ind_excluido=0)">
               <option value="<dtml-var tip_documento>">
                 <dtml-var sgl_tipo_documento> - <dtml-var des_tipo_documento>
               </option>
@@ -109,7 +109,7 @@ $(document).ready(function () {
          <dtml-elif expr="AUTHENTICATED_USER.has_role(['Operador Modulo Administrativo'])">
            <select class="custom-select" id="lst_tip_documento" name="lst_tip_documento" required>
 	    <option>Selecione</option>
-            <dtml-in expr="zsql.tipo_documento_administrativo_obter_zsql(ind_publico=0,ind_excluido=0)">
+            <dtml-in expr="zsql.tipo_documento_administrativo_obter_zsql(tip_natureza='P',ind_publico=0,ind_excluido=0)">
               <option value="<dtml-var tip_documento>">
                 <dtml-var sgl_tipo_documento> - <dtml-var des_tipo_documento>
               </option>
@@ -118,7 +118,7 @@ $(document).ready(function () {
          <dtml-elif expr="AUTHENTICATED_USER.has_role(['Operador Materia'])">
            <select class="custom-select" id="lst_tip_documento" name="lst_tip_documento" required>
 	    <option>Selecione</option>
-            <dtml-in expr="zsql.tipo_documento_administrativo_obter_zsql(ind_publico=1,ind_excluido=0)">
+            <dtml-in expr="zsql.tipo_documento_administrativo_obter_zsql(tip_natureza='P',ind_publico=1,ind_excluido=0)">
               <option value="<dtml-var tip_documento>">
                 <dtml-var sgl_tipo_documento> - <dtml-var des_tipo_documento>
               </option>

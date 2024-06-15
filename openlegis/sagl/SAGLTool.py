@@ -697,6 +697,30 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         os.unlink(nom_arquivo_pdf)
         self.sapl_documentos.materia.manage_addFile(id=nom_arquivo_pdf,file=self.pysc.upload_file(file=content, title='Documento Acessório'))
 
+    def doc_acessorio_adm_gerar_odt(self, inf_basicas_dic, documento_dic, modelo_documento):
+        arq = getattr(self.sapl_documentos.modelo.documento_administrativo, modelo_documento)
+        template_file = BytesIO(bytes(arq.data))
+        brasao_file = self.get_brasao()
+        exec('brasao = brasao_file')
+        output_file_odt = "%s" % documento_dic['nom_arquivo']
+        renderer = Renderer(template_file, locals(), output_file_odt, pythonWithUnoPath='/usr/bin/python3',forceOoCall=True)
+        renderer.run()
+        data = open(output_file_odt, "rb").read()
+        os.unlink(output_file_odt)
+        self.sapl_documentos.administrativo.manage_addFile(id=output_file_odt,file=data)
+
+    def doc_acessorio_adm_gerar_pdf(self, cod_documento_acessorio):
+        nom_arquivo_odt = "%s"%cod_documento_acessorio+'.odt'
+        nom_arquivo_pdf = "%s"%cod_documento_acessorio+'.pdf'
+        arq = getattr(self.sapl_documentos.administrativo, nom_arquivo_odt)
+        odtFile = BytesIO(bytes(arq.data))
+        output_file_pdf = os.path.normpath(nom_arquivo_pdf)
+        renderer = Renderer(odtFile,locals(),nom_arquivo_pdf,pythonWithUnoPath='/usr/bin/python3',forceOoCall=True)
+        renderer.run()
+        content = open(nom_arquivo_pdf, "rb").read()
+        os.unlink(nom_arquivo_pdf)
+        self.sapl_documentos.administrativo.manage_addFile(id=nom_arquivo_pdf,file=self.pysc.upload_file(file=content, title='Documento Acessório'))
+
     def oficio_ind_gerar_odt(self, inf_basicas_dic, lst_indicacao, lst_presidente):
         arq = getattr(self.sapl_documentos.modelo.sessao_plenaria, "oficio_indicacao.odt")
         template_file = BytesIO(bytes(arq.data))

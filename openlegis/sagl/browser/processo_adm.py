@@ -86,6 +86,7 @@ class ProcessoAdm(grok.View):
                texto_anexo = pymupdf.open(stream=arquivo_doc)
                metadata = {"title": dic["title"]}
                texto_anexo.set_metadata(metadata)
+               texto_anexo.bake()
                merger.insert_pdf(texto_anexo)
                arq2 = texto_anexo.tobytes()
                with open(os.path.join(dirpath) + '/' + downloaded_pdf, 'wb') as f:

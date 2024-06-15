@@ -30,7 +30,7 @@
           return false;
       }
       if (form.txt_nom_autor_documento.value==""){
-         alert("A nome do autor do documento acessório deve ser preenchido!");
+         alert("A autor do documento acessório deve ser preenchido!");
          form.txt_nom_autor_documento.focus();
          return false;
       }  
@@ -39,19 +39,36 @@
         
       form.submit();
   }
-    
+
+  function texto_odt_gerar(){
+      lst_modelo = document.getElementById("lst_modelo");
+      lst_modelo.options[lst_modelo.selectedIndex].value;     
+
+      if (lst_modelo.selectedIndex == 0) {
+         alert("É necessário selecionar um modelo!");
+      }
+
+      if ((lst_modelo.selectedIndex != 0) && confirm("Confirma a geração do arquivo ODT?")) {
+         location.href="<dtml-var portal_url>/modelo_proposicao/doc_acessorio_adm?cod_documento_acessorio=<dtml-var cod_documento_acessorio missing>&modelo_documento="+lst_modelo.options[lst_modelo.selectedIndex].value;
+         setTimeout(function(){window.location.reload(true)},2500);
+         return true;
+       }
+         return;
+  }
+
+  function texto_pdf_gerar(){
+      if (confirm("Confirma a geração do arquivo PDF?")) {
+         location.href="<dtml-var portal_url>/modelo_proposicao/doc_acessorio_adm_gerar_pdf?cod_documento_acessorio=<dtml-var cod_documento_acessorio missing>";
+         setTimeout(function(){window.location.reload(true)},2500);
+         return true;
+       }
+  return;
+  }
   
   function documento_acessorio_excluir(){
        
-       if (confirm("Deseja realmente excluir?")) {          
+       if (confirm("Deseja realmente excluir o registro do documento acessório?")) {          
           location.href="documento_acessorio_excluir_proc?cod_documento_acessorio=<dtml-var cod_documento_acessorio missing>&cod_documento=<dtml-var cod_documento missing>&nom_documento=<dtml-var nom_documento missing>&modal=1";
-       }
-  } 
-
-  function texto_documento_excluir(){
-       
-       if (confirm("Deseja realmente excluir o texto?")) {          
-          location.href="texto_documento_acessorio_excluir_proc?cod_documento_acessorio=<dtml-var cod_documento_acessorio missing>&cod_documento=<dtml-var cod_documento missing>&modal=1";
        }
   } 
 
@@ -77,7 +94,7 @@ $(document).ready(function () {
         <label for="lst_tip_documento" class="required">Tipo de Documento</label>
         <select class="custom-select" id="lst_tip_documento" name="lst_tip_documento" required>
           <option value="0">Selecione</option> 
-            <dtml-in expr="zsql.tipo_documento_administrativo_obter_zsql(ind_excluido=0)">           
+            <dtml-in expr="zsql.tipo_documento_administrativo_obter_zsql(tip_natureza='A',ind_excluido=0)">           
                <option <dtml-if  cod_documento_acessorio>
                  <dtml-if expr="(cod_documento_acessorio!=None) and _.int(tip_documento) == _.int(documento_acessorio_form.tip_documento)"> 
                     selected 
@@ -118,16 +135,12 @@ $(document).ready(function () {
   </div>
   <div class="form-row">
      <div class="col-12 col-sm-6 mb-3">
-        <label for="txa_txt_assunto">Observações</label>
-        <textarea class="form-control auto-resize" id="txa_txt_assunto" name="txa_txt_assunto" rows="1"><dtml-var txt_assunto missing null=""></textarea>
-     </div>
-     <div class="col-12 col-sm-6 mb-3">
-        <label class="d-block">PDF Texto Integral</label>
+        <label class="d-block">Arquivo PDF</label>
         <dtml-if expr="_.has_key('cod_documento_acessorio')"> 
            <dtml-call expr="REQUEST.set('id_documento', str(cod_documento_acessorio)+'.pdf')">
            <dtml-if "hasattr(sapl_documentos.administrativo,id_documento)">
               <dtml-let documento="getattr(sapl_documentos.administrativo,id_documento).absolute_url">
-                 <a class="btn btn-secondary" target="_blank" href="<dtml-var documento>">
+                 <a class="btn btn-secondary" target="_blank" href="<dtml-var documento>?<dtml-var expr="ZopeTime().timeTime()">">
                     <dtml-if expr="zsql.assinatura_documento_obter_zsql(codigo=cod_documento_acessorio, tipo_doc='doc_acessorio_adm',ind_assinado=1, cod_usuario=None)">
                       <i class="fa fa-certificate"></i>
                     <dtml-else>
@@ -138,22 +151,70 @@ $(document).ready(function () {
                   <dtml-if "sapl_documentos.props_sagl.restpki_access_token!=''">
                      <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#iFrameModal" data-title="Assinaturas Digitais" data-src="<dtml-var portal_url>/cadastros/assinatura/assinatura_solicitar_form?codigo=<dtml-var cod_documento_acessorio>&tipo_doc=doc_acessorio_adm&modal=1"><i class="fas fa-file-signature"></i> Assinaturas</button>
                   </dtml-if>
+                  <a class="btn btn-danger" href="<dtml-var portal_url>/cadastros/documento_administrativo/documento_acessorio/texto_pdf_excluir_proc?cod_documento_acessorio=<dtml-var cod_documento_acessorio missing>&modal=1" data-confirm="Deseja realmente excluir o arquivo PDF?"><i class="fas fa-trash"></i> Excluir</a> 
               </dtml-let>
            <dtml-else>
+            <div class="input-group">
              <div class="custom-file">
                <input type="file" class="custom-file-input" id="file_nom_arquivo" name="file_nom_arquivo" accept="application/pdf">
                <label class="custom-file-label" for="file_nom_arquivo">Selecione o arquivo</label>
-             </div>           
-           </dtml-if>
+             </div>
+             <dtml-let id_documento_odt="str(cod_documento_acessorio)+'.odt'">
+               <dtml-if "hasattr(sapl_documentos.administrativo,id_documento_odt)">
+                 <dtml-call expr="REQUEST.set('temODT', 1)">
+               </dtml-if>
+             </dtml-let>
+             <dtml-if expr="_.has_key('temODT')">
+                <div class="input-group-append">                  
+                   <a class="btn btn-secondary" href="javascript:texto_pdf_gerar()">
+                     Gerar do ODT
+                  </a>
+                </div>
+             </dtml-if>
+             </div>
+           </dtml-if>  
         <dtml-else>
-             <div class="custom-file">
-               <input type="file" class="custom-file-input" id="file_nom_arquivo" name="file_nom_arquivo" accept="application/pdf">
-               <label class="custom-file-label" for="file_nom_arquivo">Selecione o arquivo</label>
-             </div> 
+          <div class="custom-file">
+            <input type="file" class="custom-file-input" id="file_nom_arquivo" name="file_nom_arquivo" accept="application/pdf">
+            <label class="custom-file-label" for="file_nom_arquivo">Selecione o arquivo</label>
+          </div>
         </dtml-if>
      </div>
+   <div class="col-12 col-sm-6 mb-3">
+             <dtml-if expr="_.has_key('cod_documento_acessorio')">
+              <dtml-call expr="REQUEST.set('prefixo_arquivo', str(sgl_tipo_documento)+'-')">
+              <label for="lst_modelo" class="d-block">Arquivo ODT</label>
+                   <dtml-call expr="REQUEST.set('nome_arquivo_odt',str(cod_documento_acessorio)+'.odt')">
+                   <dtml-if "hasattr(sapl_documentos.administrativo,nome_arquivo_odt)">
+                         <a class="btn btn-secondary" href="<dtml-var portal_url>/generico/viewerJS/#<dtml-var portal_url>/sapl_documentos/administrativo/<dtml-var nome_arquivo_odt>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fa fa-fw fa-file-alt"></i> Visualizar</a>
+                         <button type="button" class="btn btn-secondary" onclick="javascript:location.href='<dtml-var portal_url>/sapl_documentos/administrativo/externalEdit_/<dtml-var nome_arquivo_odt>.zem'" data-toggle="tooltip" data-placement="bottom" title="Editar no LibreOffice"><i class="fas fa-fw fa-external-link-alt"></i>Editar</button>                                          
+                      <a class="btn btn-danger" href="<dtml-var portal_url>/cadastros/documento_administrativo/documento_acessorio/texto_odt_excluir_proc?cod_documento_acessorio=<dtml-var cod_documento_acessorio missing>&modal=1" data-confirm="Deseja realmente excluir o arquivo ODT?"><i class="fas fa-trash"></i> Excluir</a> 
+                   <dtml-else>
+                    <div class="input-group">
+                      <select class="custom-select" id="lst_modelo" name="lst_modelo">
+                         <option value="0">Selecione um modelo</option>
+                         <dtml-with expr="sapl_documentos.modelo.documento_administrativo">
+                            <dtml-in expr="objectValues('File')" sort="title_or_id">
+                              <dtml-if expr="id.startswith(prefixo_arquivo)">
+                                  <option value="<dtml-var id>"><dtml-var title_or_id></option>
+                              </dtml-if>
+                            </dtml-in>
+                         </dtml-with>
+                      </select>
+                     <div class="input-group-append">
+                        <a class="btn btn-secondary" href="javascript:texto_odt_gerar();">Gerar</a>
+                     </div>
+                    </div>
+                   </dtml-if>
+             </dtml-if>
+   </div>
   </div>
-
+  <div class="form-row">
+     <div class="col-12 col-sm-12 mb-3">
+        <label for="txa_txt_assunto">Observações</label>
+        <textarea class="form-control auto-resize" id="txa_txt_assunto" name="txa_txt_assunto" rows="1"><dtml-var txt_assunto missing null=""></textarea>
+     </div>
+   </div>
    <input type="hidden" name="txa_txt_indexacao" value="<dtml-var txt_indexacao missing null="">" />
 
  <div class="text-left">

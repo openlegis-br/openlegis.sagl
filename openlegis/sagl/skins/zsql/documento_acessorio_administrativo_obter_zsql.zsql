@@ -7,6 +7,8 @@ max_cache : 100
 
 SELECT 
        REPLACE(documento_acessorio_administrativo.cod_documento_acessorio,  'L', '') as cod_documento_acessorio,
+       tipo_documento_administrativo.sgl_tipo_documento,
+       tipo_documento_administrativo.des_tipo_documento,
        REPLACE(documento_acessorio_administrativo.cod_documento,    'L', '') as cod_documento,
        DATE_FORMAT(documento_acessorio_administrativo.dat_documento, '%d/%m/%Y %H:%i:%s') as dat_documento,
        REPLACE(documento_acessorio_administrativo.tip_documento,  'L', '') as tip_documento,
@@ -14,10 +16,11 @@ SELECT
        documento_acessorio_administrativo.txt_indexacao,
        documento_acessorio_administrativo.nom_autor_documento,
        documento_acessorio_administrativo.nom_documento,
-       documento_acessorio_administrativo.ind_excluido       
+       documento_acessorio_administrativo.ind_excluido
       
 FROM   
        documento_acessorio_administrativo
+       LEFT JOIN tipo_documento_administrativo ON tipo_documento_administrativo.tip_documento = documento_acessorio_administrativo.tip_documento
 
 <dtml-sqlgroup where>
   <dtml-sqltest cod_documento    column="documento_acessorio_administrativo.cod_documento"   op="=" type="int" optional><dtml-and>

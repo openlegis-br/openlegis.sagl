@@ -21,6 +21,6 @@ meses=['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','s
 
 if data != '':
     mes = int(data[3:5])
-    return data[0:2] + " de " + meses[int(mes-1)] + " de " + data[6:]
+    return data[0:2] + " de " + meses[int(mes-1)] + " de " + data[6:10]
 else:
    return ''

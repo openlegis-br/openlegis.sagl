@@ -104,7 +104,7 @@ $(document).ready(function () {
              <label for="tip_derivado" class="required">Tipo de Documento Administrativo</label>
               <select class="custom-select" id="tip_derivado" name="tip_derivado">
                 <option></option>              
-                <dtml-in expr="zsql.tipo_documento_administrativo_obter_zsql()">
+                <dtml-in expr="zsql.tipo_documento_administrativo_obter_zsql(tip_natureza='P', ind_excluido=0)">
                   <option 
                      value="<dtml-var tip_documento>"<dtml-if expr="(_.has_key('tip_derivado') and tip_derivado==tip_documento)">selected</dtml-if>>
                      <dtml-var des_tipo_documento></option>

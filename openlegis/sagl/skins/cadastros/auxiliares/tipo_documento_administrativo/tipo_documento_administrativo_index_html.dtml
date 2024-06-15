@@ -17,7 +17,8 @@
          <thead class="table-secondary">
           <tr> 
             <th width="15%">Sigla</th>
-            <th width="65%">Tipo de Documento</th>
+            <th>Tipo de Documento</th>
+            <th width="15%">Natureza</th>
             <th width="20%">Acesso Público</th>
           </tr>
          </thead>
@@ -27,6 +28,13 @@
               <a href="tipo_documento_administrativo_mostrar_proc?tip_documento=<dtml-var tip_documento>">
                <dtml-var sgl_tipo_documento></a></td>
             <td><dtml-var des_tipo_documento></td>
+            <td>
+             <dtml-if expr="tip_natureza=='A'">
+                Acessório
+             <dtml-elif expr="tip_natureza=='P'">
+                Principal
+             </dtml-if>
+           </td>
             <td>
             <dtml-if expr="ind_publico == 1">
               Sim

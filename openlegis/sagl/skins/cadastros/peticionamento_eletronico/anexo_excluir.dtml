@@ -5,6 +5,16 @@
     <dtml-var mensagem_emitir>
   </dtml-let>  
 <dtml-else>
+  <dtml-in expr="zsql.assinatura_documento_obter_zsql(codigo=cod_peticao, anexo=hdn_cod_anexo, tipo_doc='anexo_peticao')">
+   <dtml-try>
+     <dtml-call expr="zsql.assinatura_documento_excluir_zsql(
+                           cod_assinatura_doc  = cod_assinatura_doc,
+                           codigo              = codigo,
+                           tipo_doc            = tipo_doc)">
+   <dtml-except>
+      <dtml-call expr="REQUEST.set('erro', 1)">
+   </dtml-try>
+  </dtml-in>
   <dtml-let mensagem="'Documento acessório excluído com sucesso!'" url="'peticao_mostrar_proc?cod_peticao='+cod_peticao+'&modal=1#docs'" modal="'1'">
     <dtml-var mensagem_emitir>
   </dtml-let>

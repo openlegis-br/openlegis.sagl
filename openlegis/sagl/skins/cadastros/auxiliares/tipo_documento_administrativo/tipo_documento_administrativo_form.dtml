@@ -93,7 +93,7 @@ $(document).ready(function () {
   </div>
   <div class="form-row">
    <dtml-if tip_documento>
-    <div class="col-12 col-md-10 mb-3"> 
+    <div class="col-12 col-md-7 mb-3"> 
         <label for="lst_usuarios">Usuários Permitidos para Gerenciamento</label>
         <select id="lst_usuarios" name="lst_usuarios" class="form-control selectpicker show-tick" multiple data-actions-box="true" data-size="10" data-selected-text-format="count > 4" data-live-search="true">
           <dtml-in expr="zsql.usuario_obter_zsql(ind_ativo='1',ind_excluido=0)">        
@@ -108,7 +108,16 @@ $(document).ready(function () {
         </select>
     </div>
    </dtml-if>
-    <div class="col-12 col-md-2 mb-3">
+    <div class="col-6 col-md-3 mb-3">
+       <label class="d-block required">Natureza</label>                     
+       <dtml-in expr="['Principal', 'Acessório']">
+         <div class="form-check form-check-inline">
+           <input class="form-check-input" type="radio" id="rad<dtml-var expr="_['sequence-item']">" name="rad_tip_natureza" value="<dtml-var expr="_['sequence-item'][0]">" <dtml-if expr="_.has_key('tip_natureza') and tip_natureza==_['sequence-item'][0]">checked<dtml-elif expr="not _.has_key('tip_natureza') and 'P'==_['sequence-item'][0]">checked</dtml-if> />
+           <label class="form-check-label" for="rad<dtml-var expr="_['sequence-item']">"><dtml-var expr="_['sequence-item']"></label>
+         </div>
+       </dtml-in>
+    </div> 
+    <div class="col-6 col-md-2 mb-3">
        <label class="d-block required">Acesso Público ?</label>                 
        <dtml-in expr="[(1,'Sim'),(0,'Não')]">
           <div class="form-check form-check-inline">

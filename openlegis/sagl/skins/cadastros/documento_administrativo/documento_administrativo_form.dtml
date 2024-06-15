@@ -106,7 +106,7 @@
   function texto_pdf_gerar(){
       if (confirm("Confirma a geração do texto original em PDF?")) {
          location.href="<dtml-var portal_url>/modelo_proposicao/oficio_gerar_pdf?cod_documento=<dtml-var cod_documento missing>";
-         setTimeout(function(){window.location.reload(true)},3000);
+         setTimeout(function(){window.location.reload(true)},2500);
          return true;
        }
   return;
@@ -399,7 +399,7 @@ $(document).ready(() => {
   </dtml-if>
   <div class="form-row mb-1">
     <div class="col-12 col-lg-6 mb-3">
-      <label class="d-block">PDF Texto Original</label>
+      <label class="d-block">Arquivo PDF</label>
       <dtml-if expr="_.has_key('cod_documento')">
         <dtml-call expr="REQUEST.set('id_documento', str(cod_documento)+'_texto_integral.pdf')">
         <dtml-in expr="zsql.assinatura_documento_obter_zsql(codigo=cod_documento, tipo_doc='documento',cod_usuario=None)">
@@ -417,7 +417,7 @@ $(document).ready(() => {
              <dtml-if "sapl_documentos.props_sagl.restpki_access_token!=''">
                 <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#iFrameModal" data-title="Assinaturas Digitais" data-src="<dtml-var portal_url>/cadastros/assinatura/assinatura_solicitar_form?codigo=<dtml-var cod_documento>&tipo_doc=documento&modal=1"><i class="fas fa-file-signature"></i>Assinaturas</button>
              </dtml-if>
-             <a class="btn btn-danger" href="<dtml-var portal_url>/cadastros/documento_administrativo/texto_documento_administrativo_excluir_proc?cod_documento=<dtml-var cod_documento missing>" data-confirm="Deseja realmente excluir o arquivo PDF do Texto Original?"><i class="fas fa-trash"></i> Excluir</a>              
+             <a class="btn btn-danger" href="<dtml-var portal_url>/cadastros/documento_administrativo/texto_documento_administrativo_excluir_proc?cod_documento=<dtml-var cod_documento missing>" data-confirm="Deseja realmente excluir o arquivo PDF?"><i class="fas fa-trash"></i> Excluir</a>              
  	  </dtml-let>
 	<dtml-else>
           <dtml-let id_documento_odt="str(cod_documento)+'_texto_integral.odt'">
@@ -448,7 +448,7 @@ $(document).ready(() => {
     </div>
     <div class="col-12 col-lg-6 mb-3">
       <dtml-if cod_documento>
-         <label class="d-block">ODT Texto Original</label>
+         <label class="d-block">Arquivo ODT</label>
          <dtml-let id_documento="str(cod_documento)+'_texto_integral.odt'">
             <dtml-if "hasattr(sapl_documentos.administrativo,id_documento)">
                <dtml-let documento="getattr(sapl_documentos.administrativo,id_documento).absolute_url">
@@ -457,7 +457,7 @@ $(document).ready(() => {
                  <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#iFrameModal" data-title="Edição de Arquivo ODT" data-src="<dtml-var portal_url>/webeditor/editorDocumento?<dtml-var documento>" data-toggle="tooltip" data-placement="bottom" title="Editar Online"><i class="fa fa-fw fa-edit"></i>Editar</button>
   	         <dtml-call expr="REQUEST.set('nome_arquivo_odt',str(cod_documento)+'_texto_integral.odt')">
                  <button type="button" class="btn btn-secondary" onclick="javascript:location.href='&dtml-URL1;/sapl_documentos/administrativo/externalEdit_/<dtml-var nome_arquivo_odt>.zem'" data-toggle="tooltip" data-placement="bottom" title="Editar no LibreOffice"><i class="fas fa-fw fa-external-link-alt"></i>LibreOffice</button>
-                 <a class="btn btn-danger" href="<dtml-var portal_url>/cadastros/documento_administrativo/texto_documento_administrativo_excluir_odt_proc?cod_documento=<dtml-var cod_documento missing>" data-confirm="Deseja realmente excluir o arquivo ODT do Texto Original?"><i class="fas fa-trash"></i> Excluir</a>
+                 <a class="btn btn-danger" href="<dtml-var portal_url>/cadastros/documento_administrativo/texto_documento_administrativo_excluir_odt_proc?cod_documento=<dtml-var cod_documento missing>" data-confirm="Deseja realmente excluir o arquivo ODT?"><i class="fas fa-trash"></i> Excluir</a>
   	       </dtml-let>
             <dtml-else>
                <dtml-call expr="REQUEST.set('prefixo_arquivo', str(sgl_tipo_documento)+'-')">

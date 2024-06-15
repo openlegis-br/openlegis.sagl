@@ -67,7 +67,7 @@
                  <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Modulo Administrativo'])">
                  <select class="custom-select" id="lst_tip_documento" name="lst_tip_documento" onChange="numero_buscar(document.numero_reservar_form)">
                      <option>Selecione</option>
-                        <dtml-in expr="zsql.tipo_documento_administrativo_obter_zsql(ind_excluido=0)">
+                        <dtml-in expr="zsql.tipo_documento_administrativo_obter_zsql(tip_natureza='P', ind_excluido=0)">
                            <option value="<dtml-var tip_documento>"
                                  <dtml-if expr="REQUEST.has_key('tip_documento_novo')">
                                      <dtml-if expr="_.int(tip_documento) == _.int(tip_documento_novo)">

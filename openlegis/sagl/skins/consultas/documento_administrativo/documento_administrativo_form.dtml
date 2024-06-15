@@ -31,8 +31,7 @@ $(function () {
       <h1 class="firstHeading"><dtml-var des_tipo_documento> nº <dtml-var num_documento>/<dtml-var ano_documento></h1>
   </div>
   <div class="col-12 col-lg-4 text-lg-right">
-   <dtml-let isAnon="portal_membership.isAnonymousUser()">
-     <dtml-if expr="not isAnon">   
+     <dtml-if expr="AUTHENTICATED_USER.has_role(['Authenticated'])">   
       <div class="btn-group mb-3" role="group">
         <dtml-call expr="REQUEST.set('id_documento', str(cod_documento)+'_texto_integral.pdf')">
           <dtml-if expr="hasattr(sapl_documentos.administrativo,id_documento) and AUTHENTICATED_USER.has_role(['Operador', 'Operador Modulo Administrativo', 'Geracao Processos Integrais'])">       
@@ -40,7 +39,6 @@ $(function () {
           </dtml-if>
       </div>
      </dtml-if>
-   </dtml-let>
   </div>
 </div>
 
@@ -63,11 +61,9 @@ $(function () {
         </dtml-in>
         <dtml-call expr="REQUEST.set('id_documento', str(cod_documento)+'_texto_integral.pdf')">
         <dtml-if expr="hasattr(sapl_documentos.administrativo,id_documento)">
-          <dtml-let isAnon="portal_membership.isAnonymousUser()">
-            <dtml-if expr="not isAnon">  
-               <a class="btn btn-sm btn-primary" href="<dtml-var portal_url>/consultas/documento_administrativo/pasta_digital/?cod_documento=<dtml-var cod_documento>&action=pasta" target="_blank"><i class="far fa-folder"></i> Pasta Digital</a>
+            <dtml-if expr="AUTHENTICATED_USER.has_role(['Authenticated'])">
+               <a class="btn btn-sm btn-primary block" href="<dtml-var portal_url>/consultas/documento_administrativo/pasta_digital/?cod_documento=<dtml-var cod_documento>&action=pasta" target="_blank"><i class="far fa-folder"></i> Pasta Digital</a>
            </dtml-if>
-          </dtml-let>
           <dtml-let documento="getattr(sapl_documentos.administrativo,id_documento).absolute_url">        
              <a class="btn btn-sm btn-primary" target="_blank" href="<dtml-var portal_url>/pysc/download_documento_pysc?cod_documento=<dtml-var cod_documento>">
                <dtml-if expr="_.has_key('cod_assinatura_doc') and hasattr(sapl_documentos.documentos_assinados, cod_assinatura_doc+'.pdf')">
@@ -105,48 +101,6 @@ $(function () {
    </div>
 </dtml-if>
 
-        <dtml-in expr="zsql.documento_administrativo_vinculado_obter_zsql(cod_documento_vinculado = cod_documento)">
-           <dtml-if sequence-start>
-              <div class="row">
-                <div class="col-12">
-              <p><b>Documento<dtml-if expr="_['sequence-length'] > 1">s</dtml-if> Vinculante<dtml-if expr="_['sequence-length'] > 1">s</dtml-if>: </b>
-           </dtml-if>
-           <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Modulo Administrativo'])">
-              <a href="<dtml-var portal_url>/cadastros/documento_administrativo/documento_administrativo_mostrar_proc?cod_documento=<dtml-var cod_documento_vinculante>">
-           <dtml-elif expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia'])">
-              <a href="<dtml-var portal_url>/cadastros/documento_administrativo/documento_administrativo_mostrar_proc?cod_documento=<dtml-var cod_documento_vinculante>">
-           <dtml-else>
-              <a href="<dtml-var portal_url>/consultas/documento_administrativo/documento_administrativo_mostrar_proc?cod_documento=<dtml-var cod_documento_vinculante>" >
-           </dtml-if>             
-           <b><dtml-var sgl_tipo_documento_vinculante> <dtml-var num_documento_vinculante>/<dtml-var ano_documento_vinculante></b></a></p>
-           <dtml-unless sequence-end>,</dtml-unless>
-           <dtml-if sequence-end>
-                </div>
-              </div>   
-           </dtml-if>
-        </dtml-in>
-
-        <dtml-in expr="zsql.documento_administrativo_vinculado_obter_zsql(cod_documento_vinculante = cod_documento)">
-           <dtml-if sequence-start>
-              <div class="row">
-                <div class="col-12">
-              <p><b>Documento<dtml-if expr="_['sequence-length'] > 1">s</dtml-if> Vinculado<dtml-if expr="_['sequence-length'] > 1">s</dtml-if>: </b> 
-           </dtml-if>
-           <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Modulo Administrativo'])">
-              <a href="<dtml-var portal_url>/cadastros/documento_administrativo/documento_administrativo_mostrar_proc?cod_documento=<dtml-var cod_documento_vinculado>">
-           <dtml-elif expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia'])">
-              <a href="<dtml-var portal_url>/cadastros/documento_administrativo/documento_administrativo_mostrar_proc?cod_documento=<dtml-var cod_documento_vinculado>">
-           <dtml-else>
-              <a href="<dtml-var portal_url>/consultas/documento_administrativo/documento_administrativo_mostrar_proc?cod_documento=<dtml-var cod_documento_vinculado>">  
-           </dtml-if>                            
-           <b><dtml-var sgl_tipo_documento_vinculado> <dtml-var num_documento_vinculado>/<dtml-var ano_documento_vinculado></b></a></p>
-           <dtml-unless sequence-end>,</dtml-unless>
-           <dtml-if sequence-end>
-                </div>
-              </div>   
-           </dtml-if>
-        </dtml-in>
-
  <dtml-in expr="zsql.tramitacao_administrativo_obter_zsql(cod_documento=cod_documento, ind_ult_tramitacao=1)">
     <dtml-call expr="REQUEST.set('temTramitacao', 1)">
  </dtml-in>
@@ -165,10 +119,12 @@ $(function () {
              </dtml-if>
            </div>            
       </div>
- <dtml-if temTramitacao>
-   <dtml-in expr="zsql.tramitacao_administrativo_obter_zsql(cod_documento=cod_documento, ind_excluido=0)">
+
+   <dtml-in expr="zsql.tramitacao_administrativo_obter_zsql(cod_documento=cod_documento, ind_ult_tramitacao=1, ind_excluido=0)">
      <dtml-if sequence-start>
-      <dtml-call expr="REQUEST.set('cod_ult_unidade', int(cod_unid_tram_dest))">     
+      <dtml-call expr="REQUEST.set('cod_ult_origem', int(cod_unid_tram_local))">     
+      <dtml-call expr="REQUEST.set('cod_ult_dest', int(cod_unid_tram_dest))">
+      <dtml-call expr="REQUEST.set('dat_encaminha', dat_encaminha)">     
       <div class="card mb-4">
        <div class="card-body">
            <p class="card-text"><b>Último Local:</b> <dtml-var dat_tramitacao>
@@ -200,22 +156,22 @@ $(function () {
        </div>
       </div>
     </dtml-if>
- </dtml-in>
- </dtml-if> 
+   </dtml-in>
 
  <dtml-in expr="zsql.documento_acessorio_administrativo_obter_zsql(cod_documento=cod_documento,ind_excluido=0)">
     <dtml-call expr="REQUEST.set('temDocAC', 1)">
  </dtml-in>
 
- <dtml-let isAnon="portal_membership.isAnonymousUser()">
-    <dtml-if expr="not isAnon and _.has_key('cod_usuario_corrente')">
+    <dtml-if expr="AUTHENTICATED_USER.has_role(['Authenticated']) and _.has_key('cod_usuario_corrente')">
       <dtml-in expr="zsql.usuario_unid_tram_obter_zsql(cod_usuario=cod_usuario_corrente)">
-         <dtml-if expr="_.has_key('cod_ult_unidade') and int(cod_ult_unidade) == int(cod_unid_tramitacao)">
+         <dtml-if expr="_.has_key('cod_ult_origem') and int(cod_ult_origem) == int(cod_unid_tramitacao) and dat_encaminha==None">
             <dtml-call expr="REQUEST.set('add_doc', 1)">
+         <dtml-elif expr="_.has_key('cod_ult_dest') and int(cod_ult_dest) == int(cod_unid_tramitacao)">
+            <dtml-call expr="REQUEST.set('add_doc', 1)">
+            <dtml-call expr="REQUEST.set('pode_tramitar', 1)">
          </dtml-if>
       </dtml-in>
      </dtml-if>
- </dtml-let>
 
 <dtml-if expr="_.has_key('temDocAC') or _.has_key('add_doc')">
   <div id="accordion" class="docAC">
@@ -230,20 +186,19 @@ $(function () {
       </div>
       <div id="collapsedoc" class="collapse" aria-labelledby="headingOne" data-parent=".docAC">
         <div class="card-body">
-         <dtml-let isAnon="portal_membership.isAnonymousUser()">
-             <dtml-if expr="not isAnon and _.has_key('add_doc')">      
+             <dtml-if expr="AUTHENTICATED_USER.has_role(['Authenticated']) and _.has_key('add_doc')">      
                  <button type="button" class="btn btn-sm btn-secondary mb-2" data-toggle="popover" title="Documento Acessório"><i class="fas fa-plus-circle"></i> Incluir</button>
                  <div id="PopoverContent" class="d-none">
                    <form name="myform" id="myform" class="needs-validation" validate role="form" enctype="multipart/form-data" method="post" action="documento_acessorio_salvar_proc" onSubmit="return confirm('Confirma a inclusão do documento acessório?');">
                     <input type="hidden" name="cod_documento" value="<dtml-var cod_documento>" />
                     <input type="hidden" name="cod_usuario" value="<dtml-var cod_usuario_corrente missing>" />
-                    <input type="hidden" name="cod_unid_tram_local" value="<dtml-var cod_ult_unidade missing>" />
+                    <input type="hidden" name="cod_unid_tram_local" value="<dtml-var cod_ult_dest missing>" />
                     <div class="row">
                       <div class="col-12 mb-3">
                        <label for="lst_tip_documento" class="required">Tipo</label>
                          <select class="custom-select" id="lst_tip_documento" name="lst_tip_documento" required>
                              <option></option> 
-                             <dtml-in expr="zsql.tipo_documento_administrativo_obter_zsql(ind_excluido=0)">           
+                             <dtml-in expr="zsql.tipo_documento_administrativo_obter_zsql(tip_natureza='A',ind_excluido=0)">           
                                 <option value="<dtml-var tip_documento>"> <dtml-var des_tipo_documento></option>
                              </dtml-in>                   
                           </select>
@@ -268,7 +223,7 @@ $(function () {
                       </div>
                      </div>
                      <div class="col-12">                      
-                        <button class="btn btn-primary btn-block" type="submit" data-toggle="popover" data-placement="bottom" data-html="true" data-title="OK"><i class="fa fa-fw fa-check"></i> Incluir Documento</button>                     
+                        <button class="btn btn-primary btn-block" type="submit" data-toggle="popover" data-placement="bottom" data-html="true" data-title="OK">Incluir</button>                     
                      </div>
                      <div class="col-md-12 mt-2">
                        <p class="text-muted small"><i class="fas fa-asterisk text-danger"></i> Campos obrigatórios</p>
@@ -277,7 +232,6 @@ $(function () {
                 </form> 
               </div>   
              </dtml-if>
-          </dtml-let>
 
           <dtml-in expr="zsql.documento_acessorio_administrativo_obter_zsql(cod_documento=cod_documento, ind_excluido=0)">
             <dtml-if sequence-start>
@@ -287,7 +241,7 @@ $(function () {
                    <tr>
                      <th>Identificação do Documento</th>
                      <th>Autoria</th>                     
-                     <th>Data / Horário</th>
+                     <th>Data</th>
                    </tr>
                  </thead>
             </dtml-if>
@@ -306,8 +260,7 @@ $(function () {
 			</a>
 
 			<dtml-if expr="sapl_documentos.props_sagl.restpki_access_token!='' and dbcon_logs">
-                             <dtml-let isAnon="portal_membership.isAnonymousUser()">                      
-                                <dtml-if expr="not isAnon">
+                                <dtml-if expr="AUTHENTICATED_USER.has_role(['Authenticated'])">
                                   <dtml-in expr="zsql.logs_pesquisar_zsql(cod_registro=cod_documento_acessorio, modulo='documento_acessorio_adm', ordem=1)">
                                     <dtml-call expr="REQUEST.set('usuario_doc', usuario)">
                                   </dtml-in>
@@ -323,7 +276,6 @@ $(function () {
                                    <button type="button" class="btn btn-sm btn-danger" onClick="documento_acessorio_excluir(<dtml-var cod_documento_acessorio missing>)"><i class="fas fa-trash"></i> Excluir</button>
                                  </dtml-if>
                                 </dtml-if>
-                             </dtml-let>
                         </dtml-if>
 		      </dtml-let>
                     <dtml-else>
@@ -349,6 +301,78 @@ $(function () {
       </div>
     </div>         
 </dtml-if> 
+
+    <dtml-if expr="zsql.documento_administrativo_vinculado_obter_zsql(cod_documento_vinculado = cod_documento) or zsql.documento_administrativo_vinculado_obter_zsql(cod_documento_vinculante = cod_documento)">
+       <dtml-call expr="REQUEST.set('temVinculado', 1)">
+    </dtml-if>
+
+    <dtml-if temVinculado> 
+      <div id="accordion" class="vinculado">
+        <div class="card mb-4">
+          <div class="card-header" id="headingOne">
+            <p class="h5 mb-0">
+              <a href="#" class="d-block text-left collapsed" data-toggle="collapse" data-target="#collapseVinculado" aria-expanded="false" aria-controls="collapseArquivo"> 
+                <i class="fa float-right pt-1 align-self-center" aria-hidden="true"></i>
+                 <span class="h6 font-weight-bold">Documentos Vinculados</span>
+              </a>
+            </p>
+          </div>
+          <div id="collapseVinculado" class="collapse" aria-labelledby="headingOne" data-parent=".vinculado">
+            <div class="card-body">
+              <div class="table-responsive">
+               <table class="table table-sm mb-0">
+                 <thead>
+                   <tr>
+                    <th>Identificação do Documento</th>
+                    <th>Autoria</th>
+                    <th width="25%">Data de Vinculação</th>
+                   </tr>
+                 </thead>
+                 <tbody>
+                 <dtml-in expr="zsql.documento_administrativo_vinculado_obter_zsql(cod_documento_vinculado = cod_documento)">
+                  <tr>
+                    <td> 
+                      <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia', 'Operador Modulo Administrativo'])">
+                        <a href="<dtml-var portal_url>/cadastros/documento_administrativo/documento_administrativo_mostrar_proc?cod_documento=<dtml-var cod_documento_vinculante>">
+                      <dtml-else>
+                        <a href="<dtml-var portal_url>/consultas/documento_administrativo/documento_administrativo_mostrar_proc?cod_documento=<dtml-var cod_documento_vinculante>" >
+                      </dtml-if>             
+                        <dtml-var sgl_tipo_documento_vinculante> <dtml-var num_documento_vinculante>/<dtml-var ano_documento_vinculante></a> - <dtml-var txt_assunto_vinculante>
+                   </td>
+                   <td>
+                     <dtml-var txt_interessado_vinculante>
+                   </td>
+                   <td>
+                     <dtml-var dat_vinculacao>
+                   </td>
+                  </tr>
+                 </dtml-in>
+                 <dtml-in expr="zsql.documento_administrativo_vinculado_obter_zsql(cod_documento_vinculante = cod_documento)">
+                  <tr>
+                    <td> 
+                      <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia', 'Operador Modulo Administrativo'])">
+                        <a href="<dtml-var portal_url>/cadastros/documento_administrativo/documento_administrativo_mostrar_proc?cod_documento=<dtml-var cod_documento_vinculante>">
+                      <dtml-else>
+                        <a href="<dtml-var portal_url>/consultas/documento_administrativo/documento_administrativo_mostrar_proc?cod_documento=<dtml-var cod_documento_vinculante>" >
+                      </dtml-if>             
+                        <dtml-var sgl_tipo_documento_vinculado> <dtml-var num_documento_vinculado>/<dtml-var ano_documento_vinculado></a> - <dtml-var txt_assunto_vinculado>
+                   </td>
+                   <td>
+                     <dtml-var txt_interessado_vinculado>
+                   </td>
+                   <td>
+                     <dtml-var dat_vinculacao>
+                   </td>
+                  </tr>
+                 </dtml-in>
+                </tbody>  
+               </table>
+              </div>
+           </div>
+          </div>
+         </div>
+        </div>
+      </dtml-if>
 
 <dtml-if expr="zsql.documento_administrativo_materia_obter_zsql(cod_documento=cod_documento,ind_excluido=0)">
   <div id="accordion" class="materia">
@@ -410,12 +434,15 @@ $(function () {
         <p class="h5 mb-0">
           <a href="#" class="d-block text-left collapsed" data-toggle="collapse" data-target="#collapseTram" aria-expanded="false" aria-controls="collapseTram"> 
             <i class="fa float-right pt-1 align-self-center" aria-hidden="true"></i>
-             <span class="h6 font-weight-bold">Tramitação</span>
+             <span class="h6 font-weight-bold">Tramitações</span>
           </a>
         </p>
       </div>
       <div id="collapseTram" class="collapse" aria-labelledby="headingOne" data-parent=".tramitacao">
         <div class="card-body">
+          <dtml-if expr="AUTHENTICATED_USER.has_role(['Authenticated']) and _.has_key('pode_tramitar')">
+              <a href="#" data-toggle="modal" data-target="#iFrameModal" data-title="Tramitação Individual" data-src="<dtml-var portal_url>/cadastros/tramitacao_documento/tramitacao_form?hdn_cod_documento=<dtml-var cod_documento>&modal=1" class="btn btn-sm btn-secondary mb-2"><i class="fas fa-external-link-alt"></i><span> Tramitar</span></a>  
+          </dtml-if>
           <dtml-in expr="zsql.tramitacao_administrativo_obter_zsql(cod_documento=cod_documento)">
             <dtml-if sequence-start>             
               <div class="table-responsive">
@@ -484,8 +511,7 @@ $(function () {
     </div>
 </dtml-if>
 
-<dtml-let isAnon="portal_membership.isAnonymousUser()">
- <dtml-if expr="not isAnon">   
+ <dtml-if expr="AUTHENTICATED_USER.has_role(['Authenticated'])">   
  <dtml-if cod_documento>
     <dtml-in expr="zsql.arquivo_recipiente_listar_conteudo_zsql(cod_documento=cod_documento)">
        <dtml-call expr="REQUEST.set('temArquivo', 1)">
@@ -537,7 +563,6 @@ $(function () {
       </dtml-if>
  </dtml-if>
  </dtml-if>
-</dtml-let>
 
 <div class="row">
   <div class="col-12 col-lg-8">

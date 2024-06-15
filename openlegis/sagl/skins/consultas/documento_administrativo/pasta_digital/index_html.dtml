@@ -191,13 +191,18 @@
                           <ul class="list-group">
                            <dtml-if expr="_.has_key('temVinculante') or _.has_key('temVinculado')">
                             <li class="list-group-item list-group-item-light">
-                              <p><span class="h5 text-secondary"><strong>Documento Relacionados: </strong></span></p>
                                <dtml-in expr="zsql.documento_administrativo_vinculado_obter_zsql(cod_documento_vinculante = cod_documento)">
+                              <dtml-if sequence-start>
+                                 <p><span class="h5 text-secondary"><strong>Documento<dtml-if expr="_['sequence-length'] > 1">s</dtml-if> Vinculado<dtml-if expr="_['sequence-length'] > 1">s</dtml-if>: </strong></span></p>
+                              </dtml-if>
                                 <a class="text-info" href="pasta_digital?cod_documento=<dtml-var cod_documento_vinculado>&action=pasta" target="_blank"> 
                                   <dtml-var sgl_tipo_documento_vinculado>-<dtml-var num_documento_vinculado>/<dtml-var ano_documento_vinculado>
                                 </a>
                                </dtml-in>
                                <dtml-in expr="zsql.documento_administrativo_vinculado_obter_zsql(cod_documento_vinculado = cod_documento)">
+                              <dtml-if sequence-start>
+                                 <p><span class="h5 text-secondary"><strong>Documento<dtml-if expr="_['sequence-length'] > 1">s</dtml-if> Vinculante<dtml-if expr="_['sequence-length'] > 1">s</dtml-if>: </strong></span></p>
+                              </dtml-if>
                                 <a class="text-info" href="pasta_digital?cod_documento=<dtml-var cod_documento_vinculante>&action=pasta" target="_blank"> 
                                   <dtml-var sgl_tipo_documento_vinculante>-<dtml-var num_documento_vinculante>/<dtml-var ano_documento_vinculante>
                                 </a>

@@ -128,12 +128,7 @@ $(document).ready(function(){
 <div class="card mb-4">
   <div class="card-body bg-light text-center">
     <dtml-in expr="zsql.documento_administrativo_obter_zsql(cod_documento=cod_documento)">  
-       <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Modulo Administrativo'])">
-          <a href="<dtml-var portal_url>/cadastros/documento_administrativo/documento_administrativo_mostrar_proc?cod_documento=<dtml-var cod_documento>" target="_blank">
-       <dtml-else>
-          <a href="<dtml-var portal_url>/consultas/documento_administrativo/documento_administrativo_mostrar_proc?cod_documento=<dtml-var cod_documento>" target="_blank">
-       </dtml-if>
-       <p class="h5"><dtml-var des_tipo_documento> nº <dtml-var num_documento>/<dtml-var ano_documento></a> - <dtml-var txt_interessado></p>
+       <p class="h5"><dtml-var des_tipo_documento> nº <dtml-var num_documento>/<dtml-var ano_documento> - <dtml-var txt_interessado></p>
        <dtml-var txt_assunto>
     </dtml-in>
   </div>

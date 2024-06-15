@@ -87,7 +87,7 @@ function vinculado_criticar(){
            <label for="lst_tip_documento" class="required">Tipo de Documento</label>
            <select class="custom-select" name="lst_tip_documento" id="lst_tip_documento" onChange="ementa_buscar(document.documento_vinculado_form)" required <dtml-if cod_vinculo>disabled</dtml-if>>
             <option>
-              <dtml-in expr="zsql.tipo_documento_administrativo_obter_zsql(ind_excluido=0)">
+              <dtml-in expr="zsql.tipo_documento_administrativo_obter_zsql(tip_natureza='P', ind_excluido=0)">
                  <option
                     <dtml-if tip_documento_sel>
                       <dtml-if expr="_.int(tip_documento) == _.int(tip_documento_sel)">

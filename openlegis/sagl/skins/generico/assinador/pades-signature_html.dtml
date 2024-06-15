@@ -21,9 +21,13 @@
 </dtml-in>
 
 <dtml-in expr="zsql.assinatura_documento_obter_zsql(codigo=codigo, anexo=anexo, tipo_doc=tipo_doc, cod_usuario=cod_usuario, ind_assinado=1)">
-   <dtml-let mensagem="'O documento já se encontra assinado por este usuário!'" tipo_mensagem="'danger'">
-       <dtml-var mensagem_emitir>
-   </dtml-let>   
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <h5>Atenção!</h5>
+        <p class="mb-0">O documento já foi assinado por este usuário.</p>
+        <button type="button" class="close" data-dismiss="alert" aria-label="Fechar">
+          <span aria-hidden="true">&times;</span>
+        </button>
+    </div> 
 </dtml-in>
 
 <dtml-if expr="zsql.assinatura_documento_obter_zsql(codigo=codigo, anexo=anexo, tipo_doc=tipo_doc)">

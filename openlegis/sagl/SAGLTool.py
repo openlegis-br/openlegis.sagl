@@ -1515,6 +1515,14 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
                       nom_arquivo_assinado = str(codigo) + str(storage.pdf_signed)
                       pdf_file = str(pdf_location) + str(codigo) + str(storage.pdf_file)
                       nom_arquivo = str(codigo) + str(storage.pdf_file)
+                   if tipo_doc == 'anexo_peticao':
+                      storage_path = self.sapl_documentos.peticao
+                      codigo = str(codigo) + '_anexo_' + str(anexo)
+                      pdf_location = storage.pdf_location
+                      pdf_signed = str(pdf_location) + str(codigo) + str(storage.pdf_signed)
+                      nom_arquivo_assinado = str(codigo) + str(storage.pdf_signed)
+                      pdf_file = str(pdf_location) + str(codigo) + str(storage.pdf_file)
+                      nom_arquivo = str(codigo) + str(storage.pdf_file)
         try:
            arquivo = self.restrictedTraverse(pdf_signed)
            pdf_tosign = nom_arquivo_assinado
@@ -1722,6 +1730,9 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
             if tipo_doc == 'anexo_sessao':
                nom_pdf_assinado = str(cod_assinatura_doc) + '.pdf'
                nom_pdf_documento = str(codigo) + '_anexo_' + str(anexo) + '.pdf'
+            elif tipo_doc == 'anexo_peticao':
+               nom_pdf_assinado = str(cod_assinatura_doc) + '.pdf'
+               nom_pdf_documento = str(codigo) + '_anexo_' + str(anexo) + '.pdf'
             else:
                nom_pdf_assinado = str(cod_assinatura_doc) + '.pdf'
                nom_pdf_documento = str(codigo) + str(storage.pdf_file)
@@ -1798,6 +1809,11 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
            for metodo in self.zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=codigo, ind_audiencia='1'):
                sessao = 'Audiência Pública nº ' + str(metodo.num_sessao_plen) + '/' + str(metodo.ano_sessao)
            texto = 'ATA' + ' - ' + str(sessao)
+        elif tipo_doc == 'anexo_peticao':
+           storage_path = self.sapl_documentos.peticao
+           file_item =  str(codigo) + '_anexo_' + str(anexo) + '.pdf'
+           title = getattr(self.sapl_documentos.peticao,file_item).title_or_id()
+           texto = str(title)
         elif tipo_doc == 'anexo_sessao':
            storage_path = self.sapl_documentos.anexo_sessao
            for metodo in self.zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=codigo):

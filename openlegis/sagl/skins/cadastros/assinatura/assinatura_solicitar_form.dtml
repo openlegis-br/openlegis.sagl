@@ -41,7 +41,7 @@ $(document).ready(function() {
      </dtml-if>
    </dtml-if>
 
-  <dtml-if expr="str(tipo_doc) == 'anexo_sessao'">
+  <dtml-if expr="str(tipo_doc) == 'anexo_sessao' or str(tipo_doc) == 'anexo_peticao'">
      <dtml-call expr="REQUEST.set('metodo', zsql.assinatura_documento_obter_zsql(codigo=codigo, anexo=anexo, tipo_doc=tipo_doc))">
   <dtml-else>
      <dtml-call expr="REQUEST.set('metodo', zsql.assinatura_documento_obter_zsql(codigo=codigo, tipo_doc=tipo_doc))">
@@ -67,7 +67,7 @@ $(document).ready(function() {
       <form id="assinatura_solicitar" name="assinatura_solicitar" method="post" action="assinatura_solicitar_proc">
           <input type="hidden" name="hdn_cod_assinatura_doc" value="<dtml-var cod_assinatura_doc>" />
           <input type="hidden" name="hdn_codigo" value="<dtml-var codigo>" />
-          <dtml-if expr="str(tipo_doc) == 'anexo_sessao'">
+          <dtml-if expr="str(tipo_doc) == 'anexo_sessao' or str(tipo_doc) == 'anexo_peticao'">
              <input type="hidden" name="hdn_anexo" value="<dtml-var anexo missing>" />
           </dtml-if>
           <input type="hidden" name="hdn_tipo_doc" value="<dtml-var tipo_doc>" />
@@ -152,7 +152,7 @@ $(document).ready(function() {
                         <span style="color: #5d2b31">Recusada em <dtml-var dat_recusa></span>
                         <dtml-if expr="txt_motivo_recusa != None"><br /><span class="small"><b>Motivo:</b> <dtml-var txt_motivo_recusa></span></dtml-if>
                       <dtml-else>
-                          <dtml-if expr="str(tipo_doc) == 'anexo_sessao'">
+                          <dtml-if expr="str(tipo_doc) == 'anexo_sessao' or str(tipo_doc) == 'anexo_peticao'">
                              <span class="anulado">Não assinou</span> <span style="color: #5d2b31"><i class="fas fa-times"></i> | <a class="btn btn-sm btn-danger" href="assinatura_excluir_proc?hdn_cod_assinatura_doc=<dtml-var cod_assinatura_doc>&hdn_cod_usuario=<dtml-var cod_usuario>&hdn_codigo=<dtml-var codigo>&hdn_anexo=<dtml-var anexo missing>&hdn_tipo_doc=<dtml-var tipo_doc>&modal=1">Excluir</a>
                           <dtml-else>
                              <span class="anulado">Não assinou</span> <span style="color: #5d2b31"><i class="fas fa-times"></i> | <a class="btn btn-sm btn-danger" href="assinatura_excluir_proc?hdn_cod_assinatura_doc=<dtml-var cod_assinatura_doc>&hdn_cod_usuario=<dtml-var cod_usuario>&hdn_codigo=<dtml-var codigo>&hdn_tipo_doc=<dtml-var tipo_doc>&modal=1">Excluir</a>

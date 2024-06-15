@@ -114,7 +114,12 @@ $(document).ready(() => {
                   </dtml-in>
                   <dtml-in expr="zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=codigo, ind_audiencia='1', ind_excluido=0)">
                      Ata da Audiência Pública nº <dtml-var num_sessao_plen>/<dtml-var ano_sessao> 
-                  </dtml-in>  
+                  </dtml-in>
+               <dtml-elif expr="tipo_doc == 'anexo_peticao'">
+                  <dtml-call expr="REQUEST.set('file_item', str(codigo) + '_anexo_' + str(anexo) + '.pdf')">
+                  <dtml-in expr="zsql.peticao_obter_zsql(cod_peticao=codigo, ind_excluido=0)">
+                     Anexo da Petição Eletrônica nº <dtml-var cod_peticao>
+                  </dtml-in>
                <dtml-elif expr="tipo_doc == 'anexo_sessao'">
                   <dtml-call expr="REQUEST.set('file_item', str(codigo) + '_anexo_' + str(anexo) + '.pdf')">
                   <dtml-let titulo="getattr(sapl_documentos.anexo_sessao,file_item).title_or_id">

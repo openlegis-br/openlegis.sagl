@@ -166,4 +166,32 @@ $(document).ready(function() {
       </dtml-in>
   </dtml-if>
 
+  <dtml-if expr="str(tipo_doc) == 'anexo_sessao' or str(tipo_doc) == 'anexo_peticao'">
+     <dtml-call expr="REQUEST.set('assinaturas', cadastros.assinatura.get_pdf_signatures(tipo_doc=tipo_doc, codigo=codigo, anexo=anexo))">
+  <dtml-else>
+     <dtml-call expr="REQUEST.set('assinaturas', cadastros.assinatura.get_pdf_signatures(tipo_doc=tipo_doc,codigo=codigo, anexo=None))">
+  </dtml-if>
+
+  <dtml-in assinaturas mapping>
+     <dtml-if sequence-start>
+        <p class="h5">Assinaturas Extraídas do Documento</p>
+       <table class="table">
+        <thead class="table-secondary">
+          <tr>
+            <th>Nome</th>
+            <th>CPF</th>
+            <th>Data de Assinatura</th>
+          </tr>
+        </thead>
+     </dtml-if>
+          <tr>
+             <td><dtml-var expr="str(signer_name).title()"></td>
+             <td><dtml-var expr="pysc.cpf_formatar_pysc(numero=signer_cpf)"></td>
+             <td><dtml-var expr="str(DateTime(signing_time, datefmt='international').strftime('%d/%m/%Y %H:%M:%S'))"></td>
+          </tr>
+     <dtml-if sequence-end>
+       </table>
+     </dtml-if>
+  </dtml-in
+
 <dtml-var standard_html_footer>

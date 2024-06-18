@@ -265,18 +265,26 @@
                  Institucional
                 </a>
                 <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
-                    <li><a class="dropdown-item" href="<dtml-var portal_url>/consultas/parlamentar">Vereadores</a></li>
-                    <li><a class="dropdown-item" href="<dtml-var portal_url>/consultas/mesa_diretora">Mesa Diretora</a></li>
-                    <li><a class="dropdown-item" href="<dtml-var portal_url>/consultas/comissao">Comissões</a></li>
+                    <li><a class="dropdown-item" href="<dtml-var portal_url>/consultas/mesa_diretora"><dtml-var expr="sapl_documentos.props_sagl.nome_mesa"></a></li>
+                    <li><a class="dropdown-item" href="<dtml-var portal_url>/consultas/presidentes">Galeria de Presidentes</a></li>
+                    <li><a class="dropdown-item" href="<dtml-var portal_url>/consultas/vereadoras">Galeria das Vereadoras</a></li>                  
+                </ul>
+            </li>
+            <li class="nav-item dropdown">
+                <a id="dropdownMenu1" class="nav-link dropdown-toggle" href="" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                 Vereadores
+                </a>
+                <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+                    <li><a class="dropdown-item" href="<dtml-var portal_url>/consultas/parlamentar">Legislatura Atual</a></li>
+                    <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Parlamentar'])">
+                       <li><a class="dropdown-item" href="<dtml-var portal_url>/consultas/legislaturas">Legislaturas</a></li>
+                    </dtml-if>
                  <dtml-if expr="portal_membership.isAnonymousUser()">
-                    <li><a class="dropdown-item" href="<dtml-var portal_url>/consultas/bancada">Bancadas</a></li>
                     <li><a class="dropdown-item" href="<dtml-var portal_url>/consultas/bancada/frente_index_html">Frentes Parlamentares</a></li>
+                    <li><a class="dropdown-item" href="<dtml-var portal_url>/consultas/bancada">Bancadas</a></li>
                  <dtml-else>
                     <li><a class="dropdown-item" href="<dtml-var portal_url>/consultas/bancada">Bancadas e Frentes</a></li>
                  </dtml-if>
-                    <li><a class="dropdown-item" href="<dtml-var portal_url>/consultas/legislaturas">Legislaturas</a></li>
-                    <li><a class="dropdown-item" href="<dtml-var portal_url>/consultas/presidentes">Galeria de Presidentes</a></li>
-                    <li><a class="dropdown-item" href="<dtml-var portal_url>/consultas/vereadoras">Galeria de Vereadoras</a></li>                  
                 </ul>
             </li>
             <li class="nav-item dropdown">
@@ -312,7 +320,6 @@
                           </ul>
                       </li>
                     </dtml-if>
-
                     <li class="dropdown-submenu">
                         <a class="dropdown-item dropdown-toggle" href="#"><dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao_plural"> Plenárias</a>
                         <ul class="dropdown-menu">
@@ -324,8 +331,14 @@
                           </dtml-if>
                         </ul>
                     </li>
+                    <li class="dropdown-submenu">
+                        <a class="dropdown-item dropdown-toggle" href="#">Comissões</a>
+                        <ul class="dropdown-menu">
+                          <li><a class="dropdown-item" href="<dtml-var portal_url>/consultas/comissao">Lista de Comissões</a></li>
+                          <li><a class="dropdown-item" href="<dtml-var portal_url>/consultas/reuniao_comissao">Reuniões das Comissões</a></li>
+                        </ul>
+                    </li>
                     <li><a class="dropdown-item" href="<dtml-var portal_url>/consultas/audiencia_publica">Audiências Públicas</a></li>
-                    <li><a class="dropdown-item" href="<dtml-var portal_url>/consultas/reuniao_comissao">Reuniões das Comissões</a></li>
                     <li><a class="dropdown-item" href="<dtml-var portal_url>/relatorios_administrativos/relatorios_administrativos_index_html">Relatórios Estatísticos</a></li>
                 </ul>
             </li>

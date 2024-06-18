@@ -11,7 +11,7 @@ SELECT
      reuniao_comissao.des_tipo_reuniao,          
      reuniao_comissao.txt_tema,     
      DATE_FORMAT(reuniao_comissao.dat_inicio_reuniao, '%d/%m/%Y') as dat_inicio_reuniao,
-     DATE_FORMAT(reuniao_comissao.dat_inicio_reuniao, '%Y/%m/%d') as dat_inicio_reuniao_ord,
+     reuniao_comissao.dat_inicio_reuniao as dat_inicio_reuniao_ord,
      reuniao_comissao.hr_inicio_reuniao,
      reuniao_comissao.hr_fim_reuniao,
      reuniao_comissao.txt_observacao,
@@ -54,3 +54,4 @@ FROM
 
 ORDER BY
   DATE(reuniao_comissao.dat_inicio_reuniao) DESC
+

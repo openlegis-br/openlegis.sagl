@@ -15,7 +15,7 @@
     <dtml-in expr="zsql.cargo_mesa_obter_zsql(ind_excluido=0, cod_cargo=lst_cod_cargo)">    
         <dtml-if expr="ind_unico == 1">
             <dtml-call expr="REQUEST.set('ainda_ok', 0)">
-            <dtml-let mensagem="'O cargo não pode ser exercido por mais de um parlamentar!'" tipo_mensagem="'danger'">
+            <dtml-let mensagem="'O cargo não pode ser exercido por mais de um vereador!'" tipo_mensagem="'danger'">
                 <dtml-var mensagem_emitir>
             </dtml-let>
         </dtml-if>
@@ -28,7 +28,7 @@
                                                    cod_periodo_comp = lst_periodo_comp,
                                                    ind_excluido = 0)">
         <dtml-call expr="REQUEST.set('ainda_ok', 0)">
-        <dtml-let mensagem="'Esse Parlamentar já está associado a outro cargo da Mesa!'" tipo_mensagem="'danger'">
+        <dtml-let mensagem="'Esse vereador já está associado a outro cargo!'" tipo_mensagem="'danger'">
             <dtml-var mensagem_emitir>
         </dtml-let>      
     </dtml-in>
@@ -55,11 +55,11 @@
                                 ind_excluido = 0)">
 
     <dtml-except>
-        <dtml-let mensagem="'Não foi possível incluir o Parlamentar na composição da Mesa! Tente novamente.'" tipo_mensagem="'danger'">
+        <dtml-let mensagem="'Não foi possível incluir o vereador na composição! Tente novamente.'" tipo_mensagem="'danger'">
             <dtml-var mensagem_emitir>
         </dtml-let> 
     <dtml-else>
-        <dtml-let mensagem="'Parlamentar incluído com sucesso na composição da Mesa!'" url="'index_html?num_legislatura_sel=' + hdn_num_legislatura + '&cod_periodo_comp_sel=' + hdn_cod_periodo_comp">
+        <dtml-let mensagem="'Vereador incluído com sucesso na composição!'" url="'index_html?num_legislatura_sel=' + hdn_num_legislatura + '&cod_periodo_comp_sel=' + hdn_cod_periodo_comp">
             <dtml-var mensagem_emitir>
         </dtml-let>
     </dtml-try>

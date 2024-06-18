@@ -66,6 +66,14 @@
          return false;
       }
 
+      if (form.txt_nome_mesa.value==""){
+         alert("O nome da Mesa Diretora deve ser preenchido!");
+         form.txt_nome_mesa.focus();
+         form.txt_nome_mesa.select();
+         return false;
+      }
+
+
       if (form.file_nom_logo.value != "") 
          form.hdn_file.value = 1;      
 
@@ -231,13 +239,17 @@
   </div>
   
   <div class="form-row">
-    <div class="col-6 mb-3">
+    <div class="col-4 mb-3">
         <label for="txt_reuniao_sessao" class="required">Nome da sessão / reunião plenária</label>
         <input class="form-control" type="text" id="txt_reuniao_sessao" name="txt_reuniao_sessao" value="<dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao" missing>" />
     </div>
-    <div class="col-6 mb-3">
-        <label for="txt_reuniao_sessao_plural" class="required">Nome das sessão / reunião plenária (plural)</label>
+    <div class="col-4 mb-3">
+        <label for="txt_reuniao_sessao_plural" class="required">Nome da sessão / reunião plenária (plural)</label>
         <input class="form-control" type="text" id="txt_reuniao_sessao_plural" name="txt_reuniao_sessao_plural" value="<dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao_plural" missing>" />
+    </div>
+    <div class="col-4 mb-3">
+        <label for="txt_nome_mesa" class="required">Nome da Mesa Diretora</label>
+        <input class="form-control" type="text" id="txt_nome_mesa" name="txt_nome_mesa" value="<dtml-var expr="sapl_documentos.props_sagl.nome_mesa" missing>" />
     </div>
   </div>
   

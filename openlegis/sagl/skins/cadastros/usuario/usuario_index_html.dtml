@@ -1,100 +1,127 @@
 <dtml-var standard_html_header>
-<h1 class="firstHeading">Gerenciamento de Usuários</h1>
 
-<script type="text/javascript">
-
+<script>
 $(document).ready(function() {
-  $("#checkedAll").change(function(){
-    if(this.checked){
-      $(".checkSingle").each(function(){
-        this.checked=true;
-      })              
-    }else{
-      $(".checkSingle").each(function(){
-        this.checked=false;
-      })              
-    }
-  });
+    var table = $('#jdTable').DataTable( {
+        "responsive": true,
+        "order": [[ 0, "asc" ], [ 1, "asc" ]],
+        "buttons": [
+            {
+                extend: 'collection',
+                text: 'Exportar',
+                buttons: [ 
+                           {
+                             extend:    'excelHtml5',
+                             text:      '<i class="far fa-file-excel"></i> Excel',
+                             titleAttr: 'PDF'
+                           },
+                           {
+                             extend:    'pdfHtml5',
+                             download: 'open',
+                             text:      '<i class="fa fa-file-adobe"></i> PDF',
+                             titleAttr: 'PDF'
+                           },
+                           {
+                             extend:    'print',
+                             text:      '<i class="fa fa-print"></i> Impressão',
+                             titleAttr: 'Impressão'
+                           },
+                         ],
+               className: '',
+               dropup: true,
+               autoClose: true,
+               fade: true
 
-  $(".checkSingle").click(function () {
-    if ($(this).is(":checked")){
-      var isAllChecked = 0;
-      $(".checkSingle").each(function(){
-        if(!this.checked)
-           isAllChecked = 1;
-      })              
-      if(isAllChecked == 0){ $("#checkedAll").prop("checked", true); }     
-    }else {
-      $("#checkedAll").prop("checked", false);
-    }
-  });
+            }
+        ],
+        "language": {
+          search: "Pesquisar:",
+          processing:     "Processando...",
+          loadingRecords: "Carregando...",
+          lengthMenu:     "Exibir _MENU_ registros por página",
+          info:           "Exibindo _START_ a _END_ de _TOTAL_ registros",
+          infoEmpty:      "Exibindo _START_ a _END_ de _TOTAL_ registros",
+          infoFiltered:   "(total de registros:_MAX_)",
+          emptyTable:     "Nenhum registro encontrado",
+          zeroRecords:     "Nenhum registro encontrado",
+          paginate: {
+            first:      "Primeiro",
+            previous:   "Anterior",
+            next:       "Próximo",
+            last:       "Último"
+          },
+         "buttons": {
+           print: "Imprimir",
+           copy: "Copiar",
+           copyTitle: "Cópia bem sucedida",
+           copySuccess: {
+            1: "Uma linha copiada com sucesso",
+            _: "%d linhas copiadas com sucesso"
+          }
+        }
+        }
+    });
+    table.buttons().container()
+        .appendTo( '#panelBtn .col-sm-12:eq(0)' );
 });
 
-   function validate() {
-     var checkbox= document.querySelector('input[name="names:list"]:checked');
-     if(!checkbox) {
-       alert('Selecione ao menos um usuário!');
-       return false;
-     }
-     else return confirm('Confirma a exclusão?');
-   }
-
-   function mostrar(){
-      location.href = "usuario_form";
-   } 
+function mostrar(){
+  location.href = "usuario_form";
+} 
 
 </script>
 
-<form id="usuario_index" name="usuario_index" action="usuario_excluir_proc" method="post" onsubmit="return validate()">
-<table class="table">
+ <div class="row mb-2">
+      <div class="col-12 col-md-8 align-self-center">
+        <h1 class="firstHeading">Gerenciamento de Usuários</h1>
+      </div>
+      <div class="col-12 col-md-4 text-left text-md-right">
+         <dtml-if expr="AUTHENTICATED_USER.has_role(['Administrador', 'Operador'])">
+            <input class="btn btn-sm btn-primary" type="button" name="submit" value="Incluir Usuário" onClick="mostrar()"/>
+         </dtml-if> 
+      </div>
+ </div>
+
+
+<table id="jdTable" class="table">
  <thead class="table-secondary">
   <tr>
-    <th width="5%">
-      <div class="form-check form-check-inline">    
-        <input class="form-check-input position-static" type="checkbox" name="checkedAll" id="checkedAll">
-        <label class="form-check-label d-none" for="checkedAll"></label> 
-      </div>
-    </th>
     <th width="20%">Nome do Usuário</th>
     <th>Nome Completo</th>
     <th>Perfil</th>
   </tr>
  </thead>
-  <tr class="table-default">
-<dtml-in "acl_users.getUsers()">
-  <dtml-let user_roles="_.getitem('sequence-item').getRoles()">
-    <dtml-unless "('Manager' in user_roles)">
-        <tr>
-          <td width="6%">
-            <div class="form-check">
-               <input class="checkSingle form-check-input position-static" type="checkbox" name="names:list" value="<dtml-var sequence-item>" />
-             </div>
-          </td>
-          <td>
-            <a href="usuario_mostrar_proc?nome=<dtml-var sequence-item>"><i class="fa fa-fw fa-user"></i> <dtml-var sequence-item></a>
-          </td>
-          <td>
-            <dtml-in expr="zsql.usuario_obter_zsql(col_username=_['sequence-item'])">
-              <dtml-var nom_completo missing>
-            </dtml-in>
-          </td>
-          <td>
-             <dtml-in user_roles>
-              <dtml-if expr="_['sequence-item'] != 'Authenticated'">             
-                <i class="fas fa-fw fa-caret-right"></i><dtml-var sequence-item>
-              </dtml-if>
-             </dtml-in>
-          </td>
-        </tr>
-    </dtml-unless>
-  </dtml-let>
-</dtml-in>
+ <tbody>
+    <dtml-in "acl_users.getUsers()">
+      <dtml-let user_roles="_.getitem('sequence-item').getRoles()">
+        <dtml-unless "('Manager' in user_roles)">
+            <tr>
+              <td>
+                <a href="usuario_mostrar_proc?nome=<dtml-var sequence-item>"><i class="fa fa-fw fa-user"></i> <dtml-var sequence-item></a>
+              </td>
+              <td>
+                <dtml-in expr="zsql.usuario_obter_zsql(col_username=_['sequence-item'])">
+                  <dtml-var nom_completo missing>
+                </dtml-in>
+              </td>
+              <td>
+                 <dtml-in user_roles>
+                  <dtml-if expr="_['sequence-item'] != 'Authenticated'">             
+                    <i class="fas fa-fw fa-caret-right"></i><dtml-var sequence-item>
+                  </dtml-if>
+                 </dtml-in>
+              </td>
+            </tr>
+        </dtml-unless>
+      </dtml-let>
+    </dtml-in>
+  </tbody>
 </table>
 
-<div class="text-left mt-4">
-  <input class="btn btn-primary" type="button" name="submit" value="Incluir Usuário" onClick="mostrar()"/>
-  <input class="btn btn-danger"  type="submit" id="btn_excluir" value="Excluir" />
+<div id="panelBtn" class="d-print-none" style="margin-bottom: 20px;">
+  <div class="row">
+     <div class="col-sm-12 mt-2"></div>
+  </div>
 </div>
 
-</form>
 <dtml-var standard_html_footer>

@@ -15,7 +15,7 @@
 </dtml-unless>
 
 <dtml-unless hdn_cod_usuario>
-    <dtml-if expr="zsql.usuario_obter_zsql(num_cpf=txt_num_cpf)">
+    <dtml-if expr="zsql.usuario_obter_zsql(num_cpf=txt_num_cpf, ind_excluido=0)">
        <dtml-let mensagem="'Já existe um usuário com este CPF.'" tipo_mensagem="'danger'">
           <dtml-var mensagem_emitir>
         </dtml-let>
@@ -97,14 +97,16 @@
      <dtml-call expr="REQUEST.set('metodo', acl_users.manage_users('Change', REQUEST))">
    <dtml-else>
      <dtml-call expr="REQUEST.set('metodo', acl_users.manage_users('Add', REQUEST))">
-     <dtml-call expr="REQUEST.set('roles', roles+['Alterar Senha'])">
+     <dtml-if roles>
+        <dtml-call expr="REQUEST.set('roles', roles+['Alterar Senha'])">
+     </dtml-if>
    </dtml-if>
    <dtml-if expr="metodo">
      <dtml-let mensagem="'Dados do usuário salvos com sucesso.'" url=url>
        <dtml-var mensagem_emitir>
      </dtml-let>
    <dtml-else>
-     <dtml-let mensagem="'Não foi possível salvar os dados do usuario! Tente novamente.'" tipo_mensagem="'danger'">
+     <dtml-let mensagem="'Não foi possível salvar os dados do usuário! Tente novamente.'" tipo_mensagem="'danger'">
        <dtml-var mensagem_emitir>
      </dtml-let>
    </dtml-if>

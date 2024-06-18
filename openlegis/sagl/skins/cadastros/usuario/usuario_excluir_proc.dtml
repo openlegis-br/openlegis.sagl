@@ -1,4 +1,5 @@
 <dtml-call expr="REQUEST.set('name', names)">
+<dtml-call expr="REQUEST.set('names', names.split())">
 
 <dtml-if expr="(name == AUTHENTICATED_USER.getUserName()) and (roles == ['Operador'])">
   <dtml-call expr="REQUEST.set('url', portal_url() + '/index_html')">
@@ -23,11 +24,11 @@
 
 <dtml-unless erro>
 <dtml-if expr="acl_users.manage_users('Delete', REQUEST)">
-  <dtml-let mensagem="'Usuário(s) excluído(s) com sucesso!'" url=url>
+  <dtml-let mensagem="'Usuário excluído com sucesso!'" url=url>
        <dtml-var mensagem_emitir>
   </dtml-let>
 <dtml-else>
-  <dtml-let mensagem="'Não foi possível excluir o(s) usuário(s)'" tipo_mensagem="'danger'">
+  <dtml-let mensagem="'Não foi possível excluir o usuário'" tipo_mensagem="'danger'">
        <dtml-var mensagem_emitir>
   </dtml-let>
 </dtml-if>

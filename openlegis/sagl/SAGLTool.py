@@ -1868,7 +1868,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
            storage_path = self.sapl_documentos.pauta_sessao
            for metodo in self.zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=codigo):
                for tipo in self.zsql.tipo_sessao_plenaria_obter_zsql(tip_sessao=metodo.tip_sessao):
-                   sessao = str(metodo.num_sessao_plen) +  'ª Reunião ' + str(tipo.nom_sessao)+' - '+ str(metodo.dat_inicio_sessao)
+                   sessao = str(metodo.num_sessao_plen) + 'ª ' + str(self.sapl_documentos.props_sagl.reuniao_sessao).upper() + ' ' + str(tipo.nom_sessao) + ' - ' + str(metodo.dat_inicio_sessao)
            for metodo in self.zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=codigo, ind_audiencia='1'):
                sessao = 'Audiência Pública nº ' + str(metodo.num_sessao_plen) + '/' + str(metodo.ano_sessao)
            texto = 'PAUTA' + ' - ' + str(sessao)
@@ -1876,7 +1876,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
            storage_path = self.sapl_documentos.ata_sessao
            for metodo in self.zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=codigo):
                for tipo in self.zsql.tipo_sessao_plenaria_obter_zsql(tip_sessao=metodo.tip_sessao):
-                   sessao = str(metodo.num_sessao_plen) +  'ª Reunião ' + str(tipo.nom_sessao)+' - '+ str(metodo.dat_inicio_sessao)
+                   sessao = str(metodo.num_sessao_plen) + 'ª ' + str(self.sapl_documentos.props_sagl.reuniao_sessao).upper() + ' ' + str(tipo.nom_sessao) + ' - ' + str(metodo.dat_inicio_sessao)
            for metodo in self.zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=codigo, ind_audiencia='1'):
                sessao = 'Audiência Pública nº ' + str(metodo.num_sessao_plen) + '/' + str(metodo.ano_sessao)
            texto = 'ATA' + ' - ' + str(sessao)
@@ -1889,7 +1889,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
            storage_path = self.sapl_documentos.anexo_sessao
            for metodo in self.zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=codigo):
                for tipo in self.zsql.tipo_sessao_plenaria_obter_zsql(tip_sessao=metodo.tip_sessao):
-                   sessao = str(metodo.num_sessao_plen) +  'ª Reunião ' + str(tipo.nom_sessao)+ ' de ' + str(metodo.dat_inicio_sessao)
+                   sessao = str(metodo.num_sessao_plen) + 'ª ' + str(self.sapl_documentos.props_sagl.reuniao_sessao).upper() + ' ' + str(tipo.nom_sessao) + ' - ' + str(metodo.dat_inicio_sessao)
            file_item =  str(codigo) + '_anexo_' + str(anexo) + '.pdf'
            title = getattr(self.sapl_documentos.anexo_sessao,file_item).title_or_id()
            texto = str(title)
@@ -2065,7 +2065,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         if cod_sessao_plen != '0' and cod_sessao_plen != '':
            for item in self.zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=cod_sessao_plen):
                for tipo in self.zsql.tipo_sessao_plenaria_obter_zsql(tip_sessao=item.tip_sessao):
-                   id_sessao = str(item.num_sessao_plen) + 'ª Reunião ' + tipo.nom_sessao
+                   id_sessao = str(item.num_sessao_plen) + 'ª ' + str(self.sapl_documentos.props_sagl.reuniao_sessao) + ' ' + tipo.nom_sessao
                data = item.dat_inicio_sessao
                data1 = item.dat_inicio
                num_legislatura = item.num_legislatura

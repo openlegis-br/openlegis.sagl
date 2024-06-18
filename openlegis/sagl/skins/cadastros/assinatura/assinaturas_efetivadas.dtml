@@ -69,7 +69,7 @@ $(document).ready(function() {
                <dtml-if expr="tipo_doc == 'ata'">
                   <dtml-in expr="zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=codigo, ind_excluido=0)">
                      <dtml-in expr="zsql.tipo_sessao_plenaria_obter_zsql(tip_sessao=tip_sessao)">                  
-                        Ata da <dtml-var num_sessao_plen>ª Sessão <dtml-var nom_sessao> de <dtml-var dat_inicio_sessao>
+                        Ata da <dtml-var num_sessao_plen>ª <dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao"> <dtml-var nom_sessao> de <dtml-var dat_inicio_sessao>
                      </dtml-in>
                   </dtml-in>    
                   <dtml-in expr="zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=codigo, ind_audiencia='1', ind_excluido=0)">
@@ -133,7 +133,7 @@ $(document).ready(function() {
                <dtml-elif expr="tipo_doc == 'pauta'">
                   <dtml-in expr="zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=codigo, ind_excluido=0)">
                      <dtml-in expr="zsql.tipo_sessao_plenaria_obter_zsql(tip_sessao=tip_sessao)">                  
-                        Pauta da <dtml-var num_sessao_plen>ª Sessão <dtml-var nom_sessao> de <dtml-var dat_inicio_sessao>
+                        Pauta da <dtml-var num_sessao_plen>ª <dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao"> <dtml-var nom_sessao> de <dtml-var dat_inicio_sessao>
                      </dtml-in>
                   </dtml-in>
                   <dtml-in expr="zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=codigo, ind_audiencia='1', ind_excluido=0)">

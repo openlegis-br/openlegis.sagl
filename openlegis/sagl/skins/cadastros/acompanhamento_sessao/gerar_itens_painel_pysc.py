@@ -22,7 +22,7 @@ for sessao in context.zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=int(contex
   cod_sessao_plen = sessao.cod_sessao_plen
   dic_sessao["cod_sessao_plen"] = sessao.cod_sessao_plen
   dic_sessao["nom_fase"] = 'Abertura'
-  dic_sessao["txt_exibicao"] = str(sessao.num_sessao_plen)+'ª' + ' Sessão '+ tipo_sessao.nom_sessao + ' (' + context.pysc.data_converter_por_extenso_pysc(data=sessao.dat_inicio_sessao) + ' - ' + sessao.hr_inicio_sessao +'hs)'
+  dic_sessao["txt_exibicao"] = str(sessao.num_sessao_plen)+'ª ' + str(context.sapl_documentos.props_sagl.reuniao_sessao) + ' ' + tipo_sessao.nom_sessao + ' (' + context.pysc.data_converter_por_extenso_pysc(data=sessao.dat_inicio_sessao) + ' - ' + sessao.hr_inicio_sessao + 'hs)'
   dic_sessao["cod_materia"] = ''
   dic_sessao["txt_autoria"] = ''
   dic_sessao["txt_turno"] = ''

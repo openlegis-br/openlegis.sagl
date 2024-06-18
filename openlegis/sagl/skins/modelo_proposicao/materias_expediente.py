@@ -18,7 +18,7 @@ session = REQUEST.SESSION
 for sessao in context.zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=cod_sessao_plen,ind_excluido=0):
     relatorio_dic = {}
     tipo_sessao = context.zsql.tipo_sessao_plenaria_obter_zsql(tip_sessao=sessao.tip_sessao,ind_excluido=0)[0]
-    relatorio_dic["id_sessao"] = str(sessao.num_sessao_plen)+'ª Sessão ' + tipo_sessao.nom_sessao + ', em ' + sessao.dat_inicio_sessao
+    relatorio_dic["id_sessao"] = str(sessao.num_sessao_plen)+'ª ' + str(context.sapl_documentos.props_sagl.reuniao_sessao) + ' ' + ' + tipo_sessao.nom_sessao + ', em ' + sessao.dat_inicio_sessao
     nom_arquivo = str(sessao.cod_sessao_plen)+ '_materias_expediente.odt'
     data_sessao = sessao.dat_inicio_sessao
 

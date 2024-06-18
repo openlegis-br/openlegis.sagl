@@ -20,7 +20,7 @@ function campos_criticar(){
     var regexp_digitos = /\D+/;
 
     if (form.lst_tip_sessao_plen.selectedIndex == 0){
-          alert("Escolha o tipo de <dtml-if expr="_.has_key('ind_audiencia')">audiência<dtml-else>sessão</dtml-if>!");
+          alert("Escolha o tipo!");
           form.lst_tip_sessao_plen.focus();
           return false;
     }
@@ -38,19 +38,19 @@ function campos_criticar(){
     }
 
     if (form.txt_dat_inicio_sessao.value == "") {
-         alert("A data da <dtml-if expr="_.has_key('ind_audiencia')">audiência<dtml-else>sessão</dtml-if> deve ser preenchida!");
+         alert("A data de abertura deve ser preenchida!");
          form.txt_dat_inicio_sessao.focus();
          return false;
     }
 
     if (form.txt_hr_inicio_sessao.value == "") {
-         alert("A hora de início da <dtml-if expr="_.has_key('ind_audiencia')">audiência<dtml-else>sessão</dtml-if> deve ser preenchida!");
+         alert("A hora de início deve ser preenchida!");
          form.txt_hr_inicio_sessao.focus();
          return false;
     }
 
     if (form.txt_num_sessao_plen.value == "") {
-         alert("O número da <dtml-if expr="_.has_key('ind_audiencia')">audiência<dtml-else>sessão</dtml-if> deve ser preenchido!");
+         alert("O número deve ser preenchido!");
          form.txt_num_sessao_plen.focus();
          return false;
     }
@@ -185,7 +185,7 @@ $(document).ready(function(){
    <dtml-if ind_audiencia>
       <h1 class="firstHeading">Cadastro de Audiência Pública</h1>
    <dtml-else>
-      <h1 class="firstHeading">Cadastro de Reunião</h1>
+      <h1 class="firstHeading">Cadastro de <dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao"></h1>
    </dtml-if>
 </dtml-if>
 
@@ -362,7 +362,7 @@ $(document).ready(function(){
     <dtml-if expr="cod_periodo_sessao != None">
       <div class="form-row">
          <div class="col-12 mb-3">
-            <label for="txt_periodo" class="required">Período da Reunião</label>
+            <label for="txt_periodo" class="required">Período da <dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao"></label>
             <dtml-if expr="_.has_key('cod_sessao_plen') and cod_periodo_sessao != None">
             <dtml-in expr="zsql.periodo_sessao_obter_zsql(cod_periodo=cod_periodo_sessao)">
                 <dtml-call expr="REQUEST.set('texto_periodo', str(num_periodo) + 'º Período ' + '(' + str(data_inicio) + ' - ' + str(data_fim)+ ')' )">
@@ -578,7 +578,7 @@ target="_blank">Gerar PDF</a>
                 <a class="btn btn-sm btn-secondary" target="_blank" href="<dtml-var roteiro>?<dtml-var expr="ZopeTime().timeTime()">">
                   <i class="fa fa-fw fa-file-pdf"></i>Visualizar
                 </a>
-                <a class="btn btn-sm btn-danger" href="roteiro_excluir_proc?cod_sessao_plen=<dtml-var cod_sessao_plen missing><dtml-if expr="_.has_key('ind_audiencia')">&ind_audiencia=1</dtml-if>" data-confirm="Deseja realmente excluir o arquivo PDF do Roteiro<dtml-if expr="_.has_key('ind_audiencia')"><dtml-else> da Reunião</dtml-if>?"><i class="fas fa-trash"></i> Excluir</a> 
+                <a class="btn btn-sm btn-danger" href="roteiro_excluir_proc?cod_sessao_plen=<dtml-var cod_sessao_plen missing><dtml-if expr="_.has_key('ind_audiencia')">&ind_audiencia=1</dtml-if>" data-confirm="Deseja realmente excluir o arquivo PDF do Roteiro<dtml-if expr="_.has_key('ind_audiencia')"><dtml-else> da <dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao"></dtml-if>?"><i class="fas fa-trash"></i> Excluir</a> 
              </dtml-let>
           <dtml-else>
              <div class="custom-file">
@@ -653,7 +653,7 @@ target="_blank">Gerar PDF</a>
    <input class="btn btn-primary" type="button" name="button" value="Salvar" onClick="campos_criticar()" />
    <dtml-if cod_sessao_plen>
       <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador'])">
-         <a class="btn btn-danger" href="<dtml-var portal_url>/cadastros/sessao_plenaria/sessao_plenaria_excluir_proc?cod_sessao_plen=<dtml-var cod_sessao_plen><dtml-if expr="_.has_key('ind_audiencia')">&ind_audiencia=1</dtml-if>" data-confirm="Deseja realmente excluir a <dtml-if expr="_.has_key('ind_audiencia')">audiência pública<dtml-else>sessão plenária</dtml-if>?">Excluir</a>
+         <a class="btn btn-danger" href="<dtml-var portal_url>/cadastros/sessao_plenaria/sessao_plenaria_excluir_proc?cod_sessao_plen=<dtml-var cod_sessao_plen><dtml-if expr="_.has_key('ind_audiencia')">&ind_audiencia=1</dtml-if>" data-confirm="Deseja realmente excluir a <dtml-if expr="_.has_key('ind_audiencia')">audiência pública<dtml-else>plenária</dtml-if>?">Excluir</a>
       </dtml-if>
    </dtml-if>
   </div>

@@ -16,6 +16,6 @@ for i in quorum_busca:
 lista=context.zsql.presenca_sessao_obter_zsql(cod_sessao_plen=cod_sessao_plen,tip_frequencia="P",ind_excluido=0)
 
 if len(lista) >= quorum:
-    return "Quórum atingido para a abertura da Sessão Plenária."
+    return "Quórum atingido para a abertura."
 else:
-    return "Quórum não atingido para a abertura da Sessão Plenária!"
+    return "Quórum não atingido para a abertura!"

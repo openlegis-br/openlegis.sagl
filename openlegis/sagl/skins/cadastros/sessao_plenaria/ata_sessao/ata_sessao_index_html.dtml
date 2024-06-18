@@ -26,14 +26,14 @@
 
 <a id="ajuda" href="<dtml-var portal_url>/ajuda/sessao_plenaria_ata">Ajuda</a>
 
-<h1 class="firstHeading">Ata da Sessão</h1>
+<h1 class="firstHeading">Ata da <dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao"></h1>
 
 <h3 align="center"><dtml-var sessao_plenaria_header></h3>
 
 <dtml-var sessao_plenaria_menu>
 
 <fieldset>
-<legend>Ata da Sessão</legend>
+<legend>Ata da <dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao"></legend>
 <form name="ata_sessao_form" method="post" action="ata_sessao_salvar_proc" enctype="multipart/form-data">
   <table class="table">
     <dtml-in expr="zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=cod_sessao_plen, ind_excluido=0)">

@@ -57,6 +57,9 @@ for sessao in metodo:
   pauta_dic["dat_fim_sessao"] = sessao.dat_fim_sessao
   pauta_dic["hr_fim_sessao"] = sessao.hr_fim_sessao
   pauta_dic["txt_tema"] = sessao.tip_expediente
+  pauta_dic["num_periodo"] = ''
+  for periodo in context.zsql.periodo_sessao_obter_zsql(cod_periodo=sessao.cod_periodo_sessao):
+      pauta_dic["num_periodo"] = periodo.num_periodo
 
   # obtém o nome do Presidente da Câmara titular
   for cargo in context.zsql.cargo_mesa_obter_zsql(ind_excluido=0):

@@ -91,14 +91,14 @@
       <table class="table table-borderless">
         <tr>
           <td>
-            <label for="txt_dat_ordem" class="required">Data da Sessão</label>
+            <label for="txt_dat_ordem" class="required">Data da <dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao"></label>
             <input class="form-control" type="text" name="txt_dat_ordem" id="txt_dat_ordem" readonly="readonly" onBlur="formata_data(form.txt_dat_ordem)"
                <dtml-if lst_dat_ordem> value="<dtml-var lst_dat_ordem>"
                <dtml-else> value="<dtml-var dat_inicio_sessao>"
 	       </dtml-if> />
           </td>
           <td>
-            <label for="lst_tip_sessao" class="required">Tipo da Sessão</label>
+            <label for="lst_tip_sessao" class="required">Tipo da <dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao"></label>
             <select class="custom-select" id="lst_tip_sessao" name="lst_tip_sessao" onfocus="this.initialSelect = this.selectedIndex;" onchange="this.selectedIndex = this.initialSelect;" required>
 	      <option value="0">Selecione</option>
               <dtml-in expr="zsql.tipo_sessao_plenaria_obter_zsql(ind_excluido=0)">

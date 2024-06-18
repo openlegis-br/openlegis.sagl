@@ -134,9 +134,9 @@
          <a class="btn btn-danger" href="oradores_expediente_excluir_proc?cod_sessao_plen=<dtml-var cod_sessao_plen>&cod_sessao_leg=&num_legislatura=<dtml-var num_legislatura>&tip_sessao=<dtml-var tip_sessao>&dat_sessao=<dtml-var dat_sessao>" data-confirm="Deseja realmente excluir todos os oradores cadastrados?">Excluir Lista</a>
       <dtml-else>
          <dtml-call expr="REQUEST.set('cod_sessao_anterior', int(cod_sessao_plen) - 1)">
-         <a class="btn btn-primary" href="oradores_expediente_incluir?cod_sessao_plen=<dtml-var cod_sessao_plen>&cod_sessao_leg=&num_legislatura=<dtml-var num_legislatura>&tip_sessao=<dtml-var tip_sessao>&dat_sessao=<dtml-var dat_sessao>&ativos=1" data-confirm="Gerar lista de oradores com Vereadores ativos na data da Sessão?">Vereadores Ativos</a>
+         <a class="btn btn-primary" href="oradores_expediente_incluir?cod_sessao_plen=<dtml-var cod_sessao_plen>&cod_sessao_leg=&num_legislatura=<dtml-var num_legislatura>&tip_sessao=<dtml-var tip_sessao>&dat_sessao=<dtml-var dat_sessao>&ativos=1" data-confirm="Gerar lista de oradores com Vereadores ativos na data da <dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao">?">Vereadores Ativos</a>
          <dtml-if expr="zsql.oradores_expediente_obter_zsql(cod_sessao_plen = cod_sessao_anterior, ind_excluido=0)">         
-            <a class="btn btn-primary" href="oradores_expediente_incluir?cod_sessao_plen=<dtml-var cod_sessao_plen>&cod_sessao_leg=&num_legislatura=<dtml-var num_legislatura>&tip_sessao=<dtml-var tip_sessao>&dat_sessao=<dtml-var dat_sessao>" data-confirm="Gerar lista de oradores com base na sessão anterior?">Sessão Anterior</a>      
+            <a class="btn btn-primary" href="oradores_expediente_incluir?cod_sessao_plen=<dtml-var cod_sessao_plen>&cod_sessao_leg=&num_legislatura=<dtml-var num_legislatura>&tip_sessao=<dtml-var tip_sessao>&dat_sessao=<dtml-var dat_sessao>" data-confirm="Gerar lista de oradores com base na sessão anterior?"><dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao"> Anterior</a>      
          </dtml-if>   
       </dtml-if>    
     </div>

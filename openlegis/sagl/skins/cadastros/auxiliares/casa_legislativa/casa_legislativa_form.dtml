@@ -52,6 +52,20 @@
          return false;
       } 
 
+      if (form.txt_reuniao_sessao.value==""){
+         alert("O nome da sessão / reunião deve ser preenchido!");
+         form.txt_reuniao_sessao.focus();
+         form.txt_reuniao_sessao.select();
+         return false;
+      }
+
+      if (form.txt_reuniao_sessao_plural.value==""){
+         alert("O nome da sessão / reunião no plural deve ser preenchido!");
+         form.txt_reuniao_sessao_plural.focus();
+         form.txt_reuniao_sessao_plural.select();
+         return false;
+      }
+
       if (form.file_nom_logo.value != "") 
          form.hdn_file.value = 1;      
 
@@ -214,6 +228,20 @@
         <label for="txt_restpki_access_token">Token de Assinatura Digital</label>
         <textarea class="form-control autoresize" id="txt_restpki_access_token" name="txt_restpki_access_token" rows="1"><dtml-var expr="sapl_documentos.props_sagl.restpki_access_token" missing></textarea>
      </div>
+  </div>
+  
+  <div class="form-row">
+    <div class="col-6 mb-3">
+        <label for="txt_reuniao_sessao" class="required">Nome da sessão / reunião plenária</label>
+        <input class="form-control" type="text" id="txt_reuniao_sessao" name="txt_reuniao_sessao" value="<dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao" missing>" />
+    </div>
+    <div class="col-6 mb-3">
+        <label for="txt_reuniao_sessao_plural" class="required">Nome das sessão / reunião plenária (plural)</label>
+        <input class="form-control" type="text" id="txt_reuniao_sessao_plural" name="txt_reuniao_sessao_plural" value="<dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao_plural" missing>" />
+    </div>
+  </div>
+  
+  <div class="form-row"> 
      <div class="col-12 mb-3">
         <label for="txt_informacao_geral">Observações</label>
         <textarea class="form-control" id="txt_informacao_geral" name="txt_informacao_geral" rows="1"><dtml-var expr="sapl_documentos.props_sagl.txt_informacao_geral" missing></textarea>

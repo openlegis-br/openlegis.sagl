@@ -67,7 +67,10 @@ def pauta(pauta_dic):
        tmp+='\t\t\t<font color="white"> </font>\n'
        tmp+='\t\t</para>\n'
     else:
-       tmp+='\t\t<para style="P0">'+ str(pauta_dic["num_sessao_plen"]) +'ª REUNIÃO ' + pauta_dic["nom_sessao"] + ', EM ' + pauta_dic["dia_sessao"] + ', ÀS ' + str(pauta_dic["hr_inicio_sessao"]) + 'HS' + '</para>\n'
+       if pauta_dic["num_periodo"] != '':
+          tmp+='\t\t<para style="P0">'+ str(pauta_dic["num_sessao_plen"]) +'ª ' + str(context.sapl_documentos.props_sagl.reuniao_sessao).upper() + ' ' + pauta_dic["nom_sessao"] + ' DO ' + str(pauta_dic["num_periodo"]) + 'º PERÍODO - ' + pauta_dic["dat_inicio_sessao"] + '</para>\n'
+       else:
+          tmp+='\t\t<para style="P0">'+ str(pauta_dic["num_sessao_plen"]) +'ª ' + str(context.sapl_documentos.props_sagl.reuniao_sessao).upper() + ' ' + pauta_dic["nom_sessao"] + ' - ' + pauta_dic["dat_inicio_sessao"] + '</para>\n'
        tmp+='\t\t<para style="P2" spaceAfter="4">\n'
        tmp+='\t\t\t<font color="white"> </font>\n'
        tmp+='\t\t</para>\n'

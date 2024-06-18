@@ -5,7 +5,7 @@
 </dtml-comment>
 
 <dtml-in expr="zsql.tipo_sessao_plenaria_obter_zsql(tip_sessao=tip_sessao)">
-<h1 class="firstHeading d-none">Reunião Plenária</h1>
+<h1 class="firstHeading d-none"><dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao"> Plenária</h1>
 <h2 align="center"><dtml-var sessao_plenaria_header></h2>
 </dtml-in>
 
@@ -16,7 +16,7 @@
    <dtml-call expr="REQUEST.set('id_documento', str(cod_sessao_plen)+ '_' + 'ata_sessao.pdf')">
    <dtml-if "hasattr(sapl_documentos.ata_sessao,id_documento)">
       <dtml-let documento="getattr(sapl_documentos.ata_sessao,id_documento).absolute_url">
-             <a class="btn btn-secondary" href="<dtml-var documento>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fas fa-file-pdf"></i> <span class="">Ata da Reunião</span></a>             
+             <a class="btn btn-secondary" href="<dtml-var documento>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fas fa-file-pdf"></i> <span class="">Ata da <dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao"></span></a>             
       </dtml-let>
    </dtml-if>
     <dtml-if url_audio>

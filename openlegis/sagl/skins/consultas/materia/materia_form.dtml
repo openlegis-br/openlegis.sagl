@@ -495,16 +495,16 @@ $(function () {
               <thead>
                 <tr>
                    <th>Resultado</th>
-                   <th>Sessão</th>
+                   <th><dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao"></th>
                 </tr>
               </thead>
               <dtml-in expr="zsql.materia_apresentada_sessao_obter_zsql(cod_materia=cod_materia)">
                 <tr>
-                  <td>Leitura da matéria na sessão</td>                 
+                  <td>Leitura da matéria na <dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao"></td>                 
                   <td>
                   <dtml-in expr="zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=cod_sessao_plen)">
                     <a href="<dtml-var portal_url>/consultas/sessao_plenaria/agenda_sessao_plen_mostrar_proc?cod_sessao_plen=<dtml-var cod_sessao_plen>&dat_sessao=<dtml-var dat_inicio_sessao>">
-                       <dtml-var num_sessao_plen>ª Sessão <dtml-in expr="zsql.tipo_sessao_plenaria_obter_zsql(tip_sessao=tip_sessao)"><dtml-var nom_sessao>, em <dtml-var dat_inicio_sessao></dtml-in>
+                       <dtml-var num_sessao_plen>ª <dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao"> <dtml-in expr="zsql.tipo_sessao_plenaria_obter_zsql(tip_sessao=tip_sessao)"><dtml-var nom_sessao>, em <dtml-var dat_inicio_sessao></dtml-in>
                     </a>
                   </dtml-in>
                   </td>
@@ -535,7 +535,7 @@ $(function () {
                     </td>
                     <td>
                       <a href="<dtml-var portal_url>/consultas/sessao_plenaria/agenda_sessao_plen_mostrar_proc?cod_sessao_plen=<dtml-var cod_sessao_plen>&dat_sessao=<dtml-var dat_inicio_sessao>">
-                        <dtml-var num_sessao_plen>ª Sessão <dtml-in expr="zsql.tipo_sessao_plenaria_obter_zsql(tip_sessao=tip_sessao)"><dtml-var nom_sessao></dtml-in>, em <dtml-var dat_inicio_sessao></a>
+                        <dtml-var num_sessao_plen>ª <dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao"> <dtml-in expr="zsql.tipo_sessao_plenaria_obter_zsql(tip_sessao=tip_sessao)"><dtml-var nom_sessao></dtml-in>, em <dtml-var dat_inicio_sessao></a>
                     </td>
                   </tr>
                 </dtml-in>
@@ -564,7 +564,7 @@ $(function () {
                    </td>                   
                    <td>
                      <a href="<dtml-var portal_url>/consultas/sessao_plenaria/agenda_sessao_plen_mostrar_proc?cod_sessao_plen=<dtml-var cod_sessao_plen>&dat_sessao=<dtml-var dat_inicio_sessao>">
-                      <dtml-var num_sessao_plen>ª Sessão <dtml-in expr="zsql.tipo_sessao_plenaria_obter_zsql(tip_sessao=tip_sessao)"><dtml-var nom_sessao></dtml-in>, em <dtml-var dat_inicio_sessao></a>
+                      <dtml-var num_sessao_plen>ª <dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao"> <dtml-in expr="zsql.tipo_sessao_plenaria_obter_zsql(tip_sessao=tip_sessao)"><dtml-var nom_sessao></dtml-in>, em <dtml-var dat_inicio_sessao></a>
                    </td>
                  </tr>
                </dtml-in>

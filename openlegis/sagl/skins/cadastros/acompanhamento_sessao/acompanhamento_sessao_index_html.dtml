@@ -89,7 +89,7 @@ $(document).ready(function() {
      <div class="col-12 mb-3 form-group">
        <dtml-call expr="REQUEST.set('ano_sessao', DateTime().strftime('%Y'))">
        <select class="form-control selectpicker show-tick jumpmenu" data-dropup-auto="false" id="lst_cod_sessao" name="lst_cod_sessao">
-         <option value="<dtml-var ACTUAL_URL>"> Selecione uma reunião</option>
+         <option value="<dtml-var ACTUAL_URL>"> Selecione uma <dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao"></option>
          <dtml-in expr="zsql.sessao_plenaria_obter_zsql(ano_sessao=ano_sessao, ind_excluido=0)">
            <dtml-if expr="hr_fim_sessao==''">
               <option 
@@ -98,7 +98,7 @@ $(document).ready(function() {
                  </dtml-if> 
                  value="<dtml-var ACTUAL_URL>?hdn_cod_sessao_plen=<dtml-var cod_sessao_plen>">
                 <dtml-in expr="zsql.tipo_sessao_plenaria_obter_zsql(tip_sessao=tip_sessao)">
-                   <dtml-var num_sessao_plen missing>ª Reunião <dtml-var nom_sessao> - <dtml-var dat_inicio_sessao>
+                   <dtml-var num_sessao_plen missing>ª <dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao"> <dtml-var nom_sessao> - <dtml-var dat_inicio_sessao>
                 </dtml-in>
                </option>
            </dtml-if>
@@ -193,7 +193,7 @@ $(document).ready(function() {
        <div class="card-body text-left bg-light">
       <dtml-in expr="zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=cod_sessao_plen)">
             <dtml-in expr="zsql.tipo_sessao_plenaria_obter_zsql(tip_sessao=tip_sessao)">
-                   <p class="h4 card-title "><dtml-var num_sessao_plen>ª <dtml-if expr="nom_sessao!='Audiência Pública'">Reunião</dtml-if> <dtml-var nom_sessao></p>
+                   <p class="h4 card-title "><dtml-var num_sessao_plen>ª <dtml-if expr="nom_sessao!='Audiência Pública'"><dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao"></dtml-if> <dtml-var nom_sessao></p>
             </dtml-in>
       </dtml-in>
    <div class="card-text">

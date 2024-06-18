@@ -154,7 +154,7 @@ for materia in context.zsql.materia_obter_zsql(cod_materia=cod_materia):
              tipo_sessao = tipo_sessao.nom_sessao
      for tipo_resultado in context.zsql.tipo_resultado_votacao_obter_zsql(tip_resultado_votacao=votacao.tip_resultado_votacao, ind_excluido=0):
          resultado = tipo_resultado.nom_resultado
-     id_resultado = resultado + ' no Expediente da ' + str(num_sessao) + 'ª Sessão ' + tipo_sessao + ' de ' + data_sessao
+     id_resultado = resultado + ' no Expediente da ' + str(num_sessao) + 'ª ' + str(context.sapl_documentos.props_sagl.reuniao_sessao) + ' ' + tipo_sessao + ' de ' + data_sessao
      lst_votacao.append(id_resultado)
 
  for votacao in context.zsql.votacao_materia_ordem_dia_pesquisar_zsql(cod_materia=materia.cod_materia):
@@ -167,7 +167,7 @@ for materia in context.zsql.materia_obter_zsql(cod_materia=cod_materia):
          des_turno = turno.des_turno
      for tipo_resultado in context.zsql.tipo_resultado_votacao_obter_zsql(tip_resultado_votacao=votacao.tip_resultado_votacao, ind_excluido=0):
          resultado = tipo_resultado.nom_resultado
-     id_resultado = resultado + ' em ' + des_turno + ' na Ordem do Dia da ' + str(num_sessao) + 'ª Sessão ' + tipo_sessao + ' de ' + data_sessao
+     id_resultado = resultado + ' em ' + des_turno + ' na Ordem do Dia da ' + str(num_sessao) + 'ª ' + str(context.sapl_documentos.props_sagl.reuniao_sessao) + ' ' + tipo_sessao + ' de ' + data_sessao
      lst_votacao.append(id_resultado)
 
  capa_dic['votacao'] = ', '.join(['%s' % (value) for (value) in lst_votacao])

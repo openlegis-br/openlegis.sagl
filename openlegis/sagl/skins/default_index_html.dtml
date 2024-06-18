@@ -91,7 +91,7 @@
         <div class="homeContent rounded py-3 px-4">
           <div class="homeTitle">
             <img src="<dtml-var portal_url>/imagens/icon_pautas.png" alt="Lista de Pautas">
-            <h2 class="home">Pautas das Sessões</h2>
+            <h2 class="home">Pautas das <dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao_plural"></h2>
           </div>
           <p style="font-size: 90%;">
             Utilizadas para se determinar quais matérias serão discutidas e votadas. A responsabilidade pela
@@ -107,7 +107,7 @@
         <div class="homeContent rounded py-3 px-4">
           <div class="homeTitle">
             <img src="<dtml-var portal_url>/imagens/icon_plenarias.png" alt="Lista de Sessões">          
-            <h2 class="home">Sessões Plenárias</h2>
+            <h2 class="home"><dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao_plural"> Plenárias</h2>
           </div>
           <p style="font-size: 90%;">
             Foro apropriado para a tomada de decisões sobre os projetos de lei e outras matérias legislativas,        
@@ -169,12 +169,12 @@
 <div class="form-row mt-2">
  <div class="col-12">
    <div class="card mb-3">
-     <h5 class="card-header"><i class="fas fa-calendar-alt"></i> Próximas Sessões</h5>   
+     <h5 class="card-header"><i class="fas fa-calendar-alt"></i> Próximas <dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao_plural"></h5>   
       <ul class="list-group list-group-flush">     
         <dtml-in expr="zsql.sessao_plenaria_proximas_zsql()">
            <dtml-in expr="zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=cod_sessao_plen)">
               <dtml-in expr="zsql.tipo_sessao_plenaria_obter_zsql(tip_sessao=tip_sessao)">           
-                  <li class="list-group-item"><span class="badge badge-secondary"><dtml-var dat_inicio_sessao> <dtml-var expr="pysc.hora_formatar_pysc(hora=hr_inicio_sessao)"> </span> <dtml-var num_sessao_plen>ª <dtml-if expr="nom_sessao!='Audiência Pública'">Sessão</dtml-if> <dtml-var nom_sessao> (<dtml-var num_sessao_leg>ª Sessão Legislativa)
+                  <li class="list-group-item"><span class="badge badge-secondary"><dtml-var dat_inicio_sessao> <dtml-var expr="pysc.hora_formatar_pysc(hora=hr_inicio_sessao)"> </span> <dtml-var num_sessao_plen>ª <dtml-if expr="nom_sessao!='Audiência Pública'"><dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao"></dtml-if> <dtml-var nom_sessao> (<dtml-var num_sessao_leg>ª Sessão Legislativa)
                   <dtml-if expr="zsql.materia_apresentada_sessao_obter_zsql(cod_sessao_plen = cod_sessao_plen, ind_excluido=0) or zsql.expediente_materia_obter_zsql(cod_sessao_plen = cod_sessao_plen, ind_excluido=0)">
                      <a class="btn btn-sm btn-link" href="<dtml-var portal_url>/relatorios/pdf_expediente_preparar_pysc?data=<dtml-var dat_inicio_sessao>&cod_sessao_plen=<dtml-var cod_sessao_plen>" target="_blank"><i class="fas fa-file-pdf"></i> <span class="">Expediente</span></a>
                   </dtml-if>
@@ -195,7 +195,7 @@
            <div class="card-body">Não há nenhuma sessão agendada.</div>
         </dtml-in>
             <div class="card-footer text-right">
-             <a class="btn btn-sm btn-link" href="<dtml-var portal_url>/consultas/sessao_plenaria"><i class="fa fa-link"></i> Calendário das Sessões</a>
+             <a class="btn btn-sm btn-link" href="<dtml-var portal_url>/consultas/sessao_plenaria"><i class="fa fa-link"></i> Calendário das <dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao_plural"></a>
             </div>        
    </div>
 </div>

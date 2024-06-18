@@ -49,7 +49,7 @@ for sessao in metodo:
      ata_dic["url_video"] = '<p>A audiência está disponibilizada na íntegra, em vídeo, através do endereço eletrônico: ' + '<a href="'+ sessao.url_video +'" target="_blank">' + str(sessao.num_sessao_plen) + 'ª' + nom_sessao + '</a></p>' 
   else:
      ata_dic["txt_tema"] = ''
-     ata_dic["url_video"] = '<p>A sessão está disponibilizada na íntegra, em vídeo, através do endereço eletrônico: ' + '<a href="'+ sessao.url_video +'" target="_blank">' + str(sessao.num_sessao_plen) + 'ª Sessão ' + nom_sessao + '</a></p>' 
+     ata_dic["url_video"] = '<p>A gravação do evento sessão está disponibilizada na íntegra, em vídeo, através do endereço eletrônico: ' + '<a href="'+ sessao.url_video +'" target="_blank">' + str(sessao.num_sessao_plen) + 'ª ' + str(context.sapl_documentos.props_sagl.reuniao_sessao) + ' ' + nom_sessao + '</a></p>' 
   nom_modelo = nom_modelo
   ata_dic['nom_usuario'] = ''
   for usuario in context.zsql.usuario_obter_zsql(col_username=REQUEST['AUTHENTICATED_USER'].getUserName()):

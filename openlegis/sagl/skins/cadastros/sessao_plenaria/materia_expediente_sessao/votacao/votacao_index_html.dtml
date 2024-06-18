@@ -51,7 +51,7 @@
                   qp = quo - 1;
                }
 	       if (qtv != qp) {
-                  alert("O total de votos não confere com o quorum de presentes na Sessão. Reinforme corretamente!"); 
+                  alert("O total de votos não confere com o quorum de presentes na <dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao">. Reinforme corretamente!"); 
                   form.rad_ind_votacao_presidente[0].focus();
                   return false;
                 } 
@@ -70,7 +70,7 @@
                var quo = parseInt(form.hdn_nro_presentes.value,10);
                qtv = qvs + qvn + qva;
                if (quo != qtv) {
-                  alert("Votos indicados não conferem com o quorum de presentes na Sessão. Reinforme! - quorum= " + quo + " - Sim= " + qvs + " - Não= " + qvn + " - Abstenção= " + qva);
+                  alert("Votos indicados não conferem com o quorum de presentes na <dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao">. Reinforme! - quorum= " + quo + " - Sim= " + qvs + " - Não= " + qvn + " - Abstenção= " + qva);
                   form.txt_votos_sim.focus();
                   return false;
                }   

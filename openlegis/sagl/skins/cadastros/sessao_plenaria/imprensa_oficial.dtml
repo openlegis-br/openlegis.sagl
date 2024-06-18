@@ -2,12 +2,12 @@
 
 <a id="ajuda" href="<dtml-var portal_url>/ajuda/sessao_plenaria">Ajuda</a>
 
-<h1 class="firstHeading">Sessão Plenária</h1>
+<h1 class="firstHeading"><dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao"> Plenária</h1>
 
 <h3 style="text-transform: uppercase" align="center">
 ﻿ <dtml-if cod_sessao_plen>
     <dtml-in expr="zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=cod_sessao_plen, ind_excluido=0)">
-      <dtml-in expr="zsql.tipo_sessao_plenaria_obter_zsql(tip_sessao=tip_sessao)">Ementário da proposições apresentadas pelos senhores vereadores <br />na <dtml-var num_sessao_plen>ª Sessão <dtml-var nom_sessao>  de <dtml-var expr="pysc.data_converter_por_extenso_pysc(data=dat_inicio_sessao)">
+      <dtml-in expr="zsql.tipo_sessao_plenaria_obter_zsql(tip_sessao=tip_sessao)">Ementário da proposições apresentadas pelos senhores vereadores <br />na <dtml-var num_sessao_plen>ª <dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao"> <dtml-var nom_sessao>  de <dtml-var expr="pysc.data_converter_por_extenso_pysc(data=dat_inicio_sessao)">
       </dtml-in>
     </dtml-in>
  </dtml-if>

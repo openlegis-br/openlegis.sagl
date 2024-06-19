@@ -9,14 +9,14 @@ import uuid
 import pymupdf
 
 
-class ProcessoAdm(grok.View):
+class ProcessoNorma(grok.View):
     grok.context(Interface)
     grok.require('zope2.View')
-    grok.name('processo_adm_integral')
+    grok.name('norma_integral')
     install_home = os.environ.get('INSTALL_HOME')
 
-    def download_files(self, cod_documento):       
-        dirpath = os.path.join(self.install_home, 'var/tmp/processo_adm_integral_' + str(cod_documento))
+    def download_files(self, cod_norma):       
+        dirpath = os.path.join(self.install_home, 'var/tmp/processo_norma_' + str(cod_norma))
         pagepath = os.path.join(dirpath, 'pages')
         
         if os.path.exists(dirpath) and os.path.isdir(dirpath):
@@ -29,45 +29,37 @@ class ProcessoAdm(grok.View):
       
         lst_arquivos = []
                
-        for documento in self.context.zsql.documento_administrativo_obter_zsql(cod_documento=cod_documento):
-            processo_integral = documento.sgl_tipo_documento+'-'+str(documento.num_documento)+'-'+str(documento.ano_documento)+'.pdf'
-            id_processo = documento.sgl_tipo_documento + ' ' + str(documento.num_documento) + '/' +str(documento.ano_documento)
-            id_capa = str(uuid.uuid4().hex)
-            id_arquivo = "%s.pdf" % str(id_capa)
-            self.context.modelo_proposicao.capa_processo_adm(cod_documento=cod_documento, nom_arquivo=str(id_capa))
-            if hasattr(self.context.temp_folder, id_arquivo):
+        for norma in self.context.zsql.norma_juridica_obter_zsql(cod_norma=cod_norma):
+            processo_integral = norma.sgl_tipo_norma+'-'+str(norma.num_norma)+'-'+str(norma.ano_norma)+'.pdf'
+            id_processo = norma.sgl_tipo_norma + ' ' + str(norma.num_norma) + '/' +str(norma.ano_norma)
+
+            nom_arquivo_compilado = str(cod_norma) + '_texto_consolidado.pdf'
+            nom_arquivo = str(cod_norma) + '_texto_integral.pdf'
+            
+            if hasattr(self.context.sapl_documentos.norma_juridica, nom_arquivo_compilado):
                dic = {}
-               dic["data"] = DateTime(documento.dat_documento, datefmt='international').strftime('%Y-%m-%d 00:00:01')
-               dic['path'] = self.context.temp_folder
-               dic['file'] = id_arquivo
-               dic['title'] = 'Capa do Processo'
+               dic["data"] = DateTime(norma.dat_norma, datefmt='international').strftime('%Y-%m-%d 00:00:01')
+               dic['path'] = self.context.sapl_documentos.norma_juridica
+               dic['file'] = nom_arquivo_compilado
+               dic['title'] = 'Texto Compilado'
                lst_arquivos.append(dic)
 
-            nom_arquivo = str(cod_documento) + '_texto_integral.pdf'
-            if hasattr(self.context.sapl_documentos.administrativo, nom_arquivo):
+            if hasattr(self.context.sapl_documentos.norma_juridica, nom_arquivo):
                dic = {}
-               dic["data"] = DateTime(documento.dat_documento, datefmt='international').strftime('%Y-%m-%d 00:00:02')
-               dic['path'] = self.context.sapl_documentos.administrativo
+               dic["data"] = DateTime(norma.dat_norma, datefmt='international').strftime('%Y-%m-%d 00:00:02')
+               dic['path'] = self.context.sapl_documentos.norma_juridica
                dic['file'] = nom_arquivo
-               dic['title'] = documento.des_tipo_documento + ' ' + str(documento.num_documento) + '/' +str(documento.ano_documento)
+               dic['title'] = 'Texto Original'
                lst_arquivos.append(dic)
 
-            for docadm in self.context.zsql.documento_acessorio_administrativo_obter_zsql(cod_documento=documento.cod_documento, ind_excluido=0):
-                if hasattr(self.context.sapl_documentos.administrativo, str(docadm.cod_documento_acessorio) + '.pdf'):
+            for anexo in self.context.zsql.anexo_norma_obter_zsql(cod_norma=norma.cod_norma, ind_excluido=0):
+                nom_anexo = str(cod_norma) + '_anexo_' + anexo.cod_anexo 
+                if hasattr(self.context.sapl_documentos.norma_juridica, nom_anexo):
                    dic = {}
-                   dic["data"] = DateTime(docadm.dat_documento, datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
-                   dic['path'] = self.context.sapl_documentos.administrativo
-                   dic['file'] = str(docadm.cod_documento_acessorio) + '.pdf'
-                   dic['title'] = docadm.nom_documento
-                   lst_arquivos.append(dic)
-
-            for tram in self.context.zsql.tramitacao_administrativo_obter_zsql(cod_documento=documento.cod_documento, rd_ordem='1', ind_excluido=0):
-                if hasattr(self.context.sapl_documentos.administrativo.tramitacao, str(tram.cod_tramitacao) + '_tram.pdf'):
-                   dic = {}
-                   dic["data"] = DateTime(tram.dat_tramitacao, datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
-                   dic['path'] = self.context.sapl_documentos.administrativo.tramitacao
-                   dic['file'] = str(tram.cod_tramitacao) + '_tram.pdf'
-                   dic['title'] = 'Tramitação (' + tram.des_status + ')'
+                   dic["data"] = DateTime(norma.dat_norma, datefmt='international').strftime('%Y-%m-%d 00:00:02') + anexo.cod_anexo
+                   dic['path'] = self.context.sapl_documentos.norma_juridica
+                   dic['file'] = nom_anexo
+                   dic['title'] = anexo.txt_descricao
                    lst_arquivos.append(dic)
 
         lst_arquivos.sort(key=lambda dic: dic['data'])
@@ -122,17 +114,17 @@ class ProcessoAdm(grok.View):
                    doc_tmp.set_metadata(metadata)
                    doc_tmp.save(file_name, deflate=True, garbage=3, use_objstms=1)
 
-    def render(self, cod_documento, action):
+    def render(self, cod_norma, action):
         portal_url = self.context.portal_url.portal_url()
         portal = self.context.portal_url.getPortalObject()    
-        dirpath = os.path.join(self.install_home, 'var/tmp/processo_adm_integral_' + str(cod_documento))
+        dirpath = os.path.join(self.install_home, 'var/tmp/processo_norma_' + str(cod_norma))
         pagepath = os.path.join(dirpath, 'pages')
 
-        self.download_files(cod_documento=cod_documento)
+        self.download_files(cod_norma=cod_norma)
 
         if action == 'download':
-           for documento in self.context.zsql.documento_administrativo_obter_zsql(cod_documento=cod_documento):
-               arquivo_final = str(documento.sgl_tipo_documento)+'-'+str(documento.num_documento)+'-'+str(documento.ano_documento)+'.pdf'
+           for norma in self.context.zsql.norma_juridica_obter_zsql(cod_norma=cod_norma):
+               arquivo_final = str(norma.sgl_tipo_norma)+'-'+str(norma.num_norma)+'-'+str(norma.ano_norma)+'.pdf'
            with open(os.path.join(dirpath) + '/' + arquivo_final, 'rb') as download:
               arquivo = download.read()
               self.context.REQUEST.RESPONSE.setHeader('Content-Type', 'application/pdf')
@@ -191,7 +183,7 @@ class ProcessoAdm(grok.View):
                dic_indice= {}
                dic_indice['id'] = item['id']
                dic_indice['title'] = item['title']
-               dic_indice["url"] = str(portal_url) + '/@@pagina_processo_adm_integral?cod_documento=' + str(cod_documento) + '%26pagina=' +  'pg_0001.pdf'
+               dic_indice["url"] = str(portal_url) + '/@@pagina_processo_norma?cod_norma=' + str(cod_norma) + '%26pagina=' +  'pg_0001.pdf'
                dic_indice["paginas_geral"] = len(page_paths)
                dic_indice['paginas'] = []
                dic_indice['id_paginas'] = []
@@ -200,7 +192,7 @@ class ProcessoAdm(grok.View):
                    if item['id'] == str(pag.get('id',pag)):
                       dic_pagina['num_pagina'] = pag['num_pagina']
                       dic_pagina['id_pagina'] = pag['pagina']
-                      dic_pagina["url"] = str(portal_url) + '/@@pagina_processo_adm_integral?cod_documento=' + str(cod_documento) + '%26pagina=' +  pag['pagina']
+                      dic_pagina["url"] = str(portal_url) + '/@@pagina_processo_norma?cod_norma=' + str(cod_norma) + '%26pagina=' +  pag['pagina']
                       dic_indice['paginas'].append(dic_pagina)
                       dic_indice['paginas_doc'] = len(dic_indice['paginas'])
                pasta.append(dic_indice)
@@ -211,13 +203,13 @@ class ProcessoAdm(grok.View):
 class LimparPasta(grok.View):
     grok.context(Interface)
     grok.require('zope2.View')
-    grok.name('processo_adm_integral_limpar')
+    grok.name('processo_norma_limpar')
     install_home = os.environ.get('INSTALL_HOME')
 
-    def render(self, cod_documento):
+    def render(self, cod_norma):
         portal_url = self.context.portal_url.portal_url()
         portal = self.context.portal_url.getPortalObject()
-        dirpath = os.path.join(self.install_home, 'var/tmp/processo_adm_integral_' + str(cod_documento))
+        dirpath = os.path.join(self.install_home, 'var/tmp/processo_norma_' + str(cod_norma))
         if os.path.exists(dirpath) and os.path.isdir(dirpath):
            shutil.rmtree(dirpath)      
            return 'Diretório temporário "' + dirpath + '" removido com sucesso.'
@@ -225,16 +217,16 @@ class LimparPasta(grok.View):
            return 'Diretório temporário "' + dirpath + '" não existe.'
 
 
-class PaginaProcessoAdm(grok.View):
+class PaginaProcessoNorma(grok.View):
     grok.context(Interface)
     grok.require('zope2.View')
-    grok.name('pagina_processo_adm_integral')
+    grok.name('pagina_processo_norma')
     install_home = os.environ.get('INSTALL_HOME')
 
-    def render(self, cod_documento, pagina):
+    def render(self, cod_norma, pagina):
         portal_url = self.context.portal_url.portal_url()
         portal = self.context.portal_url.getPortalObject()
-        dirpath = os.path.join(self.install_home, 'var/tmp/processo_adm_integral_' + str(cod_documento))
+        dirpath = os.path.join(self.install_home, 'var/tmp/processo_norma_' + str(cod_norma))
         pagepath = os.path.join(dirpath, 'pages')      
         with open(os.path.join(pagepath) +'/' + pagina, 'rb') as download:
            arquivo = download.read()

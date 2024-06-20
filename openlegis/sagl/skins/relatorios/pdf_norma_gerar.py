@@ -1,12 +1,7 @@
 ##parameters=sessao,imagem,data,lst_normas,dic_cabecalho,lst_rodape,dic_filtro
 
-"""relatorio_norma.py
-   External method para gerar o arquivo rml do resultado de uma pesquisa de normas
-   Autor: Luciano De Fázio
-   Empresa: OpenLegis
-"""
 from trml2pdf import parseString
-from io import BytesIO
+from xml.sax.saxutils import escape
 import time
 
 def cabecalho(inf_basicas_dic,imagem):
@@ -75,8 +70,7 @@ def normas(lst_normas):
         if dic['titulo']!=None:
             tmp_data+='\t\t<para style="P1">' + dic['titulo'] + '</para>\n'
         if dic['txt_ementa']!=None:
-            txt_ementa = dic['txt_ementa'].replace('&','&amp;')
-            tmp_data+='\t\t<para style="P2">' + txt_ementa + '</para>\n'
+            tmp_data+='\t\t<para style="P2">' + escape(dic['txt_ementa']) + '</para>\n'
         if dic['materia_vinculada']!=None and dic['materia_vinculada']!= " ":
             tmp_data+='\t\t<para style="P2"><b>Matéria originária: </b>' + dic['materia_vinculada'] + '</para>\n'
         if dic['situacao_norma']!=None and dic['situacao_norma']!= " ":

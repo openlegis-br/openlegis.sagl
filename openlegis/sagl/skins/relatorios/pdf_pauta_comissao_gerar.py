@@ -1,12 +1,7 @@
 ##parameters=imagem,dat_reuniao,cod_reuniao,lst_reuniao,lst_pauta,dic_cabecalho,lst_rodape
 
-"""Ordem do Dia
-"""
 from trml2pdf import parseString
-from io import BytesIO
 import time
-import os
-
 
 def cabecalho(dic_cabecalho,dat_reuniao,imagem):
     """Gera o codigo rml do cabecalho"""
@@ -105,7 +100,7 @@ def pauta(lst_reuniao, lst_pauta):
             tmp+='\t\t\t<font color="white"> </font>\n'
             tmp+='\t\t</para>\n'
         if dic['txt_ementa']!=None:
-            tmp+='\t\t<para style="P3">' + dic['txt_ementa'].replace('&','&amp;') + '</para>\n'
+            tmp+='\t\t<para style="P3">' + escape(dic['txt_ementa']) + '</para>\n'
             tmp+='\t\t<para style="P2" spaceAfter="1">\n'
             tmp+='\t\t\t<font color="white"> </font>\n'
             tmp+='\t\t</para>\n' 
@@ -120,7 +115,7 @@ def pauta(lst_reuniao, lst_pauta):
 
         if dic['emenda']!= 0:
             for emenda in dic['emendas']:
-                tmp+='\t\t<para style="P3"><font color="#126e90">' + emenda["id_emenda"] + '</font> - ' + emenda["autoria"] + ' - ' + emenda["txt_ementa"] + '</para>\n'
+                tmp+='\t\t<para style="P3"><font color="#126e90">' + emenda["id_emenda"] + '</font> - ' + emenda["autoria"] + ' - ' + escape(emenda['txt_ementa']) + '</para>\n'
                 tmp+='\t\t<para style="P2" spaceAfter="2">\n'
                 tmp+='\t\t\t<font color="white"> </font>\n'
                 tmp+='\t\t</para>\n'

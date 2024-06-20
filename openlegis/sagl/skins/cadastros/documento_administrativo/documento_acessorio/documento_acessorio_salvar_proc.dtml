@@ -11,7 +11,7 @@
                           nom_autor_documento = txt_nom_autor_documento,
                           cod_documento = hdn_cod_documento,
                           txt_indexacao = txa_txt_indexacao,
-                          txt_assunto = txa_txt_assunto, 
+                          txt_assunto = pysc.convert_unicode_pysc(texto=str(txa_txt_assunto)), 
                           dat_documento = DateTime(txt_dat_documento, datefmt='international').strftime('%Y/%m/%d %H:%M:%S'),
                           ind_excluido = 0)">
 
@@ -73,6 +73,5 @@
             modulo       = 'documento_acessorio_adm',
             metodo       = 'documento_acessorio_salvar_proc',
             IP           = pysc.get_ip(),
-            dados        = REQUEST.form.items(),
             cod_registro = hdn_cod_documento_acessorio)"> 
 </dtml-if>

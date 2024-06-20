@@ -202,6 +202,26 @@ class Comissoes(grok.View):
                 "hora_abertura": reuniao.hr_inicio_reuniao,
                 "hora_encerramento": reuniao.hr_fim_reuniao
             }
+            lst_pauta = []
+            dic_pauta = {}	    
+            pauta = str(reuniao.cod_reuniao) + "_pauta.pdf"
+            if hasattr(self.context.sapl_documentos.reuniao_comissao, pauta):
+               dic_pauta['content-type'] = 'application/pdf'
+               dic_pauta['download'] = self.portal_url + '/sapl_documentos/reuniao_comissao/' + pauta
+               dic_pauta['filename'] = pauta
+               dic_pauta['size'] = ''
+               lst_pauta.append(dic_pauta)
+            dic_reuniao['arquivo_pauta'] = lst_pauta
+            lst_ata = []
+            dic_ata = {}
+            ata = str(reuniao.cod_reuniao) + "_ata.pdf"
+            if hasattr(self.context.sapl_documentos.reuniao_comissao, ata):
+               dic_ata['content-type'] = 'application/pdf'
+               dic_ata['download'] = self.portal_url + '/sapl_documentos/reuniao_comissao/' + ata
+               dic_ata['filename'] = ata
+               dic_ata['size'] = ''
+               lst_ata.append(dic_ata)
+            dic_reuniao['arquivo_ata'] = lst_ata
             lst_reunioes.append(dic_reuniao)
         lst_reunioes.sort(key=lambda dic_reuniao: dic_reuniao['data'], reverse=True)
         comissao = self.context.zsql.comissao_obter_zsql(cod_comissao=item_id, ind_excluido=0)[0]

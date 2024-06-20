@@ -1,12 +1,8 @@
 ##parameters=imagem, dic_rodape,dic_inf_basicas,dic_orig_externa,lst_mat_anexadas,lst_autoria,lst_des_iniciais,lst_tramitacoes,lst_relatorias,lst_numeracoes,lst_leg_citadas,lst_acessorios,sessao=''
 
-"""relatorio_detalhe_materia.py
-   External method para gerar o arquivo rml do resultado da pesquisa de uma matéria
-   OpenLegis
-"""
 from trml2pdf import parseString
-from io import BytesIO
 from html2rml import html2rml
+from xml.sax.saxutils import escape
 import time
 
 def cabecalho(dic_inf_basicas,imagem):
@@ -94,7 +90,7 @@ def inf_basicas(dic_inf_basicas):
         tmp+='\t\t<para style="P2"></para>\n'
         tmp+='\t\t<para style="P2"></para>\n'
         tmp+='\t\t<para style="P2"></para>\n'
-        tmp+='\t\t<para style="texto_projeto">' + texto_projeto.replace('&','&amp;') + '</para>\n'
+        tmp+='\t\t<para style="texto_projeto">' + escape(dic_inf_basicas['texto_projeto']) + '</para>\n'
 
     #iní­cio das informações básicas
     tmp+='\t\t<para style="P1">Dados Básicos da Matéria</para>\n'
@@ -272,10 +268,6 @@ def documentos_acessorios(lst_acessorios):
         if dic_dados['autor']!=None:
             tmp+='\t\t<para style="P2"><b>Autor:</b> ' + dic_dados['autor'] + '</para>\n'
 
-        if dic_dados['ementa']!=None:
-            tmp+='\t\t<para style="P2"><b>Ementa:</b> ' + dic_dados['ementa'].replace('&','&amp;') + '</para>\n'
-        if dic_dados['indexacao']!=None:
-            tmp+='\t\t<para style="P2"><b>Ementa:</b> ' + dic_dados['indexacao'].replace('&','&amp;') + '</para>\n'
         tmp+='\t\t<para style="P2"></para>\n'
         tmp+='\t\t<para style="P2"></para>\n'
     return tmp

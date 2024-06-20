@@ -28,7 +28,7 @@
         num_dias_prazo           = txt_num_dias_prazo,
         dat_fim_prazo            = pysc.data_converter_pysc(data=txt_dat_fim_prazo),
         ind_tramitacao           = rad_ind_tramitacao,
-        txt_assunto              = txa_txt_assunto,
+        txt_assunto              = pysc.convert_unicode_pysc(texto=str(txa_txt_assunto)),
         txt_observacao           = txa_txt_observacao,
         cod_assunto              = lst_assunto)">
 
@@ -158,7 +158,6 @@
             modulo       = 'documento_administrativo',
             metodo       = 'documento_administrativo_salvar_proc',
             IP           = pysc.get_ip(),
-            dados        = REQUEST.form.items(),
             cod_registro = hdn_cod_documento)"> 
 </dtml-if>
 

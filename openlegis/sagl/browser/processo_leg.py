@@ -81,7 +81,7 @@ class ProcessoLeg(grok.View):
                    dic['path'] = self.context.sapl_documentos.parecer_comissao
                    dic["file"] = str(relat.cod_relatoria) + '_parecer.pdf'
                    comissao = self.context.zsql.comissao_obter_zsql(cod_comissao=relat.cod_comissao,ind_excluido=0)[0]
-                   dic["title"] = 'Parecer ' + comissao.sgl_comissao + ' nº ' + str(relat.num_parecer) + '/' + relat.ano_parecer
+                   dic["title"] = 'Parecer ' + comissao.sgl_comissao + ' nº ' + str(relat.num_parecer) + '/' + str(relat.ano_parecer)
                    lst_arquivos.append(dic)
             for anexada in self.context.zsql.anexada_obter_zsql(cod_materia_principal=materia.cod_materia,ind_excluido=0):
                 if hasattr(self.context.sapl_documentos.materia, str(anexada.cod_materia_anexada) + '_texto_integral.pdf'):
@@ -91,8 +91,7 @@ class ProcessoLeg(grok.View):
                        dic["data"] = DateTime(proposicao.dat_recebimento, datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
                    dic['path'] = self.context.sapl_documentos.materia
                    dic["file"] = str(anexada.cod_materia_anexada) + '_texto_integral.pdf'
-                   tipo = self.context.zsql.tipo_materia_legislativa_obter_zsql(tip_materia=anexada.tip_materia_anexada,ind_excluido=0)[0]
-                   dic["title"] = tipo.sgl_tipo_materia + ' ' + str(anexada.num_materia_anexada) + '/' +str(anexada.ano_materia_anexada) + ' (anexada)'
+                   dic["title"] = anexada.tip_materia_anexada + ' ' + str(anexada.num_materia_anexada) + '/' +str(anexada.ano_materia_anexada) + ' (anexada)'
                    lst_arquivos.append(dic)
                    for documento in self.context.zsql.documento_acessorio_obter_zsql(cod_materia=anexada.cod_materia_anexada, ind_excluido=0):
                        if hasattr(self.context.sapl_documentos.materia, str(documento.cod_documento) + '.pdf'):
@@ -112,8 +111,7 @@ class ProcessoLeg(grok.View):
                        dic["data"] = DateTime(proposicao.dat_recebimento, datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
                    dic['path'] = self.context.sapl_documentos.materia
                    dic["file"] = str(anexada.cod_materia_principal) + '_texto_integral.pdf'
-                   tipo = self.context.zsql.tipo_materia_legislativa_obter_zsql(tip_materia=anexada.tip_materia_principal,ind_excluido=0)[0]
-                   dic["title"] = tipo.sgl_tipo_materia + ' ' + str(anexada.num_materia_principal) + '/' +str(anexada.ano_materia_principal) + ' (anexadora)'
+                   dic["title"] = anexada.tip_materia_principal + ' ' + str(anexada.num_materia_principal) + '/' +str(anexada.ano_materia_principal) + ' (anexadora)'
                    lst_arquivos.append(dic)
                    for documento in self.context.zsql.documento_acessorio_obter_zsql(cod_materia=anexada.cod_materia_principal, ind_excluido=0):
                        if hasattr(self.context.sapl_documentos.materia, str(documento.cod_documento) + '.pdf'):
@@ -154,7 +152,7 @@ class ProcessoLeg(grok.View):
                    dic["data"] = DateTime(tram.dat_tramitacao, datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
                    dic['path'] = self.context.sapl_documentos.materia.tramitacao
                    dic["file"] = str(tram.cod_tramitacao) + '_tram.pdf'
-                   dic["id"] = 'Tramitação (' + tram.des_status + ')'
+                   dic["title"] = 'Tramitação (' + tram.des_status + ')'
                    lst_arquivos.append(dic)
             for norma in self.context.zsql.materia_buscar_norma_juridica_zsql(cod_materia=materia.cod_materia):
                 if hasattr(self.context.sapl_documentos.norma_juridica, str(norma.cod_norma) + '_texto_integral.pdf'):
@@ -162,7 +160,7 @@ class ProcessoLeg(grok.View):
                    dic["data"] = DateTime(norma.dat_norma, datefmt='international').strftime('%Y-%m-%d 23:59:00')
                    dic['path'] = self.context.sapl_documentos.norma_juridica
                    dic["file"] = str(norma.cod_norma) + '_texto_integral.pdf'
-                   dic["id"] = norma.sgl_tipo_norma + ' nº ' + str(norma.num_norma) + '/' + str(norma.ano_norma)
+                   dic["title"] = norma.sgl_norma + ' nº ' + str(norma.num_norma) + '/' + str(norma.ano_norma)
                    lst_arquivos.append(dic)
 
         lst_arquivos.sort(key=lambda dic: dic['data'])

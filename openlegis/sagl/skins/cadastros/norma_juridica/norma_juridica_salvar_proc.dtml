@@ -44,7 +44,7 @@
                                     des_veiculo_publicacao = txt_des_veiculo_publicacao,
                                     num_pag_inicio_publ    = txt_num_pag_inicio_publ,
                                     num_pag_fim_publ       = txt_num_pag_fim_publ,
-                                    txt_ementa             = txa_txt_ementa,
+                                    txt_ementa             = pysc.convert_unicode_pysc(texto=str(txa_txt_ementa)),
                                     txt_indexacao          = txa_txt_indexacao,
                                     txt_observacao         = txa_txt_observacao,
                                     ind_complemento        = rad_ind_complemento,
@@ -62,7 +62,7 @@
             <dtml-if file_nom_arquivo>
                <dtml-call expr="REQUEST.set('id_documento', str(hdn_cod_norma)+'_texto_integral.pdf')">
                <dtml-in expr="zsql.norma_juridica_obter_zsql(cod_norma = hdn_cod_norma)">
-                  <dtml-call expr="REQUEST.set('titulo', sgl_tipo_norma + ' ' + str(num_norma) + '/' + str(ano_norma))">
+                  <dtml-call expr="REQUEST.set('titulo', str(sgl_tipo_norma) + ' ' + str(num_norma) + '/' + str(ano_norma))">
                </dtml-in>
                <dtml-call expr="sapl_documentos.norma_juridica.manage_addFile(id=id_documento,file=pysc.upload_file(file=file_nom_arquivo, title=titulo))">            
             </dtml-if>
@@ -89,7 +89,6 @@
             modulo       = str(_['REQUEST']['URL1']).split('/')[-1],
             metodo       = 'norma_juridica_salvar_proc',
             IP           = pysc.get_ip(),
-            dados        = REQUEST.form.items(),
             cod_registro = hdn_cod_norma)"> 
   </dtml-if>
 </dtml-unless>

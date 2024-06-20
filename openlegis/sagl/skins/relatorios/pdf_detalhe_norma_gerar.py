@@ -1,11 +1,7 @@
 ##parameters=imagem, dic_rodape,inf_basicas_dic,lst_assuntos,lst_vinculos_ativos,lst_vinculos_passivos,sessao=''
 
-"""relatorio_detalhe_norma.py
-   External method para gerar o arquivo rml do resultado da pesquisa de uma norma
-   OpenLegis
-"""
 from trml2pdf import parseString
-from io import BytesIO
+from xml.sax.saxutils import escape
 import time
 
 def cabecalho(inf_basicas_dic,imagem):
@@ -94,7 +90,7 @@ def inf_basicas(inf_basicas_dic):
         tmp+='\t\t<para style="P2"></para>\n'
         tmp+='\t\t<para style="P2"></para>\n'
         tmp+='\t\t<para style="P2"></para>\n'
-        tmp+='\t\t<para style="texto_projeto">' + txt_ementa.replace('&','&amp;') + '</para>\n'
+        tmp+='\t\t<para style="texto_projeto">' + escape(inf_basicas_dic['txt_ementa']) + '</para>\n'
 
     indexacao = inf_basicas_dic['indexacao']
     observacao = inf_basicas_dic['observacao']

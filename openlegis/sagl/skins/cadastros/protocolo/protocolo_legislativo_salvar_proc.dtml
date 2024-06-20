@@ -49,7 +49,7 @@
         tip_natureza_materia    = lst_tip_natureza,
         cod_materia_principal   = cod_materia,
         num_paginas             = txt_num_paginas,
-        txt_assunto_ementa      = txa_txt_ementa,
+        txt_assunto_ementa      = pysc.convert_unicode_pysc(texto=str(txa_txt_ementa)),
         cod_autor               = lst_cod_autor,
         txt_observacao          = txa_txt_observacao,
         txt_user_protocolo      = txt_user)">
@@ -88,6 +88,5 @@
             modulo       = str(_['REQUEST']['URL1']).split('/')[-1],
             metodo       = metodo1,
             IP           = pysc.get_ip(),
-            dados        = REQUEST.form.items(),
             cod_registro = codigo)"> 
 </dtml-if>

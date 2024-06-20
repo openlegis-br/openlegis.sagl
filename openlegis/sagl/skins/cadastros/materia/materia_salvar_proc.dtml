@@ -41,6 +41,10 @@
     <dtml-call expr="REQUEST.set('rad_ind_complementar', '')">
   </dtml-unless>
 
+  <dtml-if txa_txt_ementa>
+    <dtml-call expr="REQUEST.set('txa_txt_ementa', pysc.convert_unicode_pysc(texto=str(txa_txt_ementa)))">
+  </dtml-if>
+
   <dtml-try>
     <dtml-call expr="metodo(
         cod_materia              = hdn_cod_materia,
@@ -66,7 +70,7 @@
         des_objeto               = txt_des_objeto,
         ind_complementar         = rad_ind_complementar,
         cod_regime_tramitacao    = lst_cod_regime_tramitacao,
-        txt_ementa               = txa_txt_ementa,
+        txt_ementa               = pysc.convert_unicode_pysc(texto=str(txa_txt_ementa)),
         cod_assunto              = lst_cod_assunto,        
         txt_indexacao            = txa_txt_indexacao,
         txt_observacao           = txa_txt_observacao)">
@@ -107,8 +111,8 @@
           </dtml-comment>
         </dtml-in>
         <dtml-call expr="zsql.proposicao_registrar_recebimento_zsql(cod_proposicao = hdn_cod_proposicao,
-                                                                 dat_recebimento = pysc.data_atual_iso_pysc(),
-                                                                 cod_mat_ou_doc = _.int(hdn_cod_materia))">
+                                                                    dat_recebimento = pysc.data_atual_iso_pysc(),
+                                                                    cod_mat_ou_doc = _.int(hdn_cod_materia))">
         <dtml-call expr="pysc.proposicao_salvar_como_texto_integral_materia_pysc(hdn_cod_proposicao,hdn_cod_materia,0)">
         <dtml-call expr="REQUEST.set('hdn_dat_tramitacao', DateTime().strftime('%d/%m/%Y'))">
         <dtml-call expr="REQUEST.set('hdn_dat_encaminha', DateTime().strftime('%Y-%m-%d %H:%M:%S'))">
@@ -264,6 +268,5 @@
             modulo       = str(_['REQUEST']['URL1']).split('/')[-1],
             metodo       = 'materia_salvar_proc',
             IP           = pysc.get_ip(),
-            dados        = REQUEST.form.items(),
             cod_registro = hdn_cod_materia)"> 
 </dtml-if>

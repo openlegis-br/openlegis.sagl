@@ -3,6 +3,7 @@
    Script python para gerar o PDF da tramitação
 """
 from trml2pdf import parseString
+from xml.sax.saxutils import escape
 from html2rml import html2rml
 
 def cabecalho(inf_basicas_dic,imagem):
@@ -103,7 +104,7 @@ def tramitacao(tramitacao_dic):
     tmp+='\t\t\t<font color="white">-</font>\n'
     tmp+='\t\t</para>\n'
 
-    tmp+='\t\t<para style="P2">' + str(tramitacao_dic['id_materia']) + '</para>\n\n'
+    tmp+='\t\t<para style="P2">' + escape(tramitacao_dic['id_materia']) + '</para>\n\n'
 
     tmp+='\t\t<para style="P2">\n'
     tmp+='\t\t\t<font color="white">-</font>\n'

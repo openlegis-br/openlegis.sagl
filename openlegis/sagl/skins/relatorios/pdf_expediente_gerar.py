@@ -3,6 +3,7 @@
 """Expediente
 """
 from trml2pdf import parseString
+from xml.sax.saxutils import escape
 
 def cabecalho(dic_cabecalho, imagem):
     """Gera o codigo rml do cabecalho"""
@@ -72,7 +73,7 @@ def pauta(pauta_dic):
     for dic in pauta_dic["lst_requerimentos_vereadores"]:
         tmp+='\t\t<para style="P2" spaceBefore="20"><b><u>' + str(dic['vereador']) + ' [' + str(dic['qtde_materias']) + ']</u></b></para>\n'
         for item in dic['materias']:
-            tmp+='\t\t<para style="P2" spaceBefore="5"><font color="#126e90"><b>' + item['id_materia'] + '</b></font> - ' + item['txt_ementa'] + '</para>\n'
+            tmp+='\t\t<para style="P2" spaceBefore="5"><font color="#126e90"><b>' + item['id_materia'] + '</b></font> - ' + escape(item['txt_ementa']) + '</para>\n'
     
     # fim do bloco 
     tmp+='\t</story>\n'

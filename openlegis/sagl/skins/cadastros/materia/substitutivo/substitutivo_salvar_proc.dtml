@@ -23,7 +23,7 @@
                             cod_materia            = cod_materia,
                             dat_apresentacao       = pysc.data_converter_pysc(data=txt_dat_apresentacao),
                             num_protocolo          = txt_num_protocolo,
-                            txt_ementa             = txa_txt_ementa,
+                            txt_ementa             = pysc.convert_unicode_pysc(texto=str(txa_txt_ementa)),
                             txt_observacao         = txa_txt_observacao)">
 
 <dtml-except>
@@ -46,7 +46,7 @@
          </dtml-if>
      </dtml-in>
      <dtml-call expr="REQUEST.set('txt_user', AUTHENTICATED_USER.getUserName())">
-     <dtml-call expr="zsql.protocolo_legislativo_incluir_zsql(num_protocolo=txt_num_protocolo, tip_protocolo=0, tip_processo=1, cod_materia_principal=cod_materia, tip_materia=tip_materia, tip_natureza_materia=2, txt_assunto_ementa=txa_txt_ementa, cod_autor=lst_cod_autor, txt_user_protocolo=txt_user)">
+     <dtml-call expr="zsql.protocolo_legislativo_incluir_zsql(num_protocolo=txt_num_protocolo, tip_protocolo=0, tip_processo=1, cod_materia_principal=cod_materia, tip_materia=tip_materia, tip_natureza_materia=2, txt_assunto_ementa=pysc.convert_unicode_pysc(texto=str(txa_txt_ementa)), cod_autor=lst_cod_autor, txt_user_protocolo=txt_user)">
      <dtml-try>
         <dtml-call expr="zsql.proposicao_registrar_recebimento_zsql(cod_proposicao=hdn_cod_proposicao, dat_recebimento=dat_recebimento, cod_mat_ou_doc=cod_materia, cod_substitutivo=hdn_cod_substitutivo)">
         <dtml-call expr="modelo_proposicao.proposicao_autuar(cod_proposicao=hdn_cod_proposicao)">
@@ -171,6 +171,5 @@
             modulo       = str(_['REQUEST']['URL1']).split('/')[-1],
             metodo       = 'substitutivo_salvar_proc',
             IP           = pysc.get_ip(),
-            dados        = REQUEST.form.items(),
             cod_registro = hdn_cod_substitutivo)"> 
 </dtml-if>

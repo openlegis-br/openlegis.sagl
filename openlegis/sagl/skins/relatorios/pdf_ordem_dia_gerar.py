@@ -4,8 +4,7 @@
 """
 from trml2pdf import parseString
 from io import BytesIO
-import time
-import os
+from xml.sax.saxutils import escape
 
 def cabecalho(dic_cabecalho, imagem):
     """Gera o codigo rml do cabecalho"""
@@ -105,7 +104,7 @@ def pauta(pauta_dic):
     for dic in pauta_dic["lst_materia_apresentada"]:
         tmp+='\t\t<condPageBreak height="20mm"/>\n'
         tmp+='\t\t<para style="P2" spaceAfter="2">' + str(dic['num_ordem']) +') <font color="#126e90"><b>' + dic['id_materia'] + '</b></font> - Autoria: ' + dic['autoria'] + '</para>\n'
-        tmp+='\t\t<para style="P2" spaceAfter="10">' + dic['txt_ementa'] + '</para>\n'
+        tmp+='\t\t<para style="P2" spaceAfter="10">' + escape(dic['txt_ementa']) + '</para>\n'
 
     if pauta_dic["lst_indicacoes_vereadores"] != []:
         tmp+='\t\t<condPageBreak height="20mm"/>\n'
@@ -113,7 +112,7 @@ def pauta(pauta_dic):
     for dic in pauta_dic["lst_indicacoes_vereadores"]:
         tmp+='\t\t<para style="P2" spaceBefore="10"><b><u>' + dic['vereador'] + '</u></b>:</para>\n'
         for item in dic['materias']:
-            tmp+='\t\t<para style="P2" spaceBefore="5"><font color="#126e90"><b>' + item['id_materia'] + '</b></font> - ' + item['txt_ementa'] + '</para>\n'
+            tmp+='\t\t<para style="P2" spaceBefore="5"><font color="#126e90"><b>' + item['id_materia'] + '</b></font> - ' + escape(item['txt_ementa']) + '</para>\n'
 
     if pauta_dic["lst_requerimentos_vereadores"] != []:
         tmp+='\t\t<condPageBreak height="20mm"/>\n'
@@ -121,7 +120,7 @@ def pauta(pauta_dic):
     for dic in pauta_dic["lst_requerimentos_vereadores"]:
         tmp+='\t\t<para style="P2" spaceBefore="10"><b><u>' + dic['vereador'] + '</u></b>:</para>\n'
         for item in dic['materias']:
-            tmp+='\t\t<para style="P2" spaceBefore="5"><font color="#126e90"><b>' + item['id_materia'] + '</b></font> - ' + item['txt_ementa'] + '</para>\n'
+            tmp+='\t\t<para style="P2" spaceBefore="5"><font color="#126e90"><b>' + item['id_materia'] + '</b></font> - ' + escape(item['txt_ementa']) + '</para>\n'
 
     if pauta_dic["lst_mocoes_vereadores"] != []:
         tmp+='\t\t<condPageBreak height="20mm"/>\n'
@@ -140,7 +139,7 @@ def pauta(pauta_dic):
            tmp+='\t\t<para style="P0" spaceBefore="20" spaceAfter="10"><b><u>PAUTA - URGÊNCIA ESPECIAL</u></b></para>\n\n'
     for dic in pauta_dic["lst_urgencia"]:
         tmp+='\t\t<para style="P2" spaceBefore="15" spaceAfter="3"><b>' + str(dic['num_ordem']) +'</b>) <font color="#126e90"><b>' + dic['id_materia'] + '</b></font> - Autoria: ' + dic['nom_autor'] + '</para>\n'
-        tmp+='\t\t<para style="P2" spaceAfter="3">' + dic['txt_ementa'] + '</para>\n'
+        tmp+='\t\t<para style="P2" spaceAfter="3">' + escape(dic['txt_ementa']) + '</para>\n'
 
         tmp+='\t\t<para style="P3" spaceAfter="3"><b>Turno</b>: '+ dic["des_turno"] +' | <b>Quorum</b>: '+ dic['des_quorum']+' | <b>Tipo de Votação</b>: '+ dic['tip_votacao'] + '' + '</para>\n'
 
@@ -152,12 +151,12 @@ def pauta(pauta_dic):
         if dic['substitutivo']!= 0 and dic['substitutivo']!= '':
             tmp+='\t\t<para style="P3" spaceAfter="3"><b>Substitutivo:</b></para>\n\n'     
             for substitutivo in dic['substitutivos']:
-                tmp+='\t\t<para style="P3" spaceAfter="3"><b><font color="#126e90">' + substitutivo["id_substitutivo"] + '</font> - ' + substitutivo["autoria"] + '</b> - ' + substitutivo["txt_ementa"] + '</para>\n'
+                tmp+='\t\t<para style="P3" spaceAfter="3"><b><font color="#126e90">' + substitutivo["id_substitutivo"] + '</font> - ' + substitutivo["autoria"] + '</b> - ' + escape(substitutivo['txt_ementa']) + '</para>\n'
 
         if dic['emenda']!= 0 and dic['emenda']!= '':
             tmp+='\t\t<para style="P3" spaceAfter="3"><b>Emendas:</b></para>\n\n'
             for emenda in dic['emendas']:
-                tmp+='\t\t<para style="P3" spaceAfter="3"><b><font color="#126e90">' + emenda["id_emenda"] + '</font> - ' + emenda["autoria"] + '</b> - ' + emenda["txt_ementa"] + '</para>\n'
+                tmp+='\t\t<para style="P3" spaceAfter="3"><b><font color="#126e90">' + emenda["id_emenda"] + '</font> - ' + emenda["autoria"] + '</b> - ' + escape(emenda['txt_ementa']) + '</para>\n'
 
 
     if pauta_dic["lst_pauta"] != []:
@@ -168,7 +167,7 @@ def pauta(pauta_dic):
            tmp+='\t\t<para style="P0" spaceBefore="20" spaceAfter="10"><b><u>ORDEM DO DIA</u></b></para>\n\n'
     for dic in pauta_dic["lst_pauta"]:
         tmp+='\t\t<para style="P2" spaceBefore="15" spaceAfter="3"><b>' + str(dic['num_ordem']) +'</b>) <font color="#126e90"><b>' + dic['id_materia'] + '</b></font> - Autoria: ' + dic['nom_autor'] + '</para>\n'
-        tmp+='\t\t<para style="P2" spaceAfter="3">' + dic['txt_ementa'] + '</para>\n'
+        tmp+='\t\t<para style="P2" spaceAfter="3">' + escape(dic['txt_ementa']) + '</para>\n'
 
         tmp+='\t\t<para style="P3" spaceAfter="3"><b>Turno</b>: '+ dic["des_turno"] +' | <b>Quorum</b>: '+ dic['des_quorum']+' | <b>Tipo de Votação</b>: '+ dic['tip_votacao'] + '' + '</para>\n'
 
@@ -180,12 +179,12 @@ def pauta(pauta_dic):
         if dic['substitutivo']!= 0 and dic['substitutivo']!= '':
             tmp+='\t\t<para style="P3" spaceAfter="3"><b>Substitutivo:</b></para>\n\n'     
             for substitutivo in dic['substitutivos']:
-                tmp+='\t\t<para style="P3" spaceAfter="3"><b><font color="#126e90">' + substitutivo["id_substitutivo"] + '</font> - ' + substitutivo["autoria"] + '</b> - ' + substitutivo["txt_ementa"] + '</para>\n'
+                tmp+='\t\t<para style="P3" spaceAfter="3"><b><font color="#126e90">' + substitutivo["id_substitutivo"] + '</font> - ' + substitutivo["autoria"] + '</b> - ' + escape(substitutivo['txt_ementa']) + '</para>\n'
 
         if dic['emenda']!= 0 and dic['emenda']!= '':
             tmp+='\t\t<para style="P3" spaceAfter="3"><b>Emendas:</b></para>\n\n'           
             for emenda in dic['emendas']:
-                tmp+='\t\t<para style="P3" spaceAfter="3"><b><font color="#126e90">' + emenda["id_emenda"] + '</font> - ' + emenda["autoria"] + '</b> - ' + emenda["txt_ementa"] + '</para>\n'
+                tmp+='\t\t<para style="P3" spaceAfter="3"><b><font color="#126e90">' + emenda["id_emenda"] + '</font> - ' + emenda["autoria"] + '</b> - ' + escape(emenda['txt_ementa']) + '</para>\n'
 
     if pauta_dic["nom_sessao"] != 'AUDIÊNCIA PÚBLICA':
        tmp+='\t\t<para style="P4" spaceBefore="40" spaceAfter="2"><b>' + pauta_dic["presidente"] + '</b></para>\n'
@@ -201,7 +200,7 @@ def principal(dic_cabecalho, dic_rodape, imagem, pauta_dic):
     tmp+='<?xml version="1.0" encoding="utf-8" standalone="no" ?>\n'
     tmp+='<!DOCTYPE document SYSTEM "rml_1_0.dtd">\n'
     tmp+='<document filename="pauta.pdf">\n'
-    tmp+='\t<template pageSize="(21cm, 29.7cm)" title="Pauta" author="OpenLegis" allowSplitting="20">\n'
+    tmp+='\t<template pageSize="(21cm, 29.7cm)" title="Pauta" author="SAGL" allowSplitting="20">\n'
     tmp+='\t\t<pageTemplate id="first">\n'
     tmp+='\t\t\t<pageGraphics>\n'
     tmp+=cabecalho(dic_cabecalho,imagem)

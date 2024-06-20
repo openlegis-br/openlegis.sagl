@@ -1,13 +1,7 @@
 ##parameters=sessao,imagem,data,lst_documentos,dic_cabecalho,lst_rodape,dic_filtro
 
-"""relatorio_documento.py
-   External method para gerar o arquivo rml do resultado de uma pesquisa de documentos administrativos
-   Autor: Luciano De Fazio
-   Empresa: OpenLegis
-   versão: 1.0
-"""
 from trml2pdf import parseString
-from io import BytesIO
+from xml.sax.saxutils import escape
 import time
 
 def cabecalho(inf_basicas_dic,imagem):
@@ -76,7 +70,7 @@ def documentos(lst_documentos):
         if dic['titulo']!=None:
             tmp_data+='\t\t<para style="P1">' + dic['titulo'] + '</para>\n'
         if dic['txt_assunto']!=None:
-            txt_assunto = dic['txt_assunto'].replace('&','&amp;')
+            txt_assunto = escape(dic['txt_assunto'])
             tmp_data+='\t\t<para style="P2">' + txt_assunto + '</para>\n'
         if dic['txt_interessado']!=None:
             tmp_data+='\t\t<para style="P2"><b>Interessado:</b> ' + dic['txt_interessado'] + '</para>\n'

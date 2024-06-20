@@ -1,12 +1,7 @@
 ##parameters=imagem,data,lst_materias,dic_cabecalho,lst_rodape,dic_filtro
 
-"""relatorio_materia.py
-   External method para gerar o arquivo rml do resultado de uma pesquisa de matérias
-   Autor: Luciano De Fázio
-   Empresa: OpenLegis
-"""
 from trml2pdf import parseString
-from io import BytesIO
+from xml.sax.saxutils import escape
 import time
 
 def cabecalho(dic_cabecalho,imagem):
@@ -74,8 +69,7 @@ def materias(lst_materias):
         #materias
         tmp_data+='\t\t<para style="P1"><b>'+ dic['titulo'] +'</b>' + ' </para>\n'
         if dic['txt_ementa']!=None:
-            txt_ementa = dic['txt_ementa'].replace('&','&amp;')
-            tmp_data+='\t\t<para style="P2"> '+ txt_ementa +' </para>\n'
+            tmp_data+='\t\t<para style="P2"> '+ escape(dic['txt_ementa']) +' </para>\n'
             tmp_data+='\t\t<para style="P2"><b>Autoria: </b>' + str(dic['nom_autor']) + '</para>'
             tmp_data+='\t\t<para style="P2"><b>Data de Apresentação: </b>' + str(dic['dat_apresentacao']) + '</para>'
         if dic['parecer']!= 0 and dic['parecer']!= '':

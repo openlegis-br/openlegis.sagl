@@ -87,7 +87,7 @@ for sessao in metodo:
          dic_materia["num_ordem"] = materia_apresentada.num_ordem
          dic_materia["id_materia"] = '<link href="' + context.sapl_documentos.absolute_url() + '/materia/' + str(materia.cod_materia) + '_texto_integral.pdf' + '">'+materia.des_tipo_materia +' nº '+ str(materia.num_ident_basica)+'/'+str(materia.ano_ident_basica)+'</link>'
          dic_materia['autoria'] = ', '.join(['%s' % (value) for (value) in lista_autor])
-         dic_materia['txt_ementa'] = materia.txt_ementa
+         dic_materia['txt_ementa'] = context.pysc.convert_unicode_pysc(texto=str(materia.txt_ementa))
          lst_materia_apresentada.append(dic_materia)
       # emendas
       elif materia_apresentada.cod_emenda != None:
@@ -144,7 +144,7 @@ for sessao in metodo:
            dic_materia["num_ordem"] = materia_apresentada.num_ordem
            dic_materia["link_materia"] = '<link href="'+context.sapl_documentos.absolute_url()+'/administrativo/'+ str(materia_apresentada.cod_documento) + '_texto_integral.pdf' +'">'+materia.des_tipo_documento+' nº '+str(materia.num_documento)+'/'+str(materia.ano_documento)+'</link>'
            dic_materia['autoria'] = materia.txt_interessado
-           dic_materia['txt_ementa'] = materia.txt_assunto
+           dic_materia['txt_ementa'] = context.pysc.convert_unicode_pysc(texto=str(materia.txt_assunto))
            lst_materia_apresentada.append(materia)
 
   for item in context.zsql.expediente_materia_obter_zsql(cod_sessao_plen=sessao.cod_sessao_plen,ind_excluido=0):
@@ -154,7 +154,7 @@ for sessao in metodo:
              dic_materia['cod_materia']= str(materia.cod_materia)
              dic_materia['num_ident_basica']= str(materia.num_ident_basica)
              dic_materia["id_materia"] = '<link href="' + context.sapl_documentos.absolute_url() + '/materia/' + str(materia.cod_materia) + '_texto_integral.pdf' + '">'+materia.des_tipo_materia +' nº '+ str(materia.num_ident_basica)+'/'+str(materia.ano_ident_basica)+'</link>'
-             dic_materia['txt_ementa'] = materia.txt_ementa
+             dic_materia['txt_ementa'] = context.pysc.convert_unicode_pysc(texto=str(materia.txt_ementa))
              if materia.des_tipo_materia == 'Indicação':
                 dic_autores = {}
                 for autoria in context.zsql.autoria_obter_zsql(cod_materia=materia.cod_materia):
@@ -237,7 +237,7 @@ for sessao in metodo:
       dic["cod_materia"] = ordem.cod_materia
       dic["cod_parecer"] = ''
       dic["id_materia"] = '<link href="' + context.sapl_documentos.absolute_url() + '/materia/' + str(materia.cod_materia) + '_texto_integral.pdf' + '">'+materia.des_tipo_materia +' nº '+ str(materia.num_ident_basica)+'/'+str(materia.ano_ident_basica)+'</link>'
-      dic["txt_ementa"] = ordem.txt_observacao
+      dic["txt_ementa"] = context.pysc.convert_unicode_pysc(texto=str(ordem.txt_observacao))
       dic["des_turno"]=""
       for turno in context.zsql.turno_discussao_obter_zsql(cod_turno=ordem.tip_turno):
          dic["des_turno"] = turno.des_turno

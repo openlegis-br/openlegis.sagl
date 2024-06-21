@@ -70,13 +70,21 @@ def criar_documento(numero,ano,data,tip_documento,hdn_num_protocolo,txt_interess
     for codigo in context.zsql.documento_administrativo_incluido_codigo_obter_zsql():
         cod_documento = int(codigo.cod_documento)
         id_documento = str(cod_documento)+'_texto_integral.pdf'
+        id_odt = str(cod_documento)+'_texto_integral.odt'
 
     context.zsql.peticao_enviar_zsql(cod_peticao = cod_peticao, num_protocolo=hdn_num_protocolo, cod_documento=cod_documento)
 
     if hasattr(context.sapl_documentos.peticao, str(cod_peticao) + '.pdf'):
        context.modelo_proposicao.peticao_autuar(cod_peticao=cod_peticao)
-       if context.zsql.assinatura_documento_obter_zsql(codigo=cod_peticao, tipo_doc='peticao',cod_usuario=None):
+       if context.zsql.assinatura_documento_obter_zsql(codigo=cod_peticao, tipo_doc='peticao', cod_usuario=None):
           context.pysc.assinaturas_obter_pysc(codigo_origem=cod_peticao, tipo_doc_origem='peticao', codigo_destino=cod_documento, tipo_doc_destino='documento')
+
+    if hasattr(context.sapl_documentos.peticao, str(cod_peticao) + '.odt'):
+       tmp_copy = context.sapl_documentos.peticao.manage_copyObjects(ids=str(cod_peticao) + '.odt')
+       tmp_id = context.sapl_documentos.administrativo.manage_pasteObjects(tmp_copy)[0]['new_id']
+       context.sapl_documentos.administrativo.manage_renameObjects(ids=list([tmp_id]),new_ids=list([id_odt]))
+       odt = getattr(context.sapl_documentos.administrativo, id_odt)
+       odt.manage_permission('View', roles=['Manager','Authenticated'], acquire=1)
 
     anexos = context.pysc.anexo_peticao_pysc(str(cod_peticao),listar=True)
     for item in anexos:
@@ -92,7 +100,7 @@ def criar_documento(numero,ano,data,tip_documento,hdn_num_protocolo,txt_interess
             tmp_id = context.sapl_documentos.administrativo.manage_pasteObjects(tmp_copy)[0]['new_id']
             context.sapl_documentos.administrativo.manage_renameObjects(ids=list([tmp_id]),new_ids=list([id_pdf]))
             pdf = getattr(context.sapl_documentos.administrativo, id_pdf)
-            pdf.manage_permission('View', roles=['Authenticated'], acquire=1)
+            pdf.manage_permission('View', roles=['Manager','Authenticated'], acquire=1)
 
     if cod_documento_vinculado != None and cod_documento_vinculado !='Nulo':
         context.zsql.documento_administrativo_vinculado_incluir_zsql(cod_documento_vinculante = cod_documento_vinculado, cod_documento_vinculado = cod_documento)

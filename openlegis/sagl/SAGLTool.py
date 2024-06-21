@@ -1050,7 +1050,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         template_file = BytesIO(bytes(modelo.data))
         brasao_file = self.get_brasao()
         exec('brasao = brasao_file')
-        if inf_basicas_dic['des_tipo_proposicao'] == 'Requerimento':
+        if (inf_basicas_dic['des_tipo_proposicao'] == 'Requerimento' or inf_basicas_dic['des_tipo_proposicao'] == 'Indicação'):
            id_imagem1 = str(num_proposicao)+'_image_1.jpg'
            image1 = None
            if hasattr(self.sapl_documentos.proposicao, id_imagem1):

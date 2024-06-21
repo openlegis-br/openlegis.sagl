@@ -1,6 +1,7 @@
 ##parameters=imagem,dat_reuniao,cod_reuniao,lst_reuniao,lst_pauta,dic_cabecalho,lst_rodape
 
 from trml2pdf import parseString
+from xml.sax.saxutils import escape
 import time
 
 def cabecalho(dic_cabecalho,dat_reuniao,imagem):

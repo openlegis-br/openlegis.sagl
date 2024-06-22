@@ -78,7 +78,7 @@ class Sessoes(grok.View):
                 "@type": 'SessaoPlenaria',
                 "id": str(item_id),
                 "title": str(item.num_sessao_plen) + 'ª ' + 'Reunião ' +  tipo.nom_sessao,
-                "description": DateTime(item.dat_inicio_sessao, datefmt='international').strftime("%d/%m/%Y") + ' ' + item.hr_inicio_sessao,
+                "description": DateTime(item.dat_inicio_sessao, datefmt='international').strftime("%d/%m/%Y") + ' ' + DateTime(item.hr_inicio_sessao, datefmt='international').strftime("%H:%M"),
                 "date": DateTime(item.dat_inicio_sessao, datefmt='international').strftime("%Y-%m-%d"),
                 "type": tipo.nom_sessao,
                 "type_id": item.tip_sessao,
@@ -124,16 +124,22 @@ class Sessoes(grok.View):
         for sessao in self.context.zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=item_id, ind_excluido=0):
             tipo = self.context.zsql.tipo_sessao_plenaria_obter_zsql(tip_sessao=sessao.tip_sessao, ind_excluido=0)[0]
             title = str(sessao.num_sessao_plen) + 'ª Reunião ' +  tipo.nom_sessao
-            description = DateTime(sessao.dat_inicio_sessao, datefmt='international').strftime("%d/%m/%Y") + ' - ' + sessao.hr_inicio_sessao
-        dic_sessao = {
-            "@type": 'SessaoPlenaria',
-            "@id": self.service_url + '/id/' + item_id,
-            "@id_votacao": self.service_url + '/id/' + item_id + '/votacao',
-            "@id_presenca": self.service_url + '/id/' + item_id + '/presenca',
-            "description": description,
-            "title": title,
-            "pauta": lst_pauta,
-            "ata": lst_ata,
+            description = DateTime(sessao.dat_inicio_sessao, datefmt='international').strftime("%d/%m/%Y") + ' - ' + DateTime(sessao.hr_inicio_sessao, datefmt='international').strftime("%H:%M")
+            dic_sessao = {
+                "@type": 'SessaoPlenaria',
+                "@id": self.service_url + '/id/' + item_id,
+                "@id_votacao": self.service_url + '/id/' + item_id + '/votacao',
+                "@id_presenca": self.service_url + '/id/' + item_id + '/presenca',
+                "id": str(sessao.cod_sessao_plen),
+                "date": DateTime(sessao.dat_inicio_sessao, datefmt='international').strftime("%Y-%m-%d"),
+                "description": description,
+                "type": tipo.nom_sessao,
+                "type_id": sessao.tip_sessao,
+                "startTime": DateTime(sessao.hr_inicio_sessao, datefmt='international').strftime("%H:%M"),
+                "endTime": sessao.hr_fim_sessao,
+                "title": title,
+                "pauta": lst_pauta,
+                "ata": lst_ata,
         }
         return dic_sessao
 

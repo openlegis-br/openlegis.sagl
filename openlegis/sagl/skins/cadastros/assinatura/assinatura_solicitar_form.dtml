@@ -77,7 +77,7 @@ $(document).ready(function() {
              <label for="lst_cod_usuario" class="required">Selecione o Usuário</label>
                <div class="input-group">
                 <select class="form-control selectpicker" name="lst_cod_usuario:list:int" id="lst_cod_usuario" multiple="multiple" data-selected-text-format="count > 3" data-size="6" data-actions-box="true" data-live-search="true" required>
-                    <dtml-if expr="tipo_doc=='proposicao'">
+                   <dtml-if expr="tipo_doc=='proposicao'">
                      <dtml-call expr="REQUEST.set('data_atual', DateTime().strftime('%d/%m/%Y'))">
                      <dtml-if expr="AUTHENTICATED_USER.has_role(['Autor'])">
                         <dtml-in expr="zsql.usuario_obter_zsql(col_username=AUTHENTICATED_USER.getUserName())">
@@ -113,8 +113,14 @@ $(document).ready(function() {
                               </dtml-if>
                            </dtml-in>
                         </dtml-if>
+                     <dtml-else>
+                            <dtml-in expr="zsql.autores_obter_zsql(txt_dat_apresentacao=data_atual)">
+                              <dtml-in expr="zsql.usuario_obter_zsql(col_username=col_username_autor)">
+                                   <option value="<dtml-var cod_usuario>"><dtml-var nom_completo></option>
+                              </dtml-in>
+                           </dtml-in>
                      </dtml-if>
-                    <dtml-else>
+                   <dtml-else>
                       <dtml-in expr="zsql.usuario_obter_zsql()">
                         <option value="<dtml-var cod_usuario>"><dtml-var nom_completo></option>
                       </dtml-in>

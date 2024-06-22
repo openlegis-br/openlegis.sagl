@@ -15,7 +15,7 @@ function refreshPage() {
 }
 </style>
 
-<dtml-if expr="envrec=='E' and AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia', 'Revisor Proposicao'])">
+<dtml-if expr="envrec=='E' and AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia', 'Revisor Proposicao', 'Chefia Revisão'])">
     <dtml-in expr="proposicoes_contar_pysc(caixa='revisao')" mapping>
        <dtml-if sequence-start>
          <p class="text-muted font-weight-bold">Proposições em elaboração ou revisão textual</p>
@@ -60,7 +60,7 @@ function refreshPage() {
            <p class="text-muted">Não há proposições para revisão textual.</p>        
     </dtml-in>
 
-<dtml-elif expr="envrec=='P' and AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia', 'Revisor Proposicao'])">
+<dtml-elif expr="envrec=='P' and AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia', 'Revisor Proposicao', 'Chefia Revisão'])">
     <dtml-in expr="proposicoes_contar_pysc(caixa='assinatura')" mapping>
        <dtml-if sequence-start>
          <p class="text-muted font-weight-bold">Proposições revisadas e aguardando assinatura digital</p>
@@ -105,7 +105,7 @@ function refreshPage() {
            <p class="text-muted">Não há proposições aguardando assinatura.</p>         
     </dtml-in>
 
-<dtml-elif expr="envrec=='S' and AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia'])">
+<dtml-elif expr="envrec=='S' and AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia', 'Revisor Proposicao', 'Chefia Revisão'])">
     <dtml-in expr="proposicoes_contar_pysc(caixa='pedido_devolucao')" mapping>
        <dtml-if sequence-start>
          <p class="text-muted font-weight-bold">Proposições com devolução solicitada pelo autor</p>
@@ -195,7 +195,7 @@ function refreshPage() {
            <p class="text-muted">Não há proposições para protocolo.</p>       
     </dtml-in>
 
-   <dtml-elif expr="envrec=='I' and AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia', 'Revisor Proposicao'])">
+   <dtml-elif expr="envrec=='I' and AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia', 'Revisor Proposicao', 'Chefia Revisão'])">
         <dtml-in expr="proposicoes_contar_pysc(caixa='incorporado')" mapping>
         <dtml-if sequence-start>
             <p class="text-muted font-weight-bold">Histórico das últimas proposições incorporadas</p>        
@@ -265,7 +265,7 @@ function refreshPage() {
            <p class="text-muted">Não há proposições incorporadas.</p>
         </dtml-in>
 
-  <dtml-elif expr="envrec=='R' and AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia', 'Revisor Proposicao'])">
+  <dtml-elif expr="envrec=='R' and AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia', 'Revisor Proposicao', 'Chefia Revisão'])">
         <dtml-in expr="proposicoes_contar_pysc(caixa='devolvido')" mapping>
         <dtml-if sequence-start>
             <p class="text-muted font-weight-bold">Proposições devolvidas ao autor</p>

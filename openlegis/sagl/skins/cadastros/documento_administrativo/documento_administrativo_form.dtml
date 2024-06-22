@@ -450,11 +450,11 @@ $(document).ready(() => {
       <dtml-if cod_documento>
          <label class="d-block">Arquivo ODT</label>
          <dtml-let id_documento="str(cod_documento)+'_texto_integral.odt'">
-            <dtml-if "hasattr(sapl_documentos.administrativo,id_documento)">
+            <dtml-if expr="hasattr(sapl_documentos.administrativo,id_documento)">
                <dtml-let documento="getattr(sapl_documentos.administrativo,id_documento).absolute_url">
                  <dtml-call expr="REQUEST.set('nome_arquivo',str(cod_documento)+'_texto_integral.odt')">
-                 <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#iFrameModal" data-title="Visualização de Arquivo" data-src="<dtml-var portal_url>/generico/viewerJS/#<dtml-var documento>?<dtml-var expr="ZopeTime().timeTime()">"><i class="fa fa-fw fa-file-alt"></i>Visualizar</button>                 
-                 <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#iFrameModal" data-title="Edição de Arquivo ODT" data-src="<dtml-var portal_url>/webeditor/editorDocumento?<dtml-var documento>" data-toggle="tooltip" data-placement="bottom" title="Editar Online"><i class="fa fa-fw fa-edit"></i>Editar</button>
+                 <a class="btn btn-secondary" href="<dtml-var portal_url>/generico/viewerJS/#<dtml-var documento>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fa fa-fw fa-file-alt"></i>Visualizar</a>                 
+                 <a class="btn btn-secondary" href="<dtml-var portal_url>/webeditor/editorDocumento?<dtml-var documento>" target="_blank"><i class="fa fa-fw fa-edit"></i>Editar</a>
   	         <dtml-call expr="REQUEST.set('nome_arquivo_odt',str(cod_documento)+'_texto_integral.odt')">
                  <button type="button" class="btn btn-secondary" onclick="javascript:location.href='&dtml-URL1;/sapl_documentos/administrativo/externalEdit_/<dtml-var nome_arquivo_odt>.zem'" data-toggle="tooltip" data-placement="bottom" title="Editar no LibreOffice"><i class="fas fa-fw fa-external-link-alt"></i>LibreOffice</button>
                  <a class="btn btn-danger" href="<dtml-var portal_url>/cadastros/documento_administrativo/texto_documento_administrativo_excluir_odt_proc?cod_documento=<dtml-var cod_documento missing>" data-confirm="Deseja realmente excluir o arquivo ODT?"><i class="fas fa-trash"></i> Excluir</a>

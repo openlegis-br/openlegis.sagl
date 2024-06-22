@@ -1,7 +1,15 @@
 <dtml-try>
   <dtml-in expr="zsql.materia_obter_zsql(cod_materia = cod_materia)">
-  <dtml-call "REQUEST.set('ind_pdf_detalhe_materia', 'mostrar')">  
-    <dtml-var materia_form>
+     <dtml-call "REQUEST.set('ind_pdf_detalhe_materia', 'mostrar')">
+     <dtml-if expr="AUTHENTICATED_USER.has_role(['Authenticated'])">
+       <dtml-in expr="zsql.usuario_obter_zsql(col_username=AUTHENTICATED_USER.getUserName())">
+          <dtml-call expr="REQUEST.set('cod_usuario_corrente', cod_usuario)">
+       </dtml-in>
+       <dtml-if expr="_.has_key('hdn_tramitacao')">
+          <dtml-call expr="zsql.tramitacao_visualizacao_zsql(cod_tramitacao=hdn_tramitacao, cod_usuario=cod_usuario_corrente)">
+       </dtml-if>
+      </dtml-if>
+      <dtml-var materia_form>
   </dtml-in>
 <dtml-except>
   <dtml-let mensagem="'Houve um erro!'" tipo_mensagem="'danger'">

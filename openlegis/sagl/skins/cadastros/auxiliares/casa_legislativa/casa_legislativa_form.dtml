@@ -73,9 +73,56 @@
          return false;
       }
 
-
       if (form.file_nom_logo.value != "") 
          form.hdn_file.value = 1;      
+
+      if (form.lst_origem.selectedIndex == '') {
+         alert("A origem deve ser selecionada!");
+         form.lst_origem.focus();
+         return false;
+      } 
+
+      if (form.lst_destino.selectedIndex == '') {
+         alert("O destino dos projetos deve ser selecionado!");
+         form.lst_destino.focus();
+         return false;
+      } 
+
+      if (form.lst_destino_outros.selectedIndex == '') {
+         alert("O destino das outras matérias deve ser selecionado!");
+         form.lst_destino_outros.focus();
+         return false;
+      }
+      
+      if (form.lst_status.selectedIndex == '') {
+         alert("O status das matérias deve ser selecionado!");
+         form.lst_status.focus();
+         return false;
+      } 
+
+      if (form.lst_status_doc.selectedIndex == '') {
+         alert("O status dos documentos acessórios deve ser selecionado!");
+         form.lst_status_doc.focus();
+         return false;
+      } 
+
+      if (form.lst_status_eme.selectedIndex == '') {
+         alert("O status das emendas deve ser selecionado!");
+         form.lst_status_eme.focus();
+         return false;
+      } 
+
+      if (form.lst_status_par.selectedIndex == '') {
+         alert("O status dos pareceres deve ser selecionado!");
+         form.lst_status_par.focus();
+         return false;
+      } 
+
+      if (form.lst_status_sub.selectedIndex == '') {
+         alert("O status dos substitutivos deve ser selecionado!");
+         form.lst_status_sub.focus();
+         return false;
+      } 
 
       return form.submit();
     }
@@ -118,10 +165,9 @@
 
 <h1 class="firstHeading">Cadastro de Casa Legislativa</h1> 
 
-
 <form name="casa_legislativa_form" method="post" action="casa_legislativa_salvar_proc"  enctype="multipart/form-data">
+  <legend>Configurações Básicas</legend>
   <input type="hidden" name="hdn_url" value="casa_legislativa_form" />
-  
   <div class="form-row">
      <div class="col-12 col-md-7 mb-3">
         <label for="txt_nom_casa" class="required">Nome da Casa</label>     
@@ -252,7 +298,7 @@
         <input class="form-control" type="text" id="txt_nome_mesa" name="txt_nome_mesa" value="<dtml-var expr="sapl_documentos.props_sagl.nome_mesa" missing>" />
     </div>
   </div>
-  
+
   <div class="form-row"> 
      <div class="col-12 mb-3">
         <label for="txt_informacao_geral">Observações</label>
@@ -308,8 +354,118 @@
         </div>
        </div>
 
+  <legend>Processo Legislativo Eletrônico</legend>
+  <div class="form-row">
+    <div class="col-3 mb-3">
+       <label for="lst_origem" class="required">Origem</label>
+       <select id="lst_origem" name="lst_origem" class="form-control">
+          <option value="">Selecione</option>
+          <dtml-in expr="zsql.unidade_tramitacao_obter_zsql(ind_excluido=0)">        
+              <option value="<dtml-var cod_unid_tramitacao>"
+                <dtml-if expr="str(sapl_documentos.props_sagl.origem) == str(cod_unid_tramitacao)">
+                   selected
+                </dtml-if> >
+              <dtml-var nom_unidade_join></option>
+         </dtml-in>     
+       </select>
+    </div> 
+    <div class="col-3 mb-3">
+       <label for="lst_destino" class="required">Destino Projetos</label>
+       <select id="lst_destino" name="lst_destino" class="form-control">
+          <option value="">Selecione</option>
+          <dtml-in expr="zsql.unidade_tramitacao_obter_zsql(ind_excluido=0, ing_leg=1)">        
+              <option value="<dtml-var cod_unid_tramitacao>"
+                <dtml-if expr="str(sapl_documentos.props_sagl.destino) == str(cod_unid_tramitacao)">
+                   selected
+                </dtml-if> >
+              <dtml-var nom_unidade_join></option>
+         </dtml-in>     
+       </select>
+    </div> 
+    <div class="col-3 mb-3">
+       <label for="lst_destino_outros" class="required">Destino Outras Matérias</label>
+       <select id="lst_destino_outros" name="lst_destino_outros" class="form-control">
+          <option value="">Selecione</option>
+          <dtml-in expr="zsql.unidade_tramitacao_obter_zsql(ind_excluido=0, ing_leg=1)">        
+              <option value="<dtml-var cod_unid_tramitacao>"
+                <dtml-if expr="str(sapl_documentos.props_sagl.destino_outros) == str(cod_unid_tramitacao)">
+                   selected
+                </dtml-if> >
+              <dtml-var nom_unidade_join></option>
+         </dtml-in>     
+       </select>
+    </div> 
+    <div class="col-3 mb-3">
+       <label for="lst_status" class="required">Status Matérias</label>
+       <select id="lst_status" name="lst_status" class="form-control">
+          <option value="">Selecione</option>
+          <dtml-in expr="zsql.status_tramitacao_obter_zsql(ind_excluido=0)">        
+              <option value="<dtml-var cod_status>"
+                <dtml-if expr="str(sapl_documentos.props_sagl.status) == str(cod_status)">
+                   selected
+                </dtml-if> >
+              <dtml-var sgl_status> - <dtml-var des_status></option>
+         </dtml-in>     
+       </select>
+    </div> 
+  </div>
 
-  <input class="btn btn-primary" type="button" name="btn_casa_salvar" value="Salvar" onClick="campos_criticar(document.casa_legislativa_form)" />
+  <div class="form-row">
+    <div class="col-3 mb-3">
+       <label for="lst_status_doc" class="required">Status Docs. Acessórios</label>
+       <select id="lst_status_doc" name="lst_status_doc" class="form-control">
+          <option value="">Selecione</option>
+          <dtml-in expr="zsql.status_tramitacao_obter_zsql(ind_excluido=0)">        
+              <option value="<dtml-var cod_status>"
+                <dtml-if expr="str(sapl_documentos.props_sagl.status_doc) == str(cod_status)">
+                   selected
+                </dtml-if> >
+              <dtml-var sgl_status> - <dtml-var des_status></option>
+         </dtml-in>     
+       </select>
+    </div> 
+    <div class="col-3 mb-3">
+       <label for="lst_status_eme" class="required">Status Emendas</label>
+       <select id="lst_status_eme" name="lst_status_eme" class="form-control">
+          <option value="">Selecione</option>
+          <dtml-in expr="zsql.status_tramitacao_obter_zsql(ind_excluido=0)">        
+              <option value="<dtml-var cod_status>"
+                <dtml-if expr="str(sapl_documentos.props_sagl.status_eme) == str(cod_status)">
+                   selected
+                </dtml-if> >
+              <dtml-var sgl_status> - <dtml-var des_status></option>
+         </dtml-in>     
+       </select>
+    </div> 
+    <div class="col-3 mb-3">
+       <label for="lst_status_par" class="required">Status Pareceres</label>
+       <select id="lst_status_par" name="lst_status_par" class="form-control">
+          <option value="">Selecione</option>
+          <dtml-in expr="zsql.status_tramitacao_obter_zsql(ind_excluido=0)">        
+              <option value="<dtml-var cod_status>"
+                <dtml-if expr="str(sapl_documentos.props_sagl.status_par) == str(cod_status)">
+                   selected
+                </dtml-if> >
+              <dtml-var sgl_status> - <dtml-var des_status></option>
+         </dtml-in>     
+       </select>
+    </div> 
+    <div class="col-3 mb-3">
+       <label for="lst_status_sub" class="required">Status Substitutivos</label>
+       <select id="lst_status_sub" name="lst_status_sub" class="form-control">
+          <option value="">Selecione</option>
+          <dtml-in expr="zsql.status_tramitacao_obter_zsql(ind_excluido=0)">        
+              <option value="<dtml-var cod_status>"
+                <dtml-if expr="str(sapl_documentos.props_sagl.status_sub) == str(cod_status)">
+                   selected
+                </dtml-if> >
+              <dtml-var sgl_status> - <dtml-var des_status></option>
+         </dtml-in>     
+       </select>
+    </div> 
+  </div>
+
+   <input class="btn btn-primary" type="button" name="btn_casa_salvar" value="Salvar" onClick="campos_criticar(document.casa_legislativa_form)" />
 
    <div class="row">
       <div class="col-md-12 mt-2">

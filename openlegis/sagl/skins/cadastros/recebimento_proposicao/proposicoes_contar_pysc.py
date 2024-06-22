@@ -18,8 +18,20 @@ incorporado = []
 devolvido = []
 pedido_devolucao = []
 
+if REQUEST['AUTHENTICATED_USER'].has_role(['Revisor Proposicao']):
+   for usuario in context.zsql.usuario_obter_zsql(col_username=REQUEST['AUTHENTICATED_USER'].getUserName()):
+       metodo = context.zsql.proposicao_obter_zsql(cod_revisor=usuario.cod_usuario, ind_excluido=0, ind_pendente=1, ind_pedido_devolucao=0, ind_devolvido='0')
+       metodo1 = context.zsql.proposicao_obter_zsql(cod_revisor=usuario.cod_usuario, ind_excluido=0, ind_incorporado=1)
+       metodo2 = context.zsql.proposicao_obter_zsql(cod_revisor=usuario.cod_usuario, ind_excluido=0, ind_devolvido='1')
+       metodo3 = context.zsql.proposicao_obter_zsql(cod_revisor=usuario.cod_usuario, ind_excluido=0, ind_pedido_devolucao='1')
+else:
+       metodo = context.zsql.proposicao_obter_zsql(ind_excluido=0, ind_pendente=1, ind_pedido_devolucao=0, ind_devolvido='0')
+       metodo1 = context.zsql.proposicao_obter_zsql(ind_excluido=0, ind_incorporado=1)
+       metodo2 = context.zsql.proposicao_obter_zsql(ind_excluido=0, ind_devolvido='1')
+       metodo3 = context.zsql.proposicao_obter_zsql(ind_excluido=0, ind_pedido_devolucao='1')
+
 if caixa == 'revisao' or caixa == 'assinatura' or caixa == 'protocolo':
-   for proposicao in context.zsql.proposicao_obter_zsql(ind_excluido=0, ind_pendente=1, ind_pedido_devolucao=0, ind_devolvido='0'):
+   for proposicao in metodo:
        id_odt = str(proposicao.cod_proposicao) +'.odt'
        id_documento = str(proposicao.cod_proposicao) +'.pdf'
        id_documento_assinado = str(proposicao.cod_proposicao) +'_signed.pdf'
@@ -55,7 +67,7 @@ if caixa == 'revisao' or caixa == 'assinatura' or caixa == 'protocolo':
       return protocolo
 
 if caixa == 'incorporado':
-   for proposicao in context.zsql.proposicao_obter_zsql(ind_excluido=0, ind_incorporado=1):
+   for proposicao in metodo1:
        dic={}
        dic['cod_proposicao'] = int(proposicao.cod_proposicao)
        dic['des_tipo_proposicao'] = proposicao.des_tipo_proposicao
@@ -76,7 +88,7 @@ if caixa == 'incorporado':
    return incorporado
 
 if caixa == 'devolvido':
-   for proposicao in context.zsql.proposicao_obter_zsql(ind_excluido=0, ind_devolvido='1'):
+   for proposicao in metodo2:
        dic={}
        dic['cod_proposicao'] = int(proposicao.cod_proposicao)
        dic['des_tipo_proposicao'] = proposicao.des_tipo_proposicao
@@ -91,7 +103,7 @@ if caixa == 'devolvido':
    return devolvido
 
 if caixa == 'pedido_devolucao':
-   for proposicao in context.zsql.proposicao_obter_zsql(ind_excluido=0, ind_pedido_devolucao='1'):
+   for proposicao in metodo3:
        dic={}
        dic['cod_proposicao'] = int(proposicao.cod_proposicao)
        dic['des_tipo_proposicao'] = proposicao.des_tipo_proposicao

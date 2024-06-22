@@ -1,8 +1,11 @@
 <dtml-in expr="zsql.usuario_obter_zsql(col_username=AUTHENTICATED_USER.getUserName())">
-    <dtml-call expr="REQUEST.set('cod_usuario_corrente', int(cod_usuario))">
+    <dtml-call expr="REQUEST.set('cod_usuario_corrente', cod_usuario)">
 </dtml-in>
 <dtml-try>
     <dtml-in expr="zsql.documento_administrativo_obter_zsql(cod_documento=cod_documento,ind_excluido=0)">
+      <dtml-if expr="_.has_key('hdn_tramitacao')">
+         <dtml-call expr="zsql.tramitacao_administrativo_visualizacao_zsql(cod_tramitacao=hdn_tramitacao, cod_usuario=cod_usuario_corrente)">
+      </dtml-if>
       <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Modulo Administrativo'])">
           <dtml-var documento_administrativo_form>
       <dtml-elif expr="AUTHENTICATED_USER.has_role(['Operador Materia']) and ind_publico==1">

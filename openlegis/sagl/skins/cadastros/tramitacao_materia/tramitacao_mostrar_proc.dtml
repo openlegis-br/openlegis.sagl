@@ -11,16 +11,6 @@
     
 </script>
 
-<dtml-if lote>
-    <div class="alert alert-<dtml-var tipo_mensagem missing=success html_quote> alert-dismissible fade show" role="alert">
-        <h5>Tramitação em lote realizada com sucesso!</h5>
-          <p class="mb-0">Confira abaixo a tramitação da última matéria selecionada.</p>
-        <button type="button" class="close" data-dismiss="alert" aria-label="Fechar">
-          <span aria-hidden="true">&times;</span>
-        </button>
-    </div>
-</dtml-if>
-
 <h1 class="firstHeading">Tramitação de Matéria Legislativa</h1>
 
 <dtml-call expr="REQUEST.set('cod_materia', hdn_cod_materia)">
@@ -129,7 +119,7 @@
             </div>
          </dtml-in>
     </div>
-    <div class="col-6 col-md-9 mb-3">
+    <div class="col-12 col-md-4 mb-3">
       <label class="d-block">Despacho em PDF</label>
       <dtml-call expr="REQUEST.set('pdf', str(cod_tramitacao)+'_tram.pdf')">
       <dtml-call expr="REQUEST.set('pdf_assinado', str(cod_tramitacao)+'_tram_signed.pdf')">
@@ -151,7 +141,13 @@
          </dtml-if>
         </div>
       </dtml-if>           
-    </div>    
+    </div>
+    <div class="col-12 col-md-8 mb-3">
+      <dtml-if expr="ind_ult_tramitacao == 1 and dat_visualizacao">
+      <label class="d-block"><i class="fa fa-info-circle"></i> Importante</label>
+        Esta tramitação foi visualizada na unidade de destino, em <dtml-var dat_visualizacao>, pelo usuário <dtml-in expr="zsql.usuario_obter_zsql(cod_usuario=cod_usuario_visualiza)"><dtml-var nom_completo></dtml-in>, não sendo possível retomá-la.
+      </dtml-if>
+    </div> 
   </div>
 
   <div class="form-row">
@@ -161,7 +157,7 @@
     </div>
   </div>
 
-  <dtml-if expr="dat_encaminha and not dat_recebimento and (int(cod_usuario_corrente)==int(cod_usuario_local))">
+  <dtml-if expr="dat_encaminha and not dat_visualizacao and (int(cod_usuario_corrente)==int(cod_usuario_local))">
      <form name="retomada_registrar" method="post" action="retomada_registrar_proc" class="needs-validation" novalidate>
         <input type="hidden" name="hdn_cod_tramitacao" value="<dtml-var cod_tramitacao>" />
         <input type="hidden" name="hdn_cod_materia" value="<dtml-var cod_materia>" />        

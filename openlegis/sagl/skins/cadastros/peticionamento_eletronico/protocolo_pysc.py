@@ -111,9 +111,7 @@ def criar_documento(numero,ano,data,tip_documento,hdn_num_protocolo,txt_interess
     return tramitar_documento(cod_documento)
 
 def tramitar_documento(cod_documento):
-    for unidade in context.zsql.unidade_tramitacao_obter_zsql(ind_excluido=0):
-        if 'Protocolo' == unidade.nom_unidade_join:
-            cod_unid_tram_local =  int(unidade.cod_unid_tramitacao)
+    cod_unid_tram_local = int(context.sapl_documentos.props_sagl.origem)
     cod_unid_tram_dest = int(lst_unidade)            
     for status in context.zsql.status_tramitacao_administrativo_obter_zsql(sgl_status='PRT'):
         cod_status = status.cod_status

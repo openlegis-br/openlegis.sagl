@@ -722,7 +722,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         data = open(output_file_odt, "rb").read()
         os.unlink(output_file_odt)
         self.sapl_documentos.administrativo.manage_addFile(id=output_file_odt,file=data)
-        odt = getattr(self.sapl_documentos.administrativo, nom_arquivo)
+        odt = getattr(self.sapl_documentos.administrativo, output_file_odt)
         odt.manage_permission('View', roles=['Manager','Authenticated'], acquire=0)
 
     def doc_acessorio_adm_gerar_pdf(self, cod_documento_acessorio):
@@ -1127,8 +1127,8 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
             arquivo.close()
         content = merger.tobytes()
         self.sapl_documentos.proposicao.manage_addFile(id=nom_arquivo_pdf,file=bytes(content),title='Proposição '+ cod_proposicao)
-        pdf = getattr(self.sapl_documentos.proposicao, nom_arquivo)
-        pdf.manage_permission('View', roles=['Manager','Anonymouys'], acquire=0)
+        pdf = getattr(self.sapl_documentos.proposicao, nom_arquivo_pdf)
+        pdf.manage_permission('View', roles=['Manager','Authenticated','Anonymous'], acquire=0)
 
     def substitutivo_gerar_odt(self, inf_basicas_dic, num_proposicao, nom_arquivo, des_tipo_materia, num_ident_basica, ano_ident_basica, txt_ementa, materia_vinculada, dat_apresentacao, nom_autor, apelido_autor, modelo_proposicao):
         arq = getattr(self.sapl_documentos.modelo.materia.substitutivo, modelo_proposicao)

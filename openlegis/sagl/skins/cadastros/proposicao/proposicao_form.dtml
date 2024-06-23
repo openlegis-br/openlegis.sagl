@@ -194,8 +194,7 @@ $(document).ready(function () {
         f.accept="application/pdf";
         p = document.getElementById("arquivos_anexos");
         p.appendChild(f);
-        p.appendChild(document.createElement("br"));        
-        p.appendChild(document.createElement("br"));        
+        p.appendChild(document.createElement("p"));
     }
 </script>
 
@@ -363,7 +362,7 @@ $(function () {
         <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia', 'Revisor Proposicao', 'Chefia Revisao']) and not prop_recebida and not prop_devolvida">                         
              <!-- Modal -->
              <button type="button" class="btn btn-sm btn-danger d-print-none" data-toggle="modal" data-target="#devolucaoModal">
-                <i class="fas fa-window-close"></i> Devolver ao Autor
+                <i class="fas fa-window-close"></i> Devolver
              </button>
              <div class="modal fade" id="devolucaoModal" tabindex="-1" aria-labelledby="devolucaoModalLabel" aria-hidden="true">
               <div class="modal-dialog">
@@ -491,21 +490,21 @@ $(function () {
                <dtml-elif expr="ind_mat_ou_doc=='M'">
                   <dtml-call expr="REQUEST.set('cod_mat', cod_mat_ou_doc)">
                </dtml-if>
+               <label for="txt_materia" class="d-block">Matéria Legislativa</label>       
                <dtml-in expr="zsql.materia_obter_zsql(cod_materia=cod_mat)">
                   <dtml-if expr="(AUTHENTICATED_USER.has_role(['Autor', 'Assessor Parlamentar', 'Revisor Proposicao', 'Chefia Revisao']))">
-                     <label for="txt_materia" class="d-block">Matéria Legislativa</label>       
-                     <a class="btn btn-sm btn-secondary btn-block" href="<dtml-var portal_url>/consultas/materia/materia_mostrar_proc?cod_materia=<dtml-var cod_mat>" target="_blank"><i class="fas fa-eye"></i> <dtml-var des_tipo_materia> nº <dtml-var num_ident_basica>/<dtml-var ano_ident_basica></a>
+                     <a class="btn btn-secondary btn-block" href="<dtml-var portal_url>/consultas/materia/materia_mostrar_proc?cod_materia=<dtml-var cod_mat>" target="_blank"><i class="fas fa-eye"></i> <dtml-var des_tipo_materia> nº <dtml-var num_ident_basica>/<dtml-var ano_ident_basica></a>
                   <dtml-else>
-                    <label for="txt_materia" class="d-block">Matéria Legislativa</label>
-                     <a class="btn btn-sm btn-secondary btn-block" href="<dtml-var portal_url>/cadastros/materia/materia_mostrar_proc?cod_materia=<dtml-var cod_mat>"><i class="fas fa-eye"></i> <dtml-var des_tipo_materia> nº <dtml-var num_ident_basica>/<dtml-var ano_ident_basica></a>
+                     <a class="btn btn-secondary btn-block" href="<dtml-var portal_url>/cadastros/materia/materia_mostrar_proc?cod_materia=<dtml-var cod_mat>"><i class="fas fa-eye"></i> <dtml-var des_tipo_materia> nº <dtml-var num_ident_basica>/<dtml-var ano_ident_basica></a>
                   </dtml-if>
                </dtml-in>
-            <dtml-else>
-               <i>Não incorporada.</i>
             </dtml-if>
          <dtml-elif prop_devolvida>
            <label for="txt_dat_devolucao" class="d-block"><span style="color: #DE1E1E">Data de Devolução</span></label>
            <input class="form-control" type="text" id="txt_dat_devolucao" name="txt_dat_devolucao" value="<dtml-var dat_devolucao missing>" disabled />
+         <dtml-else>
+           <label for="txt_situacao" class="d-block"><span>Status da Proposição</span></label>
+           <input class="form-control" type="text" id="txt_situacao" name="txt_situacao" value="Aguardando análise do setor responsável" disabled />
          </dtml-if> 
        </div>           
   </dtml-if>  
@@ -715,10 +714,11 @@ $(function () {
         </div>
       </div>
     </div>
+ </div>
 
 </dtml-if>
   <dtml-if expr="AUTHENTICATED_USER.has_role(['Autor', 'Assessor Parlamentar'])">
-   <div class="form-row mb-2">  
+   <div class="form-row">  
      <div class="col-12 col-lg-6 mb-3">
        <label class="form-label d-block">Texto Editável (ODT)</label>
          <dtml-let id_original="str(cod_proposicao)+'_original.odt'">
@@ -829,27 +829,34 @@ $(function () {
   </dtml-if>
   <dtml-if expr="(not prop_recebida)">
     <div class="form-row mb-2">
-       <div class="col-12 col-md-6 mb-3">
-         <label class="form-label d-block">Anexos em PDF</label>       
+       <div class="col-4 col-md-2">
+         <label class="form-label d-block">Anexos em PDF</label>
           <dtml-if expr="not cod_mat_ou_doc and not prop_devolvida">   
            <small id="link_add_file">
-             <a class="btn btn-sm btn-light mb-3" onclick="addFileField(); return false;" href="#"><i class="fa fa-fw fa-plus"></i>Anexar Arquivo</a>
+             <a class="btn btn-sm btn-light btn-block" onclick="addFileField(); return false;" href="#"><i class="fa fa-fw fa-plus"></i>Anexar Arquivo</a>
            </small>
           </dtml-if>
+       </div>
+       <div class="col-8 col-md-10 mb-3">
+         <label class="form-label d-block">&nbsp;<span class="d-none">Arquivos anexados</span></label>
+         <span class="d-block" id="arquivos_anexos"></span>	                  
          <dtml-in expr="pysc.anexo_proposicao_pysc(cod_proposicao, listar=True)" prefix="file">
             <dtml-if expr="hasattr(sapl_documentos.proposicao, file_item)">
                <dtml-let documento="getattr(sapl_documentos.proposicao,file_item).absolute_url">
-                  <a target="_blank" href="<dtml-var documento>">
+                <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                  <a class="btn btn-sm btn-secondary" target="_blank" href="<dtml-var documento>">
                     <i class="fa fa-fw fa-file-pdf"></i><dtml-var file_item>
                   </a>
-                  <a class="btn btn-sm btn-danger" href="javascript:void(0)" onclick="location.href='anexo_excluir?anexo=<dtml-var file_item>&cod_proposicao=<dtml-var cod_proposicao missing>'"> Excluir</a>
+                  <a class="btn btn-sm btn-danger" href="javascript:void(0)" onclick="location.href='anexo_excluir?anexo=<dtml-var file_item>&cod_proposicao=<dtml-var cod_proposicao missing>'"> <i class="fas fa-trash"></i></a>
+                </div>
                </dtml-let>
             </dtml-if>
          </dtml-in>
-         <span class="d-block mb-2" id="arquivos_anexos"></span>	                  
        </div>
-    <dtml-if expr="AUTHENTICATED_USER.has_role(['Autor', 'Assessor Parlamentar']) and (des_tipo_autor == 'Parlamentar')">
-     <div class="col-12 col-md-6 mb-3">
+    </div>
+  <dtml-if expr="AUTHENTICATED_USER.has_role(['Autor', 'Assessor Parlamentar']) and (des_tipo_autor == 'Parlamentar')">
+   <div class="form-row mb-4">
+     <div class="col-12 col-md-6">
            <label for="lst_assessor">Assessor Responsável</label>
            <select class="custom-select custom-select-sm" id="lst_assessor" name="lst_assessor" <dtml-if expr="(prop_enviada)">disabled</dtml-if>>
              <option value =""></option>
@@ -866,18 +873,46 @@ $(function () {
              </dtml-in>
            </select>
      </div>
-     <dtml-elif expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia', 'Revisor Proposicao', 'Chefia Revisao'])">
-       <div class="col-12 col-md-6 mb-3">
-         <label for="nom_assessor">Assessor Responsável</label>
-         <dtml-in expr="zsql.assessor_parlamentar_obter_zsql(cod_assessor=cod_assessor_sel)">
-           <input class="form-control" type="text" name="nom_assessor" value="<dtml-var nom_assessor missing>" disabled>
-         </dtml-in>
-       </div>
-       <input type="hidden" name="lst_assessor" value="<dtml-var cod_assessor_sel missing null>">
-    <dtml-else>
-       <input type="hidden" name="lst_assessor" value="<dtml-var cod_assessor_sel missing null>">
-    </dtml-if> 
+     <div class="col-12 col-md-6">
+         <label for="nom_revisor">Revisor Designado</label>
+         <dtml-if expr="(prop_enviada and cod_revisor)">
+           <dtml-in expr="zsql.usuario_obter_zsql(cod_usuario=cod_revisor)">
+             <input class="form-control form-control-sm" type="text" name="nom_revisor" value="<dtml-var nom_completo missing>" disabled>
+           </dtml-in>
+         <dtml-else>
+           <input class="form-control form-control-sm" type="text" name="nom_revisor" value="" disabled>
+         </dtml-if>
+     </div>
     </div>
+  <dtml-elif expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia', 'Revisor Proposicao', 'Chefia Revisao'])">
+      <dtml-if expr="(prop_enviada)">
+        <div class="form-row mb-3">
+         <div class="col-12 col-md-6">
+           <label for="nom_assessor">Assessor Responsável</label>
+           <dtml-if expr="(prop_enviada and cod_assessor_sel)">
+              <dtml-in expr="zsql.assessor_parlamentar_obter_zsql(cod_assessor=cod_assessor_sel)">
+                <input class="form-control form-control-sm" type="text" name="nom_assessor" value="<dtml-var nom_assessor missing>" disabled>
+              </dtml-in>
+           <dtml-else>
+             <input class="form-control form-control-sm" type="text" name="nom_assessor" value="" disabled>
+           </dtml-if>
+         </div>
+         <div class="col-12 col-md-6">
+           <label for="nom_revisor">Revisor Designado</label>
+           <dtml-if expr="(prop_enviada and cod_revisor)">
+             <dtml-in expr="zsql.usuario_obter_zsql(cod_usuario=cod_revisor)">
+               <input class="form-control form-control-sm" type="text" name="nom_revisor" value="<dtml-var nom_completo missing>" disabled>
+             </dtml-in>
+           <dtml-else>
+             <input class="form-control form-control-sm" type="text" name="nom_revisor" value="" disabled>
+           </dtml-if>
+         </div>
+        </div>
+      </dtml-if>
+      <input type="hidden" name="lst_assessor" value="<dtml-var cod_assessor_sel missing null>">
+     <dtml-else>
+        <input type="hidden" name="lst_assessor" value="<dtml-var cod_assessor_sel missing null>">
+     </dtml-if> 
   </dtml-if>
 
    <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia', 'Revisor Proposicao', 'Chefia Revisao'])">
@@ -968,9 +1003,9 @@ $(function () {
 </form>
 
 <dtml-if expr="(AUTHENTICATED_USER.has_role(['Autor', 'Assessor Parlamentar']) and not prop_enviada and not prop_devolvida)">
-   <input class="btn btn-primary" type="button" value="Salvar Dados da Proposição" onClick="campos_criticar(document.proposicao_form)" />
+   <input class="btn btn-primary" type="button" value="Salvar Proposição" onClick="campos_criticar(document.proposicao_form)" />
 <dtml-elif expr="(AUTHENTICATED_USER.has_role(['Operador','Operador Materia', 'Revisor Proposicao', 'Chefia Revisao']) and not prop_recebida and not prop_devolvida)">
-   <input class="btn btn-primary" type="button" value="Salvar Dados da Proposição" onClick="campos_criticar(document.proposicao_form)" /> 
+   <input class="btn btn-primary" type="button" value="Salvar Proposição" onClick="campos_criticar(document.proposicao_form)" /> 
 </dtml-if>
 
 <dtml-if expr="usr_eh_autor and AUTHENTICATED_USER.has_role(['Autor', 'Assessor Parlamentar'])">
@@ -1081,7 +1116,7 @@ $(function () {
     </div>
 
     <dtml-if expr="not cod_mat_ou_doc and not prop_devolvida">
-       <input class="btn btn-sm btn-primary" type="button" value="Salvar Observações" onClick="observacao_salvar(document.observacao_form)" />
+       <input class="btn btn-sm btn-secondary" type="button" value="Salvar Observações" onClick="observacao_salvar(document.observacao_form)" />
     </dtml-if>
   </form>
 </dtml-if>

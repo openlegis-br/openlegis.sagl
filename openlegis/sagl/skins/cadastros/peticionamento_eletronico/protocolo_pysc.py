@@ -91,9 +91,10 @@ def criar_documento(numero,ano,data,tip_documento,hdn_num_protocolo,txt_interess
         id_anexo = str(item).split('.')[0] + '.pdf'
         arquivo = context.sapl_documentos.peticao[id_anexo]
         nom_doc = arquivo.title
+        tipo_doc_ac = int(arquivo.tip_documento)
         data_doc = container.last_modified(arquivo)
         data = DateTime(data_doc, datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
-        context.zsql.documento_acessorio_administrativo_incluir_zsql(tip_documento=tip_documento, cod_documento=int(cod_documento), nom_autor_documento=txt_interessado, dat_documento=data, nom_documento=nom_doc)
+        context.zsql.documento_acessorio_administrativo_incluir_zsql(tip_documento=tipo_doc_ac, cod_documento=int(cod_documento), nom_autor_documento=txt_interessado, dat_documento=data, nom_documento=nom_doc)
         for cod_acessorio in context.zsql.documento_acessorio_administrativo_incluido_codigo_obter_zsql():
             id_pdf = str(cod_acessorio.cod_documento_acessorio)+'.pdf'
             tmp_copy = context.sapl_documentos.peticao.manage_copyObjects(ids=item)

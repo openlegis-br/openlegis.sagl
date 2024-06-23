@@ -22,11 +22,7 @@
       }  
       if ((form.txt_num_parecer.value=="") ||
           (form.txt_ano_parecer.value=="") ||
-          (form.lst_comissao.selectedIndex == 0) ||
-          (form.lst_tip_id_basica.selectedIndex == 0) ||
-          (form.lst_tip_sessao.selectedIndex == 0) ||
-          (form.txt_num_ident_basica.value=="") || 
-          (form.txt_ano_ident_basica.value=="")){
+          (form.lst_comissao.selectedIndex == 0)){
           alert("Os campos de identificação do parecer devem ser preenchidos!");
           form.lst_comissao.focus();
           return false;
@@ -62,18 +58,11 @@
   function ementa_buscar(form){
      if ((form.txt_num_parecer.value!="") && 
          (form.txt_ano_parecer.value!="") &&
-         (form.lst_comissao.selectedIndex != 0) &&
-         (form.lst_tip_id_basica.selectedIndex != 0) &&
-	 (form.txt_num_ident_basica.value!="") && 
-	 (form.txt_ano_ident_basica.value!="")){
-	 location.href="ementa_parecer_buscar_proc?tip_ident_basica=" +       
-         form.lst_tip_id_basica[form.lst_tip_id_basica.selectedIndex].value +
-         "&num_ident_basica=" + form.txt_num_ident_basica.value + 
-         "&ano_ident_basica=" + form.txt_ano_ident_basica.value + 
-         "&num_parecer=" + form.txt_num_parecer.value + 
+         (form.lst_comissao.selectedIndex != '')){
+	 location.href="ementa_parecer_buscar_proc?num_parecer=" +       
+         form.txt_num_parecer.value +
          "&ano_parecer=" + form.txt_ano_parecer.value + 
          "&cod_comissao=" + form.lst_comissao[form.lst_comissao.selectedIndex].value + 
-         "&cod_ordem=" + form.cod_ordem.value +
          "&dat_ordem=" + form.txt_dat_ordem.value + 
          "&num_ordem=" + form.txt_num_ordem.value + 
          "&tip_sessao_plen=" + form.lst_tip_sessao[form.lst_tip_sessao.selectedIndex].value + 
@@ -129,7 +118,7 @@
             <div class="col-6">         
              <label for="lst_comissao" class="required">Selecione a Comissão</label>
              <select class="custom-select" id="lst_comissao" name="lst_comissao" onChange="ementa_buscar(document.ordem_dia_parecer_form)" required>
-                  <option>Selecione</option>
+                  <option value=''>Selecione</option>
                    <dtml-in expr="zsql.comissao_obter_zsql(ind_excluido=0)">
                     <dtml-if expr="dat_extincao is None">
                       <option value="<dtml-var cod_comissao>"
@@ -153,35 +142,6 @@
          </div>
         </td>
        </tr>
-       <tr>
-           <td colspan="3">
-             <div class="form-row">
-              <div class="col-6">
-                <label for="lst_tip_id_basica" class="required">Tipo de Matéria</label>
-                <select class="custom-select" id="lst_tip_id_basica" name="lst_tip_id_basica" onChange="ementa_buscar(document.ordem_dia_parecer_form)" required >
-                 <option></option>
-                   <dtml-in expr="zsql.tipo_materia_legislativa_obter_zsql(ind_excluido=0,tip_natureza='P')">
-                      <option
-                        <dtml-if expr="REQUEST.has_key('tip_ident_basica') and _.int(tip_materia) == _.int(tip_ident_basica)">
-                           selected
-                       </dtml-if>
-                       value="<dtml-var tip_materia>">
-                       <dtml-var sgl_tipo_materia> - <dtml-var des_tipo_materia missing>
-                      </option>
-                   </dtml-in>
-                 </select>
-               </div>
-              <div class="col-3">
-                <label for="txt_num_ident_basica" class="required">Número</label>              
-                <input class="form-control number" type="number" id="txt_num_ident_basica" name="txt_num_ident_basica" onChange="ementa_buscar(document.ordem_dia_parecer_form)" value="<dtml-var num_ident_basica missing>" />
-               </div>
-              <div class="col-3">
-                <label for="txt_ano_ident_basica" class="required">Ano</label>                 
-             <input class="form-control year" type="number" id="txt_ano_ident_basica" name="txt_ano_ident_basica" onChange="ementa_buscar(document.ordem_dia_parecer_form)" value="<dtml-var ano_ident_basica missing>"  />
-              </div>
-           </div> 
-        </td>
-      </tr>
       <tr>
         <td colspan="3">
           <label for="txa_txt_observacao" class="required">Ementa </label>

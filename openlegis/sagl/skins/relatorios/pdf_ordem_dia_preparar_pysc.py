@@ -1,8 +1,5 @@
-import os
-
 request=context.REQUEST
 response=request.RESPONSE
-session= request.SESSION
 
 lst_materia_apresentada=[]
 
@@ -32,7 +29,7 @@ for item in context.zsql.tipo_expediente_obter_zsql(ind_excluido=0):
 
 cod_sessao_plen = context.REQUEST['cod_sessao_plen']
 
-if context.REQUEST['cod_sessao_plen']!='' and 'ind_audiencia' in request:
+if request.has_key('ind_audiencia'):
    metodo = context.zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=cod_sessao_plen, ind_audiencia=1, ind_excluido=0)
    for item in metodo:
        for nome in context.zsql.tipo_sessao_plenaria_obter_zsql(tip_sessao=item.tip_sessao,ind_audiencia=1,ind_excluido=0):
@@ -58,8 +55,9 @@ for sessao in metodo:
   pauta_dic["hr_fim_sessao"] = sessao.hr_fim_sessao
   pauta_dic["txt_tema"] = sessao.tip_expediente
   pauta_dic["num_periodo"] = ''
-  for periodo in context.zsql.periodo_sessao_obter_zsql(cod_periodo=sessao.cod_periodo_sessao):
-      pauta_dic["num_periodo"] = periodo.num_periodo
+  if sessao.cod_periodo_sessao != None:
+     for periodo in context.zsql.periodo_sessao_obter_zsql(cod_periodo=sessao.cod_periodo_sessao):
+         pauta_dic["num_periodo"] = periodo.num_periodo
 
   # obtém o nome do Presidente da Câmara titular
   for cargo in context.zsql.cargo_mesa_obter_zsql(ind_excluido=0):
@@ -229,7 +227,7 @@ for sessao in metodo:
                 lst_qtde_mocoes.append(materia.cod_materia)
 
   # Ordem do Dia
-  for ordem in context.zsql.ordem_dia_obter_zsql(dat_ordem=data, cod_sessao_plen=sessao.cod_sessao_plen, ind_excluido=0):
+  for ordem in context.zsql.ordem_dia_obter_zsql(cod_sessao_plen=sessao.cod_sessao_plen, ind_excluido=0):
     dic = {}
     dic["num_ordem"] = ordem.num_ordem
     if ordem.cod_materia != None:
@@ -322,6 +320,32 @@ for sessao in metodo:
              lst_qtde_emendas.append(cod_emenda)
       dic["emendas"] = lst_emendas
       dic["emenda"] = len(lst_qtde_emendas)
+      
+    elif ordem.cod_parecer != None:
+         relatoria = context.zsql.relatoria_obter_zsql(cod_relatoria=ordem.cod_parecer)[0]
+         for turno in context.zsql.turno_discussao_obter_zsql(cod_turno=ordem.tip_turno):
+             dic["des_turno"] = str(turno.des_turno)
+             dic["cod_turno"] = int(turno.cod_turno)
+         for comissao in context.zsql.comissao_obter_zsql(cod_comissao=relatoria.cod_comissao):
+             sgl_comissao = comissao.sgl_comissao
+             nom_comissao = comissao.nom_comissao
+         for resultado in context.zsql.tipo_fim_relatoria_obter_zsql(tip_fim_relatoria=relatoria.tip_fim_relatoria):
+             resultado_comissao = ' (' + resultado.des_fim_relatoria + ')'
+         for mat in context.zsql.materia_obter_zsql(cod_materia=relatoria.cod_materia):
+             id_mat = ' ao ' + str(mat.des_tipo_materia) + ' Nº ' + str(mat.num_ident_basica) + '/' + str(mat.ano_ident_basica)
+         dic["id_materia"] = '<link href="'+context.sapl_documentos.absolute_url()+'/parecer_comissao/'+ str(relatoria.cod_relatoria) + '_parecer.pdf' +'">' + 'PARECER ' + sgl_comissao + ' N° ' +str(relatoria.num_parecer) + '/' + str(relatoria.ano_parecer) + '</link>'
+         dic["txt_ementa"] = ordem.txt_observacao
+         dic['nom_autor'] = str(nom_comissao)
+         dic["des_quorum"]=""
+         for quorum in context.zsql.quorum_votacao_obter_zsql(cod_quorum=ordem.tip_quorum):
+             dic["des_quorum"] = quorum.des_quorum
+         dic["tip_votacao"]=""
+         for tip_votacao in context.zsql.tipo_votacao_obter_zsql(tip_votacao=ordem.tip_votacao):
+             dic["tip_votacao"] = 'Votação ' + str(tip_votacao.des_tipo_votacao)
+         dic["parecer"] = ''
+         dic["substitutivo"] = ''
+         dic["emenda"] = ''
+
     if ordem.urgencia == 1:
        lst_urgencia.append(dic)
     else:

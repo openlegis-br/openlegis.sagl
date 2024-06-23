@@ -458,7 +458,7 @@ target="_blank">Gerar PDF</a>
              <dtml-if "hasattr(sapl_documentos.oradores_expediente,id_documento_odt)">
                 <dtml-let documento_odt="getattr(sapl_documentos.oradores_expediente,id_documento_odt).absolute_url">
                    <dtml-call expr="REQUEST.set('nome_arquivo_odt',str(cod_sessao_plen)+'_oradores_expediente.odt')">
-                   <button type="button" class="btn btn-sm btn-secondary" data-toggle="modal" data-target="#iFrameModal" data-title="Visualização de Arquivo" data-src="<dtml-var portal_url>/generico/viewerJS/#<dtml-var documento_odt>?<dtml-var expr="ZopeTime().timeTime()">"><i class="fa fa-fw fa-file-alt"></i>Visualizar</button>
+                   <a class="btn btn-sm btn-secondary" href="<dtml-var portal_url>/generico/viewerJS/#<dtml-var documento_odt>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fa fa-fw fa-file-alt"></i>Visualizar</a>
                    <button type="button" class="btn btn-sm btn-secondary" onclick="javascript:location.href='<dtml-var portal_url>/sapl_documentos/oradores_expediente/externalEdit_/<dtml-var nome_arquivo_odt>.zem'" data-toggle="tooltip" data-placement="bottom" title="Editar no LibreOffice"><i class="fas fa-fw fa-external-link-alt"></i>LibreOffice</button>
                    <a class="btn btn-sm btn-danger" href="oradores_odt_excluir_proc?cod_sessao_plen=<dtml-var cod_sessao_plen missing><dtml-if expr="_.has_key('ind_audiencia')">&ind_audiencia=1</dtml-if>" data-confirm="Deseja realmente excluir o arquivo ODT da Lista de Oradores?"><i class="fas fa-trash"></i> Excluir</a> 
                 </dtml-let>
@@ -497,7 +497,7 @@ target="_blank">Gerar PDF</a>
   <div class="form-row">
      <div class="col-4 col-md-1 mb-3">
        <label class="form-label d-block">Nº da Ata</label>
-       <input class="form-control form-control-sm number" type="number" id="txt_numero_ata" name="txt_numero_ata" value="<dtml-var numero_ata missing>" autocomplete="off"  maxlength="3">
+       <input class="form-control form-control-sm number" type="number" id="txt_numero_ata" name="txt_numero_ata" value="<dtml-var numero_ata missing null>" autocomplete="off"  maxlength="3">
      </div>
      <div class="col-8 col-md-5 mb-3">
        <label class="form-label d-block">ODT Ata</label>

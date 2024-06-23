@@ -224,7 +224,7 @@
       <dtml-if expr="hasattr(sapl_documentos.parecer_comissao,id_parecer)">
          <dtml-let parecer="getattr(sapl_documentos.parecer_comissao,id_parecer)">
             <dtml-in expr="zsql.tipo_fim_relatoria_obter_zsql(des_fim_relatoria='Aguardando apreciação')">
-               <dtml-if expr="str(lst_tip_fim_relatoria)==str(tip_fim_relatoria)">
+               <dtml-if expr="int(lst_tip_fim_relatoria)==int(tip_fim_relatoria)">
                   <dtml-call expr="parecer.manage_permission('View', roles=['Manager','Authenticated'], acquire=1)">
                </dtml-if>
             <dtml-else>

@@ -344,6 +344,8 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         content = open(nom_arquivo, "rb").read()
         os.unlink(nom_arquivo)
         self.sapl_documentos.ata_sessao.manage_addFile(id=nom_arquivo,file=content)
+        odt = getattr(self.sapl_documentos.ata_sessao, nom_arquivo)
+        odt.manage_permission('View', roles=['Manager','Authenticated'], acquire=0)
 
     def ata_gerar_pdf(self, cod_sessao_plen):
         nom_arquivo_odt = "%s"%cod_sessao_plen+'_ata_sessao.odt'
@@ -366,6 +368,8 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         data = open(nom_arquivo, "rb").read()
         os.unlink(nom_arquivo)
         self.sapl_documentos.reuniao_comissao.manage_addFile(id=nom_arquivo,file=data)
+        odt = getattr(self.sapl_documentos.reuniao_comissao, nom_arquivo)
+        odt.manage_permission('View', roles=['Manager','Authenticated'], acquire=0)
 
     def ata_comissao_gerar_pdf(self, cod_reuniao):
         nom_arquivo_odt = "%s"%cod_reuniao+'_ata.odt'
@@ -420,7 +424,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         self.REQUEST.RESPONSE.headers['Content-Disposition'] = 'attachment; filename="%s"'%output_file_odt
         return data 
 
-    def ordem_dia_gerar_odt(self, inf_basicas_dic, lst_pdiscussao, lst_sdiscussao, lst_discussao_unica, lst_presidente, nom_arquivo, nom_modelo):
+    def ordem_dia_gerar_odt(self, inf_basicas_dic, nom_arquivo, nom_modelo):
         arq = getattr(self.sapl_documentos.modelo.sessao_plenaria, nom_modelo)
         template_file = BytesIO(bytes(arq.data))
         brasao_file = self.get_brasao()
@@ -430,6 +434,8 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         data = open(nom_arquivo, "rb").read()
         os.unlink(nom_arquivo)
         self.sapl_documentos.pauta_sessao.manage_addFile(id=nom_arquivo,file=data)
+        odt = getattr(self.sapl_documentos.pauta_sessao, nom_arquivo)
+        odt.manage_permission('View', roles=['Manager','Authenticated'], acquire=0)
 
     def ordem_dia_gerar_pdf(self, cod_sessao_plen):
         nom_arquivo_odt = "%s"%cod_sessao_plen+'_pauta_sessao.odt'
@@ -613,6 +619,8 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         data = open(nom_arquivo, "rb").read()
         os.unlink(nom_arquivo)
         self.sapl_documentos.oradores_expediente.manage_addFile(id=nom_arquivo,file=data)
+        odt = getattr(self.sapl_documentos.oradores_expediente, nom_arquivo)
+        odt.manage_permission('View', roles=['Manager','Authenticated'], acquire=0)
 
     def oradores_gerar_pdf(self,cod_sessao_plen):
         nom_arquivo_odt = "%s"%cod_sessao_plen+'_oradores_expediente.odt'
@@ -635,6 +643,8 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         data = open(nom_arquivo, "rb").read()
         os.unlink(nom_arquivo)
         self.sapl_documentos.pauta_sessao.manage_addFile(id=nom_arquivo,file=data)
+        odt = getattr(self.sapl_documentos.pauta_sessao, nom_arquivo)
+        odt.manage_permission('View', roles=['Manager','Authenticated'], acquire=0)
 
     def expediente_gerar_pdf(self, cod_sessao_plen):
         nom_arquivo_odt = "%s"%cod_sessao_plen+'_expediente.odt'
@@ -686,6 +696,8 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         data = open(nom_arquivo, "rb").read()
         os.unlink(nom_arquivo)
         self.sapl_documentos.materia_odt.manage_addFile(id=nom_arquivo,file=data)
+        odt = getattr(self.sapl_documentos.materia_odt, nom_arquivo)
+        odt.manage_permission('View', roles=['Manager','Authenticated'], acquire=0)
 
     def doc_acessorio_gerar_pdf(self, cod_documento):
         nom_arquivo_odt = "%s"%cod_documento+'.odt'
@@ -710,6 +722,8 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         data = open(output_file_odt, "rb").read()
         os.unlink(output_file_odt)
         self.sapl_documentos.administrativo.manage_addFile(id=output_file_odt,file=data)
+        odt = getattr(self.sapl_documentos.administrativo, nom_arquivo)
+        odt.manage_permission('View', roles=['Manager','Authenticated'], acquire=0)
 
     def doc_acessorio_adm_gerar_pdf(self, cod_documento_acessorio):
         nom_arquivo_odt = "%s"%cod_documento_acessorio+'.odt'
@@ -761,6 +775,8 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         data = open(nom_arquivo, "rb").read()
         os.unlink(nom_arquivo_pdf)
         self.sapl_documentos.emenda.manage_addFile(id=nom_arquivo,file=data)
+        odt = getattr(self.sapl_documentos.emenda, nom_arquivo)
+        odt.manage_permission('View', roles=['Manager','Authenticated'], acquire=0)
 
     def emenda_gerar_pdf(self,cod_emenda):
         nom_arquivo_odt = "%s"%cod_emenda+'_emenda.odt'
@@ -826,6 +842,8 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         data = open(nom_arquivo, "rb").read()
         os.unlink(nom_arquivo)
         self.sapl_documentos.materia_odt.manage_addFile(id=nom_arquivo,file=data)
+        odt = getattr(self.sapl_documentos.materia_odt, nom_arquivo)
+        odt.manage_permission('View', roles=['Manager','Authenticated'], acquire=0)
 
     def materia_gerar_pdf(self, cod_materia):
         nom_arquivo_odt = "%s"%cod_materia+'_texto_integral.odt'
@@ -873,6 +891,8 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         data = open(nom_arquivo, "rb").read()
         os.unlink(nom_arquivo)
         self.sapl_documentos.norma_juridica.manage_addFile(id=nom_arquivo,file=data)
+        odt = getattr(self.sapl_documentos.norma_juridica, nom_arquivo)
+        odt.manage_permission('View', roles=['Manager','Authenticated'], acquire=0)
 
     def norma_gerar_pdf(self, cod_norma, tipo_texto):
         nom_arquivo_odt = "%s"%cod_norma+'_texto_integral.odt'
@@ -898,6 +918,8 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         data = open(nom_arquivo, "rb").read()
         os.unlink(nom_arquivo)
         self.sapl_documentos.administrativo.manage_addFile(id=nom_arquivo,file=data)
+        odt = getattr(self.sapl_documentos.administrativo, nom_arquivo)
+        odt.manage_permission('View', roles=['Manager','Authenticated'], acquire=0)
 
     def oficio_gerar_pdf(self, cod_documento):
         nom_arquivo_odt = "%s"%cod_documento+'_texto_integral.odt'
@@ -969,6 +991,8 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         data = open(nom_arquivo, "rb").read()
         os.unlink(nom_arquivo)
         self.sapl_documentos.parecer_comissao.manage_addFile(id=nom_arquivo,file=data)
+        odt = getattr(self.sapl_documentos.parecer_comissao, nom_arquivo)
+        odt.manage_permission('View', roles=['Manager','Authenticated'], acquire=0)
 
     def parecer_gerar_pdf(self, cod_parecer):
         nom_arquivo_odt = "%s"%cod_parecer+'_parecer.odt'
@@ -1076,6 +1100,8 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         data = open(nom_arquivo, "rb").read()
         os.unlink(nom_arquivo)
         self.sapl_documentos.proposicao.manage_addFile(id=nom_arquivo,file=data)
+        odt = getattr(self.sapl_documentos.proposicao, nom_arquivo)
+        odt.manage_permission('View', roles=['Manager','Authenticated'], acquire=0)
 
     def proposicao_gerar_pdf(self, cod_proposicao):
         merger = pymupdf.open()
@@ -1101,6 +1127,8 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
             arquivo.close()
         content = merger.tobytes()
         self.sapl_documentos.proposicao.manage_addFile(id=nom_arquivo_pdf,file=bytes(content),title='Proposição '+ cod_proposicao)
+        pdf = getattr(self.sapl_documentos.proposicao, nom_arquivo)
+        pdf.manage_permission('View', roles=['Manager','Anonymouys'], acquire=0)
 
     def substitutivo_gerar_odt(self, inf_basicas_dic, num_proposicao, nom_arquivo, des_tipo_materia, num_ident_basica, ano_ident_basica, txt_ementa, materia_vinculada, dat_apresentacao, nom_autor, apelido_autor, modelo_proposicao):
         arq = getattr(self.sapl_documentos.modelo.materia.substitutivo, modelo_proposicao)
@@ -1112,6 +1140,21 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         data = open(nom_arquivo, "rb").read()
         os.unlink(nom_arquivo)
         self.sapl_documentos.substitutivo.manage_addFile(id=nom_arquivo,file=data)
+        odt = getattr(self.sapl_documentos.substitutivo, nom_arquivo)
+        odt.manage_permission('View', roles=['Manager','Authenticated'], acquire=0)
+
+    def substitutivo_gerar_pdf(self,cod_substitutivo):
+        nom_arquivo_odt = "%s"%cod_substitutivo+'_substitutivo.odt'
+        nom_arquivo_pdf = "%s"%cod_substitutivo+'_substitutivo.pdf'
+        arquivo = getattr(self.sapl_documentos.substitutivo, nom_arquivo_odt)
+        odtFile = BytesIO(bytes(arquivo.data))
+        output_file_pdf = os.path.normpath(nom_arquivo_pdf)
+        renderer = Renderer(odtFile,locals(),output_file_pdf,pythonWithUnoPath='/usr/bin/python3',forceOoCall=True)
+        renderer.run()
+        data = open(output_file_pdf, "rb").read()
+        os.unlink(output_file_pdf)
+        content = data.getvalue()
+        self.sapl_documentos.substitutivo.manage_addFile(id=nom_arquivo_pdf,file=self.pysc.upload_file(file=content, title='Substitutivo'))
 
     def pessoas_exportar(self, pessoas):
         arq = getattr(self.sapl_documentos.modelo, "planilha-visitantes.ods")
@@ -1162,19 +1205,6 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         self.REQUEST.RESPONSE.headers['Content-Type'] = 'vnd.oasis.opendocument.spreadsheet'
         self.REQUEST.RESPONSE.headers['Content-Disposition'] = 'attachment; filename="%s"'%output_file_ods
         return data
-
-    def substitutivo_gerar_pdf(self,cod_substitutivo):
-        nom_arquivo_odt = "%s"%cod_substitutivo+'_substitutivo.odt'
-        nom_arquivo_pdf = "%s"%cod_substitutivo+'_substitutivo.pdf'
-        arquivo = getattr(self.sapl_documentos.substitutivo, nom_arquivo_odt)
-        odtFile = BytesIO(bytes(arquivo.data))
-        output_file_pdf = os.path.normpath(nom_arquivo_pdf)
-        renderer = Renderer(odtFile,locals(),output_file_pdf,pythonWithUnoPath='/usr/bin/python3',forceOoCall=True)
-        renderer.run()
-        data = open(output_file_pdf, "rb").read()
-        os.unlink(output_file_pdf)
-        content = data.getvalue()
-        self.sapl_documentos.substitutivo.manage_addFile(id=nom_arquivo_pdf,file=self.pysc.upload_file(file=content, title='Substitutivo'))
 
     def protocolo_barcode(self,cod_protocolo):
         sgl_casa = self.sapl_documentos.props_sagl.sgl_casa
@@ -1242,6 +1272,8 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
            documento.manage_upload(file=content)
         else:
            self.sapl_documentos.protocolo.manage_addFile(id=nom_pdf_protocolo,file=content,title='Protocolo')
+        pdf = getattr(self.sapl_documentos.protocolo, nom_pdf_protocolo)
+        pdf.manage_permission('View', roles=['Manager','Authenticated'], acquire=0)
 
     def proposicao_autuar(self,cod_proposicao):
         nom_pdf_proposicao = str(cod_proposicao) + "_signed.pdf"
@@ -1273,16 +1305,15 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
                for materia in self.zsql.materia_obter_zsql(cod_materia=proposicao.cod_mat_ou_doc):
                    if materia.num_protocolo != None and materia.num_protocolo != '':
                       for protocolo in self.zsql.protocolo_obter_zsql(num_protocolo=materia.num_protocolo, ano_protocolo=materia.ano_ident_basica):
-                          info_protocolo = ' - Protocolo nº ' + str(protocolo.num_protocolo) + '/' + str(protocolo.ano_protocolo) + ' recebido em ' + str(DateTime(protocolo.dat_protocolo, datefmt='international').strftime('%d/%m/%Y')) + ' ' + protocolo.hor_protocolo + '.'
-                   texto = str(materia.des_tipo_materia.upper())+' Nº '+ str(materia.num_ident_basica)+'/'+str(materia.ano_ident_basica)
+                          info_protocolo = ' - Protocolo nº ' + str(protocolo.num_protocolo) + '/' + str(protocolo.ano_protocolo) + ', recebido em ' + str(DateTime(protocolo.dat_protocolo, datefmt='international').strftime('%d/%m/%Y')) + ' ' + protocolo.hor_protocolo + '.'
+                   texto = str(materia.des_tipo_materia) + ' nº ' + str(materia.num_ident_basica) + '/' + str(materia.ano_ident_basica)
                    storage_path = self.sapl_documentos.materia
                    nom_pdf_saida = str(materia.cod_materia) + "_texto_integral.pdf"
             elif proposicao.ind_mat_ou_doc=='D' and (proposicao.des_tipo_proposicao!='Emenda' and proposicao.des_tipo_proposicao!='Mensagem Aditiva' and proposicao.des_tipo_proposicao!='Substitutivo' and proposicao.des_tipo_proposicao!='Parecer' and proposicao.des_tipo_proposicao!='Parecer de Comissão'):
                for documento in self.zsql.documento_acessorio_obter_zsql(cod_documento=proposicao.cod_mat_ou_doc):
                    for materia in self.zsql.materia_obter_zsql(cod_materia=documento.cod_materia):
                        materia = str(materia.sgl_tipo_materia)+' nº '+ str(materia.num_ident_basica)+'/'+str(materia.ano_ident_basica)
-                   info_protocolo = '- Recebido em ' + proposicao.dat_recebimento + '.'
-                   texto = str(documento.des_tipo_documento.upper())+' - ' + str(materia)
+                   texto = str(documento.des_tipo_documento) + ' - ' + str(materia)
                    storage_path = self.sapl_documentos.materia
                    nom_pdf_saida = str(documento.cod_documento) + ".pdf"
             elif proposicao.ind_mat_ou_doc=='D' and (proposicao.des_tipo_proposicao=='Emenda' or proposicao.des_tipo_proposicao=='Mensagem Aditiva'):
@@ -1290,14 +1321,14 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
                    for materia in self.zsql.materia_obter_zsql(cod_materia=emenda.cod_materia):
                        materia = str(materia.sgl_tipo_materia)+' nº '+ str(materia.num_ident_basica)+'/'+str(materia.ano_ident_basica)
                    info_protocolo = '- Recebida em ' + proposicao.dat_recebimento + '.'
-                   texto = 'EMENDA ' + str(emenda.des_tipo_emenda.upper())+' Nº '+ str(emenda.num_emenda) + ' ao ' + str(materia)
+                   texto = 'Emenda ' + str(emenda.des_tipo_emenda)+ ' nº ' + str(emenda.num_emenda) + ' ao ' + str(materia)
                    storage_path = self.sapl_documentos.emenda
                    nom_pdf_saida = str(emenda.cod_emenda) + "_emenda.pdf"
             elif proposicao.ind_mat_ou_doc=='D' and (proposicao.des_tipo_proposicao=='Substitutivo'):
                for substitutivo in self.zsql.substitutivo_obter_zsql(cod_substitutivo=proposicao.cod_substitutivo):
                    for materia in self.zsql.materia_obter_zsql(cod_materia=substitutivo.cod_materia):
-                       materia = str(materia.sgl_tipo_materia)+' nº '+ str(materia.num_ident_basica)+'/'+str(materia.ano_ident_basica)
-                   texto = 'SUBSTITUTIVO' + ' Nº '+ str(substitutivo.num_substitutivo) + ' AO ' + str(materia)
+                       materia = str(materia.sgl_tipo_materia)+ ' nº ' + str(materia.num_ident_basica) + '/' + str(materia.ano_ident_basica)
+                   texto = 'Substitutivo nº ' + str(substitutivo.num_substitutivo) + ' ao ' + str(materia)
                    storage_path = self.sapl_documentos.substitutivo
                    nom_pdf_saida = str(substitutivo.cod_substitutivo) + "_substitutivo.pdf"
             elif proposicao.ind_mat_ou_doc=='D' and (proposicao.des_tipo_proposicao=='Parecer' or proposicao.des_tipo_proposicao=='Parecer de Comissão'):
@@ -1305,8 +1336,8 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
                    for comissao in self.zsql.comissao_obter_zsql(cod_comissao=relatoria.cod_comissao):
                        sgl_comissao = comissao.sgl_comissao
                    for materia in self.zsql.materia_obter_zsql(cod_materia=relatoria.cod_materia):
-                       materia = str(materia.sgl_tipo_materia)+' nº '+ str(materia.num_ident_basica)+'/'+str(materia.ano_ident_basica)
-                   texto = 'PARECER ' + sgl_comissao + ' Nº '+ str(relatoria.num_parecer) + '/' +str(relatoria.ano_parecer) + ' ao ' + str(materia)
+                       materia = str(materia.sgl_tipo_materia) + ' nº ' + str(materia.num_ident_basica) + '/' + str(materia.ano_ident_basica)
+                   texto = 'Parecer ' + sgl_comissao + ' nº ' + str(relatoria.num_parecer) + '/' + str(relatoria.ano_parecer) + ' ao ' + str(materia)
                    storage_path = self.sapl_documentos.parecer_comissao
                    nom_pdf_saida = str(relatoria.cod_relatoria) + "_parecer.pdf"
         mensagem1 = 'Esta é uma cópia do original assinado digitalmente por ' + nom_autor + outros
@@ -1338,15 +1369,17 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         w = existing_pdf[0].rect.width
         h = existing_pdf[0].rect.height
         rect = pymupdf.Rect(40, 140, w-20, 170)
-        existing_pdf[0].insert_textbox(rect, texto, fontname = "tibo", fontsize = 13, align=pymupdf.TEXT_ALIGN_CENTER)
+        existing_pdf[0].insert_textbox(rect, str(texto).upper(), fontname = "tibo", fontsize = 13, align=pymupdf.TEXT_ALIGN_CENTER)
         metadata = {"title": texto, "author": nom_autor}
         existing_pdf.set_metadata(metadata)
         content = existing_pdf.tobytes(deflate=True, garbage=3, use_objstms=1)
         if nom_pdf_saida in storage_path:
-           arq=storage_path[nom_pdf_saida]
-           arq.manage_upload(file=content)
+           pdf=storage_path[nom_pdf_saida]
+           pdf.manage_upload(file=content)
         else:
            storage_path.manage_addFile(id=nom_pdf_saida,file=content,title=texto)
+           pdf=storage_path[nom_pdf_saida]
+        pdf.manage_permission('View', roles=['Manager','Authenticated'], acquire=0)
 
     def peticao_autuar(self,cod_peticao):          
         for peticao in self.zsql.peticao_obter_zsql(cod_peticao=cod_peticao):
@@ -1389,20 +1422,21 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
                for documento in self.zsql.documento_administrativo_obter_zsql(cod_documento=peticao.cod_documento):
                    for protocolo in self.zsql.protocolo_obter_zsql(num_protocolo=documento.num_protocolo, ano_protocolo=documento.ano_documento):
                        info_protocolo = ' - Protocolo nº ' + str(protocolo.num_protocolo) + '/' + str(protocolo.ano_protocolo) + ' recebido em ' + str(DateTime(protocolo.dat_protocolo, datefmt='international').strftime('%d/%m/%Y')) + ' ' + protocolo.hor_protocolo + '.'
-                   texto = str(documento.des_tipo_documento.upper())+' Nº '+ str(documento.num_documento)+ '/' +str(documento.ano_documento)
+                   texto = str(documento.des_tipo_documento)+ ' nº ' + str(documento.num_documento)+ '/' +str(documento.ano_documento)
                    storage_path = self.sapl_documentos.administrativo
                    nom_pdf_saida = str(documento.cod_documento) + "_texto_integral.pdf"
                    caminho = '/sapl_documentos/administrativo/'
             elif peticao.ind_doc_materia == "1":
                for documento in self.zsql.documento_acessorio_obter_zsql(cod_documento=peticao.cod_doc_acessorio):
-                   texto = str(documento.des_tipo_documento.upper())+' - ' + str(materia)
+                   texto = str(documento.des_tipo_documento) + ' - ' + str(materia)
                    storage_path = self.sapl_documentos.materia
                    nom_pdf_saida = str(documento.cod_documento) + ".pdf"
                    caminho = '/sapl_documentos/materia/'
             elif peticao.ind_norma == "1":
                storage_path = self.sapl_documentos.norma_juridica
                for norma in self.zsql.norma_juridica_obter_zsql(cod_norma=peticao.cod_norma):
-                   texto = str(norma.des_tipo_norma.upper())+' Nº '+ str(norma.num_norma) + '/' + str(norma.ano_norma)
+                   info_protocolo = '- Recebida em ' + peticao.dat_recebimento + '.'
+                   texto = str(norma.des_tipo_norma) + ' nº ' + str(norma.num_norma) + '/' + str(norma.ano_norma)
                    nom_pdf_saida = str(norma.cod_norma) + "_texto_integral.pdf"
                    caminho = '/sapl_documentos/norma_juridica/'
         if cod_validacao_doc != '':
@@ -1440,21 +1474,21 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         w = existing_pdf[0].rect.width
         h = existing_pdf[0].rect.height
         rect = pymupdf.Rect(40, 140, w-20, 170)
-        existing_pdf[0].insert_textbox(rect, texto, fontname = "tibo", fontsize = 13, align=pymupdf.TEXT_ALIGN_CENTER)
+        existing_pdf[0].insert_textbox(rect, str(texto).upper(), fontname = "tibo", fontsize = 13, align=pymupdf.TEXT_ALIGN_CENTER)
         metadata = {"title": texto, "author": nom_autor}
         existing_pdf.set_metadata(metadata)
         content = existing_pdf.tobytes(deflate=True, garbage=3, use_objstms=1)
         if nom_pdf_saida in storage_path:
            arq=storage_path[nom_pdf_saida]
            arq.manage_upload(file=content)
-           arq.manage_permission('View', roles=['Manager','Authenticated'], acquire=1)
+           arq.manage_permission('View', roles=['Manager','Authenticated'], acquire=0)
         else:
            storage_path.manage_addFile(id=nom_pdf_saida,file=content,title=texto)
            arq=storage_path[nom_pdf_saida]
-           arq.manage_permission('View', roles=['Manager','Authenticated'], acquire=1)
+           arq.manage_permission('View', roles=['Manager','Authenticated'], acquire=0)
         if peticao.ind_norma == "1":
            arq=storage_path[nom_pdf_saida]
-           arq.manage_permission('View', roles=['Manager', 'Anonymoys'], acquire=1)
+           arq.manage_permission('View', roles=['Manager', 'Anonymous'], acquire=1)
            self.sapl_documentos.norma_juridica.Catalog.atualizarCatalogo(cod_norma=peticao.cod_norma)
 
     def restpki_client(self):
@@ -1830,9 +1864,9 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
               for metodo in self.zsql.materia_obter_zsql(cod_materia=codigo):
                   num_documento = metodo.num_ident_basica
                   if tipo_doc == 'materia':
-                     texto = str(metodo.des_tipo_materia.upper())+' Nº '+ str(metodo.num_ident_basica) + '/' + str(metodo.ano_ident_basica)
+                     texto = str(metodo.des_tipo_materia)+' nº '+ str(metodo.num_ident_basica) + '/' + str(metodo.ano_ident_basica)
                   elif tipo_doc == 'redacao_final':
-                     texto = 'REDAÇÃO FINAL - ' + str(metodo.sgl_tipo_materia)+' Nº '+ str(metodo.num_ident_basica) + '/' + str(metodo.ano_ident_basica)
+                     texto = 'Redação Final do ' + str(metodo.sgl_tipo_materia)+' nº '+ str(metodo.num_ident_basica) + '/' + str(metodo.ano_ident_basica)
            elif tipo_doc == 'doc_acessorio':
               for metodo in self.zsql.documento_acessorio_obter_zsql(cod_documento=codigo):
                   for materia in self.zsql.materia_obter_zsql(cod_materia=metodo.cod_materia):
@@ -1843,18 +1877,18 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
            for metodo in self.zsql.emenda_obter_zsql(cod_emenda=codigo):
                for materia in self.zsql.materia_obter_zsql(cod_materia=metodo.cod_materia):
                    materia = str(materia.sgl_tipo_materia)+' '+ str(materia.num_ident_basica)+'/'+str(materia.ano_ident_basica)
-               texto = str('Emenda ') + str(metodo.des_tipo_emenda) + str(' nº ') + str(metodo.num_emenda) + str(' - ') + str(materia)
+               texto = 'Emenda ' + str(metodo.des_tipo_emenda) + ' nº ' + str(metodo.num_emenda) + ' ao ' + str(materia)
         elif tipo_doc == 'substitutivo':
            storage_path = self.sapl_documentos.substitutivo
            for metodo in self.zsql.substitutivo_obter_zsql(cod_substitutivo=codigo):
                for materia in self.zsql.materia_obter_zsql(cod_materia=metodo.cod_materia):
                    materia = str(materia.sgl_tipo_materia)+' '+ str(materia.num_ident_basica)+'/'+str(materia.ano_ident_basica)
-               texto = 'Substitutivo nº '+ str(metodo.num_substitutivo) + ' - ' + str(materia)
+               texto = 'Substitutivo nº ' + str(metodo.num_substitutivo) + ' ao ' + str(materia)
         elif tipo_doc == 'tramitacao':
            storage_path = self.sapl_documentos.materia.tramitacao
            for metodo in self.zsql.tramitacao_obter_zsql(cod_tramitacao=codigo):
                materia = str(metodo.sgl_tipo_materia)+' '+ str(metodo.num_ident_basica)+'/'+str(metodo.ano_ident_basica)
-           texto = 'TRAMITAÇÃO Nº '+ str(metodo.cod_tramitacao) + ' - ' + str(materia)
+           texto = 'Tramitação nº '+ str(metodo.cod_tramitacao) + ' - ' + str(materia)
         elif tipo_doc == 'parecer_comissao':
            storage_path = self.sapl_documentos.parecer_comissao
            for metodo in self.zsql.relatoria_obter_zsql(cod_relatoria=codigo):
@@ -1871,7 +1905,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
                    sessao = str(metodo.num_sessao_plen) + 'ª ' + str(self.sapl_documentos.props_sagl.reuniao_sessao).upper() + ' ' + str(tipo.nom_sessao) + ' - ' + str(metodo.dat_inicio_sessao)
            for metodo in self.zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=codigo, ind_audiencia='1'):
                sessao = 'Audiência Pública nº ' + str(metodo.num_sessao_plen) + '/' + str(metodo.ano_sessao)
-           texto = 'PAUTA' + ' - ' + str(sessao)
+           texto = 'Pauta da ' + str(sessao)
         elif tipo_doc == 'ata':
            storage_path = self.sapl_documentos.ata_sessao
            for metodo in self.zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=codigo):
@@ -1879,66 +1913,66 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
                    sessao = str(metodo.num_sessao_plen) + 'ª ' + str(self.sapl_documentos.props_sagl.reuniao_sessao).upper() + ' ' + str(tipo.nom_sessao) + ' - ' + str(metodo.dat_inicio_sessao)
            for metodo in self.zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=codigo, ind_audiencia='1'):
                sessao = 'Audiência Pública nº ' + str(metodo.num_sessao_plen) + '/' + str(metodo.ano_sessao)
-           texto = 'ATA' + ' - ' + str(sessao)
+           texto = 'Ata da ' + str(sessao)
         elif tipo_doc == 'anexo_peticao':
            storage_path = self.sapl_documentos.peticao
            file_item =  str(codigo) + '_anexo_' + str(anexo) + '.pdf'
            title = getattr(self.sapl_documentos.peticao,file_item).title_or_id()
-           texto = str(title)
+           texto = 'Anexo de petição: ' + str(title)
         elif tipo_doc == 'anexo_sessao':
            storage_path = self.sapl_documentos.anexo_sessao
            for metodo in self.zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=codigo):
                for tipo in self.zsql.tipo_sessao_plenaria_obter_zsql(tip_sessao=metodo.tip_sessao):
-                   sessao = str(metodo.num_sessao_plen) + 'ª ' + str(self.sapl_documentos.props_sagl.reuniao_sessao).upper() + ' ' + str(tipo.nom_sessao) + ' - ' + str(metodo.dat_inicio_sessao)
+                   sessao = str(metodo.num_sessao_plen) + 'ª ' + str(self.sapl_documentos.props_sagl.reuniao_sessao) + ' ' + str(tipo.nom_sessao) + ', de ' + str(metodo.dat_inicio_sessao)
            file_item =  str(codigo) + '_anexo_' + str(anexo) + '.pdf'
            title = getattr(self.sapl_documentos.anexo_sessao,file_item).title_or_id()
-           texto = str(title)
+           texto = str(title) + ' da ' + str(sessao)
         elif tipo_doc == 'norma':
            storage_path = self.sapl_documentos.norma_juridica
            for metodo in self.zsql.norma_juridica_obter_zsql(cod_norma=codigo):
-               texto = str(metodo.des_tipo_norma.upper())+' Nº '+ str(metodo.num_norma) + '/' + str(metodo.ano_norma)
+               texto = str(metodo.des_tipo_norma) + ' nº ' + str(metodo.num_norma) + '/' + str(metodo.ano_norma)
         elif tipo_doc == 'documento' or tipo_doc == 'doc_acessorio_adm':
            storage_path = self.sapl_documentos.administrativo
            if tipo_doc == 'documento':
               for metodo in self.zsql.documento_administrativo_obter_zsql(cod_documento=codigo):
                   num_documento = metodo.num_documento
-              texto = str(metodo.des_tipo_documento.upper())+' Nº '+ str(metodo.num_documento)+ '/' +str(metodo.ano_documento)
+              texto = str(metodo.des_tipo_documento)+ ' nº ' + str(metodo.num_documento)+ '/' +str(metodo.ano_documento)
            elif tipo_doc == 'doc_acessorio_adm':
               for metodo in self.zsql.documento_acessorio_administrativo_obter_zsql(cod_documento_acessorio=codigo):
                   for documento in self.zsql.documento_administrativo_obter_zsql(cod_documento=metodo.cod_documento):
                       documento = str(documento.sgl_tipo_documento) +' '+ str(documento.num_documento)+'/'+str(documento.ano_documento)
-              texto = 'Acessório' + ' - ' + str(documento)
+              texto = 'Doumento Acessório do ' + str(documento)
         elif tipo_doc == 'tramitacao_adm':
            storage_path = self.sapl_documentos.administrativo.tramitacao
            for metodo in self.zsql.tramitacao_administrativo_obter_zsql(cod_tramitacao=codigo):
                documento = str(metodo.sgl_tipo_documento)+' '+ str(metodo.num_documento)+'/'+str(metodo.ano_documento)
-           texto = 'TRAMITAÇÃO Nº '+ str(metodo.cod_tramitacao) + ' - ' + str(documento)
+           texto = 'Tramitação nº '+ str(metodo.cod_tramitacao) + ' - ' + str(documento)
         elif tipo_doc == 'proposicao':
            storage_path = self.sapl_documentos.proposicao
            for metodo in self.zsql.proposicao_obter_zsql(cod_proposicao=codigo):
-               texto = str(metodo.des_tipo_proposicao.upper())+' Nº '+ str(metodo.cod_proposicao)
+               texto = str(metodo.des_tipo_proposicao) +' nº ' + str(metodo.cod_proposicao)
         elif tipo_doc == 'protocolo':
            storage_path = self.sapl_documentos.protocolo
            for metodo in self.zsql.protocolo_obter_zsql(cod_protocolo=codigo):
-               texto = 'PROTOCOLO Nº '+ str(metodo.num_protocolo)+'/'+ str(metodo.ano_protocolo)
+               texto = 'Protocolo nº '+ str(metodo.num_protocolo) +'/' + str(metodo.ano_protocolo)
         elif tipo_doc == 'peticao':
            storage_path = self.sapl_documentos.peticao
-           texto = 'PETIÇÃO ELETRÔNICA'
+           texto = 'Petição Eletrônica'
         elif tipo_doc == 'pauta_comissao':
            storage_path = self.sapl_documentos.reuniao_comissao
            for metodo in self.zsql.reuniao_comissao_obter_zsql(cod_reuniao=codigo):
                for comissao in self.zsql.comissao_obter_zsql(cod_comissao=metodo.cod_comissao):
-                   texto = 'PAUTA - ' + metodo.num_reuniao + 'ª Reunião da ' + comissao.sgl_comissao + ', em ' + metodo.dat_inicio_reuniao
+                   texto = 'Pauta da ' + str(metodo.num_reuniao) + 'ª Reunião da ' + comissao.sgl_comissao + ', em ' + str(metodo.dat_inicio_reuniao)
         elif tipo_doc == 'ata_comissao':
            storage_path = self.sapl_documentos.reuniao_comissao
            for metodo in self.zsql.reuniao_comissao_obter_zsql(cod_reuniao=codigo):
                for comissao in self.zsql.comissao_obter_zsql(cod_comissao=metodo.cod_comissao):
-                   texto = 'ATA - ' + metodo.num_reuniao + 'ª Reunião da ' + comissao.sgl_comissao + ', em ' + metodo.dat_inicio_reuniao
+                   texto = 'Ata da ' + str(metodo.num_reuniao) + 'ª Reunião da ' + comissao.sgl_comissao + ', em ' + str(metodo.dat_inicio_reuniao)
         elif tipo_doc == 'documento_comissao':
            storage_path = self.sapl_documentos.documento_comissao
            for metodo in self.zsql.documento_comissao_obter_zsql(cod_documento=codigo):
                for comissao in self.zsql.comissao_obter_zsql(cod_comissao=metodo.cod_comissao):
-                   texto = metodo.txt_descricao + ' - ' + comissao.sgl_comissao
+                   texto = metodo.txt_descricao + ' da ' + comissao.sgl_comissao
         mensagem1 = 'Esta é uma cópia do original assinado digitalmente por ' + nom_autor + outros + '.'
         mensagem2 = 'Valide pelo qrcode ou acesse ' + self.url() + '/conferir_assinatura' + ' com o código ' + string
         existing_pdf = pymupdf.open(stream=fileStream)
@@ -1964,45 +1998,44 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
             shape.insert_text(p2, text2, fontname = "helv", fontsize = 8, rotate=0)
             shape.commit()
         content = existing_pdf.tobytes(deflate=True, garbage=3, use_objstms=1)
-        if hasattr(storage_path,nom_pdf_documento):
-           arq=storage_path[nom_pdf_documento]
-           arq.manage_upload(file=content)
+        if hasattr(storage_path, nom_pdf_documento):
+           pdf = getattr(storage_path, nom_pdf_documento)
+           pdf.manage_upload(file=content)
         else:
            storage_path.manage_addFile(id=nom_pdf_documento,file=content,title=texto)
+           pdf = getattr(storage_path, nom_pdf_documento)
         if tipo_doc == 'parecer_comissao':
            for relat in self.zsql.relatoria_obter_zsql(cod_relatoria=codigo):
-               nom_arquivo_pdf = "%s"%relat.cod_relatoria+'_parecer.pdf'
-               if relat.tip_fim_relatoria == '18' and hasattr(self.sapl_documentos.parecer_comissao, nom_arquivo_pdf):
-                  pdf = getattr(self.sapl_documentos.parecer_comissao, nom_arquivo_pdf)
-                  pdf.manage_permission('View', roles=['Manager','Authenticated'], acquire=1)
-        if tipo_doc == 'doc_acessorio':
+               for tipo in zsql.tipo_fim_relatoria_obter_zsql(tip_fim_relatoria = relat.tip_fim_relatoria):
+                   if tipo.des_fim_relatoria=='Aguardando apreciação':
+                      pdf.manage_permission('View', roles=['Manager','Authenticated'], acquire=0)
+                   else:
+                      pdf.manage_permission('View', roles=['Manager','Anonymous'], acquire=1)
+               else:
+                   pdf.manage_permission('View', roles=['Manager','Anonymous'], acquire=1)
+        elif tipo_doc == 'doc_acessorio':
            for documento in self.zsql.documento_acessorio_obter_zsql(cod_documento=codigo):
-               nom_arquivo_pdf = "%s"%documento.cod_documento+'.pdf'
-               if str(documento.ind_publico) == '1' and hasattr(self.sapl_documentos.materia, nom_arquivo_pdf):
-                  pdf = getattr(self.sapl_documentos.materia, nom_arquivo_pdf)
-                  pdf.manage_permission('View', roles=['Anonymous'], acquire=1)
-               elif str(documento.ind_publico) == '0' and hasattr(self.sapl_documentos.materia, nom_arquivo_pdf):
-                  pdf = getattr(self.sapl_documentos.materia, nom_arquivo_pdf)
-                  pdf.manage_permission('View', roles=['Manager','Authenticated'], acquire=1)
-        if tipo_doc == 'documento':
-           for documento in self.zsql.documento_administrativo_obter_zsql(cod_documento=codigo):
-               nom_arquivo_pdf = "%s"%documento.cod_documento+'_texto_integral.pdf'
-               if str(documento.ind_publico) == '1' and hasattr(self.sapl_documentos.administrativo, nom_arquivo_pdf):
-                  pdf = getattr(self.sapl_documentos.administrativo, nom_arquivo_pdf)
-                  pdf.manage_permission('View', roles=['Manager', 'Anonymous'], acquire=1)
-               elif str(documento.ind_publico) == '0' and hasattr(self.sapl_documentos.administrativo, nom_arquivo_pdf):
-                  pdf = getattr(self.sapl_documentos.administrativo, nom_arquivo_pdf)
-                  pdf.manage_permission('View', roles=['Manager','Authenticated'], acquire=1)
-        if tipo_doc == 'doc_acessorio_adm':
-           for doc in self.zsql.documento_acessorio_administrativo_obter_zsql(cod_documento_acessorio=codigo):
-               documento = self.zsql.documento_administrativo_obter_zsql(cod_documento=doc.cod_documento)[0]
-               nom_arquivo_pdf = "%s"%doc.cod_documento_acessorio+'.pdf'
-               if str(documento.ind_publico) == '1' and hasattr(self.sapl_documentos.administrativo, nom_arquivo_pdf):
-                  pdf = getattr(self.sapl_documentos.administrativo, nom_arquivo_pdf)
+               if str(documento.ind_publico) == '1':
                   pdf.manage_permission('View', roles=['Manager','Anonymous'], acquire=1)
-               if str(documento.ind_publico) == '0' and hasattr(self.sapl_documentos.administrativo, nom_arquivo_pdf):
-                  pdf = getattr(self.sapl_documentos.administrativo, nom_arquivo_pdf)
-                  pdf.manage_permission('View', roles=['Manager','Authenticated'], acquire=1)
+               elif str(documento.ind_publico) == '0':
+                  pdf.manage_permission('View', roles=['Manager','Authenticated'], acquire=0)
+        elif tipo_doc == 'documento':
+           for documento in self.zsql.documento_administrativo_obter_zsql(cod_documento=codigo):
+               if str(documento.ind_publico) == '1':
+                  pdf.manage_permission('View', roles=['Manager', 'Anonymous'], acquire=1)
+               elif str(documento.ind_publico) == '0':
+                  pdf.manage_permission('View', roles=['Manager','Authenticated'], acquire=0)
+        elif tipo_doc == 'doc_acessorio_adm':
+           for doc in self.zsql.documento_acessorio_administrativo_obter_zsql(cod_documento_acessorio=codigo):
+               if str(doc.ind_publico) == '1':
+                  pdf.manage_permission('View', roles=['Manager','Anonymous'], acquire=1)
+               if str(doc.ind_publico) == '0':
+                  pdf.manage_permission('View', roles=['Manager','Authenticated'], acquire=0)
+        elif tipo_doc == 'peticao' or tipo_doc == 'anexo_peticao':
+           pdf.manage_permission('View', roles=['Manager','Authenticated'], acquire=0)
+        else:
+           pdf.manage_permission('View', roles=['Manager','Anonymous'], acquire=1)
+
         return 'ok'
 
     def assinar_proposicao(self, lista):
@@ -2042,10 +2075,12 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
                shape.commit()
            content = existing_pdf.tobytes(deflate=True, garbage=3, use_objstms=1)
            if hasattr(storage_path,pdf_assinado):
-              arq=storage_path[pdf_assinado]
-              arq.manage_upload(file=content)
+              pdf = getattr(storage_path, pdf_assinado)
+              pdf.manage_upload(file=content)
            else:
               storage_path.manage_addFile(id=pdf_assinado,file=content, title='Proposição '+ str(item))
+              pdf = getattr(storage_path, pdf_assinado)
+           pdf.manage_permission('View', roles=['Manager','Anonymous'], acquire=1)
         if len(lista) == 1:
            redirect_url = self.portal_url()+'/cadastros/proposicao/proposicao_mostrar_proc?cod_proposicao=' + proposicao.cod_proposicao
            REQUEST = self.REQUEST

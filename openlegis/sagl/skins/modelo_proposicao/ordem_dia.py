@@ -168,7 +168,7 @@ for sessao in metodo:
                lst_qtde_substitutivos.append(cod_substitutivo)
            dic["substitutivos"] = lst_substitutivos
            dic["substitutivo"] = len(lst_qtde_substitutivos)
-        elif item.parecer != None:
+        elif item.cod_parecer != None:
            materia = context.zsql.relatoria_obter_zsql(cod_relatoria=item.cod_parecer)[0]
            for comissao in context.zsql.comissao_obter_zsql(cod_comissao=materia.cod_comissao):
                sgl_comissao = comissao.sgl_comissao
@@ -176,7 +176,7 @@ for sessao in metodo:
            for resultado in context.zsql.tipo_fim_relatoria_obter_zsql(tip_fim_relatoria=materia.tip_fim_relatoria):
                resultado_comissao = ' (' + resultado.des_fim_relatoria + ')'
            for mat in context.zsql.materia_obter_zsql(cod_materia=materia.cod_materia):
-               id_materia = ' ao ' + str(mat.des_tipo_materia) + ' Nº ' + str(mat.num_ident_basica) + '/' + str(mat.ano_ident_basica)
+               id_materia = ' ao ' + str(mat.des_tipo_materia) + ' nº ' + str(mat.num_ident_basica) + '/' + str(mat.ano_ident_basica)
            dic['materia'] = 'PARECER ' + sgl_comissao + ' N° ' + str(materia.num_parecer) + '/' + str(materia.ano_parecer) + id_materia + resultado_comissao
            dic["link_materia"] = '<link href="'+context.sapl_documentos.absolute_url()+'/parecer_comissao/'+ str(materia.cod_relatoria) + '_parecer.pdf' +'">' + 'PARECER ' + sgl_comissao + ' N° ' + str(materia.num_parecer) + '/' + str(materia.ano_parecer) + id_materia + resultado_comissao + '</link>'
            dic["txt_ementa"] = item.txt_observacao

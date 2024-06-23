@@ -128,7 +128,7 @@ for sessao in metodo:
                for comissao in context.zsql.comissao_obter_zsql(cod_comissao=parecer.cod_comissao):
                    sgl_comissao = comissao.sgl_comissao
                    nom_comissao = comissao.nom_comissao
-               autoria = nom_comissao.upper()
+               autoria = nom_comissao
                dic_materia = {}
                dic_materia["num_ordem"] = materia_apresentada.num_ordem
                dic_materia["id_materia"] = '<link href="' + context.sapl_documentos.absolute_url() + '/parecer_comissao/' + str(materia_apresentada.cod_parecer) + '_parecer.pdf' + '">' + 'Parecer ' + sgl_comissao+ ' nº ' + str(parecer.num_parecer) + '/' + str(parecer.ano_parecer) + " ao " +  materia.sgl_tipo_materia +' ' + str(materia.num_ident_basica) + '/' + str(materia.ano_ident_basica) + '</link>'
@@ -332,7 +332,7 @@ for sessao in metodo:
          for resultado in context.zsql.tipo_fim_relatoria_obter_zsql(tip_fim_relatoria=relatoria.tip_fim_relatoria):
              resultado_comissao = ' (' + resultado.des_fim_relatoria + ')'
          for mat in context.zsql.materia_obter_zsql(cod_materia=relatoria.cod_materia):
-             id_mat = ' ao ' + str(mat.des_tipo_materia) + ' Nº ' + str(mat.num_ident_basica) + '/' + str(mat.ano_ident_basica)
+             id_mat = ' ao ' + str(mat.des_tipo_materia) + ' nº ' + str(mat.num_ident_basica) + '/' + str(mat.ano_ident_basica)
          dic["id_materia"] = '<link href="'+context.sapl_documentos.absolute_url()+'/parecer_comissao/'+ str(relatoria.cod_relatoria) + '_parecer.pdf' +'">' + 'PARECER ' + sgl_comissao + ' N° ' +str(relatoria.num_parecer) + '/' + str(relatoria.ano_parecer) + '</link>'
          dic["txt_ementa"] = ordem.txt_observacao
          dic['nom_autor'] = str(nom_comissao)

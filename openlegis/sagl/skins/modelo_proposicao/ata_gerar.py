@@ -13,7 +13,8 @@ st = getToolByName(context, 'portal_sagl')
 
 REQUEST = context.REQUEST
 RESPONSE =  REQUEST.RESPONSE
-session = REQUEST.SESSION
+
+cod_sessao_plen = context.REQUEST['cod_sessao_plen']
 
 if 'ind_audiencia' in REQUEST:
    nom_modelo = 'ata_audiencia.odt'
@@ -42,7 +43,10 @@ for sessao in metodo:
   ata_dic["hr_inicio_sessao"] = sessao.hr_inicio_sessao
   ata_dic["dat_fim_sessao"] = sessao.dat_fim_sessao
   ata_dic["hr_fim_sessao"] = sessao.hr_fim_sessao
-  ata_dic["numero_ata"] = sessao.numero_ata
+  if sessao.numero_ata != None:
+     ata_dic["numero_ata"] = sessao.numero_ata
+  else:
+     ata_dic["numero_ata"] = sessao.num_sessao_plen
   ata_dic["ano_sessao"] = sessao.ano_sessao
   if nom_sessao == 'Audiência Pública':
      ata_dic["txt_tema"] = sessao.tip_expediente
@@ -138,8 +142,6 @@ for sessao in metodo:
                materia = context.zsql.materia_obter_zsql(cod_materia=parecer.cod_materia)[0]
                for comissao in context.zsql.comissao_obter_zsql(cod_comissao=parecer.cod_comissao):
                    sgl_comissao = comissao.sgl_comissao
-                   nom_comissao = comissao.nom_comissao
-               autoria = nom_comissao
                materia = '<a href="'+context.consultas.absolute_url()+'/materia/materia_mostrar_proc?cod_materia='+materia.cod_materia+'">' + 'Parecer ' + str(sgl_comissao) + ' nº ' + str(parecer.num_parecer) + '/' + str(parecer.ano_parecer) + ' ao ' + str(materia.sgl_tipo_materia) +' ' + str(materia.num_ident_basica) + '/' + str(materia.ano_ident_basica) + '</a> - ' + autoria + ' - ' + materia_apresentada.txt_observacao
            lst_materia_apresentada.append(materia)
       elif materia_apresentada.cod_documento != None:
@@ -310,7 +312,6 @@ for sessao in metodo:
                    num_ident_basica = materia.num_ident_basica
                    ano_ident_basica = materia.ano_ident_basica
                for comissao in context.zsql.comissao_obter_zsql(cod_comissao=parecer.cod_comissao):
-                   nom_comissao = comissao.nom_comissao
                    sgl_comissao = comissao.sgl_comissao
                for votacao in context.zsql.votacao_expediente_materia_obter_zsql(cod_materia=item.cod_parecer, cod_sessao_plen=sessao.cod_sessao_plen, ind_excluido=0):
                    if votacao.tip_resultado_votacao:
@@ -383,89 +384,53 @@ for sessao in metodo:
   lst_urgencia=[]
   lst_votacao=[]
   for ordem in context.zsql.ordem_dia_obter_zsql(cod_sessao_plen=sessao.cod_sessao_plen, ind_excluido=0):
-      materia = context.zsql.materia_obter_zsql(cod_materia=ordem.cod_materia)[0]
-      urgencia = ordem.urgencia
       dic_votacao = {}
       dic_votacao["num_ordem"] = ordem.num_ordem
-      autores = context.zsql.autoria_obter_zsql(cod_materia=ordem.cod_materia)
-      fields = autores.data_dictionary().keys()
-      lista_autor = []
-      for autor in autores:
-          for field in fields:
-              nome_autor = autor['nom_autor_join']
-          lista_autor.append(nome_autor)
-      autoria = ', '.join(['%s' % (value) for (value) in lista_autor])
       des_turno = ''
       for turno in context.zsql.turno_discussao_obter_zsql(cod_turno=ordem.tip_turno):
          des_turno = turno.des_turno
-      nom_resultado = ''
-      for votacao in context.zsql.votacao_ordem_dia_obter_zsql(cod_materia=ordem.cod_materia, cod_sessao_plen=sessao.cod_sessao_plen, ind_excluido=0):
-          votacao_nominal = ''
-          if ordem.tip_votacao == 2:
-              lst_nominal = []
-              for votos in context.zsql.votacao_parlamentar_obter_zsql(cod_votacao = votacao.cod_votacao, ind_excluido=0):
-                  votos_nominais = votos.nom_completo + ': ' + votos.vot_parlamentar
-                  lst_nominal.append(votos_nominais)
-              votacao_nominal = ', '.join(['%s' % (value) for (value) in lst_nominal])
-              votacao_nominal = ' - ' + votacao_nominal
-          contagem_votos = ''
-          if votacao.tip_votacao == 2:
-              if votacao.num_votos_sim == 0:
-                 votos_favoraveis = ''
-              elif votacao.num_votos_sim == 1:
-                 votos_favoraveis = ' - ' +str(votacao.num_votos_sim) + " voto favorável"
-              elif votacao.num_votos_sim > 1:
-                 votos_favoraveis = ' - ' + str(votacao.num_votos_sim) + " votos favoráveis"
-              if votacao.num_votos_nao == 0:
-                 votos_contrarios = ''
-              elif votacao.num_votos_nao == 1:
-                 votos_contrarios = ' - ' + str(votacao.num_votos_nao) + " voto contrário"
-              elif votacao.num_votos_nao > 1:
-                 votos_contrarios = ' - ' + str(votacao.num_votos_nao) + " votos contrários"
-              if votacao.num_abstencao == 0:
-                 abstencoes = ''
-              elif votacao.num_abstencao == 1:
-                 abstencoes = ' - ' + str(votacao.num_abstencao) + " abstenção"
-              elif votacao.num_abstencao > 1:
-                 abstencoes =  ' - ' + str(votacao.num_abstencao) + " abstenções"
-              contagem_votos = votos_favoraveis + votos_contrarios + abstencoes
-          if votacao.votacao_observacao != '':
-             votacao_observacao = ' - ' + votacao.votacao_observacao
-          else:
-             votacao_observacao = ''
-          if votacao.tip_resultado_votacao:
-             for turno in context.zsql.turno_discussao_obter_zsql(cod_turno=votacao.tip_turno):
-                 turno_discussao = turno.des_turno
-             resultado = context.zsql.tipo_resultado_votacao_obter_zsql(tip_resultado_votacao=votacao.tip_resultado_votacao, ind_excluido=0)
-             for i in resultado:
-                 nom_resultado= ' (' + i.nom_resultado+ ' em ' + turno_discussao + contagem_votos + votacao_nominal + votacao_observacao + ')'
-          else:
-             nom_resultado = " (Matéria não votada)"
-             votacao_observacao = ''
-      # Oradores que discutiram a materia
-      lst_discussao_materia = []
-      for discussao in context.zsql.discussao_ordem_dia_obter_zsql(cod_ordem=ordem.cod_ordem, ind_excluido=0):
-          nom_parlamentar = discussao.nom_parlamentar
-          lst_discussao_materia.append(nom_parlamentar)
-      discussao = ''
-      if len(lst_discussao_materia) >= 1:
-         discussao = ' Uso da palavra: ' + ', '.join(['%s' % (value) for (value) in lst_discussao_materia]) + '.'
-      dic_votacao["materia"] = '<b>Item ' + str(ordem.num_ordem) + '</b> - ' + str(des_turno) + ' do <a href="'+context.consultas.absolute_url() +'/materia/materia_mostrar_proc?cod_materia=' + str(materia.cod_materia) +'">' + str(materia.des_tipo_materia) + " nº " + str(materia.num_ident_basica) + "/" + str(materia.ano_ident_basica) + '</a> - ' + str(autoria) + ' - ' + str(materia.txt_ementa) + str(discussao) + str(nom_resultado)
-
-      lst_qtde_substitutivos=[]
-      lst_substitutivos=[]
-      for substitutivo in context.zsql.substitutivo_obter_zsql(cod_materia=ordem.cod_materia,ind_excluido=0):
-          autores = context.zsql.autoria_substitutivo_obter_zsql(cod_substitutivo=substitutivo.cod_substitutivo, ind_excluido=0)
-          dic_substitutivo = {}
-          fields = autores.data_dictionary().keys()
-          lista_autor = []
-          for autor in autores:
-              for field in fields:
-                  nome_autor = autor['nom_autor_join']
-              lista_autor.append(nome_autor)
-          autoria = ', '.join(['%s' % (value) for (value) in lista_autor])
-          nom_resultado = ''
-          for votacao in context.zsql.votacao_ordem_dia_obter_zsql(cod_substitutivo=substitutivo.cod_substitutivo, cod_sessao_plen=sessao.cod_sessao_plen, ind_excluido=0):
+      urgencia = ordem.urgencia
+      if ordem.cod_materia != None:
+         materia = context.zsql.materia_obter_zsql(cod_materia=ordem.cod_materia)[0]
+         autores = context.zsql.autoria_obter_zsql(cod_materia=ordem.cod_materia)
+         fields = autores.data_dictionary().keys()
+         lista_autor = []
+         for autor in autores:
+             for field in fields:
+                 nome_autor = autor['nom_autor_join']
+             lista_autor.append(nome_autor)
+         autoria = ', '.join(['%s' % (value) for (value) in lista_autor])
+         nom_resultado = ''
+         for votacao in context.zsql.votacao_ordem_dia_obter_zsql(cod_materia=ordem.cod_materia, cod_sessao_plen=sessao.cod_sessao_plen, ind_excluido=0):
+             votacao_nominal = ''
+             if ordem.tip_votacao == 2:
+                 lst_nominal = []
+                 for votos in context.zsql.votacao_parlamentar_obter_zsql(cod_votacao = votacao.cod_votacao, ind_excluido=0):
+                     votos_nominais = votos.nom_completo + ': ' + votos.vot_parlamentar
+                     lst_nominal.append(votos_nominais)
+                 votacao_nominal = ', '.join(['%s' % (value) for (value) in lst_nominal])
+                 votacao_nominal = ' - ' + votacao_nominal
+             contagem_votos = ''
+             if votacao.tip_votacao == 2:
+                 if votacao.num_votos_sim == 0:
+                    votos_favoraveis = ''
+                 elif votacao.num_votos_sim == 1:
+                    votos_favoraveis = ' - ' +str(votacao.num_votos_sim) + " voto favorável"
+                 elif votacao.num_votos_sim > 1:
+                    votos_favoraveis = ' - ' + str(votacao.num_votos_sim) + " votos favoráveis"
+                 if votacao.num_votos_nao == 0:
+                    votos_contrarios = ''
+                 elif votacao.num_votos_nao == 1:
+                    votos_contrarios = ' - ' + str(votacao.num_votos_nao) + " voto contrário"
+                 elif votacao.num_votos_nao > 1:
+                    votos_contrarios = ' - ' + str(votacao.num_votos_nao) + " votos contrários"
+                 if votacao.num_abstencao == 0:
+                    abstencoes = ''
+                 elif votacao.num_abstencao == 1:
+                    abstencoes = ' - ' + str(votacao.num_abstencao) + " abstenção"
+                 elif votacao.num_abstencao > 1:
+                    abstencoes =  ' - ' + str(votacao.num_abstencao) + " abstenções"
+                 contagem_votos = votos_favoraveis + votos_contrarios + abstencoes
              if votacao.votacao_observacao != '':
                 votacao_observacao = ' - ' + votacao.votacao_observacao
              else:
@@ -475,58 +440,147 @@ for sessao in metodo:
                     turno_discussao = turno.des_turno
                 resultado = context.zsql.tipo_resultado_votacao_obter_zsql(tip_resultado_votacao=votacao.tip_resultado_votacao, ind_excluido=0)
                 for i in resultado:
-                    nom_resultado = ' (' + i.nom_resultado+ ' em ' + turno_discussao + votacao_observacao + ')'
-                    if votacao.votacao_observacao:
-                       votacao_observacao = votacao.ordem_observacao
+                    nom_resultado= ' (' + i.nom_resultado+ ' em ' + turno_discussao + contagem_votos + votacao_nominal + votacao_observacao + ')'
              else:
-                nom_resultado = " (Substitutivo não votado)"
-                votacao_observacao = ""
-          dic_substitutivo["materia"] = 'Substitutivo nº ' + str(substitutivo.num_substitutivo) + ' - ' +  autoria + ' - ' + substitutivo.txt_ementa + nom_resultado
-          if int(ordem.tip_turno) != 4:
-             lst_substitutivos.append(dic_substitutivo)
-             cod_substitutivo = substitutivo.cod_substitutivo
-             lst_qtde_substitutivos.append(cod_substitutivo)
-      dic_votacao["substitutivos"] = lst_substitutivos
-      dic_votacao["qtde_substitutivos"] = len(lst_qtde_substitutivos)
-
-      lst_qtde_emendas=[]
-      lst_emendas=[]
-      for emenda in context.zsql.emenda_obter_zsql(cod_materia=ordem.cod_materia,ind_excluido=0,exc_pauta=0):
-          autores = context.zsql.autoria_emenda_obter_zsql(cod_emenda=emenda.cod_emenda,ind_excluido=0)
-          dic_emenda = {}
-          fields = autores.data_dictionary().keys()
-          lista_autor = []
-          for autor in autores:
-              for field in fields:
-                  nome_autor = autor['nom_autor_join']
-              lista_autor.append(nome_autor)
-          autoria = ', '.join(['%s' % (value) for (value) in lista_autor])
-          nom_resultado = ''
-          for votacao in context.zsql.votacao_ordem_dia_obter_zsql(cod_emenda=emenda.cod_emenda, cod_sessao_plen=sessao.cod_sessao_plen, ind_excluido=0):
-             if votacao.votacao_observacao != '':
-                votacao_observacao = ' - ' + votacao.votacao_observacao
-             else:
+                nom_resultado = " (Matéria não votada)"
                 votacao_observacao = ''
-             if votacao.tip_resultado_votacao:
-                for turno in context.zsql.turno_discussao_obter_zsql(cod_turno=votacao.tip_turno):
-                    turno_discussao = turno.des_turno
-                resultado = context.zsql.tipo_resultado_votacao_obter_zsql(tip_resultado_votacao=votacao.tip_resultado_votacao, ind_excluido=0)
-                for i in resultado:
-                    nom_resultado = ' (' + i.nom_resultado+ ' em ' + turno_discussao + votacao_observacao + ')'
-                    if votacao.votacao_observacao:
-                        votacao_observacao = votacao.ordem_observacao
-             else:
-                nom_resultado = " (Emenda não votada)"
-                votacao_observacao = ""
-          dic_emenda["materia"] = 'Emenda nº ' + str(emenda.num_emenda) + ' (' + emenda.des_tipo_emenda + ') - ' +  autoria + ' - ' + emenda.txt_ementa + nom_resultado
-          if int(ordem.tip_turno) != 4:
-             lst_emendas.append(dic_emenda)
-             cod_emenda = emenda.cod_emenda
-             lst_qtde_emendas.append(cod_emenda)
-      dic_votacao["emendas"] = lst_emendas
-      dic_votacao["qtde_emenda"] = len(lst_qtde_emendas)
+         # Oradores que discutiram a materia
+         lst_discussao_materia = []
+         for discussao in context.zsql.discussao_ordem_dia_obter_zsql(cod_ordem=ordem.cod_ordem, ind_excluido=0):
+             nom_parlamentar = discussao.nom_parlamentar
+             lst_discussao_materia.append(nom_parlamentar)
+         discussao = ''
+         if len(lst_discussao_materia) >= 1:
+            discussao = ' Uso da palavra: ' + ', '.join(['%s' % (value) for (value) in lst_discussao_materia]) + '.'
+         dic_votacao["materia"] = '<b>Item ' + str(ordem.num_ordem) + '</b> - ' + str(des_turno) + ' do <a href="'+context.consultas.absolute_url() +'/materia/materia_mostrar_proc?cod_materia=' + str(materia.cod_materia) +'">' + str(materia.des_tipo_materia) + " nº " + str(materia.num_ident_basica) + "/" + str(materia.ano_ident_basica) + '</a> - ' + str(autoria) + ' - ' + str(materia.txt_ementa) + str(discussao) + str(nom_resultado)
 
-      if urgencia == 0:
+         lst_qtde_substitutivos=[]
+         lst_substitutivos=[]
+         for substitutivo in context.zsql.substitutivo_obter_zsql(cod_materia=ordem.cod_materia,ind_excluido=0):
+             autores = context.zsql.autoria_substitutivo_obter_zsql(cod_substitutivo=substitutivo.cod_substitutivo, ind_excluido=0)
+             dic_substitutivo = {}
+             fields = autores.data_dictionary().keys()
+             lista_autor = []
+             for autor in autores:
+                 for field in fields:
+                     nome_autor = autor['nom_autor_join']
+                 lista_autor.append(nome_autor)
+             autoria = ', '.join(['%s' % (value) for (value) in lista_autor])
+             nom_resultado = ''
+             for votacao in context.zsql.votacao_ordem_dia_obter_zsql(cod_substitutivo=substitutivo.cod_substitutivo, cod_sessao_plen=sessao.cod_sessao_plen, ind_excluido=0):
+                if votacao.votacao_observacao != '':
+                   votacao_observacao = ' - ' + votacao.votacao_observacao
+                else:
+                   votacao_observacao = ''
+                if votacao.tip_resultado_votacao:
+                   for turno in context.zsql.turno_discussao_obter_zsql(cod_turno=votacao.tip_turno):
+                       turno_discussao = turno.des_turno
+                   resultado = context.zsql.tipo_resultado_votacao_obter_zsql(tip_resultado_votacao=votacao.tip_resultado_votacao, ind_excluido=0)
+                   for i in resultado:
+                       nom_resultado = ' (' + i.nom_resultado+ ' em ' + turno_discussao + votacao_observacao + ')'
+                       if votacao.votacao_observacao:
+                          votacao_observacao = votacao.ordem_observacao
+                else:
+                   nom_resultado = " (Substitutivo não votado)"
+                   votacao_observacao = ""
+             dic_substitutivo["materia"] = 'Substitutivo nº ' + str(substitutivo.num_substitutivo) + ' - ' +  autoria + ' - ' + substitutivo.txt_ementa + nom_resultado
+             if int(ordem.tip_turno) != 4:
+                lst_substitutivos.append(dic_substitutivo)
+                cod_substitutivo = substitutivo.cod_substitutivo
+                lst_qtde_substitutivos.append(cod_substitutivo)
+         dic_votacao["substitutivos"] = lst_substitutivos
+         dic_votacao["qtde_substitutivos"] = len(lst_qtde_substitutivos)
+
+         lst_qtde_emendas=[]
+         lst_emendas=[]
+         for emenda in context.zsql.emenda_obter_zsql(cod_materia=ordem.cod_materia,ind_excluido=0,exc_pauta=0):
+             autores = context.zsql.autoria_emenda_obter_zsql(cod_emenda=emenda.cod_emenda,ind_excluido=0)
+             dic_emenda = {}
+             fields = autores.data_dictionary().keys()
+             lista_autor = []
+             for autor in autores:
+                 for field in fields:
+                     nome_autor = autor['nom_autor_join']
+                 lista_autor.append(nome_autor)
+             autoria = ', '.join(['%s' % (value) for (value) in lista_autor])
+             nom_resultado = ''
+             for votacao in context.zsql.votacao_ordem_dia_obter_zsql(cod_emenda=emenda.cod_emenda, cod_sessao_plen=sessao.cod_sessao_plen, ind_excluido=0):
+                if votacao.votacao_observacao != '':
+                   votacao_observacao = ' - ' + votacao.votacao_observacao
+                else:
+                   votacao_observacao = ''
+                if votacao.tip_resultado_votacao:
+                   for turno in context.zsql.turno_discussao_obter_zsql(cod_turno=votacao.tip_turno):
+                       turno_discussao = turno.des_turno
+                   resultado = context.zsql.tipo_resultado_votacao_obter_zsql(tip_resultado_votacao=votacao.tip_resultado_votacao, ind_excluido=0)
+                   for i in resultado:
+                       nom_resultado = ' (' + i.nom_resultado+ ' em ' + turno_discussao + votacao_observacao + ')'
+                       if votacao.votacao_observacao:
+                           votacao_observacao = votacao.ordem_observacao
+                else:
+                   nom_resultado = " (Emenda não votada)"
+                   votacao_observacao = ""
+             dic_emenda["materia"] = 'Emenda nº ' + str(emenda.num_emenda) + ' (' + emenda.des_tipo_emenda + ') - ' +  autoria + ' - ' + emenda.txt_ementa + nom_resultado
+             if int(ordem.tip_turno) != 4:
+                lst_emendas.append(dic_emenda)
+                cod_emenda = emenda.cod_emenda
+                lst_qtde_emendas.append(cod_emenda)
+         dic_votacao["emendas"] = lst_emendas
+         dic_votacao["qtde_emenda"] = len(lst_qtde_emendas)
+                  
+      elif ordem.cod_parecer != None:
+           relatoria = context.zsql.relatoria_obter_zsql(cod_relatoria=ordem.cod_parecer)[0]
+           for comissao in context.zsql.comissao_obter_zsql(cod_comissao=relatoria.cod_comissao):
+               sgl_comissao = comissao.sgl_comissao
+           for resultado in context.zsql.tipo_fim_relatoria_obter_zsql(tip_fim_relatoria=relatoria.tip_fim_relatoria):
+               resultado_comissao = ' (' + resultado.des_fim_relatoria + ')'
+           for mat in context.zsql.materia_obter_zsql(cod_materia=relatoria.cod_materia):
+               id_materia = ' ao ' + str(mat.des_tipo_materia) + ' nº ' + str(mat.num_ident_basica) + '/' + str(mat.ano_ident_basica)
+           nom_resultado = ''
+           for votacao in context.zsql.votacao_ordem_dia_obter_zsql(cod_parecer=ordem.cod_parecer, cod_sessao_plen=sessao.cod_sessao_plen, ind_excluido=0):
+               votacao_nominal = ''
+               if ordem.tip_votacao == 2:
+                   lst_nominal = []
+                   for votos in context.zsql.votacao_parlamentar_obter_zsql(cod_votacao = votacao.cod_votacao, ind_excluido=0):
+                       votos_nominais = votos.nom_completo + ': ' + votos.vot_parlamentar
+                       lst_nominal.append(votos_nominais)
+                   votacao_nominal = ', '.join(['%s' % (value) for (value) in lst_nominal])
+                   votacao_nominal = ' - ' + votacao_nominal
+               contagem_votos = ''
+               if votacao.tip_votacao == 2:
+                   if votacao.num_votos_sim == 0:
+                      votos_favoraveis = ''
+                   elif votacao.num_votos_sim == 1:
+                      votos_favoraveis = ' - ' +str(votacao.num_votos_sim) + " voto favorável"
+                   elif votacao.num_votos_sim > 1:
+                      votos_favoraveis = ' - ' + str(votacao.num_votos_sim) + " votos favoráveis"
+                   if votacao.num_votos_nao == 0:
+                      votos_contrarios = ''
+                   elif votacao.num_votos_nao == 1:
+                      votos_contrarios = ' - ' + str(votacao.num_votos_nao) + " voto contrário"
+                   elif votacao.num_votos_nao > 1:
+                      votos_contrarios = ' - ' + str(votacao.num_votos_nao) + " votos contrários"
+                   if votacao.num_abstencao == 0:
+                      abstencoes = ''
+                   elif votacao.num_abstencao == 1:
+                      abstencoes = ' - ' + str(votacao.num_abstencao) + " abstenção"
+                   elif votacao.num_abstencao > 1:
+                      abstencoes =  ' - ' + str(votacao.num_abstencao) + " abstenções"
+                   contagem_votos = votos_favoraveis + votos_contrarios + abstencoes
+               if votacao.votacao_observacao != '':
+                  votacao_observacao = ' - ' + votacao.votacao_observacao
+               else:
+                  votacao_observacao = ''
+               if votacao.tip_resultado_votacao:
+                  resultado = context.zsql.tipo_resultado_votacao_obter_zsql(tip_resultado_votacao=votacao.tip_resultado_votacao, ind_excluido=0)
+                  for i in resultado:
+                      nom_resultado= ' (' + i.nom_resultado+ ' em ' + turno_discussao + contagem_votos + votacao_nominal + votacao_observacao + ')'
+               else:
+                  nom_resultado = " (Parecer não votado)"
+                  votacao_observacao = ''
+           dic_votacao["materia"] = '<b>Item ' + str(ordem.num_ordem) + '</b> - ' + str(des_turno) + ' do <a href="'+context.sapl_documentos.absolute_url() +'/parecer_comissao/' + str(ordem.cod_parecer) +'">' + 'Parecer ' + sgl_comissao + ' n° ' + str(relatoria.num_parecer) + '/' + str(relatoria.ano_parecer) + id_materia + resultado_comissao + str(nom_resultado)
+
+      if ordem.urgencia == 0:
          lst_votacao.append(dic_votacao)
       else:
          lst_urgencia.append(dic_votacao)
@@ -539,16 +593,27 @@ for sessao in metodo:
   lst_sdiscussao=[]
   lst_discussao_unica=[]
   for item in context.zsql.ordem_dia_obter_zsql(cod_sessao_plen=sessao.cod_sessao_plen, ind_excluido=0):
-      materia = context.zsql.materia_obter_zsql(cod_materia=item.cod_materia)[0]
-      autores = context.zsql.autoria_obter_zsql(cod_materia=item.cod_materia)
-      fields = autores.data_dictionary().keys()
-      lista_autor = []
-      for autor in autores:
-          for field in fields:
-              nome_autor = autor['nom_autor_join']
-          lista_autor.append(nome_autor)
-      autoria = ', '.join(['%s' % (value) for (value) in lista_autor])
-      materia = str(materia.num_ident_basica)+"/"+str(context.pysc.ano_abrevia_pysc(ano=str(materia.ano_ident_basica)))+" - "+ materia.txt_ementa + " Autoria: "+ autoria
+      if item.cod_materia != None:
+         materia = context.zsql.materia_obter_zsql(cod_materia=item.cod_materia)[0]
+         autores = context.zsql.autoria_obter_zsql(cod_materia=item.cod_materia)
+         fields = autores.data_dictionary().keys()
+         lista_autor = []
+         for autor in autores:
+             for field in fields:
+                 nome_autor = autor['nom_autor_join']
+             lista_autor.append(nome_autor)
+         autoria = ', '.join(['%s' % (value) for (value) in lista_autor])
+         materia = str(materia.sgl_tipo_materia) + ' ' + str(materia.num_ident_basica)+"/"+str(context.pysc.ano_abrevia_pysc(ano=str(materia.ano_ident_basica)))+" - "+ materia.txt_ementa + " Autoria: "+ autoria
+      if item.cod_parecer != None:
+         relatoria = context.zsql.relatoria_obter_zsql(cod_relatoria=item.cod_parecer)[0]
+         for comissao in context.zsql.comissao_obter_zsql(cod_comissao=relatoria.cod_comissao):
+             sgl_comissao = comissao.sgl_comissao
+         for resultado in context.zsql.tipo_fim_relatoria_obter_zsql(tip_fim_relatoria=relatoria.tip_fim_relatoria):
+             resultado_comissao = ' (' + resultado.des_fim_relatoria + ')'
+         for mat in context.zsql.materia_obter_zsql(cod_materia=relatoria.cod_materia):
+             id_materia = ' ao ' + str(mat.des_tipo_materia) + ' nº ' + str(mat.num_ident_basica) + '/' + str(mat.ano_ident_basica)
+         materia = 'Parecer ' + sgl_comissao + ' n° ' + str(relatoria.num_parecer) + '/' + str(relatoria.ano_parecer) + id_materia + resultado_comissao
+
       if item.tip_turno==1:
          lst_pdiscussao.append(materia)
       elif item.tip_turno==2:

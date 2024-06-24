@@ -1,5 +1,9 @@
 <dtml-call expr="REQUEST.set('metodo', zsql.assinatura_documento_incluir_zsql)">
 
+<dtml-in expr="zsql.usuario_obter_zsql(col_username=AUTHENTICATED_USER.getUserName())">
+  <dtml-call expr="REQUEST.set('codigo_solicitante', int(cod_usuario))">
+</dtml-in>
+
 <dtml-in lst_cod_usuario>
   <dtml-call expr="REQUEST.set('codigo_usuario', int(_['sequence-item']))">   
   <dtml-if expr="zsql.assinatura_documento_obter_zsql(cod_assinatura_doc=hdn_cod_assinatura_doc)">
@@ -14,12 +18,14 @@
                               codigo              = hdn_codigo,
                               anexo               = hdn_anexo,
                               tipo_doc            = hdn_tipo_doc,
+                              cod_solicitante     = codigo_solicitante,
                               cod_usuario         = codigo_usuario,
                               ind_prim_assinatura = ind_prim_assinatura)">
       <dtml-else>                        
          <dtml-call expr="metodo(cod_assinatura_doc  = hdn_cod_assinatura_doc,
                               codigo              = hdn_codigo,
                               tipo_doc            = hdn_tipo_doc,
+                              cod_solicitante     = codigo_solicitante,
                               cod_usuario         = codigo_usuario,
                               ind_prim_assinatura = ind_prim_assinatura)">
       </dtml-if>

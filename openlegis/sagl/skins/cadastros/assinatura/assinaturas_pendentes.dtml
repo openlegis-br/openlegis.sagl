@@ -1,5 +1,11 @@
 <dtml-var standard_html_header>
 
+<style>
+.table {
+    font-size: 90%;
+}
+</style>
+
 <script src="<dtml-var portal_url>/js/moment.min.js"></script>
 <script src="<dtml-var portal_url>/js/datetime-moment.js"></script>
 
@@ -87,14 +93,14 @@ $(document).ready(() => {
 
 <div class="tab-content bg-white">
  <div class="tab-pane p-3 border fade show active" id="principal">
-  <dtml-in expr="zsql.assinatura_documento_obter_zsql(cod_usuario=cod_usuario_corrente, ind_assinado=0, ind_recusado=0, ind_separado=0)">
+  <dtml-in expr="zsql.assinatura_documento_obter_zsql(cod_usuario=cod_usuario_corrente, ind_assinado=0, ind_recusado=0, ind_separado=0)" mapping>
     <dtml-if cod_assinatura_doc>
        <dtml-call expr="REQUEST.set('cod_assinatura_doc', cod_assinatura_doc)">
        <dtml-call expr="REQUEST.set('formatted_code', format_verification_code(cod_assinatura_doc))">
     </dtml-if>
     <dtml-if sequence-start>
      <div class="table-responsive">
-      <table class="table">
+      <table class="table table-striped">
         <thead>
          <tr>
            <th>Solicitação</th>
@@ -104,7 +110,15 @@ $(document).ready(() => {
         </thead>
     </dtml-if>
          <tr>
-           <td><dtml-var dat_solicitacao></td>         
+           <td>
+               <dtml-if cod_solicitante>
+                  <dtml-in expr="zsql.usuario_obter_zsql(cod_usuario=cod_solicitante)">
+                     <dtml-var dat_solicitacao>, por <dtml-var nom_completo>
+                  </dtml-in>
+               <dtml-else>
+                  <dtml-var dat_solicitacao>
+               </dtml-if>
+           </td>         
            <td> 
                <dtml-if expr="tipo_doc == 'ata'">
                   <dtml-in expr="zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=codigo, ind_excluido=0)">
@@ -318,18 +332,18 @@ $(document).ready(() => {
      </div>
     </dtml-if>
   <dtml-else>
-     <p>Não há documentos pendentes de assinatura.</p>
+     <p>Não há documentos para assinatura.</p>
   </dtml-in>
  </div>
  <div class="tab-pane p-3 border fade show" id="analise">
-  <dtml-in expr="zsql.assinatura_documento_obter_zsql(cod_usuario=cod_usuario_corrente, ind_assinado=0, ind_recusado=0, ind_separado=1)">
+  <dtml-in expr="zsql.assinatura_documento_obter_zsql(cod_usuario=cod_usuario_corrente, ind_assinado=0, ind_recusado=0, ind_separado=1)" mapping>
     <dtml-if cod_assinatura_doc>
        <dtml-call expr="REQUEST.set('cod_assinatura_doc', cod_assinatura_doc)">
        <dtml-call expr="REQUEST.set('formatted_code', format_verification_code(cod_assinatura_doc))">
     </dtml-if>
     <dtml-if sequence-start>
      <div class="table-responsive">
-      <table class="table">
+      <table class="table table-striped">
         <thead>
          <tr>
            <th>Solicitação</th>
@@ -339,7 +353,15 @@ $(document).ready(() => {
         </thead>
     </dtml-if>
          <tr>
-           <td><dtml-var dat_solicitacao></td>         
+           <td>
+               <dtml-if cod_solicitante>
+                  <dtml-in expr="zsql.usuario_obter_zsql(cod_usuario=cod_solicitante)">
+                     <dtml-var dat_solicitacao>, por <dtml-var nom_completo>
+                  </dtml-in>
+               <dtml-else>
+                  <dtml-var dat_solicitacao>
+               </dtml-if>
+           </td> 
            <td>          
                <dtml-if expr="tipo_doc == 'ata'">
                   <dtml-in expr="zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=codigo, ind_excluido=0)">
@@ -552,7 +574,7 @@ $(document).ready(() => {
      </div>
     </dtml-if>
   <dtml-else>
-     <p>Não há assinaturas postergadas.</p>
+     <p>Não há itens postergados.</p>
   </dtml-in>
  </div>
 </div>

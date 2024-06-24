@@ -201,6 +201,7 @@ CREATE TABLE IF NOT EXISTS `assinatura_documento` (
   `codigo` int NOT NULL,
   `anexo` int DEFAULT NULL,
   `tipo_doc` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `cod_solicitante` int DEFAULT NULL,
   `dat_solicitacao` datetime NOT NULL,
   `cod_usuario` int NOT NULL,
   `dat_assinatura` datetime DEFAULT NULL,
@@ -216,7 +217,8 @@ CREATE TABLE IF NOT EXISTS `assinatura_documento` (
   KEY `ind_assinado` (`ind_assinado`),
   KEY `ind_recusado` (`ind_recusado`),
   KEY `assinatura_documento_ibfk` (`cod_usuario`) USING BTREE,
-  KEY `tipo_doc` (`tipo_doc`)
+  KEY `tipo_doc` (`tipo_doc`),
+  KEY `cod_solicitante` (`cod_solicitante`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `assinatura_storage` (
@@ -7807,7 +7809,8 @@ ALTER TABLE `assessor_parlamentar`
   ADD CONSTRAINT `assessor_parlamentar_ibfk_1` FOREIGN KEY (`cod_parlamentar`) REFERENCES `parlamentar` (`cod_parlamentar`) ON DELETE CASCADE;
 
 ALTER TABLE `assinatura_documento`
-  ADD CONSTRAINT `assinatura_documento_ibfk_1` FOREIGN KEY (`cod_usuario`) REFERENCES `usuario` (`cod_usuario`) ON DELETE RESTRICT;
+  ADD CONSTRAINT `assinatura_documento_ibfk_1` FOREIGN KEY (`cod_usuario`) REFERENCES `usuario` (`cod_usuario`) ON DELETE RESTRICT,
+  ADD CONSTRAINT `assinatura_documento_ibfk_2` FOREIGN KEY (`cod_solicitante`) REFERENCES `usuario` (`cod_usuario`) ON DELETE RESTRICT ON UPDATE RESTRICT;
 
 ALTER TABLE `assunto_proposicao`
   ADD CONSTRAINT `assunto_proposicao_ibfk_1` FOREIGN KEY (`tip_proposicao`) REFERENCES `tipo_proposicao` (`tip_proposicao`) ON DELETE RESTRICT ON UPDATE RESTRICT;

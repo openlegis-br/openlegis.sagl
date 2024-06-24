@@ -144,7 +144,9 @@
     <dtml-if file_nom_anexo>
         <dtml-in file_nom_anexo prefix="file">
            <dtml-call expr="REQUEST.set('nom_arquivo', pysc.anexo_proposicao_pysc(cod_proposicao,nomear=True))">
-           <dtml-call expr="sapl_documentos.proposicao.manage_addFile(id=nom_arquivo,file=pysc.upload_file(file=file_item, title=nom_arquivo))">
+           <dtml-if expr="len(file_item.read())!=0">
+              <dtml-call expr="sapl_documentos.proposicao.manage_addFile(id=nom_arquivo,file=pysc.upload_file(file=file_item, title=nom_arquivo))">
+           </dtml-if>
         </dtml-in>
     </dtml-if>
 

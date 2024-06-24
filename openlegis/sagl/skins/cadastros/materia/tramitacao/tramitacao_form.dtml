@@ -213,7 +213,11 @@ $(document).ready(function(){
   <dtml-call expr="REQUEST.set('cod_usuario_corrente', int(cod_usuario))">
 </dtml-in>
 
-<h1 class="firstHeading">Tramitação</h1>
+<dtml-in expr="zsql.materia_obter_zsql(cod_materia=cod_materia)">
+   <dtml-call expr="REQUEST.set('id_materia', str(des_tipo_materia)+ ' nº  ' +str(num_ident_basica)+ '/' +str(ano_ident_basica))">
+</dtml-in>
+
+<h1 class="firstHeading"><dtml-var id_materia></h1>
 
 <dtml-if cod_usuario_corrente>
 

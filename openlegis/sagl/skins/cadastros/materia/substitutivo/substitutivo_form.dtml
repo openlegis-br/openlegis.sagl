@@ -133,10 +133,10 @@ $(document).ready(function () {
 </script>
 
 <dtml-in expr="zsql.materia_obter_zsql(cod_materia=cod_materia)">
-   <dtml-call expr="REQUEST.set('id_materia', str(sgl_tipo_materia)+ ' ' +str(num_ident_basica)+ '/' +str(ano_ident_basica))">
+   <dtml-call expr="REQUEST.set('id_materia', str(des_tipo_materia)+ ' nº  ' +str(num_ident_basica)+ '/' +str(ano_ident_basica))">
 </dtml-in>
 
-<h1 class="firstHeading">Substitutivo - <dtml-var id_materia></h1>
+<h1 class="firstHeading"><dtml-var id_materia></h1>
 
 <dtml-unless dat_apresentacao>
    <dtml-call expr="REQUEST.set('dat_apresentacao', DateTime().strftime('%d/%m/%Y'))">

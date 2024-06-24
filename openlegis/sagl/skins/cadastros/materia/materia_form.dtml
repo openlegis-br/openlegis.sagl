@@ -833,7 +833,7 @@ $(document).ready(() => {
      <dtml-in expr="zsql.proposicao_obter_zsql(ind_mat_ou_doc='M',cod_mat_ou_doc=cod_materia)">
        <dtml-let id_proposicao="str(cod_proposicao)+'_signed.pdf'">
          <dtml-if "hasattr(sapl_documentos.proposicao,id_proposicao)">
-             <legend>Processo Eletrônico</legend>
+             <legend>Processo Digital</legend>
              <div class="card mb-3">
                <div class="row card-body">
                    <div class="col-12 col-md-8">
@@ -861,7 +861,7 @@ $(document).ready(() => {
      </dtml-in>
 
      <dtml-if temProposicao>
-         <legend>Proposição Eletrônica</legend>
+         <legend>Proposição Digital</legend>
          <div class="card mb-3">
             <div class="card-body">          
                    <dtml-call expr="REQUEST.set('cod_documento',pysc.proposicao_calcular_checksum_pysc(hdnCodProposicao))">

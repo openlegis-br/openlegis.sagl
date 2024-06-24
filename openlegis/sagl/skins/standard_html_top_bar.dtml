@@ -92,7 +92,7 @@
                       <dtml-if expr="AUTHENTICATED_USER.has_role(['Autor', 'Assessor Parlamentar', 'Operador', 'Operador Materia','Revisor Proposicao','Chefia Revisão'])">
                          <li class="dropdown-header">Processo Legislativo</li>
                             <dtml-if expr="AUTHENTICATED_USER.has_role(['Autor', 'Assessor Parlamentar'])">
-                                <li><a class="dropdown-item" href="<dtml-var portal_url>/cadastros/proposicao?ind_enviado=0">Proposições Eletrônicas</a></li>
+                                <li><a class="dropdown-item" href="<dtml-var portal_url>/cadastros/proposicao?ind_enviado=0">Proposições Digitais</a></li>
                             </dtml-if>
                             <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia','Revisor Proposicao','Chefia Revisão'])">
                                 <li><a class="dropdown-item" href="<dtml-var portal_url>/cadastros/recebimento_proposicao">Recebimento de Proposições</a></li>
@@ -103,7 +103,7 @@
                          <li class="dropdown-divider"></li>
                       </dtml-if>
                          <li class="dropdown-header">Processo Administrativo</li>
-                         <li><a class="dropdown-item" href="<dtml-var portal_url>/cadastros/peticionamento_eletronico">Peticionamento Eletrônico</a></li>
+                         <li><a class="dropdown-item" href="<dtml-var portal_url>/cadastros/peticionamento_eletronico">Peticionamento Digital</a></li>
                          <dtml-if cod_usuario_corrente>
                             <li><a class="dropdown-item" href="<dtml-var portal_url>/cadastros/tramitacao_documento/tramitacao_lote_form">Tramitação de Documentos</a></li>
                          </dtml-if>
@@ -228,7 +228,7 @@
             </dtml-in>
            </dtml-comment>
         </div>
-           <div id="siteDescription">Processo Legislativo Eletrônico</div>
+           <div id="siteDescription">Plataforma de Processos Digitais</div>
         </div>
      </a>
     </div>
@@ -306,7 +306,7 @@
 
                     <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia', 'Autor', 'Assessor Parlamentar', 'Revisor Proposicao', 'Chefia Revisão'])">
                       <li class="dropdown-submenu">
-                          <a class="dropdown-item dropdown-toggle" href="#">Proposições Eletrônicas</a>
+                          <a class="dropdown-item dropdown-toggle" href="#">Proposições Digitais</a>
                           <ul class="dropdown-menu">
                             <dtml-if expr="AUTHENTICATED_USER.has_role(['Autor','Assessor Parlamentar'])">
                               <li><a class="dropdown-item" href="<dtml-var portal_url>/cadastros/proposicao/proposicao_form">Criar Proposição</a></li>
@@ -376,7 +376,7 @@
                       </li>
                     </dtml-if>
                     <dtml-if cod_usuario_corrente>
-                      <li><a class="dropdown-item" href="<dtml-var portal_url>/cadastros/peticionamento_eletronico">Peticionamento Eletrônico</a></li>
+                      <li><a class="dropdown-item" href="<dtml-var portal_url>/cadastros/peticionamento_eletronico">Peticionamento Digital</a></li>
                     </dtml-if>
                     <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Recepção'])">
                       <li class="dropdown-submenu">

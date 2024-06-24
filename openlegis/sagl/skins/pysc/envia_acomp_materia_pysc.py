@@ -95,7 +95,7 @@ for dic in destinatarios:
        </p>
        <p>
           <strong>{casa_legislativa}</strong><br>
-          Processo Eletrônico
+          Processo Digital
        </p>
        <p>
           <small><a href="{link_remocao}" target="_blank">Clique aqui</a> para excluir seu e-mail da lista de envios.</small>

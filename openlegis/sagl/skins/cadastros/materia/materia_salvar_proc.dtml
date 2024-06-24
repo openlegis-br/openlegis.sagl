@@ -105,7 +105,7 @@
           <dtml-call expr="REQUEST.set('des_tipo_proposicao', des_tipo_proposicao)">
           <dtml-call expr="REQUEST.set('cod_documento',pysc.proposicao_calcular_checksum_pysc(cod_proposicao))">
           <dtml-call expr="REQUEST.set('hdn_hor_tramitacao', DateTime().strftime('%d/%m/%Y às %H:%M'))">
-          <dtml-call expr="REQUEST.set('txt_tramitacao', 'Proposição Eletrônica ' + cod_documento + ' incorporada como matéria principal em ' + hdn_hor_tramitacao)">
+          <dtml-call expr="REQUEST.set('txt_tramitacao', 'Proposição Digital ' + cod_documento + ' incorporada como matéria principal em ' + hdn_hor_tramitacao)">
           <dtml-comment>
             <dtml-call expr="zsql.autoria_incluir_zsql(cod_autor = cod_autor, cod_materia = codigo, ind_primeiro_autor = 0)">
           </dtml-comment>
@@ -116,22 +116,13 @@
         <dtml-call expr="pysc.proposicao_salvar_como_texto_integral_materia_pysc(hdn_cod_proposicao,hdn_cod_materia,0)">
         <dtml-call expr="REQUEST.set('hdn_dat_tramitacao', DateTime().strftime('%d/%m/%Y'))">
         <dtml-call expr="REQUEST.set('hdn_dat_encaminha', DateTime().strftime('%Y-%m-%d %H:%M:%S'))">
-        <dtml-call expr="REQUEST.set('nom_unidade_origem', 'Protocolo Eletrônico')">
-        <dtml-in expr="zsql.unidade_tramitacao_obter_zsql(nom_orgao=nom_unidade_origem)">
-           <dtml-call expr="REQUEST.set('cod_unid_tram_local', cod_unid_tramitacao)">
-        </dtml-in>
+        <dtml-call expr="REQUEST.set('cod_unid_tram_local', int(sapl_documentos.props_sagl.origem))"> 
         <dtml-if expr="des_tipo_proposicao=='Indicação' or des_tipo_proposicao=='Moção' or des_tipo_proposicao=='Requerimento'">
-          <dtml-call expr="REQUEST.set('nom_unidade_destino', 'Departamento Técnico Legislativo')">
+          <dtml-call expr="REQUEST.set('cod_unid_tram_dest', int(sapl_documentos.props_sagl.destino_outros))">
         <dtml-else>
-          <dtml-call expr="REQUEST.set('nom_unidade_destino', 'Departamento Técnico Legislativo')">
+          <dtml-call expr="REQUEST.set('cod_unid_tram_dest', int(sapl_documentos.props_sagl.destino))">
         </dtml-if>
-        <dtml-in expr="zsql.unidade_tramitacao_obter_zsql(nom_orgao=nom_unidade_destino)">
-          <dtml-call expr="REQUEST.set('cod_unid_tram_dest', cod_unid_tramitacao)">
-        </dtml-in>
-        <dtml-call expr="REQUEST.set('sgl_status', 'PRT')">
-        <dtml-in expr="zsql.status_tramitacao_obter_zsql(sgl_status=sgl_status)">
-          <dtml-call expr="REQUEST.set('cod_status', cod_status)">
-        </dtml-in>
+        <dtml-call expr="REQUEST.set('cod_status', int(sapl_documentos.props_sagl.status))">
         <dtml-call expr="zsql.tramitacao_incluir_zsql(cod_materia = codigo,
                                                    dat_tramitacao = pysc.data_converter_pysc(data=hdn_dat_tramitacao),
                                                    cod_unid_tram_local = cod_unid_tram_local,

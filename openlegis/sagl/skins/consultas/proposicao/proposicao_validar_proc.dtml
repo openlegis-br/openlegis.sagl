@@ -13,7 +13,7 @@
         <dtml-call expr="REQUEST.set('cod_materia',cod_materia)">
            <dtml-call expr="REQUEST.set('cod_documento',pysc.proposicao_calcular_checksum_pysc(codigo))">
 <dtml-var standard_html_header>
-           <h1 class="firstHeading">Proposição Eletrônica nº <dtml-var cod_proposicao></h1>
+           <h1 class="firstHeading">Proposição Digital nº <dtml-var cod_proposicao></h1>
            <table class="table">
              <tr>
               <td>
@@ -53,8 +53,8 @@
                      <dtml-let proposicao="getattr(sapl_documentos.proposicao,id_proposicao).absolute_url">
                       <dtml-call expr="REQUEST.set('cod_documento',pysc.proposicao_calcular_checksum_pysc(cod_proposicao))">
                         <a target="blank" href="<dtml-var proposicao>">
-                          <img align="middle" height="40" src="<dtml-var portal_url>/imagens/pdf_signed.gif" alt="Proposição Eletrônica" title="Proposição Eletrônica">
-                          <p style="line-height: 1.3em; font-size:12px"><b>Proposição Eletrônica<br /><dtml-var cod_documento></p>
+                          <img align="middle" height="40" src="<dtml-var portal_url>/imagens/pdf_signed.gif" alt="Proposição Digital" title="Proposição Digital">
+                          <p style="line-height: 1.3em; font-size:12px"><b>Proposição Digital<br /><dtml-var cod_documento></p>
                         </a>
                      </dtml-let>
                    </dtml-if>
@@ -67,10 +67,10 @@
            </table>
            <p align="center">
              <dtml-if expr="ind_mat_ou_doc=='D'">
-                <input class="form-control" class="pf-button btn botao" type="button" id="btn_processo_abrir" name="btn_norma_pesquisar" value="Abrir Processo Eletrônico" onclick="javascript:location.href='<dtml-var portal_url>/consultas/materia/materia_mostrar_proc?cod_materia=<dtml-var cod_materia>'" />
+                <input class="form-control" class="pf-button btn botao" type="button" id="btn_processo_abrir" name="btn_norma_pesquisar" value="Abrir Processo Digital" onclick="javascript:location.href='<dtml-var portal_url>/consultas/materia/materia_mostrar_proc?cod_materia=<dtml-var cod_materia>'" />
              </dtml-if>
              <dtml-if expr="ind_mat_ou_doc=='M'">
-                <input class="form-control" class="pf-button btn botao" type="button" id="btn_processo_abrir" name="btn_norma_pesquisar" value="Abrir Processo Eletrônico" onclick="javascript:location.href='<dtml-var portal_url>/consultas/materia/materia_mostrar_proc?cod_materia=<dtml-var cod_mat_ou_doc>'" />
+                <input class="form-control" class="pf-button btn botao" type="button" id="btn_processo_abrir" name="btn_norma_pesquisar" value="Abrir Processo Digital" onclick="javascript:location.href='<dtml-var portal_url>/consultas/materia/materia_mostrar_proc?cod_materia=<dtml-var cod_mat_ou_doc>'" />
              </dtml-if>
              <input class="form-control" class="pf-button btn botao" type="button" id="btn_nor" name="btn_nova_consulta" value="Nova Consulta" onclick="javascript:location.href='<dtml-var portal_url>/generico/proposicao_validar'"/>
            </p>

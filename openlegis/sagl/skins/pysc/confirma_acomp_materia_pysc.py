@@ -52,7 +52,7 @@ html = """\
     </p>
     <p>
        <strong>{casa_legislativa}</strong><br>
-       Processo Eletrônico
+       Processo Digital
     </p>
   </body>
 </html>

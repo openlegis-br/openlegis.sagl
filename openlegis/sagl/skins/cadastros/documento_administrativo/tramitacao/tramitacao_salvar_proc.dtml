@@ -121,7 +121,7 @@
   </dtml-if>
 </dtml-if>
 
-<dtml-if dbcon_logs>
+<dtml-if expr="dbcon_logs and hdn_cod_tramitacao">
   <dtml-call expr="REQUEST.set('metodo1', str(metodo).split('/')[-1])">
   <dtml-call expr="REQUEST.set('metodo1', str(metodo1).split(' at ')[-1])">
   <dtml-call expr="REQUEST.set('metodo1', str(metodo1).split('>')[0])">
@@ -131,6 +131,5 @@
             modulo       = 'tramitacao_documento',
             metodo       = metodo1,
             IP           = pysc.get_ip(),
-            dados        = REQUEST.form.items(),
             cod_registro = hdn_cod_tramitacao)"> 
 </dtml-if>

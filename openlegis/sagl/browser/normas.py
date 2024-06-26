@@ -190,7 +190,7 @@ class Normas(grok.View):
         lst_compilado = []
         dic_compilado = {}
         arquivo_compilado = str(cod_norma) + "_texto_consolidado.pdf"
-        if hasattr(self.context.sapl_documentos.norma_juridica, arquivo):
+        if hasattr(self.context.sapl_documentos.norma_juridica, arquivo_compilado):
            dic_compilado['content-type'] = 'application/pdf'
            dic_compilado['download'] = self.portal_url + '/sapl_documentos/norma_juridica/' + arquivo_compilado
            dic_compilado['filename'] = arquivo_compilado

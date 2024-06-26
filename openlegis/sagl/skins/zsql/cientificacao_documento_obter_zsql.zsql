@@ -1,0 +1,32 @@
+<dtml-comment>
+connection_id : dbcon_sagl
+arguments : cod_documento cod_cientificado ind_pendente="" ind_excluido=0
+max_rows : 200
+max_cache : 100
+</dtml-comment>
+SELECT
+   id,
+   cod_documento,
+   cod_cientificador,
+   DATE_FORMAT(dat_envio, '%d/%m/%Y %H:%i:%s') as dat_envio,
+   DATE_FORMAT(dat_expiracao, '%d/%m/%Y %H:%i:%s') as dat_expiracao,
+   cod_cientificado,
+   DATE_FORMAT(dat_leitura, '%d/%m/%Y %H:%i:%s') as dat_leitura
+
+FROM 
+   cientificacao_documento 
+
+<dtml-sqlgroup where>
+   <dtml-sqltest cod_documento    op="=" type="int" optional><dtml-and>
+   <dtml-sqltest cod_cientificado op="=" type="int" optional><dtml-and>
+   <dtml-sqltest ind_excluido     op="=" type="int">
+</dtml-sqlgroup>
+
+<dtml-if expr="ind_pendente==1">
+    and dat_leitura IS NULL
+    and DATE(dat_expiracao) > DATE(NOW())
+</dtml-if>
+
+
+ORDER BY
+   dat_envio DESC

@@ -237,9 +237,20 @@ $(document).ready(() => {
        </dtml-if>
     </a>
   </li>
+  <li class="nav-item">
+    <a class="nav-link <dtml-unless cod_documento>disabled</dtml-unless>" id="cientificacoes-tab" data-toggle="tab" href="#cientificacoes" role="tab" aria-controls="cientificacoes" aria-selected="false">Cientificações
+       <dtml-if cod_documento>
+         <dtml-in expr="zsql.cientificacao_documento_obter_zsql(cod_documento=cod_documento, ind_excluido=0)">
+           <dtml-if sequence-start>
+            [<dtml-var sequence-length>]
+           </dtml-if sequence-start>
+         </dtml-in>
+       </dtml-if>
+    </a>
+  </li>  
  <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Modulo Administrativo'])">
   <li class="nav-item">
-    <a class="nav-link <dtml-unless cod_documento>disabled</dtml-unless>" id="destinatarios-tab" data-toggle="tab" href="#destinatarios" role="tab" aria-controls="destinatarios" aria-selected="false">Destinatários
+    <a class="nav-link <dtml-unless cod_documento>disabled</dtml-unless>" id="destinatarios-tab" data-toggle="tab" href="#destinatarios" role="tab" aria-controls="destinatarios" aria-selected="false">Impressos
        <dtml-if cod_documento>
          <dtml-in expr="zsql.destinatario_oficio_obter_zsql(cod_documento=cod_documento, ind_excluido=0)">
            <dtml-if sequence-start>
@@ -592,6 +603,11 @@ $(document).ready(() => {
       <dtml-var tramitacao_index_html>
     </dtml-with>
   </div>
+  <div class="tab-pane p-3 border fade" id="cientificacoes">
+    <dtml-with cientificacao>
+      <dtml-var cientificacao_index_html>
+    </dtml-with>
+  </div>
   <div class="tab-pane p-3 border fade" id="destinatarios">
     <dtml-with destinatario>
       <dtml-var destinatario_index_html>
@@ -604,7 +620,7 @@ $(document).ready(() => {
 <dtml-if expr="_.has_key('cod_documento')">
   <dtml-if dbcon_logs>
     <div class="row">
-      <div class="col-12 text-right">
+      <div class="col-12 mt-1 text-right">
         <i class="fa fa-clock small"></i>      
         <a href="#" class="text-muted small" data-toggle="modal" data-target="#iFrameModal" data-title="Histórico" data-src="<dtml-var portal_url>/historico?cod_registro=<dtml-var cod_documento>&modulo=documento_administrativo&modal=1">Histórico</a>  
       </div>

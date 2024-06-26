@@ -1,0 +1,18 @@
+<dtml-comment>
+connection_id : dbcon_sagl
+arguments : id cod_documento
+max_rows : 1
+max_cache : 100
+</dtml-comment>
+DELETE FROM 
+     cientificacao_documento
+
+<dtml-if id>
+   <dtml-sqlgroup where>
+      id = <dtml-sqlvar id type="int">
+   </dtml-sqlgroup>
+<dtml-elif cod_documento>
+   <dtml-sqlgroup where>
+       cod_documento = <dtml-sqlvar cod_documento type="int">
+   </dtml-sqlgroup>
+</dtml-if>

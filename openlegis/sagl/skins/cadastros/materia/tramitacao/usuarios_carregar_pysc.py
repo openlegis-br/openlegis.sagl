@@ -1,4 +1,4 @@
-## Script (Python) "busca_palavra_pysc"
+## Script (Python) "usuarios_carregar_pysc"
 ##bind container=container
 ##bind context=context
 ##bind namespace=
@@ -29,7 +29,7 @@ for usuario in usuarios:
                 usuarioDict['name'] = usuario['nom_completo']
                 usuarioDict['id'] = usuario['cod_usuario']
     usuarioArray.append(usuarioDict)
-
+usuarioArray.sort(key=lambda dic: dic['name'])
 listaDic.update({'options': usuarioArray})
     
 return json.dumps(usuarioArray)

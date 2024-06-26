@@ -1,0 +1,20 @@
+
+<dtml-call expr="REQUEST.set('metodo', zsql.cientificacao_documento_incluir_zsql)">
+
+<dtml-in expr="zsql.usuario_obter_zsql(col_username=AUTHENTICATED_USER.getUserName())">
+   <dtml-call expr="REQUEST.set('cod_cientificador', cod_usuario)">
+</dtml-in>
+
+<dtml-in lst_cod_usuario_dest>
+  <dtml-call expr="REQUEST.set('cod_cientificado', int(_['sequence-item']))">   
+    <dtml-try>
+       <dtml-call expr="metodo(cod_documento       = hdn_cod_documento,
+                               cod_cientificador   = cod_cientificador,
+                               dat_envio           = DateTime(datefmt='international').strftime('%Y/%m/%d %H:%M:%S'),
+                               dat_expiracao       = DateTime(txt_dat_expiracao, datefmt='international').strftime('%Y/%m/%d 23:59:59'),
+                               cod_cientificado    = cod_cientificado)">  
+    </dtml-try>
+</dtml-in>
+
+<dtml-call "REQUEST['RESPONSE'].redirect(portal_url()+'/cadastros/documento_administrativo/documento_administrativo_mostrar_proc?cod_documento='+hdn_cod_documento+'#cientificacoes')">
+

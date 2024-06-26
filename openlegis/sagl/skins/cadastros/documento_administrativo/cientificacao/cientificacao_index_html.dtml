@@ -1,0 +1,188 @@
+<script src="<dtml-var portal_url>/js/moment.min.js"></script>
+<script src="<dtml-var portal_url>/js/datetime-moment.js"></script>
+<script>
+$(document).ready(function(){
+    $.fn.dataTable.moment( 'DD/MM/YYYY HH:mm:ss' );    //Formatação com Hora
+    $.fn.dataTable.moment('DD/MM/YYYY');    //Formatação sem Hora
+    var table = $('#table').DataTable( {
+        "responsive": true,
+        "order": [[ 0, "asc" ]],
+        "language": {
+          search: "Pesquisar:",
+          processing:     "Processando...",
+          loadingRecords: "Carregando...",
+          lengthMenu:     "Exibir _MENU_ registros por página",
+          info:           "Exibindo _START_ a _END_ de _TOTAL_ registros",
+          infoEmpty:      "Exibindo _START_ a _END_ de _TOTAL_ registros",
+          infoFiltered:   "(total de registros:_MAX_)",
+          emptyTable:     "Nenhum registro encontrado",
+          zeroRecords:     "Nenhum registro encontrado",
+          paginate: {
+            first:      "Primeiro",
+            previous:   "Anterior",
+            next:       "Próximo",
+            last:       "Último"
+          },
+         "buttons": {
+           print: "Imprimir",
+           copy: "Copiar",
+           copyTitle: "Cópia bem sucedida",
+           copySuccess: {
+            1: "Uma linha copiada com sucesso",
+            _: "%d linhas copiadas com sucesso"
+          }
+        }
+        }
+    });
+
+        var unidade = $("#lst_unidade").val();
+        $.ajax({
+            url: '<dtml-var portal_url>/cadastros/documento_administrativo/cientificacao/usuarios_carregar_pysc',
+            type: 'post',
+            data: {svalue:unidade, cod_documento:<dtml-var cod_documento>},
+            dataType: 'json',
+            success:function(response){
+                var len = response.length;
+                $('#lst_cod_usuario_dest').selectpicker('destroy');
+                for( var i = 0; i<len; i++){
+                    var id = response[i]['id'];
+                    var name = response[i]['name'];
+                    $("#lst_cod_usuario_dest").append("<option value='"+id+"'>"+name+"</option>");
+                }
+                 $('#lst_cod_usuario_dest').selectpicker('render');                                
+            }
+        });
+
+    $("#lst_unidade").change(function(){
+        var unidade = $(this).val();
+        $.ajax({
+            url: '<dtml-var portal_url>/cadastros/documento_administrativo/cientificacao/usuarios_carregar_pysc',
+            type: 'post',
+            data: {svalue:unidade, cod_documento:<dtml-var cod_documento>},
+            dataType: 'json',
+            success:function(response){
+                var len = response.length;
+                $('#lst_cod_usuario_dest').selectpicker('destroy');
+                $('#lst_cod_usuario_dest option').remove();
+                for( var i = 0; i<len; i++){
+                    var id = response[i]['id'];
+                    var name = response[i]['name'];
+                    $("#lst_cod_usuario_dest").append("<option value='"+id+"' data-content='"+name+"'>"+name+"</option>");
+                }
+                $('#lst_cod_usuario_dest').selectpicker('render');
+            }
+        });
+    }); 
+});
+</script>
+
+<style>
+.table {
+    font-size: 90%;
+}
+</style>
+
+<legend>Cientificar Usuários</legend>
+<form class="form mb-3" id="usuario_form" name="usuario_form" method="post" action="<dtml-var portal_url>/cadastros/documento_administrativo/cientificacao/cientificacao_salvar_pysc">
+ <div class="form-row">
+ <div class="col-12 col-md-4 mb-2">
+     <input type="hidden" name="modal" value="1" />              
+     <input type="hidden" name="hdn_cod_documento" value="<dtml-var cod_documento>" />
+     <input type="hidden" name="hdn_url" value="<dtml-var ACTUAL_URL>?cod_documento=<dtml-var cod_documento>#cientificacoes" />
+        <label class="label" for="lst_unidade">Filtrar Unidade</label>
+        <select class="form-control selectpicker" id="lst_unidade" name="lst_unidade" data-live-search="true">
+          <option value="">Todas</option> 
+                 <dtml-in expr="zsql.unidade_tramitacao_obter_zsql()">
+                       <option value="<dtml-var cod_unid_tramitacao>">
+                         <dtml-var nom_unidade_join>
+                       </option>
+                 </dtml-in>                 
+          </option>
+        </select>
+  </div>
+     <div class="col-12 col-md-4 mb-2">
+        <label class="label required" for="lst_cod_usuario_dest">Usuários</label>
+        <select class="form-control selectpicker" name="lst_cod_usuario_dest:list:int" id="lst_cod_usuario_dest" multiple="multiple" data-selected-text-format="count > 1" data-size="6" data-actions-box="true" data-live-search="true" required>
+       </select> 
+     </div>
+     <div class="col-8 col-md-3">
+        <label class="label required" for="txt_dat_expiracao">Expiração</label>
+        <input class="form-control date" type="text" name="txt_dat_expiracao" id="txt_dat_expiracao" value="<dtml-var dat_expiracao missing>" required=required autocomplete="off" />    
+     <input type="hidden" id="hoje" name="hoje" value="<dtml-var expr="DateTime(datefmt='international').strftime('%d/%m/%Y')">" />
+        <script>
+          $('#txt_dat_expiracao').datepicker({
+              locale: 'pt-br',
+              icons: {rightIcon: '<i class="fa fa-fw fa-calendar-alt"></i>'},
+              format: 'dd/mm/yyyy',
+              uiLibrary: 'bootstrap4',
+              iconsLibrary: 'fontawesome',
+              minDate: function () {
+                return $('#hoje').val();
+              }
+          });
+        </script>
+     </div>
+     <div class="col-4 col-md-1 mb-2">
+       <label class="label">Adicionar</label>
+       <button type="submit" name=submit" class="btn btn-primary"><i class="fas fa-plus"></i></button>
+     </div>
+ </div>
+</form>
+
+
+<div class="row">
+<div class="col-12">
+<dtml-in expr="zsql.cientificacao_documento_obter_zsql(cod_documento=cod_documento,ind_excluido=0)">
+  <dtml-if sequence-start>   
+    <div class="table-responsive">
+    <table class="table" id="table">
+     <thead class="table-secondary">    
+       <tr> 
+          <th width="25%">Data de Envio</th>
+          <th width="30%">Usuário de Destino</th>
+          <th>Expiração</th>
+          <th>Visualização</th>
+          <th>Ações</th>
+       </tr>     
+     </thead>
+   </dtml-if sequence-start>
+   <tr>
+      <td><dtml-var expr="DateTime(dat_envio, datefmt='international').strftime('%d/%m/%Y %Hh%M')">, por <dtml-in expr="zsql.usuario_obter_zsql(cod_usuario=cod_cientificador)"><dtml-var col_username></dtml-in></td>
+      <td><dtml-in expr="zsql.usuario_obter_zsql(cod_usuario=cod_cientificado)"><dtml-var nom_completo></dtml-in></td>
+      <td>
+         <dtml-if expr="dat_expiracao != None">
+           <dtml-if expr="DateTime(datefmt='international').strftime('%Y/%m/%d') > DateTime(dat_expiracao, datefmt='international').strftime('%Y/%m/%d')">
+              <span class="text-danger">
+           <dtml-else>
+              <span>
+           </dtml-if>
+           <dtml-var expr="DateTime(dat_expiracao, datefmt='international').strftime('%d/%m/%Y %Hh%M')">
+           </span>
+         </dtml-if>
+      </td>
+      <td>
+         <dtml-if expr="dat_leitura != None">
+           <span class="text-primary">
+           <dtml-var expr="DateTime(dat_leitura, datefmt='international').strftime('%d/%m/%Y %Hh%M')" missing null>
+           </span>
+         <dtml-else>
+           <span class="text-danger">pendente</span>
+         </dtml-if>
+      </td>
+      <td>
+      <dtml-if expr="(dat_leitura != None)">
+        <a class="btn btn-sm btn-danger disabled" type="button"><i class="fas fa-fw fa-trash"></i>Excluir</a>
+      <dtml-else>
+        <a class="btn btn-sm btn-danger" href="#" onclick="javascript:location.href='<dtml-var portal_url>/cadastros/documento_administrativo/cientificacao/usuarios_excluir_proc?hdn_id=<dtml-var id>&hdn_cod_documento=<dtml-var cod_documento>'"><i class="fas fa-fw fa-trash"></i>Excluir</a>
+      </dtml-if>
+      </td>
+   </td>
+   <dtml-if sequence-end>
+    </table>
+    </div>
+   </dtml-if sequence-end>
+<dtml-else>
+       <p>Nenhuma solicitação de ciência cadastrada.</p>
+</dtml-in>
+</div>
+</div>

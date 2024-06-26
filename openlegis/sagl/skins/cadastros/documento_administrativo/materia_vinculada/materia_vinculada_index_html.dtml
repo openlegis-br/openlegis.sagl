@@ -72,7 +72,7 @@ function myFunction() {
               - <dtml-var txt_ementa>
            </td>
            <td width="15%">
-                <a class="btn btn-danger" href="javascript:materia_excluir(<dtml-var cod_vinculo>)">Excluir</a>
+                <a class="btn btn-sm btn-danger" href="javascript:materia_excluir(<dtml-var cod_vinculo>)"><i class="fas fa-fw fa-trash"></i>Excluir</a>
         </tr>
        </dtml-in>
     <dtml-if sequence-end>
@@ -85,36 +85,33 @@ function myFunction() {
 <form name="materia_vinculada_form" method="post" action="materia_vinculada/materia_vinculada_salvar_proc">  
    <div class="table-resposive">
     <table class="table" id="master_table">
-       <thead>
-        <tr>
-            <th><label for="lst_tip_id_basica" class="required">Tipo de Matéria</label></th>
-            <th><label for="txt_num_ident_basica" class="required">Número</label></th>
-            <th><label for="txt_ano_ident_basica" class="required">Ano</label></th>
-            <th><span class="d-none">Ações</span></th>
-        </tr>
-       </thead>
         <tr>
             <td>
-                <select class="custom-select" name="lst_tip_id_basica" id="lst_tip_id_basica"><option value=""></option><dtml-in expr="zsql.tipo_materia_legislativa_obter_zsql(tip_natureza='P', ind_excluido=0)"><option value="<dtml-var tip_materia missing>"><dtml-var des_tipo_materia></option></dtml-in></select>
+                <select class="custom-select custom-select-sm" name="lst_tip_id_basica" id="lst_tip_id_basica">
+                  <option value="">Selecione o Tipo de Matéria</option>
+                    <dtml-in expr="zsql.tipo_materia_legislativa_obter_zsql(tip_natureza='P', ind_excluido=0)">
+                      <option value="<dtml-var tip_materia missing>"><dtml-var des_tipo_materia></option>
+                    </dtml-in>
+                </select>
                 <div class="invalid-feedback">
                   Este campo é obrigatório!
                 </div>
             </td>
             <td>
-                <input class="form-control number" type="number" name="txt_num_ident_basica" id="txt_num_ident_basica" size="5" value="<dtml-var num_ident_basica_sel missing>">
+                <input class="form-control form-control-sm number" type="number" name="txt_num_ident_basica" id="txt_num_ident_basica" size="5" value="<dtml-var num_ident_basica_sel missing>" placeholder="Número">
                 <div class="invalid-feedback">
                   Este campo é obrigatório!
                 </div>                
             </td>
             <td>
-                <input class="form-control year" type="number" name="txt_ano_ident_basica" id="txt_ano_ident_basica" size="4" value="<dtml-var ano_ident_basica_sel missing>">
+                <input class="form-control form-control-sm year" type="number" name="txt_ano_ident_basica" id="txt_ano_ident_basica" size="4" value="<dtml-var ano_ident_basica_sel missing>" placeholder="Ano">
                 <div class="invalid-feedback">
                   Este campo é obrigatório!
                 </div>
             </td>
             <td>
-                <input type="button" name="addRow" class="add btn btn-primary" value='Adicionar' />
-                <input type="button" name="removeRow" class="removeRow btn btn-danger" value='Excluir' />
+                <input type="button" name="addRow" class="add btn btn-sm btn-primary" value='Adicionar' />
+                <input type="button" name="removeRow" class="removeRow btn btn-sm btn-danger" value='Excluir' />
             </td>
         </tr>
     </table>

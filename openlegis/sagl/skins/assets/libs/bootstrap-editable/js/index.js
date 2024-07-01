@@ -3260,7 +3260,7 @@ $(function(){
             }
 
             for(var i=0; i<this.sourceData.length; i++) {
-                $label = $('<label class="form-label">').append($('<input>', {
+                $label = $('<label>').append($('<input>', {
                                            type: 'checkbox',
                                            value: this.sourceData[i].value 
                                      }))

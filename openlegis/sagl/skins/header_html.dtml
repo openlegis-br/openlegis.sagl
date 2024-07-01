@@ -15,6 +15,11 @@
         <meta content="OpenLegis" name="author" />
         <!-- App favicon -->
         <link rel="shortcut icon" href="<dtml-var portal_url>/imagens/favicon.ico">
+        <!-- DataTables -->
+        <link href="<dtml-var portal_url>/assets/libs/datatables.net-bs4/css/dataTables.bootstrap4.min.css" rel="stylesheet" type="text/css" />
+        <link href="<dtml-var portal_url>/assets/libs/datatables.net-buttons-bs4/css/buttons.bootstrap4.min.css" rel="stylesheet" type="text/css" />
+        <!-- Responsive datatable examples -->
+        <link href="<dtml-var portal_url>/assets/libs/datatables.net-responsive-bs4/css/responsive.bootstrap4.min.css" rel="stylesheet" type="text/css" />
         <!-- Bootstrap Css -->
         <link href="<dtml-var portal_url>/assets/css/bootstrap.min.css" id="bootstrap-style" rel="stylesheet" type="text/css" />
         <!-- Icons Css -->
@@ -180,7 +185,7 @@
                          <form action="<dtml-var portal_url>/generico/palavra_chave_buscar_proc" name="search_form" id="search_form">
                             <input name="txt_palavra_chave" class="search-input form-control" placeholder="Pesquisar" />
                          </form>
-                            <a href="#" class="close-search toggle-search" data-bs-target="#search-wrap">
+                            <a href="#" class="close-search toggle-search" data-target="#search-wrap">
                                 <i class="mdi mdi-close-circle"></i>
                             </a>
                         </div>
@@ -195,14 +200,13 @@
                         </div>
 
                         <div class="dropdown d-none d-lg-inline-block">
-                            <button type="button" class="btn header-item toggle-search noti-icon waves-effect"
-                                data-bs-target="#search-wrap">
+                            <button type="button" class="btn header-item toggle-search noti-icon waves-effect" data-target="#search-wrap">
                                 <i class="mdi mdi-magnify"></i>
                             </button>
                         </div>
 
                         <button type="button" class="btn btn-sm font-size-16 d-lg-none header-item waves-effect waves-light"
-                            data-bs-toggle="collapse" data-bs-target="#topnav-menu-content">
+                            data-bs-toggle="collapse" data-target="#topnav-menu-content">
                             <i class="fa fa-fw fa-bars"></i>
                         </button>
                     <dtml-if expr="AUTHENTICATED_USER.has_role(['Authenticated'])">
@@ -224,7 +228,7 @@
                             </div>
                         </div>
                     <dtml-else>
-                                <button type="button" class="btn btn-sm header-item waves-effect noti-icon" data-bs-toggle="modal" data-bs-target="#loginModal">
+                                <button type="button" class="btn btn-sm header-item waves-effect noti-icon" data-bs-toggle="modal" data-target="#loginModal">
                                     <i class="mdi mdi-login"></i>
                                 </button>
                     </dtml-if>

@@ -84,10 +84,10 @@ $(document).ready(() => {
 
 <ul class="nav nav-tabs assinatura border-0 mt-4" id="nav_assinatura" role="tablist">
     <li class="nav-item active">
-        <a class="nav-link active" id="principal-tab" data-bs-toggle="tab" href="#principal" role="tab" aria-controls="principal" data-bs-target="#principal" aria-selected="true">Lista Principal <dtml-in expr="zsql.assinatura_documento_obter_zsql(cod_usuario=cod_usuario_corrente, ind_assinado=0, ind_recusado=0, ind_separado=0)"><dtml-if sequence-start>[<dtml-var sequence-length>]</dtml-if></dtml-in></a>
+        <a class="nav-link active" id="principal-tab" data-bs-toggle="tab" href="#principal" role="tab" aria-controls="principal" data-target="#principal" aria-selected="true">Lista Principal <dtml-in expr="zsql.assinatura_documento_obter_zsql(cod_usuario=cod_usuario_corrente, ind_assinado=0, ind_recusado=0, ind_separado=0)"><dtml-if sequence-start>[<dtml-var sequence-length>]</dtml-if></dtml-in></a>
     </li>
     <li class="nav-item">
-        <a class="nav-link" id="analise-tab" data-bs-toggle="tab" href="#analise" role="tab" aria-controls="analise" data-bs-target="#analise" aria-selected="false">Itens Postergados <dtml-in expr="zsql.assinatura_documento_obter_zsql(cod_usuario=cod_usuario_corrente, ind_assinado=0, ind_recusado=0, ind_separado=1)"><dtml-if sequence-start>[<dtml-var sequence-length>]</dtml-if></dtml-in></a>
+        <a class="nav-link" id="analise-tab" data-bs-toggle="tab" href="#analise" role="tab" aria-controls="analise" data-target="#analise" aria-selected="false">Itens Postergados <dtml-in expr="zsql.assinatura_documento_obter_zsql(cod_usuario=cod_usuario_corrente, ind_assinado=0, ind_recusado=0, ind_separado=1)"><dtml-if sequence-start>[<dtml-var sequence-length>]</dtml-if></dtml-in></a>
     </li>     
 </ul>
 
@@ -282,10 +282,10 @@ $(document).ready(() => {
            <td>
              <div class="btn-group">
               <a class="btn btn-sm btn-secondary" href="<dtml-var portal_url>/<dtml-var expr="gerar_link_pysc(tipo_doc,codigo,anexo)">" target="_blank"><i class="far fa-file-pdf"></i> Visualizar</a>
-              <button type="button" class="btn btn-sm btn-secondary" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Assinar Digitalmente" data-src="<dtml-var portal_url>/generico/assinador/pades-signature_html?codigo=<dtml-var codigo>&anexo=<dtml-var anexo missing null>&tipo_doc=<dtml-var tipo_doc>&modal=1"><i class="fas fa-file-signature"></i> Assinar</button>
+              <button type="button" class="btn btn-sm btn-secondary" data-bs-toggle="modal" data-target="#iFrameModal" data-title="Assinar Digitalmente" data-src="<dtml-var portal_url>/generico/assinador/pades-signature_html?codigo=<dtml-var codigo>&anexo=<dtml-var anexo missing null>&tipo_doc=<dtml-var tipo_doc>&modal=1"><i class="fas fa-file-signature"></i> Assinar</button>
               <a class="btn btn-sm btn-secondary" href="<dtml-var portal_url>/cadastros/assinatura/assinatura_postergar_proc?cod_usuario=<dtml-var cod_usuario_corrente missing>&codigo=<dtml-var codigo missing>&anexo=<dtml-var anexo missing null>&tipo_doc=<dtml-var tipo_doc missing>" data-confirm="Postergar a assinatura?"><i class="fa fa-hourglass-end"></i> Postergar</a>
              <!-- Modal -->
-             <button type="button" class="btn btn-sm btn-danger d-print-none" data-bs-toggle="modal" data-bs-target="#recusaModal<dtml-var formatted_code>">
+             <button type="button" class="btn btn-sm btn-danger d-print-none" data-bs-toggle="modal" data-target="#recusaModal<dtml-var formatted_code>">
                 <i class="fas fa-window-close"></i> Recusar
              </button>
             </div>
@@ -525,9 +525,9 @@ $(document).ready(() => {
            <td>
              <div class="btn-group">
               <a class="btn btn-sm btn-secondary" href="<dtml-var portal_url>/<dtml-var expr="gerar_link_pysc(tipo_doc,codigo,anexo)">" target="_blank"><i class="far fa-file-pdf"></i> Visualizar</a>
-              <button type="button" class="btn btn-sm btn-secondary" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Assinar Digitalmente" data-src="<dtml-var portal_url>/generico/assinador/pades-signature_html?codigo=<dtml-var codigo>&anexo=<dtml-var anexo missing null>&tipo_doc=<dtml-var tipo_doc>&modal=1"><i class="fas fa-file-signature"></i> Assinar</button>
+              <button type="button" class="btn btn-sm btn-secondary" data-bs-toggle="modal" data-target="#iFrameModal" data-title="Assinar Digitalmente" data-src="<dtml-var portal_url>/generico/assinador/pades-signature_html?codigo=<dtml-var codigo>&anexo=<dtml-var anexo missing null>&tipo_doc=<dtml-var tipo_doc>&modal=1"><i class="fas fa-file-signature"></i> Assinar</button>
              <!-- Modal -->
-             <button type="button" class="btn btn-sm btn-danger d-print-none" data-bs-toggle="modal" data-bs-target="#recusaModal<dtml-var formatted_code>">
+             <button type="button" class="btn btn-sm btn-danger d-print-none" data-bs-toggle="modal" data-target="#recusaModal<dtml-var formatted_code>">
                 <i class="fas fa-window-close"></i> Recusar
              </button>
             </div>

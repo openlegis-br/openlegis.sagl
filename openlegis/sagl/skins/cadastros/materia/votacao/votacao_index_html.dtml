@@ -6,7 +6,7 @@
     <div class="card mb-4">
       <div class="card-header" id="headingOne">
         <p class="h5 mb-0">
-          <a href="#" class="d-block text-start" data-bs-toggle="collapse" data-bs-target="#collapseSessao" aria-expanded="true" aria-controls="collapseSessao"> 
+          <a href="#" class="d-block text-start" data-bs-toggle="collapse" data-target="#collapseSessao" aria-expanded="true" aria-controls="collapseSessao"> 
             <i class="fa float-right pt-1 align-self-center" aria-hidden="true"></i>
              <span class="h6 font-weight-bold">Deliberações em Plenário</span>
           </a>
@@ -45,7 +45,7 @@
                                <dtml-in expr="zsql.tipo_resultado_votacao_obter_zsql(tip_resultado_votacao=tip_resultado_votacao, ind_excluido=0)">
                                  <dtml-call expr="REQUEST.set('nom_resultado', nom_resultado)">
                                  <dtml-if expr="tip_votacao == 2">
-                                    <a href="#" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Resultado de Votação" data-src="<dtml-var portal_url>/consultas/sessao_plenaria/sessao_plenaria_mostrar_painel_proc?cod_sessao_plen=<dtml-var cod_sessao_plen>&cod_ordem=<dtml-var cod_ordem>&cod_materia=<dtml-var cod_materia>&tipo_materia=expediente&modal=1"><dtml-var nom_resultado></a>
+                                    <a href="#" data-bs-toggle="modal" data-target="#iFrameModal" data-title="Resultado de Votação" data-src="<dtml-var portal_url>/consultas/sessao_plenaria/sessao_plenaria_mostrar_painel_proc?cod_sessao_plen=<dtml-var cod_sessao_plen>&cod_ordem=<dtml-var cod_ordem>&cod_materia=<dtml-var cod_materia>&tipo_materia=expediente&modal=1"><dtml-var nom_resultado></a>
                                  <dtml-else>
                                    <b><dtml-var nom_resultado></b>
                                  </dtml-if>
@@ -77,7 +77,7 @@
                             <dtml-in expr="zsql.tipo_resultado_votacao_obter_zsql(tip_resultado_votacao=tip_resultado_votacao, ind_excluido=0)">
                               <dtml-call expr="REQUEST.set('nom_resultado', nom_resultado)">
                               <dtml-if expr="tip_votacao == 2 ">
-                                 <a href="#" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Resultado de Votação" data-src="<dtml-var portal_url>/consultas/sessao_plenaria/sessao_plenaria_mostrar_painel_proc?cod_sessao_plen=<dtml-var cod_sessao_plen>&cod_ordem=<dtml-var cod_ordem>&cod_materia=<dtml-var cod_materia>&tipo_materia=ordemdia&modal=1">
+                                 <a href="#" data-bs-toggle="modal" data-target="#iFrameModal" data-title="Resultado de Votação" data-src="<dtml-var portal_url>/consultas/sessao_plenaria/sessao_plenaria_mostrar_painel_proc?cod_sessao_plen=<dtml-var cod_sessao_plen>&cod_ordem=<dtml-var cod_ordem>&cod_materia=<dtml-var cod_materia>&tipo_materia=ordemdia&modal=1">
                                   <dtml-var nom_resultado> em <dtml-in expr="zsql.turno_discussao_obter_zsql(cod_turno=tip_turno)"><dtml-var des_turno></dtml-in>
                                 </a>
                               <dtml-else>

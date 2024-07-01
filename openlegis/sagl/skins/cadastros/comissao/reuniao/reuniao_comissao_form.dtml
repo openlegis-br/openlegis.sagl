@@ -192,7 +192,7 @@ $(document).ready(() => {
            <input class="form-control" type="text" id="txt_url_video" name="txt_url_video" maxlength="150" value="<dtml-var url_video missing null>" placeholder="Exemplo: https://www.youtube.com/embed/XXXXX" autocomplete="off" />
            <dtml-if expr="_.has_key('cod_reuniao') and url_video">
               <div class="input-group-append">                            
-                <button type="button" class="btn btn-sm btn-secondary" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Reprodução de Vídeo" data-src="<dtml-var url_video missing null=''>"><i class="fa fa-fw fa-play"></i><span class="d-none">Video</span></button>
+                <button type="button" class="btn btn-sm btn-secondary" data-bs-toggle="modal" data-target="#iFrameModal" data-title="Reprodução de Vídeo" data-src="<dtml-var url_video missing null=''>"><i class="fa fa-fw fa-play"></i><span class="d-none">Video</span></button>
               </div>
            </dtml-if>
          </div>
@@ -229,7 +229,7 @@ $(document).ready(() => {
                    <p>
                    <a class="btn btn-sm btn-primary" href="<dtml-var pauta>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fa fa-file-pdf"></i> Visualizar</a>
                    <dtml-if "sapl_documentos.props_sagl.restpki_access_token!=''">
-                     <button type="button" class="btn btn-sm btn-secondary" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Assinaturas Digitais" data-src="<dtml-var portal_url>/cadastros/assinatura/assinatura_solicitar_form?codigo=<dtml-var cod_reuniao>&tipo_doc=pauta_comissao&modal=1"><i class="fas fa-file-signature"></i> Assinaturas</button>
+                     <button type="button" class="btn btn-sm btn-secondary" data-bs-toggle="modal" data-target="#iFrameModal" data-title="Assinaturas Digitais" data-src="<dtml-var portal_url>/cadastros/assinatura/assinatura_solicitar_form?codigo=<dtml-var cod_reuniao>&tipo_doc=pauta_comissao&modal=1"><i class="fas fa-file-signature"></i> Assinaturas</button>
                   </dtml-if>
                   </p>
                 </dtml-let>
@@ -277,7 +277,7 @@ $(document).ready(() => {
                     <p>
                     <a class="btn btn-sm btn-primary" href="<dtml-var ata>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fa fa-file-pdf"></i> Visualizar</a>
                     <dtml-if "sapl_documentos.props_sagl.restpki_access_token!=''">
-                      <button type="button" class="btn btn-sm btn-secondary" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Assinaturas Digitais" data-src="<dtml-var portal_url>/cadastros/assinatura/assinatura_solicitar_form?codigo=<dtml-var cod_reuniao missing>&tipo_doc=ata_comissao&modal=1"><i class="fas fa-file-signature"></i> Assinaturas</button>
+                      <button type="button" class="btn btn-sm btn-secondary" data-bs-toggle="modal" data-target="#iFrameModal" data-title="Assinaturas Digitais" data-src="<dtml-var portal_url>/cadastros/assinatura/assinatura_solicitar_form?codigo=<dtml-var cod_reuniao missing>&tipo_doc=ata_comissao&modal=1"><i class="fas fa-file-signature"></i> Assinaturas</button>
                     </dtml-if>
                     </p>
                   </dtml-let>
@@ -443,7 +443,7 @@ $(document).ready(function() {
            <td>
              <dtml-if cod_materia>
                  <dtml-in expr="zsql.materia_obter_zsql(cod_materia=_.getitem('cod_materia'), ind_excluido=0)">
-                    <a href="#" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Edição de Item da Pauta" data-src="pauta_mostrar_proc?cod_item=<dtml-var cod_item>&cod_materia=<dtml-var cod_materia>&modal=1">
+                    <a href="#" data-bs-toggle="modal" data-target="#iFrameModal" data-title="Edição de Item da Pauta" data-src="pauta_mostrar_proc?cod_item=<dtml-var cod_item>&cod_materia=<dtml-var cod_materia>&modal=1">
                       <b><dtml-var des_tipo_materia missing> nº <dtml-var num_ident_basica missing>/<dtml-var ano_ident_basica missing></b></a>
                  </dtml-in>
                  - <dtml-var txt_observacao>
@@ -463,7 +463,7 @@ $(document).ready(function() {
                 <dtml-elif expr="tip_conclusao=='C'">
                    <dtml-call expr="REQUEST.set('enunciado', 'CONTRÁRIO')">
                 </dtml-if>              
-                  <a href="#" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Edição de Item da Pauta" data-src="pauta_mostrar_proc?cod_item=<dtml-var cod_item>&cod_parecer=<dtml-var cod_parecer>&modal=1">                
+                  <a href="#" data-bs-toggle="modal" data-target="#iFrameModal" data-title="Edição de Item da Pauta" data-src="pauta_mostrar_proc?cod_item=<dtml-var cod_item>&cod_parecer=<dtml-var cod_parecer>&modal=1">                
                     <b>Parecer <dtml-var sgl_comissao> nº <dtml-var num_parecer>/<dtml-var ano_parecer> - <dtml-var enunciado> ao <dtml-var id_materia> </b>          
                   </a>
                  <dtml-in expr="zsql.parlamentar_obter_zsql(cod_parlamentar=cod_parlamentar)">
@@ -492,8 +492,8 @@ $(document).ready(function() {
 
 <div class="row">
   <div class="col-12 text-start">
-  <a class="btn btn-sm btn-secondary mb-3" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Adicionar Matéria na Pauta" data-src="pauta_reuniao_form?cod_reuniao=<dtml-var cod_reuniao missing>&modal=1" ><i class="fa fa-plus"></i> Matéria</a>
-  <a class="btn btn-sm btn-secondary mb-3" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Adicionar Parecer na Pauta" data-src="pauta_reuniao_parecer_form?cod_reuniao=<dtml-var cod_reuniao missing>&cod_comissao=<dtml-var cod_comissao>&modal=1" ><i class="fa fa-plus"></i> Parecer</a>  
+  <a class="btn btn-sm btn-secondary mb-3" data-bs-toggle="modal" data-target="#iFrameModal" data-title="Adicionar Matéria na Pauta" data-src="pauta_reuniao_form?cod_reuniao=<dtml-var cod_reuniao missing>&modal=1" ><i class="fa fa-plus"></i> Matéria</a>
+  <a class="btn btn-sm btn-secondary mb-3" data-bs-toggle="modal" data-target="#iFrameModal" data-title="Adicionar Parecer na Pauta" data-src="pauta_reuniao_parecer_form?cod_reuniao=<dtml-var cod_reuniao missing>&cod_comissao=<dtml-var cod_comissao>&modal=1" ><i class="fa fa-plus"></i> Parecer</a>  
 </div>
 </dtml-if>
 </div

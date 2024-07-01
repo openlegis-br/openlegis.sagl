@@ -143,7 +143,7 @@ $(document).ready(function() {
                        <b><dtml-var sgl_tipo_materia missing> N° <dtml-var num_ident_basica missing>/<dtml-var ano_ident_basica missing></b> - <dtml-in expr="zsql.autoria_obter_zsql(cod_materia=cod_materia)"><dtml-var nom_autor_join><dtml-unless sequence-end>,</dtml-unless></dtml-in> - <dtml-var txt_ementa>
                     </dtml-in>
                  <dtml-else>
-                   <a href="" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Cadastro de Item" data-src="item_mostrar_proc?cod_item=<dtml-var cod_item>&cod_sessao_plen=<dtml-var hdn_cod_sessao_plen>&modal=1"> <dtml-var txt_exibicao></a>
+                   <a href="" data-bs-toggle="modal" data-target="#iFrameModal" data-title="Cadastro de Item" data-src="item_mostrar_proc?cod_item=<dtml-var cod_item>&cod_sessao_plen=<dtml-var hdn_cod_sessao_plen>&modal=1"> <dtml-var txt_exibicao></a>
                  </dtml-if>
               </td>
               <td>
@@ -178,7 +178,7 @@ $(document).ready(function() {
      <dtml-if sequence-end>
            <tbody>
          </table>
-         <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Cadastro de Item" data-src="item_form?cod_sessao_plen=<dtml-var hdn_cod_sessao_plen>&modal=1">Incluir Item</button>
+         <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-target="#iFrameModal" data-title="Cadastro de Item" data-src="item_form?cod_sessao_plen=<dtml-var hdn_cod_sessao_plen>&modal=1">Incluir Item</button>
          <input class="btn btn-sm btn-danger" type="button" value="Excluir Lista" onClick="sessao_encerrar()">
         </form>
      </dtml-if sequence-end>

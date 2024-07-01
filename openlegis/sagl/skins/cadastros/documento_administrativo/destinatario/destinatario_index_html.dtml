@@ -121,8 +121,8 @@ $(document).ready(function() {
 </dtml-in>
 
 <div class="text-start mt-2">
-  <a class="btn btn-primary" href="#" data-bs-toggle="modal" data-target="#iFrameModal" data-title="Inclusão de Destinatário" data-src="destinatario/destinatario_pesquisar_form?hdn_cod_documento=<dtml-var cod_documento>&modal=1"> Incluir Destinatário </a>
-  <a class="btn btn-primary" href="#" data-bs-toggle="modal" data-target="#iFrameModal" data-title="Geração de Lista" data-src="destinatario/destinatario_form?cod_documento=<dtml-var cod_documento>&modal=1"> Gerar Lista </a>
+  <a class="btn btn-primary" href="#" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Inclusão de Destinatário" data-src="destinatario/destinatario_pesquisar_form?hdn_cod_documento=<dtml-var cod_documento>&modal=1"> Incluir Destinatário </a>
+  <a class="btn btn-primary" href="#" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Geração de Lista" data-src="destinatario/destinatario_form?cod_documento=<dtml-var cod_documento>&modal=1"> Gerar Lista </a>
   <dtml-if expr="zsql.destinatario_oficio_obter_zsql(cod_documento = cod_documento, ind_excluido=0) and AUTHENTICATED_USER.has_role(['Operador','Operador Modulo Administrativo', 'Operador Materia'])">
     <input class="btn btn-danger" type="button" value="Excluir Lista" onClick="lista_destinatarios_excluir()" />
   </dtml-if>

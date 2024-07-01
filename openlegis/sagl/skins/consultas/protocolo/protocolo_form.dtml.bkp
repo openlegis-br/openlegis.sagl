@@ -28,9 +28,9 @@
         <i class="fas fa-fw fa-file-export"></i> Gerar
       </button>
       <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
-           <button type="button" class="dropdown-item" data-bs-toggle="modal" data-target="#iFrameModal" data-title="Etiqueta de Protocolo" data-src="<dtml-var portal_url>/relatorios/pdf_etiqueta_protocolo_preparar_pysc?rad_tip_protocolo=&txt_cod_protocolo=<dtml-var cod_protocolo>&txt_num_protocolo=<dtml-var num_protocolo>&txt_ano_protocolo=<dtml-var ano_protocolo>&dt_apres=&dt_apres2=&rad_tip_processo=&lst_tip_documento=&lst_tip_materia=&txt_assunto=&txa_txt_interessado=&hdn_cod_autor=">Etiqueta de Protocolo</button>
-           <button type="button" class="dropdown-item" data-bs-toggle="modal" data-target="#iFrameModal" data-title="Etiqueta de Processo" data-src="<dtml-var portal_url>/relatorios/pdf_capa_processo_preparar_pysc?rad_tip_protocolo=&txt_cod_protocolo=<dtml-var cod_protocolo>&txt_num_protocolo=<dtml-var num_protocolo>&txt_ano_protocolo=<dtml-var ano_protocolo>&dt_apres=&dt_apres2=&rad_tip_processo=&lst_tip_documento=&lst_tip_materia=&txt_assunto=&txa_txt_interessado=&hdn_cod_autor=">Etiqueta de Processo</button>           
-           <button type="button" class="dropdown-item" data-bs-toggle="modal" data-target="#iFrameModal" data-title="Emissão de Comprovante" data-src="comprovante_protocolo_mostrar_proc?cod_protocolo=<dtml-var cod_protocolo>&modal=1">Comprovante de Protocolo</button>  
+           <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Etiqueta de Protocolo" data-src="<dtml-var portal_url>/relatorios/pdf_etiqueta_protocolo_preparar_pysc?rad_tip_protocolo=&txt_cod_protocolo=<dtml-var cod_protocolo>&txt_num_protocolo=<dtml-var num_protocolo>&txt_ano_protocolo=<dtml-var ano_protocolo>&dt_apres=&dt_apres2=&rad_tip_processo=&lst_tip_documento=&lst_tip_materia=&txt_assunto=&txa_txt_interessado=&hdn_cod_autor=">Etiqueta de Protocolo</button>
+           <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Etiqueta de Processo" data-src="<dtml-var portal_url>/relatorios/pdf_capa_processo_preparar_pysc?rad_tip_protocolo=&txt_cod_protocolo=<dtml-var cod_protocolo>&txt_num_protocolo=<dtml-var num_protocolo>&txt_ano_protocolo=<dtml-var ano_protocolo>&dt_apres=&dt_apres2=&rad_tip_processo=&lst_tip_documento=&lst_tip_materia=&txt_assunto=&txa_txt_interessado=&hdn_cod_autor=">Etiqueta de Processo</button>           
+           <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Emissão de Comprovante" data-src="comprovante_protocolo_mostrar_proc?cod_protocolo=<dtml-var cod_protocolo>&modal=1">Comprovante de Protocolo</button>  
       </div>
   </dtml-if>
 </dtml-let>
@@ -68,7 +68,7 @@
             </dtml-let>
             <dtml-if expr="ind_anulado==0 and AUTHENTICATED_USER.has_role(['Operador', 'Operador Protocolo'])">
                <dtml-if "sapl_documentos.props_sagl.restpki_access_token!=''">
-                  <button type="button" class="btn btn-sm btn-secondary d-print-none " data-bs-toggle="modal" data-target="#iFrameModal" data-title="Assinatura Digital" data-src="<dtml-var portal_url>/generico/assinador/pades-signature_html?codigo=<dtml-var cod_protocolo>&tipo_doc=protocolo&modal=1"><i class="fas fa-file-signature"></i>Assinar</button>
+                  <button type="button" class="btn btn-sm btn-secondary d-print-none " data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Assinatura Digital" data-src="<dtml-var portal_url>/generico/assinador/pades-signature_html?codigo=<dtml-var cod_protocolo>&tipo_doc=protocolo&modal=1"><i class="fas fa-file-signature"></i>Assinar</button>
                </dtml-if>
             </dtml-if>
             <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador'])">
@@ -209,7 +209,7 @@
             <dtml-if expr="des_tipo_mat_acessoria=='Emenda' or tip_materia == 97">
                <dtml-in expr="zsql.emenda_obter_zsql(num_protocolo=num_protocolo,cod_materia=cod_materia_principal)">
                  <dtml-if sequence-start>
-                     <a href="#" data-bs-toggle="modal" data-target="#iFrameModal" data-title="Cadastro de Emenda" data-src="<dtml-var portal_url>/cadastros/materia/emenda/emenda_mostrar_proc?cod_materia=<dtml-var cod_materia_principal>&cod_emenda=<dtml-var cod_emenda>&modal=1">
+                     <a href="#" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Cadastro de Emenda" data-src="<dtml-var portal_url>/cadastros/materia/emenda/emenda_mostrar_proc?cod_materia=<dtml-var cod_materia_principal>&cod_emenda=<dtml-var cod_emenda>&modal=1">
                         Emenda nº <dtml-var num_emenda> (<dtml-var des_tipo_emenda>)
                      </a>
                  </dtml-if>
@@ -223,13 +223,13 @@
                        </dtml-in>
                     </dtml-in>
                     <dtml-call "REQUEST.set('cod_autor_sel', cod_autor)">
-                    <button type="button" class="btn btn-sm btn-secondary" data-bs-toggle="modal" data-target="#iFrameModal" data-title="Cadastro de Emenda" data-src="<dtml-var portal_url>/cadastros/materia/emenda/emenda_form?cod_materia=<dtml-var cod_materia_principal>&dat_apresentacao=<dtml-var dat_apresentacao>&txt_ementa=<dtml-var txt_assunto_ementa html_quote>&num_protocolo=<dtml-var num_protocolo>&tip_autor=<dtml-var tip_autor>&des_tipo_autor=<dtml-var des_tipo_autor>&cod_autor_sel=<dtml-var cod_autor_sel>&modal=1">Cadastrar Emenda</button>  
+                    <button type="button" class="btn btn-sm btn-secondary" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Cadastro de Emenda" data-src="<dtml-var portal_url>/cadastros/materia/emenda/emenda_form?cod_materia=<dtml-var cod_materia_principal>&dat_apresentacao=<dtml-var dat_apresentacao>&txt_ementa=<dtml-var txt_assunto_ementa html_quote>&num_protocolo=<dtml-var num_protocolo>&tip_autor=<dtml-var tip_autor>&des_tipo_autor=<dtml-var des_tipo_autor>&cod_autor_sel=<dtml-var cod_autor_sel>&modal=1">Cadastrar Emenda</button>  
                  </dtml-if>
                </dtml-in>
             <dtml-elif expr="des_tipo_mat_acessoria=='Substitutivo' or tip_materia == 98">
                <dtml-in expr="zsql.substitutivo_obter_zsql(num_protocolo=num_protocolo,cod_materia=cod_materia_principal)">
                  <dtml-if sequence-start>
-                     <a href="#" data-bs-toggle="modal" data-target="#iFrameModal" data-title="Cadastro de Substitutivo" data-src="<dtml-var portal_url>/cadastros/materia/substitutivo/substitutivo_mostrar_proc?cod_materia=<dtml-var cod_materia_principal>&cod_substitutivo=<dtml-var cod_substitutivo>&modal=1">                 
+                     <a href="#" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Cadastro de Substitutivo" data-src="<dtml-var portal_url>/cadastros/materia/substitutivo/substitutivo_mostrar_proc?cod_materia=<dtml-var cod_materia_principal>&cod_substitutivo=<dtml-var cod_substitutivo>&modal=1">                 
                         Substitutivo nº <dtml-var num_substitutivo>
                      </a>
                  </dtml-if>
@@ -243,7 +243,7 @@
                        </dtml-in>
                     </dtml-in>
                     <dtml-call "REQUEST.set('cod_autor_sel', cod_autor)">
-                    <button type="button" class="btn btn-sm btn-secondary" data-bs-toggle="modal" data-target="#iFrameModal" data-title="Cadastro de Substitutivo" data-src="<dtml-var portal_url>/cadastros/materia/substitutivo/substitutivo_form?cod_materia=<dtml-var cod_materia_principal>&dat_apresentacao=<dtml-var dat_apresentacao>&num_protocolo=<dtml-var num_protocolo>&tip_autor=<dtml-var tip_autor>&des_tipo_autor=<dtml-var des_tipo_autor>&cod_autor_sel=<dtml-var cod_autor_sel>&modal=1">Cadastrar Substitutivo</button> 
+                    <button type="button" class="btn btn-sm btn-secondary" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Cadastro de Substitutivo" data-src="<dtml-var portal_url>/cadastros/materia/substitutivo/substitutivo_form?cod_materia=<dtml-var cod_materia_principal>&dat_apresentacao=<dtml-var dat_apresentacao>&num_protocolo=<dtml-var num_protocolo>&tip_autor=<dtml-var tip_autor>&des_tipo_autor=<dtml-var des_tipo_autor>&cod_autor_sel=<dtml-var cod_autor_sel>&modal=1">Cadastrar Substitutivo</button> 
                  </dtml-if>
                </dtml-in>
              </dtml-if>
@@ -254,7 +254,7 @@
             </dtml-in>
             <dtml-in expr="zsql.documento_acessorio_obter_zsql(num_protocolo=num_protocolo,cod_materia=cod_materia_principal)">
                  <dtml-if sequence-start>
-                     <a href="#" data-bs-toggle="modal" data-target="#iFrameModal" data-title="Cadastro de Documento Acessório" data-src="<dtml-var portal_url>/cadastros/materia/documento_acessorio/documento_acessorio_mostrar_proc?cod_documento=<dtml-var cod_documento>&modal=1">
+                     <a href="#" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Cadastro de Documento Acessório" data-src="<dtml-var portal_url>/cadastros/materia/documento_acessorio/documento_acessorio_mostrar_proc?cod_documento=<dtml-var cod_documento>&modal=1">
                         <dtml-var des_tipo_mat_acessoria> - <dtml-var nom_documento>
                      </a>
                  </dtml-if>
@@ -263,7 +263,7 @@
                    <dtml-in expr="zsql.autor_obter_zsql(cod_autor=cod_autor)">
                       <dtml-call expr="REQUEST.set('nom_autor_documento', nom_autor_join)">
                    </dtml-in>                 
-                   <button type="button" class="btn btn-sm btn-secondary" data-bs-toggle="modal" data-target="#iFrameModal" data-title="Cadastro de Documento Acessório" data-src="<dtml-var portal_url>/cadastros/materia/documento_acessorio/documento_acessorio_form?cod_materia=<dtml-var cod_materia_principal>&tip_documento_sel=<dtml-var tip_materia>&num_protocolo=<dtml-var num_protocolo>&nom_autor_documento=<dtml-var nom_autor_documento>&modal=1">Cadastrar <dtml-var des_tipo_mat_acessoria></button>                     
+                   <button type="button" class="btn btn-sm btn-secondary" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Cadastro de Documento Acessório" data-src="<dtml-var portal_url>/cadastros/materia/documento_acessorio/documento_acessorio_form?cod_materia=<dtml-var cod_materia_principal>&tip_documento_sel=<dtml-var tip_materia>&num_protocolo=<dtml-var num_protocolo>&nom_autor_documento=<dtml-var nom_autor_documento>&modal=1">Cadastrar <dtml-var des_tipo_mat_acessoria></button>                     
                  </dtml-if>
             </dtml-in>
           <dtml-elif expr="tip_natureza_materia==4">
@@ -280,7 +280,7 @@
                     <dtml-call "REQUEST.set('sgl_comissao', sgl_comissao)">
                 </dtml-in>
                 <dtml-in expr="zsql.relatoria_obter_zsql(cod_comissao=cod_comissao, cod_materia=cod_materia_principal, num_protocolo=num_protocolo, num_ordem=num_ordem)">
-                  <a href="#" data-bs-toggle="modal" data-target="#iFrameModal" data-title="Cadastro de Parecer" data-src="<dtml-var portal_url>/cadastros/comissao/materia/relatoria_mostrar_proc?cod_relatoria=<dtml-var cod_relatoria>&cod_materia=<dtml-var cod_materia>&cod_comissao=<dtml-var cod_comissao>&num_ordem=<dtml-var num_ordem>&modal=1">
+                  <a href="#" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Cadastro de Parecer" data-src="<dtml-var portal_url>/cadastros/comissao/materia/relatoria_mostrar_proc?cod_relatoria=<dtml-var cod_relatoria>&cod_materia=<dtml-var cod_materia>&cod_comissao=<dtml-var cod_comissao>&num_ordem=<dtml-var num_ordem>&modal=1">
                     Parecer <dtml-var sgl_comissao> <dtml-var num_parecer missing null>/<dtml-var ano_parecer>
                   </a>
                 <dtml-else>
@@ -289,7 +289,7 @@
                 <dtml-else>
                     <dtml-call "REQUEST.set('num_ordem', '1')">
                 </dtml-in>                
-                  <button type="button" class="btn btn-sm btn-secondary" data-bs-toggle="modal" data-target="#iFrameModal" data-title="Cadastro de Parecer" data-src="<dtml-var portal_url>/cadastros/comissao/materia/relatoria_form?cod_materia=<dtml-var cod_materia_principal>&cod_comissao=<dtml-var cod_comissao>&num_protocolo=<dtml-var num_protocolo>&modal=1">Cadastrar Parecer</button>                 
+                  <button type="button" class="btn btn-sm btn-secondary" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Cadastro de Parecer" data-src="<dtml-var portal_url>/cadastros/comissao/materia/relatoria_form?cod_materia=<dtml-var cod_materia_principal>&cod_comissao=<dtml-var cod_comissao>&num_protocolo=<dtml-var num_protocolo>&modal=1">Cadastrar Parecer</button>                 
                 </dtml-in>
              </dtml-if>
           </dtml-if>

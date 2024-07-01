@@ -769,7 +769,7 @@ $(function () {
              <dtml-if "sapl_documentos.props_sagl.restpki_access_token!=''">                           
               <dtml-if "AUTHENTICATED_USER.has_role(['Autor','Assessor Parlamentar'])">
                 <dtml-if expr="zsql.assinatura_documento_obter_zsql(codigo=cod_proposicao,tipo_doc='proposicao')">
-                   <button type="button" class="btn btn-sm btn-secondary" data-bs-toggle="modal" data-target="#iFrameModal" data-title="Assinaturas Digitais" data-src="<dtml-var portal_url>/cadastros/assinatura/assinatura_solicitar_form?codigo=<dtml-var cod_proposicao>&tipo_doc=proposicao&modal=1"><i class="fas fa-file-signature"></i>Assinaturas</button>
+                   <button type="button" class="btn btn-sm btn-secondary" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Assinaturas Digitais" data-src="<dtml-var portal_url>/cadastros/assinatura/assinatura_solicitar_form?codigo=<dtml-var cod_proposicao>&tipo_doc=proposicao&modal=1"><i class="fas fa-file-signature"></i>Assinaturas</button>
                 </dtml-if>
               </dtml-if>
              </dtml-if>
@@ -787,11 +787,11 @@ $(function () {
                      <dtml-if expr="(des_tipo_proposicao=='Requerimento' or des_tipo_proposicao=='Indicação' or des_tipo_proposicao=='Moção' or des_tipo_proposicao=='Pedido de Informação')">                     
                         <a class="btn btn-sm btn-primary" href="<dtml-var portal_url>/cadastros/proposicao/assinar_pdf?cod_proposicao=<dtml-var cod_proposicao missing>" data-confirm="Confirma a assinatura da proposição?"><i class="fas fa-file-signature"></i> Assinar</a>
                      </dtml-if>
-                     <button type="button" class="btn btn-sm btn-secondary" data-bs-toggle="modal" data-target="#iFrameModal" data-title="Assinar Digitalmente" data-src="<dtml-var portal_url>/generico/assinador/pades-signature_html?codigo=<dtml-var cod_proposicao missing>&tipo_doc=proposicao&modal=1"><i class="fas fa-file-signature"></i> ICP-Brasil</button>
+                     <button type="button" class="btn btn-sm btn-secondary" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Assinar Digitalmente" data-src="<dtml-var portal_url>/generico/assinador/pades-signature_html?codigo=<dtml-var cod_proposicao missing>&tipo_doc=proposicao&modal=1"><i class="fas fa-file-signature"></i> ICP-Brasil</button>
                   </dtml-if>
                </dtml-if>
                <dtml-if expr="AUTHENTICATED_USER.has_role(['Assessor Parlamentar']) or (des_tipo_autor == 'Mesa Diretora' or des_tipo_autor == 'Comissao')">
-                  <button type="button" class="btn btn-sm btn-secondary" data-bs-toggle="modal" data-target="#iFrameModal" data-title="Assinaturas Digitais" data-src="<dtml-var portal_url>/cadastros/assinatura/assinatura_solicitar_form?codigo=<dtml-var cod_proposicao missing>&tipo_doc=proposicao&modal=1"><i class="fas fa-file-signature"></i> Assinaturas</button>
+                  <button type="button" class="btn btn-sm btn-secondary" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Assinaturas Digitais" data-src="<dtml-var portal_url>/cadastros/assinatura/assinatura_solicitar_form?codigo=<dtml-var cod_proposicao missing>&tipo_doc=proposicao&modal=1"><i class="fas fa-file-signature"></i> Assinaturas</button>
                </dtml-if>
           <dtml-else>
                <dtml-if expr="AUTHENTICATED_USER.has_role(['Autor']) and des_tipo_autor != 'Mesa Diretora' and des_tipo_autor != 'Comissao'">
@@ -954,7 +954,7 @@ $(function () {
               </dtml-let>
               <dtml-if expr="prop_enviada and not prop_devolvida">
                <dtml-if "sapl_documentos.props_sagl.restpki_access_token!=''">                           
-                <button type="button" class="btn btn-sm btn-secondary" data-bs-toggle="modal" data-target="#iFrameModal" data-title="Assinaturas Digitais" data-src="<dtml-var portal_url>/cadastros/assinatura/assinatura_solicitar_form?codigo=<dtml-var cod_proposicao missing>&tipo_doc=proposicao&modal=1"><i class="fas fa-file-signature"></i> Assinaturas</button>         
+                <button type="button" class="btn btn-sm btn-secondary" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Assinaturas Digitais" data-src="<dtml-var portal_url>/cadastros/assinatura/assinatura_solicitar_form?codigo=<dtml-var cod_proposicao missing>&tipo_doc=proposicao&modal=1"><i class="fas fa-file-signature"></i> Assinaturas</button>         
               </dtml-if>    
              </dtml-if>   
           <dtml-elif "hasattr(sapl_documentos.proposicao,id_documento)">  
@@ -964,7 +964,7 @@ $(function () {
                </a>
                <dtml-if expr="not prop_recebida and not prop_devolvida">  
                 <dtml-if "sapl_documentos.props_sagl.restpki_access_token!=''">
-                 <button type="button" class="btn btn-sm btn-secondary" data-bs-toggle="modal" data-target="#iFrameModal" data-title="Assinaturas Digitais" data-src="<dtml-var portal_url>/cadastros/assinatura/assinatura_solicitar_form?codigo=<dtml-var cod_proposicao>&tipo_doc=proposicao&modal=1"><i class="fas fa-file-signature"></i> Assinaturas</button>  
+                 <button type="button" class="btn btn-sm btn-secondary" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Assinaturas Digitais" data-src="<dtml-var portal_url>/cadastros/assinatura/assinatura_solicitar_form?codigo=<dtml-var cod_proposicao>&tipo_doc=proposicao&modal=1"><i class="fas fa-file-signature"></i> Assinaturas</button>  
                 </dtml-if>
                </dtml-if>
                <dtml-if expr="not prop_recebida and not prop_devolvida">
@@ -1088,7 +1088,7 @@ $(function () {
             <dtml-if expr="ind_mat_ou_doc=='D' and (des_tipo_proposicao=='Parecer' or des_tipo_proposicao=='Parecer de Comissão')"> 
                <dtml-let cod_doc="pysc.proposicao_calcular_checksum_pysc(cod_proposicao)">
                 <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia'])">
-                  <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-target="#iFrameModal" data-title="Parecer de Comissão" data-src="<dtml-var portal_url>/cadastros/recebimento_proposicao/proposicao_buscar_proc?txtCodDoc=<dtml-var cod_doc missing>&modal=1"><i class="fas fa-exchange-alt"></i> Incorporar Parecer</button>
+                  <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Parecer de Comissão" data-src="<dtml-var portal_url>/cadastros/recebimento_proposicao/proposicao_buscar_proc?txtCodDoc=<dtml-var cod_doc missing>&modal=1"><i class="fas fa-exchange-alt"></i> Incorporar Parecer</button>
                 </dtml-if>
                </dtml-let>                
             <dtml-else>
@@ -1128,7 +1128,7 @@ $(function () {
     <div class="row">
       <div class="col-12 text-end">
         <i class="fa fa-clock small"></i>      
-        <a href="#" class="text-muted small" data-bs-toggle="modal" data-target="#iFrameModal" data-title="Histórico" data-src="<dtml-var portal_url>/historico?cod_registro=<dtml-var cod_proposicao>&modulo=proposicao&modal=1">Histórico</a>  
+        <a href="#" class="text-muted small" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Histórico" data-src="<dtml-var portal_url>/historico?cod_registro=<dtml-var cod_proposicao>&modulo=proposicao&modal=1">Histórico</a>  
       </div>
     </div>
   </dtml-if>

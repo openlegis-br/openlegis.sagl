@@ -75,7 +75,7 @@
         </dtml-if>
         <span class="titulo"><b>PROTOCOLO Nº <dtml-var num_protocolo>/<dtml-var ano_protocolo></b></span></a>
         <dtml-if expr="ind_anulado==0">
-           <a href="" data-bs-toggle="modal" data-target="#iFrameModal" data-title="Etiqueta de Protocolo" data-src="<dtml-var portal_url>/relatorios/pdf_etiqueta_protocolo_preparar_pysc?rad_tip_protocolo=&txt_cod_protocolo=<dtml-var cod_protocolo>&txt_num_protocolo=<dtml-var num_protocolo>&txt_ano_protocolo=<dtml-var ano_protocolo>&dt_apres=&dt_apres2=&rad_tip_processo=&lst_tip_documento=&lst_tip_materia=&txt_assunto=&txa_txt_interessado=&hdn_cod_autor="><i class="fa fa-fw fa-barcode"></i><span class="d-none">PDF</span></a>
+           <a href="" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Etiqueta de Protocolo" data-src="<dtml-var portal_url>/relatorios/pdf_etiqueta_protocolo_preparar_pysc?rad_tip_protocolo=&txt_cod_protocolo=<dtml-var cod_protocolo>&txt_num_protocolo=<dtml-var num_protocolo>&txt_ano_protocolo=<dtml-var ano_protocolo>&dt_apres=&dt_apres2=&rad_tip_processo=&lst_tip_documento=&lst_tip_materia=&txt_assunto=&txa_txt_interessado=&hdn_cod_autor="><i class="fa fa-fw fa-barcode"></i><span class="d-none">PDF</span></a>
         </dtml-if>
         <dtml-if expr="ind_anulado==1"> <span class="anulado">** NULO **</span></dtml-if><br>
         <dtml-var txt_assunto_ementa missing><br>
@@ -139,7 +139,7 @@
                  <b>Tipo de Matéria:</b> <dtml-var des_tipo_mat_acessoria>
                  <dtml-in expr="zsql.emenda_obter_zsql(num_protocolo=num_protocolo,cod_materia=cod_materia_principal)">
                     <br /><b>Registro Derivado:</b>
-                     <a href="#" data-bs-toggle="modal" data-target="#iFrameModal" data-title="Cadastro de Emenda" data-src="<dtml-var portal_url>/cadastros/materia/emenda/emenda_mostrar_proc?cod_materia=<dtml-var cod_materia_principal>&cod_emenda=<dtml-var cod_emenda>&modal=1">                    
+                     <a href="#" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Cadastro de Emenda" data-src="<dtml-var portal_url>/cadastros/materia/emenda/emenda_mostrar_proc?cod_materia=<dtml-var cod_materia_principal>&cod_emenda=<dtml-var cod_emenda>&modal=1">                    
                       Emenda nº <dtml-var num_emenda> (<dtml-var des_tipo_emenda>)
                     </a>
                  </dtml-in>
@@ -147,7 +147,7 @@
                  <b>Tipo de Matéria:</b> <dtml-var des_tipo_mat_acessoria>
                  <dtml-in expr="zsql.substitutivo_obter_zsql(num_protocolo=num_protocolo,cod_materia=cod_materia_principal)">
                     <br /><b>Registro Derivado:</b>
-                     <a href="#" data-bs-toggle="modal" data-target="#iFrameModal" data-title="Cadastro de Substitutivo" data-src="<dtml-var portal_url>/cadastros/materia/substitutivo/substitutivo_mostrar_proc?cod_materia=<dtml-var cod_materia_principal>&cod_substitutivo=<dtml-var cod_substitutivo>&modal=1">  
+                     <a href="#" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Cadastro de Substitutivo" data-src="<dtml-var portal_url>/cadastros/materia/substitutivo/substitutivo_mostrar_proc?cod_materia=<dtml-var cod_materia_principal>&cod_substitutivo=<dtml-var cod_substitutivo>&modal=1">  
                        Substitutivo nº <dtml-var num_substitutivo>
                     </a>
                  </dtml-in>
@@ -161,7 +161,7 @@
                  <b>Tipo de Documento:</b> <dtml-var des_tipo_documento>
                   <dtml-in expr="zsql.documento_acessorio_obter_zsql(num_protocolo=num_protocolo, cod_materia=cod_materia_principal)">
                      <br /><b>Registro Derivado:</b>
-                     <a href="#" data-bs-toggle="modal" data-target="#iFrameModal" data-title="Cadastro de Documento Acessório" data-src="<dtml-var portal_url>/cadastros/materia/documento_acessorio/documento_acessorio_mostrar_proc?cod_documento=<dtml-var cod_documento>&modal=1">
+                     <a href="#" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Cadastro de Documento Acessório" data-src="<dtml-var portal_url>/cadastros/materia/documento_acessorio/documento_acessorio_mostrar_proc?cod_documento=<dtml-var cod_documento>&modal=1">
                         <dtml-var nom_documento>
                      </a>
                   </dtml-in>
@@ -183,7 +183,7 @@
                 </dtml-in>
                 <br /><b>Registro Derivado:</b>
                 <dtml-in expr="zsql.relatoria_obter_zsql(cod_comissao=cod_comissao, cod_materia=cod_materia_principal, num_protocolo=num_protocolo)">
-                    <a href="#" data-bs-toggle="modal" data-target="#iFrameModal" data-title="Cadastro de Parecer" data-src="<dtml-var portal_url>/cadastros/comissao/materia/relatoria_mostrar_proc?cod_relatoria=<dtml-var cod_relatoria>&cod_materia=<dtml-var cod_materia>&cod_comissao=<dtml-var cod_comissao>&num_ordem=<dtml-var num_ordem>&modal=1">
+                    <a href="#" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Cadastro de Parecer" data-src="<dtml-var portal_url>/cadastros/comissao/materia/relatoria_mostrar_proc?cod_relatoria=<dtml-var cod_relatoria>&cod_materia=<dtml-var cod_materia>&cod_comissao=<dtml-var cod_comissao>&num_ordem=<dtml-var num_ordem>&modal=1">
                       Parecer <dtml-var sgl_comissao> <dtml-var num_parecer missing null>/<dtml-var ano_parecer>
                    </a>
                 </dtml-in>

@@ -86,7 +86,7 @@ $(document).ready(function() {
     </dtml-if sequence-start>
        <tr> 
           <td>
-            <a href="#" data-bs-toggle="modal" data-target="#iFrameModal" data-title="Edição de Emenda" data-src="emenda/emenda_mostrar_proc?cod_emenda=<dtml-var cod_emenda>&cod_materia=<dtml-var cod_materia>&modal=1">
+            <a href="#" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Edição de Emenda" data-src="emenda/emenda_mostrar_proc?cod_emenda=<dtml-var cod_emenda>&cod_materia=<dtml-var cod_materia>&modal=1">
                <dtml-var num_emenda>
             </a>
           </td>
@@ -117,7 +117,7 @@ $(document).ready(function() {
                 <dtml-if tip_resultado_votacao>
                 <dtml-in expr="zsql.tipo_resultado_votacao_obter_zsql(tip_resultado_votacao=tip_resultado_votacao, ind_excluido=0)">
                     <dtml-if expr="tip_votacao == 2 ">
-                       <a href="#" data-bs-toggle="modal" data-target="#iFrameModal" data-title="Resultado de Votação" data-src="<dtml-var portal_url>/consultas/sessao_plenaria/sessao_plenaria_mostrar_painel_proc?cod_sessao_plen=<dtml-var cod_sessao_plen>&cod_ordem=<dtml-var cod_ordem>&cod_materia=<dtml-var cod_materia>&cod_emenda=<dtml-var cod_emenda>&tipo_materia=acessoria&modal=1">  
+                       <a href="#" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Resultado de Votação" data-src="<dtml-var portal_url>/consultas/sessao_plenaria/sessao_plenaria_mostrar_painel_proc?cod_sessao_plen=<dtml-var cod_sessao_plen>&cod_ordem=<dtml-var cod_ordem>&cod_materia=<dtml-var cod_materia>&cod_emenda=<dtml-var cod_emenda>&tipo_materia=acessoria&modal=1">  
                          <b><dtml-var nom_resultado></b>
                        </a>
                     <dtml-else>
@@ -138,4 +138,4 @@ $(document).ready(function() {
       <p>Nenhuma emenda cadastrada.</p>
    </dtml-in>
     
-  <button type="button" class="btn m btn-primary d-print-none" data-bs-toggle="modal" data-target="#iFrameModal" data-title="Cadastro de Emenda" data-src="emenda/emenda_form?cod_materia=<dtml-var cod_materia>&modal=1">Incluir Emenda</button>
+  <button type="button" class="btn m btn-primary d-print-none" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Cadastro de Emenda" data-src="emenda/emenda_form?cod_materia=<dtml-var cod_materia>&modal=1">Incluir Emenda</button>

@@ -20,10 +20,10 @@
       </dtml-let>
    </dtml-if>
     <dtml-if url_audio>
-           <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-target="#iFrameModal" data-title="Reprodução de Áudio" data-src="sessao_plenaria_player_audio?url_audio=<dtml-var url_audio>&modal=1"><i class="fas fa-fw fa-volume-up"></i></i> Áudio</button>
+           <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Reprodução de Áudio" data-src="sessao_plenaria_player_audio?url_audio=<dtml-var url_audio>&modal=1"><i class="fas fa-fw fa-volume-up"></i></i> Áudio</button>
     </dtml-if>
     <dtml-if url_video>
-         <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-target="#iFrameModal" data-title="Reprodução de Vídeo" data-src="<dtml-var url_video>"><i class="fab fa-fw fa-youtube"></i> Vídeo</button>
+         <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Reprodução de Vídeo" data-src="<dtml-var url_video>"><i class="fab fa-fw fa-youtube"></i> Vídeo</button>
     </dtml-if>
     <dtml-if url_fotos>
            <a class="btn btn-block btn-secondary" href="<dtml-var url_fotos>" target="_blank"><i class="fas fa-fw fa-images"></i><span class="d-none">Fotos</span></a> 
@@ -358,7 +358,7 @@
                <dtml-if tip_resultado_votacao>
                   <dtml-in expr="zsql.tipo_resultado_votacao_obter_zsql(tip_resultado_votacao=tip_resultado_votacao, ind_excluido=0)">
                      <dtml-if expr="tip_votacao==2 ">
-                        <a href="#" data-bs-toggle="modal" data-target="#iFrameModal" data-title="Resultado de Votação" data-src="sessao_plenaria_mostrar_painel_proc?cod_sessao_plen=<dtml-var cod_sessao_plen>&cod_ordem=<dtml-var cod_ordem>&cod_materia=<dtml-var cod_materia>&tipo_materia=expediente&modal=1"><b><dtml-var nom_resultado></b></a>
+                        <a href="#" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Resultado de Votação" data-src="sessao_plenaria_mostrar_painel_proc?cod_sessao_plen=<dtml-var cod_sessao_plen>&cod_ordem=<dtml-var cod_ordem>&cod_materia=<dtml-var cod_materia>&tipo_materia=expediente&modal=1"><b><dtml-var nom_resultado></b></a>
                         <br /> <span class="small"><dtml-var votacao_observacao missing></span>
                      <dtml-else>
                          <b><dtml-var nom_resultado></b><br /><span class="small"><dtml-var votacao_observacao missing></span>
@@ -391,7 +391,7 @@
                    <dtml-if tip_resultado_votacao>
                       <dtml-in expr="zsql.tipo_resultado_votacao_obter_zsql(tip_resultado_votacao=tip_resultado_votacao, ind_excluido=0)">
                          <dtml-if expr="tip_votacao==2 ">
-                            <a href="#" data-bs-toggle="modal" data-target="#iFrameModal" data-title="Resultado de Votação" data-src="sessao_plenaria_mostrar_painel_proc?cod_sessao_plen=<dtml-var cod_sessao_plen>&cod_ordem=<dtml-var cod_ordem>&cod_parecer=<dtml-var cod_parecer>&tipo_materia=expediente&modal=1"><b><dtml-var nom_resultado></b></a>
+                            <a href="#" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Resultado de Votação" data-src="sessao_plenaria_mostrar_painel_proc?cod_sessao_plen=<dtml-var cod_sessao_plen>&cod_ordem=<dtml-var cod_ordem>&cod_parecer=<dtml-var cod_parecer>&tipo_materia=expediente&modal=1"><b><dtml-var nom_resultado></b></a>
                              <br /> <span class="small"><dtml-var votacao_observacao missing></span>
                          <dtml-else>
                              <b><dtml-var nom_resultado></b><br /><span class="small"><dtml-var votacao_observacao missing></span>
@@ -605,7 +605,7 @@
                 <dtml-if expr="cod_votacao and tip_resultado_votacao!=0">
                     <dtml-in expr="zsql.tipo_resultado_votacao_obter_zsql(tip_resultado_votacao=tip_resultado_votacao, ind_excluido=0)">
                       <dtml-if expr="tip_votacao == 2 ">
-                         <a href="#" data-bs-toggle="modal" data-target="#iFrameModal" data-title="Resultado de Votação" data-src="sessao_plenaria_mostrar_painel_proc?cod_sessao_plen=<dtml-var cod_sessao_plen>&cod_ordem=<dtml-var cod_ordem>&cod_materia=<dtml-var cod_materia>&tipo_materia=ordemdia&modal=1"><b><dtml-var nom_resultado></b></a> 
+                         <a href="#" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Resultado de Votação" data-src="sessao_plenaria_mostrar_painel_proc?cod_sessao_plen=<dtml-var cod_sessao_plen>&cod_ordem=<dtml-var cod_ordem>&cod_materia=<dtml-var cod_materia>&tipo_materia=ordemdia&modal=1"><b><dtml-var nom_resultado></b></a> 
                          <br /><span class="small"><dtml-var votacao_observacao missing></span>
                       <dtml-else>
                         <b><dtml-var nom_resultado></b><br/> <span class="small"><dtml-var votacao_observacao missing></span>
@@ -655,7 +655,7 @@
                 <dtml-if tip_resultado_votacao>
                 <dtml-in expr="zsql.tipo_resultado_votacao_obter_zsql(tip_resultado_votacao=tip_resultado_votacao, ind_excluido=0)">
                     <dtml-if expr="tip_votacao == 2 ">
-                       <a href=#" data-bs-toggle="modal" data-target="#iFrameModal" data-title="Resultado de Votação" data-src="sessao_plenaria_mostrar_painel_proc?cod_sessao_plen=<dtml-var cod_sessao_plen>&cod_ordem=<dtml-var cod_ordem>&cod_materia=<dtml-var cod_materia>&cod_parecer=<dtml-var cod_relatoria>&tipo_materia=acessoria&modal=1"><b><dtml-var nom_resultado></b></a> 
+                       <a href=#" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Resultado de Votação" data-src="sessao_plenaria_mostrar_painel_proc?cod_sessao_plen=<dtml-var cod_sessao_plen>&cod_ordem=<dtml-var cod_ordem>&cod_materia=<dtml-var cod_materia>&cod_parecer=<dtml-var cod_relatoria>&tipo_materia=acessoria&modal=1"><b><dtml-var nom_resultado></b></a> 
                        <br /><span class="small"><dtml-var votacao_observacao missing></span>
                     <dtml-else>
                         <b><dtml-var nom_resultado></b><br/> <span class="small"><dtml-var votacao_observacao missing></span>
@@ -699,7 +699,7 @@
                 <dtml-if tip_resultado_votacao>
                 <dtml-in expr="zsql.tipo_resultado_votacao_obter_zsql(tip_resultado_votacao=tip_resultado_votacao, ind_excluido=0)">
                     <dtml-if expr="tip_votacao == 2 ">
-                       <a href=#" data-bs-toggle="modal" data-target="#iFrameModal" data-title="Resultado de Votação" data-src="sessao_plenaria_mostrar_painel_proc?cod_sessao_plen=<dtml-var cod_sessao_plen>&cod_ordem=<dtml-var cod_ordem>&cod_materia=<dtml-var cod_materia>&cod_substitutivo=<dtml-var cod_substitutivo>&tipo_materia=acessoria&modal=1"><b><dtml-var nom_resultado></b></a> 
+                       <a href=#" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Resultado de Votação" data-src="sessao_plenaria_mostrar_painel_proc?cod_sessao_plen=<dtml-var cod_sessao_plen>&cod_ordem=<dtml-var cod_ordem>&cod_materia=<dtml-var cod_materia>&cod_substitutivo=<dtml-var cod_substitutivo>&tipo_materia=acessoria&modal=1"><b><dtml-var nom_resultado></b></a> 
                        <br /><span class="small"><dtml-var votacao_observacao missing></span>
                     <dtml-else>
                          <br /><span class="small"><dtml-var votacao_observacao missing></span>
@@ -743,7 +743,7 @@
                 <dtml-if tip_resultado_votacao>
                 <dtml-in expr="zsql.tipo_resultado_votacao_obter_zsql(tip_resultado_votacao=tip_resultado_votacao, ind_excluido=0)">
                     <dtml-if expr="tip_votacao == 2 ">
-                       <a href="#" data-bs-toggle="modal" data-target="#iFrameModal" data-title="Resultado de Votação" data-src="sessao_plenaria_mostrar_painel_proc?cod_sessao_plen=<dtml-var cod_sessao_plen>&cod_ordem=<dtml-var cod_ordem>&cod_materia=<dtml-var cod_materia>&cod_emenda=<dtml-var cod_emenda>&tipo_materia=acessoria&modal=1"><b><dtml-var nom_resultado></b></a>
+                       <a href="#" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Resultado de Votação" data-src="sessao_plenaria_mostrar_painel_proc?cod_sessao_plen=<dtml-var cod_sessao_plen>&cod_ordem=<dtml-var cod_ordem>&cod_materia=<dtml-var cod_materia>&cod_emenda=<dtml-var cod_emenda>&tipo_materia=acessoria&modal=1"><b><dtml-var nom_resultado></b></a>
                        <br /><span class="small"><dtml-var votacao_observacao missing></span>
                     <dtml-else>
                         <b><dtml-var nom_resultado></b><br/> <span class="small"><dtml-var votacao_observacao missing></span>

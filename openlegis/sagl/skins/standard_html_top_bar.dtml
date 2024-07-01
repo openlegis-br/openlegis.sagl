@@ -12,16 +12,16 @@
                 <a href="<dtml-var portal_url>/generico/acessibilidade" class="nav-link"><i class="fa fa-fw fa-wheelchair"></i><span class="d-none d-lg-inline"> Acessibilidade</span></a>
             </li>
             <li class="nav-item align-self-center">
-                <button type="button" id="onoff" value="On" class="btn btn-sm btn-dark" onclick="onoff();" data-toggle="tooltip" data-placement="bottom" title="Ligar / Desligar Contraste"><i class="fa fa-adjust"></i><span>Contraste</span></button> 
+                <button type="button" id="onoff" value="On" class="btn btn-sm btn-dark" onclick="onoff();" data-bs-toggle="tooltip" data-placement="bottom" title="Ligar / Desligar Contraste"><i class="fa fa-adjust"></i><span>Contraste</span></button> 
             </li>
             <li class="nav-item align-self-center">
-                <button type="button" class="btn btn-sm btn-dark" onclick="javascript:setBaseFontSize('largeText',1);" data-toggle="tooltip" data-placement="bottom" title="Aumentar Fonte">A+</button> 
+                <button type="button" class="btn btn-sm btn-dark" onclick="javascript:setBaseFontSize('largeText',1);" data-bs-toggle="tooltip" data-placement="bottom" title="Aumentar Fonte">A+</button> 
             </li>
             <li class="nav-item align-self-center">
-                <button type="button" class="btn btn-sm btn-dark" onclick="javascript:setBaseFontSize('smallText',1);" data-toggle="tooltip" data-placement="bottom" title="Diminuir Fonte">A-</button> 
+                <button type="button" class="btn btn-sm btn-dark" onclick="javascript:setBaseFontSize('smallText',1);" data-bs-toggle="tooltip" data-placement="bottom" title="Diminuir Fonte">A-</button> 
             </li>
             <li class="nav-item align-self-center">
-               <button type="button" class="btn btn-sm btn-dark" onclick="javascript:setBaseFontSize('',1);" data-toggle="tooltip" data-placement="bottom" title="Fonte Normal">A</button> 
+               <button type="button" class="btn btn-sm btn-dark" onclick="javascript:setBaseFontSize('',1);" data-bs-toggle="tooltip" data-placement="bottom" title="Fonte Normal">A</button> 
             </li>
        </ul>
       <dtml-let isAnon="portal_membership.isAnonymousUser()">
@@ -50,16 +50,16 @@
           <dtml-if expr="isAnon">
             <dtml-if "sapl_documentos.props_sagl.restpki_access_token!=''">
               <li class="nav-item dropdown">
-                 <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown"><i class="fa fa-fw fa-at"></i><span class="d-none d-sm-inline"> e-Processo</span></a>
+                 <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown"><i class="fa fa-fw fa-at"></i><span class="d-none d-sm-inline"> e-Processo</span></a>
                  <ul class="dropdown-menu dropdown-menu-right">
                     <li><a href="<dtml-var portal_url>/conferir_assinatura" class="dropdown-item">Validação Digital</a></li>
                  </ul>
               </li>
             </dtml-if>
-            <li><a href="#loginModal" data-toggle = "modal" data-target= "#loginModal" class="nav-link"><i class="fa fa-fw fa-sign-in-alt"></i> Login</a></li>
+            <li><a href="#loginModal" data-bs-toggle = "modal" data-bs-target= "#loginModal" class="nav-link"><i class="fa fa-fw fa-sign-in-alt"></i> Login</a></li>
           <dtml-else>
             <li class="nav-item dropdown">
-                <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown"><i class="fa fa-fw fa-cog"></i> <span class="d-none d-lg-inline"> Sistema</span></a>
+                <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown"><i class="fa fa-fw fa-cog"></i> <span class="d-none d-lg-inline"> Sistema</span></a>
                 <ul class="dropdown-menu dropdown-menu-right">
                   <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Tabela Auxiliar'])">
                     <li class="dropdown-header">Administração do Sistema</li>
@@ -87,7 +87,7 @@
                 </ul>
             </li>
             <li class="nav-item dropdown">
-                <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown"><i class="fa fa-fw fa-at"></i><span class="d-none d-sm-inline"> e-Processo</span></a>
+                <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown"><i class="fa fa-fw fa-at"></i><span class="d-none d-sm-inline"> e-Processo</span></a>
                 <ul class="dropdown-menu dropdown-menu-right">
                       <dtml-if expr="AUTHENTICATED_USER.has_role(['Autor', 'Assessor Parlamentar', 'Operador', 'Operador Materia','Revisor Proposicao','Chefia Revisão'])">
                          <li class="dropdown-header">Processo Legislativo</li>
@@ -120,7 +120,7 @@
                 </ul>
             </li>
             <li class="nav-item dropdown">
-                <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" aria-expanded="false"><i class="fa fa-fw fa-user-cog"></i> &dtml-AUTHENTICATED_USER;</a>
+                <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false"><i class="fa fa-fw fa-user-cog"></i> &dtml-AUTHENTICATED_USER;</a>
                 <ul class="dropdown-menu dropdown-menu-right">
                     <li class="navbar-login nav-item d-flex">
                                 <div class="col-4">
@@ -145,12 +145,12 @@
                                            <dtml-elif expr="sex_parlamentar == 'F'">
                                              <dtml-call expr="REQUEST.set('cargo', 'Vereadora')">
                                            </dtml-if>
-                                           <p class="text-left mb-0"><strong><dtml-var nom_parlamentar></strong></p>
+                                           <p class="text-start mb-0"><strong><dtml-var nom_parlamentar></strong></p>
                                         </dtml-in>
                                     <dtml-else>
-                                       <p class="text-left mb-0"><strong>&dtml-AUTHENTICATED_USER;</strong></p>
+                                       <p class="text-start mb-0"><strong>&dtml-AUTHENTICATED_USER;</strong></p>
                                     </dtml-if>
-                                    <p class="text-left text-muted small mt-0">
+                                    <p class="text-start text-muted small mt-0">
                                       <dtml-if cargo>
                                         <dtml-var cargo>
                                       <dtml-else>
@@ -234,7 +234,7 @@
      </a>
     </div>
 
-<div class="col d-none d-lg-block col-lg-4 col-xl-3 align-self-center text-right"> 
+<div class="col d-none d-lg-block col-lg-4 col-xl-3 align-self-center text-end"> 
   <div class="mr-2">
      <dtml-if expr="AUTHENTICATED_USER.has_role(['Authenticated'])">
        <form class="px-0 py-2" action='<dtml-var portal_url>/generico/palavra_chave_buscar_proc' name='search_header' id='search_header' method="POST">
@@ -256,13 +256,13 @@
     <dtml-let isAnon="portal_membership.isAnonymousUser()">
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary second-nav">
         <div class="container">
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNavDropdown">
           <ul class="navbar-nav">
             <li class="nav-item dropdown">
-                <a id="dropdownMenu1" class="nav-link dropdown-toggle" href="" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <a id="dropdownMenu1" class="nav-link dropdown-toggle" href="" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                  Institucional
                 </a>
                 <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
@@ -272,7 +272,7 @@
                 </ul>
             </li>
             <li class="nav-item dropdown">
-                <a id="dropdownMenu1" class="nav-link dropdown-toggle" href="" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <a id="dropdownMenu1" class="nav-link dropdown-toggle" href="" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                  Vereadores
                 </a>
                 <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
@@ -289,7 +289,7 @@
                 </ul>
             </li>
             <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" href="" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <a class="nav-link dropdown-toggle" href="" id="navbarDropdownMenuLink" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                  Atividade Legislativa
                 </a>
                 <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
@@ -344,7 +344,7 @@
                 </ul>
             </li>
             <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" href="" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <a class="nav-link dropdown-toggle" href="" id="navbarDropdownMenuLink" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                  Legislação
                 </a>
                 <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
@@ -357,14 +357,14 @@
                 </ul>
             </li>
             <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" href="" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <a class="nav-link dropdown-toggle" href="" id="navbarDropdownMenuLink" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                  Processo Administrativo
                 </a>
                 <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
                     <li><a class="dropdown-item" href="<dtml-var portal_url>/consultas/documento_administrativo">Pesquisa de Documentos</a></li>
                     <dtml-if cod_usuario_corrente>
                      <li class="dropdown-submenu">
-                        <a id="dropdownMenu2" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" class="dropdown-item dropdown-toggle">Tramitação de Processos</a>
+                        <a id="dropdownMenu2" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" class="dropdown-item dropdown-toggle">Tramitação de Processos</a>
                         <ul aria-labelledby="dropdownMenu2" class="dropdown-menu border-0 shadow">
                             <li><a class="dropdown-item" href="<dtml-var portal_url>/cadastros/tramitacao_documento/tramitacao_lote_form">Caixa de Entrada</a></li>
                             <li><a class="dropdown-item" href="<dtml-var portal_url>/cadastros/tramitacao_documento/rascunhos_html">Tramitações em Rascunho</a></li>
@@ -381,7 +381,7 @@
                     </dtml-if>
                     <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Recepção'])">
                       <li class="dropdown-submenu">
-                         <a id="dropdownMenu3" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" class="dropdown-item dropdown-toggle">Controle de Recepção</a>
+                         <a id="dropdownMenu3" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" class="dropdown-item dropdown-toggle">Controle de Recepção</a>
                         <ul aria-labelledby="dropdownMenu3" class="dropdown-menu border-0 shadow">
                            <li><a class="dropdown-item" href="<dtml-var portal_url>/cadastros/pessoa">Cadastro de Visitantes</a></li>
                            <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador'])">
@@ -406,7 +406,7 @@
             </li>
           <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Protocolo', 'Operador Materia',  'Operador Modulo Administrativo'])">
             <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" href="" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <a class="nav-link dropdown-toggle" href="" id="navbarDropdownMenuLink" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                  Protocolo
                 </a>
                 <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
@@ -429,7 +429,7 @@
         <dtml-if expr="AUTHENTICATED_USER.has_role(['Authenticated'])">
           <ul class="navbar-nav ml-auto navbar-search d-lg-none">
             <li class="nav-item dropdown">
-                <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown"><i class="fa fa-fw fa-search"></i> Pesquisar</a>
+                <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown"><i class="fa fa-fw fa-search"></i> Pesquisar</a>
                 <ul class="dropdown-menu dropdown-menu-right">
                   <form class="px-3 py-2" action='<dtml-var portal_url>/generico/palavra_chave_buscar_proc' name='search_form' id='search_form'>
                    <div class="input-group">
@@ -456,27 +456,27 @@
                 <h4 class="modal-title">
                     <i class="fa fa-fw fa-sign-in-alt"></i> Login
                 </h4>
-               <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+               <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
                  <span aria-hidden="true">&times;</span>
                </button>
             </div>
             <div class="modal-body">
                 <dtml-if expr="_.has_key('QUERY_STRING') and QUERY_STRING == 'retry=0'">
                    <div class="alert alert-danger" role="alert">
-                     <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                     <a href="#" class="close" data-bs-dismiss="alert" aria-label="close">&times;</a>
                      Informe corretamente seu nome de usuário e senha.
                    </div>
                 </dtml-if>
                 <form class="" id="login_form" name="login_form" method="post" action="<dtml-var portal_url>?retry=1">
                   <input type="hidden" name="came_from" value="<dtml-var "REQUEST.get('came_from', '')">" />
                   <div class="form-group">
-                    <label for="name">Usuário</label>
+                    <label class="form-label" for="name">Usuário</label>
                     <input type="text" class="form-control" id="name" name="__ac_name" placeholder="" autocomplete="false" value="<dtml-var "REQUEST.get('__ac_name', '')">" required>
                   </div>
                   <div class="form-group">
-                    <label for="password">Senha</label>
+                    <label class="form-label" for="password">Senha</label>
                     <label class="d-none" for="hide">Hide</label>
-                    <input data-toggle="password" type="password" class="form-control" id="password" name="__ac_password" placeholder="" required>
+                    <input data-bs-toggle="password" type="password" class="form-control" id="password" name="__ac_password" placeholder="" required>
                   </div>
                   <div class="form-group form-check mb-2">
                      <input type="checkbox" class="form-check-input" name="__ac_persistent"  id="persistent" checked>
@@ -488,7 +488,7 @@
                 </form>
             </div>
             <div class="modal-footer">
-               <p class="text-left"><a href="<dtml-var portal_url>/mail_password_form">Esqueceu a senha?</a></p>
+               <p class="text-start"><a href="<dtml-var portal_url>/mail_password_form">Esqueceu a senha?</a></p>
             </div>
         </div><!-- /.modal-content -->
     </div><!-- /.modal-dialog -->

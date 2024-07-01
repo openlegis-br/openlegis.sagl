@@ -1,4 +1,4 @@
-<h1 class="firstHeading">Pareceres das Comissões</h1>
+<h1 class="firstHeading font-size-18">Pareceres das Comissões</h1>
 
   <dtml-in expr="zsql.despacho_inicial_obter_zsql(cod_materia=cod_materia, ind_excluido=0)">
        <dtml-if previous-sequence>
@@ -9,7 +9,7 @@
        </dtml-if previous-sequence>
     <dtml-if sequence-start>   
     <table class="table">
-      <thead class="table-secondary">
+      <thead>
        <tr> 
          <th>Comissão</th>
          <th width="35%">Relatoria</th>
@@ -19,20 +19,20 @@
     </dtml-if sequence-start>
        <tr> 
           <td>
-             <a href="#" data-toggle="modal" data-target="#iFrameModal" data-title="Designação de Comissão" data-src="despacho_inicial/despacho_inicial_mostrar_proc?cod_materia=<dtml-var cod_materia>&num_ordem=<dtml-var num_ordem>&modal=1">          
+             <a href="#" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Designação de Comissão" data-src="despacho_inicial/despacho_inicial_mostrar_proc?cod_materia=<dtml-var cod_materia>&num_ordem=<dtml-var num_ordem>&modal=1">          
               <dtml-var nom_comissao_index missing>
             </a>
           </td>
           <td>
            <dtml-in expr="zsql.relatoria_obter_zsql(cod_comissao=cod_comissao_sel, cod_materia=cod_materia,num_ordem=num_ordem)">
              <dtml-in expr="zsql.parlamentar_obter_zsql(cod_parlamentar=cod_parlamentar)">
-                <a href="#" data-toggle="modal" data-target="#iFrameModal" data-title="Edição de Relatoria" data-src="<dtml-var portal_url>/cadastros/comissao/materia/relatoria_mostrar_proc?cod_relatoria=<dtml-var cod_relatoria>&cod_materia=<dtml-var cod_materia missing>&cod_comissao=<dtml-var cod_comissao_sel missing>&num_ordem=<dtml-var num_ordem missing>&modal=1">               
+                <a href="#" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Edição de Relatoria" data-src="<dtml-var portal_url>/cadastros/comissao/materia/relatoria_mostrar_proc?cod_relatoria=<dtml-var cod_relatoria>&cod_materia=<dtml-var cod_materia missing>&cod_comissao=<dtml-var cod_comissao_sel missing>&num_ordem=<dtml-var num_ordem missing>&modal=1">               
                    <dtml-var nom_parlamentar>
                 </a>
              </dtml-in>
              <dtml-else>
                <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia'])">
-                <a href="#" class="btn btn-sm btn-secondary" data-toggle="modal" data-target="#iFrameModal" data-title="Cadastro de Relatoria" data-src="<dtml-var portal_url>/cadastros/comissao/materia/relatoria_form?cod_materia=<dtml-var cod_materia missing>&cod_comissao=<dtml-var cod_comissao_sel missing>&num_ordem=<dtml-var num_ordem missing>&modal=1"> 
+                <a href="#" class="btn btn-sm btn-secondary" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Cadastro de Relatoria" data-src="<dtml-var portal_url>/cadastros/comissao/materia/relatoria_form?cod_materia=<dtml-var cod_materia missing>&cod_comissao=<dtml-var cod_comissao_sel missing>&num_ordem=<dtml-var num_ordem missing>&modal=1"> 
                     Cadastrar Relatoria
                   </a> 
                </dtml-if>
@@ -68,6 +68,6 @@
       </table>
    </dtml-in>
     
-  <div class="text-left">
-     <button type="button" class="btn m btn-primary d-print-none" data-toggle="modal" data-target="#iFrameModal" data-title="Despacho Inicial" data-src="despacho_inicial/despacho_inicial_form?cod_materia=<dtml-var cod_materia>&modal=1">Designar Comissão</button>  
+  <div class="text-start">
+     <button type="button" class="btn m btn-primary d-print-none" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Despacho Inicial" data-src="despacho_inicial/despacho_inicial_form?cod_materia=<dtml-var cod_materia>&modal=1">Designar Comissão</button>  
   </div>

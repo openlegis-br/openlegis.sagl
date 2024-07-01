@@ -1,4 +1,4 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
 <script>
 <!--
@@ -13,9 +13,9 @@
 
  <div class="row mb-2">
       <div class="col-12 col-md-8 align-self-center">
-        <h1 class="firstHeading">Pesquisa de Entidades</h1>
+        <h1 class="firstHeading font-size-18">Pesquisa de Entidades</h1>
       </div>
-      <div class="col-12 col-md-4 text-left text-md-right">
+      <div class="col-12 col-md-4 text-start text-end">
          <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Entidade', 'Operador Modulo Administrativo'])">
              <a class="btn btn-primary btn-sm d-print-none" href="<dtml-var portal_url>/cadastros/instituicao/instituicao_form""><i class="fa fa-fw fa-plus"></i> Incluir Entidade</a>
          </dtml-if>
@@ -24,10 +24,10 @@
 
 <form class="pf-form" name="pesq_basica_form" action="instituicao_pesquisar_proc">
   <input type="hidden" name="existe_ocorrencia" value="0" />
-  <div class="form-row">
+  <div class="row">
     <div class="col-12 col-md-6 mb-3">
-       <label for="lst_tip_instituicao">Tipo de Entidade</label>    
-          <select class="custom-select" id="lst_tip_instituicao" name="lst_tip_instituicao" onChange="categoria_listar(document.pesq_basica_form)">
+       <label class="form-label" for="lst_tip_instituicao">Tipo de Entidade</label>    
+          <select class="form-select" id="lst_tip_instituicao" name="lst_tip_instituicao" onChange="categoria_listar(document.pesq_basica_form)">
             <option value="">Todos</option>
             <dtml-in expr="zsql.tipo_instituicao_obter_zsql(ind_excluido=0)">
               <option value="<dtml-var tip_instituicao missing>"
@@ -45,8 +45,8 @@
           </select>
     </div>
     <div class="col-12 col-md-6 mb-3">
-       <label for="lst_categoria">Categoria</label>
-          <select class="custom-select" id="lst_categoria" name="lst_categoria">
+       <label class="form-label" for="lst_categoria">Categoria</label>
+          <select class="form-select" id="lst_categoria" name="lst_categoria">
             <option value="">Todas</option>
             <dtml-in expr="zsql.categoria_instituicao_obter_zsql(tip_instituicao=hdn_tip_instituicao,ind_excluido=0)">
               <option value="<dtml-var cod_categoria missing>">
@@ -57,21 +57,21 @@
     </div>    
   </div>
 
-  <div class="form-row">
+  <div class="row">
     <div class="col-12 col-md-6 mb-3">
-         <label for="txa_txt_nom_instituicao">Nome da Entidade</label>
+         <label class="form-label" for="txa_txt_nom_instituicao">Nome da Entidade</label>
          <input class="form-control" id="txa_txt_nom_instituicao" type="text" name="txa_txt_nom_instituicao" null="" maxlength="80" />
     </div>
     <div class="col-12 col-md-6 mb-3">
-         <label for="txa_txt_nom_responsavel">Nome do Responsável</label>
+         <label class="form-label" for="txa_txt_nom_responsavel">Nome do Responsável</label>
          <input class="form-control" id="txa_txt_nom_responsavel" type="text" name="txa_txt_nom_responsavel" null="" />
     </div>    
   </div>
 
-  <div class="form-row">
+  <div class="row">
     <div class="col-12 col-md-6 mb-3">
-         <label for="lst_localidade">Localidade</label>
-          <select class="custom-select" id="lst_localidade" name="lst_localidade">
+         <label class="form-label" for="lst_localidade">Localidade</label>
+          <select class="form-select" id="lst_localidade" name="lst_localidade">
             <option value="">Todas</option>
             <dtml-in expr="zsql.instituicao_localidade_obter_zsql()">
               <option value="<dtml-var cod_localidade missing>">
@@ -81,7 +81,7 @@
           </select>
     </div>
     <div class="col-12 col-md-6 mb-3">
-         <label class="d-block">Ordenação do Resultado</label>
+         <label class="form-label d-block">Ordenação do Resultado</label>
           <dtml-in expr="[('Descendente', '1'), ('Ascendente', '2')]">
            <div class="form-check form-check-inline">          
             <input class="form-check-input" type="radio" name="rd_ordem" value="<dtml-var expr="_['sequence-item']">" id="rd_ordem<dtml-var expr="_['sequence-item']">"
@@ -92,9 +92,10 @@
     </div>    
   </div>
 
-  <div class="text-left">
+  <div class="text-start">
      <button type="submit" class="btn btn-primary"><i class="fa fa-fw fa-search"></i> Pesquisar</button>  
   </div>
 
 </form>
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>

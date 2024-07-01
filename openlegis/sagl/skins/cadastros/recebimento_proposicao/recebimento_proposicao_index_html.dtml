@@ -1,4 +1,4 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
 <script src="<dtml-var portal_url>/js/moment.min.js""></script>
 <script src="<dtml-var portal_url>/js/datetime-moment.js"></script>
@@ -102,7 +102,7 @@ $(document).ready(() => {
     history.replaceState(null, null, url);
   } 
 
-  $('a[data-toggle="tab"]').on("click", function() {
+  $('a[data-bs-toggle="tab"]').on("click", function() {
     let newUrl;
     const hash = $(this).attr("href");
     if(hash == "#home") {
@@ -116,33 +116,33 @@ $(document).ready(() => {
 });
 </script>
 
-<h1 class="firstHeading">Recebimento de Proposições</h1> 
+<h1 class="firstHeading font-size-18">Recebimento de Proposições</h1> 
 
 <ul class="nav nav-tabs proposicao border-0 mt-4" id="nav_proposicao" role="tablist">
  <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia', 'Revisor Proposicao', 'Chefia Revisão'])">
     <li class="nav-item active">
-        <a class="nav-link active" id="pendente-tab" data-toggle="tab" href="#pendente" role="tab" aria-controls="pendente" data-target="#pendente" aria-selected="true">Revisão <dtml-in expr="proposicoes_contar_pysc(caixa='revisao')" mapping><dtml-if sequence-start>[<dtml-var sequence-length>]</dtml-if></dtml-in></a>
+        <a class="nav-link active" id="pendente-tab" data-bs-toggle="tab" href="#pendente" role="tab" aria-controls="pendente" data-bs-target="#pendente" aria-selected="true">Revisão <dtml-in expr="proposicoes_contar_pysc(caixa='revisao')" mapping><dtml-if sequence-start>[<dtml-var sequence-length>]</dtml-if></dtml-in></a>
     </li>
   <dtml-if "sapl_documentos.props_sagl.restpki_access_token!=''">                                            
     <li class="nav-item">
-        <a class="nav-link" id="assinatura-tab" data-toggle="tab" href="#assinatura" role="tab" aria-controls="assinatura" data-target="#assinatura" aria-selected="true">Assinatura <dtml-in expr="proposicoes_contar_pysc(caixa='assinatura')" mapping><dtml-if sequence-start>[<dtml-var sequence-length>]</dtml-if></dtml-in></a>
+        <a class="nav-link" id="assinatura-tab" data-bs-toggle="tab" href="#assinatura" role="tab" aria-controls="assinatura" data-bs-target="#assinatura" aria-selected="true">Assinatura <dtml-in expr="proposicoes_contar_pysc(caixa='assinatura')" mapping><dtml-if sequence-start>[<dtml-var sequence-length>]</dtml-if></dtml-in></a>
     </li>     
   </dtml-if>
  </dtml-if>
  <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia'])">
     <li class="nav-item">
-        <a class="nav-link" id="protocolo-tab" data-toggle="tab" href="#protocolo" role="tab" aria-controls="protocolo" data-target="#protocolo" aria-selected="true">Protocolo <dtml-in expr="proposicoes_contar_pysc(caixa='protocolo')" mapping><dtml-if sequence-start>[<dtml-var sequence-length>]</dtml-if></dtml-in></a>
+        <a class="nav-link" id="protocolo-tab" data-bs-toggle="tab" href="#protocolo" role="tab" aria-controls="protocolo" data-bs-target="#protocolo" aria-selected="true">Protocolo <dtml-in expr="proposicoes_contar_pysc(caixa='protocolo')" mapping><dtml-if sequence-start>[<dtml-var sequence-length>]</dtml-if></dtml-in></a>
     </li>    
  </dtml-if>
  <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia', 'Revisor Proposicao', 'Chefia Revisão'])">
     <li class="nav-item">
-       <a class="nav-link" id="incorporada-tab" data-toggle="tab" href="#incorporada" role="tab" aria-controls="incorporada" data-target="#incorporada" aria-selected="true">Incorporadas </a>
+       <a class="nav-link" id="incorporada-tab" data-bs-toggle="tab" href="#incorporada" role="tab" aria-controls="incorporada" data-bs-target="#incorporada" aria-selected="true">Incorporadas </a>
     </li>
     <li class="nav-item">
-        <a class="nav-link" id="protocolo-tab" data-toggle="tab" href="#pedido_devolucao" role="tab" aria-controls="pedido_devolucao" data-target="#pedido_devolucao" aria-selected="true">Pedidos de Devolução <dtml-in expr="proposicoes_contar_pysc(caixa='pedido_devolucao')" mapping><dtml-if sequence-start>[<dtml-var sequence-length>]</dtml-if></dtml-in></a>
+        <a class="nav-link" id="protocolo-tab" data-bs-toggle="tab" href="#pedido_devolucao" role="tab" aria-controls="pedido_devolucao" data-bs-target="#pedido_devolucao" aria-selected="true">Pedidos de Devolução <dtml-in expr="proposicoes_contar_pysc(caixa='pedido_devolucao')" mapping><dtml-if sequence-start>[<dtml-var sequence-length>]</dtml-if></dtml-in></a>
     </li> 
     <li class="nav-item">
-       <a class="nav-link" id="devolvida-tab" data-toggle="tab" href="#devolvida" role="tab" aria-controls="devolvida" data-target="#devolvida" aria-selected="true">Devolvidas <dtml-in expr="proposicoes_contar_pysc(caixa='devolvido')" mapping><dtml-if sequence-start>[<dtml-var sequence-length>]</dtml-if></dtml-in></a>
+       <a class="nav-link" id="devolvida-tab" data-bs-toggle="tab" href="#devolvida" role="tab" aria-controls="devolvida" data-bs-target="#devolvida" aria-selected="true">Devolvidas <dtml-in expr="proposicoes_contar_pysc(caixa='devolvido')" mapping><dtml-if sequence-start>[<dtml-var sequence-length>]</dtml-if></dtml-in></a>
     </li>
  </dtml-if>
 </ul>
@@ -180,4 +180,5 @@ $(document).ready(() => {
     </div>           
 </div>
 
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>

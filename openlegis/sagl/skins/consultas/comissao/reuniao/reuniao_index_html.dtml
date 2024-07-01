@@ -1,4 +1,4 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
 <dtml-in expr="zsql.comissao_obter_zsql(cod_comissao=cod_comissao)">
   <dtml-call expr="REQUEST.set('nom_comissao', nom_comissao)">
@@ -14,7 +14,7 @@ location.href = endereco;
 //-->
 </script>
 
-<h1 class="firstHeading"><dtml-var nom_comissao></h1> 
+<h1 class="firstHeading font-size-18"><dtml-var nom_comissao></h1> 
 
 <form name="reuniao_index_form" action="reuniao_comissao_form">
  <input type="hidden" name="cod_comissao" value="<dtml-var cod_comissao>" />
@@ -33,7 +33,7 @@ location.href = endereco;
 <dtml-call "REQUEST.set('start',(page-1) * step + 1)">
  <dtml-in expr="zsql.reuniao_comissao_obter_zsql(cod_comissao=cod_comissao,ind_excluido=0)" size="step" start="start" orphan=0>
     <dtml-if sequence-start>
-      <fieldset><legend>Reuniões</legend>
+      <fieldset><legend class="font-size-16">Reuniões</legend>
       <table class="table">
         <tr>
           <th width="10%">Número</th>
@@ -90,10 +90,11 @@ location.href = endereco;
   </dtml-if>
     </dtml-if sequence-end>
 <dtml-else>
- <fieldset><legend>Reuniões</legend>
+ <fieldset><legend class="font-size-16">Reuniões</legend>
  <p>Nenhuma reunião cadastrada para esta comissão.</p>
  </fieldset>
 </dtml-in>
 </form>
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>
 

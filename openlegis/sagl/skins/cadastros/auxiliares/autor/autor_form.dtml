@@ -1,4 +1,4 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
 <script>
 
@@ -114,9 +114,9 @@
 
  <div class="row mb-2">
       <div class="col-12 col-md-8 align-self-center">
-        <h1 class="firstHeading">Autor</h1>
+        <h1 class="firstHeading font-size-18">Autor</h1>
       </div>
-      <div class="col-12 col-md-4 text-left text-md-right">
+      <div class="col-12 col-md-4 text-start text-end">
          <div class="btn-group d-print-none ">
            <a class="btn btn-primary btn-sm" href="index_html"><i class="fa fa-fw fa-undo"></i> Voltar</a>         
          </div>
@@ -154,10 +154,10 @@
      <input type="hidden" name="hdn_url" value="autor_mostrar_proc?cod_autor=<dtml-var cod_autor missing>" />  
   </dtml-if>
 
-  <div class="form-row">
+  <div class="row">
      <div class="col-12 col-sm-3 mb-3">
-        <label for="lst_tip_autor" class="required">Tipo de Autor</label>
-        <select class="custom-select" name="lst_tip_autor" id="lst_tip_autor" onChange="tipo_autor_mudou(document.autor_form)">
+        <label class="form-label" for="lst_tip_autor" class="required">Tipo de Autor</label>
+        <select class="form-select" name="lst_tip_autor" id="lst_tip_autor" onChange="tipo_autor_mudou(document.autor_form)">
           <dtml-unless tip_autor>
              <option value="">Selecione</option>
           </dtml-unless>
@@ -172,8 +172,8 @@
      </div>
      <div class="col-12 col-sm-6 mb-3">
         <dtml-if expr="_.has_key('des_tipo_autor') and des_tipo_autor=='Parlamentar'">
-           <label for="lst_cod_autor" class="required">Nome do Autor</label>        
-	   <select class="custom-select" name="lst_cod_autor" id="lst_cod_autor">
+           <label class="form-label" for="lst_cod_autor" class="required">Nome do Autor</label>        
+	   <select class="form-select" name="lst_cod_autor" id="lst_cod_autor">
               <option value="">Selecione</option>
                 <dtml-if cod_autor>
                    <dtml-call expr="REQUEST.set('cod_autor_parlamentar',REQUEST['cod_autor'])">
@@ -189,8 +189,8 @@
            </select>
            <input type="hidden" name="txt_nom_autor" />
         <dtml-elif expr="_.has_key('des_tipo_autor') and (des_tipo_autor=='Comissao')">
-           <label for="lst_cod_autor" class="required">Nome do Autor</label>                
-           <select class="custom-select" name="lst_cod_autor" id="lst_cod_autor">
+           <label class="form-label" for="lst_cod_autor" class="required">Nome do Autor</label>                
+           <select class="form-select" name="lst_cod_autor" id="lst_cod_autor">
               <option value="0"></option>
                 <dtml-in expr="zsql.comissao_obter_zsql(cod_comissao='')">
                    <option <dtml-if expr="REQUEST.has_key('cod_comissao') and cod_comissao==REQUEST['cod_comissao']">
@@ -201,8 +201,8 @@
            </select>
            <input type="hidden" name="txt_nom_autor" />
         <dtml-elif expr="_.has_key('des_tipo_autor') and (des_tipo_autor=='Bancada')">
-           <label for="lst_cod_autor" class="required">Nome do Autor</label>                
-           <select class="custom-select" name="lst_cod_autor" id="lst_cod_autor">
+           <label class="form-label" for="lst_cod_autor" class="required">Nome do Autor</label>                
+           <select class="form-select" name="lst_cod_autor" id="lst_cod_autor">
               <option value="0"></option>
                 <dtml-in expr="zsql.bancada_obter_zsql(cod_bancada='')">
                   <option <dtml-if expr="REQUEST.has_key('cod_bancada') and _.int(cod_bancada)==_.int(REQUEST['cod_bancada'])">
@@ -214,29 +214,29 @@
            </select>
            <input type="hidden" name="txt_nom_autor" />
        <dtml-elif expr="_.has_key('des_tipo_autor')">
-          <label for="txt_nom_autor" class="required">Nome do Autor</label>               
+          <label class="form-label" for="txt_nom_autor" class="required">Nome do Autor</label>               
           <input class="form-control" type="text" id="txt_nom_autor" name="txt_nom_autor" value="<dtml-var nom_autor_join missing>" maxlength="100" />
        <dtml-else>
-          <label for="txt_nom_autor" class="required">Nome do Autor</label>                      
+          <label class="form-label" for="txt_nom_autor" class="required">Nome do Autor</label>                      
           <input class="form-control" type="text" name="txt_nom_autor" value="<dtml-var nom_autor_join missing>" disabled />
        </dtml-if>
     </div>
      <div class="col-12 col-sm-3 mb-3">
-          <label for="txt_end_email">E-mail:</label>
+          <label class="form-label" for="txt_end_email">E-mail:</label>
           <input class="form-control" type="text" id="txt_end_email" name="txt_end_email" maxlength="100" value="<dtml-var end_email missing null="">" />
      </div>    
   </div>    
 
 
 <dtml-if expr="_.has_key('des_tipo_autor') and ((des_tipo_autor!='Parlamentar') and (des_tipo_autor!='Comissao') and (des_tipo_autor!='Bancada'))">
-  <div class="form-row">
+  <div class="row">
      <div class="col-6 mb-3">
-         <label for="txt_des_cargo" class="required">Cargo:</label>
+         <label class="form-label" for="txt_des_cargo" class="required">Cargo:</label>
          <input class="form-control" type="text" name="txt_des_cargo" id="txt_des_cargo" value="<dtml-var des_cargo missing null="">" maxlength="50" />
      </div>
      <div class="col-6 mb-3">     
-                <label for="lst_cod_partido">Partido:</label><br />
-                <select class="custom-select"  name="lst_cod_partido" id="lst_cod_partido">
+                <label class="form-label" for="lst_cod_partido">Partido:</label><br />
+                <select class="form-select"  name="lst_cod_partido" id="lst_cod_partido">
                   <option value="">Selecione</option>
                   <dtml-in expr="zsql.partido_obter_zsql(cod_partido='')">
                     <option value="<dtml-var cod_partido>"
@@ -254,14 +254,14 @@
 </dtml-if>
 
  
-  <legend>Acesso ao Sistema</legend>
+  <legend class="font-size-16">Acesso ao Sistema</legend>
 
   <dtml-unless expr="_.has_key('col_username')">
     <dtml-call expr="REQUEST.set('col_username',None)">
   </dtml-unless>
 
-  <label class="d-block">Criar usuário para elaboração de proposições eletrônicas?</label>
-  <div class="form-row">
+  <label class="form-label d-block">Criar usuário para elaboração de proposições eletrônicas?</label>
+  <div class="row">
     <div class="col-12 col-sm-6 mb-3">
        <div class="input-group mb-3">
          <div class="input-group-prepend">    
@@ -286,4 +286,5 @@
       </dtml-if>
 
 </form>
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>

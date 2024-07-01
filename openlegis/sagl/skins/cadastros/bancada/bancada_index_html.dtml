@@ -1,6 +1,6 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
-<h1 class="firstHeading">Bancadas</h1>
+<h1 class="firstHeading font-size-18">Bancadas</h1>
 
 <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Parlamentar', 'Operador Tabela Auxiliar'])">
 <div id="barra-conteudo">
@@ -15,8 +15,8 @@
 <form name="index_form">
  <div class="row">
   <div class="col-12 col-sm-6 mb-3">
-    <label for="lst_num_legislatura">Selecione a Legislatura:</label>
-         <select class="form-control selectpicker show-tick jumpmenu" data-dropup-auto="false" data-size="6" id="lst_num_legislatura" name="lst_num_legislatura">    
+    <label class="form-label" for="lst_num_legislatura">Selecione a Legislatura:</label>
+         <select class="form-select selectpicker show-tick jumpmenu" data-dropup-auto="false" data-size="6" id="lst_num_legislatura" name="lst_num_legislatura">    
             <dtml-in expr="zsql.legislatura_obter_zsql()">
                <option 
                   <dtml-if expr="_.has_key('hdn_num_legislatura') and num_legislatura==_.int(hdn_num_legislatura)">
@@ -46,8 +46,8 @@
          </select>
    </div>
    <div class="col-12 col-sm-6 mb-3">
-     <label for="lst_periodo_comp">Selecione o Período:</label>
-     <select class="form-control selectpicker show-tick jumpmenu" data-size="6" data-dropup-auto="false" id="lst_periodo_comp" name="lst_periodo_comp">
+     <label class="form-label" for="lst_periodo_comp">Selecione o Período:</label>
+     <select class="form-select selectpicker show-tick jumpmenu" data-size="6" data-dropup-auto="false" id="lst_periodo_comp" name="lst_periodo_comp">
        <dtml-in expr="zsql.periodo_comp_bancada_obter_zsql(num_legislatura=hdn_num_legislatura)">
           <option
             <dtml-if expr="((not _.has_key('cod_periodo_comp_sel') and not _.has_key('prim_sel') 
@@ -138,4 +138,5 @@
 </script>
 
 
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>

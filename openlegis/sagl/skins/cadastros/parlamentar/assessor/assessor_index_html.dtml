@@ -1,10 +1,10 @@
-<legend>Assessoria Parlamentar</legend>
+<legend class="font-size-16">Assessoria Parlamentar</legend>
 <dtml-if cod_parlamentar>
 <dtml-in expr="zsql.assessor_parlamentar_obter_zsql(cod_parlamentar=cod_parlamentar)"> 
   <dtml-if sequence-start>
        <div class="table-responsive">
          <table class="table">
-           <thead class="table-secondary">
+           <thead>
            <tr> 
             <th>Nome</th>
             <th>Cargo</th>
@@ -16,7 +16,7 @@
   </dtml-if sequence-start>
          <tr> 
            <td>
-              <a href="#" data-toggle="modal" data-target="#iFrameModal" data-title="Edição de Assessoria - <dtml-var nom_parlamentar>" data-src="assessor/assessor_mostrar_proc?cod_parlamentar=<dtml-var cod_parlamentar>&cod_assessor=<dtml-var cod_assessor>&modal=1"><dtml-var nom_assessor></a>
+              <a href="#" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Edição de Assessoria - <dtml-var nom_parlamentar>" data-src="assessor/assessor_mostrar_proc?cod_parlamentar=<dtml-var cod_parlamentar>&cod_assessor=<dtml-var cod_assessor>&modal=1"><dtml-var nom_assessor></a>
            </td>
            <td>
               <dtml-var des_cargo>
@@ -34,7 +34,7 @@
 <dtml-else>
      <p>Não há nenhum assessor cadastrado.</p>
 </dtml-in>
-  <div class="text-left">
-     <button type="button" class="btn m btn-primary d-print-none" data-toggle="modal" data-target="#iFrameModal" data-title="Cadastro de Assessor - <dtml-var nom_parlamentar>" data-src="assessor/assessor_form?cod_parlamentar=<dtml-var cod_parlamentar>&modal=1">Incluir Assessor</button>
+  <div class="text-start">
+     <button type="button" class="btn m btn-primary d-print-none" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Cadastro de Assessor - <dtml-var nom_parlamentar>" data-src="assessor/assessor_form?cod_parlamentar=<dtml-var cod_parlamentar>&modal=1">Incluir Assessor</button>
   </div>
 </dtml-if>

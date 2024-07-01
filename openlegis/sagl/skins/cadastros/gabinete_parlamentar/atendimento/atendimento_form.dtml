@@ -1,4 +1,4 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
 <script>
 <!--
@@ -22,7 +22,7 @@
 </script>
 
 
-  <h1 class="firstHeading">Registro de Atendimento</h1>
+  <h1 class="firstHeading font-size-18">Registro de Atendimento</h1>
 
   <form name="atendimento_form" method="post" action="atendimento_salvar_proc">
       <input type="hidden" name="hdn_cod_atendimento" value="<dtml-var cod_atendimento missing>" />
@@ -31,7 +31,7 @@
       <table class="table table-borderless">
          </tr>
            <td>
-            <label for="txa_nom_eleitor">Nome do Eleitor</label><br />
+            <label class="form-label" for="txa_nom_eleitor">Nome do Eleitor</label><br />
             <dtml-unless cod_atendimento>
               <dtml-in expr="zsql.gabinete_eleitor_obter_zsql(cod_eleitor=cod_eleitor)">
                  <dtml-call expr="REQUEST.set('nom_eleitor', nom_eleitor)">
@@ -41,7 +41,7 @@
             <input type="hidden" name="hdn_cod_eleitor" value="<dtml-var cod_eleitor>" />
            </td>
            <td>
-             <label for="txt_dat_atendimento">Data</label>
+             <label class="form-label" for="txt_dat_atendimento">Data</label>
              <dtml-if dat_atendimento>
                <input class="form-control" type="text" name="txt_dat_atendimento" size="18" value="<dtml-var dat_atendimento>" readonly />
              <dtml-else>
@@ -51,17 +51,17 @@
            </td>
          </tr>
          <tr>
-           <td colspan="2"><label for="txa_txt_observacao">Assunto</label><span class="campoObrigatorio"></span> 
+           <td colspan="2"><label class="form-label" for="txa_txt_observacao">Assunto</label><span class="campoObrigatorio"></span> 
               <textarea class="form-control" id="txa_txt_assunto" name="txa_txt_assunto" id="txa_txt_assunto" rows="2"><dtml-var txt_assunto missing></textarea>
            </td>
          </tr>
          <tr>
            <td>
-             <label for="txt_dat_resultado">Data do Resultado</label>
+             <label class="form-label" for="txt_dat_resultado">Data do Resultado</label>
              <input class="form-control date" type="text" name="txt_dat_resultado" id="txt_dat_resultado" size="18" value="<dtml-var dat_resultado missing null>" onblur="formata_data(form.txt_dat_resultado)" />
            </td>
            <td>
-             <label for="lst_txt_status" class="d-block">Status</label>
+             <label class="form-label" for="lst_txt_status" class="d-block">Status</label>
                     <dtml-in expr="['Aberto','Atendido']">
                        <div class="form-check form-check-inline">                    
                               <input class="form-check-input" type="radio" id="lst_txt_status" name="lst_txt_status" value="<dtml-var expr="_['sequence-item']">"
@@ -77,7 +77,7 @@
          </tr>
          <tr>           
            <td colspan="2">
-             <label for="txt_nom_atendente">Atendente</label>
+             <label class="form-label" for="txt_nom_atendente">Atendente</label>
             <dtml-unless cod_atendimento>
               <dtml-call expr="REQUEST.set('nom_atendente', AUTHENTICATED_USER.getUserName())">
             </dtml-unless>
@@ -86,7 +86,7 @@
          </tr>
          <tr>
            <td colspan="2">
-            <label for="txa_txt_resultado">Observações</label>
+            <label class="form-label" for="txa_txt_resultado">Observações</label>
             <textarea class="form-control" name="txa_txt_resultado"rows="1"><dtml-var txt_resultado missing null></textarea>
            </td>
          </tr>
@@ -97,5 +97,6 @@
           </dtml-if>
   </form>
    
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>
 

@@ -1,4 +1,4 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
 <script>
 /* Formatting function for row details - modify as you need */
@@ -87,20 +87,20 @@ $(document).ready(function() {
  <div class="row mb-2">
       <div class="col-12 col-lg-6 align-self-center">
        <dtml-in expr="zsql.arquivo_recipiente_obter_zsql(cod_recipiente=cod_recipiente)">      
-          <h1 class="firstHeading"><dtml-var des_tipo_recipiente_sel> <dtml-var num_recipiente>/<dtml-var ano_recipiente></h1>
+          <h1 class="firstHeading font-size-18"><dtml-var des_tipo_recipiente_sel> <dtml-var num_recipiente>/<dtml-var ano_recipiente></h1>
           <h5>Conjunto Documental: <dtml-var des_tipo_tit_documental_sel></h5>
        </dtml-in>
       </div>
-      <div class="col-12 col-lg-6 text-left text-md-right">
+      <div class="col-12 col-lg-6 text-start text-end">
          <div class="btn-group d-print-none">
            <a class="btn btn-primary btn-sm" href="<dtml-var portal_url>/cadastros/arquivo"><i class="fa fa-fw fa-undo"></i> Voltar ao Arquivo</a>
-           <button type="button" class="btn btn-sm btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+           <button type="button" class="btn btn-sm btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
              <i class="fa fa-fw fa-plus"></i> Incluir
            </button>
            <div class="dropdown-menu">
-             <a class="dropdown-item" data-toggle="modal" data-target="#iFrameModal" data-title="Incluir Matéria" data-src="arquivo_item_materia_form?cod_recipiente=<dtml-var cod_recipiente>&modal=1">Matéria</a>
-             <a class="dropdown-item" data-toggle="modal" data-target="#iFrameModal" data-title="Incluir Norma" data-src="arquivo_item_norma_form?cod_recipiente=<dtml-var cod_recipiente>&modal=1">Norma</a>
-             <a class="dropdown-item" data-toggle="modal" data-target="#iFrameModal" data-title="Incluir Documento" data-src="arquivo_item_documento_form?cod_recipiente=<dtml-var cod_recipiente>&modal=1">Documento</a>             
+             <a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Incluir Matéria" data-src="arquivo_item_materia_form?cod_recipiente=<dtml-var cod_recipiente>&modal=1">Matéria</a>
+             <a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Incluir Norma" data-src="arquivo_item_norma_form?cod_recipiente=<dtml-var cod_recipiente>&modal=1">Norma</a>
+             <a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Incluir Documento" data-src="arquivo_item_documento_form?cod_recipiente=<dtml-var cod_recipiente>&modal=1">Documento</a>             
            </div>
          </div>      
       </div>
@@ -109,7 +109,7 @@ $(document).ready(function() {
 <dtml-in expr="zsql.arquivo_recipiente_listar_conteudo_zsql(cod_recipiente = cod_recipiente)">
    <dtml-if sequence-start>
       <table class="table" id="itens">
-         <thead class="table-secondary">
+         <thead>
           <tr>
             <th width="70%">Descrição do Item</th>
             <th>Data de Arquivamento</th>
@@ -183,4 +183,5 @@ $(document).ready(function() {
      <p>Nenhum item cadastrado</p>
 </dtml-in>
 
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>

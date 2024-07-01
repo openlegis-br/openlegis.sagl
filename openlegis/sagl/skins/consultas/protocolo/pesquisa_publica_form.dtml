@@ -1,27 +1,6 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
-<script>
-
-  $(document).ready(function () {
-        $("#btn_consultar").click(function () {
-            var form = document.pesquisa_publica_form;
-            var chave = $('#txt_chave_acesso');
-            if (chave.val() === '') {
-                $.showAlert({title: "Preenchimento obrigatório", body: "É necessário informar a chave de acesso!"});
-                $("#txt_chave_acesso").focus();
-                return false;
-            }
-           if ($("#txt_chave_acesso").val().length < 18) {
-                $.showAlert({title: "Mensagem do SIstema", body: "Formato da chave inválido. Informe os dados corretamente."});
-                return false;
-            }
-            return form.submit();
-        });
-  });
-  
-</script>
-
-<h1 class="firstHeading">Consulta de Protocolo</h1> 
+<h1 class="firstHeading font-size-18">Consulta de Protocolo</h1> 
 
 <p>Informe a chave de acesso fornecida junto ao comprovante de protocolo.</p>
 
@@ -44,4 +23,25 @@
   
 </form>
 
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<script>
+
+  $(document).ready(function () {
+        $("#btn_consultar").click(function () {
+            var form = document.pesquisa_publica_form;
+            var chave = $('#txt_chave_acesso');
+            if (chave.val() === '') {
+                bootstrap.showModal({title: "Preenchimento obrigatório", body: "É necessário informar a chave de acesso!"});
+                $("#txt_chave_acesso").focus();
+                return false;
+            }
+           if ($("#txt_chave_acesso").val().length < 18) {
+                bootstrap.showModal({title: "Mensagem do SIstema", body: "Formato da chave inválido. Informe os dados corretamente."});
+                return false;
+            }
+            return form.submit();
+        });
+  });
+  
+</script>
+<dtml-var footer_html>

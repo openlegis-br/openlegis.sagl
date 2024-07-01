@@ -1,4 +1,4 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
 <dtml-call expr="REQUEST.set('txt_codigo', cadastros.assinatura.parse_verification_code(formatted_code=txt_codigo_verificacao.upper()))">
 
@@ -6,12 +6,12 @@
 
  <dtml-if sequence-start> 
 
- <h1 class="firstHeading">Validação Digital</h1>
+ <h1 class="firstHeading font-size-18">Validação Digital</h1>
  
  <p><b>Código de Validação:</b> <dtml-var txt_codigo_verificacao></p>
 
      <table class="table table-bordered">
-      <thead class="table-secondary">
+      <thead>
         <tr>
            <th>Documento Assinado</th>
         </tr>
@@ -29,7 +29,7 @@
                </dtml-if>
            </td>
         </tr>
-      <thead class="table-secondary">        
+      <thead>        
         <tr>
            <th>Versão para Impressão</th>
         </tr>
@@ -83,7 +83,7 @@
      </table>
 
     <table class="table table-bordered">
-     <thead class="table-secondary">
+     <thead>
       <tr>
           <th width="50%">Signatário</th>
           <th width="30%">CPF</th>
@@ -103,10 +103,10 @@
   </dtml-if>
 
 <dtml-else>
-  <h1 class="firstHeading">Validação Digital</h1> 
+  <h1 class="firstHeading font-size-18">Validação Digital</h1> 
     <div class="alert alert-danger alert-dismissible fade show" role="alert">
         <h5>O código de validação <b><dtml-var txt_codigo_verificacao></b> não localizado!</h5>
-        <button type="button" class="close" data-dismiss="alert" aria-label="Fechar">
+        <button type="button" class="close" data-bs-dismiss="alert" aria-label="Fechar">
           <span aria-hidden="true">&times;</span>
         </button>
     </div>
@@ -117,4 +117,5 @@
   <button class="btn btn-secondary d-print-none" onClick="window.print();return false;"><i class="fas fa-print"></i> Imprimir</button>
 </div>
 
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>

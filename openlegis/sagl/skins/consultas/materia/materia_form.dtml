@@ -1,8 +1,8 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
 <script>
 $(function () {
-    $('[data-toggle="popover"]').popover({
+    $('[data-bs-toggle="popover"]').popover({
     container: 'body',
     html: true,
     placement: 'right',
@@ -27,13 +27,13 @@ $(function () {
 
  <div class="row mb-2">
       <div class="col-12 col-md-8 align-self-center">
-         <h1 class="firstHeading"><dtml-var des_tipo_materia> nº <dtml-var num_ident_basica missing>/<dtml-var ano_ident_basica missing></h1>
+         <h1 class="firstHeading font-size-18"><dtml-var des_tipo_materia> nº <dtml-var num_ident_basica missing>/<dtml-var ano_ident_basica missing></h1>
       </div>
-      <div class="col-12 col-md-4 text-left text-md-right">
+      <div class="col-12 col-md-4 text-start text-end">
       <dtml-let isAnon="portal_membership.isAnonymousUser()">
         <dtml-if expr="not isAnon">
           <div class="dropdown d-print-none mb-3">
-            <button class="btn btn-sm btn-link dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <button class="btn btn-sm btn-link dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
               <i class="fas fa-fw fa-file-export"></i> Gerar
             </button>
             <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
@@ -72,7 +72,7 @@ $(function () {
       <div class="col-12 col-lg-6">
         <dtml-call expr="REQUEST.set('id_documento', str(cod_materia)+'_texto_integral.pdf')">
         <dtml-call expr="REQUEST.set('id_redacao', str(cod_materia)+'_redacao_final.pdf')">
-        <div class="text-lg-right">
+        <div class="text-end">
         <dtml-if expr="hasattr(sapl_documentos.materia,id_documento)">
            <dtml-let isAnon="portal_membership.isAnonymousUser()">
               <dtml-if expr="not isAnon">
@@ -218,12 +218,12 @@ $(function () {
          <div class="col-6">
            <span class="h6 font-weight-bold">Situação Atual</span>
          </div>
-         <div class="col-6 text-right">
+         <div class="col-6 text-end">
 
              <dtml-if expr="ind_tramitacao==1">
                 <span class="badge badge-primary">Em Tramitação</span>
                 <dtml-if expr="int(sapl_documentos.props_sagl.acompanhamento_materia)==1">                
-                  <button type="button" class="btn btn-sm btn-link d-print-none" data-toggle="modal" data-target="#iFrameModal" data-title="Acompanhar esta matéria" data-src="<dtml-var portal_url>/consultas/materia/acompanhamento/acomp_materia_form?cod_materia=<dtml-var expr="pysc.b64encode_pysc(codigo=cod_materia)">&modal=1"><i class="fa fa-fw fa-envelope"></i><span class="d-none d-md-inline-block"> Acompanhar</span></button> 
+                  <button type="button" class="btn btn-sm btn-link d-print-none" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Acompanhar esta matéria" data-src="<dtml-var portal_url>/consultas/materia/acompanhamento/acomp_materia_form?cod_materia=<dtml-var expr="pysc.b64encode_pysc(codigo=cod_materia)">&modal=1"><i class="fa fa-fw fa-envelope"></i><span class="d-none d-md-inline-block"> Acompanhar</span></button> 
                 </dtml-if>
              <dtml-elif expr="ind_tramitacao==0">                
                 <span class="badge badge-warning">Tramitação Encerrada</span>
@@ -287,7 +287,7 @@ $(function () {
     <div class="card mb-4">
       <div class="card-header" id="headingOne">
         <p class="h5 mb-0">
-          <a href="#" class="d-block text-left collapsed" data-toggle="collapse" data-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne"> 
+          <a href="#" class="d-block text-start collapsed" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne"> 
             <i class="fa float-right pt-1 align-self-center" aria-hidden="true"></i>
              <span class="h6 font-weight-bold">Comissões Permanentes</span>
           </a>
@@ -331,7 +331,7 @@ $(function () {
     <div class="card mb-4">
       <div class="card-header" id="headingOne">
         <p class="h5 mb-0">
-          <a href="#" class="d-block text-left collapsed" data-toggle="collapse" data-target="#collapseSub" aria-expanded="false" aria-controls="collapseSub"> 
+          <a href="#" class="d-block text-start collapsed" data-bs-toggle="collapse" data-bs-target="#collapseSub" aria-expanded="false" aria-controls="collapseSub"> 
             <i class="fa float-right pt-1 align-self-center" aria-hidden="true"></i>
              <span class="h6 font-weight-bold">Substitutivos [<dtml-var qtdSub>]</span>
           </a>
@@ -374,7 +374,7 @@ $(function () {
                                <dtml-if tip_resultado_votacao>
                                  <dtml-in expr="zsql.tipo_resultado_votacao_obter_zsql(tip_resultado_votacao=tip_resultado_votacao, ind_excluido=0)">
                                    <dtml-if expr="tip_votacao == 2 ">
-                                     <a href="#" data-toggle="modal" data-target="#iFrameModal" data-title="Resultado de Votação" data-src="<dtml-var portal_url>/consultas/sessao_plenaria/sessao_plenaria_mostrar_painel_proc?cod_sessao_plen=<dtml-var cod_sessao_plen>&cod_ordem=<dtml-var cod_ordem>&cod_materia=<dtml-var cod_materia>&cod_substitutivo=<dtml-var cod_substitutivo>&tipo_materia=acessoria&modal=1"><dtml-var nom_resultado></a>                                    
+                                     <a href="#" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Resultado de Votação" data-src="<dtml-var portal_url>/consultas/sessao_plenaria/sessao_plenaria_mostrar_painel_proc?cod_sessao_plen=<dtml-var cod_sessao_plen>&cod_ordem=<dtml-var cod_ordem>&cod_materia=<dtml-var cod_materia>&cod_substitutivo=<dtml-var cod_substitutivo>&tipo_materia=acessoria&modal=1"><dtml-var nom_resultado></a>                                    
                                    <dtml-else>
                                         <dtml-var nom_resultado>
                                    </dtml-if>
@@ -408,7 +408,7 @@ $(function () {
     <div class="card mb-4">
       <div class="card-header" id="headingOne">
         <p class="h5 mb-0">
-          <a href="#" class="d-block text-left collapsed" data-toggle="collapse" data-target="#collapseEme" aria-expanded="false" aria-controls="collapseEme"> 
+          <a href="#" class="d-block text-start collapsed" data-bs-toggle="collapse" data-bs-target="#collapseEme" aria-expanded="false" aria-controls="collapseEme"> 
             <i class="fa float-right pt-1 align-self-center" aria-hidden="true"></i>
              <span class="h6 font-weight-bold">Emendas [<dtml-var qtdEme>]</span>
           </a>
@@ -451,7 +451,7 @@ $(function () {
                                <dtml-if tip_resultado_votacao>
                                  <dtml-in expr="zsql.tipo_resultado_votacao_obter_zsql(tip_resultado_votacao=tip_resultado_votacao, ind_excluido=0)">
                                    <dtml-if expr="tip_votacao == 2 ">
-                                     <a href="#" data-toggle="modal" data-target="#iFrameModal" data-title="Resultado de Votação" data-src="<dtml-var portal_url>/consultas/sessao_plenaria/sessao_plenaria_mostrar_painel_proc?cod_sessao_plen=<dtml-var cod_sessao_plen>&cod_ordem=<dtml-var cod_ordem>&cod_materia=<dtml-var cod_materia>&cod_emenda=<dtml-var cod_emenda>&tipo_materia=acessoria&modal=1"><dtml-var nom_resultado></a>                                    
+                                     <a href="#" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Resultado de Votação" data-src="<dtml-var portal_url>/consultas/sessao_plenaria/sessao_plenaria_mostrar_painel_proc?cod_sessao_plen=<dtml-var cod_sessao_plen>&cod_ordem=<dtml-var cod_ordem>&cod_materia=<dtml-var cod_materia>&cod_emenda=<dtml-var cod_emenda>&tipo_materia=acessoria&modal=1"><dtml-var nom_resultado></a>                                    
                                    <dtml-else>
                                         <dtml-var nom_resultado>
                                    </dtml-if>
@@ -482,7 +482,7 @@ $(function () {
     <div class="card mb-4">
       <div class="card-header" id="headingOne">
         <p class="h5 mb-0">
-          <a href="#" class="d-block text-left collapsed" data-toggle="collapse" data-target="#collapseSessao" aria-expanded="false" aria-controls="collapseSessao"> 
+          <a href="#" class="d-block text-start collapsed" data-bs-toggle="collapse" data-bs-target="#collapseSessao" aria-expanded="false" aria-controls="collapseSessao"> 
             <i class="fa float-right pt-1 align-self-center" aria-hidden="true"></i>
              <span class="h6 font-weight-bold">Deliberações em Plenário</span>
           </a>
@@ -520,7 +520,7 @@ $(function () {
                             <dtml-if tip_resultado_votacao>
                                <dtml-in expr="zsql.tipo_resultado_votacao_obter_zsql(tip_resultado_votacao=tip_resultado_votacao, ind_excluido=0)">
                                  <dtml-if expr="tip_votacao == 2">
-                                    <a href="#" data-toggle="modal" data-target="#iFrameModal" data-title="Resultado de Votação" data-src="<dtml-var portal_url>/consultas/sessao_plenaria/sessao_plenaria_mostrar_painel_proc?cod_sessao_plen=<dtml-var cod_sessao_plen>&cod_ordem=<dtml-var cod_ordem>&cod_materia=<dtml-var cod_materia>&tipo_materia=expediente&modal=1"><dtml-var nom_resultado></a>                                
+                                    <a href="#" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Resultado de Votação" data-src="<dtml-var portal_url>/consultas/sessao_plenaria/sessao_plenaria_mostrar_painel_proc?cod_sessao_plen=<dtml-var cod_sessao_plen>&cod_ordem=<dtml-var cod_ordem>&cod_materia=<dtml-var cod_materia>&tipo_materia=expediente&modal=1"><dtml-var nom_resultado></a>                                
                                  <dtml-else>
                                    <b><dtml-var nom_resultado></b>
                                  </dtml-if>
@@ -551,7 +551,7 @@ $(function () {
                          <dtml-if tip_resultado_votacao>
                             <dtml-in expr="zsql.tipo_resultado_votacao_obter_zsql(tip_resultado_votacao=tip_resultado_votacao, ind_excluido=0)">
                               <dtml-if expr="tip_votacao == 2 ">
-                                 <a href="#" data-toggle="modal" data-target="#iFrameModal" data-title="Resultado de Votação" data-src="<dtml-var portal_url>/consultas/sessao_plenaria/sessao_plenaria_mostrar_painel_proc?cod_sessao_plen=<dtml-var cod_sessao_plen>&cod_ordem=<dtml-var cod_ordem>&cod_materia=<dtml-var cod_materia>&tipo_materia=ordemdia&modal=1">
+                                 <a href="#" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Resultado de Votação" data-src="<dtml-var portal_url>/consultas/sessao_plenaria/sessao_plenaria_mostrar_painel_proc?cod_sessao_plen=<dtml-var cod_sessao_plen>&cod_ordem=<dtml-var cod_ordem>&cod_materia=<dtml-var cod_materia>&tipo_materia=ordemdia&modal=1">
                                   <dtml-var nom_resultado> em <dtml-in expr="zsql.turno_discussao_obter_zsql(cod_turno=tip_turno)"><dtml-var des_turno></dtml-in>
                                 </a>
                               <dtml-else>
@@ -607,7 +607,7 @@ $(function () {
     <div class="card mb-4">
       <div class="card-header" id="headingOne">
         <p class="h5 mb-0">
-          <a href="#" class="d-block text-left collapsed" data-toggle="collapse" data-target="#collapseDoc" aria-expanded="false" aria-controls="collapseDoc"> 
+          <a href="#" class="d-block text-start collapsed" data-bs-toggle="collapse" data-bs-target="#collapseDoc" aria-expanded="false" aria-controls="collapseDoc"> 
             <i class="fa float-right pt-1 align-self-center" aria-hidden="true"></i>
              <span class="h6 font-weight-bold">Documentos</span>
           </a>
@@ -617,7 +617,7 @@ $(function () {
       <div class="card-body">
          <dtml-let isAnon="portal_membership.isAnonymousUser()">
              <dtml-if expr="not isAnon and _.has_key('add_doc')">      
-                 <button type="button" class="btn btn-sm btn-secondary" data-toggle="popover" title="Documento Acessório"><i class="fas fa-plus-circle"></i> Incluir</button>
+                 <button type="button" class="btn btn-sm btn-secondary" data-bs-toggle="popover" title="Documento Acessório"><i class="fas fa-plus-circle"></i> Incluir</button>
                  <div id="PopoverContent" class="d-none">
                    <form name="myform" id="myform" class="needs-validation" validate role="form" enctype="multipart/form-data" method="post" action="documento_acessorio_salvar_proc" onSubmit="return confirm('Confirma a inclusão do documento acessório?');">
                     <input type="hidden" name="cod_materia" value="<dtml-var cod_materia>" />
@@ -625,8 +625,8 @@ $(function () {
                     <input type="hidden" name="cod_unid_tram_local" value="<dtml-var cod_ult_unidade missing>" />
                     <div class="row">
                       <div class="col-12 mb-3">
-                       <label for="lst_tip_documento" class="required">Tipo</label>
-                         <select class="custom-select" id="lst_tip_documento" name="lst_tip_documento" required>
+                       <label class="form-label" for="lst_tip_documento" class="required">Tipo</label>
+                         <select class="form-select" id="lst_tip_documento" name="lst_tip_documento" required>
                              <option></option> 
                              <dtml-in expr="zsql.tipo_documento_obter_zsql(ind_excluido=0)">           
                                 <option value="<dtml-var tip_documento>"> <dtml-var des_tipo_documento></option>
@@ -637,7 +637,7 @@ $(function () {
                           </div>
                       </div>
                       <div class="col-12 mb-2">
-                        <label for="txt_nom_documento" class="required">Descrição</label>        
+                        <label class="form-label" for="txt_nom_documento" class="required">Descrição</label>        
                         <input class="form-control" type="text" id="txt_nom_documento" name="txt_nom_documento" value="" maxlength="50" required />
                           <small id="passwordHelpInline" class="text-muted">
                              Máximo 50 caracteres.
@@ -648,15 +648,15 @@ $(function () {
                      </div>                    
                      <div class="col-12">                      
                       <div class="form-group">
-                         <label for="file_nom_arquivo" class="required">Arquivo</label>
+                         <label class="form-label" for="file_nom_arquivo" class="required">Arquivo</label>
                          <input type="file" class="form-control-file" id="file_nom_arquivo" name="file_nom_arquivo" accept="application/pdf" required />
                       </div>
                      </div>
                      <div class="col-12">                      
-                        <button class="btn btn-primary btn-block" type="submit" data-toggle="popover" data-placement="bottom" data-html="true" data-title="OK"><i class="fa fa-fw fa-check"></i> Incluir Documento</button>                     
+                        <button class="btn btn-primary btn-block" type="submit" data-bs-toggle="popover" data-placement="bottom" data-html="true" data-title="OK"><i class="fa fa-fw fa-check"></i> Incluir Documento</button>                     
                      </div>
                      <div class="col-md-12 mt-2">
-                       <p class="text-muted small"><i class="fas fa-asterisk text-danger"></i> Campos obrigatórios</p>
+                       <p class="text-muted small font-size-12"><i class="fas fa-asterisk text-danger"></i> Campos obrigatórios</p>
                      </div>
                    </div>
                 </form> 
@@ -731,9 +731,9 @@ $(function () {
                               <dtml-if expr="_.has_key('add_doc') and _.has_key('usuario_doc') and _.has_key('usuario_logado') and usuario_doc==usuario_logado">
                                <dtml-if expr="zsql.assinatura_documento_obter_zsql(codigo=cod_documento, tipo_doc='doc_acessorio')">             
                                <dtml-else>
-                                  <button type="button" class="btn btn-sm btn-secondary" data-toggle="modal" data-target="#iFrameModal" data-title="Assinar Digitalmente" data-src="<dtml-var portal_url>/generico/assinador/pades-signature_html?codigo=<dtml-var cod_documento>&tipo_doc=doc_acessorio&modal=1"><i class="fas fa-file-signature"></i> Assinar</button>
+                                  <button type="button" class="btn btn-sm btn-secondary" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Assinar Digitalmente" data-src="<dtml-var portal_url>/generico/assinador/pades-signature_html?codigo=<dtml-var cod_documento>&tipo_doc=doc_acessorio&modal=1"><i class="fas fa-file-signature"></i> Assinar</button>
                                </dtml-if>
-                               <button type="button" class="btn btn-sm btn-secondary" data-toggle="modal" data-target="#iFrameModal" data-title="Assinaturas Digitais" data-src="<dtml-var portal_url>/cadastros/assinatura/assinatura_solicitar_form?codigo=<dtml-var cod_documento>&tipo_doc=doc_acessorio&modal=1"><i class="fas fa-file-signature"></i> Assinaturas</button>
+                               <button type="button" class="btn btn-sm btn-secondary" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Assinaturas Digitais" data-src="<dtml-var portal_url>/cadastros/assinatura/assinatura_solicitar_form?codigo=<dtml-var cod_documento>&tipo_doc=doc_acessorio&modal=1"><i class="fas fa-file-signature"></i> Assinaturas</button>
                                <button type="button" class="btn btn-sm btn-danger" onClick="documento_acessorio_excluir(<dtml-var cod_documento missing>)"><i class="fas fa-trash"></i> Excluir</button>          
                               </dtml-if>
                            </dtml-if>                             
@@ -805,7 +805,7 @@ $(function () {
     <div class="card mb-4">
       <div class="card-header" id="headingOne">
         <p class="h5 mb-0">
-          <a href="#" class="d-block text-left collapsed" data-toggle="collapse" data-target="#collapseTram" aria-expanded="false" aria-controls="collapseTram"> 
+          <a href="#" class="d-block text-start collapsed" data-bs-toggle="collapse" data-bs-target="#collapseTram" aria-expanded="false" aria-controls="collapseTram"> 
             <i class="fa float-right pt-1 align-self-center" aria-hidden="true"></i>
              <span class="h6 font-weight-bold">Tramitação</span>
           </a>
@@ -886,7 +886,7 @@ $(function () {
         <div class="card mb-4">
           <div class="card-header" id="headingOne">
             <p class="h5 mb-0">
-              <a href="#" class="d-block text-left collapsed" data-toggle="collapse" data-target="#collapseArquivo" aria-expanded="false" aria-controls="collapseArquivo"> 
+              <a href="#" class="d-block text-start collapsed" data-bs-toggle="collapse" data-bs-target="#collapseArquivo" aria-expanded="false" aria-controls="collapseArquivo"> 
                 <i class="fa float-right pt-1 align-self-center" aria-hidden="true"></i>
                  <span class="h6 font-weight-bold">Arquivo Permanente</span>
               </a>
@@ -929,9 +929,10 @@ $(function () {
  </dtml-if>
 </dtml-let>
 
-<div class="text-left">
+<div class="text-start">
   <a class="btn btn-primary d-print-none" href="<dtml-var portal_url>/consultas/materia" ><i class="fa fa-fw fa-search"></i> Nova Pesquisa</a>
   <a class="btn btn-secondary" href="javascript:void(0)" onClick="window.history.go(-1); return false;"><i class="fa fa-fw fa-undo"></i> Voltar</a>  
 </div>
 
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>

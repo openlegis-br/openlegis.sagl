@@ -1,6 +1,6 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
-<h1 class="firstHeading">Legislação por Assunto</h1>
+<h1 class="firstHeading font-size-18">Legislação por Assunto</h1>
  <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Norma'])">
     <dtml-call expr="REQUEST.set('incluir', 1)">
  </dtml-if>
@@ -8,7 +8,7 @@
   <table class="table">
      <dtml-in expr="zsql.assunto_norma_juridica_obter_zsql(ind_excluido=0)">
      <dtml-if sequence-start>
-      <thead class="table-secondary">
+      <thead>
        <tr>
          <th>Descrição do Assunto</th>
          <th width="20%">Quantidade de Normas</th>
@@ -27,4 +27,5 @@
     </tr>
      </dtml-in>
     </table>
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>

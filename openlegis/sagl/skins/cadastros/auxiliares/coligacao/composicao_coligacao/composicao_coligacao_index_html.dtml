@@ -1,5 +1,5 @@
 
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
 <script>
 <!--  
@@ -31,7 +31,7 @@
 
 <a id="ajuda" href="<dtml-var portal_url>/ajuda/coligacao">Ajuda</a>
 
-<h1 class="firstHeading">Tabelas Auxiliares</h1> 
+<h1 class="firstHeading font-size-18">Tabelas Auxiliares</h1> 
 
 <table class="table">
   <tr> 
@@ -40,7 +40,7 @@
    </tr>
 </table>  
 
-<fieldset><legend>Coligação</legend>
+<fieldset><legend class="font-size-16">Coligação</legend>
 <input type="hidden" name="lst_cod_coligacao" value="<dtml-var cod_coligacao>" />
 
   <dtml-in expr="zsql.composicao_coligacao_obter_zsql(cod_coligacao=cod_coligacao)">    
@@ -57,7 +57,7 @@
       </dtml-if sequence-start>
         <tr> 
            <td width="75%">
-            <select class="custom-select"  name="lst_cod_partido_<dtml-var cod_partido>" size="1">
+            <select class="form-select"  name="lst_cod_partido_<dtml-var cod_partido>" size="1">
                  <dtml-in expr="zsql.partido_obter_zsql(cod_partido='')">
                   <option 
                      <dtml-if expr="cod_partido==index_html.cod_partido">
@@ -90,7 +90,7 @@
        <table class="table">
           <tr>
            <td>
-            <select class="custom-select"  name="lst_cod_partido" size="1">
+            <select class="form-select"  name="lst_cod_partido" size="1">
 		 <option value="0"></option>
                <dtml-in expr="zsql.partido_obter_zsql()">
                  <option value="<dtml-var cod_partido>"><dtml-var sgl_partido> - <dtml-var nom_partido></option>
@@ -102,4 +102,5 @@
       </table>
 </fieldset>
 </form>
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>

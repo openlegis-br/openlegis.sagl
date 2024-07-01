@@ -1,4 +1,4 @@
-<h1 class="firstHeading">Substitutivos</h1>
+<h1 class="firstHeading font-size-18">Substitutivos</h1>
 
 <form name="index_form" action="substitutivo_form">
 <input type="hidden" name="cod_materia" value="<dtml-var cod_materia missing>">
@@ -6,7 +6,7 @@
     <dtml-if sequence-start>
     <div class="table-responsive">    
     <table class="table">
-      <thead class="table-secondary">
+      <thead>
        <tr> 
          <th width="10%">Número</th>
          <th>Ementa</th>
@@ -18,7 +18,7 @@
     </dtml-if sequence-start>
        <tr> 
           <td>
-             <a href="#" data-toggle="modal" data-target="#iFrameModal" data-title="Edição de Substitutivo" data-src="substitutivo/substitutivo_mostrar_proc?cod_substitutivo=<dtml-var cod_substitutivo>&cod_materia=<dtml-var cod_materia>&modal=1">  
+             <a href="#" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Edição de Substitutivo" data-src="substitutivo/substitutivo_mostrar_proc?cod_substitutivo=<dtml-var cod_substitutivo>&cod_materia=<dtml-var cod_materia>&modal=1">  
                 <dtml-var num_substitutivo>
              </a>
           </td>
@@ -57,7 +57,7 @@
                 <dtml-if tip_resultado_votacao>
                 <dtml-in expr="zsql.tipo_resultado_votacao_obter_zsql(tip_resultado_votacao=tip_resultado_votacao, ind_excluido=0)">
                     <dtml-if expr="tip_votacao == 2 ">
-                       <a href="#" data-toggle="modal" data-target="#iFrameModal" data-title="Resultado de Votação" data-src="<dtml-var portal_url>/consultas/sessao_plenaria/sessao_plenaria_mostrar_painel_proc?cod_sessao_plen=<dtml-var cod_sessao_plen>&cod_ordem=<dtml-var cod_ordem>&cod_materia=<dtml-var cod_materia>&cod_substitutivo=<dtml-var cod_substitutivo>&tipo_materia=acessoria&modal=1">  
+                       <a href="#" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Resultado de Votação" data-src="<dtml-var portal_url>/consultas/sessao_plenaria/sessao_plenaria_mostrar_painel_proc?cod_sessao_plen=<dtml-var cod_sessao_plen>&cod_ordem=<dtml-var cod_ordem>&cod_materia=<dtml-var cod_materia>&cod_substitutivo=<dtml-var cod_substitutivo>&tipo_materia=acessoria&modal=1">  
                          <dtml-var nom_resultado>
                       </a>
                     <dtml-else>
@@ -80,8 +80,8 @@
       </table>
    </dtml-in>
    
-  <div class="text-left">
-     <button type="button" class="btn m btn-primary d-print-none" data-toggle="modal" data-target="#iFrameModal" data-title="Cadastro de Substitutivo" data-src="substitutivo/substitutivo_form?cod_materia=<dtml-var cod_materia>&modal=1">Incluir Substitutivo</button> 
+  <div class="text-start">
+     <button type="button" class="btn m btn-primary d-print-none" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Cadastro de Substitutivo" data-src="substitutivo/substitutivo_form?cod_materia=<dtml-var cod_materia>&modal=1">Incluir Substitutivo</button> 
   </div>
 
 </form>

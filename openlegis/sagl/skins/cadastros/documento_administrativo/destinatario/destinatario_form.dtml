@@ -1,4 +1,4 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
 <script>
    function campos_criticar(form){
@@ -12,13 +12,13 @@
   }
 </script>
 
-<legend>Gerar Lista de Destinatários</legend>
+<legend class="font-size-16">Gerar Lista de Destinatários</legend>
 
  <form name="destinatario_form" method="post" action="destinatario_gerar_proc">
-    <div class="form-row">
+    <div class="row">
       <div class="col-12 mb-3">
-	  <label for="lst_tip_instituicao" class="required">Selecione o Tipo de Entidade</label>     
-          <select class="custom-select" id="lst_tip_instituicao" name="lst_tip_instituicao">
+	  <label class="form-label" for="lst_tip_instituicao" class="required">Selecione o Tipo de Entidade</label>     
+          <select class="form-select" id="lst_tip_instituicao" name="lst_tip_instituicao">
             <option value=""></option>
             <dtml-in expr="zsql.tipo_instituicao_obter_zsql(ind_excluido=0)">
               <option value="<dtml-var tip_instituicao missing>">
@@ -28,7 +28,7 @@
           </select>
       </div>
    </div>
-   <div class="text-left">
+   <div class="text-start">
      <input class="btn btn-primary" type="button" name="btn_destinatario_form" value="Continuar" 
          onClick="campos_criticar(document.destinatario_form)">
      <input type="hidden" name="cod_documento" value="<dtml-var cod_documento missing>" />
@@ -36,4 +36,5 @@
    </div>
  </form>
 
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>

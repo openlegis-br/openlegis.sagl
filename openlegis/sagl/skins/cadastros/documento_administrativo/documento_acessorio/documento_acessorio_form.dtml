@@ -1,4 +1,4 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
 <script>
 
@@ -78,7 +78,7 @@ $(document).ready(function () {
 
 </script>
 
-<h1 class="firstHeading">Documento Acessório</h1>
+<h1 class="firstHeading font-size-18">Documento Acessório</h1>
 
 <form name="documento_acessorio_form" method="post" action="documento_acessorio_salvar_proc" enctype="multipart/form-data">
   <input type="hidden" name="hdn_cod_documento_acessorio" value="<dtml-var cod_documento_acessorio missing>" />
@@ -89,10 +89,10 @@ $(document).ready(function () {
   </dtml-if>
   <input type="hidden" name="modal" value="1" /> 
 
-  <div class="form-row">
+  <div class="row">
      <div class="col-12 col-sm-6 mb-3">
-        <label for="lst_tip_documento" class="required">Tipo de Documento</label>
-        <select class="custom-select" id="lst_tip_documento" name="lst_tip_documento" required>
+        <label class="form-label" for="lst_tip_documento" class="required">Tipo de Documento</label>
+        <select class="form-select" id="lst_tip_documento" name="lst_tip_documento" required>
           <option value="0">Selecione</option> 
             <dtml-in expr="zsql.tipo_documento_administrativo_obter_zsql(tip_natureza='A',ind_excluido=0)">           
                <option <dtml-if  cod_documento_acessorio>
@@ -106,13 +106,13 @@ $(document).ready(function () {
         </select>
      </div>
      <div class="col-12 col-sm-6 mb-3">
-        <label for="txt_nom_documento" class="required">Nome do Documento</label>
+        <label class="form-label" for="txt_nom_documento" class="required">Nome do Documento</label>
         <input class="form-control" type="text" id="txt_nom_documento" name="txt_nom_documento" value="<dtml-var nom_documento missing null="">" maxlength="250" required />
      </div>
   </div>
-  <div class="form-row">
+  <div class="row">
      <div class="col-4 col-sm-3 mb-3">
-        <label for="txt_dat_documento" class="required">Data / Horário</label>
+        <label class="form-label" for="txt_dat_documento" class="required">Data / Horário</label>
         <dtml-unless dat_documento>
           <dtml-call expr="REQUEST.set('dat_documento', DateTime().strftime('%d/%m/%Y %H:%M:%S'))">
         </dtml-unless>        
@@ -129,13 +129,13 @@ $(document).ready(function () {
     });
  </script>
      <div class="col-8 col-sm-9 mb-3">
-        <label for="txt_nom_autor_documento" class="required">Autoria</label>
+        <label class="form-label" for="txt_nom_autor_documento" class="required">Autoria</label>
         <input class="form-control" type="text" id="txt_nom_autor_documento" name="txt_nom_autor_documento" value="<dtml-var nom_autor_documento missing null="">" maxlength="50" required />        
      </div>
   </div>
-  <div class="form-row">
+  <div class="row">
      <div class="col-12 col-sm-6 mb-3">
-        <label class="d-block">Arquivo PDF</label>
+        <label class="form-label d-block">Arquivo PDF</label>
         <dtml-if expr="_.has_key('cod_documento_acessorio')"> 
            <dtml-call expr="REQUEST.set('id_documento', str(cod_documento_acessorio)+'.pdf')">
            <dtml-if "hasattr(sapl_documentos.administrativo,id_documento)">
@@ -149,7 +149,7 @@ $(document).ready(function () {
 		    Visualizar
 		  </a>
                   <dtml-if "sapl_documentos.props_sagl.restpki_access_token!=''">
-                     <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#iFrameModal" data-title="Assinaturas Digitais" data-src="<dtml-var portal_url>/cadastros/assinatura/assinatura_solicitar_form?codigo=<dtml-var cod_documento_acessorio>&tipo_doc=doc_acessorio_adm&modal=1"><i class="fas fa-file-signature"></i> Assinaturas</button>
+                     <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Assinaturas Digitais" data-src="<dtml-var portal_url>/cadastros/assinatura/assinatura_solicitar_form?codigo=<dtml-var cod_documento_acessorio>&tipo_doc=doc_acessorio_adm&modal=1"><i class="fas fa-file-signature"></i> Assinaturas</button>
                   </dtml-if>
                   <a class="btn btn-danger" href="<dtml-var portal_url>/cadastros/documento_administrativo/documento_acessorio/texto_pdf_excluir_proc?cod_documento_acessorio=<dtml-var cod_documento_acessorio missing>&modal=1" data-confirm="Deseja realmente excluir o arquivo PDF?"><i class="fas fa-trash"></i> Excluir</a> 
               </dtml-let>
@@ -183,15 +183,15 @@ $(document).ready(function () {
    <div class="col-12 col-sm-6 mb-3">
              <dtml-if expr="_.has_key('cod_documento_acessorio')">
               <dtml-call expr="REQUEST.set('prefixo_arquivo', str(sgl_tipo_documento)+'-')">
-              <label for="lst_modelo" class="d-block">Arquivo ODT</label>
+              <label class="form-label" for="lst_modelo" class="d-block">Arquivo ODT</label>
                    <dtml-call expr="REQUEST.set('nome_arquivo_odt',str(cod_documento_acessorio)+'.odt')">
                    <dtml-if "hasattr(sapl_documentos.administrativo,nome_arquivo_odt)">
                          <a class="btn btn-secondary" href="<dtml-var portal_url>/generico/viewerJS/#<dtml-var portal_url>/sapl_documentos/administrativo/<dtml-var nome_arquivo_odt>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fa fa-fw fa-file-alt"></i> Visualizar</a>
-                         <button type="button" class="btn btn-secondary" onclick="javascript:location.href='<dtml-var portal_url>/sapl_documentos/administrativo/externalEdit_/<dtml-var nome_arquivo_odt>.zem'" data-toggle="tooltip" data-placement="bottom" title="Editar no LibreOffice"><i class="fas fa-fw fa-external-link-alt"></i>Editar</button>                                          
+                         <button type="button" class="btn btn-secondary" onclick="javascript:location.href='<dtml-var portal_url>/sapl_documentos/administrativo/externalEdit_/<dtml-var nome_arquivo_odt>.zem'" data-bs-toggle="tooltip" data-placement="bottom" title="Editar no LibreOffice"><i class="fas fa-fw fa-external-link-alt"></i>Editar</button>                                          
                       <a class="btn btn-danger" href="<dtml-var portal_url>/cadastros/documento_administrativo/documento_acessorio/texto_odt_excluir_proc?cod_documento_acessorio=<dtml-var cod_documento_acessorio missing>&modal=1" data-confirm="Deseja realmente excluir o arquivo ODT?"><i class="fas fa-trash"></i> Excluir</a> 
                    <dtml-else>
                     <div class="input-group">
-                      <select class="custom-select" id="lst_modelo" name="lst_modelo">
+                      <select class="form-select" id="lst_modelo" name="lst_modelo">
                          <option value="0">Selecione um modelo</option>
                          <dtml-with expr="sapl_documentos.modelo.documento_administrativo">
                             <dtml-in expr="objectValues('File')" sort="title_or_id">
@@ -209,15 +209,15 @@ $(document).ready(function () {
              </dtml-if>
    </div>
   </div>
-  <div class="form-row">
+  <div class="row">
      <div class="col-12 col-sm-12 mb-3">
-        <label for="txa_txt_assunto">Observações</label>
+        <label class="form-label" for="txa_txt_assunto">Observações</label>
         <textarea class="form-control auto-resize" id="txa_txt_assunto" name="txa_txt_assunto" rows="1"><dtml-var txt_assunto missing null=""></textarea>
      </div>
    </div>
    <input type="hidden" name="txa_txt_indexacao" value="<dtml-var txt_indexacao missing null="">" />
 
- <div class="text-left">
+ <div class="text-start">
     <input class="btn btn-primary" type="button" name="btn_documento_acessorio_salvar" value="Salvar" onClick="acessorio_criticar(document.documento_acessorio_form)" />
     <dtml-if cod_documento_acessorio>
       <input class="btn btn-danger" type="button" name="btn_documento_acessorio_excluir" value="Excluir" onClick="documento_acessorio_excluir()" />
@@ -226,10 +226,11 @@ $(document).ready(function () {
 
  <div class="row">
     <div class="col-md-12 mt-2">
-       <p class="text-muted small"><i class="fas fa-asterisk text-danger"></i> Campos obrigatórios</p>
+       <p class="text-muted small font-size-12"><i class="fas fa-asterisk text-danger"></i> Campos obrigatórios</p>
     </div>
  </div>  
 
 </form>
 
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>

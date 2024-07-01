@@ -1,11 +1,11 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
 
 <div class="row">
   <div class="col-12 col-lg-8">
-    <h1 class="firstHeading"><dtml-var des_tipo_norma> nº <dtml-var num_norma>, de <dtml-var dat_norma></h1>
+    <h1 class="firstHeading font-size-18"><dtml-var des_tipo_norma> nº <dtml-var num_norma>, de <dtml-var dat_norma></h1>
   </div>
-  <div class="col-12 col-lg-4 text-lg-right">
+  <div class="col-12 col-lg-4 text-end">
    <dtml-let isAnon="portal_membership.isAnonymousUser()">
      <dtml-if expr="not isAnon">   
       <div class="btn-group" role="group" aria-label="Button group with nested dropdown">
@@ -45,7 +45,7 @@
        </p>
     </dtml-if>
    </div>
-      <div class="col-12 col-lg-4 text-left text-lg-right">
+      <div class="col-12 col-lg-4 text-start text-end">
          <dtml-call expr="REQUEST.set('texto_original', str(cod_norma)+'_texto_integral.pdf')">
          <dtml-if "hasattr(sapl_documentos.norma_juridica,texto_original)">
             <a class="btn btn-sm btn-primary" href="<dtml-var portal_url>/consultas/norma_juridica/pasta_digital/?cod_norma=<dtml-var cod_norma>&action=pasta" target="_blank"><i class="far fa-folder"></i> Pasta Digital</a>
@@ -127,7 +127,7 @@
     <div class="card mb-4">
       <div class="card-header" id="headingOne">
         <p class="h5 mb-0">
-          <a href="#" class="d-block text-left collapsed" data-toggle="collapse" data-target="#collapseAnexo" aria-expanded="false" aria-controls="collapseAnexo"> 
+          <a href="#" class="d-block text-start collapsed" data-bs-toggle="collapse" data-bs-target="#collapseAnexo" aria-expanded="false" aria-controls="collapseAnexo"> 
             <i class="fa float-right pt-1 align-self-center" aria-hidden="true"></i>
              <span class="h6 font-weight-bold">Anexos</span>
           </a>
@@ -175,7 +175,7 @@
     <div class="card mb-4">
       <div class="card-header" id="headingOne">
         <p class="h5 mb-0">
-          <a href="#" class="d-block text-left collapsed" data-toggle="collapse" data-target="#collapseRel" aria-expanded="false" aria-controls="collapseRel"> 
+          <a href="#" class="d-block text-start collapsed" data-bs-toggle="collapse" data-bs-target="#collapseRel" aria-expanded="false" aria-controls="collapseRel"> 
             <i class="fa float-right pt-1 align-self-center" aria-hidden="true"></i>
              <span class="h6 font-weight-bold">Normas Relacionadas</span>
           </a>
@@ -251,7 +251,7 @@
         <div class="card mb-4">
           <div class="card-header" id="headingOne">
             <p class="h5 mb-0">
-              <a href="#" class="d-block text-left collapsed" data-toggle="collapse" data-target="#collapseArquivo" aria-expanded="false" aria-controls="collapseArquivo"> 
+              <a href="#" class="d-block text-start collapsed" data-bs-toggle="collapse" data-bs-target="#collapseArquivo" aria-expanded="false" aria-controls="collapseArquivo"> 
                 <i class="fa float-right pt-1 align-self-center" aria-hidden="true"></i>
                  <span class="h6 font-weight-bold">Arquivo Permanente</span>
               </a>
@@ -298,4 +298,5 @@
 
 <a class="btn btn-secondary" href="javascript:void(0)" onClick="window.history.go(-1); return false;"><i class="fa fa-fw fa-undo"></i> Voltar</a>  
 
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>

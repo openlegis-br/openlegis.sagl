@@ -12,7 +12,7 @@
            <div class="col-lg-6 col-sm-6">
               <span class="text-muted"><a href="https://www.openlegis.com.br" target="_blank"><i class="fab fa-creative-commons mr-1"></i><b>open</b>legis</a> - SAGL v5.0</span>
            </div>
-           <div class="col-lg-6 col-sm-6 text-sm-right">
+           <div class="col-lg-6 col-sm-6 text-sm-end">
               <span class="text-muted d-none d-md-inline small"><dtml-var expr="DateTime()" fmt="%d/%m/%Y - %H:%M:%S"></span>
            </div>
          </div>
@@ -27,14 +27,14 @@
     <div class="modal-content">
       <div class="modal-header">
         <p class="h5 modal-title" id="iFrameModalLabel">New message</p>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+        <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
       <div class="modal-body">
         <iframe src="" height="100%" width="100%" frameborder="0"></iframe>
       </div>
-        <button type="button" data-dismiss="modal" hidden="hidden" id="close"><span class="d-none">Fechar</span></button>
+        <button type="button" data-bs-dismiss="modal" hidden="hidden" id="close"><span class="d-none">Fechar</span></button>
     </div>
   </div>
 </div>
@@ -62,11 +62,11 @@ $(document).ready(function() {
 	$('a[data-confirm]').click(function(ev) {
 		var href = $(this).attr('href');
 		if (!$('#dataConfirmModal').length) {
-			$('body').append('<div class="modal fade" id="dataConfirmModal" tabindex="-1" role="dialog" aria-labelledby="dataConfirmLabel" aria-hidden="true"><div class="modal-dialog modal-md" role="document"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="exampleModalLabel">Mensagem do sistema</h5><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button></div><div class="modal-body"></div><div class="modal-footer"><a class="btn btn-primary" id="dataConfirmOK">OK</a><button class="btn btn-danger" data-dismiss="modal" aria-hidden="true">Cancelar</button></div></div></div></div>');
+			$('body').append('<div class="modal fade" id="dataConfirmModal" tabindex="-1" role="dialog" aria-labelledby="dataConfirmLabel" aria-hidden="true"><div class="modal-dialog" role="document"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="exampleModalLabel">Mensagem do sistema</h5>        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button></div><div class="modal-body"></div><div class="modal-footer"><a class="btn btn-primary" id="dataConfirmOK">OK</a><button class="btn btn-danger" data-bs-dismiss="modal" aria-hidden="true">Cancelar</button></div></div></div></div>');
 		} 
 		$('#dataConfirmModal').find('.modal-body').text($(this).attr('data-confirm'));
 		$('#dataConfirmOK').attr('href', href);
-		$('#dataConfirmModal').modal({show:true});
+		$('#dataConfirmModal').modal('show');
 		return false;
 	});
 });
@@ -115,7 +115,7 @@ $( document ).ready( function () {
 
 <script>
 $(function () {
-  $('[data-toggle="tooltip"]').tooltip()
+  $('[data-bs-toggle="tooltip"]').tooltip()
 })
 </script>
 

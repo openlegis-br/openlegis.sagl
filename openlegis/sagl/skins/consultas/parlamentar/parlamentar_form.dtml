@@ -1,4 +1,4 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 <script>
 window.onload = function(){  
     var url = document.location.toString();
@@ -20,7 +20,7 @@ $(document).ready(() => {
     history.replaceState(null, null, url);
   } 
 
-  $('a[data-toggle="tab"]').on("click", function() {
+  $('a[data-bs-toggle="tab"]').on("click", function() {
     let newUrl;
     const hash = $(this).attr("href");
     if(hash == "#home") {
@@ -36,11 +36,11 @@ $(document).ready(() => {
 
 <div class="row">
  <div class="col-9">
-    <h1 class="firstHeading">
+    <h1 class="firstHeading font-size-18">
        <dtml-var nom_parlamentar>
     </h1>
  </div>
- <div class="col-3 text-right align-self-center">
+ <div class="col-3 text-end align-self-center">
      <dtml-call expr="REQUEST.set('logo_partido', str(cod_partido)+'_logo.png')">
      <dtml-if expr="cod_partido!=None">
         <dtml-if expr="hasattr(sapl_documentos.partido, logo_partido)">
@@ -94,25 +94,25 @@ $(document).ready(() => {
 
 <ul class="nav nav-tabs border-0" id="nav_parlamentar" role="tablist">
   <li class="nav-item">
-    <a class="nav-link active" id="biografia-tab" data-toggle="tab" href="#biografia" role="tab" aria-controls="biografia" aria-selected="true">Biografia</a>
+    <a class="nav-link active" id="biografia-tab" data-bs-toggle="tab" href="#biografia" role="tab" aria-controls="biografia" aria-selected="true">Biografia</a>
   </li>
   <li class="nav-item">
-    <a class="nav-link " id="filiacao-tab" data-toggle="tab" href="#filiacao" role="tab" aria-controls="filiacao" aria-selected="false">Filiações</a>
+    <a class="nav-link " id="filiacao-tab" data-bs-toggle="tab" href="#filiacao" role="tab" aria-controls="filiacao" aria-selected="false">Filiações</a>
   </li>
   <li class="nav-item">
-    <a class="nav-link " id="mandato-tab" data-toggle="tab" href="#mandato" role="tab" aria-controls="mandato" aria-selected="false">Mandatos</a>
+    <a class="nav-link " id="mandato-tab" data-bs-toggle="tab" href="#mandato" role="tab" aria-controls="mandato" aria-selected="false">Mandatos</a>
   </li>
   <li class="nav-item">
-    <a class="nav-link " id="mesa-tab" data-toggle="tab" href="#mesa" role="tab" aria-controls="mesa" aria-selected="false"><dtml-var expr="sapl_documentos.props_sagl.nome_mesa"></a>
+    <a class="nav-link " id="mesa-tab" data-bs-toggle="tab" href="#mesa" role="tab" aria-controls="mesa" aria-selected="false"><dtml-var expr="sapl_documentos.props_sagl.nome_mesa"></a>
   </li>
   <li class="nav-item">
-    <a class="nav-link " id="comissao-tab" data-toggle="tab" href="#comissao" role="tab" aria-controls="comissao" aria-selected="false">Comissões</a>
+    <a class="nav-link " id="comissao-tab" data-bs-toggle="tab" href="#comissao" role="tab" aria-controls="comissao" aria-selected="false">Comissões</a>
   </li>
   <li class="nav-item">
-    <a class="nav-link " id="proposicao-tab" data-toggle="tab" href="#proposicao" role="tab" aria-controls="proposicao" aria-selected="false">Proposições</a>
+    <a class="nav-link " id="proposicao-tab" data-bs-toggle="tab" href="#proposicao" role="tab" aria-controls="proposicao" aria-selected="false">Proposições</a>
   </li>
   <li class="nav-item">
-    <a class="nav-link " id="relatoria-tab" data-toggle="tab" href="#relatoria" role="tab" aria-controls="relatoria" aria-selected="false">Relatorias</a>
+    <a class="nav-link " id="relatoria-tab" data-bs-toggle="tab" href="#relatoria" role="tab" aria-controls="relatoria" aria-selected="false">Relatorias</a>
   </li>
 </ul>
 
@@ -154,7 +154,8 @@ $(document).ready(() => {
    </div>
 </div>
 
-<div class="text-left mt-3 d-print-none">
+<div class="text-start mt-3 d-print-none">
      <a class="btn btn-secondary" href="<dtml-var portal_url>/consultas/parlamentar" ><i class="fa fa-fw fa-undo"></i> Lista de Vereadores</a>
 </div>
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>

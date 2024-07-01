@@ -1,4 +1,4 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
 <script src="<dtml-var portal_url>/javascript/data_validar.js"></script>
 
@@ -20,22 +20,22 @@ function pesquisan_criticar(form){
   var form = document.norma_pesquisar;
 
   if (form.dt_norma.value != "" && !IsValidDate(form.dt_norma.value)) {
-    $.showAlert({title: "Mensagem do Sistema", body: "Digite uma data inicial válida para a norma!"});
+    bootstrap.showModal({title: "Mensagem do Sistema", body: "Digite uma data inicial válida para a norma!"});
     return false;
   } 
 
   if (form.dt_norma2.value != "" && !IsValidDate(form.dt_norma2.value)) {
-    $.showAlert({title: "Mensagem do Sistema", body: "Digite uma data final válida para a norma!"});
+    bootstrap.showModal({title: "Mensagem do Sistema", body: "Digite uma data final válida para a norma!"});
     return false;
   } 
 
   if (form.dt_public.value != "" && !IsValidDate(form.dt_public.value)) {
-    $.showAlert({title: "Mensagem do Sistema", body: "Digite uma data inicial válida para a publicação!"});
+    bootstrap.showModal({title: "Mensagem do Sistema", body: "Digite uma data inicial válida para a publicação!"});
     return false;
   } 
 
   if (form.dt_public2.value != "" && !IsValidDate(form.dt_public2.value)) {
-    $.showAlert({title: "Mensagem do Sistema", body: "Digite uma data final válida para a publicação!"});
+    bootstrap.showModal({title: "Mensagem do Sistema", body: "Digite uma data final válida para a publicação!"});
     return false;
   }
 
@@ -43,7 +43,7 @@ function pesquisan_criticar(form){
 }
 
   $(document).ready(function(){
-      $('[data-toggle="popover"]').popover({ 
+      $('[data-bs-toggle="popover"]').popover({ 
 	placement : 'top'
       });
   });
@@ -55,7 +55,7 @@ function pesquisan_criticar(form){
           if(checked){
               $('#norma_pesquisar').attr('action','norma_juridica_texto_pesquisar_proc');
               if($('#txt_assunto').val() == '') {
-                 $.showAlert({title: "Informação", body: "Para realizar uma pesquisa textual, é necessário prencher o campo 'Termos da Pesquisa'."})
+                 bootstrap.showModal({title: "Informação", body: "Para realizar uma pesquisa textual, é necessário prencher o campo 'Termos da Pesquisa'."})
               }
           }
           else{
@@ -73,9 +73,9 @@ function pesquisan_criticar(form){
 
  <div class="row mb-2">
       <div class="col-12 col-md-8 align-self-center">
-        <h1 class="firstHeading">Pesquisa de Legislação</h1>
+        <h1 class="firstHeading font-size-18">Pesquisa de Legislação</h1>
       </div>
-      <div class="col-12 col-md-4 text-left text-md-right">
+      <div class="col-12 col-md-4 text-start text-end">
          <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Norma'])">      
              <a class="btn btn-primary btn-sm d-print-none" href="<dtml-var portal_url>/cadastros/norma_juridica/norma_juridica_form" ><i class="fa fa-fw fa-plus"></i> Incluir Norma</a>
          </dtml-if>
@@ -85,7 +85,7 @@ function pesquisan_criticar(form){
 <!-- Nav tabs -->
 <ul class="nav nav-tabs border-0" role="tablist">
   <li class="nav-item">
-    <a class="nav-link active" id="pesquisa-tab" data-toggle="tab" href="#pesquisa" role="tab" aria-controls="pesquisa" aria-selected="true">Pesquisa de Legislação</a>
+    <a class="nav-link active" id="pesquisa-tab" data-bs-toggle="tab" href="#pesquisa" role="tab" aria-controls="pesquisa" aria-selected="true">Pesquisa de Legislação</a>
   </li>
 </ul>
 
@@ -94,9 +94,9 @@ function pesquisan_criticar(form){
 
 
 <form name="norma_pesquisar" id="norma_pesquisar" action="norma_juridica_pesquisar_proc">
-  <div class="form-row">
+  <div class="row">
     <div class="col-12 col-md-6 mb-3">
-      <label for="lst_tip_norma">Tipo de Norma</label>
+      <label class="form-label" for="lst_tip_norma">Tipo de Norma</label>
       <select id="lst_tip_norma" name="lst_tip_norma" class="form-control selectpicker" data-dropup-auto="false" data-size="6" multiple="multiple" multiple data-actions-box="true" title="Todos" data-header="Tipo de Norma" data-selected-text-format="count > 3">
            <dtml-in expr="zsql.tipo_norma_juridica_obter_zsql(ind_excluido=0)">
              <option value="<dtml-var tip_norma>"><dtml-var des_tipo_norma></option>
@@ -104,21 +104,21 @@ function pesquisan_criticar(form){
       </select>
     </div>
     <div class="col-6 col-md-3 mb-3">
-      <label for="txt_numero">Número</label>
+      <label class="form-label" for="txt_numero">Número</label>
       <input name="txt_numero" id="txt_numero" type="number" min="1" maxlength="6" class="form-control number" autocomplete="off">
     </div>
     <div class="col-6 col-md-3 mb-3 controls">
-      <label for="txt_ano">Ano</label>
+      <label class="form-label" for="txt_ano">Ano</label>
       <input name="txt_ano" id="txt_ano" type="number" min="1900" minlength="4" maxlength="4" class="form-control year" autocomplete="off">
     </div>
   </div>
-  <div class="form-row">
+  <div class="row">
       <div class="col-6 col-lg-3 mb-3">
-        <label for="dt_norma">Data da Norma (Inicial)</label>
+        <label class="form-label" for="dt_norma">Data da Norma (Inicial)</label>
           <input type="text" class="form-control date" id="dt_norma" name="dt_norma" autocomplete="off">
       </div>
       <div class="col-6 col-lg-3 mb-3">
-         <label for="dt_norma2">Data da Norma (Final)</label>
+         <label class="form-label" for="dt_norma2">Data da Norma (Final)</label>
          <input type="text" class="form-control date" id="dt_norma2" name="dt_norma2" autocomplete="off">
       </div>
       <script>
@@ -144,11 +144,11 @@ function pesquisan_criticar(form){
         });
       </script>    
       <div class="col-6 col-lg-3 mb-3">
-        <label for="dt_public">Data de Publicação (Inicial)</label>
+        <label class="form-label" for="dt_public">Data de Publicação (Inicial)</label>
           <input type="text" class="form-control date" id="dt_public" name="dt_public" autocomplete="off">
       </div>
       <div class="col-6 col-lg-3 mb-3">
-         <label for="dt_public2">Data de Publicação (Final)</label>
+         <label class="form-label" for="dt_public2">Data de Publicação (Final)</label>
          <input type="text" class="form-control date" id="dt_public2" name="dt_public2" autocomplete="off">
       </div>
       <script>
@@ -174,10 +174,10 @@ function pesquisan_criticar(form){
         });
       </script>    
   </div>
-  <div class="form-row">
+  <div class="row">
       <div class="col-12 col-md-6 mb-3">
-         <label for="lst_assunto_norma">Assunto</label>
-         <select class="custom-select" id="lst_assunto_norma" name="lst_assunto_norma">
+         <label class="form-label" for="lst_assunto_norma">Assunto</label>
+         <select class="form-select" id="lst_assunto_norma" name="lst_assunto_norma">
          <option value="">Todos</option>
            <dtml-in expr="zsql.assunto_norma_juridica_obter_zsql(ind_excluido=0)">
              <option value="<dtml-var cod_assunto missing>">
@@ -187,8 +187,8 @@ function pesquisan_criticar(form){
          </select>
       </div>
       <div class="col-12 col-md-6 mb-3">
-         <label for="lst_tip_situacao_norma">Situação</label>
-         <select class="custom-select" data-size="6" id="lst_tip_situacao_norma" name="lst_tip_situacao_norma">
+         <label class="form-label" for="lst_tip_situacao_norma">Situação</label>
+         <select class="form-select" data-size="6" id="lst_tip_situacao_norma" name="lst_tip_situacao_norma">
          <option value="">Todas</option>
            <dtml-in expr="zsql.tipo_situacao_norma_obter_zsql(ind_excluido=0)">
              <option value="<dtml-var tip_situacao_norma missing>">
@@ -198,29 +198,29 @@ function pesquisan_criticar(form){
          </select>
       </div>
   </div>
-  <div class="form-row">
+  <div class="row">
       <div class="col-12 col-md-6 mb-3">
-          <label for="txt_assunto">Termos da Pesquisa</label>
-          <input type="text" class="form-control" name="txt_assunto" id="txt_assunto" autocomplete="off" data-toggle="popover" data-trigger="focus" title="Dicas de Preenchimento" data-content="A frase colocada entre aspas duplas pesquisa por registros com a frase exata. Um asterisco (*) é um operador de truncamento que pode ser inserido ao fim de uma palavra. Um sinal de mais (+) precedente indica que a palavra deve estar presente no texto. Um sinal de menos (-) precedente indica que a palavra não deve estar presente em qualquer parte do texto." max-lenght="100">
+          <label class="form-label" for="txt_assunto">Termos da Pesquisa</label>
+          <input type="text" class="form-control" name="txt_assunto" id="txt_assunto" autocomplete="off" data-bs-toggle="popover" data-trigger="focus" title="Dicas de Preenchimento" data-content="A frase colocada entre aspas duplas pesquisa por registros com a frase exata. Um asterisco (*) é um operador de truncamento que pode ser inserido ao fim de uma palavra. Um sinal de mais (+) precedente indica que a palavra deve estar presente no texto. Um sinal de menos (-) precedente indica que a palavra não deve estar presente em qualquer parte do texto." max-lenght="100">
       </div>
     <div class="col-12 col-sm-6 col-md-3 mb-3">
-      <label for="rd_ordenacao" class="d-block">Ordenação</label>
-        <select class="custom-select" id="rd_ordenacao" name="rd_ordenacao">
+      <label class="form-label" for="rd_ordenacao" class="d-block">Ordenação</label>
+        <select class="form-select" id="rd_ordenacao" name="rd_ordenacao">
          <dtml-in expr="[('Tipo/Ano/Número', '1'), ('Relevância', '2')]">      
             <option value="<dtml-var expr="_['sequence-item']">" <dtml-if expr="_['sequence-item']==''">selected</dtml-if>><dtml-var expr="_['sequence-key']"></option>
          </dtml-in>
         </select>
     </div>
     <div class="col-12 col-sm-6 col-md-3 mb-3">
-      <label class="d-block">Pesquisa Textual</label>
+      <label class="form-label d-block">Pesquisa Textual</label>
       <div class="custom-control custom-switch">
         <input type="checkbox" class="custom-control-input" name ="chk_textual" id="chk_textual">
         <label class="custom-control-label" for="chk_textual">Pesquisar nos Textos Integrais</label>
       </div>
     </div>
   </div>
-  <div class="form-row">
-    <div class="col-12 col-md-12 mt-2 text-left"> 
+  <div class="row">
+    <div class="col-12 col-md-12 mt-2 text-start"> 
         <dtml-let isAnon="portal_membership.isAnonymousUser()">
             <dtml-if expr="isAnon and sapl_documentos.props_sagl.recaptcha_key">
                 <div class="g-recaptcha mb-3" data-sitekey="<dtml-var "sapl_documentos.props_sagl.recaptcha_key">"></div>
@@ -237,4 +237,5 @@ function pesquisan_criticar(form){
 </div>
 </div>
 
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>

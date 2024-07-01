@@ -1,4 +1,4 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
 <script src="<dtml-var portal_url>/javascript/data_validar.js"></script>
 
@@ -73,7 +73,7 @@ function clear_form_elements(ele) {
 }
 </script>
 
-<h1 class="firstHeading">Relatório de Visitas por Período</h1>
+<h1 class="firstHeading font-size-18">Relatório de Visitas por Período</h1>
 
 <dtml-if expr="not _.has_key('impressao') or (_.has_key('impressao') and not _.has_key('txt_dat_visita') and not _.has_key('txt_dat_visita2'))">
 
@@ -83,13 +83,13 @@ function clear_form_elements(ele) {
     <input type="hidden" name="impressao" value="<dtml-var impressao>">
   </dtml-if>
 
-  <div class="form-row">
+  <div class="row">
     <div class="col-6 mb-3">
-      <label for="txt_dat_visita" class="required">Data Inicial</label>
+      <label class="form-label" for="txt_dat_visita" class="required">Data Inicial</label>
       <input class="form-control date" type="text" id="txt_dat_visita" name="txt_dat_visita" value="<dtml-var txt_dat_visita missing>" onblur="formata_data(form.txt_dat_visita)" />
     </div>
     <div class="col-6 mb-3">
-      <label for="txt_dat_visita2" class="required">Data Final</label>
+      <label class="form-label" for="txt_dat_visita2" class="required">Data Final</label>
       <input class="form-control date" type="text" id="txt_dat_visita2" name="txt_dat_visita2" value="<dtml-var txt_dat_visita2 missing>" onblur="formata_data(form.txt_dat_visita2)" />
     </div>
   </div>
@@ -117,10 +117,10 @@ function clear_form_elements(ele) {
         });
     </script> 
 
-  <div class="form-row">
+  <div class="row">
     <div class="col-12 mb-3">  
-      <label for="lst_funcionario">Funcionário</label>
-      <select class="custom-select" id="lst_funcionario" name="lst_funcionario" <dtml-if dat_saida>disabled</dtml-if> >
+      <label class="form-label" for="lst_funcionario">Funcionário</label>
+      <select class="form-select" id="lst_funcionario" name="lst_funcionario" <dtml-if dat_saida>disabled</dtml-if> >
         <option value=""></option>
         <dtml-in expr="zsql.funcionario_obter_zsql(ind_excluido=0)">
           <option
@@ -135,9 +135,9 @@ function clear_form_elements(ele) {
      </div>
     </div>
 
-    <div class="form-row">
+    <div class="row">
      <div class="col-12 mb-3">
-      <label class="d-block">Modo de Exibição</label>
+      <label class="form-label d-block">Modo de Exibição</label>
       <dtml-in expr="['Visitas', 'Visitantes']">
          <div class="form-check form-check-inline">             
           <input class="form-check-input" type="radio" id="<dtml-var expr="_['sequence-item']">" name="rad_mod_exibicao" value="<dtml-var expr="_['sequence-item']">"
@@ -150,7 +150,7 @@ function clear_form_elements(ele) {
      </div>
     </div>
 
-    <div class="text-left">
+    <div class="text-start">
         <input class="btn btn-primary" type="button" name="button" value="Gerar relatório" onClick="campos_criticar()" />
         <input class="btn btn-secondary" type="button" name="btn_materia_limpar" value="Limpar" onclick="clear_form_elements('#relvisita')" >
     </div>
@@ -163,7 +163,7 @@ function clear_form_elements(ele) {
  <h5>Visitas no período de <dtml-var txt_dat_visita> a <dtml-var txt_dat_visita2>: <dtml-var sequence-length> ocorrências</h5>
  <br />
     <table class="table">
-     <thead class="table-secondary">
+     <thead>
       <tr>
        <th>Data de Entrada</th>
        <th>Visitante</th>
@@ -195,7 +195,7 @@ function clear_form_elements(ele) {
      <h5>Visitantes no período de <dtml-var txt_dat_visita> a <dtml-var txt_dat_visita2></h5>
  <br />
     <table class="table">
-     <thead class="table-secondary">
+     <thead>
       <tr>
        <th>Funcionário</th>
        <th>Visitantes</th>
@@ -226,4 +226,5 @@ function clear_form_elements(ele) {
  </dtml-in>
 </dtml-if>
 
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>

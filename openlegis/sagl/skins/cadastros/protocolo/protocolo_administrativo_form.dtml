@@ -1,4 +1,4 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
 <script src="<dtml-var portal_url>/javascript/data_validar.js"></script>
 
@@ -44,9 +44,9 @@ $(document).ready(function () {
 
  <div class="row mb-2">
       <div class="col-12 col-md-8 align-self-center">
-        <h1 class="firstHeading">Protocolo Administrativo</h1>
+        <h1 class="firstHeading font-size-18">Protocolo Administrativo</h1>
       </div>
-      <div class="col-12 col-md-4 text-left text-md-right">
+      <div class="col-12 col-md-4 text-start text-end">
          <div class="btn-group d-print-none ">
            <a class="btn btn-primary btn-sm" href="<dtml-var portal_url>/consultas/protocolo" ><i class="fa fa-fw fa-search"></i> Pesquisa de Protocolos</a>         
          </div>
@@ -79,9 +79,9 @@ $(document).ready(function () {
      <input type="hidden" name="hdn_url" value="<dtml-var portal_url>/cadastros/protocolo/protocolo_administrativo_form" />
   </dtml-if>
 
-  <legend>Identificação do Documento</legend>
+  <legend class="font-size-16">Identificação do Documento</legend>
 
-  <div class="form-row">
+  <div class="row">
     <div class="col-12 mb-2">
        <label class="required">Modalidade de Protocolo:</label> 
        <dtml-in expr="[('Recebimento', '0'), ('Envio', '1')]">
@@ -94,11 +94,11 @@ $(document).ready(function () {
     </div>   
   </div>
 
-  <div class="form-row">
+  <div class="row">
     <div class="col-12 col-sm-6 mb-3">
-         <label for="lst_tip_documento" class="required">Tipo de Documento</label>
+         <label class="form-label" for="lst_tip_documento" class="required">Tipo de Documento</label>
          <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Protocolo'])">
-           <select class="custom-select" id="lst_tip_documento" name="lst_tip_documento" required>
+           <select class="form-select" id="lst_tip_documento" name="lst_tip_documento" required>
             <option>Selecione</option>
             <dtml-in expr="zsql.tipo_documento_administrativo_obter_zsql(tip_natureza='P',ind_excluido=0)">
               <option value="<dtml-var tip_documento>">
@@ -107,7 +107,7 @@ $(document).ready(function () {
             </dtml-in>
            </select>
          <dtml-elif expr="AUTHENTICATED_USER.has_role(['Operador Modulo Administrativo'])">
-           <select class="custom-select" id="lst_tip_documento" name="lst_tip_documento" required>
+           <select class="form-select" id="lst_tip_documento" name="lst_tip_documento" required>
 	    <option>Selecione</option>
             <dtml-in expr="zsql.tipo_documento_administrativo_obter_zsql(tip_natureza='P',ind_publico=0,ind_excluido=0)">
               <option value="<dtml-var tip_documento>">
@@ -116,7 +116,7 @@ $(document).ready(function () {
             </dtml-in>
            </select>
          <dtml-elif expr="AUTHENTICATED_USER.has_role(['Operador Materia'])">
-           <select class="custom-select" id="lst_tip_documento" name="lst_tip_documento" required>
+           <select class="form-select" id="lst_tip_documento" name="lst_tip_documento" required>
 	    <option>Selecione</option>
             <dtml-in expr="zsql.tipo_documento_administrativo_obter_zsql(tip_natureza='P',ind_publico=1,ind_excluido=0)">
               <option value="<dtml-var tip_documento>">
@@ -127,25 +127,25 @@ $(document).ready(function () {
          </dtml-if>
     </div> 
     <div class="col-12 col-sm-6 mb-3">
-         <label for="txa_txt_interessado" class="required">Interessado</label>
+         <label class="form-label" for="txa_txt_interessado" class="required">Interessado</label>
           <input class="form-control" id="txa_txt_interessado" type="text" name="txa_txt_interessado" maxlength="60" />
     </div>   
   </div>
 
-  <div class="form-row">
+  <div class="row">
     <div class="col-12 mb-3">
-         <label for="txa_txt_assunto" class="required">Assunto</label>
+         <label class="form-label" for="txa_txt_assunto" class="required">Assunto</label>
          <textarea class="form-control auto-resize" id="txa_txt_assunto" name="txa_txt_assunto" rows="1" maxlength="500"><dtml-var txt_assunto_ementa missing></textarea> 
     </div>
   </div>
 
-  <div class="form-row">
+  <div class="row">
     <div class="col-6 mb-3">  
-                <label for="txt_num_paginas">Núm. Páginas</label>
+                <label class="form-label" for="txt_num_paginas">Núm. Páginas</label>
                 <input class="form-control" type="number" id="txt_num_paginas" name="txt_num_paginas" maxlength="3" value="<dtml-var num_dias_prazo missing null="">"/>    
     </div>
     <div class="col-6 mb-3">  
-                 <label class="d-block">PDF Arquivo Digitalizado</label>
+                 <label class="form-label d-block">PDF Arquivo Digitalizado</label>
                  <div class="custom-file">
                    <input type="file" class="custom-file-input" id="file_nom_arquivo" name="file_nom_arquivo" accept="application/pdf">
                    <label class="custom-file-label" for="file_nom_arquivo">Selecione o arquivo</label>
@@ -153,14 +153,14 @@ $(document).ready(function () {
     </div>
   </div> 
 
-  <div class="form-row">
+  <div class="row">
     <div class="col-12 mb-3">
-           <label for="txa_txt_observacao">Observações</label>
+           <label class="form-label" for="txa_txt_observacao">Observações</label>
            <textarea class="form-control auto-resize" id="txa_txt_observacao" name="txa_txt_observacao" rows="1"><dtml-var txt_observacao missing null=""></textarea>
     </div>
   </div>
 
-  <div class="form-row">
+  <div class="row">
     <div class="col-12 mb-3">
       <div class="form-check">
        <input class="form-check-input" type="checkbox" id="chk_consulta_externa" name="chk_consulta_externa" checked onclick="return false">
@@ -171,7 +171,7 @@ $(document).ready(function () {
     </div>
   </div>
 
-  <div class="text-left">
+  <div class="text-start">
      <input class="btn btn-primary" type="button" name="button" value="Protocolar Documento" onClick="campos_criticar()" />
   </div>
 
@@ -184,4 +184,5 @@ $(document).ready(function () {
 autosize(document.querySelectorAll('textarea'));
 </script>
 
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>

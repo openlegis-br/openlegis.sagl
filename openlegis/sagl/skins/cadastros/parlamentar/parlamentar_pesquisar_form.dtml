@@ -23,7 +23,7 @@
 </head>
 <body class="">
 
-<h1 class="firstHeading">Pesquisar Parlamentares</h1> 
+<h1 class="firstHeading font-size-18">Pesquisar Parlamentares</h1> 
 
 <form name="parlamentar_pesquisar_form" action="parlamentar_pesquisar_form" onsubmit="return false;">
 <table class="table">
@@ -35,7 +35,7 @@
    </tr>
    <dtml-if expr="REQUEST.has_key('txt_parlamentar')">
      <tr><td class="tela-popup" colspan="2">Selecione o parlamentar desejado:<br>
-       <select class="custom-select"  name="lst_parlamentar" size="10">
+       <select class="form-select"  name="lst_parlamentar" size="10">
        <dtml-in expr="zsql.parlamentar_obter_zsql(nom_parlamentar_match=txt_parlamentar)">
        <option value="parlamentar_mostrar_proc?cod_parlamentar=<dtml-var cod_parlamentar>"><dtml-var nom_completo> </option>
        </dtml-in>

@@ -1,4 +1,4 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
 <script>
 
@@ -122,7 +122,7 @@ $(document).ready(function(){
 </script>
 
 
-<h1 class="firstHeading">Tramitação de Matéria Legislativa</h1>
+<h1 class="firstHeading font-size-18">Tramitação de Matéria Legislativa</h1>
 
 <dtml-call expr="REQUEST.set('cod_materia', hdn_cod_materia)">
 
@@ -179,9 +179,9 @@ $(document).ready(function(){
   <input type="hidden" id="hdn_file" name="hdn_file" value="0"/>
   <input type="hidden" name="modal" value="1"/>    
 
-  <div class="form-row">
+  <div class="row">
     <div class="col-12 col-md-3 mb-3">
-       <label for="txt_dat_tramitacao" class="required">Data da Tramitação</label>
+       <label class="form-label" for="txt_dat_tramitacao" class="required">Data da Tramitação</label>
        <dtml-unless dat_tramitacao>
           <dtml-call expr="REQUEST.set('dat_tramitacao', DateTime().strftime('%d/%m/%Y %H:%M'))">
        </dtml-unless>
@@ -203,9 +203,9 @@ $(document).ready(function(){
       </div>        
     </div>
     <div class="col-12 col-md-6 mb-3">
-      <label for="lst_cod_unid_tram_local" class="required">Unidade de Origem</label>  
+      <label class="form-label" for="lst_cod_unid_tram_local" class="required">Unidade de Origem</label>  
        <dtml-if expr="not _.has_key('hdn_cod_tramitacao') and zsql.tramitacao_pesquisar_zsql(cod_materia=cod_materia)">
-          <select class="custom-select" id="lst_cod_unid_tram_local" name="lst_cod_unid_tram_local" required>
+          <select class="form-select" id="lst_cod_unid_tram_local" name="lst_cod_unid_tram_local" required>
              <option value="">Selecione</option>          
              <dtml-in expr="zsql.tramitacao_obter_zsql(cod_materia=cod_materia, ind_ult_tramitacao=1)">
                  <dtml-call expr="REQUEST.set('cod_unid_tram', cod_unid_tram_dest)">
@@ -219,7 +219,7 @@ $(document).ready(function(){
              </dtml-in>
           </select>
        <dtml-elif expr="_.has_key('hdn_cod_tramitacao') and zsql.tramitacao_pesquisar_zsql(cod_materia=cod_materia)">
-          <select class="custom-select" id="lst_cod_unid_tram_local" name="lst_cod_unid_tram_local" required>
+          <select class="form-select" id="lst_cod_unid_tram_local" name="lst_cod_unid_tram_local" required>
              <option value="">Selecione</option>
              <dtml-in expr="zsql.tramitacao_obter_zsql(cod_materia=cod_materia, ind_ult_tramitacao=1)">
                  <dtml-call expr="REQUEST.set('cod_unid_tram', cod_unid_tram_local)">
@@ -234,7 +234,7 @@ $(document).ready(function(){
              </dtml-in>
           </select>          
        <dtml-else>
-          <select class="custom-select" id="lst_cod_unid_tram_local" name="lst_cod_unid_tram_local" required>
+          <select class="form-select" id="lst_cod_unid_tram_local" name="lst_cod_unid_tram_local" required>
              <option value="">Selecione</option>
               <dtml-in expr="zsql.usuario_unid_tram_obter_zsql(cod_usuario=cod_usuario_corrente)">
                     <option 
@@ -249,7 +249,7 @@ $(document).ready(function(){
        </div>
     </div>    
     <div class="col-12 col-md-3 mb-3">
-      <label for="txt_nom_usuario"class="d-block">Usuário de Origem</label>
+      <label class="form-label" for="txt_nom_usuario"class="d-block">Usuário de Origem</label>
       <dtml-in expr="zsql.usuario_obter_zsql(col_username=AUTHENTICATED_USER.getUserName())">      
          <input class="form-control" type="text" id="txt_nom_usuario" value="<dtml-var nom_completo>" disabled> 
          <input type="hidden" name="hdn_cod_usuario_local" id="hdn_cod_usuario_local" value="<dtml-var cod_usuario_corrente>">     
@@ -257,19 +257,19 @@ $(document).ready(function(){
     </div>     
   </div> 
  
-  <div class="form-row">
+  <div class="row">
     <div class="col-12 col-md-3 mb-3">
-      <label for="txt_dat_encaminha">Encaminhamento</label>
+      <label class="form-label" for="txt_dat_encaminha">Encaminhamento</label>
       <input class="form-control " type="text" name="txt_dat_encaminha" id="txt_dat_encaminha" value="<dtml-var dat_encaminha missing null="">" readonly required/>      
     </div>  
     <div class="col-12 col-md-6 mb-3">
-      <label for="lst_cod_unid_tram_dest" class="required">Unidade de Destino</label>
+      <label class="form-label" for="lst_cod_unid_tram_dest" class="required">Unidade de Destino</label>
        <dtml-if expr="not _.has_key('hdn_cod_tramitacao')">
-          <select class="custom-select" name="lst_cod_unid_tram_dest" id="lst_cod_unid_tram_dest" required>
+          <select class="form-select" name="lst_cod_unid_tram_dest" id="lst_cod_unid_tram_dest" required>
              <option value=""></option>
           </select>
        <dtml-elif expr="_.has_key('hdn_cod_tramitacao') and zsql.tramitacao_pesquisar_zsql(cod_materia=cod_materia)">
-          <select class="custom-select" id="lst_cod_unid_tram_dest" name="lst_cod_unid_tram_dest" required>
+          <select class="form-select" id="lst_cod_unid_tram_dest" name="lst_cod_unid_tram_dest" required>
              <option value="">Selecione</option>
              <dtml-in expr="zsql.tramitacao_obter_zsql(cod_materia=cod_materia, ind_ult_tramitacao=1)">
                  <dtml-call expr="REQUEST.set('cod_unid_tram', cod_unid_tram_dest)">
@@ -282,7 +282,7 @@ $(document).ready(function(){
              </dtml-in>
           </select>          
        <dtml-else>
-          <select class="custom-select" id="lst_cod_unid_tram_dest" name="lst_cod_unid_tram_dest" required>
+          <select class="form-select" id="lst_cod_unid_tram_dest" name="lst_cod_unid_tram_dest" required>
              <option>Selecione</option>
               <dtml-in expr="zsql.usuario_unid_tram_obter_zsql(cod_usuario=cod_usuario_corrente)">
                     <option 
@@ -297,8 +297,8 @@ $(document).ready(function(){
       </div>          
     </div>
     <div class="col-12 col-md-3 mb-3">
-      <label for="lst_cod_usuario_dest">Usuário de Destino</label>   
-       <select class="custom-select" name="lst_cod_usuario_dest" id="lst_cod_usuario_dest">
+      <label class="form-label" for="lst_cod_usuario_dest">Usuário de Destino</label>   
+       <select class="form-select" name="lst_cod_usuario_dest" id="lst_cod_usuario_dest">
           <option value="<dtml-var cod_usuario_dest missing>">
               <dtml-if cod_usuario_dest>
                 <dtml-in expr="zsql.usuario_obter_zsql(cod_usuario=cod_usuario_dest)">
@@ -309,15 +309,15 @@ $(document).ready(function(){
       </select>    
     </div>  
   </div> 
-  <div class="form-row">
+  <div class="row">
     <div class="col-12 col-md-6 mb-3"> 
-      <label for="lst_cod_status" class="required">Status</label>
+      <label class="form-label" for="lst_cod_status" class="required">Status</label>
       <dtml-if expr="not _.has_key('hdn_cod_tramitacao')">      
-         <select class="custom-select" id="lst_cod_status" name="lst_cod_status" required>
+         <select class="form-select" id="lst_cod_status" name="lst_cod_status" required>
             <option value=""></option>
          </select>
       <dtml-else>
-         <select class="custom-select" id="lst_cod_status" name="lst_cod_status" required>      
+         <select class="form-select" id="lst_cod_status" name="lst_cod_status" required>      
          <dtml-in expr="zsql.tramitacao_obter_zsql(cod_materia=cod_materia, ind_ult_tramitacao=1)">
              <dtml-call expr="REQUEST.set('cod_unid_tram', cod_unid_tram_local)">
              <dtml-call expr="REQUEST.set('hdn_cod_status', cod_status)">             
@@ -342,7 +342,7 @@ $(document).ready(function(){
        </div> 
     </div>   
     <div class="col-12 col-md-3 mb-3">
-      <label for="txt_dat_fim_prazo">Data de Fim de Prazo</label>
+      <label class="form-label" for="txt_dat_fim_prazo">Data de Fim de Prazo</label>
       <input class="form-control date" type="text" name="txt_dat_fim_prazo" id="txt_dat_fim_prazo" value="<dtml-var dat_fim_prazo missing>" autocomplete="off" />
         <script>
         $('#txt_dat_fim_prazo').datepicker({
@@ -355,7 +355,7 @@ $(document).ready(function(){
         </script>       
     </div> 
     <div class="col-6 col-md-3 mb-3">
-      <label for="txa_dat_recebimento">Recebimento</label>    
+      <label class="form-label" for="txa_dat_recebimento">Recebimento</label>    
       <input class="form-control" type="text" id="txa_dat_recebimento" value="<dtml-var dat_recebimento missing null>" readonly>
     </div>      
     <div class="col-12 col-md-3 mb-3">
@@ -376,7 +376,7 @@ $(document).ready(function(){
     <dtml-call expr="REQUEST.set('pdf_assinado', str(hdn_cod_tramitacao)+'_tram_signed.pdf')">
     <dtml-if "hasattr(sapl_documentos.materia.tramitacao,pdf)"> 
       <div class="col-12 col-sm-3 col-lg-3 mb-3">
-        <label class="d-block">Despacho em PDF</label>
+        <label class="form-label d-block">Despacho em PDF</label>
         <div class="btn-group" role="group" aria-label="tram_button">
           <dtml-let pdf="getattr(sapl_documentos.materia.tramitacao,pdf).absolute_url">
              <a class="btn btn-secondary" target="_blank" href="<dtml-var pdf>?<dtml-var expr="ZopeTime().timeTime()">">
@@ -443,15 +443,15 @@ $(document).ready(function(){
    </dtml-if>
   </div>
 
-  <div class="form-row">
+  <div class="row">
     <div class="col-12 mb-3">
-      <label for="txa_txt_tramitacao">Texto do Despacho</label>
+      <label class="form-label" for="txa_txt_tramitacao">Texto do Despacho</label>
       <textarea class="form-control" name="txa_txt_tramitacao" id="txa_txt_tramitacao" rows="1"><dtml-var hdn_txt_tramitacao missing></textarea>
     </div>
   </div>
 
  <div class="row">
-   <div class="col-12 text-left mt-2">
+   <div class="col-12 text-start mt-2">
      <button type="submit" id="btn_tramitar" class="btn btn-primary">Salvar</button>
   <dtml-unless modal>
      <input class="btn btn-secondary" type="button" value="Voltar aos Rascunhos" onClick="location.href='<dtml-var portal_url>/cadastros/tramitacao_materia/rascunhos_html'">
@@ -478,4 +478,5 @@ tinymce.init({
 });
 </script>
   
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>

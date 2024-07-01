@@ -1,4 +1,4 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
 <dtml-comment>
 <a class="btn btn-link d-print-none float-right" href="<dtml-var portal_url>/relatorios/pdf_sessao_plenaria_preparar_pysc?data=<dtml-var dat_inicio_sessao>&cod_sessao_plen=<dtml-var cod_sessao_plen>" target="_blank"><i class="fas fa-file-pdf"></i> PDF</a>
@@ -20,10 +20,10 @@
       </dtml-let>
    </dtml-if>
     <dtml-if url_audio>
-           <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#iFrameModal" data-title="Reprodução de Áudio" data-src="sessao_plenaria_player_audio?url_audio=<dtml-var url_audio>&modal=1"><i class="fas fa-fw fa-volume-up"></i></i> Áudio</button>
+           <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Reprodução de Áudio" data-src="sessao_plenaria_player_audio?url_audio=<dtml-var url_audio>&modal=1"><i class="fas fa-fw fa-volume-up"></i></i> Áudio</button>
     </dtml-if>
     <dtml-if url_video>
-         <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#iFrameModal" data-title="Reprodução de Vídeo" data-src="<dtml-var url_video>"><i class="fab fa-fw fa-youtube"></i> Vídeo</button>
+         <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Reprodução de Vídeo" data-src="<dtml-var url_video>"><i class="fab fa-fw fa-youtube"></i> Vídeo</button>
     </dtml-if>
     <dtml-if url_fotos>
            <a class="btn btn-block btn-secondary" href="<dtml-var url_fotos>" target="_blank"><i class="fas fa-fw fa-images"></i><span class="d-none">Fotos</span></a> 
@@ -43,7 +43,7 @@
     <div class="card mb-4">
       <div class="card-header" id="headingOne">
         <p class="h5 mb-0">
-          <a href="#" class="d-block text-left collapsed" data-toggle="collapse" data-target="#collapseMesa" aria-expanded="false" aria-controls="collapseMesa"> 
+          <a href="#" class="d-block text-start collapsed" data-bs-toggle="collapse" data-bs-target="#collapseMesa" aria-expanded="false" aria-controls="collapseMesa"> 
             <i class="fa float-right pt-1 align-self-center" aria-hidden="true"></i>
              <span class="h6 font-weight-bold"><dtml-var expr="sapl_documentos.props_sagl.nome_mesa"></span>
           </a>
@@ -76,7 +76,7 @@
     <div class="card mb-4">
       <div class="card-header" id="headingOne">
         <p class="h5 mb-0">
-          <a href="#" class="d-block text-left collapsed" data-toggle="collapse" data-target="#collapsePres" aria-expanded="false" aria-controls="collapsePres"> 
+          <a href="#" class="d-block text-start collapsed" data-bs-toggle="collapse" data-bs-target="#collapsePres" aria-expanded="false" aria-controls="collapsePres"> 
             <i class="fa float-right pt-1 align-self-center" aria-hidden="true"></i>
              <span class="h6 font-weight-bold">Chamada da Abertura</span>
           </a>
@@ -132,7 +132,7 @@
     <div class="card mb-4">
       <div class="card-header" id="headingOne">
         <p class="h5 mb-0">
-          <a href="#" class="d-block text-left collapsed" data-toggle="collapse" data-target="#collapseDiv" aria-expanded="false" aria-controls="collapseDiv"> 
+          <a href="#" class="d-block text-start collapsed" data-bs-toggle="collapse" data-bs-target="#collapseDiv" aria-expanded="false" aria-controls="collapseDiv"> 
             <i class="fa float-right pt-1 align-self-center" aria-hidden="true"></i>
              <span class="h6 font-weight-bold">Expedientes Diversos</span>
           </a>
@@ -177,7 +177,7 @@
     <div class="card mb-4">
       <div class="card-header" id="headingOne">
         <p class="h5 mb-0">
-          <a href="#" class="d-block text-left collapsed" data-toggle="collapse" data-target="#collapseLeit" aria-expanded="false" aria-controls="collapseLeit"> 
+          <a href="#" class="d-block text-start collapsed" data-bs-toggle="collapse" data-bs-target="#collapseLeit" aria-expanded="false" aria-controls="collapseLeit"> 
             <i class="fa float-right pt-1 align-self-center" aria-hidden="true"></i>
              <span class="h6 font-weight-bold">Objeto de Deliberação / Encaminhar para Comissão</span>
           </a>
@@ -307,7 +307,7 @@
     <div class="card mb-4">
       <div class="card-header" id="headingOne">
         <p class="h5 mb-0">
-          <a href="#" class="d-block text-left collapsed" data-toggle="collapse" data-target="#collapseExp" aria-expanded="false" aria-controls="collapseExp"> 
+          <a href="#" class="d-block text-start collapsed" data-bs-toggle="collapse" data-bs-target="#collapseExp" aria-expanded="false" aria-controls="collapseExp"> 
             <i class="fa float-right pt-1 align-self-center" aria-hidden="true"></i>
              <span class="h6 font-weight-bold">Listagem de Leitura</span>
           </a>
@@ -358,7 +358,7 @@
                <dtml-if tip_resultado_votacao>
                   <dtml-in expr="zsql.tipo_resultado_votacao_obter_zsql(tip_resultado_votacao=tip_resultado_votacao, ind_excluido=0)">
                      <dtml-if expr="tip_votacao==2 ">
-                        <a href="#" data-toggle="modal" data-target="#iFrameModal" data-title="Resultado de Votação" data-src="sessao_plenaria_mostrar_painel_proc?cod_sessao_plen=<dtml-var cod_sessao_plen>&cod_ordem=<dtml-var cod_ordem>&cod_materia=<dtml-var cod_materia>&tipo_materia=expediente&modal=1"><b><dtml-var nom_resultado></b></a>
+                        <a href="#" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Resultado de Votação" data-src="sessao_plenaria_mostrar_painel_proc?cod_sessao_plen=<dtml-var cod_sessao_plen>&cod_ordem=<dtml-var cod_ordem>&cod_materia=<dtml-var cod_materia>&tipo_materia=expediente&modal=1"><b><dtml-var nom_resultado></b></a>
                         <br /> <span class="small"><dtml-var votacao_observacao missing></span>
                      <dtml-else>
                          <b><dtml-var nom_resultado></b><br /><span class="small"><dtml-var votacao_observacao missing></span>
@@ -391,7 +391,7 @@
                    <dtml-if tip_resultado_votacao>
                       <dtml-in expr="zsql.tipo_resultado_votacao_obter_zsql(tip_resultado_votacao=tip_resultado_votacao, ind_excluido=0)">
                          <dtml-if expr="tip_votacao==2 ">
-                            <a href="#" data-toggle="modal" data-target="#iFrameModal" data-title="Resultado de Votação" data-src="sessao_plenaria_mostrar_painel_proc?cod_sessao_plen=<dtml-var cod_sessao_plen>&cod_ordem=<dtml-var cod_ordem>&cod_parecer=<dtml-var cod_parecer>&tipo_materia=expediente&modal=1"><b><dtml-var nom_resultado></b></a>
+                            <a href="#" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Resultado de Votação" data-src="sessao_plenaria_mostrar_painel_proc?cod_sessao_plen=<dtml-var cod_sessao_plen>&cod_ordem=<dtml-var cod_ordem>&cod_parecer=<dtml-var cod_parecer>&tipo_materia=expediente&modal=1"><b><dtml-var nom_resultado></b></a>
                              <br /> <span class="small"><dtml-var votacao_observacao missing></span>
                          <dtml-else>
                              <b><dtml-var nom_resultado></b><br /><span class="small"><dtml-var votacao_observacao missing></span>
@@ -423,7 +423,7 @@
     <div class="card mb-4">
       <div class="card-header" id="headingOne">
         <p class="h5 mb-0">
-          <a href="#" class="d-block text-left collapsed" data-toggle="collapse" data-target="#collapseOra" aria-expanded="false" aria-controls="collapseOra"> 
+          <a href="#" class="d-block text-start collapsed" data-bs-toggle="collapse" data-bs-target="#collapseOra" aria-expanded="false" aria-controls="collapseOra"> 
             <i class="fa float-right pt-1 align-self-center" aria-hidden="true"></i>
              <span class="h6 font-weight-bold">Oradores</span>
           </a>
@@ -492,7 +492,7 @@
     <div class="card mb-4">
       <div class="card-header" id="headingOne">
         <p class="h5 mb-0">
-          <a href="#" class="d-block text-left collapsed" data-toggle="collapse" data-target="#collapsePres1" aria-expanded="false" aria-controls="collapsePres1"> 
+          <a href="#" class="d-block text-start collapsed" data-bs-toggle="collapse" data-bs-target="#collapsePres1" aria-expanded="false" aria-controls="collapsePres1"> 
             <i class="fa float-right pt-1 align-self-center" aria-hidden="true"></i>
              <span class="h6 font-weight-bold">Chamada da Ordem do Dia</span>
           </a>
@@ -549,7 +549,7 @@
     <div class="card mb-4">
       <div class="card-header" id="headingOne">
         <p class="h5 mb-0">
-          <a href="#" class="d-block text-left collapsed" data-toggle="collapse" data-target="#collapseOrd" aria-expanded="false" aria-controls="collapseOrd"> 
+          <a href="#" class="d-block text-start collapsed" data-bs-toggle="collapse" data-bs-target="#collapseOrd" aria-expanded="false" aria-controls="collapseOrd"> 
             <i class="fa float-right pt-1 align-self-center" aria-hidden="true"></i>
              <span class="h6 font-weight-bold">Matérias da Ordem do Dia</span>
           </a>
@@ -605,7 +605,7 @@
                 <dtml-if expr="cod_votacao and tip_resultado_votacao!=0">
                     <dtml-in expr="zsql.tipo_resultado_votacao_obter_zsql(tip_resultado_votacao=tip_resultado_votacao, ind_excluido=0)">
                       <dtml-if expr="tip_votacao == 2 ">
-                         <a href="#" data-toggle="modal" data-target="#iFrameModal" data-title="Resultado de Votação" data-src="sessao_plenaria_mostrar_painel_proc?cod_sessao_plen=<dtml-var cod_sessao_plen>&cod_ordem=<dtml-var cod_ordem>&cod_materia=<dtml-var cod_materia>&tipo_materia=ordemdia&modal=1"><b><dtml-var nom_resultado></b></a> 
+                         <a href="#" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Resultado de Votação" data-src="sessao_plenaria_mostrar_painel_proc?cod_sessao_plen=<dtml-var cod_sessao_plen>&cod_ordem=<dtml-var cod_ordem>&cod_materia=<dtml-var cod_materia>&tipo_materia=ordemdia&modal=1"><b><dtml-var nom_resultado></b></a> 
                          <br /><span class="small"><dtml-var votacao_observacao missing></span>
                       <dtml-else>
                         <b><dtml-var nom_resultado></b><br/> <span class="small"><dtml-var votacao_observacao missing></span>
@@ -655,7 +655,7 @@
                 <dtml-if tip_resultado_votacao>
                 <dtml-in expr="zsql.tipo_resultado_votacao_obter_zsql(tip_resultado_votacao=tip_resultado_votacao, ind_excluido=0)">
                     <dtml-if expr="tip_votacao == 2 ">
-                       <a href=#" data-toggle="modal" data-target="#iFrameModal" data-title="Resultado de Votação" data-src="sessao_plenaria_mostrar_painel_proc?cod_sessao_plen=<dtml-var cod_sessao_plen>&cod_ordem=<dtml-var cod_ordem>&cod_materia=<dtml-var cod_materia>&cod_parecer=<dtml-var cod_relatoria>&tipo_materia=acessoria&modal=1"><b><dtml-var nom_resultado></b></a> 
+                       <a href=#" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Resultado de Votação" data-src="sessao_plenaria_mostrar_painel_proc?cod_sessao_plen=<dtml-var cod_sessao_plen>&cod_ordem=<dtml-var cod_ordem>&cod_materia=<dtml-var cod_materia>&cod_parecer=<dtml-var cod_relatoria>&tipo_materia=acessoria&modal=1"><b><dtml-var nom_resultado></b></a> 
                        <br /><span class="small"><dtml-var votacao_observacao missing></span>
                     <dtml-else>
                         <b><dtml-var nom_resultado></b><br/> <span class="small"><dtml-var votacao_observacao missing></span>
@@ -699,7 +699,7 @@
                 <dtml-if tip_resultado_votacao>
                 <dtml-in expr="zsql.tipo_resultado_votacao_obter_zsql(tip_resultado_votacao=tip_resultado_votacao, ind_excluido=0)">
                     <dtml-if expr="tip_votacao == 2 ">
-                       <a href=#" data-toggle="modal" data-target="#iFrameModal" data-title="Resultado de Votação" data-src="sessao_plenaria_mostrar_painel_proc?cod_sessao_plen=<dtml-var cod_sessao_plen>&cod_ordem=<dtml-var cod_ordem>&cod_materia=<dtml-var cod_materia>&cod_substitutivo=<dtml-var cod_substitutivo>&tipo_materia=acessoria&modal=1"><b><dtml-var nom_resultado></b></a> 
+                       <a href=#" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Resultado de Votação" data-src="sessao_plenaria_mostrar_painel_proc?cod_sessao_plen=<dtml-var cod_sessao_plen>&cod_ordem=<dtml-var cod_ordem>&cod_materia=<dtml-var cod_materia>&cod_substitutivo=<dtml-var cod_substitutivo>&tipo_materia=acessoria&modal=1"><b><dtml-var nom_resultado></b></a> 
                        <br /><span class="small"><dtml-var votacao_observacao missing></span>
                     <dtml-else>
                          <br /><span class="small"><dtml-var votacao_observacao missing></span>
@@ -743,7 +743,7 @@
                 <dtml-if tip_resultado_votacao>
                 <dtml-in expr="zsql.tipo_resultado_votacao_obter_zsql(tip_resultado_votacao=tip_resultado_votacao, ind_excluido=0)">
                     <dtml-if expr="tip_votacao == 2 ">
-                       <a href="#" data-toggle="modal" data-target="#iFrameModal" data-title="Resultado de Votação" data-src="sessao_plenaria_mostrar_painel_proc?cod_sessao_plen=<dtml-var cod_sessao_plen>&cod_ordem=<dtml-var cod_ordem>&cod_materia=<dtml-var cod_materia>&cod_emenda=<dtml-var cod_emenda>&tipo_materia=acessoria&modal=1"><b><dtml-var nom_resultado></b></a>
+                       <a href="#" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Resultado de Votação" data-src="sessao_plenaria_mostrar_painel_proc?cod_sessao_plen=<dtml-var cod_sessao_plen>&cod_ordem=<dtml-var cod_ordem>&cod_materia=<dtml-var cod_materia>&cod_emenda=<dtml-var cod_emenda>&tipo_materia=acessoria&modal=1"><b><dtml-var nom_resultado></b></a>
                        <br /><span class="small"><dtml-var votacao_observacao missing></span>
                     <dtml-else>
                         <b><dtml-var nom_resultado></b><br/> <span class="small"><dtml-var votacao_observacao missing></span>
@@ -808,7 +808,7 @@
     <div class="card mb-4">
       <div class="card-header" id="headingOne">
         <p class="h5 mb-0">
-          <a href="#" class="d-block text-left collapsed" data-toggle="collapse" data-target="#collapsePess" aria-expanded="false" aria-controls="collapsePess"> 
+          <a href="#" class="d-block text-start collapsed" data-bs-toggle="collapse" data-bs-target="#collapsePess" aria-expanded="false" aria-controls="collapsePess"> 
             <i class="fa float-right pt-1 align-self-center" aria-hidden="true"></i>
              <span class="h6 font-weight-bold">Explicações Pessoais</span>
           </a>
@@ -871,4 +871,5 @@
   </div>
 </dtml-if>
 
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>

@@ -1,4 +1,4 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
 <script>
 
@@ -34,9 +34,9 @@ function tipo_autor_excluir() {
 
  <div class="row mb-2">
       <div class="col-12 col-md-8 align-self-center">
-        <h1 class="firstHeading">Tipo de Autor</h1>
+        <h1 class="firstHeading font-size-18">Tipo de Autor</h1>
       </div>
-      <div class="col-12 col-md-4 text-left text-md-right">
+      <div class="col-12 col-md-4 text-start text-end">
          <div class="btn-group d-print-none ">
            <a class="btn btn-primary btn-sm" href="index_html"><i class="fa fa-fw fa-undo"></i> Voltar</a>         
          </div>
@@ -45,7 +45,7 @@ function tipo_autor_excluir() {
 
 <form name="tipo_autor_form" method="post" action="tipo_autor_salvar_proc">
 
-  <div class="form-row">
+  <div class="row">
     <div class="col-12 col-sm-4 mb-3">
            <label class="d-block required">Tipo de Autor</label>             
            <dtml-in expr="[('Parlamentar','Parlamentar'), ('Comissão','Comissao'), ('Outros','Outros')]">
@@ -70,7 +70,7 @@ function tipo_autor_excluir() {
            </dtml-in>
     </div>
     <div class="col-12 col-sm-8 mb-3">
-           <label for="txt_des_tipo_autor" class="required">Descrição</label>                 
+           <label class="form-label" for="txt_des_tipo_autor" class="required">Descrição</label>                 
              <dtml-if expr="pysc.browser_verificar_pysc(HTTP_USER_AGENT)">
                <input class="form-control" type="text" id="txt_des_tipo_autor" name="txt_des_tipo_autor"  maxlength="50" <dtml-unless enable>disabled</dtml-unless>
                <dtml-if expr="_.has_key('des_tipo_autor') and des_tipo_autor=='_des_'">value=""<dtml-else>value="<dtml-var des_tipo_autor missing>"
@@ -85,8 +85,8 @@ function tipo_autor_excluir() {
     </div>
   </div>
 
-  <legend>Proposições Digitais</legend>
-  <div class="form-row mb-3">
+  <legend class="font-size-16">Proposições Digitais</legend>
+  <div class="row mb-3">
     <div class="col-12 mb-3">
       <div class="form-check d-none">
         <input class="form-check-input" type="checkbox" value="0" id="defaultCheck" name="chk_tip_proposicao" checked />
@@ -115,4 +115,5 @@ function tipo_autor_excluir() {
 
 </form>
 
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>

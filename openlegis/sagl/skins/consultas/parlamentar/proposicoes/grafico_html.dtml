@@ -1,4 +1,4 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
   
 <body>
 
@@ -17,14 +17,14 @@
 </dtml-in>
 
 <form>
-<div class="form-row">
+<div class="row">
     <div class="col-6 col-md-4 mb-3 controls">
-      <label for="txt_autor">Autoria</label>
+      <label class="form-label" for="txt_autor">Autoria</label>
       <input name="txt_autor" id="txt_autor" type="text" class="form-control form-control-sm" value="<dtml-var nom_autor missing>" readonly>
     </div>
     <div class="col-6 col-md-4 mb-3">
-      <label for="lst_tip_materia">Tipo de Matéria</label>
-      <select id="lst_tip_materia" name="lst_tip_materia" class="custom-select custom-select-sm" disabled>
+      <label class="form-label" for="lst_tip_materia">Tipo de Matéria</label>
+      <select id="lst_tip_materia" name="lst_tip_materia" class="form-control form-control-sm" disabled>
               <dtml-in expr="zsql.tipo_materia_legislativa_obter_zsql(tip_natureza='P', ind_excluido=0)">
                 <dtml-if expr="_.has_key('tip_materia_sel')">
                   <option <dtml-if expr="_.int(tip_materia)==_.int(tip_materia_sel)">selected</dtml-if>
@@ -37,12 +37,12 @@
       </select>
     </div>
     <div class="col-6 col-md-2 mb-3 controls">
-      <label for="txt_ano">Ano</label>
+      <label class="form-label" for="txt_ano">Ano</label>
       <input name="txt_ano" id="txt_ano" type="number" min="1900" minlength="4" maxlength="4" class="form-control form-control-sm year" value="<dtml-var txt_ano missing>" readonly>
     </div>
     <div class="col-6 col-md-2 mb-3">
-           <label for="select1">Gráfico</label>
-           <select class="custom-select custom-select-sm" id="select1" name="select1">
+           <label class="form-label" for="select1">Gráfico</label>
+           <select class="form-select form-control-sm" id="select1" name="select1">
                   <option value="bar">Barra</option>
                   <option value="column">Coluna</option>
                   <option value="line">Linha</option>
@@ -99,4 +99,5 @@ document.getElementById("select1").addEventListener("change", function(e){
 
 <script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
       
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>

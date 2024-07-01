@@ -1,4 +1,4 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
 <script>
     function submeter(tip_situacao_militar, campo, form) {
@@ -24,7 +24,7 @@
 
 </script>
 
-<h1 class="firstHeading">Tipos de Situação Militar</h1> 
+<h1 class="firstHeading font-size-18">Tipos de Situação Militar</h1> 
 
 <form name="tipo_situacao_militar_form" method="post" action="tipo_situacao_militar_salvar_proc">  
 
@@ -34,7 +34,7 @@
    <dtml-in expr="zsql.tipo_situacao_militar_obter_zsql(ind_excluido=0)">
     <dtml-if sequence-start>
        <table class="table">
-        <thead class="table-secondary">       
+        <thead>       
          <tr>
            <th width="10%">Código</th>
            <th>Situação Militar</th>
@@ -45,7 +45,7 @@
          <tr> 
            <td><dtml-var tip_situacao_militar></td>
            <td> 
-             <label for="txt_des_tipo_situacao_<dtml-var tip_situacao_militar>" class="d-none">Tipo</label> 
+             <label class="form-label" for="txt_des_tipo_situacao_<dtml-var tip_situacao_militar>" class="d-none">Tipo</label> 
              <input class="form-control" type="text" name="txt_des_tipo_situacao_<dtml-var tip_situacao_militar>" value="<dtml-var des_tipo_situacao missing>" size="40" />
            </td>
            <td><a class="btn btn-primary" href="javascript:submeter(<dtml-var tip_situacao_militar>,document.tipo_situacao_militar_form.txt_des_tipo_situacao_<dtml-var tip_situacao_militar>,document.tipo_situacao_militar_form)">Atualizar</a> <a class="btn btn-danger" href="javascript:excluir(<dtml-var tip_situacao_militar>)">Excluir</a>
@@ -58,10 +58,10 @@
    </dtml-in>
    
 
- <legend>Formulário de Inclusão</legend>
- <div class="form-row">
+ <legend class="font-size-16">Formulário de Inclusão</legend>
+ <div class="row">
    <div class="col-12 mb-3">
-      <label for="txt_des_tipo_situacao" class="required">Tipo de Situação Militar</label>
+      <label class="form-label" for="txt_des_tipo_situacao" class="required">Tipo de Situação Militar</label>
       <div class="input-group">                   
          <input class="form-control" type="text" id="txt_des_tipo_situacao" name="txt_des_tipo_situacao" maxlength="50" />
          <div class="input-group-append">
@@ -71,8 +71,9 @@
    </div>
    <div class="row">
       <div class="col-md-12">
-         <p class="text-muted small"><i class="fas fa-asterisk text-danger"></i> Campo obrigatório</p>
+         <p class="text-muted small font-size-12"><i class="fas fa-asterisk text-danger"></i> Campo obrigatório</p>
       </div>
    </div> 
 </form>
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>

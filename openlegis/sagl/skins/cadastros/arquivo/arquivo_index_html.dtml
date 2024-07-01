@@ -1,4 +1,4 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
 <script>
 /* Formatting function for row details - modify as you need */
@@ -77,9 +77,9 @@ $(document).ready(function() {
 
  <div class="row mb-2">
       <div class="col-12 col-md-6 align-self-center">
-        <h1 class="firstHeading">Arquivo Permanente</h1>
+        <h1 class="firstHeading font-size-18">Arquivo Permanente</h1>
       </div>
-      <div class="col-12 col-md-6 text-left text-md-right">
+      <div class="col-12 col-md-6 text-start text-end">
          <div class="btn-group d-print-none ">
            <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Arquivo'])">      
                <a class="btn btn-primary btn-sm d-print-none" href="arquivo_recipiente_form"><i class="fa fa-fw fa-plus"></i> Incluir Recipiente</a>
@@ -94,7 +94,7 @@ $(document).ready(function() {
 <dtml-in expr="zsql.arquivo_recipiente_obter_zsql(ind_excluido=0)">
   <dtml-if sequence-start>
         <table class="table" id="recipientes">
-          <thead class="table-secondary">
+          <thead>
             <tr>
                 <th width="15%">Identificador</th>
                 <th width="10%">Ano</th>
@@ -142,4 +142,5 @@ $(document).ready(function() {
 </dtml-in>
 </form>
 
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>

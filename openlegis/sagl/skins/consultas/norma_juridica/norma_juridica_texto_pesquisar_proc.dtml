@@ -1,10 +1,10 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
  <div class="row mb-2">
   <div class="col-12 col-sm-8 align-self-center">
-    <h1 class="firstHeading">Pesquisa de Legislação</h1>
+    <h1 class="firstHeading font-size-18">Pesquisa de Legislação</h1>
   </div>
-  <div class="col-12 col-sm-4 text-left text-sm-right mb-2">
+  <div class="col-12 col-sm-4 text-start text-sm-end mb-2">
     <div class="btn-group" role="group" aria-label="Button group with nested dropdown">
      <a class="btn btn-primary btn-sm" href="<dtml-var portal_url>/consultas/norma_juridica" ><i class="fa fa-fw fa-search"></i> Nova Pesquisa</a>
      <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Norma'])">          
@@ -141,7 +141,7 @@
  <dtml-call expr="REQUEST.set('texto_original', str(cod_norma)+'_texto_integral.pdf')">
 <dtml-if "hasattr(sapl_documentos.norma_juridica,texto_original) or hasattr(sapl_documentos.norma_juridica,texto_consolidado)">
  <div class="row d-print-none">
-    <div class="col-12 text-left mt-1"> 
+    <div class="col-12 text-start mt-1"> 
      <div class="btn-group btn-group-sm">
       <dtml-if "hasattr(sapl_documentos.norma_juridica,texto_original)">
           <a class="btn btn-primary" href="<dtml-var portal_url>/pysc/download_norma_pysc?cod_norma=<dtml-var cod_norma>&texto_original=1" target="_blank"><i class="far fa-file-pdf"></i> Texto Original</a>
@@ -188,11 +188,12 @@
 <dtml-else>
   <div class="alert alert-danger alert-dismissible fade show" role="alert">
     <h5 class="alert-heading">Confirme que você não é um robô.</h5>
-    <button type="button" class="close" data-dismiss="alert" aria-label="Fechar">
+    <button type="button" class="close" data-bs-dismiss="alert" aria-label="Fechar">
        <span aria-hidden="true">&times;</span>
     </button>
   </div>
   <a class="btn btn-danger" href="javascript:void(0)" onClick="window.history.go(-1); return false;"><i class="fa fa-fw fa-undo"></i> Voltar</a>
 </dtml-if>
 
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>

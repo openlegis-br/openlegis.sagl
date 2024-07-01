@@ -1,6 +1,6 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
-<h1 class="firstHeading">Resultados da pesquisa por "<i><dtml-var expr="_.string.replace(txt_palavra_chave,'\x22', '')"></i>"</h1>
+<h1 class="firstHeading font-size-18">Resultados da pesquisa por "<i><dtml-var expr="txt_palavra_chave.replace('\x22', '%22')"></i>"</h1>
 
 <dtml-comment>
 <dtml-call expr="REQUEST.set('txt_palavra_chave', txt_palavra_chave + '*')">
@@ -11,7 +11,7 @@
    <p class="h5">Matérias Legislativas: <dtml-if expr="_.len(total) == 0">nenhuma<dtml-else> <dtml-var expr="_.len(total)"></dtml-if> ocorrência<dtml-if expr="_.len(total) > 1">s</dtml-if></p>
       <dtml-if expr="_.len(total) >= 1">
        <table class="table">
-        <thead class="table-secondary">
+        <thead>
          <tr>
           <th>Tipo de Matéria</th>
           <th>Quantidade</th>
@@ -24,7 +24,7 @@
            <dtml-if expr="_.len(subtotal) > 0">
              <tr>
                <td width="80%">
-                <a href="<dtml-var portal_url>/generico/palavra_materia_pesquisar_proc?incluir=0&existe_ocorrencia=0&lst_tip_materia=<dtml-var tip_materia>&txt_busca=<dtml-var expr="_.string.replace(txt_palavra_chave,'\x22', '%22')">&btn_materia_pesquisar=Pesquisar">
+                <a href="<dtml-var portal_url>/generico/palavra_materia_pesquisar_proc?incluir=0&existe_ocorrencia=0&lst_tip_materia=<dtml-var tip_materia>&txt_busca=<dtml-var expr="txt_palavra_chave.replace('\x22', '%22')">&btn_materia_pesquisar=Pesquisar">
                   <dtml-var des_tipo_materia>
                 </a>
                </td>               
@@ -44,7 +44,7 @@
    <p class="h5">Normas Jurídicas: <dtml-if expr="_.len(total_normas) == 0">nenhuma<dtml-else> <dtml-var expr="_.len(total_normas)"></dtml-if> ocorrência<dtml-if expr="_.len(total_normas) > 1">s</dtml-if></p>
       <dtml-if expr="_.len(total_normas) >= 1">
        <table class="table">
-        <thead class="table-secondary">       
+        <thead>       
          <tr>
           <th>Tipo de Norma</th>
           <th>Quantidade</th>
@@ -57,7 +57,7 @@
            <dtml-if expr="_.len(subtotal_normas) > 0">
              <tr>
                <td width="80%">
-                <a href="<dtml-var portal_url>/generico/palavra_norma_pesquisar_proc?incluir=0&lst_tip_norma=<dtml-var tip_norma>&txt_assunto=<dtml-var expr="_.string.replace(txt_palavra_chave, '\x22', '%22')">">
+                <a href="<dtml-var portal_url>/generico/palavra_norma_pesquisar_proc?incluir=0&lst_tip_norma=<dtml-var tip_norma>&txt_assunto=<dtml-var expr="txt_palavra_chave.replace('\x22', '%22')">">
                   <dtml-var des_tipo_norma>
                 </a>
                </td>               
@@ -71,4 +71,5 @@
        </table>
  </dtml-with>
 
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>

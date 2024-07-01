@@ -1,4 +1,4 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
 <script>
 $(document).ready(function() {
@@ -73,9 +73,9 @@ function mostrar(){
 
  <div class="row mb-2">
       <div class="col-12 col-md-8 align-self-center">
-        <h1 class="firstHeading">Gerenciamento de Usuários</h1>
+        <h1 class="firstHeading font-size-18">Gerenciamento de Usuários</h1>
       </div>
-      <div class="col-12 col-md-4 text-left text-md-right">
+      <div class="col-12 col-md-4 text-start text-end">
          <dtml-if expr="AUTHENTICATED_USER.has_role(['Administrador', 'Operador'])">
             <input class="btn btn-sm btn-primary" type="button" name="submit" value="Incluir Usuário" onClick="mostrar()"/>
          </dtml-if> 
@@ -84,7 +84,7 @@ function mostrar(){
 
 
 <table id="jdTable" class="table">
- <thead class="table-secondary">
+ <thead>
   <tr>
     <th width="20%">Nome do Usuário</th>
     <th>Nome Completo</th>
@@ -124,4 +124,5 @@ function mostrar(){
   </div>
 </div>
 
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>

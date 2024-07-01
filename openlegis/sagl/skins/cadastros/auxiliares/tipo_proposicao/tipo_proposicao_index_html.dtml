@@ -1,10 +1,10 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
  <div class="row mb-2">
       <div class="col-12 col-md-8 align-self-center">
-        <h1 class="firstHeading">Tipos de Proposição Digital</h1>
+        <h1 class="firstHeading font-size-18">Tipos de Proposição Digital</h1>
       </div>
-      <div class="col-12 col-md-4 text-left text-md-right">
+      <div class="col-12 col-md-4 text-start text-end">
          <div class="btn-group d-print-none ">
           <a class="btn btn-sm btn-primary d-print-none mb-3" href="tipo_proposicao_form?escolha=M&tip_mat_ou_doc=0"><i class="fa fa-fw fa-plus"></i> Incluir Tipo</a>
          </div>
@@ -14,7 +14,7 @@
 <dtml-in expr="zsql.tipo_proposicao_obter_zsql()"> 
   <dtml-if sequence-start>
    <table class="table">
-        <thead class="table-secondary">
+        <thead>
           <tr>
             <th>Tipo de Proposição</th>
           </tr>
@@ -32,4 +32,5 @@
 <dtml-else>
    <p><td>Nenhum tipo de proposição cadastrada.</p>
 </dtml-in>
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>

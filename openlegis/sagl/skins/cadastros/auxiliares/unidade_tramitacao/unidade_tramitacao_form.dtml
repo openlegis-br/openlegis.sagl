@@ -1,4 +1,4 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
 <script>
 
@@ -51,9 +51,9 @@
 
  <div class="row mb-2">
       <div class="col-12 col-md-8 align-self-center">
-        <h1 class="firstHeading">Unidade de Tramitação</h1>
+        <h1 class="firstHeading font-size-18">Unidade de Tramitação</h1>
       </div>
-      <div class="col-12 col-md-4 text-left text-md-right">
+      <div class="col-12 col-md-4 text-start text-end">
          <div class="btn-group d-print-none ">
            <a class="btn btn-primary btn-sm" href="index_html"><i class="fa fa-fw fa-undo"></i> Voltar</a>         
          </div>
@@ -62,10 +62,10 @@
 
 <form method="post" name="unidade_tramitacao_form" action="unidade_tramitacao_salvar_proc">
 
-  <div class="form-row">
+  <div class="row">
     <div class="col-12 col-sm-4 mb-3" id="list1">
-      <label for="lst_cod_orgao">Órgão</label>                 
-             <select class="custom-select" id="lst_cod_orgao" name="lst_cod_orgao">
+      <label class="form-label" for="lst_cod_orgao">Órgão</label>                 
+             <select class="form-select" id="lst_cod_orgao" name="lst_cod_orgao">
                <option value=""></option>
                <dtml-in expr="zsql.orgao_obter_zsql(ind_excluido=0)">
                    <option
@@ -80,8 +80,8 @@
              </select>
     </div>
     <div class="col-12 col-sm-4 mb-3" id="list2">
-      <label for="lst_cod_comissao">Comissão</label>                     
-            <select class="custom-select" id="lst_cod_comissao" name="lst_cod_comissao">  
+      <label class="form-label" for="lst_cod_comissao">Comissão</label>                     
+            <select class="form-select" id="lst_cod_comissao" name="lst_cod_comissao">  
               <option value=""></option>
               <dtml-in expr="zsql.comissao_obter_zsql(ind_excluido=0)">
                  <option               
@@ -96,9 +96,9 @@
             </select>
     </div>
     <div class="col-12 col-sm-4 mb-3" id="list3">
-      <label for="lst_cod_parlamentar">Vereador</label>  
+      <label class="form-label" for="lst_cod_parlamentar">Vereador</label>  
              <dtml-call expr="REQUEST.set('data_atual', DateTime().strftime('%d/%m/%Y'))">                      
-             <select class="custom-select" id="lst_cod_parlamentar" name="lst_cod_parlamentar">
+             <select class="form-select" id="lst_cod_parlamentar" name="lst_cod_parlamentar">
                <option value=""></option>
                <dtml-in expr="zsql.autores_obter_zsql(txt_dat_apresentacao=data_atual)">
                    <option
@@ -116,11 +116,11 @@
    
   <dtml-if cod_unid_tramitacao>
   
-  <legend>Permissões de Tramitação Digital</legend>  
+  <legend class="font-size-16">Permissões de Tramitação Digital</legend>  
 
-  <div class="form-row">
+  <div class="row">
     <div class="col-12 col-sm-4 mb-3">
-       <label class="d-block">Tipo de Unidade</label>                             
+       <label class="form-label d-block">Tipo de Unidade</label>                             
        <div class="form-check form-check-inline">
          <input class="form-check-input" type="checkbox" id="chk_ind_adm" name="chk_ind_adm"
            <dtml-if expr="_.has_key('ind_adm') and ind_adm==1">
@@ -138,9 +138,9 @@
     </div>
   </div>
 
-  <div class="form-row">    
+  <div class="row">    
     <div class="col-12 col-sm-4 mb-3">
-      <label for="chk_cod_unid_tram_dest">Unidades de Destino Permitidas</label>
+      <label class="form-label" for="chk_cod_unid_tram_dest">Unidades de Destino Permitidas</label>
        <select id="chk_cod_unid_tram_dest" name="chk_cod_unid_tram_dest" class="form-control selectpicker show-tick" multiple data-actions-box="true" data-size="10" data-selected-text-format="count > 4">
           <dtml-in expr="zsql.unidade_tramitacao_obter_zsql(ind_excluido=0)">        
             <dtml-if cod_comissao>
@@ -162,7 +162,7 @@
 
    <dtml-if expr="ind_leg==1">    
     <div class="col-12 col-sm-4 mb-3">
-      <label for="chk_cod_status">Status Permitidos (Processo Legislativo)</label>    
+      <label class="form-label" for="chk_cod_status">Status Permitidos (Processo Legislativo)</label>    
        <select id="chk_cod_status" name="chk_cod_status" class="form-control selectpicker show-tick" multiple data-actions-box="true" data-size="10" data-selected-text-format="count > 1" title="Selecione">
           <dtml-in expr="zsql.status_tramitacao_obter_zsql(ind_excluido=0)">
               <option value="<dtml-var cod_status>"
@@ -177,7 +177,7 @@
 
    <dtml-if expr="ind_adm==1">    
     <div class="col-12 col-sm-4 mb-3">
-      <label for="chk_cod_status_adm">Status Permitidos (Processo Administrativo)</label>    
+      <label class="form-label" for="chk_cod_status_adm">Status Permitidos (Processo Administrativo)</label>    
        <select id="chk_cod_status_adm" name="chk_cod_status_adm" class="form-control selectpicker show-tick" multiple data-actions-box="true" data-size="10" data-selected-text-format="count > 1" title="Selecione">
           <dtml-in expr="zsql.status_tramitacao_administrativo_obter_zsql(ind_excluido=0)">
               <option value="<dtml-var cod_status>"
@@ -196,9 +196,9 @@
   <dtml-in expr="zsql.usuario_unid_tram_obter_zsql(cod_unid_tramitacao=cod_unid_tramitacao)">
    <dtml-if sequence-start>
      <dtml-call expr="REQUEST.set('temVinculo', 1)">
-     <legend>Usuários Vinculados</legend>
+     <legend class="font-size-16">Usuários Vinculados</legend>
      <table class="table">
-       <thead class="table-secondary">
+       <thead>
        <tr>
          <th>Login</th>
          <th>Nome Completo</th>
@@ -237,4 +237,5 @@
  </dtml-if>
   
 </form>
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>

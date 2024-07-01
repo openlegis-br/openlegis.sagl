@@ -1,4 +1,4 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
 <script>
 <!--
@@ -25,7 +25,7 @@
 //-->
 </script>
 
-<h1 class="firstHeading">Regimes de Tramitação</h1>
+<h1 class="firstHeading font-size-18">Regimes de Tramitação</h1>
 
 <form name="regime_tramitacao_form" method="post" action="regime_tramitacao_salvar_proc">  
 
@@ -35,7 +35,7 @@
   <dtml-in expr="zsql.regime_tramitacao_obter_zsql()">
     <dtml-if sequence-start>
        <table class="table">
-        <thead class="table-secondary">  
+        <thead>  
              <tr> 
                <th width="10%">Código</th>
                <th>Regime de Tramitacao</th>
@@ -57,10 +57,10 @@
       <p>Nenhum reegime de tramitação cadastrado.</p>
    </dtml-in>
    
- <legend>Formulário de Inclusão</legend>
- <div class="form-row">
+ <legend class="font-size-16">Formulário de Inclusão</legend>
+ <div class="row">
    <div class="col-12 mb-3">
-      <label for="txt_des_regime_tramitacao" class="required">Regime de Tramitação</label>
+      <label class="form-label" for="txt_des_regime_tramitacao" class="required">Regime de Tramitação</label>
       <div class="input-group">                   
          <input class="form-control" type="text" id="txt_des_regime_tramitacao" name="txt_des_regime_tramitacao" maxlength="50" />       
          <div class="input-group-append">
@@ -70,8 +70,9 @@
    </div>
    <div class="row">
       <div class="col-md-12">
-         <p class="text-muted small"><i class="fas fa-asterisk text-danger"></i> Campo obrigatório</p>
+         <p class="text-muted small font-size-12"><i class="fas fa-asterisk text-danger"></i> Campo obrigatório</p>
       </div>
    </div> 
 </form>
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>

@@ -1,4 +1,4 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
 <script>
    function campos_criticar(form){
@@ -12,7 +12,7 @@
   }
 </script>
 
-<h1 class="firstHeading">Matérias Apresentadas</h1>
+<h1 class="firstHeading font-size-18">Matérias Apresentadas</h1>
 
 <form name="pauta_apresentada_form" method="post" action="pauta_apresentada_gerar_proc">
 
@@ -25,10 +25,10 @@
      <input type="hidden" name="dat_ordem" value="<dtml-var dat_inicio_sessao>" />
   </dtml-in>
 
-   <div class="form-row">
+   <div class="row">
       <div class="col-12 mb-3">
-          <label for="lst_status" class="required">Selecione o status atual das matérias</label>
-          <select class="custom-select" id="lst_status" name="lst_status">
+          <label class="form-label" for="lst_status" class="required">Selecione o status atual das matérias</label>
+          <select class="form-select" id="lst_status" name="lst_status">
             <option value=""></option>
             <dtml-in expr="zsql.status_tramitacao_obter_zsql(ind_excluido=0)">
               <option value="<dtml-var cod_status missing>">
@@ -39,18 +39,19 @@
       </div>
    </div>
 
-   <div class="form-row">
-     <div class="col-12 mb-3 text-left">
+   <div class="row">
+     <div class="col-12 mb-3 text-start">
       <input class="btn btn-primary" type="button" name="btn_pauta_apresentada_form" value="Filtrar" onClick="campos_criticar(document.pauta_apresentada_form)">
      <div>
    </div>
   
  <div class="row">
     <div class="col-md-12 mt-2">
-       <p class="text-muted small"><i class="fas fa-asterisk text-danger"></i> Campo obrigatório</p>
+       <p class="text-muted small font-size-12"><i class="fas fa-asterisk text-danger"></i> Campo obrigatório</p>
     </div>
  </div>  
   
 </form>
 
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>

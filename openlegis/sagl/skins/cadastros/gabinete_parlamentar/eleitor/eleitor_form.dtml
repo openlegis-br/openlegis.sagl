@@ -1,4 +1,4 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
            <dtml-if expr="AUTHENTICATED_USER.has_role(['Assessor Parlamentar'])">
               <dtml-in expr="zsql.assessor_parlamentar_obter_zsql(col_username=AUTHENTICATED_USER.getUserName())">
@@ -82,7 +82,7 @@
   }
 </script>
 
-<h1 class="firstHeading">Cadastro de Eleitor</h1> 
+<h1 class="firstHeading font-size-18">Cadastro de Eleitor</h1> 
 
 <form class="mb-3" name="eleitor_form" action="eleitor_salvar_proc" method="post">
 
@@ -92,15 +92,15 @@
                 <table class="table table-borderless">
                         <tr>
                           <td width="45%">
-                            <label for="txt_nom_eleitor" class="required">Nome do Eleitor</label>
+                            <label class="form-label" for="txt_nom_eleitor" class="required">Nome do Eleitor</label>
                             <input class="form-control" type="text" id="txt_nom_eleitor" name="txt_nom_eleitor" size="50" maxlength="200"  value="<dtml-var nom_eleitor missing>" />
                           </td>
                           <td>
-                          <label for="txt_doc_identidade">Número do RG</label>
+                          <label class="form-label" for="txt_doc_identidade">Número do RG</label>
                             <input class="form-control" type="text" id="txt_doc_identidade" name="txt_doc_identidade" maxlength="50" value="<dtml-var doc_identidade missing null>" />
                           </td>
                           <td>
-			       <label for="rad_sex_pessoa" class="d-block required">Sexo</label>
+			       <label class="form-label" for="rad_sex_pessoa" class="d-block required">Sexo</label>
 			       <dtml-in expr="[('Masculino', 'M'), ('Feminino', 'F')]">
 				  <div class="form-check form-check-inline">
 				    <input class="form-check-input" type="radio" name="rad_sex_eleitor" id="rad<dtml-var expr="_['sequence-item']">" value="<dtml-var expr="_['sequence-item']">" 
@@ -114,46 +114,46 @@
                         </tr>
                         <tr>
                           <td>
-                             <label for="txt_end_residencial">Endereço </label>
+                             <label class="form-label" for="txt_end_residencial">Endereço </label>
                               <input class="form-control" type="text" id="txt_end_residencial" name="txt_end_residencial" maxlength="80" value="<dtml-var end_residencial missing null>"/>
                           </td>
-                          <td><label for="txt_num_cep">CEP </label>
+                          <td><label class="form-label" for="txt_num_cep">CEP </label>
                             <input class="form-control" type="text" id="txt_num_cep" name="txt_num_cep" size="15" maxlength="15" value="<dtml-var num_cep missing null>" />
                           </td>
-                          <td><label for="txt_num_cpf">CPF </label>
+                          <td><label class="form-label" for="txt_num_cpf">CPF </label>
                             <input class="form-control" type="text" id="txt_num_cpf" name="txt_num_cpf" size="20" maxlength="15" value="<dtml-var num_cpf missing null>" />
                           </td>
                         </tr>
                         <tr>
-                          <td><label for="txt_nom_bairro">Bairro</label>
+                          <td><label class="form-label" for="txt_nom_bairro">Bairro</label>
                             <input class="form-control" type="text" id="txt_nom_bairro" name="txt_nom_bairro" size="50" maxlength="80" value="<dtml-var nom_bairro missing null>" />
                           </td>
-                          <td><label for="txt_nom_localidade">Localidade</label>
+                          <td><label class="form-label" for="txt_nom_localidade">Localidade</label>
                             <input class="form-control" type="text" id="txt_nom_localidade" name="txt_nom_localidade" size="30" maxlength="80" value="<dtml-var nom_localidade missing null>" />
                           </td>
-                          <td><label for="txt_sgl_uf">Estado</label>
+                          <td><label class="form-label" for="txt_sgl_uf">Estado</label>
                             <input class="form-control" type="text" id="txt_sgl_uf" name="txt_sgl_uf" size="10" maxlength="2" value="<dtml-var sgl_uf missing null=SP>" />
                           </td>
                         </tr>
-                          <td><label for="txt_end_email">E-mail</label>
+                          <td><label class="form-label" for="txt_end_email">E-mail</label>
                             <input class="form-control" type="text" id="txt_end_email" name="txt_end_email" size="50" maxlength="100" value="<dtml-var end_email missing null="">" />
                           </td>
-                          <td><label for="txt_num_telefone">Telefone</label>
+                          <td><label class="form-label" for="txt_num_telefone">Telefone</label>
                             <input class="form-control" type="text" id="txt_num_telefone" name="txt_num_telefone" size="20" maxlength="50" value="<dtml-var num_telefone missing null>" />
                           </td>
-                          <td><label for="txt_num_fax">Celular</label>
+                          <td><label class="form-label" for="txt_num_fax">Celular</label>
                             <input class="form-control mobile" type="text" id="txt_num_celular" name="txt_num_celular" size="20" maxlength="50" value="<dtml-var num_celular missing null>" />
                           </td>
                         </tr>
                         <tr>
-                          <td colspan="3"><label for="txa_txt_observacao">Observações</label> 
+                          <td colspan="3"><label class="form-label" for="txa_txt_observacao">Observações</label> 
                             <textarea class="form-control" id="txa_txt_observacao" name="txa_txt_observacao" cols="67" rows="2"><dtml-var txt_observacao missing null=""></textarea>
                           </td>
                         </tr>
                         <tr>
                           <td>
-                           <label for="lst_assessor">Assessor Responsável</label>
-                           <select class="custom-select" id="lst_assessor" name="lst_assessor">
+                           <label class="form-label" for="lst_assessor">Assessor Responsável</label>
+                           <select class="form-select" id="lst_assessor" name="lst_assessor">
                              <option value =""></option>
                              <dtml-in expr="zsql.assessor_parlamentar_obter_zsql(cod_parlamentar=cod_parlamentar_corrente)" mapping>
                               <dtml-if expr="dat_exoneracao == None or dat_exoneracao == ''">
@@ -169,53 +169,53 @@
                            </select>
                           </td>
                           <td colspan="2">
-                            <label for="lst_assessor">Registro atualizado em:</label> 
+                            <label class="form-label" for="lst_assessor">Registro atualizado em:</label> 
                             <input class="form-control" type="text" id="txt_dat_atualizacao" name="txt_dat_atualizacao" value="<dtml-var dat_atualizacao missing>" disabled=disabled />  
                           </td>
                         </tr>
             </table>
 
-         <legend>Informações Complementares</legend>
+         <legend class="font-size-16">Informações Complementares</legend>
             <table class="table table-borderless">
              <tr>
               <td>
-               <label for="txt_dat_nascimento">Data de Nascimento</label>
+               <label class="form-label" for="txt_dat_nascimento">Data de Nascimento</label>
                <input class="form-control date" type="text" id="txt_dat_nascimento" name="txt_dat_nascimento" size="13" value="<dtml-var dat_nascimento missing null>" onblur="formata_data(form.txt_dat_nascimento)" />
               </td>
               <td>
-               <label for="txt_des_estado_civil">Estado Civil</label>
+               <label class="form-label" for="txt_des_estado_civil">Estado Civil</label>
                <input class="form-control" type="text" id="txt_des_estado_civil" name="txt_des_estado_civil" size="20" maxlength="15" value="<dtml-var des_estado_civil missing null>" />
               </td>
               <td>
-               <label for="txt_nom_conjuge">Nome do Cônjuge</label>
+               <label class="form-label" for="txt_nom_conjuge">Nome do Cônjuge</label>
                <input class="form-control" type="text" id="txt_nom_conjuge" name="txt_nom_conjuge" size="30" maxlength="50" value="<dtml-var nom_conjuge missing null>" />
               </td>
              </tr>
              <tr>
               <td>
-               <label for="txt_num_dependentes">Num. Dependentes</label>
+               <label class="form-label" for="txt_num_dependentes">Num. Dependentes</label>
                <input class="form-control" type="text" id="txt_num_dependentes" name="txt_num_dependentes" size="10" maxlength="2" value="<dtml-var num_dependentes missing null>" />
               </td>
               <td>
-               <label for="txt_num_tit_eleitor">Título de Eleitor</label>
+               <label class="form-label" for="txt_num_tit_eleitor">Título de Eleitor</label>
                <input class="form-control" type="text" id="txt_num_tit_eleitor" name="txt_num_tit_eleitor" size="30" maxlength="15" value="<dtml-var num_tit_eleitor missing null>" />
               </td>
               <td>
-               <label for="txa_txt_classe">Classificação</label>
+               <label class="form-label" for="txa_txt_classe">Classificação</label>
                <input class="form-control" type="text" id="txa_txt_classe" name="txa_txt_classe" size="30" maxlength="15" value="<dtml-var txt_classe missing null>" />
               </td>
              </tr>
              <tr>
               <td>
-               <label for="txt_des_profissao">Profissão</label>
+               <label class="form-label" for="txt_des_profissao">Profissão</label>
                <input class="form-control" type="text" id="txt_des_profissao" name="txt_des_profissao" size="30" maxlength="50" value="<dtml-var des_profissao missing null>" />
               </td>
               <td>
-               <label for="txt_des_local_trabalho">Local de Trabalho</label>
+               <label class="form-label" for="txt_des_local_trabalho">Local de Trabalho</label>
                <input class="form-control" type="text" id="txt_des_local_trabalho" name="txt_des_local_trabalho" size="30" maxlength="100" value="<dtml-var des_local_trabalho missing null>" />
               </td>
               <td>
-               <label for="txt_des_local_trabalho">Escolaridade</label>
+               <label class="form-label" for="txt_des_local_trabalho">Escolaridade</label>
                <input class="form-control" type="text" id="txt_des_escolaridade" name="txt_des_escolaridade" size="30" maxlength="100" value="<dtml-var des_escolaridade missing null>" />
               </td>
              </tr>
@@ -229,11 +229,11 @@
 </form>
 
 <dtml-if cod_eleitor>
-     <legend>Histórico de Atendimentos</legend>
+     <legend class="font-size-16">Histórico de Atendimentos</legend>
      <dtml-in expr="zsql.gabinete_atendimento_obter_zsql(cod_parlamentar=cod_parlamentar_corrente, cod_eleitor=cod_eleitor)">
        <dtml-if sequence-start>
          <table class="table">
-          <thead class="table-secondary">
+          <thead>
            <tr>
               <th class="label">Data</th>
               <th class="label">Assunto</th>
@@ -243,7 +243,7 @@
        </dtml-if>
            <tr>
               <td>
-                 <a href=""" data-src="<dtml-var portal_url>/cadastros/gabinete_parlamentar/atendimento/atendimento_mostrar_proc?cod_atendimento=<dtml-var cod_atendimento>&modal=1" data-title="Edição de Atendimento" data-toggle="modal" data-target="#iFrameModal">
+                 <a href=""" data-src="<dtml-var portal_url>/cadastros/gabinete_parlamentar/atendimento/atendimento_mostrar_proc?cod_atendimento=<dtml-var cod_atendimento>&modal=1" data-title="Edição de Atendimento" data-bs-toggle="modal" data-bs-target="#iFrameModal">
                    <dtml-var dat_atendimento>
                  </a>
                </td>
@@ -256,8 +256,9 @@
      <dtml-else>
        <p>Nenhum registro encontrado.</p>
      </dtml-in>
-     <a href="#" class="btn btn-primary" data-src="<dtml-var portal_url>/cadastros/gabinete_parlamentar/atendimento/atendimento_form?cod_eleitor=<dtml-var cod_eleitor>&modal=1" data-title="Inclusão de Atendimento" data-toggle="modal" data-target="#iFrameModal">Incluir Atendimento</a>      
+     <a href="#" class="btn btn-primary" data-src="<dtml-var portal_url>/cadastros/gabinete_parlamentar/atendimento/atendimento_form?cod_eleitor=<dtml-var cod_eleitor>&modal=1" data-title="Inclusão de Atendimento" data-bs-toggle="modal" data-bs-target="#iFrameModal">Incluir Atendimento</a>      
 
 </dtml-if>
 
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>

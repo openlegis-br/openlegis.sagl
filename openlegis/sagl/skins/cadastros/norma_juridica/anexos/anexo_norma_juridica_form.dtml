@@ -1,4 +1,4 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
   <script>
 
@@ -28,13 +28,13 @@
    <h1>Cadastro de Anexo</h1>
    <table class="table table-borderless">
     <tr>
-       <td><label for="txa_txt_descricao" class="required">Descrição</label>
+       <td><label class="form-label" for="txa_txt_descricao" class="required">Descrição</label>
            <input class="form-control" type="text" id="txa_txt_descricao"  name="txa_txt_descricao" maxlength="200" <dtml-if cod_anexo>disabled</dtml-if> value="<dtml-var txt_descricao missing null="">">
       </td>
     </tr>
     <tr>
       <td>
-         <label for="file_nom_anexo" class="required d-block">Texto Integral</label>
+         <label class="form-label" for="file_nom_anexo" class="required d-block">Texto Integral</label>
            <dtml-if expr="_.has_key('cod_anexo')"> 
              <dtml-call expr="REQUEST.set('id_anexo', str(cod_norma)+'_anexo_'+ str(cod_anexo))">
              <dtml-if "hasattr(sapl_documentos.norma_juridica,id_anexo)">
@@ -63,4 +63,5 @@
  <input type="hidden" name="modal" value="1"> 
 </form>
 
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>

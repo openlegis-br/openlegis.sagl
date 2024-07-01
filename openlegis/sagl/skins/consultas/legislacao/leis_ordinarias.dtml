@@ -1,17 +1,17 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
 <dtml-var legislacao_header_html>
 
 <div class="legis_container">
 
-<h1 class="firstHeading" id="indice">Leis Ordinárias</h1>
+<h1 class="firstHeading font-size-16" id="indice">Leis Ordinárias</h1>
 
 <span id="lista"><b>São as leis típicas, ou as mais comuns, aprovadas pela maioria dos parlamentares da Câmara Municipal presentes durante a votação.</b></span>
 
-<div class="form-row ano-lei mt-3 mb-3 p-1">
+<div class="row ano-lei mt-3 mb-3 p-1">
   <form class="form-inline">
-    <label for="lst_ano" class="required mr-2">Selecione o Ano</label>
-    <select class="custom-select jumpmenu" id="lst_ano" name="lst_ano">
+    <label class="form-label" for="lst_ano" class="required mr-2">Selecione o Ano</label>
+    <select class="form-select jumpmenu" id="lst_ano" name="lst_ano">
        <option value="<dtml-var ACTUAL_URL>#lista"></option>
        <dtml-in expr="ano_tipo_obter_zsql(des_tipo_norma='Lei Ordinária')">
            <option value="<dtml-var ACTUAL_URL>?ano_norma=<dtml-var ano_norma>#lista"
@@ -30,7 +30,7 @@
     <dtml-if sequence-start>
      <table class="table">
       <caption>Leis Ordinárias - <dtml-var ano_norma></caption>
-      <thead class="table-secondary">
+      <thead>
         <tr>
          <th width="30%" style="text-align:center">Número</th>
          <th>Ementa</th>
@@ -69,7 +69,7 @@
         var selectElements = document.getElementsByTagName("select");
         for( i = 0; i < selectElements.length; i++ ) {
             // Check for the class and make sure the element has an ID
-            if( selectElements[i].className == "custom-select jumpmenu" && document.getElementById(selectElements[i].id) != "" ) {
+            if( selectElements[i].className == "form-control jumpmenu" && document.getElementById(selectElements[i].id) != "" ) {
                 jumpmenu = document.getElementById(selectElements[i].id);
                 jumpmenu.onchange = function() {
                     if( this.options[this.selectedIndex].value != '' ) {
@@ -85,4 +85,5 @@
     }
 </script>
 
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>

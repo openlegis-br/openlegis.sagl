@@ -1,13 +1,13 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
-<h1 class="firstHeading">Atas das <dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao_plural"></h1>
+<h1 class="firstHeading font-size-18">Atas das <dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao_plural"></h1>
 
 <form name="pauta_form" method="post" action="ata_mostrar">
 
 <div class="row">
   <div class="col-6 mt-1 mb-4">
-     <label for="lst_ano_sessao">Selecione o Ano:</label>
-     <select class="custom-select jumpmenu" id="lst_ano_sessao" name="lst_ano_sessao">
+     <label class="form-label" for="lst_ano_sessao">Selecione o Ano:</label>
+     <select class="form-select jumpmenu" id="lst_ano_sessao" name="lst_ano_sessao">
          <dtml-in expr="zsql.sessao_plenaria_listar_ano_zsql()">
              <option value="<dtml-var ACTUAL_URL>?ano_sessao_sel=<dtml-var ano_sessao missing>" 
                <dtml-if expr="((not _.has_key('ano_sessao_sel') and (DateTime().year() == ano_sessao)))
@@ -22,8 +22,8 @@
      </select>
   </div>
   <div class="col-6 mt-1 mb-4">
-     <label for="lst_tip_sessao">Tipo de <dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao">:</label>
-     <select class="custom-select jumpmenu" id="lst_tip_sessao" name="lst_tip_sessao">
+     <label class="form-label" for="lst_tip_sessao">Tipo de <dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao">:</label>
+     <select class="form-select jumpmenu" id="lst_tip_sessao" name="lst_tip_sessao">
        <option value="<dtml-var ACTUAL_URL>?ano_sessao_sel=<dtml-var ano_sessao_sel missing>">Todos</option>
          <dtml-in expr="zsql.tipo_sessao_plenaria_obter_zsql(ind_excluido=0)">
              <option value="<dtml-var ACTUAL_URL>?ano_sessao_sel=<dtml-var ano_sessao_sel missing>&tip_sessao_sel=<dtml-var tip_sessao missing>"
@@ -99,7 +99,7 @@
             </dtml-let>
          </dtml-if> 
        </div>
-       <div class="col-12 col-md-5 mt-1 mb-sm-0 text-left text-md-right">
+       <div class="col-12 col-md-5 mt-1 mb-sm-0 text-start text-end">
          <dtml-let id_ata="str(cod_sessao_plen)+'_ata_sessao.pdf'">
             <dtml-if "hasattr(sapl_documentos.ata_sessao,id_ata)">
                <dtml-let ata="getattr(sapl_documentos.ata_sessao,id_ata).absolute_url">
@@ -139,7 +139,7 @@
         var selectElements = document.getElementsByTagName("select");
         for( i = 0; i < selectElements.length; i++ ) {
             // Check for the class and make sure the element has an ID
-            if( selectElements[i].className == "custom-select jumpmenu" && document.getElementById(selectElements[i].id) != "" ) {
+            if( selectElements[i].className == "form-control jumpmenu" && document.getElementById(selectElements[i].id) != "" ) {
                 jumpmenu = document.getElementById(selectElements[i].id);
                 jumpmenu.onchange = function() {
                     if( this.options[this.selectedIndex].value != '' ) {
@@ -155,4 +155,5 @@
     }
 </script>
 
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>

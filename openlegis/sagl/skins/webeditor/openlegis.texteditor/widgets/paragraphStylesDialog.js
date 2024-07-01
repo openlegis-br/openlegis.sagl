@@ -220,7 +220,7 @@ function (IdMangler) {
                 cloneTooltip = new TooltipDialog({
                     content: idMangler.mangleIds(
                         '<h2 style="margin: 0;">' + tr("Clone this Style") + '</h2><br/>' +
-                        '<label for="name">' + tr("New Name:") + '</label> <input data-dojo-type="dijit/form/TextBox" id="name" name="name"><br/><br/>'),
+                        '<label class="form-label" for="name">' + tr("New Name:") + '</label> <input data-dojo-type="dijit/form/TextBox" id="name" name="name"><br/><br/>'),
                     style: "width: 300px;"
                 });
                 cloneButton = new Button({

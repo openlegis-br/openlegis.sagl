@@ -1,4 +1,4 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
 <script>
 
@@ -107,9 +107,9 @@
 
  <div class="row mb-2">
       <div class="col-12 col-md-6 align-self-center">
-        <h1 class="firstHeading">Cadastro de Entidade</h1>
+        <h1 class="firstHeading font-size-18">Cadastro de Entidade</h1>
       </div>
-      <div class="col-12 col-md-6 text-left text-md-right">
+      <div class="col-12 col-md-6 text-start text-end">
          <div class="btn-group d-print-none ">
            <a class="btn btn-primary btn-sm" href="<dtml-var portal_url>/consultas/instituicao" ><i class="fa fa-fw fa-search"></i> Nova Pesquisa</a>
            <dtml-if cod_entidade>          
@@ -127,14 +127,14 @@
  <input type="hidden" name="hdn_txt_user" value="<dtml-var "AUTHENTICATED_USER.getUserName()">" />
  <input type="hidden" name="hdn_txt_ip" value="<dtml-var REMOTE_ADDR missing>" />
 
- <div class="form-row">
+ <div class="row">
   <div class="col-12 col-md-6 mb-3">
-     <label for="txa_txt_nom_instituicao" class="required">Nome da Entidade</label>
+     <label class="form-label" for="txa_txt_nom_instituicao" class="required">Nome da Entidade</label>
      <input class="form-control" type="text" id="txa_txt_nom_instituicao" name="txa_txt_nom_instituicao" maxlength="200" value="<dtml-var nom_instituicao missing>" required/>  
   </div>
   <div class="col-6 col-md-3 mb-3">
-              <label for="lst_tip_instituicao" class="required">Tipo</label>
-              <select class="custom-select"  id="lst_tip_instituicao" name="lst_tip_instituicao" <dtml-unless cod_instituicao>onChange="categoria_listar(document.instituicao_form)"</dtml-unless> <dtml-if cod_instituicao>onfocus="this.initialSelect = this.selectedIndex;" onchange="this.selectedIndex = this.initialSelect;"</dtml-if> required>
+              <label class="form-label" for="lst_tip_instituicao" class="required">Tipo</label>
+              <select class="form-select"  id="lst_tip_instituicao" name="lst_tip_instituicao" <dtml-unless cod_instituicao>onChange="categoria_listar(document.instituicao_form)"</dtml-unless> <dtml-if cod_instituicao>onfocus="this.initialSelect = this.selectedIndex;" onchange="this.selectedIndex = this.initialSelect;"</dtml-if> required>
                 <option value="0">Selecione</option>
                 <dtml-if cod_instituicao>
                    <dtml-call expr="REQUEST.set('tip_instituicao_sel', tip_instituicao)">
@@ -156,8 +156,8 @@
               </select>
   </div>
   <div class="col-6 col-md-3 mb-3">
-              <label for="lst_categoria">Categoria</label>
-              <select class="custom-select"  id="lst_categoria" name="lst_categoria">
+              <label class="form-label" for="lst_categoria">Categoria</label>
+              <select class="form-select"  id="lst_categoria" name="lst_categoria">
                 <option value="0">Selecione</option>
                   <dtml-if cod_instituicao>
                      <dtml-call expr="REQUEST.set('cod_categoria_sel', cod_categoria)">
@@ -177,24 +177,24 @@
   </div>
  </div>
 
- <div class="form-row">
+ <div class="row">
   <div class="col-12 col-md-5 mb-3">
-     <label for="txt_end_instituicao" class="required">Endereço</label>
+     <label class="form-label" for="txt_end_instituicao" class="required">Endereço</label>
      <input class="form-control" type="text" id="txt_end_instituicao" name="txt_end_instituicao" maxlength="80" value="<dtml-var end_instituicao missing null="">" required/>
   </div>
   <div class="col-6 col-md-5 mb-3">
-     <label for="txt_nom_bairro" class="required">Bairro</label>
+     <label class="form-label" for="txt_nom_bairro" class="required">Bairro</label>
      <input class="form-control" type="text" id="txt_nom_bairro" name="txt_nom_bairro" maxlength="80" value="<dtml-var nom_bairro missing null="">" required />
   </div>
   <div class="col-6 col-md-2 mb-3">
-     <label for="txt_num_cep" class="required">CEP</label>
+     <label class="form-label" for="txt_num_cep" class="required">CEP</label>
      <input class="form-control" type="text" id="txt_num_cep" name="txt_num_cep" maxlength="15" value="<dtml-var num_cep missing null="">" required />
   </div>
  </div>
 
- <div class="form-row">
+ <div class="row">
   <div class="col-8 mb-3">
-     <label for="txt_municipio" class="required">Município</label>
+     <label class="form-label" for="txt_municipio" class="required">Município</label>
      <div class="input-group">
        <input class="form-control" type="text" id="txt_municipio" name="txt_municipio" value="<dtml-if cod_localidade><dtml-in expr="zsql.localidade_obter_zsql(cod_localidade=cod_localidade)"><dtml-var nom_localidade missing null=""></dtml-in></dtml-if>" maxlength="50" required />
        <div class="input-group-append">
@@ -204,8 +204,8 @@
      </div>
   </div> 
   <div class="col-4 mb-3">
-     <label for="lst_sgl_uf" class="required">Estado</label>
-              <select class="custom-select" id="lst_sgl_uf" name="lst_sgl_uf">
+     <label class="form-label" for="lst_sgl_uf" class="required">Estado</label>
+              <select class="form-select" id="lst_sgl_uf" name="lst_sgl_uf">
                 <option>Selecione</option>
                 <dtml-if cod_instituicao>
                   <dtml-if cod_localidade>
@@ -229,65 +229,65 @@
   </div>  
  </div>
 
- <div class="form-row">
+ <div class="row">
   <div class="col-6 col-md-2 mb-3">
-      <label for="txt_num_telefone">Telefone </label>
+      <label class="form-label" for="txt_num_telefone">Telefone </label>
       <input class="form-control" type="text" id="txt_num_telefone" name="txt_num_telefone" maxlength="50" value="<dtml-var num_telefone missing null>" />
   </div>
   <div class="col-6 col-md-2 mb-3">
-      <label for="txt_num_fax">Fax </label>
+      <label class="form-label" for="txt_num_fax">Fax </label>
       <input class="form-control" type="text" id="txt_num_fax" name="txt_num_fax" maxlength="50" value="<dtml-var num_fax missing null="">" />
   </div>
   <div class="col-12 col-md-4 mb-3">
-      <label for="txt_end_email">Email </label>
+      <label class="form-label" for="txt_end_email">Email </label>
       <input class="form-control" type="text" id="txt_end_email" name="txt_end_email" maxlength="50" value="<dtml-var end_email missing null="">" />
   </div>
   <div class="col-12 col-md-4 mb-3">
-      <label for="txt_end_web">Website </label>
+      <label class="form-label" for="txt_end_web">Website </label>
       <input class="form-control" type="text" id="txt_end_web" name="txt_end_web" maxlength="50" value="<dtml-var end_web missing null="">" />
   </div>
  </div>
 
- <div class="form-row">
+ <div class="row">
   <div class="col-12 col-md-6 mb-3">
-     <label for="txt_nom_responsavel">Nome do Responsável</label>
+     <label class="form-label" for="txt_nom_responsavel">Nome do Responsável</label>
      <input class="form-control" type="text" id="txt_nom_responsavel" name="txt_nom_responsavel" maxlength="50" value="<dtml-var nom_responsavel missing null="">" />
   </div>
   <div class="col-12 col-md-4 mb-3">
-     <label for="txt_des_cargo">Cargo </label>
+     <label class="form-label" for="txt_des_cargo">Cargo </label>
      <input class="form-control" type="text" id="txt_des_cargo" name="txt_des_cargo" maxlength="50" value="<dtml-var des_cargo missing null="">" />
   </div>
   <div class="col-12 col-md-2 mb-3">
-     <label for="txa_txt_forma_tratamento">Forma de Tratamento</label>
+     <label class="form-label" for="txa_txt_forma_tratamento">Forma de Tratamento</label>
      <input class="form-control" type="text" id="txa_txt_forma_tratamento" name="txa_txt_forma_tratamento" maxlength="30" value="<dtml-var txt_forma_tratamento missing null="">" />
   </div>  
  </div>
 
- <div class="form-row">
+ <div class="row">
   <div class="col-12 mb-3">
-     <label for="txa_txt_observacao">Observações</label> 
+     <label class="form-label" for="txa_txt_observacao">Observações</label> 
      <textarea class="form-control"  id="txa_txt_observacao" name="txa_txt_observacao" rows="1" onChange="javascript:form.hdn_alterou.value=1"><dtml-var txt_observacao missing null=""></textarea>
   </div>
  </div> 
 
 <dtml-if cod_instituicao>
-  <div class="form-row">
+  <div class="row">
     <div class="col-12 col-md-4 mb-3">
-      <label for="txt_timestamp_alteracao">Última Alteração</label> 
+      <label class="form-label" for="txt_timestamp_alteracao">Última Alteração</label> 
       <input class="form-control" type="text" id="txt_timestamp_alteracao" name="txt_timestamp_alteracao" size="16" value="<dtml-var timestamp_alteracao missing null="">" disabled=disabled />
     </div>
     <div class="col-12 col-md-4 mb-3">
-      <label for="txt_user_alteracao">Usuário</label> 
+      <label class="form-label" for="txt_user_alteracao">Usuário</label> 
       <input class="form-control" type="text" id="txt_user_alteracao" name="txt_user_alteracao" size="12" value="<dtml-var txt_user_alteracao missing null="">" disabled=disabled />    
     </div>
     <div class="col-12 col-md-4 mb-3">
-      <label for="txt_ip_alteracao">Endereço IP</label>     
+      <label class="form-label" for="txt_ip_alteracao">Endereço IP</label>     
       <input class="form-control" type="text" id="txt_ip_alteracao" name="txt_ip_alteracao" size="15" value="<dtml-var txt_ip_alteracao missing null="">" disabled=disabled />
     </div>      
   </div>
 </dtml-if>
       
- <div class="text-left">
+ <div class="text-start">
    <input class="btn btn-primary" type="button" name="button" value="Salvar" onClick="campos_criticar()" />
    <dtml-if cod_instituicao>
      <input class="btn btn-danger" type="button" name="btn_excluir" value="Excluir" onClick="instituicao_excluir()" />
@@ -296,4 +296,5 @@
  
 </form>
 
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>

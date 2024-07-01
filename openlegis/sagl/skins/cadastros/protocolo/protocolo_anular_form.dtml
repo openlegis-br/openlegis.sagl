@@ -1,4 +1,4 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
 <script>
 
@@ -38,9 +38,9 @@
 
  <div class="row mb-2">
       <div class="col-12 col-md-8 align-self-center">
-        <h1 class="firstHeading">Anulação de Protocolo</h1>
+        <h1 class="firstHeading font-size-18">Anulação de Protocolo</h1>
       </div>
-      <div class="col-12 col-md-4 text-left text-md-right">
+      <div class="col-12 col-md-4 text-start text-end">
          <div class="btn-group d-print-none ">
            <a class="btn btn-primary btn-sm" href="<dtml-var portal_url>/consultas/protocolo" ><i class="fa fa-fw fa-search"></i> Pesquisa de Protocolos</a>         
          </div>
@@ -76,22 +76,22 @@
    <input type="hidden" name="hdn_url" value="<dtml-var portal_url>/cadastros/protocolo/protocolo_administrativo_form" />
  </dtml-if>
 
-  <legend>Anulação de Protocolo</legend>
+  <legend class="font-size-16">Anulação de Protocolo</legend>
 
-  <div class="form-row">
+  <div class="row">
     <div class="col-6 mb-3">
-       <label for="txt_num_protocolo" class="required">Número</label>
+       <label class="form-label" for="txt_num_protocolo" class="required">Número</label>
        <input class="form-control number" id="txt_num_protocolo" type="number" name="txt_num_protocolo" required />
     </div>
     <div class="col-6 mb-3">
-       <label for="txt_ano_protocolo" class="required">Ano</label>
+       <label class="form-label" for="txt_ano_protocolo" class="required">Ano</label>
        <input class="form-control year" id="txt_ano_protocolo" type="number" name="txt_ano_protocolo" />    
     </div>       
   </div>    
 
-  <div class="form-row">
+  <div class="row">
     <div class="col-12 mb-3">
-       <label for="txa_txt_just_anulacao" class="required">Motivo da Anulação</label>
+       <label class="form-label" for="txa_txt_just_anulacao" class="required">Motivo da Anulação</label>
        <textarea class="form-control" id="txa_txt_just_anulacao" name="txa_txt_just_anulacao" rows="2"><dtml-var txt_observacao missing></textarea>
     </div>
   </div>    
@@ -103,7 +103,7 @@
 
 
 
-  <div class="text-left">
+  <div class="text-start">
     <input class="btn btn-primary" type="button" name="button" value="Anular Protocolo" onClick="campos_criticar()" />
     <input class="btn btn-secondary" type="reset" name="btn_protocolo_limpar" value="Limpar" />
   </div>
@@ -113,4 +113,5 @@
 </div>
 </div>
 
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>

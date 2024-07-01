@@ -1,4 +1,4 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
 <script>
 $(document).ready(function() {
@@ -39,12 +39,12 @@ $(document).ready(function() {
     
  </script>
 
-<h1 class="firstHeading">Atendimentos no Gabinete</h1> 
+<h1 class="firstHeading font-size-18">Atendimentos no Gabinete</h1> 
     
  <dtml-in expr="zsql.gabinete_atendimento_obter_zsql(cod_parlamentar=cod_parlamentar_corrente)"> 
   <dtml-if sequence-start>
        <table class="table display" id="atendimentos">
-        <thead class="table-secondary">
+        <thead>
           <tr> 
             <th width="10%">Data</th>
             <th>Nome do Eleitor</th>
@@ -55,12 +55,12 @@ $(document).ready(function() {
   </dtml-if sequence-start>
          <tr>
               <td>            
-                 <a data-toggle="modal" data-target="#iFrameModal" data-title="Cadastro de Atendimento" data-src="atendimento_mostrar_proc?cod_atendimento=<dtml-var cod_atendimento>&modal=1" href="#">
+                 <a data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Cadastro de Atendimento" data-src="atendimento_mostrar_proc?cod_atendimento=<dtml-var cod_atendimento>&modal=1" href="#">
                    <dtml-var dat_atendimento>
                  </a>
                </td>
               <td>
-                 <a data-toggle="modal" data-target="#iFrameModal" data-title="Cadastro de Eleitor" data-src="../eleitor/eleitor_mostrar_proc?hdn_cod_eleitor=<dtml-var cod_eleitor>&modal=1" href="#">              
+                 <a data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Cadastro de Eleitor" data-src="../eleitor/eleitor_mostrar_proc?hdn_cod_eleitor=<dtml-var cod_eleitor>&modal=1" href="#">              
                    <dtml-var nom_eleitor>
                  </a>
               </td>
@@ -74,4 +74,5 @@ $(document).ready(function() {
    <p>Nenhum atendimento registrado.</p>
 </dtml-in>
 
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>

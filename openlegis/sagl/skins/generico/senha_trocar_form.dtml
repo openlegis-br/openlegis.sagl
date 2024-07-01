@@ -1,4 +1,4 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
 <script src="<dtml-var portal_url>/js/jqBootstrapValidation.js"></script>
 
@@ -6,12 +6,12 @@
   $(function () { $("input").not("[type=submit]").jqBootstrapValidation(); } );
 </script>
 
-<h1 class="firstHeading">Troca de Senha</h1> 
+<h1 class="firstHeading font-size-18">Troca de Senha</h1> 
 
 <form class="form-horizontal" id="password_form" action="senha_trocar_proc" method="post" novalidate="">
  <dtml-let member="portal_membership.getAuthenticatedMember()">
   <div class="form-group row">
-    <label for="txt_usuario" class="col-sm-2 col-form-label">Usuário</label>
+    <label class="form-label" for="txt_usuario" class="col-sm-2 col-form-label">Usuário</label>
       <div class="input-group col-sm-10">
 	<div class="input-group-prepend">
            <span class="input-group-text"><i class="fa fa-user"></i></span>
@@ -21,18 +21,18 @@
   </div>
   <div class="form-group" validate>
      <div class="controls row">
-        <label for="password" class="col-sm-2 col-form-label">Nova senha</label>
+        <label class="form-label" for="password" class="col-sm-2 col-form-label">Nova senha</label>
         <div class="input-group col-sm-10">
-          <input type="password" name="password" id="password" class="form-control" data-toggle="password" minlength="6" data-validation-minlength-message="Deve conter no mínimo de 6 caracteres" data-validation-login-regex="^(?!<dtml-var expr="AUTHENTICATED_USER.getUserName()">$).*$" data-validation-login-message="Não pode ser igual ao nome de Login" data-validation-required-message="Este campo é obrigatório" data-validation-passwd-regex="^(?!<dtml-var expr="sapl_documentos.props_sagl.txt_senha_inicial">$).*$" data-validation-passwd-message="Deve ser diferente da senha padrão" data-validation-required-message="Este campo é obrigatório" required="" aria-invalid="false">
+          <input type="password" name="password" id="password" class="form-control" data-bs-toggle="password" minlength="6" data-validation-minlength-message="Deve conter no mínimo de 6 caracteres" data-validation-login-regex="^(?!<dtml-var expr="AUTHENTICATED_USER.getUserName()">$).*$" data-validation-login-message="Não pode ser igual ao nome de Login" data-validation-required-message="Este campo é obrigatório" data-validation-passwd-regex="^(?!<dtml-var expr="sapl_documentos.props_sagl.txt_senha_inicial">$).*$" data-validation-passwd-message="Deve ser diferente da senha padrão" data-validation-required-message="Este campo é obrigatório" required="" aria-invalid="false">
           <div class="help-block"></div>
         </div>
      </div>
   </div>
   <div class="form-group" validate>
    <div class="controls row">
-    <label for="confirm" class="col-sm-2 col-form-label">Repita a senha</label>
+    <label class="form-label" for="confirm" class="col-sm-2 col-form-label">Repita a senha</label>
         <div class="input-group col-sm-10">
-    <input type="password" name="confirm" id="confirm" data-toggle="password" class="form-control" data-validation-match-match="password" data-validation-match-message="Nova senha e confirmação devem ser iguais" data-validation-required-message="Este campo é obrigatório" required="" aria-invalid="false">
+    <input type="password" name="confirm" id="confirm" data-bs-toggle="password" class="form-control" data-validation-match-match="password" data-validation-match-message="Nova senha e confirmação devem ser iguais" data-validation-required-message="Este campo é obrigatório" required="" aria-invalid="false">
     <div class="help-block"></div>
             </div>
    </div>
@@ -47,4 +47,5 @@
  </dtml-let>
 </form>
 
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>

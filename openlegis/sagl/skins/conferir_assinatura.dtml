@@ -1,4 +1,4 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
 <script>
   $(document).ready(function () {
@@ -6,12 +6,12 @@
             var form = document.conferir_assinatura_form;
             var chave = $('#txt_codigo_verificacao');
             if (chave.val() === '') {
-                $.showAlert({title: "Preenchimento obrigatório", body: "É necessário informar o código de validação!"});
+                bootstrap.showModal({title: "Preenchimento obrigatório", body: "É necessário informar o código de validação!"});
                 $("#txt_codigo_verificacao").focus();
                 return false;
             }
            if ($("#txt_codigo_verificacao").val().length < 18) {
-                $.showAlert({title: "Mensagem do SIstema", body: "Formato do código inválido. Informe os dados corretamente."});
+                bootstrap.showModal({title: "Mensagem do SIstema", body: "Formato do código inválido. Informe os dados corretamente."});
                 return false;
             }
             return form.submit();
@@ -19,7 +19,7 @@
   });
 </script>
 
-<h1 class="firstHeading">Validação Digital</h1> 
+<h1 class="firstHeading font-size-18">Validação Digital</h1> 
 
 <p>Informe o código de validação do documento assinado digitalmente.</p>
 
@@ -42,4 +42,5 @@
    
 </form>
 
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>

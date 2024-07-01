@@ -1,4 +1,4 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
   <form name="item_form" method="post" action="item_salvar_proc">
     <input type="hidden" name="modal" value="1" />
@@ -13,9 +13,9 @@
        <input type="hidden" name="hdn_url" value="item_mostrar_proc?cod_item=<dtml-var cod_item missing>&modal=1">
     </dtml-if>
 
-    <div class="form-row">
+    <div class="row">
        <div class="col-12 mb-3">
-         <label for="txa_txt_exibicao" class="required">Descrição</label>
+         <label class="form-label" for="txa_txt_exibicao" class="required">Descrição</label>
          <textarea class="form-control auto-resize" id="txa_txt_exibicao" name="txa_txt_exibicao" rows="1"><dtml-var txt_exibicao missing></textarea>
        </div>
     </div>
@@ -44,4 +44,5 @@ tinymce.init({
 autosize(document.querySelectorAll('textarea'));
 </script>
 
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>

@@ -1,4 +1,4 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
 <script>
 
@@ -33,9 +33,9 @@
 
  <div class="row mb-2">
       <div class="col-12 col-md-6 align-self-center">
-        <h1 class="firstHeading">Audiências Públicas</h1>
+        <h1 class="firstHeading font-size-18">Audiências Públicas</h1>
       </div>
-      <div class="col-12 col-md-6 text-left text-md-right">
+      <div class="col-12 col-md-6 text-start text-end">
         <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Sessao Plenaria', 'Operador Ordem Dia'])">
           <a class="btn btn-sm btn-primary mb-3" href="<dtml-var portal_url>/cadastros/sessao_plenaria/sessao_plenaria_form?ind_audiencia=1">Incluir Audiência</a> 
         </dtml-if>
@@ -49,10 +49,10 @@
 
 <form name="sessao_plen_form" method="post" action="sessao_plen_form">
 
-<div class="form-row mb-3">
+<div class="row mb-3">
    <div class="col-4 col-sm-3 mb-3">
-    <label for="lst_ano_sessao">Ano</label>
-                <select class="custom-select" id="lst_ano_sessao" name="lst_ano_sessao"  onChange="atualiza_ano_sessao(document.sessao_plen_form.lst_ano_sessao[document.sessao_plen_form.lst_ano_sessao.selectedIndex].value)">
+    <label class="form-label" for="lst_ano_sessao">Ano</label>
+                <select class="form-select" id="lst_ano_sessao" name="lst_ano_sessao"  onChange="atualiza_ano_sessao(document.sessao_plen_form.lst_ano_sessao[document.sessao_plen_form.lst_ano_sessao.selectedIndex].value)">
                     <dtml-in expr="zsql.sessao_plenaria_listar_ano_zsql(ind_audiencia='1')">
                         <option value="<dtml-var ano_sessao missing>" 
                           <dtml-if expr="((not _.has_key('ano_sessao_sel') and (DateTime().year() == ano_sessao)))
@@ -67,8 +67,8 @@
                 </select>
    </div>
    <div class="col-4 col-sm-6 mb-3">   
-    <label for="lst_mes_sessao">Mês</label>
-                <select class="custom-select" d="lst_mes_sessao" name="lst_mes_sessao"  onChange="atualiza_mes_sessao(document.sessao_plen_form.lst_ano_sessao[document.sessao_plen_form.lst_ano_sessao.selectedIndex].value, document.sessao_plen_form.lst_mes_sessao[document.sessao_plen_form.lst_mes_sessao.selectedIndex].value)">
+    <label class="form-label" for="lst_mes_sessao">Mês</label>
+                <select class="form-select" d="lst_mes_sessao" name="lst_mes_sessao"  onChange="atualiza_mes_sessao(document.sessao_plen_form.lst_ano_sessao[document.sessao_plen_form.lst_ano_sessao.selectedIndex].value, document.sessao_plen_form.lst_mes_sessao[document.sessao_plen_form.lst_mes_sessao.selectedIndex].value)">
                         <dtml-if expr="not _.has_key('ano_sessao_sel')">
                             <dtml-call expr="REQUEST.set('ano_sessao_sel', DateTime().year())">
                         </dtml-if>
@@ -85,8 +85,8 @@
                 </select>
   </div>
    <div class="col-4 col-sm-3 mb-3">     
-    <label for="lst_dia_sessao">Dia</label>
-                <select class="custom-select" id="lst_dia_sessao" name="lst_dia_sessao" onChange="atualiza_dia_sessao(document.sessao_plen_form.lst_ano_sessao[document.sessao_plen_form.lst_ano_sessao.selectedIndex].value, document.sessao_plen_form.lst_mes_sessao[document.sessao_plen_form.lst_mes_sessao.selectedIndex].value,document.sessao_plen_form.lst_dia_sessao[document.sessao_plen_form.lst_dia_sessao.selectedIndex].value)">
+    <label class="form-label" for="lst_dia_sessao">Dia</label>
+                <select class="form-select" id="lst_dia_sessao" name="lst_dia_sessao" onChange="atualiza_dia_sessao(document.sessao_plen_form.lst_ano_sessao[document.sessao_plen_form.lst_ano_sessao.selectedIndex].value, document.sessao_plen_form.lst_mes_sessao[document.sessao_plen_form.lst_mes_sessao.selectedIndex].value,document.sessao_plen_form.lst_dia_sessao[document.sessao_plen_form.lst_dia_sessao.selectedIndex].value)">
                   <option value="-1">Todos</option>
                   <dtml-if expr="_.has_key('mes_sessao_sel')">
                     <dtml-in expr="zsql.sessao_plenaria_listar_dia_zsql(ano_sessao=ano_sessao_sel,mes_sessao=mes_sessao_sel, ind_audiencia='1')">
@@ -137,7 +137,7 @@
      </dtml-if sequence-start>
 
      <div class="card mb-4">
-       <div class="card-body text-left bg-light">
+       <div class="card-body text-start bg-light">
          <div class="col-12 col-md-12">
             <dtml-in expr="zsql.tipo_sessao_plenaria_obter_zsql(tip_sessao=tip_sessao,ind_audiencia='1')">
                <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Sessao Plenaria', 'Operador Ordem Dia'])">
@@ -187,7 +187,7 @@ inicio_sessao=<dtml-var dat_inicio_sessao missing>&num_legislatura=<dtml-var num
                  </dtml-let>
 
                  <dtml-if url_video>
-                    <a target="_blank" href="#" data-toggle="modal" data-target="#iFrameModal" data-title="Reprodução de Vídeo" data-src="<dtml-var url_video>" class="btn btn-link"><i class="fab fa-fw fa-youtube"></i>Vídeo</a>       
+                    <a target="_blank" href="#" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Reprodução de Vídeo" data-src="<dtml-var url_video>" class="btn btn-link"><i class="fab fa-fw fa-youtube"></i>Vídeo</a>       
                  </dtml-if>
                  
          </li>
@@ -214,4 +214,5 @@ inicio_sessao=<dtml-var dat_inicio_sessao missing>&num_legislatura=<dtml-var num
 
 </form>
 
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>

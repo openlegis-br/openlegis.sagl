@@ -1,4 +1,4 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
 <script>
 
@@ -48,8 +48,8 @@ function vinculo_norma_juridica_excluir() {
 <form name="vinculo_norma_juridica_form" method="post" action="vinculo_norma_juridica_salvar_proc">
    <table class="table table-borderless">
     <tr>
-       <td colspan="3"><label for="lst_tip_vinculo" class="required">Natureza do Relacionamento</label>
-                <select class="custom-select" id="lst_tip_vinculo" name="lst_tip_vinculo">
+       <td colspan="3"><label class="form-label" for="lst_tip_vinculo" class="required">Natureza do Relacionamento</label>
+                <select class="form-select" id="lst_tip_vinculo" name="lst_tip_vinculo">
                   <option value=""></option>
                     <dtml-in expr="zsql.tipo_vinculo_norma_obter_zsql(ind_excluido=0)">
                       <option
@@ -62,8 +62,8 @@ function vinculo_norma_juridica_excluir() {
       </td>
       </tr>
              <tr>
-                <td><label for="lst_tip_norma" class="required">Tipo Norma</label>
-              <select class="custom-select" id="lst_tip_norma" name="lst_tip_norma">
+                <td><label class="form-label" for="lst_tip_norma" class="required">Tipo Norma</label>
+              <select class="form-select" id="lst_tip_norma" name="lst_tip_norma">
                <option> 
                <dtml-in expr="zsql.tipo_norma_juridica_obter_zsql(ind_excluido=0)">
                   <option
@@ -75,15 +75,15 @@ function vinculo_norma_juridica_excluir() {
                </dtml-in>
               </select>
        </td>
-       <td><label for="txt_num_norma">Número</label>
+       <td><label class="form-label" for="txt_num_norma">Número</label>
               <input class="form-control number" type="number" id="txt_num_norma" name="txt_num_norma" value="<dtml-var num_norma missing null="">">
        </td>
-       <td><label for="txt_ano_norma">Ano</label>
+       <td><label class="form-label" for="txt_ano_norma">Ano</label>
              <input class="form-control year" type="number" id="txt_ano_norma" name="txt_ano_norma" value="<dtml-var ano_norma missing>">
        </td>
     </tr>
       <td colspan="3">
-        <label for="txa_txt_observacao_vinculo">Observações</label>
+        <label class="form-label" for="txa_txt_observacao_vinculo">Observações</label>
         <textarea class="form-control auto-resize" id="txa_txt_observacao_vinculo" name="txa_txt_observacao_vinculo" rows="1"><dtml-var txt_observacao_vinculo missing null=""></textarea>
       </td>
     <tr>
@@ -105,4 +105,5 @@ function vinculo_norma_juridica_excluir() {
 autosize(document.querySelectorAll('textarea'));
 </script>
 
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>

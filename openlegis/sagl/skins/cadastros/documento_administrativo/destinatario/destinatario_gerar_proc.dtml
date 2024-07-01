@@ -1,4 +1,4 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
 <script>
   function campos_criticar(form){
@@ -7,7 +7,7 @@
 
 </script>
 
-<legend>Gerar Lista de Destinatários</legend>
+<legend class="font-size-16">Gerar Lista de Destinatários</legend>
 
   <form name="destinatario_gerar" method="post" action="destinatario_salvar_proc">
 
@@ -18,7 +18,7 @@
 	    <b>Resultado da Pesquisa: </b><dtml-var sequence-length> registros(s) encontrado(s).
 	   </p>
          <table class="table">
-          <thead class="table-secondary">
+          <thead>
             <tr>
               <th width="40%">Nome</th>
               <th width="30%">Tipo</th>
@@ -42,7 +42,7 @@
         <dtml-if sequence-end>
           <tr>
           </table>
-           <div class="text-left">
+           <div class="text-start">
             <input class="btn btn-primary" type="button" name="btn_destinatario_gerar" value="Confirmar Geração" onClick="campos_criticar(document.destinatario_gerar)" />
            </div>
         </dtml-if sequence-end>
@@ -54,4 +54,5 @@
       <input type="hidden" name="modal" value="1" />      
   </form>
 
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>

@@ -1,4 +1,4 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
 <script>
 
@@ -43,7 +43,7 @@
 <div class="tab-content bg-white">
   <div class="tab-pane p-3 border fade show active">
 
-<legend>Mesa da <dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao"></legend>
+<legend class="font-size-16">Mesa da <dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao"></legend>
 
 <form name="composicao_mesa_sessao_form" method="post" action="composicao_mesa_sessao_incluir_proc">
   <input type="hidden" name="hdn_cod_sessao_leg" value="<dtml-var cod_sessao_leg>" />
@@ -54,8 +54,8 @@
   
   <div class="row">
       <div class="form-group col-md-6">
-           <label for="lst_composicao_mesa_sessao">Membros Designados</label>
-           <select class="custom-select mb-3" id="lst_composicao_mesa_sessao" name="lst_composicao_mesa_sessao" size="6"> 
+           <label class="form-label" for="lst_composicao_mesa_sessao">Membros Designados</label>
+           <select class="form-select mb-3" id="lst_composicao_mesa_sessao" name="lst_composicao_mesa_sessao" size="6"> 
               <dtml-in expr="zsql.composicao_mesa_sessao_obter_zsql(cod_sessao_plen=cod_sessao_plen,ind_excluido=0)">
                  <dtml-in expr="zsql.parlamentar_obter_zsql(cod_parlamentar=cod_parlamentar, ind_excluido=0)">
                     <dtml-in expr="zsql.cargo_mesa_obter_zsql(cod_cargo=cod_cargo, ind_excluido=0)">
@@ -76,8 +76,8 @@
            <button class="btn btn-danger mb-3" type="button" name="btn_excluir" onclick="javascript:composicao_mesa_sessao_excluir(lst_composicao_mesa_sessao,<dtml-var cod_sessao_leg>,<dtml-var cod_sessao_plen>)">Excluir</button>
         </div>
         <div class="form-group col-md-6">
-             <label for="lst_cod_parlamentar"">Parlamentar</label>
-             <select class="custom-select mb-3" id="lst_cod_parlamentar" name="lst_cod_parlamentar">
+             <label class="form-label" for="lst_cod_parlamentar"">Parlamentar</label>
+             <select class="form-select mb-3" id="lst_cod_parlamentar" name="lst_cod_parlamentar">
                <dtml-in expr="zsql.autores_obter_zsql(txt_dat_apresentacao=dat_sessao)">
                   <option
                      <dtml-if expr=" (not _.has_key('prim_sel2') ) or (_.has_key('cod_parlamentar_sel') and cod_parlamentar == cod_parlamentar_sel)">
@@ -90,8 +90,8 @@
                    </option>
                </dtml-in>
              </select>
-             <label for="lst_cod_cargo"">Cargo na Mesa</label>
-             <select class="custom-select mb-3" id="lst_cod_cargo" name="lst_cod_cargo">
+             <label class="form-label" for="lst_cod_cargo"">Cargo na Mesa</label>
+             <select class="form-select mb-3" id="lst_cod_cargo" name="lst_cod_cargo">
                <dtml-in expr="zsql.comp_mesa_sessao_cargo_obter_zsql(cod_sessao_plen=cod_sessao_plen,ind_excluido=0)">
                   <option
                    <dtml-if expr=" not _.has_key('prim_sel3') or (_.has_key('des_cargo_sel') and des_cargo == des_cargo_sel)">
@@ -112,4 +112,5 @@
 </div>
 </div>
 
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>

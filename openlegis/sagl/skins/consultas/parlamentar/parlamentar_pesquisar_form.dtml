@@ -1,8 +1,8 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
   <script >
       function campos_criticar(form) {
         if (form.lst_parlamentar.value == ""){
-           $.showAlert({title: "Mensagem do Sistema", body: "Selecione um Vereador!"});        
+           bootstrap.showModal({title: "Mensagem do Sistema", body: "Selecione um Vereador!"});        
            form.txt_parlamentar.focus();
            return false;        
         }    
@@ -12,9 +12,9 @@
 
 <form name="parlamentar_pesquisar_form">
 
- <div class="form-row">
+ <div class="row">
    <div class="col-12 mb-3">
-     <label for="lst_parlamentar">Nome do Vereador</label>
+     <label class="form-label" for="lst_parlamentar">Nome do Vereador</label>
         <select id="lst_parlamentar" name="lst_parlamentar" class="form-control selectpicker show-tick" title="Selecione" data-live-search="true">
          <option></option>
           <dtml-in expr="zsql.parlamentar_obter_zsql(ind_excluido=0)">
@@ -40,4 +40,5 @@ if (campos_criticar(document.parlamentar_pesquisar_form)) {parent.location.href 
 
 </form>
 
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>

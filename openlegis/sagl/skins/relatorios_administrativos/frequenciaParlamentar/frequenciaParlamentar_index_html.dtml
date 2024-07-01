@@ -1,4 +1,4 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
 <script>
 function campos_criticar(form){
@@ -12,7 +12,7 @@ function campos_criticar(form){
     } 
 </script>
 
-<h1 class="firstHeading">Frequência nas Sessões</h1> 
+<h1 class="firstHeading font-size-18">Frequência nas Sessões</h1> 
 
 <dtml-if expr="not _.has_key('impressao') or (_.has_key('impressao') and not _.has_key('dt_inicio') and not _.has_key('dt_fim'))">
 
@@ -24,9 +24,9 @@ function campos_criticar(form){
 
   <div class="row">
     <div class="col-12 col-lg-6">
-       <label for="lst_ano_sessao" class="required">Selecione o Ano</label>
+       <label class="form-label" for="lst_ano_sessao" class="required">Selecione o Ano</label>
            <div class="input-group">
-             <select class="custom-select" id="lst_ano_sessao" name="lst_ano_sessao">
+             <select class="form-select" id="lst_ano_sessao" name="lst_ano_sessao">
                  <option value ="0"></option>
                  <dtml-in expr="listar_ano_zsql()">
                      <option value="<dtml-var ano_sessao missing>" 
@@ -51,4 +51,5 @@ function campos_criticar(form){
   </form>
 </dtml-if>
 
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>

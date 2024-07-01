@@ -1,4 +1,4 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
 <script src="<dtml-var portal_url>/javascript/data_validar.js"></script>
 <script src="<dtml-var portal_url>/js/moment.min.js""></script>
@@ -11,25 +11,25 @@
       var form = document.auditoria_form;
 
       if (form.dat_inicial.value == "") {
-         $.showAlert({title: "Mensagem do Sistema", body: "A data inicial deve ser preenchida!"});
+         bootstrap.showModal({title: "Mensagem do Sistema", body: "A data inicial deve ser preenchida!"});
          form.dat_inicial.focus();
          return false;
       }
 
       if (form.dat_final.value == "") {
-         $.showAlert({title: "Mensagem do Sistema", body: "A data final deve ser preenchida!"});
+         bootstrap.showModal({title: "Mensagem do Sistema", body: "A data final deve ser preenchida!"});
          form.dat_final.focus();
          return false;
       }
 
       if (form.dat_inicial.value!="" && !IsValidDate(form.dat_inicial.value)){
-         $.showAlert({title: "Mensagem do Sistema", body: "Digite uma data inicial válida!"});      
+         bootstrap.showModal({title: "Mensagem do Sistema", body: "Digite uma data inicial válida!"});      
          form.dat_inicial.focus();
          return false;
       }
 
       if (form.dat_final.value!="" && !IsValidDate(form.dat_final.value)){
-         $.showAlert({title: "Mensagem do Sistema", body: "Digite uma data final válida!"});      
+         bootstrap.showModal({title: "Mensagem do Sistema", body: "Digite uma data final válida!"});      
          form.dat_final.focus();
          return false;
       }
@@ -38,7 +38,7 @@
       var dat_final = form.dat_final.value.substring(6,10) + form.dat_final.value.substring(3,5) + form.dat_final.value.substring(0,2);
 
       if (dat_final < dat_inicial) {
-         $.showAlert({title: "Mensagem do Sistema", body: "A data final deve ser igual ou posterior à data inicial!"});            
+         bootstrap.showModal({title: "Mensagem do Sistema", body: "A data final deve ser igual ou posterior à data inicial!"});            
            form.dat_final.focus();
            return false;
       }
@@ -121,10 +121,10 @@ $(document).ready(function() {
 
 <div class="row mb-2">
   <div class="col-12 col-lg-8">
-    <h1 class="firstHeading">Logs de Auditoria</h1>
+    <h1 class="firstHeading font-size-18">Logs de Auditoria</h1>
   </div>
-  <div class="col-12 col-lg-4 text-lg-right">
-    <button type="button" class="btn btn-sm btn-white d-print-none" data-toggle="modal" data-target="#iFrameModal" data-title="Manutenção de Logs" data-src="gerenciar_logs?modal=1"><i class="fa fa-fw fa-wrench"></i> Manutenção</button>    
+  <div class="col-12 col-lg-4 text-end">
+    <button type="button" class="btn btn-sm btn-white d-print-none" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Manutenção de Logs" data-src="gerenciar_logs?modal=1"><i class="fa fa-fw fa-wrench"></i> Manutenção</button>    
   </div>
 </div>
 
@@ -132,21 +132,21 @@ $(document).ready(function() {
 
 <form class="d-print-none mb-4" method="post" id="auditoria_form" name="auditoria_form" action="auditoria_index_html">
 
-   <div class="form-row">
+   <div class="row">
      <div class="col-6 col-md-3 mb-3">
-            <label for="dat_inicial" class="required">Data Inicial</label>
+            <label class="form-label" for="dat_inicial" class="required">Data Inicial</label>
             <input class="form-control date" type="text" name="dat_inicial" id="dat_inicial" value="<dtml-var dat_inicial missing>" required />
      </div>
      <div class="col-6 col-md-3 mb-3">
-           <label for="dat_final" class="required">Data Final</label>
+           <label class="form-label" for="dat_final" class="required">Data Final</label>
            <input class="form-control date" type="text" name="dat_final" id="dat_final" value="<dtml-var dat_final missing>" required />
      </div>
      <div class="col-6 col-md-3 mb-3">
-           <label for="usuario">Usuário</label>
+           <label class="form-label" for="usuario">Usuário</label>
            <input class="form-control" type="text" name="usuario" id="usuario" value="<dtml-var usuario missing>" />
      </div>
      <div class="col-6 col-md-3 mb-3">
-           <label for="IP">Endereço IP</label>
+           <label class="form-label" for="IP">Endereço IP</label>
            <input class="form-control" type="text" name="IP" id="IP" value="<dtml-var IP missing>" />
      </div>          
     <script>
@@ -172,22 +172,22 @@ $(document).ready(function() {
         });
     </script>
   </div>
-  <div class="form-row">
+  <div class="row">
      <div class="col-6 col-md-3 mb-3">
-         <label for="cod_registro">ID do Registro</label>
+         <label class="form-label" for="cod_registro">ID do Registro</label>
          <input class="form-control" type="text" name="cod_registro" id="cod_registro" value="<dtml-var cod_registro missing>" />
      </div>
      <div class="col-6 col-md-3 mb-3">
-         <label for="modulo">Módulo</label>
+         <label class="form-label" for="modulo">Módulo</label>
          <input class="form-control" type="text" name="modulo" id="modulo" value="<dtml-var modulo missing>" />
      </div>
      <div class="col-12 col-md-6 mb-3">
-         <label for="metodo">Método</label>
+         <label class="form-label" for="metodo">Método</label>
          <input class="form-control" type="text" name="metodo" id="metodo" value="<dtml-var metodo missing>" />
      </div>          
   </div>  
 
-  <div class="text-left">
+  <div class="text-start">
     <input class="btn btn-primary" type="button" name="button" value="Pesquisar" onClick="return campos_criticar(form)" />
   </div>
 
@@ -200,7 +200,7 @@ $(document).ready(function() {
    <dtml-if sequence-start>
     <div class="table-responsive">
     <table id="jdTable" class="table table-striped display mt-4">
-      <thead class="table-secondary"> 
+      <thead> 
         <tr>
           <th width="20%">
               Data
@@ -246,7 +246,7 @@ $(document).ready(function() {
       </td>
       <td>
          <dtml-if dados>
-            <i class="fas fa-info-circle d-print-none"  data-toggle="tooltip" data-placement="left" title="<dtml-var dados html_quote>"></i>
+            <i class="fas fa-info-circle d-print-none"  data-bs-toggle="tooltip" data-placement="left" title="<dtml-var dados html_quote>"></i>
          </dtml-if> 
       </td>               
     </tr>   
@@ -267,4 +267,5 @@ $(document).ready(function() {
  
 </dtml-if>
 
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>

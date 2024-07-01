@@ -1,6 +1,6 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
- <h1 class="firstHeading">Incorporar Matérias do Protocolo</h1>
+ <h1 class="firstHeading font-size-18">Incorporar Matérias do Protocolo</h1>
 
  <dtml-call "REQUEST.set('existe_seq_anterior', 0)">
  <dtml-call "REQUEST.set('existe_seq_posterior', 0)">
@@ -20,7 +20,7 @@
     <dtml-if sequence-start>
        <b>Resultado: <dtml-var sequence-length> protocolo<dtml-if expr="_['sequence-length'] > 1">s</dtml-if> encontrado<dtml-if expr="_['sequence-length'] > 1">s</dtml-if></b>
     <table class="table">
-      <thead class="table-secondary">
+      <thead>
        <tr>
          <th width="10%"><b>Protocolo</b></th>
          <th width="17%"><b>Data | Horário</b></th>
@@ -67,4 +67,5 @@
 
  <input class="btn btn-secondary" type="button" value="Voltar" onClick="history.back()">
 
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>

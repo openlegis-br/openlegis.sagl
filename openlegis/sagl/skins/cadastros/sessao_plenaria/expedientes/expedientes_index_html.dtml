@@ -1,4 +1,4 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
   <dtml-in expr="zsql.tipo_expediente_obter_zsql(ind_excluido=0)">
      <dtml-if expr="'Executivo' in nom_expediente">
@@ -41,7 +41,7 @@
 <div class="tab-content bg-white">
   <div class="tab-pane p-3 border fade show active">
 
-<legend>Expedientes Diversos</legend>
+<legend class="font-size-16">Expedientes Diversos</legend>
 
 <form name="expediente_form" method="post" action="expedientes_salvar_proc">
   <dtml-if expr="_.has_key('ind_audiencia')">
@@ -73,7 +73,7 @@
        </div>         
     </dtml-if>
   </dtml-in>
-  <div clas="text-left">
+  <div clas="text-start">
      <input class="btn btn-primary" type="submit" name="button" value="Salvar" />
   </div>
 </form>
@@ -104,4 +104,5 @@ tinymce.init({
 });
 </script>
 
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>

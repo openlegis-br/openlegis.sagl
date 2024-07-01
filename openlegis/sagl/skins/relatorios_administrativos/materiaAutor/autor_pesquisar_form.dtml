@@ -51,12 +51,12 @@
 
 <body class="fadeIn">
 
-<h1 class="firstHeading">Pesquisar Autores</h1> 
+<h1 class="firstHeading font-size-18">Pesquisar Autores</h1> 
 
 <form class="pf-form" name="autor_pesquisar_form" action="autor_pesquisar_form" onsubmit="return false;">
  <fieldset>
     <div class="pf-element">
-     <label for="txt_autor">
+     <label class="form-label" for="txt_autor">
       <span class="pf-label">Nome do autor</span>
       <span class="pf-note">Informe o nome ou apelido do autor</span>
      </label>
@@ -67,7 +67,7 @@
     </div>
    <dtml-if expr="REQUEST.has_key('txt_autor')">
     <div class="pf-element">
-     <label for="lst_autor"><span class="pf-label">Selecione o autor desejado</span>
+     <label class="form-label" for="lst_autor"><span class="pf-label">Selecione o autor desejado</span>
        <select class="pf-field" name="lst_autor" size="10" style="max-width: 480px; width: 100%;">
        <dtml-in expr="zsql.parlamentar_obter_zsql(nom_parlamentar_match=txt_autor)">
          <dtml-in expr="zsql.autor_obter_zsql(cod_parlamentar=cod_parlamentar)">

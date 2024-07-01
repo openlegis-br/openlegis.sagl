@@ -24,7 +24,9 @@ for item in context.zsql.autores_obter_zsql(txt_dat_apresentacao=data_atual):
     dic = {}
     dic['cod_parlamentar'] = item.cod_parlamentar
     dic['nom_parlamentar'] = item.nom_parlamentar
-    dic['nom_completo'] = item.nom_completo           
+    dic['nom_completo'] = item.nom_completo
+    for parlamentar in context.zsql.parlamentar_obter_zsql(cod_parlamentar = item.cod_parlamentar):
+        dic['sex_parlamentar'] = parlamentar.sex_parlamentar           
     lista_exercicio.append(dic)
     exercicio.append(int(item.cod_parlamentar))
 
@@ -55,7 +57,8 @@ for item in titulares_inativos:
        dic = {}
        dic['cod_parlamentar'] = parlamentar.cod_parlamentar
        dic['nom_parlamentar'] = parlamentar.nom_parlamentar
-       dic['nom_completo'] = parlamentar.nom_completo       
+       dic['nom_completo'] = parlamentar.nom_completo  
+       dic['sex_parlamentar'] = parlamentar.sex_parlamentar           
        inativos.append(dic)
 
 suplentes = []
@@ -64,7 +67,8 @@ for item in suplentes_inativos:
        dic = {}
        dic['cod_parlamentar'] = parlamentar.cod_parlamentar
        dic['nom_parlamentar'] = parlamentar.nom_parlamentar
-       dic['nom_completo'] = parlamentar.nom_completo              
+       dic['nom_completo'] = parlamentar.nom_completo
+       dic['sex_parlamentar'] = parlamentar.sex_parlamentar           
        suplentes.append(dic)
 
 if lista == 'ativos':

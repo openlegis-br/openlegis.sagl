@@ -1,4 +1,4 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
 <script src="<dtml-var portal_url>/js/jquery.jeditable.js"></script>
 
@@ -77,11 +77,11 @@ $(document).ready(function () {
 
 </script>
 
-<h1 class="firstHeading">Modelos Diversos</h1> 
+<h1 class="firstHeading font-size-18">Modelos Diversos</h1> 
 
-  <legend>Documento Acessórios</legend>
+  <legend class="font-size-16">Documento Acessórios</legend>
   <table class="table mb-4">
-     <thead class="table-secondary">    
+     <thead>    
       <tr>
          <th>Nome do Modelo</th>
          <th width="20%">Ação</th>
@@ -103,9 +103,9 @@ $(document).ready(function () {
       </dtml-with>
   </table>
 
-  <legend>Emendas</legend>
+  <legend class="font-size-16">Emendas</legend>
   <table class="table mb-4">
-     <thead class="table-secondary">    
+     <thead>    
       <tr>
          <th>Nome do Modelo</th>
          <th width="20%">Ação</th>
@@ -127,9 +127,9 @@ $(document).ready(function () {
       </dtml-with>
   </table>
 
-  <legend>Pareceres</legend>
+  <legend class="font-size-16">Pareceres</legend>
   <table class="table mb-4">
-     <thead class="table-secondary">    
+     <thead>    
       <tr>
          <th>Nome do Modelo</th>
          <th width="20%">Ação</th>
@@ -151,9 +151,9 @@ $(document).ready(function () {
       </dtml-with>
   </table>
 
-  <legend>Substitutivos</legend>
+  <legend class="font-size-16">Substitutivos</legend>
   <table class="table">
-     <thead class="table-secondary">    
+     <thead>    
       <tr>
          <th>Nome do Modelo</th>
          <th width="20%">Ação</th>
@@ -175,9 +175,9 @@ $(document).ready(function () {
       </dtml-with>
   </table>
 
- <legend>Inclusão de Modelos</legend>
+ <legend class="font-size-16">Inclusão de Modelos</legend>
  <form name="modelo_form" method="post" action="modelo_incluir_proc" enctype="multipart/form-data">
- <div class="form-row">
+ <div class="row">
     <div class="col-12 mb-3">
       <label class="required d-block">Tipo de Modelo</label>
       <dtml-in expr="[('doc_acessorio','Documento Acessório'), ('emenda','Emenda'), ('parecer','Parecer'), ('substitutivo','Substitutiivo')]">
@@ -188,13 +188,13 @@ $(document).ready(function () {
       </dtml-in>    
     </div> 
  </div>
- <div class="form-row">
+ <div class="row">
    <div class="col-6 mb-3"> 
-     <label for="txt_title" class="required">Nome do Modelo</label>   
+     <label class="form-label" for="txt_title" class="required">Nome do Modelo</label>   
      <input class="form-control" type="text" id="txt_title" name="txt_title" maxlength="35"/>
    </div>
    <div class="col-6 mb-3">
-      <label for="file_nom_arquivo">Arquivo ODT</label> 
+      <label class="form-label" for="file_nom_arquivo">Arquivo ODT</label> 
       <div class="input-group">                   
         <div class="custom-file">
           <input type="file" class="custom-file-input" id="file_nom_arquivo" name="file_nom_arquivo" accept="application/vnd.oasis.opendocument.text">
@@ -211,4 +211,5 @@ $(document).ready(function () {
  </div>
  </form>
 
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>

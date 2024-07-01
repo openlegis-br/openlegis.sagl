@@ -1,12 +1,12 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
 <script>
   $(document).ready(function(){
 
-    $('[data-toggle="popover"]').popover('show');
+    $('[data-bs-toggle="popover"]').popover('show');
 
-    $('[data-toggle="popover"]').on('click', function () {
-        $('[data-toggle="popover"]').popover('destroy');
+    $('[data-bs-toggle="popover"]').on('click', function () {
+        $('[data-bs-toggle="popover"]').popover('destroy');
     });
 
   });
@@ -24,7 +24,7 @@
     <div class="alert alert-danger alert-dismissible fade show" role="alert">
         <h5>Atenção!</h5>
         <p class="mb-0">O documento já foi assinado por este usuário.</p>
-        <button type="button" class="close" data-dismiss="alert" aria-label="Fechar">
+        <button type="button" class="close" data-bs-dismiss="alert" aria-label="Fechar">
           <span aria-hidden="true">&times;</span>
         </button>
     </div> 
@@ -37,10 +37,10 @@
 <dtml-else>
   <dtml-unless expr="_.has_key('txt_qtde_assinaturas')">
   <form class="d-print-none" method="post" id="qtde_assinaturas" name="qtde_assinaturas" action="pades-signature_html">  
-    <div class="form-row">
+    <div class="row">
      <div class="col-4 mb-3">
-       <label for="txt_qtde_assinaturas">Quantidade de Signatários</label>
-       <input class="form-control number" type="number" id="txt_qtde_assinaturas" name="txt_qtde_assinaturas" value="4" min="1" required data-toggle="popover" data-trigger="focus" title="Informação importante:" data-content="Informando até 3 (três) signatários, as assinaturas digitais serão exibidas na última página do documento, limitando a visualização de apenas três assinaturas. Informando 4 (quatro) signatários ou mais, uma nova página em branco será adicionada ao final do documento para visibilidade de todas as assinaturas."/>
+       <label class="form-label" for="txt_qtde_assinaturas">Quantidade de Signatários</label>
+       <input class="form-control number" type="number" id="txt_qtde_assinaturas" name="txt_qtde_assinaturas" value="4" min="1" required data-bs-toggle="popover" data-trigger="focus" title="Informação importante:" data-content="Informando até 3 (três) signatários, as assinaturas digitais serão exibidas na última página do documento, limitando a visualização de apenas três assinaturas. Informando 4 (quatro) signatários ou mais, uma nova página em branco será adicionada ao final do documento para visibilidade de todas as assinaturas."/>
      </div>
     </div>
     <input class="btn btn-primary" type="submit" name="button" value="Prosseguir" />
@@ -69,13 +69,13 @@
     <input type="hidden" id="tipo_doc" name="tipo_doc" value="<dtml-var tipo_doc>">
     <input type="hidden" id="modal" name="modal" value="1" />
     <input type="hidden" id="txt_qtde_assinaturas" name="txt_qtde_assinaturas" value="<dtml-var txt_qtde_assinaturas>">  
-    <div class="form-row">
+    <div class="row">
        <div class="col-12 mb-3">
-         <label for="certificateSelect">Selecione um Certificado Digital</label>
-         <select class="custom-select"  id="certificateSelect" class="form-control"></select>
+         <label class="form-label" for="certificateSelect">Selecione um Certificado Digital</label>
+         <select class="form-select"  id="certificateSelect" class="form-control"></select>
        </div>
     </div>
-    <div class="form-row">
+    <div class="row">
        <div class="col-10 mb-3">
          <button id="signButton" type="button" class="btn btn-primary"><i class="fas fa-file-signature"></i> Assinar PDF</button>
          <button id="refreshButton" type="button" class="btn btn-secondary"><i class="fas fa-sync"></i> Recarregar Certificados</button>
@@ -84,4 +84,5 @@
   </form>
   <script src="static/js/lacuna-web-pki-client.js"></script>
 </dtml-if>
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>

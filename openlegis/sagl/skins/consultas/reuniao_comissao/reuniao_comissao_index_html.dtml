@@ -1,4 +1,4 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
 <script>
 
@@ -10,26 +10,26 @@
 
 <div class="row mb-2">
   <div class="col-12 col-md-8 align-self-center">
-     <h1 class="firstHeading">Reuniões das Comissões</h1> 
+     <h1 class="firstHeading font-size-18">Reuniões das Comissões</h1> 
   </div>
-  <div class="col-12 col-md-4 text-left text-md-right">
+  <div class="col-12 col-md-4 text-start text-end">
      <dtml-if cod_comissao_sel>
        <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Comissao']) or pysc.permissao_comissao_pysc(cod_comissao=cod_comissao_sel)=='1'">
          <dtml-in expr="zsql.comissao_obter_zsql(cod_comissao=cod_comissao_sel,ind_excluido=0)">
             <dtml-call expr="REQUEST.set('nom_comissao_sel', nom_comissao)">
          </dtml-in>
-         <button type="button" class="btn btn-sm btn-primary d-print-none mt-3" data-toggle="modal" data-target="#iFrameModal" data-title="Cadastro de Reunião - <dtml-var nom_comissao_sel>" data-src="<dtml-var portal_url>/cadastros/comissao/reuniao/reuniao_comissao_form?cod_comissao=<dtml-var cod_comissao_sel>&modal=1">Incluir Reunião</button>
+         <button type="button" class="btn btn-sm btn-primary d-print-none mt-3" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Cadastro de Reunião - <dtml-var nom_comissao_sel>" data-src="<dtml-var portal_url>/cadastros/comissao/reuniao/reuniao_comissao_form?cod_comissao=<dtml-var cod_comissao_sel>&modal=1">Incluir Reunião</button>
        </dtml-if>
     </dtml-if>  
   </div>
 </div>
-<div class="form-row">
+<div class="row">
   <div class="col-4 col-sm-4 col-md-2 mt-1 mb-4">
    <dtml-if expr="not _.has_key('ano_reuniao_sel')">
       <dtml-call expr="REQUEST.set('ano_reuniao_sel', DateTime().year())">
    </dtml-if>
-    <label for="lst_ano_reuniao">Ano</label>
-    <select class="custom-select" id="lst_ano_reuniao" name="lst_ano_reuniao" onChange="atualiza_filtro(lst_ano_reuniao[lst_ano_reuniao.selectedIndex].value, lst_comissao[lst_comissao.selectedIndex].value, lst_tipo[lst_tipo.selectedIndex].value, lst_situacao[lst_situacao.selectedIndex].value)">
+    <label class="form-label" for="lst_ano_reuniao">Ano</label>
+    <select class="form-select" id="lst_ano_reuniao" name="lst_ano_reuniao" onChange="atualiza_filtro(lst_ano_reuniao[lst_ano_reuniao.selectedIndex].value, lst_comissao[lst_comissao.selectedIndex].value, lst_tipo[lst_tipo.selectedIndex].value, lst_situacao[lst_situacao.selectedIndex].value)">
       <option value="">Todos</option>    
       <dtml-in expr="zsql.ano_reuniao_comissao_obter_zsql()">
         <option value="<dtml-var ano_reuniao missing>" 
@@ -48,8 +48,8 @@
    <dtml-if expr="not _.has_key('cod_comissao_sel')">
       <dtml-call "REQUEST.set('cod_comissao_sel', '')">
    </dtml-if>
-     <label for="lst_comissao">Comissão</label>
-     <select class="custom-select" id="lst_comissao" name="lst_comissao" onChange="atualiza_filtro(lst_ano_reuniao[lst_ano_reuniao.selectedIndex].value, lst_comissao[lst_comissao.selectedIndex].value, lst_tipo[lst_tipo.selectedIndex].value, lst_situacao[lst_situacao.selectedIndex].value)">
+     <label class="form-label" for="lst_comissao">Comissão</label>
+     <select class="form-select" id="lst_comissao" name="lst_comissao" onChange="atualiza_filtro(lst_ano_reuniao[lst_ano_reuniao.selectedIndex].value, lst_comissao[lst_comissao.selectedIndex].value, lst_tipo[lst_tipo.selectedIndex].value, lst_situacao[lst_situacao.selectedIndex].value)">
          <option value="">Todas</option>
          <dtml-in expr="comissoes_carregar_pysc(svalue=ano_reuniao_sel)" mapping>
              <option value="<dtml-var cod_comissao missing>" 
@@ -66,8 +66,8 @@
    <dtml-if expr="not _.has_key('tipo_sel')">
       <dtml-call expr="REQUEST.set('tipo_sel', '')">
    </dtml-if>   
-    <label for="lst_tipo">Tipo de Reunião</label>
-    <select class="custom-select" id="lst_tipo" name="lst_tipo" onChange="atualiza_filtro(lst_ano_reuniao[lst_ano_reuniao.selectedIndex].value, lst_comissao[lst_comissao.selectedIndex].value, lst_tipo[lst_tipo.selectedIndex].value, lst_situacao[lst_situacao.selectedIndex].value)">
+    <label class="form-label" for="lst_tipo">Tipo de Reunião</label>
+    <select class="form-select" id="lst_tipo" name="lst_tipo" onChange="atualiza_filtro(lst_ano_reuniao[lst_ano_reuniao.selectedIndex].value, lst_comissao[lst_comissao.selectedIndex].value, lst_tipo[lst_tipo.selectedIndex].value, lst_situacao[lst_situacao.selectedIndex].value)">
       <option value="">Todos</option>          
       <option value="Ordinária"
           <dtml-if expr="(_.has_key('tipo_sel') and str(tipo_sel)=='Ordinária')">
@@ -83,8 +83,8 @@
    <dtml-if expr="not _.has_key('status_sel')">
       <dtml-call expr="REQUEST.set('status_sel', '')">
    </dtml-if>   
-    <label for="lst_situacao">Situação</label>
-    <select class="custom-select" id="lst_situacao" name="lst_situacao" onChange="atualiza_filtro(lst_ano_reuniao[lst_ano_reuniao.selectedIndex].value, lst_comissao[lst_comissao.selectedIndex].value, lst_tipo[lst_tipo.selectedIndex].value, lst_situacao[lst_situacao.selectedIndex].value)">
+    <label class="form-label" for="lst_situacao">Situação</label>
+    <select class="form-select" id="lst_situacao" name="lst_situacao" onChange="atualiza_filtro(lst_ano_reuniao[lst_ano_reuniao.selectedIndex].value, lst_comissao[lst_comissao.selectedIndex].value, lst_tipo[lst_tipo.selectedIndex].value, lst_situacao[lst_situacao.selectedIndex].value)">
       <option value="">Qualquer</option> 
       <option value="Agendadas"
           <dtml-if expr="(_.has_key('status_sel') and str(status_sel)=='Agendadas')">
@@ -139,7 +139,7 @@
      <div class="row">
        <div class="col-12">
          <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Comissao']) or pysc.permissao_comissao_pysc(cod_comissao=cod_comissao)=='1'">
-             <a href="#" data-toggle="modal" data-target="#iFrameModal" data-title="Edição de Reunião - <dtml-in expr="zsql.comissao_obter_zsql(cod_comissao=cod_comissao)"><dtml-var nom_comissao></dtml-in>" data-src="<dtml-var portal_url>/cadastros/comissao/reuniao/reuniao_comissao_mostrar_proc?cod_reuniao=<dtml-var cod_reuniao>&modal=1"">
+             <a href="#" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Edição de Reunião - <dtml-in expr="zsql.comissao_obter_zsql(cod_comissao=cod_comissao)"><dtml-var nom_comissao></dtml-in>" data-src="<dtml-var portal_url>/cadastros/comissao/reuniao/reuniao_comissao_mostrar_proc?cod_reuniao=<dtml-var cod_reuniao>&modal=1"">
                 <p class="h5 card-title "><dtml-var num_reuniao>ª Reunião <dtml-var des_tipo_reuniao> </p></a>
                 <p><dtml-in expr="zsql.comissao_obter_zsql(cod_comissao=cod_comissao)"><dtml-var nom_comissao></dtml-in></p>             
                 <p class=""><i class="fa fa-calendar-alt"></i> <dtml-var dat_inicio_reuniao><dtml-if hr_inicio_reuniao>, às <dtml-var hr_inicio_reuniao missing null=""></p></dtml-if>
@@ -164,7 +164,7 @@
                   </dtml-if>
                 </dtml-let>
                  <dtml-if url_video>
-                    <a target="_blank" href="#" data-toggle="modal" data-target="#iFrameModal" data-title="Reprodução de Vídeo" data-src="<dtml-var url_video>" class="btn btn-sm btn-secondary"><i class="fab fa-fw fa-youtube"></i> Vídeo</a>       
+                    <a target="_blank" href="#" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Reprodução de Vídeo" data-src="<dtml-var url_video>" class="btn btn-sm btn-secondary"><i class="fab fa-fw fa-youtube"></i> Vídeo</a>       
                  </dtml-if>                
    </p>
        </div>
@@ -192,4 +192,5 @@
 </dtml-in>
 </form>
 
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>

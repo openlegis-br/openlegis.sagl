@@ -1,4 +1,4 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
 <script src="<dtml-var portal_url>/js/moment.min.js""></script>
 <script src="<dtml-var portal_url>/js/datetime-moment.js"></script>
@@ -72,13 +72,13 @@ $(document).ready(function() {
 });
 </script>
 
-<h1 class="firstHeading">Tramitações Vencendo em <dtml-var expr="ZopeTime().strftime('%d/%m/%Y')"></h1>
+<h1 class="firstHeading font-size-18">Tramitações Vencendo em <dtml-var expr="ZopeTime().strftime('%d/%m/%Y')"></h1>
 
     <dtml-in expr="zsql.tramitacao_prazo_vincendo_obter_zsql()">
         <dtml-if sequence-start>
         <div class="table-responsive">
         <table class="table" id="jdTable" class="tablesorter">
-         <thead class="table-secondary">
+         <thead>
             <tr>
                 <th>Matéria</th>
                 <th>Localização</th>
@@ -121,4 +121,5 @@ $(document).ready(function() {
   <dtml-else>
     <p>Nenhuma tramitação vencendo hoje.</p>
 </dtml-in>
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>

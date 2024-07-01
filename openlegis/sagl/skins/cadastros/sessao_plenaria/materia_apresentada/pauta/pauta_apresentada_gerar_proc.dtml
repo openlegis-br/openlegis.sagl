@@ -1,4 +1,4 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
 <script>
   function campos_criticar(form){
@@ -6,7 +6,7 @@
   }
 </script>
 
-<h1 class="firstHeading">Matérias Apresentadas</h1>
+<h1 class="firstHeading font-size-18">Matérias Apresentadas</h1>
 
 <form name="pauta_apresentadas_gerar" method="post" action="pauta_salvar_pysc">
 
@@ -20,7 +20,7 @@
 	</p>
         <div class="table-responsive">
         <table class="table">
-          <thead class="table-secondary">
+          <thead>
             <tr>
               <th width="5%">Item</th>
               <th>Matéria</th>
@@ -44,7 +44,7 @@
             </tr> 
      <dtml-if sequence-end>
           </table>
-          <div class="text-left">
+          <div class="text-start">
             <input class="btn btn-primary" type="button" name="btn_pauta_apresentadas_gerar" value="Gerar Lista" onClick="campos_criticar(document.pauta_apresentadas_gerar)" />
             <a class="btn btn-primary" href="#" onclick="window.history.go(-1)"><i class="fa fa-fw fa-undo"></i> Voltar</a>             
            </div>
@@ -64,4 +64,5 @@
 
   </form>
 
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>

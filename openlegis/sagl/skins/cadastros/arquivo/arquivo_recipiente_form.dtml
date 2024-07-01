@@ -1,4 +1,4 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
 <script src="<dtml-var portal_url>/javascript/data_validar.js"></script>
 
@@ -80,9 +80,9 @@
 
  <div class="row mb-2">
       <div class="col-12 col-lg-6 align-self-center">
-        <h1 class="firstHeading">Recipiente de Arquivamento</h1>
+        <h1 class="firstHeading font-size-18">Recipiente de Arquivamento</h1>
       </div>
-      <div class="col-12 col-lg-6 text-left text-md-right">
+      <div class="col-12 col-lg-6 text-start text-end">
          <div class="btn-group d-print-none ">
             <a class="btn btn-primary btn-sm d-print-none" href="<dtml-var portal_url>/cadastros/arquivo"><i class="fa fa-fw fa-undo"></i> Voltar ao Arquivo</a>
          </div>
@@ -95,21 +95,21 @@
   <input type="hidden" name="hdn_cod_recipiente" value="<dtml-var cod_recipiente missing>" />
   <input type="hidden" name="hdn_url" value="<dtml-var URL1>" />
   
-  <div class="form-row">
+  <div class="row">
     <div class="col-12 col-lg-6 mb-3">
-      <label for="txt_num_recipiente" class="required">Identificador do Recipiente</label>
+      <label class="form-label" for="txt_num_recipiente" class="required">Identificador do Recipiente</label>
       <input class="form-control" type="text" id="txt_num_recipiente" name="txt_num_recipiente" maxlength="9" value="<dtml-var num_recipiente missing null="">" />
     </div>
     <div class="col-6 col-lg-3 mb-3">
-      <label for="txt_ano_recipiente" class="required">Ano</label>
+      <label class="form-label" for="txt_ano_recipiente" class="required">Ano</label>
       <dtml-unless ano_recipiente>
          <dtml-call expr="REQUEST.set('ano_recipiente', _.DateTime.year(DateTime()))">
       </dtml-unless>
       <input class="form-control year" type="number" id="txt_ano_recipiente" name="txt_ano_recipiente" maxlength="4" value="<dtml-var ano_recipiente missing>">
     </div>
     <div class="col-6 col-lg-3 mb-3">    
-      <label for="lst_tip_recipiente" class="required">Tipo de Suporte</label>
-      <select class="custom-select" id="lst_tip_recipiente" name="lst_tip_recipiente">
+      <label class="form-label" for="lst_tip_recipiente" class="required">Tipo de Suporte</label>
+      <select class="form-select" id="lst_tip_recipiente" name="lst_tip_recipiente">
         <option value="0">Selecione</option>
           <dtml-in expr="zsql.arquivo_tipo_recipiente_obter_zsql(ind_excluido=0)">
              <option 
@@ -126,9 +126,9 @@
     </div>
   </div>             
 
-  <div class="form-row">
+  <div class="row">
     <div class="col-6 col-lg-3 mb-3">
-      <label for="txt_dat_recipiente" class="required">Data</label>
+      <label class="form-label" for="txt_dat_recipiente" class="required">Data</label>
       <dtml-unless dat_recipiente>
          <dtml-call expr="REQUEST.set('dat_recipiente', DateTime().strftime('%d/%m/%Y'))">
       </dtml-unless>
@@ -144,8 +144,8 @@
         </script>         
     </div>
     <div class="col-6 col-lg-3 mb-3">
-      <label for="lst_tip_tit_documental" class="required">Conjunto Documental</label>
-      <select class="custom-select" id="lst_tip_tit_documental" name="lst_tip_tit_documental">
+      <label class="form-label" for="lst_tip_tit_documental" class="required">Conjunto Documental</label>
+      <select class="form-select" id="lst_tip_tit_documental" name="lst_tip_tit_documental">
         <option value="0">Selecione</option>
           <dtml-in expr="zsql.arquivo_tipo_tit_documental_obter_zsql(ind_excluido=0)">
              <option 
@@ -161,16 +161,16 @@
       </select>
     </div>
     <div class="col-6 col-lg-2 mb-3">
-      <label for="num_folha_recipiente">Folhas</label>     
+      <label class="form-label" for="num_folha_recipiente">Folhas</label>     
       <input class="form-control" type="number" id="num_folha_recipiente" name="num_folha_recipiente" size="7" value="<dtml-var num_folha_recipiente missing null="">">
     </div>    
     <div class="col-12 col-lg-4 mb-3">
-      <label for="txa_txt_observacao">Observações</label> 
+      <label class="form-label" for="txa_txt_observacao">Observações</label> 
       <textarea class="form-control" id="txa_txt_observacao" name="txa_txt_observacao" rows="1"><dtml-var txt_observacao missing null=""></textarea>
     </div>    
   </div>
 
-<div class="text-left">
+<div class="text-start">
   <input class="btn btn-primary" type="button" value="Salvar" onClick="campos_criticar()" />
   <dtml-if cod_recipiente>
     <dtml-in expr="zsql.arquivo_recipiente_contar_itens_zsql(cod_recipiente=cod_recipiente)">
@@ -183,4 +183,5 @@
 
 </form>
 
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>

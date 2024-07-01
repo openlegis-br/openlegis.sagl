@@ -1,6 +1,6 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
  
-  <h1 class="firstHeading">Incorporação de Proposição</h1> 
+  <h1 class="firstHeading font-size-18">Incorporação de Proposição</h1> 
 
         <dtml-if txtCodDoc>
           <dtml-in expr="zsql.autor_obter_zsql(cod_autor=cod_autor)">
@@ -34,7 +34,7 @@
         </dtml-if>
           
         <table class="table table-bordered">
-            <thead class="table-secondary">
+            <thead>
         	<tr>
             	 <th>
                    <b>Código de Autenticidade:</b>
@@ -126,8 +126,8 @@
             <form method="post" action="../comissao/materia/relatoria_form" class="needs-validation" novalidate>
               <div class="row">
                <div class="col-12 mb-3">
-                 <label for="cod_comissao" class="required">Selecione a Comissão</label>
-                 <select class="custom-select" id="lst_cod_comissao" name="cod_comissao" required>
+                 <label class="form-label" for="cod_comissao" class="required">Selecione a Comissão</label>
+                 <select class="form-select" id="lst_cod_comissao" name="cod_comissao" required>
                     <option></option> 
                     <dtml-in expr="zsql.comissao_obter_zsql()">
                        <dtml-if expr="dat_extincao is None">
@@ -156,4 +156,5 @@
            </form>
       </dtml-if>
 
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>

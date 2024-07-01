@@ -1,4 +1,4 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
 <script src="<dtml-var portal_url>/js/moment.min.js""></script>
 <script src="<dtml-var portal_url>/js/datetime-moment.js"></script>
@@ -73,13 +73,13 @@ $(document).ready(function() {
 });
 </script>
 
-<h1 class="firstHeading">Prazos de Deliberação Vencidos</h1>
+<h1 class="firstHeading font-size-18">Prazos de Deliberação Vencidos</h1>
 
     <dtml-in expr="zsql.materia_prazo_deliberacao_vencido_zsql()">
         <dtml-if sequence-start>
         <div class="table-responsive">        
         <table class="table" id="jdTable">
-         <thead class="table-secondary">
+         <thead>
             <tr>
                 <th>Matéria</th>
                 <th>Vencimento</th>
@@ -108,4 +108,5 @@ $(document).ready(function() {
      <p>Nenhuma ocorrência.</p>
 </dtml-in>
 
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>

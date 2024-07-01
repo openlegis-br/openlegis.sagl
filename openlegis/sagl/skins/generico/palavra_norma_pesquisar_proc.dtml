@@ -1,10 +1,10 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
  <div class="row mb-2">
   <div class="col-12 col-sm-8 align-self-center">
-    <h1 class="firstHeading">Pesquisa de Legislação</h1>
+    <h1 class="firstHeading font-size-18">Pesquisa de Legislação</h1>
   </div>
-  <div class="col-12 col-sm-4 text-left text-sm-right mb-2">
+  <div class="col-12 col-sm-4 text-start text-sm-end mb-2">
     <div class="btn-group" role="group" aria-label="Button group with nested dropdown">
      <a class="btn btn-primary btn-sm" href="<dtml-var portal_url>/consultas/norma_juridica" ><i class="fa fa-fw fa-search"></i> Nova Pesquisa</a>
      <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Norma'])">          
@@ -43,7 +43,7 @@
       <div class="col-8 col-sm-9 align-self-center">
          <i class="far fa-list-alt"></i> Resultado: <dtml-var sequence-length> norma<dtml-if expr="_['sequence-length'] > 1">s</dtml-if>
       </div>
-      <div class="col-4 col-sm-3 text-right align-self-center">
+      <div class="col-4 col-sm-3 text-end align-self-center">
       </div>
        </div>
       </div>
@@ -108,7 +108,7 @@
   <div id="accordion" class="ac<dtml-var cod_norma>">
     <div class="card border-0">
         <p class="h5 mb-0">
-          <a href="#" class="d-block text-left collapsed mb-1" data-toggle="collapse" data-target="#collapseTram<dtml-var cod_norma>" aria-expanded="false" aria-controls="collapseTram<dtml-var cod_norma>"> 
+          <a href="#" class="d-block text-start collapsed mb-1" data-bs-toggle="collapse" data-bs-target="#collapseTram<dtml-var cod_norma>" aria-expanded="false" aria-controls="collapseTram<dtml-var cod_norma>"> 
             <i class="fa float-right pt-1 align-self-center" aria-hidden="true"></i>
              <span class="h6 font-weight-bold">Normas Relacionadas</span>
           </a>
@@ -164,7 +164,7 @@
  <dtml-call expr="REQUEST.set('texto_odt', str(cod_norma)+'_texto_integral.odt')">                   
 <dtml-if "hasattr(sapl_documentos.norma_juridica,texto_original) or hasattr(sapl_documentos.norma_juridica,texto_consolidado)">
  <div class="row d-print-none">
-    <div class="col-12 text-left mt-1"> 
+    <div class="col-12 text-start mt-1"> 
      <div class="btn-group btn-group-sm">
       <dtml-if "hasattr(sapl_documentos.norma_juridica,texto_original)">
           <a class="btn btn-primary" href="<dtml-var portal_url>/pysc/download_norma_pysc?cod_norma=<dtml-var cod_norma>&texto_original=1" target="_blank"><i class="far fa-file-pdf"></i> Texto Original</a>
@@ -198,4 +198,5 @@
    <p>Nenhuma ocorrência encontrada.</p>
 </dtml-in>
 
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>

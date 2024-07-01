@@ -1,4 +1,4 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
 <style>
 .table {
@@ -65,7 +65,7 @@ $(document).ready(() => {
     history.replaceState(null, null, url);
   } 
 
-  $('a[data-toggle="tab"]').on("click", function() {
+  $('a[data-bs-toggle="tab"]').on("click", function() {
     let newUrl;
     const hash = $(this).attr("href");
     if(hash == "#home") {
@@ -80,14 +80,14 @@ $(document).ready(() => {
 
 </script>
 
-  <h1 class="firstHeading">Assinatura Digital de Documentos</h1> 
+  <h1 class="firstHeading font-size-18">Assinatura Digital de Documentos</h1> 
 
 <ul class="nav nav-tabs assinatura border-0 mt-4" id="nav_assinatura" role="tablist">
     <li class="nav-item active">
-        <a class="nav-link active" id="principal-tab" data-toggle="tab" href="#principal" role="tab" aria-controls="principal" data-target="#principal" aria-selected="true">Lista Principal <dtml-in expr="zsql.assinatura_documento_obter_zsql(cod_usuario=cod_usuario_corrente, ind_assinado=0, ind_recusado=0, ind_separado=0)"><dtml-if sequence-start>[<dtml-var sequence-length>]</dtml-if></dtml-in></a>
+        <a class="nav-link active" id="principal-tab" data-bs-toggle="tab" href="#principal" role="tab" aria-controls="principal" data-bs-target="#principal" aria-selected="true">Lista Principal <dtml-in expr="zsql.assinatura_documento_obter_zsql(cod_usuario=cod_usuario_corrente, ind_assinado=0, ind_recusado=0, ind_separado=0)"><dtml-if sequence-start>[<dtml-var sequence-length>]</dtml-if></dtml-in></a>
     </li>
     <li class="nav-item">
-        <a class="nav-link" id="analise-tab" data-toggle="tab" href="#analise" role="tab" aria-controls="analise" data-target="#analise" aria-selected="false">Itens Postergados <dtml-in expr="zsql.assinatura_documento_obter_zsql(cod_usuario=cod_usuario_corrente, ind_assinado=0, ind_recusado=0, ind_separado=1)"><dtml-if sequence-start>[<dtml-var sequence-length>]</dtml-if></dtml-in></a>
+        <a class="nav-link" id="analise-tab" data-bs-toggle="tab" href="#analise" role="tab" aria-controls="analise" data-bs-target="#analise" aria-selected="false">Itens Postergados <dtml-in expr="zsql.assinatura_documento_obter_zsql(cod_usuario=cod_usuario_corrente, ind_assinado=0, ind_recusado=0, ind_separado=1)"><dtml-if sequence-start>[<dtml-var sequence-length>]</dtml-if></dtml-in></a>
     </li>     
 </ul>
 
@@ -282,10 +282,10 @@ $(document).ready(() => {
            <td>
              <div class="btn-group">
               <a class="btn btn-sm btn-secondary" href="<dtml-var portal_url>/<dtml-var expr="gerar_link_pysc(tipo_doc,codigo,anexo)">" target="_blank"><i class="far fa-file-pdf"></i> Visualizar</a>
-              <button type="button" class="btn btn-sm btn-secondary" data-toggle="modal" data-target="#iFrameModal" data-title="Assinar Digitalmente" data-src="<dtml-var portal_url>/generico/assinador/pades-signature_html?codigo=<dtml-var codigo>&anexo=<dtml-var anexo missing null>&tipo_doc=<dtml-var tipo_doc>&modal=1"><i class="fas fa-file-signature"></i> Assinar</button>
+              <button type="button" class="btn btn-sm btn-secondary" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Assinar Digitalmente" data-src="<dtml-var portal_url>/generico/assinador/pades-signature_html?codigo=<dtml-var codigo>&anexo=<dtml-var anexo missing null>&tipo_doc=<dtml-var tipo_doc>&modal=1"><i class="fas fa-file-signature"></i> Assinar</button>
               <a class="btn btn-sm btn-secondary" href="<dtml-var portal_url>/cadastros/assinatura/assinatura_postergar_proc?cod_usuario=<dtml-var cod_usuario_corrente missing>&codigo=<dtml-var codigo missing>&anexo=<dtml-var anexo missing null>&tipo_doc=<dtml-var tipo_doc missing>" data-confirm="Postergar a assinatura?"><i class="fa fa-hourglass-end"></i> Postergar</a>
              <!-- Modal -->
-             <button type="button" class="btn btn-sm btn-danger d-print-none" data-toggle="modal" data-target="#recusaModal<dtml-var formatted_code>">
+             <button type="button" class="btn btn-sm btn-danger d-print-none" data-bs-toggle="modal" data-bs-target="#recusaModal<dtml-var formatted_code>">
                 <i class="fas fa-window-close"></i> Recusar
              </button>
             </div>
@@ -294,7 +294,7 @@ $(document).ready(() => {
                 <div class="modal-content">
                   <div class="modal-header">
                     <h5 class="modal-title" id="ModalLabel">Recusa de Assinatura</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
                       <span aria-hidden="true">&times;</span>
                     </button>
                   </div>
@@ -304,20 +304,20 @@ $(document).ready(() => {
                      <input type="hidden" name="tipo_doc" value="<dtml-var tipo_doc missing>" />
                      <input type="hidden" name="codigo" value="<dtml-var codigo missing>" />
                      <input type="hidden" name="anexo" value="<dtml-var anexo missing null>" />
-                     <div class="form-row">
+                     <div class="row">
                        <div class="col-12 mb-3">
-                        <label for="txa_txt_motivo_recusa" class="required">Motivo da Recusa</label>
+                        <label class="form-label" for="txa_txt_motivo_recusa" class="required">Motivo da Recusa</label>
                         <textarea class="form-control" name="txa_txt_motivo_recusa" rows="3" required></textarea>
                        </div>
                      </div>
-                     <div class="form-row">
+                     <div class="row">
                        <div class="col-12 mb-2">
                         <button class="btn btn-primary" method="post" action="assinatura_recusar_proc">Recusar Assinatura</button>
                        </div>
                      </div>
-                     <div class="form-row">
+                     <div class="row">
                        <div class="col-md-12">
-                         <p class="text-muted small"><i class="fas fa-asterisk text-danger"></i> Campo obrigatório</p>
+                         <p class="text-muted small font-size-12"><i class="fas fa-asterisk text-danger"></i> Campo obrigatório</p>
                        </div>
                      </div>
                    </form> 
@@ -525,9 +525,9 @@ $(document).ready(() => {
            <td>
              <div class="btn-group">
               <a class="btn btn-sm btn-secondary" href="<dtml-var portal_url>/<dtml-var expr="gerar_link_pysc(tipo_doc,codigo,anexo)">" target="_blank"><i class="far fa-file-pdf"></i> Visualizar</a>
-              <button type="button" class="btn btn-sm btn-secondary" data-toggle="modal" data-target="#iFrameModal" data-title="Assinar Digitalmente" data-src="<dtml-var portal_url>/generico/assinador/pades-signature_html?codigo=<dtml-var codigo>&anexo=<dtml-var anexo missing null>&tipo_doc=<dtml-var tipo_doc>&modal=1"><i class="fas fa-file-signature"></i> Assinar</button>
+              <button type="button" class="btn btn-sm btn-secondary" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Assinar Digitalmente" data-src="<dtml-var portal_url>/generico/assinador/pades-signature_html?codigo=<dtml-var codigo>&anexo=<dtml-var anexo missing null>&tipo_doc=<dtml-var tipo_doc>&modal=1"><i class="fas fa-file-signature"></i> Assinar</button>
              <!-- Modal -->
-             <button type="button" class="btn btn-sm btn-danger d-print-none" data-toggle="modal" data-target="#recusaModal<dtml-var formatted_code>">
+             <button type="button" class="btn btn-sm btn-danger d-print-none" data-bs-toggle="modal" data-bs-target="#recusaModal<dtml-var formatted_code>">
                 <i class="fas fa-window-close"></i> Recusar
              </button>
             </div>
@@ -536,7 +536,7 @@ $(document).ready(() => {
                 <div class="modal-content">
                   <div class="modal-header">
                     <h5 class="modal-title" id="ModalLabel">Recusa de Assinatura</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
                       <span aria-hidden="true">&times;</span>
                     </button>
                   </div>
@@ -546,20 +546,20 @@ $(document).ready(() => {
                      <input type="hidden" name="tipo_doc" value="<dtml-var tipo_doc missing>" />
                      <input type="hidden" name="codigo" value="<dtml-var codigo missing>" />
                      <input type="hidden" name="anexo" value="<dtml-var anexo missing>" />
-                     <div class="form-row">
+                     <div class="row">
                        <div class="col-12 mb-3">
-                        <label for="txa_txt_motivo_recusa" class="required">Motivo da Recusa</label>
+                        <label class="form-label" for="txa_txt_motivo_recusa" class="required">Motivo da Recusa</label>
                         <textarea class="form-control" name="txa_txt_motivo_recusa" rows="3" required></textarea>
                        </div>
                      </div>
-                     <div class="form-row">
+                     <div class="row">
                        <div class="col-12 mb-2">
                         <button class="btn btn-primary" method="post" action="assinatura_recusar_proc">Recusar Assinatura</button>
                        </div>
                      </div>
-                     <div class="form-row">
+                     <div class="row">
                        <div class="col-md-12">
-                         <p class="text-muted small"><i class="fas fa-asterisk text-danger"></i> Campo obrigatório</p>
+                         <p class="text-muted small font-size-12"><i class="fas fa-asterisk text-danger"></i> Campo obrigatório</p>
                        </div>
                      </div>
                    </form> 
@@ -579,4 +579,5 @@ $(document).ready(() => {
  </div>
 </div>
   
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>

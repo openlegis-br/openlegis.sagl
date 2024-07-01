@@ -1,4 +1,4 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
 <script src="<dtml-var portal_url>/javascript/data_validar.js"></script>
 
@@ -119,7 +119,7 @@ $(document).ready(function () {
    <dtml-call expr="REQUEST.set('id_materia', str(des_tipo_materia)+ ' nº  ' +str(num_ident_basica)+ '/' +str(ano_ident_basica))">
 </dtml-in>
 
-<h1 class="firstHeading"><dtml-var id_materia></h1>
+<h1 class="firstHeading font-size-18"><dtml-var id_materia></h1>
 
 <dtml-call expr="REQUEST.set('temProposicao',REQUEST.has_key('hdnCodProposicao'))">
 <dtml-if temProposicao>
@@ -154,16 +154,16 @@ $(document).ready(function () {
 
 <form id="documento_acessorio_form" name="documento_acessorio_form" method="post" action="documento_acessorio_salvar_proc" enctype="multipart/form-data">
 
-  <div class="form-row">
+  <div class="row">
      <div class="col-12 col-sm-6 mb-3">
-            <label for="lst_tip_documento" class="required">Tipo de Documento</label>
+            <label class="form-label" for="lst_tip_documento" class="required">Tipo de Documento</label>
             <dtml-if temProposicao>
               <input type="hidden" name="lst_tip_documento" value="<dtml-var propTipoDoc>" />
                <dtml-in expr="zsql.tipo_documento_obter_zsql(tip_documento=propTipoDoc)">
                   <input class="form-control" type="text" id="lst_tip_documento" value="<dtml-var des_tipo_documento>" size="35" readonly />
                </dtml-in>
             <dtml-else>           
-                <select class="custom-select" id="lst_tip_documento" name="lst_tip_documento" required>
+                <select class="form-select" id="lst_tip_documento" name="lst_tip_documento" required>
                   <option value="0">Selecione</option> 
                   <dtml-in expr="zsql.tipo_documento_obter_zsql(ind_excluido=0)">           
                      <option 
@@ -187,16 +187,16 @@ $(document).ready(function () {
            </div> 
      </div>
      <div class="col-12 col-sm-6 mb-3">
-          <label for="txt_nom_documento" class="required">Descrição</label>        
+          <label class="form-label" for="txt_nom_documento" class="required">Descrição</label>        
           <input class="form-control" type="text" id="txt_nom_documento" name="txt_nom_documento" value="<dtml-var nom_documento html_quote missing null="">" maxlength="250" required />        
           <div class="invalid-feedback">
              Este campo é obrigatório!
           </div> 
      </div>
   </div>
-  <div class="form-row">
+  <div class="row">
      <div class="col-6 col-sm-3 mb-3">
-          <label for="txt_dat_documento" class="required">Data / Horário</label>
+          <label class="form-label" for="txt_dat_documento" class="required">Data / Horário</label>
           <dtml-unless dat_documento>
              <dtml-call expr="REQUEST.set('dat_documento', DateTime().strftime('%d/%m/%Y %H:%M:%S'))">
           </dtml-unless>
@@ -217,14 +217,14 @@ $(document).ready(function () {
                     
      </div>
      <div class="col-6 col-sm-3 mb-3">
-          <label for="txt_num_protocolo">Número de Protocolo</label>
+          <label class="form-label" for="txt_num_protocolo">Número de Protocolo</label>
           <input class="form-control number" type="text" name="txt_num_protocolo" id ="txt_num_protocolo" value="<dtml-var num_protocolo missing null="">" maxlength="10" />  
           <div class="invalid-feedback">
              Este campo é obrigatório!
           </div>              
      </div>
      <div class="col-12 col-sm-6 mb-3">
-          <label for="txt_nom_autor_documento" class="required">Autoria</label>
+          <label class="form-label" for="txt_nom_autor_documento" class="required">Autoria</label>
           <input class="form-control" type="text" id="txt_nom_autor_documento" name="txt_nom_autor_documento" value="<dtml-var nom_autor_documento missing null="">" maxlength="150" required />
           <div class="invalid-feedback">
              Este campo é obrigatório!
@@ -236,12 +236,12 @@ $(document).ready(function () {
   <dtml-in expr="zsql.proposicao_obter_zsql(ind_mat_ou_doc='D',cod_mat_ou_doc=cod_documento)">
     <dtml-let id_proposicao="str(cod_proposicao)+'_signed.pdf'">
       <dtml-if "hasattr(sapl_documentos.proposicao,id_proposicao)">
-        <div class="form-row">
+        <div class="row">
           <div class="col-12">
             <dtml-let proposicao="getattr(sapl_documentos.proposicao,id_proposicao).absolute_url">
                <dtml-call expr="REQUEST.set('nome_arquivo',str(cod_proposicao)+'_signed.pdf')">
                <dtml-call expr="REQUEST.set('cod_doc',pysc.proposicao_calcular_checksum_pysc(cod_proposicao))">
-               <legend>Proposição Digital <dtml-var cod_doc></legend>
+               <legend class="font-size-16">Proposição Digital <dtml-var cod_doc></legend>
                <a class="btn btn-secondary mb-3" target="blank" href="<dtml-var proposicao>">   
                   <i class="fas fa-certificate" style="font-size:21px; margin-right: 3px;"></i>Documento Assinado 
                </a>
@@ -253,9 +253,9 @@ $(document).ready(function () {
   </dtml-in>
 </dtml-if>
 
- <div class="form-row">
+ <div class="row">
    <div class="col-12 col-sm-6 mb-3">
-             <label class="d-block">PDF Texto Original</label>
+             <label class="form-label d-block">PDF Texto Original</label>
               <dtml-if expr="_.has_key('cod_documento')"> 
                <dtml-call expr="REQUEST.set('id_documento', str(cod_documento)+'.pdf')">
                <dtml-if "hasattr(sapl_documentos.materia,id_documento)">
@@ -268,7 +268,7 @@ $(document).ready(function () {
                       </dtml-if>
                     </a>
                   <dtml-if "sapl_documentos.props_sagl.restpki_access_token!=''">
-                     <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#iFrameModal" data-title="Assinaturas Digitais" data-src="<dtml-var portal_url>/cadastros/assinatura/assinatura_solicitar_form?codigo=<dtml-var cod_documento>&tipo_doc=doc_acessorio&modal=1"><i class="fas fa-file-signature"></i> Assinaturas</button>
+                     <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Assinaturas Digitais" data-src="<dtml-var portal_url>/cadastros/assinatura/assinatura_solicitar_form?codigo=<dtml-var cod_documento>&tipo_doc=doc_acessorio&modal=1"><i class="fas fa-file-signature"></i> Assinaturas</button>
                   </dtml-if>
                    <a class="btn btn-danger" href="javascript:texto_integral_excluir()">Excluir</a>
                  </dtml-let>
@@ -301,18 +301,18 @@ $(document).ready(function () {
    </div>
    <div class="col-12 col-sm-6 mb-3">
              <dtml-if expr="_.has_key('cod_documento')">
-              <label for="lst_modelo" class="d-block">ODT Texto Original</label>
+              <label class="form-label" for="lst_modelo" class="d-block">ODT Texto Original</label>
                 <dtml-let id_documento_odt="str(cod_documento)+'.odt'">
                    <dtml-if "hasattr(sapl_documentos.materia_odt,id_documento_odt)">
                       <dtml-let documento_odt="getattr(sapl_documentos.materia_odt,id_documento_odt).absolute_url">
                          <dtml-call expr="REQUEST.set('nome_arquivo_odt',str(cod_documento)+'.odt')">
                          <a class="btn btn-secondary" href="<dtml-var portal_url>/generico/viewerJS/#<dtml-var documento_odt>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fa fa-fw fa-file-alt"></i> Visualizar</a>
-                         <button type="button" class="btn btn-secondary" onclick="javascript:location.href='<dtml-var portal_url>/sapl_documentos/materia_odt/externalEdit_/<dtml-var nome_arquivo_odt>.zem'" data-toggle="tooltip" data-placement="bottom" title="Editar no LibreOffice"><i class="fas fa-fw fa-external-link-alt"></i>Editar</button>                                          
+                         <button type="button" class="btn btn-secondary" onclick="javascript:location.href='<dtml-var portal_url>/sapl_documentos/materia_odt/externalEdit_/<dtml-var nome_arquivo_odt>.zem'" data-bs-toggle="tooltip" data-placement="bottom" title="Editar no LibreOffice"><i class="fas fa-fw fa-external-link-alt"></i>Editar</button>                                          
                          <a class="btn btn-danger" href="javascript:texto_odt_documento_excluir()"><i class="fas fa-trash"></i> Excluir</a>
                       </dtml-let>
                    <dtml-else>
                     <div class="input-group">
-                      <select class="custom-select" id="lst_modelo" name="lst_modelo">
+                      <select class="form-select" id="lst_modelo" name="lst_modelo">
                          <option value="0">Selecione um modelo</option>
                          <dtml-with expr="sapl_documentos.modelo.materia.documento_acessorio">
                             <dtml-in expr="objectValues('File')" sort="title_or_id">
@@ -333,9 +333,9 @@ $(document).ready(function () {
    </div>
  </div>
 
- <div class="form-row">
+ <div class="row">
    <div class="col-12 col-sm-2 mb-3">
-      <label for="rad_ind_publico" class="required d-block">Acesso Público?</label>
+      <label class="form-label" for="rad_ind_publico" class="required d-block">Acesso Público?</label>
       <dtml-in expr="[(1,'Sim'), (0,'Não')]">
         <div class="form-check form-check-inline">            
           <input class="form-check-input" type="radio" id="rad<dtml-var expr="_['sequence-key']">" name="rad_ind_publico" value="<dtml-var expr="_['sequence-key']">"
@@ -346,11 +346,11 @@ $(document).ready(function () {
       </dtml-in> 
    </div>
    <div class="col-12 col-sm-5 mb-3">
-      <label for="txa_txt_ementa">Ementa </label>
+      <label class="form-label" for="txa_txt_ementa">Ementa </label>
       <textarea class="form-control auto-resize" id="txa_txt_ementa" name="txa_txt_ementa" rows="1"><dtml-var txt_ementa missing null=""></textarea>
    </div>
    <div class="col-12 col-sm-5 mb-3">
-      <label for="txa_txt_observacao">Observações</label>
+      <label class="form-label" for="txa_txt_observacao">Observações</label>
       <textarea class="form-control auto-resize" id="txa_txt_observacao" name="txa_txt_observacao" rows="1"><dtml-var txt_observacao missing null=""></textarea>
    </div>
  </div>
@@ -367,7 +367,7 @@ $(document).ready(function () {
    <dtml-elif temProposicao>
       <input type="hidden" name="hdn_url" value="<dtml-var portal_url>/cadastros/materia/materia_mostrar_proc?cod_materia=<dtml-var cod_materia>#acessorio" />
    </dtml-if>  
-  <div class="text-left">
+  <div class="text-start">
     <input type="button" class="btn btn-primary" name="btn_documento_acessorio_salvar" value="Salvar" onClick="documento_criticar(document.documento_acessorio_form)" />
    <dtml-if cod_documento>
       <input type="button" class="btn btn-danger" name="btn_documento_acessorio_excluir" value="Excluir" onClick="documento_acessorio_excluir()" />
@@ -376,7 +376,7 @@ $(document).ready(function () {
 
  <div class="row">
     <div class="col-md-12 mt-2">
-       <p class="text-muted small"><i class="fas fa-asterisk text-danger"></i> Campos obrigatórios</p>
+       <p class="text-muted small font-size-12"><i class="fas fa-asterisk text-danger"></i> Campos obrigatórios</p>
     </div>
 </div>  
 
@@ -386,4 +386,5 @@ $(document).ready(function () {
 autosize(document.querySelectorAll('textarea'));
 </script>
 
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>

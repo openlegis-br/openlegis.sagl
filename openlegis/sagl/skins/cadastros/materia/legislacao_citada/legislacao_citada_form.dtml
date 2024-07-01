@@ -1,4 +1,4 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
 <script>
 <!--
@@ -90,17 +90,17 @@
 
 <a id="ajuda" href="<dtml-var portal_url>/ajuda/legislacao_cita_matanexada">Ajuda</a>
 
-<h1 class="firstHeading">Matéria Legislativa</h1>
+<h1 class="firstHeading font-size-18">Matéria Legislativa</h1>
 
 <form name="legislacao_citada_form" method="post" action="legislacao_citada_salvar_proc">
       <dtml-var materia_menu>
       <dtml-var materia_header>
 
-<fieldset><legend>Legislação Citada</legend>
+<fieldset><legend class="font-size-16">Legislação Citada</legend>
       <table class="table">
            <tr> 
             <td colspan="2">
-             <label for="lst_tip_norma">Tipo Norma </label> <span class="campoObrigatorio"></span><br/>
+             <label class="form-label" for="lst_tip_norma">Tipo Norma </label> <span class="campoObrigatorio"></span><br/>
              <select name="lst_tip_norma" onChange="javascript:form.hdn_alterou.value=1">
              <option>Selecione</option> 
              <dtml-in expr="zsql.tipo_norma_juridica_obter_zsql(ind_excluido=0)">
@@ -115,16 +115,16 @@
              </dtml-in>
             </select></td>
             <td>
-             <label for="txt_num_norma">Número </label> <span class="campoObrigatorio"></span><br/>
+             <label class="form-label" for="txt_num_norma">Número </label> <span class="campoObrigatorio"></span><br/>
              <input type="text" name="txt_num_norma" size="6" maxlength="6"  value="<dtml-var num_norma missing>" 
               onChange="javascript:form.hdn_alterou.value=1" /></td>
             <td>
-             <label for="txt_ano_norma">Ano</label> <span class="campoObrigatorio"></span><br/>
+             <label class="form-label" for="txt_ano_norma">Ano</label> <span class="campoObrigatorio"></span><br/>
              <input type="text" name="txt_ano_norma" size="4" maxlength="4" value="<dtml-var ano_norma missing>" 
               onChange="javascript:form.hdn_alterou.value=1" /></td>
            <tr> 
             <td>
-             <label for="lst_des_disposicoes">Disposição </label><br/>
+             <label class="form-label" for="lst_des_disposicoes">Disposição </label><br/>
              <select name="lst_des_disposicoes" onChange="javascript:form.hdn_alterou.value=1">
                <option>Selecione</option>
                <dtml-in expr="[('Final', 'Final'), ('Geral', 'Geral'), ('Preliminar', 'Preliminar'), ('Transitória', 'Transitoria')]">
@@ -136,51 +136,51 @@
                </dtml-in>
              </select></td>
             <td>
-             <label for="txt_des_parte">Parte </label><br/>
+             <label class="form-label" for="txt_des_parte">Parte </label><br/>
              <input type="text" name="txt_des_parte" value="<dtml-var des_parte missing null="">" size="8" maxlength="8"
                    onChange="javascript:form.hdn_alterou.value=1" /></td>
             <td>
-             <label for="txt_des_livro">Livro </label><br/>
+             <label class="form-label" for="txt_des_livro">Livro </label><br/>
              <input type="text" name="txt_des_livro" value="<dtml-var des_livro missing null="">" size="7" maxlength="7"
                    onChange="javascript:form.hdn_alterou.value=1" /></td>
             <td>
-             <label for="txt_des_titulo">T&iacute;tulo </label><br/>
+             <label class="form-label" for="txt_des_titulo">T&iacute;tulo </label><br/>
              <input type="text" name="txt_des_titulo" value="<dtml-var des_titulo missing null="">" size="7" maxlength="7"
                    onChange="javascript:form.hdn_alterou.value=1" /></td>
           </tr>
            <tr> 
              <td>
-              <label for="txt_des_capitulo">Capítulo </label><br />
+              <label class="form-label" for="txt_des_capitulo">Capítulo </label><br />
               <input type="text" name="txt_des_capitulo" value="<dtml-var des_capitulo missing null="">" size="7" maxlength="7"
                     onChange="javascript:form.hdn_alterou.value=1" /></td>
              <td>
-              <label for="txt_des_secao">Seção </label><br />
+              <label class="form-label" for="txt_des_secao">Seção </label><br />
               <input type="text" name="txt_des_secao" value="<dtml-var des_secao missing null="">" size="7" maxlength="7"
                     onChange="javascript:form.hdn_alterou.value=1" /></td>
              <td>
-              <label for="txt_des_subsecao">Subseção </label><br />
+              <label class="form-label" for="txt_des_subsecao">Subseção </label><br />
               <input type="text" name="txt_des_subsecao" value="<dtml-var des_subsecao missing null="">" size="7" maxlength="7"
                     onChange="javascript:form.hdn_alterou.value=1" /></td>
              <td>
-              <label for="txt_des_artigo">Artigo </label><br />
+              <label class="form-label" for="txt_des_artigo">Artigo </label><br />
               <input type="text" name="txt_des_artigo" value="<dtml-var des_artigo missing null="">" size="4" maxlength="4"
                     onChange="javascript:form.hdn_alterou.value=1" /></td>
           </tr>
           <tr> 
              <td>
-              <label for="txt_des_paragrafo">Par&ágrafo </label><br />
+              <label class="form-label" for="txt_des_paragrafo">Par&ágrafo </label><br />
               <input type="text" name="txt_des_paragrafo" value="<dtml-var des_paragrafo missing null="">" size="3" maxlength="3"
                     onChange="javascript:form.hdn_alterou.value=1" /></td>
              <td>
-              <label for="txt_des_inciso">Inciso </label><br />
+              <label class="form-label" for="txt_des_inciso">Inciso </label><br />
               <input type="text" name="txt_des_inciso" value="<dtml-var des_inciso missing null="">" size="10" maxlength="10"
                     onChange="javascript:form.hdn_alterou.value=1" /></td>
              <td>
-              <label for="txt_des_alinea">Alínea </label><br />
+              <label class="form-label" for="txt_des_alinea">Alínea </label><br />
               <input type="text" name="txt_des_alinea" value="<dtml-var des_alinea missing null="">" size="3" maxlength="3"
                     onChange="javascript:form.hdn_alterou.value=1" /></td>
              <td>
-              <label for="txt_des_item">Item </label><br />
+              <label class="form-label" for="txt_des_item">Item </label><br />
               <input type="text" name="txt_des_item" value="<dtml-var des_item missing null="">" size="3" maxlength="3"
                     onChange="javascript:form.hdn_alterou.value=1" /></td>
            </tr>
@@ -204,4 +204,5 @@
 
 </form>
 
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>

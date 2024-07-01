@@ -82,15 +82,15 @@ $(document).ready(function(){
 }
 </style>
 
-<legend>Cientificar Usuários</legend>
+<legend class="font-size-16">Cientificar Usuários</legend>
 <form class="form mb-3" id="usuario_form" name="usuario_form" method="post" action="<dtml-var portal_url>/cadastros/documento_administrativo/cientificacao/cientificacao_salvar_pysc">
- <div class="form-row">
+ <div class="row">
  <div class="col-12 col-md-4 mb-2">
      <input type="hidden" name="modal" value="1" />              
      <input type="hidden" name="hdn_cod_documento" value="<dtml-var cod_documento>" />
      <input type="hidden" name="hdn_url" value="<dtml-var ACTUAL_URL>?cod_documento=<dtml-var cod_documento>#cientificacoes" />
         <label class="label" for="lst_unidade">Filtrar Unidade</label>
-        <select class="form-control selectpicker" id="lst_unidade" name="lst_unidade" data-live-search="true">
+        <select class="form-select selectpicker" id="lst_unidade" name="lst_unidade" data-live-search="true">
           <option value="">Todas</option> 
                  <dtml-in expr="zsql.unidade_tramitacao_obter_zsql()">
                        <option value="<dtml-var cod_unid_tramitacao>">
@@ -102,7 +102,7 @@ $(document).ready(function(){
   </div>
      <div class="col-12 col-md-4 mb-2">
         <label class="label required" for="lst_cod_usuario_dest">Usuários</label>
-        <select class="form-control selectpicker" name="lst_cod_usuario_dest:list:int" id="lst_cod_usuario_dest" multiple="multiple" data-selected-text-format="count > 1" data-size="6" data-actions-box="true" data-live-search="true" required>
+        <select class="form-select selectpicker" name="lst_cod_usuario_dest:list:int" id="lst_cod_usuario_dest" multiple="multiple" data-selected-text-format="count > 1" data-size="6" data-actions-box="true" data-live-search="true" required>
        </select> 
      </div>
      <div class="col-8 col-md-3">
@@ -136,7 +136,7 @@ $(document).ready(function(){
   <dtml-if sequence-start>   
     <div class="table-responsive">
     <table class="table" id="table">
-     <thead class="table-secondary">    
+     <thead>    
        <tr> 
           <th width="25%">Data de Envio</th>
           <th width="30%">Usuário de Destino</th>

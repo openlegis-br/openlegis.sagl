@@ -1,4 +1,4 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
 <script src="<dtml-var portal_url>/javascript/jquery.cleditor.js"></script>
 <script src="<dtml-var portal_url>/javascript/jquery.cleditor.xhtml.min.js"></script>
@@ -138,7 +138,7 @@ $("#txa_txt_tramitacao").cleditor({width:"100%", height:"100%"})[0];
 
 <a id="ajuda" href="<dtml-var portal_url>/ajuda/tramitacao_lote">Ajuda</a>
 
-<h1 class="firstHeading">Tramitação de Matérias em Lote</h1>
+<h1 class="firstHeading font-size-18">Tramitação de Matérias em Lote</h1>
 
 <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia'])">
 <div id="barra-conteudo">
@@ -248,7 +248,7 @@ $("#txa_txt_tramitacao").cleditor({width:"100%", height:"100%"})[0];
       </tr>
       <tr>
         <td>
-         <label>Status</label> <span class="campoObrigatorio"></span><br />
+         <label class="form-label">Status</label> <span class="campoObrigatorio"></span><br />
          <select name="lst_cod_status" style="max-width: 338px; width: 100%;">
            <option value="">Selecione</option>
            <dtml-in expr="zsql.status_tramitacao_obter_zsql()">
@@ -269,13 +269,13 @@ $("#txa_txt_tramitacao").cleditor({width:"100%", height:"100%"})[0];
       </tr>
       <tr>          
          <td colspan="2">
-           <label>Data Fim Prazo</label> <br />
+           <label class="form-label">Data Fim Prazo</label> <br />
            <input type="text" name="txt_dat_fim_prazo" id="txt_dat_fim_prazo" size="12" maxlength="10" value="" onBlur="formata_data(form.txt_dat_fim_prazo)">
          </td>
       </tr>
       <tr> 
          <td colspan="2">
-           <label>Texto da Ação</label><br />
+           <label class="form-label">Texto da Ação</label><br />
            <textarea name="txa_txt_tramitacao" id="txa_txt_tramitacao" cols="65" rows="4"></textarea>
          </td>
       </tr>
@@ -336,4 +336,5 @@ $("#txa_txt_tramitacao").cleditor({width:"100%", height:"100%"})[0];
 </dtml-in>
 
 
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>

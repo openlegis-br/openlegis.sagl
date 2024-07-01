@@ -1,4 +1,4 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
   <script src="<dtml-var portal_url>/js/moment.min.js"></script>
   <script src="<dtml-var portal_url>/js/datetime-moment.js"></script>
@@ -40,7 +40,7 @@ $(document).ready(function() {
 });
 </script>
 
-  <h1 class="firstHeading">Histórico de Assinaturas Digitais</h1> 
+  <h1 class="firstHeading font-size-18">Histórico de Assinaturas Digitais</h1> 
 
   <dtml-in expr="zsql.assinatura_documento_obter_zsql(cod_usuario=cod_usuario_corrente, ind_assinado=1, rd_ordenacao=1)">
     <dtml-if expr="cod_assinatura_doc">
@@ -50,7 +50,7 @@ $(document).ready(function() {
     <dtml-if sequence-start>
      <div class="table-responsive">    
       <table class="table">
-        <thead class="table-secondary">      
+        <thead>      
          <tr>
            <th>Data da Assinatura</th>
            <th>Documento Assinado</th>
@@ -204,4 +204,5 @@ $(document).ready(function() {
      <p>Não há registros de assinaturas digitais.</p>
   </dtml-in>
 
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>

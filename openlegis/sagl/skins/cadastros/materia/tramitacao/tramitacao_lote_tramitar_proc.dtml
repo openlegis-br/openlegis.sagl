@@ -1,8 +1,8 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
 <a id="ajuda" href="<dtml-var portal_url>/ajuda/tramitacao_lote">Ajuda</a>
 
-<h1 class="firstHeading">Tramitação em Lote</h1>
+<h1 class="firstHeading font-size-18">Tramitação em Lote</h1>
 
 <script src="<dtml-var portal_url>/javascript/data_validar.js"></script>
 
@@ -122,7 +122,7 @@ $(function() {
     </li>
 </ul>
 
-<fieldset><legend>Tramitação em Lote</legend>
+<fieldset><legend class="font-size-16">Tramitação em Lote</legend>
 
  <dtml-call expr="REQUEST.set('check_ocorrencia', 0)">
  <dtml-call expr="REQUEST.set('contador', 0)">
@@ -154,12 +154,12 @@ $(function() {
    </tr>
    <tr>
      <td>
-       <label for="tram_dat_tramitacao">Data Ação</label> <span class="campoObrigatorio"></span><br />
+       <label class="form-label" for="tram_dat_tramitacao">Data Ação</label> <span class="campoObrigatorio"></span><br />
        <input type="text" name="txt_dat_tramitacao" size="10" maxlength="10" value="<dtml-var tram_dat_tramitacao>" disabled>
        <span class="nota" style="font-size:10px">(dd/mm/aaaa)</span>
      </td>
      <td>
-      <label for="tram_tip_materia">Tipo Matéria</label> <span class="campoObrigatorio"></span><br />
+      <label class="form-label" for="tram_tip_materia">Tipo Matéria</label> <span class="campoObrigatorio"></span><br />
       <select name="tram_tip_materia" disabled>
       <dtml-in expr="zsql.tipo_materia_legislativa_obter_zsql(tip_materia=tram_tip_materia,ind_excluido=0)">
       <option value="<dtml-var tip_materia>">
@@ -172,7 +172,7 @@ $(function() {
     <tr><th colspan="2" class="label">2. Localização e status atuais</th></tr>
    <tr>
      <td>
-      <label>Unidade Local</label> <span class="campoObrigatorio"></span><br />
+      <label class="form-label">Unidade Local</label> <span class="campoObrigatorio"></span><br />
       <select name="tram_cod_unid_local" disabled>
       <dtml-in expr="zsql.unidade_tramitacao_obter_zsql(cod_unid_tramitacao=tram_cod_unid_tram_local,ind_excluido=0)">
       <option value="<dtml-var cod_unid_tramitacao>">
@@ -188,7 +188,7 @@ $(function() {
       </select>
      </td>
      <td>
-       <label>Status Atual</label> <span class="campoObrigatorio"></span><br />
+       <label class="form-label">Status Atual</label> <span class="campoObrigatorio"></span><br />
 	<select name="tram_cod_status" disabled>
         <dtml-in expr="zsql.status_tramitacao_obter_zsql(cod_status=tram_cod_status,ind_excluido=0)">
         <option value="<dtml-var cod_status>">
@@ -201,12 +201,12 @@ $(function() {
     <tr><th colspan="2" class="label">3. Período para localização das matérias pela data de tramitação atual</th>
      <tr>
       <td>
-       <label>Data Inicial</label><br />
+       <label class="form-label">Data Inicial</label><br />
        <input type="text" name="txt_data_inicial" size="10" maxlength="10" value="<dtml-var txt_data_inicial>" disabled>
        <span class="nota" style="font-size:10px">(dd/mm/aaaa)</span>
       </td>
       <td>
-       <label>Data Final</label><br />
+       <label class="form-label">Data Final</label><br />
        <input type="text" name="txt_data_final" size="10" maxlength="10" value="<dtml-var txt_data_final>" disabled>
        <span class="nota" style="font-size:10px">(dd/mm/aaaa)</span>
       </td>
@@ -214,19 +214,19 @@ $(function() {
     <tr><th colspan="2" class="label">4. Informe os detalhes da nova tramitação</th></tr>
      <tr>
       <td>
-        <label>Data Encaminhamento</label> <span class="campoObrigatorio"></span><br />
+        <label class="form-label">Data Encaminhamento</label> <span class="campoObrigatorio"></span><br />
         <input type="text" name="txt_dat_encaminha" id="txt_dat_encaminha" size="10" maxlength="10" value="" onBlur="formata_data(form.txt_dat_encaminha)">
        <span class="nota" style="font-size:10px">(dd/mm/aaaa)</span>
       </td>
       <td>
-       <label>Data Fim do Prazo</label> <br />
+       <label class="form-label">Data Fim do Prazo</label> <br />
        <input type="text" name="txt_dat_fim_prazo" id="txt_dat_fim_prazo" size="10" maxlength="10" value="<dtml-var dat_fim_prazo missing null="">" onBlur="formata_data(form.txt_dat_fim_prazo)" onChange="javascript:form.hdn_alterou.value=1">
        <span class="nota" style="font-size:10px">(dd/mm/aaaa)</span>
       </td>
      </tr>
      <tr>          
       <td>
-       <label>Status</label> <span class="campoObrigatorio"></span><br />
+       <label class="form-label">Status</label> <span class="campoObrigatorio"></span><br />
        <select name="lst_cod_status" onChange="javascript:form.hdn_alterou.value=1">
        <option></option>
        <dtml-in expr="zsql.status_tramitacao_obter_zsql()">
@@ -248,7 +248,7 @@ $(function() {
       </tr>
       <tr>
        <td>
-	<label>Unidade Destino</label> <span class="campoObrigatorio"></span><br />
+	<label class="form-label">Unidade Destino</label> <span class="campoObrigatorio"></span><br />
         <select name="lst_cod_unid_tram_dest">
         <option></option>
         <dtml-in expr="zsql.unidade_tramitacao_obter_zsql()">
@@ -265,7 +265,7 @@ $(function() {
         </select>
        </td>
        <td>
-         <label>Turno</label><br />
+         <label class="form-label">Turno</label><br />
 	 <select name="lst_sgl_turno" onChange="javascript:form.hdn_alterou.value=1">
          <option></option>
          <dtml-in expr="[('P','Primeiro'),('S','Segundo'),('U','Único'),('L','Suplementar'),('F','Final'),('A','Votação Única em Regime de Urgência'),('B','1ª Votação'),('C','2ª e 3ª Votação')]">
@@ -279,7 +279,7 @@ $(function() {
         </tr>
         <tr> 
          <td colspan="2">
-           <label>Texto da Ação</label><br />
+           <label class="form-label">Texto da Ação</label><br />
            <textarea name="txa_txt_tramitacao" cols="65" rows="4"></textarea>
           </td>
          </tr>
@@ -327,4 +327,5 @@ $(function() {
 </p>
 </dtml-in>
 
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>

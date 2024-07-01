@@ -1,71 +1,8 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
 <script src="<dtml-var portal_url>/javascript/data_validar.js"></script>
 
-<script src="<dtml-var portal_url>/javascript/data_validar_fim_mandato.js" "></script>
-
-<script>
-
-  function mandato_criticar(form){
-  
-     var form = document.mandato_form;
-     var regexp_digitos = /\D+/;
-
-
-     if (form.lst_num_legislatura.selectedIndex==""){
-        $('#lst_num_legislatura').addClass('is-invalid');
-        form.lst_num_legislatura.focus();
-        return false;
-     }
-     if (form.rad_ind_titular.selectedIndex==""){
-        $('#rad_ind_titular').addClass('is-invalid');
-        form.rad_ind_titular.focus();
-        return false;
-     }
-     if (form.txt_dat_expedicao_diploma.value != "") {
-         if (!IsValidDate(form.txt_dat_expedicao_diploma.value)) {
-             form.txt_dat_expedicao_diploma.focus();
-             return false;
-         }
-     }
-     
-     if (form.txt_dat_inicio_mandato.value =="") {
-        $('#txt_dat_inicio_mandato').addClass('is-invalid');
-        form.txt_dat_inicio_mandato.focus();
-        return false;
-     }
-     if (!IsValidDate(form.txt_dat_inicio_mandato.value)) {
-         $('#txt_dat_inicio_mandato').addClass('is-invalid');
-         form.txt_dat_inicio_mandato.focus();
-         return false;
-     }
-
-     if (form.txt_dat_fim_mandato.value == "") {
-         $('#txt_dat_fim_mandato').addClass('is-invalid');
-         $.showAlert({title: "Mensagem do Sistema", body: "A data de fim do mandato é campo obrigatório! Caso não haja data previamente definida, informe a data final da legislatura!"});    
-         form.txt_dat_fim_mandato.focus();
-         return false;
-     }
-     if (form.txt_dat_fim_mandato.value != "") {
-         if (!IsValidDate(form.txt_dat_fim_mandato.value)) {
-             $.showAlert({title: "Mensagem do Sistema", body: "Digite uma data válida para o fim do mandato!"});
-             form.txt_dat_fim_mandato.focus();
-             return false;
-         }
-     }
-     if (form.txt_dat_fim_mandato.value != "") {
-        var dat_inicio = form.txt_dat_inicio_mandato.value.substring(6,10) + form.txt_dat_inicio_mandato.value.substring(3,5) + form.txt_dat_inicio_mandato.value.substring(0,2);
-        var dat_fim = form.txt_dat_fim_mandato.value.substring(6,10) + form.txt_dat_fim_mandato.value.substring(3,5) + form.txt_dat_fim_mandato.value.substring(0,2);
-        if (dat_inicio > dat_fim) {
-           $.showAlert({title: "Mensagem do Sistema", body: "A data de fim do mandato deve ser maior que a data de início!"});
-           form.txt_dat_inicio_mandato.focus();
-           return false;
-        }
-     }     
-
-  form.submit();
-  }
-</script>
+<script src="<dtml-var portal_url>/javascript/data_validar_fim_mandato.js"></script>
 
 <dtml-in expr="zsql.parlamentar_obter_zsql(cod_parlamentar=cod_parlamentar)">
   <dtml-call expr="REQUEST.set('nom_parlamentar', nom_parlamentar)">
@@ -76,15 +13,15 @@
   <dtml-call expr="REQUEST.set('num_legislatura_sel', _.int(num_legislatura))">
 </dtml-if>
 
-<legend>Dados do Mandato</legend>
+<legend class="font-size-16">Mandato</legend>
 
 <form method="post" name="mandato_form" action="mandato_salvar_proc">
    <input type="hidden" name="dat_inicio" value="<dtml-var dat_inicio missing null="">" />
    <input type="hidden" name="dat_fim"    value="<dtml-var dat_fim missing null="">"    />
-   <div class="form-row">
+   <div class="row">
      <div class="col-12 col-sm-6 mb-3">
-        <label for="lst_num_legislatura" class="form-label required">Legislatura</label>
-        <select class="custom-select" name="lst_num_legislatura" id="lst_num_legislatura" required>
+        <label class="form-label" for="lst_num_legislatura" class="form-label required">Legislatura</label>
+        <select class="form-select" name="lst_num_legislatura" id="lst_num_legislatura" required>
               <option value="">Selecione</option>
               <dtml-in expr="zsql.legislatura_obter_zsql(ind_excluido=0)">
                  <option 
@@ -97,13 +34,10 @@
                  </option>
               </dtml-in>
         </select>
-        <div class="invalid-feedback">
-          Este campo é obrigatório !
-        </div>
      </div>
      <div class="col-12 col-sm-6 mb-3">
-        <label for="lst_cod_coligacao">Coligação</label>
-        <select class="form-control selectpicker show-tick" data-size="6" name="lst_cod_coligacao" id="lst_cod_coligacao">
+        <label class="form-label" for="lst_cod_coligacao">Coligação</label>
+        <select class="form-select selectpicker show-tick" data-size="6" name="lst_cod_coligacao" id="lst_cod_coligacao">
               <option value="">Selecione</option>
                <dtml-if num_legislatura>
                  <dtml-if cod_coligacao>
@@ -130,51 +64,51 @@
         </select>
      </div>
    </div>
-   <div class="form-row">
+   <div class="row">
      <div class="col-6 col-sm-4 mb-3">
-        <label for="rad_ind_titular" class="form-label required">Natureza do Mandato</label>
-        <select id="rad_ind_titular" name="rad_ind_titular" class="custom-select" required>
+        <label class="form-label" for="rad_ind_titular" class="form-label required">Natureza do Mandato</label>
+        <select id="rad_ind_titular" name="rad_ind_titular" class="form-select" required>
          <option value="">Selecione</option>
          <dtml-in expr="[(1,'Titular'),(0,'Suplente')]">      
             <option value="<dtml-var expr="_['sequence-key']">" <dtml-if expr="_.has_key('cod_mandato') and ind_titular==_['sequence-key']">selected</dtml-if>><dtml-var expr="_['sequence-item']"></option>
          </dtml-in>
         </select>
-        <div class="invalid-feedback">
-          Este campo é obrigatório !
-        </div>
      </div>
      <div class="col-6 col-sm-4 mb-3">
-        <label for="txt_num_votos_recebidos">Votos Recebidos</label>
+        <label class="form-label" for="txt_num_votos_recebidos">Votos Recebidos</label>
         <input class="form-control number" type="number" min="1" maxlength="6" name="txt_num_votos_recebidos" id="txt_num_votos_recebidos" value="<dtml-var num_votos_recebidos missing null>">
      </div>
      <div class="col-12 col-sm-4 mb-3">
-        <label for="txt_dat_expedicao_diploma">Diplomação</label>
-        <input class="form-control date" type="text" name="txt_dat_expedicao_diploma" id="txt_dat_expedicao_diploma"  value="<dtml-var dat_expedicao_diploma missing null>" />
+        <label class="form-label" for="txt_dat_expedicao_diploma">Diplomação</label>
+         <div class="input-group">
+            <input type="text" class="form-control datepicker" placeholder="dd/mm/aaaa" name="txt_dat_expedicao_diploma" id="txt_dat_expedicao_diploma" data-provide="datepicker" data-date-autoclose="true" value="<dtml-var dat_expedicao_diploma missing null>" autocomplete="off">
+            <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
+         </div>
      </div>
    </div>
-   <div class="form-row"> 
+   <div class="row"> 
      <div class="col-6 mb-3">
-        <label for="txt_dat_inicio_mandato" class="form-label required">Início do Mandato</label>
-        <input class="form-control date" type="text" name="txt_dat_inicio_mandato" id="txt_dat_inicio_mandato"  value="<dtml-var dat_inicio_mandato missing null>" required />
-        <div class="invalid-feedback">
-          Este campo é obrigatório !
-        </div>
+        <label class="form-label required" for="txt_dat_inicio_mandato">Início do Mandato</label>
+         <div class="input-group">
+            <input type="text" class="form-control datepicker" placeholder="dd/mm/aaaa" name="txt_dat_inicio_mandato" id="txt_dat_inicio_mandato" data-provide="datepicker" data-date-autoclose="true" value="<dtml-var dat_inicio_mandato missing null>" autocomplete="off" required>
+            <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
+         </div>
      </div>
      <div class="col-6 mb-3">
-        <label for="txt_dat_fim_mandato" class="form-label required">Fim do Mandato</label>
-        <input class="form-control date" type="text" name="txt_dat_fim_mandato" id="txt_dat_fim_mandato"  value="<dtml-var dat_fim_mandato missing null>" required />
-        <div class="invalid-feedback">
-          Este campo é obrigatório !
-        </div>
+        <label class="form-label required" for="txt_dat_fim_mandato">Fim do Mandato</label>
+         <div class="input-group">
+            <input type="text" class="form-control datepicker" placeholder="dd/mm/aaaa" name="txt_dat_fim_mandato" id="txt_dat_fim_mandato" data-provide="datepicker" data-date-autoclose="true" value="<dtml-var dat_fim_mandato missing null>" autocomplete="off" required>
+            <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
+         </div>
      </div>
    </div>   
-   <div class="form-row">  
+   <div class="row">  
      <div class="col-12 mb-3">
-        <label for="txa_txt_observacao">Observações</label>
+        <label class="form-label" for="txa_txt_observacao">Observações</label>
         <textarea class="form-control auto-resize" name="txa_txt_observacao" id="txa_txt_observacao" cols="40" rows="1"><dtml-var txt_observacao missing null=""></textarea>
      </div>
    </div>      
-  <div class="text-left">
+  <div class="text-start">
      <button class="btn btn-primary" onClick="return mandato_criticar()">Salvar</button>
      <dtml-if cod_mandato>
          <a class="btn btn-danger" href="mandato_excluir_proc?cod_parlamentar=<dtml-var cod_parlamentar missing>&cod_mandato=<dtml-var cod_mandato missing>&modal=1" data-confirm="Deseja realmente excluir o mandato?">Excluir</a>
@@ -182,7 +116,7 @@
   </div>
    <div class="row">
       <div class="col-md-12 mt-2">
-         <p class="text-muted small"><i class="fas fa-asterisk text-danger"></i> Campos obrigatórios</p>
+         <p class="text-muted small font-size-12"><i class="fas fa-asterisk text-danger"></i> Campos obrigatórios</p>
       </div>
    </div>
   <input type="hidden" name="hdn_cod_mandato" value="<dtml-var cod_mandato missing>" />
@@ -196,13 +130,12 @@
 </form>
 
 <dtml-if expr="_.has_key('cod_mandato')">
-  <hr />
-  <legend id="afastamentos">Afastamentos</legend>
+  <legend id="afastamentos" class="font-size-16">Registro de Afastamentos</legend>
   <dtml-in expr="zsql.afastamento_obter_zsql(cod_parlamentar=cod_parlamentar, cod_mandato=cod_mandato)">
    <dtml-if sequence-start>
     <div class="table-responsive">
      <table class="table">
-      <thead class="table-secondary">
+      <thead>
        <tr> 
          <th>Motivo</th>
          <th>Início</th>
@@ -234,13 +167,73 @@
  <dtml-else>
     <div class="row">
       <div class="col-12">
-         Não há afastamentos cadastrados durante este mandato.
+         <p class="small">Não há afastamentos registrados no curso do mandato.</p>
       </div>
     </div>
  </dtml-in>
- <div align="text-left">
-   <a class="btn btn-primary mt-3" href="afastamento_form?cod_parlamentar=<dtml-var cod_parlamentar>&cod_mandato=<dtml-var cod_mandato missing>&num_legislatura=<dtml-var num_legislatura>&modal=1">Incluir Afastamento</a>
+ <div align="text-start">
+   <a class="btn btn-secondary" href="afastamento_form?cod_parlamentar=<dtml-var cod_parlamentar>&cod_mandato=<dtml-var cod_mandato missing>&num_legislatura=<dtml-var num_legislatura>&modal=1">Incluir Afastamento</a>
  </div>
  </dtml-if>
 
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<script>
+  function mandato_criticar(form){
+       var form = document.mandato_form;
+     var regexp_digitos = /\D+/;
+
+     if (form.lst_num_legislatura.selectedIndex==""){
+        $('#lst_num_legislatura').addClass('is-invalid');
+        form.lst_num_legislatura.focus();
+        return false;
+     }
+     if (form.rad_ind_titular.selectedIndex==""){
+        $('#rad_ind_titular').addClass('is-invalid');
+        form.rad_ind_titular.focus();
+        return false;
+     }
+     if (form.txt_dat_expedicao_diploma.value != "") {
+         if (!IsValidDate(form.txt_dat_expedicao_diploma.value)) {
+             form.txt_dat_expedicao_diploma.focus();
+             return false;
+         }
+     }
+     
+     if (form.txt_dat_inicio_mandato.value =="") {
+        $('#txt_dat_inicio_mandato').addClass('is-invalid');
+        form.txt_dat_inicio_mandato.focus();
+        return false;
+     }
+     if (!IsValidDate(form.txt_dat_inicio_mandato.value)) {
+         $('#txt_dat_inicio_mandato').addClass('is-invalid');
+         form.txt_dat_inicio_mandato.focus();
+         return false;
+     }
+
+     if (form.txt_dat_fim_mandato.value == "") {
+         $('#txt_dat_fim_mandato').addClass('is-invalid');
+         bootstrap.showModal({title: "Mensagem do Sistema", body: "A data de fim do mandato é campo obrigatório! Caso não haja data previamente definida, informe a data final da legislatura!"});    
+         form.txt_dat_fim_mandato.focus();
+         return false;
+     }
+     if (form.txt_dat_fim_mandato.value != "") {
+         if (!IsValidDate(form.txt_dat_fim_mandato.value)) {
+             bootstrap.showModal({title: "Mensagem do Sistema", body: "Digite uma data válida para o fim do mandato!"});
+             form.txt_dat_fim_mandato.focus();
+             return false;
+         }
+     }
+     if (form.txt_dat_fim_mandato.value != "") {
+        var dat_inicio = form.txt_dat_inicio_mandato.value.substring(6,10) + form.txt_dat_inicio_mandato.value.substring(3,5) + form.txt_dat_inicio_mandato.value.substring(0,2);
+        var dat_fim = form.txt_dat_fim_mandato.value.substring(6,10) + form.txt_dat_fim_mandato.value.substring(3,5) + form.txt_dat_fim_mandato.value.substring(0,2);
+        if (dat_inicio > dat_fim) {
+           bootstrap.showModal({title: "Mensagem do Sistema", body: "A data de fim do mandato deve ser maior que a data de início!"});
+           form.txt_dat_inicio_mandato.focus();
+           return false;
+        }
+     }     
+
+  form.submit();
+  }
+</script>
+<dtml-var footer_html>

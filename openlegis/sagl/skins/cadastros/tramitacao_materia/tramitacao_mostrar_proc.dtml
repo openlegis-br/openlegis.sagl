@@ -1,4 +1,4 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
 <script>
 
@@ -11,7 +11,7 @@
     
 </script>
 
-<h1 class="firstHeading">Tramitação de Matéria Legislativa</h1>
+<h1 class="firstHeading font-size-18">Tramitação de Matéria Legislativa</h1>
 
 <dtml-call expr="REQUEST.set('cod_materia', hdn_cod_materia)">
 
@@ -45,9 +45,9 @@
     <dtml-call expr="REQUEST.set('hdn_cod_materia', int(cod_materia))">
     <dtml-call expr="REQUEST.set('hdn_cod_unid_tram_dest', int(cod_unid_tram_dest))">
 
-  <div class="form-row">
+  <div class="row">
     <div class="col-12 col-md-3 mb-3">
-       <label for="txt_dat_tramitacao" class="required">Data da Tramitação</label>
+       <label class="form-label" for="txt_dat_tramitacao" class="required">Data da Tramitação</label>
        <dtml-unless dat_tramitacao>
           <dtml-call expr="REQUEST.set('dat_tramitacao', DateTime().strftime('%d/%m/%Y %H:%M'))">
        </dtml-unless>
@@ -55,35 +55,35 @@
        <input class="form-control" type="text" name="txt_dat_tramitacao" id="txt_dat_tramitacao" value="<dtml-var dat_tramitacao missing>" required readonly />
     </div>
     <div class="col-12 col-md-6 mb-3">
-      <label for="lst_cod_unid_tram_local" class="required">Unidade Local</label>
+      <label class="form-label" for="lst_cod_unid_tram_local" class="required">Unidade Local</label>
       <dtml-in expr="zsql.unidade_tramitacao_obter_zsql(cod_unid_tramitacao=cod_unid_tram_local, ind_leg=1)">
          <input class="form-control" type="text" id="lst_cod_unid_tram_local" value="<dtml-var nom_unidade_join>" readonly>
       </dtml-in>
     </div>    
     <div class="col-12 col-md-3 mb-3">
-      <label for="txt_nom_usuario"class="d-block">Usuário de Origem</label>
+      <label class="form-label" for="txt_nom_usuario"class="d-block">Usuário de Origem</label>
       <dtml-in expr="zsql.usuario_obter_zsql(col_username=AUTHENTICATED_USER.getUserName())">      
          <input class="form-control" type="text" id="txt_nom_usuario" value="<dtml-var nom_completo>" disabled> 
          <input type="hidden" name="hdn_cod_usuario_local" id="hdn_cod_usuario_local" value="<dtml-var cod_usuario_corrente>">     
      </dtml-in>
     </div>     
   </div> 
-  <div class="form-row">
+  <div class="row">
     <div class="col-12 col-md-3 mb-3">
-      <label for="txt_dat_encaminha">Encaminhamento</label>
+      <label class="form-label" for="txt_dat_encaminha">Encaminhamento</label>
       <input class="form-control" type="text" name="txt_dat_encaminha" id="txt_dat_encaminha" value="<dtml-var dat_encaminha missing null>" readonly > 
       <div class="invalid-feedback">
         Este campo é obrigatório!
       </div>        
     </div>
     <div class="col-12 col-md-6 mb-3">
-      <label for="lst_cod_unid_tram_dest">Unidade de Destino</label>
+      <label class="form-label" for="lst_cod_unid_tram_dest">Unidade de Destino</label>
       <dtml-in expr="zsql.unidade_tramitacao_obter_zsql(cod_unid_tramitacao=cod_unid_tram_dest, ind_leg=1)">
          <input class="form-control" type="text" id="lst_cod_unid_tram_dest" value="<dtml-var nom_unidade_join>" readonly>
       </dtml-in>
     </div>
     <div class="col-12 col-md-3 mb-3">
-      <label for="lst_cod_usuario_dest">Usuário de Destino</label>
+      <label class="form-label" for="lst_cod_usuario_dest">Usuário de Destino</label>
       <dtml-if cod_usuario_dest>
         <dtml-in expr="zsql.usuario_obter_zsql(cod_usuario=cod_usuario_dest)">      
            <input class="form-control" type="text" id="lst_cod_usuario_dest" value="<dtml-var nom_completo>" readonly>
@@ -93,19 +93,19 @@
       </dtml-if>
     </div>
   </div> 
-  <div class="form-row">
+  <div class="row">
     <div class="col-12 col-md-6 mb-3"> 
-      <label for="lst_cod_status">Status</label>
+      <label class="form-label" for="lst_cod_status">Status</label>
       <dtml-in expr="zsql.status_tramitacao_obter_zsql(cod_status=cod_status)">
          <input class="form-control" type="text" id="lst_cod_status" value="<dtml-var des_status>" readonly>
       </dtml-in>      
     </div>
     <div class="col-6 col-md-3 mb-3">
-      <label for="txt_dat_fim_prazo">Data de Fim de Prazo</label><br />
+      <label class="form-label" for="txt_dat_fim_prazo">Data de Fim de Prazo</label><br />
       <input class="form-control date" type="text" name="txt_dat_fim_prazo" id="txt_dat_fim_prazo" value="<dtml-var dat_fim_prazo missing null="">" readonly />    
     </div>    
     <div class="col-6 col-md-3 mb-3">
-      <label for="txa_dat_recebimento">Recebimento</label>    
+      <label class="form-label" for="txa_dat_recebimento">Recebimento</label>    
       <input class="form-control" type="text" id="txa_dat_recebimento" value="<dtml-var dat_recebimento missing null>" readonly>
     </div>  
     <div class="col-12 col-md-3 mb-3">
@@ -120,7 +120,7 @@
          </dtml-in>
     </div>
     <div class="col-12 col-md-4 mb-3">
-      <label class="d-block">Despacho em PDF</label>
+      <label class="form-label d-block">Despacho em PDF</label>
       <dtml-call expr="REQUEST.set('pdf', str(cod_tramitacao)+'_tram.pdf')">
       <dtml-call expr="REQUEST.set('pdf_assinado', str(cod_tramitacao)+'_tram_signed.pdf')">
       <dtml-if "hasattr(sapl_documentos.materia.tramitacao,pdf)"> 
@@ -133,9 +133,9 @@
          <dtml-if "hasattr(sapl_documentos.materia.tramitacao,pdf) and sapl_documentos.props_sagl.restpki_access_token!=''">
             <dtml-if expr="int(cod_usuario_corrente)==int(cod_usuario_local)" >
              <dtml-if expr="zsql.assinatura_documento_obter_zsql(codigo=cod_tramitacao,tipo_doc='tramitacao')">             
-               <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#iFrameModal" data-title="Assinaturas Digitais" data-src="<dtml-var portal_url>/cadastros/assinatura/assinatura_solicitar_form?codigo=<dtml-var cod_tramitacao>&tipo_doc=tramitacao&modal=1"><i class="fas fa-file-signature"></i> Assinaturas</button>
+               <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Assinaturas Digitais" data-src="<dtml-var portal_url>/cadastros/assinatura/assinatura_solicitar_form?codigo=<dtml-var cod_tramitacao>&tipo_doc=tramitacao&modal=1"><i class="fas fa-file-signature"></i> Assinaturas</button>
              <dtml-else>
-               <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#iFrameModal" data-title="Assinar Digitalmente" data-src="<dtml-var portal_url>/generico/assinador/pades-signature_html?codigo=<dtml-var cod_tramitacao>&tipo_doc=tramitacao&modal=1"><i class="fas fa-file-signature"></i> Assinar</button>               
+               <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Assinar Digitalmente" data-src="<dtml-var portal_url>/generico/assinador/pades-signature_html?codigo=<dtml-var cod_tramitacao>&tipo_doc=tramitacao&modal=1"><i class="fas fa-file-signature"></i> Assinar</button>               
              </dtml-if>                
             </dtml-if>
          </dtml-if>
@@ -144,15 +144,15 @@
     </div>
     <div class="col-12 col-md-8 mb-3">
       <dtml-if expr="ind_ult_tramitacao == 1 and dat_visualizacao">
-      <label class="d-block"><i class="fa fa-info-circle"></i> Importante</label>
+      <label class="form-label d-block"><i class="fa fa-info-circle"></i> Importante</label>
         Esta tramitação foi visualizada na unidade de destino, em <dtml-var dat_visualizacao>, pelo usuário <dtml-in expr="zsql.usuario_obter_zsql(cod_usuario=cod_usuario_visualiza)"><dtml-var nom_completo></dtml-in>, não sendo possível retomá-la.
       </dtml-if>
     </div> 
   </div>
 
-  <div class="form-row">
+  <div class="row">
     <div class="col-12 mb-3">
-      <label for="txa_txt_tramitacao">Texto do Despacho</label>
+      <label class="form-label" for="txa_txt_tramitacao">Texto do Despacho</label>
       <textarea class="form-control" name="txa_txt_tramitacao" id="txa_txt_tramitacao" rows="1" readonly><dtml-var txt_tramitacao missing null></textarea>
     </div>
   </div>
@@ -200,4 +200,5 @@ tinymce.init({
 });
 </script>
 
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>

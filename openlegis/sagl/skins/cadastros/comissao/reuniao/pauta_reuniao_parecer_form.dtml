@@ -1,4 +1,4 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
 <script>
 
@@ -48,9 +48,9 @@
      <input type="hidden" name="cod_item" value="<dtml-var cod_item missing>" />
      <input type="hidden" name="cod_parecer" value="<dtml-var cod_parecer missing>" />
      <input type="hidden" name="cod_reuniao" value="<dtml-var cod_reuniao>" />
-      <div class="form-row">
+      <div class="row">
            <div class="col-4 mb-3">
-            <label for="txt_num_ordem" class="required">Nº Ordem</label>
+            <label class="form-label" for="txt_num_ordem" class="required">Nº Ordem</label>
             <dtml-unless cod_item>
               <dtml-in expr="zsql.reuniao_comissao_ordem_obter_zsql(cod_reuniao=cod_reuniao)">
                  <dtml-call expr="REQUEST.set('num_ordem', _.int(novo_item))">
@@ -59,26 +59,26 @@
 	    <input class="form-control number" type="number" id="txt_num_ordem" name="txt_num_ordem" value="<dtml-var num_ordem missing>" maxlength="3"/ required>
            </div> 
           <div class="col-4">
-            <label for="txt_num_parecer" class="required">Parecer nº</label>
+            <label class="form-label" for="txt_num_parecer" class="required">Parecer nº</label>
             <input class="form-control number" type="number" id="txt_num_parecer" name="txt_num_parecer" value="<dtml-var num_parecer missing>" onChange="ementa_buscar(document.materia_expediente_parecer_form)">
            </div>
           <div class="col-4">
-            <label for="txt_ano_parecer" class="required">Ano</label>
+            <label class="form-label" for="txt_ano_parecer" class="required">Ano</label>
             <input class="form-control year" type="number" id="txt_ano_parecer" name="txt_ano_parecer" value="<dtml-var ano_parecer missing>" onChange="ementa_buscar(document.materia_expediente_parecer_form)">
           </div>
      </div>
-     <div class="form-row">
+     <div class="row">
            <div class="col-12 mb-3">         
-             <label for="txa_txt_observacao" class="required">Ementa </label>
+             <label class="form-label" for="txa_txt_observacao" class="required">Ementa </label>
              <textarea class="form-control auto-resize" name="txa_txt_observacao" rows="2"><dtml-var txt_observacao missing></textarea>
            </div>
      </div>
       
 <dtml-if cod_parecer>
-   <div class="form-row">
+   <div class="row">
      <div class="col-6 mb-3">
-         <label for="lst_tip_resultado">Resultado na Comissão</label>
-         <select class="custom-select"  name="lst_tip_resultado" id="lst_tip_resultado"  required>
+         <label class="form-label" for="lst_tip_resultado">Resultado na Comissão</label>
+         <select class="form-select"  name="lst_tip_resultado" id="lst_tip_resultado"  required>
            <option></option>
            <dtml-in expr="zsql.tipo_fim_relatoria_obter_zsql(ind_excluido=0)">
              <option
@@ -98,8 +98,8 @@
         <dtml-in expr="zsql.periodo_comp_comissao_obter_zsql(data=DateTime(dat_inicio_reuniao), ind_excluido=0)">
            <dtml-call expr="REQUEST.set('cod_periodo_comp', cod_periodo_comp)">        
         </dtml-in>
-        <label for="lst_relator">Relatoria</label>
-        <select class="custom-select" id="lst_relator" name="lst_relator">
+        <label class="form-label" for="lst_relator">Relatoria</label>
+        <select class="form-select" id="lst_relator" name="lst_relator">
             <option></option>
             <dtml-if cod_periodo_comp>
                  <dtml-in expr="zsql.composicao_comissao_obter_zsql(cod_comissao=cod_comissao, cod_periodo_comp=cod_periodo_comp)">
@@ -118,8 +118,8 @@
    </div>
 </dtml-if>
 
-<div class="form-row">
-  <div class="col-12 text-left">
+<div class="row">
+  <div class="col-12 text-start">
   <dtml-if cod_parecer>
        <input class="btn btn-primary" type="button" value="Salvar" onClick="campos_criticar(document.pauta_parecer_form)" />
   </dtml-if>
@@ -132,7 +132,7 @@
   </dtml-if>
   </div>
   <div class="col-md-12 mt-2">
-    <p class="text-muted small"><i class="fas fa-asterisk text-danger"></i> Campos obrigatórios</p>
+    <p class="text-muted small font-size-12"><i class="fas fa-asterisk text-danger"></i> Campos obrigatórios</p>
   </div>
 </div>
 </form>
@@ -141,4 +141,5 @@
 autosize(document.querySelectorAll('textarea'));
 </script>
 
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>

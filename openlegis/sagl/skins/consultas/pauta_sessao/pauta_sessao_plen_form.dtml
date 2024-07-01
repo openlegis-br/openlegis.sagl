@@ -1,4 +1,4 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
 <a id="ajuda" href="<dtml-var portal_url>/ajuda/pauta_sessao">Ajuda</a>
 
@@ -7,14 +7,14 @@ target="_blank">PDF</a>
 
 <dtml-in expr="zsql.tipo_sessao_plenaria_obter_zsql(tip_sessao=tip_sessao)">
 
-<h1 class="firstHeading">Pauta da <dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao"></h1>
+<h1 class="firstHeading font-size-18">Pauta da <dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao"></h1>
 
 <h3 align="center"><dtml-var sessao_plenaria_header></h3>
 
 </dtml-in>
 
 <fieldset>
- <legend>Matérias do Expediente</legend>
+ <legend class="font-size-16">Matérias do Expediente</legend>
     <table class="table">
      <dtml-in expr="zsql.expediente_materia_obter_zsql(cod_sessao_plen = cod_sessao_plen, ind_excluido=0)">
      <dtml-if sequence-start>
@@ -85,7 +85,7 @@ target="_blank">PDF</a>
 
 <dtml-if expr="zsql.oradores_expediente_obter_zsql(cod_sessao_plen=cod_sessao_plen, ind_excluido=0)">
 <fieldset>
-   <legend>Oradores Inscritos no Expediente</legend>
+   <legend class="font-size-16">Oradores Inscritos no Expediente</legend>
     <table class="table">
         <dtml-in expr="zsql.oradores_expediente_obter_zsql(cod_sessao_plen=cod_sessao_plen, ind_excluido=0)">
         <dtml-in expr="zsql.parlamentar_obter_zsql(cod_parlamentar=cod_parlamentar, ind_excluido=0)">
@@ -103,7 +103,7 @@ target="_blank">PDF</a>
 </dtml-if>
 
 <fieldset>
-    <legend>Ordem do Dia</legend>
+    <legend class="font-size-16">Ordem do Dia</legend>
     <table class="table">
         <dtml-in expr="zsql.ordem_dia_obter_zsql(cod_sessao_plen = cod_sessao_plen, ind_excluido=0)">
      <dtml-if sequence-start>
@@ -183,7 +183,7 @@ target="_blank">PDF</a>
 
 <dtml-if expr="zsql.oradores_obter_zsql(cod_sessao_plen=cod_sessao_plen, ind_excluido=0)">
 <fieldset>
-   <legend>Explicações Pessoais</legend>
+   <legend class="font-size-16">Explicações Pessoais</legend>
     <table class="table">
         <dtml-in expr="zsql.oradores_obter_zsql(cod_sessao_plen=cod_sessao_plen, ind_excluido=0)">
         <dtml-in expr="zsql.parlamentar_obter_zsql(cod_parlamentar=cod_parlamentar, ind_excluido=0)">
@@ -204,4 +204,5 @@ target="_blank">PDF</a>
   <input type="button" value="Voltar" OnClick="history.go(-1)" />
 </p>
 
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>

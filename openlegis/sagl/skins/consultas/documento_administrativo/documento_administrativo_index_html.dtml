@@ -1,4 +1,4 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
 <script src="<dtml-var portal_url>/javascript/data_validar.js"></script>
 
@@ -20,12 +20,12 @@ function documento_criticar(form){
   var form = document.pesq_basica_form;
 
   if (form.dt_apres1.value != "" && !IsValidDate(form.dt_apres1.value)) {
-    $.showAlert({title: "Mensagem do Sistema", body: "Digite uma data inicial válida!"});
+    bootstrap.showModal({title: "Mensagem do Sistema", body: "Digite uma data inicial válida!"});
     return false;
   } 
 
   if (form.dt_apres2.value != "" && !IsValidDate(form.dt_apres2.value)) {
-    $.showAlert({title: "Mensagem do Sistema", body: "Digite uma data final válida!"});
+    bootstrap.showModal({title: "Mensagem do Sistema", body: "Digite uma data final válida!"});
     return false;
   } 
 
@@ -41,9 +41,9 @@ function documento_criticar(form){
 
  <div class="row mb-2">
       <div class="col-12 col-md-6 align-self-center">
-        <h1 class="firstHeading">Pesquisa de Documentos</h1>
+        <h1 class="firstHeading font-size-18">Pesquisa de Documentos</h1>
       </div>
-      <div class="col-12 col-md-6 text-left text-md-right">
+      <div class="col-12 col-md-6 text-start text-end">
         <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Modulo Administrativo', 'Operador Materia'])">
           <div class="btn-group">  
             <a class="btn btn-primary btn-sm d-print-none" href="<dtml-var portal_url>/cadastros/documento_administrativo/documento_administrativo_form" ><i class="fa fa-fw fa-plus"></i> Incluir Documento</a>
@@ -59,7 +59,7 @@ function documento_criticar(form){
 
 <ul class="nav nav-tabs border-0" role="tablist">
   <li class="nav-item">
-    <a class="nav-link active" id="pesquisa-tab" data-toggle="tab" href="#pesquisa" role="tab" aria-controls="pesquisa" aria-selected="true">Pesquisa de Documentos</a>
+    <a class="nav-link active" id="pesquisa-tab" data-bs-toggle="tab" href="#pesquisa" role="tab" aria-controls="pesquisa" aria-selected="true">Pesquisa de Documentos</a>
   </li>
 </ul>
 
@@ -68,9 +68,9 @@ function documento_criticar(form){
 
 
 <form id="pesq_basica_form" name="pesq_basica_form" action="documento_administrativo_pesquisar_proc">
-  <div class="form-row">
+  <div class="row">
     <div class="col-12 col-md-6 mb-3">
-      <label for="lst_tip_documento">Tipo de Documento</label>
+      <label class="form-label" for="lst_tip_documento">Tipo de Documento</label>
       <select id="lst_tip_documento" name="lst_tip_documento" class="form-control selectpicker" data-dropup-auto="false" data-size="6" multiple="multiple" multiple data-actions-box="true" title="Todos" data-header="Tipo de Documento" data-selected-text-format="count > 3">
           <dtml-in expr="permissao_tipo()" mapping>
              <option value="<dtml-var tip_documento>"><dtml-var des_tipo_documento></option>
@@ -78,29 +78,29 @@ function documento_criticar(form){
       </select>
     </div>
     <div class="col-6 col-md-3 mb-3">
-      <label for="txt_num_documento">Número</label>
+      <label class="form-label" for="txt_num_documento">Número</label>
       <input name="txt_num_documento" id="txt_num_documento" type="number" min="1" maxlength="6" class="form-control number" autocomplete="off">
     </div>
     <div class="col-6 col-md-3 mb-3 controls">
-      <label for="txt_ano_documento">Ano</label>
+      <label class="form-label" for="txt_ano_documento">Ano</label>
       <input name="txt_ano_documento" id="txt_ano_documento" type="number" min="1900" maxlength="4" class="form-control year" autocomplete="off">
     </div>
   </div>
-  <div class="form-row">
+  <div class="row">
     <div class="col-6 col-md-3 mb-3">
-      <label for="txt_num_protocolo">Protocolo</label>
+      <label class="form-label" for="txt_num_protocolo">Protocolo</label>
       <input id="txt_num_protocolo" name="txt_num_protocolo" min="1" type="number" maxlength="8" class="form-control number" autocomplete="off">
     </div>
     <div class="col-6 col-md-3 mb-3">
-      <label for="txt_npc">Processo</label>
+      <label class="form-label" for="txt_npc">Processo</label>
       <input id="txt_npc" name="txt_npc" min="1" type="number" maxlength="6" class="form-control number" autocomplete="off">
     </div>
     <div class="col-6 col-md-3 mb-3">
-      <label for="dt_apres1">Data Inicial</label>
+      <label class="form-label" for="dt_apres1">Data Inicial</label>
         <input type="text" class="form-control date" id="dt_apres1" name="dt_apres1" autocomplete="off">
     </div>
    <div class="col-6 col-md-3 mb-3">
-      <label for="dt_apres2">Data Final</label>
+      <label class="form-label" for="dt_apres2">Data Final</label>
       <input type="text" class="form-control date" id="dt_apres2" name="dt_apres2" autocomplete="off">
     </div>
     <script>
@@ -127,20 +127,20 @@ function documento_criticar(form){
         });
     </script>    
   </div>
-  <div class="form-row">
+  <div class="row">
     <div class="col-12 col-md-6 mb-3">
-      <label for="txa_txt_interessado">Interessado</label>
+      <label class="form-label" for="txa_txt_interessado">Interessado</label>
       <input type="text" class="form-control" name="txa_txt_interessado" id="txa_txt_interessado"/>
     </div>
     <div class="col-12 col-sm-6 mb-3">
-       <label for="txa_txt_assunto"><span class="pf-label">Termos da Pesquisa</span></label></th>
+       <label class="form-label" for="txa_txt_assunto"><span class="pf-label">Termos da Pesquisa</span></label></th>
        <input class="form-control" id="txa_txt_assunto" type="text" name="txa_txt_assunto" />
     </div>
   </div>
-  <div class="form-row">
+  <div class="row">
     <div class="col-12 col-md-4 mb-3">
-      <label for="lst_tramitou">Tramitou por:</label>
-        <select id="lst_tramitou" name="lst_tramitou" class="custom-select" data-size="6">
+      <label class="form-label" for="lst_tramitou">Tramitou por:</label>
+        <select id="lst_tramitou" name="lst_tramitou" class="form-control" data-size="6">
             <option value=""></option>
             <dtml-in expr="zsql.unidade_tramitacao_obter_zsql(ind_adm=1)">
               <option value="<dtml-var cod_unid_tramitacao missing>">
@@ -150,8 +150,8 @@ function documento_criticar(form){
        </select>
     </div>
     <div class="col-12 col-md-4 mb-3">
-      <label for="lst_localizacao">Localização Atual</label>
-        <select id="lst_localizacao" name="lst_localizacao" class="custom-select" data-size="6">
+      <label class="form-label" for="lst_localizacao">Localização Atual</label>
+        <select id="lst_localizacao" name="lst_localizacao" class="form-control" data-size="6">
             <option value="">Todas</option>
             <dtml-in expr="zsql.unidade_tramitacao_obter_zsql(ind_adm=1)">
               <option value="<dtml-var cod_unid_tramitacao missing>">
@@ -161,8 +161,8 @@ function documento_criticar(form){
        </select>
     </div>
     <div class="col-12 col-md-4 mb-3">
-      <label for="lst_status">Situação Atual</label>
-        <select id="lst_status" name="lst_status" class="custom-select" data-size="6">
+      <label class="form-label" for="lst_status">Situação Atual</label>
+        <select id="lst_status" name="lst_status" class="form-control" data-size="6">
             <option value="">Todas</option>
             <dtml-in expr="zsql.status_tramitacao_administrativo_obter_zsql(ind_excluido=0)">
               <option value="<dtml-var cod_status missing>">
@@ -172,10 +172,10 @@ function documento_criticar(form){
        </select>
     </div>
   </div>
-  <div class="form-row">
+  <div class="row">
     <div class="col-12 col-md-4 mb-3">
-      <label for="lst_assunto">Classificação</label>
-        <select id="lst_assunto" name="lst_assunto" class="custom-select" data-size="6">
+      <label class="form-label" for="lst_assunto">Classificação</label>
+        <select id="lst_assunto" name="lst_assunto" class="form-control" data-size="6">
             <option value="">Todos</option>
             <dtml-in expr="zsql.tipo_peticionamento_obter_zsql(ind_doc_adm=1, ind_excluido=0)">
               <option value="<dtml-var tip_peticionamento missing>">
@@ -185,7 +185,7 @@ function documento_criticar(form){
        </select>
     </div>
   <div class="col-6 col-sm-4 mb-3">
-      <label for="rad_tramitando" class="d-block">Em Tramitação?</label>
+      <label class="form-label" for="rad_tramitando" class="d-block">Em Tramitação?</label>
         <select id="rad_tramitando" name="rad_tramitando" class="form-control selectpicker show-tick">
          <dtml-in expr="[('Não', '0'), ('Sim', '1'), ('Tanto faz', '')]">      
             <option value="<dtml-var expr="_['sequence-item']">" <dtml-if expr="_['sequence-item']==''">selected</dtml-if>><dtml-var expr="_['sequence-key']"></option>
@@ -193,7 +193,7 @@ function documento_criticar(form){
         </select>
    </div>                         
     <div class="col-6 col-sm-4 mb-3">
-      <label for="rd_ordenacao" class="d-block">Ordenação</label>
+      <label class="form-label" for="rd_ordenacao" class="d-block">Ordenação</label>
         <select id="rd_ordenacao" name="rd_ordenacao" class="form-control selectpicker show-tick">
          <dtml-in expr="[('Descendente', '1'), ('Ascendente', '2')]">      
             <option value="<dtml-var expr="_['sequence-item']">" <dtml-if expr="_['sequence-item']==''">selected</dtml-if>><dtml-var expr="_['sequence-key']"></option>
@@ -201,8 +201,8 @@ function documento_criticar(form){
         </select>
     </div>
   </div>  
-  <div class="form-row">
-    <div class="col-12 col-md-12 mt-2 text-left"> 
+  <div class="row">
+    <div class="col-12 col-md-12 mt-2 text-start"> 
         <dtml-let isAnon="portal_membership.isAnonymousUser()">
             <dtml-if expr="isAnon and sapl_documentos.props_sagl.recaptcha_key">
                 <div class="g-recaptcha mb-3" data-sitekey="<dtml-var "sapl_documentos.props_sagl.recaptcha_key">"></div>
@@ -218,4 +218,5 @@ function documento_criticar(form){
 
 </form>
 
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>

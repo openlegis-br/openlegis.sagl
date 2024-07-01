@@ -1,4 +1,4 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
 <script>
    function submeter(endereco){
@@ -26,19 +26,19 @@
 
 <a id="ajuda" href="<dtml-var portal_url>/ajuda/sessao_plenaria_ata">Ajuda</a>
 
-<h1 class="firstHeading">Ata da <dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao"></h1>
+<h1 class="firstHeading font-size-18">Ata da <dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao"></h1>
 
 <h3 align="center"><dtml-var sessao_plenaria_header></h3>
 
 <dtml-var sessao_plenaria_menu>
 
 <fieldset>
-<legend>Ata da <dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao"></legend>
+<legend class="font-size-16">Ata da <dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao"></legend>
 <form name="ata_sessao_form" method="post" action="ata_sessao_salvar_proc" enctype="multipart/form-data">
   <table class="table">
     <dtml-in expr="zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=cod_sessao_plen, ind_excluido=0)">
         <tr>
-            <td><label for="nom_arquivo">Arquivo:</label>
+            <td><label class="form-label" for="nom_arquivo">Arquivo:</label>
                 <dtml-if expr="(_.has_key('cod_sessao_plen'))">
                     <dtml-call expr="REQUEST.set('id_documento', str(cod_sessao_plen)+ '_' + 'ata_sessao.pdf')">
                     <dtml-if "hasattr(sapl_documentos.ata_sessao,id_documento)">
@@ -58,4 +58,5 @@
   </form>
 </table>
 </fieldset>
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>

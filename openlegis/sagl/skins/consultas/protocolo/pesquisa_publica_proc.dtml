@@ -1,6 +1,6 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
-<h1 class="firstHeading">Consulta de Protocolo</h1>
+<h1 class="firstHeading font-size-18">Consulta de Protocolo</h1>
 
 <dtml-in expr="zsql.protocolo_pesquisa_publica_zsql(chave_acesso=txt_chave_acesso)">
   <dtml-call expr="REQUEST.set('resultado', '1')">
@@ -57,7 +57,7 @@
  <dtml-in expr="zsql.documento_acessorio_administrativo_obter_zsql(cod_documento=cod_documento,ind_excluido=0)">
   <dtml-if sequence-start>
     <div>
-      <legend>Documentos Acessórios</legend>  
+      <legend class="font-size-16">Documentos Acessórios</legend>  
     </div>
     <table class="table table-sm mb-3">
        <thead>
@@ -86,7 +86,7 @@
   </dtml-if> 
  </dtml-in>
   <div>
-    <legend>Tramitações</legend>
+    <legend class="font-size-16">Tramitações</legend>
     <dtml-in expr="zsql.tramitacao_administrativo_obter_zsql(cod_documento=cod_documento)">
      <dtml-if sequence-start>
       <table class="table tablep-bordered">
@@ -142,7 +142,7 @@
 <dtml-else>
     <div class="alert alert-danger alert-dismissible fade show" role="alert">
         <h5>A chave de acesso <b><dtml-var txt_chave_acesso></b> não foi localizada!</h5>
-        <button type="button" class="close" data-dismiss="alert" aria-label="Fechar">
+        <button type="button" class="close" data-bs-dismiss="alert" aria-label="Fechar">
           <span aria-hidden="true">&times;</span>
         </button>
     </div>
@@ -153,7 +153,8 @@
   <p class="text-center">
     <button class="btn btn-sm btn-primary d-print-none ml-3" onClick="history.back()"><i class="fas fa-fw fa-undo"></i> Voltar</button>
     <button class="btn btn-sm btn-secondary d-print-none" onClick="window.print();return false;"><i class="fas fa-fw fa-print"></i> Imprimir Consulta</button>
-    <button type="button" class="btn btn-sm btn-secondary d-print-none" data-toggle="modal" data-target="#iFrameModal" data-title="Processo Integral" data-src="<dtml-var portal_url>/modelo_proposicao/processo_adm_eletronico?token=<dtml-var txt_chave_acesso>&modal=1"><i class="fa fa-file-pdf"></i> Processo Integral</button>
+    <button type="button" class="btn btn-sm btn-secondary d-print-none" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Processo Integral" data-src="<dtml-var portal_url>/modelo_proposicao/processo_adm_eletronico?token=<dtml-var txt_chave_acesso>&modal=1"><i class="fa fa-file-pdf"></i> Processo Integral</button>
   </p>
 
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>

@@ -1,4 +1,4 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
 <script src="<dtml-var portal_url>/js/moment.min.js"></script>
 <script src="<dtml-var portal_url>/js/datetime-moment.js"></script>
@@ -111,7 +111,7 @@ $(document).ready(() => {
     history.replaceState(null, null, url);
   } 
 
-  $('a[data-toggle="tab"]').on("click", function() {
+  $('a[data-bs-toggle="tab"]').on("click", function() {
     let newUrl;
     const hash = $(this).attr("href");
     if(hash == "#home") {
@@ -128,12 +128,12 @@ $(document).ready(() => {
 <div class="row">
   <div class="col-12 col-lg-8">
     <dtml-if cod_materia>
-      <h1 class="firstHeading"><dtml-var des_tipo_materia> nº <dtml-var num_ident_basica>/<dtml-var ano_ident_basica></h1>
+      <h1 class="firstHeading font-size-18"><dtml-var des_tipo_materia> nº <dtml-var num_ident_basica>/<dtml-var ano_ident_basica></h1>
     <dtml-else>
-      <h1 class="firstHeading">Proposições Digitais</h1> 
+      <h1 class="firstHeading font-size-18">Proposições Digitais</h1> 
     </dtml-if>
   </div>
-  <div class="col-12 col-lg-4 text-lg-right mb-2">
+  <div class="col-12 col-lg-4 text-end mb-2">
      <div class="btn-group" role="group">
        <dtml-if expr="AUTHENTICATED_USER.has_role(['Autor', 'Assessor Parlamentar'])">         
           <a class="btn btn-primary btn-sm" href="<dtml-var portal_url>/cadastros/proposicao/proposicao_form" ><i class="fa fa-fw fa-plus"></i> Criar Proposição</a>
@@ -222,7 +222,7 @@ href="<dtml-var portal_url>/cadastros/proposicao/proposicao_index_html?ind_envia
 <dtml-in expr="zsql.proposicao_obter_zsql(ind_excluido=0, ind_enviado=ind_enviado, ind_devolvido=ind_devolvido, col_username=col_username)">
     <dtml-if sequence-start>    
             <table class="table display" id="enviadas">    
-             <thead class="table-secondary">
+             <thead>
                 <tr>  
                     <th width="20%">Tipo de Proposição</th>
                     <th>Ementa</th>
@@ -277,7 +277,7 @@ href="<dtml-var portal_url>/cadastros/proposicao/proposicao_index_html?ind_envia
     <dtml-if sequence-start>    
         <fieldset>
             <table class="table display" id="enviadas">    
-             <thead class="table-secondary">
+             <thead>
                 <tr>  
                     <th width="20%">Tipo de Proposição</th>
                     <th>Ementa</th>
@@ -348,7 +348,7 @@ href="<dtml-var portal_url>/cadastros/proposicao/proposicao_index_html?ind_envia
     <dtml-if sequence-start>    
         <fieldset>
             <table class="table display" id="devolvidas">    
-             <thead class="table-secondary">
+             <thead>
                 <tr>  
                     <th width="20%">Tipo de Proposição</th>
                     <th>Ementa</th>
@@ -388,4 +388,5 @@ href="<dtml-var portal_url>/cadastros/proposicao/proposicao_index_html?ind_envia
 </dtml-in>
 </dtml-if>
 
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>

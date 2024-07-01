@@ -1,13 +1,13 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
-<h1 class="firstHeading">Tramitação de Matérias</h1> 
+<h1 class="firstHeading font-size-18">Tramitação de Matérias</h1> 
 
 
 <form method="post" name="tramitacao_materia_form" action="tramitacaoMateriaProc">
 
-   <div class="form-row">
+   <div class="row">
     <div class="col-12 col-md-6 mb-3">  
-            <label for="lst_tip_materia">Tipo de Matéria</label>
+            <label class="form-label" for="lst_tip_materia">Tipo de Matéria</label>
              <select id="lst_tip_materia" name="lst_tip_materia" class="form-control selectpicker" data-dropup-auto="false" data-size="6" multiple="multiple" data-actions-box="true" title="Todos" data-header="Tipo de Matéria" data-selected-text-format="count > 3">
 	               <dtml-in expr="zsql.tipo_materia_legislativa_obter_zsql(ind_excluido=0)">
 	                 <option value="<dtml-var tip_materia>">
@@ -18,15 +18,15 @@
    </div>
 
    <div class="col-6 col-md-3 mb-3">  
-           <label for="selAno" class="form-label required">Ano da Matéria</label>
-            <select class="custom-select" id="selAno" name="selAno">
+           <label class="form-label" for="selAno" class="form-label required">Ano da Matéria</label>
+            <select class="form-select" id="selAno" name="selAno">
                 <dtml-in listaAnosMaterias>
                    <option value="<dtml-var ano_mat>"><dtml-var ano_mat></option>
                 </dtml-in>
             </select>
    </div> 
    <div class="col-6 col-md-3 mb-3">  
-             <label for="dat_przlim">Prazo de Tramitação</label>
+             <label class="form-label" for="dat_przlim">Prazo de Tramitação</label>
              <input class="form-control date" type="text" id="dat_przlim" name="dat_przlim"  value="<dtml-var dat_przlim missing null=" ">" />
     <script>
         $('#dat_przlim').datepicker({
@@ -41,10 +41,10 @@
  
   </div>
 
-  <div class="form-row">
+  <div class="row">
   
     <div class="col-12 col-md-6 mb-3">
-      <label for="hdn_cod_autor">Autoria</label>
+      <label class="form-label" for="hdn_cod_autor">Autoria</label>
         <select id="hdn_cod_autor" name="hdn_cod_autor" class="form-control selectpicker show-tick" data-size="6" data-live-search="true" title="Todas" data-header="Pesquisar Autor">
               <option value="">Todas</option>
               <dtml-in expr="zsql.autor_obter_zsql(ind_excluido=0)">
@@ -55,8 +55,8 @@
 
    
    <div class="col-12 col-md-6 mb-3">  
-             <label for="Dst_cod_unid_tram_local">Localização</label>
-             <select class="custom-select" id="Dst_cod_unid_tram_local" name="Dst_cod_unid_tram_local">
+             <label class="form-label" for="Dst_cod_unid_tram_local">Localização</label>
+             <select class="form-select" id="Dst_cod_unid_tram_local" name="Dst_cod_unid_tram_local">
                <option value="">Todas</option>
                  <dtml-in expr="zsql.unidade_tramitacao_obter_zsql(ind_leg=1)">
                    <option 
@@ -70,8 +70,8 @@
    </div>  
 
    <div class="col-12 col-md-6 mb-3">  
-            <label for="lst_status">Situação</label>
-            <select class="custom-select" id="lst_status" name="lst_status">
+            <label class="form-label" for="lst_status">Situação</label>
+            <select class="form-select" id="lst_status" name="lst_status">
               <option value="">Todas</option>
               <dtml-in expr="zsql.status_tramitacao_obter_zsql()">
                 <option <dtml-if expr="_.has_key('cod_status')">
@@ -84,24 +84,25 @@
    </div>  
 
    <div class="col-12 col-md-6 mb-3"> 
-            <label for="txt_texto_acao">Texto do Despacho</label>   
+            <label class="form-label" for="txt_texto_acao">Texto do Despacho</label>   
             <input type="text" class="form-control" name="txt_texto_acao" id="txt_texto_acao" maxlenght="50" autocomplete="off" />
    </div>
 
   </div>
 
      
-  <div class="text-left">
+  <div class="text-start">
     <input class="btn btn-primary" type="submit" value="Pesquisar">
     <input class="btn btn-secondary" type="reset" value="Limpar">
   </div>
 
   <div class="row">
     <div class="col-md-12 mt-2">
-       <p class="text-muted small"><i class="fas fa-asterisk text-danger"></i>  Campos obrigatórios</p>
+       <p class="text-muted small font-size-12"><i class="fas fa-asterisk text-danger"></i>  Campos obrigatórios</p>
     </div>
   </div>
 
 </form>
 
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>

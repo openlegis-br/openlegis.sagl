@@ -1,4 +1,4 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
 <script>
 <!--
@@ -33,14 +33,14 @@
 //-->
 </script>
 
-  <h1 class="firstHeading">Verificação de Textos Integrais</h1>
-  <legend>Normas Jurídicas</legend>
+  <h1 class="firstHeading font-size-18">Verificação de Textos Integrais</h1>
+  <legend class="font-size-16">Normas Jurídicas</legend>
   <form class="d-print-none" method="post" name="normas_form" action="verificar_normas_html">
     <input type="hidden" name="norma" value="1">
-    <div class="form-row">
+    <div class="row">
      <div class="col-8 col-md-6 mb-3">
-      <label for="lst_tip_norma" class="required">Tipo de Norma</label>
-        <select class="custom-select" id="lst_tip_norma" name="lst_tip_norma">
+      <label class="form-label" for="lst_tip_norma" class="required">Tipo de Norma</label>
+        <select class="form-select" id="lst_tip_norma" name="lst_tip_norma">
           <option value="0">Selecione</option>
           <dtml-in expr="zsql.tipo_norma_juridica_obter_zsql(ind_excluido=0)">
             <option 
@@ -53,12 +53,12 @@
         </select>
     </div>
     <div class="col-4 col-md-2 mb-3">
-          <label for="txt_ano_norma" class="required">Ano</label>
+          <label class="form-label" for="txt_ano_norma" class="required">Ano</label>
           <input class="form-control year" type="text" id="txt_ano_norma" name="txt_ano_norma" maxlength="4" value="<dtml-var txt_ano_norma missing>" />
         </label>
     </div>
    </div>
-   <div class="text-left">
+   <div class="text-start">
         <input class="btn btn-primary" type="button"value="Gerar Relatório" onClick="campos_criticar()" />
         <dtml-if expr="_.has_key('norma')">
           <a class="btn btn-secondary" href="<dtml-var portal_url>/relatorios_administrativos/verificaTextosIntegrais/verificar_normas_html">Nova Pesquisa</a>
@@ -80,4 +80,5 @@
          </dtml-in>
 </dtml-if>
 
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>

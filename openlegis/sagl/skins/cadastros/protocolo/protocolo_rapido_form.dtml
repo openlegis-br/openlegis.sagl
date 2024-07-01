@@ -1,4 +1,4 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
 <script src="<dtml-var portal_url>/javascript/data_validar.js"></script>
 <script>
@@ -23,7 +23,7 @@ form.submit();
 }
 </script>
 
-<h1 class="firstHeading">Protocolo Rápido</h1> 
+<h1 class="firstHeading font-size-18">Protocolo Rápido</h1> 
 <div id="barra-conteudo">
     <ul>
         <li>
@@ -46,27 +46,27 @@ form.submit();
 <input type="hidden" name="hdn_url" value="<dtml-var portal_url>/consultas/protocolo/protocolo_mostrar_proc?cod_protocolo=<dtml-var hdn_cod_potocolo missing>" />
 
 <fieldset>
-    <legend>Identificação do Protocolo</legend>
+    <legend class="font-size-16">Identificação do Protocolo</legend>
      <table class="table">
          <tr>
            <td colspan="2">
-                <label for="txa_txt_assunto">Assunto </label> <span class="campoObrigatorio"></span>
+                <label class="form-label" for="txa_txt_assunto">Assunto </label> <span class="campoObrigatorio"></span>
                 <textarea class="form-control"  id="txa_txt_assunto" name="txa_txt_assunto" cols="67" rows="4" maxlength="500"></textarea> 
            </td>
          </tr>
          <tr>
            <td>
-               <label for="file_nom_arquivo">Arquivo Digitalizado (PDF)</label><br />
+               <label class="form-label" for="file_nom_arquivo">Arquivo Digitalizado (PDF)</label><br />
                <input class="form-control" type="file" id="file_nom_arquivo" name="file_nom_arquivo" accept="application/pdf" size="20" maxlength="100" />
            </td>
            <td>
-                <label for="txt_num_paginas">Núm. Páginas</label><br />
+                <label class="form-label" for="txt_num_paginas">Núm. Páginas</label><br />
                 <input class="form-control" type="text" id="txt_num_paginas" name="txt_num_paginas" size="6 maxlength="3" value="<dtml-var num_dias_prazo missing null="">"/>
            </td> 
          </tr>
          <tr>
            <td colspan="2">
-                <label for="txa_txt_observacao">Observações</label> 
+                <label class="form-label" for="txa_txt_observacao">Observações</label> 
                 <textarea class="form-control"  id="txa_txt_observacao" name="txa_txt_observacao" cols="67" rows="4"></textarea>
            </td>
          </tr>
@@ -80,4 +80,5 @@ form.submit();
 
 </form>
 
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>

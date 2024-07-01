@@ -1,4 +1,4 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
 <script>
 <!--
@@ -30,9 +30,9 @@
     <input type="hidden" name="hdn_cod_visita" value="<dtml-var cod_visita missing>" />
     <input type="hidden" name="modal" value="1" /> 
       
-    <div class="form-row">
+    <div class="row">
        <div class="col-12 mb-3">
-            <label for="txa_nom_pessoa">Nome do Visitante</label>
+            <label class="form-label" for="txa_nom_pessoa">Nome do Visitante</label>
             <dtml-unless cod_visita>
               <dtml-in expr="zsql.pessoa_obter_zsql(cod_pessoa=cod_pessoa)">
                  <dtml-call expr="REQUEST.set('nom_pessoa', nom_pessoa)">
@@ -43,10 +43,10 @@
        </div>
     </div>  
 
-    <div class="form-row">
+    <div class="row">
        <div class="col-8 mb-3">
-             <label for="lst_funcionario" class="required">Funcionário</label>
-             <select class="custom-select" id="lst_funcionario" name="lst_funcionario" <dtml-if dat_saida>disabled</dtml-if> required>
+             <label class="form-label" for="lst_funcionario" class="required">Funcionário</label>
+             <select class="form-select" id="lst_funcionario" name="lst_funcionario" <dtml-if dat_saida>disabled</dtml-if> required>
                 <option value=""></option>
                 <dtml-in expr="zsql.funcionario_obter_zsql(ind_excluido=0,ind_ativo=1)">
                   <option
@@ -62,32 +62,32 @@
              </select>
        </div>
        <div class="col-4">
-            <label for="txt_num_cracha" class="required">Crachá</label>
+            <label class="form-label" for="txt_num_cracha" class="required">Crachá</label>
             <input class="form-control" type="text" id="txt_num_cracha" name="txt_num_cracha" size="18" maxlength="3" value="<dtml-var num_cracha missing>" <dtml-if dat_saida>readonly</dtml-if> />
        </div>       
     </div>
     
   <dtml-if cod_visita>
-    <div class="form-row">
+    <div class="row">
        <div class="col-6 mb-3">
-             <label for="dat_entrada">Entrada</label>
+             <label class="form-label" for="dat_entrada">Entrada</label>
              <input class="form-control" type="text" name="dat_entrada" value="<dtml-var dat_entrada>" readonly />
        </div>
        <div class="col-6 mb-3">
-             <label for="dat_saida">Saída</label><br />
+             <label class="form-label" for="dat_saida">Saída</label><br />
              <input class="form-control" type="text" name="dat_saida" value="<dtml-var dat_saida missing null>" readonly />
        </div>
     </div>  
   </dtml-if>      
 
-    <div class="form-row">
+    <div class="row">
        <div class="col-12 mb-3">
-            <label for="txa_txt_observacao">Observações</label><br />
+            <label class="form-label" for="txa_txt_observacao">Observações</label><br />
             <textarea class="form-control"  name="txa_txt_observacao" rows="2" <dtml-if dat_saida>readonly</dtml-if>><dtml-var txt_observacao missing null=""></textarea>       
        </div>
     </div>
       
- <div class="text-left">
+ <div class="text-start">
    <dtml-unless dat_saida>
       <input class="btn btn-primary" type="button" value="Salvar" onClick="campos_criticar(document.visita_form)" />
       <dtml-if cod_visita>
@@ -98,4 +98,5 @@
 
 </form>
 
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>

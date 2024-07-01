@@ -5,7 +5,7 @@
 </dtml-if>
 
 <dtml-if erro>
-     <dtml-var standard_html_header>
+     <dtml-var header_html>
      <table class="table"  border=0 align="center"> 
       <tr><td colspan="2" class="titulo"></td></tr>
       <tr>
@@ -13,7 +13,8 @@
        <td width="80%">Houve um erro ao localizar seu e-mail<br />
       </td></tr>
      </table>
-     <dtml-var standard_html_footer>
+     <dtml-var js_slot>
+<dtml-var footer_html>
 </dtml-if>
 
 <dtml-unless erro>
@@ -23,7 +24,7 @@
         <dtml-call expr="metodo(txt_hash            = txt_hash,
                                 ind_excluido        = ind_excluido)">
     <dtml-except>
-     <dtml-var standard_html_header>
+     <dtml-var header_html>
      <table class="table"  border=0 align="center"> 
       <tr><td colspan="2" class="titulo"></td></tr>
       <tr>
@@ -31,10 +32,11 @@
        <td width="80%">Houve um erro<br />
       </td></tr>
      </table>
-     <dtml-var standard_html_footer>
+     <dtml-var js_slot>
+<dtml-var footer_html>
 
     <dtml-else>
-     <dtml-var standard_html_header>
+     <dtml-var header_html>
      <table class="table"  border=0 align="center"> 
       <tr><td colspan="2" class="titulo"></td></tr>
       <tr>
@@ -42,7 +44,8 @@
        <td width="80%">E-mail exclu&iacute;do com sucesso<br />
       </td></tr>
      </table>
-     <dtml-var standard_html_footer>
+     <dtml-var js_slot>
+<dtml-var footer_html>
 
 </dtml-try>
 

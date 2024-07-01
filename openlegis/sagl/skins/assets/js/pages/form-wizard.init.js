@@ -1,0 +1,1 @@
+$(function(){$("#form-horizontal").steps({headerTag:"h3",bodyTag:"fieldset",transitionEffect:"slide",enableAllSteps:!0,enablePagination:!0}),$("#form-vertical").steps({headerTag:"h3",bodyTag:"fieldset",transitionEffect:"slideLeft",stepsOrientation:"vertical",enableAllSteps:!0,enablePagination:!0})});

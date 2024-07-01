@@ -1,4 +1,4 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
 <script src="<dtml-var portal_url>/javascript/data_validar.js"></script>
 <script>
@@ -76,9 +76,9 @@ function setar_hdn_file(form){
 
  <div class="row mb-2">
       <div class="col-12 col-md-8 align-self-center">
-        <h1 class="firstHeading">Cadastro de Partido</h1>
+        <h1 class="firstHeading font-size-18">Cadastro de Partido</h1>
       </div>
-      <div class="col-12 col-md-4 text-left text-md-right">
+      <div class="col-12 col-md-4 text-start text-end">
          <div class="btn-group d-print-none ">
            <a class="btn btn-primary btn-sm" href="index_html"><i class="fa fa-fw fa-undo"></i> Voltar</a>         
          </div>
@@ -89,31 +89,31 @@ function setar_hdn_file(form){
 
   <input type="hidden" name="hdn_cod_partido" value="<dtml-var cod_partido missing>" />
 
-  <div class="form-row">
+  <div class="row">
     <div class="col-8 mb-3">
-      <label for="txt_nom_partido" class="required">Nome do Partido</label>         
+      <label class="form-label" for="txt_nom_partido" class="required">Nome do Partido</label>         
       <input class="form-control" type="text" id="txt_nom_partido" name="txt_nom_partido" value="<dtml-var nom_partido missing>" maxlength="50" />
     </div>
     <div class="col-4 mb-3">
-      <label for="txt_sgl_partido" class="required">Sigla</label>             
+      <label class="form-label" for="txt_sgl_partido" class="required">Sigla</label>             
       <input class="form-control" type="text" id="txt_sgl_partido" name="txt_sgl_partido" value="<dtml-var sgl_partido missing>" maxlength="20" />
     </div>    
   </div>
 
-  <div class="form-row">
+  <div class="row">
     <div class="col-6 col-sm-3 mb-3">
-      <label for="txt_dat_criacao" class="required">Data de Criação</label>                 
+      <label class="form-label" for="txt_dat_criacao" class="required">Data de Criação</label>                 
       <input class="form-control date" type="text" id="txt_dat_criacao" name="txt_dat_criacao" value="<dtml-var dat_criacao missing null="">" />
     </div>
     <div class="col-6 col-sm-3 mb-3">
-      <label for="txt_dat_extincao">Data de Extinção</label>                     
+      <label class="form-label" for="txt_dat_extincao">Data de Extinção</label>                     
       <input class="form-control date" type="text" id="txt_dat_extincao" name="txt_dat_extincao" value="<dtml-var dat_extincao missing null="">" />
     </div>    
   </div>
 
-  <div class="form-row">
+  <div class="row">
     <div class="col-12 col-sm-6 mb-3">
-       <label class="d-block">Logotipo</label>                     
+       <label class="form-label d-block">Logotipo</label>                     
        <dtml-if cod_partido>
           <dtml-call expr="REQUEST.set('logo_partido', str(cod_partido)+'_logo.png')">
           <dtml-if expr="hasattr(sapl_documentos.partido, logo_partido)">
@@ -136,7 +136,7 @@ function setar_hdn_file(form){
     </div>    
   </div>
 
- <div class="text-left">
+ <div class="text-start">
   <input class="btn btn-primary" type="button" value="Salvar" onClick="campos_criticar(document.partido_form)" />
   <dtml-if cod_partido>
     <input class="btn btn-danger" type="button" value="Excluir" onClick="partido_excluir(document.partido_form)" />
@@ -145,10 +145,11 @@ function setar_hdn_file(form){
 
    <div class="row">
       <div class="col-md-12 mt-2">
-         <p class="text-muted small"><i class="fas fa-asterisk text-danger"></i> Campos obrigatórios</p>
+         <p class="text-muted small font-size-12"><i class="fas fa-asterisk text-danger"></i> Campos obrigatórios</p>
       </div>
    </div> 
 
 </form>
 
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>

@@ -1,4 +1,4 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
 <script src="<dtml-var portal_url>/javascript/data_validar.js"></script>
 
@@ -149,7 +149,7 @@ $(document).ready(() => {
     history.replaceState(null, null, url);
   } 
 
-  $('a[data-toggle="tab"]').on("click", function() {
+  $('a[data-bs-toggle="tab"]').on("click", function() {
     let newUrl;
     const hash = $(this).attr("href");
     if(hash == "#home") {
@@ -167,16 +167,16 @@ $(document).ready(() => {
 <div class="row mb-2">
   <div class="col-12 col-lg-8">
     <dtml-if expr="_.has_key('cod_documento')">
-       <h1 class="firstHeading"><dtml-var des_tipo_documento> nº <dtml-var num_documento>/<dtml-var ano_documento></h1>
+       <h1 class="firstHeading font-size-18"><dtml-var des_tipo_documento> nº <dtml-var num_documento>/<dtml-var ano_documento></h1>
     <dtml-else>
-       <h1 class="firstHeading">Cadastro de Documento</h1>
+       <h1 class="firstHeading font-size-18">Cadastro de Documento</h1>
     </dtml-if>
   </div>
-  <div class="col-12 col-lg-4 text-lg-right">
+  <div class="col-12 col-lg-4 text-end">
    <dtml-if expr="_.has_key('cod_documento')">
     <div class="btn-group">
       <a class="btn btn-primary btn-sm d-print-none" href="<dtml-var portal_url>/cadastros/documento_administrativo/documento_administrativo_form" ><i class="fa fa-fw fa-plus"></i> Incluir Documento</a>    
-      <button class="btn btn-sm btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+      <button class="btn btn-sm btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
         <i class="fas fa-fw fa-file-export"></i> Gerar
       </button>
       <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
@@ -191,10 +191,10 @@ $(document).ready(() => {
 
 <ul class="nav nav-tabs border-0" id="nav_norma" role="tablist">
   <li class="nav-item">
-    <a class="nav-link active" id="index-tab" data-toggle="tab" href="#home" role="tab" aria-controls="home" aria-selected="true">Dados Básicos</a>
+    <a class="nav-link active" id="index-tab" data-bs-toggle="tab" href="#home" role="tab" aria-controls="home" aria-selected="true">Dados Básicos</a>
   </li>
   <li class="nav-item">
-    <a class="nav-link <dtml-unless cod_documento>disabled</dtml-unless>" id="acessorios-tab" data-toggle="tab" href="#acessorios" role="tab" aria-controls="acessorios" aria-selected="false">Documentos Acessórios
+    <a class="nav-link <dtml-unless cod_documento>disabled</dtml-unless>" id="acessorios-tab" data-bs-toggle="tab" href="#acessorios" role="tab" aria-controls="acessorios" aria-selected="false">Documentos Acessórios
            <dtml-if cod_documento>
          <dtml-in expr="zsql.documento_acessorio_administrativo_obter_zsql(cod_documento=cod_documento, ind_excluido=0)">
            <dtml-if sequence-start>
@@ -205,7 +205,7 @@ $(document).ready(() => {
     </a>
   </li>
   <li class="nav-item">
-    <a class="nav-link <dtml-unless cod_documento>disabled</dtml-unless>" id="vinculados-tab" data-toggle="tab" href="#vinculados" role="tab" aria-controls="vinculados" aria-selected="false">Documentos Vinculados
+    <a class="nav-link <dtml-unless cod_documento>disabled</dtml-unless>" id="vinculados-tab" data-bs-toggle="tab" href="#vinculados" role="tab" aria-controls="vinculados" aria-selected="false">Documentos Vinculados
        <dtml-if cod_documento>
          <dtml-in expr="zsql.documento_administrativo_vinculado_obter_zsql(cod_documento_vinculante=cod_documento, ind_excluido=0)">
            <dtml-if sequence-start>
@@ -216,7 +216,7 @@ $(document).ready(() => {
     </a>
   </li>
   <li class="nav-item">
-    <a class="nav-link <dtml-unless cod_documento>disabled</dtml-unless>" id="materias-tab" data-toggle="tab" href="#materias" role="tab" aria-controls="materias" aria-selected="false">Matérias Vinculadas
+    <a class="nav-link <dtml-unless cod_documento>disabled</dtml-unless>" id="materias-tab" data-bs-toggle="tab" href="#materias" role="tab" aria-controls="materias" aria-selected="false">Matérias Vinculadas
        <dtml-if cod_documento>
          <dtml-in expr="zsql.documento_administrativo_materia_obter_zsql(cod_documento=cod_documento, ind_excluido=0)">
            <dtml-if sequence-start>
@@ -227,7 +227,7 @@ $(document).ready(() => {
     </a>
   </li> 
   <li class="nav-item">
-    <a class="nav-link <dtml-unless cod_documento>disabled</dtml-unless>" id="tramitacao-tab" data-toggle="tab" href="#tramitacao" role="tab" aria-controls="tramitacao" aria-selected="false">Tramitações
+    <a class="nav-link <dtml-unless cod_documento>disabled</dtml-unless>" id="tramitacao-tab" data-bs-toggle="tab" href="#tramitacao" role="tab" aria-controls="tramitacao" aria-selected="false">Tramitações
        <dtml-if cod_documento>
          <dtml-in expr="zsql.tramitacao_administrativo_obter_zsql(cod_documento=cod_documento, ind_excluido=0)">
            <dtml-if sequence-start>
@@ -238,7 +238,7 @@ $(document).ready(() => {
     </a>
   </li>
   <li class="nav-item">
-    <a class="nav-link <dtml-unless cod_documento>disabled</dtml-unless>" id="cientificacoes-tab" data-toggle="tab" href="#cientificacoes" role="tab" aria-controls="cientificacoes" aria-selected="false">Cientificações
+    <a class="nav-link <dtml-unless cod_documento>disabled</dtml-unless>" id="cientificacoes-tab" data-bs-toggle="tab" href="#cientificacoes" role="tab" aria-controls="cientificacoes" aria-selected="false">Cientificações
        <dtml-if cod_documento>
          <dtml-in expr="zsql.cientificacao_documento_obter_zsql(cod_documento=cod_documento, ind_excluido=0)">
            <dtml-if sequence-start>
@@ -250,7 +250,7 @@ $(document).ready(() => {
   </li>  
  <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Modulo Administrativo'])">
   <li class="nav-item">
-    <a class="nav-link <dtml-unless cod_documento>disabled</dtml-unless>" id="destinatarios-tab" data-toggle="tab" href="#destinatarios" role="tab" aria-controls="destinatarios" aria-selected="false">Impressos
+    <a class="nav-link <dtml-unless cod_documento>disabled</dtml-unless>" id="destinatarios-tab" data-bs-toggle="tab" href="#destinatarios" role="tab" aria-controls="destinatarios" aria-selected="false">Impressos
        <dtml-if cod_documento>
          <dtml-in expr="zsql.destinatario_oficio_obter_zsql(cod_documento=cod_documento, ind_excluido=0)">
            <dtml-if sequence-start>
@@ -271,11 +271,11 @@ $(document).ready(() => {
   <input type="hidden" name="hdn_cod_documento" value="<dtml-var cod_documento missing>" />
   <input type="hidden" name="hdn_url" value="documento_administrativo_mostrar_proc?cod_documento=<dtml-var cod_documento missing>" />
 
-  <legend>Dados Básicos</legend>
-  <div class="form-row">
+  <legend class="font-size-16">Dados Básicos</legend>
+  <div class="row">
     <div class="col-12 col-lg-6 mb-3">
-       <label for="lst_tip_documento" class="required">Tipo de Documento</label>
-          <select class="custom-select" id="lst_tip_documento" name="lst_tip_documento" <dtml-unless cod_documento>onChange="numero_buscar(document.documento_administrativo_form)"</dtml-unless> required>
+       <label class="form-label" for="lst_tip_documento" class="required">Tipo de Documento</label>
+          <select class="form-select" id="lst_tip_documento" name="lst_tip_documento" <dtml-unless cod_documento>onChange="numero_buscar(document.documento_administrativo_form)"</dtml-unless> required>
             <option>Selecione</option>
           <dtml-in expr="consultas.documento_administrativo.permissao_tipo()" mapping>
              <dtml-if expr="ind_incluir == 1">
@@ -299,12 +299,12 @@ $(document).ready(() => {
           </select>
     </div>
     <div class="col-6 col-lg-3 mb-3">
-       <label for="txt_num_documento" class="required">Número</label>
+       <label class="form-label" for="txt_num_documento" class="required">Número</label>
        <input type="hidden" name="hdn_num_documento" value="" />
        <input class="form-control number" type="number" id="txt_num_documento" name="txt_num_documento" value="<dtml-var num_documento missing null="">" required />
     </div>
     <div class="col-6 col-lg-3 mb-3">
-       <label for="txt_ano_documento" class="required">Ano</label>
+       <label class="form-label" for="txt_ano_documento" class="required">Ano</label>
        <dtml-unless ano_documento>
           <dtml-call expr="REQUEST.set('ano_documento', _.DateTime.year(DateTime()))">
        </dtml-unless>
@@ -312,9 +312,9 @@ $(document).ready(() => {
     </div>    
   </div>
 
-  <div class="form-row">
+  <div class="row">
     <div class="col-6 col-lg-3 mb-3">
-       <label for="txt_dat_documento" class="required">Data do Documento</label>
+       <label class="form-label" for="txt_dat_documento" class="required">Data do Documento</label>
        <dtml-unless dat_documento>
           <dtml-call expr="REQUEST.set('dat_documento', DateTime().strftime('%d/%m/%Y'))">
        </dtml-unless>
@@ -330,14 +330,14 @@ $(document).ready(() => {
         </script>        
     </div>
     <div class="col-6 col-lg-3 mb-3">
-      <label for="txt_num_protocolo">Número de Protocolo</label>
+      <label class="form-label" for="txt_num_protocolo">Número de Protocolo</label>
       <div class="input-group">
       <input class="form-control" type="number" id="txt_num_protocolo" name="txt_num_protocolo" value="<dtml-var num_protocolo missing null="">" autocomplete="off" />   
       <dtml-if num_protocolo>
          <dtml-in expr="zsql.protocolo_obter_zsql(num_protocolo=num_protocolo, ano_protocolo=ano_documento)">
             <dtml-if cod_protocolo>
              <div class="input-group-append">
-               <button type="button" class="btn btn-secondary d-print-none" data-toggle="modal" data-target="#iFrameModal" data-title="Etiqueta de Protocolo" data-src="<dtml-var portal_url>/relatorios/pdf_etiqueta_protocolo_preparar_pysc?rad_tip_protocolo=&txt_cod_protocolo=<dtml-var cod_protocolo>&txt_num_protocolo=<dtml-var num_protocolo>&txt_ano_protocolo=<dtml-var ano_protocolo>&dt_apres=&dt_apres2=&rad_tip_processo=&lst_tip_documento=&lst_tip_materia=&txt_assunto=&txa_txt_interessado=&hdn_cod_autor="><i class="fa fa-fw fa-barcode"></i><span class="d-none">PDF</span></button>
+               <button type="button" class="btn btn-secondary d-print-none" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Etiqueta de Protocolo" data-src="<dtml-var portal_url>/relatorios/pdf_etiqueta_protocolo_preparar_pysc?rad_tip_protocolo=&txt_cod_protocolo=<dtml-var cod_protocolo>&txt_num_protocolo=<dtml-var num_protocolo>&txt_ano_protocolo=<dtml-var ano_protocolo>&dt_apres=&dt_apres2=&rad_tip_processo=&lst_tip_documento=&lst_tip_materia=&txt_assunto=&txa_txt_interessado=&hdn_cod_autor="><i class="fa fa-fw fa-barcode"></i><span class="d-none">PDF</span></button>
                <button class="btn btn-secondary" type="button" name="btn_incluir" onclick="location.href='<dtml-var portal_url>/consultas/protocolo/protocolo_mostrar_proc?cod_protocolo=<dtml-var cod_protocolo>';"><i class="fas fa-fw fa-eye"></i><span class="d-none">Protocolo</span></button>
               </div>
             </dtml-if>
@@ -346,22 +346,22 @@ $(document).ready(() => {
       </div>     
     </div>  
     <div class="col-12 col-lg-6 mb-3">
-      <label for="txa_txt_interessado" class="required">Interessado</label>
+      <label class="form-label" for="txa_txt_interessado" class="required">Interessado</label>
       <input class="form-control" type="text" id="txa_txt_interessado" name="txa_txt_interessado" maxlength="200" value="<dtml-var txt_interessado missing null="">" required />
     </div>         
   </div>
 
-  <div class="form-row"> 
+  <div class="row"> 
     <div class="col-12 mb-3">
-      <label for="txa_txt_assunto" class="required">Assunto</label>
+      <label class="form-label" for="txa_txt_assunto" class="required">Assunto</label>
       <textarea class="form-control auto-resize" id="txa_txt_assunto" name="txa_txt_assunto" rows="1" required><dtml-var txt_assunto missing></textarea>
     </div>
   </div> 
 
-  <div class="form-row">
+  <div class="row">
     <div class="col-12 col-lg-4 mb-3">
-      <label for="lst_assunto">Classificação</label>
-        <select id="lst_assunto" name="lst_assunto" class="custom-select"">
+      <label class="form-label" for="lst_assunto">Classificação</label>
+        <select id="lst_assunto" name="lst_assunto" class="form-control"">
             <option value=""></option>
             <dtml-in expr="zsql.tipo_peticionamento_obter_zsql(ind_doc_adm=1, ind_excluido=0)">
               <option value="<dtml-var tip_peticionamento>"
@@ -376,11 +376,11 @@ $(document).ready(() => {
        </select>   
     </div>
     <div class="col-6 col-lg-3 mb-3">
-      <label for="txt_num_dias_prazo">Dias de Prazo</label>
+      <label class="form-label" for="txt_num_dias_prazo">Dias de Prazo</label>
       <input class="form-control" type="number" id="txt_num_dias_prazo" name="txt_num_dias_prazo" maxlength="2" value="<dtml-var num_dias_prazo missing null="">" />    
     </div>
     <div class="col-6 col-lg-3 mb-3">
-      <label for="txt_dat_fim_prazo">Prazo de Conclusão</label>
+      <label class="form-label" for="txt_dat_fim_prazo">Prazo de Conclusão</label>
       <input class="form-control date" type="text" id="txt_dat_fim_prazo" name="txt_dat_fim_prazo" value="<dtml-var dat_fim_prazo missing null="">" autocomplete="off" pattern=".{10,}" />
         <script>
         $('#txt_dat_fim_prazo').datepicker({
@@ -406,11 +406,11 @@ $(document).ready(() => {
   </div>
 
   <dtml-if cod_documento>
-    <legend>Textos Integrais</legend>
+    <legend class="font-size-16">Textos Integrais</legend>
   </dtml-if>
-  <div class="form-row mb-1">
+  <div class="row mb-1">
     <div class="col-12 col-lg-6 mb-3">
-      <label class="d-block">Arquivo PDF</label>
+      <label class="form-label d-block">Arquivo PDF</label>
       <dtml-if expr="_.has_key('cod_documento')">
         <dtml-call expr="REQUEST.set('id_documento', str(cod_documento)+'_texto_integral.pdf')">
         <dtml-in expr="zsql.assinatura_documento_obter_zsql(codigo=cod_documento, tipo_doc='documento',cod_usuario=None)">
@@ -426,7 +426,7 @@ $(document).ready(() => {
                </dtml-if>
              </a>
              <dtml-if "sapl_documentos.props_sagl.restpki_access_token!=''">
-                <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#iFrameModal" data-title="Assinaturas Digitais" data-src="<dtml-var portal_url>/cadastros/assinatura/assinatura_solicitar_form?codigo=<dtml-var cod_documento>&tipo_doc=documento&modal=1"><i class="fas fa-file-signature"></i>Assinaturas</button>
+                <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Assinaturas Digitais" data-src="<dtml-var portal_url>/cadastros/assinatura/assinatura_solicitar_form?codigo=<dtml-var cod_documento>&tipo_doc=documento&modal=1"><i class="fas fa-file-signature"></i>Assinaturas</button>
              </dtml-if>
              <a class="btn btn-danger" href="<dtml-var portal_url>/cadastros/documento_administrativo/texto_documento_administrativo_excluir_proc?cod_documento=<dtml-var cod_documento missing>" data-confirm="Deseja realmente excluir o arquivo PDF?"><i class="fas fa-trash"></i> Excluir</a>              
  	  </dtml-let>
@@ -459,7 +459,7 @@ $(document).ready(() => {
     </div>
     <div class="col-12 col-lg-6 mb-3">
       <dtml-if cod_documento>
-         <label class="d-block">Arquivo ODT</label>
+         <label class="form-label d-block">Arquivo ODT</label>
          <dtml-let id_documento="str(cod_documento)+'_texto_integral.odt'">
             <dtml-if expr="hasattr(sapl_documentos.administrativo,id_documento)">
                <dtml-let documento="getattr(sapl_documentos.administrativo,id_documento).absolute_url">
@@ -467,13 +467,13 @@ $(document).ready(() => {
                  <a class="btn btn-secondary" href="<dtml-var portal_url>/generico/viewerJS/#<dtml-var documento>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fa fa-fw fa-file-alt"></i>Visualizar</a>                 
                  <a class="btn btn-secondary" href="<dtml-var portal_url>/webeditor/editorDocumento?<dtml-var documento>" target="_blank"><i class="fa fa-fw fa-edit"></i>Editar</a>
   	         <dtml-call expr="REQUEST.set('nome_arquivo_odt',str(cod_documento)+'_texto_integral.odt')">
-                 <button type="button" class="btn btn-secondary" onclick="javascript:location.href='&dtml-URL1;/sapl_documentos/administrativo/externalEdit_/<dtml-var nome_arquivo_odt>.zem'" data-toggle="tooltip" data-placement="bottom" title="Editar no LibreOffice"><i class="fas fa-fw fa-external-link-alt"></i>LibreOffice</button>
+                 <button type="button" class="btn btn-secondary" onclick="javascript:location.href='&dtml-URL1;/sapl_documentos/administrativo/externalEdit_/<dtml-var nome_arquivo_odt>.zem'" data-bs-toggle="tooltip" data-placement="bottom" title="Editar no LibreOffice"><i class="fas fa-fw fa-external-link-alt"></i>LibreOffice</button>
                  <a class="btn btn-danger" href="<dtml-var portal_url>/cadastros/documento_administrativo/texto_documento_administrativo_excluir_odt_proc?cod_documento=<dtml-var cod_documento missing>" data-confirm="Deseja realmente excluir o arquivo ODT?"><i class="fas fa-trash"></i> Excluir</a>
   	       </dtml-let>
             <dtml-else>
                <dtml-call expr="REQUEST.set('prefixo_arquivo', str(sgl_tipo_documento)+'-')">
                <div class="input-group">
-                 <select class="custom-select" id="lst_modelo" name="lst_modelo">
+                 <select class="form-select" id="lst_modelo" name="lst_modelo">
                    <option value="0">Selecione um modelo</option>
                      <dtml-with expr="sapl_documentos.modelo.documento_administrativo">
                         <dtml-in expr="objectValues('File')" sort="title_or_id">
@@ -493,9 +493,9 @@ $(document).ready(() => {
     </div>    
   </div>
 
-  <div class="form-row">
+  <div class="row">
     <div class="col-12 col-lg-12">
-      <label for="txa_txt_observacao">Observações</label> 
+      <label class="form-label" for="txa_txt_observacao">Observações</label> 
       <textarea class="form-control" id="txa_txt_observacao" name="txa_txt_observacao" rows="1"><dtml-var txt_observacao missing null=""></textarea>
     </div>
   </div>
@@ -510,7 +510,7 @@ $(document).ready(() => {
         <div class="card mb-4">
           <div class="card-header" id="headingOne">
             <p class="h5 mb-0">
-              <a href="#" class="d-block text-left collapsed" data-toggle="collapse" data-target="#collapseArquivo" aria-expanded="false" aria-controls="collapseArquivo"> 
+              <a href="#" class="d-block text-start collapsed" data-bs-toggle="collapse" data-bs-target="#collapseArquivo" aria-expanded="false" aria-controls="collapseArquivo"> 
                 <i class="fa float-right pt-1 align-self-center" aria-hidden="true"></i>
                  <span class="h5">Arquivo Permanente</span>
               </a>
@@ -558,7 +558,7 @@ $(document).ready(() => {
       <dtml-call "REQUEST.set('usuario_envio', nom_completo)">
    </dtml-in>
         <div class="row">   
-          <div class="col-md-12 mt-2 text-right"> 
+          <div class="col-md-12 mt-2 text-end"> 
             <span class="text-muted small">Petição enviada eletronicamente em <dtml-var dat_envio>, por <dtml-var usuario_envio missing>. [<dtml-var cod_peticao>]</span>
           </div>
         </div>
@@ -566,7 +566,7 @@ $(document).ready(() => {
     </dtml-in>
  </dtml-if>
  
- <div class="text-left mt-3">
+ <div class="text-start mt-3">
     <input class="btn btn-primary" type="button" value="Salvar" onClick="documento_criticar()" />
     <dtml-if cod_documento>
       <a class="btn btn-danger" href="<dtml-var portal_url>/cadastros/documento_administrativo/documento_administrativo_excluir_proc?cod_documento=<dtml-var cod_documento missing>&url=<dtml-var portal_url>/consultas/documento_administrativo" data-confirm="Deseja realmente excluir o documento?">Excluir</a>
@@ -575,7 +575,7 @@ $(document).ready(() => {
 
  <div class="row">
     <div class="col-md-12 mt-2">
-       <p class="text-muted small"><i class="fas fa-asterisk text-danger"></i> Campos obrigatórios</p>
+       <p class="text-muted small font-size-12"><i class="fas fa-asterisk text-danger"></i> Campos obrigatórios</p>
     </div>
 </div>
 
@@ -620,9 +620,9 @@ $(document).ready(() => {
 <dtml-if expr="_.has_key('cod_documento')">
   <dtml-if dbcon_logs>
     <div class="row">
-      <div class="col-12 mt-1 text-right">
+      <div class="col-12 mt-1 text-end">
         <i class="fa fa-clock small"></i>      
-        <a href="#" class="text-muted small" data-toggle="modal" data-target="#iFrameModal" data-title="Histórico" data-src="<dtml-var portal_url>/historico?cod_registro=<dtml-var cod_documento>&modulo=documento_administrativo&modal=1">Histórico</a>  
+        <a href="#" class="text-muted small" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Histórico" data-src="<dtml-var portal_url>/historico?cod_registro=<dtml-var cod_documento>&modulo=documento_administrativo&modal=1">Histórico</a>  
       </div>
     </div>
   </dtml-if>
@@ -632,4 +632,5 @@ $(document).ready(() => {
 autosize(document.querySelectorAll('textarea'));
 </script>
 
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>

@@ -1,4 +1,4 @@
-<legend>Participações na <dtml-var expr="sapl_documentos.props_sagl.nome_mesa"></legend>
+<legend class="font-size-16">Participações na <dtml-var expr="sapl_documentos.props_sagl.nome_mesa"></legend>
 <dtml-in expr="zsql.parlamentar_obter_zsql(cod_parlamentar=cod_parlamentar)">
   <dtml-call expr="REQUEST.set('nom_parlamentar', nom_parlamentar)">
 </dtml-in>
@@ -6,7 +6,7 @@
  <table class="table" >
  <dtml-in expr="zsql.parlamentar_mesa_obter_zsql(cod_parlamentar=cod_parlamentar,ind_excluido=0)"> 
   <dtml-if sequence-start>
-   <thead class="table-secondary">
+   <thead>
      <tr>
        <th>Cargo</th>
        <th>Período</th>

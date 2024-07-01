@@ -1,4 +1,4 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
 <script>
 $(document).ready(function() {
@@ -34,7 +34,7 @@ $(document).ready(function() {
 <div class="tab-content bg-white">
   <div class="tab-pane p-3 border fade show active">
 
-<legend>Presença no Encerramento</legend>
+<legend class="font-size-16">Presença no Encerramento</legend>
 
 <form name="presenca_encerramento_form" method="post" action="presenca_encerramento_salvar_proc">
    <input type="hidden" name="hdn_url" value="index_html?cod_sessao_plen=<dtml-var cod_sessao_plen missing>&num_legislatura=<dtml-var num_legislatura missing>&cod_sessao_leg=<dtml-var cod_sessao_leg missing>&dat_sessao=<dtml-var dat_sessao missing>&tip_sessao=<dtml-var tip_sessao missing>" />
@@ -42,7 +42,7 @@ $(document).ready(function() {
    <input type="hidden" name="dat_inicio_sessao" value="<dtml-var dat_sessao missing>"/>
    
         <table class="table">
-          <thead class="table-secondary">
+          <thead>
             <tr>
               <th width="6%">
                 <div class="form-check">    
@@ -65,7 +65,7 @@ $(document).ready(function() {
                </div> 
             </td>
             <td>
-                <label for="chk_presen_parlamentar">
+                <label class="form-label" for="chk_presen_parlamentar">
                     <dtml-var nom_parlamentar>
                 </label>
             </td>
@@ -76,10 +76,11 @@ $(document).ready(function() {
          </tr>
        </dtml-in>
     </table>
-  <div clas="text-left">
+  <div clas="text-start">
      <input class="btn btn-primary" type="submit" name="button" value="Salvar" />
   </div>
 </form>
 </div>
 </div>
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>

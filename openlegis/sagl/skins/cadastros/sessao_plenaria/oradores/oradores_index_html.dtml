@@ -1,4 +1,4 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
 <script>
 
@@ -53,7 +53,7 @@
 <div class="tab-content bg-white">
   <div class="tab-pane p-3 border fade show active">
 
-<legend>Oradores do Grande Expediente</legend>
+<legend class="font-size-16">Oradores do Grande Expediente</legend>
 
 
 <form name="oradores_form" method="post" action="oradores_salvar_proc" enctype="multipart/form-data">
@@ -106,12 +106,12 @@
    </thead>
     <tr>
         <td width="10%">
-            <label for="txt_num_ordem" class="required">Ordem</label>        
+            <label class="form-label" for="txt_num_ordem" class="required">Ordem</label>        
             <input class="form-control" type="number" id="txt_num_ordem" name="txt_num_ordem" maxlength="2" autocomplete="off" />
         </td>
         <td>
-            <label for="lst_cod_parlamentar" class="required">Vereador</label>        
-            <select class="custom-select" id="lst_cod_parlamentar" name="lst_cod_parlamentar" size="1">
+            <label class="form-label" for="lst_cod_parlamentar" class="required">Vereador</label>        
+            <select class="form-select" id="lst_cod_parlamentar" name="lst_cod_parlamentar" size="1">
                 <option value ="">Selecione</option>            
                 <dtml-in expr="zsql.autores_obter_zsql(txt_dat_apresentacao=dat_sessao)">
                    <option
@@ -123,7 +123,7 @@
         </td>
     </tr>
 </table>
-    <div class="text-left mb-3">
+    <div class="text-start mb-3">
        <input class="btn btn-primary" type="button" name="btn_liderancas" value="Incluir Orador" onClick="campos_criticar(document.oradores_cadastro_form)"/>
     </div>
     <input type="hidden" name="hdn_cod_sessao_plen" value="<dtml-var cod_sessao_plen missing>" />
@@ -135,4 +135,5 @@
 </form>
 </div>
 </div>
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>

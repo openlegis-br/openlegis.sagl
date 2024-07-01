@@ -1,4 +1,4 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
 <script>
 
@@ -44,7 +44,7 @@
 <div class="tab-content bg-white">
   <div class="tab-pane p-3 border fade show active">
 
-<legend>Lideranças Partidárias</legend>
+<legend class="font-size-16">Lideranças Partidárias</legend>
 
 <form name="liderancas_form" method="post" action="liderancas_partidarias_salvar_proc" enctype="multipart/form-data">
     <dtml-in expr="zsql.liderancas_partidarias_obter_zsql(cod_sessao_plen=cod_sessao_plen, ind_excluido=0)">
@@ -60,7 +60,7 @@
         </dtml-if sequence-start>
           <tr>
             <td>
-                <label for="txt_num_ordem_<dtml-var num_ordem>" class="d-none">Ordem</label>
+                <label class="form-label" for="txt_num_ordem_<dtml-var num_ordem>" class="d-none">Ordem</label>
                 <input class="form-control" type="text" id="txt_num_ordem_<dtml-var num_ordem>" name="txt_num_ordem" maxlenght="2" value="<dtml-var num_ordem>">
             </td>
             <td>
@@ -95,12 +95,12 @@
    </thead>
     <tr>
         <td width="10%">
-            <label for="txt_num_ordem" class="required">Ordem</label>                
+            <label class="form-label" for="txt_num_ordem" class="required">Ordem</label>                
             <input class="form-control" type="number" id="txt_num_ordem" name="txt_num_ordem" maxlength="2" autocomplete="off" />
         </td>
         <td>
-            <label for="lst_cod_parlamentar" class="required">Vereador</label>                
-            <select class="custom-select" id="lst_cod_parlamentar"  name="lst_cod_parlamentar">
+            <label class="form-label" for="lst_cod_parlamentar" class="required">Vereador</label>                
+            <select class="form-select" id="lst_cod_parlamentar"  name="lst_cod_parlamentar">
                 <option value ="0">Selecione</option>
                 <dtml-in expr="zsql.autores_obter_zsql(txt_dat_apresentacao=dat_sessao)">
                     <option value="<dtml-var cod_parlamentar >">
@@ -117,7 +117,7 @@
     <input type="hidden" name="hdn_dat_sessao" value="<dtml-var dat_sessao missing>"/>
     <input type="hidden" name="hdn_num_legislatura" value="<dtml-var num_legislatura missing>"/>
     <input type="hidden" name="hdn_tip_sessao" value="<dtml-var tip_sessao missing>"/>
-    <div class="text-left">
+    <div class="text-start">
        <input class="btn btn-primary" type="button" name="btn_liderancas" value="Incluir Liderança" onClick="campos_criticar(document.liderancas_cadastro_form)"/>
     </div>
 
@@ -125,4 +125,5 @@
 </div>
 </div>
 
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>

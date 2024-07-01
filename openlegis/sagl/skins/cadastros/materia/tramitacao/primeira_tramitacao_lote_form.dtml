@@ -1,4 +1,4 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
 <script src="<dtml-var portal_url>/javascript/data_validar.js"></script>
 
@@ -79,7 +79,7 @@ $(function() {
 
 <a id="ajuda" href="<dtml-var portal_url>/ajuda/tramitacao_lote">Ajuda</a>
 
-<h1 class="firstHeading">Primeira Tramitação</h1>
+<h1 class="firstHeading font-size-18">Primeira Tramitação</h1>
 
 <div id="barra-conteudo">
 <ul>
@@ -100,11 +100,11 @@ $(function() {
     </tr>
     <tr>
      <td width="40%">
-      <label for="tram_dat_tramitacao">Data da Ação</label> <span class="campoObrigatorio"></span><br />
+      <label class="form-label" for="tram_dat_tramitacao">Data da Ação</label> <span class="campoObrigatorio"></span><br />
       <input type="text" name="tram_dat_tramitacao" id="tram_dat_tramitacao" size="10" maxlength="10" value=" " onBlur="formata_data(form.tram_dat_tramitacao)">
      </td>
      <td width="60%">
-      <label for="tram_tip_materia">Tipo Matéria</label> <span class="campoObrigatorio"></span><br />
+      <label class="form-label" for="tram_tip_materia">Tipo Matéria</label> <span class="campoObrigatorio"></span><br />
       <select name="tram_tip_materia" style="max-width: 338px; width: 100%;">
       <option value=""></option>
       <dtml-in expr="zsql.tipo_materia_legislativa_obter_zsql(ind_excluido=0)">
@@ -118,11 +118,11 @@ $(function() {
     <tr><th colspan="2" class="label">2. Informe um período para filtrar matérias por data de apresentação</th></tr>
     <tr>
      <td>
-      <label for="txt_data_inicial">Data Inicial</label> <span class="campoObrigatorio"></span><br />
+      <label class="form-label" for="txt_data_inicial">Data Inicial</label> <span class="campoObrigatorio"></span><br />
       <input type="text" name="txt_data_inicial" id="txt_data_inicial" size="10" maxlength="10" value="" onBlur="formata_data(form.txt_data_inicial)">
      </td>
      <td>
-      <label for="txt_data_final">Data Final</label> <span class="campoObrigatorio"></span><br />
+      <label class="form-label" for="txt_data_final">Data Final</label> <span class="campoObrigatorio"></span><br />
       <input type="text" name="txt_data_final" id="txt_data_final" size="10" maxlength="10" value="" onBlur="formata_data(form.txt_data_final)">
      </td>
     </tr>
@@ -140,4 +140,5 @@ $(function() {
 </form>
 </fiedset>
 
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>

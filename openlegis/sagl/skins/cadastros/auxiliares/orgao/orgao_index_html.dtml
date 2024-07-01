@@ -1,4 +1,4 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
 <script>
 $(document).ready(function() {
@@ -37,9 +37,9 @@ $(document).ready(function() {
 
  <div class="row mb-2">
       <div class="col-12 col-md-8 align-self-center">
-        <h1 class="firstHeading">Órgãos</h1>
+        <h1 class="firstHeading font-size-18">Órgãos</h1>
       </div>
-      <div class="col-12 col-md-4 text-left text-md-right">
+      <div class="col-12 col-md-4 text-start text-end">
          <div class="btn-group d-print-none ">
           <a class="btn btn-sm btn-primary d-print-none mb-3" href="orgao_form"><i class="fa fa-fw fa-plus"></i> Incluir Órgão</a>
          </div>
@@ -49,7 +49,7 @@ $(document).ready(function() {
   <dtml-in expr="zsql.orgao_obter_zsql()">
     <dtml-if sequence-start>
        <table class="table">
-        <thead class="table-secondary">  
+        <thead>  
           <tr> 
             <th>Nome do Órgão</th>
             <th>Sigla</th>
@@ -68,4 +68,5 @@ $(document).ready(function() {
     <p>Nenhum órgão cadastrado.</p> 
  </dtml-in>
 
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>

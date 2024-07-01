@@ -1,4 +1,4 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
 <dtml-in expr="zsql.bancada_obter_zsql(cod_bancada=cod_bancada)">
   <dtml-call expr="REQUEST.set('nom_bancada', nom_bancada)">
@@ -12,9 +12,9 @@
 
 <a id="ajuda" href="<dtml-var portal_url>/ajuda/modulo_bancadas">Ajuda</a>
 
-<h1 class="firstHeading"><dtml-var nom_bancada></h1> 
+<h1 class="firstHeading font-size-18"><dtml-var nom_bancada></h1> 
 
-<legend>Composição no período de <dtml-var dat_inicio> a <dtml-var dat_fim></legend><br />
+<legend class="font-size-16">Composição no período de <dtml-var dat_inicio> a <dtml-var dat_fim></legend><br />
 
 <form name="composicao_index_form" action="composicao_bancada_form">
    <input type="hidden" name="nom_bancada" value="<dtml-var nom_bancada>" />
@@ -54,4 +54,5 @@
   </p>
 </form>
 
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>

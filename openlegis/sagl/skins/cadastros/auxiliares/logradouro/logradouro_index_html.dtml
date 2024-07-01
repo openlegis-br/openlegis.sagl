@@ -1,4 +1,4 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
 
 <script>
@@ -91,9 +91,9 @@ $(document).ready(function() {
 
  <div class="row mb-2">
       <div class="col-12 col-md-8 align-self-center">
-        <h1 class="firstHeading">Logradouros</h1>
+        <h1 class="firstHeading font-size-18">Logradouros</h1>
       </div>
-      <div class="col-12 col-md-4 text-left text-md-right">
+      <div class="col-12 col-md-4 text-start text-end">
          <div class="btn-group d-print-none ">
           <a class="btn btn-sm btn-primary d-print-none mb-3" href="logradouro_form"><i class="fa fa-fw fa-plus"></i> Incluir Logradouro</a>
          </div>
@@ -103,7 +103,7 @@ $(document).ready(function() {
  <dtml-in expr="zsql.logradouro_obter_zsql(ind_excluido=0)">
   <dtml-if sequence-start>
     <table class="table" id="logradouros">
-    <thead class="table-secondary">
+    <thead>
      <tr>
       <th>Logradouro</th>
       <th>Bairro</th>
@@ -143,5 +143,6 @@ $(document).ready(function() {
    <p>Nenhum logradouro cadastrado.</td>
  </dtml-in>
 
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>
 

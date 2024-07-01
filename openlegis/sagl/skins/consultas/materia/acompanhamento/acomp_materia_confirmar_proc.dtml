@@ -1,6 +1,6 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
-<h1 class="firstHeading">Acompanhamento de Matéria</h1>
+<h1 class="firstHeading font-size-18">Acompanhamento de Matéria</h1>
 
 <dtml-in expr="zsql.acomp_materia_obter_zsql(txt_hash=txt_hash)">
   <dtml-if expr="ind_excluido==1">
@@ -40,7 +40,7 @@
 <dtml-if erro>
     <div class="alert alert-danger alert-dismissible fade show" role="alert">
         <h5>ouve um erro ao localizar sua inscrição!</h5>
-        <button type="button" class="close" data-dismiss="alert" aria-label="Fechar">
+        <button type="button" class="close" data-bs-dismiss="alert" aria-label="Fechar">
           <span aria-hidden="true">×</span>
         </button>
     </div>
@@ -52,18 +52,19 @@
  <dtml-except>
     <div class="alert alert-danger alert-dismissible fade show" role="alert">
         <h5>Seu e-mail já se encontra ativo para acompanhamento desta matéria!</h5>
-        <button type="button" class="close" data-dismiss="alert" aria-label="Fechar">
+        <button type="button" class="close" data-bs-dismiss="alert" aria-label="Fechar">
           <span aria-hidden="true">×</span>
         </button>
     </div>
  <dtml-else>
     <div class="alert alert-success alert-dismissible fade show" role="alert">
         <h5>E-mail ativado com sucesso!</h5>
-        <button type="button" class="close" data-dismiss="alert" aria-label="Fechar">
+        <button type="button" class="close" data-bs-dismiss="alert" aria-label="Fechar">
           <span aria-hidden="true">×</span>
         </button>
     </div>
  </dtml-try>
 </dtml-unless>
 
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>

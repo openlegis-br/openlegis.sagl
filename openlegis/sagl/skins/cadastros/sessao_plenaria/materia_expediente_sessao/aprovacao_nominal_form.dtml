@@ -1,4 +1,4 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
 <script src="<dtml-var portal_url>/javascript/data_validar.js"></script>
 
@@ -30,7 +30,7 @@
 
 </script>
 
-<h1 class="firstHeading">Aprovação de Matérias em Lote</h1>
+<h1 class="firstHeading font-size-18">Aprovação de Matérias em Lote</h1>
 
 <h3 align="center"><dtml-var sessao_plenaria_header></h3>
 
@@ -38,7 +38,7 @@
         <input type="hidden" name="hdn_cod_sessao_plen" value="<dtml-var cod_sessao_plen missing>" />
         <input type="hidden" name="modal" value="1"/>        
 
-        <legend>Votação Nominal</legend>
+        <legend class="font-size-16">Votação Nominal</legend>
         <table class="table table-borderless">
             <dtml-call expr="REQUEST.set('temVotacao', '0')">
             <dtml-in expr="zsql.autores_obter_zsql(txt_dat_apresentacao=dat_sessao)">
@@ -59,7 +59,7 @@
                     <input type="hidden" name="hdn_cod_parlamentar" value="<dtml-var cod_parlamentar missing>"/>
                 </td>
                 <td>
-                  <select class="custom-select"  name="lst_voto_parlamentar" size="1">
+                  <select class="form-select"  name="lst_voto_parlamentar" size="1">
                    <option value="-1">Selecione </option>
                    <dtml-in expr="[('Sim','Sim'), ('Nao', 'Não'), ('Abstencao', 'Abstenção'), ('Ausente','Ausente'), ('Na Presid.','Na Presidência')]">                 
                       <option
@@ -82,7 +82,7 @@
                     <input type="hidden" name="hdn_cod_parlamentar" value="<dtml-var cod_parlamentar missing>"/>
                 </td>
                 <td>
-                    <select class="custom-select"  name="lst_voto_parlamentar" size="1">
+                    <select class="form-select"  name="lst_voto_parlamentar" size="1">
                         <option value="-1">Selecione </option> 
                         <dtml-in expr="[('Sim','Sim'),('Nao','Não'),('Abstencao','Abstenção'),('Ausente','Ausente'),('Na Presid.','Na Presidência')]">
                            <option value="<dtml-var expr="_['sequence-key']">"<dtml-if expr="_['sequence-item']=='Sim'"> selected </dtml-if>><dtml-var expr="_['sequence-item']"></option>
@@ -94,8 +94,8 @@
             </dtml-if>
             <tr>
                 <th colspan="3">
-                    <label for="lst_tip_resultado">Resultado da Votação </label><span class="campoObrigatorio"></span>
-                    <select class="custom-select"  name="lst_tip_resultado" size="1">
+                    <label class="form-label" for="lst_tip_resultado">Resultado da Votação </label><span class="campoObrigatorio"></span>
+                    <select class="form-select"  name="lst_tip_resultado" size="1">
                         <option value="-1">Selecione</option>
                         <dtml-in expr="zsql.tipo_resultado_votacao_obter_zsql()">
                             <option
@@ -110,7 +110,7 @@
             </tr>
             <tr>
                 <td colspan="3">
-                    <label for="txa_txt_observacao">Observações</label>
+                    <label class="form-label" for="txa_txt_observacao">Observações</label>
                     <textarea class="form-control"  name="txa_txt_observacao" rows="4" cols="60"><dtml-var txt_observacao missing></textarea>
                 </td>
             </tr>
@@ -120,5 +120,6 @@
                     <input class="btn btn-primary" type="button" name="button" value="Salvar" onClick="campos_criticar()" />
                 </p>
 </form>
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>
 

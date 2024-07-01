@@ -1,4 +1,4 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 <script src="<dtml-var portal_url>/javascript/data_validar.js"></script>
 <script src="<dtml-var portal_url>/javascript/data_validar_designacao_comissao.js"></script>
 <script src="<dtml-var portal_url>/javascript/data_validar_desligamento.js"></script>
@@ -34,27 +34,27 @@ function composicao_criticar(form){
   }
 
   if (!IsValidDate(form.txt_dat_designacao.value)) {
-     $.showAlert({title: "Mensagem do Sistema", body: "Digite uma data de designação válida!"});
+     bootstrap.showModal({title: "Mensagem do Sistema", body: "Digite uma data de designação válida!"});
      form.txt_dat_designacao.focus();
      return false;     
   }
 
   if (!IsValidDateDesignacaoComissao(form.txt_dat_designacao.value, form.txt_dat_inicio.value, form.txt_dat_fim.value)) {
-     $.showAlert({title: "Mensagem do Sistema", body: "Digite uma data de designação que esteja dentro do período de composição!"});
+     bootstrap.showModal({title: "Mensagem do Sistema", body: "Digite uma data de designação que esteja dentro do período de composição!"});
      form.txt_dat_designacao.focus();
      return false;
   }
 
   if (form.txt_dat_desligamento.value != "" && 
      !IsValidDate(form.txt_dat_desligamento.value)) {
-     $.showAlert({title: "Mensagem do Sistema", body: "Digite uma data de desligamento válida!"});
+     bootstrap.showModal({title: "Mensagem do Sistema", body: "Digite uma data de desligamento válida!"});
      form.txt_dat_desligamento.focus();
      return false;
   }
 
   if ((form.txt_dat_desligamento.value != "") && 
 (!IsValidDateDesligamento(form.txt_dat_desligamento.value, form.txt_dat_designacao.value, form.txt_dat_fim.value))) {
-     $.showAlert({title: "Mensagem do Sistema", body: "Digite uma data de desligamento que esteja dentro do período de composição!"});
+     bootstrap.showModal({title: "Mensagem do Sistema", body: "Digite uma data de desligamento que esteja dentro do período de composição!"});
      form.txt_dat_desligamento.focus();
      return false;
   }
@@ -71,7 +71,7 @@ function composicao_excluir(form){
 }   
 </script>
 
-<legend>Membro da Comissão</legend>
+<legend class="font-size-16">Membro da Comissão</legend>
 
 <form name="composicao_comissao_form" method="post" action="composicao_comissao_salvar_proc">
   <input type="hidden" name="hdn_cod_comp_comissao" value="<dtml-var cod_comp_comissao missing>">
@@ -83,10 +83,10 @@ function composicao_excluir(form){
     <input type="hidden" name="hdn_url" value="composicao_comissao_mostrar_proc?cod_comp_comissao=<dtml-var cod_comp_comissao>&cod_periodo_comp=<dtml-var cod_periodo_comp>&modal=1" />
   </dtml-if>
   <input type="hidden" name="modal" value="1"/>
-   <div class="form-row">
+   <div class="row">
      <div class="col-8 col-sm-8 mb-3">
-        <label for="lst_parlamentar" class="form-label required">Vereador</label>
-        <select class="custom-select" id="lst_parlamentar" name="lst_parlamentar" required>
+        <label class="form-label" for="lst_parlamentar" class="form-label required">Vereador</label>
+        <select class="form-select" id="lst_parlamentar" name="lst_parlamentar" required>
           <option></option>
           <dtml-in expr="zsql.parlamentar_obter_zsql(ind_excluido=0)">
              <dtml-if expr="pysc.composicao_comissao_validar_parlamentar_pysc(dat_inicio_periodo, dat_fim_periodo, cod_parlamentar)">
@@ -105,8 +105,8 @@ function composicao_excluir(form){
         </div>
      </div>
      <div class="col-4 col-sm-4 mb-3">
-        <label for="lst_cargo_comissao" class="form-label required">Cargo na Comissão</label>
-        <select class="custom-select required" id="lst_cargo_comissao" name="lst_cargo_comissao" required>
+        <label class="form-label" for="lst_cargo_comissao" class="form-label required">Cargo na Comissão</label>
+        <select class="form-select required" id="lst_cargo_comissao" name="lst_cargo_comissao" required>
           <option></option>
           <dtml-in expr="zsql.cargo_comissao_obter_zsql()">
              <option 
@@ -123,10 +123,10 @@ function composicao_excluir(form){
         </div>
      </div>
    </div>
-   <div class="form-row">
+   <div class="row">
      <div class="col-4 col-sm-4 mb-3">
-        <label for="rad_ind_titular" class="form-label required">Membro Titular ?</label>
-        <select id="rad_ind_titular" name="rad_ind_titular" class="custom-select" required>
+        <label class="form-label" for="rad_ind_titular" class="form-label required">Membro Titular ?</label>
+        <select id="rad_ind_titular" name="rad_ind_titular" class="form-control" required>
            <option value=""></option>
            <dtml-in expr="[(0,'Não'),(1,'Sim')]">      
               <option value="<dtml-var expr="_['sequence-key']">" <dtml-if expr="_.has_key('cod_comp_comissao') and ind_titular==_['sequence-key']">selected</dtml-if>><dtml-var expr="_['sequence-item']"></option>
@@ -137,28 +137,28 @@ function composicao_excluir(form){
         </div>
      </div>
      <div class="col-4 col-sm-4 mb-3">
-        <label for="txt_dat_designacao" class="form-label required">Data de Designação</label>
+        <label class="form-label" for="txt_dat_designacao" class="form-label required">Data de Designação</label>
         <input class="form-control date" type="text" name="txt_dat_designacao" id="txt_dat_designacao"  value="<dtml-var dat_designacao missing null>" required />
         <div class="invalid-feedback">
           Este campo é obrigatório !
         </div>
      </div>
      <div class="col-4 col-sm-4 mb-3">
-        <label for="txt_dat_desligamento">Data de Desligamento</label>
+        <label class="form-label" for="txt_dat_desligamento">Data de Desligamento</label>
         <input class="form-control date" type="text" name="txt_dat_desligamento" id="txt_dat_desligamento"  value="<dtml-var dat_desligamento missing null>" />
      </div>
    </div>
-   <div class="form-row">  
+   <div class="row">  
      <div class="col-6 mb-3">
-        <label for="txt_des_motivo_desligamento">Motivo do Desligamento</label>
+        <label class="form-label" for="txt_des_motivo_desligamento">Motivo do Desligamento</label>
         <input class="form-control" type="text" id="txt_des_motivo_desligamento" name="txt_des_motivo_desligamento" value="<dtml-var des_motivo_desligamento missing>" maxlength="150">
      </div>
      <div class="col-6 mb-3">
-        <label for="txt_obs_composicao">Observações</label>
+        <label class="form-label" for="txt_obs_composicao">Observações</label>
         <input class="form-control" type="text" id="txt_obs_composicao" name="txt_obs_composicao" value="<dtml-var obs_composicao missing>" maxlength="250">
      </div>
    </div> 
-  <div class="text-left">
+  <div class="text-start">
      <button class="btn btn-primary" onClick="return composicao_criticar()">Salvar</button>
      <dtml-if cod_comp_comissao>
          <a class="btn btn-danger" href="composicao_comissao_excluir_proc?cod_comp_comissao=<dtml-var cod_comp_comissao>&cod_comissao=<dtml-var cod_comissao>&cod_periodo_comp=<dtml-var cod_periodo_comp>&modal=1" data-confirm="Deseja realmente excluir o membro da comissão?">Excluir</a>
@@ -166,8 +166,9 @@ function composicao_excluir(form){
   </div>
    <div class="row">
       <div class="col-md-12 mt-2">
-         <p class="text-muted small"><i class="fas fa-asterisk text-danger"></i> Campos obrigatórios</p>
+         <p class="text-muted small font-size-12"><i class="fas fa-asterisk text-danger"></i> Campos obrigatórios</p>
       </div>
    </div>
 </form>
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>

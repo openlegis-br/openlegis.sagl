@@ -1,4 +1,4 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
 <script>
 
@@ -17,7 +17,7 @@
 <a id="ajuda" href="<dtml-var portal_url>/ajuda/consultas#cons_comp_bancada">Ajuda</a>
 
 <dtml-in expr="zsql.bancada_obter_zsql(cod_bancada=cod_bancada)">
-  <h1 class="firstHeading"><dtml-var nom_bancada></h1>
+  <h1 class="firstHeading font-size-18"><dtml-var nom_bancada></h1>
 </dtml-in>
 
 <fieldset>
@@ -46,7 +46,7 @@
          <input type="hidden" name="hdn_cod_comp_bancada" value="<dtml-var cod_comp_bancada missing>">
        </dtml-if>
       </dtml-in>
-      <select class="custom-select"  id="lst_cargo_bancada" name="lst_cargo_bancada">
+      <select class="form-select"  id="lst_cargo_bancada" name="lst_cargo_bancada">
         <option value="0">Selecione</option>
       <dtml-in expr="zsql.cargo_bancada_obter_zsql(ind_excluido=0)">
         <option 
@@ -78,4 +78,5 @@
   <input class="btn btn-primary" type="button" name="retornar" value="Voltar" onClick="javascript:history.go(-1)">
 </p>
 
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>

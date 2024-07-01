@@ -1,10 +1,10 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
  <div class="row mb-2">
   <div class="col-12 col-sm-6 align-self-center">
-    <h1 class="firstHeading">Pesquisa de Matérias Acessórias</h1>
+    <h1 class="firstHeading font-size-18">Pesquisa de Matérias Acessórias</h1>
   </div>
-  <div class="col-12 col-sm-6 text-left text-sm-right mb-2">
+  <div class="col-12 col-sm-6 text-start text-sm-end mb-2">
     <div class="btn-group" role="group">
      <a class="btn btn-primary btn-sm" href="<dtml-var portal_url>/consultas/materia/materia_acessoria_pesquisar_form" ><i class="fa fa-fw fa-search"></i> Nova Pesquisa</a>
      <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia'])">         
@@ -101,7 +101,7 @@
                 <dtml-if tip_resultado_votacao>
                   <dtml-in expr="zsql.tipo_resultado_votacao_obter_zsql(tip_resultado_votacao=tip_resultado_votacao,  ind_excluido=0)">
                     <dtml-if expr="tip_votacao == 2 ">
-                       <a href="#" data-toggle="modal" data-target="#iFrameModal" data-title="Votação Nominal" data-src="<dtml-var portal_url>/consultas/sessao_plenaria/sessao_plenaria_mostrar_painel_proc?cod_sessao_plen=<dtml-var cod_sessao_plen>&cod_ordem=<dtml-var cod_ordem>&cod_materia=<dtml-var cod_materia>&cod_emenda=<dtml-var cod_emenda>&tipo_materia=acessoria&modal=1">
+                       <a href="#" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Votação Nominal" data-src="<dtml-var portal_url>/consultas/sessao_plenaria/sessao_plenaria_mostrar_painel_proc?cod_sessao_plen=<dtml-var cod_sessao_plen>&cod_ordem=<dtml-var cod_ordem>&cod_materia=<dtml-var cod_materia>&cod_emenda=<dtml-var cod_emenda>&tipo_materia=acessoria&modal=1">
                           <dtml-var nom_resultado>
                        </a>
                     <dtml-else>
@@ -117,7 +117,7 @@
   <dtml-let id_emenda="str(cod_emenda)+'_emenda.pdf'">
     <dtml-if "hasattr(sapl_documentos.emenda,id_emenda)">
       <div class="row d-print-none">
-        <div class="col-12 text-left mt-1">
+        <div class="col-12 text-start mt-1">
           <dtml-let emenda="getattr(sapl_documentos.emenda,id_emenda).absolute_url">
               <a class="btn btn-sm btn-primary" href="<dtml-var emenda>" target="_blank"><i class="far fa-file-pdf"></i> Texto Integral</a>
           </dtml-let>
@@ -209,7 +209,7 @@
                 <dtml-if tip_resultado_votacao>
                 <dtml-in expr="zsql.tipo_resultado_votacao_obter_zsql(tip_resultado_votacao=tip_resultado_votacao,  ind_excluido=0)">
                     <dtml-if expr="tip_votacao == 2">
-                       <a href="#" data-toggle="modal" data-target="#iFrameModal" data-title="Votação Nominal" data-src="consultas/sessao_plenaria/sessao_plenaria_mostrar_painel_proc?cod_sessao_plen=<dtml-var cod_sessao_plen>&cod_ordem=<dtml-var cod_ordem>&cod_materia=<dtml-var cod_materia>&cod_substitutivo=<dtml-var cod_substitutivo>&tipo_materia=acessoria&modal=1">
+                       <a href="#" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Votação Nominal" data-src="consultas/sessao_plenaria/sessao_plenaria_mostrar_painel_proc?cod_sessao_plen=<dtml-var cod_sessao_plen>&cod_ordem=<dtml-var cod_ordem>&cod_materia=<dtml-var cod_materia>&cod_substitutivo=<dtml-var cod_substitutivo>&tipo_materia=acessoria&modal=1">
                           <dtml-var nom_resultado>
                        </a>
                     <dtml-else>
@@ -225,7 +225,7 @@
   <dtml-let id_substitutivo="str(cod_substitutivo)+'_substitutivo.pdf'">
     <dtml-if "hasattr(sapl_documentos.substitutivo,id_substitutivo)">
       <div class="row d-print-none">
-        <div class="col-12 text-left mt-1">
+        <div class="col-12 text-start mt-1">
           <dtml-let substitutivo="getattr(sapl_documentos.substitutivo,id_substitutivo).absolute_url">
               <a class="btn btn-sm btn-primary" href="<dtml-var substitutivo>" target="_blank"><i class="far fa-file-pdf"></i> Texto Integral</a>
           </dtml-let>
@@ -260,11 +260,12 @@
 <dtml-else>
   <div class="alert alert-danger alert-dismissible fade show" role="alert">
     <h5 class="alert-heading">Confirme que você não é um robô.</h5>
-    <button type="button" class="close" data-dismiss="alert" aria-label="Fechar">
+    <button type="button" class="close" data-bs-dismiss="alert" aria-label="Fechar">
        <span aria-hidden="true">&times;</span>
     </button>
   </div>
   <a class="btn btn-danger" href="javascript:void(0)" onClick="window.history.go(-1); return false;"><i class="fa fa-fw fa-undo"></i> Voltar</a>
 </dtml-if>
 
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>

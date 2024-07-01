@@ -1,21 +1,20 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
+
+<dtml-if expr="_.has_key('QUERY_STRING') and QUERY_STRING == 'retry=1'">
+  <div class="alert alert-success alert-dismissible fade show align-items-center" id="alertLogin" role="alert">
+     <i class="mdi mdi-check-circle me-1"></i>
+     O usuário <strong>&dtml-AUTHENTICATED_USER;</strong> foi autenticado com sucesso.
+     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
+</dtml-if>
 
 <dtml-let isAnon="portal_membership.isAnonymousUser()">
   <dtml-if expr="not isAnon">
-    <h1 class="firstHeading">Painel de Notificações</h1>
+    <h5 class="firstHeading mb-3">Painel do Usuário</h5>
   <dtml-else>
-    <h1 class="firstHeading" style="display: none;">Página Inicial</h1>
+    <h5 class="firstHeading mb-3" style="display: none;">Página Inicial</h5>
   </dtml-if>
 </dtml-let>
-
-<dtml-if expr="_.has_key('QUERY_STRING') and QUERY_STRING == 'retry=1'">
-  <div class="alert alert-success alert-dismissible fade show" role="alert">
-    <p class="h6 alert-heading">O usuário <strong>&dtml-AUTHENTICATED_USER;</strong> foi autenticado corretamente.</p>
-    <button type="button" class="close" data-dismiss="alert" aria-label="Fechar">
-       <span aria-hidden="true">&times;</span>
-    </button>
-  </div>
-</dtml-if>
 
 <dtml-if expr="(str(REQUEST['AUTHENTICATED_USER']).strip()=='Anonymous User')">
 
@@ -53,7 +52,6 @@
         </div>
         </a>        
       </div>
-
 
       <div class="col-12 col-md-6 col-lg-4 mt-3 mb-3 text-center homeBlock">
         <a href="<dtml-var portal_url>/consultas/comissao">      
@@ -165,7 +163,7 @@
 
 <dtml-comment>
 
-<div class="form-row mt-2">
+<div class="row mt-2">
  <div class="col-12">
    <div class="card mb-3">
      <h6 class="card-header"><i class="fas fa-calendar-alt"></i> Próximas <dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao_plural"></h6>   
@@ -193,7 +191,7 @@
         <dtml-else>
            <div class="card-body">Não há nenhuma sessão agendada.</div>
         </dtml-in>
-            <div class="card-footer text-right">
+            <div class="card-footer text-end">
              <a class="btn btn-sm btn-link" href="<dtml-var portal_url>/consultas/sessao_plenaria"><i class="fa fa-link"></i> Calendário das <dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao_plural"></a>
             </div>        
    </div>
@@ -219,7 +217,7 @@
         <dtml-else>
            <div class="card-body">Nenhum registro encontrado.</div>
         </dtml-in>
-            <div class="card-footer text-right">
+            <div class="card-footer text-end">
              <a class="btn btn-sm btn-link" href="<dtml-var portal_url>/consultas/materia"><i class="fa fa-link"></i> Pesquisa de Matérias</a>
             </div>        
    </div>
@@ -239,7 +237,7 @@
         <dtml-else>
            <div class="card-body">Nenhum registro encontrado.</div>
         </dtml-in>
-            <div class="card-footer text-right">
+            <div class="card-footer text-end">
              <a class="btn btn-sm btn-link" href="<dtml-var portal_url>/consultas/norma_juridica"><i class="fa fa-link"></i> Pesquisa de Legislação</a>
             </div>        
    </div>     
@@ -248,6 +246,11 @@
 </dtml-comment>
 <dtml-else>
 
+<div class="row">
+   <div class="col-lg-6 col-xl-6">
+      <div class="card">
+         <div class="card-body">
+            <h5 class="card-title mb-3">Notificações</h5>
 <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador','Operador Materia'])">
  <dtml-with expr="_.namespace(materias=zsql.materia_prazo_deliberacao_vencido_zsql())">
   <dtml-if expr="_.len(materias) > 0">
@@ -255,12 +258,9 @@
    <div class="col-12">
      <div class="bs-component">
        <div class="alert alert-dismissible alert-danger">
-         <h6 class="alert-heading"><i class="fas fa-exclamation-circle"></i> Prazos de Deliberação de Matérias</h6>
-         <p class="mb-0">Há <a href="<dtml-var portal_url>/generico/materia_listar_prazo_de
-liberacao" class="alert-link"> <dtml-var expr="_.len(materias)"> matéria<dtml-if expr="_.len(materias) > 1">s</dtml-if> legislativa<dtml-if expr="_.len(materias) > 1">s</dtml-if></a> com prazo de deliberação vencido.</p>
-        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
+         Há <a href="<dtml-var portal_url>/generico/materia_listar_prazo_de
+liberacao" class="alert-link"> <dtml-var expr="_.len(materias)"> matéria<dtml-if expr="_.len(materias) > 1">s</dtml-if> legislativa<dtml-if expr="_.len(materias) > 1">s</dtml-if></a> com prazo de deliberação vencido.
+         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
        </div>
      </div>
     </div>
@@ -274,8 +274,8 @@ liberacao" class="alert-link"> <dtml-var expr="_.len(materias)"> matéria<dtml-i
    <div class="col-12">
      <div class="bs-component">
        <div class="alert alert-dismissible alert-danger">
-         <button type="button" class="close" data-dismiss="alert">×</button>
-         <h6 class="alert-heading"><i class="fas fa-exclamation-triangle"></i> Há <a href="<dtml-var portal_url>/generico/materia_listar_prazo_vencido" class="alert-link"> <dtml-var expr="_.len(materias)"> matéria<dtml-if expr="_.len(materias) > 1">s</dtml-if> legislativa<dtml-if expr="_.len(materias) > 1">s</dtml-if></a> com prazo<dtml-if expr="_.len(materias) > 1">s</dtml-if> de tramitação vencidos.</h6>
+         Há <a href="<dtml-var portal_url>/generico/materia_listar_prazo_vencido" class="alert-link text-decoration-underline"> <dtml-var expr="_.len(materias)"> matéria<dtml-if expr="_.len(materias) > 1">s</dtml-if> legislativa<dtml-if expr="_.len(materias) > 1">s</dtml-if></a> com prazo<dtml-if expr="_.len(materias) > 1">s</dtml-if> de tramitação vencidos.
+         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
        </div>
      </div>
     </div>
@@ -288,9 +288,9 @@ liberacao" class="alert-link"> <dtml-var expr="_.len(materias)"> matéria<dtml-i
    <div class="row">    
    <div class="col-12">
      <div class="bs-component">
-       <div class="alert alert-dismissible alert-primary">
-         <button type="button" class="close" data-dismiss="alert">×</button>
-         <h6 class="alert-heading"><i class="fas fa-info-circle"></i> Há <a href="<dtml-var portal_url>/generico/materia_listar_prazo" class="alert-link"> <dtml-var expr="_.len(materias)"> matéria<dtml-if expr="_.len(materias) > 1">s</dtml-if> legislativa<dtml-if expr="_.len(materias) > 1">s</dtml-if></a> com prazo<dtml-if expr="_.len(materias) > 1">s</dtml-if> de tramitação vencendo hoje.</h6>
+       <div class="alert alert-dismissible alert-info me-2">
+         Há <a href="<dtml-var portal_url>/generico/materia_listar_prazo" class="alert-link text-decoration-underline"> <dtml-var expr="_.len(materias)"> matéria<dtml-if expr="_.len(materias) > 1">s</dtml-if> legislativa<dtml-if expr="_.len(materias) > 1">s</dtml-if></a> com prazo<dtml-if expr="_.len(materias) > 1">s</dtml-if> de tramitação vencendo hoje
+         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
        </div>
      </div>
     </div>
@@ -306,9 +306,9 @@ liberacao" class="alert-link"> <dtml-var expr="_.len(materias)"> matéria<dtml-i
    <div class="row">    
    <div class="col-12">
      <div class="bs-component">
-       <div class="alert alert-dismissible alert-primary">
-         <button type="button" class="close" data-dismiss="alert">×</button>
-         <h6 class="alert-heading"><i class="fas fa-file-signature"></i> Há <a href="<dtml-var portal_url>/cadastros/assinatura/assinaturas_pendentes" class="alert-link"><dtml-var expr="_.len(assinaturas)"> <dtml-if expr="_.len(assinaturas) > 1">solicitações<dtml-else>solicitação</dtml-if> de assinatura digital</a> pendente<dtml-if expr="_.len(assinaturas) > 1">s</dtml-if>.</h6>
+       <div class="alert alert-dismissible alert-warning">
+         Há <a href="<dtml-var portal_url>/cadastros/assinatura/assinaturas_pendentes" class="alert-link text-decoration-underline"><dtml-var expr="_.len(assinaturas)"> <dtml-if expr="_.len(assinaturas) > 1">solicitações<dtml-else>solicitação</dtml-if> de assinatura digital</a> pendente<dtml-if expr="_.len(assinaturas) > 1">s</dtml-if>.
+         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
        </div>
      </div>
     </div>
@@ -322,8 +322,8 @@ liberacao" class="alert-link"> <dtml-var expr="_.len(materias)"> matéria<dtml-i
    <div class="col-12">
      <div class="bs-component">
        <div class="alert alert-dismissible alert-primary">
-         <button type="button" class="close" data-dismiss="alert">×</button>
-         <h6 class="alert-heading"><i class="fas fa-eye"></i> Há <a href="<dtml-var portal_url>/consultas/documento_administrativo/visualizar_processos" class="alert-link"><dtml-var expr="_.len(cientificacoes)"> novo<dtml-if expr="_.len(cientificacoes) > 1">s</dtml-if> processo<dtml-if expr="_.len(cientificacoes) > 1">s</dtml-if> administrativo<dtml-if expr="_.len(cientificacoes) > 1">s</dtml-if></a> enviado<dtml-if expr="_.len(cientificacoes) > 1">s</dtml-if> para conhecimento ou providências.</h6>
+         Há <a href="<dtml-var portal_url>/consultas/documento_administrativo/visualizar_processos" class="alert-link text-decoration-underline"><dtml-var expr="_.len(cientificacoes)"> novo<dtml-if expr="_.len(cientificacoes) > 1">s</dtml-if> processo<dtml-if expr="_.len(cientificacoes) > 1">s</dtml-if> administrativo<dtml-if expr="_.len(cientificacoes) > 1">s</dtml-if></a> enviado<dtml-if expr="_.len(cientificacoes) > 1">s</dtml-if> para conhecimento ou providências.
+         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
        </div>
      </div>
     </div>
@@ -337,8 +337,8 @@ liberacao" class="alert-link"> <dtml-var expr="_.len(materias)"> matéria<dtml-i
        <div class="col-12">
          <div class="bs-component">
            <div class="alert alert-dismissible alert-primary">
-             <button type="button" class="close" data-dismiss="alert">×</button>
-             <h6 class="alert-heading"><i class="fas fa-info-circle"></i> Há <a href="<dtml-var portal_url>/cadastros/tramitacao_materia/tramitacao_lote_form" class="alert-link"> <dtml-var expr="pysc.caixa_entrada_contar_pysc(cod_usuario=cod_usuario_corrente)"> matéria<dtml-if expr="pysc.caixa_entrada_contar_pysc(cod_usuario=cod_usuario_corrente)>1">s</dtml-if> legislativa<dtml-if expr="pysc.caixa_entrada_contar_pysc(cod_usuario=cod_usuario_corrente)>1">s</dtml-if></a> em sua caixa de entrada.</h6>
+            Há <a href="<dtml-var portal_url>/cadastros/tramitacao_materia/tramitacao_lote_form" class="alert-link text-decoration-underline"> <dtml-var expr="pysc.caixa_entrada_contar_pysc(cod_usuario=cod_usuario_corrente)"> matéria<dtml-if expr="pysc.caixa_entrada_contar_pysc(cod_usuario=cod_usuario_corrente)>1">s</dtml-if> legislativa<dtml-if expr="pysc.caixa_entrada_contar_pysc(cod_usuario=cod_usuario_corrente)>1">s</dtml-if></a> em sua caixa de entrada.
+             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
            </div>
          </div>
         </div>
@@ -350,8 +350,8 @@ liberacao" class="alert-link"> <dtml-var expr="_.len(materias)"> matéria<dtml-i
        <div class="col-12">
          <div class="bs-component">
            <div class="alert alert-dismissible alert-primary">
-             <button type="button" class="close" data-dismiss="alert">×</button>
-             <h6 class="alert-heading"><i class="fas fa-info-circle"></i> Há <a href="<dtml-var portal_url>/cadastros/tramitacao_documento/tramitacao_lote_form" class="alert-link"> <dtml-var expr="pysc.caixa_entrada_administrativo_contar_pysc(cod_usuario=cod_usuario_corrente)"> processo<dtml-if expr="pysc.caixa_entrada_administrativo_contar_pysc(cod_usuario=cod_usuario_corrente)>1">s</dtml-if> administrativo<dtml-if expr="pysc.caixa_entrada_administrativo_contar_pysc(cod_usuario=cod_usuario_corrente)>1">s</dtml-if></a> em sua caixa de entrada.</h6>
+             Há <a href="<dtml-var portal_url>/cadastros/tramitacao_documento/tramitacao_lote_form" class="alert-link text-decoration-underline"> <dtml-var expr="pysc.caixa_entrada_administrativo_contar_pysc(cod_usuario=cod_usuario_corrente)"> processo<dtml-if expr="pysc.caixa_entrada_administrativo_contar_pysc(cod_usuario=cod_usuario_corrente)>1">s</dtml-if> administrativo<dtml-if expr="pysc.caixa_entrada_administrativo_contar_pysc(cod_usuario=cod_usuario_corrente)>1">s</dtml-if></a> em sua caixa de entrada.
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
            </div>
          </div>
         </div>
@@ -375,10 +375,10 @@ liberacao" class="alert-link"> <dtml-var expr="_.len(materias)"> matéria<dtml-i
    <div class="row">    
    <div class="col-12">
      <div class="bs-component">
-       <div class="alert alert-dismissible alert-warning">
-         <button type="button" class="close" data-dismiss="alert">×</button>
-         <h6 class="alert-heading"><i class="fas fa-exclamation-circle"></i> Aviso de Proposição Devolvida</h6>
-         <p class="mb-0"><a href="<dtml-var portal_url>/cadastros/proposicao?ind_devolvido=1" class="alert-link"><dtml-var expr="_.len(devolvidas)"> <dtml-if expr="_.len(devolvidas) > 1">Proposições Digitais<dtml-else>Proposição Digital</dtml-if></a> de sua autoria <dtml-if expr="_.len(devolvidas) > 1">foram devolvidas<dtml-else>foi devolvida</dtml-if> pelo setor competente. Para eventual reaproveitamento, providencie a regularização, conforme orientações fornecidas na justificativa da devolução, ou proceda a sua exclusão.</p>
+       <div class="alert alert-dismissible alert-warning mb-0 p-3">
+         <h4 class="alert-heading font-size-18"><i class="fas fa-exclamation-triangle me-2"></i>Proposição Devolvida</h4>
+         <p class="mb-0"><a href="<dtml-var portal_url>/cadastros/proposicao?ind_devolvido=1" class="alert-link text-decoration-underline"><dtml-var expr="_.len(devolvidas)"> <dtml-if expr="_.len(devolvidas) > 1">Proposições Digitais<dtml-else>Proposição Digital</dtml-if></a> de sua autoria <dtml-if expr="_.len(devolvidas) > 1">foram devolvidas<dtml-else>foi devolvida</dtml-if> pelo setor competente. Para eventual reaproveitamento, providencie a regularização, conforme orientações fornecidas na justificativa da devolução, ou proceda a sua exclusão.</p>
+         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
        </div>
      </div>
     </div>
@@ -390,7 +390,7 @@ liberacao" class="alert-link"> <dtml-var expr="_.len(materias)"> matéria<dtml-i
 </dtml-if>
 
 <dtml-comment>
-<div class="form-row">
+<div class="row">
 <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador','Operador Materia','Operador Modulo Administrativo', 'Leitor Relatorios'])">
   <div class="col-12">
    <div class="card">
@@ -408,7 +408,17 @@ liberacao" class="alert-link"> <dtml-var expr="_.len(materias)"> matéria<dtml-i
 </dtml-if>
 </div>
 </dtml-comment>
-
+</div>
+</div>
+</div>
+<div class="col-md-6">
+  <div class="card">
+     <div class="card-body">
+       <h5 class="card-title mb-3">Gabinete do Vereador</h5>
+     </div>
+  </div>
+</div>
+</div>
 </dtml-if>
-
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>

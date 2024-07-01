@@ -1,4 +1,4 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
 <script src="<dtml-var portal_url>/javascript/data_validar.js"></script>
 
@@ -20,12 +20,12 @@ function pesquisam_criticar(form){
   var form = document.pesq_basica_form;
 
   if (form.dt_apres.value != "" && !IsValidDate(form.dt_apres.value)) {
-    $.showAlert({title: "Mensagem do Sistema", body: "Digite uma data inicial válida!"});
+    bootstrap.showModal({title: "Mensagem do Sistema", body: "Digite uma data inicial válida!"});
     return false;
   } 
 
   if (form.dt_apres2.value != "" && !IsValidDate(form.dt_apres2.value)) {
-    $.showAlert({title: "Mensagem do Sistema", body: "Digite uma data final válida!"});
+    bootstrap.showModal({title: "Mensagem do Sistema", body: "Digite uma data final válida!"});
     return false;
   } 
   
@@ -33,7 +33,7 @@ function pesquisam_criticar(form){
 }
 
   $(document).ready(function(){
-    $('[data-toggle="popover"]').popover({
+    $('[data-bs-toggle="popover"]').popover({
 		placement : 'top'
     });
   });
@@ -45,7 +45,7 @@ function pesquisam_criticar(form){
           if(checked){
               $('#pesq_basica_form').attr('action','materia_texto_pesquisar_proc');
               if($('#txt_assunto').val() == '') {
-                 $.showAlert({title: "Informação", body: "Para realizar uma pesquisa textual, é necessário prencher o campo 'Termos da Pesquisa'."})
+                 bootstrap.showModal({title: "Informação", body: "Para realizar uma pesquisa textual, é necessário prencher o campo 'Termos da Pesquisa'."})
               }
           }
           else{
@@ -64,9 +64,9 @@ function pesquisam_criticar(form){
 
  <div class="row mb-2">
       <div class="col-12 col-md-8 align-self-center">
-        <h1 class="firstHeading">Pesquisa de Matérias</h1>
+        <h1 class="firstHeading font-size-18">Pesquisa de Matérias</h1>
       </div>
-      <div class="col-12 col-md-4 text-left text-md-right">
+      <div class="col-12 col-md-4 text-start text-end">
          <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia'])">      
              <a class="btn btn-primary btn-sm d-print-none" href="<dtml-var portal_url>/cadastros/materia/materia_form_resumido"><i class="fa fa-fw fa-plus"></i> Incluir Matéria</a>
          </dtml-if>
@@ -79,9 +79,9 @@ function pesquisam_criticar(form){
   <div class="tab-pane p-3 border fade show active" id="principais">
 
 <form name="pesq_basica_form" id="pesq_basica_form" action="materia_pesquisar_proc">
-  <div class="form-row">
+  <div class="row">
     <div class="col-12 col-md-6 mb-3">
-      <label for="lst_tip_materia">Tipo de Matéria</label>
+      <label class="form-label" for="lst_tip_materia">Tipo de Matéria</label>
       <select id="lst_tip_materia" name="lst_tip_materia" class="form-control selectpicker" data-dropup-auto="false" data-size="6" multiple="multiple" data-actions-box="true" title="Todos" data-header="Tipo de Matéria" data-selected-text-format="count > 3">
             <optgroup label="Matérias Principais">
               <dtml-in expr="zsql.tipo_materia_legislativa_obter_zsql(tip_natureza='P', ind_excluido=0)">
@@ -102,29 +102,29 @@ function pesquisam_criticar(form){
       </select>
     </div>
     <div class="col-6 col-md-3 mb-3">
-      <label for="txt_numero">Número</label>
+      <label class="form-label" for="txt_numero">Número</label>
       <input name="txt_numero" id="txt_numero" type="number" min="1" maxlength="6" class="form-control number" autocomplete="off">
     </div>
     <div class="col-6 col-md-3 mb-3 controls">
-      <label for="txt_ano">Ano</label>
+      <label class="form-label" for="txt_ano">Ano</label>
       <input name="txt_ano" id="txt_ano" type="number" min="1900" minlength="4" maxlength="4" class="form-control year" autocomplete="off">
     </div>
   </div>
-  <div class="form-row">
+  <div class="row">
     <div class="col-6 col-md-3 mb-3">
-      <label for="txt_num_protocolo">Protocolo</label>
+      <label class="form-label" for="txt_num_protocolo">Protocolo</label>
       <input id="txt_num_protocolo" name="txt_num_protocolo" min="1" type="number" maxlength="8" class="form-control number" autocomplete="off">
     </div>
     <div class="col-6 col-md-3 mb-3">
-      <label for="txt_num_processo">Processo</label>
+      <label class="form-label" for="txt_num_processo">Processo</label>
       <input id="txt_num_processo" name="txt_num_processo" min="1" type="number" maxlength="6" class="form-control number" autocomplete="off">
     </div>
     <div class="col-6 col-md-3 mb-3">
-      <label for="dt_apres">Data Inicial</label>
+      <label class="form-label" for="dt_apres">Data Inicial</label>
         <input type="text" class="form-control date" id="dt_apres" name="dt_apres" autocomplete="off">
     </div>
    <div class="col-6 col-md-3 mb-3">
-      <label for="dt_apres2">Data Final</label>
+      <label class="form-label" for="dt_apres2">Data Final</label>
       <input type="text" class="form-control date" id="dt_apres2" name="dt_apres2" autocomplete="off">
     </div>
     <script>
@@ -150,9 +150,9 @@ function pesquisam_criticar(form){
         });
     </script>    
   </div>
-  <div class="form-row">
+  <div class="row">
     <div class="col-12 col-md-6 mb-3">
-      <label for="hdn_cod_autor">Autoria</label>
+      <label class="form-label" for="hdn_cod_autor">Autoria</label>
         <select id="hdn_cod_autor" name="hdn_cod_autor" class="form-control selectpicker show-tick" data-size="6" data-live-search="true" title="Todas" data-header="Pesquisar Autor">
               <option value="">Todas</option>
               <dtml-in expr="zsql.autor_obter_zsql(ind_excluido=0)">
@@ -161,14 +161,14 @@ function pesquisam_criticar(form){
        </select>
     </div>
     <div class="col-12 col-md-6 mb-3">
-      <label for="txt_assunto">Termos da Pesquisa</label>
-      <input type="text" class="form-control" name="txt_assunto" id="txt_assunto" maxlenght="50" autocomplete="off" data-toggle="popover" data-trigger="focus" title="Dicas de Preenchimento" data-content="A frase colocada entre aspas duplas pesquisa por registros com a frase exata. Um asterisco (*) é um operador de truncamento que pode ser inserido ao fim de uma palavra. Um sinal de mais (+) precedente indica que a palavra deve estar presente no texto. Um sinal de menos (-) precedente indica que a palavra não deve estar presente em qualquer parte do texto." />
+      <label class="form-label" for="txt_assunto">Termos da Pesquisa</label>
+      <input type="text" class="form-control" name="txt_assunto" id="txt_assunto" maxlenght="50" autocomplete="off" data-bs-toggle="popover" data-trigger="focus" title="Dicas de Preenchimento" data-content="A frase colocada entre aspas duplas pesquisa por registros com a frase exata. Um asterisco (*) é um operador de truncamento que pode ser inserido ao fim de uma palavra. Um sinal de mais (+) precedente indica que a palavra deve estar presente no texto. Um sinal de menos (-) precedente indica que a palavra não deve estar presente em qualquer parte do texto." />
     </div>
   </div>
-  <div class="form-row">
+  <div class="row">
     <div class="col-12 col-md-4 mb-3">
-      <label for="lst_tramitou">Tramitou por:</label>
-        <select id="lst_tramitou" name="lst_tramitou" class="custom-select">
+      <label class="form-label" for="lst_tramitou">Tramitou por:</label>
+        <select id="lst_tramitou" name="lst_tramitou" class="form-control">
             <option value=""></option>
             <dtml-in expr="zsql.unidade_tramitacao_obter_zsql(ind_leg=1)">
               <option value="<dtml-var cod_unid_tramitacao missing>">
@@ -178,8 +178,8 @@ function pesquisam_criticar(form){
        </select>
     </div>
     <div class="col-12 col-md-4 mb-3">
-      <label for="lst_localizacao">Localização Atual</label>
-        <select id="lst_localizacao" name="lst_localizacao" class="custom-select">
+      <label class="form-label" for="lst_localizacao">Localização Atual</label>
+        <select id="lst_localizacao" name="lst_localizacao" class="form-control">
             <option value="">Todas</option>
             <dtml-in expr="zsql.unidade_tramitacao_obter_zsql(ind_leg=1)">
               <option value="<dtml-var cod_unid_tramitacao missing>">                
@@ -189,8 +189,8 @@ function pesquisam_criticar(form){
        </select>
     </div>
     <div class="col-12 col-md-4 mb-3">
-      <label for="lst_status">Situação Atual</label>
-        <select id="lst_status" name="lst_status" class="custom-select">
+      <label class="form-label" for="lst_status">Situação Atual</label>
+        <select id="lst_status" name="lst_status" class="form-control">
             <option value="">Todas</option>
             <dtml-in expr="zsql.status_tramitacao_obter_zsql(ind_excluido=0)">
               <option value="<dtml-var cod_status missing>">
@@ -200,33 +200,33 @@ function pesquisam_criticar(form){
        </select>
     </div>
   </div>
-  <div class="form-row">
+  <div class="row">
   <div class="col-12 col-sm-4 mb-3">
-      <label for="rad_tramitando" class="d-block">Em Tramitação?</label>
-        <select id="rad_tramitando" name="rad_tramitando" class="custom-select">
+      <label class="form-label" for="rad_tramitando" class="d-block">Em Tramitação?</label>
+        <select id="rad_tramitando" name="rad_tramitando" class="form-control">
          <dtml-in expr="[('Não', '0'), ('Sim', '1'), ('Tanto faz', '')]">      
             <option value="<dtml-var expr="_['sequence-item']">" <dtml-if expr="_['sequence-item']==''">selected</dtml-if>><dtml-var expr="_['sequence-key']"></option>
          </dtml-in>
         </select>
    </div>                         
     <div class="col-12 col-sm-4 mb-3">
-      <label for="rd_ordenacao" class="d-block">Ordenação</label>
-        <select id="rd_ordenacao" name="rd_ordenacao" class="custom-select">
+      <label class="form-label" for="rd_ordenacao" class="d-block">Ordenação</label>
+        <select id="rd_ordenacao" name="rd_ordenacao" class="form-control">
          <dtml-in expr="[('Descendente', '1'), ('Ascendente', '2')]">      
             <option value="<dtml-var expr="_['sequence-item']">" <dtml-if expr="_['sequence-item']==''">selected</dtml-if>><dtml-var expr="_['sequence-key']"></option>
          </dtml-in>
         </select>
     </div>
     <div class="col-12 col-sm-4 mb-3">
-      <label class="d-block">Pesquisa Textual</label>
+      <label class="form-label d-block">Pesquisa Textual</label>
       <div class="custom-control custom-switch">
       <input type="checkbox" class="custom-control-input" name ="chk_textual" id="chk_textual">
         <label class="custom-control-label" for="chk_textual">Pesquisar nos Textos Integrais</label>
       </div>
     </div>        
   </div>    
-  <div class="form-row">
-    <div class="col-12 col-md-12 mt-2 text-left"> 
+  <div class="row">
+    <div class="col-12 col-md-12 mt-2 text-start"> 
         <dtml-let isAnon="portal_membership.isAnonymousUser()">
             <dtml-if expr="isAnon and sapl_documentos.props_sagl.recaptcha_key">
                 <div class="g-recaptcha mb-3" data-sitekey="<dtml-var "sapl_documentos.props_sagl.recaptcha_key">"></div>
@@ -249,4 +249,5 @@ function pesquisam_criticar(form){
 </div>
 </div>
 
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>

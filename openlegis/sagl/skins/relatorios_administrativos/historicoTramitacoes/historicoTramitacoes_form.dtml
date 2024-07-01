@@ -1,10 +1,10 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
-<h1 class="firstHeading">Histórico de Tramitações</h1>
+<h1 class="firstHeading font-size-18">Histórico de Tramitações</h1>
 
 <form method="post" action="" name="historicoTramitacoes_form">
 
-  <legend>Parâmetros da Pesquisa</legend>
+  <legend class="font-size-16">Parâmetros da Pesquisa</legend>
   <p><b>Período:</b> <dtml-var dat_inicio> a <dtml-var dat_fim></p>
   <p><b>Unidade de Tramitação:</b>
     <dtml-if expr="lst_cod_unid_tram_dest=='0'">
@@ -40,7 +40,7 @@
 <dtml-call name="REQUEST">
 <dtml-if dat_inicio>
   <hr />
-  <legend>Resultado da Pesquisa</legend>
+  <legend class="font-size-16">Resultado da Pesquisa</legend>
   <dtml-call expr="REQUEST.set('dat_inicio_c',pysc.data_converter_pysc(dat_inicio))">
   <dtml-call expr="REQUEST.set('dat_fim_c',pysc.data_converter_pysc(dat_fim))"> 
   <dtml-in "qtdeGeral(dat_inicio=dat_inicio_c, dat_fim=dat_fim_c)"><b>Total de Tramitações:</b> <dtml-var qtde></p>
@@ -83,9 +83,9 @@
     </dtml-in>
   </dtml-in>
   
-  <legend>Quadro Geral</legend>
+  <legend class="font-size-16">Quadro Geral</legend>
     <table class="table table-sm">
-      <thead class="table-secondary">
+      <thead>
       <tr>
        <td>Unidade de Tramitação</td>
        <td align="center">Tramitações</td>
@@ -116,4 +116,5 @@
 
 <p><input class="btn btn-primary d-print-none" type="button" value="Voltar" onClick="history.go(-1)" /></p>
 
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>

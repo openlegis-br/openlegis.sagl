@@ -1,4 +1,4 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
 <script src="<dtml-var portal_url>/javascript/jquery.cleditor.js"></script>
 <script src="<dtml-var portal_url>/javascript/jquery.cleditor.xhtml.min.js"></script>
@@ -10,7 +10,7 @@ $("#txa_txt_tramitacao").cleditor()[0].disable("true");;
 });
 </script>
 
-<h1 class="firstHeading">Detalhes da Tramitação Digital</h1>
+<h1 class="firstHeading font-size-18">Detalhes da Tramitação Digital</h1>
 
 <dtml-in expr="zsql.tramitacao_obter_zsql(cod_tramitacao=hdn_cod_tramitacao)">
     <dtml-call expr="REQUEST.set('hdn_cod_materia', int(cod_materia))">
@@ -139,4 +139,5 @@ $("#txa_txt_tramitacao").cleditor()[0].disable("true");;
 
 </dtml-in>
 
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>

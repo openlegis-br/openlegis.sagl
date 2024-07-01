@@ -1,4 +1,4 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
 <script>
 
@@ -72,22 +72,22 @@
 
 </script>
 
-<h1 class="firstHeading">Parecer de Comissão</h1> 
+<h1 class="firstHeading font-size-18">Parecer de Comissão</h1> 
 
 <form id="materia_apresentada_parecer_form" name="materia_apresentada_parecer_form" method="post" action="materia_apresentada_salvar_proc">
  <dtml-in expr="zsql.sessao_plenaria_obter_zsql(cod_sessao_plen = cod_sessao_plen,ind_excluido=0)">
    <table class="table table-borderless">
      <tr>
        <td>
-          <label for="txt_dat_ordem" class="required">Data da <dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao"></label>
+          <label class="form-label" for="txt_dat_ordem" class="required">Data da <dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao"></label>
           <input class="form-control" type="text" name="txt_dat_ordem" id="txt_dat_ordem" size="10"readonly="readonly"
              <dtml-if lst_dat_ordem> value="<dtml-var lst_dat_ordem>"
              <dtml-else> value="<dtml-var dat_inicio_sessao>"
              </dtml-if> />
         </td>
         <td>
-           <label for="lst_tip_sessao" class="required">Tipo de <dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao"></label>
-            <select class="custom-select" id="lst_tip_sessao" name="lst_tip_sessao" onfocus="this.initialSelect = this.selectedIndex;" onchange="this.selectedIndex = this.initialSelect;" required>
+           <label class="form-label" for="lst_tip_sessao" class="required">Tipo de <dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao"></label>
+            <select class="form-select" id="lst_tip_sessao" name="lst_tip_sessao" onfocus="this.initialSelect = this.selectedIndex;" onchange="this.selectedIndex = this.initialSelect;" required>
     	      <option value="0">Selecione</option>
               <dtml-in expr="zsql.tipo_sessao_plenaria_obter_zsql(ind_excluido=0)">
                  <option
@@ -102,7 +102,7 @@
             </select>
          </td>
          <td>
-            <label for="txt_num_ordem" class="required">Nº de Ordem </label>
+            <label class="form-label" for="txt_num_ordem" class="required">Nº de Ordem </label>
             <dtml-unless cod_ordem>
                <dtml-in expr="zsql.materia_apresentada_numero_obter_zsql(cod_sessao_plen=cod_sessao_plen)">
                  <dtml-call expr="REQUEST.set('num_ordem', _.int(novo_item))">
@@ -113,10 +113,10 @@
        </tr>
        <tr>
          <td colspan="3">
-          <div class="form-row">
+          <div class="row">
             <div class="col-6">         
-             <label for="lst_comissao" class="required">Selecione a Comissão</label>
-             <select class="custom-select" id="lst_comissao" name="lst_comissao" onChange="ementa_buscar(document.materia_apresentada_parecer_form)" required>
+             <label class="form-label" for="lst_comissao" class="required">Selecione a Comissão</label>
+             <select class="form-select" id="lst_comissao" name="lst_comissao" onChange="ementa_buscar(document.materia_apresentada_parecer_form)" required>
                   <option>Selecione</option>
                    <dtml-in expr="zsql.comissao_obter_zsql(ind_excluido=0)">
                     <dtml-if expr="dat_extincao is None">
@@ -131,11 +131,11 @@
              </select>
           </div>
           <div class="col-3">
-            <label for="txt_num_parecer" class="required">Parecer nº</label>
+            <label class="form-label" for="txt_num_parecer" class="required">Parecer nº</label>
             <input class="form-control number" type="number" id="txt_num_parecer" name="txt_num_parecer" value="<dtml-var num_parecer missing>" onChange="ementa_buscar(document.materia_apresentada_parecer_form)">
            </div>
           <div class="col-3">
-            <label for="txt_ano_parecer" class="required">Ano</label>
+            <label class="form-label" for="txt_ano_parecer" class="required">Ano</label>
             <input class="form-control year" type="number" id="txt_ano_parecer" name="txt_ano_parecer" value="<dtml-var ano_parecer missing>" onChange="ementa_buscar(document.materia_apresentada_parecer_form)">
           </div>
          </div>
@@ -143,10 +143,10 @@
        </tr>
        <tr>
            <td colspan="3">
-             <div class="form-row">
+             <div class="row">
               <div class="col-6">
-                <label for="lst_tip_id_basica" class="required">Tipo de Matéria</label>
-                <select class="custom-select" id="lst_tip_id_basica" name="lst_tip_id_basica" onChange="ementa_buscar(document.materia_apresentada_parecer_form)" required >
+                <label class="form-label" for="lst_tip_id_basica" class="required">Tipo de Matéria</label>
+                <select class="form-select" id="lst_tip_id_basica" name="lst_tip_id_basica" onChange="ementa_buscar(document.materia_apresentada_parecer_form)" required >
                  <option></option>
                    <dtml-in expr="zsql.tipo_materia_legislativa_obter_zsql(ind_excluido=0,tip_natureza='P')">
                       <option
@@ -160,11 +160,11 @@
                  </select>
                </div>
               <div class="col-3">
-                <label for="txt_num_ident_basica" class="required">Número</label>              
+                <label class="form-label" for="txt_num_ident_basica" class="required">Número</label>              
                 <input class="form-control number" type="number" id="txt_num_ident_basica" name="txt_num_ident_basica" onChange="ementa_buscar(document.materia_apresentada_parecer_form)" value="<dtml-var num_ident_basica missing>" />
                </div>
               <div class="col-3">
-                <label for="txt_ano_ident_basica" class="required">Ano</label>                 
+                <label class="form-label" for="txt_ano_ident_basica" class="required">Ano</label>                 
              <input class="form-control year" type="number" id="txt_ano_ident_basica" name="txt_ano_ident_basica" onChange="ementa_buscar(document.materia_apresentada_parecer_form)" value="<dtml-var ano_ident_basica missing>"  />
               </div>
            </div> 
@@ -172,7 +172,7 @@
       </tr>
       <tr>
         <td colspan="3">
-          <label for="txa_txt_observacao" class="required">Ementa </label>
+          <label class="form-label" for="txa_txt_observacao" class="required">Ementa </label>
           <textarea class="form-control auto-resize" name="txa_txt_observacao" rows="1"><dtml-var txt_observacao missing></textarea>
         </td>
       </tr>
@@ -189,7 +189,7 @@
 
 <div class="row">
   <div class="col-md-12 mt-2">
-     <p class="text-muted small"><i class="fas fa-asterisk text-danger"></i> Campos obrigatórios</p>
+     <p class="text-muted small font-size-12"><i class="fas fa-asterisk text-danger"></i> Campos obrigatórios</p>
   </div>
 </div>
 
@@ -204,4 +204,5 @@
 autosize(document.querySelectorAll('textarea'));
 </script>
 
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>

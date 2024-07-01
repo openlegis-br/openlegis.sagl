@@ -1,4 +1,4 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
 <script>
   function campos_criticar(){
@@ -25,14 +25,14 @@
    <dtml-if codigo>
      <dtml-if expr="not hasattr(sapl_documentos.administrativo,codigo+'.pdf')">
        if (document.getElementById("anexo").value != "") {
-         $.showAlert({title: "Mensagem do Sistema", body: "Um arquivo PDF foi selecionado mas ainda foi não carregado no sistema! Se deseja anexar o arquivo, antes de protocolar a petição, clique no botão Carregar."});           
+         bootstrap.showModal({title: "Mensagem do Sistema", body: "Um arquivo PDF foi selecionado mas ainda foi não carregado no sistema! Se deseja anexar o arquivo, antes de protocolar a petição, clique no botão Carregar."});           
          form.anexo.focus();
          return false;
         } 
      </dtml-if>   
    <dtml-else>
       if (document.getElementById("anexo").value != "") {
-       $.showAlert({title: "Mensagem do Sistema", body: "Um arquivo PDF foi selecionado mas ainda foi não carregado no sistema! Se deseja anexar o arquivo, antes de protocolar a petição, clique no botão Carregar."});
+       bootstrap.showModal({title: "Mensagem do Sistema", body: "Um arquivo PDF foi selecionado mas ainda foi não carregado no sistema! Se deseja anexar o arquivo, antes de protocolar a petição, clique no botão Carregar."});
        form.anexo.focus();
        return false;
       }   
@@ -83,14 +83,14 @@
      <dtml-if expr="_.has_key('sucesso')">
        <div class="alert alert-success alert-dismissible fade show" role="alert">
         <h5><dtml-var mensagem newline_to_br html_quote></h5>
-        <button type="button" class="close" data-dismiss="alert" aria-label="Fechar">
+        <button type="button" class="close" data-bs-dismiss="alert" aria-label="Fechar">
           <span aria-hidden="true">&times;</span>
         </button>
        </div>
      <dtml-else>
        <div class="alert alert-success alert-dismissible fade show" role="alert">
         <h5><dtml-var mensagem newline_to_br html_quote></h5>
-        <button type="button" class="close" data-dismiss="alert" aria-label="Fechar">
+        <button type="button" class="close" data-bs-dismiss="alert" aria-label="Fechar">
           <span aria-hidden="true">&times;</span>
         </button>
        </div>
@@ -115,17 +115,17 @@
 
      <input type="hidden" id="codigo" name="codigo" value="<dtml-var codigo missing>" />
 
-     <div class="form-row">
+     <div class="row">
         <div class="col-12 mb-3">
-	  <label for="txa_txt_interessado">Nome do Requerente</label>
+	  <label class="form-label" for="txa_txt_interessado">Nome do Requerente</label>
 	  <input class="form-control" type="text" id="txa_txt_interessado" name="txa_txt_interessado" value="<dtml-var nom_completo>" readonly/>        
         </div>
       </div>
       
-     <div class="form-row">         
+     <div class="row">         
         <div class="col-6 mb-3">
-	 <label for="lst_assunto" class="required">Assunto</label>
-         <select class="custom-select" id="lst_assunto" name="lst_assunto">
+	 <label class="form-label" for="lst_assunto" class="required">Assunto</label>
+         <select class="form-select" id="lst_assunto" name="lst_assunto">
 	      <option></option>
                 <dtml-in expr="['Adiantamento de 13º salário', 'Adiantamento de despesas de viagem', 'Compra de produto ou serviço', 'Férias', 'Justificativa de falta', 'Licença-prêmio', 'Outros assuntos']">
                    <option value="<dtml-var expr="_['sequence-item']">"
@@ -135,8 +135,8 @@
 	 </select>     
         </div>
         <div class="col-6 mb-3">
-         <label for="lst_cod_unid_tram_dest" class="required">Unidade de Destino</label>
-         <select class="custom-select" name="lst_cod_unid_tram_dest" id="lst_cod_unid_tram_dest" required>
+         <label class="form-label" for="lst_cod_unid_tram_dest" class="required">Unidade de Destino</label>
+         <select class="form-select" name="lst_cod_unid_tram_dest" id="lst_cod_unid_tram_dest" required>
             <option></option>
                <dtml-in expr="zsql.unidade_tramitacao_obter_zsql(ind_adm=1)">
                    <option 
@@ -148,17 +148,17 @@
          </select>        
        </div>
      </div>
-     <div class="form-row">
+     <div class="row">
         <div class="col-12 mb-3">
-	  <label for="txa_txt_assunto" class="required">Resumo da Solicitação</label>
+	  <label class="form-label" for="txa_txt_assunto" class="required">Resumo da Solicitação</label>
 	  <textarea class="form-control auto-resize" id="txa_txt_assunto" name="txa_txt_assunto" rows="1"><dtml-var txa_txt_assunto missing></textarea>
         </div>
      </div>
   </form>
 
-     <div class="form-row">
+     <div class="row">
         <div class="col-12 mb-3">    
- 	   <label class="d-block">Anexo PDF</label>
+ 	   <label class="form-label d-block">Anexo PDF</label>
            <dtml-if expr="_.has_key('codigo')">
               <dtml-in expr="zsql.assinatura_documento_obter_zsql(tipo_doc='peticao',codigo=codigo)">
                  <dtml-call "REQUEST.set('cod_assinatura_doc', cod_assinatura_doc)">
@@ -174,7 +174,7 @@
                  <i class="fa fa-file-pdf"></i> Visualizar
               </a>
               <dtml-if "sapl_documentos.props_sagl.restpki_access_token!=''">
-                 <button type="button" class="btn btn-secondary d-print-none " data-toggle="modal" data-target="#iFrameModal" data-title="Assinatura Digital" data-src="<dtml-var portal_url>/generico/assinador/pades-signature_html?codigo=<dtml-var codigo>&tipo_doc=peticao&modal=1"><i class="fas fa-file-signature"></i>Assinar</button>              
+                 <button type="button" class="btn btn-secondary d-print-none " data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Assinatura Digital" data-src="<dtml-var portal_url>/generico/assinador/pades-signature_html?codigo=<dtml-var codigo>&tipo_doc=peticao&modal=1"><i class="fas fa-file-signature"></i>Assinar</button>              
               </dtml-if>
               <input class="btn btn-danger" type="button" value="Excluir"  onClick="arquivo_excluir(<dtml-var codigo>)"/>
            <dtml-else>
@@ -195,7 +195,7 @@
         </div>
      </div>
 
-     <div class="text-left">
+     <div class="text-start">
        <input class="btn btn-primary" type="button" value="Protocolar Petição" onClick="campos_criticar()" />
      </div>
 
@@ -203,4 +203,5 @@
 autosize(document.querySelectorAll('textarea'));
 </script>
 
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>

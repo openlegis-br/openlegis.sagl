@@ -12,8 +12,8 @@
       <dtml-else>
         <dtml-call expr="REQUEST.set('cod_materia',cod_materia)">
            <dtml-call expr="REQUEST.set('cod_documento',pysc.proposicao_calcular_checksum_pysc(codigo))">
-<dtml-var standard_html_header>
-           <h1 class="firstHeading">Proposição Digital nº <dtml-var cod_proposicao></h1>
+<dtml-var header_html>
+           <h1 class="firstHeading font-size-18">Proposição Digital nº <dtml-var cod_proposicao></h1>
            <table class="table">
              <tr>
               <td>
@@ -74,7 +74,8 @@
              </dtml-if>
              <input class="form-control" class="pf-button btn botao" type="button" id="btn_nor" name="btn_nova_consulta" value="Nova Consulta" onclick="javascript:location.href='<dtml-var portal_url>/generico/proposicao_validar'"/>
            </p>
-﻿          <dtml-var standard_html_footer>
+﻿          <dtml-var js_slot>
+<dtml-var footer_html>
       </dtml-if>
      </dtml-if>
     </dtml-in>

@@ -1,4 +1,4 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
 <script src="<dtml-var portal_url>/js/moment.min.js""></script>
 <script src="<dtml-var portal_url>/js/datetime-moment.js"></script>
@@ -44,7 +44,7 @@ $(document).ready(function() {
 
 </script>
 
- <h1 class="firstHeading">Histórico de Visitas</h1>
+ <h1 class="firstHeading font-size-18">Histórico de Visitas</h1>
 
   <dtml-in expr="zsql.usuario_obter_zsql(col_username=AUTHENTICATED_USER.getUserName())">
        <dtml-if cod_usuario>
@@ -57,7 +57,7 @@ $(document).ready(function() {
  <dtml-in expr="zsql.visita_obter_zsql(cod_funcionario=cod_funcionario_corrente)">
   <dtml-if sequence-start>
     <table class="table display" id="visitas">
-     <thead class="table-secondary">
+     <thead>
        <tr>
         <th>Entrada</th>
         <th>Nome do Visitante</th>
@@ -69,19 +69,19 @@ $(document).ready(function() {
         <tr>
            <td><dtml-var dat_entrada></td>
            <td>                  
-               <a href="#" data-src="<dtml-var portal_url>/cadastros/atendimento/visitante_mostrar_proc?hdn_cod_pessoa=<dtml-var cod_pessoa missing>&modal=1" data-toggle="modal" data-target="#iFrameModal" /><dtml-var nom_pessoa></a> 
+               <a href="#" data-src="<dtml-var portal_url>/cadastros/atendimento/visitante_mostrar_proc?hdn_cod_pessoa=<dtml-var cod_pessoa missing>&modal=1" data-bs-toggle="modal" data-bs-target="#iFrameModal" /><dtml-var nom_pessoa></a> 
             </td>
            <td><dtml-var num_cracha></td>
            <td>
                <dtml-if des_situacao>
                  <dtml-if expr="des_situacao == 'P'">
-                   <a class="btn btn-sm btn-link" data-src="<dtml-var portal_url>/cadastros/atendimento/atendimento_mostrar_proc?cod_visita=<dtml-var cod_visita>&modal=1" data-toggle="modal" data-target="#iFrameModal" />Pendente</a>
+                   <a class="btn btn-sm btn-link" data-src="<dtml-var portal_url>/cadastros/atendimento/atendimento_mostrar_proc?cod_visita=<dtml-var cod_visita>&modal=1" data-bs-toggle="modal" data-bs-target="#iFrameModal" />Pendente</a>
                
                  <dtml-elif expr="des_situacao == 'R'">
-                   <a class="btn btn-sm btn-link" data-src="<dtml-var portal_url>/cadastros/atendimento/atendimento_mostrar_proc?cod_visita=<dtml-var cod_visita>&modal=1" data-toggle="modal" data-target="#iFrameModal" />Resolvido</a> 
+                   <a class="btn btn-sm btn-link" data-src="<dtml-var portal_url>/cadastros/atendimento/atendimento_mostrar_proc?cod_visita=<dtml-var cod_visita>&modal=1" data-bs-toggle="modal" data-bs-target="#iFrameModal" />Resolvido</a> 
                  </dtml-if>
                <dtml-else>
-                  <a class="btn btn-sm btn-link" data-src="<dtml-var portal_url>/cadastros/atendimento/atendimento_mostrar_proc?cod_visita=<dtml-var cod_visita>&modal=1" data-toggle="modal" data-target="#iFrameModal" />Registrar</a> 
+                  <a class="btn btn-sm btn-link" data-src="<dtml-var portal_url>/cadastros/atendimento/atendimento_mostrar_proc?cod_visita=<dtml-var cod_visita>&modal=1" data-bs-toggle="modal" data-bs-target="#iFrameModal" />Registrar</a> 
                </dtml-if>
            </td>
         </tr>
@@ -92,5 +92,6 @@ $(document).ready(function() {
    <p>Nenhuma visita registrada.</td>
  </dtml-in>
 
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>
 

@@ -1,34 +1,34 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
 <script>
   function campos_criticar(){
   var form = document.peticionamento_form;
       if (form.lst_tip_peticionamento.selectedIndex==''){
-          $.showAlert({title: "Mensagem do Sistema", body: "O tipo de documento deve ser selecionado !"});
+          bootstrap.showModal({title: "Mensagem do Sistema", body: "O tipo de documento deve ser selecionado !"});
           form.lst_tip_peticionamento.focus();
           return false;
       }
 
       if (form.txa_txt_descricao.value == "") {
-         $.showAlert({title: "Mensagem do Sistema", body: "A descrição do documento ser preenchida !"});
+         bootstrap.showModal({title: "Mensagem do Sistema", body: "A descrição do documento ser preenchida !"});
          form.txa_txt_descricao.focus();
          return false;
       }
 
       if (form.lst_tip_materia.selectedIndex==''){
-          $.showAlert({title: "Mensagem do Sistema", body: "O tipo de matéria legislativa  deve ser selecionado !"});
+          bootstrap.showModal({title: "Mensagem do Sistema", body: "O tipo de matéria legislativa  deve ser selecionado !"});
           form.lst_tip_materia.focus();
           return false;
       }
       
       if (form.txt_num_materia.value == "") {
-         $.showAlert({title: "Mensagem do Sistema", body: "O número da matéria deve ser preenchido !"});
+         bootstrap.showModal({title: "Mensagem do Sistema", body: "O número da matéria deve ser preenchido !"});
          form.txt_num_materia.focus();
          return false;
       }
 
       if (form.txt_ano_materia.value == "") {
-         $.showAlert({title: "Mensagem do Sistema", body: "O ano da matéria deve ser preenchido !"});
+         bootstrap.showModal({title: "Mensagem do Sistema", body: "O ano da matéria deve ser preenchido !"});
          form.txt_ano_materia.focus();
          return false;
       }
@@ -39,7 +39,7 @@
   if (processo_principal != ""){
      if ((form.lst_tip_materia[form.lst_tip_materia.selectedIndex].value == "") ||
         (form.txt_num_materia.value == "") || (form.txt_ano_materia.value == "")) {
-         $.showAlert({title: "Mensagem do Sistema", body: "Informe tipo, número e ano da matéria originária !"});       
+         bootstrap.showModal({title: "Mensagem do Sistema", body: "Informe tipo, número e ano da matéria originária !"});       
          form.txt_num_materia.focus(); 
          return false;
      }
@@ -55,7 +55,7 @@
       var path = selected.getAttribute('data-path');
   
       if (lst_modelo.selectedIndex == 0) {
-         $.showAlert({title: "Mensagem do Sistema", body: "É necessário selecionar um modelo!"});        
+         bootstrap.showModal({title: "Mensagem do Sistema", body: "É necessário selecionar um modelo!"});        
          return false;
       }
 
@@ -145,10 +145,10 @@ $(document).ready(function(){
      <input type="hidden" name="cod_usuario_corrente" value="<dtml-var cod_usuario_corrente>" />
      <input type="hidden" name="hdn_url" value="peticao_mostrar_proc?modal=1&cod_peticao=<dtml-var cod_peticao missing>" />
 
-     <div class="form-row">         
+     <div class="row">         
         <div class="col-12 col-sm-6 mb-3">
-	 <label for="lst_tip_peticionamento" class="required">Tipo de Documento Acessório</label>
-         <select class="custom-select" id="lst_tip_peticionamento" name="lst_tip_peticionamento">
+	 <label class="form-label" for="lst_tip_peticionamento" class="required">Tipo de Documento Acessório</label>
+         <select class="form-select" id="lst_tip_peticionamento" name="lst_tip_peticionamento">
 	      <option></option>
                <dtml-in expr="zsql.tipo_peticionamento_obter_zsql(ind_doc_materia=1, ind_excluido=0)">
                  <dtml-if expr="zsql.usuario_peticionamento_obter_zsql(cod_usuario=cod_usuario_corrente, tip_peticionamento=tip_peticionamento)">
@@ -164,15 +164,15 @@ $(document).ready(function(){
 	 </select>     
         </div>
         <div class="col-12 col-sm-6 mb-3">
-	  <label for="txa_txt_descricao" class="required">Identificação do Documento</label>
+	  <label class="form-label" for="txa_txt_descricao" class="required">Identificação do Documento</label>
           <input class="form-control" id="txa_txt_descricao" maxlenght="250" name="txa_txt_descricao" value="<dtml-var txt_descricao missing>" />
         </div>
      </div>
 
-<div class="form-row">        
+<div class="row">        
    <div class="col-8 col-sm-6 mb-3">          
-    <label for="lst_tip_materia" class="required">Matéria Legislativa</label>
-      <select class="custom-select" id="lst_tip_materia" name="lst_tip_materia" required>
+    <label class="form-label" for="lst_tip_materia" class="required">Matéria Legislativa</label>
+      <select class="form-select" id="lst_tip_materia" name="lst_tip_materia" required>
        <option value=""></option>
          <dtml-in expr="zsql.tipo_materia_legislativa_obter_zsql(tip_natureza='P', ind_excluido=0)">
             <option
@@ -183,39 +183,39 @@ $(document).ready(function(){
       </select>
   </div>
   <div class="col-6 col-sm-3 mb-3">
-      <label for="txt_num_materia" class="required">Número</label>
+      <label class="form-label" for="txt_num_materia" class="required">Número</label>
       <input class="form-control numero" type="number" id="txt_num_materia" name="txt_num_materia" value="<dtml-var num_materia missing>" required/>
   </div>
   <div class="col-6 col-sm-3 mb-3">
-    <label for="txt_ano_materia" class="required">Ano</label>
+    <label class="form-label" for="txt_ano_materia" class="required">Ano</label>
     <input class="form-control year" type="number" id="txt_ano_materia" name="txt_ano_materia" value="<dtml-var ano_materia missing>" required/>
    </div>
 </div>
 
  <dtml-if cod_materia>
-  <div class="form-row">        
+  <div class="row">        
    <div class="col-12 mb-3">          
-     <label for="txa_txt_assunto">Ementa</label>
+     <label class="form-label" for="txa_txt_assunto">Ementa</label>
      <textarea class="form-control auto-resize" id="txa_txt_assunto" name="txa_txt_assunto" rows="1" readonly><dtml-var txt_assunto missing></textarea>
    </div>
   </div>
  </dtml-if>
 
 <dtml-if cod_peticao>
-   <div class="form-row">  
+   <div class="row">  
      <div class="col-12 col-md-6 mb-3">
-       <label for="lst_modelo" class="form-label d-block">Texto Editável</label>     
+       <label class="form-label" for="lst_modelo" class="form-label d-block">Texto Editável</label>     
          <dtml-let id_documento="str(cod_peticao)+'.odt'">
             <dtml-if "hasattr(sapl_documentos.peticao,id_documento)">
                <dtml-let documento="getattr(sapl_documentos.peticao,id_documento).absolute_url">
                   <dtml-call expr="REQUEST.set('nome_arquivo',str(cod_peticao)+'.odt')">
-                    <button type="button" class="btn btn-sm btn-secondary" onclick="javascript:location.href='&dtml-URL1;/sapl_documentos/peticao/externalEdit_/<dtml-var nome_arquivo>.zem'" data-toggle="tooltip" data-placement="bottom" title="Editar no LibreOffice"><i class="fas fa-fw fa-external-link-alt"></i>LibreOffice</button>
+                    <button type="button" class="btn btn-sm btn-secondary" onclick="javascript:location.href='&dtml-URL1;/sapl_documentos/peticao/externalEdit_/<dtml-var nome_arquivo>.zem'" data-bs-toggle="tooltip" data-placement="bottom" title="Editar no LibreOffice"><i class="fas fa-fw fa-external-link-alt"></i>LibreOffice</button>
                     <a class="btn btn-sm btn-danger" href="<dtml-var portal_url>/cadastros/peticionamento_eletronico/texto_peticao_excluir_proc?modal=1&cod_peticao=<dtml-var cod_peticao missing>" data-confirm="Deseja realmente excluir o arquivo ODT?"><i class="fas fa-trash"></i> Excluir ODT</a>                    
                </dtml-let>
              <dtml-else>
                <dtml-if expr="dat_envio!=''">
                  <div class="input-group">
-                   <select class="custom-select" id="lst_modelo" name="lst_modelo">
+                   <select class="form-select" id="lst_modelo" name="lst_modelo">
                       <option value="0">Selecione um modelo</option>
                    </select>
                    <div class="input-group-append">
@@ -228,7 +228,7 @@ $(document).ready(function(){
      </div>
 
      <div class="col-12 col-md-6 mb-3">
-       <label for="file_nom_arquivo" class="form-label d-block">Texto PDF</label>
+       <label class="form-label" for="file_nom_arquivo" class="form-label d-block">Texto PDF</label>
        <dtml-call expr="REQUEST.set('id_documento', str(cod_peticao)+'.pdf')">
        <dtml-in expr="zsql.assinatura_documento_obter_zsql(codigo=cod_peticao,tipo_doc='peticao',cod_usuario=None)">
           <dtml-call "REQUEST.set('cod_assinatura_doc', cod_assinatura_doc)">
@@ -240,7 +240,7 @@ $(document).ready(function(){
              <i class="fa fa-certificate"></i> Arquivo Assinado
           </a>
          </dtml-let>
-          <button type="button" class="btn btn-sm btn-primary" data-toggle="modal" data-target="#iFrameModal" data-title="Assinaturas Digitais" data-src="<dtml-var portal_url>/cadastros/assinatura/assinatura_solicitar_form?codigo=<dtml-var cod_peticao missing>&tipo_doc=peticao&modal=1"><i class="fas fa-file-signature"></i> Assinaturas</button>
+          <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Assinaturas Digitais" data-src="<dtml-var portal_url>/cadastros/assinatura/assinatura_solicitar_form?codigo=<dtml-var cod_peticao missing>&tipo_doc=peticao&modal=1"><i class="fas fa-file-signature"></i> Assinaturas</button>
            <a class="btn btn-sm btn-danger" href="<dtml-var portal_url>/cadastros/peticionamento_eletronico/texto_pdf_excluir_proc?cod_peticao=<dtml-var cod_peticao>&modal=1" data-confirm="Deseja realmente excluir o texto PDF?"><i class="fas fa-trash"></i> Excluir PDF</a> 
 
        <dtml-elif expr="hasattr(sapl_documentos.peticao,id_documento)">
@@ -251,7 +251,7 @@ $(document).ready(function(){
           </a>
          </dtml-let>
           <dtml-if "sapl_documentos.props_sagl.restpki_access_token!=''">
-             <button type="button" class="btn btn-sm btn-primary d-print-none " data-toggle="modal" data-target="#iFrameModal" data-title="Assinatura Digital" data-src="<dtml-var portal_url>/generico/assinador/pades-signature_html?codigo=<dtml-var cod_peticao>&tipo_doc=peticao&modal=1"><i class="fas fa-file-signature"></i>Assinar</button>              
+             <button type="button" class="btn btn-sm btn-primary d-print-none " data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Assinatura Digital" data-src="<dtml-var portal_url>/generico/assinador/pades-signature_html?codigo=<dtml-var cod_peticao>&tipo_doc=peticao&modal=1"><i class="fas fa-file-signature"></i>Assinar</button>              
           </dtml-if>
           <a class="btn btn-sm btn-danger" href="<dtml-var portal_url>/cadastros/peticionamento_eletronico/texto_pdf_excluir_proc?cod_peticao=<dtml-var cod_peticao>&modal=1" data-confirm="Deseja realmente excluir o texto PDF?"><i class="fas fa-trash"></i> Excluir PDF</a> 
        <dtml-else>
@@ -279,7 +279,7 @@ $(document).ready(function(){
 </form>
 
 <dtml-if cod_peticao>
-  <div class="mt-3 text-left">
+  <div class="mt-3 text-start">
        <form enctype="multipart/form-data" id="protocolo_form" name="protocolo_form" method="post" action="protocolo_pysc" class="needs-validation" novalidate>
          <input class="btn btn-primary" type="button" value="Salvar" onClick="campos_criticar()" />
          <dtml-if expr="_.has_key('temPDFAssinado')">
@@ -290,14 +290,14 @@ $(document).ready(function(){
          <a class="btn btn-danger" href="<dtml-var portal_url>/cadastros/peticionamento_eletronico/peticao_excluir_proc?cod_peticao=<dtml-var cod_peticao missing>&modal=1" data-confirm="Deseja realmente excluir esta petição?">Excluir Petição</a> 
        </form>
 <dtml-else>
-  <div class="text-left">
+  <div class="text-start">
       <input class="btn btn-primary" type="button" value="Salvar Dados" onClick="campos_criticar()" />
   </div>
 </dtml-if>
 
  <div class="row">
     <div class="col-md-12 mt-2">
-       <p class="text-muted small"><i class="fas fa-asterisk text-danger"></i> Campos obrigatórios</p>
+       <p class="text-muted small font-size-12"><i class="fas fa-asterisk text-danger"></i> Campos obrigatórios</p>
     </div>
 </div>
 
@@ -305,4 +305,5 @@ $(document).ready(function(){
   autosize(document.querySelectorAll('textarea'));
 </script>
 
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>

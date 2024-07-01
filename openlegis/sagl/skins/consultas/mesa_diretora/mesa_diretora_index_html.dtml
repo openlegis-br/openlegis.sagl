@@ -1,12 +1,12 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
-<h1 class="firstHeading"><dtml-var expr="sapl_documentos.props_sagl.nome_mesa"></h1>
+<h1 class="firstHeading font-size-18"><dtml-var expr="sapl_documentos.props_sagl.nome_mesa"></h1>
 
 <form name="composicao_mesa_form">
  <div class="row">
   <div class="col-12 col-sm-6 mb-3">
-      <label for="lst_num_legislatura">Selecione a Legislatura:</label>
-      <select class="form-control selectpicker show-tick jumpmenu" data-dropup-auto="false" data-size="6" id="lst_num_legislatura" name="lst_num_legislatura">
+      <label class="form-label" for="lst_num_legislatura">Selecione a Legislatura:</label>
+      <select class="form-select selectpicker show-tick jumpmenu" data-dropup-auto="false" data-size="6" id="lst_num_legislatura" name="lst_num_legislatura">
           <dtml-in expr="zsql.legislatura_obter_zsql(ind_excluido=0)">
              <option
                <dtml-if expr="(not _.has_key('num_legislatura_sel') and (DateTime() >= DateTime(dat_inicio) and DateTime() <= DateTime(dat_fim)))
@@ -32,8 +32,8 @@
         </dtml-if>
   </div>
   <div class="col-12 col-sm-6 mb-3">
-      <label for="lst_periodo_comp">Selecione o Período:</label>
-         <select class="form-control selectpicker show-tick jumpmenu" data-dropup-auto="false" data-size="6" id="lst_periodo_comp" name="lst_periodo_comp">
+      <label class="form-label" for="lst_periodo_comp">Selecione o Período:</label>
+         <select class="form-select selectpicker show-tick jumpmenu" data-dropup-auto="false" data-size="6" id="lst_periodo_comp" name="lst_periodo_comp">
            <dtml-in expr="zsql.periodo_comp_mesa_obter_zsql(num_legislatura=num_legislatura_sel)">
               <option
                 <dtml-if expr="((not _.has_key('cod_periodo_comp_sel') and not _.has_key('prim_sel') 
@@ -55,9 +55,9 @@
 </form>
   <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Mesa Diretora'])">
    <div class="row">
-    <div class="col-12 text-left">
+    <div class="col-12 text-end">
        <dtml-if cod_periodo_comp_sel>
-            <a class="btn btn-sm btn-primary d-print-none mb-3" href="<dtml-var portal_url>/cadastros/mesa_diretora/mesa_diretora_index_html?cod_periodo_comp_sel=<dtml-var cod_periodo_comp_sel>&num_legislatura_sel=<dtml-var num_legislatura_sel>"><i class="fa fa-fw fa-edit"></i> Editar Composição</a>
+            <a class="btn btn-primary d-print-none mb-3" href="<dtml-var portal_url>/cadastros/mesa_diretora/mesa_diretora_index_html?cod_periodo_comp_sel=<dtml-var cod_periodo_comp_sel>&num_legislatura_sel=<dtml-var num_legislatura_sel>"><i class="fa fa-fw fa-edit"></i> Editar Composição</a>
          </dtml-if>      
     </div>
    </div>
@@ -69,25 +69,27 @@
     <dtml-if cod_periodo_comp_sel>
       <dtml-in expr="zsql.composicao_mesa_obter_zsql(cod_periodo_comp=cod_periodo_comp_sel, ind_excluido=0)">
         <dtml-in expr="zsql.parlamentar_obter_zsql(cod_parlamentar=cod_parlamentar, ind_excluido=0)">
-          <dtml-in expr="zsql.cargo_mesa_obter_zsql(cod_cargo=cod_cargo, ind_excluido=0)"> 
+          <dtml-in expr="zsql.cargo_mesa_obter_zsql(cod_cargo=cod_cargo, ind_excluido=0)">
         <!-- Parlamentar -->
-        <div class="col-6 col-md-4 col-lg-3 mb-4">
+        <div class="col-md-6 col-lg-4 col-xl-3">
           <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia'])">
-            <a href="<dtml-var portal_url>/cadastros/parlamentar/parlamentar_mostrar_proc?cod_parlamentar=<dtml-var cod_parlamentar>" title="<dtml-var nom_completo>">
+            <a href="<dtml-var portal_url>/cadastros/parlamentar/parlamentar_mostrar_proc?cod_parlamentar=<dtml-var cod_parlamentar>" title="<dtml-var nom_completo>" >
           <dtml-else>
             <a href="<dtml-var portal_url>/consultas/parlamentar/parlamentar_mostrar_proc?cod_parlamentar=<dtml-var cod_parlamentar>" title="<dtml-var nom_completo>">
-          </dtml-if>  
-            <div class="vereador py-4 px-4 border rounded bg-light">
-             <dtml-call expr="REQUEST.set('id_foto', str(cod_parlamentar)+'_foto_parlamentar')">
-             <dtml-if expr="hasattr(sapl_documentos.parlamentar.fotos,id_foto)">
-                 <img alt="<dtml-var nom_completo>" src="<dtml-var portal_url>/sapl_documentos/parlamentar/fotos/<dtml-var id_foto>" width="140" class="img-fluid mb-2 img-thumbnail shadow-sm">
-             <dtml-else>
-                 <img alt="<dtml-var nom_completo>" src="<dtml-var portal_url>/imagens/avatar.png" width="140" class="img-fluid mb-2 img-thumbnail shadow-sm">
-             </dtml-if>
-                <p class="h6 mt-1 mb-0">
-                   <dtml-var nom_parlamentar>
-                </p>
-                <span class="small text-uppercase text-muted">
+          </dtml-if>
+            <div class="card profile" style="height: 90%">
+               <div class="card-body">
+                 <div class="text-center">
+                 <dtml-call expr="REQUEST.set('id_foto', str(cod_parlamentar)+'_foto_parlamentar')">
+                 <dtml-if expr="hasattr(sapl_documentos.parlamentar.fotos,id_foto)">
+                    <img alt="<dtml-var nom_completo>" src="<dtml-var portal_url>/sapl_documentos/parlamentar/fotos/<dtml-var id_foto>" width="140" class="rounded-circle img-thumbnail avatar-xl">
+                 <dtml-else>
+                    <img alt="<dtml-var nom_completo>" src="<dtml-var portal_url>/imagens/avatar.png" width="140" class="rounded-circle img-thumbnail avatar-xl">
+                 </dtml-if>
+                 <h5 class="mt-3 mb-1 font-size-14 font-color-dark">
+                    <dtml-var nom_parlamentar>
+                 </h5>
+                 <p class="small text-uppercase text-muted">
                      <dtml-in expr="zsql.parlamentar_data_filiacao_obter_zsql(num_legislatura=num_legislatura_sel, cod_parlamentar=cod_parlamentar)">
                        <dtml-if expr="dat_filiacao != '0' and dat_filiacao != None">
                           <dtml-in expr="zsql.parlamentar_partido_obter_zsql(dat_filiacao=dat_filiacao, cod_parlamentar=cod_parlamentar)">
@@ -95,21 +97,25 @@
                           </dtml-in>
                        </dtml-if>
                      </dtml-in>
-                </span>
+                 </p>
                 <p class="text-muted mt-0">
                    <dtml-var des_cargo>
                 </p>
-            </div></a>
-        </div><!-- Fim -->  
+              </div>
+            </div>
+           </div>
+          </a>
+        </div>
+        <!-- Fim Parlamentar-->
         </dtml-in>                
        </dtml-in>
      <dtml-else>
-       <div class="col-12 text-left">
+       <div class="col-12 text-start">
           <p>Nenhum parlamentar cadastrado na composição da <dtml-var expr="sapl_documentos.props_sagl.nome_mesa">.</p>
        </div>
      </dtml-in> 
     <dtml-else>
-      <div class="col-12 text-left">
+      <div class="col-12 text-start">
         <dtml-if expr="num_legislatura_sel=='-1'">
           <p>Não há nenhum período de composição cadastrado.</p>
         <dtml-else>
@@ -118,13 +124,14 @@
       </div>     
 </dtml-if>
 
+<dtml-var js_slot>
 <script>
     function initJumpMenus() {
         // Turns all <select> elements with the 'jumpmenu' class into jump menus
         var selectElements = document.getElementsByTagName("select");
         for( i = 0; i < selectElements.length; i++ ) {
             // Check for the class and make sure the element has an ID
-            if( selectElements[i].className == "form-control selectpicker show-tick jumpmenu" && document.getElementById(selectElements[i].id) != "" ) {
+            if( selectElements[i].className == "form-select selectpicker show-tick jumpmenu" && document.getElementById(selectElements[i].id) != "" ) {
                 jumpmenu = document.getElementById(selectElements[i].id);
                 jumpmenu.onchange = function() {
                     if( this.options[this.selectedIndex].value != '' ) {
@@ -139,5 +146,4 @@
         initJumpMenus();
     }
 </script>
-
-<dtml-var standard_html_footer>
+<dtml-var footer_html>

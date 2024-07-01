@@ -1,4 +1,4 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
 <script src="<dtml-var portal_url>/js/moment.min.js"></script>
 <script src="<dtml-var portal_url>/js/datetime-moment.js"></script>
@@ -83,7 +83,7 @@ $(document).ready(() => {
     history.replaceState(null, null, url);
   } 
 
-  $('a[data-toggle="tab"]').on("click", function() {
+  $('a[data-bs-toggle="tab"]').on("click", function() {
     let newUrl;
     const hash = $(this).attr("href");
     if(hash == "#home") {
@@ -108,12 +108,12 @@ $(document).ready(() => {
 
  <div class="row mb-2">
       <div class="col-12 col-md-8 align-self-center">
-        <h1 class="firstHeading">Peticionamento Digital</h1>
+        <h1 class="firstHeading font-size-18">Peticionamento Digital</h1>
       </div>
-      <div class="col-12 col-md-4 text-left text-md-right">
+      <div class="col-12 col-md-4 text-start text-end">
        <dtml-if expr="AUTHENTICATED_USER.has_role(['Authenticated'])">
          <div class="btn-group">
-           <button type="button" class="btn btn-sm btn-primary d-print-none mb-2 dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+           <button type="button" class="btn btn-sm btn-primary d-print-none mb-2 dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
              <i class="fa fa-fw fa-plus"></i> Peticionar
            </button>
            <div class="dropdown-menu dropdown-menu-right">
@@ -123,7 +123,7 @@ $(document).ready(() => {
                 </dtml-if>
             </dtml-in>
             <dtml-if expr="_.has_key('mostrar_acessorio')">
-              <a href="#" class="dropdown-item" data-toggle="modal" data-target="#iFrameModal" data-title="Documento Acessório de Matéria" data-src="peticao_acessorio_form?modal=1">Acessório de Matéria</a>
+              <a href="#" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Documento Acessório de Matéria" data-src="peticao_acessorio_form?modal=1">Acessório de Matéria</a>
             </dtml-if>
             <dtml-in expr="zsql.tipo_peticionamento_obter_zsql(ind_doc_adm=1, ind_excluido=0)">
                <dtml-if expr="_['sequence-length'] > 0 and zsql.usuario_peticionamento_obter_zsql(cod_usuario=cod_usuario_corrente, tip_peticionamento=tip_peticionamento)">
@@ -131,7 +131,7 @@ $(document).ready(() => {
                </dtml-if>
             </dtml-in>
             <dtml-if expr="_.has_key('mostrar_adm')">
-                  <a href="#" class="dropdown-item" data-toggle="modal" data-target="#iFrameModal" data-title="Peticionar em Processo Administrativo" data-src="peticao_administrativo_form?modal=1">Processo Administrativo</a>
+                  <a href="#" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Peticionar em Processo Administrativo" data-src="peticao_administrativo_form?modal=1">Processo Administrativo</a>
             </dtml-if>
             <dtml-in expr="zsql.tipo_peticionamento_obter_zsql(ind_norma=1, ind_excluido=0)">
                <dtml-if expr="_['sequence-length'] > 0 and zsql.usuario_peticionamento_obter_zsql(cod_usuario=cod_usuario_corrente, tip_peticionamento=tip_peticionamento)">
@@ -139,7 +139,7 @@ $(document).ready(() => {
                </dtml-if>
             </dtml-in>
             <dtml-if expr="_.has_key('mostrar_norma')">
-               <a href="#" class="dropdown-item" data-toggle="modal" data-target="#iFrameModal" data-title="Protocolo de Norma Jurídica" data-src="peticao_norma_form?modal=1">Protocolo de Norma</a>
+               <a href="#" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Protocolo de Norma Jurídica" data-src="peticao_norma_form?modal=1">Protocolo de Norma</a>
             </dtml-if>
            </div>
          </div>
@@ -194,7 +194,7 @@ href="<dtml-var portal_url>/cadastros/peticionamento_eletronico/peticionamento_e
 <dtml-in expr="zsql.peticao_obter_zsql(cod_usuario=cod_usuario_corrente, ind_enviado=ind_enviado, ind_excluido=0)">
     <dtml-if sequence-start>    
             <table class="table display" id="enviadas">    
-             <thead class="table-secondary">
+             <thead>
                 <tr>  
                     <th width="20%">Tipo</th>
                     <th>Descrição</th>
@@ -204,7 +204,7 @@ href="<dtml-var portal_url>/cadastros/peticionamento_eletronico/peticionamento_e
     </dtml-if sequence-start>
                <tr>
                     <td>
-                        <a href="#" data-toggle="modal" data-target="#iFrameModal" data-title="<dtml-var des_tipo_peticionamento>" data-src="peticao_mostrar_proc?cod_peticao=<dtml-var cod_peticao>&modal=1">
+                        <a href="#" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="<dtml-var des_tipo_peticionamento>" data-src="peticao_mostrar_proc?cod_peticao=<dtml-var cod_peticao>&modal=1">
                            <dtml-var des_tipo_peticionamento>
                         </a>                    
                     </td>
@@ -234,7 +234,7 @@ href="<dtml-var portal_url>/cadastros/peticionamento_eletronico/peticionamento_e
     <dtml-if sequence-start>    
         <fieldset>
             <table class="table display" id="enviadas">    
-             <thead class="table-secondary">
+             <thead>
                 <tr>  
                     <th width="20%">Tipo</th>
                     <th width="40%">Descrição</th>
@@ -324,7 +324,7 @@ href="<dtml-var portal_url>/cadastros/peticionamento_eletronico/peticionamento_e
 	     <dtml-if sequence-start>
 	       <div class="table-responsive">
                 <table class="table display" id="historico">
-                  <thead class="table-secondary">  
+                  <thead>  
 		   <tr>
                       <th>Nº de Protocolo</th>
                       <th>Resumo da Solicitação</th>
@@ -360,4 +360,5 @@ href="<dtml-var portal_url>/cadastros/peticionamento_eletronico/peticionamento_e
           </dtml-in>
 </dtml-if>
 
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>

@@ -43,12 +43,12 @@ function myFunction() {
 </script>
 
 
-<legend>Matérias Vinculadas</legend>
+<legend class="font-size-16">Matérias Vinculadas</legend>
 
   <dtml-in expr="zsql.documento_administrativo_materia_obter_zsql(cod_documento=cod_documento)">
     <dtml-if sequence-start>
    <table class="table">
-      <thead class="table-secondary">
+      <thead>
        <tr> 
            <th>Identificação da Matéria</th>
            <th width="15%">Ação</th>
@@ -87,7 +87,7 @@ function myFunction() {
     <table class="table" id="master_table">
         <tr>
             <td>
-                <select class="custom-select custom-select-sm" name="lst_tip_id_basica" id="lst_tip_id_basica">
+                <select class="form-select form-control-sm" name="lst_tip_id_basica" id="lst_tip_id_basica">
                   <option value="">Selecione o Tipo de Matéria</option>
                     <dtml-in expr="zsql.tipo_materia_legislativa_obter_zsql(tip_natureza='P', ind_excluido=0)">
                       <option value="<dtml-var tip_materia missing>"><dtml-var des_tipo_materia></option>
@@ -120,7 +120,7 @@ function myFunction() {
    <input type="hidden" name="hdn_cod_documento" value="<dtml-var cod_documento missing>" />
    <input type="hidden" name="hdn_url" value="<dtml-var ACTUAL_URL>?cod_documento=<dtml-var cod_documento>#materias" />
 
-   <div class="text-left">
+   <div class="text-start">
      <input class="btn btn-primary" type="submit" name="button" value="Incluir Vínculo" onclick="return myFunction()" />
    </div>
 

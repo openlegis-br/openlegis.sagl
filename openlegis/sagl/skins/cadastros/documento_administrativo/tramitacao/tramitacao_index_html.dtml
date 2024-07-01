@@ -60,13 +60,13 @@ $(document).ready(function() {
 });
 </script>
 
-<legend>Tramitações</legend>
+<legend class="font-size-16">Tramitações</legend>
 
 <dtml-in expr="zsql.tramitacao_administrativo_obter_zsql(cod_documento=cod_documento)">
   <dtml-if sequence-start>
     <div class="table-responsive mb-2">
     <table class="table display">
-     <thead class="table-secondary">
+     <thead>
       <tr>  
          <th width="15%">Data</th>
          <th>Unidade de Origem</th>
@@ -78,7 +78,7 @@ $(document).ready(function() {
     </dtml-if sequence-start>
       <tr> 
          <td>
-            <a href="#" data-toggle="modal" data-target="#iFrameModal" data-title="Visualização de Tramitação" data-src="tramitacao/tramitacao_mostrar_proc?hdn_cod_tramitacao=<dtml-var cod_tramitacao>&cod_documento=<dtml-var cod_documento>&modal=1">  
+            <a href="#" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Visualização de Tramitação" data-src="tramitacao/tramitacao_mostrar_proc?hdn_cod_tramitacao=<dtml-var cod_tramitacao>&cod_documento=<dtml-var cod_documento>&modal=1">  
               <dtml-var dat_tramitacao>
             </a>
           </td>
@@ -132,6 +132,6 @@ $(document).ready(function() {
     <p>Nenhuma tramitação cadastrada.</p>
 </dtml-in>
 
-  <div class="text-left">
-     <button type="button" class="btn btn-primary d-print-none" data-toggle="modal" data-target="#iFrameModal" data-title="Cadastro de Tramitação" data-src="tramitacao/tramitacao_form?cod_documento=<dtml-var cod_documento>&modal=1">Incluir Tramitação</button> 
+  <div class="text-start">
+     <button type="button" class="btn btn-primary d-print-none" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Cadastro de Tramitação" data-src="tramitacao/tramitacao_form?cod_documento=<dtml-var cod_documento>&modal=1">Incluir Tramitação</button> 
   </div>

@@ -1,4 +1,4 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
 <script>
 function atualiza_periodo_comp(cod_periodo_comp, num_legislatura){
@@ -17,11 +17,11 @@ alert ("Período de composição deve ser cadastrado na legislatura selecionada 
 return;
 }
 if (form.lst_cod_parlamentar[form.lst_cod_parlamentar.selectedIndex].value == -1){
-$.showAlert({title: "Preenchimento obrigatório", body: "Selecione um parlamentar!"});
+bootstrap.showModal({title: "Preenchimento obrigatório", body: "Selecione um parlamentar!"});
 return;
 }
 if (form.lst_cod_cargo.selectedIndex == -1){
-$.showAlert({title: "Preenchimento obrigatório", body: "Selecione um cargo!"});
+bootstrap.showModal({title: "Preenchimento obrigatório", body: "Selecione um cargo!"});
 return;
 }
 form.submit();
@@ -29,7 +29,7 @@ form.submit();
 function composicao_mesa_excluir(valor, valor1, valor2){
 var form = document.composicao_mesa_form;
 if (valor.selectedIndex == -1){
-$.showAlert({title: "Preenchimento obrigatório", body: "Selecione um parlamentar para realizar a exclusão."});
+bootstrap.showModal({title: "Preenchimento obrigatório", body: "Selecione um parlamentar para realizar a exclusão."});
 return false;
 }
 valor = valor[valor.selectedIndex].value;
@@ -47,14 +47,14 @@ location.href="composicao_mesa_excluir_proc?hdn_num_legislatura="+ num_legislatu
 } 
 </script>
 
-<h1 class="firstHeading"><dtml-var expr="sapl_documentos.props_sagl.nome_mesa"></h1> 
+<h1 class="firstHeading font-size-18"><dtml-var expr="sapl_documentos.props_sagl.nome_mesa"></h1> 
 
 <form name="composicao_mesa_form" method="post" action="composicao_mesa_incluir_proc">
 
   <div class="row">
     <div class="col-12 col-sm-6 mb-3">
-      <label for="lst_num_legislatura">Selecione a Legislatura:</label>
-        <select class="form-control selectpicker show-tick" data-size="6" id="lst_num_legislatura" name="lst_num_legislatura" size="1" onChange="atualiza_num_leg(form.lst_num_legislatura [form.lst_num_legislatura.selectedIndex].value)">
+      <label class="form-label" for="lst_num_legislatura">Selecione a Legislatura:</label>
+        <select class="form-select selectpicker show-tick" data-size="6" id="lst_num_legislatura" name="lst_num_legislatura" size="1" onChange="atualiza_num_leg(form.lst_num_legislatura [form.lst_num_legislatura.selectedIndex].value)">
           <dtml-in expr="zsql.legislatura_obter_zsql(ind_excluido=0)">
              <option
                <dtml-if expr="(not _.has_key('num_legislatura_sel') and (DateTime() >= DateTime(dat_inicio) and DateTime() <= DateTime(dat_fim)))
@@ -80,8 +80,8 @@ location.href="composicao_mesa_excluir_proc?hdn_num_legislatura="+ num_legislatu
         </dtml-if>
       </div>
     <div class="col-12 col-sm-6 mb-3">
-      <label for="lst_periodo_comp">Selecione o Período:</label>
-         <select class="form-control selectpicker show-tick" id="lst_periodo_comp" name="lst_periodo_comp" size="1" onChange="atualiza_periodo_comp(form.lst_periodo_comp[form.lst_periodo_comp.selectedIndex].value, form.lst_num_legislatura[form.lst_num_legislatura.selectedIndex].value)">
+      <label class="form-label" for="lst_periodo_comp">Selecione o Período:</label>
+         <select class="form-select selectpicker show-tick" id="lst_periodo_comp" name="lst_periodo_comp" size="1" onChange="atualiza_periodo_comp(form.lst_periodo_comp[form.lst_periodo_comp.selectedIndex].value, form.lst_num_legislatura[form.lst_num_legislatura.selectedIndex].value)">
            <dtml-in expr="zsql.periodo_comp_mesa_obter_zsql(num_legislatura=num_legislatura_sel)">
               <option
                 <dtml-if expr="((not _.has_key('cod_periodo_comp_sel') and not _.has_key('prim_sel') 
@@ -101,12 +101,12 @@ location.href="composicao_mesa_excluir_proc?hdn_num_legislatura="+ num_legislatu
     </div>
   </div>
 
-  <legend>Edição de Composição</legend>
+  <legend class="font-size-16">Edição de Composição</legend>
   
   <div class="row">
       <div class="form-group col-md-6">
-           <label for="lst_composicao_mesa"">Membros Designados</label>
-           <select class="custom-select mb-3" id="lst_composicao_mesa" name="lst_composicao_mesa" size="6"> 
+           <label class="form-label" for="lst_composicao_mesa"">Membros Designados</label>
+           <select class="form-select mb-3" id="lst_composicao_mesa" name="lst_composicao_mesa" size="6"> 
               <dtml-in expr="zsql.composicao_mesa_obter_zsql(ind_excluido=0)">
                   <dtml-in expr="zsql.parlamentar_obter_zsql(cod_parlamentar=cod_parlamentar, ind_excluido=0)">
                       <dtml-in expr="zsql.cargo_mesa_obter_zsql(cod_cargo=cod_cargo, ind_excluido=0)">         
@@ -138,8 +138,8 @@ location.href="composicao_mesa_excluir_proc?hdn_num_legislatura="+ num_legislatu
            <button class="btn btn-danger mb-3" type="button" name="btn_excluir" onclick="composicao_mesa_excluir(lst_composicao_mesa, lst_periodo_comp[lst_periodo_comp.selectedIndex].value, lst_num_legislatura[lst_num_legislatura.selectedIndex].value)">Excluir</button>
         </div>
         <div class="form-group col-md-6">
-             <label for="lst_cod_parlamentar"">Vereador</label>
-             <select class="form-control selectpicker show-tick mb-3" id="lst_cod_parlamentar" name="lst_cod_parlamentar">
+             <label class="form-label" for="lst_cod_parlamentar"">Vereador</label>
+             <select class="form-select selectpicker show-tick mb-3" id="lst_cod_parlamentar" name="lst_cod_parlamentar">
                      <dtml-unless cod_periodo_comp_sel>
                            <dtml-call expr="REQUEST.set('cod_periodo_comp_sel','-1')">
                      </dtml-unless>
@@ -156,8 +156,8 @@ location.href="composicao_mesa_excluir_proc?hdn_num_legislatura="+ num_legislatu
                         </option>
                      </dtml-in>
              </select>
-             <label for="lst_cod_cargo"">Cargo na <dtml-var expr="sapl_documentos.props_sagl.nome_mesa"></label>
-             <select class="form-control selectpicker show-tick mb-3" id="lst_cod_cargo" name="lst_cod_cargo">
+             <label class="form-label" for="lst_cod_cargo"">Cargo na <dtml-var expr="sapl_documentos.props_sagl.nome_mesa"></label>
+             <select class="form-select selectpicker show-tick mb-3" id="lst_cod_cargo" name="lst_cod_cargo">
                      <dtml-in expr="zsql.comp_mesa_cargo_obter_zsql(cod_periodo_comp=cod_periodo_comp_sel,ind_excluido=0)">
                         <option
                             <dtml-if expr=" not _.has_key('prim_sel3')  
@@ -178,4 +178,5 @@ location.href="composicao_mesa_excluir_proc?hdn_num_legislatura="+ num_legislatu
  <input type="hidden" name="hdn_cod_periodo_comp" value="<dtml-var cod_periodo_comp_sel missing>"/> 
 </form>
 
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>

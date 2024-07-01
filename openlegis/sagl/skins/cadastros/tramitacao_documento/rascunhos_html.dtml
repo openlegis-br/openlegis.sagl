@@ -1,4 +1,4 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 <script src="<dtml-var portal_url>/js/moment.min.js""></script>
 <script src="<dtml-var portal_url>/js/datetime-moment.js"></script>
 <script>
@@ -71,7 +71,7 @@ $(document).ready(function() {
   <dtml-call expr="REQUEST.set('cod_usuario_corrente', int(cod_usuario))">
 </dtml-in>
 
-<h1 class="firstHeading">Tramitação de Processos Administrativos</h1>
+<h1 class="firstHeading font-size-18">Tramitação de Processos Administrativos</h1>
 
 <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Modulo Administrativo'])">
    <a class="btn btn-sm btn-primary mb-3" href="<dtml-var portal_url>/cadastros/tramitacao_documento/primeira_tramitacao_lote_form">Primeira Tramitação</a>
@@ -90,7 +90,7 @@ $(document).ready(function() {
       <dtml-if sequence-start>
         <div class="table-responsive">
            <table class="table" id="rascunhos">
-             <thead class="table-secondary">
+             <thead>
 		 <tr>  
 		     <th width="20%">Data da Tramitação</th>
 		     <th>Identificação do Processo</th>
@@ -103,7 +103,7 @@ $(document).ready(function() {
                    <tr>
                      <td>
                        <dtml-if dat_tramitacao>
-                         <a href="#" data-toggle="modal" data-target="#iFrameModal" data-title="Formulário de Tramitação" data-src="tramitacao_mostrar_proc?cod_documento=<dtml-var cod_documento>&hdn_cod_tramitacao=<dtml-var cod_tramitacao>&modal=1" class="btn btn-primary btn-sm"><i class="fas fa-edit"></i><span class="d-none">Link</span> <dtml-var dat_tramitacao></a>
+                         <a href="#" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Formulário de Tramitação" data-src="tramitacao_mostrar_proc?cod_documento=<dtml-var cod_documento>&hdn_cod_tramitacao=<dtml-var cod_tramitacao>&modal=1" class="btn btn-primary btn-sm"><i class="fas fa-edit"></i><span class="d-none">Link</span> <dtml-var dat_tramitacao></a>
                        </dtml-if>
                      </td> 
                      <td>
@@ -147,4 +147,5 @@ $(document).ready(function() {
      <p>Nenhuma tramitação em rascunho.</p>
    </dtml-in>
 
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>

@@ -1,10 +1,10 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
  <div class="row mb-2">
   <div class="col-12 col-sm-6 align-self-center">
-    <h1 class="firstHeading">Pesquisa de Pareceres</h1>
+    <h1 class="firstHeading font-size-18">Pesquisa de Pareceres</h1>
   </div>
-  <div class="col-12 col-sm-6 text-left text-sm-right mb-2">
+  <div class="col-12 col-sm-6 text-start text-sm-end mb-2">
     <div class="btn-group" role="group">
      <a class="btn btn-primary btn-sm" href="<dtml-var portal_url>/consultas/materia/parecer_pesquisar_form" ><i class="fa fa-fw fa-search"></i> Nova Pesquisa</a>
      <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia'])">         
@@ -137,11 +137,12 @@
 <dtml-else>
   <div class="alert alert-danger alert-dismissible fade show" role="alert">
     <h5 class="alert-heading">Confirme que você não é um robô.</h5>
-    <button type="button" class="close" data-dismiss="alert" aria-label="Fechar">
+    <button type="button" class="close" data-bs-dismiss="alert" aria-label="Fechar">
        <span aria-hidden="true">&times;</span>
     </button>
   </div>
   <a class="btn btn-danger" href="javascript:void(0)" onClick="window.history.go(-1); return false;"><i class="fa fa-fw fa-undo"></i> Voltar</a>
 </dtml-if>
 
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>

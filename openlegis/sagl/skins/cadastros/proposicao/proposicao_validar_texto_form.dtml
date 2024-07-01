@@ -2,10 +2,10 @@
   <dtml-call expr="REQUEST.set('prop_enviada',(dat_envio!='00/00/0000 00:00:00'))">
   <dtml-call expr="REQUEST.set('usr_eh_autor',(col_username==AUTHENTICATED_USER.getUserName()))">
 </dtml-in>
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
 <a id="ajuda" href="<dtml-var portal_url>/ajuda/proposicao#validar_texto">Ajuda</a>
-<h1 class="firstHeading"> Proposi&ccedil;&atilde;o </h1>
+<h1 class="firstHeading font-size-18"> Proposi&ccedil;&atilde;o </h1>
 
 <table class="table"  width="100%" border="0" cellspacing="0" cellpadding="0" align="center">
     <tr>
@@ -16,7 +16,7 @@
 </table>
 <form name="proposicao_form" method="post" action="proposicao_salvar_proc">
 <fieldset>
-    <legend>Verifica&ccedil;&atilde;o de Validade</legend> 
+    <legend class="font-size-16">Verifica&ccedil;&atilde;o de Validade</legend> 
     <table class="table"  width="100%" border="0" cellspacing="0" cellpadding="0" align="center" vspace="0" hspace="0">
         <tr>
             <td>
@@ -48,4 +48,5 @@
         </table>
     </dtml-unless>
 </dtml-if>
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>

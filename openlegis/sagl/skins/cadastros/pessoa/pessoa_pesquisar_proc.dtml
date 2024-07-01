@@ -1,10 +1,10 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
  <div class="row mb-2">
       <div class="col-12 col-md-8 align-self-center">
-        <h1 class="firstHeading">Pesquisa de Visitantes</h1>
+        <h1 class="firstHeading font-size-18">Pesquisa de Visitantes</h1>
       </div>
-      <div class="col-12 col-md-4 text-left text-md-right">
+      <div class="col-12 col-md-4 text-start text-end">
        <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Recepção'])">
          <div class="btn-group d-print-none">     
            <a class="btn btn-primary btn-sm" href="<dtml-var portal_url>/cadastros/pessoa" ><i class="fa fa-fw fa-search"></i> Nova Pesquisa</a>
@@ -89,4 +89,5 @@
     <p>Nenhuma visitante encontrado.</p>
 </dtml-in>
 
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>

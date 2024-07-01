@@ -1,4 +1,4 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 <script>
 <!--
     function atualiza_ano_sessao(ano_sessao){
@@ -9,13 +9,13 @@
 
 <a id="ajuda" href="<dtml-var portal_url>/ajuda/ata_sessao">Ajuda</a>
 
-<h1 class="firstHeading">Audiências Públicas</h1>
+<h1 class="firstHeading font-size-18">Audiências Públicas</h1>
 
 <form name="ata_form" method="post" action="ata_mostrar">
 
 <fieldset>
   <div>
-     <label for="lst_ano_sessao">Selecione o Ano:</label>
+     <label class="form-label" for="lst_ano_sessao">Selecione o Ano:</label>
                 <select id="lst_ano_sessao" name="lst_ano_sessao" size="1" onChange="atualiza_ano_sessao(document.ata_form.lst_ano_sessao[document.ata_form.lst_ano_sessao.selectedIndex].value)">
                     <dtml-in expr="zsql.sessao_plenaria_listar_ano_zsql()">
                         <option value="<dtml-var ano_sessao missing>" 
@@ -132,5 +132,6 @@ target="_blank">Gerar PDF</a>
 </fieldset>
 </dtml-if ano_sessao_sel>
 </form>
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>
 

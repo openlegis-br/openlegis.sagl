@@ -1,4 +1,4 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
 <script src="<dtml-var portal_url>/javascript/data_validar.js"></script>
 
@@ -38,7 +38,7 @@
       }
 
       if (form.txt_dat_apresentacao.value!="" && !IsValidDate(form.txt_dat_apresentacao.value)){
-         $.showAlert({title: "Mensagem do Sistema", body: "Digite uma data de apresentação válida!"});
+         bootstrap.showModal({title: "Mensagem do Sistema", body: "Digite uma data de apresentação válida!"});
          form.txt_dat_apresentacao.focus();
          form.txt_dat_apresentacao.select();
          return false;
@@ -49,7 +49,7 @@
       var ano=dtapm.substring(6,10);
 
       if (ano != anoi){
-         $.showAlert({title: "Mensagem do Sistema", body: "O ano deve corresponder à data de apresentação!"});
+         bootstrap.showModal({title: "Mensagem do Sistema", body: "O ano deve corresponder à data de apresentação!"});
          form.txt_ano_ident_basica.focus();
          return false;
       }
@@ -129,7 +129,7 @@ $(document).ready(function () {
 
 </script>
 
-<h1 class="firstHeading">Cadastro de Matéria</h1> 
+<h1 class="firstHeading font-size-18">Cadastro de Matéria</h1> 
 
 <dtml-unless dat_apresentacao>
    <dtml-call expr="REQUEST.set('dat_apresentacao', DateTime().strftime('%d/%m/%Y'))">
@@ -143,7 +143,7 @@ $(document).ready(function () {
 
 <ul class="nav nav-tabs border-0 mt-2" id="nav_materia" role="tablist">
   <li class="nav-item">
-    <a class="nav-link active" id="index-tab" data-toggle="tab" href="#home" role="tab" aria-controls="home" aria-selected="true">Dados Básicos</a>  
+    <a class="nav-link active" id="index-tab" data-bs-toggle="tab" href="#home" role="tab" aria-controls="home" aria-selected="true">Dados Básicos</a>  
   </li>
 </ul>
 
@@ -171,10 +171,10 @@ $(document).ready(function () {
   <input type="hidden" name="txa_txt_indexacao" value="" />
   <input type="hidden" name="txa_txt_observacao" value="" />
 
-  <div class="form-row">
+  <div class="row">
     <div class="col-12 col-sm-6 mb-3">
-      <label for="lst_tip_id_basica" class="required">Tipo de Matéria</label>
-          <select class="custom-select" id="lst_tip_id_basica" name="lst_tip_id_basica" onChange="numero_materia_buscar(document.materia_form)" required>
+      <label class="form-label" for="lst_tip_id_basica" class="required">Tipo de Matéria</label>
+          <select class="form-select" id="lst_tip_id_basica" name="lst_tip_id_basica" onChange="numero_materia_buscar(document.materia_form)" required>
              <option value="0">Selecione</option>
              <dtml-in expr="zsql.tipo_materia_legislativa_obter_zsql(tip_natureza='P')">
                 <option
@@ -201,14 +201,14 @@ $(document).ready(function () {
           </div>  
     </div>
     <div class="col-6 col-sm-3 mb-3">
-      <label for="txt_num_ident_basica" class="required">Número</label> 
+      <label class="form-label" for="txt_num_ident_basica" class="required">Número</label> 
       <input class="form-control number" type="number" id="txt_num_ident_basica" name="txt_num_ident_basica" value="<dtml-var num_ident_basica missing null="1">" required/>
       <div class="invalid-feedback">
         Este campo é obrigatório!
       </div>
     </div>
     <div class="col-6 col-sm-3 mb-3">
-      <label for="txt_ano_ident_basica" class="required">Ano</label>
+      <label class="form-label" for="txt_ano_ident_basica" class="required">Ano</label>
       <dtml-unless ano_ident_basica>
          <dtml-call expr="REQUEST.set('ano_ident_basica', _.DateTime.year(DateTime()))">
       </dtml-unless>
@@ -219,9 +219,9 @@ $(document).ready(function () {
     </div>
   </div>
 
-  <div class="form-row">
+  <div class="row">
     <div class="col-6 col-lg-3 mb-3">
-      <label for="txt_dat_apresentacao" class="required">Data de Apresentação</label>
+      <label class="form-label" for="txt_dat_apresentacao" class="required">Data de Apresentação</label>
       <dtml-unless dat_apresentacao>
          <dtml-call expr="REQUEST.set('dat_apresentacao', DateTime().strftime('%d/%m/%Y'))">
       </dtml-unless>
@@ -240,20 +240,20 @@ $(document).ready(function () {
         </script>    
     </div>
     <div class="col-6 col-lg-3 mb-3">
-      <label for="txt_num_protocolo">Número de Protocolo</label>
+      <label class="form-label" for="txt_num_protocolo">Número de Protocolo</label>
       <input class="form-control" type="number" id="txt_num_protocolo" name="txt_num_protocolo" value="<dtml-var num_protocolo missing null="">" />      
     </div>
     <div class="col-6 col-lg-3 mb-3">
-      <label for="rad_ind_tramitacao" class="required d-block">Em Tramitação?</label>
-        <select class="custom-select" id="rad_ind_tramitacao" name="rad_ind_tramitacao" required>
+      <label class="form-label" for="rad_ind_tramitacao" class="required d-block">Em Tramitação?</label>
+        <select class="form-select" id="rad_ind_tramitacao" name="rad_ind_tramitacao" required>
          <dtml-in expr="[('Não', '0'), ('Sim', '1')]">      
             <option value="<dtml-var expr="_['sequence-item']">" <dtml-if expr="_['sequence-item']=='1'">selected</dtml-if>><dtml-var expr="_['sequence-key']"></option>
          </dtml-in>
         </select>     
     </div>
     <div class="col-6 col-lg-3 mb-3">
-      <label for="rad_tip_apresentacao" class="required d-block">Forma de Apresentação</label>
-        <select class="custom-select" id="rad_tip_apresentacao" name="rad_tip_apresentacao" required>
+      <label class="form-label" for="rad_tip_apresentacao" class="required d-block">Forma de Apresentação</label>
+        <select class="form-select" id="rad_tip_apresentacao" name="rad_tip_apresentacao" required>
          <dtml-in expr="['Escrita', 'Oral']">      
             <option value="<dtml-var expr="_['sequence-item'][0]">" 
                <dtml-if expr="_.has_key('cod_materia') and tip_apresentacao==_['sequence-item'][0]">
@@ -273,9 +273,9 @@ $(document).ready(function () {
     </div>
   </div>
 
-  <div class="form-row"> 
+  <div class="row"> 
     <div class="col-12 mb-3">
-      <label for="txa_txt_ementa" class="required">Ementa</label>
+      <label class="form-label" for="txa_txt_ementa" class="required">Ementa</label>
       <textarea class="form-control auto-resize" id="txa_txt_ementa" name="txa_txt_ementa" rows="1" required><dtml-var txt_ementa missing></textarea>
       <div class="invalid-feedback">
         Este campo é obrigatório!
@@ -283,10 +283,10 @@ $(document).ready(function () {
     </div>
   </div> 
 
-  <div class="form-row">  
+  <div class="row">  
     <div class="col-12 col-md-6 mb-3">
-      <label for="lst_tip_autor">Tipo de Autor</label>  
-      <select class="custom-select" id="lst_tip_autor" name="lst_tip_autor" onChange="tipo_autor_mudou(document.materia_form)" required>
+      <label class="form-label" for="lst_tip_autor">Tipo de Autor</label>  
+      <select class="form-select" id="lst_tip_autor" name="lst_tip_autor" onChange="tipo_autor_mudou(document.materia_form)" required>
            <option value="1&Parlamentar">Parlamentar</option>
            <dtml-unless des_tipo_autor> 
               <dtml-call expr="REQUEST.set('des_tipo_autor', 'Parlamentar')">
@@ -308,16 +308,16 @@ $(document).ready(function () {
       </div>
     </div>
     <div class="col-12 col-md-6 mb-3">
-      <label for="chk_cod_autor" class="required">Autor</label>
+      <label class="form-label" for="chk_cod_autor" class="required">Autor</label>
       <dtml-if expr="_.has_key('des_tipo_autor')">
          <dtml-if expr="des_tipo_autor=='Parlamentar'">
-            <select class="form-control selectpicker" id="chk_cod_autor" name="chk_cod_autor:list:int" multiple="multiple" data-selected-text-format="count > 3" data-size="6" data-actions-box="true" title="Selecione" size="1">
+            <select class="form-select selectpicker" id="chk_cod_autor" name="chk_cod_autor:list:int" multiple="multiple" data-selected-text-format="count > 3" data-size="6" data-actions-box="true" title="Selecione" size="1">
                <dtml-in expr="zsql.autores_obter_zsql(txt_dat_apresentacao=dat_apresentacao)">
                   <option value="<dtml-var cod_autor>" <dtml-if expr="_.has_key('hdn_cod_autor') and int(hdn_cod_autor)==int(cod_autor)">selected</dtml-if>><dtml-var nom_parlamentar></option>
                </dtml-in>
             </select>
          <dtml-elif expr="des_tipo_autor=='Comissao'">
-            <select class="form-control selectpicker" id="chk_cod_autor" name="chk_cod_autor:list:int" multiple="multiple" data-selected-text-format="count > 3" data-size="6" data-actions-box="true" title="Selecione">
+            <select class="form-select selectpicker" id="chk_cod_autor" name="chk_cod_autor:list:int" multiple="multiple" data-selected-text-format="count > 3" data-size="6" data-actions-box="true" title="Selecione">
                <dtml-in expr="zsql.autor_obter_zsql(comissao='1')">
                   <dtml-call expr="REQUEST.set('cod_autor_comissao', cod_autor)">
                   <dtml-in expr="zsql.comissao_obter_zsql(cod_comissao=cod_comissao,ind_excluido=0)">
@@ -328,7 +328,7 @@ $(document).ready(function () {
                </dtml-in>
             </select>
          <dtml-elif expr="des_tipo_autor=='Bancada'">
-            <select class="form-control selectpicker" id="chk_cod_autor" name="chk_cod_autor:list:int" multiple="multiple" data-selected-text-format="count > 3" data-size="6" data-actions-box="true" title="Selecione">
+            <select class="form-select selectpicker" id="chk_cod_autor" name="chk_cod_autor:list:int" multiple="multiple" data-selected-text-format="count > 3" data-size="6" data-actions-box="true" title="Selecione">
                <dtml-in expr="zsql.autor_obter_zsql(bancada='1')">
                   <dtml-call expr="REQUEST.set('cod_autor_bancada', cod_autor)">
                   <dtml-in expr="zsql.bancada_obter_zsql(num_legislatura=num_legislatura_sel, cod_bancada=cod_bancada,ind_excluido=0)">
@@ -337,7 +337,7 @@ $(document).ready(function () {
                </dtml-in>
             </select>
          <dtml-else>
-            <select class="form-control selectpicker" id="chk_cod_autor" name="chk_cod_autor:list:int" multiple="multiple" data-selected-text-format="count > 3" data-size="6" data-actions-box="true" title="Selecione">                                 
+            <select class="form-select selectpicker" id="chk_cod_autor" name="chk_cod_autor:list:int" multiple="multiple" data-selected-text-format="count > 3" data-size="6" data-actions-box="true" title="Selecione">                                 
                <dtml-in expr="zsql.autor_obter_zsql(des_tipo_autor=des_tipo_autor)">
                   <dtml-call expr="REQUEST.set('cod_autor_geral', cod_autor)">
                   <option value="<dtml-var cod_autor_geral>"><dtml-var nom_autor></option>
@@ -353,10 +353,10 @@ $(document).ready(function () {
     </div>
   </div>
 
-  <div class="form-row">  
+  <div class="row">  
     <div class="col-12 col-md-6 mb-3">
-      <label for="lst_tip_quorum" class="required">Quórum de Votação</label>      
-      <select class="custom-select" id="lst_tip_quorum" name="lst_tip_quorum" required>
+      <label class="form-label" for="lst_tip_quorum" class="required">Quórum de Votação</label>      
+      <select class="form-select" id="lst_tip_quorum" name="lst_tip_quorum" required>
            <option value="0">Selecione</option>
            <dtml-in expr="zsql.quorum_votacao_obter_zsql()">
               <option
@@ -375,8 +375,8 @@ $(document).ready(function () {
       </div>      
     </div>   
     <div class="col-12 col-md-6 mb-3">
-      <label for="lst_cod_regime_tramitacao" class="required">Regime de Tramitação</label>   
-      <select class="custom-select" id="lst_cod_regime_tramitacao" name="lst_cod_regime_tramitacao" required>
+      <label class="form-label" for="lst_cod_regime_tramitacao" class="required">Regime de Tramitação</label>   
+      <select class="form-select" id="lst_cod_regime_tramitacao" name="lst_cod_regime_tramitacao" required>
         <option value="0">Selecione</option>
            <dtml-in expr="zsql.regime_tramitacao_obter_zsql()">
               <option
@@ -396,10 +396,10 @@ $(document).ready(function () {
     </div>  
   </div>
    
-  <div class="form-row"> 
+  <div class="row"> 
     <div class="col-6 col-lg-6 mb-3">
-      <label for="lst_cod_assunto">Assunto</label>
-      <select class="custom-select" id="lst_cod_assunto" name="lst_cod_assunto">
+      <label class="form-label" for="lst_cod_assunto">Assunto</label>
+      <select class="form-select" id="lst_cod_assunto" name="lst_cod_assunto">
          <option value="0"></option>
          <dtml-in expr="zsql.assunto_materia_obter_zsql()">
             <option value="<dtml-var cod_assunto>">
@@ -409,7 +409,7 @@ $(document).ready(function () {
       </select>    
     </div>   
     <div class="col-12 col-lg-6 mb-3">
-      <label for="file_nom_arquivo">PDF Texto Original</label>
+      <label class="form-label" for="file_nom_arquivo">PDF Texto Original</label>
       <div class="custom-file">
         <input type="file" class="custom-file-input" id="file_nom_arquivo" name="file_nom_arquivo" accept="application/pdf">
         <label class="custom-file-label" for="file_nom_arquivo">Selecione o arquivo</label>
@@ -417,13 +417,13 @@ $(document).ready(function () {
     </div>
   </div>   
 
-  <div class="text-left">
+  <div class="text-start">
     <input class="btn btn-primary" type="button" value="Salvar" onClick="campos_criticar()" />
   </div> 
 
   <div class="row">
     <div class="col-md-12 mt-2">
-       <p class="text-muted small"><i class="fas fa-asterisk text-danger"></i> Campos obrigatórios</p>
+       <p class="text-muted small font-size-12"><i class="fas fa-asterisk text-danger"></i> Campos obrigatórios</p>
     </div>
  </div> 
 
@@ -436,4 +436,5 @@ $(document).ready(function () {
 autosize(document.querySelectorAll('textarea'));
 </script>
 
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>

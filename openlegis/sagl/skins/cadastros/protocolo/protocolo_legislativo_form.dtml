@@ -1,4 +1,4 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
 <script src="<dtml-var portal_url>/javascript/data_validar.js"></script>
 
@@ -88,9 +88,9 @@ $(document).ready(function () {
 
  <div class="row mb-2">
       <div class="col-12 col-md-8 align-self-center">
-        <h1 class="firstHeading">Protocolo Legislativo</h1>
+        <h1 class="firstHeading font-size-18">Protocolo Legislativo</h1>
       </div>
-      <div class="col-12 col-md-4 text-left text-md-right">
+      <div class="col-12 col-md-4 text-start text-end">
          <div class="btn-group d-print-none ">
            <a class="btn btn-primary btn-sm" href="<dtml-var portal_url>/consultas/protocolo" ><i class="fa fa-fw fa-search"></i> Pesquisa de Protocolos</a>         
          </div>
@@ -108,7 +108,7 @@ $(document).ready(function () {
 <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Protocolo', 'Operador Materia'])">
 <ul class="nav nav-tabs border-0" id="nav_protocolo" role="tablist">
   <li class="nav-item">
-    <a class="nav-link active" id="LEG-tab" data-toggle="tab" href="#LEG" role="tab" aria-controls="LEG" aria-selected="true">Protocolo Legislativo</a>
+    <a class="nav-link active" id="LEG-tab" data-bs-toggle="tab" href="#LEG" role="tab" aria-controls="LEG" aria-selected="true">Protocolo Legislativo</a>
   </li>
   <li class="nav-item">
     <a class="nav-link" id="ADM-tab" href="<dtml-var portal_url>/cadastros/protocolo/protocolo_administrativo_form" role="tab" aria-controls="ADM" aria-selected="false">Protocolo Administrativo</a>
@@ -122,7 +122,7 @@ $(document).ready(function () {
 <div class="tab-content bg-white">
   <div class="tab-pane p-3 border fade show active" id="LEG">
 
-<legend>Identificação da Matéria</legend>
+<legend class="font-size-16">Identificação da Matéria</legend>
 
 <form action="protocolo_legislativo_salvar_proc" name="protocolo_legislativo_form" method="post" enctype="multipart/form-data">
 
@@ -131,10 +131,10 @@ $(document).ready(function () {
 <input type="hidden" name="hdn_tip_processo" value="1" />
 <input type="hidden" name="hdn_url" value="<dtml-var portal_url>/cadastros/protocolo/protocolo_legislativo_form" />
 
-  <div class="form-row">
+  <div class="row">
     <div class="col-12 col-sm-6 mb-3">
-         <label for="lst_tip_natureza" class="required">Natureza da Matéria</label>
-         <select class="custom-select"  name="lst_tip_natureza" id="lst_tip_natureza" onChange="tipo_natureza_mudou(document.protocolo_legislativo_form)" required>
+         <label class="form-label" for="lst_tip_natureza" class="required">Natureza da Matéria</label>
+         <select class="form-select"  name="lst_tip_natureza" id="lst_tip_natureza" onChange="tipo_natureza_mudou(document.protocolo_legislativo_form)" required>
               <dtml-unless tip_natureza>
                  <dtml-call expr="REQUEST.set('tip_natureza', '1')">
              </dtml-unless>
@@ -147,8 +147,8 @@ $(document).ready(function () {
          </select>
     </div>
     <div class="col-12 col-sm-6 mb-3">
-        <label for="lst_tip_materia" class="required">Tipo de Matéria</label>
-        <select class="custom-select" id="lst_tip_materia" name="lst_tip_materia" required>
+        <label class="form-label" for="lst_tip_materia" class="required">Tipo de Matéria</label>
+        <select class="form-select" id="lst_tip_materia" name="lst_tip_materia" required>
            <option value="0">Selecione</option>
              <dtml-if expr="tip_natureza=='1'">
                <dtml-in expr="zsql.tipo_materia_legislativa_obter_zsql(tip_natureza='P',ind_excluido=0)">
@@ -193,17 +193,17 @@ $(document).ready(function () {
     </div>
   </div>
   
-  <div class="form-row">
+  <div class="row">
     <div class="col-12 mb-3">
-       <label for="txa_txt_ementa" class="required">Ementa</label>
+       <label class="form-label" for="txa_txt_ementa" class="required">Ementa</label>
        <textarea class="form-control auto-resize" id="txa_txt_ementa" name="txa_txt_ementa" rows="1" maxlength="500"><dtml-var txt_assunto_ementa missing html_quote></textarea>
     </div>
   </div>
   
-  <div class="form-row">
+  <div class="row">
     <div class="col-12 col-sm-6 mb-3">
-              <label for="lst_tip_autor" class="required">Tipo de Autor</label>
-              <select class="custom-select" id="lst_tip_autor" name="lst_tip_autor" onChange="tipo_autor_mudou(document.protocolo_legislativo_form)" required>
+              <label class="form-label" for="lst_tip_autor" class="required">Tipo de Autor</label>
+              <select class="form-select" id="lst_tip_autor" name="lst_tip_autor" onChange="tipo_autor_mudou(document.protocolo_legislativo_form)" required>
              <dtml-if expr="tip_natureza and tip_natureza=='4'">
                <dtml-call expr="REQUEST.set('tip_autor', 2)">
                <dtml-call expr="REQUEST.set('des_tipo_autor', 'Comissao')">
@@ -224,9 +224,9 @@ $(document).ready(function () {
              </select>
     </div>
     <div class="col-12 col-sm-6 mb-3">
-              <label for="lst_cod_autor" class="required">Nome do Autor</label>
+              <label class="form-label" for="lst_cod_autor" class="required">Nome do Autor</label>
               <dtml-if expr="_.has_key('des_tipo_autor')"> 
-              <select class="custom-select" id="lst_cod_autor" name="lst_cod_autor" required>
+              <select class="form-select" id="lst_cod_autor" name="lst_cod_autor" required>
                <option value=0>Selecione</option>
 
                <dtml-if expr="des_tipo_autor=='Parlamentar'">
@@ -273,13 +273,13 @@ $(document).ready(function () {
     </div>
   </div>
   
-  <div class="form-row">
+  <div class="row">
     <div class="col-6 mb-3">  
-                <label for="txt_num_paginas">Núm. Páginas</label>
+                <label class="form-label" for="txt_num_paginas">Núm. Páginas</label>
                 <input class="form-control" type="number" id="txt_num_paginas" name="txt_num_paginas" maxlength="3" value="<dtml-var num_dias_prazo missing null="">"/>    
     </div>
     <div class="col-6 mb-3">  
-                 <label class="d-block">PDF Arquivo Digitalizado</label>
+                 <label class="form-label d-block">PDF Arquivo Digitalizado</label>
                  <div class="custom-file">
                    <input type="file" class="custom-file-input" id="file_nom_arquivo" name="file_nom_arquivo" accept="application/pdf">
                    <label class="custom-file-label" for="file_nom_arquivo">Selecione o arquivo</label>
@@ -288,10 +288,10 @@ $(document).ready(function () {
   </div>    
 
   <dtml-if expr="tip_natureza=='2' or tip_natureza=='3' or tip_natureza=='4'"> 
-  <div class="form-row">
+  <div class="row">
     <div class="col-12 col-sm-6 mb-3">  
-         <label for="lst_tip_id_basica" class="required">Matéria a Vincular</label>
-               <select class="custom-select" id="lst_tip_id_basica" name="lst_tip_id_basica" required>   
+         <label class="form-label" for="lst_tip_id_basica" class="required">Matéria a Vincular</label>
+               <select class="form-select" id="lst_tip_id_basica" name="lst_tip_id_basica" required>   
                   <option value="0" disabled selected>Selecione o tipo</option>
                   <dtml-in expr="zsql.tipo_materia_legislativa_obter_zsql(ind_excluido=0,tip_natureza='P')">
                     <option value="<dtml-var tip_materia missing>"> 
@@ -301,24 +301,24 @@ $(document).ready(function () {
                </select>
     </div>
     <div class="col-6 col-sm-3 mb-3">   
-               <label for="txt_num_ident_basica" class="required">Número</label>                  
+               <label class="form-label" for="txt_num_ident_basica" class="required">Número</label>                  
                <input class="form-control number" type="number" id="txt_num_ident_basica" name="txt_num_ident_basica" value="<dtml-var num_ident_basica_sel missing>" />
     </div>
     <div class="col-6 col-sm-3 mb-3">                 
-               <label for="txt_ano_ident_basica" class="required">Ano</label>                  
+               <label class="form-label" for="txt_ano_ident_basica" class="required">Ano</label>                  
                <input class="form-control year" type="number" id="txt_ano_ident_basica" name="txt_ano_ident_basica" value="<dtml-var ano_ident_basica_sel missing>" />
     </div>
   </div>
   </dtml-if>
   
-  <div class="form-row">
+  <div class="row">
     <div class="col-12 mb-3">
-           <label for="txa_txt_observacao">Observações</label>
+           <label class="form-label" for="txa_txt_observacao">Observações</label>
            <textarea class="form-control auto-resize" id="txa_txt_observacao" name="txa_txt_observacao" rows="1"><dtml-var txt_observacao missing null=""></textarea>
     </div>
   </div>
 
-<div class="text-left">
+<div class="text-start">
   <input class="btn btn-primary" type="button" name="button" value="Protocolar Matéria" onClick="campos_criticar()" />
 </div>
 
@@ -331,4 +331,5 @@ $(document).ready(function () {
 autosize(document.querySelectorAll('textarea'));
 </script>
 
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>

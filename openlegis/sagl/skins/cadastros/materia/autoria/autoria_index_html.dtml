@@ -1,4 +1,4 @@
-<h1 class="firstHeading">Autoria</h1>
+<h1 class="firstHeading font-size-18">Autoria</h1>
 
 <form name="index_form" action="autoria_form">
   <input type="hidden" name="hdn_cod_materia" value="<dtml-var cod_materia missing>">
@@ -8,7 +8,7 @@
 <dtml-in expr="zsql.autoria_obter_zsql(cod_materia=cod_materia)">
    <dtml-if sequence-start>
     <table class="table">
-     <thead class="table-secondary">
+     <thead>
       <tr> 
          <th>Nome do Autor</th>
          <th>Tipo de Autor</th>
@@ -18,7 +18,7 @@
    </dtml-if sequence-start>
       <tr> 
          <td>
-              <a href="#" data-toggle="modal" data-target="#iFrameModal" data-title="Edição de Autoria" data-src="autoria/autoria_mostrar_proc?cod_autor=<dtml-var cod_autor>&ind_primeiro_autor=<dtml-var ind_primeiro_autor>&hdn_cod_materia=<dtml-var cod_materia>&cod_materia=<dtml-var cod_materia>&dat_apresentacao=<dtml-var dat_apresentacao>&modal=1">
+              <a href="#" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Edição de Autoria" data-src="autoria/autoria_mostrar_proc?cod_autor=<dtml-var cod_autor>&ind_primeiro_autor=<dtml-var ind_primeiro_autor>&hdn_cod_materia=<dtml-var cod_materia>&cod_materia=<dtml-var cod_materia>&dat_apresentacao=<dtml-var dat_apresentacao>&modal=1">
                  <dtml-var nom_autor_join>
              </a>
          </td>
@@ -37,6 +37,6 @@
 </dtml-in>
 
 <div class="align-left">
-  <button type="button" class="btn m btn-primary d-print-none" data-toggle="modal" data-target="#iFrameModal" data-title="Cadastro de Autoria" data-src="autoria/autoria_form?cod_materia=<dtml-var cod_materia>&hdn_cod_materia=<dtml-var cod_materia>&dat_apresentacao=<dtml-var dat_apresentacao missing>&modal=1">Incluir Autor</button>
+  <button type="button" class="btn m btn-primary d-print-none" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Cadastro de Autoria" data-src="autoria/autoria_form?cod_materia=<dtml-var cod_materia>&hdn_cod_materia=<dtml-var cod_materia>&dat_apresentacao=<dtml-var dat_apresentacao missing>&modal=1">Incluir Autor</button>
 </div>
 

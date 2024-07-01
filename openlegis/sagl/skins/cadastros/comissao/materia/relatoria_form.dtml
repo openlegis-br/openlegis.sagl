@@ -1,4 +1,4 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
 <script src="<dtml-var portal_url>/javascript/data_validar.js"></script>
 
@@ -148,7 +148,7 @@ $(document).ready(function () {
    <dtml-call expr="REQUEST.set('cod_periodo_comp_sel', int(cod_periodo_comp))">
 </dtml-in>
 
-<h1 class="firstHeading"><dtml-var nom_comissao></h1>
+<h1 class="firstHeading font-size-18"><dtml-var nom_comissao></h1>
 
 <p class="font-weight-bold"><dtml-var id_materia></p>
 
@@ -165,9 +165,9 @@ $(document).ready(function () {
   </dtml-if>    
   <input type="hidden" name="modal" value="1" />
 
-  <div class="form-row">
+  <div class="row">
     <div class="col-3 col-md-4 mb-3">
-        <label for="txt_dat_desig_relator" class="required">Data de Designação</label>
+        <label class="form-label" for="txt_dat_desig_relator" class="required">Data de Designação</label>
         <input class="form-control date" type="text" name="txt_dat_desig_relator" id="txt_dat_desig_relator" value="<dtml-var dat_desig_relator missing>" onchange="setar_data(form.txt_dat_desig_relator.value);" />
         <div class="invalid-feedback">
            Este campo é obrigatório!
@@ -175,9 +175,9 @@ $(document).ready(function () {
     </div> 
     
     <div class="col-9 col-md-8 mb-3">
-        <label for="lst_relator" class="d-block required">Relatoria</label>
+        <label class="form-label" for="lst_relator" class="d-block required">Relatoria</label>
         <dtml-if expr="_.has_key('cod_periodo_comp_sel')">
-            <select class="custom-select" id="lst_relator" name="lst_relator" required>
+            <select class="form-select" id="lst_relator" name="lst_relator" required>
              <option value="0">Selecione</option>
                  <dtml-in expr="zsql.periodo_comp_comissao_obter_zsql(cod_comissao=cod_comissao, data=str(DateTime(dat_desig_relator).strftime('%Y/%m/%d')), ind_excluido=0)">
                     <dtml-call expr="REQUEST.set('cod_periodo_comp_sel', int(cod_periodo_comp))">
@@ -192,7 +192,7 @@ $(document).ready(function () {
 	        </dtml-in> 
             </select>
         <dtml-else>
-           <select class="custom-select text-danger" id="lst_relator">
+           <select class="form-select text-danger" id="lst_relator">
              <option value="0">Inexiste composição da Comissão na data de designação informada!</value>
            </select>
        </dtml-if>  
@@ -202,9 +202,9 @@ $(document).ready(function () {
     </div>
   </div>
 
-  <div class="form-row">
+  <div class="row">
     <div class="col-6 col-md-3 mb-3">
-       <label for="txt_dat_destit_relator">Data do Parecer</label>
+       <label class="form-label" for="txt_dat_destit_relator">Data do Parecer</label>
        <dtml-unless dat_destit_relator>
           <dtml-call expr="REQUEST.set('dat_destit_relator', DateTime().strftime('%d/%m/%Y %H:%M:%S'))">
        </dtml-unless>
@@ -227,36 +227,36 @@ $(document).ready(function () {
              <dtml-call expr="REQUEST.set('num_parecer', novo_numero)">
           </dtml-in>
        </dtml-unless>
-       <label for="txt_num_parecer">Número do Parecer</label>
+       <label class="form-label" for="txt_num_parecer">Número do Parecer</label>
        <input class="form-control number" type="number" name="txt_num_parecer" id="txt_num_parecer" value="<dtml-var num_parecer missing null="">" />    
     </div>  
     <div class="col-6 col-md-3 mb-3">
-       <label for="txt_ano_parecer">Ano do Parecer</label>
+       <label class="form-label" for="txt_ano_parecer">Ano do Parecer</label>
        <dtml-unless ano_parecer>
           <dtml-call expr="REQUEST.set('ano_parecer', DateTime().strftime('%Y'))">
        </dtml-unless>
        <input class="form-control year" type="number" name="txt_ano_parecer" id="txt_ano_parecer" value="<dtml-var ano_parecer missing null="">" />    
     </div> 
     <div class="col-6 col-md-3 mb-3">
-       <label for="txt_num_protocolo">Número de Protocolo</label>
+       <label class="form-label" for="txt_num_protocolo">Número de Protocolo</label>
        <input class="form-control number" type="text" name="txt_num_protocolo" id="txt_num_protocolo" value="<dtml-var num_protocolo missing null="">" />    
     </div>              
   </div>
 
-  <div class="form-row">
+  <div class="row">
     <div class="col-6 col-md-3 mb-3">
-       <label class="d-block">Forma de Apresentação</label>
+       <label class="form-label d-block">Forma de Apresentação</label>
        <dtml-in expr="['Escrita', 'Oral']">
           <input type="radio" id="rad<dtml-var expr="_['sequence-item'][0]">" name="rad_tip_apresentacao" value="<dtml-var expr="_['sequence-item'][0]">"
            <dtml-if expr="_.has_key('cod_relatoria') and tip_apresentacao==_['sequence-item'][0]">
                checked=1
            </dtml-if> 
            <dtml-if expr="not _.has_key('cod_relatoria') and _['sequence-item'][0]=='E'">checked=1</dtml-if> />
-            <label for="rad<dtml-var expr="_['sequence-item'][0]">"><dtml-var expr="_['sequence-item']"></label>
+            <label class="form-label" for="rad<dtml-var expr="_['sequence-item'][0]">"><dtml-var expr="_['sequence-item']"></label>
        </dtml-in>    
     </div>   
     <div class="col-6 col-md-3 mb-3">
-       <label class="d-block">Tipo de Parecer</label>
+       <label class="form-label d-block">Tipo de Parecer</label>
        <dtml-in expr="['Favorável', 'Contrário']">
           <input type="radio" id="radt<dtml-var expr="_['sequence-item'][0]">" name="rad_tip_conclusao" value="<dtml-var expr="_['sequence-item'][0]">"
           <dtml-if expr="_.has_key('cod_relatoria') and tip_conclusao==_['sequence-item'][0]">
@@ -264,12 +264,12 @@ $(document).ready(function () {
            <dtml-elif expr="'F'==_['sequence-item'][0]">
               checked=1
            </dtml-if> />
-           <label for="radt<dtml-var expr="_['sequence-item'][0]">"><dtml-var expr="_['sequence-item']"></label>
+           <label class="form-label" for="radt<dtml-var expr="_['sequence-item'][0]">"><dtml-var expr="_['sequence-item']"></label>
        </dtml-in>    
     </div>    
     <div class="col-12 col-md-6 mb-3">
-       <label for="lst_tip_fim_relatoria">Resultado na Comissão</label> 
-       <select class="custom-select" id="lst_tip_fim_relatoria" name="lst_tip_fim_relatoria">
+       <label class="form-label" for="lst_tip_fim_relatoria">Resultado na Comissão</label> 
+       <select class="form-select" id="lst_tip_fim_relatoria" name="lst_tip_fim_relatoria">
          <option value="">Selecione</option>
          <dtml-in expr="zsql.tipo_fim_relatoria_obter_zsql(tip_fim_relatoria='')">
             <option
@@ -282,9 +282,9 @@ $(document).ready(function () {
     </div>     
   </div>
   
-  <div class="form-row"> 
+  <div class="row"> 
     <div class="col-12 col-md-6 mb-3">
-       <label class="d-block">PDF Parecer</label>
+       <label class="form-label d-block">PDF Parecer</label>
        <input type="hidden" name="hdn_file_parecer" value="0"/>
        <dtml-if cod_relatoria>
           <dtml-call expr="REQUEST.set('id_parecer', str(cod_relatoria)+'_parecer.pdf')">
@@ -294,7 +294,7 @@ $(document).ready(function () {
                    <a class="btn btn-secondary" target="_blank" href="<dtml-var parecer>?<dtml-var expr="ZopeTime().timeTime()">"><i class="fa fa-fw fa-file-pdf"></i> Visualizar</a>
                  <dtml-unless expr="zsql.proposicao_obter_zsql(cod_materia=cod_materia, cod_parecer=cod_relatoria)">                      
                    <dtml-if "sapl_documentos.props_sagl.restpki_access_token!=''">               
-                      <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#iFrameModal" data-title="Assinaturas Digitais" data-src="<dtml-var portal_url>/cadastros/assinatura/assinatura_solicitar_form?codigo=<dtml-var cod_relatoria>&tipo_doc=parecer_comissao&modal=1"><i class="fas fa-file-signature"></i> Assinaturas</button>
+                      <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Assinaturas Digitais" data-src="<dtml-var portal_url>/cadastros/assinatura/assinatura_solicitar_form?codigo=<dtml-var cod_relatoria>&tipo_doc=parecer_comissao&modal=1"><i class="fas fa-file-signature"></i> Assinaturas</button>
                    </dtml-if>
                  </dtml-unless>
                 </dtml-let>                         
@@ -339,19 +339,19 @@ $(document).ready(function () {
     </div>
     <div class="col-12 col-md-6 mb-3">
        <dtml-if expr="_.has_key('cod_relatoria')">
-          <label class="d-block">ODT Parecer</label>
+          <label class="form-label d-block">ODT Parecer</label>
           <dtml-let id_documento_odt="str(cod_relatoria)+'_parecer.odt'">
              <dtml-if "hasattr(sapl_documentos.parecer_comissao,id_documento_odt)">
                 <dtml-let documento_odt="getattr(sapl_documentos.parecer_comissao,id_documento_odt).absolute_url">
                    <dtml-call expr="REQUEST.set('nome_arquivo_odt',str(cod_relatoria)+'_parecer.odt')">
                    <a class="btn btn-secondary" href="<dtml-var portal_url>/generico/viewerJS/#<dtml-var documento_odt>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fa fa-fw fa-file-alt"></i> Visualizar</a>
-                   <button type="button" class="btn btn-secondary" onclick="javascript:location.href='<dtml-var portal_url>/sapl_documentos/parecer_comissao/externalEdit_/<dtml-var nome_arquivo_odt>.zem'" data-toggle="tooltip" data-placement="bottom" title="Editar no LibreOffice"><i class="fas fa-fw fa-external-link-alt"></i>Editar</button>  
+                   <button type="button" class="btn btn-secondary" onclick="javascript:location.href='<dtml-var portal_url>/sapl_documentos/parecer_comissao/externalEdit_/<dtml-var nome_arquivo_odt>.zem'" data-bs-toggle="tooltip" data-placement="bottom" title="Editar no LibreOffice"><i class="fas fa-fw fa-external-link-alt"></i>Editar</button>  
 
                    <a class="btn btn-danger" href="javascript:texto_integral_odt_excluir()">Excluir</a>
                 </dtml-let>
              <dtml-else>
                <div class="input-group">
-                <select class="custom-select" id="lst_modelo" name="lst_modelo">
+                <select class="form-select" id="lst_modelo" name="lst_modelo">
                    <option value="0">Selecione um modelo</option>
                    <dtml-with expr="sapl_documentos.modelo.materia.parecer">
                       <dtml-in expr="objectValues('File')" sort="title_or_id">
@@ -369,9 +369,9 @@ $(document).ready(function () {
     </div>    
   </div>
 
-  <div class="form-row"> 
+  <div class="row"> 
     <div class="col-12 mb-3">
-       <label for="txa_txt_parecer">Observações</label>
+       <label class="form-label" for="txa_txt_parecer">Observações</label>
        <textarea class="form-control auto-resize" id="txa_txt_parecer" name="txa_txt_parecer" rows="1"><dtml-var txt_parecer missing null=""></textarea>    
     </div>
   </div>
@@ -380,7 +380,7 @@ $(document).ready(function () {
      <dtml-in expr="zsql.proposicao_obter_zsql(cod_materia=cod_materia, cod_parecer=cod_relatoria)">
        <dtml-let id_proposicao="str(cod_proposicao)+'_signed.pdf'">
          <dtml-if "hasattr(sapl_documentos.proposicao,id_proposicao)">
-             <legend>Processo Digital</legend>
+             <legend class="font-size-16">Processo Digital</legend>
              <div class="card mb-3">
                <div class="row card-body">
                    <div class="col-12 col-md-8">        
@@ -392,7 +392,7 @@ $(document).ready(function () {
                           <a class="btn btn-secondary" target="_blank" href="<dtml-var portal_url>/cadastros/proposicao/proposicao_mostrar_proc?cod_proposicao=<dtml-var cod_proposicao>">Mais Informações</a>
                        </dtml-let>
                    </div>
-                   <div class="col-12 col-md-4 text-right">                   
+                   <div class="col-12 col-md-4 text-end">                   
                       <dtml-if expr="not _.has_key('temODT')">                 
                         <input class="btn btn-primary" type="button" value="ODT" onClick="odt_proposicao_obter(<dtml-var cod_proposicao>)" />
                       </dtml-if>
@@ -407,7 +407,7 @@ $(document).ready(function () {
      </dtml-in>
   </dtml-if>
 
-  <div class="text-left">
+  <div class="text-start">
     <input type="button" class="btn btn-primary" value="Salvar" onClick="campos_criticar(document.relatoria_form)" />
    <dtml-if hdnCodProposicao>
      <input type="button" class="btn btn-secondary" value="Voltar" onClick="javascript:history.back()" />   
@@ -419,7 +419,7 @@ $(document).ready(function () {
 
   <div class="row">
     <div class="col-md-12 mt-2">
-       <p class="text-muted small"><i class="fas fa-asterisk text-danger"></i> Campos obrigatórios</p>
+       <p class="text-muted small font-size-12"><i class="fas fa-asterisk text-danger"></i> Campos obrigatórios</p>
     </div>
   </div>
 
@@ -429,4 +429,5 @@ $(document).ready(function () {
 autosize(document.querySelectorAll('textarea'));
 </script>
 
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>

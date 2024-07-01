@@ -1,12 +1,12 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
-<h1 class="firstHeading">Frentes Parlamentares</h1>
+<h1 class="firstHeading font-size-18">Frentes Parlamentares</h1>
 
 <form name="index_form">
  <div class="row">
   <div class="col-12 col-sm-6 mb-3">
-    <label for="lst_num_legislatura">Selecione a Legislatura:</label>
-         <select class="form-control selectpicker show-tick jumpmenu" data-dropup-auto="false" data-size="6" id="lst_num_legislatura" name="lst_num_legislatura">    
+    <label class="form-label" for="lst_num_legislatura">Selecione a Legislatura:</label>
+         <select class="form-select selectpicker show-tick jumpmenu" data-dropup-auto="false" data-size="6" id="lst_num_legislatura" name="lst_num_legislatura">    
             <dtml-in expr="zsql.legislatura_obter_zsql()">
                <option 
                   <dtml-if expr="_.has_key('hdn_num_legislatura') and num_legislatura==_.int(hdn_num_legislatura)">
@@ -36,8 +36,8 @@
          </select>
    </div>
    <div class="col-12 col-sm-6 mb-3">
-     <label for="lst_periodo_comp">Selecione o Período:</label>
-     <select class="form-control selectpicker show-tick jumpmenu" data-size="6" data-dropup-auto="false" id="lst_periodo_comp" name="lst_periodo_comp">
+     <label class="form-label" for="lst_periodo_comp">Selecione o Período:</label>
+     <select class="form-select selectpicker show-tick jumpmenu" data-size="6" data-dropup-auto="false" id="lst_periodo_comp" name="lst_periodo_comp">
        <dtml-in expr="zsql.periodo_comp_bancada_obter_zsql(num_legislatura=hdn_num_legislatura)">
           <option
             <dtml-if expr="((not _.has_key('cod_periodo_comp_sel') and not _.has_key('prim_sel') 
@@ -60,7 +60,7 @@
 
   <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Parlamentar', 'Operador Tabela Auxiliar'])">
    <div class="row">
-    <div class="col-12 text-left">
+    <div class="col-12 text-start">
             <a class="btn btn-sm btn-primary d-print-none mb-3" href="<dtml-var portal_url>/cadastros/auxiliares/bancada/bancada_form?num_legislatura_sel=<dtml-var hdn_num_legislatura missing>"><i class="fa fa-fw fa-plus"></i> Incluir Bancada</a>
     </div>
    </div>
@@ -73,7 +73,7 @@
  </dtml-in>
 <div class="table-responsive mt-2">
  <table class="table" id="bancadas">
-   <thead class="table-secondary">
+   <thead>
      <tr>
        <th>Nome</th>
        <th width="20%">Membros</th>
@@ -140,4 +140,5 @@
 </script>
 
 
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>

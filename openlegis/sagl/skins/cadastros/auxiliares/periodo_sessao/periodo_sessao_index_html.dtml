@@ -1,4 +1,4 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
 <script src="<dtml-var portal_url>/javascript/data_validar.js"></script>
 
@@ -74,14 +74,14 @@ function atualiza_num_leg(num_legislatura,cod_sessao_plen){
 
 </script>
 
-  <h1 class="firstHeading">Períodos de <dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao"> </h1> 
+  <h1 class="firstHeading font-size-18">Períodos de <dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao"> </h1> 
 
   <form name="periodo_sessao_form" method="post" action="periodo_sessao_salvar_proc">
 
   <div class="row mb-2">
   <div class="col-12 col-sm-6 mb-3">
-      <label for="lst_num_legislatura" class="required">Legislatura:</label>
-      <select class="custom-select show-tick jumpmenu" data-dropup-auto="false" data-size="6" id="lst_num_legislatura" name="lst_num_legislatura required">
+      <label class="form-label" for="lst_num_legislatura" class="required">Legislatura:</label>
+      <select class="form-select show-tick jumpmenu" data-dropup-auto="false" data-size="6" id="lst_num_legislatura" name="lst_num_legislatura required">
           <dtml-in expr="zsql.legislatura_obter_zsql(ind_excluido=0)">
              <option
                <dtml-if expr="(not _.has_key('num_legislatura_sel') and (DateTime() >= DateTime(dat_inicio) and DateTime() <= DateTime(dat_fim)))
@@ -107,8 +107,8 @@ function atualiza_num_leg(num_legislatura,cod_sessao_plen){
         </dtml-if>
   </div>
     <div class="col-12 col-sm-6 mb-3">
-        <label for="lst_sessao_leg" class="required">Sessão Legislativa</label>
-         <select class="custom-select show-tick jumpmenu" data-dropup-auto="false" data-size="4" id="lst_sessao_leg" name="lst_sessao_leg">
+        <label class="form-label" for="lst_sessao_leg" class="required">Sessão Legislativa</label>
+         <select class="form-select show-tick jumpmenu" data-dropup-auto="false" data-size="4" id="lst_sessao_leg" name="lst_sessao_leg">
            <dtml-in expr="zsql.sessao_legislativa_obter_zsql(num_legislatura=num_legislatura_sel)">
               <option
                 <dtml-if expr="((not _.has_key('cod_sessao_leg_sel') and not _.has_key('prim_sel') 
@@ -136,7 +136,7 @@ function atualiza_num_leg(num_legislatura,cod_sessao_plen){
   <dtml-in expr="zsql.periodo_sessao_obter_zsql(num_legislatura=num_legislatura_sel, cod_sessao_leg=cod_sessao_leg_sel)">
     <dtml-if sequence-start>
        <table class="table table-bordered">
-        <thead class="table-secondary">                     
+        <thead>                     
          <tr>
            <th>Período</th>
            <th>Tipo de <dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao"></th>
@@ -148,13 +148,13 @@ function atualiza_num_leg(num_legislatura,cod_sessao_plen){
      </dtml-if sequence-start>
          <tr> 
           <td>
-            <label for="txt_num_periodo_<dtml-var cod_periodo>" class="required d-none">Período</label>
+            <label class="form-label" for="txt_num_periodo_<dtml-var cod_periodo>" class="required d-none">Período</label>
             <input class="form-control" type="text" id="txt_num_periodo_<dtml-var cod_periodo>" name="txt_num_periodo_<dtml-var cod_periodo>" 
              value="<dtml-var num_periodo>" maxlength="2" readonly />
           </td>
           <td>
-            <label for="lst_tip_sessao_<dtml-var cod_periodo>" class="required d-none">Tipo</label>
-            <select class="custom-select" id="lst_tip_sessao_<dtml-var cod_periodo>" name="lst_tip_sessao_<dtml-var cod_periodo>" disabled>
+            <label class="form-label" for="lst_tip_sessao_<dtml-var cod_periodo>" class="required d-none">Tipo</label>
+            <select class="form-select" id="lst_tip_sessao_<dtml-var cod_periodo>" name="lst_tip_sessao_<dtml-var cod_periodo>" disabled>
                <dtml-in expr="zsql.tipo_sessao_plenaria_obter_zsql(tip_sessao=tip_sessao)">
                   <option           
                    value="<dtml-var tip_sessao>"><dtml-var nom_sessao>
@@ -163,12 +163,12 @@ function atualiza_num_leg(num_legislatura,cod_sessao_plen){
             </select> 
           </td>
           <td>
-            <label for="txt_dat_inicio_<dtml-var cod_periodo>" class="required d-none">Início</label>
+            <label class="form-label" for="txt_dat_inicio_<dtml-var cod_periodo>" class="required d-none">Início</label>
             <input class="form-control date" type="text" id="txt_dat_inicio_<dtml-var cod_periodo>" name="txt_dat_inicio_<dtml-var cod_periodo>" 
              value="<dtml-var data_inicio>" />
           </td>
           <td>
-            <label for="txt_dat_fim_<dtml-var cod_periodo>" class="required d-none">Fim</label>
+            <label class="form-label" for="txt_dat_fim_<dtml-var cod_periodo>" class="required d-none">Fim</label>
             <input class="form-control date" type="text" id="txt_dat_fim_<dtml-var cod_periodo>" name="txt_dat_fim_<dtml-var cod_periodo>" 
              value="<dtml-var data_fim>" />
           </td>
@@ -187,7 +187,7 @@ function atualiza_num_leg(num_legislatura,cod_sessao_plen){
       <p>Nenhuma Sessão Legislativa cadastrada na Legislatura selecionada.</p>
 </dtml-if>
 
-        <legend>Formulário de Inclusão</legend>
+        <legend class="font-size-16">Formulário de Inclusão</legend>
         <input type="hidden" name="hdn_num_legislatura" value="<dtml-var num_legislatura_sel>" /> 
         <input type="hidden" name="hdn_cod_sessao_leg" value="<dtml-var cod_sessao_leg_sel>" />  
         <input type="hidden" name="hdn_num_periodo" />  
@@ -196,7 +196,7 @@ function atualiza_num_leg(num_legislatura,cod_sessao_plen){
         <input type="hidden" name="hdn_dat_inicio" /> 
         <input type="hidden" name="hdn_dat_fim" />  
         <table class="table table-bordered">
-        <thead class="table-secondary">                     
+        <thead>                     
          <tr>
            <th>Período</th>
            <th>Tipo de <dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao"></th>
@@ -207,12 +207,12 @@ function atualiza_num_leg(num_legislatura,cod_sessao_plen){
         </thead>
          <tr> 
           <td>
-            <label for="txt_num_periodo" class="d-none required">Período</label>
+            <label class="form-label" for="txt_num_periodo" class="d-none required">Período</label>
             <input class="form-control number" type="number" id="txt_num_periodo" name="txt_num_periodo" min="1" max="12" maxlength="2" />
           </td>
           <td>
-            <label for="lst_tip_sessao" class="d-none required">Tipo</label>
-            <select class="custom-select" id="lst_tip_sessao" name="lst_tip_sessao">
+            <label class="form-label" for="lst_tip_sessao" class="d-none required">Tipo</label>
+            <select class="form-select" id="lst_tip_sessao" name="lst_tip_sessao">
                <option value ="0"></option>
                <dtml-in expr="zsql.tipo_sessao_plenaria_obter_zsql(ind_excluido=0)">
                   <option           
@@ -222,12 +222,12 @@ function atualiza_num_leg(num_legislatura,cod_sessao_plen){
             </select> 
           </td>
           <td>
-            <label for="txt_dat_inicio" class="d-none required">Início</label>
+            <label class="form-label" for="txt_dat_inicio" class="d-none required">Início</label>
             <input class="form-control date" type="text" id="txt_dat_inicio" name="txt_dat_inicio" 
              value="" />
           </td>
           <td>
-            <label for="txt_dat_fim" class="d-none required">Fim</label>
+            <label class="form-label" for="txt_dat_fim" class="d-none required">Fim</label>
             <input class="form-control date" type="text" id="txt_dat_fim" name="txt_dat_fim" 
              value="" />
           </td>
@@ -247,7 +247,7 @@ function atualiza_num_leg(num_legislatura,cod_sessao_plen){
         var selectElements = document.getElementsByTagName("select");
         for( i = 0; i < selectElements.length; i++ ) {
             // Check for the class and make sure the element has an ID
-            if( selectElements[i].className == "custom-select show-tick jumpmenu" && document.getElementById(selectElements[i].id) != "" ) {
+            if( selectElements[i].className == "form-control show-tick jumpmenu" && document.getElementById(selectElements[i].id) != "" ) {
                 jumpmenu = document.getElementById(selectElements[i].id);
                 jumpmenu.onchange = function() {
                     if( this.options[this.selectedIndex].value != '' ) {
@@ -263,5 +263,6 @@ function atualiza_num_leg(num_legislatura,cod_sessao_plen){
     }
 </script>
 
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>
 

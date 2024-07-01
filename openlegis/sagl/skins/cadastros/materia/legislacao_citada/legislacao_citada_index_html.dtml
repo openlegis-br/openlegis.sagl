@@ -1,8 +1,8 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
 <a id="ajuda" href="<dtml-var portal_url>/ajuda/legislacao_cita_matanexada">Ajuda</a>
 
-<h1 class="firstHeading"> Matéria Legislativa </h1>
+<h1 class="firstHeading font-size-18"> Matéria Legislativa </h1>
 
 <form name="index_form" action="legislacao_citada_form">
   <input type="hidden" name="cod_materia" value="<dtml-var cod_materia>" />
@@ -10,7 +10,7 @@
     <dtml-var materia_menu>
     <dtml-var materia_header>
 
-<fieldset><legend>Legislação Citada</legend>
+<fieldset><legend class="font-size-16">Legislação Citada</legend>
 <dtml-in expr="zsql.legislacao_citada_obter_zsql(cod_materia=cod_materia, ind_excluido=0)" size=8 start=query_start orphan=2>
   <dtml-if previous-sequence>
       <span>
@@ -54,4 +54,5 @@
 
 </form>
 
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>

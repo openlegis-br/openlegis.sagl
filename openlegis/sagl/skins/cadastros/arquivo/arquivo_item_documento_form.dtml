@@ -1,4 +1,4 @@
-<dtml-var standard_html_header>
+<dtml-var header_html>
 
 <script src="<dtml-var portal_url>/javascript/data_validar.js"></script>
 
@@ -52,7 +52,7 @@
  
 </script>
 
-<h1 class="firstHeading">Dados do Documento</h1>
+<h1 class="firstHeading font-size-18">Dados do Documento</h1>
 
 
 <form name="arquivo_item_documento_form" method="post" action="arquivo_item_salvar_proc">
@@ -60,8 +60,8 @@
     <table class="table">
       <tr> 
         <td width="40%">
-           <label for="lst_tip_documento" class="required">Tipo de Documento</label>
-           <select class="custom-select"  name="lst_tip_documento" id="lst_tip_documento" onChange="ementa_buscar(document.arquivo_item_documento_form)">
+           <label class="form-label" for="lst_tip_documento" class="required">Tipo de Documento</label>
+           <select class="form-select"  name="lst_tip_documento" id="lst_tip_documento" onChange="ementa_buscar(document.arquivo_item_documento_form)">
             <option>
               <dtml-in expr="zsql.tipo_documento_administrativo_obter_zsql(ind_excluido=0)">
                  <option
@@ -75,28 +75,28 @@
               </dtml-in>
            </select></td>
         <td>
-           <label for="txt_num_documento" class="required">Número</label>
+           <label class="form-label" for="txt_num_documento" class="required">Número</label>
             <input class="form-control number" type="number" name="txt_num_documento" id="txt_num_documento" size="5" value="<dtml-var num_documento_sel missing>" onChange="ementa_buscar(document.arquivo_item_documento_form)">
         </td>
         <td>
-           <label for="txt_ano_documento" class="required">Ano</label>
+           <label class="form-label" for="txt_ano_documento" class="required">Ano</label>
             <input class="form-control year" type="number" name="txt_ano_documento" id="txt_ano_documento" size="4" value="<dtml-var ano_documento_sel missing>" onChange="ementa_buscar(document.arquivo_item_documento_form)">
         </td>
       </tr>
       <tr>
-        <td colspan="3"><label for="txa_txt_assunto" class="required">Assunto</label> 
+        <td colspan="3"><label class="form-label" for="txa_txt_assunto" class="required">Assunto</label> 
           <textarea class="form-control auto-resize" name="txa_txt_assunto" id="txa_txt_assunto" rows="1" readonly><dtml-var txt_assunto missing></textarea>
         </td>
       </tr>
       <tr>
-        <td><label for="txt_dat_arquivamento" class="required">Data de Arquivamento</label>
+        <td><label class="form-label" for="txt_dat_arquivamento" class="required">Data de Arquivamento</label>
             <dtml-unless dat_arquivamento>
                <dtml-call expr="REQUEST.set('dat_arquivamento', DateTime().strftime('%d/%m/%Y'))">
             </dtml-unless>
             <input class="form-control date" type="text" id="txt_dat_arquivamento" name="txt_dat_arquivamento" value="<dtml-var dat_arquivamento missing null="">" />
         </td>
-        <td colspan="2"><label for="lst_tip_suporte" class="required">Suporte Físico</label>
-           <select class="custom-select"  id="lst_tip_suporte" name="lst_tip_suporte">
+        <td colspan="2"><label class="form-label" for="lst_tip_suporte" class="required">Suporte Físico</label>
+           <select class="form-select"  id="lst_tip_suporte" name="lst_tip_suporte">
              <option value="0">Selecione</option>
              <dtml-in expr="zsql.arquivo_tipo_suporte_obter_zsql(ind_excluido=0)">
              <option 
@@ -116,7 +116,7 @@
            </select>
         </td>
       <tr>
-        <td colspan="3"><label for="txa_txt_observacao">Observações</label> 
+        <td colspan="3"><label class="form-label" for="txa_txt_observacao">Observações</label> 
            <textarea class="form-control"  id="txa_txt_observacao" name="txa_txt_observacao" rows="1" onChange="javascript:form.hdn_alterou.value=1"><dtml-var txt_observacao missing null=""></textarea>
         </td>
       </tr>
@@ -135,6 +135,7 @@
 autosize(document.querySelectorAll('textarea'));
 </script>
 
-<dtml-var standard_html_footer>
+<dtml-var js_slot>
+<dtml-var footer_html>
 
 

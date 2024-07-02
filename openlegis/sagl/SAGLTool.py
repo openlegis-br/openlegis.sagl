@@ -1224,8 +1224,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         renderer.run()
         data = open(output_file_pdf, "rb").read()
         os.unlink(output_file_pdf)
-        content = data.getvalue()
-        self.sapl_documentos.substitutivo.manage_addFile(id=nom_arquivo_pdf,file=self.pysc.upload_file(file=content, title='Substitutivo'))       
+        self.sapl_documentos.substitutivo.manage_addFile(id=nom_arquivo_pdf,file=self.pysc.upload_file(file=data, title='Substitutivo'))       
 
     def protocolo_barcode(self,cod_protocolo):
         sgl_casa = self.sapl_documentos.props_sagl.sgl_casa

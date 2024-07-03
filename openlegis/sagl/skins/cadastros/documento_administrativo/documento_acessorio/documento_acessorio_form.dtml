@@ -140,7 +140,7 @@ $(document).ready(function () {
            <dtml-call expr="REQUEST.set('id_documento', str(cod_documento_acessorio)+'.pdf')">
            <dtml-if "hasattr(sapl_documentos.administrativo,id_documento)">
               <dtml-let documento="getattr(sapl_documentos.administrativo,id_documento).absolute_url">
-                 <a class="btn btn-secondary" target="_blank" href="<dtml-var documento>?<dtml-var expr="ZopeTime().timeTime()">">
+                 <a class="btn btn-light" target="_blank" href="<dtml-var documento>?<dtml-var expr="ZopeTime().timeTime()">">
                     <dtml-if expr="zsql.assinatura_documento_obter_zsql(codigo=cod_documento_acessorio, tipo_doc='doc_acessorio_adm',ind_assinado=1, cod_usuario=None)">
                       <i class="fa fa-certificate"></i>
                     <dtml-else>
@@ -149,7 +149,7 @@ $(document).ready(function () {
 		    Visualizar
 		  </a>
                   <dtml-if "sapl_documentos.props_sagl.restpki_access_token!=''">
-                     <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Assinaturas Digitais" data-src="<dtml-var portal_url>/cadastros/assinatura/assinatura_solicitar_form?codigo=<dtml-var cod_documento_acessorio>&tipo_doc=doc_acessorio_adm&modal=1"><i class="fas fa-file-signature"></i> Assinaturas</button>
+                     <button type="button" class="btn btn-light" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Assinaturas Digitais" data-src="<dtml-var portal_url>/cadastros/assinatura/assinatura_solicitar_form?codigo=<dtml-var cod_documento_acessorio>&tipo_doc=doc_acessorio_adm&modal=1"><i class="fas fa-file-signature"></i> Assinaturas</button>
                   </dtml-if>
                   <a class="btn btn-danger" href="<dtml-var portal_url>/cadastros/documento_administrativo/documento_acessorio/texto_pdf_excluir_proc?cod_documento_acessorio=<dtml-var cod_documento_acessorio missing>&modal=1" data-confirm="Deseja realmente excluir o arquivo PDF?"><i class="fas fa-trash"></i> Excluir</a> 
               </dtml-let>
@@ -166,7 +166,7 @@ $(document).ready(function () {
              </dtml-let>
              <dtml-if expr="_.has_key('temODT')">
                 <div class="input-group-append">                  
-                   <a class="btn btn-secondary" href="javascript:texto_pdf_gerar()">
+                   <a class="btn btn-light" href="javascript:texto_pdf_gerar()">
                      Gerar do ODT
                   </a>
                 </div>
@@ -186,8 +186,8 @@ $(document).ready(function () {
               <label class="form-label" for="lst_modelo" class="d-block">Arquivo ODT</label>
                    <dtml-call expr="REQUEST.set('nome_arquivo_odt',str(cod_documento_acessorio)+'.odt')">
                    <dtml-if "hasattr(sapl_documentos.administrativo,nome_arquivo_odt)">
-                         <a class="btn btn-secondary" href="<dtml-var portal_url>/generico/viewerJS/#<dtml-var portal_url>/sapl_documentos/administrativo/<dtml-var nome_arquivo_odt>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fa fa-fw fa-file-alt"></i> Visualizar</a>
-                         <button type="button" class="btn btn-secondary" onclick="javascript:location.href='<dtml-var portal_url>/sapl_documentos/administrativo/externalEdit_/<dtml-var nome_arquivo_odt>.zem'" data-bs-toggle="tooltip" data-placement="bottom" title="Editar no LibreOffice"><i class="fas fa-fw fa-external-link-alt"></i>Editar</button>                                          
+                         <a class="btn btn-light" href="<dtml-var portal_url>/generico/viewerJS/#<dtml-var portal_url>/sapl_documentos/administrativo/<dtml-var nome_arquivo_odt>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fa fa-fw fa-file-alt"></i> Visualizar</a>
+                         <button type="button" class="btn btn-light" onclick="javascript:location.href='<dtml-var portal_url>/sapl_documentos/administrativo/externalEdit_/<dtml-var nome_arquivo_odt>.zem'" data-bs-toggle="tooltip" data-placement="bottom" title="Editar no LibreOffice"><i class="fas fa-fw fa-external-link-alt"></i>Editar</button>                                          
                       <a class="btn btn-danger" href="<dtml-var portal_url>/cadastros/documento_administrativo/documento_acessorio/texto_odt_excluir_proc?cod_documento_acessorio=<dtml-var cod_documento_acessorio missing>&modal=1" data-confirm="Deseja realmente excluir o arquivo ODT?"><i class="fas fa-trash"></i> Excluir</a> 
                    <dtml-else>
                     <div class="input-group">
@@ -202,7 +202,7 @@ $(document).ready(function () {
                          </dtml-with>
                       </select>
                      <div class="input-group-append">
-                        <a class="btn btn-secondary" href="javascript:texto_odt_gerar();">Gerar</a>
+                        <a class="btn btn-light" href="javascript:texto_odt_gerar();">Gerar</a>
                      </div>
                     </div>
                    </dtml-if>

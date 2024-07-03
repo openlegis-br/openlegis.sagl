@@ -1,75 +1,6 @@
-<script src="<dtml-var portal_url>/js/moment.min.js""></script>
-<script src="<dtml-var portal_url>/js/datetime-moment.js"></script>
-
-<script>
-$(document).ready(function() {
-    $.fn.dataTable.moment( 'DD/MM/YYYY HH:mm:ss' );    //Formatação com Hora
-    $.fn.dataTable.moment('DD/MM/YYYY');    //Formatação sem Hora
-    var table = $('#reunioes_table').DataTable( {
-        "responsive": true,
-        "order": [[ 1, "desc" ], [ 0, "asc" ]],
-        "buttons": [
-            {
-                extend: 'collection',
-                text: 'Exportar',
-                buttons: [ 
-                           {
-                             extend:    'excelHtml5',
-                             text:      '<i class="far fa-file-excel"></i> Excel',
-                             titleAttr: 'PDF'
-                           },
-                           {
-                             extend:    'pdfHtml5',
-                             download: 'open',
-                             text:      '<i class="fa fa-file-adobe"></i> PDF',
-                             titleAttr: 'PDF'
-                           },
-                           {
-                             extend:    'print',
-                             text:      '<i class="fa fa-print"></i> Impressão',
-                             titleAttr: 'Impressão'
-                           },
-                         ],
-               className: '',
-               dropup: true,
-               autoClose: true,
-               fade: true
-
-            }
-        ],
-        "language": {
-          search: "Pesquisar:",
-          processing:     "Processando...",
-          loadingRecords: "Carregando...",
-          lengthMenu:     "Exibir _MENU_ registros por página",
-          info:           "Exibindo _START_ a _END_ de _TOTAL_ registros",
-          infoEmpty:      "Exibindo _START_ a _END_ de _TOTAL_ registros",
-          infoFiltered:   "(total de registros:_MAX_)",
-          emptyTable:     "Nenhum registro encontrado",
-          zeroRecords:     "Nenhum registro encontrado",
-          paginate: {
-            first:      "Primeiro",
-            previous:   "Anterior",
-            next:       "Próximo",
-            last:       "Último"
-          },
-         "buttons": {
-           print: "Imprimir",
-           copy: "Copiar",
-           copyTitle: "Cópia bem sucedida",
-           copySuccess: {
-            1: "Uma linha copiada com sucesso",
-            _: "%d linhas copiadas com sucesso"
-          }
-        }
-        }
-    });
-});
-</script>
-
 <legend class="font-size-16">Reuniões</legend>
-
-   <table id="reunioes_table" class="table responsive nowrap" style="width:100%">
+<div class="table-responsive">
+   <table id="table-reuniao" class="table w-100 datatable">
       <thead>
          <tr>
            <th>Título</th>
@@ -122,7 +53,6 @@ $(document).ready(function() {
      </dtml-in>
    </tbody>
   </table>
-
-  <button type="button" class="btn m btn-primary d-print-none mt-3" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Cadastro de Reunião - <dtml-var nom_comissao>" data-src="reuniao/reuniao_comissao_form?cod_comissao=<dtml-var cod_comissao>&modal=1">Incluir Reunião</button>
-
+</div>
+  <button type="button" class="btn btn-light d-print-none" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Cadastro de Reunião - <dtml-var nom_comissao>" data-src="reuniao/reuniao_comissao_form?cod_comissao=<dtml-var cod_comissao>&modal=1">Incluir Reunião</button>
 

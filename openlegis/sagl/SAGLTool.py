@@ -280,14 +280,14 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         img_path = BytesIO(bytes(arq.data))
         modified_path = BytesIO() 
         crop_type='top'
-        size = (350, 380)
+        size = (350, 350)
         img = Image.open(img_path)
         img = img.convert('RGB')
         img_ratio = img.size[0] / float(img.size[1])
         ratio = size[0] / float(size[1])
         if ratio > img_ratio:
             img = img.resize((size[0], int(round(size[0] * img.size[1] / img.size[0]))),
-                Image.ANTIALIAS)
+                Image.Resampling.LANCZOS)
             if crop_type == 'top':
                 box = (0, 0, img.size[0], size[1])
             elif crop_type == 'middle':

@@ -13,93 +13,35 @@
                           txt_observacao         = txa_txt_observacao)">
 
 <dtml-except>
-  <dtml-let mensagem="'Não foi possível salvar o documento. Tente novamente!'" tipo_mensagem="'warning'" modal="1">
+  <dtml-let mensagem="'Não foi possível salvar o documento. Tente novamente!'" tipo_mensagem="'danger'" modal="1">
     <dtml-var mensagem_emitir>
   </dtml-let>
 
-  <dtml-in expr="zsql.documento_comissao_incluido_codigo_obter_zsql()" >
-    <dtml-call "REQUEST.set('ult_documento_incluido',cod_documento)">
-  </dtml-in>
-
-<dtml-else>      
-    <dtml-call expr="REQUEST.set('erro', 0)">              
-    <dtml-if expr="radTI=='I' or radTI=='S'">                
-        <dtml-call expr="REQUEST.set('existe_arquivo', 0)">        
-        <dtml-if expr="(_.int(hdn_file)==1)">
-            <dtml-if hdn_cod_documento>
-                <dtml-call expr="REQUEST.set('id_documento', str(hdn_cod_documento)+'_documento.pdf')">
-                <dtml-if "hasattr(sapl_documentos.documento_comissao,id_documento)">
-                    <dtml-let documento="getattr(sapl_documentos.documento_comissao,id_documento) ">
-                        <dtml-call expr="REQUEST.set('existe_arquivo', 1)">
-                        <dtml-try>
-                          <dtml-if expr="pysc.arquivo_pdf_validar_pysc(file=file_nom_arquivo)">
-                             <dtml-call "documento.manage_upload(file=file_nom_arquivo)">
-                          </dtml-if>
-                        <dtml-except>
-                            <dtml-call expr="REQUEST.set('erro', 1)">              
-                        </dtml-try>
-                    </dtml-let>
-                <dtml-in expr="zsql.assinatura_documento_obter_zsql(codigo=hdn_cod_documento, tipo_doc='documento_comissao')">
-                   <dtml-try>
-                     <dtml-call expr="zsql.assinatura_documento_excluir_zsql(
-                       cod_assinatura_doc  = cod_assinatura_doc,
-                       codigo              = codigo,
-                       tipo_doc            = tipo_doc)">
-                   <dtml-except>
-                     <dtml-call expr="REQUEST.set('erro', 1)">
-                   </dtml-try>
-                </dtml-in>                     
-                </dtml-if>
-            <dtml-else>
-                <dtml-in expr="zsql.documento_comissao_incluido_codigo_obter_zsql()">
-                 <dtml-call "REQUEST.set('ult_documento_incluido',cod_documento)">
-                </dtml-in>
-               <dtml-call expr="REQUEST.set('id_documento',str(ult_documento_incluido)+'_documento.pdf')">
-             </dtml-if>
-             <dtml-if "not existe_arquivo">
-          <dtml-try>
-             <dtml-if expr="pysc.arquivo_pdf_validar_pysc(file=file_nom_arquivo)">
-                <dtml-call expr="sapl_documentos.documento_comissao.manage_addFile(id=id_documento, file=file_nom_arquivo)">
-             </dtml-if>
-                 <dtml-except> 
-                     <dtml-call expr="REQUEST.set('erro', 1)">              
-                 </dtml-try>      
-             </dtml-if>
-         </dtml-if>
-     <dtml-elif expr="radTI=='E'">
-         <dtml-if hdn_cod_documento>
-             <dtml-call expr="REQUEST.set('id_documento', str(hdn_cod_documento)+'_documento.pdf')">
-             <dtml-call "sapl_documentos.documento_comissao.manage_delObjects(id_documento)">
-                <dtml-in expr="zsql.assinatura_documento_obter_zsql(codigo=hdn_cod_documento, tipo_doc='documento_comissao')">
-                   <dtml-try>
-                     <dtml-call expr="zsql.assinatura_documento_excluir_zsql(
-                       cod_assinatura_doc  = cod_assinatura_doc,
-                       codigo              = codigo,
-                       tipo_doc            = tipo_doc)">
-                   <dtml-except>
-                     <dtml-call expr="REQUEST.set('erro', 1)">
-                   </dtml-try>
-                </dtml-in>              
-         </dtml-if>
-     </dtml-if>
-                <dtml-call expr="REQUEST.set('id_documento', str(hdn_cod_documento)+'_documento.pdf')">
-                <dtml-if expr="hasattr(sapl_documentos.documento_comissao,id_documento)">
-                  <dtml-if expr="rad_ind_publico=='0'">
-                    <dtml-let arquivo="getattr(sapl_documentos.documento_comissao,id_documento)">
-                      <dtml-call "arquivo.manage_permission('View', roles=['Manager','Authenticated'], acquire=1)">
-                    </dtml-let>
-                  <dtml-elif expr="rad_ind_publico=='1'">
-                    <dtml-let arquivo="getattr(sapl_documentos.documento_comissao,id_documento)">     
-                      <dtml-call "arquivo.manage_permission('View', roles=['Manager','Authenticated', 'Anonymous'], acquire=1)">
-                    </dtml-let>
-                  </dtml-if>
-                </dtml-if>
-    <dtml-if erro>
-        <dtml-let mensagem="'Não foi possível salvar o texto integral do documento. Tente novamente.'" tipo_mensagem="'warning'" modal="1">
-            <dtml-var mensagem_emitir>
-        </dtml-let>        
-    </dtml-if>
+<dtml-else> 
+ <dtml-if hdn_cod_documento>
+    <dtml-call "REQUEST.set('hdn_cod_documento',hdn_cod_documento)">
+ <dtml-else>
+    <dtml-in expr="zsql.documento_comissao_incluido_codigo_obter_zsql()" >
+       <dtml-call "REQUEST.set('hdn_cod_documento',cod_documento)">
+    </dtml-in> 
+ </dtml-if>
+  <dtml-call expr="REQUEST.set('id_documento',str(hdn_cod_documento)+'_documento.pdf')">
+  <dtml-if file_nom_documento>
+     <dtml-call expr="sapl_documentos.documento_comissao.manage_addFile(id=id_documento,file=pysc.upload_file(file=file_nom_documento, title=txa_txt_descricao))">
+  </dtml-if>
     
+  <dtml-if expr="hasattr(sapl_documentos.documento_comissao,id_documento)">
+     <dtml-if expr="rad_ind_publico=='0'">
+        <dtml-let arquivo="getattr(sapl_documentos.documento_comissao,id_documento)">
+           <dtml-call "arquivo.manage_permission('View', roles=['Manager','Authenticated'], acquire=1)">
+        </dtml-let>
+     <dtml-elif expr="rad_ind_publico=='1'">
+        <dtml-let arquivo="getattr(sapl_documentos.documento_comissao,id_documento)">     
+          <dtml-call "arquivo.manage_permission('View', roles=['Manager','Authenticated', 'Anonymous'], acquire=1)">
+        </dtml-let>
+     </dtml-if>
+  </dtml-if>
+
   <dtml-if hdn_url>
     <dtml-let mensagem="'Documento salvo com sucesso!'" tipo_mensagem="'success'" modal="1" url=hdn_url>
       <dtml-var mensagem_emitir>
@@ -109,11 +51,10 @@
       <dtml-var mensagem_emitir>
     </dtml-let>
   </dtml-if>
-
 </dtml-try>
 
 <dtml-comment>LOG DE AUDITORIA</dtml-comment>
-<dtml-if dbcon_logs>
+<dtml-if expr="dbcon_logs and hdn_cod_documento">
   <dtml-call expr="REQUEST.set('metodo1', str(metodo).split('/')[-1])">
   <dtml-call expr="REQUEST.set('metodo1', str(metodo1).split(' at ')[-1])">
   <dtml-call expr="REQUEST.set('metodo1', str(metodo1).split('>')[0])">
@@ -123,6 +64,5 @@
             modulo       = str(_['REQUEST']['URL1']).split('/')[-1],
             metodo       = metodo1,
             IP           = pysc.get_ip(),
-            dados        = REQUEST.form.items(),
-            cod_registro = hdn_cod_comissao)"> 
+            cod_registro = hdn_cod_documento)"> 
 </dtml-if>

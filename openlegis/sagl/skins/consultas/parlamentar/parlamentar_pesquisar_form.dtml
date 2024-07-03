@@ -3,7 +3,6 @@
       function campos_criticar(form) {
         if (form.lst_parlamentar.value == ""){
            bootstrap.showModal({title: "Mensagem do Sistema", body: "Selecione um Vereador!"});        
-           form.txt_parlamentar.focus();
            return false;        
         }    
         return true;
@@ -14,8 +13,9 @@
 
  <div class="row">
    <div class="col-12 mb-3">
-     <label class="form-label" for="lst_parlamentar">Nome do Vereador</label>
-        <select id="lst_parlamentar" name="lst_parlamentar" class="form-control selectpicker show-tick" title="Selecione" data-live-search="true">
+     <label class="form-label required" for="lst_parlamentar">Nome do vereador</label>
+        <div class="input-group">
+        <select id="lst_parlamentar" name="lst_parlamentar" class="select2 form-control mb-3 custom-select" style="width: 80%; height:45px;"">
          <option></option>
           <dtml-in expr="zsql.parlamentar_obter_zsql(ind_excluido=0)">
            <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Parlamentar'])">
@@ -29,14 +29,16 @@
            </dtml-if>
           </dtml-in>
        </select>
-       <small id="autorHelp" class="form-text text-muted">Selecione um Vereador e clique no botão OK para visualizar os dados cadastrais.</small>       
+      <input class="btn btn-light" type="button" value="OK" onClick="javascript:
+if (campos_criticar(document.parlamentar_pesquisar_form)) {parent.location.href = this.form.lst_parlamentar.options[this.form.lst_parlamentar.selectedIndex].value; return false;}">
+    </div>
+       <small id="autorHelp" class="form-text text-muted">Selecione um vereador e clique OK para visualizar seus dados cadastrais.</small>       
    </div>
+
  </div>
 
 <input type="hidden" name="modal" value="1">
 
-<input class="btn btn-primary" type="button" value="OK" onClick="javascript:
-if (campos_criticar(document.parlamentar_pesquisar_form)) {parent.location.href = this.form.lst_parlamentar.options[this.form.lst_parlamentar.selectedIndex].value; return false;}">
 
 </form>
 

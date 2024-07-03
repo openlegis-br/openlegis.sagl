@@ -337,8 +337,8 @@ $(document).ready(() => {
          <dtml-in expr="zsql.protocolo_obter_zsql(num_protocolo=num_protocolo, ano_protocolo=ano_documento)">
             <dtml-if cod_protocolo>
              <div class="input-group-append">
-               <button type="button" class="btn btn-secondary d-print-none" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Etiqueta de Protocolo" data-src="<dtml-var portal_url>/relatorios/pdf_etiqueta_protocolo_preparar_pysc?rad_tip_protocolo=&txt_cod_protocolo=<dtml-var cod_protocolo>&txt_num_protocolo=<dtml-var num_protocolo>&txt_ano_protocolo=<dtml-var ano_protocolo>&dt_apres=&dt_apres2=&rad_tip_processo=&lst_tip_documento=&lst_tip_materia=&txt_assunto=&txa_txt_interessado=&hdn_cod_autor="><i class="fa fa-fw fa-barcode"></i><span class="d-none">PDF</span></button>
-               <button class="btn btn-secondary" type="button" name="btn_incluir" onclick="location.href='<dtml-var portal_url>/consultas/protocolo/protocolo_mostrar_proc?cod_protocolo=<dtml-var cod_protocolo>';"><i class="fas fa-fw fa-eye"></i><span class="d-none">Protocolo</span></button>
+               <button type="button" class="btn btn-light d-print-none" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Etiqueta de Protocolo" data-src="<dtml-var portal_url>/relatorios/pdf_etiqueta_protocolo_preparar_pysc?rad_tip_protocolo=&txt_cod_protocolo=<dtml-var cod_protocolo>&txt_num_protocolo=<dtml-var num_protocolo>&txt_ano_protocolo=<dtml-var ano_protocolo>&dt_apres=&dt_apres2=&rad_tip_processo=&lst_tip_documento=&lst_tip_materia=&txt_assunto=&txa_txt_interessado=&hdn_cod_autor="><i class="fa fa-fw fa-barcode"></i><span class="d-none">PDF</span></button>
+               <button class="btn btn-light" type="button" name="btn_incluir" onclick="location.href='<dtml-var portal_url>/consultas/protocolo/protocolo_mostrar_proc?cod_protocolo=<dtml-var cod_protocolo>';"><i class="fas fa-fw fa-eye"></i><span class="d-none">Protocolo</span></button>
               </div>
             </dtml-if>
          </dtml-in>
@@ -418,7 +418,7 @@ $(document).ready(() => {
         </dtml-in>
         <dtml-if "hasattr(sapl_documentos.administrativo,id_documento)">
           <dtml-let documento="getattr(sapl_documentos.administrativo,id_documento).absolute_url">
-             <a class="btn btn-secondary" target="_blank" href="<dtml-var portal_url>/pysc/download_documento_pysc?cod_documento=<dtml-var cod_documento>">
+             <a class="btn btn-light" target="_blank" href="<dtml-var portal_url>/pysc/download_documento_pysc?cod_documento=<dtml-var cod_documento>">
                <dtml-if expr="_.has_key('cod_assinatura_doc') and hasattr(sapl_documentos.documentos_assinados, cod_assinatura_doc+'.pdf')">
                  <i class="fa fa-certificate"></i> Visualizar
                <dtml-else>
@@ -426,7 +426,7 @@ $(document).ready(() => {
                </dtml-if>
              </a>
              <dtml-if "sapl_documentos.props_sagl.restpki_access_token!=''">
-                <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Assinaturas Digitais" data-src="<dtml-var portal_url>/cadastros/assinatura/assinatura_solicitar_form?codigo=<dtml-var cod_documento>&tipo_doc=documento&modal=1"><i class="fas fa-file-signature"></i>Assinaturas</button>
+                <button type="button" class="btn btn-light" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Assinaturas Digitais" data-src="<dtml-var portal_url>/cadastros/assinatura/assinatura_solicitar_form?codigo=<dtml-var cod_documento>&tipo_doc=documento&modal=1"><i class="fas fa-file-signature"></i>Assinaturas</button>
              </dtml-if>
              <a class="btn btn-danger" href="<dtml-var portal_url>/cadastros/documento_administrativo/texto_documento_administrativo_excluir_proc?cod_documento=<dtml-var cod_documento missing>" data-confirm="Deseja realmente excluir o arquivo PDF?"><i class="fas fa-trash"></i> Excluir</a>              
  	  </dtml-let>
@@ -443,7 +443,7 @@ $(document).ready(() => {
             </div>
             <dtml-if expr="_.has_key('temODT')">
              <div class="input-group-append">            
-               <input class="btn btn-secondary" type="button" value="Gerar do ODT" onclick="javascript:texto_pdf_gerar()" />
+               <input class="btn btn-light" type="button" value="Gerar do ODT" onclick="javascript:texto_pdf_gerar()" />
              </div>
             </dtml-if>
           </div>	
@@ -464,10 +464,10 @@ $(document).ready(() => {
             <dtml-if expr="hasattr(sapl_documentos.administrativo,id_documento)">
                <dtml-let documento="getattr(sapl_documentos.administrativo,id_documento).absolute_url">
                  <dtml-call expr="REQUEST.set('nome_arquivo',str(cod_documento)+'_texto_integral.odt')">
-                 <a class="btn btn-secondary" href="<dtml-var portal_url>/generico/viewerJS/#<dtml-var documento>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fa fa-fw fa-file-alt"></i>Visualizar</a>                 
-                 <a class="btn btn-secondary" href="<dtml-var portal_url>/webeditor/editorDocumento?<dtml-var documento>" target="_blank"><i class="fa fa-fw fa-edit"></i>Editar</a>
+                 <a class="btn btn-light" href="<dtml-var portal_url>/generico/viewerJS/#<dtml-var documento>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fa fa-fw fa-file-alt"></i>Visualizar</a>                 
+                 <a class="btn btn-light" href="<dtml-var portal_url>/webeditor/editorDocumento?<dtml-var documento>" target="_blank"><i class="fa fa-fw fa-edit"></i>Editar</a>
   	         <dtml-call expr="REQUEST.set('nome_arquivo_odt',str(cod_documento)+'_texto_integral.odt')">
-                 <button type="button" class="btn btn-secondary" onclick="javascript:location.href='&dtml-URL1;/sapl_documentos/administrativo/externalEdit_/<dtml-var nome_arquivo_odt>.zem'" data-bs-toggle="tooltip" data-placement="bottom" title="Editar no LibreOffice"><i class="fas fa-fw fa-external-link-alt"></i>LibreOffice</button>
+                 <button type="button" class="btn btn-light" onclick="javascript:location.href='&dtml-URL1;/sapl_documentos/administrativo/externalEdit_/<dtml-var nome_arquivo_odt>.zem'" data-bs-toggle="tooltip" data-placement="bottom" title="Editar no LibreOffice"><i class="fas fa-fw fa-external-link-alt"></i>LibreOffice</button>
                  <a class="btn btn-danger" href="<dtml-var portal_url>/cadastros/documento_administrativo/texto_documento_administrativo_excluir_odt_proc?cod_documento=<dtml-var cod_documento missing>" data-confirm="Deseja realmente excluir o arquivo ODT?"><i class="fas fa-trash"></i> Excluir</a>
   	       </dtml-let>
             <dtml-else>
@@ -484,7 +484,7 @@ $(document).ready(() => {
                      </dtml-with>
                  </select>
                  <div class="input-group-append">
-                    <input type="button" class="btn btn-secondary" value="Gerar" onclick="javascript:texto_odt_gerar();" />
+                    <input type="button" class="btn btn-light" value="Gerar" onclick="javascript:texto_odt_gerar();" />
                  </div>
                </div>
             </dtml-if>

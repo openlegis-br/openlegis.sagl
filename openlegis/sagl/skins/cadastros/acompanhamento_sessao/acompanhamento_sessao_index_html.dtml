@@ -88,7 +88,7 @@ $(document).ready(function() {
    <div class="row">
      <div class="col-12 mb-3 form-group">
        <dtml-call expr="REQUEST.set('ano_sessao', DateTime().strftime('%Y'))">
-       <select class="form-select selectpicker show-tick jumpmenu" data-dropup-auto="false" id="lst_cod_sessao" name="lst_cod_sessao">
+       <select class="form-select form-select jumpmenu" data-dropup-auto="false" id="lst_cod_sessao" name="lst_cod_sessao">
          <option value="<dtml-var ACTUAL_URL>"> Selecione uma <dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao"></option>
          <dtml-in expr="zsql.sessao_plenaria_obter_zsql(ano_sessao=ano_sessao, ind_excluido=0)">
            <dtml-if expr="hr_fim_sessao==''">
@@ -166,7 +166,7 @@ $(document).ready(function() {
                   </div>
                 <dtml-elif expr="dat_fim!=None">
                   <div align="center">
-                    <a class="btn btn-sm btn-secondary" href="item_exibir_proc?cod_sessao_plen=<dtml-var hdn_cod_sessao_plen>&cod_item=<dtml-var cod_item>&num_ordem=<dtml-var num_ordem>">Reenviar</a>
+                    <a class="btn btn-sm btn-light" href="item_exibir_proc?cod_sessao_plen=<dtml-var hdn_cod_sessao_plen>&cod_item=<dtml-var cod_item>&num_ordem=<dtml-var num_ordem>">Reenviar</a>
                   </div>
                 <dtml-else>
                   <div align="center">
@@ -225,7 +225,7 @@ $(document).ready(function() {
         var selectElements = document.getElementsByTagName("select");
         for( i = 0; i < selectElements.length; i++ ) {
             // Check for the class and make sure the element has an ID
-            if( selectElements[i].className == "form-control selectpicker show-tick jumpmenu" && document.getElementById(selectElements[i].id) != "" ) {
+            if( selectElements[i].className == "form-control form-select jumpmenu" && document.getElementById(selectElements[i].id) != "" ) {
                 jumpmenu = document.getElementById(selectElements[i].id);
                 jumpmenu.onchange = function() {
                     if( this.options[this.selectedIndex].value != '' ) {

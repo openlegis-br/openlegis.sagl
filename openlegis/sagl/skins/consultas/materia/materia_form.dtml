@@ -82,7 +82,7 @@ $(function () {
            <a class="btn btn-sm btn-primary" target="_blank" href="<dtml-var portal_url>/pysc/download_materia_pysc?cod_materia=<dtml-var expr="pysc.b64encode_pysc(codigo=cod_materia)">&texto_original=1"><i class="fa fa-file-pdf"></i> Texto Integral</a>
         </dtml-if>
         <dtml-if expr="hasattr(sapl_documentos.materia,id_redacao)">
-           <a class="btn btn-sm btn-secondary" target="_blank" href="<dtml-var portal_url>/pysc/download_materia_pysc?cod_materia=<dtml-var expr="pysc.b64encode_pysc(codigo=cod_materia)">&redacao_final=1"><i class="fa fa-file-pdf"></i> Redação Final</a>
+           <a class="btn btn-sm btn-light" target="_blank" href="<dtml-var portal_url>/pysc/download_materia_pysc?cod_materia=<dtml-var expr="pysc.b64encode_pysc(codigo=cod_materia)">&redacao_final=1"><i class="fa fa-file-pdf"></i> Redação Final</a>
         </dtml-if>
        </div>
        
@@ -617,7 +617,7 @@ $(function () {
       <div class="card-body">
          <dtml-let isAnon="portal_membership.isAnonymousUser()">
              <dtml-if expr="not isAnon and _.has_key('add_doc')">      
-                 <button type="button" class="btn btn-sm btn-secondary" data-bs-toggle="popover" title="Documento Acessório"><i class="fas fa-plus-circle"></i> Incluir</button>
+                 <button type="button" class="btn btn-sm btn-light" data-bs-toggle="popover" title="Documento Acessório"><i class="fas fa-plus-circle"></i> Incluir</button>
                  <div id="PopoverContent" class="d-none">
                    <form name="myform" id="myform" class="needs-validation" validate role="form" enctype="multipart/form-data" method="post" action="documento_acessorio_salvar_proc" onSubmit="return confirm('Confirma a inclusão do documento acessório?');">
                     <input type="hidden" name="cod_materia" value="<dtml-var cod_materia>" />
@@ -731,9 +731,9 @@ $(function () {
                               <dtml-if expr="_.has_key('add_doc') and _.has_key('usuario_doc') and _.has_key('usuario_logado') and usuario_doc==usuario_logado">
                                <dtml-if expr="zsql.assinatura_documento_obter_zsql(codigo=cod_documento, tipo_doc='doc_acessorio')">             
                                <dtml-else>
-                                  <button type="button" class="btn btn-sm btn-secondary" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Assinar Digitalmente" data-src="<dtml-var portal_url>/generico/assinador/pades-signature_html?codigo=<dtml-var cod_documento>&tipo_doc=doc_acessorio&modal=1"><i class="fas fa-file-signature"></i> Assinar</button>
+                                  <button type="button" class="btn btn-sm btn-light" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Assinar Digitalmente" data-src="<dtml-var portal_url>/generico/assinador/pades-signature_html?codigo=<dtml-var cod_documento>&tipo_doc=doc_acessorio&modal=1"><i class="fas fa-file-signature"></i> Assinar</button>
                                </dtml-if>
-                               <button type="button" class="btn btn-sm btn-secondary" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Assinaturas Digitais" data-src="<dtml-var portal_url>/cadastros/assinatura/assinatura_solicitar_form?codigo=<dtml-var cod_documento>&tipo_doc=doc_acessorio&modal=1"><i class="fas fa-file-signature"></i> Assinaturas</button>
+                               <button type="button" class="btn btn-sm btn-light" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Assinaturas Digitais" data-src="<dtml-var portal_url>/cadastros/assinatura/assinatura_solicitar_form?codigo=<dtml-var cod_documento>&tipo_doc=doc_acessorio&modal=1"><i class="fas fa-file-signature"></i> Assinaturas</button>
                                <button type="button" class="btn btn-sm btn-danger" onClick="documento_acessorio_excluir(<dtml-var cod_documento missing>)"><i class="fas fa-trash"></i> Excluir</button>          
                               </dtml-if>
                            </dtml-if>                             
@@ -931,7 +931,7 @@ $(function () {
 
 <div class="text-start">
   <a class="btn btn-primary d-print-none" href="<dtml-var portal_url>/consultas/materia" ><i class="fa fa-fw fa-search"></i> Nova Pesquisa</a>
-  <a class="btn btn-secondary" href="javascript:void(0)" onClick="window.history.go(-1); return false;"><i class="fa fa-fw fa-undo"></i> Voltar</a>  
+  <a class="btn btn-light" href="javascript:void(0)" onClick="window.history.go(-1); return false;"><i class="fa fa-fw fa-undo"></i> Voltar</a>  
 </div>
 
 <dtml-var js_slot>

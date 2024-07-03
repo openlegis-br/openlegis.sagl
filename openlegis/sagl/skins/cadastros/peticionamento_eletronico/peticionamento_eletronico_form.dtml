@@ -165,16 +165,16 @@
               </dtml-in>
            </dtml-if>
            <dtml-if expr="_.has_key('cod_assinatura_doc') and hasattr(sapl_documentos.documentos_assinados,cod_assinatura_doc+'.pdf')">
-             <a class="btn btn-secondary" href="<dtml-var portal_url>/sapl_documentos/documentos_assinados/<dtml-var cod_assinatura_doc>.pdf" target="_blank">
+             <a class="btn btn-light" href="<dtml-var portal_url>/sapl_documentos/documentos_assinados/<dtml-var cod_assinatura_doc>.pdf" target="_blank">
                 <i class="fas fa-certificate"></i> <dtml-var cod_assinatura_doc>.pdf
              </a>
              <input class="btn btn-primary" type="button" id="excluir" name="excluir" value="Excluir"  onClick="arquivo_excluir(<dtml-var codigo>)"/>
            <dtml-elif expr="_.has_key('codigo') and hasattr(sapl_documentos.administrativo,codigo+'.pdf')">
-              <a class="btn btn-secondary" href="<dtml-var portal_url>/sapl_documentos/administrativo/<dtml-var filename>" target="_blank">
+              <a class="btn btn-light" href="<dtml-var portal_url>/sapl_documentos/administrativo/<dtml-var filename>" target="_blank">
                  <i class="fa fa-file-pdf"></i> Visualizar
               </a>
               <dtml-if "sapl_documentos.props_sagl.restpki_access_token!=''">
-                 <button type="button" class="btn btn-secondary d-print-none " data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Assinatura Digital" data-src="<dtml-var portal_url>/generico/assinador/pades-signature_html?codigo=<dtml-var codigo>&tipo_doc=peticao&modal=1"><i class="fas fa-file-signature"></i>Assinar</button>              
+                 <button type="button" class="btn btn-light d-print-none " data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Assinatura Digital" data-src="<dtml-var portal_url>/generico/assinador/pades-signature_html?codigo=<dtml-var codigo>&tipo_doc=peticao&modal=1"><i class="fas fa-file-signature"></i>Assinar</button>              
               </dtml-if>
               <input class="btn btn-danger" type="button" value="Excluir"  onClick="arquivo_excluir(<dtml-var codigo>)"/>
            <dtml-else>
@@ -184,7 +184,7 @@
                      <input class="custom-file-input" type="file" id="anexo" name="anexo" accept="application/pdf" />
                      <label class="custom-file-label" for="file_redacao">Arquivo digitalizado</label>  
                   </div>                 
-                  <input class="btn btn-secondary" type="button" id="upload" value="Carregar"  onClick="arquivo_carregar(<dtml-var codigo>)"/>
+                  <input class="btn btn-light" type="button" id="upload" value="Carregar"  onClick="arquivo_carregar(<dtml-var codigo>)"/>
                 </div>
                <input type="hidden" name="modal" value="1" />                
                <input type="hidden" name="hdn_lst_assunto" value="" />

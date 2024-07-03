@@ -53,7 +53,7 @@ function dependente_criticar(form){
   <legend class="font-size-16">Dados do Dependente</legend>
   <div class="row"> 
      <div class="col-12 mb-3">
-        <label class="form-label" for="txt_nom_dependente" class="form-label required">Nome</label>
+        <label class="form-label required" for="txt_nom_dependente" class="form-label required">Nome</label>
         <input class="form-control" type="text" name="txt_nom_dependente" id="txt_nom_dependente"  value="<dtml-var nom_dependente missing>" maxlength="50" required/>
       <div class="invalid-feedback">
         Este campo é obrigatório!
@@ -62,7 +62,7 @@ function dependente_criticar(form){
    </div>
    <div class="row"> 
      <div class="col-4 mb-3">
-        <label class="form-label" for="lst_tip_dependente" class="form-label required">Tipo</label>
+        <label class="form-label required" for="lst_tip_dependente" class="form-label required">Tipo</label>
         <select class="form-select"  id="lst_tip_dependente" name="lst_tip_dependente" required>
           <option value="">Selecione</option>
             <dtml-in expr="zsql.tipo_dependente_obter_zsql()">              
@@ -78,7 +78,7 @@ function dependente_criticar(form){
       </div>
      </div>
      <div class="col-4 mb-3">
-        <label class="form-label" for="rad_sex_dependente" class="form-label required">Sexo</label>
+        <label class="form-label required" for="rad_sex_dependente" class="form-label required">Sexo</label>
         <select class="form-select" name="rad_sex_dependente" id="rad_sex_dependente" required>
           <option value="">Selecione</option>
           <dtml-in expr="[('M','Masculino'),('F','Feminino')]">
@@ -95,8 +95,11 @@ function dependente_criticar(form){
       </div>
      </div>
      <div class="col-4 mb-3">
-        <label class="form-label" for="txt_dat_nascimento">Nascimento</label>
-        <input type="text" class="form-control date" name="txt_dat_nascimento" id="txt_dat_nascimento" value="<dtml-var dat_nascimento missing null>" autocomplete="off" required>
+        <label class="form-label" for="txt_dat_nascimento">Data de Nascimento</label>
+        <div class="input-group">
+           <input type="text" class="form-control datepicker" placeholder="dd/mm/aaaa" name="txt_dat_nascimento" id="txt_dat_nascimento" data-provide="datepicker" data-date-autoclose="true" value="<dtml-var dat_nascimento missing null>" autocomplete="off">
+           <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
+        </div>
      </div>
    </div>
    <div class="row"> 

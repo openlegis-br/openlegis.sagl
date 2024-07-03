@@ -33,13 +33,6 @@
       form.submit();
   }
 
-  function materia_expediente_excluir(){
-
-       if (confirm("Deseja realmente excluir?")) {
-          location.href="pauta_excluir_proc?cod_item=<dtml-var cod_item missing>&cod_reuniao=<dtml-var cod_reuniao>&modal=1";
-       }
-  }
-
   function ementa_buscar(form){
      if ((form.lst_tip_id_basica.selectedIndex != 0) &&
 	 (form.txt_num_ident_basica.value!="") && 
@@ -61,7 +54,7 @@
      </dtml-unless>
           <div class="row">
            <div class="col-4 col-sm-2 mb-3">
-            <label class="form-label" for="txt_num_ordem" class="required">Nº Ordem</label>
+            <label class="form-label required" for="txt_num_ordem">Nº Ordem</label>
             <dtml-unless cod_item>
               <dtml-in expr="zsql.reuniao_comissao_ordem_obter_zsql(cod_reuniao=cod_reuniao)">
                  <dtml-call expr="REQUEST.set('num_ordem', _.int(novo_item))">
@@ -70,7 +63,7 @@
 	    <input class="form-control number" type="number" id="txt_num_ordem" name="txt_num_ordem" value="<dtml-var num_ordem missing>" maxlength="3"/ required>
            </div>          
            <div class="col-8 col-sm-6 mb-3">          
-            <label class="form-label" for="lst_tip_id_basica" class="required">Tipo de Matéria</label>
+            <label class="form-label required" for="lst_tip_id_basica">Tipo de Matéria</label>
               <select class="form-select" id="lst_tip_id_basica" name="lst_tip_id_basica" onChange="ementa_buscar(document.pauta_materia_form)" required>
                <option>Selecione</option>
                   <dtml-in expr="zsql.tipo_materia_legislativa_obter_zsql(ind_excluido=0)">
@@ -91,7 +84,7 @@
               </select>
           </div>
           <div class="col-6 col-sm-2 mb-3">
-              <label class="form-label" for="txt_num_ident_basica" class="required">Número</label>
+              <label class="form-label required" for="txt_num_ident_basica"">Número</label>
               <input class="form-control numero" type="number" id="txt_num_ident_basica" name="txt_num_ident_basica" onChange="ementa_buscar(document.pauta_materia_form)"
                 <dtml-if cod_materia>
                    <dtml-in expr="zsql.materia_obter_zsql(cod_materia = cod_materia)">
@@ -105,7 +98,7 @@
             <dtml-unless ano_ident_basica>
               <dtml-call expr="REQUEST.set('ano_ident_basica', _.DateTime.year(DateTime()))">
             </dtml-unless>
-            <label class="form-label" for="txt_ano_ident_basica" class="required">Ano</label>
+            <label class="form-label required" for="txt_ano_ident_basica">Ano</label>
             <input class="form-control year" type="number" id="txt_ano_ident_basica" name="txt_ano_ident_basica"  onChange="ementa_buscar(document.pauta_materia_form)"
                <dtml-if cod_materia>
                   <dtml-in expr="zsql.materia_obter_zsql(cod_materia = cod_materia)">
@@ -119,7 +112,7 @@
           
           <div class="row">
            <div class="col-12 mb-3">          
-             <label class="form-label" for="txa_txt_observacao" class="required">Ementa</label>
+             <label class="form-label required" for="txa_txt_observacao">Ementa</label>
              <textarea class="form-control auto-resize" id="txa_txt_observacao" name="txa_txt_observacao" rows="1"><dtml-var txt_observacao missing></textarea>
             </div>
           </div>
@@ -127,8 +120,8 @@
 <dtml-if cod_materia>
    <div class="row">
      <div class="col-6 mb-3">
-         <label class="form-label" for="lst_tip_resultado">Resultado na Comissão</label>
-         <select class="form-select" name="lst_tip_resultado" id="lst_tip_resultado"  required>
+         <label class="form-label required" for="lst_tip_resultado">Resultado na Comissão</label>
+         <select class="form-select" name="lst_tip_resultado" id="lst_tip_resultado" required>
            <option></option>
            <dtml-in expr="zsql.tipo_fim_relatoria_obter_zsql(ind_excluido=0)">
              <option
@@ -148,7 +141,7 @@
         <dtml-in expr="zsql.periodo_comp_comissao_obter_zsql(data=DateTime(dat_inicio_reuniao), ind_excluido=0)">
            <dtml-call expr="REQUEST.set('cod_periodo_comp', cod_periodo_comp)">        
         </dtml-in>
-        <label class="form-label" for="lst_relator">Relator Designado</label>
+        <label class="form-label" for="lst_relator">Relatoria Designada</label>
         <select class="form-select" id="lst_relator" name="lst_relator">
             <option></option>
             <dtml-if cod_periodo_comp>
@@ -173,12 +166,12 @@
   <dtml-if cod_materia>
        <input class="btn btn-primary" type="button" value="Salvar" onClick="campos_criticar(document.pauta_materia_form)" />
   </dtml-if>
-  <dtml-if cod_item> 
-     <input type="hidden" name="flag_atualizar" value="<dtml-var cod_item missing>" />
-     <input class="btn btn-danger" type="button" value="Excluir" onClick="materia_expediente_excluir()" />
-  </dtml-if>
   <dtml-if cod_materia>
      <a class="btn btn-secondary" target="_blank" href="<dtml-var portal_url>/cadastros/materia/materia_mostrar_proc?cod_materia=<dtml-var cod_materia>">Consultar Matéria</a>
+  </dtml-if>
+  <dtml-if cod_item> 
+     <input type="hidden" name="flag_atualizar" value="<dtml-var cod_item missing>" />
+     <a class="btn btn-danger" href="pauta_excluir_proc?cod_item=<dtml-var cod_item missing>&cod_reuniao=<dtml-var cod_reuniao>&modal=1" data-confirm="Deseja realmente excluir o item da pauta?">Excluir</a>
   </dtml-if>
   </div>
   <div class="col-md-12 mt-2">
@@ -186,10 +179,6 @@
   </div>
 </div>
 </form>
-
-<script>
-autosize(document.querySelectorAll('textarea'));
-</script>
 
 <dtml-var js_slot>
 <dtml-var footer_html>

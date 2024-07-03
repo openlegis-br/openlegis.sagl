@@ -80,7 +80,7 @@ $(function () {
             </dtml-let>
             <dtml-if expr="ind_anulado==0 and AUTHENTICATED_USER.has_role(['Operador', 'Operador Protocolo'])">
                <dtml-if "sapl_documentos.props_sagl.restpki_access_token!=''">
-                  <button type="button" class="btn btn-sm btn-secondary d-print-none " data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Assinatura Digital" data-src="<dtml-var portal_url>/generico/assinador/pades-signature_html?codigo=<dtml-var cod_protocolo>&tipo_doc=protocolo&modal=1"><i class="fas fa-file-signature"></i>Assinar</button>
+                  <button type="button" class="btn btn-sm btn-light d-print-none " data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Assinatura Digital" data-src="<dtml-var portal_url>/generico/assinador/pades-signature_html?codigo=<dtml-var cod_protocolo>&tipo_doc=protocolo&modal=1"><i class="fas fa-file-signature"></i>Assinar</button>
                </dtml-if>
             </dtml-if>
             <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador'])">
@@ -95,7 +95,7 @@ $(function () {
                    <input class="custom-file-input" type="file" id="file_nom_arquivo" name="file_nom_arquivo" accept="application/pdf" />
                    <label class="custom-file-label" for="file_redacao">Arquivo digitalizado</label>  
                 </div>                 
-                <input class="btn btn-secondary" type="button" id="upload" value="Carregar"  onClick="campos_criticar(document.arquivo_form)"/>
+                <input class="btn btn-light" type="button" id="upload" value="Carregar"  onClick="campos_criticar(document.arquivo_form)"/>
               </div>
             </form>
          </dtml-if>
@@ -172,7 +172,7 @@ $(function () {
              <dtml-else> 
               <dtml-call expr="REQUEST.set('id_documento', str(cod_protocolo)+'_protocolo.pdf')">
                 <dtml-if "hasattr(sapl_documentos.protocolo,id_documento)">             
-                 <button type="button" class="btn btn-sm btn-secondary" data-bs-toggle="popover" title="Unidade de Destino"><i class="fas fa-plus-circle"></i> Criar Processo</button>
+                 <button type="button" class="btn btn-sm btn-light" data-bs-toggle="popover" title="Unidade de Destino"><i class="fas fa-plus-circle"></i> Criar Processo</button>
                  <div id="PopoverContent" class="d-none">
                    <form id="myform" class="form-inline" role="form" method="post" action="criar_documento_pysc" onSubmit="return confirm('Confirma a criação do processo administrativo?');" class="was-validated">
                     <input type="hidden" name="cod_protocolo"   value="<dtml-var cod_protocolo>" />                   
@@ -210,7 +210,7 @@ $(function () {
                   <input type="hidden" name="num_protocolo"   value="<dtml-var num_protocolo>" />
                   <input type="hidden" name="txt_assunto"     value='<dtml-var txt_assunto_ementa html_quote>' />
                   <input type="hidden" name="txt_interessado" value="<dtml-var txt_interessado missing null="">" />
-                  <input class="btn btn-sm btn-secondary" type="submit" name="cmdCriarDoc" value="Criar Documento" />
+                  <input class="btn btn-sm btn-light" type="submit" name="cmdCriarDoc" value="Criar Documento" />
                 </form>
               </dtml-if>
            </dtml-in>           
@@ -226,7 +226,7 @@ $(function () {
                <dtml-if expr="ind_anulado==0 and AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia'])">
                   <form class="d-inline-block" name="materia_form" method="post" action="criar_materia_pysc" onSubmit="return confirm('Confirma a criação da matéria legislativa?');">
                      <input type="hidden" name="cod_protocolo" value="<dtml-var cod_protocolo>" />
-                     <input class="btn btn-sm btn-secondary" type="submit" name="cmdCriarMat" value="Criar Matéria" />
+                     <input class="btn btn-sm btn-light" type="submit" name="cmdCriarMat" value="Criar Matéria" />
                    </form>
                 </dtml-if>
             </dtml-in>
@@ -251,7 +251,7 @@ $(function () {
                        </dtml-in>
                     </dtml-in>
                     <dtml-call "REQUEST.set('cod_autor_sel', cod_autor)">
-                    <button type="button" class="btn btn-sm btn-secondary" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Cadastro de Emenda" data-src="<dtml-var portal_url>/cadastros/materia/emenda/emenda_form?cod_materia=<dtml-var cod_materia_principal>&dat_apresentacao=<dtml-var dat_apresentacao>&txt_ementa=<dtml-var txt_assunto_ementa html_quote>&num_protocolo=<dtml-var num_protocolo>&tip_autor=<dtml-var tip_autor>&des_tipo_autor=<dtml-var des_tipo_autor>&cod_autor_sel=<dtml-var cod_autor_sel>&modal=1">Cadastrar Emenda</button>  
+                    <button type="button" class="btn btn-sm btn-light" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Cadastro de Emenda" data-src="<dtml-var portal_url>/cadastros/materia/emenda/emenda_form?cod_materia=<dtml-var cod_materia_principal>&dat_apresentacao=<dtml-var dat_apresentacao>&txt_ementa=<dtml-var txt_assunto_ementa html_quote>&num_protocolo=<dtml-var num_protocolo>&tip_autor=<dtml-var tip_autor>&des_tipo_autor=<dtml-var des_tipo_autor>&cod_autor_sel=<dtml-var cod_autor_sel>&modal=1">Cadastrar Emenda</button>  
                  </dtml-if>
                </dtml-in>
             <dtml-elif expr="des_tipo_mat_acessoria=='Substitutivo' or tip_materia == 98">
@@ -271,7 +271,7 @@ $(function () {
                        </dtml-in>
                     </dtml-in>
                     <dtml-call "REQUEST.set('cod_autor_sel', cod_autor)">
-                    <button type="button" class="btn btn-sm btn-secondary" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Cadastro de Substitutivo" data-src="<dtml-var portal_url>/cadastros/materia/substitutivo/substitutivo_form?cod_materia=<dtml-var cod_materia_principal>&dat_apresentacao=<dtml-var dat_apresentacao>&num_protocolo=<dtml-var num_protocolo>&tip_autor=<dtml-var tip_autor>&des_tipo_autor=<dtml-var des_tipo_autor>&cod_autor_sel=<dtml-var cod_autor_sel>&modal=1">Cadastrar Substitutivo</button> 
+                    <button type="button" class="btn btn-sm btn-light" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Cadastro de Substitutivo" data-src="<dtml-var portal_url>/cadastros/materia/substitutivo/substitutivo_form?cod_materia=<dtml-var cod_materia_principal>&dat_apresentacao=<dtml-var dat_apresentacao>&num_protocolo=<dtml-var num_protocolo>&tip_autor=<dtml-var tip_autor>&des_tipo_autor=<dtml-var des_tipo_autor>&cod_autor_sel=<dtml-var cod_autor_sel>&modal=1">Cadastrar Substitutivo</button> 
                  </dtml-if>
                </dtml-in>
              </dtml-if>
@@ -291,7 +291,7 @@ $(function () {
                    <dtml-in expr="zsql.autor_obter_zsql(cod_autor=cod_autor)">
                       <dtml-call expr="REQUEST.set('nom_autor_documento', nom_autor_join)">
                    </dtml-in>                 
-                   <button type="button" class="btn btn-sm btn-secondary" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Cadastro de Documento Acessório" data-src="<dtml-var portal_url>/cadastros/materia/documento_acessorio/documento_acessorio_form?cod_materia=<dtml-var cod_materia_principal>&tip_documento_sel=<dtml-var tip_materia>&num_protocolo=<dtml-var num_protocolo>&nom_autor_documento=<dtml-var nom_autor_documento>&modal=1">Cadastrar <dtml-var des_tipo_mat_acessoria></button>                     
+                   <button type="button" class="btn btn-sm btn-light" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Cadastro de Documento Acessório" data-src="<dtml-var portal_url>/cadastros/materia/documento_acessorio/documento_acessorio_form?cod_materia=<dtml-var cod_materia_principal>&tip_documento_sel=<dtml-var tip_materia>&num_protocolo=<dtml-var num_protocolo>&nom_autor_documento=<dtml-var nom_autor_documento>&modal=1">Cadastrar <dtml-var des_tipo_mat_acessoria></button>                     
                  </dtml-if>
             </dtml-in>
           <dtml-elif expr="tip_natureza_materia==4">
@@ -317,7 +317,7 @@ $(function () {
                 <dtml-else>
                     <dtml-call "REQUEST.set('num_ordem', '1')">
                 </dtml-in>                
-                  <button type="button" class="btn btn-sm btn-secondary" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Cadastro de Parecer" data-src="<dtml-var portal_url>/cadastros/comissao/materia/relatoria_form?cod_materia=<dtml-var cod_materia_principal>&cod_comissao=<dtml-var cod_comissao>&num_protocolo=<dtml-var num_protocolo>&modal=1">Cadastrar Parecer</button>                 
+                  <button type="button" class="btn btn-sm btn-light" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Cadastro de Parecer" data-src="<dtml-var portal_url>/cadastros/comissao/materia/relatoria_form?cod_materia=<dtml-var cod_materia_principal>&cod_comissao=<dtml-var cod_comissao>&num_protocolo=<dtml-var num_protocolo>&modal=1">Cadastrar Parecer</button>                 
                 </dtml-in>
              </dtml-if>
           </dtml-if>
@@ -357,10 +357,10 @@ $(function () {
        <dtml-if expr="codigo_acesso!=None">
          <form class="d-inline-block" name="pesquisa_publica" action="<dtml-var portal_url>/consultas/protocolo/pesquisa_publica_proc" method="post">
             <input type="hidden" name="txt_chave_acesso" value="<dtml-var codigo_acesso>" />
-            <button type="submit" class="btn btn-sm btn-secondary"><i class="fa fa-fw fa-unlock"></i> <dtml-var codigo_acesso></button>
+            <button type="submit" class="btn btn-sm btn-light"><i class="fa fa-fw fa-unlock"></i> <dtml-var codigo_acesso></button>
          </form>
        <dtml-else>
-          <a class="btn btn-sm btn-secondary" href="<dtml-var portal_url>/cadastros/protocolo/senha_protocolo_gerar_proc?cod_protocolo=<dtml-var cod_protocolo>" data-confirm="Confirma a geração da chave de acesso?"><i class="fa fa-fw fa-lock"></i> Gerar</a>       
+          <a class="btn btn-sm btn-light" href="<dtml-var portal_url>/cadastros/protocolo/senha_protocolo_gerar_proc?cod_protocolo=<dtml-var cod_protocolo>" data-confirm="Confirma a geração da chave de acesso?"><i class="fa fa-fw fa-lock"></i> Gerar</a>       
        </dtml-if>
     </div>
  </div>

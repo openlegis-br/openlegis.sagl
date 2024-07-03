@@ -115,16 +115,16 @@
       <dtml-if "hasattr(sapl_documentos.administrativo.tramitacao,pdf)"> 
        <div class="btn-group" role="group" aria-label="tram_button">
          <dtml-let pdf="getattr(sapl_documentos.administrativo.tramitacao,pdf).absolute_url">
-            <a class="btn btn-secondary" target="_blank" href="<dtml-var pdf>?<dtml-var expr="ZopeTime().timeTime()">">
+            <a class="btn btn-light" target="_blank" href="<dtml-var pdf>?<dtml-var expr="ZopeTime().timeTime()">">
               <i class="far fa-file-pdf"></i> Visualizar
             </a>
          </dtml-let>
          <dtml-if "hasattr(sapl_documentos.administrativo.tramitacao,pdf) and sapl_documentos.props_sagl.restpki_access_token!=''">
             <dtml-if expr="int(cod_usuario_corrente)==int(cod_usuario_local)" >
              <dtml-if expr="zsql.assinatura_documento_obter_zsql(codigo=hdn_cod_tramitacao,tipo_doc='tramitacao_adm')">             
-               <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Assinaturas Digitais" data-src="<dtml-var portal_url>/cadastros/assinatura/assinatura_solicitar_form?codigo=<dtml-var hdn_cod_tramitacao>&tipo_doc=tramitacao_adm&modal=1"><i class="fas fa-file-signature"></i> Assinaturas</button>
+               <button type="button" class="btn btn-light" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Assinaturas Digitais" data-src="<dtml-var portal_url>/cadastros/assinatura/assinatura_solicitar_form?codigo=<dtml-var hdn_cod_tramitacao>&tipo_doc=tramitacao_adm&modal=1"><i class="fas fa-file-signature"></i> Assinaturas</button>
              <dtml-else>
-               <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Assinar Digitalmente" data-src="<dtml-var portal_url>/generico/assinador/pades-signature_html?codigo=<dtml-var hdn_cod_tramitacao>&tipo_doc=tramitacao_adm&modal=1"><i class="fas fa-file-signature"></i> Assinar</button>               
+               <button type="button" class="btn btn-light" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Assinar Digitalmente" data-src="<dtml-var portal_url>/generico/assinador/pades-signature_html?codigo=<dtml-var hdn_cod_tramitacao>&tipo_doc=tramitacao_adm&modal=1"><i class="fas fa-file-signature"></i> Assinar</button>               
              </dtml-if>                
             </dtml-if>
          </dtml-if>
@@ -155,7 +155,7 @@
           <input type="hidden" name="modal" value="1" />              
           <input class="btn btn-primary" type="submit" name="button" value="Desarquivar" />
           <dtml-unless modal>
-            <input class="btn btn-secondary" type="button" value="Itens Enviados" onClick="location.href='<dtml-var portal_url>/cadastros/tramitacao_documento/itens_enviados_html'">
+            <input class="btn btn-light" type="button" value="Itens Enviados" onClick="location.href='<dtml-var portal_url>/cadastros/tramitacao_documento/itens_enviados_html'">
           </dtml-unless>
        </form>
   <dtml-elif expr="dat_encaminha and not dat_visualizacao and (int(cod_usuario_corrente)==int(cod_usuario_local)) and ind_tramitacao_doc != 0">
@@ -165,7 +165,7 @@
         <input type="hidden" name="modal" value="1" />   
         <input class="btn btn-danger" type="submit" name="button" value="Retomar Tramitação" />
         <dtml-unless modal>
-          <input class="btn btn-secondary" type="button" value="Voltar" onClick="location.href='tramitacao_lote_form'">
+          <input class="btn btn-light" type="button" value="Voltar" onClick="location.href='tramitacao_lote_form'">
         </dtml-unless>
      </form>
   <dtml-elif expr="not dat_encaminha and not dat_recebimento and (int(cod_usuario_corrente)==int(cod_usuario_local))">
@@ -174,7 +174,7 @@
         <input type="hidden" name="modal" value="1" />            
         <input type="hidden" name="cod_tramitacao" value="<dtml-var cod_tramitacao missing>" />
         <dtml-unless modal>
-          <input class="btn btn-secondary" type="button" value="Rascunhos" onClick="location.href='<dtml-var portal_url>/cadastros/tramitacao_documento/rascunhos_html'">
+          <input class="btn btn-light" type="button" value="Rascunhos" onClick="location.href='<dtml-var portal_url>/cadastros/tramitacao_documento/rascunhos_html'">
         </dtml-unless>
      </form>
      <form name="encaminhamento_registrar" method="post" action="encaminhamento_registrar_proc" class="needs-validation" novalidate>

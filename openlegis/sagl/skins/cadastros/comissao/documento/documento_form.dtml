@@ -2,57 +2,31 @@
 
 <script src="<dtml-var portal_url>/javascript/data_validar.js"></script>
 
-<script>
-
- function documento_criticar(form){
-    var form = document.documento_form;
-    if (form.txt_dat_documento.value == "") {
-       $('#txt_dat_documento').addClass('is-invalid');
-       form.txt_dat_documento.focus();
-       return false;
-    }
-    if (form.txa_txt_descricao_doc.value == "") {
-       $('#txa_txt_descricao_doc').addClass('is-invalid');
-       form.txa_txt_descricao_doc.focus();
-       return false;
-    }
-    if (!IsValidDate(form.txt_dat_documento.value)) {
-       bootstrap.showModal({title: "Mensagem do Sistema", body: "Digite uma data válida!"});
-       form.txt_dat_documento.focus();
-       return false;     
-    }
-    if (form.file_nom_arquivo.value != "") {
-       form.hdn_file.value = 1;
-    }
-    form.submit();
- }
- function ativa_desativa_file_field(form) {
-    form.file_nom_arquivo.disabled = !(form.radTI[2].checked);
- }
-</script>
-
-<legend class="font-size-16">Dados do Documento</legend>
+<legend class="font-size-16">Cadastro de Documento</legend>
 
 <form name="documento_form" id="documento_form" method="post" action="documento_salvar_proc" method="post" enctype="multipart/form-data">
 
   <input type="hidden" name="hdn_cod_documento"  value="<dtml-var cod_documento missing>">
   <input type="hidden" name="hdn_cod_comissao" value="<dtml-var cod_comissao missing>">
-  <dtml-if cod_reuniao>
-    <input type="hidden" name="hdn_url" value="<dtml-var portal_url>/cadastros/comissao/documento/documento_mostrar_proc?cod_documento=<dtml-var cod_documento>" />
+  <dtml-if cod_documento>
+    <input type="hidden" name="hdn_url" value="<dtml-var portal_url>/cadastros/comissao/documento/documento_mostrar_proc?cod_documento=<dtml-var cod_documento>&modal=1" />
   </dtml-if>
   <input type="hidden" name="modal" value="1">
 
    <div class="row">
-     <div class="col-4 col-sm-3 mb-3">
-        <label class="form-label" for="txt_dat_documento" class="form-label required">Data</label>
-        <input class="form-control date" type="text" name="txt_dat_documento" id="txt_dat_documento"  value="<dtml-var dat_documento missing null>" required />
+     <div class="col-12 col-sm-8 mb-3">
+        <label class="form-label required" for="txa_txt_descricao_doc">Descrição</label>
+        <input class="form-control" type="text" id="txa_txt_descricao_doc" name="txa_txt_descricao" value="<dtml-var txt_descricao missing>" maxlength="200" required>
         <div class="invalid-feedback">
           Este campo é obrigatório !
         </div>
      </div>
-     <div class="col-8 col-sm-9 mb-3">
-        <label class="form-label" for="txa_txt_descricao_doc" class="form-label required">Descrição</label>
-        <input class="form-control" type="text" id="txa_txt_descricao_doc" name="txa_txt_descricao" value="<dtml-var txt_descricao missing>" maxlength="200" required>
+     <div class="col-12 col-sm-4 mb-3">
+        <label class="form-label required" for="txt_dat_documento">Data</label>
+        <div class="input-group">
+           <input type="text" class="form-control datepicker" placeholder="dd/mm/aaaa" name="txt_dat_documento" id="txt_dat_documento" data-provide="datepicker" data-date-autoclose="true" value="<dtml-var dat_documento missing null>" autocomplete="off" required>
+           <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
+        </div>
         <div class="invalid-feedback">
           Este campo é obrigatório !
         </div>
@@ -65,44 +39,28 @@
      </div>
    </div> 
    <div class="row">
-     <div class="col-6 mb-3">
-            <label class="d-block" for="file_nom_arquivo">Texto Integral</label>
-            <input type="hidden" name="hdn_file" value="0"/>
+     <div class="col-12 col-sm-6 mb-3">
+        <label class="form-label required" for="file_nom_documento">Arquivo PDF</label>
+          <div class="input-group mb-1">
             <dtml-if cod_documento>
-             <dtml-call expr="REQUEST.set('id_documento', str(cod_documento)+'_documento.pdf')">
-             <dtml-if "hasattr(sapl_documentos.documento_comissao,id_documento)">
-              <dtml-let documento="getattr(sapl_documentos.documento_comissao,id_documento).absolute_url">
-                 <p>              
-                 <a class="btn btn-primary" href="<dtml-var documento>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fa fa-file-pdf"></i> Visualizar</a>
-                 <dtml-if "sapl_documentos.props_sagl.restpki_access_token!=''">
-                   <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Assinaturas Digitais" data-src="<dtml-var portal_url>/cadastros/assinatura/assinatura_solicitar_form?codigo=<dtml-var cod_documento>&tipo_doc=documento_comissao&modal=1"><i class="fas fa-file-signature"></i> Assinaturas</button>
-                 </dtml-if>
-                 </p>           
-              </dtml-let>
-                <div class="custom-control custom-radio custom-control-inline">
-                  <input type="radio" class="custom-control-input" id="radTI_1" name="radTI" value="M" checked="true" onClick="ativa_desativa_file_field(document.documento_form)"/>
-                  <label class="custom-control-label" for="radTI_1">Manter</label>
-                </div>
-                <div class="custom-control custom-radio custom-control-inline">
-                  <input type="radio" class="custom-control-input" id="radTI_2" name="radTI" value="E" onClick="ativa_desativa_file_field(document.documento_form)"/>
-                  <label class="custom-control-label" for="radTI_2">Excluir</label>
-                </div>
-                <div class="custom-control custom-radio custom-control-inline">
-                  <input type="radio" class="custom-control-input" id="radTI_3" name="radTI" value="S" onClick="ativa_desativa_file_field(document.documento_form)"/>
-                  <label class="custom-control-label" for="radTI_3">Substituir</label>
-                </div>
-              <input type="file" class="form-control-file" name="file_nom_arquivo" id="file_nom_arquivo" disabled>
-             <dtml-else>
-               <input type="file" class="form-control-file" name="file_nom_arquivo" id="file_nom_arquivo" accept=".pdf" />
-               <input type="hidden" name="radTI" value="I"/>
-             </dtml-if>
+               <dtml-call expr="REQUEST.set('id_documento', str(cod_documento)+'_documento.pdf')">
+               <dtml-if expr="hasattr(sapl_documentos.documento_comissao,id_documento)">
+                 <dtml-let documento="getattr(sapl_documentos.documento_comissao,id_documento).absolute_url">
+                    <a class="btn btn-light" href="<dtml-var documento>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fa fa-file-pdf"></i> Visualizar</a>
+                    <dtml-if "sapl_documentos.props_sagl.restpki_access_token!=''">
+                       <button type="button" class="btn btn-subtle-secondary" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Assinaturas Digitais" data-src="<dtml-var portal_url>/cadastros/assinatura/assinatura_solicitar_form?codigo=<dtml-var cod_documento>&tipo_doc=documento_comissao&modal=1"><i class="fas fa-file-signature"></i> Assinaturas</button>
+                    </dtml-if>
+                    
+                 </dtml-let>
+               </dtml-if>
             <dtml-else>
-              <input type="file" class="form-control-file" name="file_nom_arquivo" id="file_nom_arquivo" accept=".pdf" />
-              <input type="hidden" name="radTI" value="I"/>
+              <input type="file" class="form-control" name="file_nom_documento" id="file_nom_documento" accept=".pdf" />
             </dtml-if>
+         </div>
      </div>
-   <div class="col-6 mb-3">
-      <label class="form-label" for="rad_ind_publico" class="required d-block">Acesso Público?</label>
+   <div class="col-12 col-sm-6 mb-3">
+      <label class="form-label required" for="rad_ind_publico">Acesso público?</label>
+      <div class="d-flex align-items-start">
       <dtml-in expr="[(1,'Sim'), (0,'Não')]">
         <div class="form-check form-check-inline">            
           <input class="form-check-input" type="radio" id="rad<dtml-var expr="_['sequence-key']">" name="rad_ind_publico" value="<dtml-var expr="_['sequence-key']">" 
@@ -122,7 +80,8 @@
           />
           <label class="form-check-label" for="rad<dtml-var expr="_['sequence-key']">"><dtml-var expr="_['sequence-item']"></label>
         </div>
-      </dtml-in> 
+      </dtml-in>
+     </div> 
    </div>
    </div>
 
@@ -140,4 +99,34 @@
 </form>
 
 <dtml-var js_slot>
+<script>
+
+ function documento_criticar(form){
+    var form = document.documento_form;
+    if (form.txa_txt_descricao_doc.value == "") {
+       bootstrap.showModal({title: "Mensagem do Sistema", body: "A descrição do documento deve ser preenchida!"});
+       $('#txa_txt_descricao_doc').addClass('is-invalid');
+       form.txa_txt_descricao_doc.focus();
+       return false;
+    }
+    if (form.txt_dat_documento.value == "") {
+       $('#txt_dat_documento').addClass('is-invalid');
+       form.txt_dat_documento.focus();
+       return false;
+    }
+    if (!IsValidDate(form.txt_dat_documento.value)) {
+       bootstrap.showModal({title: "Mensagem do Sistema", body: "Digite uma data válida!"});
+       form.txt_dat_documento.focus();
+       return false;     
+    }
+
+    if(document.getElementById("file_nom_documento").value == "") {
+       bootstrap.showModal({title: "Mensagem do Sistema", body: "É necessário selecionar um arquivo!"});    
+       form.file_nom_documento.focus();
+       return false;
+    }
+
+    form.submit();
+ }
+</script>
 <dtml-var footer_html>

@@ -239,7 +239,7 @@ $(document).ready(function () {
          <div class="input-group">                
             <textarea class="form-control auto-resize" id="txt_autoria" rows="1" readonly><dtml-in expr="zsql.autoria_substitutivo_obter_zsql(cod_substitutivo=cod_substitutivo)"><dtml-var nom_autor_join><dtml-unless sequence-end>, </dtml-unless></dtml-in></textarea>
             <div class="input-group-append"> 
-               <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Autoria do Substitutivo" data-src="<dtml-var portal_url>/cadastros/materia/substitutivo/autoria_substitutivo_form?cod_substitutivo=<dtml-var cod_substitutivo>&cod_materia=<dtml-var cod_materia>&modal=1">Editar</button>                
+               <button type="button" class="btn btn-light" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Autoria do Substitutivo" data-src="<dtml-var portal_url>/cadastros/materia/substitutivo/autoria_substitutivo_form?cod_substitutivo=<dtml-var cod_substitutivo>&cod_materia=<dtml-var cod_materia>&modal=1">Editar</button>                
             </div>
           </div>
      </div>  
@@ -341,7 +341,7 @@ $(document).ready(function () {
            <dtml-call expr="REQUEST.set('id_documento', str(cod_substitutivo)+'_substitutivo.pdf')">
            <dtml-if "hasattr(sapl_documentos.substitutivo,id_documento)">
               <dtml-let documento="getattr(sapl_documentos.substitutivo,id_documento).absolute_url">
-                 <a class="btn btn-secondary" target="_blank" href="<dtml-var documento>?<dtml-var expr="ZopeTime().timeTime()">">
+                 <a class="btn btn-light" target="_blank" href="<dtml-var documento>?<dtml-var expr="ZopeTime().timeTime()">">
                     <i class="fa fa-fw fa-file-pdf"></i>Visualizar                
                  </a>
                  <a class="btn btn-danger" href="javascript:texto_pdf_excluir()">Excluir</a>
@@ -359,7 +359,7 @@ $(document).ready(function () {
               </dtml-let>
               <dtml-if expr="_.has_key('temODT')">
                  <div class="input-group-append">                                
-                   <a class="btn btn-secondary" href="javascript:texto_pdf_gerar()">
+                   <a class="btn btn-light" href="javascript:texto_pdf_gerar()">
                      Gerar do ODT
                    </a>
                  </div>
@@ -380,8 +380,8 @@ $(document).ready(function () {
              <dtml-if "hasattr(sapl_documentos.substitutivo,id_documento_odt)">
                 <dtml-let documento_odt="getattr(sapl_documentos.substitutivo,id_documento_odt).absolute_url">
                    <dtml-call expr="REQUEST.set('nome_arquivo_odt',str(cod_substitutivo)+'_substitutivo.odt')">
-                   <a class="btn btn-secondary" href="<dtml-var portal_url>/generico/viewerJS/#<dtml-var documento_odt>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fa fa-fw fa-file-alt"></i> Visualizar</a>
-                   <button type="button" class="btn btn-secondary" onclick="javascript:location.href='&dtml-URL1;/sapl_documentos/substitutivo/externalEdit_/<dtml-var nome_arquivo_odt>.zem'" data-bs-toggle="tooltip" data-placement="bottom" title="Editar no LibreOffice"><i class="fas fa-fw fa-external-link-alt"></i>Editar</button>   
+                   <a class="btn btn-light" href="<dtml-var portal_url>/generico/viewerJS/#<dtml-var documento_odt>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fa fa-fw fa-file-alt"></i> Visualizar</a>
+                   <button type="button" class="btn btn-light" onclick="javascript:location.href='&dtml-URL1;/sapl_documentos/substitutivo/externalEdit_/<dtml-var nome_arquivo_odt>.zem'" data-bs-toggle="tooltip" data-placement="bottom" title="Editar no LibreOffice"><i class="fas fa-fw fa-external-link-alt"></i>Editar</button>   
                    <a class="btn btn-danger" href="javascript:texto_integral_odt_excluir()"><i class="fas fa-trash"></i> Excluir</a>
                 </dtml-let>
              <dtml-else>
@@ -395,7 +395,7 @@ $(document).ready(function () {
                        </dtml-with>
                   </select>
                   <div class="input-group-append">                  
-                    <a class="btn btn-secondary" href="javascript:texto_odt_gerar();">Gerar</a>
+                    <a class="btn btn-light" href="javascript:texto_odt_gerar();">Gerar</a>
                   </div>
                 </div>
              </dtml-if>
@@ -420,10 +420,10 @@ $(document).ready(function () {
                <div class="card-body">          
                        <dtml-let proposicao="getattr(sapl_documentos.proposicao,id_proposicao).absolute_url">
                           <dtml-call expr="REQUEST.set('cod_documento',pysc.proposicao_calcular_checksum_pysc(cod_proposicao))">
-                          <a class="btn btn-secondary" target="_blank" href="<dtml-var proposicao>?<dtml-var expr="ZopeTime().timeTime()">">
+                          <a class="btn btn-light" target="_blank" href="<dtml-var proposicao>?<dtml-var expr="ZopeTime().timeTime()">">
                               <i class="fas fa-certificate"></i> Proposição <dtml-var cod_documento>
                           </a>                          
-                          <a class="btn btn-secondary" target="_blank" href="<dtml-var portal_url>/cadastros/proposicao/proposicao_mostrar_proc?cod_proposicao=<dtml-var cod_proposicao>">Mais Informações</a>
+                          <a class="btn btn-light" target="_blank" href="<dtml-var portal_url>/cadastros/proposicao/proposicao_mostrar_proc?cod_proposicao=<dtml-var cod_proposicao>">Mais Informações</a>
                        </dtml-let>
                </div>
              </div>

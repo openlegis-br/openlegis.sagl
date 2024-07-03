@@ -1,76 +1,5 @@
 <dtml-var header_html>
 
-<script src="<dtml-var portal_url>/js/moment.min.js""></script>
-<script src="<dtml-var portal_url>/js/datetime-moment.js"></script>
-
-<script>
-$(document).ready(function() {
-    $.fn.dataTable.moment( 'DD/MM/YYYY HH:mm:ss' );    //Formatação com Hora
-    $.fn.dataTable.moment('DD/MM/YYYY');    //Formatação sem Hora
-    var table = $('.table').DataTable( {
-        "responsive": true,
-        "order": [[ 1, "desc" ], [ 0, "asc" ]],
-        "buttons": [
-            {
-                extend: 'collection',
-                text: 'Exportar',
-                buttons: [ 
-                           {
-                             extend:    'excelHtml5',
-                             text:      '<i class="far fa-file-excel"></i> Excel',
-                             titleAttr: 'PDF'
-                           },
-                           {
-                             extend:    'pdfHtml5',
-                             download: 'open',
-                             text:      '<i class="fa fa-file-adobe"></i> PDF',
-                             titleAttr: 'PDF'
-                           },
-                           {
-                             extend:    'print',
-                             text:      '<i class="fa fa-print"></i> Impressão',
-                             titleAttr: 'Impressão'
-                           },
-                         ],
-               className: '',
-               dropup: true,
-               autoClose: true,
-               fade: true
-
-            }
-        ],
-        "language": {
-          search: "Pesquisar:",
-          processing:     "Processando...",
-          loadingRecords: "Carregando...",
-          lengthMenu:     "Exibir _MENU_ registros por página",
-          info:           "Exibindo _START_ a _END_ de _TOTAL_ registros",
-          infoEmpty:      "Exibindo _START_ a _END_ de _TOTAL_ registros",
-          infoFiltered:   "(total de registros:_MAX_)",
-          emptyTable:     "Nenhum registro encontrado",
-          zeroRecords:     "Nenhum registro encontrado",
-          paginate: {
-            first:      "Primeiro",
-            previous:   "Anterior",
-            next:       "Próximo",
-            last:       "Último"
-          },
-         "buttons": {
-           print: "Imprimir",
-           copy: "Copiar",
-           copyTitle: "Cópia bem sucedida",
-           copySuccess: {
-            1: "Uma linha copiada com sucesso",
-            _: "%d linhas copiadas com sucesso"
-          }
-        }
-        }
-    });
-    table.buttons().container()
-        .appendTo( '#panelBtn .col-sm-12:eq(0)' );      
-});
-</script>
-
 <dtml-in expr="zsql.comissao_obter_zsql(cod_comissao=cod_comissao)">
   <dtml-call expr="REQUEST.set('nom_comissao', nom_comissao)">
   <dtml-call expr="REQUEST.set('sgl_comissao', sgl_comissao)">
@@ -82,23 +11,23 @@ $(document).ready(function() {
  </div>
  <div class="col-12 col-md-2 text-start text-end">
    <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia'])"> 
-      <a class="btn btn-sm btn-primary btn-sm" href="<dtml-var portal_url>/cadastros/comissao/comissao_mostrar_proc?cod_comissao=<dtml-var cod_comissao>"><i class="fas fa-undo"></i> Voltar</a>  
+      <a class="btn btn-light" href="<dtml-var portal_url>/cadastros/comissao/comissao_mostrar_proc?cod_comissao=<dtml-var cod_comissao>"><i class="fas fa-undo"></i> Voltar</a>  
    <dtml-else>
-      <a class="btn btn-sm btn-primary btn-sm" href="<dtml-var portal_url>/consultas/comissao/comissao_mostrar_proc?cod_comissao=<dtml-var cod_comissao>"><i class="fas fa-undo"></i> Voltar</a>    
+      <a class="btn btn-light" href="<dtml-var portal_url>/consultas/comissao/comissao_mostrar_proc?cod_comissao=<dtml-var cod_comissao>"><i class="fas fa-undo"></i> Voltar</a>    
    </dtml-if>
  </div>
 </div>
 
-<div class="row mb-2">
- <div class="col-12 col-md-6">
+<div class="row">
+ <div class="col-12">
       <legend class="font-size-16">Pareceres Emitidos</legend>
  </div>
 </div>
 
 <div class="row">
- <div class="col-12 col-md-6 form-group">
-   <label class="form-label" for="ano_parecer">Selecione o ano:</label>
-   <select class="selectpicker show-tick jumpmenu" id="ano_parecer" name="ano_parecer">
+ <div class="col-12 mb-4">
+   <label class="form-label" for="ano_parecer">Selecione o ano</label>
+   <select class="form-select jumpmenu" id="ano_parecer" name="ano_parecer">
      <option></option>
      <dtml-in expr="pareceres(listar='anos', cod_comissao=cod_comissao)">
         <option value="<dtml-var ACTUAL_URL>?cod_comissao=<dtml-var cod_comissao>&ano=<dtml-var sequence-item>"
@@ -110,12 +39,13 @@ $(document).ready(function() {
 </div>
 
 <dtml-if expr="_.has_key('ano')">
-   <table id="pareceres" class="table" style="width:100%">
+<div class="table-responsive">
+   <table id="pareceres" class="table w-100 datatable">
       <thead>
          <tr>
            <th>Número</th>
            <th>Data</th>
-           <th>Matéria</th>
+           <th width="40%">Matéria</th>
            <th>Relatoria</th>
            <th>Conclusão</th>           
          </tr>
@@ -156,11 +86,7 @@ $(document).ready(function() {
       </tbody>
   </table>
 
-    <div id="panelBtn" class="d-print-none" style="margin-bottom: 20px;">
-      <div class="row">
-         <div class="col-sm-12 mt-2"></div>
-      </div>
-    </div>
+</div>
   
 </dtml-if>
 
@@ -170,7 +96,7 @@ $(document).ready(function() {
         var selectElements = document.getElementsByTagName("select");
         for( i = 0; i < selectElements.length; i++ ) {
             // Check for the class and make sure the element has an ID
-            if( selectElements[i].className == "selectpicker show-tick jumpmenu" && document.getElementById(selectElements[i].id) != "" ) {
+            if( selectElements[i].className == "form-select jumpmenu" && document.getElementById(selectElements[i].id) != "" ) {
                 jumpmenu = document.getElementById(selectElements[i].id);
                 jumpmenu.onchange = function() {
                     if( this.options[this.selectedIndex].value != '' ) {

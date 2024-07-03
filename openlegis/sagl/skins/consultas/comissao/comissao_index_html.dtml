@@ -4,31 +4,25 @@
       <div class="col-12 col-md-8 align-self-center">
         <h1 class="firstHeading font-size-18">Comissões</h1>
       </div>
-      <div class="col-12 col-md-4 text-start text-end">
+      <div class="col-12 col-md-4 text-start text-md-end">
          <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Comissao'])">
-            <a class="btn btn-sm btn-primary d-print-none mb-3" href="<dtml-var portal_url>/cadastros/comissao/comissao_form"><i class="fa fa-fw fa-plus"></i> Incluir Comissão</a>
+            <a class="btn btn-light d-print-none" href="<dtml-var portal_url>/cadastros/comissao/comissao_form"><i class="fa fa-fw fa-plus"></i> Incluir Comissão</a>
          </dtml-if> 
       </div>
  </div>
 
  <div class="row">
-    <div class="col-12 col-lg-7">
-       <div class="form-group row">
-         <label class="form-label" for="lst_tip_comissao" class="col-12 col-sm-4 col-form-label">Tipo de Comissão:</label>
-         <div class="col-12 col-sm-8">
-           <select class="form-select" id="lst_tip_comissao" name="lst_tip_comissao">
+    <div class="col-12 col-md-8 mb-3">
+         <label class="form-label" for="lst_tip_comissao" class="col-12 col-sm-4 col-form-label">Tipo de Comissão</label>
+         <select class="form-select" id="lst_tip_comissao" name="lst_tip_comissao">
               <option value="">Todos</option>
               <dtml-in expr="zsql.tipo_comissao_obter_zsql()">   
                  <option 
                    value="<dtml-var nom_tipo_comissao>"><dtml-var nom_tipo_comissao></option>
               </dtml-in>
-           </select>
-         </div>
-       </div>
+         </select>
     </div>
-    <div class="col-12 col-lg-5">
-        <div class="form-group row">
-           <div class="col-12 text-center">
+    <div class="col-12 col-md-4 mb-3 d-flex align-items-center justify-content-center">
              <div class="form-check form-check-inline">
               <input class="filter-atividade form-check-input" type="radio" name="filter" id="ativas" value="Ativa" />
               <label class="form-check-label" for="ativas">
@@ -44,15 +38,14 @@
              <div class="form-check form-check-inline">
               <input class="filter-atividade form-check-input" type="radio" name="filter" id="todas" value="all"  checked="checked" />
               <label class="form-check-label" for="todas">
-                Todos os status
+                Todas
               </label>
              </div>
-           </div>
-         </div>
     </div>
  </div>
 
- <table id="jdTable" class="table ">
+<div class="table-responsive">
+ <table id="comissoes" class="table w-100">
      <thead>
          <tr>
              <th>Nome</th>
@@ -78,6 +71,7 @@
          </dtml-in>
      </tbody>
  </table>
+</div>
 
  <div id="panelBtn" class="d-print-none" style="margin-bottom: 20px;">
    <div class="row">
@@ -89,7 +83,7 @@
 <script>
 
 $(document).ready(function() {
-    var table = $('#jdTable').DataTable( {
+    var table = $('#comissoes').DataTable( {
         "responsive": true,
         "order": [[ 2, "asc" ], [ 0, "asc" ]],
         "buttons": [
@@ -105,7 +99,7 @@ $(document).ready(function() {
                            {
                              extend:    'pdfHtml5',
                              download: 'open',
-                             text:      '<i class="fa fa-file-adobe"></i> PDF',
+                             text:      '<i class="far fa-file-pdf"></i> PDF',
                              titleAttr: 'PDF'
                            },
                            {

@@ -20,11 +20,11 @@
 <div class="row">
     <div class="col-6 col-md-4 mb-3 controls">
       <label class="form-label" for="txt_autor">Autoria</label>
-      <input name="txt_autor" id="txt_autor" type="text" class="form-control form-control-sm" value="<dtml-var nom_autor missing>" readonly>
+      <input name="txt_autor" id="txt_autor" type="text" class="form-control" value="<dtml-var nom_autor missing>" readonly>
     </div>
     <div class="col-6 col-md-4 mb-3">
       <label class="form-label" for="lst_tip_materia">Tipo de Matéria</label>
-      <select id="lst_tip_materia" name="lst_tip_materia" class="form-control form-control-sm" disabled>
+      <select id="lst_tip_materia" name="lst_tip_materia" class="form-select" disabled>
               <dtml-in expr="zsql.tipo_materia_legislativa_obter_zsql(tip_natureza='P', ind_excluido=0)">
                 <dtml-if expr="_.has_key('tip_materia_sel')">
                   <option <dtml-if expr="_.int(tip_materia)==_.int(tip_materia_sel)">selected</dtml-if>
@@ -38,11 +38,11 @@
     </div>
     <div class="col-6 col-md-2 mb-3 controls">
       <label class="form-label" for="txt_ano">Ano</label>
-      <input name="txt_ano" id="txt_ano" type="number" min="1900" minlength="4" maxlength="4" class="form-control form-control-sm year" value="<dtml-var txt_ano missing>" readonly>
+      <input name="txt_ano" id="txt_ano" type="number" min="1900" minlength="4" maxlength="4" class="form-control year" value="<dtml-var txt_ano missing>" readonly>
     </div>
     <div class="col-6 col-md-2 mb-3">
            <label class="form-label" for="select1">Gráfico</label>
-           <select class="form-select form-control-sm" id="select1" name="select1">
+           <select class="form-select" id="select1" name="select1">
                   <option value="bar">Barra</option>
                   <option value="column">Coluna</option>
                   <option value="line">Linha</option>
@@ -60,9 +60,11 @@
 
 
 <p align="center">
-  <input type="button" class="btn btn-primary btn-sm" id="hideprint" name="print_button" value="Imprimir" onClick="printFrame();return false;" />
+  <input type="button" class="btn btn-light" id="hideprint" name="print_button" value="Imprimir" onClick="printFrame();return false;" />
 </p>
-
+      
+<dtml-var js_slot>
+<script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
 <script id="path" action="<dtml-var portal_url>/consultas/parlamentar/proposicoes/proposicoes_json?cod_autor=<dtml-var cod_autor>&tip_materia=<dtml-var tip_materia_sel>&txt_ano=<dtml-var txt_ano>">
 var path = $("#path").attr("action");
 window.onload = function () {
@@ -96,8 +98,4 @@ document.getElementById("select1").addEventListener("change", function(e){
 });
 }
 </script>
-
-<script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
-      
-<dtml-var js_slot>
 <dtml-var footer_html>

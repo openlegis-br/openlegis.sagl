@@ -10,7 +10,7 @@
     <h1 class="firstHeading font-size-18"><dtml-var nom_comissao></h1>
  </div>
  <div class="col-12 col-md-2 text-start text-end">
-   <a class="btn btn-sm btn-primary btn-sm" href="<dtml-var portal_url>/consultas/comissao/comissao_mostrar_proc?cod_comissao=<dtml-var cod_comissao>"><i class="fas fa-undo"></i> Voltar</a>  
+   <a class="btn btn-light btn-sm" href="<dtml-var portal_url>/consultas/comissao/comissao_mostrar_proc?cod_comissao=<dtml-var cod_comissao>"><i class="fas fa-undo"></i> Voltar</a>  
  </div>
 </div>
 
@@ -22,8 +22,8 @@
 
 <div class="row">
   <div class="col-12 mb-3 form-group">
-    <label class="form-label" for="cod_periodo_comp">Selecione o período:</label>
-      <select class="selectpicker show-tick jumpmenu" name="cod_periodo_comp" id="cod_periodo_comp" >
+    <label class="form-label" for="cod_periodo_comp">Selecione o período</label>
+      <select class="form-select jumpmenu" name="cod_periodo_comp" id="cod_periodo_comp" >
         <dtml-in expr="zsql.periodo_comp_comissao_obter_zsql(cod_comissao='')">
           <option 
             <dtml-if cod_periodo_comp_sel>
@@ -93,13 +93,15 @@
  </fieldset>
 </dtml-if>
 
+<dtml-var js_slot>
+
 <script>
     function initJumpMenus() {
         // Turns all <select> elements with the 'jumpmenu' class into jump menus
         var selectElements = document.getElementsByTagName("select");
         for( i = 0; i < selectElements.length; i++ ) {
             // Check for the class and make sure the element has an ID
-            if( selectElements[i].className == "selectpicker show-tick jumpmenu" && document.getElementById(selectElements[i].id) != "" ) {
+            if( selectElements[i].className == "form-select jumpmenu" && document.getElementById(selectElements[i].id) != "" ) {
                 jumpmenu = document.getElementById(selectElements[i].id);
                 jumpmenu.onchange = function() {
                     if( this.options[this.selectedIndex].value != '' ) {
@@ -114,7 +116,5 @@
         initJumpMenus();
     }
 </script>
-
-<dtml-var js_slot>
 <dtml-var footer_html>
 

@@ -3,14 +3,13 @@
 <dtml-if error_message>
    <dtml-var error_message>
 <dtml-else>
-
             <div class="error-template">
-                <h1 class="text-danger firstHeading">Houve um erro ao publicar esta página</h1>
-                <h3><dtml-var URL></h3>
-                <h2>Tipo de erro: <dtml-var error_type></h2>
+                <h1 class="text-danger firstHeading font-size-18">Houve um erro ao publicar esta página !</h1>
+                <h3 font-size-15><dtml-var URL></h3>
+                <h2 font-size-15>Tipo de erro: <dtml-var error_type></h2>
                 <dtml-let isAnon="portal_membership.isAnonymousUser()">
                   <dtml-if expr="not isAnon">
-                    <div class="error-details">Valor do erro: <dtml-var error_value></div>
+                    <div class="error-details font-size-13">Valor do erro: <dtml-var error_value></div>
                   </dtml-if>
                 </dtml-let>
                 <div class="error-actions">                
@@ -23,7 +22,7 @@
                    <a href="#" class="btn btn-primary" onclick="goBack()"><i class="fa fa-fw fa-reply"></i>Voltar</a>
                  </dtml-if>
                 </div>
-                <p class="text-muted">
+                <p class="text-muted font-size-13">
                   Tente executar novamente a operação que ocasionou o erro, verificando se você seguiu corretamente o procedimento.
                   Se o erro continuar, contate os responsáveis pelo sistema (imprima esta tela para detalhar o problema).  
                   Obrigado por sua paciência.

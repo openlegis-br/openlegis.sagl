@@ -5,8 +5,8 @@
 <form name="composicao_mesa_form">
  <div class="row">
   <div class="col-12 col-sm-6 mb-3">
-      <label class="form-label" for="lst_num_legislatura">Selecione a Legislatura:</label>
-      <select class="form-select selectpicker show-tick jumpmenu" data-dropup-auto="false" data-size="6" id="lst_num_legislatura" name="lst_num_legislatura">
+      <label class="form-label" for="lst_num_legislatura">Selecione a Legislatura</label>
+      <select class="form-select jumpmenu" data-dropup-auto="false" data-size="6" id="lst_num_legislatura" name="lst_num_legislatura">
           <dtml-in expr="zsql.legislatura_obter_zsql(ind_excluido=0)">
              <option
                <dtml-if expr="(not _.has_key('num_legislatura_sel') and (DateTime() >= DateTime(dat_inicio) and DateTime() <= DateTime(dat_fim)))
@@ -32,8 +32,8 @@
         </dtml-if>
   </div>
   <div class="col-12 col-sm-6 mb-3">
-      <label class="form-label" for="lst_periodo_comp">Selecione o Período:</label>
-         <select class="form-select selectpicker show-tick jumpmenu" data-dropup-auto="false" data-size="6" id="lst_periodo_comp" name="lst_periodo_comp">
+      <label class="form-label" for="lst_periodo_comp">Selecione o Período</label>
+         <select class="form-select jumpmenu" data-dropup-auto="false" data-size="6" id="lst_periodo_comp" name="lst_periodo_comp">
            <dtml-in expr="zsql.periodo_comp_mesa_obter_zsql(num_legislatura=num_legislatura_sel)">
               <option
                 <dtml-if expr="((not _.has_key('cod_periodo_comp_sel') and not _.has_key('prim_sel') 
@@ -55,9 +55,9 @@
 </form>
   <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Mesa Diretora'])">
    <div class="row">
-    <div class="col-12 text-end">
+    <div class="col-12 text-start text-sm-end">
        <dtml-if cod_periodo_comp_sel>
-            <a class="btn btn-primary d-print-none mb-3" href="<dtml-var portal_url>/cadastros/mesa_diretora/mesa_diretora_index_html?cod_periodo_comp_sel=<dtml-var cod_periodo_comp_sel>&num_legislatura_sel=<dtml-var num_legislatura_sel>"><i class="fa fa-fw fa-edit"></i> Editar Composição</a>
+            <a class="btn btn-light d-print-none mb-3" href="<dtml-var portal_url>/cadastros/mesa_diretora/mesa_diretora_index_html?cod_periodo_comp_sel=<dtml-var cod_periodo_comp_sel>&num_legislatura_sel=<dtml-var num_legislatura_sel>"><i class="fa fa-fw fa-edit"></i> Editar Composição</a>
          </dtml-if>      
     </div>
    </div>
@@ -131,7 +131,7 @@
         var selectElements = document.getElementsByTagName("select");
         for( i = 0; i < selectElements.length; i++ ) {
             // Check for the class and make sure the element has an ID
-            if( selectElements[i].className == "form-select selectpicker show-tick jumpmenu" && document.getElementById(selectElements[i].id) != "" ) {
+            if( selectElements[i].className == "form-select jumpmenu" && document.getElementById(selectElements[i].id) != "" ) {
                 jumpmenu = document.getElementById(selectElements[i].id);
                 jumpmenu.onchange = function() {
                     if( this.options[this.selectedIndex].value != '' ) {

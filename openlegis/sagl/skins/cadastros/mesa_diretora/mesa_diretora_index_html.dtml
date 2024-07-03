@@ -1,59 +1,12 @@
 <dtml-var header_html>
 
-<script>
-function atualiza_periodo_comp(cod_periodo_comp, num_legislatura){
-location.href = "index_html?cod_periodo_comp_sel="+cod_periodo_comp+"&num_legislatura_sel="+num_legislatura;
-}   
-function atualiza_num_leg(num_legislatura){    
-location.href = "index_html?num_legislatura_sel="+num_legislatura;
-}
-function campos_criticar(form){      
-if (form.lst_num_legislatura[form.lst_num_legislatura.selectedIndex].value == -1){ 
-alert ("Legislatura deve ser cadastrada antes de efetuar a inclusão.");
-return;
-}
-if (form.lst_periodo_comp[form.lst_periodo_comp.selectedIndex].value == -1){
-alert ("Período de composição deve ser cadastrado na legislatura selecionada antes de efetuar a inclusão.");
-return;
-}
-if (form.lst_cod_parlamentar[form.lst_cod_parlamentar.selectedIndex].value == -1){
-bootstrap.showModal({title: "Preenchimento obrigatório", body: "Selecione um parlamentar!"});
-return;
-}
-if (form.lst_cod_cargo.selectedIndex == -1){
-bootstrap.showModal({title: "Preenchimento obrigatório", body: "Selecione um cargo!"});
-return;
-}
-form.submit();
-}
-function composicao_mesa_excluir(valor, valor1, valor2){
-var form = document.composicao_mesa_form;
-if (valor.selectedIndex == -1){
-bootstrap.showModal({title: "Preenchimento obrigatório", body: "Selecione um parlamentar para realizar a exclusão."});
-return false;
-}
-valor = valor[valor.selectedIndex].value;
-var fim1 = valor.indexOf("*");
-var fim2 = valor.indexOf("+");
-var fim3 = valor.indexOf("-");
-var cod_parlamentar_exc = valor.substring(0,fim1);
-var cod_periodo_comp_exc = valor.substring(fim1+1,fim2);
-var cod_cargo_exc = valor.substring(fim2+1,fim3);
-var num_legislatura = valor2;
-var cod_periodo_comp = valor1;
-if (confirm("Deseja realmente excluir?")){
-location.href="composicao_mesa_excluir_proc?hdn_num_legislatura="+ num_legislatura + "&hdn_cod_periodo_comp=" + cod_periodo_comp + "&cod_parlamentar=" + cod_parlamentar_exc + "&cod_periodo_comp=" + cod_periodo_comp_exc + "&cod_cargo=" + cod_cargo_exc;
-}
-} 
-</script>
-
 <h1 class="firstHeading font-size-18"><dtml-var expr="sapl_documentos.props_sagl.nome_mesa"></h1> 
 
 <form name="composicao_mesa_form" method="post" action="composicao_mesa_incluir_proc">
 
   <div class="row">
     <div class="col-12 col-sm-6 mb-3">
-      <label class="form-label" for="lst_num_legislatura">Selecione a Legislatura:</label>
+      <label class="form-label" for="lst_num_legislatura">Selecione a Legislatura</label>
         <select class="form-select selectpicker show-tick" data-size="6" id="lst_num_legislatura" name="lst_num_legislatura" size="1" onChange="atualiza_num_leg(form.lst_num_legislatura [form.lst_num_legislatura.selectedIndex].value)">
           <dtml-in expr="zsql.legislatura_obter_zsql(ind_excluido=0)">
              <option
@@ -80,7 +33,7 @@ location.href="composicao_mesa_excluir_proc?hdn_num_legislatura="+ num_legislatu
         </dtml-if>
       </div>
     <div class="col-12 col-sm-6 mb-3">
-      <label class="form-label" for="lst_periodo_comp">Selecione o Período:</label>
+      <label class="form-label" for="lst_periodo_comp">Selecione o Período</label>
          <select class="form-select selectpicker show-tick" id="lst_periodo_comp" name="lst_periodo_comp" size="1" onChange="atualiza_periodo_comp(form.lst_periodo_comp[form.lst_periodo_comp.selectedIndex].value, form.lst_num_legislatura[form.lst_num_legislatura.selectedIndex].value)">
            <dtml-in expr="zsql.periodo_comp_mesa_obter_zsql(num_legislatura=num_legislatura_sel)">
               <option
@@ -135,7 +88,9 @@ location.href="composicao_mesa_excluir_proc?hdn_num_legislatura="+ num_legislatu
                   </dtml-in>
               </dtml-in>
            </select>
-           <button class="btn btn-danger mb-3" type="button" name="btn_excluir" onclick="composicao_mesa_excluir(lst_composicao_mesa, lst_periodo_comp[lst_periodo_comp.selectedIndex].value, lst_num_legislatura[lst_num_legislatura.selectedIndex].value)">Excluir</button>
+           <div class="text-center">
+             <button class="btn btn-danger mb-3" type="button" name="btn_excluir" onclick="composicao_mesa_excluir(lst_composicao_mesa, lst_periodo_comp[lst_periodo_comp.selectedIndex].value, lst_num_legislatura[lst_num_legislatura.selectedIndex].value)">Excluir</button>
+           </div>
         </div>
         <div class="form-group col-md-6">
              <label class="form-label" for="lst_cod_parlamentar"">Vereador</label>
@@ -171,7 +126,9 @@ location.href="composicao_mesa_excluir_proc?hdn_num_legislatura="+ num_legislatu
                         </option>                          
                      </dtml-in>
              </select>
-             <button class="btn btn-primary" type="button" name="btn_incluir" onclick="campos_criticar(document.composicao_mesa_form)">Incluir</button>
+             <div class="text-center">
+                <button class="btn btn-primary" type="button" name="btn_incluir" onclick="campos_criticar(document.composicao_mesa_form)">Incluir</button>
+             </div>
         </div>
      </div>
  <input type="hidden" name="hdn_num_legislatura" value="<dtml-var num_legislatura_sel missing>"/>
@@ -179,4 +136,50 @@ location.href="composicao_mesa_excluir_proc?hdn_num_legislatura="+ num_legislatu
 </form>
 
 <dtml-var js_slot>
+<script>
+function atualiza_periodo_comp(cod_periodo_comp, num_legislatura){
+location.href = "index_html?cod_periodo_comp_sel="+cod_periodo_comp+"&num_legislatura_sel="+num_legislatura;
+}   
+function atualiza_num_leg(num_legislatura){    
+location.href = "index_html?num_legislatura_sel="+num_legislatura;
+}
+function campos_criticar(form){      
+if (form.lst_num_legislatura[form.lst_num_legislatura.selectedIndex].value == -1){ 
+alert ("Legislatura deve ser cadastrada antes de efetuar a inclusão.");
+return;
+}
+if (form.lst_periodo_comp[form.lst_periodo_comp.selectedIndex].value == -1){
+alert ("Período de composição deve ser cadastrado na legislatura selecionada antes de efetuar a inclusão.");
+return;
+}
+if (form.lst_cod_parlamentar[form.lst_cod_parlamentar.selectedIndex].value == -1){
+bootstrap.showModal({title: "Preenchimento obrigatório", body: "Selecione um parlamentar!"});
+return;
+}
+if (form.lst_cod_cargo.selectedIndex == -1){
+bootstrap.showModal({title: "Preenchimento obrigatório", body: "Selecione um cargo!"});
+return;
+}
+form.submit();
+}
+function composicao_mesa_excluir(valor, valor1, valor2){
+var form = document.composicao_mesa_form;
+if (valor.selectedIndex == -1){
+bootstrap.showModal({title: "Preenchimento obrigatório", body: "Selecione um parlamentar para realizar a exclusão."});
+return false;
+}
+valor = valor[valor.selectedIndex].value;
+var fim1 = valor.indexOf("*");
+var fim2 = valor.indexOf("+");
+var fim3 = valor.indexOf("-");
+var cod_parlamentar_exc = valor.substring(0,fim1);
+var cod_periodo_comp_exc = valor.substring(fim1+1,fim2);
+var cod_cargo_exc = valor.substring(fim2+1,fim3);
+var num_legislatura = valor2;
+var cod_periodo_comp = valor1;
+if (confirm("Deseja realmente excluir?")){
+location.href="composicao_mesa_excluir_proc?hdn_num_legislatura="+ num_legislatura + "&hdn_cod_periodo_comp=" + cod_periodo_comp + "&cod_parlamentar=" + cod_parlamentar_exc + "&cod_periodo_comp=" + cod_periodo_comp_exc + "&cod_cargo=" + cod_cargo_exc;
+}
+} 
+</script>
 <dtml-var footer_html>

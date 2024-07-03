@@ -26,13 +26,6 @@
       form.submit();
   }
 
-  function materia_expediente_excluir(){
-
-       if (confirm("Deseja realmente excluir?")) {
-          location.href="pauta_excluir_proc?cod_item=<dtml-var cod_item missing>&cod_reuniao=<dtml-var cod_reuniao>&modal=1";
-       }
-  }
-
   function ementa_buscar(form){
      var form = document.pauta_parecer_form;    
      if ((form.txt_num_parecer.value!="") &&
@@ -50,7 +43,7 @@
      <input type="hidden" name="cod_reuniao" value="<dtml-var cod_reuniao>" />
       <div class="row">
            <div class="col-4 mb-3">
-            <label class="form-label" for="txt_num_ordem" class="required">Nº Ordem</label>
+            <label class="form-label required" for="txt_num_ordem">Nº Ordem</label>
             <dtml-unless cod_item>
               <dtml-in expr="zsql.reuniao_comissao_ordem_obter_zsql(cod_reuniao=cod_reuniao)">
                  <dtml-call expr="REQUEST.set('num_ordem', _.int(novo_item))">
@@ -59,17 +52,17 @@
 	    <input class="form-control number" type="number" id="txt_num_ordem" name="txt_num_ordem" value="<dtml-var num_ordem missing>" maxlength="3"/ required>
            </div> 
           <div class="col-4">
-            <label class="form-label" for="txt_num_parecer" class="required">Parecer nº</label>
+            <label class="form-label required" for="txt_num_parecer">Parecer nº</label>
             <input class="form-control number" type="number" id="txt_num_parecer" name="txt_num_parecer" value="<dtml-var num_parecer missing>" onChange="ementa_buscar(document.materia_expediente_parecer_form)">
            </div>
           <div class="col-4">
-            <label class="form-label" for="txt_ano_parecer" class="required">Ano</label>
+            <label class="form-label required" for="txt_ano_parecer">Ano</label>
             <input class="form-control year" type="number" id="txt_ano_parecer" name="txt_ano_parecer" value="<dtml-var ano_parecer missing>" onChange="ementa_buscar(document.materia_expediente_parecer_form)">
           </div>
      </div>
      <div class="row">
            <div class="col-12 mb-3">         
-             <label class="form-label" for="txa_txt_observacao" class="required">Ementa </label>
+             <label class="form-label required" for="txa_txt_observacao">Ementa </label>
              <textarea class="form-control auto-resize" name="txa_txt_observacao" rows="2"><dtml-var txt_observacao missing></textarea>
            </div>
      </div>
@@ -77,8 +70,8 @@
 <dtml-if cod_parecer>
    <div class="row">
      <div class="col-6 mb-3">
-         <label class="form-label" for="lst_tip_resultado">Resultado na Comissão</label>
-         <select class="form-select"  name="lst_tip_resultado" id="lst_tip_resultado"  required>
+         <label class="form-label required" for="lst_tip_resultado">Resultado na Comissão</label>
+         <select class="form-select"  name="lst_tip_resultado" id="lst_tip_resultado" required>
            <option></option>
            <dtml-in expr="zsql.tipo_fim_relatoria_obter_zsql(ind_excluido=0)">
              <option
@@ -123,12 +116,12 @@
   <dtml-if cod_parecer>
        <input class="btn btn-primary" type="button" value="Salvar" onClick="campos_criticar(document.pauta_parecer_form)" />
   </dtml-if>
-  <dtml-if cod_item> 
-     <input type="hidden" name="flag_atualizar" value="<dtml-var cod_item missing>" />
-     <input class="btn btn-danger" type="button" value="Excluir" onClick="materia_expediente_excluir()" />
-  </dtml-if>
   <dtml-if cod_parecer>
      <a class="btn btn-secondary" target="_blank" href="<dtml-var portal_url>/cadastros/materia/materia_mostrar_proc?cod_materia=<dtml-var cod_materia_parecer>">Consultar Matéria</a>
+  </dtml-if>
+  <dtml-if cod_item> 
+     <input type="hidden" name="flag_atualizar" value="<dtml-var cod_item missing>" />
+     <a class="btn btn-danger" href="pauta_excluir_proc?cod_item=<dtml-var cod_item missing>&cod_reuniao=<dtml-var cod_reuniao>&modal=1" data-confirm="Deseja realmente excluir o item da pauta?">Excluir</a>
   </dtml-if>
   </div>
   <div class="col-md-12 mt-2">
@@ -136,10 +129,6 @@
   </div>
 </div>
 </form>
-
-<script>
-autosize(document.querySelectorAll('textarea'));
-</script>
 
 <dtml-var js_slot>
 <dtml-var footer_html>

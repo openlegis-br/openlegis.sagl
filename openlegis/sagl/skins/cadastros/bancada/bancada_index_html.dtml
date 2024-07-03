@@ -16,7 +16,7 @@
  <div class="row">
   <div class="col-12 col-sm-6 mb-3">
     <label class="form-label" for="lst_num_legislatura">Selecione a Legislatura:</label>
-         <select class="form-select selectpicker show-tick jumpmenu" data-dropup-auto="false" data-size="6" id="lst_num_legislatura" name="lst_num_legislatura">    
+         <select class="form-select form-select jumpmenu" data-dropup-auto="false" data-size="6" id="lst_num_legislatura" name="lst_num_legislatura">    
             <dtml-in expr="zsql.legislatura_obter_zsql()">
                <option 
                   <dtml-if expr="_.has_key('hdn_num_legislatura') and num_legislatura==_.int(hdn_num_legislatura)">
@@ -47,7 +47,7 @@
    </div>
    <div class="col-12 col-sm-6 mb-3">
      <label class="form-label" for="lst_periodo_comp">Selecione o Período:</label>
-     <select class="form-select selectpicker show-tick jumpmenu" data-size="6" data-dropup-auto="false" id="lst_periodo_comp" name="lst_periodo_comp">
+     <select class="form-select form-select jumpmenu" data-size="6" data-dropup-auto="false" id="lst_periodo_comp" name="lst_periodo_comp">
        <dtml-in expr="zsql.periodo_comp_bancada_obter_zsql(num_legislatura=hdn_num_legislatura)">
           <option
             <dtml-if expr="((not _.has_key('cod_periodo_comp_sel') and not _.has_key('prim_sel') 
@@ -121,7 +121,7 @@
         var selectElements = document.getElementsByTagName("select");
         for( i = 0; i < selectElements.length; i++ ) {
             // Check for the class and make sure the element has an ID
-            if( selectElements[i].className == "form-control selectpicker show-tick jumpmenu" && document.getElementById(selectElements[i].id) != "" ) {
+            if( selectElements[i].className == "form-control form-select jumpmenu" && document.getElementById(selectElements[i].id) != "" ) {
                 jumpmenu = document.getElementById(selectElements[i].id);
                 jumpmenu.onchange = function() {
                     if( this.options[this.selectedIndex].value != '' ) {

@@ -40,7 +40,7 @@
     </select>
      <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Parlamentar', 'Operador Tabela Auxiliar'])">
         <dtml-if expr="_.has_key('hdn_num_legislatura') and hdn_num_legislatura!= '-1' ">
-           <a class="btn btn-primary" href="<dtml-var portal_url>/cadastros/parlamentar/parlamentar_form?lst_num_legislatura=<dtml-var hdn_num_legislatura missing>" data-confirm="Deseja incluir um vereador com mandato na <dtml-var hdn_num_legislatura missing>ª Legislatura?"><i class="fa fa-fw fa-plus"></i> Incluir Vereador</a>
+           <a class="btn btn-light" href="<dtml-var portal_url>/cadastros/parlamentar/parlamentar_form?lst_num_legislatura=<dtml-var hdn_num_legislatura missing>" data-confirm="Deseja incluir um vereador com mandato na <dtml-var hdn_num_legislatura missing>ª Legislatura?"><i class="fa fa-fw fa-plus"></i> Incluir vereador</a>
         </dtml-if>
      </dtml-if>  
     </div>
@@ -352,6 +352,12 @@
 </div>
 </dtml-if>
 
+      <div class="col-12 text-muted mt-1 text-end">
+        <a href="<dtml-var portal_url>/@@vereadores" target="_blank"> <i class="mdi mdi-database-arrow-down"></i> Dados Abertos</a>  
+      </div>
+
+
+<dtml-var js_slot>
 <script>
 
     function initJumpMenus() {
@@ -374,6 +380,4 @@
         initJumpMenus();
     }
 </script>
-
-<dtml-var js_slot>
 <dtml-var footer_html>

@@ -47,8 +47,10 @@
         <dtml-if expr="num_tel_secretaria">
            <p class="card-text"><b>Telefone:</b> <dtml-var num_tel_secretaria></p>           
         </dtml-if>
-        <a class="btn btn-sm btn-light mb-2" href="materia/materia_index_html?cod_comissao=<dtml-var cod_comissao>"><i class="fas fas-fw fa-hourglass-start"></i> Matérias em análise</a>     
-        <a class="btn btn-sm btn-light mb-2" href="parecer/parecer_index_html?cod_comissao=<dtml-var cod_comissao>"><i class="fas fas-fw fa-folder-open"></i> Pareceres emitidos</a>
+        <div class="input-group">
+        <a class="btn btn-light mb-2" href="materia/materia_index_html?cod_comissao=<dtml-var cod_comissao>"><i class="fas fas-fw fa-hourglass-start"></i> Matérias em análise</a>     
+        <a class="btn btn-light mb-2" href="parecer/parecer_index_html?cod_comissao=<dtml-var cod_comissao>"><i class="fas fas-fw fa-folder-open"></i> Pareceres emitidos</a>
+        </div>
      </div>
    </div> 
 
@@ -59,7 +61,7 @@
               <dtml-in expr="zsql.reuniao_comissao_obter_zsql(cod_comissao=cod_comissao)" size=3>
                 <li class="list-group-item">
                   <div class="mb-1"><dtml-var num_reuniao>ª Reunião <dtml-var des_tipo_reuniao> - <dtml-var dat_inicio_reuniao><dtml-if hr_inicio_reuniao> <dtml-var hr_inicio_reuniao missing null=""></dtml-if></div>
-                <div class="text-start">
+                <div class="input-group text-start">
                  <dtml-let id_pauta="str(cod_reuniao)+'_pauta.pdf'">
                   <dtml-if "hasattr(sapl_documentos.reuniao_comissao,id_pauta)">
                     <dtml-let pauta="getattr(sapl_documentos.reuniao_comissao,id_pauta).absolute_url">
@@ -82,7 +84,7 @@
               <dtml-else>
                 <li class="list-group-item">Nenhuma reunião cadastrada</li>                
               </dtml-in>
-              <li class="list-group-item text-end small"><a href="<dtml-var portal_url>/consultas/reuniao_comissao/reuniao_comissao_index_html?cod_comissao_sel=<dtml-var cod_comissao>">todas as reuniões</a></li>
+              <li class="list-group-item text-end small"><a href="<dtml-var portal_url>/consultas/reuniao_comissao/reuniao_comissao_index_html?cod_comissao_sel=<dtml-var cod_comissao>">Todas as reuniões</a></li>
            </ul>
          </div>
        </div>
@@ -106,7 +108,7 @@
               <dtml-else>
                 <li class="list-group-item">Nenhum documento cadastrado</li>
               </dtml-in>
-              <li class="list-group-item text-end small"><a href="<dtml-var portal_url>/consultas/comissao/documento/documento_index_html?cod_comissao=<dtml-var cod_comissao>">todos os documentos</a></li>
+              <li class="list-group-item text-end small"><a href="<dtml-var portal_url>/consultas/comissao/documento/documento_index_html?cod_comissao=<dtml-var cod_comissao>">Todos os documentos</a></li>
            </ul>
          </div>
        </div>
@@ -141,7 +143,7 @@
                                     <dtml-else>
                                        <img src="<dtml-var portal_url>/imagens/avatar.png" alt="" class="avatar-xs rounded-circle me-2">
                                     </dtml-if>
-                                     <dtml-var nom_parlamentar></a>
+                                     <strong><dtml-var nom_parlamentar></strong></a>
                               </td>
                               <td>
                                <dtml-in expr="zsql.filiacao_obter_zsql(cod_parlamentar=cod_parlamentar)" size="1">
@@ -160,7 +162,7 @@
                        </tbody>
                     </table>
                    <div class="col-12 text-end">
-                        <p class="text-end small me-3"><a href="<dtml-var portal_url>/consultas/comissao/composicao/index_html?cod_comissao=<dtml-var cod_comissao>">composições anteriores</a></p>
+                        <p class="text-end small me-3"><a href="<dtml-var portal_url>/consultas/comissao/composicao/index_html?cod_comissao=<dtml-var cod_comissao>">Composições anteriores</a></p>
                    </div>
                 </div>
                 </dtml-if>
@@ -171,7 +173,7 @@
      </div>
   </div>
 </div>
-<div class="col-12 d-flex align-items-start justify-content-end"><a href="<dtml-var portal_url>/@@comissoes/<dtml-var cod_comissao>" target="_blank"> <i class="mdi mdi-database-arrow-down"></i> Dados Abertos</a></div>
+<div class="col-12 small d-flex align-items-start justify-content-end"><a href="<dtml-var portal_url>/@@comissoes/<dtml-var cod_comissao>" target="_blank"> <i class="mdi mdi-database-arrow-down"></i> Dados abertos</a></div>
 
 <link href="<dtml-var portal_url>/assets/libs/magnific-popup/magnific-popup.css" rel="stylesheet" type="text/css" />
 

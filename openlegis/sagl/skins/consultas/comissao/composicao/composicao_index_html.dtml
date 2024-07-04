@@ -5,17 +5,19 @@
   <dtml-call expr="REQUEST.set('sgl_comissao', sgl_comissao)">
 </dtml-in>
 
-<div class="row mb-2">
- <div class="col-12 col-md-10 align-self-center"> 
-    <h1 class="firstHeading font-size-18"><dtml-var nom_comissao></h1>
- </div>
- <div class="col-12 col-md-2 text-start text-end">
-   <a class="btn btn-light btn-sm" href="<dtml-var portal_url>/consultas/comissao/comissao_mostrar_proc?cod_comissao=<dtml-var cod_comissao>"><i class="fas fa-undo"></i> Voltar</a>  
+<div class="d-flex justify-content-between mb-1">
+ <h4 class="firstHeading font-size-18"><dtml-var nom_comissao></h4>
+ <div class="btn-group">
+   <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia'])"> 
+      <a class="btn btn-light" href="<dtml-var portal_url>/cadastros/comissao/comissao_mostrar_proc?cod_comissao=<dtml-var cod_comissao>"><i class="fas fa-undo"></i> Voltar</a>  
+   <dtml-else>
+      <a class="btn btn-light" href="<dtml-var portal_url>/consultas/comissao/comissao_mostrar_proc?cod_comissao=<dtml-var cod_comissao>"><i class="fas fa-undo"></i> Voltar</a>    
+   </dtml-if> 
  </div>
 </div>
 
-<div class="row mb-2">
- <div class="col-12 col-md-6">
+<div class="row">
+ <div class="col-12">
       <legend class="font-size-16">Histórico de Composições</legend>
  </div>
 </div>
@@ -66,18 +68,34 @@
           <th>Vereador</th>
           <th>Cargo</th>
           <th>Titular</th>
-          <th>Data Designação</th>
-          <th>Data Desligamento</th>
+          <th>Data de Designação</th>
+          <th>Data de Desligamento</th>
         </tr>
        </thead> 
     </dtml-if sequence-start>
        <dtml-unless dat_desligamento>
         <tr>
-             <td><a href="<dtml-var portal_url>/consultas/parlamentar/parlamentar_mostrar_proc?cod_parlamentar=<dtml-var cod_parlamentar>"><b><dtml-var nom_parlamentar></b></a></td>
+             <td>
+               <a href="<dtml-var portal_url>/consultas/parlamentar/parlamentar_mostrar_proc?cod_parlamentar=<dtml-var cod_parlamentar>">
+                  <dtml-call expr="REQUEST.set('id_foto', str(cod_parlamentar)+'_foto_parlamentar')">
+                  <dtml-if expr="hasattr(sapl_documentos.parlamentar.fotos,id_foto)">
+                     <img src="<dtml-var portal_url>/sapl_documentos/parlamentar/fotos/<dtml-var id_foto>" alt="" class="avatar-xs rounded-circle me-2">
+                  <dtml-else>
+                     <img src="<dtml-var portal_url>/imagens/avatar.png" alt="" class="avatar-xs rounded-circle me-2">
+                  </dtml-if>
+                  <dtml-var nom_parlamentar>
+               </a>
+             </td>
              <td><dtml-var des_cargo missing></td>
              <td><dtml-if expr="ind_titular">Sim <dtml-else>Não</dtml-if></td>
              <td><dtml-var dat_designacao></td>
-             <td><dtml-var dat_desligamento missing null=""></td>
+             <td>
+                <dtml-if expr="dat_desligamento == ''">             
+                   <dtml-var dat_desligamento missing null="">
+                <dtml-else>
+                   <dtml-var dat_fim_periodo missing>
+                </dtml-if>
+             </td>
         </tr>
        </dtml-unless>
     <dtml-if sequence-end>

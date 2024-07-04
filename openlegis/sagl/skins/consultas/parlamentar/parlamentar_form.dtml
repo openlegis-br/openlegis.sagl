@@ -20,7 +20,7 @@
 
 <div class="card mb-3">
  <div class="card-body">
-  <div class="row no-gutters">
+  <div class="row">
     <div class="col-12 col-md-3 col-lg-2 text-center text-md-start">
                  <dtml-call expr="REQUEST.set('id_foto', str(cod_parlamentar)+'_foto_parlamentar')">
                  <dtml-if expr="hasattr(sapl_documentos.parlamentar.fotos,id_foto)">
@@ -29,29 +29,29 @@
                     <img alt="<dtml-var nom_completo>" src="<dtml-var portal_url>/imagens/avatar.png" width="140" class="rounded-circle img-thumbnail">
                  </dtml-if>
     </div>
-    <div class="col-12 col-md-9 text-center text-md-start">
-      <div class="card-body">
+    <div class="col-12 col-md-9 col-lg-10 text-center text-md-start">
+      <div class="card-body p-0">
+          <dtml-call expr="REQUEST.set('dat_atual', DateTime().strftime('%d/%m/%Y'))">                   
+          <dtml-if expr="pysc.autoria_parlamentar_validar_pysc(cod_parlamentar=cod_parlamentar,txt_dat_apresentacao=dat_atual)">
+             <div class="text-center text-md-end mb-1"><span class="badge bg-primary mt-1">Em exercício</span></div>
+          <dtml-else>
+             <div class="text-center text-md-end mb-1"><span class="badge bg-danger mt-1">Inativo</span></div>
+          </dtml-if>
           <span><b>Nome civil:</b> <dtml-var nom_completo></span>
           <dtml-if dat_nascimento>
              <br><span><b>Data de nascimento:</b> <dtml-var dat_nascimento></span>
            </dtml-if>
-         <dtml-call expr="REQUEST.set('dat_atual', DateTime().strftime('%d/%m/%Y'))">                   
           <dtml-if expr="pysc.autoria_parlamentar_validar_pysc(cod_parlamentar=cod_parlamentar,txt_dat_apresentacao=dat_atual)">
            <dtml-if num_tel_parlamentar>
               <br><span><b>Telefone: </b><dtml-var num_tel_parlamentar missing></span>
            </dtml-if>
            <dtml-if expr="end_email">
-              <br><span><a href="mailto:<dtml-var end_email>"><i class="fa fa-fw fa-envelope"></i> <dtml-var end_email></a><span>
+              <br><span><a href="mailto:<dtml-var end_email>"><i class="fa fa-fw fa-envelope"></i> <dtml-var end_email></a></span>
            </dtml-if>
          </dtml-if>
            <dtml-if end_web>
-              <br><span><a href="<dtml-var end_web>" target="_blank"><i class="fa fa-fw fa-link"></i> Site pessoal</a></span>
+              <br><span><a href="<dtml-var end_web>" target="_blank"><i class="fas fa-fw fa-external-link-square-alt"></i> Site pessoal</a></span>
            </dtml-if>
-          <dtml-if expr="pysc.autoria_parlamentar_validar_pysc(cod_parlamentar=cod_parlamentar,txt_dat_apresentacao=dat_atual)">
-             <span class=" badge badge-primary mt-2">Em exercício</span>
-          <dtml-else>
-             <span class="badge badge-danger mt-2">Inativo</span>
-          </dtml-if>
       </div>
     </div>
   </div>

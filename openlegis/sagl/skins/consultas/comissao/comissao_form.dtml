@@ -10,14 +10,10 @@
 //-->
 </script>
 
-<div class="row mb-2">
- <div class="col-12 col-md-10 align-self-center"> 
-   <dtml-if expr="_.has_key('cod_comissao')">
-     <h1 class="firstHeading font-size-18"><dtml-var nom_comissao></h1> 
-   </dtml-if>
- </div>
- <div class="col-12 col-md-2 text-start text-end">
-      <a class="btn btn-sm btn-primary btn-sm" href="<dtml-var portal_url>/consultas/comissao"><i class="fas fa-undo"></i> Lista de Comissões</a>  
+<div class="d-flex justify-content-between mb-2">
+ <h4 class="firstHeading font-size-18"><dtml-var nom_comissao></h4>
+ <div class="btn-group">
+   <a class="btn btn-light" href="<dtml-var portal_url>/consultas/comissao"><i class="fas fa-undo"></i> Voltar</a>  
  </div>
 </div>
 
@@ -36,12 +32,12 @@
    <div class="card mb-4">
      <h6 class="card-header">Dados da Comissão</h6>
      <div class="card-body">
-        <dtml-in expr="zsql.tipo_comissao_obter_zsql(tip_comissao=tip_comissao)">
-            <p class="card-text"><b>Comissão <dtml-var nom_tipo_comissao></b></p>
-        </dtml-in>
         <p class="card-text"><b>Sigla:</b> <dtml-var sgl_comissao></p>        
+        <dtml-in expr="zsql.tipo_comissao_obter_zsql(tip_comissao=tip_comissao)">
+            <p class="card-text"><b>Tipo:</b> Comissão <dtml-var nom_tipo_comissao></p>
+        </dtml-in>
         <p class="card-text"><b>Instalação:</b> <dtml-var dat_criacao></p>
-        <p class="card-text"><b>Situação:</b> <dtml-if dat_extincao>Inativa<dtml-else>Em funcionamento</dtml-if></p>
+        <p class="card-text"><b>Situação:</b> <dtml-if dat_extincao>Inativa<dtml-else>Ativa</dtml-if></p>
         <dtml-if dat_extincao>
            <p class="card-text"><b>Extinção:</b> <dtml-var dat_extincao></p>
         </dtml-if>
@@ -51,33 +47,10 @@
         <dtml-if expr="num_tel_secretaria">
            <p class="card-text"><b>Telefone:</b> <dtml-var num_tel_secretaria></p>           
         </dtml-if>
-        <p class="card-text"><a href="materia/materia_index_html?cod_comissao=<dtml-var cod_comissao>"><i class="fa fa-link"></i> Matérias em Análise</a></p>      
-        <p class="card-text"><a href="parecer/parecer_index_html?cod_comissao=<dtml-var cod_comissao>"><i class="fa fa-link"></i> Pareceres Emitidos</a></p> 
+        <a class="btn btn-sm btn-light mb-2" href="materia/materia_index_html?cod_comissao=<dtml-var cod_comissao>"><i class="fas fas-fw fa-hourglass-start"></i> Matérias em análise</a>     
+        <a class="btn btn-sm btn-light mb-2" href="parecer/parecer_index_html?cod_comissao=<dtml-var cod_comissao>"><i class="fas fas-fw fa-folder-open"></i> Pareceres emitidos</a>
      </div>
    </div> 
- </div>
-
- <div class="col-12 col-lg-8">
-   <div class="row">
-      <div class="col-12 mb-4">
-        <dtml-in expr="zsql.periodo_comp_comissao_obter_zsql(ind_excluido=0)">
-           <dtml-if expr="(DateTime() >= DateTime(dat_inicio)) and (DateTime() <= DateTime(dat_fim))">
-              <div class="card">
-                <h6 class="card-header">Composição Atual</h6>
-                <ul class="list-group list-group-flush">
-                  <dtml-in expr="zsql.composicao_comissao_obter_zsql(cod_comissao=cod_comissao, cod_periodo_comp=cod_periodo_comp)">
-                     <dtml-unless dat_desligamento>
-                       <li class="list-group-item"><a href="<dtml-var portal_url>/consultas/parlamentar/parlamentar_mostrar_proc?cod_parlamentar=<dtml-var cod_parlamentar>"><b><dtml-var nom_parlamentar></b></a> - <dtml-var des_cargo></li>
-                     </dtml-unless>
-                  <dtml-else>
-                     <li class="list-group-item">Nenhum membro cadastrado no período atual</li>  
-                  </dtml-in>
-                  <li class="list-group-item text-end small bg-light"><a href="composicao/index_html?cod_comissao=<dtml-var cod_comissao>"><i class="fa fa-link"></i> Composições anteriores</a></li>
-                </ul>
-              </div>
-           </dtml-if>
-         </dtml-in>
-      </div>
 
       <div class="col-12 mb-4">
          <div class="card">
@@ -85,8 +58,8 @@
            <ul class="list-group list-group-flush">
               <dtml-in expr="zsql.reuniao_comissao_obter_zsql(cod_comissao=cod_comissao)" size=3>
                 <li class="list-group-item">
-                  <dtml-var num_reuniao>ª Reunião <dtml-var des_tipo_reuniao> em <dtml-var dat_inicio_reuniao><dtml-if hr_inicio_reuniao>, às <dtml-var hr_inicio_reuniao missing null=""></dtml-if>
-                <div class="float-right">
+                  <div class="mb-1"><dtml-var num_reuniao>ª Reunião <dtml-var des_tipo_reuniao> - <dtml-var dat_inicio_reuniao><dtml-if hr_inicio_reuniao> <dtml-var hr_inicio_reuniao missing null=""></dtml-if></div>
+                <div class="text-start">
                  <dtml-let id_pauta="str(cod_reuniao)+'_pauta.pdf'">
                   <dtml-if "hasattr(sapl_documentos.reuniao_comissao,id_pauta)">
                     <dtml-let pauta="getattr(sapl_documentos.reuniao_comissao,id_pauta).absolute_url">
@@ -102,14 +75,14 @@
                   </dtml-if>
                  </dtml-let>
                  <dtml-if url_video>
-                    <a target="_blank" class="btn btn-sm btn-light" href="#" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Reprodução de Vídeo" data-src="<dtml-var url_video>"><i class="fab fa-fw fa-youtube"></i><span class="">Vídeo</span></a>              
+                    <a href="<dtml-var url_video>" class="popup-youtube btn btn-sm btn-light"><i class="fab fa-fw fa-youtube"></i>Vídeo</a>               
                  </dtml-if> 
                 </div> 
                 </li>
               <dtml-else>
                 <li class="list-group-item">Nenhuma reunião cadastrada</li>                
               </dtml-in>
-              <li class="list-group-item text-end small bg-light"><a href="<dtml-var portal_url>/consultas/reuniao_comissao/reuniao_comissao_index_html?cod_comissao_sel=<dtml-var cod_comissao>"><i class="fa fa-link"></i> Todas as reuniões</a></li>
+              <li class="list-group-item text-end small"><a href="<dtml-var portal_url>/consultas/reuniao_comissao/reuniao_comissao_index_html?cod_comissao_sel=<dtml-var cod_comissao>">todas as reuniões</a></li>
            </ul>
          </div>
        </div>
@@ -123,7 +96,7 @@
                  <dtml-let id_documento="str(cod_documento)+'_documento.pdf'">
                   <dtml-if "hasattr(sapl_documentos.documento_comissao,id_documento)">
                     <dtml-let documento="getattr(sapl_documentos.documento_comissao,id_documento).absolute_url">
-                      <a target="_blank" href="<dtml-var documento>"><dtml-var dat_documento> - <dtml-var txt_descricao></a>
+                       <a target="_blank" href="<dtml-var documento>"><dtml-var dat_documento> - <dtml-var txt_descricao></a>
                     </dtml-let>
                   <dtml-else>
                       <dtml-var dat_documento> - <dtml-var txt_descricao>
@@ -133,14 +106,78 @@
               <dtml-else>
                 <li class="list-group-item">Nenhum documento cadastrado</li>
               </dtml-in>
-              <li class="list-group-item text-end small bg-light"><a href="<dtml-var portal_url>/consultas/comissao/documento/documento_index_html?cod_comissao=<dtml-var cod_comissao>"><i class="fa fa-link"></i> Todos os documentos</a></li>
+              <li class="list-group-item text-end small"><a href="<dtml-var portal_url>/consultas/comissao/documento/documento_index_html?cod_comissao=<dtml-var cod_comissao>">todos os documentos</a></li>
            </ul>
          </div>
        </div>
-       
+ </div>
+
+ <div class="col-12 col-lg-8">
+   <div class="row">
+      <div class="col-12">
+        <div class="card">
+           <h6 class="card-header">Composição Atual</h6>
+        <dtml-in expr="zsql.periodo_comp_comissao_obter_zsql(ind_excluido=0)">
+           <dtml-if expr="(DateTime() >= DateTime(dat_inicio)) and (DateTime() <= DateTime(dat_fim))">
+            <dtml-in expr="zsql.composicao_comissao_obter_zsql(cod_comissao=cod_comissao, cod_periodo_comp=cod_periodo_comp)">
+                <dtml-if sequence-start>
+                <div class="table-responsive px-2">
+                  <table class="table table-hover table-centered table-nowrap">
+                     <thead>
+                        <tr>
+                           <th>Vereador</th>
+                           <th>Partido</th>
+                           <th>Cargo</th>
+                        </tr>
+                     </thead>
+                     <tbody>
+                </dtml-if>
+                            <tr>
+                              <td>
+                                 <a href="<dtml-var portal_url>/consultas/parlamentar/parlamentar_mostrar_proc?cod_parlamentar=<dtml-var cod_parlamentar>">
+                                   <dtml-call expr="REQUEST.set('id_foto', str(cod_parlamentar)+'_foto_parlamentar')">
+                                    <dtml-if expr="hasattr(sapl_documentos.parlamentar.fotos,id_foto)">
+                                       <img src="<dtml-var portal_url>/sapl_documentos/parlamentar/fotos/<dtml-var id_foto>" alt="" class="avatar-xs rounded-circle me-2">
+                                    <dtml-else>
+                                       <img src="<dtml-var portal_url>/imagens/avatar.png" alt="" class="avatar-xs rounded-circle me-2">
+                                    </dtml-if>
+                                     <dtml-var nom_parlamentar></a>
+                              </td>
+                              <td>
+                               <dtml-in expr="zsql.filiacao_obter_zsql(cod_parlamentar=cod_parlamentar)" size="1">
+                                  <dtml-if expr="cod_partido!=None">
+                                     <dtml-in expr="zsql.partido_obter_zsql(cod_partido=cod_partido)">
+                                        <dtml-var sgl_partido missing>                                        
+                                     </dtml-in>
+                                  <dtml-else>
+                                     sem partido
+                                  </dtml-if>
+                               </dtml-in>
+                              </td>
+                              <td><dtml-var des_cargo></td>
+                            </tr>
+                <dtml-if sequence-end>
+                       </tbody>
+                    </table>
+                   <div class="col-12 text-end">
+                        <p class="text-end small me-3"><a href="<dtml-var portal_url>/consultas/comissao/composicao/index_html?cod_comissao=<dtml-var cod_comissao>">composições anteriores</a></p>
+                   </div>
+                </div>
+                </dtml-if>
+              </dtml-in>
+           </dtml-if>
+         </dtml-in>
+      </div>
      </div>
   </div>
 </div>
+<div class="col-12 d-flex align-items-start justify-content-end"><a href="<dtml-var portal_url>/@@comissoes/<dtml-var cod_comissao>" target="_blank"> <i class="mdi mdi-database-arrow-down"></i> Dados Abertos</a></div>
+
+<link href="<dtml-var portal_url>/assets/libs/magnific-popup/magnific-popup.css" rel="stylesheet" type="text/css" />
 
 <dtml-var js_slot>
+<script src="<dtml-var portal_url>/assets/libs/magnific-popup/jquery.magnific-popup.min.js"></script>
+<script>
+(function(e){"use strict";e(".image-popup-vertical-fit").magnificPopup({type:"image",closeOnContentClick:!0,mainClass:"mfp-img-mobile",image:{verticalFit:!0}}),e(".image-popup-no-margins").magnificPopup({type:"image",closeOnContentClick:!0,closeBtnInside:!1,fixedContentPos:!0,mainClass:"mfp-no-margins mfp-with-zoom",image:{verticalFit:!0},zoom:{enabled:!0,duration:300}}),e(".popup-gallery").magnificPopup({delegate:"a",type:"image",tLoading:"Loading image #%curr%...",mainClass:"mfp-img-mobile",gallery:{enabled:!0,navigateByImgClick:!0,preload:[0,1]},image:{tError:'<a href="%url%">The image #%curr%</a> could not be loaded.'}}),e(".zoom-gallery").magnificPopup({delegate:"a",type:"image",closeOnContentClick:!1,closeBtnInside:!1,mainClass:"mfp-with-zoom mfp-img-mobile",image:{verticalFit:!0,titleSrc:function(e){return e.el.attr("title")+' &middot; <a href="'+e.el.attr("data-source")+'" target="_blank">image source</a>'}},gallery:{enabled:!0},zoom:{enabled:!0,duration:300,opener:function(e){return e.find("img")}}}),e(".popup-youtube, .popup-vimeo, .popup-gmaps").magnificPopup({disableOn:700,type:"iframe",mainClass:"mfp-fade",removalDelay:160,preloader:!1,fixedContentPos:!1}),e(".popup-with-zoom-anim").magnificPopup({type:"inline",fixedContentPos:!1,fixedBgPos:!0,overflowY:"auto",closeBtnInside:!0,preloader:!1,midClick:!0,removalDelay:300,mainClass:"my-mfp-zoom-in"}),e(".popup-with-move-anim").magnificPopup({type:"inline",fixedContentPos:!1,fixedBgPos:!0,overflowY:"auto",closeBtnInside:!0,preloader:!1,midClick:!0,removalDelay:300,mainClass:"my-mfp-slide-bottom"}),e(".popup-form").magnificPopup({type:"inline",preloader:!1,focus:"#name",callbacks:{beforeOpen:function(){e(window).width()<700?this.st.focus=!1:this.st.focus="#name"}}})}).apply(this,[jQuery]);
+</script>
 <dtml-var footer_html>

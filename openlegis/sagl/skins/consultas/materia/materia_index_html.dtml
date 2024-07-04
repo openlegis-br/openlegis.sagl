@@ -2,60 +2,6 @@
 
 <script src="<dtml-var portal_url>/javascript/data_validar.js"></script>
 
-<script>
-
-(function ($) {
-  $(function () {
-    document.onkeypress = function (event) {
-      var form = pesq_basica_form;
-      if (event.keyCode === 13) {
-        form.submit();
-      }
-    };
-  });
-}(jQuery));
-
-function pesquisam_criticar(form){  
-
-  var form = document.pesq_basica_form;
-
-  if (form.dt_apres.value != "" && !IsValidDate(form.dt_apres.value)) {
-    bootstrap.showModal({title: "Mensagem do Sistema", body: "Digite uma data inicial válida!"});
-    return false;
-  } 
-
-  if (form.dt_apres2.value != "" && !IsValidDate(form.dt_apres2.value)) {
-    bootstrap.showModal({title: "Mensagem do Sistema", body: "Digite uma data final válida!"});
-    return false;
-  } 
-  
-  form.submit();
-}
-
-  $(document).ready(function(){
-    $('[data-bs-toggle="popover"]').popover({
-		placement : 'top'
-    });
-  });
-
-  $(document).ready(function(){
-    $('#chk_textual').change(function(){
-          var form = document.pesq_basica_form;
-          var checked = $('#chk_textual').is(':checked');
-          if(checked){
-              $('#pesq_basica_form').attr('action','materia_texto_pesquisar_proc');
-              if($('#txt_assunto').val() == '') {
-                 bootstrap.showModal({title: "Informação", body: "Para realizar uma pesquisa textual, é necessário prencher o campo 'Termos da Pesquisa'."})
-              }
-          }
-          else{
-              $('#pesq_basica_form').attr('action','materia_pesquisar_proc');
-          }
-    })
-  });
-
-</script>
-
 <dtml-let isAnon="portal_membership.isAnonymousUser()">
   <dtml-if expr="isAnon and sapl_documentos.props_sagl.recaptcha_key">
      <script src='https://www.google.com/recaptcha/api.js?hl=pt-BR' async defer></script>
@@ -66,23 +12,23 @@ function pesquisam_criticar(form){
       <div class="col-12 col-md-8 align-self-center">
         <h1 class="firstHeading font-size-18">Pesquisa de Matérias</h1>
       </div>
-      <div class="col-12 col-md-4 text-start text-end">
+      <div class="col-12 col-md-4 text-start text-md-end">
          <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia'])">      
-             <a class="btn btn-primary btn-sm d-print-none" href="<dtml-var portal_url>/cadastros/materia/materia_form_resumido"><i class="fa fa-fw fa-plus"></i> Incluir Matéria</a>
+             <a class="btn btn-light d-print-none" href="<dtml-var portal_url>/cadastros/materia/materia_form_resumido"><i class="fa fa-fw fa-plus"></i> Incluir Matéria</a>
          </dtml-if>
       </div>
  </div>
 
 <dtml-var materia_menu>
 
-<div class="tab-content bg-white">
+<div class="tab-content bg-white" style="margin-top: -1px">
   <div class="tab-pane p-3 border fade show active" id="principais">
 
 <form name="pesq_basica_form" id="pesq_basica_form" action="materia_pesquisar_proc">
   <div class="row">
     <div class="col-12 col-md-6 mb-3">
       <label class="form-label" for="lst_tip_materia">Tipo de Matéria</label>
-      <select id="lst_tip_materia" name="lst_tip_materia" class="form-control selectpicker" data-dropup-auto="false" data-size="6" multiple="multiple" data-actions-box="true" title="Todos" data-header="Tipo de Matéria" data-selected-text-format="count > 3">
+      <select id="lst_tip_materia" name="lst_tip_materia:list" class="select2 form-select" multiple="multiple" style="width: 100%; min-height:34px !important;">
             <optgroup label="Matérias Principais">
               <dtml-in expr="zsql.tipo_materia_legislativa_obter_zsql(tip_natureza='P', ind_excluido=0)">
                 <dtml-if expr="_.has_key('tip_materia_sel')">
@@ -121,39 +67,23 @@ function pesquisam_criticar(form){
     </div>
     <div class="col-6 col-md-3 mb-3">
       <label class="form-label" for="dt_apres">Data Inicial</label>
-        <input type="text" class="form-control date" id="dt_apres" name="dt_apres" autocomplete="off">
+        <div class="input-group">
+           <input type="text" class="form-control datepicker" placeholder="dd/mm/aaaa" name="dt_apres" id="dt_apres" data-provide="datepicker" data-date-autoclose="true" autocomplete="off">
+           <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
+        </div>
     </div>
    <div class="col-6 col-md-3 mb-3">
       <label class="form-label" for="dt_apres2">Data Final</label>
-      <input type="text" class="form-control date" id="dt_apres2" name="dt_apres2" autocomplete="off">
-    </div>
-    <script>
-        $('#dt_apres').datepicker({
-            locale: 'pt-br',
-            icons: {rightIcon: '<i class="fa fa-fw fa-calendar-alt"></i>'},
-            format: 'dd/mm/yyyy',
-            uiLibrary: 'bootstrap4',
-            iconsLibrary: 'fontawesome',
-            maxDate: function () {
-                return $('#dt_apres2').val();
-            }
-        });
-        $('#dt_apres2').datepicker({
-            locale: 'pt-br',
-            icons: {rightIcon: '<i class="fa fa-fw fa-calendar-alt"></i>'},
-            format: 'dd/mm/yyyy',
-            uiLibrary: 'bootstrap4',
-            iconsLibrary: 'fontawesome',
-            minDate: function () {
-                return $('#dt_apres').val();
-            }
-        });
-    </script>    
+        <div class="input-group">
+           <input type="text" class="form-control datepicker" placeholder="dd/mm/aaaa" name="dt_apres2" id="dt_apres2" data-provide="datepicker" data-date-autoclose="true" autocomplete="off">
+           <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
+        </div>
+    </div>  
   </div>
   <div class="row">
     <div class="col-12 col-md-6 mb-3">
       <label class="form-label" for="hdn_cod_autor">Autoria</label>
-        <select id="hdn_cod_autor" name="hdn_cod_autor" class="form-control selectpicker show-tick" data-size="6" data-live-search="true" title="Todas" data-header="Pesquisar Autor">
+        <select class="select2 form-select" id="hdn_cod_autor" name="hdn_cod_autor" data-size="6" data-live-search="true" title="Todas" data-header="Pesquisar Autor" style="width: 100%;">
               <option value="">Todas</option>
               <dtml-in expr="zsql.autor_obter_zsql(ind_excluido=0)">
                 <option value="<dtml-var cod_autor>"><dtml-var nom_autor_join></option>
@@ -162,13 +92,13 @@ function pesquisam_criticar(form){
     </div>
     <div class="col-12 col-md-6 mb-3">
       <label class="form-label" for="txt_assunto">Termos da Pesquisa</label>
-      <input type="text" class="form-control" name="txt_assunto" id="txt_assunto" maxlenght="50" autocomplete="off" data-bs-toggle="popover" data-trigger="focus" title="Dicas de Preenchimento" data-content="A frase colocada entre aspas duplas pesquisa por registros com a frase exata. Um asterisco (*) é um operador de truncamento que pode ser inserido ao fim de uma palavra. Um sinal de mais (+) precedente indica que a palavra deve estar presente no texto. Um sinal de menos (-) precedente indica que a palavra não deve estar presente em qualquer parte do texto." />
+      <input type="text" class="form-control" name="txt_assunto" id="txt_assunto" maxlenght="50" autocomplete="off" data-bs-toggle="popover" data-bs-placement="top" title="Dicas de Preenchimento" data-bs-trigger="focus" data-bs-content="A frase colocada entre aspas duplas pesquisa por registros com a frase exata. Um asterisco (*) é um operador de truncamento que pode ser inserido ao fim de uma palavra. Um sinal de mais (+) precedente indica que a palavra deve estar presente no texto. Um sinal de menos (-) precedente indica que a palavra não deve estar presente em qualquer parte do texto." />
     </div>
   </div>
   <div class="row">
     <div class="col-12 col-md-4 mb-3">
-      <label class="form-label" for="lst_tramitou">Tramitou por:</label>
-        <select id="lst_tramitou" name="lst_tramitou" class="form-control">
+      <label class="form-label" for="lst_tramitou">Tramitou por</label>
+        <select class="select2 form-select" id="lst_tramitou" name="lst_tramitou" style="width: 100%;">
             <option value=""></option>
             <dtml-in expr="zsql.unidade_tramitacao_obter_zsql(ind_leg=1)">
               <option value="<dtml-var cod_unid_tramitacao missing>">
@@ -179,7 +109,7 @@ function pesquisam_criticar(form){
     </div>
     <div class="col-12 col-md-4 mb-3">
       <label class="form-label" for="lst_localizacao">Localização Atual</label>
-        <select id="lst_localizacao" name="lst_localizacao" class="form-control">
+        <select class="select2 form-select" id="lst_localizacao" name="lst_localizacao" style="width: 100%;">
             <option value="">Todas</option>
             <dtml-in expr="zsql.unidade_tramitacao_obter_zsql(ind_leg=1)">
               <option value="<dtml-var cod_unid_tramitacao missing>">                
@@ -190,7 +120,7 @@ function pesquisam_criticar(form){
     </div>
     <div class="col-12 col-md-4 mb-3">
       <label class="form-label" for="lst_status">Situação Atual</label>
-        <select id="lst_status" name="lst_status" class="form-control">
+        <select class="select2 form-select" id="lst_status" name="lst_status" style="width: 100%;">
             <option value="">Todas</option>
             <dtml-in expr="zsql.status_tramitacao_obter_zsql(ind_excluido=0)">
               <option value="<dtml-var cod_status missing>">
@@ -203,7 +133,7 @@ function pesquisam_criticar(form){
   <div class="row">
   <div class="col-12 col-sm-4 mb-3">
       <label class="form-label" for="rad_tramitando" class="d-block">Em Tramitação?</label>
-        <select id="rad_tramitando" name="rad_tramitando" class="form-control">
+        <select class="select2 form-select" id="rad_tramitando" name="rad_tramitando" data-minimum-results-for-search="Infinity" style="width: 100%;">
          <dtml-in expr="[('Não', '0'), ('Sim', '1'), ('Tanto faz', '')]">      
             <option value="<dtml-var expr="_['sequence-item']">" <dtml-if expr="_['sequence-item']==''">selected</dtml-if>><dtml-var expr="_['sequence-key']"></option>
          </dtml-in>
@@ -211,7 +141,7 @@ function pesquisam_criticar(form){
    </div>                         
     <div class="col-12 col-sm-4 mb-3">
       <label class="form-label" for="rd_ordenacao" class="d-block">Ordenação</label>
-        <select id="rd_ordenacao" name="rd_ordenacao" class="form-control">
+        <select class="select2 form-select" id="rd_ordenacao" name="rd_ordenacao" data-minimum-results-for-search="Infinity" style="width: 100%;">
          <dtml-in expr="[('Descendente', '1'), ('Ascendente', '2')]">      
             <option value="<dtml-var expr="_['sequence-item']">" <dtml-if expr="_['sequence-item']==''">selected</dtml-if>><dtml-var expr="_['sequence-key']"></option>
          </dtml-in>
@@ -219,14 +149,14 @@ function pesquisam_criticar(form){
     </div>
     <div class="col-12 col-sm-4 mb-3">
       <label class="form-label d-block">Pesquisa Textual</label>
-      <div class="custom-control custom-switch">
-      <input type="checkbox" class="custom-control-input" name ="chk_textual" id="chk_textual">
-        <label class="custom-control-label" for="chk_textual">Pesquisar nos Textos Integrais</label>
+      <div class="form-check form-switch">
+        <input type="checkbox" class="form-check-input" name ="chk_textual" id="chk_textual">
+        <label class="form-check-label" for="chk_textual">Pesquisar nos Textos Integrais</label>
       </div>
     </div>        
   </div>    
   <div class="row">
-    <div class="col-12 col-md-12 mt-2 text-start"> 
+    <div class="col-12 col-md-12 mt-2 text-center text-md-start"> 
         <dtml-let isAnon="portal_membership.isAnonymousUser()">
             <dtml-if expr="isAnon and sapl_documentos.props_sagl.recaptcha_key">
                 <div class="g-recaptcha mb-3" data-sitekey="<dtml-var "sapl_documentos.props_sagl.recaptcha_key">"></div>
@@ -250,4 +180,51 @@ function pesquisam_criticar(form){
 </div>
 
 <dtml-var js_slot>
+<script>
+
+(function ($) {
+  $(function () {
+    document.onkeypress = function (event) {
+      var form = pesq_basica_form;
+      if (event.keyCode === 13) {
+        form.submit();
+      }
+    };
+  });
+}(jQuery));
+
+function pesquisam_criticar(form){  
+
+  var form = document.pesq_basica_form;
+
+  if (form.dt_apres.value != "" && !IsValidDate(form.dt_apres.value)) {
+    bootstrap.showModal({title: "Mensagem do Sistema", body: "Digite uma data inicial válida!"});
+    return false;
+  } 
+
+  if (form.dt_apres2.value != "" && !IsValidDate(form.dt_apres2.value)) {
+    bootstrap.showModal({title: "Mensagem do Sistema", body: "Digite uma data final válida!"});
+    return false;
+  } 
+  
+  form.submit();
+}
+
+  $(document).ready(function(){
+    $('#chk_textual').change(function(){
+          var form = document.pesq_basica_form;
+          var checked = $('#chk_textual').is(':checked');
+          if(checked){
+              $('#pesq_basica_form').attr('action','materia_texto_pesquisar_proc');
+              if($('#txt_assunto').val() == '') {
+                 bootstrap.showModal({title: "Informação", body: "Para realizar uma pesquisa textual, é necessário prencher o campo 'Termos da Pesquisa'."})
+              }
+          }
+          else{
+              $('#pesq_basica_form').attr('action','materia_pesquisar_proc');
+          }
+    })
+  });
+
+</script>
 <dtml-var footer_html>

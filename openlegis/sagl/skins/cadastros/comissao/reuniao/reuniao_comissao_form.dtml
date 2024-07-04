@@ -79,10 +79,10 @@
      <div class="col-6 col-sm-6 col-md-9 mb-3">  
          <label class="form-label" for="txt_url_video">Player de Vídeo</label>
          <div class="input-group">
-           <input class="form-control" type="text" id="txt_url_video" name="txt_url_video" maxlength="150" value="<dtml-var url_video missing null>" placeholder="Exemplo: https://www.youtube.com/embed/XXXXX" autocomplete="off" />
+           <input class="form-control" type="text" id="txt_url_video" name="txt_url_video" maxlength="150" value="<dtml-var url_video missing null>" autocomplete="off" />
            <dtml-if expr="_.has_key('cod_reuniao') and url_video">
-              <div class="input-group-append">                            
-                <button type="button" class="btn btn-sm btn-light" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Reprodução de Vídeo" data-src="<dtml-var url_video missing null=''>"><i class="fa fa-fw fa-play"></i><span class="d-none">Video</span></button>
+              <div class="input-group-append">
+                <a href="<dtml-var url_video>" class="popup-youtube btn btn-light"><i class="fab fa-fw fa-youtube"></i>Vídeo</a>   
               </div>
            </dtml-if>
          </div>
@@ -360,6 +360,8 @@
 </div>
 </div>
 
+<link href="<dtml-var portal_url>/assets/libs/magnific-popup/magnific-popup.css" rel="stylesheet" type="text/css" />
+
 <dtml-var js_slot>
 <script>
  function reuniao_criticar(form){
@@ -487,5 +489,8 @@ $(document).ready(function() {
 });
 
 </script>
-
+<script src="<dtml-var portal_url>/assets/libs/magnific-popup/jquery.magnific-popup.min.js"></script>
+<script>
+(function(e){"use strict";e(".image-popup-vertical-fit").magnificPopup({type:"image",closeOnContentClick:!0,mainClass:"mfp-img-mobile",image:{verticalFit:!0}}),e(".image-popup-no-margins").magnificPopup({type:"image",closeOnContentClick:!0,closeBtnInside:!1,fixedContentPos:!0,mainClass:"mfp-no-margins mfp-with-zoom",image:{verticalFit:!0},zoom:{enabled:!0,duration:300}}),e(".popup-gallery").magnificPopup({delegate:"a",type:"image",tLoading:"Loading image #%curr%...",mainClass:"mfp-img-mobile",gallery:{enabled:!0,navigateByImgClick:!0,preload:[0,1]},image:{tError:'<a href="%url%">The image #%curr%</a> could not be loaded.'}}),e(".zoom-gallery").magnificPopup({delegate:"a",type:"image",closeOnContentClick:!1,closeBtnInside:!1,mainClass:"mfp-with-zoom mfp-img-mobile",image:{verticalFit:!0,titleSrc:function(e){return e.el.attr("title")+' &middot; <a href="'+e.el.attr("data-source")+'" target="_blank">image source</a>'}},gallery:{enabled:!0},zoom:{enabled:!0,duration:300,opener:function(e){return e.find("img")}}}),e(".popup-youtube, .popup-vimeo, .popup-gmaps").magnificPopup({disableOn:700,type:"iframe",mainClass:"mfp-fade",removalDelay:160,preloader:!1,fixedContentPos:!1}),e(".popup-with-zoom-anim").magnificPopup({type:"inline",fixedContentPos:!1,fixedBgPos:!0,overflowY:"auto",closeBtnInside:!0,preloader:!1,midClick:!0,removalDelay:300,mainClass:"my-mfp-zoom-in"}),e(".popup-with-move-anim").magnificPopup({type:"inline",fixedContentPos:!1,fixedBgPos:!0,overflowY:"auto",closeBtnInside:!0,preloader:!1,midClick:!0,removalDelay:300,mainClass:"my-mfp-slide-bottom"}),e(".popup-form").magnificPopup({type:"inline",preloader:!1,focus:"#name",callbacks:{beforeOpen:function(){e(window).width()<700?this.st.focus=!1:this.st.focus="#name"}}})}).apply(this,[jQuery]);
+</script>
 <dtml-var footer_html>

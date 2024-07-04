@@ -5,11 +5,9 @@
   <dtml-call expr="REQUEST.set('sgl_comissao', sgl_comissao)">
 </dtml-in>
 
-<div class="row mb-2">
- <div class="col-12 col-md-10 align-self-center"> 
-    <h1 class="firstHeading font-size-18"><dtml-var nom_comissao></h1>
- </div>
- <div class="col-12 col-md-2 text-start text-end">
+<div class="d-flex justify-content-between mb-1">
+ <h4 class="firstHeading font-size-18"><dtml-var nom_comissao></h4>
+ <div class="btn-group">
    <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia'])"> 
       <a class="btn btn-light" href="<dtml-var portal_url>/cadastros/comissao/comissao_mostrar_proc?cod_comissao=<dtml-var cod_comissao>"><i class="fas fa-undo"></i> Voltar</a>  
    <dtml-else>
@@ -20,7 +18,11 @@
 
 <dtml-in expr="materias_comissao_pysc(cod_comissao=cod_comissao)" prefix="materia">
   <dtml-if sequence-start>
-     <p class="text-muted font-weight-bold">Matérias pendentes de parecer: [<dtml-var sequence-length> ocorrência<dtml-if expr="_['sequence-length'] > 1">s</dtml-if>]</p>
+    <div class="row">
+      <div class="col-12">
+        <legend class="font-size-16">Matérias em Análise: <dtml-var sequence-length> matéria<dtml-if expr="_['sequence-length'] > 1">s</dtml-if> com parecer pendente.</legend>
+      </div>
+    </div>
      <div class="table-responsive">
      <table id="matcom" class="table datatable">
        <thead>
@@ -38,14 +40,14 @@
            <dtml-else>
 	      <a href="&dtml-portal_url;/consultas/materia/materia_mostrar_proc?cod_materia=<dtml-var expr="pysc.b64encode_pysc(codigo=cod_materia)">">
            </dtml-if>
-           <b><dtml-var des_tipo_materia> nº <dtml-var num_ident_basica>/<dtml-var ano_ident_basica></a></b>
+           <dtml-var des_tipo_materia> nº <dtml-var num_ident_basica>/<dtml-var ano_ident_basica></a>
          </td>
          <td>
            <dtml-var txt_ementa>
          </td>
          <td>
            <dtml-in expr="zsql.autoria_obter_zsql(cod_materia=materia_item, ind_excluido=0)">
-            <b><dtml-var nom_autor_join></b>
+            <dtml-var nom_autor_join>
            </dtml-in>
          </td>
       </dtml-in>

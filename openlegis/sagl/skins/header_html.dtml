@@ -205,10 +205,11 @@
                             </button>
                         </div>
 
-                        <button type="button" class="btn btn-sm font-size-16 d-lg-none header-item waves-effect waves-light"
-                            data-bs-toggle="collapse" data-target="#topnav-menu-content">
+                        <button type="button" class="btn btn-sm px-3 font-size-16 d-lg-none header-item waves-effect waves-light"
+                            data-bs-toggle="collapse" data-bs-target="#topnav-menu-content">
                             <i class="fa fa-fw fa-bars"></i>
                         </button>
+
                     <dtml-if expr="AUTHENTICATED_USER.has_role(['Authenticated'])">
                         <div class="dropdown d-inline-block">
                             <button type="button" class="btn header-item waves-effect" id="page-header-user-dropdown"
@@ -435,21 +436,9 @@
                 </dtml-if>
                 
                      <dtml-if expr="not REQUEST.get('modal', '')">
-                       <div class="row">
-                            <div class="col-12">
-                                <div class="page-title-box d-flex align-items-center justify-content-between">
-                                    <div class="page-title-left">
-                                        <ol class="breadcrumb m-0">
-                                            <li class="breadcrumb-item"><a href="javascript: void(0);">Início</a></li>
-                                            <li class="breadcrumb-item"><a href="javascript: void(0);">Consultas</a></li>
-                                            <li class="breadcrumb-item active">Vereadores</li>
-                                        </ol>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                       <dtml-var breadcrumbs>
                       </dtml-if>
                           <div class="col-lg-12 col-xl-12">
-                                <div class="card" <dtml-if expr="REQUEST.get('modal', '')">style="min-height: 500px; box-shadow:none;"</dtml-if>>
+                                <div class="card font-size-13" <dtml-if expr="REQUEST.get('modal', '')">style="min-height: 500px; box-shadow:none;"</dtml-if>>
                                     <div class="card-body">
                                     

@@ -80,7 +80,7 @@ function setar_hdn_file(form){
       </div>
       <div class="col-12 col-md-4 text-start text-end">
          <div class="btn-group d-print-none ">
-           <a class="btn btn-primary btn-sm" href="index_html"><i class="fa fa-fw fa-undo"></i> Voltar</a>         
+           <a class="btn btn-light btn-sm" href="index_html"><i class="fa fa-fw fa-undo"></i> Voltar</a>         
          </div>
       </div>
  </div>
@@ -90,24 +90,30 @@ function setar_hdn_file(form){
   <input type="hidden" name="hdn_cod_partido" value="<dtml-var cod_partido missing>" />
 
   <div class="row">
+    <div class="col-4 mb-3">
+      <label class="form-label required" for="txt_sgl_partido">Sigla</label>             
+      <input class="form-control" type="text" id="txt_sgl_partido" name="txt_sgl_partido" value="<dtml-var sgl_partido missing>" maxlength="20" />
+    </div>   
     <div class="col-8 mb-3">
-      <label class="form-label" for="txt_nom_partido" class="required">Nome do Partido</label>         
+      <label class="form-label required" for="txt_nom_partido">Nome do Partido</label>         
       <input class="form-control" type="text" id="txt_nom_partido" name="txt_nom_partido" value="<dtml-var nom_partido missing>" maxlength="50" />
     </div>
-    <div class="col-4 mb-3">
-      <label class="form-label" for="txt_sgl_partido" class="required">Sigla</label>             
-      <input class="form-control" type="text" id="txt_sgl_partido" name="txt_sgl_partido" value="<dtml-var sgl_partido missing>" maxlength="20" />
-    </div>    
   </div>
 
   <div class="row">
     <div class="col-6 col-sm-3 mb-3">
-      <label class="form-label" for="txt_dat_criacao" class="required">Data de Criação</label>                 
-      <input class="form-control date" type="text" id="txt_dat_criacao" name="txt_dat_criacao" value="<dtml-var dat_criacao missing null="">" />
+      <label class="form-label required" for="txt_dat_criacao">Data de Criação</label>   
+        <div class="input-group">
+           <input type="text" class="form-control datepicker" placeholder="dd/mm/aaaa" name="txt_dat_criacao" id="txt_dat_criacao" data-provide="datepicker" data-date-autoclose="true" value="<dtml-var dat_criacao missing null>" autocomplete="off" required>
+           <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
+        </div>
     </div>
     <div class="col-6 col-sm-3 mb-3">
-      <label class="form-label" for="txt_dat_extincao">Data de Extinção</label>                     
-      <input class="form-control date" type="text" id="txt_dat_extincao" name="txt_dat_extincao" value="<dtml-var dat_extincao missing null="">" />
+      <label class="form-label" for="txt_dat_extincao">Data de Extinção</label>
+        <div class="input-group">
+           <input type="text" class="form-control datepicker" placeholder="dd/mm/aaaa" name="txt_dat_extincao" id="txt_dat_extincao" data-provide="datepicker" data-date-autoclose="true" value="<dtml-var dat_extincao missing null>" autocomplete="off">
+           <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
+        </div>
     </div>    
   </div>
 
@@ -118,12 +124,10 @@ function setar_hdn_file(form){
           <dtml-call expr="REQUEST.set('logo_partido', str(cod_partido)+'_logo.png')">
           <dtml-if expr="hasattr(sapl_documentos.partido, logo_partido)">
              <img class="img-fluid" src="<dtml-var portal_url>/sapl_documentos/partido/<dtml-var logo_partido>?<dtml-var expr="ZopeTime().timeTime()">" alt="<dtml-var sgl_partido missing>">
-          <dtml-elif expr="hasattr(imagens.logo_partido, logo_partido)">
-             <img class="img-fluid" src="<dtml-var portal_url>/imagens/logo_partido/<dtml-var logo_partido>" alt="<dtml-var sgl_partido missing>">
           </dtml-if>
        </dtml-if>
        <div class="custom-file">
-         <input type="file" class="custom-file-input" id="file_nom_imagem" name="file_nom_imagem" accept="image/png" onChange="setar_hdn_file(form)" />
+         <input type="file" class="form-control" id="file_nom_imagem" name="file_nom_imagem" accept="image/png" onChange="setar_hdn_file(form)" />
          <label class="custom-file-label" for="file_nom_imagem">Selecione a imagem</label>
            <small id="passwordHelpBlock" class="form-text text-muted">
               PNG com fundo transparente.

@@ -6,33 +6,6 @@
      </dtml-if>
   </dtml-in>
 
-<script>
- function campos_criticar(){
-   var form = document.expediente_form;
-   var regexp_digitos = /\D+/;
-   form.submit();
- }
-
-    $(function () {
-        $("#postjq").click(function (event)
-        {
-            event.preventDefault();
-            var $post = {};
-            $.ajax({
-                url: 'respostas_obter_pysc',
-                type: 'POST',
-                data: $post,
-                dataType: 'json',
-                success:function(response){
-                    var respostas = response;
-                        tinymce.get("<dtml-var expediente_executivo>").setContent(response);
-
-                }
-            });
-        });
-    });
-</script>
-
 <dtml-if expr="_.has_key('ind_audiencia')">
   <dtml-var audiencia_publica_menu>
 <dtml-elif cod_sessao_plen>
@@ -80,6 +53,7 @@
 </div>
 </div>
 
+<dtml-var js_slot>
 <script>
 tinymce.init({
   mode : "textareas",
@@ -102,7 +76,30 @@ tinymce.init({
   forced_root_block_attrs : { style: 'text-align: justify;' },
   content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }'
 });
-</script>
 
-<dtml-var js_slot>
+ function campos_criticar(){
+   var form = document.expediente_form;
+   var regexp_digitos = /\D+/;
+   form.submit();
+ }
+
+    $(function () {
+        $("#postjq").click(function (event)
+        {
+            event.preventDefault();
+            var $post = {};
+            $.ajax({
+                url: 'respostas_obter_pysc',
+                type: 'POST',
+                data: $post,
+                dataType: 'json',
+                success:function(response){
+                    var respostas = response;
+                        tinymce.get("<dtml-var expediente_executivo>").setContent(response);
+
+                }
+            });
+        });
+    });
+</script>
 <dtml-var footer_html>

@@ -1,100 +1,5 @@
 <dtml-var header_html>
 
-<script src="<dtml-var portal_url>/js/dataTables.rowReorder.min.js"></script>
-<link rel="stylesheet" href="<dtml-var portal_url>/css/rowReorder.bootstrap4.min.css" />
-
-<script>
-    function lista_apresentada_excluir(){
-        if (confirm("Deseja realmente excluir a lista de matérias apresentadas?")) {
-            location.href="lista_apresentada_excluir_proc?<dtml-var "REQUEST.get('QUERY_STRING','')">";
-        }
-       return;
-    }
-
-$(document).ready(function() {
-
-    var table = $('#apresentada').DataTable( {
-         "order": [[ 0, 'asc' ]],
-         "rowReorder": {
-             selector: 'td:nth-child(1)',       
-             //selector: 'tr',
-             //   update: true,
-         },         
-        "responsive": true,
-        "bStateSave": true,
-        "fnStateSave": function (oSettings, oData) {
-            localStorage.setItem('apresDataTable', JSON.stringify(oData));
-        },
-        "fnStateLoad": function (oSettings) {
-            return JSON.parse(localStorage.getItem('apresDataTable'));
-        },
-        "lengthMenu": [[10, 25, 50, 100], [10, 25, 50, 100]],
-        "lengthChange": true,
-        "buttons": [
-            {
-                extend: 'collection',
-                text: 'Exportar',
-                buttons: [ 
-                           {
-                             extend:    'excelHtml5',
-                             text:      '<i class="far fa-file-excel"></i> Excel',
-                             titleAttr: 'PDF'
-                           },
-                           {
-                             extend:    'pdfHtml5',
-                             download: 'open',
-                             text:      '<i class="fa fa-file-adobe"></i> PDF',
-                             titleAttr: 'PDF'
-                           },
-                           {
-                             extend:    'print',
-                             text:      '<i class="fa fa-print"></i> Impressão',
-                             titleAttr: 'Impressão'
-                           },
-                         ],
-               className: '',
-               dropup: true,
-               autoClose: true,
-               fade: true
-
-            }
-        ],
-        "language": {
-          search: "Pesquisar:",
-          processing:     "Processando...",
-          loadingRecords: "Carregando...",
-          lengthMenu:     "Exibir _MENU_ registros por página",
-          info:           "Exibindo _START_ a _END_ de _TOTAL_ registros",
-          infoEmpty:      "Exibindo _START_ a _END_ de _TOTAL_ registros",
-          infoFiltered:   "(total de registros:_MAX_)",
-          emptyTable:     "Nenhum registro encontrado",
-          zeroRecords:     "Nenhum registro encontrado",
-          paginate: {
-            first:      "Primeiro",
-            previous:   "Anterior",
-            next:       "Próximo",
-            last:       "Último"
-          },
-        }
-    }); 
-    table.on('row-reorder.dt', function (dragEvent, data, nodes) {
-        for (var i = 0, ien = data.length ; i < ien ; i++) {
-            var rowData = table.row(data[i].node).data();
-            var codigo = table.row(data[i].node).id();
-            $.ajax({
-                type: "GET",
-                cache: false,
-                contentType: "application/json; charset=utf-8",
-                url: 'materia_apresentada_atualizar_proc',
-                data: {cod_sessao_plen: <dtml-var cod_sessao_plen>,  Id: codigo, fromPosition: data[i].oldData, toPosition: data[i].newData },
-                dataType: "json"
-            });
-            }
-    });
-});
-
-</script>
-
 <dtml-var sessao_plenaria_menu>
 
 <div class="tab-content bg-white">
@@ -108,7 +13,7 @@ $(document).ready(function() {
 
       <dtml-if sequence-start>
         <div class="table-responsive mb-3">
-          <table class="table display" id="apresentada">
+          <table class="table datatable" id="apresentada">
            <thead>
              <tr>
                 <th width="5%">Item</th>
@@ -217,5 +122,15 @@ $(document).ready(function() {
 </div>
 </div>
 
+<link rel="stylesheet" href="<dtml-var portal_url>/css/rowReorder.bootstrap4.min.css" />
 <dtml-var js_slot>
+<script src="<dtml-var portal_url>/js/dataTables.rowReorder.min.js"></script>
+<script>
+    function lista_apresentada_excluir(){
+        if (confirm("Deseja realmente excluir a lista de matérias apresentadas?")) {
+            location.href="lista_apresentada_excluir_proc?<dtml-var "REQUEST.get('QUERY_STRING','')">";
+        }
+       return;
+    }
+</script>
 <dtml-var footer_html>

@@ -5,18 +5,20 @@
   <dtml-call expr="REQUEST.set('sgl_comissao', sgl_comissao)">
 </dtml-in>
 
-<div class="row mb-2">
- <div class="col-12 col-md-10 align-self-center"> 
-    <h1 class="firstHeading font-size-18"><dtml-var nom_comissao></h1>
- </div>
- <div class="col-12 col-md-2 text-start text-end">
+ <div class="row mb-3">
+  <div class="col-9 col-md-8 d-flex align-items-center">
+    <h1 class="firstHeading font-size-18 mb-0"><dtml-var nom_comissao></h1>
+  </div>
+  <div class="col-3 col-md-4">
+    <div class="input-group mt-1 mt-md-0 d-flex justify-content-end">
    <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia'])"> 
-      <a class="btn btn-light" href="<dtml-var portal_url>/cadastros/comissao/comissao_mostrar_proc?cod_comissao=<dtml-var cod_comissao>"><i class="fas fa-undo"></i> Voltar</a>  
+      <a class="btn btn-sm btn-light" href="<dtml-var portal_url>/cadastros/comissao/comissao_mostrar_proc?cod_comissao=<dtml-var cod_comissao>"><i class="fas fa-undo"></i> Voltar</a>  
    <dtml-else>
-      <a class="btn btn-light" href="<dtml-var portal_url>/consultas/comissao/comissao_mostrar_proc?cod_comissao=<dtml-var cod_comissao>"><i class="fas fa-undo"></i> Voltar</a>    
-   </dtml-if>
+      <a class="btn btn-sm btn-light" href="<dtml-var portal_url>/consultas/comissao/comissao_mostrar_proc?cod_comissao=<dtml-var cod_comissao>"><i class="fas fa-undo"></i> Voltar</a>    
+   </dtml-if>  
+    </div>
+  </div>
  </div>
-</div>
 
 <legend class="font-size-16">Documentos Publicados</legend>
 

@@ -1,87 +1,15 @@
 <dtml-var header_html>
 
-<script>
-$(document).ready(function() {
-    var table = $('#jdTable').DataTable( {
-        "responsive": true,
-        "order": [[ 0, "asc" ], [ 1, "asc" ]],
-        "buttons": [
-            {
-                extend: 'collection',
-                text: 'Exportar',
-                buttons: [ 
-                           {
-                             extend:    'excelHtml5',
-                             text:      '<i class="far fa-file-excel"></i> Excel',
-                             titleAttr: 'PDF'
-                           },
-                           {
-                             extend:    'pdfHtml5',
-                             download: 'open',
-                             text:      '<i class="fa fa-file-adobe"></i> PDF',
-                             titleAttr: 'PDF'
-                           },
-                           {
-                             extend:    'print',
-                             text:      '<i class="fa fa-print"></i> Impressão',
-                             titleAttr: 'Impressão'
-                           },
-                         ],
-               className: '',
-               dropup: true,
-               autoClose: true,
-               fade: true
-
-            }
-        ],
-        "language": {
-          search: "Pesquisar:",
-          processing:     "Processando...",
-          loadingRecords: "Carregando...",
-          lengthMenu:     "Exibir _MENU_ registros por página",
-          info:           "Exibindo _START_ a _END_ de _TOTAL_ registros",
-          infoEmpty:      "Exibindo _START_ a _END_ de _TOTAL_ registros",
-          infoFiltered:   "(total de registros:_MAX_)",
-          emptyTable:     "Nenhum registro encontrado",
-          zeroRecords:     "Nenhum registro encontrado",
-          paginate: {
-            first:      "Primeiro",
-            previous:   "Anterior",
-            next:       "Próximo",
-            last:       "Último"
-          },
-         "buttons": {
-           print: "Imprimir",
-           copy: "Copiar",
-           copyTitle: "Cópia bem sucedida",
-           copySuccess: {
-            1: "Uma linha copiada com sucesso",
-            _: "%d linhas copiadas com sucesso"
-          }
-        }
-        }
-    });
-    table.buttons().container()
-        .appendTo( '#panelBtn .col-sm-12:eq(0)' );
-});
-
-function mostrar(){
-  location.href = "usuario_form";
-} 
-
-</script>
-
  <div class="row mb-2">
       <div class="col-12 col-md-8 align-self-center">
         <h1 class="firstHeading font-size-18">Gerenciamento de Usuários</h1>
       </div>
       <div class="col-12 col-md-4 text-start text-end">
          <dtml-if expr="AUTHENTICATED_USER.has_role(['Administrador', 'Operador'])">
-            <input class="btn btn-sm btn-primary" type="button" name="submit" value="Incluir Usuário" onClick="mostrar()"/>
+            <input class="btn btn-sm btn-light" type="button" name="submit" value="Incluir Usuário" onClick="mostrar()"/>
          </dtml-if> 
       </div>
  </div>
-
 
 <table id="jdTable" class="table">
  <thead>
@@ -125,4 +53,74 @@ function mostrar(){
 </div>
 
 <dtml-var js_slot>
+<script>
+$(document).ready(function() {
+    var table = $('#jdTable').DataTable( {
+        "responsive": true,
+        "order": [[ 0, "asc" ], [ 1, "asc" ]],
+        "buttons": [
+            {
+                extend: 'collection',
+                text: 'Exportar',
+                buttons: [ 
+                           {
+                             extend:    'excelHtml5',
+                             text:      '<i class="far fa-file-excel"></i> Excel',
+                             titleAttr: 'PDF'
+                           },
+                           {
+                             extend:    'pdfHtml5',
+                             download: 'open',
+                             text:      '<i class="fa fa-file-pdf"></i> PDF',
+                             titleAttr: 'PDF'
+                           },
+                           {
+                             extend:    'print',
+                             text:      '<i class="fa fa-print"></i> Impressão',
+                             titleAttr: 'Impressão'
+                           },
+                         ],
+               className: 'btn btn-sm btn-light',
+               dropup: true,
+               autoClose: true,
+               fade: true
+
+            }
+        ],
+        "language": {
+          search: "Pesquisar:",
+          processing:     "Processando...",
+          loadingRecords: "Carregando...",
+          lengthMenu:     "Exibir _MENU_ registros por página",
+          info:           "Exibindo _START_ a _END_ de _TOTAL_ registros",
+          infoEmpty:      "Exibindo _START_ a _END_ de _TOTAL_ registros",
+          infoFiltered:   "(total de registros:_MAX_)",
+          emptyTable:     "Nenhum registro encontrado",
+          zeroRecords:     "Nenhum registro encontrado",
+          paginate: {
+            first:      "Primeiro",
+            previous:   "Anterior",
+            next:       "Próximo",
+            last:       "Último"
+          },
+         "buttons": {
+           print: "Imprimir",
+           copy: "Copiar",
+           copyTitle: "Cópia bem sucedida",
+           copySuccess: {
+            1: "Uma linha copiada com sucesso",
+            _: "%d linhas copiadas com sucesso"
+          }
+        }
+        }
+    });
+    table.buttons().container()
+        .appendTo( '#panelBtn .col-sm-12:eq(0)' );
+});
+
+function mostrar(){
+  location.href = "usuario_form";
+} 
+
+</script>
 <dtml-var footer_html>

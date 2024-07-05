@@ -1,14 +1,14 @@
 <dtml-var header_html>
 
- <div class="row mb-2">
-  <div class="col-12 col-sm-8 align-self-center">
-    <h1 class="firstHeading font-size-18">Pesquisa de Matérias</h1>
+ <div class="row mb-3">
+  <div class="col-12 col-md-6 d-flex align-items-center">
+    <h1 class="firstHeading font-size-18 mb-0">Pesquisa de Matérias</h1>
   </div>
-  <div class="col-12 col-sm-4 text-start text-sm-end mb-2">
-    <div class="btn-group" role="group">
-     <a class="btn btn-primary btn-sm" href="<dtml-var portal_url>/consultas/materia" ><i class="fa fa-fw fa-search"></i> Nova Pesquisa</a>
-     <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia'])">         
-        <a class="btn btn-primary btn-sm" href="<dtml-var portal_url>/cadastros/materia/materia_form_resumido" ><i class="fa fa-fw fa-plus"></i> Incluir Matéria</a>
+  <div class="col-12 col-md-6">
+    <div class="input-group mt-1 mt-md-0 d-flex justify-content-start justify-content-md-end">
+     <a class="btn btn-sm btn-light" href="<dtml-var portal_url>/consultas/materia" ><i class="fa fa-fw fa-search"></i> Nova Pesquisa</a>
+     <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia'])">
+        <a class="btn btn-sm btn-light" href="<dtml-var portal_url>/cadastros/materia/materia_form_resumido" ><i class="fa fa-fw fa-plus"></i> Incluir Matéria</a>
      </dtml-if>   
     </div>
   </div>
@@ -85,11 +85,11 @@
          <i class="far fa-list-alt"></i> Resultado: <dtml-var sequence-length> matéria<dtml-if expr="_['sequence-length'] > 1">s</dtml-if>
       </div>
       <div class="col-4 col-sm-3 text-end align-self-center">
-         <div class="dropdown d-print-none">
-           <button class="btn btn-sm btn-light dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+         <div class="btn-group">
+           <button class="btn btn-sm btn-outline-light" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
              <i class="fas fa-file-export"></i> Exportar
            </button>
-           <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
+           <div class="dropdown-menu dropdown-menu-right">
               <dtml-let isAnon="portal_membership.isAnonymousUser()">
                  <dtml-if expr="not isAnon">
                      <a class="dropdown-item" href="<dtml-var portal_url>/relatorios/pdf_materia_preparar_pysc?<dtml-var "REQUEST.get('QUERY_STRING','')">&tipo_materia=<dtml-var "REQUEST.form.get('lst_tip_materia')">" target="_blank"><i class="far fa-file-pdf"></i> PDF</a>
@@ -106,22 +106,19 @@
    </dtml-if sequence-start>
    <li class="list-group-item">
     <div class="row">
-      <div class="col-12 col-sm-9 col-lg-10">
+      <div class="col-12">
                <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia'])">
                  <a href="<dtml-var portal_url>/cadastros/materia/materia_mostrar_proc?cod_materia=<dtml-var cod_materia>">
                <dtml-else>
                  <a href="<dtml-var portal_url>/consultas/materia/materia_mostrar_proc?cod_materia=<dtml-var expr="pysc.b64encode_pysc(codigo=cod_materia)">" >
                </dtml-if>
-              <p class="h6 font-weight-bold text-uppercase mb-1"><i class="fas fa-caret-right"></i> <dtml-var des_tipo_materia> nº <dtml-var num_ident_basica>/<dtml-var ano_ident_basica></p></a> 
-      </div>
-      <div class="col-12 col-sm-3 col-lg-2 text-sm-end">
-        <dtml-if expr="ind_tramitacao == 1"><span class="badge badge-primary">Em Tramitação</span></dtml-if>
+              <p class="h6 font-size-14 font-weight-bold text-uppercase mb-1"><dtml-var des_tipo_materia> nº <dtml-var num_ident_basica>/<dtml-var ano_ident_basica> <dtml-if expr="ind_tramitacao == 1"><span class="badge bg-dark-success align-text-top text-lowercase">tramitando</span></dtml-if></p></a> 
       </div>
     </div>
 
     <div class="row">
       <div class="col-12">
-        <p class="mb-0"><dtml-var txt_ementa missing null></p>
+        <p class="mb-0"><b>Ementa:</b> <dtml-var txt_ementa missing null></p>
       </div>
     </div>
     
@@ -386,19 +383,19 @@
  <dtml-call expr="REQUEST.set('redacao_final', str(cod_materia)+'_redacao_final.pdf')">
  <dtml-call expr="REQUEST.set('texto_original', str(cod_materia)+'_texto_integral.pdf')">
  <dtml-if "hasattr(sapl_documentos.materia,redacao_final) or hasattr(sapl_documentos.materia,texto_original)">
-  <div class="row d-print-none">
-    <div class="col-12 text-start mt-1 mb-2"> 
-     <div class="btn-group btn-group-sm">
+  <div class="row">
+    <div class="col-12"> 
+     <div class="input-group text_buttons">
       <dtml-if "hasattr(sapl_documentos.materia,texto_original)">
           <dtml-let isAnon="portal_membership.isAnonymousUser()">
              <dtml-if expr="not isAnon">
-                <a class="btn btn-sm btn-primary" href="<dtml-var portal_url>/consultas/materia/pasta_digital/?cod_materia=<dtml-var cod_materia>&action=pasta" target="_blank"><i class="far fa-folder"></i> Pasta Digital</a>
+                <a class="btn btn-sm btn-subtle-primary" href="<dtml-var portal_url>/consultas/materia/pasta_digital/?cod_materia=<dtml-var cod_materia>&action=pasta" target="_blank"><i class="far fa-folder"></i> Pasta Digital</a>
              </dtml-if>
           </dtml-let>
-          <a class="btn btn-sm btn-primary" href="<dtml-var portal_url>/pysc/download_materia_pysc?cod_materia=<dtml-var expr="pysc.b64encode_pysc(codigo=cod_materia)">&texto_original=1" target="_blank"><i class="far fa-file-pdf"></i> Texto Integral</a>
+          <a class="btn btn-sm btn-subtle-primary" href="<dtml-var portal_url>/pysc/download_materia_pysc?cod_materia=<dtml-var expr="pysc.b64encode_pysc(codigo=cod_materia)">&texto_original=1" target="_blank"><i class="far fa-file-pdf"></i> Texto Integral</a>
       </dtml-if> 
       <dtml-if "hasattr(sapl_documentos.materia,redacao_final)">
-          <a class="btn btn-sm btn-primary" href="<dtml-var portal_url>/pysc/download_materia_pysc?cod_materia=<dtml-var expr="pysc.b64encode_pysc(codigo=cod_materia)">&redacao_final=1" target="_blank"><i class="fas fa-file-pdf"></i> Redação Final</a>
+          <a class="btn btn-sm btn-subtle-primary" href="<dtml-var portal_url>/pysc/download_materia_pysc?cod_materia=<dtml-var expr="pysc.b64encode_pysc(codigo=cod_materia)">&redacao_final=1" target="_blank"><i class="fas fa-file-pdf"></i> Redação Final</a>
       </dtml-if>    
      </div>
     </div>

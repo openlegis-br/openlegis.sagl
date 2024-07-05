@@ -153,7 +153,7 @@
 
 
      var url="municipio_listar_form?municipio=" + municipio +
-              "&municipio_pesq=" + municipio_pesq + "&sgl_uf=" + sgl_uf;
+              "&municipio_pesq=" + municipio_pesq + "&sgl_uf=" + sgl_uf +"&modal=1";
      MunicipioWin = window.open(url, "", "width=500, height=330");
   } 
    
@@ -163,40 +163,40 @@
 
 </script>
 
-<h1 class="firstHeading font-size-18">Cadastro de Casa Legislativa</h1> 
+<h1 class="firstHeading font-size-18">Cadastro da Casa Legislativa</h1> 
 
 <form name="casa_legislativa_form" method="post" action="casa_legislativa_salvar_proc"  enctype="multipart/form-data">
-  <legend class="font-size-16">Configurações Básicas</legend>
+
   <input type="hidden" name="hdn_url" value="casa_legislativa_form" />
   <div class="row">
      <div class="col-12 col-md-7 mb-3">
-        <label class="form-label" for="txt_nom_casa" class="required">Nome da Casa</label>     
+        <label class="form-label required" for="txt_nom_casa">Nome da Casa</label>     
         <input class="form-control" type="text" id="txt_nom_casa" name="txt_nom_casa" value="<dtml-var expr="sapl_documentos.props_sagl.nom_casa" missing>" maxlength="75" />
      </div>
      <div class="col-6 col-md-2 mb-3">
-       <label class="form-label" for="txt_cod_casa" class="required">Código</label>
+       <label class="form-label required" for="txt_cod_casa">Código</label>
        <input class="form-control number" type="number" id="txt_cod_casa" name="txt_cod_casa" value="<dtml-var expr="sapl_documentos.props_sagl.cod_casa">" />
      </div>
      <div class="col-6 col-md-3 mb-3">
-        <label class="form-label" for="txt_sgl_casa" class="required">Sigla</label>
+        <label class="form-label required" for="txt_sgl_casa"">Sigla</label>
         <input class="form-control" type="text" id="txt_sgl_casa" name="txt_sgl_casa" value="<dtml-var expr="sapl_documentos.props_sagl.sgl_casa" missing null="">" maxlength="10" onBlur="form.txt_sgl_casa.value=form.txt_sgl_casa.value.toUpperCase()" />
      </div>
   </div>     
 
   <div class="row">
      <div class="col-8 col-md-9 mb-3">
-        <label class="form-label" for="txt_end_casa" class="required">Endereço</label>
+        <label class="form-label required" for="txt_end_casa">Endereço</label>
         <input class="form-control" type="text" id="txt_end_casa" name="txt_end_casa" value="<dtml-var expr="sapl_documentos.props_sagl.end_casa" missing null="">" maxlength="100" />
      </div>
      <div class="col-4 col-md-3 mb-3">
-        <label class="form-label" for="txt_num_cep" class="required">CEP</label>
+        <label class="form-label required" for="txt_num_cep">CEP</label>
         <input class="form-control" type="text" id="txt_num_cep" name="txt_num_cep" value="<dtml-var expr="sapl_documentos.props_sagl.num_cep" missing>" maxlength="9" />
      </div>     
   </div>
 
   <div class="row">
      <div class="col-8 col-lg-4 mb-3">
-        <label class="form-label" for="txt_municipio" class="required">Município</label>
+        <label class="form-label required" for="txt_municipio">Município</label>
         <div class="input-group">
            <input class="form-control" type="text" id="txt_municipio"  name="txt_municipio" 
              <dtml-in expr="zsql.localidade_obter_zsql(cod_localidade=sapl_documentos.props_sagl.cod_localidade)">
@@ -209,7 +209,7 @@
         </div>
      </div>
      <div class="col-4 col-lg-2 mb-3">     
-       <label class="form-label" for="lst_sgl_uf" class="required">Estado</label>
+       <label class="form-label required" for="lst_sgl_uf">Estado</label>
        <select class="form-select" id="lst_sgl_uf" name="lst_sgl_uf" size="1" style="value:sgl_uf missing">
            <option value="0"></option>
            <dtml-in expr="zsql.localidade_obter_zsql(tip_localidade='U')">
@@ -241,7 +241,7 @@
         <input class="form-control" type="text" id="txt_end_email_casa" name="txt_end_email_casa" value="<dtml-var expr="sapl_documentos.props_sagl.end_email_casa" missing>" maxlength="100" />
      </div>     
      <div class="col-12 col-lg-4 mb-3">
-        <label class="form-label" for="txt_txt_senha_inicial" class="required">Senha Inicial</label>
+        <label class="form-label required" for="txt_txt_senha_inicial">Senha Inicial</label>
         <input class="form-control" type="text" id="txt_txt_senha_inicial" name="txt_txt_senha_inicial" value="<dtml-var expr="sapl_documentos.props_sagl.txt_senha_inicial" missing>" maxlength="10" />
      </div>     
   </div>
@@ -252,7 +252,7 @@
         <input class="form-control" type="text" id="txt_recaptcha_key" name="txt_recaptcha_key" value="<dtml-var expr="sapl_documentos.props_sagl.recaptcha_key" missing>" />     
      </div>
      <div class="col-6 col-lg-3 mb-3">
-        <label class="d-block required">Numeração de Protocolo</label>
+        <label class="form-label required">Numeração de Protocolo</label>
         <dtml-in expr="[('1', 'Anual'), ('0', 'Consecutiva')]">
           <div class="form-check form-check-inline">        
            <input class="form-check-input" type="radio" id="rad<dtml-var expr="_['sequence-key']">" name="rad_protocolo" value="<dtml-var expr="_['sequence-key']">"
@@ -264,7 +264,7 @@
         </dtml-in>
      </div>
      <div class="col-6 col-lg-3 mb-3">
-        <label class="form-label d-block">Acompanhamento de Matérias</label>
+        <label class="form-label required">Acompanhamento de Matérias</label>
         <dtml-in expr="[('1', 'Sim'), ('0', 'Não')]">
           <div class="form-check form-check-inline">                
            <input class="form-check-input" type="radio" id="rad_rad<dtml-var expr="_['sequence-key']">" name="rad_acompanhamento" value="<dtml-var expr="_['sequence-key']">"
@@ -286,15 +286,15 @@
   
   <div class="row">
     <div class="col-4 mb-3">
-        <label class="form-label" for="txt_reuniao_sessao" class="required">Nome da sessão / reunião plenária</label>
-        <input class="form-control" type="text" id="txt_reuniao_sessao" name="txt_reuniao_sessao" value="<dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao" missing>" />
+        <label class="form-label required" for="txt_reuniao_sessao">Nome da sessão / reunião plenária</label>
+        <input class="form-select" type="text" id="txt_reuniao_sessao" name="txt_reuniao_sessao" value="<dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao" missing>" />
     </div>
     <div class="col-4 mb-3">
-        <label class="form-label" for="txt_reuniao_sessao_plural" class="required">Nome da sessão / reunião plenária (plural)</label>
-        <input class="form-control" type="text" id="txt_reuniao_sessao_plural" name="txt_reuniao_sessao_plural" value="<dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao_plural" missing>" />
+        <label class="form-label required" for="txt_reuniao_sessao_plural">Nome da sessão / reunião plenária (plural)</label>
+        <input class="form-select" type="text" id="txt_reuniao_sessao_plural" name="txt_reuniao_sessao_plural" value="<dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao_plural" missing>" />
     </div>
     <div class="col-4 mb-3">
-        <label class="form-label" for="txt_nome_mesa" class="required">Nome da Mesa Diretora</label>
+        <label class="form-label required" for="txt_nome_mesa">Nome da Mesa Diretora</label>
         <input class="form-control" type="text" id="txt_nome_mesa" name="txt_nome_mesa" value="<dtml-var expr="sapl_documentos.props_sagl.nome_mesa" missing>" />
     </div>
   </div>
@@ -332,33 +332,33 @@
            </div>
            <div class="col-6 mb-3">
              <div class="custom-file">
-               <input type="file" class="custom-file-input" id="file_nom_logo" name="file_nom_logo" accept="image/png" disabled />
+               <input type="file" class="form-control" id="file_nom_logo" name="file_nom_logo" accept="image/png" disabled />
                <label class="custom-file-label" for="file_nom_logo">Selecione a imagem</label>
-             </div>
-             <small id="passwordHelpBlock" class="form-text text-muted">
+               <small id="passwordHelpBlock" class="form-text text-muted">
                 PNG com fundo transparente. Tamanho: 100x100px.
-             </small>
+              </small> 
+             </div>
            </div>
           </div>  
         <dtml-else>
           <div class="col-6 mb-3">
            <div class="custom-file">
-             <input type="file" class="custom-file-input" id="file_nom_logo" name="file_nom_logo" accept="image/png" />
+             <input type="file" class="form-control" id="file_nom_logo" name="file_nom_logo" accept="image/png" />
              <label class="custom-file-label" for="file_nom_logo">Selecione a imagem</label>
+             <small id="passwordHelpBlock" class="form-text text-muted">
+               PNG com fundo transparente. Tamanho: 100x100px.
+             </small>  
            </div>
-           <small id="passwordHelpBlock" class="form-text text-muted">
-              PNG com fundo transparente. Tamanho: 100x100px.
-           </small>  
            <input type="hidden" name="radTI" value="I"/>
         </dtml-if>
         </div>
        </div>
 
-  <legend class="font-size-16">Plataforma de Processos Digitais</legend>
+  <legend class="font-size-16">Protocolo de Processos Digitais</legend>
   <div class="row">
     <div class="col-3 mb-3">
-       <label class="form-label" for="lst_origem" class="required">Origem</label>
-       <select id="lst_origem" name="lst_origem" class="form-control">
+       <label class="form-label required" for="lst_origem">Origem</label>
+       <select id="lst_origem" name="lst_origem" class="form-select">
           <option value="">Selecione</option>
           <dtml-in expr="zsql.unidade_tramitacao_obter_zsql(ind_excluido=0)">        
               <option value="<dtml-var cod_unid_tramitacao>"
@@ -370,8 +370,8 @@
        </select>
     </div> 
     <div class="col-3 mb-3">
-       <label class="form-label" for="lst_destino" class="required">Destino Projetos</label>
-       <select id="lst_destino" name="lst_destino" class="form-control">
+       <label class="form-label required" for="lst_destino">Destino Projetos</label>
+       <select id="lst_destino" name="lst_destino" class="form-select">
           <option value="">Selecione</option>
           <dtml-in expr="zsql.unidade_tramitacao_obter_zsql(ind_excluido=0, ing_leg=1)">        
               <option value="<dtml-var cod_unid_tramitacao>"
@@ -383,8 +383,8 @@
        </select>
     </div> 
     <div class="col-3 mb-3">
-       <label class="form-label" for="lst_destino_outros" class="required">Destino Outras Matérias</label>
-       <select id="lst_destino_outros" name="lst_destino_outros" class="form-control">
+       <label class="form-label required" for="lst_destino_outros">Destino Outras Matérias</label>
+       <select id="lst_destino_outros" name="lst_destino_outros" class="form-select">
           <option value="">Selecione</option>
           <dtml-in expr="zsql.unidade_tramitacao_obter_zsql(ind_excluido=0, ing_leg=1)">        
               <option value="<dtml-var cod_unid_tramitacao>"
@@ -396,8 +396,8 @@
        </select>
     </div> 
     <div class="col-3 mb-3">
-       <label class="form-label" for="lst_status" class="required">Status Matérias</label>
-       <select id="lst_status" name="lst_status" class="form-control">
+       <label class="form-label required" for="lst_status">Status Matérias</label>
+       <select id="lst_status" name="lst_status" class="form-select">
           <option value="">Selecione</option>
           <dtml-in expr="zsql.status_tramitacao_obter_zsql(ind_excluido=0)">        
               <option value="<dtml-var cod_status>"
@@ -412,8 +412,8 @@
 
   <div class="row">
     <div class="col-3 mb-3">
-       <label class="form-label" for="lst_status_doc" class="required">Status Docs. Acessórios</label>
-       <select id="lst_status_doc" name="lst_status_doc" class="form-control">
+       <label class="form-label required" for="lst_status_doc">Status Docs. Acessórios</label>
+       <select id="lst_status_doc" name="lst_status_doc" class="form-select">
           <option value="">Selecione</option>
           <dtml-in expr="zsql.status_tramitacao_obter_zsql(ind_excluido=0)">        
               <option value="<dtml-var cod_status>"
@@ -425,8 +425,8 @@
        </select>
     </div> 
     <div class="col-3 mb-3">
-       <label class="form-label" for="lst_status_eme" class="required">Status Emendas</label>
-       <select id="lst_status_eme" name="lst_status_eme" class="form-control">
+       <label class="form-label required" for="lst_status_eme">Status Emendas</label>
+       <select id="lst_status_eme" name="lst_status_eme" class="form-select">
           <option value="">Selecione</option>
           <dtml-in expr="zsql.status_tramitacao_obter_zsql(ind_excluido=0)">        
               <option value="<dtml-var cod_status>"
@@ -438,8 +438,8 @@
        </select>
     </div> 
     <div class="col-3 mb-3">
-       <label class="form-label" for="lst_status_par" class="required">Status Pareceres</label>
-       <select id="lst_status_par" name="lst_status_par" class="form-control">
+       <label class="form-label required" for="lst_status_par">Status Pareceres</label>
+       <select id="lst_status_par" name="lst_status_par" class="form-select">
           <option value="">Selecione</option>
           <dtml-in expr="zsql.status_tramitacao_obter_zsql(ind_excluido=0)">        
               <option value="<dtml-var cod_status>"
@@ -451,8 +451,8 @@
        </select>
     </div> 
     <div class="col-3 mb-3">
-       <label class="form-label" for="lst_status_sub" class="required">Status Substitutivos</label>
-       <select id="lst_status_sub" name="lst_status_sub" class="form-control">
+       <label class="form-label required" for="lst_status_sub">Status Substitutivos</label>
+       <select id="lst_status_sub" name="lst_status_sub" class="form-select">
           <option value="">Selecione</option>
           <dtml-in expr="zsql.status_tramitacao_obter_zsql(ind_excluido=0)">        
               <option value="<dtml-var cod_status>"
@@ -474,10 +474,6 @@
    </div> 
  
 </form>
-
-<script>
-autosize(document.querySelectorAll('textarea'));
-</script>
 
 <dtml-var js_slot>
 <dtml-var footer_html>

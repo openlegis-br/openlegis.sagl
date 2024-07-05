@@ -10,12 +10,16 @@
 //-->
 </script>
 
-<div class="d-flex justify-content-between mb-2">
- <h4 class="firstHeading font-size-18"><dtml-var nom_comissao></h4>
- <div class="btn-group">
-   <a class="btn btn-light" href="<dtml-var portal_url>/consultas/comissao"><i class="fas fa-undo"></i> Voltar</a>  
+ <div class="row mb-3">
+  <div class="col-9 col-md-8 d-flex align-items-center">
+    <h1 class="firstHeading font-size-18 mb-0"><dtml-var nom_comissao></h1>
+  </div>
+  <div class="col-3 col-md-4">
+    <div class="input-group mt-1 mt-md-0 d-flex justify-content-end">
+   <a class="btn btn-sm btn-light" href="<dtml-var portal_url>/consultas/comissao"><i class="fas fa-undo"></i> Voltar</a>   
+    </div>
+  </div>
  </div>
-</div>
 
 <dtml-if txt_finalidade>
  <div class="row">
@@ -47,10 +51,10 @@
         <dtml-if expr="num_tel_secretaria">
            <p class="card-text"><b>Telefone:</b> <dtml-var num_tel_secretaria></p>           
         </dtml-if>
-        <div class="input-group">
-        <a class="btn btn-light mb-2" href="materia/materia_index_html?cod_comissao=<dtml-var cod_comissao>"><i class="fas fas-fw fa-hourglass-start"></i> Matérias em análise</a>     
-        <a class="btn btn-light mb-2" href="parecer/parecer_index_html?cod_comissao=<dtml-var cod_comissao>"><i class="fas fas-fw fa-folder-open"></i> Pareceres emitidos</a>
-        </div>
+
+         <p><a href="materia/materia_index_html?cod_comissao=<dtml-var cod_comissao>"><strong>Matérias em análise</strong></a></p>
+        <p><a href="parecer/parecer_index_html?cod_comissao=<dtml-var cod_comissao>"><strong>Pareceres emitidos</strong></a></p>
+
      </div>
    </div> 
 
@@ -65,19 +69,19 @@
                  <dtml-let id_pauta="str(cod_reuniao)+'_pauta.pdf'">
                   <dtml-if "hasattr(sapl_documentos.reuniao_comissao,id_pauta)">
                     <dtml-let pauta="getattr(sapl_documentos.reuniao_comissao,id_pauta).absolute_url">
-                      <a class="btn btn-sm btn-light" href="<dtml-var pauta>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fas fa-file-pdf"></i> <span class="">Pauta</span></a>
+                      <a class="btn btn-sm btn-subtle-primary" href="<dtml-var pauta>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fas fa-file-pdf"></i> <span class="">Pauta</span></a>
                     </dtml-let>
                   </dtml-if>
                 </dtml-let>
                 <dtml-let id_ata="str(cod_reuniao)+'_ata.pdf'">
                   <dtml-if "hasattr(sapl_documentos.reuniao_comissao,id_ata)">
                     <dtml-let ata="getattr(sapl_documentos.reuniao_comissao,id_ata).absolute_url">
-                      <a class="btn btn-sm btn-light" href="<dtml-var ata>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fas fa-file-pdf"></i> <span class="">Ata</span></a>
+                      <a class="btn btn-sm btn-subtle-primary" href="<dtml-var ata>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fas fa-file-pdf"></i> <span class="">Ata</span></a>
                     </dtml-let>
                   </dtml-if>
                  </dtml-let>
                  <dtml-if url_video>
-                    <a href="<dtml-var url_video>" class="popup-youtube btn btn-sm btn-light"><i class="fab fa-fw fa-youtube"></i>Vídeo</a>               
+                    <a href="<dtml-var url_video>" class="popup-youtube btn btn-sm btn-subtle-primary"><i class="fab fa-fw fa-youtube"></i>Vídeo</a>               
                  </dtml-if> 
                 </div> 
                 </li>

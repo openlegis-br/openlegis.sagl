@@ -1,85 +1,19 @@
 <dtml-var header_html>
 
-<script>
-
-$(document).ready(function() {
-
-    $('#autores').DataTable( {
-        "responsive": true,
-        "bStateSave": true,        
-        "fnStateSave": function (oSettings, oData) {
-            localStorage.setItem('auDataTable', JSON.stringify(oData));
-        },
-        "fnStateLoad": function (oSettings) {
-            return JSON.parse(localStorage.getItem('auDataTable'));
-        },
-        "lengthMenu": [[10, 25, 50, 100], [10, 25, 50, 100]],
-        "lengthChange": true,
-        "buttons": [
-            {
-                extend: 'collection',
-                text: 'Exportar',
-                buttons: [ 
-                           {
-                             extend:    'excelHtml5',
-                             text:      '<i class="far fa-file-excel"></i> Excel',
-                             titleAttr: 'PDF'
-                           },
-                           {
-                             extend:    'pdfHtml5',
-                             download: 'open',
-                             text:      '<i class="fa fa-file-adobe"></i> PDF',
-                             titleAttr: 'PDF'
-                           },
-                           {
-                             extend:    'print',
-                             text:      '<i class="fa fa-print"></i> Impressão',
-                             titleAttr: 'Impressão'
-                           },
-                         ],
-               className: '',
-               dropup: true,
-               autoClose: true,
-               fade: true
-
-            }
-        ],
-        "language": {
-          search: "Pesquisar:",
-          processing:     "Processando...",
-          loadingRecords: "Carregando...",
-          lengthMenu:     "Exibir _MENU_ registros por página",
-          info:           "Exibindo _START_ a _END_ de _TOTAL_ registros",
-          infoEmpty:      "Exibindo _START_ a _END_ de _TOTAL_ registros",
-          infoFiltered:   "(total de registros:_MAX_)",
-          emptyTable:     "Nenhum registro encontrado",
-          zeroRecords:     "Nenhum registro encontrado",
-          paginate: {
-            first:      "Primeiro",
-            previous:   "Anterior",
-            next:       "Próximo",
-            last:       "Último"
-          },
-        }
-    });
-});
-
-</script>
-
  <div class="row mb-2">
       <div class="col-12 col-md-8 align-self-center">
         <h1 class="firstHeading font-size-18">Autores</h1>
       </div>
       <div class="col-12 col-md-4 text-start text-end">
          <div class="btn-group d-print-none ">
-          <a class="btn btn-sm btn-primary d-print-none mb-3" href="autor_form"><i class="fa fa-fw fa-plus"></i> Incluir Autor</a>
+          <a class="btn btn-sm btn-light d-print-none mb-3" href="autor_form"><i class="fa fa-fw fa-plus"></i> Incluir Autor</a>
          </div>
       </div>
  </div>
     
  <dtml-in expr="zsql.autor_obter_zsql(ind_excluido=0)"> 
   <dtml-if sequence-start>
-       <table class="table" id="autores">
+       <table class="table datatable" id="autores">
         <thead>
           <tr> 
             <th width="62%">Nome</th>

@@ -319,7 +319,7 @@
        <input class="form-control number" type="number" id="txt_numero_ata" name="txt_numero_ata" value="<dtml-var numero_ata missing null>" autocomplete="off"  maxlength="3">
      </div>
      <div class="col-8 col-md-4 mb-3">
-       <label class="form-label">ODT Ata</label>
+       <label class="form-label d-block">ODT Ata</label>
        <dtml-let id_documento_odt="str(cod_sessao_plen)+'_ata_sessao.odt'">
           <dtml-if "hasattr(sapl_documentos.ata_sessao,id_documento_odt)">
            <div class="input-group">
@@ -408,23 +408,9 @@
 </dtml-if>
 
   <dtml-if cod_sessao_plen>
-  <legend class="font-size-16">Multimídia</legend>
+  <legend class="font-size-16">Conteúdo Multimídia</legend>
   <div class="row">
-     <div class="col-12 col-md-6 mb-3"> 
-        <label class="form-label" for="txt_url_audio">Arquivo de Áudio</label>
-        <div class="input-group">
-          <input class="form-control" type="text" id="txt_url_audio" name="txt_url_audio" maxlength="150" value="<dtml-var url_audio missing null="">" autocomplete="off" /> 
-          <dtml-if expr="cod_sessao_plen and url_audio">                  
-              <div class="input-group-append">                            
-                <button type="button" class="btn btn-light" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Reprodução de Áudio" data-src="sessao_plenaria_player_audio?url_audio=<dtml-var url_audio>&modal=1"><i class="fa fa-fw fa-play"></i><span class="d-none">Audio</span></button>
-              </div>
-          </dtml-if>
-        </div>
-         <small class="text-muted">
-             Informe a URL pública do arquivo de áudio.
-         </small>         
-     </div>
-     <div class="col-12 col-md-6 mb-3">  
+     <div class="col-12 col-md-4 mb-3">  
          <label class="form-label" for="txt_url_video">Player de Vídeo</label>
          <div class="input-group">
            <input class="form-control" type="text" id="txt_url_video" name="txt_url_video" maxlength="150" value="<dtml-var url_video missing null="">" placeholder="Exemplo: https://www.youtube.com/embed/XXXXX" autocomplete="off" />
@@ -438,7 +424,21 @@
              Informe o código de incorporação do player de vídeo.
          </small>         
      </div>
-     <div class="col-12 col-md-12 mb-3">  
+     <div class="col-12 col-md-4 mb-3"> 
+        <label class="form-label" for="txt_url_audio">Arquivo de Áudio</label>
+        <div class="input-group">
+          <input class="form-control" type="text" id="txt_url_audio" name="txt_url_audio" maxlength="150" value="<dtml-var url_audio missing null="">" autocomplete="off" /> 
+          <dtml-if expr="cod_sessao_plen and url_audio">                  
+              <div class="input-group-append">                            
+                <button type="button" class="btn btn-light" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Reprodução de Áudio" data-src="sessao_plenaria_player_audio?url_audio=<dtml-var url_audio>&modal=1"><i class="fa fa-fw fa-play"></i><span class="d-none">Audio</span></button>
+              </div>
+          </dtml-if>
+        </div>
+         <small class="text-muted">
+             Informe a URL pública do arquivo de áudio.
+         </small>         
+     </div>
+     <div class="col-12 col-md-4 mb-3">  
          <label class="form-label" for="txt_url_fotos">Álbum de Fotos</label>
          <div class="input-group">
            <input class="form-control" type="text" id="txt_url_fotos" name="txt_url_fotos" maxlength="150" value="<dtml-var url_fotos missing null="">" autocomplete="off" />

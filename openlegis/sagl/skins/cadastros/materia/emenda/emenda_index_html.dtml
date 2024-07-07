@@ -1,81 +1,12 @@
-<script>
-$(document).ready(function() {
-    var table = $('#emendas_table').DataTable( {
-        "responsive": true,
-        "lengthMenu": [[10, 25, 50, 100], [10, 25, 50, 100]],
-        "lengthChange": true,
-        "order": [[ 0, "asc" ]],
-        "buttons": [
-            {
-                extend: 'collection',
-                text: 'Exportar',
-                buttons: [ 
-                           {
-                             extend:    'excelHtml5',
-                             text:      '<i class="far fa-file-excel"></i> Excel',
-                             titleAttr: 'PDF'
-                           },
-                           {
-                             extend:    'pdfHtml5',
-                             download: 'open',
-                             text:      '<i class="fa fa-file-adobe"></i> PDF',
-                             titleAttr: 'PDF'
-                           },
-                           {
-                             extend:    'print',
-                             text:      '<i class="fa fa-print"></i> Impressão',
-                             titleAttr: 'Impressão'
-                           },
-                         ],
-               className: '',
-               dropup: true,
-               autoClose: true,
-               fade: true
-
-            }
-        ],
-        "language": {
-          search: "Pesquisar:",
-          processing:     "Processando...",
-          loadingRecords: "Carregando...",
-          lengthMenu:     "Exibir _MENU_ registros por página",
-          info:           "Exibindo _START_ a _END_ de _TOTAL_ registros",
-          infoEmpty:      "Exibindo _START_ a _END_ de _TOTAL_ registros",
-          infoFiltered:   "(total de registros:_MAX_)",
-          emptyTable:     "Nenhum registro encontrado",
-          zeroRecords:     "Nenhum registro encontrado",
-          paginate: {
-            first:      "Primeiro",
-            previous:   "Anterior",
-            next:       "Próximo",
-            last:       "Último"
-          },
-         "buttons": {
-           print: "Imprimir",
-           copy: "Copiar",
-           copyTitle: "Cópia bem sucedida",
-           copySuccess: {
-            1: "Uma linha copiada com sucesso",
-            _: "%d linhas copiadas com sucesso"
-          }
-        }
-        }
-    });
-    table.buttons().container()
-        .appendTo( '#panelBtn .col-sm-12:eq(0)' );  
-});
-</script>
-
-
-<h1 class="firstHeading font-size-18">Emendas</h1>
+<legend class="font-size-16">Emendas</legend>
 
 <dtml-in expr="zsql.emenda_obter_zsql(cod_materia=cod_materia, ind_excluido=0)">
     <dtml-if sequence-start>
     <div class="table-responsive">
-    <table id="emendas_table" class="table">
+     <table id="emendas_table" class="table datatable">
       <thead>
        <tr> 
-         <th width="10%">Número</th>
+         <th width="15%">Número</th>
          <th>Tipo</th>
          <th width="35%">Ementa</th>
          <th width="20%">Autoria</th>
@@ -87,7 +18,7 @@ $(document).ready(function() {
        <tr> 
           <td>
             <a href="#" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Edição de Emenda" data-src="emenda/emenda_mostrar_proc?cod_emenda=<dtml-var cod_emenda>&cod_materia=<dtml-var cod_materia>&modal=1">
-               <dtml-var num_emenda>
+               Emenda nº <dtml-var num_emenda>
             </a>
           </td>
           <td><dtml-var des_tipo_emenda></td>
@@ -104,9 +35,9 @@ $(document).ready(function() {
                  <dtml-let emenda="getattr(sapl_documentos.emenda,id_emenda).absolute_url"> 
                    <a target="_blank" href="<dtml-var emenda>" title="Texto Integral">
                      <dtml-if expr="zsql.assinatura_documento_obter_zsql(codigo=cod_emenda, tipo_doc='emenda',ind_assinado=1, cod_usuario=None)">
-                        <i class="fa fa-certificate" style="font-size: 21px; margin-right: 3px;"></i>
+                        <i class="fa fa-fw fa-certificate"></i>
                       <dtml-else>
-                     <i class="fa fa-fw fa-file-pdf" style="font-size: 21px; margin-right: 3px;"></i>
+                     <i class="fa fa-fw fa-file-pdf"></i>
                      </dtml-if>
                    </a>
                  </dtml-let>
@@ -124,9 +55,9 @@ $(document).ready(function() {
                        <dtml-var nom_resultado>
                     </dtml-if>
                 </dtml-in>
-                <dtml-else><i>Matéria não votada</i>
+                <dtml-else><span class="text-muted">Matéria não votada</span>
                 </dtml-if>
-                <dtml-else><i>Matéria não votada</i>
+                <dtml-else><span class="text-muted">Matéria não votada</span>
              </dtml-in>
             </td>
        </tr>
@@ -138,4 +69,4 @@ $(document).ready(function() {
       <p>Nenhuma emenda cadastrada.</p>
    </dtml-in>
     
-  <button type="button" class="btn m btn-primary d-print-none" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Cadastro de Emenda" data-src="emenda/emenda_form?cod_materia=<dtml-var cod_materia>&modal=1">Incluir Emenda</button>
+  <button type="button" class="btn btn-light d-print-none" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Cadastro de Emenda" data-src="emenda/emenda_form?cod_materia=<dtml-var cod_materia>&modal=1">Incluir Emenda</button>

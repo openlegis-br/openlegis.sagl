@@ -40,9 +40,16 @@ label.required:after {
 
 html { font-size: 13px; }
 
-:root {
-  --bs-body-font-size: 0.97rem;  /* Overwrite this variable */
-  font-size: var(--bs-body-font-size);
+:root,[data-bs-theme=light], [data-bs-theme=dark], .form-control, .form-select {
+  --bs-body-font-size: 0.93rem;  /* Overwrite this variable */
+  --bs-btn-font-size: 0.93rem;  /* Overwrite this variable */
+  --bs-body-font-size: 0.93rem !important;  /* Overwrite this variable */
+  --bs-dropdown-font-size: 0.90rem !important;
+  font-size: var(--bs-body-font-size) !important;
+}
+
+a.dropdown-item {
+    font-size: 14px;
 }
 
 #page-topbar {
@@ -3027,18 +3034,22 @@ input[switch=dark]:checked + label {
   bottom: calc(1.5em + 0.94rem + calc(var(--bs-border-width) * 2)) !important;
 }
 
-.datepicker {
+.datepicker, .datetimepicker {
   border: 1px solid #e7eff7;
-  padding: 8px;
-  z-index: 999 !important;
+  padding: 8px !important;
+  z-index: 99 !important;
 }
-.datepicker table tr th {
+.datepicker table tr th, .datetimepicker table tr th {
   font-weight: 500;
 }
 .datepicker table tr td.active, .datepicker table tr td.active:hover,
 .datepicker table tr td .active.disabled, .datepicker table tr td.active.disabled:hover, .datepicker table tr td.today, .datepicker table tr td.today:hover, .datepicker table tr td.today.disabled, .datepicker table tr td.today.disabled:hover, .datepicker table tr td.selected, .datepicker table tr td.selected:hover, .datepicker table tr td.selected.disabled, .datepicker table tr td.selected.disabled:hover,
 .datepicker table tr td span.active.active,
-.datepicker table tr td span.active:hover.active {
+.datepicker table tr td span.active:hover.active,
+.datetimepicker table tr td.active, .datetimepicker table tr td.active:hover,
+.datetimepicker table tr td .active.disabled, .datetimepicker table tr td.active.disabled:hover, .datetimepicker table tr td.today, .datetimepicker table tr td.today:hover, .datetimepicker table tr td.today.disabled, .datetimepicker table tr td.today.disabled:hover, .datetimepicker table tr td.selected, .datetimepicker table tr td.selected:hover, .datetimepicker table tr td.selected.disabled, .datetimepicker table tr td.selected.disabled:hover,
+.datetimepicker table tr td span.active.active,
+.datetimepicker table tr td span.active:hover.active {
   background-color: #44a2d2 !important;
   background-image: none;
   -webkit-box-shadow: none;
@@ -3047,16 +3058,22 @@ input[switch=dark]:checked + label {
 }
 .datepicker table tr td.day.focused, .datepicker table tr td.day:hover,
 .datepicker table tr td span.focused,
-.datepicker table tr td span:hover {
+.datepicker table tr td span:hover,
+.datetimepicker table tr td.day.focused, .datetimepicker table tr td.day:hover,
+.datetimepicker table tr td span.focused,
+.datetimepicker table tr td span:hover {
   background: #f8f9fa;
 }
 .datepicker table tr td.new, .datepicker table tr td.old,
 .datepicker table tr td span.new,
-.datepicker table tr td span.old {
+.datepicker table tr td span.old,
+.datetimepicker table tr td.new, .datetimepicker table tr td.old,
+.datetimepicker table tr td span.new,
+.datetimepicker table tr td span.old {
   color: #adb5bd;
   opacity: 0.6;
 }
-.datepicker table tr td.range, .datepicker table tr td.range.disabled, .datepicker table tr td.range.disabled:hover, .datepicker table tr td.range:hover {
+.datepicker table tr td.range, .datepicker table tr td.range.disabled, .datepicker table tr td.range.disabled:hover, .datepicker table tr td.range:hover, .datetimepicker table tr td.range, .datetimepicker table tr td.range.disabled, .datetimepicker table tr td.range.disabled:hover, .datetimepicker table tr td.range:hover {
   background-color: #e7eff7;
 }
 
@@ -3065,42 +3082,44 @@ input[switch=dark]:checked + label {
   padding: 7px;
 }
 
-.bootstrap-datepicker-inline .datepicker-inline {
+.bootstrap-datepicker-inline .datepicker-inline, .bootstrap-datetimepicker-inline .datetimepicker-inline {
   width: auto !important;
   display: inline-block;
 }
 
-.datepicker-container {
+.datepicker-container, .datetimepicker-container {
   border: 1px solid #e7eff7;
   -webkit-box-shadow: none;
           box-shadow: none;
   background-color: var(--bs-secondary-bg);
 }
-.datepicker-container.datepicker-inline {
+.datepicker-container.datepicker-inline, .datetimepicker-container.datetimepicker-inline  {
   width: 212px;
 }
 
-.datepicker-panel > ul > li {
+.datepicker-panel > ul > li, .datetimepicker-panel > ul > li {
   background-color: var(--bs-secondary-bg);
   border-radius: 4px;
 }
-.datepicker-panel > ul > li.picked, .datepicker-panel > ul > li.picked:hover {
+.datepicker-panel > ul > li.picked, .datepicker-panel > ul > li.picked:hover, .datetimepicker-panel > ul > li.picked, .datetimepicker-panel > ul > li.picked:hover {
   background-color: rgba(68, 162, 210, 0.25);
   color: #44a2d2;
 }
-.datepicker-panel > ul > li.highlighted, .datepicker-panel > ul > li.highlighted:hover, .datepicker-panel > ul > li:hover {
+.datepicker-panel > ul > li.highlighted, .datepicker-panel > ul > li.highlighted:hover, .datepicker-panel > ul > li:hover, .datetimepicker-panel > ul > li.highlighted, .datetimepicker-panel > ul > li.highlighted:hover, .datetimepicker-panel > ul > li:hover {
   background-color: #44a2d2;
   color: #fff;
 }
-.datepicker-panel > ul > li.muted, .datepicker-panel > ul > li.muted:hover {
+.datepicker-panel > ul > li.muted, .datepicker-panel > ul > li.muted:hover, .datetimepicker-panel > ul > li.muted, .datetimepicker-panel > ul > li.muted:hover {
   color: #adb5bd;
   opacity: 0.6;
 }
-.datepicker-panel > ul[data-view=week] > li {
+.datepicker-panel > ul[data-view=week] > li, .datetimepicker-panel > ul[data-view=week] > li {
   font-weight: 500;
 }
 .datepicker-panel > ul[data-view=week] > li,
-.datepicker-panel > ul[data-view=week] > li:hover {
+.datepicker-panel > ul[data-view=week] > li:hover,
+.datetimepicker-panel > ul[data-view=week] > li,
+.datetimepicker-panel > ul[data-view=week] > li:hover {
   background-color: var(--bs-secondary-bg);
 }
 

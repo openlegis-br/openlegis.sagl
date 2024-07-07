@@ -9,28 +9,27 @@
       var form = document.numeracao_form;
 
       if (form.lst_tip_materia.value==0){
-          $('#lst_tip_materia').addClass('is-invalid');            
-          alert("O tipo de matéria deve ser preenchido");
+          $('#lst_tip_materia').addClass('is-invalid'); 
+          bootstrap.showModal({title: "Mensagem do Sistema", body: "O tipo de matéria deve ser selecionado!"});
           form.lst_tip_materia.focus();
           return false;
       }
       if (form.txt_num_materia.value==""){
-          $('#txt_num_materia').addClass('is-invalid');                  
-          alert("O número da matéria deve ser preenchida");
+          $('#txt_num_materia').addClass('is-invalid');     
+          bootstrap.showModal({title: "Mensagem do Sistema", body: "O número da matéria deve ser preenchido!"});
           form.txt_num_materia.focus();
           return false;
       }
       if (form.txt_ano_materia.value==""){
-         $('#txt_ano_materia').addClass('is-invalid');                        
-         alert("O ano da matéria deve ser preenchido");
+         $('#txt_ano_materia').addClass('is-invalid');    
+         bootstrap.showModal({title: "Mensagem do Sistema", body: "O ano da matéria deve ser preenchido!"});
          form.txt_ano_materia.focus();
          return false;
       }  
 
       if (form.txt_dat_materia.value!="" && !IsValidDate(form.txt_dat_materia.value)){
-         alert("Digite uma data válida!");
+         bootstrap.showModal({title: "Mensagem do Sistema", body: "Digite uma data válida!"});
          form.txt_dat_materia.focus();
-         form.txt_dat_materia.select();
          return false;
       } 
     
@@ -62,7 +61,7 @@
 
   <div class="row">
     <div class="col-12 col-sm-6 mb-3">
-                <label class="form-label" for="lst_tip_materia" class="required">Tipo de Matéria</label>
+                <label class="form-label required" for="lst_tip_materia">Tipo de Matéria</label>
                 <select class="form-select" id="lst_tip_materia" name="lst_tip_materia">
                   <option value="0">Selecione</option>
                   <dtml-in expr="zsql.tipo_materia_legislativa_obter_zsql()">
@@ -80,29 +79,32 @@
            </div>                   
     </div>
     <div class="col-4 col-sm-6 mb-3">
-                <label class="form-label" for="txt_num_materia" class="required">Número</label>
-                <input class="form-control number" type="number" id="txt_num_materia" name="txt_num_materia" value="<dtml-var num_materia missing>" required /">    
+                <label class="form-label required" for="txt_num_materia">Número</label>
+                <input class="form-control" type="number" id="txt_num_materia" name="txt_num_materia" value="<dtml-var num_materia missing>" required /">    
            <div class="invalid-feedback">
              Este campo é obrigatório!
            </div>  
     </div>
     <div class="col-4 col-sm-6 mb-3">
-                <label class="form-label" for="txt_ano_materia" class="required">Ano</label>
-                <input class="form-control year" type="number" id="txt_ano_materia" name="txt_ano_materia" value="<dtml-var ano_materia missing>" required />    
+                <label class="form-label required" for="txt_ano_materia">Ano</label>
+                <input class="form-control" type="number" id="txt_ano_materia" name="txt_ano_materia" value="<dtml-var ano_materia missing>" required />    
            <div class="invalid-feedback">
              Este campo é obrigatório!
            </div>  
     </div>
     <div class="col-4 col-sm-6 mb-3">
                 <label class="form-label" for="txt_dat_materia">Data</label>
-                <input class="form-control date" type="text" name="txt_dat_materia" id="txt_dat_materia" value="<dtml-var dat_materia missing null>" />    
+        <div class="input-group">
+           <input type="text" class="form-control datepicker" placeholder="dd/mm/aaaa" name="txt_dat_materia" id="txt_dat_materia" data-provide="datepicker" data-date-autoclose="true" value="<dtml-var dat_materia missing null>" autocomplete="off" required>
+           <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
+        </div>
     </div>     
   </div>
 
   <div class="text-start">
      <input type="button" class="btn btn-primary" value="Salvar" onClick="numeracao_criticar()">
      <dtml-if num_ordem>
-       <input type="button" class="btn btn-danger" value="Excluir" onClick="numeracao_excluir()">
+       <a class="btn btn-danger" href="numeracao_excluir_proc?cod_materia=<dtml-var cod_materia missing>&num_ordem=<dtml-var num_ordem missing>&modal=1" data-confirm="Deseja realmente excluir o registro de numeração?"><i class="fas fas-fw fa-trash"></i> Excluir</a>     
      </dtml-if>
   </div>
 

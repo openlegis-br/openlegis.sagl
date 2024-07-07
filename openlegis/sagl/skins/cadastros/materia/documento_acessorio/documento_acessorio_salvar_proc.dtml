@@ -134,11 +134,11 @@
        <dtml-call expr="sapl_documentos.materia.manage_addFile(id=id_documento,file=pysc.upload_file(file=file_nom_arquivo, title='Documento Acessório'))">
        <dtml-if expr="rad_ind_publico=='0'">
           <dtml-let arquivo="getattr(sapl_documentos.materia,id_documento)">
-             <dtml-call "arquivo.manage_permission('View', roles=['Manager','Authenticated'], acquire=1)">
+             <dtml-call "arquivo.manage_permission('View', roles=['Manager','Operador','Operador Materia','Autor'], acquire=0)">
           </dtml-let>
        <dtml-elif expr="rad_ind_publico=='1'">
           <dtml-let arquivo="getattr(sapl_documentos.materia,id_documento)">     
-             <dtml-call "arquivo.manage_permission('View', roles=['Manager','Authenticated','Anonymous'], acquire=1)">
+             <dtml-call "arquivo.manage_permission('View', roles=['Manager','Anonymous'], acquire=1)">
           </dtml-let>
        </dtml-if>
     </dtml-if>
@@ -157,8 +157,25 @@
          </dtml-let>       
        </dtml-if>
     </dtml-if>
+    
+    <dtml-call expr="REQUEST.set('id_documento', str(hdn_cod_documento)+'.pdf')">
+    <dtml-if expr="hasattr(sapl_documentos.materia,id_documento)">
+       <dtml-let parecer="getattr(sapl_documentos.materia,id_documento)">
+         <dtml-if expr="rad_ind_publico=='0'">
+            <dtml-let arquivo="getattr(sapl_documentos.materia,id_documento)">
+               <dtml-call "arquivo.manage_permission('View', roles=['Manager','Operador','Operador Materia','Autor'], acquire=0)">
+            </dtml-let>
+         <dtml-elif expr="rad_ind_publico=='1'">
+            <dtml-let arquivo="getattr(sapl_documentos.materia,id_documento)">     
+               <dtml-call "arquivo.manage_permission('View', roles=['Manager','Anonymous'], acquire=1)">
+            </dtml-let>
+         </dtml-if>
+       </dtml-let>
+   </dtml-if>
+
  </dtml-try>
 </dtml-unless>
+
 <dtml-if expr="dbcon_logs and hdn_cod_documento">
   <dtml-call expr="zsql.logs_registrar_zsql(
             usuario      = REQUEST['AUTHENTICATED_USER'].getUserName(), 

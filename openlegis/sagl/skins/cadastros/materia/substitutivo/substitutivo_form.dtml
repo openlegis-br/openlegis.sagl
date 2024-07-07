@@ -7,30 +7,29 @@
    function substitutivo_criticar(form){
 
       if (form.txt_num_substitutivo.value == "") {
-         $('#txt_num_substitutivo').addClass('is-invalid');            
-         alert("O número da substitutivo deve ser preenchido!");
+         $('#txt_num_substitutivo').addClass('is-invalid');
+         bootstrap.showModal({title: "Mensagem do Sistema", body: "O número da substitutivo deve ser preenchido!"});
          form.txt_num_substitutivo.focus();
          return false;
       } 
  
       if (form.txt_dat_apresentacao.value == "") {
-         $('#txt_dat_apresentacao').addClass('is-invalid');                  
-         alert ("A data da substitutivo deve ser preenchida!")
+         $('#txt_dat_apresentacao').addClass('is-invalid');    
+         bootstrap.showModal({title: "Mensagem do Sistema", body: "A data da substitutivo deve ser preenchida!"});
          form.txt_dat_apresentacao.focus();
-         form.txt_dat_apresentacao.select();
          return false;
       }
 
       if (!IsValidDate(form.txt_dat_apresentacao.value)) {
-         alert("Digite uma data válida!");
+         $('#txt_dat_apresentacao').addClass('is-invalid');    
+         bootstrap.showModal({title: "Mensagem do Sistema", body: "Digite uma data válida!"});
          form.txt_dat_apresentacao.focus();
-         form.txt_dat_apresentacao.select();
          return false;
       }
 
       if (form.txa_txt_ementa.value == "") {
-         $('#txa_txt_ementa').addClass('is-invalid');                        
-         alert("A ementa deve ser preenchida!");
+         $('#txa_txt_ementa').addClass('is-invalid');  
+         bootstrap.showModal({title: "Mensagem do Sistema", body: "A ementa deve ser preenchida!"});
          form.txa_txt_ementa.focus();
          return false;
       }
@@ -38,16 +37,16 @@
    <dtml-unless cod_substitutivo> 
       var tipo_autor = form.lst_tip_autor[form.lst_tip_autor.selectedIndex].value;
       if (tipo_autor=='0'){
-         $('#lst_tip_autor').addClass('is-invalid');                        
-         alert("Um tipo de autor deve ser selecionado!");
+         $('#lst_tip_autor').addClass('is-invalid');
+         bootstrap.showModal({title: "Mensagem do Sistema", body: "O tipo de autor deve ser selecionado!"});
          form.lst_tip_autor.focus();
          return false;
       }
 
       var cod_autor = form.lst_cod_autor[form.lst_cod_autor.selectedIndex].value;
       if (cod_autor=='0'){
-         $('#lst_cod_autor').addClass('is-invalid');                              
-         alert("Um autor deve ser selecionado!");
+         $('#lst_cod_autor').addClass('is-invalid');
+         bootstrap.showModal({title: "Mensagem do Sistema", body: "Um autor deve ser selecionado!"});
          form.lst_cod_autor.focus();
          return false; 
       }
@@ -79,56 +78,25 @@
       lst_modelo = document.getElementById("lst_modelo");
       lst_modelo.options[lst_modelo.selectedIndex].value;     
       if (lst_modelo.selectedIndex == 0) {
-         alert("É necessário selecionar um modelo!");
+         bootstrap.showModal({title: "Mensagem do Sistema", body: "É necessário selecionar um modelo!"});
       }
 
       if ((lst_modelo.selectedIndex != 0) && confirm("Confirma a geração do arquivo ODT?")) {
          location.href="<dtml-var portal_url>/modelo_proposicao/substitutivo?cod_substitutivo=<dtml-var cod_substitutivo missing>&cod_materia=<dtml-var cod_materia missing>&modelo_proposicao="+ lst_modelo.options[lst_modelo.selectedIndex].value + "&modal=1";
-         setTimeout(function(){window.location.reload(true)},2500);
+         setTimeout(function(){window.location.reload(true)},2000);
          return true;
        }
          return;
   }
 
-  function texto_integral_odt_excluir(){
-
-       if (confirm("Deseja realmente excluir o arquivo ODT?")) {
-          location.href="texto_odt_substitutivo_excluir_proc?cod_substitutivo=<dtml-var cod_substitutivo missing>&cod_materia=<dtml-var cod_materia missing>&modal=1";
-       }
-       return;
-  }
-
   function texto_pdf_gerar(){
       if (confirm("Confirma a geração do arquivo PDF?")) {
          location.href="<dtml-var portal_url>/modelo_proposicao/substitutivo_gerar_pdf?cod_substitutivo=<dtml-var cod_substitutivo missing>&modal=1";
-         setTimeout(function(){window.location.reload(true)},2500);
+         setTimeout(function(){window.location.reload(true)},2000);
          return true;
        }
   return;
   }
-
-  function texto_pdf_excluir(){
-
-       if (confirm("Deseja realmente excluir o arquivo PDF?")) {
-          location.href="texto_pdf_substitutivo_excluir_proc?cod_substitutivo=<dtml-var cod_substitutivo missing>&cod_materia=<dtml-var cod_materia missing>&modal=1";
-       }
-       return;
-  }
-
-   function substitutivo_excluir(form){
-
-       var URL = 'substitutivo_excluir_proc?cod_substitutivo=' + form.hdn_cod_substitutivo.value+
-    "&cod_materia=" + form.cod_materia.value + '&modal=1';
-;
-
-       if (confirm("Deseja realmente excluir o substitutivo?")) {
-          location.href=URL;
-       }
-   }   
-
-$(document).ready(function () {
-  bsCustomFileInput.init()
-})
 
 </script>
 
@@ -188,42 +156,36 @@ $(document).ready(function () {
 
   <div class="row">
      <div class="col-4 col-md-4 mb-3">
-            <label class="form-label" for="txt_num_substitutivo" class="required">Número do Substitutivo</label>
+            <label class="form-label required" for="txt_num_substitutivo">Número do Substitutivo</label>
             <dtml-unless cod_substitutivo>
                <dtml-in expr="zsql.numero_substitutivo_obter_zsql(cod_materia=cod_materia)">
                    <dtml-call expr="REQUEST.set('num_substitutivo', novo_numero)">
                </dtml-in>
             </dtml-unless>
-            <input class="form-control number" type="number" id="txt_num_substitutivo" name="txt_num_substitutivo" value="<dtml-var num_substitutivo missing>" autocomplete="off" required/>
+            <input class="form-control" type="number" id="txt_num_substitutivo" name="txt_num_substitutivo" value="<dtml-var num_substitutivo missing>" autocomplete="off" required/>
             <div class="invalid-feedback">
               Este campo é obrigatório!
             </div>     
      </div>
      <div class="col-4 col-md-4 mb-3"> 
-            <label class="form-label" for="txt_dat_apresentacao" class="required">Data de Apresentação</label>
+            <label class="form-label required" for="txt_dat_apresentacao">Data de Apresentação</label>
             <dtml-unless dat_apresentacao>
                <dtml-call expr="REQUEST.set('dat_apresentacao', DateTime().strftime('%d/%m/%Y'))">
             </dtml-unless>
-            <input class="form-control date" type="text" id="txt_dat_apresentacao" name="txt_dat_apresentacao" value="<dtml-var dat_apresentacao missing>" autocomplete="off" required />    
-     </div>
-        <script>
-        $('#txt_dat_apresentacao').datepicker({
-            locale: 'pt-br',
-            icons: {rightIcon: '<i class="fa fa-fw fa-calendar-alt"></i>'},
-            format: 'dd/mm/yyyy',
-            uiLibrary: 'bootstrap4',
-            iconsLibrary: 'fontawesome'
-        });
-        </script>      
+        <div class="input-group">
+           <input type="text" class="form-control datepicker" placeholder="dd/mm/aaaa" name="txt_dat_apresentacao" id="txt_dat_apresentacao" data-provide="datepicker" data-date-autoclose="true" value="<dtml-var dat_apresentacao missing null>" autocomplete="off" required>
+           <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
+        </div> 
+     </div>  
      <div class="col-4 col-md-4 mb-3">
            <label class="form-label" for="txt_num_protocolo">Número de Protocolo</label>
-           <input class="form-control number" type="text" id="txt_num_protocolo" name="txt_num_protocolo" value="<dtml-var num_protocolo missing>" autocomplete="off" />     
+           <input class="form-control number" type="text" id="txt_num_protocolo" name="txt_num_protocolo" value="<dtml-var num_protocolo missing null>" autocomplete="off" />     
      </div>      
  </div>     
 
  <div class="row">
    <div class="col-12 mb-3">
-      <label class="form-label" for="txa_txt_ementa" class="required">Ementa</label>
+      <label class="form-label required" for="txa_txt_ementa">Ementa</label>
       <textarea class="form-control auto-resize" id="txa_txt_ementa" name="txa_txt_ementa" rows="1" required><dtml-var txt_ementa missing></textarea>
            <div class="invalid-feedback">
              Este campo é obrigatório!
@@ -235,11 +197,11 @@ $(document).ready(function () {
 <dtml-if cod_substitutivo>
   <div class="row">
      <div class="col-12 mb-3">
-         <label class="form-label" for="txt_autoria" class="d-block">Autoria</label>
+         <label class="form-label required" for="txt_autoria" class="d-block">Autoria</label>
          <div class="input-group">                
             <textarea class="form-control auto-resize" id="txt_autoria" rows="1" readonly><dtml-in expr="zsql.autoria_substitutivo_obter_zsql(cod_substitutivo=cod_substitutivo)"><dtml-var nom_autor_join><dtml-unless sequence-end>, </dtml-unless></dtml-in></textarea>
             <div class="input-group-append"> 
-               <button type="button" class="btn btn-light" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Autoria do Substitutivo" data-src="<dtml-var portal_url>/cadastros/materia/substitutivo/autoria_substitutivo_form?cod_substitutivo=<dtml-var cod_substitutivo>&cod_materia=<dtml-var cod_materia>&modal=1">Editar</button>                
+               <button type="button" class="btn btn-subtle-secondary" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Autoria do Substitutivo" data-src="<dtml-var portal_url>/cadastros/materia/substitutivo/autoria_substitutivo_form?cod_substitutivo=<dtml-var cod_substitutivo>&cod_materia=<dtml-var cod_materia>&modal=1">Editar</button>                
             </div>
           </div>
      </div>  
@@ -247,7 +209,7 @@ $(document).ready(function () {
 <dtml-else>
   <div class="row">
      <div class="col-6 mb-3">
-           <label class="form-label" for="lst_tip_autor" class="required">Tipo de Autor</label>
+           <label class="form-label required" for="lst_tip_autor">Tipo de Autor</label>
            <select class="form-select" id="lst_tip_autor" name="lst_tip_autor" onChange="tipo_autor_mudou(document.substitutivo_form)">
               <dtml-unless tip_autor>
                  <option value="0"></option>
@@ -265,7 +227,7 @@ $(document).ready(function () {
            </div>            
      </div>  
      <div class="col-6 mb-3">
-           <label class="form-label" for="lst_cod_autor" class="required d-block">Autor</label>
+           <label class="form-label required" for="lst_cod_autor">Autor</label>
            <dtml-if expr="_.has_key('des_tipo_autor')"> 
               <select class="form-select" id="lst_cod_autor" name="lst_cod_autor">
                 <option value=0>Selecione</option>
@@ -335,57 +297,19 @@ $(document).ready(function () {
 </dtml-if>
 
  <div class="row">
+  <dtml-if cod_substitutivo>
    <div class="col-12 col-sm-6 mb-3">
-        <label class="form-label d-block">PDF Texto Original</label>
-        <dtml-if cod_substitutivo>
-           <dtml-call expr="REQUEST.set('id_documento', str(cod_substitutivo)+'_substitutivo.pdf')">
-           <dtml-if "hasattr(sapl_documentos.substitutivo,id_documento)">
-              <dtml-let documento="getattr(sapl_documentos.substitutivo,id_documento).absolute_url">
-                 <a class="btn btn-light" target="_blank" href="<dtml-var documento>?<dtml-var expr="ZopeTime().timeTime()">">
-                    <i class="fa fa-fw fa-file-pdf"></i>Visualizar                
-                 </a>
-                 <a class="btn btn-danger" href="javascript:texto_pdf_excluir()">Excluir</a>
-              </dtml-let>
-           <dtml-else>
-              <div class="input-group">                
-                <div class="custom-file">
-                  <input type="file" class="custom-file-input" id="file_nom_arquivo_substitutivo" name="file_nom_arquivo_substitutivo" accept="application/pdf">
-                  <label class="custom-file-label" for="file_nom_arquivo_substitutivo">Selecione o arquivo</label>
-                </div>           
-              <dtml-let id_documento_odt="str(cod_substitutivo)+'_substitutivo.odt'">
-                 <dtml-if "hasattr(sapl_documentos.substitutivo,id_documento_odt)">
-                    <dtml-call expr="REQUEST.set('temODT', 1)">
-                 </dtml-if>
-              </dtml-let>
-              <dtml-if expr="_.has_key('temODT')">
-                 <div class="input-group-append">                                
-                   <a class="btn btn-light" href="javascript:texto_pdf_gerar()">
-                     Gerar do ODT
-                   </a>
-                 </div>
-              </dtml-if>
-             </div>
-           </dtml-if>
-        <dtml-else>
-           <div class="custom-file">
-             <input type="file" class="custom-file-input" id="file_nom_arquivo_substitutivo" name="file_nom_arquivo_substitutivo" accept="application/pdf">
-             <label class="custom-file-label" for="file_nom_arquivo_substitutivo">Selecione o arquivo</label>
-           </div> 
-        </dtml-if>
-   </div>
-   <div class="col-12 col-sm-6 mb-3">
-       <dtml-if cod_substitutivo>
-          <label class="form-label d-block">ODT Texto Original</label>
+          <label class="form-label d-block">Arquivo ODT</label>
+          <div class="input-group">
           <dtml-let id_documento_odt="str(cod_substitutivo)+'_substitutivo.odt'">
              <dtml-if "hasattr(sapl_documentos.substitutivo,id_documento_odt)">
                 <dtml-let documento_odt="getattr(sapl_documentos.substitutivo,id_documento_odt).absolute_url">
                    <dtml-call expr="REQUEST.set('nome_arquivo_odt',str(cod_substitutivo)+'_substitutivo.odt')">
                    <a class="btn btn-light" href="<dtml-var portal_url>/generico/viewerJS/#<dtml-var documento_odt>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fa fa-fw fa-file-alt"></i> Visualizar</a>
-                   <button type="button" class="btn btn-light" onclick="javascript:location.href='&dtml-URL1;/sapl_documentos/substitutivo/externalEdit_/<dtml-var nome_arquivo_odt>.zem'" data-bs-toggle="tooltip" data-placement="bottom" title="Editar no LibreOffice"><i class="fas fa-fw fa-external-link-alt"></i>Editar</button>   
-                   <a class="btn btn-danger" href="javascript:texto_integral_odt_excluir()"><i class="fas fa-trash"></i> Excluir</a>
+                   <button type="button" class="btn btn-light" onclick="javascript:location.href='<dtml-var portal_url>/sapl_documentos/substitutivo/externalEdit_/<dtml-var nome_arquivo_odt>.zem'" data-bs-toggle="tooltip" data-placement="bottom" title="Editar no LibreOffice"><i class="fas fa-fw fa-external-link-alt"></i>Editar</button>   
+                   <a class="btn btn-danger" href="texto_odt_substitutivo_excluir_proc?cod_substitutivo=<dtml-var cod_substitutivo missing>&cod_materia=<dtml-var cod_materia missing>&modal=1" data-confirm="Deseja realmente excluir o arquivo ODT?"><i class="fas fas-fw fa-trash"></i>Excluir</a>
                 </dtml-let>
              <dtml-else>
-                <div class="input-group">             
                   <select class="form-select" id="lst_modelo" name="lst_modelo">
                      <option value="0">Selecione um modelo</option>
                        <dtml-with expr="sapl_documentos.modelo.materia.substitutivo">
@@ -394,14 +318,42 @@ $(document).ready(function () {
                           </dtml-in>
                        </dtml-with>
                   </select>
-                  <div class="input-group-append">                  
-                    <a class="btn btn-light" href="javascript:texto_odt_gerar();">Gerar</a>
-                  </div>
-                </div>
+                  <a class="btn btn-light" href="javascript:texto_odt_gerar();">Gerar</a>
              </dtml-if>
           </dtml-let>
-       </dtml-if>
-   </div>       
+       </div>
+   </div> 
+ </dtml-if>
+   <div class="col-12 col-sm-6 mb-3">
+        <label class="form-label d-block">Arquivo PDF</label>
+        <div class="input-group">
+        <dtml-if cod_substitutivo>
+           <dtml-call expr="REQUEST.set('id_documento', str(cod_substitutivo)+'_substitutivo.pdf')">
+           <dtml-if "hasattr(sapl_documentos.substitutivo,id_documento)">
+              <dtml-let documento="getattr(sapl_documentos.substitutivo,id_documento).absolute_url">
+                 <a class="btn btn-light" target="_blank" href="<dtml-var documento>?<dtml-var expr="ZopeTime().timeTime()">">
+                    <i class="fa fa-fw fa-file-pdf"></i>Visualizar                
+                 </a>
+                 <a class="btn btn-danger" href="texto_pdf_substitutivo_excluir_proc?cod_substitutivo=<dtml-var cod_substitutivo missing>&cod_materia=<dtml-var cod_materia missing>&modal=1" data-confirm="Deseja realmente excluir o arquivo PDF?"><i class="fas fas-fw fa-trash"></i>Excluir</a>
+              </dtml-let>
+           <dtml-else>
+                  <input type="file" class="form-control" id="file_nom_arquivo_substitutivo" name="file_nom_arquivo_substitutivo" accept="application/pdf">
+              <dtml-let id_documento_odt="str(cod_substitutivo)+'_substitutivo.odt'">
+                 <dtml-if "hasattr(sapl_documentos.substitutivo,id_documento_odt)">
+                    <dtml-call expr="REQUEST.set('temODT', 1)">
+                 </dtml-if>
+              </dtml-let>
+              <dtml-if expr="_.has_key('temODT')">
+                   <a class="btn btn-light" href="javascript:texto_pdf_gerar()">
+                     Gerar do ODT
+                   </a>
+              </dtml-if>
+           </dtml-if>
+        <dtml-else>
+           <input type="file" class="form-control" id="file_nom_arquivo_substitutivo" name="file_nom_arquivo_substitutivo" accept="application/pdf">
+        </dtml-if>
+       </div>
+   </div>     
   </div> 
   
  <div class="row">
@@ -435,7 +387,7 @@ $(document).ready(function () {
  <div class="text-start">
     <input type="button" class="btn btn-primary" name="btn_substitutivo_atualizar" value="Salvar" onClick="substitutivo_criticar(document.substitutivo_form)">
     <dtml-if expr="_.has_key('cod_substitutivo') and cod_substitutivo!=''">
-       <input type="button" class="btn btn-danger" name="btn_substitutivo_excluir" value="Excluir" onClick="substitutivo_excluir(document.substitutivo_form)">
+       <a class="btn btn-danger" href="substitutivo_excluir_proc?cod_substitutivo=<dtml-var cod_substitutivo>&cod_materia=<dtml-var cod_materia>&modal=1" data-confirm="Deseja realmente excluir o substitutivo?">Excluir</a>
     </dtml-if>
  </div>
  
@@ -446,10 +398,6 @@ $(document).ready(function () {
  </div>
   
 </form>
-
-<script>
-autosize(document.querySelectorAll('textarea'));
-</script>
 
 <dtml-var js_slot>
 <dtml-var footer_html>

@@ -102,7 +102,7 @@
   </dtml-if>
   <div class="row">
      <div class="col-6 mb-3">
-            <label class="form-label" for="lst_tip_id_basica" class="required">Tipo de Matéria</label>
+            <label class="form-label required" for="lst_tip_id_basica">Tipo de Matéria</label>
             <select class="form-select" id="lst_tip_id_basica" name="lst_tip_id_basica" required>
             <option value="">Selecione</option>
              <dtml-in expr="zsql.tipo_materia_legislativa_obter_zsql(ind_excluido=0)">
@@ -123,8 +123,8 @@
           </div>
      </div>
      <div class="col-3 mb-3">
-           <label class="form-label" for="txt_num_ident_basica" class="required">Número</label>
-           <input class="form-control number" type="number" id="txt_num_ident_basica" name="txt_num_ident_basica"
+           <label class="form-label required" for="txt_num_ident_basica">Número</label>
+           <input class="form-control" type="number" id="txt_num_ident_basica" name="txt_num_ident_basica"
              <dtml-if cod_materia_anexada> 
                 <dtml-in expr="zsql.materia_obter_zsql(cod_materia = cod_materia_anexada, )">
                    value="<dtml-var num_ident_basica missing>"
@@ -135,8 +135,8 @@
              </div>             
      </div>
      <div class="col-3 mb-3">
-           <label class="form-label" for="txt_ano_ident_basica" class="required">Ano</label>
-           <input class="form-control" type="text" name="txt_ano_ident_basica" size="4" maxlength="4"
+           <label class="form-label required" for="txt_ano_ident_basica">Ano</label>
+           <input class="form-control" type="number" name="txt_ano_ident_basica" size="4" maxlength="4"
              <dtml-if cod_materia_anexada> 
                <dtml-in expr="zsql.materia_obter_zsql(cod_materia = cod_materia_anexada, )">
                   value="<dtml-var ano_ident_basica missing>"
@@ -149,34 +149,22 @@
   </div>
   <div class="row">
      <div class="col-6 mb-3">
-           <label class="form-label" for="txt_dat_anexacao" class="required">Data de Anexação</label>
-           <input class="form-control date" type="text" name="txt_dat_anexacao" id="txt_dat_anexacao" value="<dtml-var dat_anexacao missing>" maxlength="10" required autocomplete="off" />
+           <label class="form-label required" for="txt_dat_anexacao">Data de Anexação</label>
+           <div class="input-group">
+              <input type="text" class="form-control datepicker" placeholder="dd/mm/aaaa" name="txt_dat_anexacao" id="txt_dat_anexacao" data-provide="datepicker" data-date-autoclose="true" value="<dtml-var dat_anexacao missing null>" autocomplete="off" required>
+              <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
+           </div>
            <div class="invalid-feedback">
              Este campo é obrigatório!
-           </div>
-        <script>
-        $('#txt_dat_anexacao').datepicker({
-            locale: 'pt-br',
-            icons: {rightIcon: '<i class="fa fa-fw fa-calendar-alt"></i>'},
-            format: 'dd/mm/yyyy',
-            uiLibrary: 'bootstrap4',
-            iconsLibrary: 'fontawesome'
-        });
-        </script>            
+           </div>        
      </div>
      <div class="col-6 mb-3">
            <label class="form-label" for="txt_dat_desanexacao">Data de Desanexação</label>
-           <input class="form-control date" type="text" name="txt_dat_desanexacao" id="txt_dat_desanexacao" value="<dtml-var dat_desanexacao missing null="">" autocomplete="off" maxlength="10" />
-     </div>
-        <script>
-        $('#txt_dat_desanexacao').datepicker({
-            locale: 'pt-br',
-            icons: {rightIcon: '<i class="fa fa-fw fa-calendar-alt"></i>'},
-            format: 'dd/mm/yyyy',
-            uiLibrary: 'bootstrap4',
-            iconsLibrary: 'fontawesome'
-        });
-        </script>      
+           <div class="input-group">
+              <input type="text" class="form-control datepicker" placeholder="dd/mm/aaaa" name="txt_dat_desanexacao" id="txt_dat_desanexacao" data-provide="datepicker" data-date-autoclose="true" value="<dtml-var dat_desanexacao missing null>" autocomplete="off">
+              <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
+           </div>
+     </div>    
   </div>
   <input type="hidden" name="cod_materia_principal" value="<dtml-var cod_materia_principal missing>" />
   <input type="hidden" name="modal" value="1" />

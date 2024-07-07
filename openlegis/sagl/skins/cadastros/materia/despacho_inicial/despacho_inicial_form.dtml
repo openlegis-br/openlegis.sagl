@@ -7,8 +7,8 @@
       var form = document.despacho_inicial_form;
            
       if (form.lst_cod_comissao.value == ""){
-          $('#lst_cod_comissao').addClass('is-invalid');      
-          alert("A Comissão deve ser selecionada!");
+          $('#lst_cod_comissao').addClass('is-invalid'); 
+           bootstrap.showModal({title: "Mensagem do Sistema", body: "A comissão deve ser selecionada!"});
           form.lst_nom_comissao.focus();
           return false;
       }
@@ -43,8 +43,8 @@
 
   <div class="row">
     <div class="col-12 mb-3">
-       <label class="form-label" for="lst_cod_comissao" class="required">Selecione a Comissão</label>
-       <select class="form-select" id="lst_cod_comissao" name="lst_cod_comissao" <dtml-if temRelatoria>onfocus="this.initialSelect = this.selectedIndex;" onchange="this.selectedIndex = this.initialSelect;"</dtml-if> required>
+       <label class="form-label required" for="lst_cod_comissao">Selecione a Comissão</label>
+       <select class="select2 form-select" id="lst_cod_comissao" name="lst_cod_comissao" <dtml-if temRelatoria>onfocus="this.initialSelect = this.selectedIndex;" onchange="this.selectedIndex = this.initialSelect;"</dtml-if> style="width: 100%" required>
           <option></option> 
           <dtml-in expr="zsql.comissao_obter_zsql()">
              <dtml-if expr="dat_extincao is None">
@@ -64,7 +64,7 @@
   </div>
 
   <dtml-if temRelatoria>
-    <p class="text-start"><b>Informação:</b> Parecer da Comissão já emitido. Não é possível alterar os dados deste formulário.</p> 
+    <p class="text-start"><b>Informação:</b> O parecer desta Comissão já foi emitido. Não é possível alterar os dados do formulário.</p> 
   </dtml-if>
 
   <input type="hidden" name="cod_materia" value="<dtml-var cod_materia>">

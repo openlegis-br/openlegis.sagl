@@ -773,7 +773,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         renderer = Renderer(template_file, locals(), nom_arquivo, pythonWithUnoPath='/usr/bin/python3',forceOoCall=True)
         renderer.run()
         data = open(nom_arquivo, "rb").read()
-        os.unlink(nom_arquivo_pdf)
+        os.unlink(nom_arquivo)
         self.sapl_documentos.emenda.manage_addFile(id=nom_arquivo,file=data)
         odt = getattr(self.sapl_documentos.emenda, nom_arquivo)
         odt.manage_permission('View', roles=['Manager','Authenticated'], acquire=0)
@@ -992,7 +992,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         os.unlink(nom_arquivo)
         self.sapl_documentos.parecer_comissao.manage_addFile(id=nom_arquivo,file=data)
         odt = getattr(self.sapl_documentos.parecer_comissao, nom_arquivo)
-        odt.manage_permission('View', roles=['Manager','Authenticated'], acquire=0)
+        odt.manage_permission('View', roles=['Manager','Operador','Operador Materia','Autor'], acquire=0)
 
     def parecer_gerar_pdf(self, cod_parecer):
         nom_arquivo_odt = "%s"%cod_parecer+'_parecer.odt'
@@ -1004,6 +1004,8 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         content = open(nom_arquivo_pdf, "rb").read()
         os.unlink(nom_arquivo_pdf)
         self.sapl_documentos.parecer_comissao.manage_addFile(id=nom_arquivo_pdf,file=self.pysc.upload_file(file=content, title='Parecer'))
+        pdf = getattr(self.sapl_documentos.parecer_comissao, nom_arquivo_pdf)
+        pdf.manage_permission('View', roles=['Manager','Operador','Operador Materia','Autor'], acquire=0)
 
     def peticao_gerar_odt(self, inf_basicas_dic, nom_arquivo, modelo_path):
         utool = getToolByName(self, 'portal_url')
@@ -1153,8 +1155,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         renderer.run()
         data = open(output_file_pdf, "rb").read()
         os.unlink(output_file_pdf)
-        content = data.getvalue()
-        self.sapl_documentos.substitutivo.manage_addFile(id=nom_arquivo_pdf,file=self.pysc.upload_file(file=content, title='Substitutivo'))
+        self.sapl_documentos.substitutivo.manage_addFile(id=nom_arquivo_pdf,file=self.pysc.upload_file(file=data, title='Substitutivo'))
 
     def pessoas_exportar(self, pessoas):
         arq = getattr(self.sapl_documentos.modelo, "planilha-visitantes.ods")

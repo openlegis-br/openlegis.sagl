@@ -1,0 +1,27 @@
+<dtml-call expr="REQUEST.set('erro', 0)">
+<dtml-call expr="REQUEST.set('id_texto', str(cod_relatoria)+'_parecer.pdf')">
+<dtml-if expr="hasattr(sapl_documentos.parecer_comissao,id_texto)">
+  <dtml-try>
+    <dtml-call "sapl_documentos.parecer_comissao.manage_delObjects(id_texto)">
+    <dtml-in expr="zsql.assinatura_documento_obter_zsql(codigo=cod_relatoria,tipo_doc='parecer_comissao')">
+       <dtml-try>
+          <dtml-call expr="zsql.assinatura_documento_excluir_zsql(
+             cod_assinatura_doc  = cod_assinatura_doc,
+             codigo              = codigo,
+             tipo_doc            = tipo_doc)">
+       </dtml-try>
+    </dtml-in>
+  <dtml-except>
+    <dtml-call expr="REQUEST.set('erro', 1)">
+  </dtml-try>
+  
+  <dtml-if erro>
+    <dtml-let mensagem="'Ocorreu um erro ao tentar excluir o arquivo PDF do parecer!'" tipo_mensagem="'danger'">
+      <dtml-var mensagem_emitir>
+    </dtml-let>
+  <dtml-else>
+    <dtml-let mensagem="'Arquivo PDF excluído com sucesso!'" url="'relatoria_mostrar_proc?cod_relatoria='+cod_relatoria+'&modal=1'">
+      <dtml-var mensagem_emitir>
+    </dtml-let>
+  </dtml-if>
+</dtml-if>

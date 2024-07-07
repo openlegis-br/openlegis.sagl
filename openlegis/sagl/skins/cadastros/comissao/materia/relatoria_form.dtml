@@ -1,36 +1,33 @@
 <dtml-var header_html>
 
-<script src="<dtml-var portal_url>/javascript/data_validar.js"></script>
-
 <script>
 
    function campos_criticar(form){
 
      if (form.txt_dat_desig_relator.value==""){
-        $('#txt_dat_desig_relator').addClass('is-invalid');          
-        alert('A data de designação deve ser preenchida!');
+        $('#txt_dat_desig_relator').addClass('is-invalid');
+        bootstrap.showModal({title: "Mensagem do Sistema", body: "A data de designação deve ser preenchida!"});
         form.txt_dat_desig_relator.focus();
         return false;
      }
 
      if (form.lst_relator[form.lst_relator.selectedIndex].value=="0"){
-        $('#lst_relator').addClass('is-invalid');     
-        alert('O Relator deve ser selecionado!');
+        $('#lst_relator').addClass('is-invalid');    
+        bootstrap.showModal({title: "Mensagem do Sistema", body: "A relatoria deve ser selecionada!"});
         form.lst_relator.focus();
         return false;
      }
 
      if (!IsValidDate(form.txt_dat_desig_relator.value)) {
-        alert("Digite uma data de parecer válida!");
+        bootstrap.showModal({title: "Mensagem do Sistema", body: "Digite uma data de designação válida!"});
         form.txt_dat_desig_relator.focus();
         return false;
      }
 
      if (form.txt_dat_destit_relator.value!=""){
         if (!IsValidDate(form.txt_dat_destit_relator.value)){
-            alert("Digite uma data de destituição válida!");
+            bootstrap.showModal({title: "Mensagem do Sistema", body: "Digite uma data de parecer válida!"});
             form.txt_dat_destit_relator.focus();
-            form.txt_dat_destit_relator.select();
             return false;
         }else{
             dat_desig=form.txt_dat_desig_relator.value;
@@ -38,65 +35,39 @@
             dat_destit=form.txt_dat_destit_relator.value;
             dat_destit=dat_destit.substring(6,10)+dat_destit.substring(3,5)+dat_destit.substring(0,2);
             if (dat_desig > dat_destit){
-               alert("Digite uma data de parecer válida! \nNão deve ser anterior à designação!");
+               bootstrap.showModal({title: "Mensagem do Sistema", body: "A data do parecer não pode ser anterior à data de designação!"});
                form.txt_dat_destit_relator.focus();
                form.txt_dat_destit_relator.select();
                return false;      
             }
         }
      }       
-
-    if (form.file_nom_arquivo_parecer.value != "") {
-    form.hdn_file_parecer.value = 1;
-    }    
-
-     form.submit();   
-  }
+    form.submit();   
+   }
 
   function texto_odt_gerar(){
       lst_modelo = document.getElementById("lst_modelo");
       lst_modelo.options[lst_modelo.selectedIndex].value;     
+
       if (lst_modelo.selectedIndex == 0) {
-         alert("É necessário selecionar um modelo!");
-         form.lst_modelo.focus();         
+         bootstrap.showModal({title: "Mensagem do Sistema", body: "É necessário selecionar um modelo!"});
       }
 
       if ((lst_modelo.selectedIndex != 0) && confirm("Confirma a geração do arquivo ODT?")) {
-         location.href="<dtml-var portal_url>/modelo_proposicao/parecer?cod_relatoria=<dtml-var cod_relatoria missing>&cod_materia=<dtml-var cod_materia missing>&cod_comissao=<dtml-var cod_comissao missing>&modelo_proposicao=" + lst_modelo.options[lst_modelo.selectedIndex].value + '&modal=1';
-         setTimeout(function(){window.location.reload(true)},2500);
+         location.href="<dtml-var portal_url>/modelo_proposicao/parecer?cod_relatoria=<dtml-var cod_relatoria missing>&cod_materia=<dtml-var cod_materia missing>&cod_comissao=<dtml-var cod_comissao missing>&modelo_proposicao=" + lst_modelo.options[lst_modelo.selectedIndex].value + "&modal=1";
+         setTimeout(function(){window.location.reload(true)},2000);
          return true;
        }
          return;
   }
 
-  function texto_integral_odt_excluir(){
-
-       if (confirm("Deseja realmente excluir o arquivo ODT?")) {
-          location.href="<dtml-var portal_url>/cadastros/comissao/materia/texto_odt_parecer_excluir_proc?cod_relatoria=<dtml-var cod_relatoria missing>&modal=1";
-       }
-       return;
-  }
-
-
   function texto_pdf_gerar(){
     if (confirm("Confirma a geração do arquivo PDF?")) {
        location.href="<dtml-var portal_url>/modelo_proposicao/parecer_gerar_pdf?cod_parecer=<dtml-var cod_relatoria missing>&modal=1";
-       setTimeout(function(){window.location.reload(true)},2500);
+       setTimeout(function(){window.location.reload(true)},2000);
        return true;
      }
   return;
-  }
-
-  function relatoria_excluir(){
-
-       if (confirm("Deseja realmente excluir?")) {
-          location.href="relatoria_excluir_proc?cod_relatoria=<dtml-var cod_relatoria missing>&amp;cod_materia=<dtml-var cod_materia missing>&modal=1";
-       }
-       
-   }   
-
-  function ativa_desativa_file_field_parecer(form) {
-   form.file_nom_arquivo_parecer.disabled = !(form.radTI[2].checked);
   }
 
   function setar_data(data_desig) {
@@ -104,7 +75,6 @@
   }
 
   function odt_proposicao_obter(cod_proposicao){
-
       if (confirm("Copiar arquivo ODT da proposição?")) {
          location.href="<dtml-var portal_url>/pysc/proposicao_salvar_como_texto_integral_materia_pysc?cod_proposicao="+cod_proposicao+"&cod_materia=<dtml-var cod_materia missing>";
          setTimeout(function(){window.location.reload(true)},1500);
@@ -114,7 +84,6 @@
   }
 
   function pdf_proposicao_obter(cod_proposicao){
-
       if (confirm("Copiar e autuar o arquivo PDF da proposição?")) {
          location.href="<dtml-var portal_url>/modelo_proposicao/proposicao_autuar?cod_proposicao="+cod_proposicao;
          setTimeout(function(){window.location.reload(true)},1500);
@@ -122,10 +91,6 @@
        }
          return;
   }  
-
-$(document).ready(function () {
-  bsCustomFileInput.init()
-});
 
 </script>
 
@@ -148,9 +113,8 @@ $(document).ready(function () {
    <dtml-call expr="REQUEST.set('cod_periodo_comp_sel', int(cod_periodo_comp))">
 </dtml-in>
 
-<h1 class="firstHeading font-size-18"><dtml-var nom_comissao></h1>
-
-<p class="font-weight-bold"><dtml-var id_materia></p>
+<h1 class="firstHeading font-size-18"><dtml-var id_materia></h1>
+<p class="font-weight-bold"><dtml-var nom_comissao></p>
 
 <form name="relatoria_form" method="post" action="relatoria_salvar_proc" enctype="multipart/form-data">
   <input type="hidden" name="hdn_cod_materia" value="<dtml-var cod_materia>" />
@@ -166,16 +130,19 @@ $(document).ready(function () {
   <input type="hidden" name="modal" value="1" />
 
   <div class="row">
-    <div class="col-3 col-md-4 mb-3">
-        <label class="form-label" for="txt_dat_desig_relator" class="required">Data de Designação</label>
-        <input class="form-control date" type="text" name="txt_dat_desig_relator" id="txt_dat_desig_relator" value="<dtml-var dat_desig_relator missing>" onchange="setar_data(form.txt_dat_desig_relator.value);" />
+    <div class="col-12 col-md-3 mb-3">
+        <label class="form-label required" for="txt_dat_desig_relator">Designação do Relator</label>
+        <div class="input-group">
+           <input type="text" class="form-control datepicker" placeholder="dd/mm/aaaa" name="txt_dat_desig_relator" id="txt_dat_desig_relator" data-provide="datepicker" data-date-autoclose="true" value="<dtml-var dat_desig_relator missing null>" autocomplete="off" required>
+           <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
+        </div>
         <div class="invalid-feedback">
            Este campo é obrigatório!
         </div>         
     </div> 
     
-    <div class="col-9 col-md-8 mb-3">
-        <label class="form-label" for="lst_relator" class="d-block required">Relatoria</label>
+    <div class="col-12 col-md-9 mb-3">
+        <label class="form-label required" for="lst_relator">Relatoria</label>
         <dtml-if expr="_.has_key('cod_periodo_comp_sel')">
             <select class="form-select" id="lst_relator" name="lst_relator" required>
              <option value="0">Selecione</option>
@@ -193,7 +160,7 @@ $(document).ready(function () {
             </select>
         <dtml-else>
            <select class="form-select text-danger" id="lst_relator">
-             <option value="0">Inexiste composição da Comissão na data de designação informada!</value>
+             <option value="0">Não membros na data de designação informada!</value>
            </select>
        </dtml-if>  
        <div class="invalid-feedback">
@@ -208,18 +175,11 @@ $(document).ready(function () {
        <dtml-unless dat_destit_relator>
           <dtml-call expr="REQUEST.set('dat_destit_relator', DateTime().strftime('%d/%m/%Y %H:%M:%S'))">
        </dtml-unless>
-       <input class="form-control datetime" type="text" name="txt_dat_destit_relator" id="txt_dat_destit_relator" value="<dtml-var dat_destit_relator missing null="">" />    
+        <div class="input-group">
+           <input type="text" class="form-control" placeholder="dd/mm/aaaa" name="txt_dat_destit_relator" id="txt_dat_destit_relator" value="<dtml-var dat_destit_relator missing null>" autocomplete="off">
+           <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
+        </div> 
     </div>
-    <script>
-       $('#txt_dat_destit_relator').datetimepicker({
-           locale: 'pt-br',
-           format: 'dd/mm/yyyy HH:MM:SS',
-           uiLibrary: 'bootstrap4',
-           modal: true,
-           footer: true,
-           showOtherMonths: true, calendarWeeks: true
-       });
-    </script>
     <div class="col-6 col-md-3 mb-3">
        <dtml-unless cod_relatoria>
           <dtml-call expr="REQUEST.set('ano_parecer', DateTime().strftime('%Y'))">
@@ -238,7 +198,7 @@ $(document).ready(function () {
        <input class="form-control year" type="number" name="txt_ano_parecer" id="txt_ano_parecer" value="<dtml-var ano_parecer missing null="">" />    
     </div> 
     <div class="col-6 col-md-3 mb-3">
-       <label class="form-label" for="txt_num_protocolo">Número de Protocolo</label>
+       <label class="form-label" for="txt_num_protocolo">Protocolo</label>
        <input class="form-control number" type="text" name="txt_num_protocolo" id="txt_num_protocolo" value="<dtml-var num_protocolo missing null="">" />    
     </div>              
   </div>
@@ -282,72 +242,18 @@ $(document).ready(function () {
     </div>     
   </div>
   
-  <div class="row"> 
+ <dtml-if expr="_.has_key('cod_relatoria')">
+  <div class="row">
     <div class="col-12 col-md-6 mb-3">
-       <label class="form-label d-block">PDF Parecer</label>
-       <input type="hidden" name="hdn_file_parecer" value="0"/>
-       <dtml-if cod_relatoria>
-          <dtml-call expr="REQUEST.set('id_parecer', str(cod_relatoria)+'_parecer.pdf')">
-             <dtml-if "hasattr(sapl_documentos.parecer_comissao,id_parecer)">
-                <dtml-let parecer="getattr(sapl_documentos.parecer_comissao,id_parecer).absolute_url">
-                   <dtml-call expr="REQUEST.set('temPDF', 1)">                             
-                   <a class="btn btn-light" target="_blank" href="<dtml-var parecer>?<dtml-var expr="ZopeTime().timeTime()">"><i class="fa fa-fw fa-file-pdf"></i> Visualizar</a>
-                 <dtml-unless expr="zsql.proposicao_obter_zsql(cod_materia=cod_materia, cod_parecer=cod_relatoria)">                      
-                   <dtml-if "sapl_documentos.props_sagl.restpki_access_token!=''">               
-                      <button type="button" class="btn btn-light" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Assinaturas Digitais" data-src="<dtml-var portal_url>/cadastros/assinatura/assinatura_solicitar_form?codigo=<dtml-var cod_relatoria>&tipo_doc=parecer_comissao&modal=1"><i class="fas fa-file-signature"></i> Assinaturas</button>
-                   </dtml-if>
-                 </dtml-unless>
-                </dtml-let>                         
-                <div class="d-block mt-1">
-                <div class="form-check form-check-inline">              
-                  <input class="form-check-input" type="radio" id="Radio1" name="radTI" value="M" checked="true" onClick="ativa_desativa_file_field_parecer(document.relatoria_form)"/>
-                  <label class="form-check-label" for="Radio1">Manter</label>
-                </div>               
-                <div class="form-check form-check-inline">                              
-                  <input class="form-check-input" type="radio" id="Radio2" name="radTI" value="E" onClick="ativa_desativa_file_field_parecer(document.relatoria_form)"/>
-                  <label class="form-check-label" for="Radio2">Excluir</label>  
-                </div>
-                <div class="form-check form-check-inline">                                   
-                  <input class="form-check-input" type="radio" id="Radio3" name="radTI" value="S" onClick="ativa_desativa_file_field_parecer(document.relatoria_form)"/>
-                  <label class="form-check-label" for="Radio3">Substituir</label>                                    
-                </div>
-                </div>              
-                <input class="form-control-file" type="file" id="file_nom_arquivo_parecer" name="file_nom_arquivo_parecer" accept="application/pdf" disabled="1" />
-             <dtml-else>
-                 <div class="input-group">                
-                   <div class="custom-file">
-                     <input type="file" class="custom-file-input" id="file_nom_arquivo_parecer" name="file_nom_arquivo_parecer" accept="application/pdf" lang="pt-br">
-                     <label class="custom-file-label" for="file_nom_arquivo_parecer">Selecione o arquivo</label>
-                   </div>
-                   <dtml-let id_documento_odt="str(cod_relatoria)+'_parecer.odt'">
-                     <dtml-if "hasattr(sapl_documentos.parecer_comissao,id_documento_odt)">
-                        <dtml-call expr="REQUEST.set('temODT', 1)">
-                     </dtml-if>
-                   </dtml-let>
-                   <dtml-if expr="_.has_key('temODT')">             
-                      <div class="input-group-append">
-                         <a class="btn btn-light" href="javascript:texto_pdf_gerar()">Gerar do ODT</a>
-                      </div>
-                   </dtml-if>
-                 </div>
-                 <input type="hidden" name="radTI" value="I"/>
-             </dtml-if>
-       <dtml-else>
-          <input type="file" id="file_nom_arquivo_parecer" name="file_nom_arquivo_parecer" accept="application/pdf" size="40" maxlength="100" />
-          <input type="hidden" name="radTI" value="I"/>
-       </dtml-if>  
-    </div>
-    <div class="col-12 col-md-6 mb-3">
-       <dtml-if expr="_.has_key('cod_relatoria')">
-          <label class="form-label d-block">ODT Parecer</label>
+          <label class="form-label d-block">Arquivo ODT</label>
+          <div class="input-group">
           <dtml-let id_documento_odt="str(cod_relatoria)+'_parecer.odt'">
              <dtml-if "hasattr(sapl_documentos.parecer_comissao,id_documento_odt)">
                 <dtml-let documento_odt="getattr(sapl_documentos.parecer_comissao,id_documento_odt).absolute_url">
                    <dtml-call expr="REQUEST.set('nome_arquivo_odt',str(cod_relatoria)+'_parecer.odt')">
                    <a class="btn btn-light" href="<dtml-var portal_url>/generico/viewerJS/#<dtml-var documento_odt>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fa fa-fw fa-file-alt"></i> Visualizar</a>
                    <button type="button" class="btn btn-light" onclick="javascript:location.href='<dtml-var portal_url>/sapl_documentos/parecer_comissao/externalEdit_/<dtml-var nome_arquivo_odt>.zem'" data-bs-toggle="tooltip" data-placement="bottom" title="Editar no LibreOffice"><i class="fas fa-fw fa-external-link-alt"></i>Editar</button>  
-
-                   <a class="btn btn-danger" href="javascript:texto_integral_odt_excluir()">Excluir</a>
+                   <a class="btn btn-danger" href="<dtml-var portal_url>/cadastros/comissao/materia/texto_odt_parecer_excluir_proc?cod_relatoria=<dtml-var cod_relatoria missing>&modal=1" data-confirm="Deseja realmente excluir o arquivo ODT?"><i class="fas fas-fw fa-trash"></i>Excluir</a>
                 </dtml-let>
              <dtml-else>
                <div class="input-group">
@@ -359,14 +265,48 @@ $(document).ready(function () {
                       </dtml-in>
                    </dtml-with>
                 </select>
-                <div class="input-group-append">                
-                  <a class="btn btn-light" href="javascript:texto_odt_gerar();">Gerar</a>
-                </div>
+                <a class="btn btn-light" href="javascript:texto_odt_gerar();">Gerar</a>
               </div>
              </dtml-if>
           </dtml-let>
-       </dtml-if>    
+        </div>
     </div>    
+ </dtml-if>    
+    <div class="col-12 col-md-6 mb-3">
+       <label class="form-label d-block">Arquivo PDF</label>
+       <input type="hidden" name="hdn_file_parecer" value="0"/>
+       <dtml-if cod_relatoria>
+          <dtml-call expr="REQUEST.set('id_parecer', str(cod_relatoria)+'_parecer.pdf')">
+             <dtml-if "hasattr(sapl_documentos.parecer_comissao,id_parecer)">
+               <div class="input-group">                
+                <dtml-let parecer="getattr(sapl_documentos.parecer_comissao,id_parecer).absolute_url">
+                   <dtml-call expr="REQUEST.set('temPDF', 1)">                             
+                   <a class="btn btn-light" target="_blank" href="<dtml-var parecer>?<dtml-var expr="ZopeTime().timeTime()">"><i class="fa fa-fw fa-file-pdf"></i> Visualizar</a>
+                 <dtml-unless expr="zsql.proposicao_obter_zsql(cod_materia=cod_materia, cod_parecer=cod_relatoria)">                      
+                   <dtml-if "sapl_documentos.props_sagl.restpki_access_token!=''">               
+                      <button type="button" class="btn btn-light" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Assinaturas Digitais" data-src="<dtml-var portal_url>/cadastros/assinatura/assinatura_solicitar_form?codigo=<dtml-var cod_relatoria>&tipo_doc=parecer_comissao&modal=1"><i class="fas fas-fw fa-file-signature"></i> Assinaturas</button>
+                   </dtml-if>
+                 </dtml-unless>
+                 <a class="btn btn-danger" href="<dtml-var portal_url>/cadastros/comissao/materia/texto_pdf_parecer_excluir_proc?cod_relatoria=<dtml-var cod_relatoria missing>&modal=1" data-confirm="Deseja realmente excluir o arquivo PDF?"><i class="fas fas-fw fa-trash"></i>Excluir</a>
+                </dtml-let>
+                </div>                   
+             <dtml-else>
+                 <div class="input-group">                
+                   <input type="file" class="form-control" id="file_nom_arquivo_parecer" name="file_nom_arquivo_parecer" accept="application/pdf" lang="pt-br">
+                   <dtml-let id_documento_odt="str(cod_relatoria)+'_parecer.odt'">
+                     <dtml-if "hasattr(sapl_documentos.parecer_comissao,id_documento_odt)">
+                        <dtml-call expr="REQUEST.set('temODT', 1)">
+                     </dtml-if>
+                   </dtml-let>
+                   <dtml-if expr="_.has_key('temODT')">             
+                      <a class="btn btn-light" href="javascript:texto_pdf_gerar()">Gerar do ODT</a>
+                   </dtml-if>
+                 </div>
+             </dtml-if>
+       <dtml-else>
+          <input class="form-control" type="file" id="file_nom_arquivo_parecer" name="file_nom_arquivo_parecer" accept="application/pdf" size="40" maxlength="100" />
+       </dtml-if>  
+    </div>
   </div>
 
   <div class="row"> 
@@ -413,7 +353,7 @@ $(document).ready(function () {
      <input type="button" class="btn btn-light" value="Voltar" onClick="javascript:history.back()" />   
    </dtml-if>
    <dtml-if cod_relatoria>
-      <input type="button" class="btn btn-danger" value="Excluir" onClick="relatoria_excluir()" />
+      <a class="btn btn-danger" href="relatoria_excluir_proc?cod_relatoria=<dtml-var cod_relatoria missing>&cod_materia=<dtml-var cod_materia missing>&modal=1" data-confirm="Deseja realmente excluir o parecer?">Excluir</a>
    </dtml-if>
   </div>
 
@@ -425,9 +365,17 @@ $(document).ready(function () {
 
 </form>
 
-<script>
-autosize(document.querySelectorAll('textarea'));
-</script>
-
+<link href="<dtml-var portal_url>/assets/libs/bootstrap-datetimepicker/css/bootstrap-datetimepicker.min.css" rel="stylesheet">
 <dtml-var js_slot>
+<script src="<dtml-var portal_url>/assets/libs/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js"></script>
+<script src="<dtml-var portal_url>/assets/libs/bootstrap-datetimepicker/locales/bootstrap-datetimepicker.pt-BR.js"></script>
+<script src="<dtml-var portal_url>/javascript/data_validar.js"></script>
+ <script>
+    $('#txt_dat_destit_relator').datetimepicker({
+        language: 'pt-BR',
+        formatViewType:'datetime',
+        format: 'dd/mm/yyyy hh:ii:ss',
+        minuteStep: 1
+    });
+</script>
 <dtml-var footer_html>

@@ -90,8 +90,8 @@
 <input type="hidden" name="modal" value="1" />
 
   <div class="row">
-     <div class="col-12 col-sm-6 mb-3">
-           <label class="form-label" for="lst_tip_autor" class="required">Tipo de Autor</label>
+     <div class="col-12 col-md-5 mb-3">
+           <label class="form-label required" for="lst_tip_autor">Tipo de Autor</label>
            <select class="form-select" name="lst_tip_autor" id="lst_tip_autor" onChange="tipo_autor_mudou(document.autoria_form)" required>
               <dtml-unless tip_autor>
                  <option value="0">Selecione</option>
@@ -107,8 +107,8 @@
              Este campo é obrigatório!
            </div>
      </div>
-     <div class="col-12 col-sm-6 mb-3">
-          <label class="form-label" for="des_tip_autor" class="required">Autor</label>
+     <div class="col-12 col-md-5 mb-3">
+          <label class="form-label required" for="des_tip_autor">Autor</label>
           <dtml-if expr="_.has_key('des_tipo_autor')"> 
              <select class="form-select" id="chk_cod_autor" name="chk_cod_autor" required>
                <option value=0>Selecione</option>
@@ -159,11 +159,9 @@
                 Este campo é obrigatório!
               </div>
      </div>
-  </div>
 
-  <div class="row">
-     <div class="col-12 mb-3">
-             <label class="form-label" for="rad_ind_primeiro_autor" class="required d-block">Primeiro Autor?</label>
+     <div class="col-12 col-md-2 mb-3">
+             <label class="form-label required d-block" for="rad_ind_primeiro_autor">Primeiro Autor?</label>
                <dtml-in expr="[('1','Sim'),('0','Não')]">
                  <input type="radio" id="rad<dtml-var expr="_['sequence-key']">" name="rad_ind_primeiro_autor" value="<dtml-var expr="_['sequence-key']">"
                  <dtml-if expr="_.has_key('ind_primeiro_autor') and ind_primeiro_autor==_['sequence-key']">checked=1

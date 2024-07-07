@@ -5,7 +5,7 @@
      <dtml-call expr="REQUEST.set('cod_materia_anexada',cod_materia)">
      <dtml-call expr="REQUEST.set('marcador',cod_materia)">
 <dtml-else>  
-     <dtml-let mensagem="'A matéria a ser anexada não existe no cadastro de matérias legislativas.'" tipo_mensagem="'warning'">
+     <dtml-let mensagem="'A matéria anexada não existe no cadastro de matérias legislativas.'" tipo_mensagem="'danger'">
        <dtml-var mensagem_emitir>
      </dtml-let>
 </dtml-in> 
@@ -25,7 +25,7 @@
     <dtml-if cod_materia_anexada>
       <dtml-if expr="cod_materia_anexada == cod_materia_principal">
         <dtml-call expr="REQUEST.set('marcador',0)">
-          <dtml-let mensagem="'A matéria a ser anexada não pode ser igual à matéria principal.'" tipo_mensagem="'warning'">
+          <dtml-let mensagem="'A matéria a ser anexada não pode ser igual à matéria principal.'" tipo_mensagem="'danger'">
             <dtml-var mensagem_emitir>
           </dtml-let>
       </dtml-if>

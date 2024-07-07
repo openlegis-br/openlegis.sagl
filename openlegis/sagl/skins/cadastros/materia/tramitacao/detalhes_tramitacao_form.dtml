@@ -92,10 +92,10 @@
     <div class="col-6 col-md-3 mb-3">
       <label class="form-label d-block">Urgente ?</label>
       <dtml-in expr="[(1,'Sim'),(0,'Não')]">
-         <div class="custom-control custom-radio custom-control-inline">     
-           <input class="custom-control-input"  type="radio" id="rad<dtml-var expr="_['sequence-item'][0]">" name="rad_ind_urgencia" value="<dtml-var sequence-key>"
+         <div class="form-check form-check-inline">     
+           <input class="form-check-input"  type="radio" id="rad<dtml-var expr="_['sequence-item'][0]">" name="rad_ind_urgencia" value="<dtml-var sequence-key>"
            <dtml-if expr="_.has_key('cod_tramitacao') and ind_urgencia==_['sequence-key']">checked=1</dtml-if> disabled />
-             <label class="custom-control-label" for="rad<dtml-var expr="_['sequence-item'][0]">"><dtml-var sequence-item></label>
+             <label class="form-check-label" for="rad<dtml-var expr="_['sequence-item'][0]">"><dtml-var sequence-item></label>
          </div>
       </dtml-in>    
     </div>    
@@ -148,7 +148,8 @@
        <input type="button" class="btn btn-danger" value="Excluir" onClick="tramitacao_excluir()" />
     </dtml-if>
   </div>
-      
+       
+<dtml-var js_slot>
 <script>
 tinymce.init({
   selector: '#txa_txt_tramitacao',
@@ -160,12 +161,9 @@ tinymce.init({
     'searchreplace wordcount visualblocks visualchars code fullscreen insertdatetime media nonbreaking',
     'table emoticons template paste help'
   ],
-  toolbar: 'undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | ' +
-    ' link image | print preview media fullpage | ',
+  toolbar: false,
   menubar: 'edit view insert format tools help',
   content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }'
 });
 </script>
-   
-<dtml-var js_slot>
 <dtml-var footer_html>

@@ -1,52 +1,17 @@
 <dtml-var header_html>
-
-  <script>
-    var form = document.autoria_emenda_form;
-
-    function autor_criticar(form){
-      var tipo_autor = form.lst_tip_autor[form.lst_tip_autor.selectedIndex].value;
-      if (tipo_autor=='0'){
-         alert("Um tipo de autor deve ser selecionado!");
-         form.lst_tip_autor.focus();
-         return false;
-      }
-      var cod_autor = form.lst_cod_autor[form.lst_cod_autor.selectedIndex].value;
-      if (cod_autor=='0'){
-         alert("Um autor deve ser selecionado!");
-         form.lst_cod_autor.focus();
-         return false; 
-      }
-      form.submit();
-    }
-
-   function tipo_autor_mudou(form){
-      var valor = form.lst_tip_autor[form.lst_tip_autor.selectedIndex].value;      
-      var separador = valor.indexOf("&");
-      var URL = 'autoria_emenda_form?tip_autor=' + valor.substring(0,separador) 
-              + '&des_tipo_autor=' + valor.substring(separador+1,valor.length)
-              + '&cod_materia=' + form.cod_materia.value 
-              + '&cod_emenda=' + form.cod_emenda.value
-              + '&modal=1';     
-      location.href= URL;
-   }
-  </script>
   
-  <h1 class="firstHeading font-size-18">Edição de Autoria</h1> 
+  <h1 class="firstHeading font-size-18">Autoria da Emenda</h1> 
 
    <dtml-if expr="_.has_key('mensagem')">
      <dtml-if expr="_.has_key('tipo_mensagem') or _.has_key('sucesso')">
        <div class="alert alert-success alert-dismissible fade show" role="alert">
         <h5><dtml-var mensagem newline_to_br html_quote></h5>
-        <button type="button" class="close" data-bs-dismiss="alert" aria-label="Fechar">
-          <span aria-hidden="true">&times;</span>
-        </button>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
        </div>
      <dtml-else>
        <div class="alert alert-danger alert-dismissible fade show" role="alert">
         <h5><dtml-var mensagem newline_to_br html_quote></h5>
-        <button type="button" class="close" data-bs-dismiss="alert" aria-label="Fechar">
-          <span aria-hidden="true">&times;</span>
-        </button>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
        </div>
      </dtml-if>
    </dtml-if>
@@ -73,7 +38,7 @@
                   <td><dtml-var nom_autor_join></td>
                   <td><dtml-var des_tipo_autor></td>
                   <td>
-                     <a class="btn btn-sm btn-danger" href="autoria_emenda_excluir_proc?cod_autor=<dtml-var cod_autor>&cod_emenda=<dtml-var cod_emenda>&cod_materia=<dtml-var cod_materia>&modal=1">Excluir</a>
+                     <a class="btn btn-sm btn-danger" href="autoria_emenda_excluir_proc?cod_autor=<dtml-var cod_autor>&cod_emenda=<dtml-var cod_emenda>&cod_materia=<dtml-var cod_materia>&modal=1" data-confirm="Deseja realmente excluir o autoria?">Excluir</a>
                   </td>
                </tr>
          <dtml-if sequence-end>
@@ -92,7 +57,6 @@
     </dtml-if>
   </dtml-in>
 
-  <legend class="font-size-16">Incluir Autor</legend>
   <form id="autoria_emenda_form" name="autoria_emenda_form" method="post" action="autoria_emenda_incluir_proc">
     <input type="hidden" name="cod_materia" value="<dtml-var cod_materia>">
     <input type="hidden" name="cod_emenda" value="<dtml-var cod_emenda>">
@@ -181,11 +145,44 @@
           </dtml-if>
         </td>
         <td>
-          <input type="button" class="btn btn-sm btn-primary" name="btn_autoria_emenda" value="Incluir" onClick="autor_criticar(document.autoria_emenda_form)">
+          <input type="button" class="btn btn-primary" name="btn_autoria_emenda" value="Incluir" onClick="autor_criticar(document.autoria_emenda_form)">
         </td>
       </tr>
     </table>
   </form>
+  <div class="text-center">
+     <input class="btn btn-light" type="button" id="closeBtn" onclick="var modal1 = $('#close', window.parent.document); modal1.click();" value="Fechar" />
+  </div>
 
 <dtml-var js_slot>
+  <script>
+    var form = document.autoria_emenda_form;
+
+    function autor_criticar(form){
+      var tipo_autor = form.lst_tip_autor[form.lst_tip_autor.selectedIndex].value;
+      if (tipo_autor=='0'){
+         bootstrap.showModal({title: "Mensagem do Sistema", body: "O tipo de autor deve ser selecionado!"});
+         form.lst_tip_autor.focus();
+         return false;
+      }
+      var cod_autor = form.lst_cod_autor[form.lst_cod_autor.selectedIndex].value;
+      if (cod_autor=='0'){
+         bootstrap.showModal({title: "Mensagem do Sistema", body: "Um autor deve ser selecionado!"});
+         form.lst_cod_autor.focus();
+         return false; 
+      }
+      form.submit();
+    }
+
+   function tipo_autor_mudou(form){
+      var valor = form.lst_tip_autor[form.lst_tip_autor.selectedIndex].value;      
+      var separador = valor.indexOf("&");
+      var URL = 'autoria_emenda_form?tip_autor=' + valor.substring(0,separador) 
+              + '&des_tipo_autor=' + valor.substring(separador+1,valor.length)
+              + '&cod_materia=' + form.cod_materia.value 
+              + '&cod_emenda=' + form.cod_emenda.value
+              + '&modal=1';     
+      location.href= URL;
+   }
+  </script>
 <dtml-var footer_html>

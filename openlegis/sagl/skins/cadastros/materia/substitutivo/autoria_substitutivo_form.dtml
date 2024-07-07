@@ -6,13 +6,13 @@
     function autor_criticar(form){
       var tipo_autor = form.lst_tip_autor[form.lst_tip_autor.selectedIndex].value;
       if (tipo_autor=='0'){
-         alert("Um tipo de autor deve ser selecionado!");
+         bootstrap.showModal({title: "Mensagem do Sistema", body: "O tipo de autor deve ser selecionado!"});      
          form.lst_tip_autor.focus();
          return false;
       }
       var cod_autor = form.lst_cod_autor[form.lst_cod_autor.selectedIndex].value;
       if (cod_autor=='0'){
-         alert("Um autor deve ser selecionado!");
+         bootstrap.showModal({title: "Mensagem do Sistema", body: "Um autor deve ser selecionado!"});
          form.lst_cod_autor.focus();
          return false; 
       }
@@ -37,16 +37,12 @@
      <dtml-if expr="_.has_key('tipo_mensagem') or _.has_key('sucesso')">
        <div class="alert alert-success alert-dismissible fade show" role="alert">
         <h5><dtml-var mensagem newline_to_br html_quote></h5>
-        <button type="button" class="close" data-bs-dismiss="alert" aria-label="Fechar">
-          <span aria-hidden="true">&times;</span>
-        </button>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
        </div>
      <dtml-else>
        <div class="alert alert-danger alert-dismissible fade show" role="alert">
         <h5><dtml-var mensagem newline_to_br html_quote></h5>
-        <button type="button" class="close" data-bs-dismiss="alert" aria-label="Fechar">
-          <span aria-hidden="true">&times;</span>
-        </button>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
        </div>
      </dtml-if>
    </dtml-if>
@@ -73,7 +69,7 @@
                   <td><dtml-var nom_autor_join></td>
                   <td><dtml-var des_tipo_autor></td>
                   <td>
-                     <a class="btn btn-sm btn-danger" href="autoria_substitutivo_excluir_proc?cod_autor=<dtml-var cod_autor>&cod_substitutivo=<dtml-var cod_substitutivo>&cod_materia=<dtml-var cod_materia>&modal=1">Excluir</a>
+                     <a class="btn btn-sm btn-danger" href="autoria_substitutivo_excluir_proc?cod_autor=<dtml-var cod_autor>&cod_substitutivo=<dtml-var cod_substitutivo>&cod_materia=<dtml-var cod_materia>&modal=1" data-confirm="Deseja realmente excluir o autoria?">Excluir</a>
                   </td>
                </tr>
          <dtml-if sequence-end>
@@ -181,7 +177,7 @@
           </dtml-if>
         </td>
         <td>
-          <input type="button" class="btn btn-sm btn-primary" name="btn_autoria_substitutivo" value="Incluir" onClick="autor_criticar(document.autoria_substitutivo_form)">
+          <input type="button" class="btn btn-primary" name="btn_autoria_substitutivo" value="Incluir" onClick="autor_criticar(document.autoria_substitutivo_form)">
         </td>
       </tr>
     </table>

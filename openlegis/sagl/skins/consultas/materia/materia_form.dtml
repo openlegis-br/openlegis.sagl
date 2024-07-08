@@ -1,30 +1,5 @@
 <dtml-var header_html>
 
-<script>
-$(function () {
-    $('[data-bs-toggle="popover"]').popover({
-    container: 'body',
-    html: true,
-    placement: 'right',
-    sanitize: false,
-    content: function() {
-        return $('#PopoverContent').html()
-    }
-    })
-});
-
- <dtml-let isAnon="portal_membership.isAnonymousUser()">
-    <dtml-if expr="not isAnon">
-  function documento_acessorio_excluir(cod_documento){ 
-       if (confirm("Deseja realmente excluir o documento acessório?")) {          
-          location.href="documento_acessorio_excluir_proc?cod_documento_acessorio="+cod_documento+"&cod_materia=<dtml-var cod_materia missing>";
-       }
-  } 
-    </dtml-if> 
- </dtml-let>
- 
-</script>
-
  <div class="row mb-2">
       <div class="col-12 col-md-8 align-self-center">
          <h1 class="firstHeading font-size-18"><dtml-var des_tipo_materia> nº <dtml-var num_ident_basica missing>/<dtml-var ano_ident_basica missing></h1>
@@ -88,8 +63,6 @@ $(function () {
        
       </div>
  </div>
-
- <hr />
 
  <div class="row">
     <p class="col-12"><b>Data de Apresentação</b>: <dtml-var dat_apresentacao missing null=""></p>
@@ -929,10 +902,34 @@ $(function () {
  </dtml-if>
 </dtml-let>
 
-<div class="text-start">
+<div class="text-start btn-group">
   <a class="btn btn-primary d-print-none" href="<dtml-var portal_url>/consultas/materia" ><i class="fa fa-fw fa-search"></i> Nova Pesquisa</a>
   <a class="btn btn-light" href="javascript:void(0)" onClick="window.history.go(-1); return false;"><i class="fa fa-fw fa-undo"></i> Voltar</a>  
 </div>
 
 <dtml-var js_slot>
+<script>
+$(function () {
+    $('[data-bs-toggle="popover"]').popover({
+    container: 'body',
+    html: true,
+    placement: 'right',
+    sanitize: false,
+    content: function() {
+        return $('#PopoverContent').html()
+    }
+    })
+});
+
+ <dtml-let isAnon="portal_membership.isAnonymousUser()">
+    <dtml-if expr="not isAnon">
+  function documento_acessorio_excluir(cod_documento){ 
+       if (confirm("Deseja realmente excluir o documento acessório?")) {          
+          location.href="documento_acessorio_excluir_proc?cod_documento_acessorio="+cod_documento+"&cod_materia=<dtml-var cod_materia missing>";
+       }
+  } 
+    </dtml-if> 
+ </dtml-let>
+ 
+</script>
 <dtml-var footer_html>

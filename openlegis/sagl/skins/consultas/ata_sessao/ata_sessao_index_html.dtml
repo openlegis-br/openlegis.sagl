@@ -99,11 +99,13 @@
             </dtml-let>
          </dtml-if> 
        </div>
-       <div class="col-12 col-md-4 mt-1 mt-md-0 d-flex justify-content-end">
+       <div class="col-12 col-md-4 mt-1 mt-md-0 d-flex justify-content-start justify-content-sm-end"">
          <dtml-let id_ata="str(cod_sessao_plen)+'_ata_sessao.pdf'">
             <dtml-if "hasattr(sapl_documentos.ata_sessao,id_ata)">
                <dtml-let ata="getattr(sapl_documentos.ata_sessao,id_ata).absolute_url">
+                <div class="btn-group btn-group-sm mt-1 mt-md-0">
                   <a class="btn btn-primary" href="<dtml-var ata>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fas fa-file-pdf"></i> Ata</a>
+                </div>
                </dtml-let>
             </dtml-if>
          </dtml-let>    
@@ -127,7 +129,7 @@
 <dtml-else>
  <div class="row">
     <div class="col-12">
-       Nehnuma reunião cadastrada.
+       Nehnuma <dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao"> encontrada.
     </div>
  </div>
 </dtml-in>

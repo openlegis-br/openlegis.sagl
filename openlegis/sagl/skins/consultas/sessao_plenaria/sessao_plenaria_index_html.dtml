@@ -30,7 +30,7 @@
       </div>
       <div class="col-12 col-md-6 text-start text-md-end mb-2 mb-md-0">
         <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Sessao Plenaria', 'Operador Ordem Dia'])">
-          <a class="btn btn-light" href="<dtml-var portal_url>/cadastros/sessao_plenaria/sessao_plenaria_form"><i class="fa fa-fw fa-plus"></i> Incluir <dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao"></a> 
+          <a class="btn btn-primary" href="<dtml-var portal_url>/cadastros/sessao_plenaria/sessao_plenaria_form"><i class="fa fa-fw fa-plus"></i> Incluir <dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao"></a> 
         </dtml-if>
       </div>
  </div>
@@ -167,7 +167,7 @@ inicio_sessao=<dtml-var dat_inicio_sessao missing>&num_legislatura=<dtml-var num
             </dtml-in>
           </div>
        </div>
-       <div class="input-group">
+       <div class="btn-group btn-group-sm">
                  <dtml-let id_roteiro="str(cod_sessao_plen)+'_roteiro_sessao.pdf'">
                     <dtml-if "hasattr(sapl_documentos.pauta_sessao,id_roteiro)">
                       <dtml-let roteiro="getattr(sapl_documentos.pauta_sessao,id_roteiro).absolute_url">

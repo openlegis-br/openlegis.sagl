@@ -99,8 +99,8 @@
             </dtml-let>
          </dtml-if>
        </div>
-       <div class="col-12 col-md-4">
-        <div class="input-group mt-1 mt-md-0 d-flex justify-content-start justify-content-md-end">
+       <div class="col-12 col-md-4 d-flex justify-content-start justify-content-sm-end">
+        <div class="btn-group btn-group-sm mt-1 mt-md-0">
          <dtml-if expr="zsql.materia_apresentada_sessao_obter_zsql(cod_sessao_plen = cod_sessao_plen, ind_excluido=0) or zsql.expediente_materia_obter_zsql(cod_sessao_plen = cod_sessao_plen, ind_excluido=0)">
              <a class="btn btn-primary" href="<dtml-var portal_url>/relatorios/pdf_expediente_preparar_pysc?data=<dtml-var dat_inicio_sessao>&cod_sessao_plen=<dtml-var cod_sessao_plen>" target="_blank"><i class="fas fa-file-pdf"></i> Leitura</a>
          </dtml-if> 
@@ -138,7 +138,7 @@
 <dtml-else>
  <div class="row">
     <div class="col-12">
-       Nehnuma reunião cadastrada.
+       Nehnuma <dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao"> encontrada.
     </div>
  </div>
 </dtml-in>

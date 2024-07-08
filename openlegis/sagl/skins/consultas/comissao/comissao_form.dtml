@@ -52,8 +52,8 @@
            <p class="card-text"><b>Telefone:</b> <dtml-var num_tel_secretaria></p>           
         </dtml-if>
 
-         <p><a href="materia/materia_index_html?cod_comissao=<dtml-var cod_comissao>"><strong>Matérias em análise</strong></a></p>
-        <p><a href="parecer/parecer_index_html?cod_comissao=<dtml-var cod_comissao>"><strong>Pareceres emitidos</strong></a></p>
+         <p><a href="materia/materia_index_html?cod_comissao=<dtml-var cod_comissao>"><i class="fas fa-fw fa-caret-right"></i>Matérias em análise</a></p>
+        <p><a href="parecer/parecer_index_html?cod_comissao=<dtml-var cod_comissao>"><i class="fas fa-fw fa-caret-right"></i>Pareceres emitidos</a></p>
 
      </div>
    </div> 
@@ -65,7 +65,7 @@
               <dtml-in expr="zsql.reuniao_comissao_obter_zsql(cod_comissao=cod_comissao)" size=3>
                 <li class="list-group-item">
                   <div class="mb-1"><dtml-var num_reuniao>ª Reunião <dtml-var des_tipo_reuniao> - <dtml-var dat_inicio_reuniao><dtml-if hr_inicio_reuniao> <dtml-var hr_inicio_reuniao missing null=""></dtml-if></div>
-                <div class="input-group text-start">
+                <div class="btn-group btn-group-sm text-start">
                  <dtml-let id_pauta="str(cod_reuniao)+'_pauta.pdf'">
                   <dtml-if "hasattr(sapl_documentos.reuniao_comissao,id_pauta)">
                     <dtml-let pauta="getattr(sapl_documentos.reuniao_comissao,id_pauta).absolute_url">

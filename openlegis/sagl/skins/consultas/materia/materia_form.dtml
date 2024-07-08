@@ -1,24 +1,31 @@
 <dtml-var header_html>
 
- <div class="row mb-2">
-      <div class="col-12 col-md-8 align-self-center">
-         <h1 class="firstHeading font-size-18"><dtml-var des_tipo_materia> nº <dtml-var num_ident_basica missing>/<dtml-var ano_ident_basica missing></h1>
-      </div>
-      <div class="col-12 col-md-4 text-start text-end">
+ <div class="row mb-3">
+  <div class="col-12 col-md-8 d-flex align-items-center">
+    <h1 class="firstHeading font-size-18 mb-0"><dtml-var des_tipo_materia> nº <dtml-var num_ident_basica missing>/<dtml-var ano_ident_basica missing></h1>
+  </div>
+  <div class="col-12 col-md-4 d-flex align-items-center justify-content-start justify-content-md-end">
+    <div class="btn-group btn-group-sm mt-3 mt-md-0">
       <dtml-let isAnon="portal_membership.isAnonymousUser()">
         <dtml-if expr="not isAnon">
-          <div class="dropdown d-print-none mb-3">
-            <button class="btn btn-link dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-              <i class="fas fa-fw fa-file-export"></i> Gerar
-            </button>
-            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
-              <a class="dropdown-item" href="<dtml-var portal_url>/consultas/materia/pasta_digital/pasta_digital/pastadigital?cod_materia=<dtml-var cod_materia>&action=download" target="_blank"><i class="far fa-file-pdf"></i> Processo Integral</a>
-              <a class="dropdown-item" href="<dtml-var portal_url>/relatorios/pdf_detalhe_materia_preparar_pysc?cod_materia=<dtml-var cod_materia>" target="_blank"><i class="far fa-file-pdf"></i> PDF Textual</a>
-            </div>
-          </div>
+          <a class="btn btn-primary" href="<dtml-var portal_url>/consultas/materia/pasta_digital/?cod_materia=<dtml-var cod_materia>&action=pasta" target="_blank"><i class="far fa-folder-open"></i> Pasta Digital</a>
+          <dtml-call expr="REQUEST.set('id_documento', str(cod_materia)+'_texto_integral.pdf')">
+          <dtml-if expr="hasattr(sapl_documentos.materia,id_documento)">
+             <a class="btn btn-secondary" target="_blank" href="<dtml-var portal_url>/pysc/download_materia_pysc?cod_materia=<dtml-var cod_materia>&texto_original=1"><i class="fa fa-file-pdf"></i> Texto Integral</a>
+          </dtml-if>
+        <dtml-else>
+          <dtml-call expr="REQUEST.set('id_documento', str(cod_materia)+'_texto_integral.pdf')">
+          <dtml-call expr="REQUEST.set('id_redacao', str(cod_materia)+'_redacao_final.pdf')">
+          <dtml-if expr="hasattr(sapl_documentos.materia,id_documento)">
+             <a class="btn btn-primary" target="_blank" href="<dtml-var portal_url>/pysc/download_materia_pysc?cod_materia=<dtml-var expr="pysc.b64encode_pysc(codigo=cod_materia)">&texto_original=1"><i class="fa fa-file-pdf"></i> Texto Integral</a>
+          </dtml-if>
+          <dtml-if expr="hasattr(sapl_documentos.materia,id_redacao)">
+             <a class="btn btn-secondary" target="_blank" href="<dtml-var portal_url>/pysc/download_materia_pysc?cod_materia=<dtml-var expr="pysc.b64encode_pysc(codigo=cod_materia)">&redacao_final=1"><i class="fa fa-file-pdf"></i> Redação Final</a>
+          </dtml-if>
         </dtml-if>
       </dtml-let>
-      </div>
+    </div>
+  </div>
  </div>
 
  <div class="row mb-2">
@@ -28,8 +35,7 @@
  </div>
 
  <div class="row">
-      <div class="col-12 col-lg-6 align-self-center mb-2">
-       <p class="h6 ementa">
+       <p class="col-12">
         <dtml-if expr="pysc.conta_autores_pysc(cod_materia)">
            <dtml-if expr="pysc.conta_autores_pysc(cod_materia)>1">
               <i class="fa fa-users"></i>           
@@ -42,26 +48,7 @@
           <dtml-in expr="zsql.autoria_obter_zsql(cod_materia=cod_materia)">
             <dtml-var nom_autor_join><dtml-unless sequence-end>,</dtml-unless>
           </dtml-in>
-       </p>
-      </div>
-      <div class="col-12 col-lg-6">
-        <dtml-call expr="REQUEST.set('id_documento', str(cod_materia)+'_texto_integral.pdf')">
-        <dtml-call expr="REQUEST.set('id_redacao', str(cod_materia)+'_redacao_final.pdf')">
-        <div class="text-end">
-        <dtml-if expr="hasattr(sapl_documentos.materia,id_documento)">
-           <dtml-let isAnon="portal_membership.isAnonymousUser()">
-              <dtml-if expr="not isAnon">
-                 <a class="btn btn-primary" href="<dtml-var portal_url>/consultas/materia/pasta_digital/?cod_materia=<dtml-var cod_materia>&action=pasta" target="_blank"><i class="far fa-folder"></i> Pasta Digital</a>
-              </dtml-if>
-           </dtml-let>
-           <a class="btn btn-primary" target="_blank" href="<dtml-var portal_url>/pysc/download_materia_pysc?cod_materia=<dtml-var expr="pysc.b64encode_pysc(codigo=cod_materia)">&texto_original=1"><i class="fa fa-file-pdf"></i> Texto Integral</a>
-        </dtml-if>
-        <dtml-if expr="hasattr(sapl_documentos.materia,id_redacao)">
-           <a class="btn btn-light" target="_blank" href="<dtml-var portal_url>/pysc/download_materia_pysc?cod_materia=<dtml-var expr="pysc.b64encode_pysc(codigo=cod_materia)">&redacao_final=1"><i class="fa fa-file-pdf"></i> Redação Final</a>
-        </dtml-if>
-       </div>
-       
-      </div>
+       </p> 
  </div>
 
  <div class="row">
@@ -194,12 +181,12 @@
          <div class="col-6 text-end">
 
              <dtml-if expr="ind_tramitacao==1">
-                <span class="badge badge-primary">Em Tramitação</span>
+                <span class="badge bg-dark-success">Em Tramitação</span>
                 <dtml-if expr="int(sapl_documentos.props_sagl.acompanhamento_materia)==1">                
                   <button type="button" class="btn btn-link d-print-none" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Acompanhar esta matéria" data-src="<dtml-var portal_url>/consultas/materia/acompanhamento/acomp_materia_form?cod_materia=<dtml-var expr="pysc.b64encode_pysc(codigo=cod_materia)">&modal=1"><i class="fa fa-fw fa-envelope"></i><span class="d-none d-md-inline-block"> Acompanhar</span></button> 
                 </dtml-if>
              <dtml-elif expr="ind_tramitacao==0">                
-                <span class="badge badge-warning">Tramitação Encerrada</span>
+                <span class="badge bg-warning">Tramitação Encerrada</span>
              </dtml-if>
            </div>            
       </div>
@@ -207,7 +194,7 @@
    <dtml-in expr="zsql.tramitacao_obter_zsql(cod_materia=cod_materia, ind_excluido=0)">
      <dtml-if sequence-start>
       <dtml-call expr="REQUEST.set('cod_ult_unidade', int(cod_unid_tram_dest))">
-      <div class="card mb-4">
+      <div class="card mb-2">
        <div class="card-body">
            <p class="card-text"><b>Último Local:</b> <dtml-var dat_tramitacao>
            <dtml-if cod_unid_tram_dest>
@@ -255,43 +242,39 @@
  <dtml-in expr="zsql.despacho_inicial_obter_zsql(cod_materia=cod_materia, ind_excluido=0)">
     <dtml-call expr="REQUEST.set('temDespacho', cod_comissao_sel)">
  </dtml-in>
- <dtml-if expr="_.has_key('temDespacho')"> 
-  <div id="accordion">
-    <div class="card mb-4">
-      <div class="card-header" id="headingOne">
-        <p class="h5 mb-0">
-          <a href="#" class="d-block text-start collapsed" data-bs-toggle="collapse" data-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne"> 
-            <i class="fa float-right pt-1 align-self-center" aria-hidden="true"></i>
-             <span class="h6 font-weight-bold">Comissões Permanentes</span>
-          </a>
-        </p>
-      </div>
-      <div id="collapseOne" class="collapse" aria-labelledby="headingOne" data-parent="#accordion">
-         <ul class="list-group list-group-flush">
-          <dtml-in expr="zsql.despacho_inicial_obter_zsql(cod_materia=cod_materia, ind_excluido=0)">
-            <li class="list-group-item">
-               <p class="card-text">
-                  <dtml-var num_ordem> - <dtml-var nom_comissao_index>
-                  <dtml-in expr="zsql.relatoria_obter_zsql(cod_materia=cod_materia, cod_comissao=cod_comissao_sel, num_ordem=num_ordem)">            
-                      <dtml-in expr="zsql.parlamentar_obter_zsql(cod_parlamentar=cod_parlamentar)">
-                       - Relatoria: <dtml-var nom_parlamentar>
+ <dtml-if expr="_.has_key('temDespacho')">
+      <div class="accordion accordion-flush accordion-plus-icon" id="accordionDespacho">
+         <div class="card mb-0 shadow">
+             <div class="accordion-header" id="headingPar">
+                 <h5 class="my-0">
+                   <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePar" aria-expanded="false" aria-controls="collapsePar">Comissões Permanentes</button>
+                 </h5>
+             </div>
+             <div id="collapsePar" class="accordion-collapse collapse" aria-labelledby="headingPar" data-bs-parent="#accordionDespacho">
+               <ul class="list-group list-group-flush">
+                <dtml-in expr="zsql.despacho_inicial_obter_zsql(cod_materia=cod_materia, ind_excluido=0)">
+                  <li class="list-group-item">
+                    <p class="card-text">
+                    <dtml-var num_ordem> - <dtml-var nom_comissao_index>
+                    <dtml-in expr="zsql.relatoria_obter_zsql(cod_materia=cod_materia, cod_comissao=cod_comissao_sel, num_ordem=num_ordem)">            
+                       <dtml-in expr="zsql.parlamentar_obter_zsql(cod_parlamentar=cod_parlamentar)"> - Relatoria: <dtml-var nom_parlamentar></dtml-in>
+                       <dtml-let id_parecer="str(cod_relatoria)+'_parecer.pdf'">
+                         <dtml-if "hasattr(sapl_documentos.parecer_comissao,id_parecer)">
+                           <dtml-let parecer="getattr(sapl_documentos.parecer_comissao,id_parecer).absolute_url">
+                             -<a class="btn btn-link " target="_blank" href="<dtml-var parecer>">Parecer <dtml-if expr="tip_conclusao=='F'">Favorável</dtml-if><dtml-if expr="tip_conclusao=='C'">Contrário</dtml-if></a>
+                           </dtml-let>
+                         </dtml-if>
+                       </dtml-let>
+                       <dtml-if expr="tip_fim_relatoria!=None">
+                          <dtml-in expr="zsql.tipo_fim_relatoria_obter_zsql(tip_fim_relatoria=tip_fim_relatoria)"> (<dtml-var des_fim_relatoria>)</dtml-in> 
+                       </dtml-if>
                     </dtml-in>
-                    <dtml-let id_parecer="str(cod_relatoria)+'_parecer.pdf'">
-                      <dtml-if "hasattr(sapl_documentos.parecer_comissao,id_parecer)">
-                        <dtml-let parecer="getattr(sapl_documentos.parecer_comissao,id_parecer).absolute_url">
-                          -<a class="btn btn-link " target="_blank" href="<dtml-var parecer>">Parecer <dtml-if expr="tip_conclusao=='F'">Favorável</dtml-if><dtml-if expr="tip_conclusao=='C'">Contrário</dtml-if></a>
-                        </dtml-let>
-                      </dtml-if>
-                    </dtml-let>
-                    <dtml-if expr="tip_fim_relatoria!=None">
-                       <dtml-in expr="zsql.tipo_fim_relatoria_obter_zsql(tip_fim_relatoria=tip_fim_relatoria)"> (<dtml-var des_fim_relatoria>)</dtml-in> 
-                    </dtml-if>
-                  </dtml-in>
-                </p>
-            </li>  
-          </dtml-in>
-         </ul>
-        </div>
+                    </p>
+                  </li>  
+                </dtml-in>
+               </ul>
+             </div>
+         </div>
       </div>
  </dtml-if>
 
@@ -300,95 +283,89 @@
     <dtml-call expr="REQUEST.set('qtdSub', _['sequence-length'])">
  </dtml-in>
  <dtml-if temSub> 
-  <div id="accordion" class="Sub">
-    <div class="card mb-4">
-      <div class="card-header" id="headingOne">
-        <p class="h5 mb-0">
-          <a href="#" class="d-block text-start collapsed" data-bs-toggle="collapse" data-target="#collapseSub" aria-expanded="false" aria-controls="collapseSub"> 
-            <i class="fa float-right pt-1 align-self-center" aria-hidden="true"></i>
-             <span class="h6 font-weight-bold">Substitutivos [<dtml-var qtdSub>]</span>
-          </a>
-        </p>
-      </div>
-      <div id="collapseSub" class="collapse" aria-labelledby="headingOne" data-parent=".Sub">
-        <div class="card-body">
-        <dtml-in expr="zsql.substitutivo_obter_zsql(cod_materia=cod_materia)">
-           <dtml-if sequence-start>
-              <div class="table-responsive">
-                <table class="table table-sm mb-0">
-                  <thead>
-                    <tr>
-                      <th>Identificação da Matéria</th>
-                      <th>Resultado</th>
-                   </tr>
-                 </thead>
-            </dtml-if>
-                   <tr>
-                      <td>
-                          <dtml-let id_substitutivo="str(cod_substitutivo)+'_substitutivo.pdf'">
-                             <dtml-if "hasattr(sapl_documentos.substitutivo,id_substitutivo)">
-                                <dtml-let substitutivo="getattr(sapl_documentos.substitutivo,id_substitutivo).absolute_url">
-                                   <a target="_blank" href="<dtml-var substitutivo>">
-                                     <b>Substitutivo nº <dtml-var num_substitutivo></b>
-                                   </a>
-                                </dtml-let>
-                             <dtml-else>
-                                Substitutivo nº <dtml-var num_substitutivo>                             
-                             </dtml-if>
-                         </dtml-let>
-                         <dtml-in expr="zsql.autoria_substitutivo_obter_zsql(cod_substitutivo=cod_substitutivo)">
-                           - <dtml-var nom_autor_join><dtml-unless sequence-end>,</dtml-unless>
-                         </dtml-in>                         
-                         - <dtml-var txt_ementa>                         
-                      </td>   
-                      <td>
-                         <dtml-in expr="zsql.votacao_ordem_dia_obter_zsql(cod_materia=cod_materia, cod_substitutivo=cod_substitutivo, ind_excluido=0)">
-                            <dtml-if sequence-end>   
-                               <dtml-if tip_resultado_votacao>
-                                 <dtml-in expr="zsql.tipo_resultado_votacao_obter_zsql(tip_resultado_votacao=tip_resultado_votacao, ind_excluido=0)">
-                                   <dtml-if expr="tip_votacao == 2 ">
-                                     <a href="#" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Resultado de Votação" data-src="<dtml-var portal_url>/consultas/sessao_plenaria/sessao_plenaria_mostrar_painel_proc?cod_sessao_plen=<dtml-var cod_sessao_plen>&cod_ordem=<dtml-var cod_ordem>&cod_materia=<dtml-var cod_materia>&cod_substitutivo=<dtml-var cod_substitutivo>&tipo_materia=acessoria&modal=1"><dtml-var nom_resultado></a>                                    
+      <div class="accordion accordion-flush accordion-plus-icon" id="accordionSub">
+         <div class="card mb-0 shadow">
+             <div class="accordion-header" id="headingSub">
+                 <h5 class="my-0">
+                   <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSub" aria-expanded="false" aria-controls="collapseSub">Substitutivos [<dtml-var qtdSub>]</button>
+                 </h5>
+             </div>
+             <div id="collapseSub" class="collapse" aria-labelledby="headingSub" data-bs-parent="#accordionSub">
+               <div class="card-body">
+                 <dtml-in expr="zsql.substitutivo_obter_zsql(cod_materia=cod_materia)">
+                    <dtml-if sequence-start>
+                       <div class="table-responsive">
+                         <table class="table table-sm mb-0">
+                           <thead>
+                             <tr>
+                               <th>Identificação da Matéria</th>
+                               <th width="20%">Resultado</th>
+                             </tr>
+                           </thead>
+                    </dtml-if>
+                           <tr>
+                              <td>
+                                <dtml-let id_substitutivo="str(cod_substitutivo)+'_substitutivo.pdf'">
+                                   <dtml-if "hasattr(sapl_documentos.substitutivo,id_substitutivo)">
+                                      <dtml-let substitutivo="getattr(sapl_documentos.substitutivo,id_substitutivo).absolute_url">
+                                         <a target="_blank" href="<dtml-var substitutivo>">
+                                           <b>Substitutivo nº <dtml-var num_substitutivo></b>
+                                         </a>
+                                      </dtml-let>
                                    <dtml-else>
-                                        <dtml-var nom_resultado>
+                                      Substitutivo nº <dtml-var num_substitutivo>                             
                                    </dtml-if>
-                                 </dtml-in>
-                               <dtml-else>
-                                  <i>Matéria não votada</i>
-                               </dtml-if>
-                            </dtml-if sequence-end>   
-                         <dtml-else>
-                            <i>Matéria não votada</i>
-                         </dtml-in>
-                      </td>   
-                   </tr>
-            <dtml-if sequence-end>
-                </table>
-              </div>
-            </dtml-if>
-        </dtml-in>   
-        </div>
+                                </dtml-let>
+                                <dtml-in expr="zsql.autoria_substitutivo_obter_zsql(cod_substitutivo=cod_substitutivo)">
+                                  - <dtml-var nom_autor_join><dtml-unless sequence-end>,</dtml-unless>
+                                </dtml-in>                         
+                                - <dtml-var txt_ementa>                         
+                              </td>   
+                              <td>
+                                <dtml-in expr="zsql.votacao_ordem_dia_obter_zsql(cod_materia=cod_materia, cod_substitutivo=cod_substitutivo, ind_excluido=0)">
+                                   <dtml-if sequence-end>   
+                                      <dtml-if tip_resultado_votacao>
+                                        <dtml-in expr="zsql.tipo_resultado_votacao_obter_zsql(tip_resultado_votacao=tip_resultado_votacao, ind_excluido=0)">
+                                          <dtml-if expr="tip_votacao == 2 ">
+                                            <a href="#" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Resultado de Votação" data-src="<dtml-var portal_url>/consultas/sessao_plenaria/sessao_plenaria_mostrar_painel_proc?cod_sessao_plen=<dtml-var cod_sessao_plen>&cod_ordem=<dtml-var cod_ordem>&cod_materia=<dtml-var cod_materia>&cod_substitutivo=<dtml-var cod_substitutivo>&tipo_materia=acessoria&modal=1"><dtml-var nom_resultado></a>                                    
+                                          <dtml-else>
+                                               <dtml-var nom_resultado>
+                                          </dtml-if>
+                                        </dtml-in>
+                                      <dtml-else>
+                                         <span class="text-muted">Matéria não votada</span>
+                                      </dtml-if>
+                                   </dtml-if sequence-end>   
+                                <dtml-else>
+                                   <span class="text-muted">Matéria não votada</span>
+                                </dtml-in>
+                              </td>   
+                           </tr>
+                      <dtml-if sequence-end>
+                        </table>
+                      </div>
+                    </dtml-if>
+                </dtml-in> 
+             </div>
+         </div>
       </div>
     </div>
-  </div>
  </dtml-if>
 
  <dtml-in expr="zsql.emenda_obter_zsql(cod_materia=cod_materia)">
     <dtml-call expr="REQUEST.set('temEme', 1)">
     <dtml-call expr="REQUEST.set('qtdEme', _['sequence-length'])"> 
  </dtml-in>
- <dtml-if temEme> 
-  <div id="accordion" class="emenda">
-    <div class="card mb-4">
-      <div class="card-header" id="headingOne">
-        <p class="h5 mb-0">
-          <a href="#" class="d-block text-start collapsed" data-bs-toggle="collapse" data-target="#collapseEme" aria-expanded="false" aria-controls="collapseEme"> 
-            <i class="fa float-right pt-1 align-self-center" aria-hidden="true"></i>
-             <span class="h6 font-weight-bold">Emendas [<dtml-var qtdEme>]</span>
-          </a>
-        </p>
-      </div>
-      <div id="collapseEme" class="collapse" aria-labelledby="headingOne" data-parent=".emenda">
-        <div class="card-body">
+ <dtml-if temEme>
+      <div class="accordion accordion-flush accordion-plus-icon" id="accordionEme">
+         <div class="card mb-0 shadow">
+             <div class="accordion-header" id="headingEme">
+                 <h5 class="my-0">
+                   <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseEme" aria-expanded="false" aria-controls="collapseEme">Emendas [<dtml-var qtdEme>]</button>
+                 </h5>
+             </div>
+             <div id="collapseEme" class="collapse" aria-labelledby="headingOne" data-bs-parent="#accordionEme">
+               <div class="card-body">
         <dtml-in expr="zsql.emenda_obter_zsql(cod_materia=cod_materia)">
            <dtml-if sequence-start>
               <div class="table-responsive">
@@ -396,7 +373,7 @@
                   <thead>
                     <tr>
                       <th>Identificação da Matéria</th>
-                      <th>Resultado</th>
+                      <th width="20%">Resultado</th>
                    </tr>
                  </thead>
             </dtml-if>
@@ -430,11 +407,11 @@
                                    </dtml-if>
                                  </dtml-in>
                                <dtml-else>
-                                  <i>Matéria não votada</i>
+                                  <span class="text-muted">Matéria não votada</span>
                                </dtml-if>
                             </dtml-if sequence-end>   
                          <dtml-else>
-                            <i>Matéria não votada</i>
+                            <span class="text-muted">Matéria não votada</span>
                          </dtml-in>
                       </td>   
                    </tr>
@@ -442,27 +419,23 @@
                 </table>
               </div>
             </dtml-if>
-        </dtml-in>   
-        </div>               
+        </dtml-in>  
+             </div>
+         </div>
       </div>
     </div>
-  </div>
  </dtml-if>
 
 <dtml-if expr="zsql.materia_apresentada_sessao_obter_zsql(cod_materia=cod_materia) or zsql.votacao_materia_expediente_pesquisar_zsql(cod_materia=cod_materia) or zsql.votacao_materia_ordem_dia_pesquisar_zsql(cod_materia=cod_materia)">
-
-  <div id="accordion" class="plenario">
-    <div class="card mb-4">
-      <div class="card-header" id="headingOne">
-        <p class="h5 mb-0">
-          <a href="#" class="d-block text-start collapsed" data-bs-toggle="collapse" data-target="#collapseSessao" aria-expanded="false" aria-controls="collapseSessao"> 
-            <i class="fa float-right pt-1 align-self-center" aria-hidden="true"></i>
-             <span class="h6 font-weight-bold">Deliberações em Plenário</span>
-          </a>
-        </p>
-      </div>
-      <div id="collapseSessao" class="collapse" aria-labelledby="headingOne" data-parent=".plenario">
-        <div class="card-body">
+      <div class="accordion accordion-flush accordion-plus-icon" id="accordionPlen">
+         <div class="card mb-0 shadow">
+             <div class="accordion-header" id="headingPlen">
+                 <h5 class="my-0">
+                   <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePlen" aria-expanded="false" aria-controls="collapsePlen">Deliberações em Plenário</button>
+                 </h5>
+             </div>
+             <div id="collapsePlen" class="collapse" aria-labelledby="headingOne" data-bs-parent="#accordionPlen">
+               <div class="card-body">
           <div class="table-responsive">
             <table class="table table-sm mb-0">
               <thead>
@@ -514,7 +487,6 @@
                 </dtml-in>
               </dtml-in>
 
-
               <dtml-in expr="zsql.votacao_materia_ordem_dia_pesquisar_zsql(cod_materia=cod_materia)">
                 <dtml-in expr="zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=cod_sessao_plen)">
                   <tr>
@@ -542,13 +514,12 @@
                  </tr>
                </dtml-in>
             </dtml-in>
-
             </table>
-          </div>           
+           </div>
+          </div>  
+         </div>
         </div>
       </div>
-  </div>
-        </div>
  </dtml-if>
 
  <dtml-in expr="zsql.documento_administrativo_materia_obter_zsql(cod_materia=cod_materia,ind_excluido=0)">
@@ -575,19 +546,16 @@
      </dtml-if>
  </dtml-let>
 
- <dtml-if expr="_.has_key('temDocAC') or _.has_key('temDocADM') or _.has_key('add_doc')"> 
-  <div id="accordion" class="documentos">
-    <div class="card mb-4">
-      <div class="card-header" id="headingOne">
-        <p class="h5 mb-0">
-          <a href="#" class="d-block text-start collapsed" data-bs-toggle="collapse" data-target="#collapseDoc" aria-expanded="false" aria-controls="collapseDoc"> 
-            <i class="fa float-right pt-1 align-self-center" aria-hidden="true"></i>
-             <span class="h6 font-weight-bold">Documentos</span>
-          </a>
-        </p>
-       </div>
-      <div id="collapseDoc" class="collapse" aria-labelledby="headingOne" data-parent=".documentos">
-      <div class="card-body">
+ <dtml-if expr="_.has_key('temDocAC') or _.has_key('temDocADM') or _.has_key('add_doc')">
+      <div class="accordion accordion-flush accordion-plus-icon" id="accordionDoc">
+         <div class="card mb-0 shadow">
+             <div class="accordion-header" id="headingDoc">
+               <h5 class="my-0">
+                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseDoc" aria-expanded="false" aria-controls="collapseDoc">Documentos</button>
+               </h5>
+             </div>
+             <div id="collapseDoc" class="collapse" aria-labelledby="headingDoc" data-bs-parent="#accordionDoc">
+                 <div class="card-body">
          <dtml-let isAnon="portal_membership.isAnonymousUser()">
              <dtml-if expr="not isAnon and _.has_key('add_doc')">      
                  <button type="button" class="btn btn-light" data-bs-toggle="popover" title="Documento Acessório"><i class="fas fa-plus-circle"></i> Incluir</button>
@@ -765,27 +733,24 @@
              </div>
            </dtml-if sequence-end>  
          </dtml-in> 
-       </dtml-in>   
-     </div>
-   </div>
- </div>
- </div>
+       </dtml-in>
+         </div>
+                 </div>
+             </div>
+         </div>
+      </div>
  </dtml-if>
 
-
 <dtml-if expr="zsql.tramitacao_obter_zsql(cod_materia=cod_materia)">
-  <div id="accordion" class="tramitacao">
-    <div class="card mb-4">
-      <div class="card-header" id="headingOne">
-        <p class="h5 mb-0">
-          <a href="#" class="d-block text-start collapsed" data-bs-toggle="collapse" data-target="#collapseTram" aria-expanded="false" aria-controls="collapseTram"> 
-            <i class="fa float-right pt-1 align-self-center" aria-hidden="true"></i>
-             <span class="h6 font-weight-bold">Tramitação</span>
-          </a>
-        </p>
-      </div>
-      <div id="collapseTram" class="collapse" aria-labelledby="headingOne" data-parent=".tramitacao">
-        <div class="card-body">
+      <div class="accordion accordion-flush accordion-plus-icon" id="accordionTram">
+         <div class="card mb-0 shadow">
+             <div class="accordion-header" id="headingTram">
+               <h5 class="my-0">
+                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTram" aria-expanded="false" aria-controls="collapseTram">Tramitações</button>
+               </h5>
+             </div>
+             <div id="collapseTram" class="collapse" aria-labelledby="headingTram" data-bs-parent="#accordionTram">
+                 <div class="card-body">
           <dtml-in expr="zsql.tramitacao_obter_zsql(cod_materia=cod_materia)">
             <dtml-if sequence-start>
               <div class="col-md-10 offset-md-1">                       
@@ -825,7 +790,7 @@
                          <div class="text-muted small float-right"><dtml-var dat_tramitacao></div>
                          <dtml-var expr="des_status">
                   </dtml-if>
-                  <dtml-if txt_tramitacao><div class="text-muted small"><dtml-var txt_tramitacao></div></dtml-if>  
+                  <dtml-if txt_tramitacao><div class="text-muted small tram_mat" style="margin-bottom: 0"><dtml-var txt_tramitacao></div></dtml-if>  
                   <dtml-in expr="unidade_tramitacao_obter_zsql(cod_unid_tramitacao=_.int(cod_unid_tram_local))">
                      <div class="text-muted small"><b>Origem:</b> <dtml-var nom_unidade_join></div>
                   </dtml-in>
@@ -842,9 +807,10 @@
               </div>
             </dtml-if>            
           </dtml-in>
-        </div>
+                 </div>
+             </div>
+         </div>
       </div>
-    </div>
 </dtml-if>
 
 <dtml-let isAnon="portal_membership.isAnonymousUser()">
@@ -902,9 +868,11 @@
  </dtml-if>
 </dtml-let>
 
-<div class="text-start btn-group">
-  <a class="btn btn-primary d-print-none" href="<dtml-var portal_url>/consultas/materia" ><i class="fa fa-fw fa-search"></i> Nova Pesquisa</a>
-  <a class="btn btn-light" href="javascript:void(0)" onClick="window.history.go(-1); return false;"><i class="fa fa-fw fa-undo"></i> Voltar</a>  
+<div class="col-12">
+  <div class="text-start btn-group mt-3">
+    <a class="btn btn-primary d-print-none" href="<dtml-var portal_url>/consultas/materia" ><i class="fa fa-fw fa-search"></i> Nova Pesquisa</a>
+    <a class="btn btn-light" href="javascript:void(0)" onClick="window.history.go(-1); return false;"><i class="fa fa-fw fa-undo"></i> Voltar</a>  
+  </div>
 </div>
 
 <dtml-var js_slot>
@@ -930,6 +898,5 @@ $(function () {
   } 
     </dtml-if> 
  </dtml-let>
- 
 </script>
 <dtml-var footer_html>

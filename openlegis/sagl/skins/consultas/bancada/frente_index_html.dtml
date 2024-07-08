@@ -102,7 +102,7 @@
           <dtml-in expr="zsql.bancada_contar_parlamentares_zsql(cod_bancada=cod_bancada, cod_periodo_comp=cod_periodo_comp_sel)">
              <td>
               <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Parlamentar', 'Operador Tabela auxiliar'])">
-                 <a class="btn btn-sm btn-primary" href="<dtml-var portal_url>/consultas/bancada/composicao_bancada_mostrar_proc?cod_bancada=<dtml-var cod_bancada>&num_legislatura=<dtml-var hdn_num_legislatura>&cod_periodo_comp=<dtml-var cod_periodo_comp_sel>"> 
+                 <a class="btn btn-primary" href="<dtml-var portal_url>/consultas/bancada/composicao_bancada_mostrar_proc?cod_bancada=<dtml-var cod_bancada>&num_legislatura=<dtml-var hdn_num_legislatura>&cod_periodo_comp=<dtml-var cod_periodo_comp_sel>"> 
                    <span class="badge badge-light"><dtml-var num_parlamentares missing null=""></span> <i class="fa fa-fw fa-edit"></i>
                  </a>
              <dtml-else>

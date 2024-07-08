@@ -18,7 +18,7 @@
          <dtml-in expr="zsql.comissao_obter_zsql(cod_comissao=cod_comissao_sel,ind_excluido=0)">
             <dtml-call expr="REQUEST.set('nom_comissao_sel', nom_comissao)">
          </dtml-in>
-         <button type="button" class="btn btn-sm btn-light d-print-none" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Cadastro de Reunião - <dtml-var nom_comissao_sel>" data-src="<dtml-var portal_url>/cadastros/comissao/reuniao/reuniao_comissao_form?cod_comissao=<dtml-var cod_comissao_sel>&modal=1"><i class="fa fa-fw fa-plus"></i> Incluir Reunião</button>
+         <button type="button" class="btn btn-light d-print-none" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Cadastro de Reunião - <dtml-var nom_comissao_sel>" data-src="<dtml-var portal_url>/cadastros/comissao/reuniao/reuniao_comissao_form?cod_comissao=<dtml-var cod_comissao_sel>&modal=1"><i class="fa fa-fw fa-plus"></i> Incluir Reunião</button>
        </dtml-if>
     </dtml-if>  
   </div>
@@ -152,19 +152,19 @@
                 <dtml-let id_pauta="_.str(cod_reuniao)+'_pauta.pdf'">
                   <dtml-if "_.hasattr(sapl_documentos.reuniao_comissao,id_pauta)">
                     <dtml-let pauta="_.getattr(sapl_documentos.reuniao_comissao,id_pauta).absolute_url">
-                      <a class="btn btn-sm btn-subtle-primary" href="<dtml-var pauta>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fas fa-file-pdf"></i> <span class="">Pauta</span></a>
+                      <a class="btn btn-primary" href="<dtml-var pauta>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fas fa-file-pdf"></i> <span class="">Pauta</span></a>
                     </dtml-let>
                   </dtml-if>
                 </dtml-let>
                 <dtml-let id_ata="_.str(cod_reuniao)+'_ata.pdf'">
                   <dtml-if "_.hasattr(sapl_documentos.reuniao_comissao,id_ata)">
                     <dtml-let ata="_.getattr(sapl_documentos.reuniao_comissao,id_ata).absolute_url">
-                      <a class="btn btn-sm btn-subtle-primary" href="<dtml-var ata>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fas fa-file-pdf"></i> <span class="">Ata</span></a>
+                      <a class="btn btn-primary" href="<dtml-var ata>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fas fa-file-pdf"></i> <span class="">Ata</span></a>
                     </dtml-let>
                   </dtml-if>
                 </dtml-let>
                  <dtml-if url_video>
-                    <a href="<dtml-var url_video>" class="popup-youtube btn btn-sm btn-subtle-primary"><i class="fab fa-fw fa-youtube"></i> Vídeo</a>       
+                    <a href="<dtml-var url_video>" class="popup-youtube btn btn-primary"><i class="fab fa-fw fa-youtube"></i> Vídeo</a>       
                  </dtml-if>
                </div>             
        </div>

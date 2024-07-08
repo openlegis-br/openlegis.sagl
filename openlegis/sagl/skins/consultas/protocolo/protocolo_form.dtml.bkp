@@ -21,10 +21,10 @@
       </div>
       <div class="col-12 col-md-4 text-start text-end">
         <div class="btn-group d-print-none "> 
-          <a class="btn btn-primary btn-sm" href="<dtml-var portal_url>/consultas/protocolo" ><i class="fa fa-fw fa-search"></i> Nova Pesquisa</a>                           
+          <a class="btn btn-primary" href="<dtml-var portal_url>/consultas/protocolo" ><i class="fa fa-fw fa-search"></i> Nova Pesquisa</a>                           
 <dtml-let isAnon="portal_membership.isAnonymousUser()">
   <dtml-if expr="not isAnon">
-      <button class="btn btn-sm btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+      <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
         <i class="fas fa-fw fa-file-export"></i> Gerar
       </button>
       <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
@@ -64,15 +64,15 @@
          <dtml-if "hasattr(sapl_documentos.protocolo,id_documento)">
             <div class="btn-group float-right">
             <dtml-let documento="getattr(sapl_documentos.protocolo,id_documento).absolute_url">
-               <a class="btn btn-sm btn-primary" target="_blank" href="<dtml-var documento>?<dtml-var expr="ZopeTime().timeTime()">"><i class="fa fa-file-pdf"></i> Arquivo Digitalizado</a>
+               <a class="btn btn-primary" target="_blank" href="<dtml-var documento>?<dtml-var expr="ZopeTime().timeTime()">"><i class="fa fa-file-pdf"></i> Arquivo Digitalizado</a>
             </dtml-let>
             <dtml-if expr="ind_anulado==0 and AUTHENTICATED_USER.has_role(['Operador', 'Operador Protocolo'])">
                <dtml-if "sapl_documentos.props_sagl.restpki_access_token!=''">
-                  <button type="button" class="btn btn-sm btn-light d-print-none " data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Assinatura Digital" data-src="<dtml-var portal_url>/generico/assinador/pades-signature_html?codigo=<dtml-var cod_protocolo>&tipo_doc=protocolo&modal=1"><i class="fas fa-file-signature"></i>Assinar</button>
+                  <button type="button" class="btn btn-light d-print-none " data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Assinatura Digital" data-src="<dtml-var portal_url>/generico/assinador/pades-signature_html?codigo=<dtml-var cod_protocolo>&tipo_doc=protocolo&modal=1"><i class="fas fa-file-signature"></i>Assinar</button>
                </dtml-if>
             </dtml-if>
             <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador'])">
-               <a class="btn btn-sm btn-danger d-print-none " href="arquivo_digitalizado_excluir_proc?cod_protocolo=<dtml-var cod_protocolo>" data-confirm="Deseja realmente excluir a arquivo digitalizado?">Excluir</a>
+               <a class="btn btn-danger d-print-none " href="arquivo_digitalizado_excluir_proc?cod_protocolo=<dtml-var cod_protocolo>" data-confirm="Deseja realmente excluir a arquivo digitalizado?">Excluir</a>
             </dtml-if>            
            </div>
          <dtml-else>
@@ -162,7 +162,7 @@
                   <input type="hidden" name="num_protocolo"   value="<dtml-var num_protocolo>" />
                   <input type="hidden" name="txt_assunto"     value='<dtml-var txt_assunto_ementa html_quote>' />
                   <input type="hidden" name="txt_interessado" value="<dtml-var txt_interessado missing null="">" />
-                  <input class="btn btn-sm btn-light" type="submit" name="cmdCriarDoc" value="Criar Documento" />
+                  <input class="btn btn-light" type="submit" name="cmdCriarDoc" value="Criar Documento" />
                 </form>
               </dtml-if>
            </dtml-in>
@@ -182,7 +182,7 @@
                   <input type="hidden" name="num_protocolo"   value="<dtml-var num_protocolo>" />
                   <input type="hidden" name="txt_assunto"     value='<dtml-var txt_assunto_ementa html_quote>' />
                   <input type="hidden" name="txt_interessado" value="<dtml-var txt_interessado missing null="">" />
-                  <input class="btn btn-sm btn-light" type="submit" name="cmdCriarDoc" value="Criar Documento" />
+                  <input class="btn btn-light" type="submit" name="cmdCriarDoc" value="Criar Documento" />
                 </form>
               </dtml-if>
            </dtml-in>
@@ -198,7 +198,7 @@
                <dtml-if expr="ind_anulado==0 and AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia'])">
                   <form class="d-inline-block" name="materia_form" method="post" action="criar_materia_pysc" onSubmit="return confirm('Confirma a criação da matéria legislativa?');">
                      <input type="hidden" name="cod_protocolo" value="<dtml-var cod_protocolo>" />
-                     <input class="btn btn-sm btn-light" type="submit" name="cmdCriarMat" value="Criar Matéria" />
+                     <input class="btn btn-light" type="submit" name="cmdCriarMat" value="Criar Matéria" />
                    </form>
                 </dtml-if>
             </dtml-in>
@@ -223,7 +223,7 @@
                        </dtml-in>
                     </dtml-in>
                     <dtml-call "REQUEST.set('cod_autor_sel', cod_autor)">
-                    <button type="button" class="btn btn-sm btn-light" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Cadastro de Emenda" data-src="<dtml-var portal_url>/cadastros/materia/emenda/emenda_form?cod_materia=<dtml-var cod_materia_principal>&dat_apresentacao=<dtml-var dat_apresentacao>&txt_ementa=<dtml-var txt_assunto_ementa html_quote>&num_protocolo=<dtml-var num_protocolo>&tip_autor=<dtml-var tip_autor>&des_tipo_autor=<dtml-var des_tipo_autor>&cod_autor_sel=<dtml-var cod_autor_sel>&modal=1">Cadastrar Emenda</button>  
+                    <button type="button" class="btn btn-light" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Cadastro de Emenda" data-src="<dtml-var portal_url>/cadastros/materia/emenda/emenda_form?cod_materia=<dtml-var cod_materia_principal>&dat_apresentacao=<dtml-var dat_apresentacao>&txt_ementa=<dtml-var txt_assunto_ementa html_quote>&num_protocolo=<dtml-var num_protocolo>&tip_autor=<dtml-var tip_autor>&des_tipo_autor=<dtml-var des_tipo_autor>&cod_autor_sel=<dtml-var cod_autor_sel>&modal=1">Cadastrar Emenda</button>  
                  </dtml-if>
                </dtml-in>
             <dtml-elif expr="des_tipo_mat_acessoria=='Substitutivo' or tip_materia == 98">
@@ -243,7 +243,7 @@
                        </dtml-in>
                     </dtml-in>
                     <dtml-call "REQUEST.set('cod_autor_sel', cod_autor)">
-                    <button type="button" class="btn btn-sm btn-light" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Cadastro de Substitutivo" data-src="<dtml-var portal_url>/cadastros/materia/substitutivo/substitutivo_form?cod_materia=<dtml-var cod_materia_principal>&dat_apresentacao=<dtml-var dat_apresentacao>&num_protocolo=<dtml-var num_protocolo>&tip_autor=<dtml-var tip_autor>&des_tipo_autor=<dtml-var des_tipo_autor>&cod_autor_sel=<dtml-var cod_autor_sel>&modal=1">Cadastrar Substitutivo</button> 
+                    <button type="button" class="btn btn-light" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Cadastro de Substitutivo" data-src="<dtml-var portal_url>/cadastros/materia/substitutivo/substitutivo_form?cod_materia=<dtml-var cod_materia_principal>&dat_apresentacao=<dtml-var dat_apresentacao>&num_protocolo=<dtml-var num_protocolo>&tip_autor=<dtml-var tip_autor>&des_tipo_autor=<dtml-var des_tipo_autor>&cod_autor_sel=<dtml-var cod_autor_sel>&modal=1">Cadastrar Substitutivo</button> 
                  </dtml-if>
                </dtml-in>
              </dtml-if>
@@ -263,7 +263,7 @@
                    <dtml-in expr="zsql.autor_obter_zsql(cod_autor=cod_autor)">
                       <dtml-call expr="REQUEST.set('nom_autor_documento', nom_autor_join)">
                    </dtml-in>                 
-                   <button type="button" class="btn btn-sm btn-light" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Cadastro de Documento Acessório" data-src="<dtml-var portal_url>/cadastros/materia/documento_acessorio/documento_acessorio_form?cod_materia=<dtml-var cod_materia_principal>&tip_documento_sel=<dtml-var tip_materia>&num_protocolo=<dtml-var num_protocolo>&nom_autor_documento=<dtml-var nom_autor_documento>&modal=1">Cadastrar <dtml-var des_tipo_mat_acessoria></button>                     
+                   <button type="button" class="btn btn-light" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Cadastro de Documento Acessório" data-src="<dtml-var portal_url>/cadastros/materia/documento_acessorio/documento_acessorio_form?cod_materia=<dtml-var cod_materia_principal>&tip_documento_sel=<dtml-var tip_materia>&num_protocolo=<dtml-var num_protocolo>&nom_autor_documento=<dtml-var nom_autor_documento>&modal=1">Cadastrar <dtml-var des_tipo_mat_acessoria></button>                     
                  </dtml-if>
             </dtml-in>
           <dtml-elif expr="tip_natureza_materia==4">
@@ -289,7 +289,7 @@
                 <dtml-else>
                     <dtml-call "REQUEST.set('num_ordem', '1')">
                 </dtml-in>                
-                  <button type="button" class="btn btn-sm btn-light" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Cadastro de Parecer" data-src="<dtml-var portal_url>/cadastros/comissao/materia/relatoria_form?cod_materia=<dtml-var cod_materia_principal>&cod_comissao=<dtml-var cod_comissao>&num_protocolo=<dtml-var num_protocolo>&modal=1">Cadastrar Parecer</button>                 
+                  <button type="button" class="btn btn-light" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Cadastro de Parecer" data-src="<dtml-var portal_url>/cadastros/comissao/materia/relatoria_form?cod_materia=<dtml-var cod_materia_principal>&cod_comissao=<dtml-var cod_comissao>&num_protocolo=<dtml-var num_protocolo>&modal=1">Cadastrar Parecer</button>                 
                 </dtml-in>
              </dtml-if>
           </dtml-if>
@@ -327,7 +327,7 @@
        <dtml-if expr="codigo_acesso!=None">
           <dtml-var codigo_acesso>
        <dtml-else>
-          <a class="btn btn-sm btn-light" href="<dtml-var portal_url>/cadastros/protocolo/senha_protocolo_gerar_proc?cod_protocolo=<dtml-var cod_protocolo>" data-confirm="Confirma a geração da chave de acesso?"><i class="fa fa-fw fa-unlock"></i> Gerar</a>       
+          <a class="btn btn-light" href="<dtml-var portal_url>/cadastros/protocolo/senha_protocolo_gerar_proc?cod_protocolo=<dtml-var cod_protocolo>" data-confirm="Confirma a geração da chave de acesso?"><i class="fa fa-fw fa-unlock"></i> Gerar</a>       
        </dtml-if>
     </p>
  </div>

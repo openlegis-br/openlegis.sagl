@@ -113,7 +113,7 @@ $(document).ready(() => {
       <div class="col-12 col-md-4 text-start text-end">
        <dtml-if expr="AUTHENTICATED_USER.has_role(['Authenticated'])">
          <div class="btn-group">
-           <button type="button" class="btn btn-sm btn-primary d-print-none mb-2 dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+           <button type="button" class="btn btn-primary d-print-none mb-2 dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
              <i class="fa fa-fw fa-plus"></i> Peticionar
            </button>
            <div class="dropdown-menu dropdown-menu-right">
@@ -165,9 +165,9 @@ $(document).ready(() => {
 
 <a
  <dtml-if expr="_.has_key('ind_enviado') and ind_enviado=='0'">
-    class="btn btn-sm btn-primary mb-3 disabled" 
+    class="btn btn-primary mb-3 disabled" 
   <dtml-else>
-    class="btn btn-sm btn-primary mb-3"   
+    class="btn btn-primary mb-3"   
   </dtml-if>
 href="<dtml-var portal_url>/cadastros/peticionamento_eletronico/peticionamento_eletronico_index_html?ind_enviado=0">Em elaboração
          <dtml-in expr="zsql.peticao_obter_zsql(cod_usuario=cod_usuario_corrente, ind_enviado='0', ind_excluido=0)">
@@ -178,9 +178,9 @@ href="<dtml-var portal_url>/cadastros/peticionamento_eletronico/peticionamento_e
 </a>
 <a
   <dtml-if expr="_.has_key('ind_enviado') and ind_enviado=='1'">
-     class="btn btn-sm btn-primary mb-3 disabled"
+     class="btn btn-primary mb-3 disabled"
   <dtml-else> 
-     class="btn btn-sm btn-primary mb-3"      
+     class="btn btn-primary mb-3"      
   </dtml-if>
   href="<dtml-var portal_url>/cadastros/peticionamento_eletronico/peticionamento_eletronico_index_html?ind_enviado=1">Enviados
          <dtml-in expr="zsql.peticao_obter_zsql(cod_usuario=cod_usuario_corrente, ind_enviado='1', ind_excluido=0)">

@@ -35,7 +35,7 @@ $(function () {
       <div class="btn-group mb-3" role="group">
         <dtml-call expr="REQUEST.set('id_documento', str(cod_documento)+'_texto_integral.pdf')">
           <dtml-if expr="hasattr(sapl_documentos.administrativo,id_documento) and AUTHENTICATED_USER.has_role(['Authenticated'])">       
-            <a class="btn btn-sm btn-link block" href="<dtml-var portal_url>/consultas/documento_administrativo/pasta_digital/pastadigital?cod_documento=<dtml-var cod_documento>&action=download" target="_blank"><i class="far fa-file-pdf"></i> Processo Integral</a>
+            <a class="btn btn-link block" href="<dtml-var portal_url>/consultas/documento_administrativo/pasta_digital/pastadigital?cod_documento=<dtml-var cod_documento>&action=download" target="_blank"><i class="far fa-file-pdf"></i> Processo Integral</a>
           </dtml-if>
       </div>
      </dtml-if>
@@ -62,10 +62,10 @@ $(function () {
         <dtml-call expr="REQUEST.set('id_documento', str(cod_documento)+'_texto_integral.pdf')">
         <dtml-if expr="hasattr(sapl_documentos.administrativo,id_documento)">
             <dtml-if expr="AUTHENTICATED_USER.has_role(['Authenticated'])">
-               <a class="btn btn-sm btn-primary block" href="<dtml-var portal_url>/consultas/documento_administrativo/pasta_digital/?cod_documento=<dtml-var cod_documento>&action=pasta" target="_blank"><i class="far fa-fw fa-folder"></i>Pasta Digital</a>
+               <a class="btn btn-primary block" href="<dtml-var portal_url>/consultas/documento_administrativo/pasta_digital/?cod_documento=<dtml-var cod_documento>&action=pasta" target="_blank"><i class="far fa-fw fa-folder"></i>Pasta Digital</a>
            </dtml-if>
           <dtml-let documento="getattr(sapl_documentos.administrativo,id_documento).absolute_url">        
-             <a class="btn btn-sm btn-primary" target="_blank" href="<dtml-var portal_url>/pysc/download_documento_pysc?cod_documento=<dtml-var cod_documento>">
+             <a class="btn btn-primary" target="_blank" href="<dtml-var portal_url>/pysc/download_documento_pysc?cod_documento=<dtml-var cod_documento>">
                <dtml-if expr="_.has_key('cod_assinatura_doc') and hasattr(sapl_documentos.documentos_assinados, cod_assinatura_doc+'.pdf')">
                  <i class="fa fa-certificate"></i>Texto Integral
                <dtml-else>
@@ -78,7 +78,7 @@ $(function () {
         <dtml-if expr="_.hasattr(sapl_documentos.administrativo,id_odt)">
            <dtml-let documento_odt="_.getattr(sapl_documentos.administrativo,id_odt).absolute_url">
               <dtml-if expr="AUTHENTICATED_USER.has_role(['Authenticated'])">
-                 <a class="btn btn-sm btn-primary" href="<dtml-var documento_odt>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank">
+                 <a class="btn btn-primary" href="<dtml-var documento_odt>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank">
                    <i class="fa fa-fw fa-file-alt"></i>ODT
                  </a>
               </dtml-if>
@@ -197,7 +197,7 @@ $(function () {
       <div id="collapsedoc" class="collapse" aria-labelledby="headingOne" data-parent=".docAC">
         <div class="card-body">
              <dtml-if expr="AUTHENTICATED_USER.has_role(['Authenticated']) and _.has_key('add_doc')">      
-                 <button type="button" class="btn btn-sm btn-light mb-2" data-bs-toggle="popover" title="Documento Acessório"><i class="fas fa-plus-circle"></i> Incluir</button>
+                 <button type="button" class="btn btn-light mb-2" data-bs-toggle="popover" title="Documento Acessório"><i class="fas fa-plus-circle"></i> Incluir</button>
                  <div id="PopoverContent" class="d-none">
                    <form name="myform" id="myform" class="needs-validation" validate role="form" enctype="multipart/form-data" method="post" action="documento_acessorio_salvar_proc" onSubmit="return confirm('Confirma a inclusão do documento acessório?');">
                     <input type="hidden" name="cod_documento" value="<dtml-var cod_documento>" />
@@ -288,10 +288,10 @@ $(function () {
                              <dtml-if expr="_.has_key('add_doc') and _.has_key('usuario_doc') and _.has_key('usuario_logado') and usuario_doc==usuario_logado">
                                <dtml-if expr="zsql.assinatura_documento_obter_zsql(codigo=cod_documento_acessorio, tipo_doc='doc_acessorio_adm')">
                                <dtml-else>
-                                  <button type="button" class="btn btn-sm btn-light" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Assinar Digitalmente" data-src="<dtml-var portal_url>/generico/assinador/pades-signature_html?codigo=<dtml-var cod_documento_acessorio>&tipo_doc=doc_acessorio_adm&modal=1"><i class="fas fa-file-signature"></i> Assinar</button>
+                                  <button type="button" class="btn btn-light" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Assinar Digitalmente" data-src="<dtml-var portal_url>/generico/assinador/pades-signature_html?codigo=<dtml-var cod_documento_acessorio>&tipo_doc=doc_acessorio_adm&modal=1"><i class="fas fa-file-signature"></i> Assinar</button>
                                </dtml-if>
-                               <button type="button" class="btn btn-sm btn-light" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Assinaturas Digitais" data-src="<dtml-var portal_url>/cadastros/assinatura/assinatura_solicitar_form?codigo=<dtml-var cod_documento_acessorio>&tipo_doc=doc_acessorio_adm&modal=1"><i class="fas fa-file-signature"></i> Assinaturas</button>
-                               <button type="button" class="btn btn-sm btn-danger" onClick="documento_acessorio_excluir(<dtml-var cod_documento_acessorio missing>)"><i class="fas fa-trash"></i> Excluir</button>
+                               <button type="button" class="btn btn-light" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Assinaturas Digitais" data-src="<dtml-var portal_url>/cadastros/assinatura/assinatura_solicitar_form?codigo=<dtml-var cod_documento_acessorio>&tipo_doc=doc_acessorio_adm&modal=1"><i class="fas fa-file-signature"></i> Assinaturas</button>
+                               <button type="button" class="btn btn-danger" onClick="documento_acessorio_excluir(<dtml-var cod_documento_acessorio missing>)"><i class="fas fa-trash"></i> Excluir</button>
                              </dtml-if>
                            </dtml-if>
                         </dtml-if>
@@ -458,7 +458,7 @@ $(function () {
       <div id="collapseTram" class="collapse" aria-labelledby="headingOne" data-parent=".tramitacao">
         <div class="card-body">
           <dtml-if expr="AUTHENTICATED_USER.has_role(['Authenticated']) and _.has_key('pode_tramitar')">
-              <a href="#" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Tramitação Individual" data-src="<dtml-var portal_url>/cadastros/tramitacao_documento/tramitacao_form?hdn_cod_documento=<dtml-var cod_documento>&modal=1" class="btn btn-sm btn-light mb-2"><i class="fas fa-external-link-alt"></i><span> Tramitar</span></a>  
+              <a href="#" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Tramitação Individual" data-src="<dtml-var portal_url>/cadastros/tramitacao_documento/tramitacao_form?hdn_cod_documento=<dtml-var cod_documento>&modal=1" class="btn btn-light mb-2"><i class="fas fa-external-link-alt"></i><span> Tramitar</span></a>  
           </dtml-if>
           <dtml-in expr="zsql.tramitacao_administrativo_obter_zsql(cod_documento=cod_documento)">
             <dtml-if sequence-start>             

@@ -61,7 +61,7 @@
   <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Parlamentar', 'Operador Tabela Auxiliar'])">
    <div class="row">
     <div class="col-12 text-start text-sm-end">
-            <a class="btn btn-sm btn-light d-print-none mb-3" href="<dtml-var portal_url>/cadastros/auxiliares/bancada/bancada_form?num_legislatura_sel=<dtml-var hdn_num_legislatura missing>"><i class="fa fa-fw fa-plus"></i> Incluir Bancada</a>
+            <a class="btn btn-light d-print-none mb-3" href="<dtml-var portal_url>/cadastros/auxiliares/bancada/bancada_form?num_legislatura_sel=<dtml-var hdn_num_legislatura missing>"><i class="fa fa-fw fa-plus"></i> Incluir Bancada</a>
     </div>
    </div>
   </dtml-if>
@@ -112,7 +112,7 @@
           <dtml-in expr="zsql.bancada_contar_parlamentares_zsql(cod_bancada=cod_bancada, cod_periodo_comp=cod_periodo_comp_sel)">
              <td>
               <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Parlamentar', 'Operador Tabela auxiliar'])">
-                 <a class="btn btn-sm btn-primary" href="<dtml-var portal_url>/consultas/bancada/composicao_bancada_mostrar_proc?cod_bancada=<dtml-var cod_bancada>&num_legislatura=<dtml-var hdn_num_legislatura>&cod_periodo_comp=<dtml-var cod_periodo_comp_sel>"> 
+                 <a class="btn btn-primary" href="<dtml-var portal_url>/consultas/bancada/composicao_bancada_mostrar_proc?cod_bancada=<dtml-var cod_bancada>&num_legislatura=<dtml-var hdn_num_legislatura>&cod_periodo_comp=<dtml-var cod_periodo_comp_sel>"> 
                    <span class="badge badge-light"><dtml-var num_parlamentares missing null=""></span> <i class="fa fa-fw fa-edit"></i>
                  </a>
              <dtml-else>

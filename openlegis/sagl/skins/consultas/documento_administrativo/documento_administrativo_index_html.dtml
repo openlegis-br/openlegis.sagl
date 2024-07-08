@@ -15,12 +15,12 @@
       <div class="col-12 col-md-5 text-start text-md-end">
         <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Modulo Administrativo', 'Operador Materia'])">
           <div class="btn-group">  
-            <a class="btn btn-sm btn-light d-print-none" href="<dtml-var portal_url>/cadastros/documento_administrativo/documento_administrativo_form" ><i class="fa fa-fw fa-plus"></i> Incluir Documento</a>
-            <a class="btn btn-sm btn-light d-print-none" href="<dtml-var portal_url>/cadastros/documento_administrativo/numero_reservar_form" ><i class="fas fa-fw fa-list-ol"></i> Reservar</a>
+            <a class="btn btn-primary d-print-none" href="<dtml-var portal_url>/cadastros/documento_administrativo/documento_administrativo_form" ><i class="fa fa-fw fa-plus"></i> Incluir Processo</a>
+            <a class="btn btn-primary d-print-none" href="<dtml-var portal_url>/cadastros/documento_administrativo/numero_reservar_form" ><i class="fas fa-fw fa-list-ol"></i> Reservar</a>
           </div>
         <dtml-elif expr="AUTHENTICATED_USER.has_role(['Authenticated'])">
           <dtml-if expr="zsql.usuario_tipo_documento_obter_zsql(cod_usuario=cod_usuario_corrente, ind_excluido=0)">
-            <a class="btn btn-sm btn-light d-print-none" href="<dtml-var portal_url>/cadastros/documento_administrativo/documento_administrativo_form" ><i class="fa fa-fw fa-plus"></i> Incluir Documento</a>
+            <a class="btn btn-light d-print-none" href="<dtml-var portal_url>/cadastros/documento_administrativo/documento_administrativo_form" ><i class="fa fa-fw fa-plus"></i> Incluir Processo</a>
           </dtml-if>
         </dtml-if>
       </div>
@@ -39,7 +39,7 @@
 <form id="pesq_basica_form" name="pesq_basica_form" action="documento_administrativo_pesquisar_proc">
   <div class="row">
     <div class="col-12 col-md-6 mb-3">
-      <label class="form-label" for="lst_tip_documento">Tipo de Documento</label>
+      <label class="form-label" for="lst_tip_documento">Tipo de Processo</label>
       <select class="select2 form-select"  id="lst_tip_documento" name="lst_tip_documento" multiple="multiple" style="width: 100%; min-height:34px !important;" data-placeholder="Todos">
           <dtml-in expr="permissao_tipo()" mapping>
              <option value="<dtml-var tip_documento>"><dtml-var des_tipo_documento></option>

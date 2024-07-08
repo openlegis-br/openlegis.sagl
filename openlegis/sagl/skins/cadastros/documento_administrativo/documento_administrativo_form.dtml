@@ -10,19 +10,19 @@
       var regexp_digitos = /\D+/;
 
       if (form.lst_tip_documento.selectedIndex==0){
-          alert("Escolha um tipo de documento!");
+          alert("Escolha um tipo de processo!");
           form.lst_tip_documento.focus();
           return false;
       }
 
       if (form.txt_num_documento.value == "") {
-         alert("O número do documento deve ser preenchido!");
+         alert("O número do processo deve ser preenchido!");
          form.txt_num_documento.focus();
          return false;
       }
 
       if (regexp_digitos.test(form.txt_num_documento.value)) {
-         alert("O número do documento deve ser um número natural!");
+         alert("O número do processo deve ser um número natural!");
          form.txt_num_documento.focus();
          return false;
       }
@@ -42,25 +42,25 @@
       }
   
       if (form.txt_ano_documento.value == "") {
-         alert("O ano do documento deve ser preenchido!");
+         alert("O ano do processo deve ser preenchido!");
          form.txt_ano_documento.focus();
          return false;
       }
 
       if (form.txt_dat_documento.value == "") {
-         alert("A data do documento deve ser preenchida!");
+         alert("A data do processo deve ser preenchida!");
          form.txt_dat_documento.focus();
          return false;
       }
 
       if (form.txa_txt_assunto.value == "") {
-         alert("O assunto do documento deve ser preenchido!");
+         alert("O assunto do processso deve ser preenchido!");
          form.txa_txt_assunto.focus();
          return false;
       }
 
       if (form.txa_txt_interessado.value == "") {
-         alert("O interessado / autor do documento deve ser preenchido!");
+         alert("O interessado / autor do processo deve ser preenchido!");
          form.txa_txt_interessado.focus();
          return false;
       }
@@ -169,14 +169,14 @@ $(document).ready(() => {
     <dtml-if expr="_.has_key('cod_documento')">
        <h1 class="firstHeading font-size-18"><dtml-var des_tipo_documento> nº <dtml-var num_documento>/<dtml-var ano_documento></h1>
     <dtml-else>
-       <h1 class="firstHeading font-size-18">Cadastro de Documento</h1>
+       <h1 class="firstHeading font-size-18">Cadastro de Processo</h1>
     </dtml-if>
   </div>
   <div class="col-12 col-lg-4 text-end">
    <dtml-if expr="_.has_key('cod_documento')">
     <div class="btn-group">
-      <a class="btn btn-primary btn-sm d-print-none" href="<dtml-var portal_url>/cadastros/documento_administrativo/documento_administrativo_form" ><i class="fa fa-fw fa-plus"></i> Incluir Documento</a>    
-      <button class="btn btn-sm btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+      <a class="btn btn-primary d-print-none" href="<dtml-var portal_url>/cadastros/documento_administrativo/documento_administrativo_form" ><i class="fa fa-fw fa-plus"></i> Incluir Processo</a>    
+      <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
         <i class="fas fa-fw fa-file-export"></i> Gerar
       </button>
       <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">

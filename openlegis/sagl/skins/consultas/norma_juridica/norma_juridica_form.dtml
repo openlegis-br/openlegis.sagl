@@ -9,7 +9,7 @@
    <dtml-let isAnon="portal_membership.isAnonymousUser()">
      <dtml-if expr="not isAnon">   
       <div class="btn-group" role="group" aria-label="Button group with nested dropdown">
-        <a class="btn btn-sm btn-link" href="<dtml-var portal_url>/relatorios/pdf_detalhe_norma_preparar_pysc?cod_norma=<dtml-var cod_norma>" target="_blank" ><i class="fas fa-fw fa-file-pdf"></i> PDF Textual</a> 
+        <a class="btn btn-link" href="<dtml-var portal_url>/relatorios/pdf_detalhe_norma_preparar_pysc?cod_norma=<dtml-var cod_norma>" target="_blank" ><i class="fas fa-fw fa-file-pdf"></i> PDF Textual</a> 
       </div>
      </dtml-if>
    </dtml-let>
@@ -48,9 +48,9 @@
       <div class="col-12 col-lg-4 text-start text-end">
          <dtml-call expr="REQUEST.set('texto_original', str(cod_norma)+'_texto_integral.pdf')">
          <dtml-if "hasattr(sapl_documentos.norma_juridica,texto_original)">
-            <a class="btn btn-sm btn-primary" href="<dtml-var portal_url>/consultas/norma_juridica/pasta_digital/?cod_norma=<dtml-var cod_norma>&action=pasta" target="_blank"><i class="far fa-folder"></i> Pasta Digital</a>
+            <a class="btn btn-primary" href="<dtml-var portal_url>/consultas/norma_juridica/pasta_digital/?cod_norma=<dtml-var cod_norma>&action=pasta" target="_blank"><i class="far fa-folder"></i> Pasta Digital</a>
             <dtml-comment>
-            <a class="btn btn-sm btn-primary" target="_blank" href="<dtml-var portal_url>/pysc/download_norma_pysc?cod_norma=<dtml-var cod_norma>&texto_original=1">
+            <a class="btn btn-primary" target="_blank" href="<dtml-var portal_url>/pysc/download_norma_pysc?cod_norma=<dtml-var cod_norma>&texto_original=1">
                  <dtml-if expr="zsql.assinatura_documento_obter_zsql(codigo=cod_norma, tipo_doc='norma',ind_assinado=1, cod_usuario=None)">
                    <i class="fa fa-certificate"></i>
                  <dtml-else>
@@ -65,10 +65,10 @@
          <dtml-call expr="REQUEST.set('texto_odt', str(cod_norma)+'_texto_integral.odt')">                  
          <dtml-if "hasattr(sapl_documentos.norma_juridica,texto_odt) and hasattr(sapl_documentos.norma_juridica,texto_consolidado)">
            <dtml-let documento_odt="getattr(sapl_documentos.norma_juridica,texto_odt).absolute_url">         
-               <a class="btn btn-sm btn-primary" target="_blank" href="<dtml-var portal_url>/generico/viewerJS/?cod_norma=<dtml-var cod_norma>#<dtml-var documento_odt>?<dtml-var expr="ZopeTime().timeTime()"> "> <i class="fa fa-fw fa-file-code"></i> Texto Compilado</a>
+               <a class="btn btn-primary" target="_blank" href="<dtml-var portal_url>/generico/viewerJS/?cod_norma=<dtml-var cod_norma>#<dtml-var documento_odt>?<dtml-var expr="ZopeTime().timeTime()"> "> <i class="fa fa-fw fa-file-code"></i> Texto Compilado</a>
            </dtml-let>
          <dtml-elif "not hasattr(sapl_documentos.norma_juridica,texto_odt) and hasattr(sapl_documentos.norma_juridica,texto_consolidado)">      
-            <a class="btn btn-sm btn-primary" href="<dtml-var portal_url>/pysc/download_norma_pysc?cod_norma=<dtml-var cod_norma>&texto_consolidado=1" target="_blank"> <i class="fa fa-fw fa-file-code"></i> Texto Compilado</a>
+            <a class="btn btn-primary" href="<dtml-var portal_url>/pysc/download_norma_pysc?cod_norma=<dtml-var cod_norma>&texto_consolidado=1" target="_blank"> <i class="fa fa-fw fa-file-code"></i> Texto Compilado</a>
          </dtml-if>
          </dtml-comment>    
       </div>

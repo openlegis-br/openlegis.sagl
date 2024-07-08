@@ -2,13 +2,13 @@
 
  <div class="row mb-3">
   <div class="col-12 col-md-6 d-flex align-items-center">
-    <h1 class="firstHeading font-size-18 mb-0">Pesquisa de Matérias</h1>
+    <h1 class="firstHeading font-size-18">Pesquisa de Matérias</h1>
   </div>
   <div class="col-12 col-md-6">
     <div class="input-group mt-1 mt-md-0 d-flex justify-content-start justify-content-md-end">
-     <a class="btn btn-sm btn-light" href="<dtml-var portal_url>/consultas/materia" ><i class="fa fa-fw fa-search"></i> Nova Pesquisa</a>
+     <a class="btn btn-primary" href="<dtml-var portal_url>/consultas/materia" ><i class="fa fa-fw fa-search"></i> Nova Pesquisa</a>
      <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia'])">
-        <a class="btn btn-sm btn-light" href="<dtml-var portal_url>/cadastros/materia/materia_form_resumido" ><i class="fa fa-fw fa-plus"></i> Incluir Matéria</a>
+        <a class="btn btn-primary" href="<dtml-var portal_url>/cadastros/materia/materia_form_resumido" ><i class="fa fa-fw fa-plus"></i> Incluir Matéria</a>
      </dtml-if>   
     </div>
   </div>
@@ -86,7 +86,7 @@
       </div>
       <div class="col-4 col-sm-3 text-end align-self-center">
          <div class="btn-group">
-           <button class="btn btn-sm btn-outline-light" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+           <button class="btn btn-light" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
              <i class="fas fa-file-export"></i> Exportar
            </button>
            <div class="dropdown-menu dropdown-menu-right">
@@ -385,17 +385,17 @@
  <dtml-if "hasattr(sapl_documentos.materia,redacao_final) or hasattr(sapl_documentos.materia,texto_original)">
   <div class="row">
     <div class="col-12"> 
-     <div class="input-group text_buttons">
+     <div class="btn-group btn-group-sm mt-1">
       <dtml-if "hasattr(sapl_documentos.materia,texto_original)">
           <dtml-let isAnon="portal_membership.isAnonymousUser()">
              <dtml-if expr="not isAnon">
-                <a class="btn btn-sm btn-subtle-primary" href="<dtml-var portal_url>/consultas/materia/pasta_digital/?cod_materia=<dtml-var cod_materia>&action=pasta" target="_blank"><i class="far fa-folder"></i> Pasta Digital</a>
+                <a class="btn btn-primary" href="<dtml-var portal_url>/consultas/materia/pasta_digital/?cod_materia=<dtml-var cod_materia>&action=pasta" target="_blank"><i class="far fa-folder"></i> Pasta Digital</a>
              </dtml-if>
           </dtml-let>
-          <a class="btn btn-sm btn-subtle-primary" href="<dtml-var portal_url>/pysc/download_materia_pysc?cod_materia=<dtml-var expr="pysc.b64encode_pysc(codigo=cod_materia)">&texto_original=1" target="_blank"><i class="far fa-file-pdf"></i> Texto Integral</a>
+          <a class="btn btn-primary" href="<dtml-var portal_url>/pysc/download_materia_pysc?cod_materia=<dtml-var expr="pysc.b64encode_pysc(codigo=cod_materia)">&texto_original=1" target="_blank"><i class="far fa-file-pdf"></i> Texto Integral</a>
       </dtml-if> 
       <dtml-if "hasattr(sapl_documentos.materia,redacao_final)">
-          <a class="btn btn-sm btn-subtle-primary" href="<dtml-var portal_url>/pysc/download_materia_pysc?cod_materia=<dtml-var expr="pysc.b64encode_pysc(codigo=cod_materia)">&redacao_final=1" target="_blank"><i class="fas fa-file-pdf"></i> Redação Final</a>
+          <a class="btn btn-primary" href="<dtml-var portal_url>/pysc/download_materia_pysc?cod_materia=<dtml-var expr="pysc.b64encode_pysc(codigo=cod_materia)">&redacao_final=1" target="_blank"><i class="fas fa-file-pdf"></i> Redação Final</a>
       </dtml-if>    
      </div>
     </div>

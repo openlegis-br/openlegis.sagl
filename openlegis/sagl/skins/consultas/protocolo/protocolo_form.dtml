@@ -1,39 +1,12 @@
 <dtml-var header_html>
 
-<script>
-  function campos_criticar(form){
-    if (document.getElementById("file_nom_arquivo").value == "") {
-       bootstrap.showModal({title: "Mensagem do Sistema", body: "É necessário selecionar um arquivo!"});    
-       form.file_nom_arquivo.focus();
-       return false;
-    }
-      form.submit();
-  }
-
-  $(document).ready(function () {
-    bsCustomFileInput.init()
-  })
-
-$(function () {
-    $('[data-bs-toggle="popover"]').popover({
-    container: 'body',
-    html: true,
-    placement: 'right',
-    sanitize: false,
-    content: function() {
-        return $('#PopoverContent').html()
-    }
-    })
-}); 
-</script>
-
- <div class="row mb-2">
-      <div class="col-12 col-md-8 align-self-center">
+ <div class="row mb-3">
+      <div class="col-12 col-md-6 align-self-center">
          <h1 class="firstHeading font-size-18">Protocolo nº <dtml-var num_protocolo>/<dtml-var ano_protocolo> <dtml-if expr="ind_anulado==1">(Nulo)</dtml-if></h1>
       </div>
-      <div class="col-12 col-md-4 text-start text-end">
+      <div class="col-12 col-md-6 text-start text-end">
         <div class="btn-group d-print-none "> 
-          <a class="btn btn-primary" href="<dtml-var portal_url>/consultas/protocolo" ><i class="fa fa-fw fa-search"></i> Nova Pesquisa</a>                           
+          <a class="btn btn-primary" href="<dtml-var portal_url>/consultas/protocolo" ><i class="fa fa-fw fa-search"></i> Pesquisar</a>                           
 <dtml-let isAnon="portal_membership.isAnonymousUser()">
   <dtml-if expr="not isAnon">
       <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -57,8 +30,8 @@ $(function () {
  </div>
 
  <div class="row">
-      <div class="col-12 col-lg-8 align-self-center mb-2">
-       <p class="h6">
+      <div class="col-12 col-md-6 d-flex align-items-center">
+       <p class="font-size-14">
          <dtml-if cod_autor>
             <i class="fa fa-user"></i>           
             <b>Autoria:</b>         
@@ -71,12 +44,12 @@ $(function () {
             <dtml-var txt_interessado>
 	</dtml-if>
        </div>
-      <div class="col-12 col-lg-4">
+      <div class="col-12 col-md-6 mb-3 text-end">
          <dtml-call expr="REQUEST.set('id_documento', str(cod_protocolo)+'_protocolo.pdf')">
          <dtml-if "hasattr(sapl_documentos.protocolo,id_documento)">
-            <div class="btn-group float-right">
+            <div class="btn-group btn-group-sm text-end">
             <dtml-let documento="getattr(sapl_documentos.protocolo,id_documento).absolute_url">
-               <a class="btn btn-primary" target="_blank" href="<dtml-var documento>?<dtml-var expr="ZopeTime().timeTime()">"><i class="fa fa-file-pdf"></i> Arquivo Digitalizado</a>
+               <a class="btn btn-light" target="_blank" href="<dtml-var documento>?<dtml-var expr="ZopeTime().timeTime()">"><i class="fa fa-file-pdf"></i> Documento Digitalizado</a>
             </dtml-let>
             <dtml-if expr="ind_anulado==0 and AUTHENTICATED_USER.has_role(['Operador', 'Operador Protocolo'])">
                <dtml-if "sapl_documentos.props_sagl.restpki_access_token!=''">
@@ -84,17 +57,14 @@ $(function () {
                </dtml-if>
             </dtml-if>
             <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador'])">
-               <a class="btn btn-danger d-print-none " href="arquivo_digitalizado_excluir_proc?cod_protocolo=<dtml-var cod_protocolo>" data-confirm="Deseja realmente excluir a arquivo digitalizado?">Excluir</a>
+               <a class="btn btn-danger d-print-none " href="arquivo_digitalizado_excluir_proc?cod_protocolo=<dtml-var cod_protocolo>" data-confirm="Deseja realmente excluir a documento digitalizado?">Excluir</a>
             </dtml-if>            
            </div>
          <dtml-else>
             <form action="arquivo_digitalizado_salvar_proc" id="arquivo_form" name="arquivo_form" method="post" enctype="multipart/form-data">         
               <input type="hidden" name="hdn_cod_protocolo" value="<dtml-var cod_protocolo missing>" />
-              <div class="btn-group d-print-none ">   
-                <div class="custom-file">                         
-                   <input class="custom-file-input" type="file" id="file_nom_arquivo" name="file_nom_arquivo" accept="application/pdf" />
-                   <label class="custom-file-label" for="file_redacao">Arquivo digitalizado</label>  
-                </div>                 
+              <div class="input-group d-print-none ">   
+                   <input class="form-control" type="file" id="file_nom_arquivo" name="file_nom_arquivo" accept="application/pdf" />
                 <input class="btn btn-light" type="button" id="upload" value="Carregar"  onClick="campos_criticar(document.arquivo_form)"/>
               </div>
             </form>
@@ -102,8 +72,6 @@ $(function () {
       </div>       
  </div>
  
- <hr />
-
  <div class="row">
     <p class="col-12"><b>Data de Entrada</b>: 
        <dtml-var data_protocolo> - <dtml-var hor_protocolo>
@@ -190,7 +158,7 @@ $(function () {
                    </form>  
                  </div>
                 <dtml-else>
-                   <span class="text-danger"> <i class="fas fa-exclamation-triangle"></i> Carregue o arquivo digitalizado para habilitar a criação do processo.</span>
+                   <span class="text-danger"> <i class="fas fa-exclamation-triangle"></i> Carregue o documento digitalizado para habilitar a criação do processo.</span>
                 </dtml-if>                  
               </dtml-in>
 
@@ -367,4 +335,26 @@ $(function () {
 </dtml-if>
 
 <dtml-var js_slot>
+<script>
+  function campos_criticar(form){
+    if (document.getElementById("file_nom_arquivo").value == "") {
+       bootstrap.showModal({title: "Mensagem do Sistema", body: "É necessário selecionar um arquivo!"});    
+       form.file_nom_arquivo.focus();
+       return false;
+    }
+      form.submit();
+  }
+
+$(function () {
+    $('[data-bs-toggle="popover"]').popover({
+    container: 'body',
+    html: true,
+    placement: 'right',
+    sanitize: false,
+    content: function() {
+        return $('#PopoverContent').html()
+    }
+    })
+}); 
+</script>
 <dtml-var footer_html>

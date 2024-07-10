@@ -1,48 +1,12 @@
 <dtml-var header_html>
 
-<script>
-
-  function campos_criticar(){
-
-      var form = document.protocolo_anular_form;
-      var regexp_digitos = /\D+/;
-
-      if (form.txt_num_protocolo.value == "") {
-         alert("O número do protocolo deve ser preenchido!");
-         form.txt_num_protocolo.focus();
-         return false;
-      }
-
-      if (form.txt_ano_protocolo.value == "") {
-         alert("O ano do protocolo deve ser preenchido!");
-         form.txt_ano_protocolo.focus();
-         return false;
-      }
-
-      if (form.txa_txt_just_anulacao.value == "") {
-         alert("O motivo da anulação deve ser informado!");
-         form.txa_txt_just_anulacao.focus();
-         return false;
-      }
-
-      if (regexp_digitos.test(form.txt_num_protocolo.value)) {
-         alert("O número do protocolo deve ser um número natural!");
-         form.txt_num_protocolo.focus();
-         return false;
-      }
-
-      form.submit();
-    }
-
-</script>
-
  <div class="row mb-2">
       <div class="col-12 col-md-8 align-self-center">
         <h1 class="firstHeading font-size-18">Anulação de Protocolo</h1>
       </div>
       <div class="col-12 col-md-4 text-start text-end">
          <div class="btn-group d-print-none ">
-           <a class="btn btn-primary btn-sm" href="<dtml-var portal_url>/consultas/protocolo" ><i class="fa fa-fw fa-search"></i> Pesquisa de Protocolos</a>         
+           <a class="btn btn-primary btn-sm" href="<dtml-var portal_url>/consultas/protocolo" ><i class="fa fa-fw fa-search"></i> Pesquisar</a>         
          </div>
       </div>
  </div>
@@ -80,18 +44,18 @@
 
   <div class="row">
     <div class="col-6 mb-3">
-       <label class="form-label" for="txt_num_protocolo" class="required">Número</label>
+       <label class="form-label required" for="txt_num_protocolo">Número</label>
        <input class="form-control number" id="txt_num_protocolo" type="number" name="txt_num_protocolo" required />
     </div>
     <div class="col-6 mb-3">
-       <label class="form-label" for="txt_ano_protocolo" class="required">Ano</label>
+       <label class="form-label required" for="txt_ano_protocolo">Ano</label>
        <input class="form-control year" id="txt_ano_protocolo" type="number" name="txt_ano_protocolo" />    
     </div>       
   </div>    
 
   <div class="row">
     <div class="col-12 mb-3">
-       <label class="form-label" for="txa_txt_just_anulacao" class="required">Motivo da Anulação</label>
+       <label class="form-label required" for="txa_txt_just_anulacao">Motivo da Anulação</label>
        <textarea class="form-control" id="txa_txt_just_anulacao" name="txa_txt_just_anulacao" rows="2"><dtml-var txt_observacao missing></textarea>
     </div>
   </div>    
@@ -104,7 +68,7 @@
 
 
   <div class="text-start">
-    <input class="btn btn-primary" type="button" name="button" value="Anular Protocolo" onClick="campos_criticar()" />
+    <input class="btn btn-primary" type="button" id="btn-protocolo" name="button" value="Anular Protocolo" onClick="campos_criticar()" />
     <input class="btn btn-light" type="reset" name="btn_protocolo_limpar" value="Limpar" />
   </div>
   
@@ -114,4 +78,56 @@
 </div>
 
 <dtml-var js_slot>
+<script>
+  $(document).ready(function() {
+    var clicked = false;
+    $("#btn-protocolo").on("click", function(event) {
+      if (clicked) {
+        event.preventDefault();
+        return;
+      }
+      clicked = true;
+      var $this = $(this);
+      $this.html("Salvando...")
+      $this.addClass('disabled');
+      setTimeout(function() {
+        clicked = false;
+        $this.html("Protocolar Matéria")
+        $this.removeClass('disabled');
+      }, 3000);
+    });
+  });
+  function campos_criticar(){
+
+      var form = document.protocolo_anular_form;
+      var regexp_digitos = /\D+/;
+
+      if (form.txt_num_protocolo.value == "") {
+         alert("O número do protocolo deve ser preenchido!");
+         form.txt_num_protocolo.focus();
+         return false;
+      }
+
+      if (form.txt_ano_protocolo.value == "") {
+         alert("O ano do protocolo deve ser preenchido!");
+         form.txt_ano_protocolo.focus();
+         return false;
+      }
+
+      if (form.txa_txt_just_anulacao.value == "") {
+         alert("O motivo da anulação deve ser informado!");
+         form.txa_txt_just_anulacao.focus();
+         return false;
+      }
+
+      if (regexp_digitos.test(form.txt_num_protocolo.value)) {
+         alert("O número do protocolo deve ser um número natural!");
+         form.txt_num_protocolo.focus();
+         return false;
+      }
+
+      form.submit();
+    }
+
+</script>
 <dtml-var footer_html>

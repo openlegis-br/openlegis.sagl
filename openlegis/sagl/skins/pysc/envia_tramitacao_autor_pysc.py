@@ -6,6 +6,7 @@
 ##bind subpath=traverse_subpath
 ##parameters=cod_materia
 ##title=
+from xml.sax.saxutils import escape
 from Products.PythonScripts.standard import url_unquote
 from email.mime.text import MIMEText
 request=context.REQUEST
@@ -24,7 +25,7 @@ casa_legislativa = casa['nom_casa']
 
 for materia in context.zsql.materia_obter_zsql(cod_materia=cod_materia):
  ementa = materia.txt_ementa
- projeto = materia.des_tipo_materia+" "+str(materia.num_ident_basica)+"/"+str(materia.ano_ident_basica)
+ projeto = str(materia.des_tipo_materia)+" "+str(materia.num_ident_basica)+"/"+str(materia.ano_ident_basica)
 
  nom_autor = ""
  autorias = context.zsql.autoria_obter_zsql(cod_materia=materia.cod_materia)
@@ -46,7 +47,7 @@ for materia in context.zsql.materia_obter_zsql(cod_materia=cod_materia):
    data = tramitacao.dat_tramitacao
    status = tramitacao.des_status
    if tramitacao.txt_tramitacao != None:
-     texto_acao = url_unquote(tramitacao.txt_tramitacao)
+     texto_acao = escape(tramitacao.txt_tramitacao)
    else:
      texto_acao = " "
 
@@ -54,7 +55,7 @@ remetente = email_casa
 
 cod_materia_base64 = context.pysc.b64encode_pysc(codigo=str(cod_materia))
 
-linkMat = request.SERVER_URL+"/consultas/materia/materia_mostrar_proc?cod_materia=" + cod_materia_base64
+linkMat = request.SERVER_URL+"/consultas/materia/materia_mostrar_proc?cod_materia=" + str(cod_materia_base64)
 
 destinatarios=[]
 for item in lista_codigo:

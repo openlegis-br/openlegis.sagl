@@ -193,6 +193,25 @@
   });
 }(jQuery));
 
+  $(document).ready(function() {
+    var clicked = false;
+    $("#search-btn").on("click", function(event) {
+      if (clicked) {
+        event.preventDefault();
+        return;
+      }
+      clicked = true;
+      var $this = $(this);
+      $this.html("Pesquisando...")
+      $this.addClass('disabled');
+      setTimeout(function() {
+        clicked = false;
+        $this.html("Pesquisar")
+        $this.removeClass('disabled');
+      }, 3000);
+    });
+  });
+
 function pesquisam_criticar(form){  
 
   var form = document.pesq_basica_form;

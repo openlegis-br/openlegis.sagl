@@ -66,7 +66,6 @@ def tramitar_materia(cod_materia):
        context.zsql.tramitacao_incluir_zsql(cod_materia=cod_materia, dat_tramitacao=DateTime().strftime('%Y-%m-%d %H:%M:%S'), cod_unid_tram_local=cod_unid_tram_local, cod_usuario_local=cod_usuario_corrente, cod_unid_tram_dest=cod_unid_tram_dest, dat_encaminha=DateTime().strftime('%Y-%m-%d %H:%M:%S'), cod_status=cod_status, ind_urgencia=0, txt_tramitacao = txt_tramitacao, ind_ult_tramitacao=1)    
     for tramitacao in context.zsql.tramitacao_incluida_codigo_obter_zsql():
         cod_tramitacao = tramitacao.cod_tramitacao
-    context.pysc.envia_tramitacao_autor_pysc(cod_materia = cod_materia)
     return context.relatorios.pdf_tramitacao_preparar_pysc(hdn_cod_tramitacao=cod_tramitacao, hdn_url=hdn_url)
   
 return criar_materia(tip_materia, num_ident_basica, ano_materia, dat_apresentacao, num_protocolo, txt_ementa, txt_observacao, cod_autor)

@@ -212,7 +212,7 @@
         <div class="col-12 col-md-6 mb-3">
            <label class="form-label d-block">ODT Pauta</label>
            <dtml-let id_documento_odt="str(cod_sessao_plen)+'_pauta_sessao.odt'">
-             <div class="input-group">
+             <div class="btn-group btn-group-sm">
               <dtml-if "hasattr(sapl_documentos.pauta_sessao,id_documento_odt)">
                  <dtml-let documento_odt="getattr(sapl_documentos.pauta_sessao,id_documento_odt).absolute_url">
                     <dtml-call expr="REQUEST.set('nome_arquivo_odt',str(cod_sessao_plen)+'_pauta_sessao.odt')">
@@ -228,7 +228,7 @@
         </div>
         <div class="col-12 col-md-6 mb-3">        
            <label class="form-label d-block">PDF Pauta</label>
-           <div class="input-group">
+           <div class="btn-group btn-group-sm">
            <dtml-let documento_odt="str(cod_sessao_plen)+'_pauta_sessao.odt'">
               <dtml-if "hasattr(sapl_documentos.pauta_sessao,documento_odt)">
                  <dtml-call expr="REQUEST.set('temODT', 1)">
@@ -259,7 +259,7 @@
              </dtml-let>
           <dtml-else>
              <dtml-if expr="_.has_key('temODT')">
-                <a class="btn btn-light" href="javascript:pauta_pdf_gerar()"><span class="d-none d-lg-inline-block ms-1">Gerar do ODT</span></a>
+                <a class="btn btn-light" href="javascript:pauta_pdf_gerar()"><span class="ms-1">Gerar do ODT</span></a>
              <dtml-else>
                 <a class="btn btn-light" href="<dtml-var portal_url>/relatorios/pdf_ordem_dia_preparar_pysc?data=<dtml-var dat_inicio_sessao>&cod_sessao_plen=<dtml-var cod_sessao_plen><dtml-if expr="_.has_key('ind_audiencia')">&ind_audiencia=1</dtml-if>" target="_blank"><span class="d-none d-lg-inline-block ms-1">Gerar PDF</span></a>
              </dtml-if>
@@ -316,13 +316,13 @@
   <div class="row">
      <div class="col-4 col-md-2 mb-3">
        <label class="form-label">Número da Ata</label>
-       <input class="form-control number" type="number" id="txt_numero_ata" name="txt_numero_ata" value="<dtml-var numero_ata missing null>" autocomplete="off"  maxlength="3">
+       <input class="form-control form-control-sm" type="number" id="txt_numero_ata" name="txt_numero_ata" value="<dtml-var numero_ata missing null>" autocomplete="off"  maxlength="3">
      </div>
      <div class="col-8 col-md-4 mb-3">
        <label class="form-label d-block">ODT Ata</label>
        <dtml-let id_documento_odt="str(cod_sessao_plen)+'_ata_sessao.odt'">
           <dtml-if "hasattr(sapl_documentos.ata_sessao,id_documento_odt)">
-           <div class="input-group">
+           <div class="btn-group btn-group-sm">
              <dtml-call expr="REQUEST.set('temAtaODT', 1)">
              <dtml-let documento_odt="getattr(sapl_documentos.ata_sessao,id_documento_odt).absolute_url">
                 <dtml-call expr="REQUEST.set('nome_arquivo_odt',str(cod_sessao_plen)+'_ata_sessao.odt')">
@@ -332,22 +332,22 @@
                </dtml-let>
             </div>
           <dtml-else>
-               <a class="btn btn-light" href="javascript:ata_odt_gerar();"><span class="d-none d-lg-inline-block ms-1">Gerar ODT</span></a>
+               <a class="btn btn-sm btn-light" href="javascript:ata_odt_gerar();"><span class="d-none d-lg-inline-block ms-1">Gerar ODT</span></a>
           </dtml-if>
        </dtml-let>
      </div>
      <div class="col-12 col-md-6 mb-3">
         <label class="form-label d-block">PDF Ata</label>
         <dtml-if cod_sessao_plen>
-          <div class="input-group">
            <dtml-call expr="REQUEST.set('id_ata', str(cod_sessao_plen)+'_ata_sessao.pdf')">
            <dtml-call expr="REQUEST.set('id_ata_assinada', str(cod_sessao_plen)+'_ata_sessao_signed.pdf')">
-           <dtml-if "hasattr(sapl_documentos.ata_sessao,id_ata) and not hasattr(sapl_documentos.ata_sessao,id_ata_assinada)">
+           <dtml-if expr="hasattr(sapl_documentos.ata_sessao,id_ata) and not hasattr(sapl_documentos.ata_sessao,id_ata_assinada)">
+            <div class="btn-group btn-group-sm">
               <dtml-let ata="getattr(sapl_documentos.ata_sessao,id_ata).absolute_url">
                  <a class="btn btn-light" target="_blank" href="<dtml-var ata>?<dtml-var expr="ZopeTime().timeTime()">">
                    <i class="fa fa-fw fa-file-pdf"></i><span class="d-none d-lg-inline-block ms-1">Visualizar</span>
                  </a>
-                 <dtml-if "sapl_documentos.props_sagl.restpki_access_token!=''">
+                 <dtml-if expr="sapl_documentos.props_sagl.restpki_access_token!=''">
                    <button type="button" class="btn btn-light" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Assinaturas Digitais" data-src="<dtml-var portal_url>/cadastros/assinatura/assinatura_solicitar_form?codigo=<dtml-var cod_sessao_plen>&tipo_doc=ata&modal=1"><i class="fas fa-file-signature"></i><span class="d-none d-lg-inline-block ms-1">Assinaturas</span></button>
                  </dtml-if>
                  <a class="btn btn-danger" href="ata_pdf_excluir_proc?cod_sessao_plen=<dtml-var cod_sessao_plen missing><dtml-if expr="_.has_key('ind_audiencia')">&ind_audiencia=1</dtml-if>" data-confirm="Deseja realmente excluir o arquivo PDF da Ata?"><i class="fas fa-trash"></i><span class="d-none d-lg-inline-block ms-1">Excluir</span></a>                                
@@ -362,21 +362,19 @@
                  </dtml-if>
                  <a class="btn btn-danger" href="ata_pdf_excluir_proc?cod_sessao_plen=<dtml-var cod_sessao_plen missing>" data-confirm="Deseja realmente excluir o arquivo PDF da Ata?"><i class="fas fa-trash"></i><span class="d-none d-lg-inline-block ms-1">Excluir</span></a>                    
               </dtml-let>
+            </div>
            <dtml-else>
                 <div class="input-group">
                   <input type="file" class="form-control" id="file_nom_arquivo_ata" name="file_nom_arquivo_ata" accept="application/pdf" />
                 <dtml-if expr="_.has_key('temAtaODT')">
-                     <input type="button" class="btn btn-light" value="Gerar" onclick="javascript:ata_pdf_gerar()" />
+                     <input type="button" class="btn btn-sm btn-light" value="Gerar" onclick="javascript:ata_pdf_gerar()" />
                 </dtml-if>
-                </div>
              </div>
            </dtml-if>
         <dtml-else>
-             <div class="custom-file">
                <input type="file" class="form-control" id="file_nom_arquivo_ata" name="file_nom_arquivo_ata" accept="application/pdf" />
-             </div>
-             <dtml-if expr="_.has_key('temAtaODT')">
-                  <input type="button" class="btn btn-light" value="Gerar" onclick="javascript:ata_pdf_gerar()" />
+               <dtml-if expr="_.has_key('temAtaODT')">
+                  <input type="button" class="btn btn-sm btn-light" value="Gerar" onclick="javascript:ata_pdf_gerar()" />
              </dtml-if>
         </dtml-if>
      </div>
@@ -387,12 +385,14 @@
        <dtml-if cod_sessao_plen>
           <dtml-call expr="REQUEST.set('id_roteiro', str(cod_sessao_plen)+'_roteiro_sessao.pdf')">
           <dtml-if "hasattr(sapl_documentos.pauta_sessao,id_roteiro)">
+            <div class="btn-group btn-group-sm">
              <dtml-let roteiro="getattr(sapl_documentos.pauta_sessao,id_roteiro).absolute_url">
                 <a class="btn btn-light" target="_blank" href="<dtml-var roteiro>?<dtml-var expr="ZopeTime().timeTime()">">
                   <i class="fa fa-fw fa-file-pdf"></i><span class="d-none d-lg-inline-block ms-1">Visualizar</span>
                 </a>
                 <a class="btn btn-danger" href="roteiro_excluir_proc?cod_sessao_plen=<dtml-var cod_sessao_plen missing><dtml-if expr="_.has_key('ind_audiencia')">&ind_audiencia=1</dtml-if>" data-confirm="Deseja realmente excluir o arquivo PDF do Roteiro<dtml-if expr="_.has_key('ind_audiencia')"><dtml-else> da <dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao"></dtml-if>?"><i class="fas fa-fw fa-trash"></i><span class="d-none d-lg-inline-block ms-1">Excluir</span></a> 
              </dtml-let>
+            </div>
           <dtml-else>
              <div class="custom-file">
                <input type="file" class="form-control" id="file_nom_arquivo_roteiro" name="file_nom_arquivo_roteiro" accept="application/pdf" />
@@ -459,15 +459,17 @@
      <input type="hidden" name="txt_url_video" value="" />
      <input type="hidden" name="txt_numero_ata" value="" />
   </dtml-if>
-  
-  <div class="text-start">
+
+<div class="row">
+  <div class="input-group text-start">
    <input class="btn btn-primary" type="button" name="button" value="Salvar" onClick="campos_criticar()" />
    <dtml-if cod_sessao_plen>
       <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador'])">
-         <a class="btn btn-danger" href="<dtml-var portal_url>/cadastros/sessao_plenaria/sessao_plenaria_excluir_proc?cod_sessao_plen=<dtml-var cod_sessao_plen><dtml-if expr="_.has_key('ind_audiencia')">&ind_audiencia=1</dtml-if>" data-confirm="Deseja realmente excluir a <dtml-if expr="_.has_key('ind_audiencia')">audiência pública<dtml-else>plenária</dtml-if>?">Excluir</a>
+         <a class="btn btn-danger" href="<dtml-var portal_url>/cadastros/sessao_plenaria/sessao_plenaria_excluir_proc?cod_sessao_plen=<dtml-var cod_sessao_plen><dtml-if expr="_.has_key('ind_audiencia')">&ind_audiencia=1</dtml-if>" data-confirm="Deseja realmente excluir a <dtml-if expr="_.has_key('ind_audiencia')">Audiência Pública<dtml-else> <dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao"> Plenária</dtml-if>?">Excluir</a>
       </dtml-if>
    </dtml-if>
   </div>
+</div>
 
  <div class="row">
     <div class="col-md-12 mt-2">

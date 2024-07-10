@@ -2,66 +2,6 @@
 
 <script src="<dtml-var portal_url>/javascript/data_validar.js"></script>
 
-<script>
-
-(function ($) {
-  $(function () {
-    document.onkeypress = function (event) {
-      var form = pesq_avancada_form;
-      if (event.keyCode === 13) {
-        form.submit();
-      }
-    };
-  });
-}(jQuery));
-
-function protocolo_criticar(form){  
-
-  var form = document.pesq_avancada_form;
-
-  if (form.dt_apres.value != "" && !IsValidDate(form.dt_apres.value)) {
-    bootstrap.showModal({title: "Mensagem do Sistema", body: "Digite uma data inicial válida!"});
-    return false;
-  } 
-
-  if (form.dt_apres2.value != "" && !IsValidDate(form.dt_apres2.value)) {
-    bootstrap.showModal({title: "Mensagem do Sistema", body: "Digite uma data final válida!"});
-    return false;
-  } 
-
-  form.submit();
-}
-
-$(document).ready(function(){
-  $('input:radio[name="rad_tip_processo"]').change(function(){
-             if($(this).val()=="0")
-             {
-               $("#divAdm").show();
-               $("#divLeg").hide();
-               $('#lst_tip_materia').val(function() {
-                  return this.defaultValue;
-               });
-             }
-             else if($(this).val()=="1")
-             {
-                 $("#divLeg").show();
-                 $("#divAdm").hide();
-                 $('#lst_tip_documento').val(function() {
-                    return this.defaultValue;
-                 });
-                 $('#txa_txt_interessado').val(function() {
-                    return this.defaultValue;
-                 });
-             }
-             else
-             {
-                 $("#divLeg").hide();
-                 $("#divAdm").hide();
-             }
-    });
-  });
-</script>
-
  <div class="row mb-2">
       <div class="col-12 col-md-8 align-self-center">
         <h1 class="firstHeading font-size-18">Pesquisa de Protocolos</h1>
@@ -96,11 +36,11 @@ $(document).ready(function(){
   <div class="row"> 
     <div class="col-6 col-md-3 mb-3">
       <label class="form-label" for="txt_num_protocolo">Número</label>
-      <input name="txt_num_protocolo" id="txt_num_protocolo" type="number" min="1" maxlength="6" class="form-control number" autocomplete="off">
+      <input name="txt_num_protocolo" id="txt_num_protocolo" type="number" min="1" maxlength="6" class="form-control" autocomplete="off">
     </div>
     <div class="col-6 col-md-3 mb-3 controls">
       <label class="form-label" for="txt_ano_protocolo">Ano</label>
-      <input name="txt_ano_protocolo" id="txt_ano_protocolo" type="number" min="1900" maxlength="4" class="form-control year" autocomplete="off">
+      <input name="txt_ano_protocolo" id="txt_ano_protocolo" type="number" min="1900" maxlength="4" class="form-control" autocomplete="off">
     </div>
     <div class="col-12 col-md-6 mb-3">
       <label class="form-label" for="txt_assunto">Assunto</label>
@@ -110,35 +50,18 @@ $(document).ready(function(){
   <div class="row">
   <div class="col-6 col-lg-3 mb-3">
       <label class="form-label" for="dt_apres">Data Inicial</label>
-        <input type="text" class="form-control date" id="dt_apres" name="dt_apres" autocomplete="off">
+        <div class="input-group">
+           <input type="text" class="form-control datepicker" placeholder="dd/mm/aaaa" name="dt_apres" id="dt_apres" data-provide="datepicker" data-date-autoclose="true" autocomplete="off">
+           <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
+        </div>
   </div>
   <div class="col-6 col-lg-3 mb-3">
       <label class="form-label" for="dt_apres2">Data Final</label>
-      <input type="text" class="form-control date" id="dt_apres2" name="dt_apres2" autocomplete="off" autocomplete="off">
+        <div class="input-group">
+           <input type="text" class="form-control datepicker" placeholder="dd/mm/aaaa" name="dt_apres2" id="dt_apres2" data-provide="datepicker" data-date-autoclose="true" autocomplete="off">
+           <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
+        </div>
   </div>
-    <script>
-
-        $('#dt_apres').datepicker({
-            locale: 'pt-br',
-            icons: {rightIcon: '<i class="fa fa-fw fa-calendar-alt"></i>'},
-            format: 'dd/mm/yyyy',
-            uiLibrary: 'bootstrap4',
-            iconsLibrary: 'fontawesome',
-            maxDate: function () {
-                return $('#dt_apres2').val();
-            }
-        });
-        $('#dt_apres2').datepicker({
-            locale: 'pt-br',
-            icons: {rightIcon: '<i class="fa fa-fw fa-calendar-alt"></i>'},
-            format: 'dd/mm/yyyy',
-            uiLibrary: 'bootstrap4',
-            iconsLibrary: 'fontawesome',
-            minDate: function () {
-                return $('#dt_apres').val();
-            }
-        });
-    </script> 
     <div class="col-12 col-sm-6 col-md-6 col-lg-3 mb-3">
        <label class="form-label d-block">Tipo de Protocolo</label>
        <div class="btn-group-toggle" data-bs-toggle="buttons">
@@ -196,7 +119,7 @@ $(document).ready(function(){
      </div>
     <div class="col-12 col-sm-6 mb-3">
         <label class="form-label" for="hdn_cod_autor">Autoria</label>
-        <select id="hdn_cod_autor" name="hdn_cod_autor" class="form-control selectpicker show-tick" data-size="6" data-live-search="true" title="Todos" data-header="Pesquisar Autor">
+        <select id="hdn_cod_autor" name="hdn_cod_autor" class="form-select" data-size="6" data-live-search="true" title="Todos" data-header="Pesquisar Autor">
            <option value="">Todos</option>
            <dtml-in expr="zsql.autor_obter_zsql(ind_excluido=0)">
                 <option value="<dtml-var cod_autor>"><dtml-var nom_autor_join></option>
@@ -215,4 +138,83 @@ $(document).ready(function(){
 </div>
 
 <dtml-var js_slot>
+
+<script>
+
+(function ($) {
+  $(function () {
+    document.onkeypress = function (event) {
+      var form = pesq_avancada_form;
+      if (event.keyCode === 13) {
+        form.submit();
+      }
+    };
+  });
+}(jQuery));
+
+  $(document).ready(function() {
+    var clicked = false;
+    $("#search-btn").on("click", function(event) {
+      if (clicked) {
+        event.preventDefault();
+        return;
+      }
+      clicked = true;
+      var $this = $(this);
+      $this.html("Pesquisando...")
+      $this.addClass('disabled');
+      setTimeout(function() {
+        clicked = false;
+        $this.html("Pesquisar")
+        $this.removeClass('disabled');
+      }, 3000);
+    });
+  });
+
+function protocolo_criticar(form){  
+
+  var form = document.pesq_avancada_form;
+
+  if (form.dt_apres.value != "" && !IsValidDate(form.dt_apres.value)) {
+    bootstrap.showModal({title: "Mensagem do Sistema", body: "Digite uma data inicial válida!"});
+    return false;
+  } 
+
+  if (form.dt_apres2.value != "" && !IsValidDate(form.dt_apres2.value)) {
+    bootstrap.showModal({title: "Mensagem do Sistema", body: "Digite uma data final válida!"});
+    return false;
+  } 
+
+  form.submit();
+}
+
+$(document).ready(function(){
+  $('input:radio[name="rad_tip_processo"]').change(function(){
+             if($(this).val()=="0")
+             {
+               $("#divAdm").show();
+               $("#divLeg").hide();
+               $('#lst_tip_materia').val(function() {
+                  return this.defaultValue;
+               });
+             }
+             else if($(this).val()=="1")
+             {
+                 $("#divLeg").show();
+                 $("#divAdm").hide();
+                 $('#lst_tip_documento').val(function() {
+                    return this.defaultValue;
+                 });
+                 $('#txa_txt_interessado').val(function() {
+                    return this.defaultValue;
+                 });
+             }
+             else
+             {
+                 $("#divLeg").hide();
+                 $("#divAdm").hide();
+             }
+    });
+  });
+</script>
 <dtml-var footer_html>

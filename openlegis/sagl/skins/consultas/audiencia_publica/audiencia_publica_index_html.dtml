@@ -152,7 +152,7 @@ inicio_sessao=<dtml-var dat_inicio_sessao missing>&num_legislatura=<dtml-var num
             </dtml-in>
           </div>
        </div>
-       <div class="input-group">
+       <div class="btn-group btn-group-sm">
                  <dtml-let id_roteiro="str(cod_sessao_plen)+'_roteiro_sessao.pdf'">
                     <dtml-if "hasattr(sapl_documentos.pauta_sessao,id_roteiro)">
                       <dtml-let roteiro="getattr(sapl_documentos.pauta_sessao,id_roteiro).absolute_url">
@@ -165,11 +165,11 @@ inicio_sessao=<dtml-var dat_inicio_sessao missing>&num_legislatura=<dtml-var num
                  <dtml-let id_pauta_completa="str(cod_sessao_plen)+'_pauta_completa.pdf'">   
                    <dtml-if "hasattr(sapl_documentos.pauta_sessao,id_pauta_completa)">
                       <dtml-let pauta_completa="getattr(sapl_documentos.pauta_sessao,id_pauta_completa).absolute_url">
-                        <a class="btn btn-light" href="<dtml-var pauta_completa>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fas fa-file-pdf"></i> <span class="">Pauta</span></a>
+                        <a class="btn btn-primary" href="<dtml-var pauta_completa>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fas fa-file-pdf"></i> <span class="">Pauta</span></a>
                       </dtml-let>               
                    <dtml-elif "hasattr(sapl_documentos.pauta_sessao,id_pauta)">
                       <dtml-let pauta="getattr(sapl_documentos.pauta_sessao,id_pauta).absolute_url">
-                        <a class="btn btn-lightk" href="<dtml-var pauta>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fas fa-file-pdf"></i> <span class="">Pauta</span></a>
+                        <a class="btn btn-primary" href="<dtml-var pauta>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fas fa-file-pdf"></i> <span class="">Pauta</span></a>
                       </dtml-let>
                   </dtml-if>
                  </dtml-let>  
@@ -177,12 +177,12 @@ inicio_sessao=<dtml-var dat_inicio_sessao missing>&num_legislatura=<dtml-var num
                  <dtml-let id_ata="str(cod_sessao_plen)+'_ata_sessao.pdf'">
                    <dtml-if "hasattr(sapl_documentos.ata_sessao,id_ata)">
                       <dtml-let ata="getattr(sapl_documentos.ata_sessao,id_ata).absolute_url">
-                           <a target="_blank" href="<dtml-var ata>?<dtml-var expr="ZopeTime().timeTime()">" class="btn btn-light"><i class="fa fa-fw fa-file-pdf"></i>Ata</a>    
+                           <a target="_blank" href="<dtml-var ata>?<dtml-var expr="ZopeTime().timeTime()">" class="btn btn-primary"><i class="fa fa-fw fa-file-pdf"></i>Ata</a>    
                        </dtml-let>
                    </dtml-if>
                  </dtml-let>
                  <dtml-if url_video>
-                    <a target="_blank" href="#" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Reprodução de Vídeo" data-src="<dtml-var url_video>" class="btn btn-light"><i class="fab fa-fw fa-youtube"></i>Vídeo</a>       
+                    <a target="_blank" href="#" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Reprodução de Vídeo" data-src="<dtml-var url_video>" class="btn btn-primary"><i class="fab fa-fw fa-youtube"></i>Vídeo</a>       
                  </dtml-if>
        </div>       
      </li>

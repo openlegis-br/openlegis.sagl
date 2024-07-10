@@ -4,14 +4,14 @@
    <dtml-call "REQUEST.set('rad_tip_processo', '')">
 </dtml-unless>
 
- <div class="row mb-2">
-      <div class="col-12 col-md-8 align-self-center">
+ <div class="row mb-3">
+      <div class="col-12 col-md-6 d-flex align-items-center">
         <h1 class="firstHeading font-size-18">Pesquisa de Protocolos</h1>
       </div>
-      <div class="col-12 col-md-4 text-start text-end">
+      <div class="col-12 col-md-6 text-start text-md-end">
        <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Protocolo'])">
          <div class="btn-group d-print-none ">
-           <a class="btn btn-primary" href="<dtml-var portal_url>/consultas/protocolo" ><i class="fa fa-fw fa-search"></i> Nova Pesquisa</a>         
+           <a class="btn btn-primary" href="<dtml-var portal_url>/consultas/protocolo" ><i class="fa fa-fw fa-search"></i> Pesquisar</a>         
            <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
              <i class="fa fa-fw fa-plus"></i> Incluir Protocolo
            </button>
@@ -50,8 +50,8 @@
          <i class="far fa-list-alt"></i> Resultado: <dtml-var sequence-length> protocolo<dtml-if expr="_['sequence-length'] > 1">s</dtml-if>
       </div>
       <div class="col-4 col-sm-3 text-end align-self-center">
-         <div class="dropdown d-print-none">
-           <button class="btn btn-light dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+         <div class="btn-group d-print-none">
+           <button class="btn btn-light" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
              <i class="fas fa-file-export"></i> Gerar
            </button>
            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
@@ -73,7 +73,7 @@
         <dtml-else>
            <a href="#">
         </dtml-if>
-        <span class="titulo"><b>PROTOCOLO Nº <dtml-var num_protocolo>/<dtml-var ano_protocolo></b></span></a>
+        <span class="h6 font-size-14 font-weight-bold text-uppercase mb-1">PROTOCOLO Nº <dtml-var num_protocolo>/<dtml-var ano_protocolo></span></a>
         <dtml-if expr="ind_anulado==0">
            <a href="" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Etiqueta de Protocolo" data-src="<dtml-var portal_url>/relatorios/pdf_etiqueta_protocolo_preparar_pysc?rad_tip_protocolo=&txt_cod_protocolo=<dtml-var cod_protocolo>&txt_num_protocolo=<dtml-var num_protocolo>&txt_ano_protocolo=<dtml-var ano_protocolo>&dt_apres=&dt_apres2=&rad_tip_processo=&lst_tip_documento=&lst_tip_materia=&txt_assunto=&txa_txt_interessado=&hdn_cod_autor="><i class="fa fa-fw fa-barcode"></i><span class="d-none">PDF</span></a>
         </dtml-if>

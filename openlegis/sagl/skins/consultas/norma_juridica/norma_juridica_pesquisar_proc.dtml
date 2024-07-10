@@ -95,7 +95,7 @@
  <div class="row">
     <div class="col-12">
       <dtml-if expr="zsql.materia_obter_zsql(cod_materia=cod_materia,ind_excluido=0)">
-        <b>Matéria:</b>
+        <b>Matéria Originária:</b>
         <dtml-in expr="zsql.materia_obter_zsql(cod_materia=cod_materia,ind_excluido=0)">
             <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia'])">
                <a href="<dtml-var portal_url>/cadastros/materia/materia_mostrar_proc?cod_materia=<dtml-var cod_materia>">
@@ -103,9 +103,8 @@
                <a href="<dtml-var portal_url>/consultas/materia/materia_mostrar_proc?cod_materia=<dtml-var cod_materia>">
             </dtml-if>
             <b><dtml-var sgl_tipo_materia> <dtml-var num_ident_basica missing>/<dtml-var ano_ident_basica missing></b></a>
-            - 
             <dtml-in expr="zsql.autoria_obter_zsql(cod_materia=cod_materia)">
-               <dtml-var nom_autor_join><dtml-unless sequence-end>,</dtml-unless>
+               <dtml-if sequence-start> - <strong>Autoria</strong>: </dtml-if> <dtml-var nom_autor_join><dtml-unless sequence-end>,</dtml-unless>
             </dtml-in>
         </dtml-in>
       </dtml-if>
@@ -126,21 +125,16 @@
 </dtml-if>
 
 <dtml-if expr="zsql.vinculo_norma_juridica_referentes_obter_zsql(cod_norma=cod_norma) or zsql.vinculo_norma_juridica_referidas_obter_zsql(cod_norma=cod_norma)">
- <div class="row">
- <div class="col-12">
-  <div id="accordion" class="ac<dtml-var cod_norma>">
-    <div class="card border-0">
-        <p class="h5 mb-0">
-          <a href="#" class="d-block text-start collapsed mb-1" data-bs-toggle="collapse" data-target="#collapseTram<dtml-var cod_norma>" aria-expanded="false" aria-controls="collapseTram<dtml-var cod_norma>"> 
-            <i class="fa float-right pt-1 align-self-center" aria-hidden="true"></i>
-             <span class="h6 font-weight-bold">Normas Relacionadas</span>
-          </a>
-        </p>
-      <div id="collapseTram<dtml-var cod_norma>" class="collapse" aria-labelledby="headingOne" data-parent=".ac<dtml-var cod_norma>">
-        <div class="">
+
+<div class="row">
+<div class=col-12">
+  <a class="fw-bolder" data-bs-toggle="collapse" href="#collapse<dtml-var cod_norma>" role="button" aria-expanded="false" aria-controls="collapse<dtml-var cod_norma>"><i class="mdi mdi-plus me-1"></i> Normas Relacionadas</a>
+</div>
+<div class="collapse" id="collapse<dtml-var cod_norma>">
+  <div class="card-body py-0">
        <dtml-in expr="zsql.vinculo_norma_juridica_referidas_obter_zsql(cod_norma=cod_norma)">
          <dtml-if sequence-start>
-            <ul>
+            <ul class="list-unstyled">
               <li><b>Vinculação Ativa<dtml-if expr="_['sequence-length'] > 0"> [<dtml-var sequence-length>]</dtml-if>:</b></li>   
          </dtml-if> 
               <li>
@@ -150,14 +144,14 @@
                 <dtml-else>
                   <a href="<dtml-var portal_url>/consultas/norma_juridica/norma_juridica_mostrar_proc?cod_norma=<dtml-var cod_norma_referida>">
                 </dtml-if>
-                  <b><dtml-var des_tipo_norma> nº <dtml-var num_norma>, de <dtml-var dat_norma></b>
+                  <dtml-var des_tipo_norma> nº <dtml-var num_norma>, de <dtml-var dat_norma>
                 </a>
               </li>
            <dtml-if sequence-end></ul></dtml-if>
        </dtml-in>
        <dtml-in expr="zsql.vinculo_norma_juridica_referentes_obter_zsql(cod_norma=cod_norma)">
          <dtml-if sequence-start>
-            <ul>
+            <ul class="list-unstyled">
               <li><b>Vinculação Passiva<dtml-if expr="_['sequence-length'] > 0"> [<dtml-var sequence-length>]</dtml-if>:</b></li>
          </dtml-if>
               <li>
@@ -167,15 +161,14 @@
                 <dtml-else>
                   <a href="<dtml-var portal_url>/consultas/norma_juridica/norma_juridica_mostrar_proc?cod_norma=<dtml-var cod_norma_referente>">
                 </dtml-if>
-                  <b><dtml-var des_tipo_norma> nº <dtml-var num_norma>, de <dtml-var dat_norma></b>
+                  <dtml-var des_tipo_norma> nº <dtml-var num_norma>, de <dtml-var dat_norma>
                 </a>
               </li>
            <dtml-if sequence-end></ul></dtml-if>
-       </dtml-in>        
-        </div>
-      </div>
-    </div>
-</div>    
+       </dtml-in>  
+  </div>
+</div>
+</div>
 </dtml-if>
 
  <dtml-in expr="zsql.arquivo_recipiente_listar_conteudo_zsql(cod_norma=cod_norma)" mapping>
@@ -187,7 +180,7 @@
  <dtml-call expr="REQUEST.set('texto_odt', str(cod_norma)+'_texto_integral.odt')">                   
 <dtml-if "hasattr(sapl_documentos.norma_juridica,texto_original) or hasattr(sapl_documentos.norma_juridica,texto_consolidado)">
  <div class="row d-print-none">
-    <div class="col-12 text-start mt-1"> 
+    <div class="col-12 text-start mt-2"> 
      <div class="btn-group btn-group-sm">
       <dtml-if "hasattr(sapl_documentos.norma_juridica,texto_original)">
           <a class="btn btn-primary" href="<dtml-var portal_url>/consultas/norma_juridica/pasta_digital/?cod_norma=<dtml-var cod_norma>&action=pasta" target="_blank"><i class="far fa-folder-open"></i> Pasta Digital</a>

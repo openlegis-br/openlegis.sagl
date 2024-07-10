@@ -11,37 +11,37 @@ function vinculado_criticar(){
     var regexp_digitos = /\D+/;
 
     if (form.lst_tip_documento.selectedIndex==''){
-       alert("O tipo de documento deve ser selecionado!");
+       alert("O tipo de processo deve ser selecionado!");
        form.lst_tip_documento.focus();
        return false;
     }
 
     if (form.txt_num_documento.value == "") {
-       alert("O número do documento deve ser preenchido!");
+       alert("O número do processo deve ser preenchido!");
        form.txt_num_documento.focus();
        return false;
     }
 
     if (regexp_digitos.test(form.txt_num_documento.value)) {
-       alert("O número do documento deve ser um número natural!");
+       alert("O número do processo deve ser um número natural!");
        form.txt_num_documento.focus();
        return false;
     }
 
     if (form.txt_ano_documento.value == "") {
-       alert("O ano do documento deve ser preenchido!");
+       alert("O ano do processo deve ser preenchido!");
        form.txt_ano_documento.focus();
        return false;
     }
 
     if (regexp_digitos.test(form.txt_ano_documento.value)) {
-       alert("O ano do documento deve ser um número natural!");
+       alert("O ano do processo deve ser um número natural!");
        form.txt_ano_documento.focus();
        return false;
     }
 
     if (form.hdn_cod_documento_vinculado.value == "") {
-       alert("Dados do documento obtidos com sucesso! Verifique se a ementa corresponde ao documento informado.");
+       alert("Dados do processo obtidos com sucesso! Verifique se a ementa corresponde ao processo informado.");
        form.lst_tip_documento.focus();
        return false;
     }
@@ -74,7 +74,7 @@ function vinculado_criticar(){
 
 </script>
 
-<h1 class="firstHeading font-size-18">Documento Vinculado</h1>
+<h1 class="firstHeading font-size-18">Processo Vinculado</h1>
 
 <form name="documento_vinculado_form" method="post" action="documento_vinculado_salvar_proc">  
 
@@ -84,7 +84,7 @@ function vinculado_criticar(){
 
   <div class="row">
      <div class="col-12 col-sm-6 mb-3">
-           <label class="form-label" for="lst_tip_documento" class="required">Tipo de Documento</label>
+           <label class="form-label required" for="lst_tip_documento">Tipo de Processo</label>
            <select class="form-select" name="lst_tip_documento" id="lst_tip_documento" onChange="ementa_buscar(document.documento_vinculado_form)" required <dtml-if cod_vinculo>disabled</dtml-if>>
             <option>
               <dtml-in expr="zsql.tipo_documento_administrativo_obter_zsql(tip_natureza='P', ind_excluido=0)">
@@ -100,11 +100,11 @@ function vinculado_criticar(){
            </select>     
      </div>
      <div class="col-6 col-sm-3 mb-3">
-         <label class="form-label" for="txt_num_documento" class="required">Número</label>
+         <label class="form-label required" for="txt_num_documento">Número</label>
          <input class="form-control number" type="number" name="txt_num_documento" id="txt_num_documento" value="<dtml-var num_documento_sel missing>" onChange="ementa_buscar(document.documento_vinculado_form)" <dtml-if cod_vinculo>disabled</dtml-if>>
      </div>
      <div class="col-6 col-sm-3 mb-3">
-         <label class="form-label" for="txt_ano_documento" class="required">Ano</label>
+         <label class="form-label required" for="txt_ano_documento">Ano</label>
          <input class="form-control year" type="number" name="txt_ano_documento" id="txt_ano_documento" value="<dtml-var ano_documento_sel missing>" onChange="ementa_buscar(document.documento_vinculado_form)" <dtml-if cod_vinculo>disabled</dtml-if>>
      </div>
   </div>
@@ -118,30 +118,23 @@ function vinculado_criticar(){
 
   <div class="row">
      <div class="col-12 mb-3">
-          <label class="form-label" for="txt_dat_vinculacao" class="required">Data de Vinculação</label>
+          <label class="form-label required" for="txt_dat_vinculacao">Data de Vinculação</label>
           <dtml-unless dat_vinculacao>
              <dtml-call expr="REQUEST.set('dat_vinculacao', DateTime().strftime('%d/%m/%Y %H:%M:%S'))">
           </dtml-unless>
-          <input class="form-control" type="text" name="txt_dat_vinculacao" id ="txt_dat_vinculacao" value="<dtml-var dat_vinculacao missing>" required <dtml-if cod_vinculo>disabled</dtml-if> /> 
+          <div class="input-group">
+            <input class="form-control" type="text" name="txt_dat_vinculacao" id="txt_dat_vinculacao" value="<dtml-var dat_vinculacao missing>" required <dtml-if cod_vinculo>disabled</dtml-if> />
+           <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
+          </div>
           <div class="invalid-feedback">
              Este campo é obrigatório!
           </div>
-     <script>
-        $('#txt_dat_vinculacao').datetimepicker({
-            locale: 'pt-br',
-            format: 'dd/mm/yyyy HH:MM:SS',
-            uiLibrary: 'bootstrap4',
-            modal: true,
-            footer: true,
-            showOtherMonths: true, calendarWeeks: true
-        });
-     </script>
      </div>
   </div>
 
- <div class="text-start">
+ <div class="btn-group text-start">
     <dtml-unless cod_vinculo>
-      <input class="btn btn-primary" type="button" name="button" value="Incluir" onClick="vinculado_criticar(document.documento_vinculado_form)"/>
+      <input class="btn btn-primary" type="button" name="button" value="Salvar" onClick="vinculado_criticar(document.documento_vinculado_form)"/>
     </dtml-unless>
     <dtml-if cod_vinculo>
       <a class="btn btn-primary" target="_blank" href="<dtml-var portal_url>/cadastros/documento_administrativo/documento_administrativo_mostrar_proc?cod_documento=<dtml-var hdn_cod_documento_vinculado>">Visualizar</a>
@@ -160,9 +153,17 @@ function vinculado_criticar(){
     
 </form>
 
-<script>
-autosize(document.querySelectorAll('textarea'));
-</script>
-
+<link href="<dtml-var portal_url>/assets/libs/bootstrap-datetimepicker/css/bootstrap-datetimepicker.min.css" rel="stylesheet">
 <dtml-var js_slot>
+<script src="<dtml-var portal_url>/assets/libs/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js"></script>
+<script src="<dtml-var portal_url>/assets/libs/bootstrap-datetimepicker/locales/bootstrap-datetimepicker.pt-BR.js"></script>
+ <script>
+    $('#txt_dat_vinculacao').datetimepicker({
+        language: 'pt-BR',
+        formatViewType:'datetime',
+        format: 'dd/mm/yyyy hh:ii:ss',
+        todayHighlight:true,
+        minuteStep: 1
+    });
+ </script>
 <dtml-var footer_html>

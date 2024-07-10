@@ -1,71 +1,9 @@
-<script src="<dtml-var portal_url>/js/moment.min.js"></script>
-<script src="<dtml-var portal_url>/js/datetime-moment.js"></script>
-<script>
-$(document).ready(function() {
-    $.fn.dataTable.moment( 'DD/MM/YYYY HH:mm:ss');    //Formatação com Hora
-    $.fn.dataTable.moment('DD/MM/YYYY');    //Formatação sem Hora
-
-    $('table.display').DataTable( {
-        "responsive": true,
-        "order": [[0, "desc"]],
-        "lengthMenu": [[10, 25, 50, 100], [10, 25, 50, 100]],
-        "lengthChange": true,
-        "buttons": [
-            {
-                extend: 'collection',
-                text: 'Exportar',
-                buttons: [ 
-                           {
-                             extend:    'excelHtml5',
-                             text:      '<i class="far fa-file-excel"></i> Excel',
-                             titleAttr: 'PDF'
-                           },
-                           {
-                             extend:    'pdfHtml5',
-                             download: 'open',
-                             text:      '<i class="fa fa-file-adobe"></i> PDF',
-                             titleAttr: 'PDF'
-                           },
-                           {
-                             extend:    'print',
-                             text:      '<i class="fa fa-print"></i> Impressão',
-                             titleAttr: 'Impressão'
-                           },
-                         ],
-               className: '',
-               dropup: true,
-               autoClose: true,
-               fade: true
-
-            }
-        ],
-        "language": {
-          search: "Pesquisar:",
-          processing:     "Processando...",
-          loadingRecords: "Carregando...",
-          lengthMenu:     "Exibir _MENU_ registros por página",
-          info:           "Exibindo _START_ a _END_ de _TOTAL_ registros",
-          infoEmpty:      "Exibindo _START_ a _END_ de _TOTAL_ registros",
-          infoFiltered:   "(total de registros:_MAX_)",
-          emptyTable:     "Nenhum registro encontrado",
-          zeroRecords:     "Nenhum registro encontrado",
-          paginate: {
-            first:      "Primeiro",
-            previous:   "Anterior",
-            next:       "Próximo",
-            last:       "Último"
-          },
-        }
-    });
-});
-</script>
-
 <legend class="font-size-16">Tramitações</legend>
 
 <dtml-in expr="zsql.tramitacao_administrativo_obter_zsql(cod_documento=cod_documento)">
   <dtml-if sequence-start>
     <div class="table-responsive mb-2">
-    <table class="table display">
+    <table id="tramitacoes_table" class="table datatable">
      <thead>
       <tr>  
          <th width="15%">Data</th>
@@ -103,24 +41,24 @@ $(document).ready(function() {
         <dtml-call expr="REQUEST.set('pdf_assinado', str(cod_tramitacao)+'_tram_signed.pdf')">
         <dtml-if "hasattr(sapl_documentos.administrativo.tramitacao,pdf_assinado)">
            <dtml-let pdf_assinado="getattr(sapl_documentos.administrativo.tramitacao,pdf_assinado).absolute_url">
-              <a href="<dtml-var pdf_assinado>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fas fa-certificate" style="font-size: 21px;"></i><span class="d-none">PDF</span>
+              <a href="<dtml-var pdf_assinado>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fas fa-certificate"></i><span class="d-none">PDF</span>
            </dtml-let>
         <dtml-elif expr="zsql.assinatura_documento_obter_zsql(codigo=cod_tramitacao,tipo_doc='tramitacao_adm', ind_assinado=1)">
            <dtml-in expr="zsql.assinatura_documento_obter_zsql(codigo=cod_tramitacao,tipo_doc='tramitacao_adm', ind_assinado=1, ind_prim_assinatura=1)"> 
              <dtml-if "hasattr(sapl_documentos.administrativo.tramitacao,pdf)">
                <dtml-let pdf="getattr(sapl_documentos.administrativo.tramitacao,pdf).absolute_url">
-                  <a href="<dtml-var pdf>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fas fa-certificate" style="font-size: 21px;"></i><span class="d-none">PDF</span></a>
+                  <a href="<dtml-var pdf>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fas fa-certificate"></i><span class="d-none">PDF</span></a>
                </dtml-let>
              <dtml-else>             
-                <a href="<dtml-var portal_url>/sapl_documentos/documentos_assinados/<dtml-var cod_assinatura_doc>.pdf?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fas fa-certificate" style="font-size: 21px;"></i><span class="d-none">PDF</span>
+                <a href="<dtml-var portal_url>/sapl_documentos/documentos_assinados/<dtml-var cod_assinatura_doc>.pdf?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fas fa-certificate"></i><span class="d-none">PDF</span>
              </dtml-if>
            </dtml-in>        
         <dtml-elif "hasattr(sapl_documentos.administrativo.tramitacao,pdf)">
            <dtml-let pdf="getattr(sapl_documentos.administrativo.tramitacao,pdf).absolute_url">
-              <a href="<dtml-var pdf>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fa fa-file-pdf" style="font-size: 21px;"></i><span class="d-none">PDF</span></a>
+              <a href="<dtml-var pdf>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fa fa-file-pdf"></i><span class="d-none">PDF</span></a>
            </dtml-let>
         <dtml-else>
-           <i class="fa fa-file-pdf" style="font-size: 21px; color: #e9e9e9"></i>                   
+           <i class="fa fa-file-pdf" style="color: #e9e9e9"></i>                   
         </dtml-if> 
          </td>
       </tr>
@@ -133,5 +71,5 @@ $(document).ready(function() {
 </dtml-in>
 
   <div class="text-start">
-     <button type="button" class="btn btn-primary d-print-none" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Cadastro de Tramitação" data-src="tramitacao/tramitacao_form?cod_documento=<dtml-var cod_documento>&modal=1">Incluir Tramitação</button> 
+     <button type="button" class="btn btn-light d-print-none" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Cadastro de Tramitação" data-src="tramitacao/tramitacao_form?cod_documento=<dtml-var cod_documento>&modal=1">Incluir Tramitação</button> 
   </div>

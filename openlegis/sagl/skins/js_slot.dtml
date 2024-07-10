@@ -105,6 +105,8 @@
 <script src="<dtml-var portal_url>/assets/libs/datatables.net-buttons/js/buttons.html5.min.js"></script>
 <script src="<dtml-var portal_url>/assets/libs/datatables.net-buttons/js/buttons.print.min.js"></script>
 <script src="<dtml-var portal_url>/assets/libs/datatables.net-buttons/js/buttons.colVis.min.js"></script>
+<script src="<dtml-var portal_url>/js/moment.min.js"></script>
+<script src="<dtml-var portal_url>/js/datetime-moment.js"></script>
 <!-- Responsive examples -->
 <script src="<dtml-var portal_url>/assets/libs/datatables.net-responsive/js/dataTables.responsive.min.js"></script>
 
@@ -129,7 +131,6 @@
     </div>
   </div>
 </div>
-
 
 <dtml-let isAnon="portal_membership.isAnonymousUser()">
 <dtml-if expr="isAnon">
@@ -212,10 +213,12 @@
         });
 </script>
 <dtml-else>
+  <dtml-comment>
    <dtml-if expr="not REQUEST.get('modal', '')">
      <script src="<dtml-var portal_url>/assets/libs/@curiosityx/bootstrap-session-timeout/index.js"></script>
      <script src="<dtml-var portal_url>/assets/js/pages/session-timeout.init.js"></script>
    </dtml-if>
+  </dtml-comment>
 </dtml-if>
 </dtml-let>
 

@@ -43,12 +43,12 @@ function vinculo_norma_juridica_excluir() {
 
 </script>
 
-<h1>Cadastro de Norma Relacionada</h1>
+<h1 class="firstHeading font-size-18">Cadastro de Norma Relacionada</h1>
 
 <form name="vinculo_norma_juridica_form" method="post" action="vinculo_norma_juridica_salvar_proc">
    <table class="table table-borderless">
     <tr>
-       <td colspan="3"><label class="form-label" for="lst_tip_vinculo" class="required">Natureza do Relacionamento</label>
+       <td colspan="3"><label class="form-label required" for="lst_tip_vinculo">Natureza do Relacionamento</label>
                 <select class="form-select" id="lst_tip_vinculo" name="lst_tip_vinculo">
                   <option value=""></option>
                     <dtml-in expr="zsql.tipo_vinculo_norma_obter_zsql(ind_excluido=0)">
@@ -62,7 +62,7 @@ function vinculo_norma_juridica_excluir() {
       </td>
       </tr>
              <tr>
-                <td><label class="form-label" for="lst_tip_norma" class="required">Tipo Norma</label>
+                <td><label class="form-label required" for="lst_tip_norma">Tipo Norma</label>
               <select class="form-select" id="lst_tip_norma" name="lst_tip_norma">
                <option> 
                <dtml-in expr="zsql.tipo_norma_juridica_obter_zsql(ind_excluido=0)">
@@ -75,10 +75,10 @@ function vinculo_norma_juridica_excluir() {
                </dtml-in>
               </select>
        </td>
-       <td><label class="form-label" for="txt_num_norma">Número</label>
+       <td><label class="form-label required" for="txt_num_norma">Número</label>
               <input class="form-control number" type="number" id="txt_num_norma" name="txt_num_norma" value="<dtml-var num_norma missing null="">">
        </td>
-       <td><label class="form-label" for="txt_ano_norma">Ano</label>
+       <td><label class="form-label required" for="txt_ano_norma">Ano</label>
              <input class="form-control year" type="number" id="txt_ano_norma" name="txt_ano_norma" value="<dtml-var ano_norma missing>">
        </td>
     </tr>
@@ -90,7 +90,7 @@ function vinculo_norma_juridica_excluir() {
     </tr>
   </table>
 
-  <div class="text-center">
+  <div class="btn-group ms-3">
     <input class="btn btn-primary" type="button" value="Salvar" onClick="campos_criticar(document.vinculo_norma_juridica_form)">
     <dtml-if cod_vinculo>
       <input class="btn btn-danger" type="button" value="Excluir" onClick="vinculo_norma_juridica_excluir(document.vinculo_norma_juridica_form)">
@@ -100,10 +100,6 @@ function vinculo_norma_juridica_excluir() {
  <input type="hidden" name="cod_vinculo" value="<dtml-var cod_vinculo missing>">
  <input type="hidden" name="modal" value="1"> 
 </form>
-
-<script>
-autosize(document.querySelectorAll('textarea'));
-</script>
 
 <dtml-var js_slot>
 <dtml-var footer_html>

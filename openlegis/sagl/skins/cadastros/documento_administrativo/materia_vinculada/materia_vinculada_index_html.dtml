@@ -1,48 +1,3 @@
-<style>
-.error {background:#f67280};
-</style>
-
-<script>
-
-$(document).ready(function () {
-    $(document).on('click', '#master_table .add', function () {
-
-        var row = $(this).closest('tr');
-        var clone = row.clone();
-        var tr = clone.closest('tr');
-        tr.find('input[type=text]').val('');
-        $(this).closest('tr').after(clone);
-        var $span = $("#master_table tr");
-    });
-
-    $(document).on('click', '#master_table .removeRow', function () {
-        if ($('#master_table .add').length > 1) {
-            $(this).closest('tr').remove();
-        }
-
-    });
-
-});
-
-function myFunction() {
-    var form=$("#master_table").closest('form')
-    $(form.prop('elements')).each(function(){
-        var missing= $(this).val()===""
-        $(this).parent().toggleClass('error',missing)
-    })
-    return form.find(".error").length==0
-}
-
-
- function materia_excluir(cod_vinculo) {
-    var form=document.materia_vinculada_form;       
-    if (confirm("Deseja realmente excluir o vínculo com a matéria?")) {
-       location.href="<dtml-var absolute_url>/materia_vinculada_excluir_proc?cod_vinculo=" + cod_vinculo + "&cod_documento="+form.hdn_cod_documento.value+"&hdn_url=<dtml-var ACTUAL_URL>?cod_documento=<dtml-var cod_documento>#materias";
-    }
-  } 
-</script>
-
-
 <legend class="font-size-16">Matérias Vinculadas</legend>
 
   <dtml-in expr="zsql.documento_administrativo_materia_obter_zsql(cod_documento=cod_documento)">
@@ -72,7 +27,8 @@ function myFunction() {
               - <dtml-var txt_ementa>
            </td>
            <td width="15%">
-                <a class="btn btn-danger" href="javascript:materia_excluir(<dtml-var cod_vinculo>)"><i class="fas fa-fw fa-trash"></i>Excluir</a>
+           
+                <a class="btn btn-sm btn-danger" href="<dtml-var portal_url>/cadastros/documento_administrativo/materia_vinculada/materia_vinculada_excluir_proc?cod_vinculo=<dtml-var cod_vinculo>&cod_documento=<dtml-var cod_documento>&hdn_url=<dtml-var ACTUAL_URL>?cod_documento=<dtml-var cod_documento>#materias" data-confirm="Deseja realmente excluir o vínculo?"><i class="fas fa-fw fa-trash"></i>Excluir</a>
         </tr>
        </dtml-in>
     <dtml-if sequence-end>
@@ -87,8 +43,9 @@ function myFunction() {
     <table class="table" id="master_table">
         <tr>
             <td>
-                <select class="form-select form-control-sm" name="lst_tip_id_basica" id="lst_tip_id_basica">
-                  <option value="">Selecione o Tipo de Matéria</option>
+                <label class="form-label required" for="lst_tip_id_basica">Tipo de Matéria</label>
+                <select class="form-select form-select-sm" name="lst_tip_id_basica" id="lst_tip_id_basica" required>
+                  <option value=""></option>
                     <dtml-in expr="zsql.tipo_materia_legislativa_obter_zsql(tip_natureza='P', ind_excluido=0)">
                       <option value="<dtml-var tip_materia missing>"><dtml-var des_tipo_materia></option>
                     </dtml-in>
@@ -98,30 +55,26 @@ function myFunction() {
                 </div>
             </td>
             <td>
-                <input class="form-control form-control-sm number" type="number" name="txt_num_ident_basica" id="txt_num_ident_basica" size="5" value="<dtml-var num_ident_basica_sel missing>" placeholder="Número">
+                <label class="form-label required" for="txt_num_ident_basica">Número</label>
+                <input class="form-control form-control-sm" type="number" name="txt_num_ident_basica" id="txt_num_ident_basica" size="5" value="<dtml-var num_ident_basica_sel missing>" required>
                 <div class="invalid-feedback">
                   Este campo é obrigatório!
                 </div>                
             </td>
             <td>
-                <input class="form-control form-control-sm year" type="number" name="txt_ano_ident_basica" id="txt_ano_ident_basica" size="4" value="<dtml-var ano_ident_basica_sel missing>" placeholder="Ano">
+                <label class="form-label required" for="txt_ano_ident_basica">Número</label>
+                <input class="form-control form-control-sm" type="number" name="txt_ano_ident_basica" id="txt_ano_ident_basica" size="4" value="<dtml-var ano_ident_basica_sel missing>" required>
                 <div class="invalid-feedback">
                   Este campo é obrigatório!
                 </div>
             </td>
             <td>
-                <input type="button" name="addRow" class="add btn btn-primary" value='Adicionar' />
-                <input type="button" name="removeRow" class="removeRow btn btn-danger" value='Excluir' />
+                <label class="form-label d-block" for="submitForm">Ação</label>
+                <input id="submitForm" class="btn btn-sm btn-primary" type="submit" name="button" value="Salvar" />
             </td>
         </tr>
     </table>
    </div>
-
    <input type="hidden" name="hdn_cod_documento" value="<dtml-var cod_documento missing>" />
    <input type="hidden" name="hdn_url" value="<dtml-var ACTUAL_URL>?cod_documento=<dtml-var cod_documento>#materias" />
-
-   <div class="text-start">
-     <input class="btn btn-primary" type="submit" name="button" value="Incluir Vínculo" onclick="return myFunction()" />
-   </div>
-
 </form>

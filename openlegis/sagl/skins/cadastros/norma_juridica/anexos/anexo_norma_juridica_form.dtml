@@ -10,7 +10,7 @@
        return false;
     }
     if (form.file_nom_anexo.value == "") {
-       alert("Um arquivo deve ser selecionado como anexo!");
+       alert("Um arquivo deve ser selecionado!");
        form.file_nom_anexo.focus();
        return false;
     }
@@ -24,17 +24,18 @@
 
   </script>
 
+<h1 class="firstHeading font-size-18">Cadastro de Anexo</h1>
+
 <form name="anexo_norma_juridica_form" method="post" action="anexo_norma_juridica_salvar_proc" enctype="multipart/form-data">
-   <h1>Cadastro de Anexo</h1>
    <table class="table table-borderless">
     <tr>
-       <td><label class="form-label" for="txa_txt_descricao" class="required">Descrição</label>
+       <td><label class="form-label required" for="txa_txt_descricao">Descrição</label>
            <input class="form-control" type="text" id="txa_txt_descricao"  name="txa_txt_descricao" maxlength="200" <dtml-if cod_anexo>disabled</dtml-if> value="<dtml-var txt_descricao missing null="">">
       </td>
     </tr>
     <tr>
       <td>
-         <label class="form-label" for="file_nom_anexo" class="required d-block">Texto Integral</label>
+         <label class="form-label required d-block" for="file_nom_anexo">Arquivo</label>
            <dtml-if expr="_.has_key('cod_anexo')"> 
              <dtml-call expr="REQUEST.set('id_anexo', str(cod_norma)+'_anexo_'+ str(cod_anexo))">
              <dtml-if "hasattr(sapl_documentos.norma_juridica,id_anexo)">
@@ -45,13 +46,13 @@
                </dtml-let>
              </dtml-if>
            <dtml-else>
-              <input type="file" class="form-control-file" name="file_nom_anexo" id="file_nom_anexo">
+              <input type="file" class="form-control" name="file_nom_anexo" id="file_nom_anexo">
            </dtml-if>
       </td>
     </tr>
   </table>
 
-  <div class="text-center">
+  <div class="btn-group ms-3">
     <dtml-if cod_anexo>
       <input class="btn btn-danger" type="button" value="Excluir" onClick="anexo_norma_juridica_excluir()">
     <dtml-else>

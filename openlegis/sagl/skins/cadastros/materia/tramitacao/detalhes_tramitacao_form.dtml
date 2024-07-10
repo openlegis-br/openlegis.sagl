@@ -111,15 +111,15 @@
       <dtml-call expr="REQUEST.set('pdf', str(cod_tramitacao)+'_tram.pdf')">
       <dtml-call expr="REQUEST.set('pdf_assinado', str(cod_tramitacao)+'_tram_signed.pdf')">
       <dtml-if "hasattr(sapl_documentos.materia.tramitacao,pdf)"> 
-       <div class="btn-group" role="group" aria-label="tram_button">
+       <div class="btn-group btn-group-sm" role="group" aria-label="tram_button">
          <dtml-let pdf="getattr(sapl_documentos.materia.tramitacao,pdf).absolute_url">
-            <a class="btn btn-light" target="_blank" href="<dtml-var pdf>?<dtml-var expr="ZopeTime().timeTime()">">
+            <a class="btn btn-primary" target="_blank" href="<dtml-var pdf>?<dtml-var expr="ZopeTime().timeTime()">">
               <i class="far fa-file-pdf"></i> Visualizar
             </a>
          </dtml-let>
          <dtml-if "hasattr(sapl_documentos.materia.tramitacao,pdf) and sapl_documentos.props_sagl.restpki_access_token!=''">
             <dtml-if expr="int(cod_usuario_corrente)==int(cod_usuario_local)" >
-               <button type="button" class="btn btn-light" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Assinar Digitalmente" data-src="<dtml-var portal_url>/generico/assinador/pades-signature_html?codigo=<dtml-var cod_tramitacao>&tipo_doc=tramitacao&modal=1"><i class="fas fa-file-signature"></i> Assinar</button>
+               <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Assinar Digitalmente" data-src="<dtml-var portal_url>/generico/assinador/pades-signature_html?codigo=<dtml-var cod_tramitacao>&tipo_doc=tramitacao&modal=1"><i class="fas fa-file-signature"></i> Assinar</button>
             </dtml-if>
          </dtml-if>
         </div>
@@ -163,7 +163,7 @@ tinymce.init({
   ],
   toolbar: false,
   menubar: 'edit view insert format tools help',
-  content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }'
+  content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:13px }'
 });
 </script>
 <dtml-var footer_html>

@@ -5,7 +5,7 @@
 ##bind namespace=
 ##bind script=script
 ##bind subpath=traverse_subpath
-##parameters = cod_documento, tip_materia="", num_materia="", ano_materia=""
+##parameters = cod_documento, tip_materia, num_materia, ano_materia
 ##title=
 ##
 

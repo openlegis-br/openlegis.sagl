@@ -165,7 +165,7 @@
                  </dtml-in>
           </select>
        <dtml-elif expr="_.has_key('hdn_cod_tramitacao') and zsql.tramitacao_pesquisar_zsql(cod_materia=cod_materia)">
-          <select class="form-select" id="lst_cod_unid_tram_local" name="lst_cod_unid_tram_local" required>
+          <select class="select2 form-select" id="lst_cod_unid_tram_local" name="lst_cod_unid_tram_local" style="width:100%" required>
              <option value="0">Selecione</option>
              <dtml-in expr="zsql.tramitacao_obter_zsql(cod_materia=cod_materia, ind_ult_tramitacao=1)">
                  <dtml-call expr="REQUEST.set('cod_unid_tram', cod_unid_tram_local)">
@@ -178,7 +178,7 @@
                  </dtml-in>
           </select>
        <dtml-else>
-          <select class="form-select" id="lst_cod_unid_tram_local" name="lst_cod_unid_tram_local" required>
+          <select class="select2 form-select" id="lst_cod_unid_tram_local" name="lst_cod_unid_tram_local" style="width:100%" required>
              <option value="0">Selecione</option>
               <dtml-in expr="zsql.usuario_unid_tram_obter_zsql(cod_usuario=cod_usuario_corrente)">
                     <option 
@@ -280,7 +280,7 @@
       </select> 
     </div>
     <div class="col-6 col-md-3 mb-3">
-      <label class="form-label" for="txt_dat_fim_prazo">Data Fim de Prazo</label>
+      <label class="form-label" for="txt_dat_fim_prazo">Data de Fim de Prazo</label>
         <div class="input-group">
            <input type="text" class="form-control datepicker" placeholder="dd/mm/aaaa" name="txt_dat_fim_prazo" id="txt_dat_fim_prazo" data-provide="datepicker" data-date-autoclose="true" value="<dtml-var dat_fim_prazo missing null>" autocomplete="off" required>
            <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
@@ -379,7 +379,7 @@
     </div>
   </div>
 
-  <div class="text-start">
+  <div class="text-start btn-group">
     <input type="button" class="btn btn-primary" value="Salvar" onClick="tramitacao_criticar(document.tramitacao_form)" />
    <dtml-if cod_tramitacao>
       <input type="button" class="btn btn-danger" value="Excluir" onClick="tramitacao_excluir()" />

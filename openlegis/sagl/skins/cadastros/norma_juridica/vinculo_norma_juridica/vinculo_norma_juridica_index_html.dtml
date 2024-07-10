@@ -9,13 +9,10 @@
  </li>
 </ul>
 
-<form action=vinculo_norma_juridica_form method=post>
-<fieldset>
-
 <dtml-var norma_header missing>
+<legend class="font-size-16">Normas Relacionadas</legend>                   
 
-   <fieldset><legend class="font-size-16">Normas Relacionadas</legend>                   
-
+<form action=vinculo_norma_juridica_form method=post>
     <table class="table">
       <tr>  
          <th>Relacionamento</th>
@@ -37,7 +34,7 @@
          </td>
          <td>
             <a href="<dtml-var portal_url>/cadastros/norma_juridica/norma_juridica_mostrar_proc?cod_norma=<dtml-var cod_norma_referente>">
-            <dtml-var des_tipo_norma> <dtml-var num_norma>/<dtml-var ano_norma></a>
+            <dtml-var sgl_tipo_norma> <dtml-var num_norma>/<dtml-var ano_norma></a>
          </td>
          <td>
             <dtml-var dat_norma null="">
@@ -59,7 +56,7 @@
          </td>
          <td>
             <a href="<dtml-var portal_url>/cadastros/norma_juridica/norma_juridica_mostrar_proc?cod_norma=<dtml-var cod_norma_referida>">
-            <dtml-var des_tipo_norma> <dtml-var num_norma>/<dtml-var ano_norma></a>
+            <dtml-var sgl_tipo_norma> <dtml-var num_norma>/<dtml-var ano_norma></a>
          </td>
          <td>
             <dtml-var dat_norma null="">
@@ -79,7 +76,6 @@
     </td>
   </tr>
 <input type="hidden" name="cod_norma" value="<dtml-var cod_norma>">
-  </fieldset>
 </form>
 <dtml-var js_slot>
 <dtml-var footer_html>

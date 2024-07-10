@@ -98,7 +98,7 @@
     <a class="nav-link <dtml-unless cod_materia>disabled</dtml-unless>" id="votacao-tab" data-bs-toggle="tab" href="#votacao" role="tab" aria-controls="votacao" aria-selected="false">Votação</a>
   </li>
 </ul>
-<div class="tab-content bg-white" style="margin-top: -1px;">
+<div class="tab-content" style="margin-top: -1px;">
   <div class="tab-pane p-3 border fade show active" id="home">
 
 <form action="materia_salvar_proc" name="materia_form" method="post" enctype="multipart/form-data">
@@ -810,7 +810,6 @@
       if (form.txt_dat_apresentacao.value!="" && !IsValidDate(form.txt_dat_apresentacao.value)){
          alert("Digite uma data de apresentação válida!");
          form.txt_dat_apresentacao.focus();
-         form.txt_dat_apresentacao.select();
          return false;
       }
 
@@ -821,7 +820,6 @@
       if (ano != anoi){
          alert("O ano da data de apresentação deve corresponder ao ano da identificação básica!");
          form.txt_dat_apresentacao.focus();
-         form.txt_dat_apresentacao.select();
          return false;
       }
 
@@ -873,7 +871,7 @@
   function texto_pdf_gerar(){
       if (confirm("Confirma a geração do texto original em PDF?")) {
          location.href="<dtml-var portal_url>/modelo_proposicao/materia_gerar_pdf?cod_materia=<dtml-var cod_materia missing>";
-         setTimeout(function(){window.location.reload(true)},3000);
+         setTimeout(function(){window.location.reload(true)},2000);
          return true;
        }
   return;
@@ -889,7 +887,7 @@
 
       if ((lst_modelo.selectedIndex != 0) && confirm("Confirma a geração do texto original em ODT?")) {
          location.href="<dtml-var portal_url>/modelo_proposicao/materia?cod_materia=<dtml-var cod_materia missing>&modelo_proposicao="+lst_modelo.options[lst_modelo.selectedIndex].value;
-         setTimeout(function(){window.location.reload(true)},3000);
+         setTimeout(function(){window.location.reload(true)},2000);
          return false;
        }
          return;
@@ -898,7 +896,7 @@
   function redacao_final_pdf_gerar(){
       if (confirm("Confirma a geração da redação final em PDF?")) {
          location.href="<dtml-var portal_url>/modelo_proposicao/redacao_final_gerar_pdf?cod_materia=<dtml-var cod_materia missing>";
-         setTimeout(function(){window.location.reload(true)},3000);
+         setTimeout(function(){window.location.reload(true)},2000);
          return true;
        }
   return;
@@ -908,7 +906,7 @@
 
       if (confirm("Copiar conteúdo do texto original em ODT?")) {
          location.href="<dtml-var portal_url>/pysc/texto_original_materia_obter_pysc?cod_materia=<dtml-var cod_materia missing>";
-         setTimeout(function(){window.location.reload(true)},1500);
+         setTimeout(function(){window.location.reload(true)},2000);
          return true;
        }
          return;
@@ -918,7 +916,7 @@
 
       if (confirm("Copiar arquivo ODT da proposição?")) {
          location.href="<dtml-var portal_url>/pysc/proposicao_salvar_como_texto_integral_materia_pysc?cod_proposicao="+cod_proposicao+"&cod_materia=<dtml-var cod_materia missing>";
-         setTimeout(function(){window.location.reload(true)},1500);
+         setTimeout(function(){window.location.reload(true)},2000);
          return true;
        }
          return;
@@ -928,7 +926,7 @@
 
       if (confirm("Copiar e autuar o arquivo PDF da proposição?")) {
          location.href="<dtml-var portal_url>/modelo_proposicao/proposicao_autuar?cod_proposicao="+cod_proposicao;
-         setTimeout(function(){window.location.reload(true)},1500);
+         setTimeout(function(){window.location.reload(true)},2000);
          return true;
        }
          return;

@@ -66,6 +66,10 @@
                </dtml-in>
                <dtml-call expr="sapl_documentos.norma_juridica.manage_addFile(id=id_documento,file=pysc.upload_file(file=file_nom_arquivo, title=titulo))">            
             </dtml-if>
+            <dtml-if file_nom_arquivo_odt>
+               <dtml-call expr="REQUEST.set('id_odt', str(hdn_cod_norma)+'_texto_integral.odt')">
+               <dtml-call expr="sapl_documentos.norma_juridica.manage_addFile(id=id_odt,file=file_nom_arquivo_odt)"> 
+            </dtml-if>
             <dtml-if file_nom_arquivo_compilado>
                <dtml-call expr="REQUEST.set('id_compilado', str(hdn_cod_norma)+'_texto_consolidado.pdf')">
                <dtml-call expr="sapl_documentos.norma_juridica.manage_addFile(id=id_compilado,file=pysc.upload_file(file=file_nom_arquivo_compilado, title='Norma Compilada'))">              

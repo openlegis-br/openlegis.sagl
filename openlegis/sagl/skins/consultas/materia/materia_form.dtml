@@ -159,9 +159,9 @@
          <div class="col-12 mb-3">        
            <b>Norma Derivada: </b>
         <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia', 'Operador Norma'])">
-          <a href="<dtml-var portal_url>/cadastros/norma_juridica/norma_juridica_mostrar_proc?cod_norma=<dtml-var cod_norma>"><dtml-var des_norma> nº <dtml-var num_norma>/<dtml-var ano_norma></a>
+          <a href="<dtml-var portal_url>/cadastros/norma_juridica/norma_juridica_mostrar_proc?cod_norma=<dtml-var cod_norma>"><dtml-var sgl_norma>  <dtml-var num_norma>/<dtml-var ano_norma></a>
           <dtml-else>
-            <a href="<dtml-var portal_url>/consultas/norma_juridica/norma_juridica_mostrar_proc?cod_norma=<dtml-var cod_norma>"><dtml-var des_norma> nº <dtml-var num_norma>/<dtml-var ano_norma></a>
+            <a href="<dtml-var portal_url>/consultas/norma_juridica/norma_juridica_mostrar_proc?cod_norma=<dtml-var cod_norma>"><dtml-var sgl_norma> <dtml-var num_norma>/<dtml-var ano_norma></a>
           </dtml-if>
        </div>
      </div>
@@ -194,7 +194,7 @@
    <dtml-in expr="zsql.tramitacao_obter_zsql(cod_materia=cod_materia, ind_excluido=0)">
      <dtml-if sequence-start>
       <dtml-call expr="REQUEST.set('cod_ult_unidade', int(cod_unid_tram_dest))">
-      <div class="card mb-2">
+      <div class="card mb-3">
        <div class="card-body">
            <p class="card-text"><b>Último Local:</b> <dtml-var dat_tramitacao>
            <dtml-if cod_unid_tram_dest>
@@ -753,7 +753,6 @@
             <dtml-if sequence-start>
               <div class="col-md-10 offset-md-1">                     
                  <div class="container">
-
             </dtml-if>
 
              <!-- timeline item 1 -->
@@ -846,23 +845,20 @@
        <dtml-call expr="REQUEST.set('temArquivo', 1)">
     </dtml-in>
 
-    <dtml-if temArquivo> 
-      <div id="accordion" class="arquivo">
-        <div class="card mb-4">
-          <div class="card-header" id="headingOne">
-            <p class="h5 mb-0">
-              <a href="#" class="d-block text-start collapsed" data-bs-toggle="collapse" data-target="#collapseArquivo" aria-expanded="false" aria-controls="collapseArquivo"> 
-                <i class="fa float-right pt-1 align-self-center" aria-hidden="true"></i>
-                 <span class="h6 font-weight-bold">Arquivo Permanente</span>
-              </a>
-            </p>
-          </div>
-          <div id="collapseArquivo" class="collapse" aria-labelledby="headingOne" data-parent=".arquivo">
-            <div class="card-body"> 
+    <dtml-if temArquivo>
+      <div class="accordion accordion-flush accordion-plus-icon" id="accordionArq">
+         <div class="card mb-0 shadow">
+             <div class="accordion-header" id="headingArq">
+               <h5 class="my-0">
+                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseArq" aria-expanded="false" aria-controls="collapseArq">Arquivo Permanente</button>
+               </h5>
+             </div>
+             <div id="collapseAr" class="collapse" aria-labelledby="headingArq" data-bs-parent="#accordionArq">
+                 <div class="card-body">
             <dtml-in expr="zsql.arquivo_recipiente_listar_conteudo_zsql(cod_materia=cod_materia)" mapping>
                <dtml-if sequence-start>
                  <table class="table">
-                  <thead class="table-secondary">
+                  <thead class="table-light">
                    <tr>
                     <th width="20%">Recipiente</th>
                     <th width="20%">Data de Arquivamento</th>

@@ -1,4 +1,4 @@
-<legend class="font-size-16">Documentos Vinculados</legend>
+<legend class="font-size-16">Processos Vinculados</legend>
 
  <dtml-in expr="zsql.documento_administrativo_vinculado_obter_zsql(cod_documento_vinculante=cod_documento)">
     <dtml-if sequence-start>
@@ -12,7 +12,7 @@
       </dtml-if sequence-start>
          <tr> 
            <td>
-                 <a href="#" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Edição de Documento Vinculado" data-src="documento_vinculado/documento_vinculado_mostrar_proc?cod_documento=<dtml-var cod_documento>&cod_vinculo=<dtml-var cod_vinculo>&modal=1">             
+                 <a href="#" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Cadastro de Processo Vinculado" data-src="documento_vinculado/documento_vinculado_mostrar_proc?cod_documento=<dtml-var cod_documento>&cod_vinculo=<dtml-var cod_vinculo>&modal=1">             
                    <dtml-var sgl_tipo_documento_vinculado> nº <dtml-var num_documento_vinculado>/<dtml-var ano_documento_vinculado>
                  </a> - <dtml-var txt_interessado_vinculado> - <dtml-var txt_assunto_vinculado>
             </td>
@@ -25,10 +25,10 @@
      </fieldset>
     </dtml-if sequence-end>
    <dtml-else>
-       <p>Nenhum documento vinculado.</p></fieldset>
+       <p>Nenhum processo vinculado.</p></fieldset>
    </dtml-in>
 
-   <button type="button" class="btn btn-primary d-print-none mb-3" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Cadastro de Documento Vinculado" data-src="documento_vinculado/documento_vinculado_form?cod_documento=<dtml-var cod_documento>&modal=1">Incluir Vínculo</button>
+   <button type="button" class="btn btn-light d-print-none mb-3" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Cadastro de Documento Vinculado" data-src="documento_vinculado/documento_vinculado_form?cod_documento=<dtml-var cod_documento>&modal=1">Incluir Vínculo</button>
 
   <dtml-in expr="zsql.documento_administrativo_vinculado_obter_zsql(cod_documento_vinculado=cod_documento)">
     <dtml-if sequence-start>

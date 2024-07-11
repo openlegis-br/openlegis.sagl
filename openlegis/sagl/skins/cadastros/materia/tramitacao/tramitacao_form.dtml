@@ -288,14 +288,14 @@
     </div>  
     <div class="col-6 col-md-3 mb-3">
       <label class="form-label required d-block">Urgente ?</label>
-      <dtml-in expr="[(1,'Sim'),(0,'Não')]">
-         <div class="form-check form-check-inline">
-           <input class="form-check-input"  type="radio" id="rad<dtml-var expr="_['sequence-item'][0]">" name="rad_ind_urgencia" value="<dtml-var sequence-key>" 
-           <dtml-if expr="_.has_key('cod_tramitacao') and ind_urgencia==_['sequence-key']">checked=1</dtml-if>
-           <dtml-if expr="_['sequence-item']=='Não'">checked=1</dtml-if>/>
-             <label class="form-check-label" for="rad<dtml-var expr="_['sequence-item'][0]">"><dtml-var sequence-item></label>
-         </div>
-      </dtml-in>    
+      <dtml-in expr="[(0,'Não'), (1,'Sim')]">
+        <div class="form-check form-check-inline">            
+          <input class="form-check-input" type="radio" id="rad<dtml-var expr="_['sequence-key']">" name="rad_ind_urgencia" value="<dtml-var expr="_['sequence-key']">"
+           <dtml-if expr="_.has_key('cod_tramitacao') and ind_tramitacao==_['sequence-key']">checked</dtml-if>
+           <dtml-if expr="_['sequence-item']=='Não'">checked</dtml-if> />
+           <label class="form-check-label" for="rad<dtml-var expr="_['sequence-key']">"><dtml-var expr="_['sequence-item']"></label>
+        </div>
+      </dtml-in> 
     </div>    
   </div>
 

@@ -3,7 +3,7 @@
 <dtml-in expr="zsql.tramitacao_obter_zsql(cod_materia=cod_materia)">
   <dtml-if sequence-start>
     <div class="table-responsive">
-    <table id="tramitacoes_table" class="table datatable">
+    <table id="tramitacoes_table" class="table datatable w-100">
      <thead>
       <tr>  
          <th width="15%">Data</th>
@@ -14,7 +14,7 @@
       </tr>
      </thead>
     </dtml-if sequence-start>
-      <tr> 
+      <tr <dtml-if expr="ind_ult_tramitacao==1">class="bg-light"</dtml-if>> 
          <td>
             <a href="#" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Visualização de Tramitação" data-src="tramitacao/tramitacao_mostrar_proc?hdn_cod_tramitacao=<dtml-var cod_tramitacao>&cod_materia=<dtml-var cod_materia>&modal=1">  
               <dtml-var dat_tramitacao>

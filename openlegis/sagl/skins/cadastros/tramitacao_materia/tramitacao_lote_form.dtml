@@ -1,28 +1,33 @@
 <dtml-var header_html>
-
 <style>.display {font-size:90%}"></style>
-<h1 class="firstHeading font-size-18 mb-4">Tramitação de Matérias</h1>
-
+<h1 class="firstHeading font-size-18 mb-3">Tramitação de Processos</h1>
 <div class="row">
                         <div class="col-12">
                             <!-- Left sidebar -->
                             <div class="email-leftbar ps-0 pt-0">
-                                <div class="mail-list mt-1">
+                                <div class="mail-list mt-4 pb-3">
+                                    <h1 class="font-size-14 mt-2 mb-2">Processos Legislativos</h1>
                                     <a href="<dtml-var portal_url>/cadastros/tramitacao_materia/tramitacao_lote_form" class="active font-size-13"><i class="mdi mdi-inbox"></i> Caixa de Entrada <dtml-if expr="pysc.caixa_entrada_contar_pysc(cod_usuario=cod_usuario_corrente) > 0"><span class="ms-1">(<dtml-var expr="pysc.caixa_entrada_contar_pysc(cod_usuario=cod_usuario_corrente)">)</span></dtml-if></a>
                                     <a href="<dtml-var portal_url>/cadastros/tramitacao_materia/rascunhos_html" class="font-size-13"><i class="mdi mdi-file-outline"></i> Rascunhos <dtml-in expr="zsql.tramitacao_obter_zsql(cod_usuario_local=cod_usuario_corrente, ind_ult_tramitacao=1, ind_rascunho=1, ind_tramitacao=1)" size="1"><dtml-call expr="REQUEST.set('qtde', _['sequence-length'])">(<dtml-var qtde>)</dtml-in</a>
-                                    <a href="<dtml-var portal_url>/cadastros/tramitacao_materia/itens_enviados_html" class="font-size-13"><i class="mdi mdi-send"></i> Enviadas</a>
-                                    <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia'])">
-                                       <a href="<dtml-var portal_url>/cadastros/tramitacao_materia/primeira_tramitacao_lote_form" class="font-size-13"><i class="mdi mdi-file-clock-outline"></i> Primeira Tramitação</a>
+                                    <a href="<dtml-var portal_url>/cadastros/tramitacao_materia/itens_enviados_html" class="font-size-13"><i class="mdi mdi-send"></i> Enviados</a>
+                                </div>
+
+                                <div class="mail-list mt-1">
+                                    <h1 class="font-size-14 mt-2 mb-2">Processos Administrativos</h1>
+                                    <a href="<dtml-var portal_url>/cadastros/tramitacao_documento/tramitacao_lote_form" class="font-size-13"><i class="mdi mdi-inbox"></i> Caixa de Entrada <dtml-if expr="pysc.caixa_entrada_administrativo_contar_pysc(cod_usuario=cod_usuario_corrente) > 0">(<dtml-var expr="pysc.caixa_entrada_administrativo_contar_pysc(cod_usuario=cod_usuario_corrente)">)</dtml-if></a>
+                                    <a href="<dtml-var portal_url>/cadastros/tramitacao_documento/rascunhos_html" class="font-size-13"><i class="mdi mdi-file-outline"></i> Rascunhos <dtml-in expr="zsql.tramitacao_administrativo_obter_zsql(cod_usuario_local=cod_usuario_corrente, ind_ult_tramitacao=1, ind_rascunho=1, ind_tramitacao=1)" size="1"><dtml-call expr="REQUEST.set('qtde', _['sequence-length'])">(<dtml-var qtde>)</dtml-in></a>
+                                    <a href="<dtml-var portal_url>/cadastros/tramitacao_documento/itens_enviados_html" class="font-size-13"><i class="mdi mdi-send"></i> Enviados</a>
+                                    <dtml-if expr="pysc.arquivo_morto_adm_contar_pysc(cod_usuario=cod_usuario_corrente) > 0">
+                                       <a href="<dtml-var portal_url>/cadastros/tramitacao_documento/arquivo_morto" class="font-size-13"><i class="mdi mdi-archive"></i> Arquivo</a>
                                     </dtml-if>
                                 </div>
                             </div>
                             <!-- End Left sidebar -->
 
                             <form class="needs-validation" name="tramitacao_form" id="tramitacao_form" method="post" action="tramitacao_lote_salvar_pysc" novalidate>
-
                             <!-- Right Sidebar -->
                             <div class="row">
-                                <div class="col-12 col-lg-6 d-flex flex-wrap mt-3" role="toolbar">
+                                <div class="col-12 mt-3" role="toolbar">
                                     <label class="form-label required" for="lst_cod_unid_tram_local">Unidade Atual</label>
                                     <div class="input-group">
                                      <select class="form-select" id="lst_cod_unid_tram_local" name="lst_cod_unid_tram_local" required>
@@ -43,15 +48,15 @@
                                       <dtml-in expr="caixa_entrada_pysc(cod_usuario=cod_usuario_corrente)">
                                          <dtml-if sequence-start>
                                            <div class="table-responsive">
-                                             <table class="table table-hover table-border display" width="100%" id="tramitacao">
+                                             <table class="table table-hover table-border display w-100" id="tramitacao">
                                                <thead class="table-light">
                                                  <tr>
-                                                   <th width="5%"></th>
+                                                   <th></th>
+                                                   <th width="16%">Tramitação</th>
+                                                   <th>Matéria</th>
                                                    <th>Origem</th>
                                                    <th>Destino</th>          
-                                                   <th>Matéria</th>
                                                    <th>Status</th>               
-                                                   <th>Envio</th>
                                                    <th>Prazo</th>
                                                    <th>cod_materia</th>
                                                  </tr>
@@ -63,19 +68,8 @@
                                                <td>
                                                </td>
                                                <td>
-                                                    <span class="title">
-                                                      <dtml-in expr="zsql.unidade_tramitacao_obter_zsql(cod_unid_tramitacao=cod_unid_tram_local, ind_leg=1)">
-                                                        <dtml-var nom_unidade_join>
-                                                      </dtml-in> 
-                                                    </span>
+                                                 <div class="date"><dtml-var dat_tramitacao></div>
                                                </td>
-                                               <td>
-                                                    <span class="title">
-                                                     <dtml-in expr="zsql.unidade_tramitacao_obter_zsql(cod_unid_tramitacao=cod_unid_tram_dest, ind_leg=1)">
-                                                          <dtml-var nom_unidade_join>
-                                                     </dtml-in>
-                                                    </span>
-                                               </td>                                                    
                                                <td>
                                               <div class="col-mail col-mail-2">
                                               <dtml-in expr="zsql.materia_obter_zsql(cod_materia=cod_materia, ind_excluido=0)">
@@ -90,14 +84,39 @@
                                                 </dtml-in>
                                                   <br/> <span class="teaser"><dtml-var expr="txt_ementa"></span>
                                                   <span class="d-flex justify-content-end">
-                                                    <a href="#" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Tramitação Individual" data-src="tramitacao_form?hdn_cod_materia=<dtml-var cod_materia>&modal=1" class="text-secondary"><i class="mdi mdi-email-send font-size-14"></i></a>
+                                                    <a href="#" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Tramitação Individual" data-src="tramitacao_form?hdn_cod_materia=<dtml-var cod_materia>&modal=1" class=""><i class="mdi mdi-open-in-new"></i> Tramitar</a>
                                                   </span>
                                               </dtml-in>
                                               </div>
                                                </td>
-                                               <td><span class="teaser"><dtml-var expr="des_status"></span></td>
                                                <td>
-                                                 <div class="date"><dtml-var dat_tramitacao></div>
+                                                    <span class="title">
+                                                      <dtml-in expr="zsql.unidade_tramitacao_obter_zsql(cod_unid_tramitacao=cod_unid_tram_local, ind_leg=1)">
+                                                        <dtml-var nom_unidade_join>
+                                                      </dtml-in> 
+                                                    </span>
+                                               </td>
+                                               <td>
+                                                    <span class="title">
+                                                     <dtml-in expr="zsql.unidade_tramitacao_obter_zsql(cod_unid_tramitacao=cod_unid_tram_dest, ind_leg=1)">
+                                                        <dtml-var nom_unidade_join>
+                                                     </dtml-in>
+	                                             <dtml-if expr="cod_usuario_dest != None">
+                                                        <dtml-in expr="zsql.usuario_obter_zsql(cod_usuario=cod_usuario_dest)">
+                                                        - <dtml-var nom_completo>
+                                          	        </dtml-in>
+                                                     </dtml-if>
+                                                    </span>
+                                               </td>                                                    
+                                               <td>
+                                                  <dtml-call expr="REQUEST.set('pdf', str(cod_tramitacao)+'_tram.pdf')">
+                                                  <dtml-if "hasattr(sapl_documentos.materia.tramitacao,pdf)">
+                                                    <dtml-let arquivo_pdf="getattr(sapl_documentos.materia.tramitacao,pdf).absolute_url">
+                                                      <a href="<dtml-var arquivo_pdf>" target="_blank"><i class="mdi mdi-file-pdf-outline"></i> <dtml-var expr="des_status"></a>
+                                                    </dtml-let>
+                                                  <dtml-else>
+                                                    <dtml-var expr="des_status">
+                                                  </dtml-if> 
                                                </td>
                                                <td>
                                                  <dtml-call expr="REQUEST.set('prazo_a_vencer', DateTime()+3)">
@@ -118,12 +137,12 @@
                                                </tbody>
                                                <tfoot class="">
                                                  <tr>
-                                                   <th width="5%"></th>
+                                                   <th></th>
+                                                   <th>Tramitação</th>
+                                                   <th>Matéria</th>
                                                    <th>Origem</th>
                                                    <th>Destino</th>          
-                                                   <th>Matéria</th>
                                                    <th>Status</th>               
-                                                   <th>Envio</th>
                                                    <th>Prazo</th>
                                                    <th>cod_materia</th>
                                                  </tr>
@@ -172,7 +191,7 @@
 						 
 						  <div class="row">
 						    <div class="col-12 col-md-3 mb-3">
-						      <label class="form-label" for="txt_dat_fim_prazo">Data Fim de Prazo</label>
+						      <label class="form-label" for="txt_dat_fim_prazo">Data de Fim de Prazo</label>
 							<div class="input-group">
 							   <input type="text" class="form-control datepicker" placeholder="dd/mm/aaaa" name="txt_dat_fim_prazo" id="txt_dat_fim_prazo" data-provide="datepicker" data-date-autoclose="true" value="" autocomplete="off">
 							   <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
@@ -254,7 +273,7 @@ $(document).ready(function() {
         },
         "bFilter": true,
         "responsive": true,
-        "order": [[5, "asc"]],
+        "order": [[1, "asc"]],
         "columnDefs": [
             {
                 orderable: false,
@@ -297,7 +316,7 @@ $(document).ready(function() {
  
     $('#lst_cod_unid_tram_local').on('change', function(){
         var text = $("#lst_cod_unid_tram_local option:selected").text();       
-        table.column([2]).search(text).draw();  
+        table.column([4]).search(text).draw();  
     });
 
   function checkedTargets(checkboxes) {
@@ -358,9 +377,10 @@ tinymce.init({
     'searchreplace wordcount visualblocks visualchars code fullscreen insertdatetime media nonbreaking',
     'table emoticons template paste help'
   ],
-  toolbar: false,
+  toolbar: 'undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | ' +
+    ' link image | print preview media fullpage | ',
   menubar: 'edit view insert format tools help',
-  content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:13px }'
+  content_style: 'body {font-size:14px }'
 });
 </script>
 
@@ -420,22 +440,6 @@ $(document).ready(function(){
         });
     });    
 });
-
-(function () {
-  'use strict'
-  var forms = document.querySelectorAll('.needs-validation')
-  Array.prototype.slice.call(forms)
-    .forEach(function (form) {
-      form.addEventListener('submit', function (event) {
-        if (!form.checkValidity()) {
-          event.preventDefault()
-          event.stopPropagation()
-        }
-
-        form.classList.add('was-validated')
-      }, false)
-    })
-})()
 
 </script>
 <dtml-var footer_html>

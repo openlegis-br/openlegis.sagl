@@ -20,10 +20,6 @@
 
 <h1 class="firstHeading font-size-18"><dtml-var id_materia></h1>
 
-  <dtml-in expr="zsql.usuario_obter_zsql(col_username=AUTHENTICATED_USER.getUserName())">
-    <dtml-call expr="REQUEST.set('cod_usuario_corrente', int(cod_usuario))">
-    <input type="hidden" name="hdn_cod_usuario_corrente" value="<dtml-var cod_usuario_corrente missing>" />
-  </dtml-in>
 
   <div class="row">
     <div class="col-12 col-md-3 mb-3">
@@ -87,7 +83,10 @@
     </div>
     <div class="col-6 col-md-3 mb-3">
       <label class="form-label" for="txt_dat_fim_prazo">Data Fim de Prazo</label><br />
-      <input class="form-control date" type="text" name="txt_dat_fim_prazo" id="txt_dat_fim_prazo" value="<dtml-var dat_fim_prazo missing null="">" readonly />    
+      <div class="input-group">
+        <input class="form-control" type="text" name="txt_dat_fim_prazo" id="txt_dat_fim_prazo" value="<dtml-var dat_fim_prazo missing null="">" readonly />
+        <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
+      </div> 
     </div>    
     <div class="col-6 col-md-3 mb-3">
       <label class="form-label d-block">Urgente ?</label>
@@ -120,6 +119,7 @@
          <dtml-if "hasattr(sapl_documentos.materia.tramitacao,pdf) and sapl_documentos.props_sagl.restpki_access_token!=''">
             <dtml-if expr="int(cod_usuario_corrente)==int(cod_usuario_local)" >
                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Assinar Digitalmente" data-src="<dtml-var portal_url>/generico/assinador/pades-signature_html?codigo=<dtml-var cod_tramitacao>&tipo_doc=tramitacao&modal=1"><i class="fas fa-file-signature"></i> Assinar</button>
+               <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Assinaturas Digitais" data-src="<dtml-var portal_url>/cadastros/assinatura/assinatura_solicitar_form?codigo=<dtml-var cod_tramitacao>&tipo_doc=tramitacao&modal=1"><i class="fas fas-fw fa-file-signature"></i> Assinaturas</button>
             </dtml-if>
          </dtml-if>
         </div>
@@ -140,21 +140,22 @@
       <textarea class="form-control" name="txa_txt_tramitacao" id="txa_txt_tramitacao" rows="1" readonly><dtml-var txt_tramitacao missing></textarea>
     </div>
   </div>
-
-  <div class="text-start">
-    <dtml-if expr="ind_ult_tramitacao==1 and AUTHENTICATED_USER.has_role(['Operador'])">
+  <div class="row">
+  <div class="text-start input-group">
+    <dtml-if expr="ind_ult_tramitacao==1 and AUTHENTICATED_USER.has_role(['Operador','Operador Materia'])">
        <input type="button" class="btn btn-danger" value="Excluir" onClick="tramitacao_excluir()" />
     <dtml-elif expr="ind_ult_tramitacao==1 and int(cod_usuario_corrente)==int(cod_usuario_local)">
        <input type="button" class="btn btn-danger" value="Excluir" onClick="tramitacao_excluir()" />
     </dtml-if>
   </div>
+ </div>
        
 <dtml-var js_slot>
 <script>
 tinymce.init({
   selector: '#txa_txt_tramitacao',
   language: 'pt_BR',
-  height: 250,
+  height: 200,
   readonly : 1,
   plugins: [
     'advlist autolink link image lists charmap print preview hr anchor pagebreak',
@@ -162,8 +163,8 @@ tinymce.init({
     'table emoticons template paste help'
   ],
   toolbar: false,
-  menubar: 'edit view insert format tools help',
-  content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:13px }'
+  menubar: false,
+  content_style: 'body {font-size:13px }'
 });
 </script>
 <dtml-var footer_html>

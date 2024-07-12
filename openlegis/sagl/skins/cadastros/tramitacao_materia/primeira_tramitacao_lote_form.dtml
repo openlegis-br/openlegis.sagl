@@ -22,7 +22,6 @@
            if (!IsValidDate(form.txt_data_inicial.value)){
              alert("Digite uma data válida!");
              form.txt_data_inicial.focus();
-             form.txt_data_inicial.select();
              return false;
            }
       }
@@ -37,7 +36,6 @@
              if (!IsValidDate(form.txt_data_final.value)){
                alert("Digite uma data válida!");
                form.txt_data_final.focus();
-               form.txt_data_final.select();
                return false;
              }
       }
@@ -47,20 +45,15 @@
 
 </script>
 
-<h1 class="firstHeading font-size-18">Tramitação de Matérias Legislativas</h1>
-
-<a class="btn btn-primary mb-3 disabled" href="<dtml-var portal_url>/cadastros/tramitacao_materia/primeira_tramitacao_lote_form">Primeira Tramitação</a>
-<a class="btn btn-primary mb-3" href="<dtml-var portal_url>/cadastros/tramitacao_materia/tramitacao_lote_form">Caixa de Entrada <dtml-if expr="pysc.caixa_entrada_contar_pysc(cod_usuario=cod_usuario_corrente) > 0">(<dtml-var expr="pysc.caixa_entrada_contar_pysc(cod_usuario=cod_usuario_corrente)">)</dtml-if></a>
-<a class="btn btn-primary mb-3" href="<dtml-var portal_url>/cadastros/tramitacao_materia/rascunhos_html">Rascunhos <dtml-in expr="zsql.tramitacao_obter_zsql(cod_usuario_local=cod_usuario_corrente, ind_ult_tramitacao=1, ind_rascunho=1, ind_tramitacao=1)" size="1"><dtml-call expr="REQUEST.set('qtde', _['sequence-length'])">(<dtml-var qtde>)</dtml-in></a>
-<a class="btn btn-primary mb-3" href="<dtml-var portal_url>/cadastros/tramitacao_materia/itens_enviados_html">Enviadas</a>   
-
+<h1 class="firstHeading font-size-18">Primeira Tramitação de Matérias</h1>
+  
 <form name="primeira_tramitacao_lote_form" method="post" action="primeira_tramitacao_lote_tramitar_proc" >
 
    <p class="text-muted font-weight-bold">Registro de primeira tramitação</p>
 
   <div class="row">
-    <div class="col-12 col-md-6 mb-3">
-      <label class="form-label" for="tram_tip_materia" class="required">Tipo de Matéria</label>
+    <div class="col-12 mb-3">
+      <label class="form-labe required" for="tram_tip_materia">Tipo de Matéria</label>
       <select id="tram_tip_materia" name="tram_tip_materia" class="form-control" required>
          <option>Selecione</option>
          <dtml-in expr="zsql.tipo_materia_legislativa_obter_zsql(tip_natureza='P', ind_excluido=0)">
@@ -68,37 +61,21 @@
          </dtml-in>
       </select>
     </div>
-    <div class="col-6 col-md-3 mb-3">
-      <label class="form-label" for="txt_data_inicial" class="required">Data Inicial</label>
-        <dtml-call expr="REQUEST.set('data_atual', DateTime().strftime('%d/%m/%Y'))">      
-        <input type="text" class="form-control date" id="txt_data_inicial" name="txt_data_inicial" autocomplete="off" required />
+    <div class="col-6 mb-3">
+      <label class="form-label required" for="txt_data_inicial">Data Inicial</label>
+        <dtml-call expr="REQUEST.set('data_atual', DateTime().strftime('%d/%m/%Y'))">
+      <div class="input-group">
+        <input class="form-control" type="text" name="txt_data_inicial" id="txt_data_inicial" autocomplete="off" required />
+        <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
+      </div>
     </div>
-    <div class="col-6 col-md-3 mb-3">
-      <label class="form-label" for="txt_data_final" class="required">Data Final</label>
-      <input type="text" class="form-control date" id="txt_data_final" name="txt_data_final" autocomplete="off" required />
-    </div>
-    <script>
-        $('#txt_data_inicial').datepicker({
-            locale: 'pt-br',
-            icons: {rightIcon: '<i class="fa fa-fw fa-calendar-alt"></i>'},
-            format: 'dd/mm/yyyy',
-            uiLibrary: 'bootstrap4',
-            iconsLibrary: 'fontawesome',
-            maxDate: function () {
-                return $('#txt_data_final').val();
-            }
-        });
-        $('#txt_data_final').datepicker({
-            locale: 'pt-br',
-            icons: {rightIcon: '<i class="fa fa-fw fa-calendar-alt"></i>'},
-            format: 'dd/mm/yyyy',
-            uiLibrary: 'bootstrap4',
-            iconsLibrary: 'fontawesome',
-            minDate: function () {
-                return $('#txt_data_inicial').val();
-            }
-        });      
-    </script>    
+    <div class="col-6 mb-3">
+      <label class="form-label required" for="txt_data_final">Data Final</label>
+      <div class="input-group">
+        <input class="form-control" type="text" name="txt_data_final" id="txt_data_final" autocomplete="off" required />
+        <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
+      </div>
+    </div> 
  </div>  
       
  <div class="row">
@@ -116,4 +93,26 @@
 </div>
 
 <dtml-var js_slot>
+    <script>
+        $('#txt_data_inicial').datepicker({
+            locale: 'pt-BR',
+            icons: {rightIcon: '<i class="fa fa-fw fa-calendar-alt"></i>'},
+            format: 'dd/mm/yyyy',
+            uiLibrary: 'bootstrap4',
+            iconsLibrary: 'fontawesome',
+            maxDate: function () {
+                return $('#txt_data_final').val();
+            }
+        });
+        $('#txt_data_final').datepicker({
+            locale: 'pt-BR',
+            icons: {rightIcon: '<i class="fa fa-fw fa-calendar-alt"></i>'},
+            format: 'dd/mm/yyyy',
+            uiLibrary: 'bootstrap4',
+            iconsLibrary: 'fontawesome',
+            minDate: function () {
+                return $('#txt_data_inicial').val();
+            }
+        });      
+    </script>  
 <dtml-var footer_html>

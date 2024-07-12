@@ -105,6 +105,7 @@
 <script src="<dtml-var portal_url>/assets/libs/datatables.net-buttons/js/buttons.html5.min.js"></script>
 <script src="<dtml-var portal_url>/assets/libs/datatables.net-buttons/js/buttons.print.min.js"></script>
 <script src="<dtml-var portal_url>/assets/libs/datatables.net-buttons/js/buttons.colVis.min.js"></script>
+<script src="<dtml-var portal_url>/assets/libs/datatables.net-responsive/js/dataTables.responsive.min.js"></script>
 </dtml-comment>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
@@ -124,9 +125,6 @@
 
 <script src="<dtml-var portal_url>/js/moment.min.js"></script>
 <script src="<dtml-var portal_url>/js/datetime-moment.js"></script>
-
-<!-- Responsive examples -->
-<script src="<dtml-var portal_url>/assets/libs/datatables.net-responsive/js/dataTables.responsive.min.js"></script>
 
 <!-- Datatable init js -->
 <script src="<dtml-var portal_url>/assets/js/pages/datatables.init.js"></script>
@@ -288,4 +286,19 @@ $(document).ready(function(){
      $('.datepicker').datepicker();
 });
 autosize(document.querySelectorAll('textarea'));
+(function () {
+  'use strict'
+  var forms = document.querySelectorAll('.needs-validation')
+  Array.prototype.slice.call(forms)
+    .forEach(function (form) {
+      form.addEventListener('submit', function (event) {
+        if (!form.checkValidity()) {
+          event.preventDefault()
+          event.stopPropagation()
+        }
+
+        form.classList.add('was-validated')
+      }, false)
+    })
+})()
 </script> 

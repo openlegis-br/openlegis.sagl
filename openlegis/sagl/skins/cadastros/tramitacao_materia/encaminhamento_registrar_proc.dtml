@@ -38,10 +38,10 @@
      <dtml-call "REQUEST.set('info_protocolo', cadastros.tramitacao_materia.protocolo_prefeitura_pysc(cod_materia=hdn_cod_materia))">         
      <dtml-call expr="zsql.tramitacao_prefeitura_registrar_zsql(cod_tramitacao=cod_tramitacao, texto_protocolo=info_protocolo)">
   </dtml-if>
+  <dtml-call expr="pysc.envia_tramitacao_autor_pysc(cod_materia=hdn_cod_materia)">
+  <dtml-call expr="pysc.envia_acomp_materia_pysc(cod_materia=hdn_cod_materia)">
   </dtml-comment>
 
-     <dtml-call expr="pysc.envia_tramitacao_autor_pysc(cod_materia=hdn_cod_materia)">
-     <dtml-call expr="pysc.envia_acomp_materia_pysc(cod_materia=hdn_cod_materia)">
 </dtml-try>
 
 <dtml-if dbcon_logs>

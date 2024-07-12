@@ -123,14 +123,14 @@
                                          <li><a class="dropdown-item" href="<dtml-var portal_url>/cadastros/recebimento_proposicao">Recebimento de Proposições</a></li>
                                       </dtml-if>
                                      <dtml-if cod_usuario_corrente>
-                                         <li><a class="dropdown-item" href="<dtml-var portal_url>/cadastros/tramitacao_materia/tramitacao_lote_form">Tramitação de Matérias</a></li>
+                                         <li><a class="dropdown-item" href="<dtml-var portal_url>/cadastros/tramitacao_materia/tramitacao_lote_form">Tramitação Eletrônica</a></li>
                                      </dtml-if> 
                                      <li class="dropdown-divider"></li>
                                    </dtml-if>
                                    <li class="dropdown-header">Processos Administrativos</li>
                                    <li><a class="dropdown-item" href="<dtml-var portal_url>/cadastros/peticionamento_eletronico">Peticionamento Digital</a></li>
                                    <dtml-if cod_usuario_corrente>
-                                      <li><a class="dropdown-item" href="<dtml-var portal_url>/cadastros/tramitacao_documento/tramitacao_lote_form">Tramitação de Processos</a></li>
+                                      <li><a class="dropdown-item" href="<dtml-var portal_url>/cadastros/tramitacao_documento/tramitacao_lote_form">Tramitação Eletrônica</a></li>
                                       <li><a class="dropdown-item" href="<dtml-var portal_url>/consultas/documento_administrativo/visualizar_processos">Ciência de Processos</a></li>
                                    </dtml-if>
                                    <dtml-if expr="sapl_documentos.props_sagl.restpki_access_token!=''">
@@ -297,9 +297,10 @@
                                              <div class="arrow-down"></div>
                                           </a>
                                           <div class="dropdown-menu" aria-labelledby="topnav-tramMat">
-                                           <a class="dropdown-item" href="<dtml-var portal_url>/cadastros/tramitacao_materia/tramitacao_lote_form">Caixa de Entrada</a>
-                                           <a class="dropdown-item" href="<dtml-var portal_url>/cadastros/tramitacao_materia/rascunhos_html">Tramitações em Rascunho</a>
-                                           <a class="dropdown-item" href="<dtml-var portal_url>/cadastros/tramitacao_materia/itens_enviados_html">Tramitações Enviadas</a>
+                                           <a class="dropdown-item" href="<dtml-var portal_url>/cadastros/tramitacao_materia/tramitacao_lote_form">Tramitação Eletrônica</a>
+                                           <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia'])">
+                                             <a class="dropdown-item" href="<dtml-var portal_url>/cadastros/tramitacao_materia/primeira_tramitacao_lote_form">Primeira Tramitação</a>
+                                           </dtml-if>
                                           </div>
                                        </div>
                                       </dtml-if>
@@ -372,14 +373,11 @@
                                               <div class="arrow-down"></div>
                                             </a>
                                            <div class="dropdown-menu" aria-labelledby="topnav-tramMat">
-                                             <a class="dropdown-item" href="<dtml-var portal_url>/cadastros/tramitacao_documento/tramitacao_lote_form">Caixa de Entrada</a>
-                                             <a class="dropdown-item" href="<dtml-var portal_url>/cadastros/tramitacao_documento/rascunhos_html">Tramitações em Rascunho</a>
-                                             <a class="dropdown-item" href="<dtml-var portal_url>/cadastros/tramitacao_documento/itens_enviados_html">Tramitações Enviadas</a>
-                                             <a class="dropdown-item" href="<dtml-var portal_url>/cadastros/tramitacao_documento/historico_html">Histórico de Tramitações</a>
-                                             <dtml-if expr="pysc.arquivo_morto_adm_contar_pysc(cod_usuario=cod_usuario_corrente) > 0">
-                                               <a class="dropdown-item" href="<dtml-var portal_url>/cadastros/tramitacao_documento/arquivo_morto">Arquivo</a>
-                                             </dtml-if>
-                                           </div>
+                                             <a class="dropdown-item" href="<dtml-var portal_url>/cadastros/tramitacao_documento/tramitacao_lote_form">Tramitação Eletrônica</a>
+                                           <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Modulo Administrativo'])">
+                                             <a class="dropdown-item" href="<dtml-var portal_url>/cadastros/tramitacao_documento/primeira_tramitacao_lote_form">Primeira Tramitação</a>
+                                           </dtml-if>
+                                            </div>
                                          </div>
                                        </dtml-if>
                                        <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Recepção'])">

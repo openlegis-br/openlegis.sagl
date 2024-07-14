@@ -1,6 +1,6 @@
 <dtml-var header_html>
 
-<h1 class="firstHeading font-size-18"><dtml-var expr="sapl_documentos.props_sagl.nome_mesa"></h1>
+<h1 class="firstHeading font-size-18 mb-3"><dtml-var expr="sapl_documentos.props_sagl.nome_mesa"></h1>
 
 <form name="composicao_mesa_form">
  <div class="row">
@@ -33,6 +33,7 @@
   </div>
   <div class="col-12 col-sm-6 mb-3">
       <label class="form-label" for="lst_periodo_comp">Selecione o Período</label>
+        <div class="input-group">
          <select class="form-select jumpmenu" data-dropup-auto="false" data-size="6" id="lst_periodo_comp" name="lst_periodo_comp">
            <dtml-in expr="zsql.periodo_comp_mesa_obter_zsql(num_legislatura=num_legislatura_sel)">
               <option
@@ -50,18 +51,15 @@
               </option>
            </dtml-in>
          </select>
+         <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Mesa Diretora'])">
+            <dtml-if cod_periodo_comp_sel>
+                <a class="btn btn-primary" href="<dtml-var portal_url>/cadastros/mesa_diretora/mesa_diretora_index_html?cod_periodo_comp_sel=<dtml-var cod_periodo_comp_sel>&num_legislatura_sel=<dtml-var num_legislatura_sel>"><i class="fa fa-fw fa-edit"></i> Composição</a>
+            </dtml-if>
+         </dtml-if> 
+       </div>
     </div>
   </div>
 </form>
-  <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Mesa Diretora'])">
-   <div class="row">
-    <div class="col-12 text-start text-sm-end">
-       <dtml-if cod_periodo_comp_sel>
-            <a class="btn btn-light d-print-none mb-3" href="<dtml-var portal_url>/cadastros/mesa_diretora/mesa_diretora_index_html?cod_periodo_comp_sel=<dtml-var cod_periodo_comp_sel>&num_legislatura_sel=<dtml-var num_legislatura_sel>"><i class="fa fa-fw fa-edit"></i> Editar Composição</a>
-         </dtml-if>      
-    </div>
-   </div>
-  </dtml-if>
   <div class="mt-2 mb-3">
       <p class="h6">Composição da <dtml-var expr="sapl_documentos.props_sagl.nome_mesa"></p>
   </div>

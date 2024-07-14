@@ -151,20 +151,14 @@
            <dtml-in expr="zsql.autor_obter_zsql(cod_parlamentar=cod_parlamentar)">
               <dtml-if expr="col_username">
                  <input type="text" class="form-control" name="txt_loginname" id="txt_loginname" value="<dtml-var col_username missing null>" disabled>
-                 <div class="input-group-append">
                     <button class="btn btn-subtle-secondary" type="button" name="btn_incluir" onclick="location.href='<dtml-var portal_url>/cadastros/auxiliares/autor/autor_mostrar_proc?tip_autor=1&cod_parlamentar=<dtml-var cod_parlamentar>&cod_autor=<dtml-var cod_autor>';">Editar</button>
-                 </div>
               <dtml-else>
                  <input type="text" class="form-control" name="txt_loginname" id="txt_loginname" value="<dtml-var col_username missing null>" disabled>
-                 <div class="input-group-append">
                     <button class="btn btn-subtle-secondary" type="button" name="btn_incluir" onclick="location.href='<dtml-var portal_url>/cadastros/auxiliares/autor/autor_mostrar_proc?tip_autor=1&cod_parlamentar=<dtml-var cod_parlamentar>&cod_autor=<dtml-var cod_autor>';">Criar</button>
-                 </div>
               </dtml-if>
            <dtml-else>
                  <input type="text" class="form-control" name="txt_loginname" id="txt_loginname" value="<dtml-var col_username missing null>" disabled>
-                 <div class="input-group-append">
                     <button class="btn btn-subtle-secondary" type="button" name="btn_incluir" onclick="location.href='<dtml-var portal_url>/cadastros/auxiliares/autor/autor_form?tip_autor=1&des_tipo_autor=Parlamentar&cod_parlamentar=<dtml-var cod_parlamentar>';">Criar</button>
-                 </div>
            </dtml-in>
          <dtml-else>
            <input type="text" class="form-control" name="txt_loginname" id="txt_loginname" value="<dtml-var col_username missing null>" disabled>
@@ -317,9 +311,7 @@
        <div class="input-group">
           <input class="form-control" type="text" name="txt_municipio" id="txt_municipio" value="<dtml-if
 	    cod_localidade_resid><dtml-var nom_localidade missing null=""></dtml-if>" maxlength="50" />
-          <div class="input-group-append">
              <button class="btn btn-light" type="button" name="btn_incluir" onClick="localidade_mostrar(document.parlamentar_form)">Buscar</button>
-          </div>
         </div>
     </div>
     <div class="col-4 col-md-4 mb-3">

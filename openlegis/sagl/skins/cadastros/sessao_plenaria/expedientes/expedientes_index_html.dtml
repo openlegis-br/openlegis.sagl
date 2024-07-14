@@ -25,7 +25,7 @@
   <input type="hidden" name="hdn_cod_sessao_plen" value="<dtml-var cod_sessao_plen missing>">
   <dtml-in expr="zsql.tipo_expediente_obter_zsql(ind_excluido=0)">
     <input type="hidden" name="hdn_cod_expediente" value="<dtml-var cod_expediente missing>" />  
-    <p class="h6"><dtml-var nom_expediente>
+    <p class="h6 font-size-13"><dtml-var nom_expediente>
           <dtml-if expr="'Executivo' in nom_expediente">
             <a href="#" id="postjq" class="btn btn-link ml-5"><i class="fa fa-tasks"></i> Listar</a>
          </dtml-if>
@@ -56,7 +56,7 @@
 <dtml-var js_slot>
 <script>
 tinymce.init({
-  mode : "textareas",
+  selector: 'textarea',
   language: 'pt_BR',
   height: 250,
   paste_as_text: true,
@@ -70,10 +70,11 @@ tinymce.init({
     'searchreplace wordcount visualblocks visualchars code fullscreen insertdatetime media nonbreaking',
     'table emoticons template paste help'
   ],
-  toolbar: false,
+  toolbar: 'undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | ' +
+    ' link image | print preview media fullpage | ',
   menubar: 'edit view insert format tools help',
   forced_root_block_attrs : { style: 'text-align: justify;' },
-  content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:13px }'
+  content_style: 'body {font-size:14px }'
 });
 
  function campos_criticar(){

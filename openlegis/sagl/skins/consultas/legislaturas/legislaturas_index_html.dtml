@@ -1,10 +1,10 @@
 <dtml-var header_html>
 
-<h1 class="firstHeading font-size-18">Legislaturas</h1> 
+<h1 class="firstHeading font-size-18 mb-3">Legislaturas</h1> 
 
 <form name="index_form">
- <div class="row mb-3">
-  <div class="col-12">
+ <div class="row">
+  <div class="col-12 mb-3">
     <label class="form-label" for="lst_num_legislatura">Selecione a Legislatura </label>
       <div class="input-group">
          <select class="form-select jumpmenu" id="lst_num_legislatura" name="lst_num_legislatura">    
@@ -34,14 +34,12 @@
             </dtml-if>
          </select>
       <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Tabela Auxiliar'])">
-          <a class="btn btn-light" href="<dtml-var portal_url>/cadastros/auxiliares/legislatura"><i class="fa fa-fw fa-edit"></i> Editar Legislaturas</a>
+          <a class="btn btn-primary" href="<dtml-var portal_url>/cadastros/auxiliares/legislatura"><i class="fa fa-fw fa-edit"></i> Editar</a>
       </dtml-if> 
     </div>
    </div>
   </div>
 </form>
-
-   
 
 <dtml-call expr="REQUEST.set('existe_ocorrencia', 0)">
 <dtml-call expr="REQUEST.set('listar', 1)">
@@ -64,15 +62,16 @@
            <dtml-call expr="REQUEST.set('legislatura_atual', 1)">
         </dtml-if>
      </dtml-in>
-     <legend class="h6 mt-1 mb-3">Titulares: <dtml-var sequence-length></legend>
+     <legend class="h6 mt-1 mb-2">Veradores Titulares: <dtml-var sequence-length></legend>
     <div class="table-responsive mb-3">
-     <table class="table">
+     <table class="table table-sm table-striped align-middle caption-top">
        <thead>
               <tr> 
-                <th>Vereador</th>
+                <th>Nome do Vereador</th>
                 <th width="20%">Partido </th>
               </tr>
        </thead>
+       <tbody class="table-group-divider">
     </dtml-if primeiro_listado>
     <tr> 
       <td>
@@ -104,6 +103,7 @@
 </dtml-in>
 
 <dtml-if existe_ocorrencia>
+    </tbody>
   </table>  
   </div> 
 <dtml-else>
@@ -129,16 +129,17 @@
         <dtml-call expr="REQUEST.set('suplente_listado', 0)">          
     </dtml-if suplente_listado>
     <dtml-if sequence-start>
-     <legend class="h6 mt-1 mb-3">Suplentes em Exercício: <dtml-var sequence-length></legend>
+     <legend class="h6 mt-1 mb-2">Suplentes em Exercício: <dtml-var sequence-length></legend>
     <div class="table-responsive mb-3">
-     <table class="table">
+     <table class="table table-sm table-striped">
        <thead>
               <tr> 
-                <th>Nome</th>
+                <th>Nome do Suplente</th>
                 <th width="30%">Mandato </th>
                 <th width="20%">Partido </th>
               </tr>
        </thead>
+       <tbody class="table-group-divider">
   </dtml-if>
     <tr> 
       <td>
@@ -174,6 +175,7 @@
       </td>      
     </tr>
     <dtml-if sequence-end>
+       </tbody>
       </table>
      </div>
     </dtml-if sequence-end>
@@ -181,16 +183,17 @@
 </dtml-in>
 
 <dtml-in expr="zsql.periodo_comp_mesa_obter_zsql(num_legislatura=hdn_num_legislatura)">
-     <legend class="h6 mt-1 mb-3"><dtml-var expr="sapl_documentos.props_sagl.nome_mesa"> (<dtml-var dat_inicio_periodo> a <dtml-var dat_fim_periodo>)</legend>
+     <legend class="h6 mt-1 mb-2"><dtml-var expr="sapl_documentos.props_sagl.nome_mesa"> (<dtml-var dat_inicio_periodo> a <dtml-var dat_fim_periodo>)</legend>
      <div class="table-responsive mb-3">
-     <table class="table">
+     <table class="table table-sm table-striped">
        <thead>
               <tr> 
-                <th>Vereador</th>
+                <th>Nome do Vereador</th>
                 <th width="30%">Cargo </th>
                 <th width="20%">Partido </th>
               </tr>
        </thead>
+       <tbody class="table-group-divider">
      <dtml-in expr="zsql.composicao_mesa_obter_zsql(cod_periodo_comp=cod_periodo_comp, ind_excluido=0)">
       <tr>
           <td>
@@ -230,19 +233,21 @@
     <dtml-if expr="txt_observacao!=None and txt_observacao!=''">
 	    <p><strong>* Observações:</strong> <dtml-var txt_observacao></p>
     </dtml-if>
+         </tbody>
       </table>
       </div>
 </dtml-in>
-  <legend class="h6 mt-1 mb-3">Poder Executivo</legend>
+  <legend class="h6 mt-1 mb-2">Poder Executivo</legend>
   <div class="table-responsive">
-     <table class="table">
+     <table class="table table-sm table-striped">
        <thead>
         <tr>
-          <th>Nome</th>
+          <th>Nome do Agente</th>
           <th width="30%">Cargo</th>
           <th width="20%">Partido</th>
         </tr>
-     <thead>
+     </thead>
+     <tbody class="table-group-divider">
         <dtml-in expr="zsql.cargo_executivo_obter_zsql(ind_excluido=0)">
           <tr>
                <dtml-in expr="zsql.composicao_executivo_obter_zsql(cod_cargo=cod_cargo,num_legislatura=hdn_num_legislatura,ind_excluido=0)">
@@ -277,6 +282,7 @@
                </dtml-in>
           <tr>
         </dtml-in>
+       </tbody>
     </table>
   </div>
 

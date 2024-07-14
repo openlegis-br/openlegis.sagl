@@ -53,7 +53,7 @@
                                                  <tr>
                                                    <th></th>
                                                    <th width="16%">Tramitação</th>
-                                                   <th>Matéria</th>
+                                                   <th>Processo Legislativo</th>
                                                    <th>Origem</th>
                                                    <th>Destino</th>          
                                                    <th>Status</th>               
@@ -78,13 +78,13 @@
                                                 <dtml-else>
                                                   <a class="subject" href="<dtml-var portal_url>/consultas/materia/materia_mostrar_proc?cod_materia=<dtml-var cod_materia>&hdn_tramitacao=<dtml-var cod_tramitacao>" target="_blank">
                                                 </dtml-if>
-                                                <dtml-var sgl_tipo_materia> <dtml-var num_ident_basica>/<dtml-var ano_ident_basica></a>&nbsp;–&nbsp; 
+                                                <dtml-var sgl_tipo_materia> <dtml-var num_ident_basica>/<dtml-var ano_ident_basica></a>&nbsp;–&nbsp;</a>
                                                 <dtml-in expr="zsql.autoria_obter_zsql(cod_materia=cod_materia)">
                                                    <span class="title"><dtml-var nom_autor_join><dtml-unless sequence-end>,</dtml-unless></span>
                                                 </dtml-in>
                                                   <br/> <span class="teaser"><dtml-var expr="txt_ementa"></span>
                                                   <span class="d-flex justify-content-end">
-                                                    <a href="#" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Tramitação Individual" data-src="tramitacao_form?hdn_cod_materia=<dtml-var cod_materia>&modal=1" class=""><i class="mdi mdi-open-in-new"></i> Tramitar</a>
+                                                    <a href="#" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Tramitação de Processo Legislativo" data-src="tramitacao_form?hdn_cod_materia=<dtml-var cod_materia>&modal=1" class=""><i class="mdi mdi-open-in-new"></i> Tramitar</a>
                                                   </span>
                                               </dtml-in>
                                               </div>
@@ -135,11 +135,11 @@
                                        </dtml-in>
                                          <dtml-if sequence-end>
                                                </tbody>
-                                               <tfoot class="">
+                                               <tfoot class="d-none">
                                                  <tr>
                                                    <th></th>
                                                    <th>Tramitação</th>
-                                                   <th>Matéria</th>
+                                                   <th>Processo Legislativo</th>
                                                    <th>Origem</th>
                                                    <th>Destino</th>          
                                                    <th>Status</th>               
@@ -227,7 +227,7 @@
 
 						 <div class="row">
 						   <div class="col-6 text-start mt-2">
-						    <button type="submit" id="btnTramitar" class="btn btn-primary text-white">Tramitar Matérias</button>
+						    <button type="submit" id="btnTramitar" class="btn btn-primary text-white">Tramitar Processos</button>
 						   </div>
 						 </div>
 						   <div class="row">
@@ -239,7 +239,7 @@
 						</div>
                                          </dtml-if>
                                       <dtml-else>
-                                         <p>Não há matérias para tramitação nesta unidade.</p>
+                                         <p>Não há processos legislativas na caixa de entrada.</p>
                                       </dtml-in>
                                 </div> <!-- panel -->
                             </div> <!-- end Col -->
@@ -287,29 +287,26 @@ $(document).ready(function() {
         selector: 'td:first-child',
         style: 'multi'
         },
-
         "language": {
-            url: '//cdn.datatables.net/plug-ins/2.0.8/i18n/pt-BR.json',
+            "url": '//cdn.datatables.net/plug-ins/2.0.8/i18n/pt-BR.json',
+            "select": {
+                "rows": {
+                    "_": '%d processo selecionados',
+                    "0": 'Nenhum processo selecionado',
+                    "1": '1 processo selecionado'
+                },
+               "cells": {
+                  "1": "",
+                  "_": ""
+                },
+                "columns": {
+                  "1": "",
+                  "_": ""
+                }
+            }
         },
         "lengthMenu": [[10, 25, 50, 100], [10, 25, 50, 100]],
         "lengthChange": true,
-        "language": {
-          search: "Pesquisar:",
-          processing:     "Processando...",
-          loadingRecords: "Carregando...",
-          lengthMenu:     "Exibir _MENU_ registros por página",
-          info:           "Exibindo _START_ a _END_ de _TOTAL_ registros",
-          infoEmpty:      "Exibindo _START_ a _END_ de _TOTAL_ registros",
-          infoFiltered:   "(total de registros:_MAX_)",
-          emptyTable:     "Nenhum registro encontrado",
-          zeroRecords:     "Nenhum registro encontrado",
-          paginate: {
-            first:      "Primeiro",
-            previous:   "Anterior",
-            next:       "Próximo",
-            last:       "Último"
-          },
-        }
     });
 
     var table = $('#tramitacao').DataTable();
@@ -347,7 +344,7 @@ $(document).ready(function() {
          );
       }
     } else {
-      bootstrap.showModal({title: "Mensagem do Sistema", body: "Nenhuma matéria foi selecionada para tramitação em lote. Marque as matérias que deseja tramitar e tente novamente."});
+      bootstrap.showModal({title: "Mensagem do Sistema", body: "Nenhum processo foi selecionado para tramitação em lote. Marque os processos que deseja tramitar e tente novamente."});
       return false;
     }
     var clicked = false;
@@ -396,7 +393,9 @@ $(document).ready(function(){
             success:function(response){
                 var len = response.length;
                 $("#lst_cod_unid_tram_dest").empty();
-                $("#lst_cod_usuario_dest").empty();                
+                $("#lst_cod_usuario_dest").empty();
+                var table = $('#tramitacao').DataTable();
+                table.rows().deselect();
                 for( var i = 0; i<len; i++){
                     var id = response[i]['id'];
                     var name = response[i]['name'];

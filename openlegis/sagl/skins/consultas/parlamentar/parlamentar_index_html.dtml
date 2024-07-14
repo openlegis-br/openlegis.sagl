@@ -1,7 +1,7 @@
 <dtml-var header_html>
 
- <div class="row mb-3">
-  <div class="col-8 col-md-6 d-flex align-items-center">
+ <div class="row">
+  <div class="col-8 col-md-6 d-flex align-items-start">
     <h1 class="firstHeading font-size-18 mb-0">Vereadores</h1>
   </div>
   <div class="col-4 col-md-6">
@@ -12,8 +12,8 @@
  </div>
 
 <form name="index_form">
- <div class="row mb-3">
-  <div class="col-12">
+ <div class="row">
+  <div class="col-12 mb-3">
    <label class="form-label" for="lst_num_legislatura">Selecione a Legislatura </label>
    <div class="input-group">
     <select class="form-select" id="lst_num_legislatura">
@@ -44,7 +44,7 @@
     </select>
      <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Parlamentar', 'Operador Tabela Auxiliar'])">
         <dtml-if expr="_.has_key('hdn_num_legislatura') and hdn_num_legislatura!= '-1' ">
-           <a class="btn btn-light" href="<dtml-var portal_url>/cadastros/parlamentar/parlamentar_form?lst_num_legislatura=<dtml-var hdn_num_legislatura missing>" data-confirm="Deseja incluir um vereador com mandato na <dtml-var hdn_num_legislatura missing>ª Legislatura?"><i class="fa fa-fw fa-plus"></i> Incluir vereador</a>
+           <a class="btn btn-primary" href="<dtml-var portal_url>/cadastros/parlamentar/parlamentar_form?lst_num_legislatura=<dtml-var hdn_num_legislatura missing>" data-confirm="Deseja incluir um vereador com mandato na <dtml-var hdn_num_legislatura missing>ª Legislatura?"><i class="fa fa-fw fa-plus"></i> Incluir Vereador</a>
         </dtml-if>
      </dtml-if>  
     </div>

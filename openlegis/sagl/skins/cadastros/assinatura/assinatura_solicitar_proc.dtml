@@ -35,21 +35,21 @@
 
 <dtml-if expr="hdn_tipo_doc == 'anexo_sessao' or hdn_tipo_doc == 'anexo_peticao'">
    <dtml-if erro>
-        <dtml-let mensagem="'Já existe solicitação de assinatura para esse usuário!'" tipo_mensagem="'warning'" codigo=hdn_codigo anexo=hdn_anexo tipo_doc=hdn_tipo_doc>
+        <dtml-let mensagem="'Já existe solicitação de assinatura para esse usuário.'" tipo_mensagem="'warning'" codigo=hdn_codigo anexo=hdn_anexo tipo_doc=hdn_tipo_doc>
            <dtml-var assinatura_solicitar_form>
         </dtml-let>
    <dtml-else>
-        <dtml-let mensagem="'Incluída(s) com sucesso!'" sucesso="'1'" codigo=hdn_codigo anexo=hdn_anexo tipo_doc=hdn_tipo_doc url="'assinatura_solicitar_form?codigo='+hdn_codigo + '&anexo=' + hdn_anexo + '&tipo_doc=' + hdn_tipo_doc">
+        <dtml-let mensagem="'A lista de solicitações foi atualizada.'" sucesso="'1'" codigo=hdn_codigo anexo=hdn_anexo tipo_doc=hdn_tipo_doc url="'assinatura_solicitar_form?codigo='+hdn_codigo + '&anexo=' + hdn_anexo + '&tipo_doc=' + hdn_tipo_doc">
            <dtml-var assinatura_solicitar_form>
         </dtml-let> 
    </dtml-if>
 <dtml-else>
    <dtml-if erro>
-        <dtml-let mensagem="'Já existe solicitação de assinatura para esse usuário!'" tipo_mensagem="'warning'" codigo=hdn_codigo tipo_doc=hdn_tipo_doc>
+        <dtml-let mensagem="'Já existe solicitação de assinatura para esse usuário.'" tipo_mensagem="'warning'" codigo=hdn_codigo tipo_doc=hdn_tipo_doc>
            <dtml-var assinatura_solicitar_form>
         </dtml-let>
    <dtml-else>
-        <dtml-let mensagem="'Incluída(s) com sucesso!'" sucesso="'1'" codigo=hdn_codigo tipo_doc=hdn_tipo_doc url="'assinatura_solicitar_form?codigo='+hdn_codigo + '&tipo_doc=' + hdn_tipo_doc">
+        <dtml-let mensagem="'A lista de solicitações foi atualizada.'" sucesso="'1'" codigo=hdn_codigo tipo_doc=hdn_tipo_doc url="'assinatura_solicitar_form?codigo='+hdn_codigo + '&tipo_doc=' + hdn_tipo_doc">
            <dtml-var assinatura_solicitar_form>
         </dtml-let> 
    </dtml-if>

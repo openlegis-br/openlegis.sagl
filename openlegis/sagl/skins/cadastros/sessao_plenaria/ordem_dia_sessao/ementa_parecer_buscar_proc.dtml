@@ -1,11 +1,17 @@
 <dtml-in expr="zsql.relatoria_obter_zsql(num_parecer=num_parecer, ano_parecer=ano_parecer, cod_comissao=cod_comissao)">
+   <dtml-in expr="zsql.comissao_obter_zsql(cod_comissao=cod_comissao, ind_excluido=0)">
+     <dtml-call expr="REQUEST.set('id_comissao', sgl_comissao)"> 
+   </dtml-in>
+   <dtml-in expr="zsql.materia_obter_zsql(cod_materia=cod_materia, ind_excluido=0)">
+      <dtml-call expr="REQUEST.set('id_materia', sgl_tipo_materia + ' ' + str(num_ident_basica) + '/' + str(ano_ident_basica))"> 
+   </dtml-in>
     <dtml-if expr="tip_conclusao=='F'">
-       <dtml-call expr="REQUEST.set('enunciado', 'Favorável à aprovação da matéria')">
+       <dtml-call expr="REQUEST.set('enunciado', 'Parecer ' + id_comissao + ' ' + str(num_parecer) + '/' + str(ano_parecer) + ',  favorável à aprovação do ' + id_materia)">
     <dtml-elif expr="tip_conclusao=='C'">
-       <dtml-call expr="REQUEST.set('enunciado', 'Contrário à aprovação da matéria')">
+       <dtml-call expr="REQUEST.set('enunciado', 'Parecer ' + id_comissao + ' ' + str(num_parecer) + '/' + str(ano_parecer) + ',  contrário à aprovação do ' + id_materia)">
     </dtml-if>
     <dtml-in expr="zsql.parlamentar_obter_zsql(cod_parlamentar=cod_parlamentar)">
-      <dtml-call expr="REQUEST.set('txt_observacao', enunciado + '. Relatoria: ' + nom_parlamentar)">
+      <dtml-call expr="REQUEST.set('txt_observacao', enunciado + ', relatoria de ' + nom_parlamentar)">
     </dtml-in>
     <dtml-call expr="REQUEST.set('cod_parecer', cod_relatoria)">
     <dtml-call expr="REQUEST.set('cod_comissao_sel', cod_comissao)">

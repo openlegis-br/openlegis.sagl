@@ -1,42 +1,48 @@
-<dtml-var header_html>
-  
-  <script>
-    function campos_criticar(){
-       var form = document.assinatura_solicitar;
-      if ($('.selectpicker').val().length < 1) {
-          bootstrap.showModal({title: "Mensagem do Sistema", body: "Selecione um usuário !"});
-          $('.selectpicker').addClass('is-invalid');
-          $('.selectpicker').selectpicker('refresh');
-          $('.selectpicker').selectpicker('setStyle', 'btn-outline-warning');
-         return false;
-      }       
-        form.submit();
-    }
+<!doctype html>
+<html lang="pt-br">
+    <head>
+        <meta charset="utf-8" />
+        <title>Solicitações de Assinatura</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta content="Gestão de Processos Digitais" name="description" />
+        <meta content="OpenLegis" name="author" />
+        <link rel="shortcut icon" href="<dtml-var portal_url>/imagens/favicon.ico">
+        <link href="<dtml-var portal_url>/assets/css/bootstrap.min.css" id="bootstrap-style" rel="stylesheet" type="text/css" />
+        <link href="<dtml-var portal_url>/assets/css/icons.min.css" rel="stylesheet" type="text/css" />
+        <link href="<dtml-var portal_url>/assets/libs/select2/css/select2.min.css" rel="stylesheet" type="text/css" />
+        <link href="<dtml-var portal_url>/assets/css/app.css" id="app-style" rel="stylesheet" type="text/css" />
+    </head>
+    <body data-topbar="dark" data-layout="horizontal" <dtml-if expr="REQUEST.get('modal', '')">style="background:#fff;"</dtml-if> >
+       <dtml-if expr="not portal_membership.isAnonymousUser()">
+            <dtml-in expr="zsql.usuario_obter_zsql(col_username=AUTHENTICATED_USER.getUserName())">
+               <dtml-if cod_usuario>
+                  <dtml-call expr="REQUEST.set('cod_usuario_corrente', int(cod_usuario))">
+               </dtml-if>
+           </dtml-in>
+        </dtml-if>
+        <div id="layout-wrapper">
+            <div class="main-content">
+                <dtml-if expr="REQUEST.get('modal', '')">
+                  <div class="content-modal">
+                      <div class="container-xxl">
+                <dtml-else>
+                  <div class="page-content">
+                      <div class="container-fluid">
+                </dtml-if>
+                <div class="card-body">
+                <!-- End Header -->
 
-$(document).ready(function() {
-    // show the alert
-    setTimeout(function() {
-        $(".alert").alert('close');
-    }, 2000);
-});
-    
-  </script>
-  
-  <h1 class="firstHeading font-size-18">Solicitações de Assinatura</h1> 
+  <h1 class="firstHeading font-size-18">Solicitações de Assinatura Digital</h1> 
    <dtml-if expr="_.has_key('mensagem')">
      <dtml-if expr="_.has_key('sucesso')">
        <div class="alert alert-success alert-dismissible" id="success-alert" role="alert">
-          <h5><dtml-var mensagem></h5>
-          <button type="button" class="close" data-bs-dismiss="alert" aria-label="Fechar">
-            <span aria-hidden="true">&times;</span>
-          </button>
+          <h6 class="font-size-13 mt-1 mb-1"><dtml-var mensagem></h6>
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
        </div>
      <dtml-else>
        <div class="alert alert-danger alert-dismissible" role="alert">
-          <h5><dtml-var mensagem></h5>
-          <button type="button" class="close" data-bs-dismiss="alert" aria-label="Fechar">
-            <span aria-hidden="true">&times;</span>
-          </button>
+          <h6 class="font-size-13 mt-1 mb-1"><dtml-var mensagem></h6>
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
        </div>
      </dtml-if>
    </dtml-if>
@@ -64,7 +70,7 @@ $(document).ready(function() {
   </dtml-if>
   
    <dtml-unless prop_recebida>
-      <form id="assinatura_solicitar" name="assinatura_solicitar" method="post" action="assinatura_solicitar_proc">
+      <form class="needs-validation" id="assinatura_solicitar" name="assinatura_solicitar" method="post" action="assinatura_solicitar_proc" novalidate>
           <input type="hidden" name="hdn_cod_assinatura_doc" value="<dtml-var cod_assinatura_doc>" />
           <input type="hidden" name="hdn_codigo" value="<dtml-var codigo>" />
           <dtml-if expr="str(tipo_doc) == 'anexo_sessao' or str(tipo_doc) == 'anexo_peticao'">
@@ -74,9 +80,9 @@ $(document).ready(function() {
           <input type="hidden" name="modal" value="1" />
           <div class="row">
              <div class="col-12 mb-3">
-             <label class="form-label" for="lst_cod_usuario" class="required">Selecione o Usuário</label>
-               <div class="input-group">
-                <select class="form-select selectpicker" name="lst_cod_usuario:list:int" id="lst_cod_usuario" multiple="multiple" data-selected-text-format="count > 3" data-size="6" data-actions-box="true" data-live-search="true" required>
+             <label class="form-label required d-none" for="lst_cod_usuario">Selecione o usuário</label>
+               <div class="input-group w-100">
+                <select class="select2 users form-select bg-light" name="lst_cod_usuario:list:int" id="lst_cod_usuario" multiple="multiple" required style="width:90%">
                    <dtml-if expr="tipo_doc=='proposicao'">
                      <dtml-call expr="REQUEST.set('data_atual', DateTime().strftime('%d/%m/%Y'))">
                      <dtml-if expr="AUTHENTICATED_USER.has_role(['Autor'])">
@@ -127,9 +133,10 @@ $(document).ready(function() {
                     </dtml-if>
                   </option>
                 </select>
-                <div class="input-group-append">
-                  <input class="btn btn-primary" type="button"  value="Incluir" onClick="campos_criticar(document.assinatura_solicitar)" />
-                </div>
+                <button id="bntIncluir" class="btn btn-primary" type="submit" style="width:10%">Incluir</button>
+                <div class="invalid-feedback">
+		   Selecione ao menos um usuário para solicitar assinatura.
+		</div> 
               </div>
              </div>
           </div>      
@@ -137,63 +144,79 @@ $(document).ready(function() {
    </dtml-unless>
 
   <dtml-if temCodigo>
-      <dtml-in expr="metodo">
+      <dtml-in expr="metodo" mapping>
          <dtml-if sequence-start>
-            <table class="table">
-              <thead>
+           <div class="table-responsive">
+            <table class="table table-hover table-sm align-middle caption-top">
+              <caption>Solicitações Cadastradas</caption>
+              <thead class="table-light">
                <tr>
-                  <th>Usuário</th>
-                  <th>Data de Solicitação</th>
-                  <th>Data de Assinatura</th>
+                  <th width="40%">Nome do Usuário</th>
+                  <th width="20%">Solicitante</th>
+                  <th width="20%">Data da Solicitação</th>
+                  <th width="20%">Data da Assinatura</th>
                </tr>
               </thead>
+              <tbody class="table-group-divider">
          </dtml-if>
                <tr>
                   <td><dtml-in expr="zsql.usuario_obter_zsql(cod_usuario=cod_usuario)"><dtml-var nom_completo> <dtml-if expr="ind_prim_assinatura==1"><span class="text-muted small">(1º Signatário)</span></dtml-if></dtml-in></td>
+                  <td>
+                   <dtml-if cod_solicitante>
+                     <dtml-in expr="zsql.usuario_obter_zsql(cod_usuario=cod_solicitante)">
+                        <dtml-var col_username>
+                     </dtml-in>
+                   </dtml-if>
+                  </td> 
                   <td><dtml-var dat_solicitacao></td>
                   <td>
                       <dtml-if expr="ind_assinado==1 and dat_assinatura">
-                        <dtml-var dat_assinatura> <span style="color: #096e62"><i class="fas fa-check"></i></span>
+                        <i class="fas fa-check"></i> <dtml-var dat_assinatura>
                       <dtml-elif expr="ind_recusado==1 and dat_recusa">
-                        <span class="text-danger">Recusada em <dtml-var dat_recusa></span>
+                        <span class="text-danger">recusada em <dtml-var dat_recusa></span>
                           <dtml-if expr="str(tipo_doc) == 'anexo_sessao' or str(tipo_doc) == 'anexo_peticao'">
-                            | <a class="btn btn-danger" href="assinatura_excluir_proc?hdn_cod_assinatura_doc=<dtml-var cod_assinatura_doc>&hdn_cod_usuario=<dtml-var cod_usuario>&hdn_codigo=<dtml-var codigo>&hdn_anexo=<dtml-var anexo missing>&hdn_tipo_doc=<dtml-var tipo_doc>&modal=1">Excluir</a>
+                            <a class="btn btn-sm btn-white text-danger" href="assinatura_excluir_proc?hdn_cod_assinatura_doc=<dtml-var cod_assinatura_doc>&hdn_cod_usuario=<dtml-var cod_usuario>&hdn_codigo=<dtml-var codigo>&hdn_anexo=<dtml-var anexo missing>&hdn_tipo_doc=<dtml-var tipo_doc>&modal=1"><i class="fas fa-trash"></i></a>
                           <dtml-else>
-                             | <a class="btn btn-danger" href="assinatura_excluir_proc?hdn_cod_assinatura_doc=<dtml-var cod_assinatura_doc>&hdn_cod_usuario=<dtml-var cod_usuario>&hdn_codigo=<dtml-var codigo>&hdn_tipo_doc=<dtml-var tipo_doc>&modal=1">Excluir</a>
+                            <a class="btn btn-sm btn-white text-danger" href="assinatura_excluir_proc?hdn_cod_assinatura_doc=<dtml-var cod_assinatura_doc>&hdn_cod_usuario=<dtml-var cod_usuario>&hdn_codigo=<dtml-var codigo>&hdn_tipo_doc=<dtml-var tipo_doc>&modal=1"><i class="fas fa-trash"></i></a>
                           </dtml-if>
                         <dtml-if expr="txt_motivo_recusa != None"><p class="small text-danger"><b>Motivo:</b> <dtml-var txt_motivo_recusa></p></dtml-if>
                       <dtml-else>
                           <dtml-if expr="str(tipo_doc) == 'anexo_sessao' or str(tipo_doc) == 'anexo_peticao'">
-                             <span class="anulado">Pendente</span> <span style="color: #5d2b31"><i class="fas fa-fw fa-clock"></i> | <a class="btn btn-danger" href="assinatura_excluir_proc?hdn_cod_assinatura_doc=<dtml-var cod_assinatura_doc>&hdn_cod_usuario=<dtml-var cod_usuario>&hdn_codigo=<dtml-var codigo>&hdn_anexo=<dtml-var anexo missing>&hdn_tipo_doc=<dtml-var tipo_doc>&modal=1">Excluir</a>
+                             <span class="text-muted">pendente</span> <a class="btn btn-sm btn-white text-danger" href="assinatura_excluir_proc?hdn_cod_assinatura_doc=<dtml-var cod_assinatura_doc>&hdn_cod_usuario=<dtml-var cod_usuario>&hdn_codigo=<dtml-var codigo>&hdn_anexo=<dtml-var anexo missing>&hdn_tipo_doc=<dtml-var tipo_doc>&modal=1"><i class="fas fa-trash"></i></a>
                           <dtml-else>
-                             <span class="anulado">Pendente</span> <span><i class="fas fa-fw fa-clock"></i> | <a class="btn btn-danger" href="assinatura_excluir_proc?hdn_cod_assinatura_doc=<dtml-var cod_assinatura_doc>&hdn_cod_usuario=<dtml-var cod_usuario>&hdn_codigo=<dtml-var codigo>&hdn_tipo_doc=<dtml-var tipo_doc>&modal=1">Excluir</a>
+                             <span class="text-muted">pendente</span> <a class="btn btn-sm btn-white text-danger" href="assinatura_excluir_proc?hdn_cod_assinatura_doc=<dtml-var cod_assinatura_doc>&hdn_cod_usuario=<dtml-var cod_usuario>&hdn_codigo=<dtml-var codigo>&hdn_tipo_doc=<dtml-var tipo_doc>&modal=1"><i class="fas fa-trash"></i></a>
                           </dtml-if>
                       </dtml-if>
                   </td>
                </tr>
          <dtml-if sequence-end>
+             </tbody>
             </table>
+           </div>
          </dtml-if>
       </dtml-in>
   </dtml-if>
 
-  <dtml-if expr="str(tipo_doc) == 'anexo_sessao' or str(tipo_doc) == 'anexo_peticao'">
-     <dtml-call expr="REQUEST.set('assinaturas', cadastros.assinatura.get_pdf_signatures(tipo_doc=tipo_doc, codigo=codigo, anexo=anexo))">
-  <dtml-else>
-     <dtml-call expr="REQUEST.set('assinaturas', cadastros.assinatura.get_pdf_signatures(tipo_doc=tipo_doc,codigo=codigo, anexo=None))">
-  </dtml-if>
+<dtml-if expr="str(tipo_doc) == 'anexo_sessao' or str(tipo_doc) == 'anexo_peticao'">
+  <dtml-call expr="REQUEST.set('assinaturas', cadastros.assinatura.get_pdf_signatures(tipo_doc=tipo_doc, codigo=codigo, anexo=anexo))">
+<dtml-else>
+  <dtml-call expr="REQUEST.set('assinaturas', cadastros.assinatura.get_pdf_signatures(tipo_doc=tipo_doc,codigo=8, anexo=None))">
+</dtml-if>
 
+<dtml-if expr="assinaturas!=None">
   <dtml-in assinaturas mapping>
      <dtml-if sequence-start>
-        <p class="h5">Assinaturas Existentes no Documento</p>
-       <table class="table">
-        <thead>
+       <div class="table-responsive">
+       <table class="table table-sm caption-top">
+        <caption>Assinaturas Preexistentes no Documento</caption>
+        <thead class="table-light">
           <tr>
-            <th>Signatário</th>
-            <th>CPF</th>
-            <th>Data da Assinatura</th>
+            <th width="60%">Nome do Signatário</th>
+            <th width="20%">CPF</th>
+            <th width="20%">Data da Assinatura</th>
           </tr>
         </thead>
+        <tbody class="table-group-divider">
      </dtml-if>
           <tr>
              <td><dtml-var expr="str(signer_name).title()"></td>
@@ -201,9 +224,95 @@ $(document).ready(function() {
              <td><dtml-var expr="str(DateTime(signing_time, datefmt='international').strftime('%d/%m/%Y %H:%M:%S'))"></td>
           </tr>
      <dtml-if sequence-end>
+         </tbody>
        </table>
+      </div>
      </dtml-if>
-  </dtml-in
+  <dtml-else>
+     Sem assinaturas externas
+  </dtml-in>
+ </dtml-if>
 
-<dtml-var js_slot>
-<dtml-var footer_html>
+<!-- Start Footer -->
+<script src="<dtml-var portal_url>/assets/libs/jquery/jquery.min.js"></script>
+<script src="<dtml-var portal_url>/assets/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="<dtml-var portal_url>/assets/libs/select2/js/select2.min.js"></script>
+<script src="<dtml-var portal_url>/assets/libs/select2/js/i18n/pt-BR.js"></script>
+<script>
+$(document).ready(function() {
+  setTimeout(function() {
+      $(".alert").alert('close');
+  }, 3000);
+  $('#bntIncluir').on('click', function () {
+    var clicked = false;
+    if (clicked) {
+      event.preventDefault();
+      return;
+    }
+    clicked = true;
+    var $this = $(this);
+    $this.html("Validando")
+    $this.addClass('disabled');
+    setTimeout(function() {
+      clicked = false;
+      $this.html("Incluir")
+      $this.removeClass('disabled');
+    }, 3000);
+  }); 
+}); 
+
+(function () {
+  'use strict'
+  var forms = document.querySelectorAll('.needs-validation')
+  Array.prototype.slice.call(forms)
+    .forEach(function (form) {
+      form.addEventListener('submit', function (event) {
+        if (!form.checkValidity()) {
+          event.preventDefault()
+          event.stopPropagation()
+        }
+
+        form.classList.add('was-validated')
+      }, false)
+    })
+})()
+</script>
+
+<script>
+$('.select2.users').select2({
+  placeholder: 'CTRL+A para marcar ou desmarcar todos'
+});
+
+$('.select2[multiple]').siblings('.select2-container').append('<span class="select-all"></span>');
+
+$(document).on('click', '.select-all', function (e) {
+  selectAllSelect2($(this).siblings('.selection').find('.select2-search__field'));
+});
+
+$(document).on("keyup", ".select2-search__field", function (e) {
+  var eventObj = window.event ? event : e;
+  if (eventObj.keyCode === 65 && eventObj.ctrlKey)
+     selectAllSelect2($(this));
+});
+        
+function selectAllSelect2(that) {
+
+  var selectAll = true;
+  var existUnselected = false;
+  var item = $(that.parents("span[class*='select2-container']").siblings('select[multiple]'));
+
+  item.find("option").each(function (k, v) {
+      if (!$(v).prop('selected')) {
+          existUnselected = true;
+          return false;
+      }
+  });
+
+  selectAll = existUnselected ? selectAll : !selectAll;
+
+  item.find("option").prop('selected', selectAll);
+  item.trigger('change');
+}
+</script>
+</body>
+</html>

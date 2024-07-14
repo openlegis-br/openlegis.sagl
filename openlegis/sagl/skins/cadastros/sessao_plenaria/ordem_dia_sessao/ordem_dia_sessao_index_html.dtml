@@ -12,131 +12,157 @@
 <dtml-if expr="_.has_key('ind_audiencia')">
   <legend class="font-size-16">Pauta da Audiência Pública</legend>
 <dtml-elif cod_sessao_plen>
-  <legend class="font-size-16">Ordem do Dia</legend>
+  <legend class="font-size-16">Matérias da Ordem do Dia</legend>
 </dtml-if>
 
 <form name="ordem_dia_sessao_form" method="post">
  <dtml-in expr="zsql.ordem_dia_obter_zsql(cod_sessao_plen = cod_sessao_plen, ind_excluido=0)">
     <dtml-if sequence-start>
        <div class="table-responsive mb-3">     
-          <table class="table display" id="ordem_dia">
-            <thead>
+          <table class="table align-top w-100" id="ordem_dia">
+            <thead class="table-light">
               <tr>
                 <th width="5%">Item</th>
-                <th>Identificação da Matéria</th>
-                <th>Resultado</th>
+                <th>Identificação do Item</th>
+                <th width="15%">Deliberação</th>
               </tr>
-            </thead> 
-    </dtml-if sequence-start>
-    
+            </thead class="table-light"> 
+    </dtml-if sequence-start>   
     <tr id="<dtml-var cod_ordem>">
-       <td style="cursor: move">
+       <td class="text-start" style="cursor: move">
            <dtml-var num_ordem>
        </td>
        <dtml-if cod_materia>            
          <td>
            <dtml-in expr="zsql.materia_obter_zsql(cod_materia=cod_materia, ind_excluido=0)">
-              <a href="#" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Edição de Item" data-src="ordem_dia_mostrar_proc?cod_ordem=<dtml-var cod_ordem>&cod_sessao_plen=<dtml-var cod_sessao_plen><dtml-if expr="_.has_key('ind_audiencia')">&ind_audiencia=1</dtml-if>&modal=1">
-                 <b><dtml-var des_tipo_materia missing> nº <dtml-var num_ident_basica missing>/<dtml-var ano_ident_basica missing></b>
+              <a class="fw-bolder" href="#" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Edição de Item" data-src="ordem_dia_mostrar_proc?cod_ordem=<dtml-var cod_ordem>&cod_sessao_plen=<dtml-var cod_sessao_plen><dtml-if expr="_.has_key('ind_audiencia')">&ind_audiencia=1</dtml-if>&modal=1">
+                 <span class="fw-bolder"><dtml-var sgl_tipo_materia missing> <dtml-var num_ident_basica missing>/<dtml-var ano_ident_basica missing></span> - 
               </a>
               <dtml-in expr="zsql.autoria_obter_zsql(cod_materia=cod_materia)">
-                 - <b><dtml-var nom_autor_join></b><dtml-unless sequence-end>,</dtml-unless>
+                 <b><dtml-var nom_autor_join></b><dtml-unless sequence-end>,</dtml-unless>
               </dtml-in>
            </dtml-in>
-            - <dtml-var txt_observacao> <br />              
+            <br /> <b>Ementa:</b> <dtml-var txt_observacao> <br />              
+            <dtml-if expr="_.has_key('urgencia') and urgencia==1">
+               <span class="text-danger fw-bold">Urgência Especial</span> /
+            </dtml-if>
             <dtml-in expr="zsql.turno_discussao_obter_zsql(cod_turno=tip_turno)">
-	       <b>Turno:</b> <dtml-var des_turno> -
-            </dtml-in>               
-            <dtml-in expr="zsql.quorum_votacao_obter_zsql(cod_quorum=tip_quorum)">
-	       <b>Quórum:</b> <dtml-var des_quorum>
+	       <b>Turno:</b> <dtml-var des_turno> /
             </dtml-in>
-
+            <dtml-in expr="zsql.quorum_votacao_obter_zsql(cod_quorum=tip_quorum)">
+	       <b>Quórum:</b> <dtml-var des_quorum> / 
+            </dtml-in>
+            <dtml-in expr="zsql.tipo_votacao_obter_zsql(tip_votacao=tip_votacao)">
+	       <span class="fw-bolder">Tipo de Votação:</span> <dtml-var des_tipo_votacao>
+            </dtml-in>
             <dtml-in expr="zsql.substitutivo_obter_zsql(cod_materia=cod_materia, ind_excluido=0)">
+              <dtml-if sequence-start>             
+                 <div class="mt-2 w-100">
+                   <a class="" data-bs-toggle="collapse" href="#collapseSub" role="button" aria-expanded="false" aria-controls="collapseSub"><b>Substitutivos</b> <i class="mdi mdi-chevron-down ms-1"></i></a>
+                   <div class="collapse" id="collapseSub">
+              </dtml-if>
               <div class="row mt-3">
                <div class="col-12 col-md-10">
-                  <a href="#" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Edição de Substitutivo" data-src="<dtml-var portal_url>/cadastros/materia/substitutivo/substitutivo_mostrar_proc?cod_substitutivo=<dtml-var cod_substitutivo>&cod_materia=<dtml-var cod_materia>&modal=1">
+                  <a class="fw-bolder" href="#" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Edição de Substitutivo" data-src="<dtml-var portal_url>/cadastros/materia/substitutivo/substitutivo_mostrar_proc?cod_substitutivo=<dtml-var cod_substitutivo>&cod_materia=<dtml-var cod_materia>&modal=1">
                      <b>Substitutivo nº <dtml-var num_substitutivo></b>
-                  </a>
+                  </a> - 
                   <dtml-in expr="zsql.autoria_substitutivo_obter_zsql(cod_substitutivo=cod_substitutivo)">
-                     - <b><dtml-var nom_autor_join></b><dtml-unless sequence-end>,</dtml-unless>
+                     <b><dtml-var nom_autor_join><dtml-unless sequence-end>,</dtml-unless></b>
                   </dtml-in>
-                  - <dtml-var txt_ementa>
+                  <br /> <b>Ementa:</b> <dtml-var txt_ementa>
                </div>
                <div class="col-12 col-md-2">
                  <dtml-in expr="zsql.votacao_ordem_dia_obter_zsql(cod_sessao_plen=cod_sessao_plen,cod_materia=cod_materia,cod_substitutivo=cod_substitutivo,cod_ordem=cod_ordem, ind_excluido=0)">
                     <dtml-if expr="(_.has_key(cod_votacao) and cod_substitutivo==cod_substitutivo) or tip_resultado_votacao!=0">
                        <dtml-in expr="zsql.tipo_resultado_votacao_obter_zsql(tip_resultado_votacao=tip_resultado_votacao, ind_excluido=0)">
-                          <a href="#" class="btn w-100 btn-sm btn-light mb-0" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Registro de Votação" data-src="votacao/votacao_mostrar_proc?cod_ordem=<dtml-var cod_ordem>&cod_materia=<dtml-var cod_materia>&cod_substitutivo=<dtml-var cod_substitutivo>&tip_votacao=<dtml-var tip_votacao>&dat_sessao=<dtml-var dat_sessao>&cod_sessao_plen=<dtml-var cod_sessao_plen>&num_legislatura=<dtml-var num_legislatura>&cod_sessao_leg=<dtml-var cod_sessao_leg>&cod_votacao=<dtml-var cod_votacao>&tip_sessao=<dtml-var tip_sessao>&modal=1">
-                          <i class="fas fa-arrow-circle-right"></i> 
-                         <dtml-var nom_resultado></a>
-                         <dtml-if votacao_observacao>
-                            <btn class="btn w-100 btn-sm btn-link" data-bs-toggle="popover" title="Observações da Votação" data-trigger="hover" data-placement="bottom" data-content="<dtml-var votacao_observacao>"><i class="fas fa-info-circle"></i> Observações</btn>  
-                         </dtml-if>
+                        <div class="btn-group-vertical w-100">
+                          <a class="fw-bolder" href="#" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Registro de Votação" data-src="votacao/votacao_mostrar_proc?cod_ordem=<dtml-var cod_ordem>&cod_materia=<dtml-var cod_materia>&cod_substitutivo=<dtml-var cod_substitutivo>&tip_votacao=<dtml-var tip_votacao>&dat_sessao=<dtml-var dat_sessao>&cod_sessao_plen=<dtml-var cod_sessao_plen>&num_legislatura=<dtml-var num_legislatura>&cod_sessao_leg=<dtml-var cod_sessao_leg>&cod_votacao=<dtml-var cod_votacao>&tip_sessao=<dtml-var tip_sessao>&modal=1"><dtml-var nom_resultado></a>
+                          <dtml-if votacao_observacao>
+                            <a class="btn btn-sm btn-light" data-bs-toggle="popover" data-trigger="hover" data-placement="bottom" data-content="<dtml-var votacao_observacao>">Observações</a>
+                          </dtml-if>
                        </dtml-in>
                     <dtml-elif expr="(_.has_key(cod_votacao) and cod_substitutivo==cod_substitutivo) or tip_resultado_votacao==0">
-                       <a href="#" class="btn w-100 btn-sm btn-light mb-0" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Registro de Votação" data-src="votacao/votacao_mostrar_proc?cod_ordem=<dtml-var cod_ordem>&cod_materia=<dtml-var cod_materia>&cod_substitutivo=<dtml-var cod_substitutivo>&tip_votacao=<dtml-var tip_votacao>&dat_sessao=<dtml-var dat_sessao>&cod_sessao_plen=<dtml-var cod_sessao_plen>&num_legislatura=<dtml-var num_legislatura>&cod_sessao_leg=<dtml-var cod_sessao_leg>&cod_votacao=<dtml-var cod_votacao>&tip_sessao=<dtml-var tip_sessao>&modal=1"><i class="fas fa-edit"></i> Votação</a>
+                       <div class="btn-group-vertical w-100">
+                         <a href="#" class="btn btn-sm btn-subtle-primary" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Registro de Votação" data-src="votacao/votacao_mostrar_proc?cod_ordem=<dtml-var cod_ordem>&cod_materia=<dtml-var cod_materia>&cod_substitutivo=<dtml-var cod_substitutivo>&tip_votacao=<dtml-var tip_votacao>&dat_sessao=<dtml-var dat_sessao>&cod_sessao_plen=<dtml-var cod_sessao_plen>&num_legislatura=<dtml-var num_legislatura>&cod_sessao_leg=<dtml-var cod_sessao_leg>&cod_votacao=<dtml-var cod_votacao>&tip_sessao=<dtml-var tip_sessao>&modal=1">Votação</a>
+                       </div>
                     </dtml-if>
                  <dtml-else>
-                    <a href="#" class="btn w-100 btn-sm btn-light mb-0" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Registro de Votação" data-src="votacao/votacao_form?cod_ordem=<dtml-var cod_ordem>&cod_materia=<dtml-var cod_materia>&cod_substitutivo=<dtml-var cod_substitutivo>&tip_votacao=<dtml-var tip_votacao>&dat_sessao=<dtml-var dat_sessao>&cod_sessao_plen=<dtml-var cod_sessao_plen>&num_legislatura=<dtml-var num_legislatura>&cod_sessao_leg=<dtml-var cod_sessao_leg>&tip_sessao=<dtml-var tip_sessao>&modal=1"><i class="fas fa-edit"></i> Votação</a> 
+                       <div class="btn-group-vertical w-100">
+                    <a href="#" class="btn btn-sm btn-subtle-primary" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Registro de Votação" data-src="votacao/votacao_form?cod_ordem=<dtml-var cod_ordem>&cod_materia=<dtml-var cod_materia>&cod_substitutivo=<dtml-var cod_substitutivo>&tip_votacao=<dtml-var tip_votacao>&dat_sessao=<dtml-var dat_sessao>&cod_sessao_plen=<dtml-var cod_sessao_plen>&num_legislatura=<dtml-var num_legislatura>&cod_sessao_leg=<dtml-var cod_sessao_leg>&tip_sessao=<dtml-var tip_sessao>&modal=1">Votação</a> 
                  </dtml-in>
                 </div>
+               </div>
               </div>
             </dtml-in>
             <dtml-in expr="zsql.emenda_obter_zsql(cod_materia=cod_materia, exc_pauta=0, ind_excluido=0)">
-              <div class="row mt-3">
+              <dtml-if sequence-start>             
+                 <div class="mt-2 w-100">
+                   <a class="" data-bs-toggle="collapse" href="#collapseEme" role="button" aria-expanded="false" aria-controls="collapseEme"><b>Emendas</b> <i class="mdi mdi-chevron-down ms-1"></i></a>
+                   <div class="collapse" id="collapseEme">
+              </dtml-if>
+              <div class="row mt-2">
                 <div class="col-12 col-md-10">
-                   <a href="#" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Edição de Emenda" data-src="<dtml-var portal_url>/cadastros/materia/emenda/emenda_mostrar_proc?cod_emenda=<dtml-var cod_emenda>&cod_materia=<dtml-var cod_materia>&modal=1">
-                      <b>Emenda nº <dtml-var num_emenda> (<dtml-var des_tipo_emenda>)</b>
+                   <a class="fw-bolder" href="#" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Edição de Emenda" data-src="<dtml-var portal_url>/cadastros/materia/emenda/emenda_mostrar_proc?cod_emenda=<dtml-var cod_emenda>&cod_materia=<dtml-var cod_materia>&modal=1">
+                      Emenda <dtml-var des_tipo_emenda> nº <dtml-var num_emenda> - 
                    </a>
                    <dtml-in expr="zsql.autoria_emenda_obter_zsql(cod_emenda=cod_emenda)">
-                      - <b><dtml-var nom_autor_join></b><dtml-unless sequence-end>,</dtml-unless>
+                      <b><dtml-var nom_autor_join></b><dtml-unless sequence-end>,</dtml-unless></b>
                    </dtml-in>
-                   - <dtml-var txt_ementa>
+                  <br /> <b>Ementa:</b> <dtml-var txt_ementa>
                 </div>
-                <div class="col-12 col-md-2">
+                <div class="col-12 col-md-2 d-flex justify-content-center align-items-center">
                    <dtml-call "REQUEST.set('cod_ordem_materia', cod_ordem)">
                    <dtml-in expr="zsql.votacao_ordem_dia_obter_zsql(cod_sessao_plen=cod_sessao_plen,cod_materia=cod_materia,cod_emenda=cod_emenda,cod_ordem=cod_ordem, ind_excluido=0)">
                      <dtml-if expr="(_.has_key(cod_votacao) or cod_emenda==cod_emenda) and tip_resultado_votacao!=0">
                        <dtml-in expr="zsql.tipo_resultado_votacao_obter_zsql(tip_resultado_votacao=tip_resultado_votacao, ind_excluido=0)" prefix="votacao_emenda">
-                          <a href="#" class="btn w-100 btn-sm btn-light mb-0" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Registro de Votação" data-src="votacao/votacao_mostrar_proc?cod_ordem=<dtml-var cod_ordem>&cod_materia=<dtml-var cod_materia>&cod_emenda=<dtml-var cod_emenda>&tip_votacao=<dtml-var tip_votacao>&dat_sessao=<dtml-var dat_sessao>&cod_sessao_plen=<dtml-var cod_sessao_plen>&num_legislatura=<dtml-var num_legislatura>&cod_sessao_leg=<dtml-var cod_sessao_leg>&cod_votacao=<dtml-var cod_votacao>&tip_sessao=<dtml-var tip_sessao><dtml-if expr="_.has_key('ind_audiencia')">&ind_audiencia=1</dtml-if>&modal=1">
-                          <i class="fas fa-arrow-circle-right"></i> 
+                         <div class="btn-group-vertical w-100">
+                          <a href="#" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Registro de Votação" data-src="votacao/votacao_mostrar_proc?cod_ordem=<dtml-var cod_ordem>&cod_materia=<dtml-var cod_materia>&cod_emenda=<dtml-var cod_emenda>&tip_votacao=<dtml-var tip_votacao>&dat_sessao=<dtml-var dat_sessao>&cod_sessao_plen=<dtml-var cod_sessao_plen>&num_legislatura=<dtml-var num_legislatura>&cod_sessao_leg=<dtml-var cod_sessao_leg>&cod_votacao=<dtml-var cod_votacao>&tip_sessao=<dtml-var tip_sessao><dtml-if expr="_.has_key('ind_audiencia')">&ind_audiencia=1</dtml-if>&modal=1">
                           <dtml-var nom_resultado></a>
                           <dtml-if votacao_observacao>
-                             <btn class="btn w-100 btn-sm btn-link" data-bs-toggle="popover" title="Observações da Votação" data-trigger="hover" data-placement="bottom" data-content="<dtml-var votacao_observacao>"><i class="fas fa-info-circle"></i> Observações</btn>  
+                            <button type="button" class="btn btn-sm btn-light" data-bs-container="body" data-bs-toggle="popover" data-bs-placement="left" data-bs-content="<dtml-var votacao_observacao>">Observações</button> 
                           </dtml-if>
+                         </div>
                        </dtml-in>
                      <dtml-elif expr="(_.has_key(cod_votacao) and cod_emenda==cod_emenda) or tip_resultado_votacao==0">
-                        <a href="#" class="btn w-100 btn-sm btn-light mb-0" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Registro de Votação" data-src="votacao/votacao_mostrar_proc?cod_ordem=<dtml-var cod_ordem>&cod_materia=<dtml-var cod_materia>&cod_emenda=<dtml-var cod_emenda>&tip_votacao=<dtml-var tip_votacao>&dat_sessao=<dtml-var dat_sessao>&cod_sessao_plen=<dtml-var cod_sessao_plen>&num_legislatura=<dtml-var num_legislatura>&cod_sessao_leg=<dtml-var cod_sessao_leg>&cod_votacao=<dtml-var cod_votacao>&tip_sessao=<dtml-var tip_sessao>&modal=1"><i class="fas fa-edit"></i> Votação</a>
+                      <div class="btn-group-vertical w-100">
+                        <a href="#" class="btn btn-sm btn-subtle-primary" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Registro de Votação" data-src="votacao/votacao_mostrar_proc?cod_ordem=<dtml-var cod_ordem>&cod_materia=<dtml-var cod_materia>&cod_emenda=<dtml-var cod_emenda>&tip_votacao=<dtml-var tip_votacao>&dat_sessao=<dtml-var dat_sessao>&cod_sessao_plen=<dtml-var cod_sessao_plen>&num_legislatura=<dtml-var num_legislatura>&cod_sessao_leg=<dtml-var cod_sessao_leg>&cod_votacao=<dtml-var cod_votacao>&tip_sessao=<dtml-var tip_sessao>&modal=1">Votação</a>
+                      </div>
                      </dtml-if>
                    <dtml-else>
-                      <a href="#" class="btn w-100 btn-sm btn-light mb-0" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Registro de Votação" data-src="votacao/votacao_form?cod_ordem=<dtml-var cod_ordem>&cod_materia=<dtml-var cod_materia>&cod_emenda=<dtml-var cod_emenda>&tip_votacao=<dtml-var tip_votacao>&dat_sessao=<dtml-var dat_sessao>&cod_sessao_plen=<dtml-var cod_sessao_plen>&num_legislatura=<dtml-var num_legislatura>&cod_sessao_leg=<dtml-var cod_sessao_leg>&tip_sessao=<dtml-var tip_sessao>&modal=1"><i class="fas fa-edit"></i> Votação</a>                
+                      <div class="btn-group-vertical w-100">
+                        <a href="#" class="btn btn-sm btn-subtle-primary" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Registro de Votação" data-src="votacao/votacao_form?cod_ordem=<dtml-var cod_ordem>&cod_materia=<dtml-var cod_materia>&cod_emenda=<dtml-var cod_emenda>&tip_votacao=<dtml-var tip_votacao>&dat_sessao=<dtml-var dat_sessao>&cod_sessao_plen=<dtml-var cod_sessao_plen>&num_legislatura=<dtml-var num_legislatura>&cod_sessao_leg=<dtml-var cod_sessao_leg>&tip_sessao=<dtml-var tip_sessao>&modal=1">Votação</a>
+                      </div>            
                    </dtml-in>
                 </div>
               </div>
             </dtml-in>
-
          </td>
          <td>
            <dtml-in expr="zsql.votacao_ordem_dia_obter_zsql(cod_sessao_plen=cod_sessao_plen,cod_materia=cod_materia,cod_ordem=cod_ordem, ind_excluido=0)">
              <dtml-if expr="cod_votacao and tip_resultado_votacao!=0">
-               <a href="#" class="btn w-100 btn-sm btn-light mb-0" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Registro de Discussão" data-src="discussao/discussao_index_html?cod_ordem=<dtml-var cod_ordem>&cod_materia=<dtml-var cod_materia>&dat_sessao=<dtml-var dat_sessao>&cod_sessao_plen=<dtml-var cod_sessao_plen>&num_legislatura=<dtml-var num_legislatura>&cod_sessao_leg=<dtml-var cod_sessao_leg>&tip_sessao=<dtml-var tip_sessao><dtml-if expr="_.has_key('ind_audiencia')">&ind_audiencia=1</dtml-if>&modal=1"><i class="fas fa-user-tie"></i> Discussão</a>    
+              <div class="btn-group-vertical w-100">
+               <a href="#" class="btn btn-sm btn-subtle-primary" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Registro de Discussão" data-src="discussao/discussao_index_html?cod_ordem=<dtml-var cod_ordem>&cod_materia=<dtml-var cod_materia>&dat_sessao=<dtml-var dat_sessao>&cod_sessao_plen=<dtml-var cod_sessao_plen>&num_legislatura=<dtml-var num_legislatura>&cod_sessao_leg=<dtml-var cod_sessao_leg>&tip_sessao=<dtml-var tip_sessao><dtml-if expr="_.has_key('ind_audiencia')">&ind_audiencia=1</dtml-if>&modal=1">Discussão</a>    
                <dtml-in expr="zsql.tipo_resultado_votacao_obter_zsql(tip_resultado_votacao=tip_resultado_votacao, ind_excluido=0)">
-                  <a href="#" class="btn w-100 btn-sm btn-primary mb-0" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Registro de Votação" data-src="votacao/votacao_mostrar_proc?cod_ordem=<dtml-var cod_ordem>&cod_materia=<dtml-var cod_materia>&tip_votacao=<dtml-var tip_votacao>&dat_sessao=<dtml-var dat_sessao>&cod_sessao_plen=<dtml-var cod_sessao_plen>&num_legislatura=<dtml-var num_legislatura>&cod_sessao_leg=<dtml-var cod_sessao_leg>&cod_votacao=<dtml-var cod_votacao>&tip_sessao=<dtml-var tip_sessao><dtml-if expr="_.has_key('ind_audiencia')">&ind_audiencia=1</dtml-if>&modal=1">
-                  <i class="fas fa-arrow-circle-right"></i> 
+                  <a href="#" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Registro de Votação" data-src="votacao/votacao_mostrar_proc?cod_ordem=<dtml-var cod_ordem>&cod_materia=<dtml-var cod_materia>&tip_votacao=<dtml-var tip_votacao>&dat_sessao=<dtml-var dat_sessao>&cod_sessao_plen=<dtml-var cod_sessao_plen>&num_legislatura=<dtml-var num_legislatura>&cod_sessao_leg=<dtml-var cod_sessao_leg>&cod_votacao=<dtml-var cod_votacao>&tip_sessao=<dtml-var tip_sessao><dtml-if expr="_.has_key('ind_audiencia')">&ind_audiencia=1</dtml-if>&modal=1">
                   <dtml-var nom_resultado></a>
                   <dtml-if votacao_observacao>
-                     <btn class="btn w-100 btn-sm btn-link" data-bs-toggle="popover" title="Observações da Votação" data-trigger="hover" data-placement="bottom" data-content="<dtml-var votacao_observacao>"><i class="fas fa-info-circle"></i> Observações</btn>                    
+                     <button type="button" class="btn btn-sm btn-light" data-bs-container="body" data-bs-toggle="popover" data-bs-placement="left" data-bs-content="<dtml-var votacao_observacao>">Observações</button>                  
                   </dtml-if>
                </dtml-in>
+              </div>
              <dtml-elif expr="cod_votacao and tip_resultado_votacao==0">
-               <p align="center">
-                 <a href="#" class="btn w-100 btn-sm btn-light mb-0" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Registro de Discussão" data-src="discussao/discussao_index_html?cod_ordem=<dtml-var cod_ordem>&cod_materia=<dtml-var cod_materia>&dat_sessao=<dtml-var dat_sessao>&cod_sessao_plen=<dtml-var cod_sessao_plen>&num_legislatura=<dtml-var num_legislatura>&cod_sessao_leg=<dtml-var cod_sessao_leg>&tip_sessao=<dtml-var tip_sessao><dtml-if expr="_.has_key('ind_audiencia')">&ind_audiencia=1</dtml-if>&modal=1"><i class="fas fa-user-tie"></i> Discussão</a>   
-                 <a href="#" class="btn w-100 btn-sm btn-primary mb-0" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Registro de Votação" data-src="votacao/votacao_form?cod_ordem=<dtml-var cod_ordem>&cod_materia=<dtml-var cod_materia>&tip_votacao=<dtml-var tip_votacao>&dat_sessao=<dtml-var dat_sessao>&cod_sessao_plen=<dtml-var cod_sessao_plen>&num_legislatura=<dtml-var num_legislatura>&cod_sessao_leg=<dtml-var cod_sessao_leg>&tip_sessao=<dtml-var tip_sessao><dtml-if expr="_.has_key('ind_audiencia')">&ind_audiencia=1</dtml-if>&modal=1"><i class="fas fa-edit"></i> Votação</a>
-                </p>
+              <div class="btn-group-vertical w-100">
+                 <a href="#" class="btn btn-sm btn-subtle-primary" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Registro de Discussão" data-src="discussao/discussao_index_html?cod_ordem=<dtml-var cod_ordem>&cod_materia=<dtml-var cod_materia>&dat_sessao=<dtml-var dat_sessao>&cod_sessao_plen=<dtml-var cod_sessao_plen>&num_legislatura=<dtml-var num_legislatura>&cod_sessao_leg=<dtml-var cod_sessao_leg>&tip_sessao=<dtml-var tip_sessao><dtml-if expr="_.has_key('ind_audiencia')">&ind_audiencia=1</dtml-if>&modal=1">Discussão</a>   
+                 <a href="#" class="btn btn-sm btn-subtle-primary" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Registro de Votação" data-src="votacao/votacao_form?cod_ordem=<dtml-var cod_ordem>&cod_materia=<dtml-var cod_materia>&tip_votacao=<dtml-var tip_votacao>&dat_sessao=<dtml-var dat_sessao>&cod_sessao_plen=<dtml-var cod_sessao_plen>&num_legislatura=<dtml-var num_legislatura>&cod_sessao_leg=<dtml-var cod_sessao_leg>&tip_sessao=<dtml-var tip_sessao><dtml-if expr="_.has_key('ind_audiencia')">&ind_audiencia=1</dtml-if>&modal=1">Votação</a>
+                </div>
              </dtml-if>
            <dtml-else>
-            <a href="#" class="btn w-100 btn-light mb-0" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Registro de Discussão" data-src="discussao/discussao_index_html?cod_ordem=<dtml-var cod_ordem>&cod_materia=<dtml-var cod_materia>&dat_sessao=<dtml-var dat_sessao>&cod_sessao_plen=<dtml-var cod_sessao_plen>&num_legislatura=<dtml-var num_legislatura>&cod_sessao_leg=<dtml-var cod_sessao_leg>&tip_sessao=<dtml-var tip_sessao><dtml-if expr="_.has_key('ind_audiencia')">&ind_audiencia=1</dtml-if>&modal=1"><i class="fas fa-fw fa-user-tie"></i>Discussão</a>
-            <a href="#" class="btn w-100 btn-sm btn-primary mb-0" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Registro de Votação" data-src="votacao/votacao_form?cod_ordem=<dtml-var cod_ordem>&cod_materia=<dtml-var cod_materia>&tip_votacao=<dtml-var tip_votacao>&dat_sessao=<dtml-var dat_sessao>&cod_sessao_plen=<dtml-var cod_sessao_plen>&num_legislatura=<dtml-var num_legislatura>&cod_sessao_leg=<dtml-var cod_sessao_leg>&tip_sessao=<dtml-var tip_sessao><dtml-if expr="_.has_key('ind_audiencia')">&ind_audiencia=1</dtml-if>&modal=1"><i class="fas fa-edit"></i> Votação</a>
+            <div class="btn-group-vertical w-100">
+            <a href="#" class="btn btn-sm btn-subtle-primary" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Registro de Discussão" data-src="discussao/discussao_index_html?cod_ordem=<dtml-var cod_ordem>&cod_materia=<dtml-var cod_materia>&dat_sessao=<dtml-var dat_sessao>&cod_sessao_plen=<dtml-var cod_sessao_plen>&num_legislatura=<dtml-var num_legislatura>&cod_sessao_leg=<dtml-var cod_sessao_leg>&tip_sessao=<dtml-var tip_sessao><dtml-if expr="_.has_key('ind_audiencia')">&ind_audiencia=1</dtml-if>&modal=1">Discussão</a>
+            <a href="#" class="btn btn-sm btn-subtle-primary" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Registro de Votação" data-src="votacao/votacao_form?cod_ordem=<dtml-var cod_ordem>&cod_materia=<dtml-var cod_materia>&tip_votacao=<dtml-var tip_votacao>&dat_sessao=<dtml-var dat_sessao>&cod_sessao_plen=<dtml-var cod_sessao_plen>&num_legislatura=<dtml-var num_legislatura>&cod_sessao_leg=<dtml-var cod_sessao_leg>&tip_sessao=<dtml-var tip_sessao><dtml-if expr="_.has_key('ind_audiencia')">&ind_audiencia=1</dtml-if>&modal=1">Votação</a>
+           <dtml-if sequence-end>
+              </div>
+           </dtml-if>
            </dtml-in>
          </td>
        <dtml-elif cod_parecer>   
@@ -145,128 +171,88 @@
                     <dtml-call "REQUEST.set('cod_materia_sel', cod_materia)">
                     <dtml-in expr="zsql.comissao_obter_zsql(cod_comissao=cod_comissao)">
                        <dtml-in expr="zsql.materia_obter_zsql(cod_materia=cod_materia_sel)">
-                          <a href="#" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Edição de Item" data-src="ordem_dia_parecer_mostrar_proc?cod_ordem=<dtml-var cod_ordem><dtml-if expr="_.has_key('ind_audiencia')">&ind_audiencia=1</dtml-if>&modal=1">
-                             <b>Parecer <dtml-var sgl_comissao> nº <dtml-var num_parecer>/<dtml-var ano_parecer> ao <dtml-var sgl_tipo_materia missing> <dtml-var num_ident_basica missing>/<dtml-var ano_ident_basica missing></b>
-                          </a>
+                          <a class="fw-bolder" href="#" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Edição de Item" data-src="ordem_dia_parecer_mostrar_proc?cod_ordem=<dtml-var cod_ordem><dtml-if expr="_.has_key('ind_audiencia')">&ind_audiencia=1</dtml-if>&modal=1">
+                             Parecer <dtml-var sgl_comissao> nº <dtml-var num_parecer>/<dtml-var ano_parecer>
+                          </a> - 
                        </dtml-in>
-                       - <b><dtml-var nom_comissao></b>
+                       <b><dtml-var nom_comissao></b>
                     </dtml-in>
                    <dtml-call expr="REQUEST.set('cod_materia', cod_materia)">
                  </dtml-in>
-                  - <dtml-var txt_observacao>
+                  <br/><dtml-var txt_observacao>
                </td>
                <td>
 
              <dtml-in expr="zsql.votacao_ordem_dia_obter_zsql(cod_sessao_plen=cod_sessao_plen,cod_parecer=cod_parecer,cod_ordem=cod_ordem, ind_excluido=0)">
               <dtml-if cod_votacao>
                 <dtml-in expr="zsql.tipo_resultado_votacao_obter_zsql(tip_resultado_votacao=tip_resultado_votacao, ind_excluido=0)" prefix="votacao_parecer">
-                    <a href="#" class="btn w-100 btn-sm btn-primary mb-0" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Registro de Votação" data-src="votacao/votacao_mostrar_proc?cod_ordem=<dtml-var cod_ordem>&cod_parecer=<dtml-var cod_parecer>&tip_votacao=<dtml-var tip_votacao>&dat_sessao=<dtml-var dat_sessao>&cod_sessao_plen=<dtml-var cod_sessao_plen>&num_legislatura=<dtml-var num_legislatura>&cod_sessao_leg=<dtml-var cod_sessao_leg>&cod_votacao=<dtml-var cod_votacao>&tip_sessao=<dtml-var tip_sessao>&modal=1">
-                    <i class="fas fa-arrow-circle-right"></i> 
+                  <div class="btn-group-vertical w-100">
+                    <a href="#" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Registro de Votação" data-src="votacao/votacao_mostrar_proc?cod_ordem=<dtml-var cod_ordem>&cod_parecer=<dtml-var cod_parecer>&tip_votacao=<dtml-var tip_votacao>&dat_sessao=<dtml-var dat_sessao>&cod_sessao_plen=<dtml-var cod_sessao_plen>&num_legislatura=<dtml-var num_legislatura>&cod_sessao_leg=<dtml-var cod_sessao_leg>&cod_votacao=<dtml-var cod_votacao>&tip_sessao=<dtml-var tip_sessao>&modal=1">
                     <dtml-var nom_resultado></a>
                     <dtml-if votacao_observacao>
-                        <btn class="btn w-100 btn-sm btn-link" data-bs-toggle="popover" title="Observações da Votação" data-trigger="hover" data-placement="bottom" data-content="<dtml-var votacao_observacao>"><i class="fas fa-info-circle"></i> Observações</btn>  
+                       <button type="button" class="btn btn-sm btn-light" data-bs-container="body" data-bs-toggle="popover" data-bs-placement="left" data-bs-content="<dtml-var votacao_observacao>">Observações</button> 
                     </dtml-if>
+                   </div>
                 </dtml-in>
               <dtml-else>
-                    <a href="#" class="btn w-100 btn-sm btn-primary mb-0" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Registro de Votação" data-src="votacao/votacao_form?cod_ordem=<dtml-var cod_ordem>&cod_parecer=<dtml-var cod_parecer>&tip_votacao=<dtml-var tip_votacao>&dat_sessao=<dtml-var dat_sessao>&cod_sessao_plen=<dtml-var cod_sessao_plen>&num_legislatura=<dtml-var num_legislatura>&cod_sessao_leg=<dtml-var cod_sessao_leg>&tip_sessao=<dtml-var tip_sessao>&modal=1"><i class="fas fa-edit"></i> Votação</a> 
+                 <div class="btn-group-vertical w-100">
+                    <a href="#" class="btnbtn-sm btn-subtle-primary" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Registro de Votação" data-src="votacao/votacao_form?cod_ordem=<dtml-var cod_ordem>&cod_parecer=<dtml-var cod_parecer>&tip_votacao=<dtml-var tip_votacao>&dat_sessao=<dtml-var dat_sessao>&cod_sessao_plen=<dtml-var cod_sessao_plen>&num_legislatura=<dtml-var num_legislatura>&cod_sessao_leg=<dtml-var cod_sessao_leg>&tip_sessao=<dtml-var tip_sessao>&modal=1">Votação</a> 
+                 </div>
                 </dtml-if>
               <dtml-else>
-                    <a href="#" class="btn w-100 btn-sm btn-primary mb-0" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Registro de Votação" data-src="votacao/votacao_form?cod_ordem=<dtml-var cod_ordem>&cod_parecer=<dtml-var cod_parecer>&tip_votacao=<dtml-var tip_votacao>&dat_sessao=<dtml-var dat_sessao>&cod_sessao_plen=<dtml-var cod_sessao_plen>&num_legislatura=<dtml-var num_legislatura>&cod_sessao_leg=<dtml-var cod_sessao_leg>&tip_sessao=<dtml-var tip_sessao>&modal=1"><i class="fas fa-edit"></i> Votação</a>                
+                 <div class="btn-group-vertical w-100">
+                    <a href="#" class="btn btn-sm btn-subtle-primary mb-0" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Registro de Votação" data-src="votacao/votacao_form?cod_ordem=<dtml-var cod_ordem>&cod_parecer=<dtml-var cod_parecer>&tip_votacao=<dtml-var tip_votacao>&dat_sessao=<dtml-var dat_sessao>&cod_sessao_plen=<dtml-var cod_sessao_plen>&num_legislatura=<dtml-var num_legislatura>&cod_sessao_leg=<dtml-var cod_sessao_leg>&tip_sessao=<dtml-var tip_sessao>&modal=1">Votação</a>
+                 </div>          
               </dtml-in>
              </td>
        </dtml-if>
     </tr>
     <dtml-if sequence-end>
-     <tbody>
-   </table>
+       <tbody>
+    </table>
+  </div>
  </dtml-if sequence-end>
   <dtml-else>
-     <p>Não constam matérias na <dtml-if expr="_.has_key('ind_audiencia')">Pauta<dtml-else>Ordem do Dia</dtml-if>.</p>
+     <p>Não há matérias na <dtml-if expr="_.has_key('ind_audiencia')">Pauta<dtml-else>Ordem do Dia</dtml-if>.</p>
 </dtml-in>
 
-<div class="text-start">
-  <a href="#" class="btn btn-light" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Inclusão de Matéria" data-src="ordem_dia_form?cod_sessao_plen=<dtml-var cod_sessao_plen>&modal=1<dtml-if expr="_.has_key('ind_audiencia')">&ind_audiencia=1</dtml-if>"><i class="fa fa-plus"></i> Matéria</a>
-<dtml-unless ind_audiencia>
-  <a class="btn btn-light" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Inclusão de Parecer" data-src="ordem_dia_parecer_form?cod_sessao_plen=<dtml-var cod_sessao_plen>&modal=1" ><i class="fa fa-plus"></i> Parecer</a>
-</dtml-unless>
-<dtml-comment>
-    <input class="btn btn-primary" type="button" name="btn_lote" value="Aprovação em Lote" onClick="aprovacao_lote()" />  
-</dtml-comment>
-  <input class="btn btn-primary" type="button" value="Atualizar" onClick="window.location.reload()">
+<div class="row">
+  <div class="col-12 text-start">
+  <div class="btn-group" role="group" aria-label="">
+    <div class="btn-group" role="group">
+      <button id="btnGroupDrop1" type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+        Incluir Item <i class="mdi mdi-chevron-down ms-1"></i>
+      </button>
+      <ul class="dropdown-menu" aria-labelledby="btnGroupDrop1">
+        <li> <a href="#" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Cadastro de Matéria na Ordem do Dia" data-src="ordem_dia_form?cod_sessao_plen=<dtml-var cod_sessao_plen>&modal=1<dtml-if expr="_.has_key('ind_audiencia')">&ind_audiencia=1</dtml-if>">Matéria Legislativa</a></li>
+        <li><a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Inclusão de Parecer" data-src="ordem_dia_parecer_form?cod_sessao_plen=<dtml-var cod_sessao_plen>&modal=1">Parecer de Comissão</a></li>
+      </ul>
+    </div>
+    <dtml-if expr="zsql.ordem_dia_obter_zsql(cod_sessao_plen = cod_sessao_plen, ind_excluido=0)">
+      <dtml-comment>
+        <li><input class="btn-primary" type="button" name="btn_lote" value="Aprovação em Lote" onClick="aprovacao_lote()" /></li>
+      </dtml-comment> 
+       <input class="btn btn-secondary" type="button" value="Atualizar" onClick="window.location.reload()">
+    </dtml-if>
+  </div>
+</div>
 </div>
 
 </form>
 </div>
 </div>
-<link rel="stylesheet" href="<dtml-var portal_url>/css/rowReorder.bootstrap4.min.css" />
 <dtml-var js_slot>
-<script src="<dtml-var portal_url>/js/dataTables.rowReorder.min.js"></script>
 <script>
 $(document).ready(function() {
-    var table = $('#ordem_dia').DataTable( {
-         "order": [[ 0, 'asc' ]],
-         "rowReorder": {
-             selector: 'td:nth-child(1)',       
-             //selector: 'tr',
-             //   update: true,
-         },      
-        "bStateSave": true,        
-        "fnStateSave": function (oSettings, oData) {
-            localStorage.setItem('expDataTable<dtml-var cod_sessao_plen>', JSON.stringify(oData));
-        },
-        "fnStateLoad": function (oSettings) {
-            return JSON.parse(localStorage.getItem('expDataTable<dtml-var cod_sessao_plen>'));
-        },
-        "lengthMenu": [[10, 25, 50, 100], [10, 25, 50, 100]],
-        "lengthChange": true,
-        "buttons": [
-            {
-                extend: 'collection',
-                text: 'Exportar',
-                buttons: [ 
-                           {
-                             extend:    'excelHtml5',
-                             text:      '<i class="far fa-file-excel"></i> Excel',
-                             titleAttr: 'PDF'
-                           },
-                           {
-                             extend:    'pdfHtml5',
-                             download: 'open',
-                             text:      '<i class="fa fa-file-adobe"></i> PDF',
-                             titleAttr: 'PDF'
-                           },
-                           {
-                             extend:    'print',
-                             text:      '<i class="fa fa-print"></i> Impressão',
-                             titleAttr: 'Impressão'
-                           },
-                         ],
-               className: '',
-               dropup: true,
-               autoClose: true,
-               fade: true
-
-            }
-        ],
-        "language": {
-          search: "Pesquisar:",
-          processing:     "Processando...",
-          loadingRecords: "Carregando...",
-          lengthMenu:     "Exibir _MENU_ registros por página",
-          info:           "Exibindo _START_ a _END_ de _TOTAL_ registros",
-          infoEmpty:      "Exibindo _START_ a _END_ de _TOTAL_ registros",
-          infoFiltered:   "(total de registros:_MAX_)",
-          emptyTable:     "Nenhum registro encontrado",
-          zeroRecords:     "Nenhum registro encontrado",
-          paginate: {
-            first:      "Primeiro",
-            previous:   "Anterior",
-            next:       "Próximo",
-            last:       "Último"
+  new DataTable('#ordem_dia', {
+      "responsive": true,
+      "rowReorder": true,
+      "language": {
+          "url": '//cdn.datatables.net/plug-ins/2.0.8/i18n/pt-BR.json',
           },
-        }
-    });
-    table.on('row-reorder.dt', function (dragEvent, data, nodes) {
+  });
+  var table = $('#ordem_dia').DataTable()
+   table.on('row-reorder.dt', function (dragEvent, data, nodes) {
         for (var i = 0, ien = data.length ; i < ien ; i++) {
             var rowData = table.row(data[i].node).data();
             var codigo = table.row(data[i].node).id();
@@ -279,13 +265,8 @@ $(document).ready(function() {
                 dataType: "json"
             });
             }
-    });    
+    }); 
 });
-
-$(document).ready(function(){
-  $('[data-bs-toggle="popover"]').popover();
-});
-
 function aprovacao_lote(){
     if (confirm("Confirma a aprovação em lote dos Requerimentos?")) {
         location.href="aprovacao_lote_salvar_pysc?<dtml-var "REQUEST.get('QUERY_STRING','')">";

@@ -37,7 +37,7 @@
 					     <thead class="table-light">
 						 <tr>  
 						     <th width="20%">Tramitação</th>
-						     <th>Matéria</th>
+						     <th>Processo Legislativo</th>
 						     <th>Origem</th>		     
 						     <th>Destino</th>
 						     <th>Status</th>
@@ -61,7 +61,7 @@
 							      <a href="<dtml-var portal_url>/consultas/materia/materia_mostrar_proc?cod_materia=<dtml-var cod_materia>" target="_blank">
 							  </dtml-if>
 							
-							   <dtml-var des_tipo_materia> nº <dtml-var num_ident_basica>/<dtml-var ano_ident_basica></a> - 
+							   <dtml-var sgl_tipo_materia> <dtml-var num_ident_basica>/<dtml-var ano_ident_basica></a> - 
 							   <dtml-in expr="zsql.autoria_obter_zsql(cod_materia=cod_materia)">
 							     <dtml-var nom_autor_join><dtml-unless sequence-end>,</dtml-unless>
 							   </dtml-in> 
@@ -94,7 +94,7 @@
 					</table>                   
 				      </dtml-if>
 				   <dtml-else>
-				     <p>Nenhuma tramitação foi enviada.</p>      
+				     <p>Não há tramitações enviadas.</p>      
 				   </dtml-in>
                                 </div> <!-- panel -->
                             </div> <!-- end Col -->

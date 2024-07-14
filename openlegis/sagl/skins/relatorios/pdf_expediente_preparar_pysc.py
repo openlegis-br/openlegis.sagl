@@ -7,7 +7,6 @@
 ##parameters=cod_sessao_plen
 ##title=
 ##
-from io import BytesIO
 request=context.REQUEST
 response=request.RESPONSE
 

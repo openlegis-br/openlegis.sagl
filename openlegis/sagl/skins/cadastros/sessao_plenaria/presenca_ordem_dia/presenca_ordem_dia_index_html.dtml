@@ -5,27 +5,28 @@
 <div class="tab-content">
   <div class="tab-pane p-3 border fade show active">
 
-<legend class="font-size-16">Presença na Ordem do Dia</legend>
+<legend class="font-size-16">Presenças na Ordem do Dia</legend>
 
 <form name="presenca_ordem_dia_form" method="post" action="presenca_ordem_dia_salvar_proc">
-    <input type="hidden" name="hdn_url" value="index_html?cod_sessao_plen=<dtml-var cod_sessao_plen missing>&num_legislatura=<dtml-var num_legislatura missing>&cod_sessao_leg=<dtml-var cod_sessao_leg missing>&dat_sessao=<dtml-var dat_sessao missing>&tip_sessao=<dtml-var tip_sessao missing>" />
+   <input type="hidden" name="hdn_url" value="index_html?cod_sessao_plen=<dtml-var cod_sessao_plen missing>&num_legislatura=<dtml-var num_legislatura missing>&cod_sessao_leg=<dtml-var cod_sessao_leg missing>&dat_sessao=<dtml-var dat_sessao missing>&tip_sessao=<dtml-var tip_sessao missing>" />
    <input type="hidden" name="hdn_cod_sessao_plen" value="<dtml-var cod_sessao_plen missing>">
    <input type="hidden" name="dat_ordem" value="<dtml-var dat_sessao missing>"/>
    <div class="table-reponsive">
-    <table class="table">
-          <thead>
+    <table class="table table-sm table-striped w-100 align-middle">
+          <thead class="">
              <tr>
-                  <th>
-                    Parlamentar
+                  <th width="40%">
+                    Vereador
                   </th>
-                  <th>
+                  <th width="30%">
                     Registro
                   </th>
-                  <th>
-                   Justificativa de Ausência
+                  <th width="30%">
+                    Observações
                   </th>
              </tr>
           </thead>
+          <tbody class="table-group-divider">
        <dtml-in expr="zsql.autores_obter_zsql(txt_dat_apresentacao=dat_sessao)">
               <tr>
                   <td>
@@ -33,7 +34,7 @@
                     <input type="hidden" name="hdn_cod_parlamentar" value="<dtml-var cod_parlamentar missing>"/>
                   </td>
                   <td>
-                    <select class="form-select"  id="lst_tip_frequencia" name="lst_tip_frequencia" size="1">
+                    <select class="form-select form-select-sm" name="lst_tip_frequencia">
                         <dtml-in expr="['Presença', 'Falta', 'Ausência Justificada']">                 
                          <option
                            <dtml-in expr="zsql.presenca_ordem_dia_obter_zsql(cod_sessao_plen=cod_sessao_plen,cod_parlamentar=cod_parlamentar, ind_excluido=0)">
@@ -57,12 +58,12 @@
                         <dtml-call expr="REQUEST.set('txa_txt_justif_ausencia',txt_justif_ausencia)">
                       </dtml-if>
                     </dtml-in>
-                      <input class="form-control" type="text" id="txa_txt_justif_ausencia" name="txa_txt_justif_ausencia" value="<dtml-var txa_txt_justif_ausencia missing null>" size="30" maxlenght="200">
+                      <input class="form-control form-control-sm" type="text" id="txa_txt_justif_ausencia" name="txa_txt_justif_ausencia" value="<dtml-var txa_txt_justif_ausencia missing null>" size="30" maxlenght="200">
                   </td>
               </tr>
        <dtml-else>
               <tr>
-                  <td>Nenhum parlamentar com mandato cadastrado na Legislatura.</td>
+                  <td>Nenhum parlamentar com mandato na Legislatura.</td>
               </tr>
        </dtml-in>
            <dtml-if tip_sessao>
@@ -72,12 +73,14 @@
                   </td>
                </tr>
            </dtml-if>
+      </tbody>
     </table>
    </div>
   <div clas="text-start">
      <input class="btn btn-primary" type="submit" name="button" value="Salvar" />
   </div>
   </form>
+
 </div>
 </div>
 

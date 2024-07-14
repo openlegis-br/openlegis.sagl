@@ -56,7 +56,7 @@
 
 </script>
 
-<h1 class="firstHeading font-size-18">Documento Administrativo</h1> 
+<h1 class="firstHeading font-size-18 ms-2">Processo Administrativo</h1> 
 
 <form id="materia_apresentada_documento_form" name="materia_apresentada_documento_form" method="post" action="materia_apresentada_salvar_proc">
 <fieldset>
@@ -64,14 +64,14 @@
         <table class="table table-borderless">
      <tr>
        <td>
-          <label class="form-label" for="txt_dat_ordem" class="required">Data da <dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao"></label>
+          <label class="form-label required" for="txt_dat_ordem">Data da <dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao"></label>
           <input class="form-control" type="text" name="txt_dat_ordem" id="txt_dat_ordem" readonly="readonly"
              <dtml-if lst_dat_ordem> value="<dtml-var lst_dat_ordem>"
              <dtml-else> value="<dtml-var dat_inicio_sessao>"
              </dtml-if> />
         </td>
         <td>
-           <label class="form-label" for="lst_tip_sessao" class="required">Tipo de <dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao"></label>
+           <label class="form-label required" for="lst_tip_sessao">Tipo da <dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao"></label>
             <select class="form-select" id="lst_tip_sessao" name="lst_tip_sessao" onfocus="this.initialSelect = this.selectedIndex;" onchange="this.selectedIndex = this.initialSelect;" required>
 	      <option value="0">Selecione</option>
               <dtml-in expr="zsql.tipo_sessao_plenaria_obter_zsql(ind_excluido=0)">
@@ -87,7 +87,7 @@
             </select>
          </td>
          <td>
-            <label class="form-label" for="txt_num_ordem" class="required">Nº de Ordem</label>
+            <label class="form-label required" for="txt_num_ordem">Número de Ordem</label>
             <dtml-unless cod_ordem>
                <dtml-in expr="zsql.materia_apresentada_numero_obter_zsql(cod_sessao_plen=cod_sessao_plen)">
                  <dtml-call expr="REQUEST.set('num_ordem', _.int(novo_item))">
@@ -100,7 +100,7 @@
              <td colspan="3">
                <div class="row">
                  <div class="col-6">
-                    <label class="form-label" for="lst_tip_documento" class="required">Tipo Documento</label>
+                    <label class="form-label required" for="lst_tip_documento">Tipo de Processo Administrativo</label>
                     <select class="form-select" id="lst_tip_documento" name="lst_tip_documento" onChange="ementa_buscar(document.materia_apresentada_documento_form)" required>
                         <option>Selecione</option>
                         <dtml-in expr="zsql.tipo_documento_administrativo_obter_zsql(ind_publico=1, ind_excluido=0)">
@@ -115,7 +115,7 @@
                     </select>
                 </div>
                  <div class="col-3">
-                    <label class="form-label" for="txt_num_documento" class="required">Número</label>
+                    <label class="form-label required" for="txt_num_documento">Número</label>
                     <input class="form-control number" type="number" id="txt_num_documento" name="txt_num_documento" onChange="ementa_buscar(document.materia_apresentada_documento_form)"
                         <dtml-if cod_documento>
                             <dtml-in expr="zsql.documento_administrativo_obter_zsql(cod_documento = cod_documento)">
@@ -128,7 +128,7 @@
                     <dtml-unless ano_documento>
                      <dtml-call expr="REQUEST.set('ano_documento', _.DateTime.year(DateTime()))">
                     </dtml-unless>
-                    <label class="form-label" for="txt_ano_documento" class="required">Ano</label>
+                    <label class="form-label required" for="txt_ano_documento">Ano</label>
                     <input class="form-control year" type="number" id="txt_ano_documento" name="txt_ano_documento" onChange="ementa_buscar(document.materia_apresentada_documento_form)"
                         <dtml-if cod_documento>
                             <dtml-in expr="zsql.documento_administrativo_obter_zsql(cod_documento = cod_documento)">
@@ -142,14 +142,14 @@
             </tr>
             <tr>
                 <td colspan="3">
-                    <label class="form-label" for="txa_txt_observacao" class="required">Assunto</label>
+                    <label class="form-label required" for="txa_txt_observacao">Assunto</label>
                     <textarea class="form-control auto-resize" id="txa_txt_observacao" name="txa_txt_observacao" rows="1" required><dtml-var txt_observacao missing></textarea>
                 </td>
             </tr>
         </table>
 </dtml-in>
 
-<div class="text-center">
+<div class="text-start ms-2">
    <input class="btn btn-primary" type="button" name="btn_salvar" value="Salvar" onClick="campos_criticar(document.materia_apresentada_documento_form)" />
    <dtml-if cod_ordem>
       <input type="hidden" name="flag_atualizar" value="<dtml-var cod_ordem missing>" />
@@ -161,7 +161,7 @@
 </div>
 
 <div class="row">
-  <div class="col-md-12 mt-2">
+  <div class="col-md-12 ms-2 mt-2">
      <p class="text-muted small font-size-12"><i class="fas fa-asterisk text-danger"></i> Campos obrigatórios</p>
   </div>
 </div>
@@ -171,10 +171,6 @@
 <input type="hidden" name="cod_documento" value="<dtml-var cod_documento missing>" />
 <input type="hidden" name="cod_sessao_plen" value="<dtml-var cod_sessao_plen missing>" />
 </form>
-
-<script>
-autosize(document.querySelectorAll('textarea'));
-</script>
 
 <dtml-var js_slot>
 <dtml-var footer_html>

@@ -1,5 +1,60 @@
 <dtml-var header_html>
 
+<dtml-var sessao_plenaria_menu>
+
+<div class="tab-content">
+  <div class="tab-pane p-3 border fade show active">
+
+<legend class="font-size-16">Presença no Grande Expediente</legend>
+
+<form name="presenca_expediente_form" method="post" action="presenca_expediente_salvar_proc">
+   <input type="hidden" name="hdn_url" value="index_html?cod_sessao_plen=<dtml-var cod_sessao_plen missing>&num_legislatura=<dtml-var num_legislatura missing>&cod_sessao_leg=<dtml-var cod_sessao_leg missing>&dat_sessao=<dtml-var dat_sessao missing>&tip_sessao=<dtml-var tip_sessao missing>" />
+   <input type="hidden" name="hdn_cod_sessao_plen" value="<dtml-var cod_sessao_plen missing>">
+   <input type="hidden" name="dat_inicio_sessao" value="<dtml-var dat_sessao missing>"/>
+   <div class="table-reponsive">
+    <table class="table table-sm table-striped w-100 align-middle">
+          <thead class="">
+            <tr>
+              <th width="6%">
+                <div class="form-check">    
+                  <input class="form-check-input position-static" type="checkbox" name="checkedAll" id="checkedAll">
+                  <label class="form-check-label" for="checkedAll"><b>Todos</b></label> 
+                </div>
+              </th>
+              <th>Vereador</th>
+            </tr>
+          </thead>
+          <tbody class="table-group-divider">
+       <dtml-in expr="zsql.autores_obter_zsql(txt_dat_apresentacao=dat_sessao)">
+          <tr>
+            <td>
+              <div class="form-check">
+                 <input class="checkSingle form-check-input position-static" type="checkbox" name="chk_presen_parlamentar:list" value="<dtml-var cod_parlamentar>" 
+                    <dtml-if expr="zsql.presenca_expediente_obter_zsql(cod_sessao_plen=cod_sessao_plen, dat_ordem = pysc.data_converter_pysc(data=dat_sessao),cod_parlamentar=cod_parlamentar, ind_excluido=0)">
+                        checked=1
+                    </dtml-if> 
+                 />
+               </div>            
+            </td>
+            <td>
+                <span><dtml-var nom_parlamentar></span>
+            </td>
+        </tr>
+       <dtml-else>
+         <tr>
+           <td>Nenhum Vereador com mandato na Legislatura.</td>
+         </tr>
+       </dtml-in>
+     </tbody>
+    </table>
+  <div clas="text-start">
+     <input class="btn btn-primary" type="submit" name="button" value="Salvar" />
+  </div>
+</form>
+</div>
+</div>
+<dtml-var js_slot>
+
 <script>
 $(document).ready(function() {
   $("#checkedAll").change(function(){
@@ -28,59 +83,4 @@ $(document).ready(function() {
   });
 });
 </script>
-
-<dtml-var sessao_plenaria_menu>
-
-<div class="tab-content">
-  <div class="tab-pane p-3 border fade show active">
-
-<legend class="font-size-16">Presença no Grande Expediente</legend>
-
-<form name="presenca_expediente_form" method="post" action="presenca_expediente_salvar_proc">
-   <input type="hidden" name="hdn_url" value="index_html?cod_sessao_plen=<dtml-var cod_sessao_plen missing>&num_legislatura=<dtml-var num_legislatura missing>&cod_sessao_leg=<dtml-var cod_sessao_leg missing>&dat_sessao=<dtml-var dat_sessao missing>&tip_sessao=<dtml-var tip_sessao missing>" />
-   <input type="hidden" name="hdn_cod_sessao_plen" value="<dtml-var cod_sessao_plen missing>">
-   <input type="hidden" name="dat_inicio_sessao" value="<dtml-var dat_sessao missing>"/>
-
-        <table class="table">
-          <thead>
-            <tr>
-              <th width="6%">
-                <div class="form-check">    
-                  <input class="form-check-input position-static" type="checkbox" name="checkedAll" id="checkedAll">
-                  <label class="form-check-label" for="checkedAll"><b>Todos</b></label> 
-                </div>
-              </th>
-              <th>Parlamentar</th>
-            </tr>
-          </thead>
-       <dtml-in expr="zsql.autores_obter_zsql(txt_dat_apresentacao=dat_sessao)">
-          <tr>
-            <td>
-              <div class="form-check">
-                 <input class="checkSingle form-check-input position-static" type="checkbox" name="chk_presen_parlamentar:list" value="<dtml-var cod_parlamentar>" 
-                    <dtml-if expr="zsql.presenca_expediente_obter_zsql(cod_sessao_plen=cod_sessao_plen, dat_ordem = pysc.data_converter_pysc(data=dat_sessao),cod_parlamentar=cod_parlamentar, ind_excluido=0)">
-                        checked=1
-                    </dtml-if> 
-                 />
-               </div>            
-            </td>
-            <td>
-                <label class="form-label" for="chk_presen_parlamentar">
-                    <dtml-var nom_parlamentar>
-                </label>
-            </td>
-        </tr>
-       <dtml-else>
-         <tr>
-           <td>Nenhum parlamentar com mandato cadastrado na Legislatura.</td>
-         </tr>
-       </dtml-in>
-    </table>
-  <div clas="text-start">
-     <input class="btn btn-primary" type="submit" name="button" value="Salvar" />
-  </div>
-</form>
-</div>
-</div>
-<dtml-var js_slot>
 <dtml-var footer_html>

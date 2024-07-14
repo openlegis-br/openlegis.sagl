@@ -59,7 +59,7 @@
 
     <dtml-in expr="zsql.oradores_expediente_obter_zsql(cod_sessao_plen=cod_sessao_plen, ind_excluido=0)">
         <dtml-if sequence-start>
-         <table class="table">
+         <table class="table table-sm align-middle">
             <tr>
                 <th width="10%">Ordem</th>
                 <th>Vereador</th>
@@ -69,7 +69,7 @@
         </dtml-if sequence-start>
           <tr>
             <td>
-                <input class="form-control" type="number" id="txt_num_ordem_<dtml-var num_ordem>" name="txt_num_ordem" size="2" value="<dtml-var num_ordem>">
+                <input class="form-control form-control-sm" type="number" id="txt_num_ordem_<dtml-var num_ordem>" name="txt_num_ordem" size="2" value="<dtml-var num_ordem>">
             </td>
             <td>
                 <dtml-in expr="zsql.parlamentar_obter_zsql(cod_parlamentar=cod_parlamentar, ind_excluido=0)">
@@ -78,11 +78,13 @@
                 </dtml-in>
             </td>
             <td>
-                <input class="form-control" type="text" id="txt_url_discurso_<dtml-var num_ordem>" name="txt_url_discurso" value="<dtml-var url_discurso missing null="">">
+                <input class="form-control form-control-sm" type="text" id="txt_url_discurso_<dtml-var num_ordem>" name="txt_url_discurso" value="<dtml-var url_discurso missing null="">">
             </td>
             <td>
-                <a class="btn btn-light" href="javascript:atualizar(<dtml-var cod_sessao_plen>,<dtml-var cod_parlamentar>,document.oradores_form.txt_num_ordem_<dtml-var num_ordem>,document.oradores_form.txt_url_discurso_<dtml-var num_ordem>,document.oradores_discurso_form_<dtml-var num_ordem>)">Atualizar</a> 
-                 <a class="btn btn-danger" href="javascript:excluir(<dtml-var cod_sessao_plen>,<dtml-var cod_parlamentar>)">Excluir</a>
+               <div class="input-group">
+                <a class="btn btn-sm btn-light" href="javascript:atualizar(<dtml-var cod_sessao_plen>,<dtml-var cod_parlamentar>,document.oradores_form.txt_num_ordem_<dtml-var num_ordem>,document.oradores_form.txt_url_discurso_<dtml-var num_ordem>,document.oradores_discurso_form_<dtml-var num_ordem>)">Atualizar</a> 
+                 <a class="btn btn-sm btn-danger" href="javascript:excluir(<dtml-var cod_sessao_plen>,<dtml-var cod_parlamentar>)">Excluir</a>
+               </div>
             </td>
         </tr>
     <dtml-if sequence-end>
@@ -103,16 +105,15 @@
     <tr>
         <th width="10%">Ordem</th>
         <th>Vereador</th>
-        <th></th>        
     </tr>
    </thead>
     <tr>
         <td width="10%">
-            <label class="form-label" for="txt_num_ordem" class="required">Ordem</label>        
+            <label class="form-label required" for="txt_num_ordem">Ordem</label>        
             <input class="form-control" type="number" id="txt_num_ordem" name="txt_num_ordem" maxlength="2" autocomplete="off" />
         </td>
         <td>
-            <label class="form-label" for="lst_cod_parlamentar" class="required">Vereador</label>        
+            <label class="form-label required" for="lst_cod_parlamentar">Vereador</label>        
             <select class="form-select" id="lst_cod_parlamentar" name="lst_cod_parlamentar" size="1">
                 <option value ="">Selecione</option>            
                 <dtml-in expr="zsql.autores_obter_zsql(txt_dat_apresentacao=dat_sessao)">
@@ -123,20 +124,18 @@
                 </dtml-in>
             </select>           
         </td>
-        <td>
-         <label  class="form-label d-block">Ação</label>                
-         <a href="#" class="btn btn-primary" onClick="campos_criticar(document.oradores_cadastro_form)">Adicionar</a>          
-        </td>                
+             
     </tr>
 </table>
-    <div class="text-start mb-3">
+    <div class="text-start btn-group">
+      <a href="#" class="btn btn-primary" onClick="campos_criticar(document.oradores_cadastro_form)">Incluir Orador</a>          
       <dtml-if expr="zsql.oradores_expediente_obter_zsql(cod_sessao_plen = cod_sessao_plen, ind_excluido=0)">
          <a class="btn btn-danger" href="oradores_expediente_excluir_proc?cod_sessao_plen=<dtml-var cod_sessao_plen>&cod_sessao_leg=&num_legislatura=<dtml-var num_legislatura>&tip_sessao=<dtml-var tip_sessao>&dat_sessao=<dtml-var dat_sessao>" data-confirm="Deseja realmente excluir todos os oradores cadastrados?">Excluir Lista</a>
       <dtml-else>
          <dtml-call expr="REQUEST.set('cod_sessao_anterior', int(cod_sessao_plen) - 1)">
-         <a class="btn btn-primary" href="oradores_expediente_incluir?cod_sessao_plen=<dtml-var cod_sessao_plen>&cod_sessao_leg=&num_legislatura=<dtml-var num_legislatura>&tip_sessao=<dtml-var tip_sessao>&dat_sessao=<dtml-var dat_sessao>&ativos=1" data-confirm="Gerar lista de oradores com Vereadores ativos na data da <dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao">?">Vereadores Ativos</a>
+         <a class="btn btn-subtle-primary" href="oradores_expediente_incluir?cod_sessao_plen=<dtml-var cod_sessao_plen>&cod_sessao_leg=&num_legislatura=<dtml-var num_legislatura>&tip_sessao=<dtml-var tip_sessao>&dat_sessao=<dtml-var dat_sessao>&ativos=1" data-confirm="Gerar lista de oradores com Vereadores ativos na data da <dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao">?">Vereadores Ativos</a>
          <dtml-if expr="zsql.oradores_expediente_obter_zsql(cod_sessao_plen = cod_sessao_anterior, ind_excluido=0)">         
-            <a class="btn btn-primary" href="oradores_expediente_incluir?cod_sessao_plen=<dtml-var cod_sessao_plen>&cod_sessao_leg=&num_legislatura=<dtml-var num_legislatura>&tip_sessao=<dtml-var tip_sessao>&dat_sessao=<dtml-var dat_sessao>" data-confirm="Gerar lista de oradores com base na sessão anterior?"><dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao"> Anterior</a>      
+            <a class="btn btn-subtle" href="oradores_expediente_incluir?cod_sessao_plen=<dtml-var cod_sessao_plen>&cod_sessao_leg=&num_legislatura=<dtml-var num_legislatura>&tip_sessao=<dtml-var tip_sessao>&dat_sessao=<dtml-var dat_sessao>" data-confirm="Gerar lista de oradores com base na sessão anterior?"><dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao"> Anterior</a>      
          </dtml-if>   
       </dtml-if>    
     </div>

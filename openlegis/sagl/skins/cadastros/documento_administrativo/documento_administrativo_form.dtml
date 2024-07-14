@@ -342,7 +342,7 @@
             <dtml-in expr="zsql.arquivo_recipiente_listar_conteudo_zsql(cod_documento=cod_documento)" mapping>
                <dtml-if sequence-start>
                  <table class="table">
-                  <thead>
+                  <thead class="table-light">
                    <tr>
                     <th width="20%">Recipiente</th>
                     <th width="20%">Data de Arquivamento</th>
@@ -612,7 +612,7 @@ $(document).ready(function(){
         $.ajax({
             url: '<dtml-var portal_url>/cadastros/documento_administrativo/cientificacao/usuarios_carregar_pysc',
             type: 'post',
-            data: {svalue:unidade, cod_documento:<dtml-var cod_documento>},
+            data: {svalue:unidade, cod_documento:<dtml-var cod_documento missing>},
             dataType: 'json',
             success:function(response){
                 var len = response.length;
@@ -630,7 +630,7 @@ $(document).ready(function(){
         $.ajax({
             url: '<dtml-var portal_url>/cadastros/documento_administrativo/cientificacao/usuarios_carregar_pysc',
             type: 'post',
-            data: {svalue:unidade, cod_documento:<dtml-var cod_documento>},
+            data: {svalue:unidade, cod_documento:<dtml-var cod_documento missing>},
             dataType: 'json',
             success:function(response){
                 var len = response.length;
@@ -648,7 +648,7 @@ $(document).ready(function(){
 </script>
 <script>
 $('.select2.users').select2({
-  placeholder: 'CTRL+A para marcar ou desmarcar tudo'
+  placeholder: 'CTRL+A para marcar ou desmarcar todos'
 });
 
 $('.select2[multiple]').siblings('.select2-container').append('<span class="select-all"></span>');

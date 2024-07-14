@@ -37,6 +37,7 @@
    </div>
    <div class="col-12 col-sm-6 mb-3">
      <label class="form-label" for="lst_periodo_comp">Selecione o Período</label>
+     <div class="input-group">
      <select class="form-select jumpmenu" id="lst_periodo_comp" name="lst_periodo_comp">
        <dtml-in expr="zsql.periodo_comp_bancada_obter_zsql(num_legislatura=hdn_num_legislatura)">
           <option
@@ -54,17 +55,13 @@
               </option>
        </dtml-in>
      </select>
+     <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Parlamentar', 'Operador Tabela Auxiliar'])">
+        <a class="btn btn-primary" href="<dtml-var portal_url>/cadastros/auxiliares/bancada/bancada_form?num_legislatura_sel=<dtml-var hdn_num_legislatura missing>"><i class="fa fa-fw fa-plus"></i> Incluir Bancada</a>
+     </dtml-if>
+    </div>
    </div>
   </div>
 </form>
-
-  <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Parlamentar', 'Operador Tabela Auxiliar'])">
-   <div class="row">
-    <div class="col-12 text-start text-sm-end">
-            <a class="btn btn-light d-print-none mb-3" href="<dtml-var portal_url>/cadastros/auxiliares/bancada/bancada_form?num_legislatura_sel=<dtml-var hdn_num_legislatura missing>"><i class="fa fa-fw fa-plus"></i> Incluir Bancada</a>
-    </div>
-   </div>
-  </dtml-if>
 
 <dtml-if expr="_.has_key('hdn_num_legislatura') and _.has_key('cod_periodo_comp_sel')">
  <dtml-in expr="zsql.periodo_comp_bancada_obter_zsql(cod_periodo_comp=cod_periodo_comp_sel,ind_excluido=0)">

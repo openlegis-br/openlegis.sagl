@@ -4,7 +4,7 @@
   <dtml-if sequence-start>
     <div class="table-responsive mb-2">
     <table id="tramitacoes_table" class="table datatable w-100">
-     <thead>
+     <thead class="table-light">
       <tr>  
          <th width="15%">Data</th>
          <th>Unidade de Origem</th>
@@ -14,7 +14,7 @@
       </tr>
      </thead>
     </dtml-if sequence-start>
-      <tr> 
+      <tr <dtml-if expr="ind_ult_tramitacao==1">class="bg-light"</dtml-if>> 
          <td>
             <a href="#" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Visualização de Tramitação" data-src="tramitacao/tramitacao_mostrar_proc?hdn_cod_tramitacao=<dtml-var cod_tramitacao>&cod_documento=<dtml-var cod_documento>&modal=1">  
               <dtml-var dat_tramitacao>

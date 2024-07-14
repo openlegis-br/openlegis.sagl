@@ -49,8 +49,8 @@
 <form name="liderancas_form" method="post" action="liderancas_partidarias_salvar_proc" enctype="multipart/form-data">
     <dtml-in expr="zsql.liderancas_partidarias_obter_zsql(cod_sessao_plen=cod_sessao_plen, ind_excluido=0)">
         <dtml-if sequence-start>
-        <table class="table">
-           <thead>
+         <table class="table table-sm align-middle">
+           <thead class="">
             <tr>
                 <th width="10%">Ordem</th>
                 <th>Vereador</th>
@@ -60,8 +60,7 @@
         </dtml-if sequence-start>
           <tr>
             <td>
-                <label class="form-label" for="txt_num_ordem_<dtml-var num_ordem>" class="d-none">Ordem</label>
-                <input class="form-control" type="text" id="txt_num_ordem_<dtml-var num_ordem>" name="txt_num_ordem" maxlenght="2" value="<dtml-var num_ordem>">
+                <input class="form-control  form-control-sm" type="text" id="txt_num_ordem_<dtml-var num_ordem>" name="txt_num_ordem" maxlenght="2" value="<dtml-var num_ordem>">
             </td>
             <td>
                 <dtml-in expr="zsql.parlamentar_obter_zsql(cod_parlamentar=cod_parlamentar, ind_excluido=0)">
@@ -71,8 +70,10 @@
             </td>
 
             <td>
-                <a class="btn btn-light" href="javascript:atualizar(<dtml-var cod_sessao_plen>,<dtml-var cod_parlamentar>,document.liderancas_form.txt_num_ordem_<dtml-var num_ordem>)">Atualizar</a> 
-                <a class="btn btn-danger" href="javascript:excluir(<dtml-var cod_sessao_plen>,<dtml-var cod_parlamentar>)">Excluir</a>
+              <div class="input-group">
+                <a class="btn btn-sm btn-light" href="javascript:atualizar(<dtml-var cod_sessao_plen>,<dtml-var cod_parlamentar>,document.liderancas_form.txt_num_ordem_<dtml-var num_ordem>)">Atualizar</a> 
+                <a class="btn btn-sm btn-danger" href="javascript:excluir(<dtml-var cod_sessao_plen>,<dtml-var cod_parlamentar>)">Excluir</a>
+              </div>
             </td>
         </tr>
     <dtml-if sequence-end>
@@ -95,11 +96,11 @@
    </thead>
     <tr>
         <td width="10%">
-            <label class="form-label" for="txt_num_ordem" class="required">Ordem</label>                
+            <label class="form-label required" for="txt_num_ordem">Ordem</label>                
             <input class="form-control" type="number" id="txt_num_ordem" name="txt_num_ordem" maxlength="2" autocomplete="off" />
         </td>
         <td>
-            <label class="form-label" for="lst_cod_parlamentar" class="required">Vereador</label>                
+            <label class="form-label required" for="lst_cod_parlamentar">Vereador</label>                
             <select class="form-select" id="lst_cod_parlamentar"  name="lst_cod_parlamentar">
                 <option value ="0">Selecione</option>
                 <dtml-in expr="zsql.autores_obter_zsql(txt_dat_apresentacao=dat_sessao)">
@@ -120,7 +121,6 @@
     <div class="text-start">
        <input class="btn btn-primary" type="button" name="btn_liderancas" value="Incluir Liderança" onClick="campos_criticar(document.liderancas_cadastro_form)"/>
     </div>
-
 </form>
 </div>
 </div>

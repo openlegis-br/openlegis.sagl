@@ -1,86 +1,6 @@
 <dtml-var header_html>
 
-<style>
-.table {
-    font-size: 90%;
-}
-</style>
-
-<script src="<dtml-var portal_url>/js/moment.min.js"></script>
-<script src="<dtml-var portal_url>/js/datetime-moment.js"></script>
-
-<script>
-$(document).ready(function() {
-    $.fn.dataTable.moment( 'DD/MM/YYYY HH:mm:ss' );    //Formatação com Hora
-    $.fn.dataTable.moment('DD/MM/YYYY');    //Formatação sem Hora
-    var table = $('.table').DataTable( {
-        "responsive": true,
-        "order": [[ 0, "asc" ]],
-        "language": {
-          search: "Pesquisar:",
-          processing:     "Processando...",
-          loadingRecords: "Carregando...",
-          lengthMenu:     "Exibir _MENU_ registros por página",
-          info:           "Exibindo _START_ a _END_ de _TOTAL_ registros",
-          infoEmpty:      "Exibindo _START_ a _END_ de _TOTAL_ registros",
-          infoFiltered:   "(total de registros:_MAX_)",
-          emptyTable:     "Nenhum registro encontrado",
-          zeroRecords:     "Nenhum registro encontrado",
-          paginate: {
-            first:      "Primeiro",
-            previous:   "Anterior",
-            next:       "Próximo",
-            last:       "Último"
-          },
-         "buttons": {
-           print: "Imprimir",
-           copy: "Copiar",
-           copyTitle: "Cópia bem sucedida",
-           copySuccess: {
-            1: "Uma linha copiada com sucesso",
-            _: "%d linhas copiadas com sucesso"
-          }
-        }
-        }
-    });
-});
-
-window.onload = function(){  
-    var url = document.location.toString();
-    if (url.match('#')) {
-        $('.nav-tabs a[href="#' + url.split('#')[1] + '"]').tab('show');
-    }
-    //Change hash for page-reload
-    $('.nav-tabs a[href="#' + url.split('#')[1] + '"]').on('shown', function (e) {
-        window.location.hash = e.target.hash;
-    }); 
-} 
-
-$(document).ready(() => {
-  let url = location.href.replace(/\/$/, "");
-   if (location.hash) {
-    const hash = url.split("#");
-    $('#nav_assinatura a[href="#'+hash[1]+'"]').tab("show");
-    url = location.href.replace(/\/#/, "#");
-    history.replaceState(null, null, url);
-  } 
-
-  $('a[data-bs-toggle="tab"]').on("click", function() {
-    let newUrl;
-    const hash = $(this).attr("href");
-    if(hash == "#home") {
-      newUrl = url.split("#")[0];
-    } else {
-      newUrl = url.split("#")[0] + hash;
-    }
-    newUrl += "";
-    history.replaceState(null, null, newUrl);
-  });
-});
-
-</script>
-
-  <h1 class="firstHeading font-size-18">Assinatura Digital de Documentos</h1> 
+<h1 class="firstHeading font-size-18">Assinatura Digital de Documentos</h1> 
 
 <ul class="nav nav-tabs assinatura border-0 mt-4" id="nav_assinatura" role="tablist">
     <li class="nav-item active">
@@ -100,25 +20,27 @@ $(document).ready(() => {
     </dtml-if>
     <dtml-if sequence-start>
      <div class="table-responsive">
-      <table class="table table-striped">
-        <thead>
+      <table class="table w-100 align-middle">
+        <thead class="table-light">
          <tr>
-           <th>Solicitação</th>
-           <th>Identificação do Documento</th>
+           <th>Data</th>
+           <th>Solicitante</th>
+           <th>Documento para Assinatura</th>
            <th>Ações</th>
          </tr>
         </thead>
     </dtml-if>
          <tr>
            <td>
-               <dtml-if cod_solicitante>
-                  <dtml-in expr="zsql.usuario_obter_zsql(cod_usuario=cod_solicitante)">
-                     <dtml-var dat_solicitacao>, por <dtml-var nom_completo>
-                  </dtml-in>
-               <dtml-else>
-                  <dtml-var dat_solicitacao>
-               </dtml-if>
-           </td>         
+              <dtml-var dat_solicitacao>
+           </td>
+           <td>
+              <dtml-if cod_solicitante>
+                <dtml-in expr="zsql.usuario_obter_zsql(cod_usuario=cod_solicitante)">
+                   <dtml-var nom_completo>
+                </dtml-in>
+              </dtml-if>
+           </td>        
            <td> 
                <dtml-if expr="tipo_doc == 'ata'">
                   <dtml-in expr="zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=codigo, ind_excluido=0)">
@@ -280,12 +202,12 @@ $(document).ready(() => {
                </dtml-if>
            </td>
            <td>
-             <div class="btn-group">
-              <a class="btn btn-light" href="<dtml-var portal_url>/<dtml-var expr="gerar_link_pysc(tipo_doc,codigo,anexo)">" target="_blank"><i class="far fa-file-pdf"></i> Visualizar</a>
-              <button type="button" class="btn btn-light" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Assinar Digitalmente" data-src="<dtml-var portal_url>/generico/assinador/pades-signature_html?codigo=<dtml-var codigo>&anexo=<dtml-var anexo missing null>&tipo_doc=<dtml-var tipo_doc>&modal=1"><i class="fas fa-file-signature"></i> Assinar</button>
-              <a class="btn btn-light" href="<dtml-var portal_url>/cadastros/assinatura/assinatura_postergar_proc?cod_usuario=<dtml-var cod_usuario_corrente missing>&codigo=<dtml-var codigo missing>&anexo=<dtml-var anexo missing null>&tipo_doc=<dtml-var tipo_doc missing>" data-confirm="Postergar a assinatura?"><i class="fa fa-hourglass-end"></i> Postergar</a>
+             <div class="btn-group btn-group-sm">
+              <a class="btn btn-white text-primary" href="<dtml-var portal_url>/<dtml-var expr="gerar_link_pysc(tipo_doc,codigo,anexo)">" target="_blank"><i class="far fa-file-pdf"></i> Visualizar</a>
+              <button type="button" class="btn btn-white text-primary" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Assinar Digitalmente" data-src="<dtml-var portal_url>/generico/assinador/pades-signature_html?codigo=<dtml-var codigo>&anexo=<dtml-var anexo missing null>&tipo_doc=<dtml-var tipo_doc>&modal=1"><i class="fas fa-file-signature"></i> Assinar</button>
+              <a class="btn btn-white text-primary" href="<dtml-var portal_url>/cadastros/assinatura/assinatura_postergar_proc?cod_usuario=<dtml-var cod_usuario_corrente missing>&codigo=<dtml-var codigo missing>&anexo=<dtml-var anexo missing null>&tipo_doc=<dtml-var tipo_doc missing>" data-confirm="Postergar a assinatura?"><i class="fa fa-hourglass-end"></i> Postergar</a>
              <!-- Modal -->
-             <button type="button" class="btn btn-danger d-print-none" data-bs-toggle="modal" data-target="#recusaModal<dtml-var formatted_code>">
+             <button type="button" class="btn btn-white text-primary text-danger d-print-none" data-bs-toggle="modal" data-target="#recusaModal<dtml-var formatted_code>">
                 <i class="fas fa-window-close"></i> Recusar
              </button>
             </div>
@@ -312,7 +234,7 @@ $(document).ready(() => {
                      </div>
                      <div class="row">
                        <div class="col-12 mb-2">
-                        <button class="btn btn-primary" method="post" action="assinatura_recusar_proc">Recusar Assinatura</button>
+                        <button class="btn btn-white text-primary" method="post" action="assinatura_recusar_proc">Recusar Assinatura</button>
                        </div>
                      </div>
                      <div class="row">
@@ -343,25 +265,27 @@ $(document).ready(() => {
     </dtml-if>
     <dtml-if sequence-start>
      <div class="table-responsive">
-      <table class="table table-striped">
-        <thead>
+      <table class="table">
+        <thead class="table-light">
          <tr>
-           <th>Solicitação</th>
-           <th>Identificação do Documento</th>
+           <th>Data</th>
+           <th>Solicitante</th>
+           <th>Documento para Assinatura</th>
            <th>Ações</th>
          </tr>
         </thead>
     </dtml-if>
          <tr>
            <td>
-               <dtml-if cod_solicitante>
-                  <dtml-in expr="zsql.usuario_obter_zsql(cod_usuario=cod_solicitante)">
-                     <dtml-var dat_solicitacao>, por <dtml-var nom_completo>
-                  </dtml-in>
-               <dtml-else>
-                  <dtml-var dat_solicitacao>
-               </dtml-if>
-           </td> 
+              <dtml-var dat_solicitacao>
+           </td>
+           <td>
+              <dtml-if cod_solicitante>
+                <dtml-in expr="zsql.usuario_obter_zsql(cod_usuario=cod_solicitante)">
+                   <dtml-var nom_completo>
+                </dtml-in>
+              </dtml-if>
+           </td>
            <td>          
                <dtml-if expr="tipo_doc == 'ata'">
                   <dtml-in expr="zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=codigo, ind_excluido=0)">
@@ -523,11 +447,11 @@ $(document).ready(() => {
                </dtml-if>
            </td>
            <td>
-             <div class="btn-group">
-              <a class="btn btn-light" href="<dtml-var portal_url>/<dtml-var expr="gerar_link_pysc(tipo_doc,codigo,anexo)">" target="_blank"><i class="far fa-file-pdf"></i> Visualizar</a>
-              <button type="button" class="btn btn-light" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Assinar Digitalmente" data-src="<dtml-var portal_url>/generico/assinador/pades-signature_html?codigo=<dtml-var codigo>&anexo=<dtml-var anexo missing null>&tipo_doc=<dtml-var tipo_doc>&modal=1"><i class="fas fa-file-signature"></i> Assinar</button>
+             <div class="btn-group btn-group-sm">
+              <a class="btn btn-white text-primary" href="<dtml-var portal_url>/<dtml-var expr="gerar_link_pysc(tipo_doc,codigo,anexo)">" target="_blank"><i class="far fa-file-pdf"></i> Visualizar</a>
+              <button type="button" class="btn btn-white text-primary" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Assinar Digitalmente" data-src="<dtml-var portal_url>/generico/assinador/pades-signature_html?codigo=<dtml-var codigo>&anexo=<dtml-var anexo missing null>&tipo_doc=<dtml-var tipo_doc>&modal=1"><i class="fas fa-file-signature"></i> Assinar</button>
              <!-- Modal -->
-             <button type="button" class="btn btn-danger d-print-none" data-bs-toggle="modal" data-target="#recusaModal<dtml-var formatted_code>">
+             <button type="button" class="btn btn-white text-primary text-danger d-print-none" data-bs-toggle="modal" data-target="#recusaModal<dtml-var formatted_code>">
                 <i class="fas fa-window-close"></i> Recusar
              </button>
             </div>
@@ -554,7 +478,7 @@ $(document).ready(() => {
                      </div>
                      <div class="row">
                        <div class="col-12 mb-2">
-                        <button class="btn btn-primary" method="post" action="assinatura_recusar_proc">Recusar Assinatura</button>
+                        <button class="btn btn-white text-primary" method="post" action="assinatura_recusar_proc">Recusar Assinatura</button>
                        </div>
                      </div>
                      <div class="row">
@@ -580,4 +504,75 @@ $(document).ready(() => {
 </div>
   
 <dtml-var js_slot>
+<script>
+$(document).ready(function() {
+    $.fn.dataTable.moment( 'DD/MM/YYYY HH:mm:ss' );    //Formatação com Hora
+    $.fn.dataTable.moment('DD/MM/YYYY');    //Formatação sem Hora
+    var table = $('.table').DataTable( {
+        "responsive": true,
+        "order": [[ 0, "asc" ]],
+        "language": {
+          search: "Pesquisar:",
+          processing:     "Processando...",
+          loadingRecords: "Carregando...",
+          lengthMenu:     "Exibir _MENU_ registros por página",
+          info:           "Exibindo _START_ a _END_ de _TOTAL_ registros",
+          infoEmpty:      "Exibindo _START_ a _END_ de _TOTAL_ registros",
+          infoFiltered:   "(total de registros:_MAX_)",
+          emptyTable:     "Nenhum registro encontrado",
+          zeroRecords:     "Nenhum registro encontrado",
+          paginate: {
+            first:      "Primeiro",
+            previous:   "Anterior",
+            next:       "Próximo",
+            last:       "Último"
+          },
+         "buttons": {
+           print: "Imprimir",
+           copy: "Copiar",
+           copyTitle: "Cópia bem sucedida",
+           copySuccess: {
+            1: "Uma linha copiada com sucesso",
+            _: "%d linhas copiadas com sucesso"
+          }
+        }
+        }
+    });
+});
+
+window.onload = function(){  
+    var url = document.location.toString();
+    if (url.match('#')) {
+        $('.nav-tabs a[href="#' + url.split('#')[1] + '"]').tab('show');
+    }
+    //Change hash for page-reload
+    $('.nav-tabs a[href="#' + url.split('#')[1] + '"]').on('shown', function (e) {
+        window.location.hash = e.target.hash;
+    }); 
+} 
+
+$(document).ready(() => {
+  let url = location.href.replace(/\/$/, "");
+   if (location.hash) {
+    const hash = url.split("#");
+    $('#nav_assinatura a[href="#'+hash[1]+'"]').tab("show");
+    url = location.href.replace(/\/#/, "#");
+    history.replaceState(null, null, url);
+  } 
+
+  $('a[data-bs-toggle="tab"]').on("click", function() {
+    let newUrl;
+    const hash = $(this).attr("href");
+    if(hash == "#home") {
+      newUrl = url.split("#")[0];
+    } else {
+      newUrl = url.split("#")[0] + hash;
+    }
+    newUrl += "";
+    history.replaceState(null, null, newUrl);
+  });
+});
+
+</script>
+
 <dtml-var footer_html>

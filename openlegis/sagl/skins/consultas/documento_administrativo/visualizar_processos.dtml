@@ -1,61 +1,44 @@
 <dtml-var header_html>
+<style>.display {font-size:90%}"></style>
+<h1 class="firstHeading font-size-18 mb-3">Tramitação de Processos</h1>
+<div class="row">
+                        <div class="col-12">
+                            <!-- Left sidebar -->
+                            <div class="email-leftbar ps-0 pt-0">
+                                <div class="mail-list mt-4 pb-3">
+                                    <h1 class="font-size-14 mt-2 mb-2">Processos Legislativos</h1>
+                                    <a href="<dtml-var portal_url>/cadastros/tramitacao_materia/tramitacao_lote_form" class="font-size-13"><i class="mdi mdi-inbox"></i> Caixa de Entrada <dtml-if expr="pysc.caixa_entrada_contar_pysc(cod_usuario=cod_usuario_corrente) > 0"><span class="ms-1">(<dtml-var expr="pysc.caixa_entrada_contar_pysc(cod_usuario=cod_usuario_corrente)">)</span></dtml-if></a>
+                                    <a href="<dtml-var portal_url>/cadastros/tramitacao_materia/rascunhos_html" class=" font-size-13"><i class="mdi mdi-file-outline"></i> Rascunhos <dtml-in expr="zsql.tramitacao_obter_zsql(cod_usuario_local=cod_usuario_corrente, ind_ult_tramitacao=1, ind_rascunho=1, ind_tramitacao=1)" size="1"><dtml-call expr="REQUEST.set('qtde', _['sequence-length'])">(<dtml-var qtde>)</dtml-in</a>
+                                    <a href="<dtml-var portal_url>/cadastros/tramitacao_materia/itens_enviados_html" class="font-size-13"><i class="mdi mdi-send"></i> Enviados</a>
+                                </div>
 
-<script src="<dtml-var portal_url>/js/moment.min.js"></script>
-<script src="<dtml-var portal_url>/js/datetime-moment.js"></script>
-<script>
-$(document).ready(function(){
-    $.fn.dataTable.moment( 'DD/MM/YYYY HH:mm:ss' );    //Formatação com Hora
-    $.fn.dataTable.moment('DD/MM/YYYY');    //Formatação sem Hora
-    var table = $('.table').DataTable( {
-        "responsive": true,
-        "order": [[ 0, "desc" ]],
-        "language": {
-          search: "Pesquisar:",
-          processing:     "Processando...",
-          loadingRecords: "Carregando...",
-          lengthMenu:     "Exibir _MENU_ registros por página",
-          info:           "Exibindo _START_ a _END_ de _TOTAL_ registros",
-          infoEmpty:      "Exibindo _START_ a _END_ de _TOTAL_ registros",
-          infoFiltered:   "(total de registros:_MAX_)",
-          emptyTable:     "Nenhum registro encontrado",
-          zeroRecords:     "Nenhum registro encontrado",
-          paginate: {
-            first:      "Primeiro",
-            previous:   "Anterior",
-            next:       "Próximo",
-            last:       "Último"
-          },
-         "buttons": {
-           print: "Imprimir",
-           copy: "Copiar",
-           copyTitle: "Cópia bem sucedida",
-           copySuccess: {
-            1: "Uma linha copiada com sucesso",
-            _: "%d linhas copiadas com sucesso"
-          }
-        }
-        }
-    });
-});
-</script>
+                                <div class="mail-list mt-1">
+                                    <h1 class="font-size-14 mt-2 mb-2">Processos Administrativos</h1>
+                                    <a href="<dtml-var portal_url>/cadastros/tramitacao_documento/tramitacao_lote_form" class="font-size-13"><i class="mdi mdi-inbox"></i> Caixa de Entrada <dtml-if expr="pysc.caixa_entrada_administrativo_contar_pysc(cod_usuario=cod_usuario_corrente) > 0">(<dtml-var expr="pysc.caixa_entrada_administrativo_contar_pysc(cod_usuario=cod_usuario_corrente)">)</dtml-if></a>
+                                    <a href="<dtml-var portal_url>/cadastros/tramitacao_documento/rascunhos_html" class="font-size-13"><i class="mdi mdi-file-outline"></i> Rascunhos <dtml-in expr="zsql.tramitacao_administrativo_obter_zsql(cod_usuario_local=cod_usuario_corrente, ind_ult_tramitacao=1, ind_rascunho=1, ind_tramitacao=1)" size="1"><dtml-call expr="REQUEST.set('qtde', _['sequence-length'])">(<dtml-var qtde>)</dtml-in></a>
+                                    <a href="<dtml-var portal_url>/cadastros/tramitacao_documento/itens_enviados_html" class="font-size-13"><i class="mdi mdi-send"></i> Enviados</a>
+                                    <dtml-if expr="pysc.arquivo_morto_adm_contar_pysc(cod_usuario=cod_usuario_corrente) > 0">
+                                       <a href="<dtml-var portal_url>/cadastros/tramitacao_documento/arquivo_morto" class="font-size-13"><i class="mdi mdi-archive"></i> Arquivo</a>
+                                    </dtml-if>
+                                    <a href="<dtml-var portal_url>/consultas/documento_administrativo/visualizar_processos" class="active font-size-13"><i class="mdi mdi-folder-star-outline"></i> Ciência de Processos <dtml-in expr="zsql.cientificacao_documento_obter_zsql(cod_cientificado=cod_usuario_corrente, ind_pendente=1)" size="1"><dtml-call expr="REQUEST.set('qtde', _['sequence-length'])">(<dtml-var qtde>)</dtml-in></a>
+                                </div>
+                            </div>
+                            <!-- End Left sidebar -->
 
-<style>
-.table {
-    font-size: 90%;
-}
-</style>
+                            <!-- Right Sidebar -->
+                            <div class="row">
+                                <div class="col-12 mt-1" role="toolbar">
+                                </div>
 
-<h1 class="firstHeading font-size-18">Processos Administrativos</h1>
-
-<h6 class="mb-3">Histórico de cientificações de processos</h6>
+                                <div class="my-3">
 
 <dtml-in expr="zsql.cientificacao_documento_obter_zsql(cod_cientificado=cod_usuario_corrente)">
   <dtml-if sequence-start>
    <div class="table-responsive">
-    <table class="table table-sm table-hover">
-      <thead>
+    <table id="ciencia" class="table w-100 table-hover align-top display">
+      <thead class="table-light">
         <tr>
-          <th scope="col" width="40%">Identificação do Processo</th>
+          <th scope="col">Identificação do Processo</th>
           <th scope="col">Envio</th>
           <th scope="col">Expiração</th>
           <th scope="col">Visualização</th>
@@ -67,7 +50,7 @@ $(document).ready(function(){
       <tr>
           <td>
             <dtml-in expr="zsql.documento_administrativo_obter_zsql(cod_documento=cod_documento)">
-               <b><dtml-var sgl_tipo_documento> <dtml-var num_documento>/<dtml-var ano_documento></b> - <dtml-var txt_interessado>
+               <dtml-var sgl_tipo_documento> <dtml-var num_documento>/<dtml-var ano_documento> - <dtml-var txt_interessado>
                <div class="row">
                   <div class="col-12">
                      <dtml-var txt_assunto>
@@ -101,7 +84,7 @@ $(document).ready(function(){
             <dtml-elif expr="dat_leitura == None and DateTime(datefmt='international').strftime('%Y/%m/%d') > DateTime(dat_expiracao, datefmt='international').strftime('%Y/%m/%d')">        
                <span class="text-danger">expirado</span>
             <dtml-else>
-               <a id="reset" class="btn btn-outline-dark" href="<dtml-var portal_url>/consultas/documento_administrativo/visualizacao_registrar_pysc?hdn_id=<dtml-var id>&hdn_cod_documento=<dtml-var cod_documento>&hdn_lido=1" target="_blank"><i class="far fa-fw fa-folder-open"></i> Pasta Digital</a>
+               <a id="reset" class="btn btn-sm btn-link" href="<dtml-var portal_url>/consultas/documento_administrativo/visualizacao_registrar_pysc?hdn_id=<dtml-var id>&hdn_cod_documento=<dtml-var cod_documento>&hdn_lido=1" target="_blank"><i class="far fa-fw fa-folder-open"></i> Pasta Digital</a>
             </dtml-if>
           </td>
       </tr>
@@ -111,6 +94,41 @@ $(document).ready(function(){
    </div>
   </dtml-if>
 </dtml-in>
+                                </div> <!-- panel -->
+                            </div> <!-- end Col -->
+                        </div>
+                    </div>
 
 <dtml-var js_slot>
+
+<script>
+$(document).ready(function() {
+    $.fn.dataTable.moment( 'DD/MM/YYYY HH:mm:ss' );
+    $('#ciencia').DataTable( {
+        "responsive": true,
+        "bStateSave": false,
+        "bFilter": true,
+        "order": [[1, "desc"]],                       
+        "lengthMenu": [[10, 25, 50, 100], [10, 25, 50, 100]],
+        "lengthChange": true,
+        "language": {
+          search: "Pesquisar:",
+          processing:     "Processando...",
+          loadingRecords: "Carregando...",
+          lengthMenu:     "Exibir _MENU_ registros por página",
+          info:           "Exibindo _START_ a _END_ de _TOTAL_ registros",
+          infoEmpty:      "Exibindo _START_ a _END_ de _TOTAL_ registros",
+          infoFiltered:   "(total de registros:_MAX_)",
+          emptyTable:     "Nenhum registro encontrado",
+          zeroRecords:     "Nenhum registro encontrado",
+          paginate: {
+            first:      "Primeiro",
+            previous:   "Anterior",
+            next:       "Próximo",
+            last:       "Último"
+          },
+        }
+    });
+});
+</script>
 <dtml-var footer_html>

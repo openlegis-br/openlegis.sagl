@@ -13,9 +13,9 @@
 
  <div class="row">
    <div class="col-12 mb-3">
-     <label class="form-label required" for="lst_parlamentar">Nome do vereador</label>
+     <label class="form-label required" for="lst_parlamentar">Nome do Vereador</label>
         <div class="input-group w-100">
-        <select id="lst_parlamentar" name="lst_parlamentar" class="select2 form-control mb-3 custom-select" style="width: 90%;">
+        <select id="lst_parlamentar" name="lst_parlamentar" class="select2 form-control mb-3 custom-select" style="width: 85%;">
          <option></option>
           <dtml-in expr="zsql.parlamentar_obter_zsql(ind_excluido=0)">
            <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Parlamentar'])">
@@ -29,8 +29,8 @@
            </dtml-if>
           </dtml-in>
        </select>
-      <input class="btn btn-light" type="button" value="OK" onClick="javascript:
-if (campos_criticar(document.parlamentar_pesquisar_form)) {parent.location.href = this.form.lst_parlamentar.options[this.form.lst_parlamentar.selectedIndex].value; return false;}" style="width: 10%;">
+      <input class="btn btn-primary" type="button" value="OK" onClick="javascript:
+if (campos_criticar(document.parlamentar_pesquisar_form)) {parent.location.href = this.form.lst_parlamentar.options[this.form.lst_parlamentar.selectedIndex].value; return false;}" style="width: 15%;">
     </div>
        <small id="autorHelp" class="form-text text-muted">Selecione um Vereador e clique no botão OK para visualizar seus dados cadastrais.</small>       
    </div>

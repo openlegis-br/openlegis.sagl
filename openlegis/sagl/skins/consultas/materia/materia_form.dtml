@@ -20,7 +20,7 @@
              <a class="btn btn-primary" target="_blank" href="<dtml-var portal_url>/pysc/download_materia_pysc?cod_materia=<dtml-var expr="pysc.b64encode_pysc(codigo=cod_materia)">&texto_original=1"><i class="fa fa-file-pdf"></i> Texto Integral</a>
           </dtml-if>
           <dtml-if expr="hasattr(sapl_documentos.materia,id_redacao)">
-             <a class="btn btn-secondary" target="_blank" href="<dtml-var portal_url>/pysc/download_materia_pysc?cod_materia=<dtml-var expr="pysc.b64encode_pysc(codigo=cod_materia)">&redacao_final=1"><i class="fa fa-file-pdf"></i> Redação Final</a>
+             <a class="btn btn-primary" target="_blank" href="<dtml-var portal_url>/pysc/download_materia_pysc?cod_materia=<dtml-var expr="pysc.b64encode_pysc(codigo=cod_materia)">&redacao_final=1"><i class="fa fa-file-pdf"></i> Redação Final</a>
           </dtml-if>
         </dtml-if>
       </dtml-let>
@@ -784,7 +784,7 @@
                        <div class="text-muted small float-right"><dtml-var dat_tramitacao></div>
                        <dtml-let pdf_assinado="getattr(sapl_documentos.materia.tramitacao,pdf_assinado).absolute_url">
                          <a href="<dtml-var pdf_assinado>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank">
-                            <h4 class="card-title font-size-14"><dtml-var expr="des_status"></h4>
+                            <h4 class="card-title font-size-13"><dtml-var expr="des_status"></h4>
                          </a>  
                        </dtml-let>
                      <dtml-elif expr="zsql.assinatura_documento_obter_zsql(codigo=cod_tramitacao,tipo_doc='tramitacao', ind_assinado=1)">
@@ -792,26 +792,26 @@
                            <dtml-if "hasattr(sapl_documentos.materia.tramitacao,pdf)">
                               <dtml-let pdf="getattr(sapl_documentos.materia.tramitacao,pdf).absolute_url">
                                 <a href="<dtml-var pdf>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank">
-                                   <h4 class="card-title font-size-14"><dtml-var expr="des_status"></h4>
+                                   <h4 class="card-title font-size-13"><dtml-var expr="des_status"></h4>
                                 </a>
                               </dtml-let>
                            <dtml-else>
                                 <a href="<dtml-var portal_url>/sapl_documentos/documentos_assinados/<dtml-var cod_assinatura_doc>.pdf?<dtml-var expr="ZopeTime().timeTime()">" target="_blank">
-                                   <h4 class="card-title font-size-14"><dtml-var expr="des_status"></h4>
+                                   <h4 class="card-title font-size-13"><dtml-var expr="des_status"></h4>
                                 </a>
                            </dtml-if>
                         </dtml-in>
                      <dtml-elif "hasattr(sapl_documentos.materia.tramitacao,pdf)">
                         <dtml-let pdf="getattr(sapl_documentos.materia.tramitacao,pdf).absolute_url">
                            <a href="<dtml-var pdf>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank">
-                              <h4 class="card-title font-size-14"><dtml-var expr="des_status"></h4>
+                              <h4 class="card-title font-size-13"><dtml-var expr="des_status"></h4>
                            </a>
                         </dtml-let>
                      <dtml-else>
-                        <h4 class="card-title font-size-14 text-muted"><dtml-var expr="des_status"></h4>
+                        <h4 class="card-title font-size-13 text-muted"><dtml-var expr="des_status"></h4>
                      </dtml-if> 
                   <dtml-else>
-                     <h4 class="card-title font-size-14 text-muted"><dtml-var expr="des_status"></h4>
+                     <h4 class="card-title font-size-13 text-muted"><dtml-var expr="des_status"></h4>
                   </dtml-if>
                   <dtml-if txt_tramitacao><div class="card-text text-muted tram_mat2"><dtml-var txt_tramitacao></div></dtml-if>
                   <dtml-if cod_unid_tram_dest>                      

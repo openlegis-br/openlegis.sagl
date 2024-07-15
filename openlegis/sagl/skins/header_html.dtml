@@ -15,7 +15,7 @@
         <meta content="OpenLegis" name="author" />
         <!-- App favicon -->
         <link rel="shortcut icon" href="<dtml-var portal_url>/imagens/favicon.ico">
-
+        <link rel="manifest" href="<dtml-var portal_url>/manifest.json">
         <dtml-comment>
         <!-- DataTables -->
         <link href="<dtml-var portal_url>/assets/libs/datatables.net-bs4/css/dataTables.bootstrap4.min.css" rel="stylesheet" type="text/css" />
@@ -95,13 +95,13 @@
                    <div class="d-flex">
                       <a class="navbar-brand navbar waves-effect waves-light d-flex" href="<dtml-var portal_url>">
                         <dtml-if expr="not existe_logo">
-                           <img class="d-none d-sm-block p-2" src="<dtml-var portal_url>/imagens/brasao.gif" alt="" height="80">
+                           <img class="logo" src="<dtml-var portal_url>/imagens/brasao.gif" alt="" height="80">
                         <dtml-else>
-                           <img class="d-none d-sm-block p-2" src="sapl_documentos/props_sagl/<dtml-var id_logo>" alt="" height="80" />
+                           <img class="logo" src="sapl_documentos/props_sagl/<dtml-var id_logo>" alt="" height="80" style="max-width: 80px" />
                         </dtml-if>
                         <div class="d-flex flex-column pt-0 pb-0">
-                           <h5 class="text-white font-size-16 text-uppercase mb-0"><dtml-var "sapl_documentos.props_sagl.nom_casa"></h5>
-                           <p class="text-white font-size-13 mb-0">Plataforma de Processos Digitais</p>
+                           <h5 class="siteTitle text-white text-uppercase mb-0"><dtml-var "sapl_documentos.props_sagl.nom_casa"></h5>
+                           <p class="siteSubTitle text-white mb-0">Plataforma de Processos Digitais</p>
                         </div>
                       </a>
                      <dtml-if expr="AUTHENTICATED_USER.has_role(['Authenticated'])">

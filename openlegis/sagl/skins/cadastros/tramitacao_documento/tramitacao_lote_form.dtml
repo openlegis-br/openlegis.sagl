@@ -20,6 +20,7 @@
                                     <dtml-if expr="pysc.arquivo_morto_adm_contar_pysc(cod_usuario=cod_usuario_corrente) > 0">
                                        <a href="<dtml-var portal_url>/cadastros/tramitacao_documento/arquivo_morto" class="font-size-13"><i class="mdi mdi-archive"></i> Arquivo</a>
                                     </dtml-if>
+                                    <a href="<dtml-var portal_url>/consultas/documento_administrativo/visualizar_processos" class="font-size-13"><i class="mdi mdi-folder-star-outline"></i> Ciência de Processos <dtml-in expr="zsql.cientificacao_documento_obter_zsql(cod_cientificado=cod_usuario_corrente, ind_pendente=1)" size="1"><dtml-call expr="REQUEST.set('qtde', _['sequence-length'])">(<dtml-var qtde>)</dtml-in></a>
                                 </div>
                             </div>
                             <!-- End Left sidebar -->
@@ -31,7 +32,7 @@
                                 <div class="col-12 mt-3" role="toolbar">
                                     <label class="form-label required" for="lst_cod_unid_tram_local">Unidade Atual</label>
                                     <div class="input-group">
-                                     <select class="form-select" id="lst_cod_unid_tram_local" name="lst_cod_unid_tram_local" required>
+                                     <select class="form-select form-select-sm" id="lst_cod_unid_tram_local" name="lst_cod_unid_tram_local" required>
                                        <option></option>
                                        <dtml-in expr="zsql.usuario_unid_tram_obter_zsql(cod_usuario=cod_usuario_corrente)">
                                          <dtml-in expr="zsql.unidade_tramitacao_obter_zsql(cod_unid_tramitacao=cod_unid_tramitacao, ind_adm=1)">

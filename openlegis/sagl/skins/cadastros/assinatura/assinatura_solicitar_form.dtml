@@ -200,7 +200,7 @@
 <dtml-if expr="str(tipo_doc) == 'anexo_sessao' or str(tipo_doc) == 'anexo_peticao'">
   <dtml-call expr="REQUEST.set('assinaturas', cadastros.assinatura.get_pdf_signatures(tipo_doc=tipo_doc, codigo=codigo, anexo=anexo))">
 <dtml-else>
-  <dtml-call expr="REQUEST.set('assinaturas', cadastros.assinatura.get_pdf_signatures(tipo_doc=tipo_doc,codigo=8, anexo=None))">
+  <dtml-call expr="REQUEST.set('assinaturas', cadastros.assinatura.get_pdf_signatures(tipo_doc=tipo_doc,codigo=codigo, anexo=None))">
 </dtml-if>
 
 <dtml-if expr="assinaturas!=None">

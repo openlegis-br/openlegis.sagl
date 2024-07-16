@@ -32,7 +32,7 @@ select#perfis, select#lst_unidade, select#lst_peticionamento {
       </div>
       <div class="col-12 col-md-4 text-start text-end">
          <dtml-if expr="AUTHENTICATED_USER.has_role(['Administrador'])">      
-             <a class="btn btn-light d-print-none" href="<dtml-var portal_url>/cadastros/usuario"><i class="fa fa-fw fa-undo"></i> Voltar à Lista</a>
+             <a class="btn btn-light d-print-none" href="<dtml-var portal_url>/cadastros/usuario"><i class="fa fa-fw fa-undo"></i>Voltar</a>
          </dtml-if>
       </div>
  </div>
@@ -69,7 +69,7 @@ select#perfis, select#lst_unidade, select#lst_peticionamento {
     <div class="row">
        <div class="col-12 col-md-6 mb-3">
          <label class="form-label required" for="perfis">Perfil do Usuário</label>
-          <select class="select2 form-select" id="perfis" name="roles:list" size="6" multiple <dtml-unless expr="AUTHENTICATED_USER.has_role(['Administrador'])">tabindex="-1" aria-disabled="true"</dtml-unless>>
+          <select class="select2 form-select" id="perfis" name="roles:list" size="6" multiple <dtml-unless expr="AUTHENTICATED_USER.has_role(['Administrador'])">readonly</dtml-unless> style="width:100%">
            <dtml-in valid_roles>
 	       <dtml-if expr="_['sequence-item'] != 'Anonymous'"> 
 	         <dtml-if expr="_['sequence-item'] != 'Manager'">
@@ -265,7 +265,7 @@ select#perfis, select#lst_unidade, select#lst_peticionamento {
     <div class="row">
        <div class="col-12 col-md-6 mb-3">
           <label class="form-label" for="lst_unidade">Unidades de Tramitação Vinculadas</label>
-          <select class="select2 form-select" id="lst_unidade" name="lst_cod_unid_tramitacao:list" size="5" multiple <dtml-unless expr="AUTHENTICATED_USER.has_role(['Administrador'])">tabindex="-1" aria-disabled="true"</dtml-unless> data-placeholder="Nenhuma">
+          <select class="select2 form-select" id="lst_unidade" name="lst_cod_unid_tramitacao:list" size="5" multiple <dtml-unless expr="AUTHENTICATED_USER.has_role(['Administrador'])">readonly</dtml-unless> style="width:100%" data-placeholder="Nenhuma">
              <dtml-in expr="zsql.unidade_tramitacao_obter_zsql()">
                <option value="<dtml-var cod_unid_tramitacao>"
                 <dtml-if cod_usuario>
@@ -292,7 +292,7 @@ select#perfis, select#lst_unidade, select#lst_peticionamento {
        </div>
        <div class="col-12 col-md-6 mb-3">
           <label class="form-label" for="lst_peticionamento">Tipos de Peticionamento Permitidos</label>
-          <select class="select2 form-select" id="lst_peticionamento" name="lst_peticionamento:list" size="5" multiple <dtml-unless expr="AUTHENTICATED_USER.has_role(['Administrador'])">tabindex="-1" aria-disabled="true"</dtml-unless> data-placeholder="Nenhum">
+          <select class="select2 form-select" id="lst_peticionamento" name="lst_peticionamento:list" size="5" multiple <dtml-unless expr="AUTHENTICATED_USER.has_role(['Administrador'])">readonly</dtml-unless> style="width:100%" data-placeholder="Nenhum">
              <dtml-in expr="zsql.tipo_peticionamento_obter_zsql(ind_excluido=0)">
                <option value="<dtml-var tip_peticionamento>"
                 <dtml-if cod_usuario>
@@ -437,7 +437,16 @@ function post_to_url(path, params, method) {
     } ); 
     form.appendTo(document.body).submit(); 
 }
-
+<dtml-unless expr="AUTHENTICATED_USER.has_role(['Administrador'])">
+var $S1 = $("select[id=perfis]");
+var $S2 = $("select[id=lst_unidade]");
+var $S3 = $("select[id=lst_peticionamento]");
+$(document).ready(function() {
+  $S1.attr("readonly", "readonly");
+  $S2.attr("readonly", "readonly");
+  $S3.attr("readonly", "readonly");
+});
+</dtml-unless>
 </script>
 
 <dtml-var footer_html>

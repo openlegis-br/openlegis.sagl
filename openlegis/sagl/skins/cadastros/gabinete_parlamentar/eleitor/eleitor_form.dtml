@@ -82,7 +82,7 @@
   }
 </script>
 
-<h1 class="firstHeading font-size-18">Cadastro de Eleitor</h1> 
+<h1 class="firstHeading font-size-18" ms-2>Cadastro de Eleitor</h1> 
 
 <form class="mb-3" name="eleitor_form" action="eleitor_salvar_proc" method="post">
 
@@ -92,7 +92,7 @@
                 <table class="table table-borderless">
                         <tr>
                           <td width="45%">
-                            <label class="form-label" for="txt_nom_eleitor" class="required">Nome do Eleitor</label>
+                            <label class="form-label required" for="txt_nom_eleitor">Nome do Eleitor</label>
                             <input class="form-control" type="text" id="txt_nom_eleitor" name="txt_nom_eleitor" size="50" maxlength="200"  value="<dtml-var nom_eleitor missing>" />
                           </td>
                           <td>
@@ -100,7 +100,7 @@
                             <input class="form-control" type="text" id="txt_doc_identidade" name="txt_doc_identidade" maxlength="50" value="<dtml-var doc_identidade missing null>" />
                           </td>
                           <td>
-			       <label class="form-label" for="rad_sex_pessoa" class="d-block required">Sexo</label>
+			       <label class="form-label required d-block" for="rad_sex_pessoa">Sexo</label>
 			       <dtml-in expr="[('Masculino', 'M'), ('Feminino', 'F')]">
 				  <div class="form-check form-check-inline">
 				    <input class="form-check-input" type="radio" name="rad_sex_eleitor" id="rad<dtml-var expr="_['sequence-item']">" value="<dtml-var expr="_['sequence-item']">" 
@@ -221,15 +221,17 @@
              </tr>
            </table>
   <input type="hidden" name="hdn_url" value="eleitor_mostrar_proc?modal=1&hdn_cod_eleitor=<dtml-var cod_eleitor missing>" />
+  <div class="btn-group text-start ms-2">
   <input class="btn btn-primary" type="button" value="Salvar" onClick="campos_criticar()" />
    <dtml-if cod_eleitor>
      <input class="btn btn-danger" type="button" value="Excluir" onClick="eleitor_excluir()" />
    </dtml-if>
+  </div>
 
 </form>
 
 <dtml-if cod_eleitor>
-     <legend class="font-size-16">Histórico de Atendimentos</legend>
+     <legend class="font-size-16 ms-2">Histórico de Atendimentos</legend>
      <dtml-in expr="zsql.gabinete_atendimento_obter_zsql(cod_parlamentar=cod_parlamentar_corrente, cod_eleitor=cod_eleitor)">
        <dtml-if sequence-start>
          <table class="table">
@@ -243,7 +245,7 @@
        </dtml-if>
            <tr>
               <td>
-                 <a href=""" data-src="<dtml-var portal_url>/cadastros/gabinete_parlamentar/atendimento/atendimento_mostrar_proc?cod_atendimento=<dtml-var cod_atendimento>&modal=1" data-title="Edição de Atendimento" data-bs-toggle="modal" data-bs-target="#iFrameModal">
+                 <a href="#" data-src="<dtml-var portal_url>/cadastros/gabinete_parlamentar/atendimento/atendimento_mostrar_proc?cod_atendimento=<dtml-var cod_atendimento>&modal=1" data-title="Edição de Atendimento" data-bs-toggle="modal" data-bs-target="#iFrameModal">
                    <dtml-var dat_atendimento>
                  </a>
                </td>
@@ -254,9 +256,9 @@
           </table>
        </dtml-if>
      <dtml-else>
-       <p>Nenhum registro encontrado.</p>
+       <p class="ms-2">Nenhum registro encontrado.</p>
      </dtml-in>
-     <a href="#" class="btn btn-primary" data-src="<dtml-var portal_url>/cadastros/gabinete_parlamentar/atendimento/atendimento_form?cod_eleitor=<dtml-var cod_eleitor>&modal=1" data-title="Inclusão de Atendimento" data-bs-toggle="modal" data-bs-target="#iFrameModal">Incluir Atendimento</a>      
+     <a href="#" class="btn btn-light ms-2" data-src="<dtml-var portal_url>/cadastros/gabinete_parlamentar/atendimento/atendimento_form?cod_eleitor=<dtml-var cod_eleitor>&modal=1" data-title="Inclusão de Atendimento" data-bs-toggle="modal" data-bs-target="#iFrameModal">Incluir Atendimento</a>      
 
 </dtml-if>
 

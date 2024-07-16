@@ -1,21 +1,5 @@
 <dtml-var header_html>
 
-<script>
-
-(function ($) {
-  $(function () {
-    //$('input[type=submit]').hide();
-    document.onkeypress = function (event) {
-      var form = pesq_avancada_form;
-      form.action = "eleitor_pesquisar_proc";
-      if (event.keyCode === 13) {
-        form.submit();
-      }
-    };
-  });
-}(jQuery));
-</script>
-
  <div class="row mb-2">
       <div class="col-12 col-md-8 align-self-center">
         <h1 class="firstHeading font-size-18">Pesquisa de Eleitores</h1>
@@ -59,11 +43,11 @@
         <label class="form-label d-block">Sexo</label>
         <div class="form-check form-check-inline">
           <input class="form-check-input" name="rad_sex_eleitor" value="M" id="rad_sex_eleitorM" type="radio" />
-          <label class="form-check-label" for="rad_sex_eleitorM">M</label>
+          <label class="form-check-label" for="rad_sex_eleitorM">Masc.</label>
         </div>
         <div class="form-check form-check-inline">
           <input class="form-check-input" name="rad_sex_eleitor" value="F" id="rad_sex_eleitorF" type="radio" />
-          <label class="form-check-label" for="rad_sex_eleitorF">F</label>
+          <label class="form-check-label" for="rad_sex_eleitorF">Femin.</label>
         </div>
         <div class="form-check form-check-inline">
           <input class="form-check-input" name="rad_sex_eleitor" value="" id="rad_sex_eleitorI" checked type="radio" />
@@ -115,34 +99,18 @@
   <div class="row">  
     <div class="col-6 col-lg-3 mb-3">
         <label class="form-label" for="txt_dat_atendimento">Data Inicial de Atendimento</label>
-          <input class="form-control date" type="text" id="txt_dat_atendimento" name="txt_dat_atendimento" value="<dtml-var txt_dat_atendimento missing>" />
+        <div class="input-group">
+           <input type="text" class="form-control datepicker" placeholder="dd/mm/aaaa" name="txt_dat_atendimento" id="txt_dat_atendimento" data-provide="datepicker" data-date-autoclose="true" autocomplete="off">
+           <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
+        </div>
     </div>
     <div class="col-6 col-lg-3 mb-3">
         <label class="form-label" for="txt_dat_atendimento2">Data Final de Atendimento</label>
-          <input class="form-control date" type="text" id="txt_dat_atendimento2" name="txt_dat_atendimento2" value="<dtml-var txt_dat_atendimento2 missing>" />
+        <div class="input-group">
+           <input type="text" class="form-control datepicker" placeholder="dd/mm/aaaa" name="txt_dat_atendimento2" id="txt_dat_atendimento2" data-provide="datepicker" data-date-autoclose="true" autocomplete="off">
+           <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
+        </div>
    </div>
-    <script>
-        $('#txt_dat_atendimento').datepicker({
-            locale: 'pt-br',
-            icons: {rightIcon: '<i class="fa fa-fw fa-calendar-alt"></i>'},
-            format: 'dd/mm/yyyy',
-            uiLibrary: 'bootstrap4',
-            iconsLibrary: 'fontawesome',
-            maxDate: function () {
-                return $('#txt_dat_atendimento2').val();
-            }
-        });
-        $('#txt_dat_atendimento2').datepicker({
-            locale: 'pt-br',
-            icons: {rightIcon: '<i class="fa fa-fw fa-calendar-alt"></i>'},
-            format: 'dd/mm/yyyy',
-            uiLibrary: 'bootstrap4',
-            iconsLibrary: 'fontawesome',
-            minDate: function () {
-                return $('#txt_dat_atendimento').val();
-            }
-        });
-    </script>
    <div class="col-6 col-lg-3 mb-3">
       <label class="form-label" for="lst_assessor">Assessor Responsável</label>
       <select class="form-select" id="lst_assessor" name="lst_assessor">
@@ -167,4 +135,18 @@
      <input class="btn btn-light" type="reset" name="btn_eleitor_limpar" value="Limpar" />
 </form>
 <dtml-var js_slot>
+<script>
+(function ($) {
+  $(function () {
+    //$('input[type=submit]').hide();
+    document.onkeypress = function (event) {
+      var form = pesq_avancada_form;
+      form.action = "eleitor_pesquisar_proc";
+      if (event.keyCode === 13) {
+        form.submit();
+      }
+    };
+  });
+}(jQuery));
+</script>
 <dtml-var footer_html>

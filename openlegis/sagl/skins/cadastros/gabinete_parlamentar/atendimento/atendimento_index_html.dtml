@@ -1,44 +1,5 @@
 <dtml-var header_html>
 
-<script>
-$(document).ready(function() {
-    $('table.display').DataTable( {
-        "responsive": true,
-        "columnDefs": [
-           {
-              'targets': 0,
-              'checkboxes': {
-                 'selectRow': true
-              }
-           }
-        ],
-        "select": {
-           'style': 'multi'
-        },
-        "order": [[1, 'asc']],
-        "lengthMenu": [[10, 25, 50, 100], [10, 25, 50, 100]],
-        "lengthChange": true,
-        "language": {
-          search: "Pesquisar:",
-          processing:     "Processando...",
-          loadingRecords: "Carregando...",
-          lengthMenu:     "Exibir _MENU_ registros por página",
-          info:           "Exibindo _START_ a _END_ de _TOTAL_ registros",
-          infoEmpty:      "Exibindo _START_ a _END_ de _TOTAL_ registros",
-          infoFiltered:   "(total de registros:_MAX_)",
-          emptyTable:     "Nenhum registro encontrado",
-          zeroRecords:     "Nenhum registro encontrado",
-          paginate: {
-            first:      "Primeiro",
-            previous:   "Anterior",
-            next:       "Próximo",
-            last:       "Último"
-          },
-        }
-    });
-    
- </script>
-
 <h1 class="firstHeading font-size-18">Atendimentos no Gabinete</h1> 
     
  <dtml-in expr="zsql.gabinete_atendimento_obter_zsql(cod_parlamentar=cod_parlamentar_corrente)"> 
@@ -75,4 +36,30 @@ $(document).ready(function() {
 </dtml-in>
 
 <dtml-var js_slot>
+<script>
+$(document).ready(function() {
+    $.fn.dataTable.moment( 'DD/MM/YYYY HH:mm:ss' );
+    var table = $('.display').DataTable( {
+        "responsive": true,
+        "order": [[ 1, "desc" ]],
+        "language": {
+          search: "Pesquisar:",
+          processing:     "Processando...",
+          loadingRecords: "Carregando...",
+          lengthMenu:     "Exibir _MENU_ registros por página",
+          info:           "Exibindo _START_ a _END_ de _TOTAL_ registros",
+          infoEmpty:      "Exibindo _START_ a _END_ de _TOTAL_ registros",
+          infoFiltered:   "(total de registros:_MAX_)",
+          emptyTable:     "Nenhum registro encontrado",
+          zeroRecords:     "Nenhum registro encontrado",
+          paginate: {
+            first:      "Primeiro",
+            previous:   "Anterior",
+            next:       "Próximo",
+            last:       "Último"
+          },
+        }
+    });
+});
+</script>
 <dtml-var footer_html>

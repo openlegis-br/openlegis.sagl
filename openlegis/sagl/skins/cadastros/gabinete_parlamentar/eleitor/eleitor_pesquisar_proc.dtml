@@ -5,8 +5,8 @@
     <h1 class="firstHeading font-size-18">Pesquisa de Eleitores</h1>
   </div>
   <div class="col-12 col-lg-4 text-start text-end mb-2">
-    <div class="btn-group" role="group">
-     <a class="btn btn-primary btn-sm" href="<dtml-var portal_url>/cadastros/gabinete_parlamentar/eleitor/eleitor_index_html" ><i class="fa fa-fw fa-search"></i> Nova Pesquisa</a>
+    <div class="btn-group btn-group-sm" role="group">
+     <a class="btn btn-primary" href="<dtml-var portal_url>/cadastros/gabinete_parlamentar/eleitor/eleitor_index_html" ><i class="fa fa-fw fa-search"></i> Nova Pesquisa</a>
 
            <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
              <i class="fas fa-file-export"></i> Exportar
@@ -53,23 +53,24 @@ num_cep=txt_num_cep,nom_localidade=txt_nom_localidade,cod_parlamentar=cod_parlam
           Resultado: <dtml-var sequence-length> eleitor<dtml-if expr="_['sequence-length'] > 1">es</dtml-if>
         </th>
       </tr>
+      </thead>
      <dtml-if previous-sequence>
        <dtml-call "REQUEST.set('existe_seq_anterior', 1)">
      </dtml-if>
   </dtml-if sequence-start>
          <tr>            
            <td>
-              <a href="#" data-src="<dtml-var portal_url>/cadastros/gabinete_parlamentar/eleitor/eleitor_mostrar_proc?hdn_cod_eleitor=<dtml-var cod_eleitor missing>&modal=1" data-title="Edição de Eleitor" data-bs-toggle="modal" data-bs-target="#iFrameModal" /><b><dtml-var nom_eleitor></b></a>            
-            <dtml-if dat_nascimento><br /><b>Data de Nascimento:</b> <dtml-var dat_nascimento></dtml-if>
-            <dtml-if doc_identidade><br /><b>Documento:</b> <dtml-var doc_identidade missing null=""></dtml-if>
+              <a href="#" data-src="<dtml-var portal_url>/cadastros/gabinete_parlamentar/eleitor/eleitor_mostrar_proc?hdn_cod_eleitor=<dtml-var cod_eleitor missing>&modal=1" data-title="Edição de Eleitor" data-bs-toggle="modal" data-bs-target="#iFrameModal" /><span class="d-block"><b><dtml-var nom_eleitor></b></span></a>            
+            <dtml-if dat_nascimento><span class="d-block"><b>Data de Nascimento:</b> <dtml-var dat_nascimento></span></dtml-if>
+            <dtml-if doc_identidade><span class="d-block"><b>Documento:</b> <dtml-var doc_identidade missing null=""></span></dtml-if>
             <dtml-if end_residencial>
-              <br /><b>Endereço:</b> 
-              <dtml-if end_residencial><dtml-var end_residencial><br /></dtml-if> 
-              <dtml-if nom_bairro><b>Bairro: </b><dtml-var nom_bairro missing null=""><br /></dtml-if> 
-              <dtml-if nom_localidade><dtml-if num_cep><b>CEP:</b> <dtml-var num_cep missing null=""></dtml-if> <b>Localidade:</b> <dtml-var nom_localidade> - <dtml-var sgl_uf><br /></dtml-if>
+              <dtml-if end_residencial><span class="d-block"><b>Endereço</b>: <dtml-var end_residencial></span></dtml-if> 
+              <dtml-if nom_bairro><span class="d-block"><b>Bairro: </b><dtml-var nom_bairro missing null=""></span</dtml-if> 
+              <dtml-if nom_localidade><span class="d-block"><dtml-if num_cep><b>CEP:</b> <dtml-var num_cep missing null=""></dtml-if> <b>Localidade:</b> <dtml-var nom_localidade> - <dtml-var sgl_uf></span></dtml-if>
             </dtml-if>
             <dtml-if expr="num_telefone or num_celular">
-               <dtml-if num_telefone><b>Telefone Fixo:</b> <dtml-var num_telefone missing null></dtml-if> <dtml-if num_celular><b>Celular:</b> <dtml-var num_celular missing null></dtml-if>
+               <dtml-if num_telefone><span class="d-block"><b>Telefone Fixo:</b> <dtml-var num_telefone missing null></span></dtml-if> 
+               <dtml-if num_celular><span class="d-block"><b>Celular:</b> <dtml-var num_celular missing null></span></dtml-if>
             </dtml-if>
            </td>
           </tr>

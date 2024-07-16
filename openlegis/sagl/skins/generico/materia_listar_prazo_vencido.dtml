@@ -1,86 +1,14 @@
 <dtml-var header_html>
 
-<script src="<dtml-var portal_url>/js/moment.min.js""></script>
-<script src="<dtml-var portal_url>/js/datetime-moment.js"></script>
-
-<script>
-$(document).ready(function() {
-    $.fn.dataTable.moment('DD/MM/YYYY');    //Formatação sem Hora
-    var table = $('#jdTable').DataTable( {
-        "responsive": true,
-        "lengthMenu": [[10, 25, 50, 100], [10, 25, 50, 100]],
-        "lengthChange": true,
-        "order": [[3, "asc"]],                     
-        "buttons": [
-            {
-                extend: 'collection',
-                text: 'Exportar',
-                buttons: [ 
-                           {
-                             extend:    'excelHtml5',
-                             text:      '<i class="far fa-file-excel"></i> Excel',
-                             titleAttr: 'PDF'
-                           },
-                           {
-                             extend:    'pdfHtml5',
-                             download: 'open',
-                             text:      '<i class="fa fa-file-adobe"></i> PDF',
-                             titleAttr: 'PDF'
-                           },
-                           {
-                             extend:    'print',
-                             text:      '<i class="fa fa-print"></i> Impressão',
-                             titleAttr: 'Impressão'
-                           },
-                         ],
-               className: '',
-               dropup: true,
-               autoClose: true,
-               fade: true
-
-            }
-        ],
-        "language": {
-          search: "Pesquisar:",
-          processing:     "Processando...",
-          loadingRecords: "Carregando...",
-          lengthMenu:     "Exibir _MENU_ registros por página",
-          info:           "Exibindo _START_ a _END_ de _TOTAL_ registros",
-          infoEmpty:      "Exibindo _START_ a _END_ de _TOTAL_ registros",
-          infoFiltered:   "(total de registros:_MAX_)",
-          emptyTable:     "Nenhum registro encontrado",
-          zeroRecords:     "Nenhum registro encontrado",
-          paginate: {
-            first:      "Primeiro",
-            previous:   "Anterior",
-            next:       "Próximo",
-            last:       "Último"
-          },
-         "buttons": {
-           print: "Imprimir",
-           copy: "Copiar",
-           copyTitle: "Cópia bem sucedida",
-           copySuccess: {
-            1: "Uma linha copiada com sucesso",
-            _: "%d linhas copiadas com sucesso"
-          }
-        }
-        }
-    });
-    table.buttons().container()
-        .appendTo( '#panelBtn .col-sm-12:eq(0)' );  
-});
-</script>
-
-<h1 class="firstHeading font-size-18">Tramitações Vencidas</h1>
+<h1 class="firstHeading font-size-18">Matérias com Tramitação Vencida</h1>
 
     <dtml-in expr="zsql.tramitacao_prazo_vencido_obter_zsql()">
         <dtml-if sequence-start>
         <div class="table-responsive">
         <table class="table" id="jdTable">
-         <thead>
+         <thead class="table-light">
             <tr>
-                <th>Matéria</th>
+                <th width="50%">Identificação da Matéria</th>
                 <th>Localização</th>
                 <th>Situação</th>
                 <th>Vencimento</th>
@@ -123,4 +51,34 @@ $(document).ready(function() {
 </dtml-in>
 
 <dtml-var js_slot>
+<script>
+$(document).ready(function() {
+    $.fn.dataTable.moment( 'DD/MM/YYYY HH:mm:ss' ); 
+    $('#jdTable').DataTable( {
+        "responsive": true,
+        "bStateSave": false,
+        "bFilter": true,
+        "order": [[3, "asc"]],             
+        "lengthMenu": [[10, 25, 50, 100], [10, 25, 50, 100]],
+        "lengthChange": true,
+        "language": {
+          search: "Pesquisar:",
+          processing:     "Processando...",
+          loadingRecords: "Carregando...",
+          lengthMenu:     "Exibir _MENU_ registros por página",
+          info:           "Exibindo _START_ a _END_ de _TOTAL_ registros",
+          infoEmpty:      "Exibindo _START_ a _END_ de _TOTAL_ registros",
+          infoFiltered:   "(total de registros:_MAX_)",
+          emptyTable:     "Nenhum registro encontrado",
+          zeroRecords:     "Nenhum registro encontrado",
+          paginate: {
+            first:      "Primeiro",
+            previous:   "Anterior",
+            next:       "Próximo",
+            last:       "Último"
+          },
+        }
+    });
+});
+</script>
 <dtml-var footer_html>

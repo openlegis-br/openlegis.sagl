@@ -222,15 +222,35 @@
                         <div class="dropdown d-inline-block">
                             <button type="button" class="btn header-item waves-effect" id="page-header-user-dropdown"
                                 data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <img class="rounded-circle header-profile-user" src="<dtml-var portal_url>/assets/images/users/user-1.jpg"
-                                    alt="Header Avatar">
+                                <dtml-if cod_parlamentar_corrente>
+                                   <dtml-call expr="REQUEST.set('id_foto', str(cod_parlamentar_corrente)+'_foto_parlamentar')">
+                                      <dtml-if expr="hasattr(sapl_documentos.parlamentar.fotos,id_foto)">
+                                         <img class="rounded-circle header-profile-user" src="<dtml-var portal_url>/sapl_documentos/parlamentar/fotos/<dtml-var id_foto>" alt="Header Avatar">
+                                      <dtml-else>
+                                         <img class="rounded-circle header-profile-user" src="<dtml-var portal_url>/assets/images/users/user-icon.jpg" alt="Header Avatar">
+                                      </dtml-if>
+                                <dtml-else>
+                                   <img class="rounded-circle header-profile-user" src="<dtml-var portal_url>/assets/images/users/user-icon.jpg" alt="Header Avatar">
+                                </dtml-if>
                                 <span class="d-none d-xl-inline-block ms-1">&dtml-AUTHENTICATED_USER;</span>
                                 <i class="mdi mdi-chevron-down d-none d-xl-inline-block"></i>
                             </button>
                             <div class="dropdown-menu dropdown-menu-end">
                                 <!-- item-->
-                                <a class="dropdown-item" href="<dtml-var portal_url>/cadastros/usuario/usuario_mostrar_proc"><i class="dripicons-user d-inline-block text-muted me-2"></i>
-                                    Perfil</a>
+                                <dtml-if expr="AUTHENTICATED_USER.has_role(['Administrador'])">
+                                   <a class="dropdown-item" href="<dtml-var portal_url>/cadastros/usuario/usuario_mostrar_proc?nome=<dtml-var AUTHENTICATED_USER>"><i class="dripicons-user d-inline-block text-muted me-2"></i> Perfil</a>
+                                <dtml-else>
+                                   <a class="dropdown-item" href="<dtml-var portal_url>/cadastros/usuario/usuario_mostrar_proc"><i class="dripicons-user d-inline-block text-muted me-2"></i> Perfil</a>
+                                </dtml-if>
+                                <dtml-if cod_parlamentar_corrente>
+                                  <a class="dropdown-item" href="<dtml-var portal_url>/cadastros/gabinete_parlamentar/eleitor"><i class="dripicons-article d-inline-block text-muted me-2"></i>Eleitores</a>
+                                  <a  class="dropdown-item" href="<dtml-var portal_url>/cadastros/gabinete_parlamentar/atendimento"><i class="dripicons-to-do d-inline-block text-muted me-2"></i>Atendimentos</a>
+                                </dtml-if>
+                                <dtml-if cod_funcionario_corrente>
+                                   <a class="dropdown-item" href="<dtml-var portal_url>/cadastros/atendimento"><i class="dripicons-star d-inline-block text-muted me-2"></i>Visitantes Ativos</a>
+                                   <a class="dropdown-item" href="<dtml-var portal_url>/cadastros/atendimento/historico_html" class="dropdown-item"><i class="dripicons-hourglass d-inline-block text-muted me-2"></i>Histórico de Visitas</a>
+                                   <a class="dropdown-item"href="<dtml-var portal_url>/cadastros/atendimento/visitante_pesquisar_form"><i class="dripicons-search d-inline-block text-muted me-2"></i>Pesquisar Visitantes</a>
+                                </dtml-if>
                                 <div class="dropdown-divider"></div>
                                 <a class="dropdown-item" href="<dtml-var portal_url>/generico/log_out_proc"><i class="dripicons-exit d-inline-block text-muted me-2"></i>
                                     Sair</a>

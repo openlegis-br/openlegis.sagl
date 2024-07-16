@@ -1,5 +1,5 @@
 <dtml-var header_html>
-
+<script src="<dtml-var portal_url>/javascript/data_validar.js"></script>
 <script>
 <!--
   function campos_criticar(form){
@@ -20,7 +20,6 @@
   }
 
 </script>
-
 
   <h1 class="firstHeading font-size-18">Registro de Atendimento</h1>
 
@@ -61,7 +60,7 @@
              <input class="form-control date" type="text" name="txt_dat_resultado" id="txt_dat_resultado" size="18" value="<dtml-var dat_resultado missing null>" onblur="formata_data(form.txt_dat_resultado)" />
            </td>
            <td>
-             <label class="form-label" for="lst_txt_status" class="d-block">Status</label>
+             <label class="form-label d-block" for="lst_txt_status">Status</label>
                     <dtml-in expr="['Aberto','Atendido']">
                        <div class="form-check form-check-inline">                    
                               <input class="form-check-input" type="radio" id="lst_txt_status" name="lst_txt_status" value="<dtml-var expr="_['sequence-item']">"

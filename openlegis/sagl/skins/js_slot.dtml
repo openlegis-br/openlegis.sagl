@@ -95,25 +95,10 @@
 <script src="<dtml-var portal_url>/js/geral.js"></script>
 
 <!-- Required datatable js -->
-<dtml-comment>
-<script src="<dtml-var portal_url>/assets/libs/datatables.net/js/jquery.dataTables.min.js"></script>
-<script src="<dtml-var portal_url>/assets/libs/datatables.net-bs4/js/dataTables.bootstrap4.min.js"></script>
-<script src="<dtml-var portal_url>/assets/libs/datatables.net-buttons/js/dataTables.buttons.min.js"></script>
-<script src="<dtml-var portal_url>/assets/libs/datatables.net-buttons-bs4/js/buttons.bootstrap4.min.js"></script>
-<script src="<dtml-var portal_url>/assets/libs/jszip/jszip.min.js"></script>
-<script src="<dtml-var portal_url>/assets/libs/pdfmake/build/pdfmake.min.js"></script>
-<script src="<dtml-var portal_url>/assets/libs/pdfmake/build/vfs_fonts.js"></script>
-<script src="<dtml-var portal_url>/assets/libs/datatables.net-buttons/js/buttons.html5.min.js"></script>
-<script src="<dtml-var portal_url>/assets/libs/datatables.net-buttons/js/buttons.print.min.js"></script>
-<script src="<dtml-var portal_url>/assets/libs/datatables.net-buttons/js/buttons.colVis.min.js"></script>
-<script src="<dtml-var portal_url>/assets/libs/datatables.net-responsive/js/dataTables.responsive.min.js"></script>
-</dtml-comment>
-
 <script src="<dtml-var portal_url>/assets/libs/datatables.net/js/dataTables.min.js"></script>
 <script src="<dtml-var portal_url>/assets/libs/datatables.net/js/dataTables.bootstrap5.min.js"></script>
 <script src="<dtml-var portal_url>/assets/libs/datatables.net/js/dataTables.responsive.min.js"></script>
 <script src="<dtml-var portal_url>/assets/libs/datatables.net/js/responsive.bootstrap5.js"></script>
-
 <script src="<dtml-var portal_url>/assets/libs/datatables.net/js/dataTables.select.min.js"></script>
 <script src="<dtml-var portal_url>/assets/libs/datatables.net/js/select.dataTables.js"></script>
 <script src="<dtml-var portal_url>/assets/libs/datatables.net/js/dataTables.rowReorder.min.js"></script>
@@ -121,10 +106,13 @@
 <script src="<dtml-var portal_url>/assets/libs/datatables.net/js/buttons.bootstrap5.min.js"></script>
 <script src="<dtml-var portal_url>/assets/libs/datatables.net/js/buttons.colVis.min.js"></script>
 <script src="<dtml-var portal_url>/assets/libs/datatables.net/js/buttons.html5.min.js"></script>
-<script src="<dtml-var portal_url>/assets/libs/datatables.net/js/vfs_fonts.js"></script>
-
 <script src="<dtml-var portal_url>/js/moment.min.js"></script>
 <script src="<dtml-var portal_url>/js/datetime-moment.js"></script>
+<dtml-let isAnon="portal_membership.isAnonymousUser()">
+  <dtml-if expr="not isAnon">
+     <script src="<dtml-var portal_url>/assets/libs/datatables.net/js/vfs_fonts.js"></script>
+  </dtml-if>
+</dtml-let>
 
 <!-- Datatable init js -->
 <script src="<dtml-var portal_url>/assets/js/pages/datatables.init.js"></script>

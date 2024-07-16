@@ -1667,7 +1667,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
             break
         else:
             cod_assinatura_doc = str(self.cadastros.assinatura.generate_verification_code())
-            self.zsql.assinatura_documento_incluir_zsql(cod_assinatura_doc=cod_assinatura_doc, codigo=codigo, anexo=anexo, tipo_doc=tipo_doc, cod_usuario=cod_usuario, ind_prim_assinatura=1)
+            self.zsql.assinatura_documento_incluir_zsql(cod_assinatura_doc=cod_assinatura_doc, codigo=codigo, anexo=anexo, tipo_doc=tipo_doc, cod_solicitante=cod_usuario, cod_usuario=cod_usuario, ind_prim_assinatura=1)
             self.zsql.assinatura_documento_registrar_zsql(cod_assinatura_doc=cod_assinatura_doc, cod_usuario=cod_usuario)
         if tipo_doc == 'proposicao':
            storage_path = self.sapl_documentos.proposicao

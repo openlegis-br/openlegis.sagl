@@ -1,16 +1,35 @@
-<dtml-var header_html>
-
-<script>
-  $(document).ready(function(){
-
-    $('[data-bs-toggle="popover"]').popover('show');
-
-    $('[data-bs-toggle="popover"]').on('click', function () {
-        $('[data-bs-toggle="popover"]').popover('destroy');
-    });
-
-  });
-</script>
+<!doctype html>
+<html lang="pt-br">
+    <head>
+        <meta charset="utf-8" />
+        <title>Assinatura Digital</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta content="Gestão de Processos Digitais" name="description" />
+        <meta content="OpenLegis" name="author" />
+        <link rel="shortcut icon" href="<dtml-var portal_url>/imagens/favicon.ico">
+        <link href="<dtml-var portal_url>/assets/css/bootstrap.min.css" id="bootstrap-style" rel="stylesheet" type="text/css" />
+        <link href="<dtml-var portal_url>/assets/css/icons.min.css" rel="stylesheet" type="text/css" />
+        <link href="<dtml-var portal_url>/assets/css/app.css" id="app-style" rel="stylesheet" type="text/css" />
+    </head>
+    <body data-topbar="dark" data-layout="horizontal" <dtml-if expr="REQUEST.get('modal', '')">style="background:#fff;"</dtml-if> >
+       <dtml-if expr="not portal_membership.isAnonymousUser()">
+            <dtml-in expr="zsql.usuario_obter_zsql(col_username=AUTHENTICATED_USER.getUserName())">
+               <dtml-if cod_usuario>
+                  <dtml-call expr="REQUEST.set('cod_usuario_corrente', int(cod_usuario))">
+               </dtml-if>
+           </dtml-in>
+        </dtml-if>
+        <div id="layout-wrapper">
+            <div class="main-content">
+                <dtml-if expr="REQUEST.get('modal', '')">
+                  <div class="content-modal">
+                      <div class="container-xxl">
+                <dtml-else>
+                  <div class="page-content">
+                      <div class="container-fluid">
+                </dtml-if>
+                <div class="card-body">
+                <!-- End Header -->
 
 <dtml-unless expr="_.has_key('anexo')">
    <dtml-call expr="REQUEST.set('anexo', '')">
@@ -38,9 +57,12 @@
   <dtml-unless expr="_.has_key('txt_qtde_assinaturas')">
   <form class="d-print-none" method="post" id="qtde_assinaturas" name="qtde_assinaturas" action="pades-signature_html">  
     <div class="row">
-     <div class="col-4 mb-3">
-       <label class="form-label" for="txt_qtde_assinaturas">Quantidade de Signatários</label>
-       <input class="form-control number" type="number" id="txt_qtde_assinaturas" name="txt_qtde_assinaturas" value="4" min="1" required data-bs-toggle="popover" data-trigger="focus" title="Informação importante:" data-content="Informando até 3 (três) signatários, as assinaturas digitais serão exibidas na última página do documento, limitando a visualização de apenas três assinaturas. Informando 4 (quatro) signatários ou mais, uma nova página em branco será adicionada ao final do documento para visibilidade de todas as assinaturas."/>
+     <div class="col-12 col-sm-4 mb-3">
+       <label class="form-label required" for="txt_qtde_assinaturas">Quantidade de Signatários</label>
+       <input class="form-control number" type="number" id="txt_qtde_assinaturas" name="txt_qtde_assinaturas" value="4" min="1" required data-bs-toggle="popover" data-bs-trigger="focus" data-bs-placement="right" title="Informação importante" data-bs-content="Informando até 3 (três) signatários, as assinaturas digitais serão exibidas na última página do documento, limitando a visualização de apenas três assinaturas. Informando 4 (quatro) signatários ou mais, uma nova página em branco será adicionada ao final do documento para visibilidade de todas as assinaturas."/>
+     </div>
+     <div class="col-12 col-sm-8 mt-3">
+       <small class="form-text text-muted mt-4">Esse número define a página do documento na qual as assinaturas serão exibidas. Até 3 signatários, as assinaturas serão exibidas no rodapé da última página original do documento; a partir de 4 signatários, serão exibidas no topo de uma página adicionada no final do documento.</small>
      </div>
     </div>
     <input class="btn btn-primary" type="submit" name="button" value="Prosseguir" />
@@ -53,8 +75,6 @@
 </dtml-if>
 
 <dtml-if expr="_.has_key('txt_qtde_assinaturas')">
-  <script src="static/js/lacuna-web-pki-2.14.6.min.js"></script>
-  <script src="static/js/jquery.blockUI.js"></script>
   <dtml-call "REQUEST.set('campos', pades_signature_pdf(codigo=codigo, anexo=anexo, tipo_doc=tipo_doc, cod_usuario=cod_usuario, qtde_assinaturas=txt_qtde_assinaturas))">
   <dtml-call "REQUEST.set('token', campos[0])">
   <dtml-call "REQUEST.set('pdf_path', campos[1])">
@@ -71,18 +91,27 @@
     <input type="hidden" id="txt_qtde_assinaturas" name="txt_qtde_assinaturas" value="<dtml-var txt_qtde_assinaturas>">  
     <div class="row">
        <div class="col-12 mb-3">
-         <label class="form-label" for="certificateSelect">Selecione um Certificado Digital</label>
+         <label class="form-label" for="certificateSelect">Selecione um Certificado ICP-Brasil</label>
          <select class="form-select"  id="certificateSelect" class="form-control"></select>
        </div>
     </div>
     <div class="row">
        <div class="col-10 mb-3">
-         <button id="signButton" type="button" class="btn btn-primary"><i class="fas fa-file-signature"></i> Assinar PDF</button>
-         <button id="refreshButton" type="button" class="btn btn-secondary"><i class="fas fa-sync"></i> Recarregar Certificados</button>
+        <div class="btn-group">
+         <button id="signButton" type="button" class="btn btn-primary"><i class="mdi mdi-certificate"></i> Assinar Documento</button>
+         <button id="refreshButton" type="button" class="btn btn-light"><i class="mdi mdi-reload"></i> Certificados</button>
+        </div>
        </div>
     </div>
   </form>
-  <script src="static/js/lacuna-web-pki-client.js"></script>
+  <div style="card font-family: monospace;" id="logPanel"></div>
 </dtml-if>
-<dtml-var js_slot>
+
+  <script src="<dtml-var portal_url>/assets/libs/jquery/jquery.min.js"></script>
+  <script src="<dtml-var portal_url>/assets/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script src="static/js/jquery.blockUI.js"></script>
+  <script src="static/js/lacuna-web-pki-2.7.0.min.js"></script>
+  <script src="static/js/lacuna-web-pki-client.js"></script>
+
 <dtml-var footer_html>
+

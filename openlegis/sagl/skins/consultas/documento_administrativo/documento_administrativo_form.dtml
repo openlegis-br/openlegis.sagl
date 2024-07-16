@@ -201,7 +201,7 @@
                          </form> 
                       </div>
                      </div>  
-                     <a id="addDocAc" tabindex="0" class="btn btn-sm btn-light" role="button" data-bs-toggle="popover" title="title"><i class="fas fa-plus-circle"></i> Incluir documento</a>
+                     <a id="addDocAc" tabindex="0" class="btn btn-light" role="button" data-bs-toggle="popover" title="title"><i class="fas fa-plus-circle"></i> Incluir documento</a>
                </section>   
              </dtml-if>
 
@@ -418,7 +418,7 @@
                  <div class="card-body">
           <dtml-if expr="AUTHENTICATED_USER.has_role(['Authenticated']) and _.has_key('pode_tramitar')">
             <div class="mb-3">
-              <a href="#" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Tramitação Individual" data-src="<dtml-var portal_url>/cadastros/tramitacao_documento/tramitacao_form?hdn_cod_documento=<dtml-var cod_documento>&modal=1" class="btn btn-sm btn-light"><i class="fas fa-external-link-alt"></i><span> Tramitar</span></a>
+              <a href="#" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Tramitação Individual" data-src="<dtml-var portal_url>/cadastros/tramitacao_documento/tramitacao_form?hdn_cod_documento=<dtml-var cod_documento>&modal=1" class="btn btn-light"><i class="fas fa-external-link-alt"></i><span> Tramitar</span></a>
             </div>
           </dtml-if>
           <dtml-in expr="zsql.tramitacao_administrativo_obter_zsql(cod_documento=cod_documento)">

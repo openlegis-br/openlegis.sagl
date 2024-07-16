@@ -775,7 +775,7 @@
                  <div class="col py-2">
                      <div class="card border-success shadow mb-0">
                          <div class="card-body">
-                             <div class="float-end text-muted"><dtml-var dat_tramitacao></div>
+                             <div class="float-end text-muted font-size-11"><dtml-var dat_tramitacao></div>
 
                   <dtml-if expr="dat_encaminha!=None">
                      <dtml-call expr="REQUEST.set('pdf_assinado', str(cod_tramitacao)+'_tram_signed.pdf')">
@@ -813,10 +813,10 @@
                   <dtml-else>
                      <h4 class="card-title font-size-13 text-muted"><dtml-var expr="des_status"></h4>
                   </dtml-if>
-                  <dtml-if txt_tramitacao><div class="card-text text-muted tram_mat2"><dtml-var txt_tramitacao></div></dtml-if>
+                  <dtml-if txt_tramitacao><div class="card-text text-muted tram_mat2 font-size-12"><dtml-var txt_tramitacao></div></dtml-if>
                   <dtml-if cod_unid_tram_dest>                      
                      <dtml-in expr="unidade_tramitacao_obter_zsql(cod_unid_tramitacao=_.int(cod_unid_tram_dest))">
-                            <div class="text-muted"><b>Unidade de Destino</b>: <dtml-var nom_unidade_join></div>
+                            <div class="text-muted font-size-12"><b>Unidade de Destino</b>: <dtml-var nom_unidade_join></div>
                      </dtml-in>
                   </dtml-if>
                          </div>
@@ -910,21 +910,6 @@
   } 
     </dtml-if> 
  </dtml-let>
-</script>
-<script type='text/javascript'>
-  $(document).ready(function() {    
-    var options = {
-        html: true,
-        title: "Incluir Documento Acessório",
-        //html element
-        //content: $("#popover-content")
-        content: $('[data-name="popover-content"]')
-        //Doing below won't work. Shows title only
-       //content: $("#popover-content").html()         
-    }
-    var exampleEl = document.getElementById('addDocAc')
-    var popover = new bootstrap.Popover(exampleEl, options)
-  })
 </script>
 
 <dtml-var footer_html>

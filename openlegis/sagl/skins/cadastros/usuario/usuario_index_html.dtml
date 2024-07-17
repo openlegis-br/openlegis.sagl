@@ -4,14 +4,15 @@
       <div class="col-12 col-md-8 align-self-center">
         <h1 class="firstHeading font-size-18">Gerenciamento de Usuários</h1>
       </div>
-      <div class="col-12 col-md-4 text-start text-end">
+      <div class="col-12 col-md-4 text-start text-md-end">
          <dtml-if expr="AUTHENTICATED_USER.has_role(['Administrador', 'Operador'])">
-            <input class="btn btn-light" type="button" name="submit" value="Incluir Usuário" onClick="mostrar()"/>
+            <input class="btn btn-primary" type="button" name="submit" value="Incluir Usuário" onClick="mostrar()"/>
          </dtml-if> 
       </div>
  </div>
 
-<table id="jdTable" class="table">
+<div class="table-responsive">
+<table id="jdTable" class="table w-100">
  <thead class="table-light">
   <tr>
     <th width="20%">Nome do Usuário</th>
@@ -45,6 +46,7 @@
     </dtml-in>
   </tbody>
 </table>
+</div>
 
 <div id="panelBtn" class="d-print-none" style="margin-bottom: 20px;">
   <div class="row">
@@ -58,35 +60,6 @@ $(document).ready(function() {
     var table = $('#jdTable').DataTable( {
         "responsive": true,
         "order": [[ 0, "asc" ], [ 1, "asc" ]],
-        "buttons": [
-            {
-                extend: 'collection',
-                text: 'Exportar',
-                buttons: [ 
-                           {
-                             extend:    'excelHtml5',
-                             text:      '<i class="far fa-file-excel"></i> Excel',
-                             titleAttr: 'PDF'
-                           },
-                           {
-                             extend:    'pdfHtml5',
-                             download: 'open',
-                             text:      '<i class="fa fa-file-pdf"></i> PDF',
-                             titleAttr: 'PDF'
-                           },
-                           {
-                             extend:    'print',
-                             text:      '<i class="fa fa-print"></i> Impressão',
-                             titleAttr: 'Impressão'
-                           },
-                         ],
-               className: 'btn btn-light',
-               dropup: true,
-               autoClose: true,
-               fade: true
-
-            }
-        ],
         "language": {
           search: "Pesquisar:",
           processing:     "Processando...",

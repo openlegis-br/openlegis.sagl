@@ -1,102 +1,5 @@
 <dtml-var header_html>
 
-<script src="<dtml-var portal_url>/js/moment.min.js"></script>
-<script src="<dtml-var portal_url>/js/datetime-moment.js"></script>
-
-<script>
-
-$(document).ready(function() {
-    $.fn.dataTable.moment( 'DD/MM/YYYY HH:mm:ss' );    //Formatação com Hora
-    $.fn.dataTable.moment('DD/MM/YYYY');    //Formatação sem Hora
-
-    $('table.display').DataTable( {
-        "responsive": true,
-        "order": [[ 2, "desc" ]],                      
-        "lengthMenu": [[10, 25, 50, 100], [10, 25, 50, 100]],
-        "lengthChange": true,
-        "buttons": [
-            {
-                extend: 'collection',
-                text: 'Exportar',
-                buttons: [ 
-                           {
-                             extend:    'excelHtml5',
-                             text:      '<i class="far fa-file-excel"></i> Excel',
-                             titleAttr: 'PDF'
-                           },
-                           {
-                             extend:    'pdfHtml5',
-                             download: 'open',
-                             text:      '<i class="fa fa-file-adobe"></i> PDF',
-                             titleAttr: 'PDF'
-                           },
-                           {
-                             extend:    'print',
-                             text:      '<i class="fa fa-print"></i> Impressão',
-                             titleAttr: 'Impressão'
-                           },
-                         ],
-               className: '',
-               dropup: true,
-               autoClose: true,
-               fade: true
-
-            }
-        ],
-        "language": {
-          search: "Pesquisar:",
-          processing:     "Processando...",
-          loadingRecords: "Carregando...",
-          lengthMenu:     "Exibir _MENU_ registros por página",
-          info:           "Exibindo _START_ a _END_ de _TOTAL_ registros",
-          infoEmpty:      "Exibindo _START_ a _END_ de _TOTAL_ registros",
-          infoFiltered:   "(total de registros:_MAX_)",
-          emptyTable:     "Nenhum registro encontrado",
-          zeroRecords:     "Nenhum registro encontrado",
-          paginate: {
-            first:      "Primeiro",
-            previous:   "Anterior",
-            next:       "Próximo",
-            last:       "Último"
-          },
-        }
-    });
-});
-
-window.onload = function(){  
-    var url = document.location.toString();
-    if (url.match('#')) {
-        $('.nav-tabs a[href="#' + url.split('#')[1] + '"]').tab('show');
-    }
-    //Change hash for page-reload
-    $('.nav-tabs a[href="#' + url.split('#')[1] + '"]').on('shown', function (e) {
-        window.location.hash = e.target.hash;
-    }); 
-} 
-
-$(document).ready(() => {
-  let url = location.href.replace(/\/$/, "");
-   if (location.hash) {
-    const hash = url.split("#");
-    $('#nav_peticao a[href="#'+hash[1]+'"]').tab("show");
-    url = location.href.replace(/\/#/, "#");
-    history.replaceState(null, null, url);
-  } 
-
-  $('a[data-bs-toggle="tab"]').on("click", function() {
-    let newUrl;
-    const hash = $(this).attr("href");
-    if(hash == "#home") {
-      newUrl = url.split("#")[0];
-    } else {
-      newUrl = url.split("#")[0] + hash;
-    }
-    newUrl += "";
-    history.replaceState(null, null, newUrl);
-  });
-});
-</script>
-
    <dtml-call "REQUEST.set('username', AUTHENTICATED_USER)">
    <dtml-in expr="zsql.usuario_obter_zsql(col_username=username)">
       <dtml-call "REQUEST.set('nom_completo', nom_completo)">
@@ -107,10 +10,10 @@ $(document).ready(() => {
    </dtml-in>
 
  <div class="row mb-2">
-      <div class="col-12 col-md-8 align-self-center">
+      <div class="col-12 col-md-8">
         <h1 class="firstHeading font-size-18">Peticionamento Digital</h1>
       </div>
-      <div class="col-12 col-md-4 text-start text-end">
+      <div class="col-12 col-md-4 text-start text-sm-end">
        <dtml-if expr="AUTHENTICATED_USER.has_role(['Authenticated'])">
          <div class="btn-group">
            <button type="button" class="btn btn-primary d-print-none mb-2 dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -192,8 +95,9 @@ href="<dtml-var portal_url>/cadastros/peticionamento_eletronico/peticionamento_e
 
 <dtml-if expr="ind_enviado=='0'">
 <dtml-in expr="zsql.peticao_obter_zsql(cod_usuario=cod_usuario_corrente, ind_enviado=ind_enviado, ind_excluido=0)">
-    <dtml-if sequence-start>    
-            <table class="table display" id="enviadas">    
+    <dtml-if sequence-start>
+         <div class="table-responsive">
+            <table class="table display w-100" id="enviadas">    
              <thead class="table-light">
                 <tr>  
                     <th width="20%">Tipo</th>
@@ -223,6 +127,7 @@ href="<dtml-var portal_url>/cadastros/peticionamento_eletronico/peticionamento_e
                 </tr>
     <dtml-if sequence-end>
             </table>
+          </div>
     </dtml-if sequence-end>
 <dtml-else>
     <p>Não há petições em elaboração.</p>
@@ -361,4 +266,67 @@ href="<dtml-var portal_url>/cadastros/peticionamento_eletronico/peticionamento_e
 </dtml-if>
 
 <dtml-var js_slot>
+<script>
+$(document).ready(function() {
+    $.fn.dataTable.moment( 'DD/MM/YYYY HH:mm:ss' );    //Formatação com Hora
+    $.fn.dataTable.moment('DD/MM/YYYY');    //Formatação sem Hora
+
+    $('table.display').DataTable( {
+        "responsive": true,
+        "order": [[ 2, "desc" ]],                      
+        "lengthMenu": [[10, 25, 50, 100], [10, 25, 50, 100]],
+        "lengthChange": true,
+        "language": {
+          search: "Pesquisar:",
+          processing:     "Processando...",
+          loadingRecords: "Carregando...",
+          lengthMenu:     "Exibir _MENU_ registros por página",
+          info:           "Exibindo _START_ a _END_ de _TOTAL_ registros",
+          infoEmpty:      "Exibindo _START_ a _END_ de _TOTAL_ registros",
+          infoFiltered:   "(total de registros:_MAX_)",
+          emptyTable:     "Nenhum registro encontrado",
+          zeroRecords:     "Nenhum registro encontrado",
+          paginate: {
+            first:      "Primeiro",
+            previous:   "Anterior",
+            next:       "Próximo",
+            last:       "Último"
+          },
+        }
+    });
+});
+
+window.onload = function(){  
+    var url = document.location.toString();
+    if (url.match('#')) {
+        $('.nav-tabs a[href="#' + url.split('#')[1] + '"]').tab('show');
+    }
+    //Change hash for page-reload
+    $('.nav-tabs a[href="#' + url.split('#')[1] + '"]').on('shown', function (e) {
+        window.location.hash = e.target.hash;
+    }); 
+} 
+
+$(document).ready(() => {
+  let url = location.href.replace(/\/$/, "");
+   if (location.hash) {
+    const hash = url.split("#");
+    $('#nav_peticao a[href="#'+hash[1]+'"]').tab("show");
+    url = location.href.replace(/\/#/, "#");
+    history.replaceState(null, null, url);
+  } 
+
+  $('a[data-bs-toggle="tab"]').on("click", function() {
+    let newUrl;
+    const hash = $(this).attr("href");
+    if(hash == "#home") {
+      newUrl = url.split("#")[0];
+    } else {
+      newUrl = url.split("#")[0] + hash;
+    }
+    newUrl += "";
+    history.replaceState(null, null, newUrl);
+  });
+});
+</script>
 <dtml-var footer_html>

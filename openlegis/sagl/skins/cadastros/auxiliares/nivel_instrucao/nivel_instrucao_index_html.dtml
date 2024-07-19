@@ -39,7 +39,7 @@
 	   <tr>
                <th width="10%">Código</th>
                <th width="65%">Nível de Instrução</th>
-               <th width="25%">Ação</th>
+               <th width="25%">Ações</th>
            </tr>
          </thead>
      </dtml-if sequence-start>
@@ -47,9 +47,11 @@
                <td><dtml-var cod_nivel_instrucao></td>
                <td><input class="form-control" type="text" name="txt_des_nivel_instrucao_<dtml-var cod_nivel_instrucao>" value="<dtml-var des_nivel_instrucao>" size="40" maxlength="50" /></td>
                <td>
+                <div class="btn-group">
                 <a class="btn btn-primary mb-1" href="javascript:submeter(<dtml-var cod_nivel_instrucao>,document.nivel_instrucao_form.txt_des_nivel_instrucao_<dtml-var cod_nivel_instrucao>,document.nivel_instrucao_form)">
                  Atualizar</a>  
                  <a class="btn btn-danger mb-1" href="javascript:excluir(<dtml-var cod_nivel_instrucao>)">Excluir</a>
+                </div>
              </tr>
     <dtml-if sequence-end>
       </table>
@@ -61,12 +63,10 @@
  <legend class="font-size-16">Formulário de Inclusão</legend>
  <div class="row">
    <div class="col-12 mb-3">
-      <label class="form-label" for="txt_des_nivel_instrucao" class="required">Nível de Instrução</label>
+      <label class="form-label required" for="txt_des_nivel_instrucao">Nível de Instrução</label>
       <div class="input-group">                   
           <input class="form-control" type="text" id="txt_des_nivel_instrucao" name="txt_des_nivel_instrucao" maxlength="30" />
-         <div class="input-group-append">
            <input class="btn btn-primary" type="button" name="btn_nivel_instrucao_incluir" value="Incluir" onClick="submeter(0, document.nivel_instrucao_form.txt_des_nivel_instrucao, document.nivel_instrucao_form)" />         
-         </div>
       </div>
    </div>
    <div class="row">

@@ -45,11 +45,13 @@
          <tr> 
            <td><dtml-var tip_dependente></td>
            <td>
-             <label class="form-label" for="txt_des_tipo_dependente_<dtml-var tip_dependente>" class="d-none">Tipo de Dependente</label>                            
+             <label class="form-label d-none" for="txt_des_tipo_dependente_<dtml-var tip_dependente>">Tipo de Dependente</label>                            
              <input class="form-control" type="text" id="txt_des_tipo_dependente_<dtml-var tip_dependente>" name="txt_des_tipo_dependente_<dtml-var tip_dependente>" value="<dtml-var des_tipo_dependente>" maxlength="50" /></td>
            <td>
+             <div class="btn-group">
              <a class="btn btn-primary mb-1" href="javascript:submeter(<dtml-var tip_dependente>,document.tipo_dependente_form.txt_des_tipo_dependente_<dtml-var tip_dependente>,document.tipo_dependente_form)">Atualizar</a> 
              <a class="btn btn-danger mb-1" href="javascript:excluir(<dtml-var tip_dependente>)">Excluir</a>
+             </div>
            </td>
         </tr>
     <dtml-if sequence-end>
@@ -62,12 +64,10 @@
  <legend class="font-size-16">Formulário de Inclusão</legend>
  <div class="row">
    <div class="col-12 mb-3">
-      <label class="form-label" for="txt_des_tipo_dependente" class="required">Tipo de Dependente</label>
+      <label class="form-label required" for="txt_des_tipo_dependente">Tipo de Dependente</label>
       <div class="input-group">                   
          <input class="form-control" type="text" id="txt_des_tipo_dependente" name="txt_des_tipo_dependente" maxlength="50" />
-         <div class="input-group-append">
            <input class="btn btn-primary" type="button" name="btn_tipo_dependente_incluir" value="Incluir" onClick="submeter(0, document.tipo_dependente_form.txt_des_tipo_dependente, document.tipo_dependente_form)" />         
-         </div>
       </div>
    </div>
    <div class="row">

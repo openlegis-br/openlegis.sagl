@@ -4,11 +4,10 @@
   <div class="col-12 col-lg-8 align-self-center">
     <h1 class="firstHeading font-size-18">Pesquisa de Visitantes</h1>
   </div>
-  <div class="col-12 col-lg-4 text-start text-end mb-2">
-    <div class="btn-group" role="group">
-     <a class="btn btn-primary btn-sm" href="<dtml-var portal_url>/cadastros/atendimento/visitante_pesquisar_form" ><i class="fa fa-fw fa-search"></i> Nova Pesquisa</a>
-
-           <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+  <div class="col-12 col-lg-4 text-start text-md-end">
+    <div class="btn-group btn-group-sm">
+     <a class="btn btn-primary" href="<dtml-var portal_url>/cadastros/atendimento/visitante_pesquisar_form" ><i class="fa fa-fw fa-search"></i> Pesquisa</a>
+           <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
              <i class="fas fa-file-export"></i> Exportar
            </button>
            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
@@ -68,16 +67,16 @@
      </dtml-if>
   </dtml-if sequence-start>
          <tr>
-           <td width="15%">
+           <td width="12%">
                <dtml-call expr="REQUEST.set('id_foto', str(cod_pessoa)+'_foto_pessoa.jpg')">
                <dtml-if expr="hasattr(sapl_documentos.pessoa,id_foto)">
-                 <img class="img-fluid" height="100" src="<dtml-var portal_url>/sapl_documentos/pessoa/<dtml-var id_foto>?<dtml-var expr="ZopeTime().timeTime()">">
+                 <img class="image-fluid img-thumbnail" style="max-width: 140px" src="<dtml-var portal_url>/sapl_documentos/pessoa/<dtml-var id_foto>?<dtml-var expr="ZopeTime().timeTime()">">
                <dtml-else>
-                 <img class="image-fluid" height="100" alt="<dtml-var nom_pessoa>" src="<dtml-var portal_url>/imagens/avatar.png">
+                 <img class="image-fluid" style="max-width: 140px" alt="<dtml-var nom_pessoa>" src="<dtml-var portal_url>/imagens/avatar.png">
                </dtml-if>
            </td>         
-           <td width="85%">
-              <a href="#" data-src="<dtml-var portal_url>/cadastros/atendimento/visitante_mostrar_proc?hdn_cod_pessoa=<dtml-var cod_pessoa missing>&modal=1" data-title="Edição de Visitante" data-bs-toggle="modal" data-bs-target="#iFrameModal" /><dtml-var nom_pessoa></a>            
+           <td width="88%">
+              <a href="#" data-src="<dtml-var portal_url>/cadastros/atendimento/visitante_mostrar_proc?hdn_cod_pessoa=<dtml-var cod_pessoa missing>&modal=1" data-title="Edição de Visitante" data-bs-toggle="modal" data-bs-target="#iFrameModal" /><b><dtml-var nom_pessoa></b></a>            
             <dtml-if doc_identidade><br /><b>Documento:</b> <dtml-var doc_identidade missing null=""></dtml-if>
             <dtml-if end_residencial>
               <br /><b>Endereço:</b> 

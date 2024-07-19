@@ -58,22 +58,22 @@
 
      <div class="row">
        <div class="col-9 mb-3">
-         <label class="form-label" for="txa_nom_pessoa" class="required">Nome do Visitante</label>
+         <label class="form-label required" for="txa_nom_pessoa">Nome do Visitante</label>
          <input class="form-control" type="text" id="txt_nom_pessoa" name="txt_nom_pessoa" value="<dtml-var nom_pessoa>" disabled />
        </div>
        <div class="col-3 mb-3">
-         <label class="form-label" for="txt_num_cracha" class="required">Crachá</label>
+         <label class="form-label required" for="txt_num_cracha">Crachá</label>
          <input class="form-control" type="text" id="txt_num_cracha" name="txt_num_cracha" maxlength="3" value="<dtml-var num_cracha>" disabled />
        </div>       
      </div>
 
      <div class="row">
        <div class="col-6 col-sm-3 mb-3">
-         <label class="form-label" for="dat_entrada" class="required">Entrada</label>
+         <label class="form-label required" for="dat_entrada">Entrada</label>
          <input class="form-control" type="text" name="dat_entrada" value="<dtml-var dat_entrada>" readonly />
        </div>
        <div class="col-6 col-sm-3 mb-3">
-         <label class="form-label" for="dat_saida" class="required">Saída</label>
+         <label class="form-label" for="dat_saida" class="form-label required">Saída</label>
          <dtml-if dat_saida>
             <input class="form-control" type="text" name="dat_saida" value="<dtml-var dat_saida missing null>" readonly />
          <dtml-else>
@@ -81,7 +81,7 @@
          </dtml-if>
        </div>
        <div class="col-12 col-sm-6 mb-3">
-         <label class="form-label" for="lst_funcionario" class="required">Responsável pelo Atendimento</label>
+         <label class="form-label required" for="lst_funcionario">Responsável pelo Atendimento</label>
          <input class="form-control" type="text" id="txt_nom_funcionario" name="txt_nom_funcionario"  value="<dtml-var nom_funcionario>" disabled />
        </div>              
      </div>
@@ -97,14 +97,14 @@
 
      <div class="row">
        <div class="col-12 mb-3">
-         <label class="form-label" for="txa_txt_atendimento" class="required">Resumo do Atendimento</label>
+         <label class="form-label required" for="txa_txt_atendimento">Resumo do Atendimento</label>
          <textarea class="form-control" id="txa_txt_atendimento" name="txa_txt_atendimento" rows="2"><dtml-var txt_atendimento missing null=""></textarea>
        </div>
      </div>
 
      <div class="row">
        <div class="col-4 col-sm-6 mb-3">
-            <label class="form-label" for="lst_des_situacao" class="required">Situação</label>
+            <label class="form-label required" for="lst_des_situacao">Situação</label>
             <select class="form-select" id="lst_des_situacao" name="lst_des_situacao">
               <option value=""></option>
               <dtml-in expr="['Pendente','Resolvido']">
@@ -118,16 +118,10 @@
        </div>
        <div class="col-4 col-sm-6 mb-3">
           <label class="form-label" for="txt_dat_solucao">Data de Resolução</label>
-          <input class="form-control date" type="text" id="txt_dat_solucao" name="txt_dat_solucao" value="<dtml-var dat_solucao missing null>" />
-        <script>
-        $('#txt_dat_solucao').datepicker({
-            locale: 'pt-br',
-            icons: {rightIcon: '<i class="fa fa-fw fa-calendar-alt"></i>'},
-            format: 'dd/mm/yyyy',
-            uiLibrary: 'bootstrap4',
-            iconsLibrary: 'fontawesome'
-        });
-        </script>             
+           <div class="input-group">
+              <input type="text" class="form-control datepicker" placeholder="dd/mm/aaaa" name="txt_dat_solucao" id="txt_dat_solucao" data-provide="datepicker" data-date-autoclose="true" value="<dtml-var dat_solucao missing null>" autocomplete="off" required>
+              <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
+           </div> 
        </div>
      </div>
 

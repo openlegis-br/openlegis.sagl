@@ -4,7 +4,7 @@
 <!--
   function submeter(cod_regime_tramitacao, campo, form) {
     if (campo.value == "") {
-      alert("O campo não pode ficar vazio!");
+      alert("O regime de tramitação não pode ficar vazio!");
       campo.focus();
       return;
     }
@@ -47,8 +47,10 @@
                <td><dtml-var cod_regime_tramitacao></td>
                <td><input class="form-control" type="text" name="txt_des_regime_tramitacao_<dtml-var cod_regime_tramitacao>" value="<dtml-var des_regime_tramitacao>" size="40" maxlength="50" /></td>
                <td>
+                 <div class="btn-group">
                  <a class="btn btn-primary mb-1" href="javascript:submeter(<dtml-var cod_regime_tramitacao>,document.regime_tramitacao_form.txt_des_regime_tramitacao_<dtml-var cod_regime_tramitacao>,document.regime_tramitacao_form)">Atualizar</a>
                  <a class="btn btn-danger mb-1" href="javascript:excluir(<dtml-var cod_regime_tramitacao>)">Excluir</a>
+                 </div>
             </tr>
     <dtml-if sequence-end>
          </table>
@@ -60,12 +62,10 @@
  <legend class="font-size-16">Formulário de Inclusão</legend>
  <div class="row">
    <div class="col-12 mb-3">
-      <label class="form-label" for="txt_des_regime_tramitacao" class="required">Regime de Tramitação</label>
+      <label class="form-label required" for="txt_des_regime_tramitacao">Regime de Tramitação</label>
       <div class="input-group">                   
          <input class="form-control" type="text" id="txt_des_regime_tramitacao" name="txt_des_regime_tramitacao" maxlength="50" />       
-         <div class="input-group-append">
           <input class="btn btn-primary" type="button" name="btn_regime_tramitacao" value="Incluir" onClick="submeter(0, document.regime_tramitacao_form.txt_des_regime_tramitacao, document.regime_tramitacao_form)" />         
-         </div>
       </div>
    </div>
    <div class="row">

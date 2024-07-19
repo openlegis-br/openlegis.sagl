@@ -10,26 +10,26 @@ function campos_criticar(){
   var form = document.periodo_comp_mesa_form;
 
   if (form.txt_dat_inicio_periodo.value == "") {
-    alert("A data iní­cio deve ser preenchida.");
+    alert("A data de iní­cio deve ser preenchida.");
     form.txt_dat_inicio_periodo.focus();
     return false;
   }
   
   if (!IsValidDate(form.txt_dat_inicio_periodo.value)) {
-    alert("Digite uma data iní­cio válida!");
+    alert("Digite uma data de iní­cio válida!");
     form.txt_dat_inicio_periodo.focus();
     form.txt_dat_inicio_periodo.select();
     return false;
   }
 
   if (form.txt_dat_fim_periodo.value == "") {
-    alert("A data fim deve ser preenchida.");
+    alert("A data de fim deve ser preenchida.");
     form.txt_dat_fim_periodo.focus();
     return false;
   }
 
   if (!IsValidDate(form.txt_dat_fim_periodo.value)) {
-    alert("Digite uma data fim válida!");
+    alert("Digite uma data de fim válida!");
     form.txt_dat_fim_periodo.focus();
     form.txt_dat_fim_periodo.select();
     return false;
@@ -67,9 +67,9 @@ function periodo_comp_mesa_excluir(form) {
       <div class="col-12 col-md-8 align-self-center">
         <h1 class="firstHeading font-size-18">Período Composição da <dtml-var expr="sapl_documentos.props_sagl.nome_mesa"></h1>
       </div>
-      <div class="col-12 col-md-4 text-start text-end">
+      <div class="col-12 col-md-4 text-start text-md-end">
          <div class="btn-group d-print-none ">
-           <a class="btn btn-light" href="index_html"><i class="fa fa-fw fa-undo"></i> Voltar</a>         
+           <a class="btn btn-sm btn-light" href="index_html"><i class="fa fa-fw fa-undo"></i> Voltar</a>         
          </div>
       </div>
  </div>
@@ -84,24 +84,32 @@ function periodo_comp_mesa_excluir(form) {
   </dtml-try>
 
   <div class="row">
-    <div class="col-6 col-sm-3 mb-3">
-        <label class="form-label" for="txt_dat_inicio_periodo" class="required">Data de Início</label>    
-        <input class="form-control date" type="text" name="txt_dat_inicio_periodo" id="txt_dat_inicio_periodo" value="<dtml-var dat_inicio_periodo missing>" />
+    <div class="col-6 col-md-3 mb-3">
+        <label class="form-label required" for="txt_dat_inicio_periodo">Data de Início do Período</label> 
+        <div class="input-group" id="datepicker1">
+           <input type="text" class="form-control datepicker" placeholder="dd/mm/aaaa" name="txt_dat_inicio_periodo" id="txt_dat_inicio_periodo" data-provide="datepicker" data-date-container="#datepicker1" data-date-autoclose="true" autocomplete="off" value="<dtml-var dat_inicio_periodo missing>" required>
+           <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
+        </div> 
     </div>
-    <div class="col-6 col-sm-3 mb-3">
-        <label class="form-label" for="txt_dat_fim_periodo" class="required">Data de Fim</label>    
-        <input class="form-control date" type="text" name="txt_dat_fim_periodo" id="txt_dat_fim_periodo" value="<dtml-var dat_fim_periodo missing>" />
+    <div class="col-6 col-md-3 mb-3">
+        <label class="form-label required" for="txt_dat_fim_periodo">Data de Fim do Período</label>
+        <div class="input-group" id="datepicker2">
+           <input type="text" class="form-control datepicker" placeholder="dd/mm/aaaa" name="txt_dat_fim_periodo" id="txt_dat_fim_periodo" data-provide="datepicker" data-date-container="#datepicker2" data-date-autoclose="true" autocomplete="off" value="<dtml-var dat_fim_periodo missing>" required>
+           <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
+        </div> 
     </div>  
-    <div class="col-12 col-sm-6 mb-3">
+    <div class="col-12 col-md-6 mb-3">
         <label class="form-label" for="txa_txt_observacao">Observações</label>    
         <textarea class="form-control" id="txa_txt_observacao" name="txa_txt_observacao" rows="1"><dtml-var txt_observacao missing null></textarea>
     </div>      
   </div>
 
+  <div class="btn-group">
   <input class="btn btn-primary" type="button" value="Salvar" onClick="return campos_criticar()" />
   <dtml-if cod_periodo_comp>
     <input class="btn btn-danger" type="button" value="Excluir" onClick="periodo_comp_mesa_excluir()" />
   </dtml-if>
+  </div>
 
    <div class="row">
       <div class="col-md-12 mt-2">

@@ -194,22 +194,22 @@
        </tr>
          <tr>
             <td>
-               <label class="form-label" for="txt_votos_sim" class="required">Votos Sim</label>
+               <label class="form-label required" for="txt_votos_sim">Votos Sim</label>
                <input class="form-control" type="number" name="txt_votos_sim" id="txt_votos_sim" value="<dtml-var num_votos_sim missing null="">" size="3" maxlength="3" />
                 </td>
             <td>
-               <label class="form-label" for="txt_votos_nao" class="required">Votos Não</label>
+               <label class="form-label required" for="txt_votos_nao">Votos Não</label>
                <input class="form-control" type="number" name="txt_votos_nao" id="txt_votos_nao" value="<dtml-var num_votos_nao missing null="">" size="3" maxlength="3" />
             </td>
             <td>
-               <label class="form-label" for="txt_votos_abstencao" class="required">Abstenções</label>
+               <label class="form-label required" for="txt_votos_abstencao">Abstenções</label>
                <input class="form-control" type="number" name="txt_votos_abstencao" id="txt_votos_abstencao" value="<dtml-var num_abstencao missing null="">" size="3" maxlength="3" />
             </td>
             </tr>
          <tr>
          <tr>
             <td colspan="2">
-               <label class="form-label" for="lst_tip_resultado" class="required">Resultado da Votação</label>
+               <label class="form-label required" for="lst_tip_resultado">Resultado da Votação</label>
                <select class="form-select" id="lst_tip_resultado" name="lst_tip_resultado" required>
                    <option value="0">Selecione </option>
                         <dtml-in expr="zsql.tipo_resultado_votacao_obter_zsql()">
@@ -237,7 +237,7 @@
             </td>
          </tr>
     </table> 
-       <div class="text-center" >
+       <div class="text-start ms-2" >
           <input class="btn btn-primary" type="button" value="Salvar" onClick="campos_criticar()" />
        </div>
 </dtml-if>
@@ -322,7 +322,7 @@
             </dtml-if>
             <tr>
                 <td>
-                   <label class="form-label" for="lst_tip_resultado" class="required">Resultado da Votação</label>
+                   <label class="form-label required" for="lst_tip_resultado">Resultado da Votação</label>
                     <select class="form-select"  name="lst_tip_resultado" required>
                         <option value="0">Selecione</option>
                         <dtml-in expr="zsql.tipo_resultado_votacao_obter_zsql()">
@@ -336,7 +336,7 @@
                     </select>
                 </td>
                 <td>
-               <label class="form-label" for="lst_tip_resultado" class="d-block">Anulação</label>    
+               <label class="form-label d-block" for="lst_tip_resultado">Anulação</label>    
                <div class="form-check">   
                  <input class="form-check-input" type="checkbox" id="rad_votacao_branco" name="rad_votacao_branco" onchange="javascript:votacao_em_branco(tip_votacao=2)">
                  <label class="form-check-label" for="rad_votacao_branco">Anular Votação?</label>
@@ -381,22 +381,22 @@
        </tr>
          <tr>
             <td>
-               <label class="form-label" for="txt_votos_sim" class="required">Votos Sim</label>
+               <label class="form-label required" for="txt_votos_sim">Votos Sim</label>
                <input class="form-control" type="number" name="txt_votos_sim" id="txt_votos_sim" value="<dtml-var num_votos_sim missing null="">" size="3" maxlength="3" />
                 </td>
             <td>
-               <label class="form-label" for="txt_votos_nao" class="required">Votos Não</label>
+               <label class="form-label required" for="txt_votos_nao">Votos Não</label>
                <input class="form-control" type="number" name="txt_votos_nao" id="txt_votos_nao" value="<dtml-var num_votos_nao missing null="">" size="3" maxlength="3" />
             </td>
             <td>
-               <label class="form-label" for="txt_votos_abstencao" class="required">Abstenções</label>
+               <label class="form-label required" for="txt_votos_abstencao">Abstenções</label>
                <input class="form-control" type="number" name="txt_votos_abstencao" id="txt_votos_abstencao" value="<dtml-var num_abstencao missing null="">" size="3" maxlength="3" />
             </td>
             </tr>
          <tr>
          <tr>
             <td colspan="2">
-               <label class="form-label" for="lst_tip_resultado" class="required">Resultado da Votação</label>
+               <label class="form-label required" for="lst_tip_resultado">Resultado da Votação</label>
                <select class="form-select" id="lst_tip_resultado" name="lst_tip_resultado" required>
                    <option value="0">Selecione </option>
                         <dtml-in expr="zsql.tipo_resultado_votacao_obter_zsql()">
@@ -410,7 +410,7 @@
                     </select>
             </td>
             <td colspan="1">
-               <label class="form-label" for="lst_tip_resultado" class="d-block">Anulação</label>    
+               <label class="form-label d-block" for="lst_tip_resultado">Anulação</label>    
                <div class="form-check">   
                  <input class="form-check-input" type="checkbox" id="rad_votacao_branco" name="rad_votacao_branco" onchange="javascript:votacao_em_branco(tip_votacao=1)">
                  <label class="form-check-label" for="rad_votacao_branco">Anular Votação?</label>
@@ -424,15 +424,11 @@
             </td>
          </tr>
         </table>
-       <div class="text-center" >
+       <div class="text-start ms-2" >
           <input class="btn btn-primary" type="button" value="Salvar" onClick="campos_criticar()" />
        </div>
   </dtml-if>
 </form>
-
-<script>
-autosize(document.querySelectorAll('textarea'));
-</script>
 
 <dtml-var js_slot>
 <dtml-var footer_html>

@@ -29,9 +29,9 @@ function tipo_expediente_excluir() {
       <div class="col-12 col-md-8 align-self-center">
         <h1 class="firstHeading font-size-18">Tipo de Expediente</h1>
       </div>
-      <div class="col-12 col-md-4 text-start text-end">
-         <div class="btn-group d-print-none ">
-           <a class="btn btn-light" href="index_html"><i class="fa fa-fw fa-undo"></i> Voltar</a>         
+      <div class="col-12 col-md-4 text-start text-md-end">
+         <div class="btn-group d-print-none mb-3">
+           <a class="btn btn-sm btn-light" href="index_html"><i class="fa fa-fw fa-undo"></i> Voltar</a>         
          </div>
       </div>
  </div>
@@ -39,16 +39,18 @@ function tipo_expediente_excluir() {
 <form action="tipo_expediente_salvar_proc" name="tipo_expediente_form" method="post" enctype="multipart/form-data">
   <input type="hidden" name="hdn_cod_expediente" value="<dtml-var cod_expediente missing>" />
   <div class="row">
-    <div class="col-12 col-sm-6 mb-3">
-      <label class="form-label" for="txt_nom_expediente" class="required">Descrição</label>
+    <div class="col-12 mb-3">
+      <label class="form-label required" for="txt_nom_expediente">Descrição</label>
       <input class="form-control" type="text" id="txt_nom_expediente" name="txt_nom_expediente" value="<dtml-var nom_expediente missing>" maxlength="50" />
     </div>
   </div>
-        
+
+ <div class="btn-group">
   <input class="btn btn-primary" type="button" value="Salvar" onClick="campos_criticar(document.tipo_expediente_form)" />
   <dtml-if cod_expediente>
      <input class="btn btn-danger" type="button" value="Excluir" onClick="tipo_expediente_excluir(document.tipo_expediente_form)" />
   </dtml-if>
+ </div>
 
    <div class="row">
       <div class="col-md-12 mt-2">

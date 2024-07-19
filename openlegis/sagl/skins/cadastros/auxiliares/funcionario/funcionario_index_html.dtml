@@ -1,84 +1,20 @@
 <dtml-var header_html>
-<script>
-
-$(document).ready(function() {
-
-    $('#funcionarios').DataTable( {
-        "responsive": true,
-        "bStateSave": true,        
-        "fnStateSave": function (oSettings, oData) {
-            localStorage.setItem('fnDataTable', JSON.stringify(oData));
-        },
-        "fnStateLoad": function (oSettings) {
-            return JSON.parse(localStorage.getItem('fnDataTable'));
-        },
-        "lengthMenu": [[10, 25, 50, 100], [10, 25, 50, 100]],
-        "lengthChange": true,
-        "buttons": [
-            {
-                extend: 'collection',
-                text: 'Exportar',
-                buttons: [ 
-                           {
-                             extend:    'excelHtml5',
-                             text:      '<i class="far fa-file-excel"></i> Excel',
-                             titleAttr: 'PDF'
-                           },
-                           {
-                             extend:    'pdfHtml5',
-                             download: 'open',
-                             text:      '<i class="fa fa-file-adobe"></i> PDF',
-                             titleAttr: 'PDF'
-                           },
-                           {
-                             extend:    'print',
-                             text:      '<i class="fa fa-print"></i> Impressão',
-                             titleAttr: 'Impressão'
-                           },
-                         ],
-               className: '',
-               dropup: true,
-               autoClose: true,
-               fade: true
-
-            }
-        ],
-        "language": {
-          search: "Pesquisar:",
-          processing:     "Processando...",
-          loadingRecords: "Carregando...",
-          lengthMenu:     "Exibir _MENU_ registros por página",
-          info:           "Exibindo _START_ a _END_ de _TOTAL_ registros",
-          infoEmpty:      "Exibindo _START_ a _END_ de _TOTAL_ registros",
-          infoFiltered:   "(total de registros:_MAX_)",
-          emptyTable:     "Nenhum registro encontrado",
-          zeroRecords:     "Nenhum registro encontrado",
-          paginate: {
-            first:      "Primeiro",
-            previous:   "Anterior",
-            next:       "Próximo",
-            last:       "Último"
-          },
-        }
-    });
-});
-
-</script>
 
  <div class="row mb-2">
       <div class="col-12 col-md-8 align-self-center">
         <h1 class="firstHeading font-size-18">Funcionários</h1>
       </div>
-      <div class="col-12 col-md-4 text-start text-end">
+      <div class="col-12 col-md-4 text-start text-md-end">
          <div class="btn-group d-print-none ">
-          <a class="btn btn-light d-print-none mb-3" href="funcionario_form"><i class="fa fa-fw fa-plus"></i> Incluir Fucionário</a>
+          <a class="btn btn-primary d-print-none mb-3" href="funcionario_form"><i class="fa fa-fw fa-plus"></i> Incluir Fucionário</a>
          </div>
       </div>
  </div>
 
  <dtml-in expr="zsql.funcionario_obter_zsql(ind_excluido=0)">
   <dtml-if sequence-start>
-    <table class="table" id="funcionarios">
+    <div class="table-responsive">
+    <table class="table datatable w-100" id="funcionarios">
     <thead class="table-light">
      <tr>
       <th>Nome</th>
@@ -96,6 +32,7 @@ $(document).ready(function() {
         </tr>
   <dtml-if sequence-end>
    </table>
+  </div>
   </dtml-if sequence-end>
  <dtml-else>
    <p>Nenhum funcionário cadastrado.</td>

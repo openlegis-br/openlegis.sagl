@@ -33,9 +33,9 @@ function origem_excluir() {
       <div class="col-12 col-md-8 align-self-center">
         <h1 class="firstHeading font-size-18">Cadastro de Origem</h1>
       </div>
-      <div class="col-12 col-md-4 text-start text-end">
+      <div class="col-12 col-md-4 text-start text-md-end">
          <div class="btn-group d-print-none ">
-           <a class="btn btn-light" href="index_html"><i class="fa fa-fw fa-undo"></i> Voltar</a>         
+           <a class="btn btn-sm btn-light" href="index_html"><i class="fa fa-fw fa-undo"></i> Voltar</a>         
          </div>
       </div>
  </div>
@@ -45,19 +45,21 @@ function origem_excluir() {
   <input type="hidden" name="hdn_cod_origem" value="<dtml-var cod_origem missing>" />
   <div class="row">
      <div class="col-8 mb-3">
-       <label class="form-label" for="txt_nom_origem" class="required">Nome da Origem</label>        
+       <label class="form-label required" for="txt_nom_origem">Nome da Origem</label>        
        <input class="form-control" type="text" id="txt_nom_origem" name="txt_nom_origem" value="<dtml-var nom_origem missing>" maxlength="50" required />
      </div>
      <div class="col-4 mb-3">
-       <label class="form-label" for="txt_sgl_origem" class="required">Sigla da Origem</label>             
+       <label class="form-label required" for="txt_sgl_origem">Sigla da Origem</label>             
        <input class="form-control" type="text" id="txt_sgl_origem" name="txt_sgl_origem" value="<dtml-var sgl_origem missing>" maxlength="10" onBlur="form.txt_sgl_origem.value = form.txt_sgl_origem.value.toUpperCase()" />
      </div>
   </div>
 
+ <div class="btn-group">
   <input class="btn btn-primary" type="button" name="btn_origem_salvar" value="Salvar" onClick="campos_criticar(document.origem_form)" />
   <dtml-if cod_origem>
     <input class="btn btn-danger" type="button" name="btn_origem_excluir" value="Excluir" onClick="origem_excluir(document.origem_form)" />
   </dtml-if>
+ </div>
 </form>
 <dtml-var js_slot>
 <dtml-var footer_html>

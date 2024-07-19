@@ -84,9 +84,9 @@ function sessao_leg_excluir() {
       <div class="col-12 col-md-8 align-self-center">
         <h1 class="firstHeading font-size-18">Cadastro de Sessão Legislativa</h1>
       </div>
-      <div class="col-12 col-md-4 text-start text-end">
+      <div class="col-12 col-md-4 text-start text-md-end">
          <div class="btn-group d-print-none ">
-           <a class="btn btn-light" href="index_html"><i class="fa fa-fw fa-undo"></i> Voltar</a>         
+           <a class="btn btn-sm btn-light" href="index_html"><i class="fa fa-fw fa-undo"></i> Voltar</a>         
          </div>
       </div>
  </div>
@@ -102,11 +102,11 @@ function sessao_leg_excluir() {
 
   <div class="row">
     <div class="col-4 col-lg-2 mb-3">
-      <label class="form-label" for="txt_num_sessao_leg" class="required">Número</label>              
+      <label for="txt_num_sessao_leg" class="form-label required">Número</label>              
       <input class="form-control number" type="text" id="txt_num_sessao_leg" name="txt_num_sessao_leg" value="<dtml-var num_sessao_leg missing>" />
     </div>
     <div class="col-8 col-lg-4 mb-3">
-      <label class="form-label" for="lst_tip_sessao_leg" class="required">Tipo</label>                  
+      <label for="lst_tip_sessao_leg" class="form-label required">Tipo de Sessão Legislativa</label>                  
       <select class="form-select" id="lst_tip_sessao_leg" name="lst_tip_sessao_leg">
         <dtml-in expr="['Ordinária','Extraordinária']">
            <option <dtml-if expr="_.has_key('tip_sessao_leg') and tip_sessao_leg == _['sequence-item'][0]">selected</dtml-if> value="<dtml-var expr="_['sequence-item'][0]">"><dtml-var expr="_['sequence-item']"></option>
@@ -114,27 +114,39 @@ function sessao_leg_excluir() {
       </select>
     </div>    
     <div class="col-6 col-lg-3 mb-3">
-      <label class="form-label" for="txt_dat_inicio" class="required">Data de Início</label>                  
-      <input class="form-control date" type="text" id="txt_dat_inicio" name="txt_dat_inicio" value="<dtml-var dat_inicio_conv missing>" />
+      <label for="txt_dat_inicio" class="form-label required">Data de Início</label>
+        <div class="input-group" id="datepicker1">
+           <input type="text" class="form-control datepicker" placeholder="dd/mm/aaaa" name="txt_dat_inicio" id="txt_dat_inicio" data-provide="datepicker" data-date-container="#datepicker1" data-date-autoclose="true" autocomplete="off" value="<dtml-var dat_inicio_conv missing>" required>
+           <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
+        </div> 
     </div> 
     <div class="col-6 col-lg-3 mb-3">
-      <label class="form-label" for="txt_dat_fim" class="required">Data de Fim</label>                      
-      <input class="form-control date" type="text" id="txt_dat_fim" name="txt_dat_fim" value="<dtml-var dat_fim_conv missing>" />    
+      <label for="txt_dat_fim" class="form-label required">Data de Fim</label>
+        <div class="input-group" id="datepicker2">
+           <input type="text" class="form-control datepicker" placeholder="dd/mm/aaaa" name="txt_dat_fim" id="txt_dat_fim" data-provide="datepicker" data-date-container="#datepicker2" data-date-autoclose="true" autocomplete="off" value="<dtml-var dat_fim_conv missing>" required>
+           <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
+        </div> 
     </div>     
   </div>
 
   <div class="row">
     <div class="col-6 col-lg-3 mb-3">
-      <label class="form-label" for="txt_dat_inicio_intervalo">Início do Intervalo</label>                          
-      <input class="form-control date" type="text" id="txt_dat_inicio_intervalo" name="txt_dat_inicio_intervalo" value="<dtml-var dat_inicio_intervalo missing="" null="">" />
+      <label class="form-label" for="txt_dat_inicio_intervalo">Início do Intervalo</label>
+        <div class="input-group" id="datepicker3">
+           <input type="text" class="form-control datepicker" placeholder="dd/mm/aaaa" name="txt_dat_inicio_intervalo" id="txt_dat_inicio_intervalo" data-provide="datepicker" data-date-autoclose="true" autocomplete="off" value="<dtml-var dat_inicio_intervalo missing null>" required>
+           <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
+        </div> 
     </div>
     <div class="col-6 col-lg-3 mb-3">
-      <label class="form-label" for="txt_dat_fim_intervalo">Fim do Intervalo</label>                              
-      <input class="form-control" type="text" id="txt_dat_fim_intervalo" name="txt_dat_fim_intervalo" value="<dtml-var dat_fim_intervalo missing="" null="">" />
+      <label class="form-label" for="txt_dat_fim_intervalo">Fim do Intervalo</label>
+        <div class="input-group">
+           <input type="text" class="form-control datepicker" placeholder="dd/mm/aaaa" name="txt_dat_fim_intervalo" id="txt_dat_fim_intervalo" data-provide="datepicker" data-date-autoclose="true" autocomplete="off" value="<dtml-var dat_fim_intervalo missing null>" required>
+           <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
+        </div> 
     </div>    
   </div>  
 
-  <div class="text-start">
+  <div class="text-start btn-group">
   <input class="btn btn-primary" type="button" name="btn_sessao_leg_salvar" value="Salvar" onClick="campos_criticar(document.sessao_legislativa_form)" >
   <dtml-if cod_sessao_leg>
     <input class="btn btn-danger" type="button" name="btn_sessao_leg_excluir" value="Excluir" onClick="sessao_leg_excluir(document.sessao_legislativa_form)" >

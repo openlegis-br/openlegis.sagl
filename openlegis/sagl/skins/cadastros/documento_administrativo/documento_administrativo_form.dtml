@@ -142,7 +142,7 @@
        <input class="form-control number" type="number" id="txt_num_documento" name="txt_num_documento" value="<dtml-var num_documento missing null="">" required />
     </div>
     <div class="col-6 col-lg-3 mb-3">
-       <label class="form-label" for="txt_ano_documento" class="required">Ano</label>
+       <label class="form-label" for="txt_ano_documento" class="form-label required">Ano</label>
        <dtml-unless ano_documento>
           <dtml-call expr="REQUEST.set('ano_documento', _.DateTime.year(DateTime()))">
        </dtml-unless>
@@ -168,10 +168,8 @@
       <dtml-if num_protocolo>
          <dtml-in expr="zsql.protocolo_obter_zsql(num_protocolo=num_protocolo, ano_protocolo=ano_documento)">
             <dtml-if cod_protocolo>
-             <div class="input-group-append">
                <button type="button" class="btn btn-light d-print-none" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Etiqueta de Protocolo" data-src="<dtml-var portal_url>/relatorios/pdf_etiqueta_protocolo_preparar_pysc?rad_tip_protocolo=&txt_cod_protocolo=<dtml-var cod_protocolo>&txt_num_protocolo=<dtml-var num_protocolo>&txt_ano_protocolo=<dtml-var ano_protocolo>&dt_apres=&dt_apres2=&rad_tip_processo=&lst_tip_documento=&lst_tip_materia=&txt_assunto=&txa_txt_interessado=&hdn_cod_autor="><i class="fa fa-fw fa-barcode"></i><span class="d-none">PDF</span></button>
                <button class="btn btn-light" type="button" name="btn_incluir" onclick="location.href='<dtml-var portal_url>/consultas/protocolo/protocolo_mostrar_proc?cod_protocolo=<dtml-var cod_protocolo>';"><i class="fas fa-fw fa-eye"></i><span class="d-none">Protocolo</span></button>
-              </div>
             </dtml-if>
          </dtml-in>
       </dtml-if> 
@@ -252,7 +250,7 @@
   	      </div>
             <dtml-else>
                <dtml-call expr="REQUEST.set('prefixo_arquivo', str(sgl_tipo_documento)+'-')">
-               <div class="input-group input-group-sm">
+               <div class="input-group">
                  <select class="form-select" id="lst_modelo" name="lst_modelo">
                    <option value="0">Selecione um modelo</option>
                      <dtml-with expr="sapl_documentos.modelo.documento_administrativo">
@@ -263,9 +261,7 @@
                         </dtml-in>
                      </dtml-with>
                  </select>
-                 <div class="input-group-append">
-                    <input type="button" class="btn btn-primary" value="Gerar" onclick="javascript:texto_odt_gerar();" />
-                 </div>
+                 <input type="button" class="btn btn-primary" value="Gerar" onclick="javascript:texto_odt_gerar();" />
                </div>
             </dtml-if>
          </dtml-let>
@@ -304,7 +300,7 @@
           <div class="input-group">
               <input type="file" class="form-control" id="file_nom_arquivo" name="file_nom_arquivo" accept="application/pdf">
             <dtml-if expr="_.has_key('temODT')">
-               <input class="btn btn-primary" type="button" value="Gerar do ODT" onclick="javascript:texto_pdf_gerar()" />
+               <input class="btn btn-primary" type="button" value="Converter" onclick="javascript:texto_pdf_gerar()" />
             </dtml-if>
           </div>	
         </dtml-if>

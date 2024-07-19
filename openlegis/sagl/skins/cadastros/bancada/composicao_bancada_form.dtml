@@ -75,7 +75,7 @@ function composicao_excluir(form){
 
   <div class="row">
      <div class="col-8 col-sm-8 mb-3">
-       <label class="form-label" for="lst_parlamentar" class="required">Vereador</label>
+       <label class="form-label" for="lst_parlamentar" class="form-label required">Vereador</label>
        <dtml-if expr="_.has_key('cod_comp_bancada')">
           <input class="form-control" type="text" size="40" value="<dtml-var nom_parlamentar>" disabled /> 
           <input type="hidden" id="lst_parlamentar" name="lst_parlamentar" value="<dtml-var cod_parlamentar>">   
@@ -124,7 +124,7 @@ function composicao_excluir(form){
   </div>
   <div class="row">
      <div class="col-12 col-sm-6 mb-3">
-       <label class="form-label" for="lst_cargo_bancada" class="required">Cargo</label>
+       <label class="form-label" for="lst_cargo_bancada" class="form-label required">Cargo</label>
           <select class="form-select" id="lst_cargo_bancada" name="lst_cargo_bancada" required>
              <option></option>
              <dtml-in expr="zsql.cargo_bancada_obter_zsql()">
@@ -142,7 +142,7 @@ function composicao_excluir(form){
           </div>
      </div>
      <div class="col-6 col-sm-3 mb-3">
-        <label class="form-label" for="txt_dat_designacao" class="required">Data de Designação</label>
+        <label class="form-label" for="txt_dat_designacao" class="form-label required">Data de Designação</label>
         <dtml-unless dat_designacao>
           <dtml-call expr="REQUEST.set('dat_designacao', dat_inicio)">
         </dtml-unless>

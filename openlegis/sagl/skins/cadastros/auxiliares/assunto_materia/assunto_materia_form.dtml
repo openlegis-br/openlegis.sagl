@@ -29,9 +29,9 @@ function assunto_materia_excluir() {
       <div class="col-12 col-md-8 align-self-center">
         <h1 class="firstHeading font-size-18">Assunto de Matéria Legislativa</h1>
       </div>
-      <div class="col-12 col-md-4 text-start text-end">
+      <div class="col-12 col-md-4 text-start text-md-end">
          <div class="btn-group d-print-none ">
-           <a class="btn btn-light" href="index_html"><i class="fa fa-fw fa-undo"></i> Voltar</a>         
+           <a class="btn btn-sm btn-light" href="index_html"><i class="fa fa-fw fa-undo"></i> Voltar</a>         
          </div>
       </div>
  </div>
@@ -41,7 +41,7 @@ function assunto_materia_excluir() {
 
     <div class="row">
        <div class="col-12 mb-3">
-         <label class="form-label" for="txt_des_assunto" class="required">Descrição do Assunto</label>                
+         <label class="form-label required" for="txt_des_assunto">Descrição do Assunto</label>                
          <input class="form-control" type="text" id="txt_des_assunto" name="txt_des_assunto" value="<dtml-var des_assunto missing>" maxlength="50" />
        </div>
        <div class="col-12 mb-3">
@@ -50,12 +50,13 @@ function assunto_materia_excluir() {
        </div>       
     </div>
 
-
+ <div class="btn-group">
   <input class="btn btn-primary" type="button" value="Salvar" onClick="campos_criticar(document.assunto_materia_form)" />
   <dtml-if cod_assunto>
     <input class="btn btn-danger" type="button" value="Excluir" onClick="assunto_materia_excluir(document.assunto_materia_form)" />
   </dtml-if>
-
+ </div>
+ 
    <div class="row">
       <div class="col-md-12 mt-2">
          <p class="text-muted small font-size-12"><i class="fas fa-asterisk text-danger"></i> Campo obrigatório</p>

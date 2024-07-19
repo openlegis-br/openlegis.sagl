@@ -63,7 +63,7 @@ function campos_criticar(form){
                 </td>
                 <dtml-else>
                 <td width="33%">Id do publicador<br />
-                        <input class="form-control" type="text" name="txt_id_publicador" value="<dtml-var id_publicador missing>" size="5" maxlength="5" disabled="disabled" />
+                        <input class="form-control required" type="text" name="txt_id_publicador" value="<dtml-var id_publicador missing>" size="5" maxlength="5" disabled="disabled" />
                 </td>
                 </dtml-if>
                 <dtml-if expr="not(AUTHENTICATED_USER.has_role(['Operador Lexml']))">
@@ -107,17 +107,17 @@ function campos_criticar(form){
                 </tr>                
             </dtml-if>
             </table>            
-                    <p class="text-center">
+                    <div class="text-start ms-2">
                         <input class="btn btn-primary" type="button"
                                name="btn_lexml_ublicador_salvar"
                                value="Salvar" onClick="campos_criticar(document.lexml_publicador_form)" />
-                    </p>
+                    </div>
 
         <dtml-else>
         <table class="table table-borderless">
             <tr>
                 <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador Lexml'])">
-                    <td width="20%">Id do publicador <span class="campoObrigatorio"></span><br />
+                    <td width="20%">Id do publicador <span class="required"></span><br />
                         <input class="form-control" type="text" name="txt_id_publicador" value="<dtml-var id_publicador missing>" size="5" maxlength="5" />
                 </td>
                 <dtml-else>
@@ -165,10 +165,10 @@ function campos_criticar(form){
                 </tr>
             </dtml-if>
         </table>
-                <p class="text-center">
+                <div class="text-start ms-2">
                     <input class="btn btn-primary" type="button"
                            name="btn_lexml_provedor_salvar"
-                           value="Salvar" onClick="campos_criticar(document.lexml_publicador_form)" /></p>
+                           value="Salvar" onClick="campos_criticar(document.lexml_publicador_form)" /></div>
 
   </dtml-in>
 <dtml-except>

@@ -16,12 +16,12 @@
 
 </script>
 
-<h1 class="firstHeading mb-4">Pesquisa de Visitantes</h1> 
+<h1 class="firstHeading font-size-18">Pesquisa de Visitantes</h1> 
 
 <!-- Nav tabs -->
-<ul class="nav nav-tabs border-0" role="tablist">
+<ul class="nav nav-tabs border-0 mt-3" role="tablist">
   <li class="nav-item">
-    <a class="nav-link active" id="visitantes-tab" data-bs-toggle="tab" href="#visitantes" role="tab" aria-controls="visitantes" aria-selected="true">Pesquisa de Visitantes</a>
+    <a class="nav-link active" id="visitantes-tab" data-bs-toggle="tab" href="#visitantes" role="tab" aria-controls="visitantes" aria-selected="true">Formulário de Pesquisa</a>
   </li>
 </ul>
 
@@ -33,34 +33,18 @@
   <div class="row">
     <div class="col-6 col-lg-3 mb-3">
       <label class="form-label" for="txt_dat_visita">Data Inicial de Visita</label>
-        <input type="text" class="form-control date" id="txt_dat_visita" name="txt_dat_visita" autocomplete="off">
+        <div class="input-group">
+           <input type="text" class="form-control datepicker" placeholder="dd/mm/aaaa" name="txt_dat_visita" id="txt_dat_visita" data-provide="datepicker" data-date-autoclose="true" autocomplete="off">
+           <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
+        </div>
     </div>
    <div class="col-6 col-lg-3 mb-3">
       <label class="form-label" for="txt_dat_visita2">Data Final de Visita</label>
-      <input type="text" class="form-control date" id="txt_dat_visita2" name="txt_dat_visita2" autocomplete="off">
+        <div class="input-group">
+           <input type="text" class="form-control datepicker" placeholder="dd/mm/aaaa" name="txt_dat_visita2" id="txt_dat_visita2" data-provide="datepicker" data-date-autoclose="true" autocomplete="off">
+           <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
+        </div>
     </div>
-    <script>
-        $('#txt_dat_visita').datepicker({
-            locale: 'pt-br',
-            icons: {rightIcon: '<i class="fa fa-fw fa-calendar-alt"></i>'},
-            format: 'dd/mm/yyyy',
-            uiLibrary: 'bootstrap4',
-            iconsLibrary: 'fontawesome',
-            maxDate: function () {
-                return $('#txt_dat_visita2').val();
-            }
-        });
-        $('#txt_dat_visita2').datepicker({
-            locale: 'pt-br',
-            icons: {rightIcon: '<i class="fa fa-fw fa-calendar-alt"></i>'},
-            format: 'dd/mm/yyyy',
-            uiLibrary: 'bootstrap4',
-            iconsLibrary: 'fontawesome',
-            minDate: function () {
-                return $('#txt_dat_visita').val();
-            }
-        });
-    </script> 
     <div class="col-6 col-lg-3 mb-3">
         <label class="form-label" for="lst_mes_aniversario">Mês de Aniversário</label>
           <select class="form-select" id="lst_mes_aniversario" name="lst_mes_aniversario">

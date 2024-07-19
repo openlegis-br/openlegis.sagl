@@ -4,7 +4,7 @@
 <!--
   function submeter(tip_emenda, campo, form) {
     if (campo.value == "") {
-      alert("O campo não pode ficar vazio!");
+      alert("O tipo de emenda não pode ficar vazio!");
       campo.focus();
       return;
     }
@@ -48,8 +48,10 @@
              <input class="form-control" type="text" name="txt_des_tipo_emenda_<dtml-var tip_emenda>" value="<dtml-var des_tipo_emenda>" maxlength="50" />
            </td>
            <td>
+            <div class="btn-group">
              <a class="btn btn-primary mb-1" href="javascript:submeter(<dtml-var tip_emenda>,document.tipo_emenda_form.txt_des_tipo_emenda_<dtml-var tip_emenda>,document.tipo_emenda_form)">Atualizar</a>
              <a class="btn btn-danger mb-1" href="javascript:excluir(<dtml-var tip_emenda>)">Excluir</a>
+            </div>
         </tr>
     <dtml-if sequence-end>
        </table>
@@ -61,12 +63,10 @@
  <legend class="font-size-16">Formulário de Inclusão</legend>
  <div class="row">
    <div class="col-12 mb-3">
-      <label class="form-label" for="txt_des_tipo_emenda" class="required">Tipo de Emenda</label>
+      <label class="form-label required" for="txt_des_tipo_emenda">Tipo de Emenda</label>
       <div class="input-group">                   
         <input class="form-control" type="text" id="txt_des_tipo_emenda" name="txt_des_tipo_emenda" maxlength="50" />
-        <div class="input-group-append">
-          <input class="btn btn-primary" type="button" name="btn_tipo_emenda_incluir" value="Incluir" onClick="submeter(0, document.tipo_emenda_form.txt_des_tipo_emenda, document.tipo_emenda_form)" />         
-        </div>
+        <input class="btn btn-primary" type="button" name="btn_tipo_emenda_incluir" value="Incluir" onClick="submeter(0, document.tipo_emenda_form.txt_des_tipo_emenda, document.tipo_emenda_form)" />         
       </div>
    </div>
  </div>

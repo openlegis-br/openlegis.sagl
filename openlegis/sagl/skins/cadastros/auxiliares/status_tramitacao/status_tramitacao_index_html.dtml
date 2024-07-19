@@ -4,20 +4,20 @@
       <div class="col-12 col-md-8 align-self-center">
         <h1 class="firstHeading font-size-18">Status de Tramitação de Matérias</h1>
       </div>
-      <div class="col-12 col-md-4 text-start text-end">
+      <div class="col-12 col-md-4 text-start text-md-end">
          <div class="btn-group d-print-none ">
-          <a class="btn btn-light d-print-none mb-3" href="status_tramitacao_form"><i class="fa fa-fw fa-plus"></i> Incluir Status</a>
+          <a class="btn btn-primary d-print-none mb-3" href="status_tramitacao_form"><i class="fa fa-fw fa-plus"></i> Incluir Status</a>
          </div>
       </div>
  </div>
 
 <dtml-in expr="zsql.status_tramitacao_obter_zsql()">
    <dtml-if sequence-start> 
-       <table class="table">
+       <table class="table datatable">
          <thead class="table-light">
           <tr> 
-            <th width="15%">Sigla</th>
             <th width="55%">Descrição</th>
+            <th width="15%">Sigla</th>
             <th width="15%">Indicador</th>
             <th width="15%">Dias de Prazo</th>
           </tr>
@@ -25,9 +25,13 @@
     </dtml-if sequence-start>
           <tr>
             <td>
-            <a href="status_tramitacao_mostrar_proc?cod_status=<dtml-var cod_status>">
-             <dtml-var sgl_status></a></td>
-           <td><dtml-var des_status></td>
+              <a href="status_tramitacao_mostrar_proc?cod_status=<dtml-var cod_status>">
+                 <dtml-var des_status>
+              </a>
+            </td>
+            <td>
+               <dtml-var sgl_status>
+            </td>
            <td>
              <dtml-if ind_fim_tramitacao>Fim
              <dtml-elif ind_retorno_tramitacao>Retorno

@@ -1,5 +1,24 @@
 <dtml-var header_html>
 
+<h1 class="firstHeading font-size-18">Validação de Documento Digital</h1> 
+
+<p>Informe o código de validação do documento assinado digitalmente.</p>
+
+<form class="form-inline" method="post" name="conferir_assinatura_form" action="conferir_assinatura_proc">
+  <div class="col-12 col-md-6">
+    <div class="input-group">
+      <div class="input-group-text"><i class="fa fa-fw fa-key"></i></div>
+      <input type="text" class="form-control" name="txt_codigo_verificacao" id="txt_codigo_verificacao" size="19" minlength="19" maxlength="19" autofocus autocomplete="off" style="text-transform: uppercase" data-inputmask="'mask': '&&&&-&&&&-&&&&-&&&&'" required />
+      <div class="invalid-feedback">
+        Este campo é obrigatório!
+      </div>
+      <button class="btn btn-primary" type="button" id="btn_consultar"><i class="fas fa-fw fa-check"></i> Validar</button>
+    </div>
+  </div> 
+</form>
+
+<dtml-var js_slot>
+
 <script>
   $(document).ready(function () {
         $("#btn_consultar").click(function () {
@@ -18,29 +37,4 @@
         });
   });
 </script>
-
-<h1 class="firstHeading font-size-18">Validação Digital</h1> 
-
-<p>Informe o código de validação do documento assinado digitalmente.</p>
-
-<form class="form-inline" method="post" name="conferir_assinatura_form" action="conferir_assinatura_proc">
-
-    <label class="sr-only" for="txt_codigo_verificacao">Código de Validação</label>
-
-    <div class="input-group mb-3 mr-sm-2">
-      <div class="input-group-prepend">
-        <div class="input-group-text"><i class="fa fa-fw fa-key"></i></div>
-      </div>
-      <input type="text" class="form-control text-uppercase chave_validacao" name="txt_codigo_verificacao" id="txt_codigo_verificacao" placeholder="____-____-____-____" size="21" minlength="18" maxlength="18" autofocus autocomplete="off" required />
-      <div class="invalid-feedback">
-        Este campo é obrigatório!
-      </div>
-      <div class="input-group-append">
-        <button class="btn btn-primary" type="button" id="btn_consultar"><i class="fas fa-fw fa-check"></i> Validar</button>
-      </div>
-    </div>
-   
-</form>
-
-<dtml-var js_slot>
 <dtml-var footer_html>

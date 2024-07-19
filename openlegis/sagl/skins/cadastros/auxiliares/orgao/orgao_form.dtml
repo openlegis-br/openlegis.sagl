@@ -52,9 +52,9 @@ function orgao_excluir() {
       <div class="col-12 col-md-8 align-self-center">
         <h1 class="firstHeading font-size-18">Cadastro de Órgão</h1>
       </div>
-      <div class="col-12 col-md-4 text-start text-end">
+      <div class="col-12 col-md-4 text-start text-md-end">
          <div class="btn-group d-print-none ">
-           <a class="btn btn-light" href="index_html"><i class="fa fa-fw fa-undo"></i> Voltar</a>         
+           <a class="btn btn-sm btn-light" href="index_html"><i class="fa fa-fw fa-undo"></i> Voltar</a>         
          </div>
       </div>
  </div>
@@ -65,16 +65,18 @@ function orgao_excluir() {
  <input type="hidden" name="txt_num_tel_orgao" value="" /> 
  
  <div class="row">
-   <div class="col-12 col-lg-6 mb-3">
-     <label class="form-label" for="txt_nom_orgao" class="required">Nome do Órgão</label>         
-     <input class="form-control" type="text" id="txt_nom_orgao" name="txt_nom_orgao" value="<dtml-var nom_orgao missing>" maxlength="60" />
-   </div>
-   <div class="col-6 col-lg-3 mb-3">
-     <label class="form-label" for="txt_sgl_orgao" class="required">Sigla</label>            
+   <div class="col-6 col-md-3 mb-3">
+     <label class="form-label required" for="txt_sgl_orgao">Sigla</label>            
      <input class="form-control" type="text" id="txt_sgl_orgao" name="txt_sgl_orgao" value="<dtml-var sgl_orgao missing>" maxlength="10" onBlur="form.txt_sgl_orgao.value = form.txt_sgl_orgao.value.toUpperCase()" />
    </div>
-   <div class="col-6 col-lg-3 mb-3">
-     <label class="d-block required">Unidade Deliberativa?</label>            
+   <div class="col-12 col-md-9 mb-3">
+     <label class="form-label required" for="txt_nom_orgao">Nome do Órgão</label>         
+     <input class="form-control" type="text" id="txt_nom_orgao" name="txt_nom_orgao" value="<dtml-var nom_orgao missing>" maxlength="60" />
+   </div>
+ </div>
+  <div class="row">
+   <div class="col-12 col-md-3 mb-3">
+     <label class="form-label d-block required">Unidade Deliberativa?</label>            
              <dtml-in expr="['Não', 'Sim']">
                 <div class="form-check form-check-inline">
                    <input class="form-check-input" type="radio" id="rad<dtml-var expr="_['sequence-index']">" name="rad_ind_unidade_deliberativa" value="<dtml-var expr="_['sequence-index']">" 
@@ -87,19 +89,18 @@ function orgao_excluir() {
                  </div>
             </dtml-in>
    </div>      
- </div>
-
- <div class="row">
-   <div class="col-12 col-lg-9 mb-3">
+   <div class="col-12 col-md-9 mb-3">
        <label class="form-label" for="txt_end_email">E-mail</label>               
        <input class="form-control" type="text" id="txt_end_email" name="txt_end_email" value="<dtml-var end_email missing null="">" maxlength="100" />
    </div>
  </div>
 
+ <div class="btn-group">
   <input class="btn btn-primary" type="button" value="Salvar" onClick="campos_criticar(document.orgao_form)" />
   <dtml-if cod_orgao>
     <input class="btn btn-danger" type="button" value="Excluir" onClick="orgao_excluir(document.orgao_form)" />
   </dtml-if>
+ </div>
 
    <div class="row">
       <div class="col-md-12 mt-2">

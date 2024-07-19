@@ -22,12 +22,12 @@
 </script>
 
  <div class="row mb-2">
-      <div class="col-12 col-lg-6 align-self-center">
+      <div class="col-12">
         <h1 class="firstHeading font-size-18">Períodos de Composição de Bancada</h1>
       </div>
-      <div class="col-12 col-lg-6">
+      <div class="col-12">
     <form class="form-inline mb-3 float-lg-right" name="index_form" action="periodo_comp_bancada_form">
-         <label class="form-label" for="lst_num_legislatura" class="required mr-sm-2">Legislatura</label>   
+         <label class="form-label" for="lst_num_legislatura" class="required mr-sm-2">Selecione a Legislatura</label>   
          <div class="input-group">       
          <select class="form-select form-control-sm" id="lst_num_legislatura" name="lst_num_legislatura" onChange="sessao_leg_listar(document.index_form)">    
             <dtml-in expr="zsql.legislatura_obter_zsql()">
@@ -57,9 +57,7 @@
                </dtml-if>
            </dtml-in>
          </dtml-if>
-         <div class="input-group-append">
-         <input class="btn btn-light " type="button" name="btn_incluir" value="Incluir Período" onClick="campos_criticar(document.index_form)" />
-         </div>
+         <input class="btn btn-primary " type="button" name="btn_incluir" value="Incluir Período" onClick="campos_criticar(document.index_form)" />
        </div>
        <input type="hidden" name="hdn_num_legislatura" value="<dtml-var hdn_num_legislatura missing>" />       
 </form>

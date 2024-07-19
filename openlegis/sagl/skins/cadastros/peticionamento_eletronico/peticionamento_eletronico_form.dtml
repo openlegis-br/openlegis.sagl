@@ -72,10 +72,6 @@
        return;
   }
 
-  $(document).ready(function () {
-    bsCustomFileInput.init()
-  })
-
 </script>
 
 
@@ -124,7 +120,7 @@
       
      <div class="row">         
         <div class="col-6 mb-3">
-	 <label class="form-label" for="lst_assunto" class="required">Assunto</label>
+	 <label class="form-label" for="lst_assunto" class="form-label required">Assunto</label>
          <select class="form-select" id="lst_assunto" name="lst_assunto">
 	      <option></option>
                 <dtml-in expr="['Adiantamento de 13º salário', 'Adiantamento de despesas de viagem', 'Compra de produto ou serviço', 'Férias', 'Justificativa de falta', 'Licença-prêmio', 'Outros assuntos']">
@@ -135,7 +131,7 @@
 	 </select>     
         </div>
         <div class="col-6 mb-3">
-         <label class="form-label" for="lst_cod_unid_tram_dest" class="required">Unidade de Destino</label>
+         <label class="form-label required" for="lst_cod_unid_tram_dest">Unidade de Destino</label>
          <select class="form-select" name="lst_cod_unid_tram_dest" id="lst_cod_unid_tram_dest" required>
             <option></option>
                <dtml-in expr="zsql.unidade_tramitacao_obter_zsql(ind_adm=1)">
@@ -150,7 +146,7 @@
      </div>
      <div class="row">
         <div class="col-12 mb-3">
-	  <label class="form-label" for="txa_txt_assunto" class="required">Resumo da Solicitação</label>
+	  <label class="form-label" for="txa_txt_assunto" class="form-label required">Resumo da Solicitação</label>
 	  <textarea class="form-control auto-resize" id="txa_txt_assunto" name="txa_txt_assunto" rows="1"><dtml-var txa_txt_assunto missing></textarea>
         </div>
      </div>
@@ -180,10 +176,7 @@
            <dtml-else>
               <form action="upload" id="arquivo_form" name="arquivo_form" method="post" enctype="multipart/form-data">
                 <div class="btn-group d-print-none ">   
-                  <div class="custom-file">                         
-                     <input class="custom-file-input" type="file" id="anexo" name="anexo" accept="application/pdf" />
-                     <label class="custom-file-label" for="file_redacao">Arquivo digitalizado</label>  
-                  </div>                 
+                  <input class="custom-file-input" type="file" id="anexo" name="anexo" accept="application/pdf" />
                   <input class="btn btn-light" type="button" id="upload" value="Carregar"  onClick="arquivo_carregar(<dtml-var codigo>)"/>
                 </div>
                <input type="hidden" name="modal" value="1" />                
@@ -198,10 +191,6 @@
      <div class="text-start">
        <input class="btn btn-primary" type="button" value="Protocolar Petição" onClick="campos_criticar()" />
      </div>
-
-<script>
-autosize(document.querySelectorAll('textarea'));
-</script>
 
 <dtml-var js_slot>
 <dtml-var footer_html>

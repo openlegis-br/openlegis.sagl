@@ -135,7 +135,7 @@
                                          <li><a href="<dtml-var portal_url>/cadastros/assinatura/assinaturas_pendentes" class="dropdown-item">Assinaturas Pendentes</a></li>
                                          <li><a href="<dtml-var portal_url>/cadastros/assinatura/assinaturas_efetivadas" class="dropdown-item">Histórico de Assinaturas</a></li>                               
                                       </dtml-if>
-                                      <li><a href="<dtml-var portal_url>/conferir_assinatura" class="dropdown-item">Validação de Assinaturas</a></li>
+                                      <li><a href="<dtml-var portal_url>/conferir_assinatura" class="dropdown-item">Validação de Documentos</a></li>
                                    </dtml-if>
                                  </ul>
                               </div>
@@ -226,7 +226,7 @@
                                 <dtml-else>
                                    <img class="rounded-circle header-profile-user" src="<dtml-var portal_url>/assets/images/users/user-icon.jpg" alt="Header Avatar">
                                 </dtml-if>
-                                <span class="d-none d-xl-inline-block ms-1">&dtml-AUTHENTICATED_USER;</span>
+                                <span class="d-none d-xl-inline-block ms-1"><dtml-var AUTHENTICATED_USER></span>
                                 <i class="mdi mdi-chevron-down d-none d-xl-inline-block"></i>
                             </button>
                             <div class="dropdown-menu dropdown-menu-end">
@@ -236,6 +236,7 @@
                                 <dtml-else>
                                    <a class="dropdown-item" href="<dtml-var portal_url>/cadastros/usuario/usuario_mostrar_proc"><i class="dripicons-user d-inline-block text-muted me-2"></i> Perfil</a>
                                 </dtml-if>
+                                <a class="dropdown-item" href="<dtml-var portal_url>/cadastros/peticionamento_eletronico"><i class="dripicons-document-new d-inline-block text-muted me-2"></i>Peticionamento Digital</a>
                                 <dtml-if cod_parlamentar_corrente>
                                   <a class="dropdown-item" href="<dtml-var portal_url>/cadastros/gabinete_parlamentar/eleitor"><i class="dripicons-article d-inline-block text-muted me-2"></i>Eleitores</a>
                                   <a  class="dropdown-item" href="<dtml-var portal_url>/cadastros/gabinete_parlamentar/atendimento"><i class="dripicons-to-do d-inline-block text-muted me-2"></i>Atendimentos</a>
@@ -449,16 +450,16 @@
             <div class="main-content">
                 <dtml-if expr="REQUEST.get('modal', '')">
                   <div class="content-modal">
-                      <div class="container-xxl">
+                      <div class="container-xxl min-vh-100">
                 <dtml-else>
                   <div class="page-content">
-                      <div class="container-fluid">
+                      <div class="container-fluid" style="min-height:400px;">
                 </dtml-if>
                 
                      <dtml-if expr="not REQUEST.get('modal', '')">
                        <dtml-var breadcrumbs>
                       </dtml-if>
                           <div class="col-lg-12 col-xl-12">
-                                <div class="card" <dtml-if expr="REQUEST.get('modal', '')">style="min-height: 500px; box-shadow:none;"</dtml-if>>
+                                <div class="card" <dtml-if expr="REQUEST.get('modal', '')">style="box-shadow:none;"</dtml-if>>
                                     <div class="card-body">
                                     

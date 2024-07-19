@@ -5,9 +5,7 @@
            <dtml-let arquivo="getattr(sapl_documentos.pessoa,id_arquivo) ">
            <dtml-call expr="REQUEST.set('existe_arquivo', 1)">
            <dtml-try>
-             <dtml-if expr="pysc.arquivo_pdf_validar_pysc(file=file_nom_arquivo)">
-                <dtml-call "arquivo.manage_upload(file=file_nom_arquivo)">
-             </dtml-if>
+              <dtml-call "arquivo.manage_upload(file=file_nom_arquivo)">
            <dtml-except>
                <dtml-call expr="REQUEST.set('erro', 1)">
                <dtml-let mensagem="'Ocorreu erro ao incluir o anexo PDF'" tipo_mensagem="'danger'">
@@ -19,9 +17,7 @@
        <dtml-if expr="not existe_arquivo">
          <dtml-try>
            <dtml-call expr="REQUEST.set('id_arquivo', str(hdn_cod_pessoa)+ '_anexo.pdf')">
-           <dtml-if expr="pysc.arquivo_pdf_validar_pysc(file=file_nom_arquivo)">
-              <dtml-call expr="sapl_documentos.pessoa.manage_addFile(id=id_arquivo,file=file_nom_arquivo)">
-           </dtml-if>
+             <dtml-call expr="sapl_documentos.pessoa.manage_addFile(id=id_arquivo,file=file_nom_arquivo)">
            <dtml-let mensagem="'Anexo PDF incluído com sucesso!'" url="'pessoa_mostrar_proc?cod_pessoa='+hdn_cod_pessoa + '#anexo'">
              <dtml-var mensagem_emitir>
            </dtml-let>

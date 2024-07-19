@@ -41,9 +41,9 @@ function coligacao_excluir() {
       <div class="col-12 col-md-8 align-self-center">
         <h1 class="firstHeading font-size-18">Cadastro de Coligação</h1>
       </div>
-      <div class="col-12 col-md-4 text-start text-end">
+      <div class="col-12 col-md-4 text-start text-md-end">
          <div class="btn-group d-print-none ">
-           <a class="btn btn-light" href="index_html"><i class="fa fa-fw fa-undo"></i> Voltar</a>         
+           <a class="btn btn-sm btn-light" href="index_html"><i class="fa fa-fw fa-undo"></i> Voltar</a>         
          </div>
       </div>
  </div>
@@ -59,7 +59,7 @@ function coligacao_excluir() {
         <dtml-if cod_coligacao>
           <dtml-call expr="REQUEST.set('num_legislatura_sel',num_legislatura)">
         </dtml-if>
-        <label class="form-label" for="lst_num_legislatura" class="required">Legislatura</label>             
+        <label class="form-label required" for="lst_num_legislatura">Legislatura</label>             
         <select class="form-select" id="lst_num_legislatura" name="lst_num_legislatura"> 
            <dtml-in expr="zsql.legislatura_obter_zsql(ind_excluido=0)">                         
              <option
@@ -75,7 +75,7 @@ function coligacao_excluir() {
         </select>
      </div>
      <div class="col-12 col-sm-6 mb-3">
-        <label class="form-label" for="txt_nom_coligacao" class="required">Nome da Coligação</label>     
+        <label class="form-label required" for="txt_nom_coligacao">Nome da Coligação</label>     
         <input class="form-control" type="text" id="txt_nom_coligacao"  name="txt_nom_coligacao" value="<dtml-var nom_coligacao missing>" maxlength="50" />
      </div>
      <div class="col-12 col-sm-3 mb-3">
@@ -84,7 +84,7 @@ function coligacao_excluir() {
      </div>     
   </div>
 
- <div class="text-start">
+ <div class="text-start btn-group">
   <input class="btn btn-primary" type="button" value="Salvar" onClick="campos_criticar(document.coligacao_form)" />
   <dtml-if cod_coligacao>
     <input class="btn btn-danger" type="button" value="Excluir" onClick="coligacao_excluir(document.coligacao_form)" />

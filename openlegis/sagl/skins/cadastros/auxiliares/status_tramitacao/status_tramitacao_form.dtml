@@ -40,9 +40,9 @@ function status_tramitacao_excluir() {
       <div class="col-12 col-md-8 align-self-center">
         <h1 class="firstHeading font-size-18">Status de Tramitação de Matérias</h1>
       </div>
-      <div class="col-12 col-md-4 text-start text-end">
+      <div class="col-12 col-md-4 text-start text-md-end">
          <div class="btn-group d-print-none ">
-           <a class="btn btn-light" href="index_html"><i class="fa fa-fw fa-undo"></i> Voltar</a>         
+           <a class="btn btn-sm btn-light" href="index_html"><i class="fa fa-fw fa-undo"></i> Voltar</a>         
          </div>
       </div>
  </div>
@@ -53,19 +53,19 @@ function status_tramitacao_excluir() {
   <input type="hidden" name="hdn_cod_status" value="<dtml-var cod_status missing>" />
 
   <div class="row">
-    <div class="col-3 mb-3">
-       <label class="form-label" for="txt_sgl_status" class="required">Sigla</label>                     
+    <div class="col-4 col-md-4 mb-3">
+       <label class="form-label required" for="txt_sgl_status">Sigla</label>                     
        <input class="form-control" type="text" id="txt_sgl_status"  name="txt_sgl_status" value="<dtml-var sgl_status missing>" maxlength="10" onBlur="form.txt_sgl_status.value = form.txt_sgl_status.value.toUpperCase()" />
     </div> 
-    <div class="col-9 mb-3">
-       <label class="form-label" for="txt_des_status" class="required">Descrição</label>                     
+    <div class="col-8 col-md-8 mb-3">
+       <label class="form-label required" for="txt_des_status">Descrição</label>                     
        <input class="form-control" type="text" id="txt_des_status" name="txt_des_status" value="<dtml-var des_status missing>" maxlength="60" />
     </div>  
   </div>
 
   <div class="row">
-    <div class="col-3 mb-3">
-       <label class="form-label" for="lst_ind_tramitacao" class="required">Indicador</label>                         
+    <div class="col-6 col-md-4 mb-3">
+       <label class="form-label required" for="lst_ind_tramitacao">Indicador</label>                         
            <select class="form-select" id="lst_ind_tramitacao" name="lst_ind_tramitacao">
               <option></option>
               <dtml-in expr="['Fim', 'Retorno']">
@@ -81,16 +81,18 @@ function status_tramitacao_excluir() {
               </dtml-in>
            </select>
     </div>
-    <div class="col-3 mb-3">
+    <div class="col-6 col-md-8 mb-3">
        <label class="form-label" for="txt_num_dias_prazo">Dias de Prazo</label>                             
        <input class="form-control" type="text" id="txt_num_dias_prazo" name="txt_num_dias_prazo" value="<dtml-var num_dias_prazo missing null="">" maxlength="3">    
     </div>    
   </div>
 
+ <div class="btn-group">
   <input class="btn btn-primary" type="button" value="Salvar" onClick="campos_criticar(document.status_tramitacao_form)" />
   <dtml-if cod_status>
     <input class="btn btn-danger" type="button" value="Excluir" onClick="status_tramitacao_excluir(document.status_tramitacao_form)" />
   </dtml-if>
+ </div>
 
    <div class="row">
       <div class="col-md-12 mt-2">

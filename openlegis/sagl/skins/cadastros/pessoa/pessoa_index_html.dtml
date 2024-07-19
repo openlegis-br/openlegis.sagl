@@ -1,33 +1,11 @@
 <dtml-var header_html>
 
-<script>
-(function ($) {
-  $(function () {
-    //$('input[type=submit]').hide();     //uncomment this if You want to hide the submit form buttons
-    document.onkeypress = function (event) {
-      var form = pesq_basica_form;
-      form.action = "pessoa_pesquisar_proc";
-      if (event.keyCode === 13) {
-        form.submit();
-      }
-    };
-  });
-}(jQuery));
-
-  function encerrar_todas(){
-       if (confirm("Confirma o encerramento de todas as visitas? As datas de saída serão iguais às datas de entrada.")) {
-          location.href="visita_encerrar_todas_proc";
-       }
-  }
-
-</script>
-
 <h1 class="firstHeading font-size-18">Cadastro de Visitantes</h1> 
 
 <!-- Nav tabs -->
 <ul class="nav nav-tabs border-0 mt-2" role="tablist">
   <li class="nav-item">
-    <a class="nav-link active" id="pessoa" data-bs-toggle="tab" href="#pessoa" role="tab" aria-controls="pessoa" aria-selected="true">Pesquisa de Visitantes</a>
+    <a class="nav-link active" id="pessoa" data-bs-toggle="tab" href="#pessoa" role="tab" aria-controls="pessoa" aria-selected="true">Formulário de Pesquisa</a>
   </li>
 </ul>
 
@@ -47,7 +25,7 @@
          <input class="form-control" id="txt_doc_identidade" type="text" name="txt_doc_identidade" null="" />
        </div>
       </div>
-       <div class="text-start">
+       <div class="text-start btn-group">
           <button class="btn btn-primary" type="submit" href="<dtml-var portal_url>/consultas/protocolo"><i class="fa  fa-search"></i> Pesquisar</button>          
           <input class="btn btn-light" type="reset" value="Limpar" />
       </div>
@@ -85,13 +63,13 @@
                 </dtml-unless>
               </td>
               <td>
-               <a href="visita_encerrar_proc?hdn_cod_visita=<dtml-var cod_visita>">Encerrar</a>
+               <a class="btn btn-sm btn-light" href="visita_encerrar_proc?hdn_cod_visita=<dtml-var cod_visita>">Encerrar</a>
               </td>
            </tr>
        <dtml-if sequence-end>
           </table>
           <div class="text-start">
-            <input class="btn btn-primary" type="button" value="Encerrar Visitas" onClick="encerrar_todas()" />
+            <input class="btn btn-sm btn-primary ms-2" type="button" value="Encerrar Todas as Visitas" onClick="encerrar_todas()" />
           </div>
        </dtml-if>
      <dtml-else>
@@ -99,4 +77,25 @@
      </dtml-in>
 
 <dtml-var js_slot>
+<script>
+(function ($) {
+  $(function () {
+    //$('input[type=submit]').hide();     //uncomment this if You want to hide the submit form buttons
+    document.onkeypress = function (event) {
+      var form = pesq_basica_form;
+      form.action = "pessoa_pesquisar_proc";
+      if (event.keyCode === 13) {
+        form.submit();
+      }
+    };
+  });
+}(jQuery));
+
+  function encerrar_todas(){
+       if (confirm("Confirma o encerramento de todas as visitas? As datas de saída serão iguais às datas de entrada.")) {
+          location.href="visita_encerrar_todas_proc";
+       }
+  }
+
+</script>
 <dtml-var footer_html>

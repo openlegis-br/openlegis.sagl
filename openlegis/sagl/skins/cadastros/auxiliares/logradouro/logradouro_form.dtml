@@ -82,37 +82,36 @@
       <div class="col-12 col-md-8 align-self-center">
         <h1 class="firstHeading font-size-18">Cadastro de Logradouro</h1>
       </div>
-      <div class="col-12 col-md-4 text-start text-end">
+      <div class="col-12 col-md-4 text-start text-sm-end">
          <div class="btn-group d-print-none ">
-           <a class="btn btn-light" href="index_html"><i class="fa fa-fw fa-undo"></i> Voltar</a>         
+           <a class="btn btn-sm btn-light" href="index_html"><i class="fa fa-fw fa-undo"></i> Voltar</a>         
          </div>
       </div>
  </div>
 
 <form name="logradouro_form" method="post" action="logradouro_salvar_proc">
   <input type="hidden" name="hdn_cod_logradouro" value="<dtml-var cod_logradouro missing>" />
+     <div class="table-responsive">
        <table class="table table-borderless">
         <tr> 
-           <td><label class="form-label" for="txt_nom_logradouro" class="required">Nome do Logradouro</label>
+           <td colspan="2"><label class="form-label required" for="txt_nom_logradouro"">Nome do Logradouro</label>
             <input class="form-control" type="text" id="txt_nom_logradouro" name="txt_nom_logradouro" value="<dtml-var nom_logradouro missing>" maxlength="100" /></td>
-           <td colspan="2"><label class="form-label" for="txt_nom_bairro" class="required">Bairro</label>
+           <td><label class="form-label required" for="txt_nom_bairro">Bairro</label>
             <input class="form-control" type="text" id="txt_nom_bairro" name="txt_nom_bairro" value="<dtml-var nom_bairro missing null>" maxlength="100" /></td>
         </tr>
         <tr>
           <td><label class="form-label" for="txt_num_cep">CEP</label>
             <input class="form-control" type="text" id="txt_num_cep" name="txt_num_cep" value="<dtml-var num_cep missing null="">" size="20" maxlength="9" />
           </td>
-          <td><label class="form-label" for="txt_municipio" class="required">Município</label>
+          <td><label class="form-label required" for="txt_municipio">Município</label>
               <div class="input-group">
                 <input class="form-control" type="text" id="txt_municipio" name="txt_municipio" value="<dtml-if expr="_.has_key('cod_logradouro') and cod_localidade_sel!=None"><dtml-in expr="zsql.localidade_obter_zsql(cod_localidade=cod_localidade_sel)"><dtml-var nom_localidade missing
 	    null=""></dtml-in></dtml-if>" size="46" maxlength="50" />
-                <div class="input-group-append">
-                <input class="btn btn-primary" type="button" name="btn_localidade" value=" ? "
+                <input class="btn btn-light" type="button" name="btn_localidade" value=" ? "
 	        onClick="localidade_mostrar(document.logradouro_form)" />
-	        </div>
 	      </div>
           </td>
-          <td><label class="form-label" for="lst_sgl_uf" class="required">UF</label>
+          <td><label class="form-label" for="lst_sgl_uf" class="form-label required">UF</label>
              <select class="form-select" id="lst_sgl_uf" name="lst_sgl_uf" size="1">
                <option>Selecione</option>
                <dtml-if expr="_.has_key('cod_logradouro') and cod_localidade_sel!=None">
@@ -156,9 +155,8 @@
         </td>
       </tr>
       </table>
-
-  <p align="center">
-  <input class="btn btn-primary" type="button" name="btn_logradouro_salvar" value="Salvar" onClick="campos_criticar(document.logradouro_form)" />
+    </div>
+  <input class="btn btn-primary ms-2" type="button" name="btn_logradouro_salvar" value="Salvar" onClick="campos_criticar(document.logradouro_form)" />
   <dtml-if cod_logradouro>
            <dtml-if cod_norma>
              <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Norma'])">
@@ -171,7 +169,6 @@
            </dtml-if>
     <input class="btn btn-danger" type="button" name="btn_logradouro_excluir" value="Excluir" onClick="logradouro_excluir(document.logradouro_form)" />
   </dtml-if>
-  </p>
 
 </form>
 

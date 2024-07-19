@@ -388,7 +388,7 @@
                 </dtml-if>
              </dtml-let>
              <dtml-if expr="_.has_key('temODT')">
-                <input type="button" class="btn btn-primary" value="Gerar do ODT" onclick="javascript:texto_pdf_gerar()" />
+                <input type="button" class="btn btn-primary" value="Converter" onclick="javascript:texto_pdf_gerar()" />
              </dtml-if>
             </div>
           </dtml-if>
@@ -430,7 +430,7 @@
               <div class="btn-group btn-group-sm">
                 <dtml-let id_documento_odt="str(cod_materia)+'_texto_integral.odt'">
                    <dtml-if "hasattr(sapl_documentos.materia_odt,id_documento_odt)">
-                      <input class="btn btn-primary"  type="button" value="Obter Texto Original" onclick="javascript:texto_original_materia_obter()" />
+                      <input class="btn btn-primary"  type="button" value="Copiar ODT" onclick="javascript:texto_original_materia_obter()" />
                    <dtml-else>
                       <i>Não disponível</i>
                    </dtml-if>
@@ -476,7 +476,7 @@
                    </dtml-if>
                 </dtml-let>
                 <dtml-if expr="_.has_key('temODTred')">
-                   <input type="button" class="btn btn-primary" value="Gerar do ODT" onclick="javascript:redacao_final_pdf_gerar()" />
+                   <input type="button" class="btn btn-primary" value="Converter" onclick="javascript:redacao_final_pdf_gerar()" />
                 </dtml-if>
              </div>
            </dtml-if>
@@ -490,7 +490,7 @@
                 </dtml-if>
              </dtml-let>
              <dtml-if expr="_.has_key('temODTred')">
-                <input type="button" class="btn btn-primary" value="Gerar do ODT" onclick="javascript:redacao_final_pdf_gerar()" />
+                <input type="button" class="btn btn-primary" value="Converter" onclick="javascript:redacao_final_pdf_gerar()" />
              </dtml-if>
           </dtml-if>
          </div>
@@ -592,11 +592,11 @@
                      <div class="btn-group btn-group-sm">
                        <dtml-let proposicao="getattr(sapl_documentos.proposicao,id_proposicao).absolute_url">
                           <dtml-call expr="REQUEST.set('cod_documento',pysc.proposicao_calcular_checksum_pysc(cod_proposicao))">
-                          <a class="btn btn-primary" target="_blank" href="<dtml-var proposicao>?<dtml-var expr="ZopeTime().timeTime()">">
-                              <i class="fas fa-certificate"></i> Proposição <dtml-var cod_documento>
+                          <a class="btn btn-light" target="_blank" href="<dtml-var proposicao>?<dtml-var expr="ZopeTime().timeTime()">">
+                              <i class="fas fa-certificate"></i> <dtml-var cod_documento>
                           </a>                          
-                          <a class="btn btn-primary" target="_blank" href="<dtml-var portal_url>/cadastros/proposicao/proposicao_mostrar_proc?cod_proposicao=<dtml-var cod_proposicao>"><i class="fas fa-info-circle"></i> Mais Informações</a>
-                          <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Assinaturas Digitais" data-src="<dtml-var portal_url>/cadastros/assinatura/assinatura_solicitar_form?codigo=<dtml-var cod_proposicao>&tipo_doc=proposicao&modal=1"><i class="fas fa-file-signature"></i>Assinaturas</button>
+                          <a class="btn btn-light" target="_blank" href="<dtml-var portal_url>/cadastros/proposicao/proposicao_mostrar_proc?cod_proposicao=<dtml-var cod_proposicao>"><i class="fas fa-info-circle"></i> Informações</a>
+                          <button type="button" class="btn btn-light" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Assinaturas Digitais" data-src="<dtml-var portal_url>/cadastros/assinatura/assinatura_solicitar_form?codigo=<dtml-var cod_proposicao>&tipo_doc=proposicao&modal=1"><i class="fas fa-file-signature"></i> Assinaturas</button>
                        </dtml-let>
                      </div>
                    </div>

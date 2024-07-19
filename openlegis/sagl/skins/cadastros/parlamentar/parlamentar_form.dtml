@@ -131,14 +131,14 @@
 
   <div class="row">
      <div class="col-12 col-md-4 mb-3">
-       <label class="form-label required" for="txt_nom_completo" class="form-label required">Nome Completo</label>
+       <label class="form-label required" for="txt_nom_completo">Nome Completo</label>
        <input class="form-control" type="text" name="txt_nom_completo" id="txt_nom_completo" value="<dtml-var nom_completo missing>" size="50" maxlength="50" required />
       <div class="invalid-feedback">
         Este campo é obrigatório!
       </div>
     </div>
     <div class="col-12 col-md-4 mb-3">
-       <label class="form-label required" for="txt_nom_parlamentar" class="form-label required">Nome Parlamentar</label>
+       <label class="form-label required" for="txt_nom_parlamentar">Nome Parlamentar</label>
        <input class="form-control" type="text" name="txt_nom_parlamentar" id="txt_nom_parlamentar" value="<dtml-var nom_parlamentar missing>" size="50" maxlength="50" required/>
       <div class="invalid-feedback">
         Este campo é obrigatório!
@@ -168,7 +168,7 @@
   </div>
   <div class="row">
     <div class="form-group col-6 col-md-3">
-      <label class="form-label required" for="rad_ind_ativo" class="form-label required">Ativo?</label>
+      <label class="form-label required" for="rad_ind_ativo">Ativo?</label>
       <select class="form-select mb-3" name="rad_ind_ativo" id="rad_ind_ativo" required="">
         <option value=""></option>
         <dtml-in expr="[(1,'Sim'),(0,'Não')]">
@@ -185,7 +185,7 @@
       </div>
     </div>
     <div class="form-group col-6 col-md-3">
-      <label class="form-label required" for="rad_sex_parlamentar" class="form-label required">Sexo</label>
+      <label class="form-label required" for="rad_sex_parlamentar">Sexo</label>
       <select class="form-select" name="rad_sex_parlamentar" id="rad_sex_parlamentar" required="">
         <option value=""></option>
         <dtml-in expr="[('M','Masculino'),('F','Feminino')]">
@@ -373,7 +373,7 @@
                     <div class="card-body">       
                       <img class="img-fluid img-thumbnail shadow-sm" width="200" src="<dtml-var portal_url>/sapl_documentos/parlamentar/fotos/<dtml-var id_foto>?<dtml-var expr="ZopeTime().timeTime()">">
                     </div>
-                    <div class="col mb-3">
+                    <div class="col mb-3 btn-group btn-group-sm">
                     <a class="btn btn-light" href="<dtml-var portal_url>/cadastros/parlamentar/parlamentar_ajustar_foto?cod_parlamentar=<dtml-var cod_parlamentar>" data-confirm="Ajustar as dimensões para o formato recomendado (350x350 px) ?"><i class="mdi mdi-resize"></i> Autoajuste</a>
                     <a class="btn btn-danger" href="<dtml-var portal_url>/cadastros/parlamentar/parlamentar_excluir_foto?cod_parlamentar=<dtml-var cod_parlamentar>" data-confirm="Deseja realmente excluir a imagem?"><i class="fas fa-trash"></i> Excluir</a>
                     </div>
@@ -406,7 +406,7 @@
   <input type="hidden" name="hdn_cod_casa" value="<dtml-var expr="sapl_documentos.props_sagl.cod_casa" missing>" />
   <input type="hidden" name="hdn_url" value="parlamentar_mostrar_proc?cod_parlamentar=<dtml-var cod_parlamentar missing>" />
 
- <div class="text-start">
+ <div class="btn-group text-start">
    <button class="btn btn-primary" onClick="return parlamentar_criticar()">Salvar</button>
    <dtml-if cod_parlamentar>
       <a class="btn btn-danger d-print-none" href="<dtml-var portal_url>/cadastros/parlamentar/parlamentar_excluir_proc?cod_parlamentar=<dtml-var cod_parlamentar>" data-confirm="Deseja realmente excluir o Vereador?">Excluir</a>

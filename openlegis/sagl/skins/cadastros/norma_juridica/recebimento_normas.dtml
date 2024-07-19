@@ -1,20 +1,5 @@
 <dtml-var header_html>
 
-<script>
-$(function () {
-    $('[data-bs-toggle="popover"]').popover({
-    container: 'body',
-    html: true,
-    placement: 'bottom',
-    sanitize: false,
-    content: function() {
-        return $('#PopoverContent').html()
-    }
-    })
-}); 
-</script>
-
-
  <div class="row mb-2">
       <div class="col-12 col-md-8 align-self-center">
         <h1 class="firstHeading font-size-18">Recebimento de Normas</h1>
@@ -48,15 +33,13 @@ $(function () {
                 <td>
                   <a class="btn btn-link" href="<dtml-var portal_url>/cadastros/norma_juridica/incorporar_norma?cod_peticao=<dtml-var expr="_['sequence-item']['cod_peticao']">" data-confirm="Confirma a incorporação da norma?"><i class="fas fa-copy"></i> Incorporar</a>
 
-                  <a type="button" class="btn btn-link text-danger" data-bs-toggle="popover" title="Motivo da Devolução"><i class="fas fa-times"></i> Devolver</a>
-                  <div id="PopoverContent" class="d-none">
+                  <a type="button" class="btn btn-link text-danger" tabindex="0" data-bs-toggle="popover" title="Motivo da Devolução"><i class="fas fa-times"></i> Devolver</a>
+                  <div data-name="PopoverContent" id="PopoverContent" class="d-none">
                     <form id="myform" class="form-inline" role="form" method="post" action="devolver_norma_proc" onSubmit="return confirm('Confirma a devolução da norma?');">
                       <input type="hidden" name="cod_peticao" value="<dtml-var expr="_['sequence-item']['cod_peticao']">" />
                       <div class="input-group">
                         <textarea class="form-control" name="txt_observacao" rows="1" required></textarea>
-                        <div class="input-group-append" id="button-addon1">
                            <button class="btn btn-primary" type="submit" data-bs-toggle="popover" data-placement="bottom" data-html="true" data-title="OK" formaction="devolver_norma_proc">OK</button>                     
-                        </div>
                       </div>     
                     </form>  
                   </div> 
@@ -70,4 +53,17 @@ $(function () {
 </dtml-in>
 
 <dtml-var js_slot>
+<script>
+$(function () {
+    $('[data-bs-toggle="popover"]').popover({
+    container: 'body',
+    html: true,
+    placement: 'bottom',
+    sanitize: false,
+    content: function() {
+        return $('#PopoverContent').html()
+    }
+    })
+}); 
+</script>
 <dtml-var footer_html>

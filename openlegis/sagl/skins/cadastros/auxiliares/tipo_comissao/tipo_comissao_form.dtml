@@ -35,12 +35,12 @@
 </script>
 
  <div class="row mb-2">
-      <div class="col-12 col-md-8 align-self-center">
+      <div class="col-12 col-md-6 align-self-center">
         <h1 class="firstHeading font-size-18">Tipo de Comissão</h1>
       </div>
-      <div class="col-12 col-md-4 text-start text-end">
+      <div class="col-12 col-md-6 text-start text-md-end">
          <div class="btn-group d-print-none ">
-           <a class="btn btn-light" href="index_html"><i class="fa fa-fw fa-undo"></i> Voltar</a>         
+           <a class="btn btn-sm btn-light" href="index_html"><i class="fa fa-fw fa-undo"></i> Voltar</a>         
          </div>
       </div>
  </div>
@@ -51,16 +51,16 @@
 
   <div class="row">
     <div class="col-12 col-sm-6 mb-3">
-       <label class="form-label" for="txt_nom_tipo_comissao" class="required">Descrição</label>             
+       <label class="form-label required" for="txt_nom_tipo_comissao">Descrição</label>             
        <input class="form-control" type="text" id="txt_nom_tipo_comissao" name="txt_nom_tipo_comissao" value="<dtml-var nom_tipo_comissao missing>" maxlength="50" />
     </div>
     <div class="col-6 col-sm-3 mb-3">
-       <label class="form-label" for="txt_sgl_tipo_comissao" class="required">Sigla</label>                  
+       <label class="form-label required" for="txt_sgl_tipo_comissao">Sigla</label>                  
        <input class="form-control" type="text" id="txt_sgl_tipo_comissao" name="txt_sgl_tipo_comissao" value="<dtml-var sgl_tipo_comissao missing>" maxlength="10"
          onBlur="form.txt_sgl_tipo_comissao.value=form.txt_sgl_tipo_comissao.value.toUpperCase()" />
     </div>
     <div class="col-6 col-sm-3 mb-3">
-       <label class="form-label" for="lst_sgl_natureza_comissao" class="required">Natureza</label>                      
+       <label class="form-label required" for="lst_sgl_natureza_comissao">Natureza</label>                      
        <select class="form-select" id="lst_sgl_natureza_comissao" name="lst_sgl_natureza_comissao">
          <dtml-in expr="['Temporária','Permanente']">
             <option 
@@ -79,11 +79,12 @@
     </div>
   </div>  
 
+  <div class="btn-group">
   <input class="btn btn-primary" type="button" name="btn_tip_comissao_salvar" value="Salvar" onClick="campos_criticar(document.tip_comissao_form)" />
   <dtml-if tip_comissao>
     <input class="btn btn-danger" type="button" name="btn_tip_comissao_excluir" value="Excluir" onClick="tip_comissao_excluir(document.tip_comissao_form)" />
   </dtml-if>
-
+  </div>
    <div class="row">
       <div class="col-md-12 mt-2">
          <p class="text-muted small font-size-12"><i class="fas fa-asterisk text-danger"></i> Campos obrigatórios</p>

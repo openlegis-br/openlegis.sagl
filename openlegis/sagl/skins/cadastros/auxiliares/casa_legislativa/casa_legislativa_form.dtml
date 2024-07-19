@@ -252,7 +252,7 @@
         <input class="form-control" type="text" id="txt_recaptcha_key" name="txt_recaptcha_key" value="<dtml-var expr="sapl_documentos.props_sagl.recaptcha_key" missing>" />     
      </div>
      <div class="col-6 col-lg-3 mb-3">
-        <label class="form-label required">Numeração de Protocolo</label>
+        <label class="form-label d-block required">Numeração de Protocolo</label>
         <dtml-in expr="[('1', 'Anual'), ('0', 'Consecutiva')]">
           <div class="form-check form-check-inline">        
            <input class="form-check-input" type="radio" id="rad<dtml-var expr="_['sequence-key']">" name="rad_protocolo" value="<dtml-var expr="_['sequence-key']">"
@@ -264,7 +264,7 @@
         </dtml-in>
      </div>
      <div class="col-6 col-lg-3 mb-3">
-        <label class="form-label required">Acompanhamento de Matérias</label>
+        <label class="form-label d-block required">Acompanhamento de Matérias</label>
         <dtml-in expr="[('1', 'Sim'), ('0', 'Não')]">
           <div class="form-check form-check-inline">                
            <input class="form-check-input" type="radio" id="rad_rad<dtml-var expr="_['sequence-key']">" name="rad_acompanhamento" value="<dtml-var expr="_['sequence-key']">"
@@ -331,13 +331,10 @@
              </div>
            </div>
            <div class="col-6 mb-3">
-             <div class="custom-file">
                <input type="file" class="form-control" id="file_nom_logo" name="file_nom_logo" accept="image/png" disabled />
-               <label class="custom-file-label" for="file_nom_logo">Selecione a imagem</label>
                <small id="passwordHelpBlock" class="form-text text-muted">
                 PNG com fundo transparente. Tamanho: 100x100px.
               </small> 
-             </div>
            </div>
           </div>  
         <dtml-else>

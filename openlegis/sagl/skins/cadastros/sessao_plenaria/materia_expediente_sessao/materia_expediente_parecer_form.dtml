@@ -85,14 +85,14 @@
       <table class="table table-borderless">
         <tr>
           <td>
-            <label class="form-label" for="txt_dat_ordem" class="required">Data da <dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao"></label>
+            <label class="form-label required" for="txt_dat_ordem">Data da <dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao"></label>
             <input class="form-control" type="text" name="txt_dat_ordem" id="txt_dat_ordem" readonly="readonly" onBlur="formata_data(form.txt_dat_ordem)"
                <dtml-if lst_dat_ordem> value="<dtml-var lst_dat_ordem>"
                <dtml-else> value="<dtml-var dat_inicio_sessao>"
 	       </dtml-if> />
           </td>
           <td>
-            <label class="form-label" for="lst_tip_sessao" class="required">Tipo da <dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao"></label>
+            <label  class="form-label required" for="lst_tip_sessao">Tipo da <dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao"></label>
             <select class="form-select" id="lst_tip_sessao" name="lst_tip_sessao" onfocus="this.initialSelect = this.selectedIndex;" onchange="this.selectedIndex = this.initialSelect;" required>
 	      <option value="0">Selecione</option>
               <dtml-in expr="zsql.tipo_sessao_plenaria_obter_zsql(ind_excluido=0)">
@@ -108,7 +108,7 @@
             </select>
           </td>
 	  <td>
-            <label class="form-label" for="txt_num_ordem" class="required">Nº de Ordem</label>
+            <label  class="form-label required" for="txt_num_ordem">Número de Ordem</label>
             <dtml-unless cod_ordem>
               <dtml-in expr="zsql.expediente_materia_numero_obter_zsql(cod_sessao_plen=cod_sessao_plen)">
                  <dtml-call expr="REQUEST.set('num_ordem', _.int(novo_item))">
@@ -121,7 +121,7 @@
          <td colspan="3">
           <div class="row">
             <div class="col-6">         
-             <label class="form-label" for="lst_comissao" class="required">Selecione a Comissão</label>
+             <label class="form-label required" for="lst_comissao">Selecione a Comissão</label>
              <select class="form-select" id="lst_comissao" name="lst_comissao" onChange="ementa_buscar(document.materia_expediente_parecer_form)" required>
                   <option>Selecione</option>
                    <dtml-in expr="zsql.comissao_obter_zsql(ind_excluido=0)">
@@ -137,11 +137,11 @@
              </select>
           </div>
           <div class="col-3">
-            <label class="form-label" for="txt_num_parecer" class="required">Parecer nº</label>
+            <label  class="form-label required" for="txt_num_parecer">Parecer nº</label>
             <input class="form-control number" type="number" id="txt_num_parecer" name="txt_num_parecer" value="<dtml-var num_parecer missing>" onChange="ementa_buscar(document.materia_expediente_parecer_form)">
            </div>
           <div class="col-3">
-            <label class="form-label" for="txt_ano_parecer" class="required">Ano</label>
+            <label class="form-label required" for="txt_ano_parecer">Ano</label>
             <input class="form-control year" type="number" id="txt_ano_parecer" name="txt_ano_parecer" value="<dtml-var ano_parecer missing>" onChange="ementa_buscar(document.materia_expediente_parecer_form)">
           </div>
          </div>
@@ -151,7 +151,7 @@
            <td colspan="3">
              <div class="row">
               <div class="col-6">
-                <label class="form-label" for="lst_tip_id_basica" class="required">Tipo de Matéria</label>
+                <label  class="form-label required" for="lst_tip_id_basica">Tipo de Matéria</label>
                 <select class="form-select" id="lst_tip_id_basica" name="lst_tip_id_basica" onChange="ementa_buscar(document.materia_expediente_parecer_form)" required >
                  <option></option>
                    <dtml-in expr="zsql.tipo_materia_legislativa_obter_zsql(ind_excluido=0,tip_natureza='P')">
@@ -166,11 +166,11 @@
                  </select>
                </div>
               <div class="col-3">
-                <label class="form-label" for="txt_num_ident_basica" class="required">Número</label>              
+                <label class="form-label required" for="txt_num_ident_basica">Número</label>              
                 <input class="form-control number" type="number" id="txt_num_ident_basica" name="txt_num_ident_basica" onChange="ementa_buscar(document.materia_expediente_parecer_form)" value="<dtml-var num_ident_basica missing>" />
                </div>
               <div class="col-3">
-                <label class="form-label" for="txt_ano_ident_basica" class="required">Ano</label>                 
+                <label class="form-label" for="txt_ano_ident_basica" class="form-label required">Ano</label>                 
              <input class="form-control year" type="number" id="txt_ano_ident_basica" name="txt_ano_ident_basica" onChange="ementa_buscar(document.materia_expediente_parecer_form)" value="<dtml-var ano_ident_basica missing>"  />
               </div>
            </div> 
@@ -178,7 +178,7 @@
       </tr>
       <tr>
         <td colspan="3">
-          <label class="form-label" for="txa_txt_observacao" class="required">Ementa </label>
+          <label  class="form-label required" for="txa_txt_observacao">Ementa </label>
           <textarea class="form-control auto-resize" name="txa_txt_observacao" rows="1"><dtml-var txt_observacao missing></textarea>
         </td>
       </tr>
@@ -186,7 +186,7 @@
           <td colspan="3">
            <div class="row">
               <div class="col-8">
-                <label class="form-label" for="lst_tip_quorum" class="required">Quórum de Votação</label>
+                <label  class="form-label required" for="lst_tip_quorum">Quórum de Votação</label>
                 <select class="form-select" id="lst_tip_quorum" name="lst_tip_quorum" required>
                   <option value="0"></option>
                    <dtml-in expr="zsql.quorum_votacao_obter_zsql()">
@@ -195,7 +195,7 @@
                 </select>              
               </div>
               <div class="col-4">
-                <label class="form-label" for="rad_tip_votacao" class="required d-block">Tipo de Votação</label>
+                <label class="form-label required d-block" for="rad_tip_votacao">Tipo de Votação</label>
                 <dtml-in expr="zsql.tipo_votacao_obter_zsql(tip_votacao='')">
                   <div class="form-check form-check-inline">
                     <input class="form-check-input" type="radio" id="<dtml-var tip_votacao_sel>" name="rad_tip_votacao" value="<dtml-var tip_votacao_sel>"
@@ -215,7 +215,7 @@
     </table>
 </dtml-in>
 
-<div class="text-center">
+<div class="btn-group ms-2">
     <input class="btn btn-primary" type="button" value="Salvar" onClick="campos_criticar(document.materia_expediente_parecer_form)" />
     <dtml-if cod_ordem>
        <input type="hidden" name="flag_atualizar" value="<dtml-var cod_ordem missing>" />
@@ -232,10 +232,6 @@
 </div>
 
 </form>
-
-<script>
-autosize(document.querySelectorAll('textarea'));
-</script>
 
 <dtml-var js_slot>
 <dtml-var footer_html>

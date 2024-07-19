@@ -27,9 +27,9 @@ function tipo_votacao_excluir() {
       <div class="col-12 col-md-8 align-self-center">
         <h1 class="firstHeading font-size-18">Tipo de Votação</h1>
       </div>
-      <div class="col-12 col-md-4 text-start text-end">
+      <div class="col-12 col-md-4 text-start text-md-end">
          <div class="btn-group d-print-none ">
-           <a class="btn btn-light" href="index_html"><i class="fa fa-fw fa-undo"></i> Voltar</a>         
+           <a class="btn btn-sm btn-light" href="index_html"><i class="fa fa-fw fa-undo"></i> Voltar</a>         
          </div>
       </div>
  </div>
@@ -39,18 +39,20 @@ function tipo_votacao_excluir() {
   <input type="hidden" name="hdn_tip_votacao" value="<dtml-var tip_votacao missing>" />
 
   <div class="row">
-    <div class="col-12 col-sm-6 mb-3">
-      <label class="form-label" for="txt_des_tipo_votacao" class="required">Descrição</label>             
+    <div class="col-12 mb-3">
+      <label class="form-label required" for="txt_des_tipo_votacao">Descrição</label>             
       <input class="form-control" type="text" id="txt_des_tipo_votacao" name="txt_des_tipo_votacao" value="<dtml-var des_tipo_votacao missing>" maxlength="50"/>
     </div>
   </div>
 
 </form>
 
+ <div class="btn-group">
   <input class="btn btn-primary" type="button" name="btn_tipo_votacao_salvar" value="Salvar" onClick="campos_criticar(document.tipo_votacao_form)" />
   <dtml-if tip_votacao>
     <input class="btn btn-danger" type="button" name="btn_tipo_votacao_excluir" value="Excluir" onClick="tipo_votacao_excluir(document.tipo_votacao_form)" />
   </dtml-if>
+ </div>
 
    <div class="row">
       <div class="col-md-12 mt-2">

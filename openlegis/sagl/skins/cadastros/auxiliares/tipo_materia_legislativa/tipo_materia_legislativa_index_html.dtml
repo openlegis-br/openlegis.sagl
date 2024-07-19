@@ -4,15 +4,16 @@
       <div class="col-12 col-md-8 align-self-center">
         <h1 class="firstHeading font-size-18">Tipos de Matéria Legislativa</h1>
       </div>
-      <div class="col-12 col-md-4 text-start text-end">
+      <div class="col-12 col-md-4 text-start text-md-end">
          <div class="btn-group d-print-none ">
-          <a class="btn btn-light d-print-none mb-3" href="tipo_materia_legislativa_form"><i class="fa fa-fw fa-plus"></i> Incluir Tipo</a>
+          <a class="btn btn-primary d-print-none mb-3" href="tipo_materia_legislativa_form"><i class="fa fa-fw fa-plus"></i> Incluir Tipo</a>
          </div>
       </div>
  </div>
 
 <dtml-in expr="zsql.tipo_materia_legislativa_obter_zsql()">
     <dtml-if sequence-start>
+      <div class="table-responsive">
        <table class="table">
          <thead class="table-light">
           <tr> 
@@ -45,6 +46,7 @@
           </tr>
     <dtml-if sequence-end>
         </table>
+      </div>
     </dtml-if sequence-end>
   <dtml-else>
      <p>Nenhum tipo de matéria cadastrado.</p>

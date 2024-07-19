@@ -29,7 +29,7 @@
 
   <div class="row">
     <div class="col-12 col-md-3 mb-3">
-       <label class="form-label" for="txt_dat_tramitacao" class="required">Data da Tramitação</label>
+       <label class="form-label" for="txt_dat_tramitacao" class="form-label required">Data da Tramitação</label>
        <dtml-unless dat_tramitacao>
           <dtml-call expr="REQUEST.set('dat_tramitacao', DateTime().strftime('%d/%m/%Y %H:%M'))">
        </dtml-unless>
@@ -40,7 +40,7 @@
        </div> 
     </div>
     <div class="col-12 col-md-6 mb-3">
-      <label class="form-label" for="lst_cod_unid_tram_local" class="required">Unidade de Origem</label>
+      <label class="form-label" for="lst_cod_unid_tram_local" class="form-label required">Unidade de Origem</label>
       <dtml-in expr="zsql.unidade_tramitacao_obter_zsql(cod_unid_tramitacao=cod_unid_tram_local, ind_leg=1)">
          <input class="form-control" type="text" id="lst_cod_unid_tram_local" value="<dtml-var nom_unidade_join>" readonly>
       </dtml-in>

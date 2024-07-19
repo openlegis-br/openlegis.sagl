@@ -1,81 +1,6 @@
 <dtml-var header_html>
 
 <script>
-/* Formatting function for row details - modify as you need */
-$(document).ready(function() {
-    var table = $('#itens').DataTable( {
-        "responsive": true,
-        "bStateSave": true,        
-        "fnStateSave": function (oSettings, oData) {
-            localStorage.setItem('itensDataTable', JSON.stringify(oData));
-        },
-        "fnStateLoad": function (oSettings) {
-            return JSON.parse(localStorage.getItem('itensDataTable'));
-        },        
-        "lengthMenu": [[10, 25, 50, 100], [10, 25, 50, 100]],
-        "lengthChange": true,
-        "buttons": [
-            {
-                extend: 'collection',
-                text: 'Exportar',
-                buttons: [ 
-                           {
-                             extend:    'excelHtml5',
-                             text:      '<i class="far fa-file-excel"></i> Excel',
-                             titleAttr: 'PDF'
-                           },
-                           {
-                             extend:    'pdfHtml5',
-                             download: 'open',
-                             text:      '<i class="fa fa-file-adobe"></i> PDF',
-                             titleAttr: 'PDF'
-                           },
-                           {
-                             extend:    'print',
-                             text:      '<i class="fa fa-print"></i> Impressão',
-                             titleAttr: 'Impressão'
-                           },
-                         ],
-               className: '',
-               dropup: true,
-               autoClose: true,
-               fade: true
-
-            }
-        ],
-        "language": {
-          search: "Pesquisar:",
-          processing:     "Processando...",
-          loadingRecords: "Carregando...",
-          lengthMenu:     "Exibir _MENU_ registros por página",
-          info:           "Exibindo _START_ a _END_ de _TOTAL_ registros",
-          infoEmpty:      "Exibindo _START_ a _END_ de _TOTAL_ registros",
-          infoFiltered:   "(total de registros:_MAX_)",
-          emptyTable:     "Nenhum registro encontrado",
-          zeroRecords:     "Nenhum registro encontrado",
-          paginate: {
-            first:      "Primeiro",
-            previous:   "Anterior",
-            next:       "Próximo",
-            last:       "Último"
-          },
-         "buttons": {
-           print: "Imprimir",
-           copy: "Copiar",
-           copyTitle: "Cópia bem sucedida",
-           copySuccess: {
-            1: "Uma linha copiada com sucesso",
-            _: "%d linhas copiadas com sucesso"
-          }
-        }
-        }
-    });
-    table.buttons().container()
-        .appendTo( '#panelBtn .col-sm-12:eq(0)' );  
-});
-</script>
-
-<script>
     function excluir(cod_item){
        if (confirm("Deseja realmente excluir o item?")) {
           location.href = "<dtml-var absolute_url>/arquivo_item_excluir_proc?cod_item="+cod_item+"&cod_recipiente=<dtml-var cod_recipiente missing>"
@@ -91,11 +16,11 @@ $(document).ready(function() {
           <h5>Conjunto Documental: <dtml-var des_tipo_tit_documental_sel></h5>
        </dtml-in>
       </div>
-      <div class="col-12 col-lg-6 text-start text-end">
+      <div class="col-12 col-lg-6 text-start text-md-end">
          <div class="btn-group d-print-none">
-           <a class="btn btn-primary btn-sm" href="<dtml-var portal_url>/cadastros/arquivo"><i class="fa fa-fw fa-undo"></i> Voltar ao Arquivo</a>
+           <a class="btn btn-light btn-sm" href="<dtml-var portal_url>/cadastros/arquivo"><i class="fa fa-fw fa-undo"></i> Voltar</a>
            <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-             <i class="fa fa-fw fa-plus"></i> Incluir
+             Incluir
            </button>
            <div class="dropdown-menu">
              <a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Incluir Matéria" data-src="arquivo_item_materia_form?cod_recipiente=<dtml-var cod_recipiente>&modal=1">Matéria</a>
@@ -184,4 +109,79 @@ $(document).ready(function() {
 </dtml-in>
 
 <dtml-var js_slot>
+
+<script>
+/* Formatting function for row details - modify as you need */
+$(document).ready(function() {
+    var table = $('#itens').DataTable( {
+        "responsive": true,
+        "bStateSave": true,        
+        "fnStateSave": function (oSettings, oData) {
+            localStorage.setItem('itensDataTable', JSON.stringify(oData));
+        },
+        "fnStateLoad": function (oSettings) {
+            return JSON.parse(localStorage.getItem('itensDataTable'));
+        },        
+        "lengthMenu": [[10, 25, 50, 100], [10, 25, 50, 100]],
+        "lengthChange": true,
+        "buttons": [
+            {
+                extend: 'collection',
+                text: 'Exportar',
+                buttons: [ 
+                           {
+                             extend:    'excelHtml5',
+                             text:      '<i class="far fa-file-excel"></i> Excel',
+                             titleAttr: 'PDF'
+                           },
+                           {
+                             extend:    'pdfHtml5',
+                             download: 'open',
+                             text:      '<i class="fa fa-file-adobe"></i> PDF',
+                             titleAttr: 'PDF'
+                           },
+                           {
+                             extend:    'print',
+                             text:      '<i class="fa fa-print"></i> Impressão',
+                             titleAttr: 'Impressão'
+                           },
+                         ],
+               className: '',
+               dropup: true,
+               autoClose: true,
+               fade: true
+
+            }
+        ],
+        "language": {
+          search: "Pesquisar:",
+          processing:     "Processando...",
+          loadingRecords: "Carregando...",
+          lengthMenu:     "Exibir _MENU_ registros por página",
+          info:           "Exibindo _START_ a _END_ de _TOTAL_ registros",
+          infoEmpty:      "Exibindo _START_ a _END_ de _TOTAL_ registros",
+          infoFiltered:   "(total de registros:_MAX_)",
+          emptyTable:     "Nenhum registro encontrado",
+          zeroRecords:     "Nenhum registro encontrado",
+          paginate: {
+            first:      "Primeiro",
+            previous:   "Anterior",
+            next:       "Próximo",
+            last:       "Último"
+          },
+         "buttons": {
+           print: "Imprimir",
+           copy: "Copiar",
+           copyTitle: "Cópia bem sucedida",
+           copySuccess: {
+            1: "Uma linha copiada com sucesso",
+            _: "%d linhas copiadas com sucesso"
+          }
+        }
+        }
+    });
+    table.buttons().container()
+        .appendTo( '#panelBtn .col-sm-12:eq(0)' );  
+});
+</script>
 <dtml-var footer_html>

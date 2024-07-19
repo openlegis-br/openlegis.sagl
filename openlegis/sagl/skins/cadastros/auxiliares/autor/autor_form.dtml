@@ -8,7 +8,7 @@
       form.tip_autor.value = tip_autor.substring(0, separador);
 
       if (form.tip_autor.value == 0){
-         alert("O tipo de autor deve ser preenchido!");
+         alert("O tipo de autor deve ser selecionado!");
          form.lst_tip_autor.focus();
          return false;
       }
@@ -113,11 +113,11 @@
 </dtml-if>
 
  <div class="row mb-2">
-      <div class="col-12 col-md-8 align-self-center">
-        <h1 class="firstHeading font-size-18">Autor</h1>
+      <div class="col-12 col-md-6 align-self-center">
+        <h1 class="firstHeading font-size-18">Cadastro de Autor</h1>
       </div>
-      <div class="col-12 col-md-4 text-start text-end">
-         <div class="btn-group d-print-none ">
+      <div class="col-12 col-md-6 text-start text-md-end">
+         <div class="btn-group btn-group-sm d-print-none ">
            <a class="btn btn-light" href="index_html"><i class="fa fa-fw fa-undo"></i> Voltar</a>         
          </div>
       </div>
@@ -156,8 +156,8 @@
 
   <div class="row">
      <div class="col-12 col-sm-3 mb-3">
-        <label class="form-label" for="lst_tip_autor" class="required">Tipo de Autor</label>
-        <select class="form-select" name="lst_tip_autor" id="lst_tip_autor" onChange="tipo_autor_mudou(document.autor_form)">
+        <label class="form-label required" for="lst_tip_autor">Tipo de Autor</label>
+        <select class="form-select" name="lst_tip_autor" id="lst_tip_autor" onChange="tipo_autor_mudou(document.autor_form)" required>
           <dtml-unless tip_autor>
              <option value="">Selecione</option>
           </dtml-unless>
@@ -172,7 +172,7 @@
      </div>
      <div class="col-12 col-sm-6 mb-3">
         <dtml-if expr="_.has_key('des_tipo_autor') and des_tipo_autor=='Parlamentar'">
-           <label class="form-label" for="lst_cod_autor" class="required">Nome do Autor</label>        
+           <label class="form-label required" for="lst_cod_autor">Nome do Autor</label>        
 	   <select class="form-select" name="lst_cod_autor" id="lst_cod_autor">
               <option value="">Selecione</option>
                 <dtml-if cod_autor>
@@ -189,7 +189,7 @@
            </select>
            <input type="hidden" name="txt_nom_autor" />
         <dtml-elif expr="_.has_key('des_tipo_autor') and (des_tipo_autor=='Comissao')">
-           <label class="form-label" for="lst_cod_autor" class="required">Nome do Autor</label>                
+           <label class="form-label required" for="lst_cod_autor">Nome do Autor</label>                
            <select class="form-select" name="lst_cod_autor" id="lst_cod_autor">
               <option value="0"></option>
                 <dtml-in expr="zsql.comissao_obter_zsql(cod_comissao='')">
@@ -201,7 +201,7 @@
            </select>
            <input type="hidden" name="txt_nom_autor" />
         <dtml-elif expr="_.has_key('des_tipo_autor') and (des_tipo_autor=='Bancada')">
-           <label class="form-label" for="lst_cod_autor" class="required">Nome do Autor</label>                
+           <label class="form-label required" for="lst_cod_autor">Nome do Autor</label>                
            <select class="form-select" name="lst_cod_autor" id="lst_cod_autor">
               <option value="0"></option>
                 <dtml-in expr="zsql.bancada_obter_zsql(cod_bancada='')">
@@ -214,15 +214,15 @@
            </select>
            <input type="hidden" name="txt_nom_autor" />
        <dtml-elif expr="_.has_key('des_tipo_autor')">
-          <label class="form-label" for="txt_nom_autor" class="required">Nome do Autor</label>               
+          <label class="form-label required" for="txt_nom_autor">Nome do Autor</label>               
           <input class="form-control" type="text" id="txt_nom_autor" name="txt_nom_autor" value="<dtml-var nom_autor_join missing>" maxlength="100" />
        <dtml-else>
-          <label class="form-label" for="txt_nom_autor" class="required">Nome do Autor</label>                      
+          <label class="form-label required" for="txt_nom_autor">Nome do Autor</label>                      
           <input class="form-control" type="text" name="txt_nom_autor" value="<dtml-var nom_autor_join missing>" disabled />
        </dtml-if>
     </div>
      <div class="col-12 col-sm-3 mb-3">
-          <label class="form-label" for="txt_end_email">E-mail:</label>
+          <label class="form-label" for="txt_end_email">E-mail</label>
           <input class="form-control" type="text" id="txt_end_email" name="txt_end_email" maxlength="100" value="<dtml-var end_email missing null="">" />
      </div>    
   </div>    
@@ -231,11 +231,11 @@
 <dtml-if expr="_.has_key('des_tipo_autor') and ((des_tipo_autor!='Parlamentar') and (des_tipo_autor!='Comissao') and (des_tipo_autor!='Bancada'))">
   <div class="row">
      <div class="col-6 mb-3">
-         <label class="form-label" for="txt_des_cargo" class="required">Cargo:</label>
+         <label class="form-label required" for="txt_des_cargo">Cargo</label>
          <input class="form-control" type="text" name="txt_des_cargo" id="txt_des_cargo" value="<dtml-var des_cargo missing null="">" maxlength="50" />
      </div>
      <div class="col-6 mb-3">     
-                <label class="form-label" for="lst_cod_partido">Partido:</label><br />
+                <label class="form-label" for="lst_cod_partido">Partido</label><br />
                 <select class="form-select"  name="lst_cod_partido" id="lst_cod_partido">
                   <option value="">Selecione</option>
                   <dtml-in expr="zsql.partido_obter_zsql(cod_partido='')">
@@ -262,29 +262,29 @@
 
   <label class="form-label d-block">Criar usuário para elaboração de proposições eletrônicas?</label>
   <div class="row">
-    <div class="col-12 col-sm-6 mb-3">
+    <div class="col-12 col-sm-6">
        <div class="input-group mb-3">
-         <div class="input-group-prepend">    
            <div class="input-group-text">
               <input type="radio" name="rad_autor_eh_usuario" id="Radio1" value="Sim" <dtml-unless expr="col_username==None">checked</dtml-unless> onClick="setLogin(document.autor_form,1,'<dtml-var col_username null="">')">
-              <label class="form-check-label ml-1" for="Radio1">Sim</label>
+              <label class="form-check-label ms-1" for="Radio1">Sim</label>
            </div>    
            <div class="input-group-text">
               <input type="radio" name="rad_autor_eh_usuario" id="Radio2" value="Não" <dtml-if expr="col_username==None">checked</dtml-if> onClick="setLogin(document.autor_form,0,'<dtml-var col_username null="">')">
-              <label class="form-check-label ml-1" for="Radio2">Não</label>
+              <label class="form-check-label ms-1" for="Radio2">Não</label>
            </div> 
-         </div>
            <input class="form-control" type="text" id="txt_login" name="txt_login" maxlength="20" value="<dtml-var col_username null="">" placeholder="Login" disabled />
        </div>
     </div>
  
   </div>
 
+  <div class="btn-group">
       <input class="btn btn-primary" type="button" name="btn_autor_salvar" value="Salvar" onClick="submeter(document.autor_form)" />
       <dtml-if cod_autor>
         <input class="btn btn-danger" type="button" name="btn_autor_excluir" value="Excluir" onClick="autor_excluir()" />
       </dtml-if>
-
+  </div>
+  
 </form>
 <dtml-var js_slot>
 <dtml-var footer_html>

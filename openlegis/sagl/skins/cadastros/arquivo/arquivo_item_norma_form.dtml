@@ -58,7 +58,7 @@
     <table class="table table-borderless">
       <tr> 
         <td width="40%">
-           <label class="form-label" for="lst_tip_id_basica" class="required">Tipo de Norma</label>
+           <label class="form-label required" for="lst_tip_id_basica">Tipo de Norma</label>
            <select class="form-select" name="lst_tip_id_basica" id="lst_tip_id_basica" onChange="ementa_buscar(document.arquivo_item_norma_form)">
             <option>
               <dtml-in expr="zsql.tipo_norma_juridica_obter_zsql(ind_excluido=0)">
@@ -73,30 +73,30 @@
               </dtml-in>
            </select></td>
         <td>
-           <label class="form-label" for="txt_num_ident_basica" class="required">Número</label>
+           <label class="form-label required" for="txt_num_ident_basica">Número</label>
             <input class="form-control number" type="number" name="txt_num_ident_basica" id="txt_num_ident_basica" size="5" value="<dtml-var num_ident_basica_sel missing>" maxlength="5" onChange="ementa_buscar(document.arquivo_item_norma_form)">
         </td>
         <td>
-           <label class="form-label" for="txt_ano_ident_basica" class="required">Ano</label>
+           <label class="form-label required" for="txt_ano_ident_basica">Ano</label>
             <input class="form-control year" type="number" name="txt_ano_ident_basica" id="txt_ano_ident_basica" size="4" value="<dtml-var ano_ident_basica_sel missing>" maxlength="4" onChange="ementa_buscar(document.arquivo_item_norma_form)">
         </td>
       </tr>
       <tr>
         <td colspan="3">
-          <label class="form-label" for="txa_txt_ementa" class="required">Ementa</label>
+          <label class="form-label required" for="txa_txt_ementa">Ementa</label>
           <textarea class="form-control auto-resize" name="txa_txt_ementa" id="txa_txt_ementa" rows="1" readonly><dtml-var txt_ementa missing></textarea>
         </td>
       </tr>
       <tr>
-        <td><label class="form-label" for="txt_dat_arquivamento" class="required">Data de Arquivamento</label>
+        <td><label class="form-label required" for="txt_dat_arquivamento">Data de Arquivamento</label>
             <dtml-unless dat_arquivamento>
                <dtml-call expr="REQUEST.set('dat_arquivamento', DateTime().strftime('%d/%m/%Y'))">
             </dtml-unless>
             <input class="form-control date" type="text" id="txt_dat_arquivamento" name="txt_dat_arquivamento" size="10" maxlength="10" value="<dtml-var dat_arquivamento missing null="">" />
         </td>
         <td colspan="2">
-           <label class="form-label" for="lst_tip_suporte" class="required">Suporte Físico</label>
-           <select class="form-select"  id="lst_tip_suporte" name="lst_tip_suporte">
+           <label class="form-label required" for="lst_tip_suporte">Suporte Físico</label>
+           <select class="form-select" id="lst_tip_suporte" name="lst_tip_suporte">
              <option value="0">Selecione</option>
              <dtml-in expr="zsql.arquivo_tipo_suporte_obter_zsql(ind_excluido=0)">
              <option 
@@ -129,10 +129,6 @@
   <input type="hidden" name="hdn_cod_norma" value="<dtml-var cod_norma_sel missing>"/>
   <input type="hidden" name="modal" value="1"/>    
 </form>
-
-<script>
-autosize(document.querySelectorAll('textarea'));
-</script>
 
 <dtml-var js_slot>
 <dtml-var footer_html>

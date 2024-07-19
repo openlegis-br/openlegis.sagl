@@ -4,7 +4,7 @@
 
   function submeter(tip_documento, campo, form) {
     if (campo.value == "") {
-      alert("O campo não pode ficar vazio!");
+      alert("O tipo de documento acessório precisa ser informado!");
       campo.focus();
       return;
     }
@@ -47,8 +47,10 @@
            <td><input class="form-control" type="text" name="txt_des_tipo_documento_<dtml-var tip_documento>" 
            value="<dtml-var des_tipo_documento>" size="40" maxlength="50" /></td>
            <td>
+               <div class="btn-group">
                 <a class="btn btn-primary mb-1" href="javascript:submeter(<dtml-var tip_documento>,document.tipo_documento_form.txt_des_tipo_documento_<dtml-var tip_documento>,document.tipo_documento_form)">Atualizar</a> 
                 <a class="btn btn-danger mb-1" href="javascript:excluir(<dtml-var tip_documento>)">Excluir</a>
+               </div>
            </td>
         </tr>
     <dtml-if sequence-end>
@@ -61,12 +63,10 @@
  <legend class="font-size-16">Formulário de Inclusão</legend>
  <div class="row">
    <div class="col-12 mb-3">
-      <label class="form-label" for="txt_des_tipo_documento" class="required">Tipo de Documento Acessório</label>
+      <label class="form-label required" for="txt_des_tipo_documento">Tipo de Documento Acessório</label>
       <div class="input-group">                   
         <input class="form-control" type="text" id="txt_des_tipo_documento" name="txt_des_tipo_documento" maxlength="50" />
-        <div class="input-group-append">
           <input class="btn btn-primary" type="button" name="btn_tipo_documento_incluir" value="Incluir" onClick="submeter(0, document.tipo_documento_form.txt_des_tipo_documento, document.tipo_documento_form)" />         
-        </div>
       </div>
    </div>
  </div>

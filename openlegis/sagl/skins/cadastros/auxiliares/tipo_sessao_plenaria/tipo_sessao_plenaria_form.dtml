@@ -35,9 +35,9 @@ function tipo_sessao_plenaria_excluir() {
       <div class="col-12 col-md-8 align-self-center">
         <h1 class="firstHeading font-size-18">Tipo de <dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao"> Plenária</h1>
       </div>
-      <div class="col-12 col-md-4 text-start text-end">
+      <div class="col-12 col-md-4 text-start text-md-end">
          <div class="btn-group d-print-none ">
-           <a class="btn btn-light" href="index_html"><i class="fa fa-fw fa-undo"></i> Voltar</a>         
+           <a class="btn btn-sn btn-light" href="index_html"><i class="fa fa-fw fa-undo"></i> Voltar</a>         
          </div>
       </div>
  </div>
@@ -48,20 +48,22 @@ function tipo_sessao_plenaria_excluir() {
   <input type="hidden" name="hdn_tip_sessao" value="<dtml-var tip_sessao missing>" />
 
   <div class="row">
-     <div class="col-8 col-sm-6 mb-3">
-        <label class="form-label" for="txt_nom_sessao" class="required">Descrição</label>
+     <div class="col-6 col-md-8 mb-3">
+        <label class="form-label required" for="txt_nom_sessao">Descrição</label>
         <input class="form-control" type="text" id="txt_nom_sessao" name="txt_nom_sessao" value="<dtml-var nom_sessao missing>" maxlength="50" />
      </div>
-     <div class="col-4 col-sm-2 mb-3">
-        <label class="form-label" for="txt_num_minimo" class="required">Quórum de Abertura</label>
+     <div class="col-6 col-md-4 mb-3">
+        <label class="form-label required" for="txt_num_minimo">Quórum de Abertura</label>
         <input class="form-control" type="text" id="txt_num_minimo" name="txt_num_minimo" value="<dtml-var num_minimo missing>" maxlength="3" />
      </div>     
   </div>
 
+ <div class="btn-group">
   <input class="btn btn-primary" type="button" name="btn_tipo_sessao_plenaria_salvar" value="Salvar" onClick="campos_criticar(document.tipo_sessao_plenaria_form)" />
   <dtml-if tip_sessao>
     <input class="btn btn-danger" type="button" name="btn_tipo_sessao_plenaria_excluir" value="Excluir" onClick="tipo_sessao_plenaria_excluir(document.tipo_sessao_plenaria_form)" />
   </dtml-if>
+ </div>
 
    <div class="row">
       <div class="col-md-12 mt-2">

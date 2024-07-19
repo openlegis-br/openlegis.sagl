@@ -6,12 +6,12 @@
 
  <dtml-if sequence-start> 
 
- <h1 class="firstHeading font-size-18">Validação Digital</h1>
+ <h1 class="firstHeading font-size-18">Validação de Documento Digital</h1>
  
  <p><b>Código de Validação:</b> <dtml-var txt_codigo_verificacao></p>
 
      <table class="table table-bordered">
-      <thead>
+      <thead class="table-light">
         <tr>
            <th>Documento Assinado</th>
         </tr>
@@ -29,7 +29,7 @@
                </dtml-if>
            </td>
         </tr>
-      <thead>        
+      <thead class="table-light">        
         <tr>
            <th>Versão para Impressão</th>
         </tr>
@@ -83,7 +83,7 @@
      </table>
 
     <table class="table table-bordered">
-     <thead>
+     <thead class="table-light">
       <tr>
           <th width="50%">Signatário</th>
           <th width="30%">CPF</th>
@@ -106,15 +106,13 @@
   <h1 class="firstHeading font-size-18">Validação Digital</h1> 
     <div class="alert alert-danger alert-dismissible fade show" role="alert">
         <h5>O código de validação <b><dtml-var txt_codigo_verificacao></b> não localizado!</h5>
-        <button type="button" class="close" data-bs-dismiss="alert" aria-label="Fechar">
-          <span aria-hidden="true">&times;</span>
-        </button>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
 </dtml-in>
 
-<div>
-  <button class="btn btn-primary d-print-none" onClick="history.back()"><i class="fas fa-undo"></i> Nova Validação</button>
-  <button class="btn btn-secondary d-print-none" onClick="window.print();return false;"><i class="fas fa-print"></i> Imprimir</button>
+<div class="btn-group">
+  <button class="btn btn-primary d-print-none" onClick="history.back()">Nova Validação</button>
+  <button class="btn btn-secondary d-print-none" onClick="window.print();return false;">Impresssão</button>
 </div>
 
 <dtml-var js_slot>

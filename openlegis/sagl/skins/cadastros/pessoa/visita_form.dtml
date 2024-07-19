@@ -5,7 +5,7 @@
   function campos_criticar(form){
 
      if (form.lst_funcionario.selectedIndex==''){
-         alert("O Funcionário deve ser selecionado!");
+         alert("O campo funcionário / setor deve ser selecionado!");
          form.lst_funcionario.focus();
          return false;
       }
@@ -45,7 +45,7 @@
 
     <div class="row">
        <div class="col-8 mb-3">
-             <label class="form-label" for="lst_funcionario" class="required">Funcionário</label>
+             <label class="form-label required" for="lst_funcionario">Funcionário / Setor</label>
              <select class="form-select" id="lst_funcionario" name="lst_funcionario" <dtml-if dat_saida>disabled</dtml-if> required>
                 <option value=""></option>
                 <dtml-in expr="zsql.funcionario_obter_zsql(ind_excluido=0,ind_ativo=1)">
@@ -62,7 +62,7 @@
              </select>
        </div>
        <div class="col-4">
-            <label class="form-label" for="txt_num_cracha" class="required">Crachá</label>
+            <label class="form-label required" for="txt_num_cracha">Crachá</label>
             <input class="form-control" type="text" id="txt_num_cracha" name="txt_num_cracha" size="18" maxlength="3" value="<dtml-var num_cracha missing>" <dtml-if dat_saida>readonly</dtml-if> />
        </div>       
     </div>

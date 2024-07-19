@@ -4,11 +4,11 @@
       <div class="col-12 col-md-8 align-self-center">
         <h1 class="firstHeading font-size-18">Pesquisa de Visitantes</h1>
       </div>
-      <div class="col-12 col-md-4 text-start text-end">
+      <div class="col-12 col-md-4 text-start text-sm-end">
        <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Recepção'])">
-         <div class="btn-group d-print-none">     
-           <a class="btn btn-primary btn-sm" href="<dtml-var portal_url>/cadastros/pessoa" ><i class="fa fa-fw fa-search"></i> Nova Pesquisa</a>
-           <a class="btn btn-primary btn-sm" href="<dtml-var portal_url>/cadastros/pessoa/pessoa_form" ><i class="fa fa-fw fa-plus"></i> Incluir Visitante</a>           
+         <div class="btn-group btn-sm d-print-none">     
+           <a class="btn btn-primary btn-sm" href="<dtml-var portal_url>/cadastros/pessoa" ><i class="fa fa-fw fa-search"></i> Pesquisa</a>
+           <a class="btn btn-secondary btn-sm" href="<dtml-var portal_url>/cadastros/pessoa/pessoa_form">Incluir Visitante</a>           
          </div>
        </dtml-if>
       </div>
@@ -46,15 +46,15 @@
      </dtml-if>
   </dtml-if sequence-start>
          <tr <dtml-if sequence-odd>class="even"</dtml-if>>
-           <td width="15%">
+           <td width="12%">
                <dtml-call expr="REQUEST.set('id_foto', str(cod_pessoa)+'_foto_pessoa.jpg')">
                <dtml-if expr="hasattr(sapl_documentos.pessoa,id_foto)">
-                  <img class="img-fluid" src="<dtml-var portal_url>/sapl_documentos/pessoa/<dtml-var id_foto>?<dtml-var expr="ZopeTime().timeTime()">">
+                  <img style="max-width: 140px" class="image-fluid img-thumbnail" src="<dtml-var portal_url>/sapl_documentos/pessoa/<dtml-var id_foto>?<dtml-var expr="ZopeTime().timeTime()">">
                <dtml-else>
-                  <img class="image-fluid" alt="<dtml-var nom_pessoa>" src="<dtml-var portal_url>/imagens/avatar.png">
+                  <img style="max-width: 140px" class="image-fluid img-thumbnail" alt="<dtml-var nom_pessoa>" src="<dtml-var portal_url>/imagens/avatar.png">
                </dtml-if>
            </td>            
-           <td width="85%">
+           <td width="88%">
              <a href="<dtml-var portal_url>/cadastros/pessoa/pessoa_mostrar_proc?cod_pessoa=<dtml-var cod_pessoa>">
                 <b><dtml-var nom_pessoa></b> 
              </a>

@@ -109,12 +109,12 @@
       <div class="col-12 col-md-6 align-self-center">
         <h1 class="firstHeading font-size-18">Cadastro de Entidade</h1>
       </div>
-      <div class="col-12 col-md-6 text-start text-end">
+      <div class="col-12 col-md-6 text-start text-md-end">
          <div class="btn-group d-print-none ">
-           <a class="btn btn-primary btn-sm" href="<dtml-var portal_url>/consultas/instituicao" ><i class="fa fa-fw fa-search"></i> Nova Pesquisa</a>
+           <a class="btn btn-primary btn-sm" href="<dtml-var portal_url>/consultas/instituicao" ><i class="fa fa-fw fa-search"></i> Pesquisa</a>
            <dtml-if cod_entidade>          
              <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Entidade', 'Operador Modulo Administrativo'])">
-               <a class="btn btn-primary btn-sm d-print-none" href="<dtml-var portal_url>/cadastros/instituicao/instituicao_form""><i class="fa fa-fw fa-plus"></i> Incluir Entidade</a>
+               <a class="btn btn-secondary btn-sm d-print-none" href="<dtml-var portal_url>/cadastros/instituicao/instituicao_form"">Incluir Entidade</a>
              </dtml-if>
            </dtml-if>         
          </div>
@@ -129,11 +129,11 @@
 
  <div class="row">
   <div class="col-12 col-md-6 mb-3">
-     <label class="form-label" for="txa_txt_nom_instituicao" class="required">Nome da Entidade</label>
+     <label class="form-label required" for="txa_txt_nom_instituicao">Nome da Entidade</label>
      <input class="form-control" type="text" id="txa_txt_nom_instituicao" name="txa_txt_nom_instituicao" maxlength="200" value="<dtml-var nom_instituicao missing>" required/>  
   </div>
   <div class="col-6 col-md-3 mb-3">
-              <label class="form-label" for="lst_tip_instituicao" class="required">Tipo</label>
+              <label class="form-label required" for="lst_tip_instituicao">Tipo</label>
               <select class="form-select"  id="lst_tip_instituicao" name="lst_tip_instituicao" <dtml-unless cod_instituicao>onChange="categoria_listar(document.instituicao_form)"</dtml-unless> <dtml-if cod_instituicao>onfocus="this.initialSelect = this.selectedIndex;" onchange="this.selectedIndex = this.initialSelect;"</dtml-if> required>
                 <option value="0">Selecione</option>
                 <dtml-if cod_instituicao>
@@ -179,32 +179,29 @@
 
  <div class="row">
   <div class="col-12 col-md-5 mb-3">
-     <label class="form-label" for="txt_end_instituicao" class="required">Endereço</label>
+     <label class="form-label required" for="txt_end_instituicao">Endereço</label>
      <input class="form-control" type="text" id="txt_end_instituicao" name="txt_end_instituicao" maxlength="80" value="<dtml-var end_instituicao missing null="">" required/>
   </div>
   <div class="col-6 col-md-5 mb-3">
-     <label class="form-label" for="txt_nom_bairro" class="required">Bairro</label>
+     <label class="form-label required" for="txt_nom_bairro">Bairro</label>
      <input class="form-control" type="text" id="txt_nom_bairro" name="txt_nom_bairro" maxlength="80" value="<dtml-var nom_bairro missing null="">" required />
   </div>
   <div class="col-6 col-md-2 mb-3">
-     <label class="form-label" for="txt_num_cep" class="required">CEP</label>
+     <label class="form-label required" for="txt_num_cep>CEP</label>
      <input class="form-control" type="text" id="txt_num_cep" name="txt_num_cep" maxlength="15" value="<dtml-var num_cep missing null="">" required />
   </div>
  </div>
 
  <div class="row">
   <div class="col-8 mb-3">
-     <label class="form-label" for="txt_municipio" class="required">Município</label>
+     <label class="form-label required" for="txt_municipio">Município</label>
      <div class="input-group">
        <input class="form-control" type="text" id="txt_municipio" name="txt_municipio" value="<dtml-if cod_localidade><dtml-in expr="zsql.localidade_obter_zsql(cod_localidade=cod_localidade)"><dtml-var nom_localidade missing null=""></dtml-in></dtml-if>" maxlength="50" required />
-       <div class="input-group-append">
-
-         <input class="btn btn-primary" type="button" value="Buscar" onClick="localidade_mostrar(document.instituicao_form)" />  
-       </div>
+         <input class="btn btn-light" type="button" value="Buscar" onClick="localidade_mostrar(document.instituicao_form)" />  
      </div>
   </div> 
   <div class="col-4 mb-3">
-     <label class="form-label" for="lst_sgl_uf" class="required">Estado</label>
+     <label class="form-label required" for="lst_sgl_uf">Estado</label>
               <select class="form-select" id="lst_sgl_uf" name="lst_sgl_uf">
                 <option>Selecione</option>
                 <dtml-if cod_instituicao>
@@ -287,7 +284,7 @@
   </div>
 </dtml-if>
       
- <div class="text-start">
+ <div class="btn-group text-start">
    <input class="btn btn-primary" type="button" name="button" value="Salvar" onClick="campos_criticar()" />
    <dtml-if cod_instituicao>
      <input class="btn btn-danger" type="button" name="btn_excluir" value="Excluir" onClick="instituicao_excluir()" />

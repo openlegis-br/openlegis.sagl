@@ -28,9 +28,9 @@ function quorum_votacao_excluir() {
       <div class="col-12 col-md-8 align-self-center">
         <h1 class="firstHeading font-size-18">Quórum de Votação</h1>
       </div>
-      <div class="col-12 col-md-4 text-start text-end">
+      <div class="col-12 col-md-4 text-start text-md-end">
          <div class="btn-group d-print-none ">
-           <a class="btn btn-light" href="index_html"><i class="fa fa-fw fa-undo"></i> Voltar</a>         
+           <a class="btn btn-sm btn-light" href="index_html"><i class="fa fa-fw fa-undo"></i> Voltar</a>         
          </div>
       </div>
  </div>
@@ -42,19 +42,21 @@ function quorum_votacao_excluir() {
   
   <div class="row">
     <div class="col-12 col-sm-6 mb-3">
-      <label class="form-label" for="txt_des_quorum" class="required">Descrição</label>             
+      <label class="form-label required" for="txt_des_quorum">Descrição</label>             
       <input class="form-control" type="text" id="txt_des_quorum" name="txt_des_quorum" value="<dtml-var des_quorum missing>" maxlength="50" />
     </div>
     <div class="col-12 col-sm-6 mb-3">
-      <label class="form-label" for="txa_txt_formula" class="required">Fórmula</label>                 
+      <label class="form-label required" for="txa_txt_formula">Fórmula</label>                 
       <input class="form-control" type="text" id="txa_txt_formula" name="txa_txt_formula" value="<dtml-var txt_formula missing null>" maxlength="30" />
     </div>    
   </div>
 
+ <div class="btn-group">
   <input class="btn btn-primary" type="button" name="btn_quorum_votacao_salvar" value="Salvar" onClick="campos_criticar(document.quorum_votacao_form)" />
   <dtml-if cod_quorum>
     <input class="btn btn-danger" type="button" name="btn_quorum_votacao_excluir" value="Excluir" onClick="quorum_votacao_excluir(document.quorum_votacao_form)" />
   </dtml-if>
+ </div>
 
    <div class="row">
       <div class="col-md-12 mt-2">

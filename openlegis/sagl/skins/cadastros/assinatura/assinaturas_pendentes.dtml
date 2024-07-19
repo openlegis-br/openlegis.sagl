@@ -207,18 +207,14 @@
               <button type="button" class="btn btn-white text-primary" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Assinar Digitalmente" data-src="<dtml-var portal_url>/generico/assinador/pades-signature_html?codigo=<dtml-var codigo>&anexo=<dtml-var anexo missing null>&tipo_doc=<dtml-var tipo_doc>&modal=1"><i class="fas fa-file-signature"></i> Assinar</button>
               <a class="btn btn-white text-primary" href="<dtml-var portal_url>/cadastros/assinatura/assinatura_postergar_proc?cod_usuario=<dtml-var cod_usuario_corrente missing>&codigo=<dtml-var codigo missing>&anexo=<dtml-var anexo missing null>&tipo_doc=<dtml-var tipo_doc missing>" data-confirm="Postergar a assinatura?"><i class="fa fa-hourglass-end"></i> Postergar</a>
              <!-- Modal -->
-             <button type="button" class="btn btn-white text-primary text-danger d-print-none" data-bs-toggle="modal" data-target="#recusaModal<dtml-var formatted_code>">
-                <i class="fas fa-window-close"></i> Recusar
-             </button>
+             <button type="button" class="btn btn-white text-primary text-danger d-print-none" data-bs-toggle="modal" data-bs-target="#recusaModal<dtml-var formatted_code>"><i class="fas fa-window-close"></i> Recusar</button>
             </div>
              <div class="modal fade" id="recusaModal<dtml-var formatted_code>" tabindex="-1" aria-labelledby="recusaModalLabel" aria-hidden="true">
               <div class="modal-dialog">
                 <div class="modal-content">
                   <div class="modal-header">
                     <h5 class="modal-title" id="ModalLabel">Recusa de Assinatura</h5>
-                    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
-                      <span aria-hidden="true">&times;</span>
-                    </button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                   </div>
                   <div class="modal-body">
                    <form id="myform" role="form" method="post" action="assinatura_recusar_proc" onSubmit="return confirm('Confirma a recusa da assinatura?');" class="was-validated">
@@ -234,7 +230,7 @@
                      </div>
                      <div class="row">
                        <div class="col-12 mb-2">
-                        <button class="btn btn-white text-primary" method="post" action="assinatura_recusar_proc">Recusar Assinatura</button>
+                        <button class="btn btn-danger" method="post" action="assinatura_recusar_proc">Recusar Assinatura</button>
                        </div>
                      </div>
                      <div class="row">

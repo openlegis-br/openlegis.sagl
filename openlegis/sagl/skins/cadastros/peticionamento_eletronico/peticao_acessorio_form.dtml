@@ -169,7 +169,7 @@
                <dtml-let documento="getattr(sapl_documentos.peticao,id_documento).absolute_url">
                   <dtml-call expr="REQUEST.set('nome_arquivo',str(cod_peticao)+'.odt')">
                     <button type="button" class="btn btn-light" onclick="javascript:location.href='&dtml-URL1;/sapl_documentos/peticao/externalEdit_/<dtml-var nome_arquivo>.zem'" data-bs-toggle="tooltip" data-placement="bottom" title="Editar no LibreOffice"><i class="fas fa-fw fa-external-link-alt"></i>LibreOffice</button>
-                    <a class="btn btn-danger" href="<dtml-var portal_url>/cadastros/peticionamento_eletronico/texto_peticao_excluir_proc?modal=1&cod_peticao=<dtml-var cod_peticao missing>" data-confirm="Deseja realmente excluir o arquivo ODT?"><i class="fas fa-trash"></i> Excluir</a>                    
+                    <a class="btn btn-danger" href="<dtml-var portal_url>/cadastros/peticionamento_eletronico/texto_peticao_excluir_proc?modal=1&cod_peticao=<dtml-var cod_peticao missing>" data-confirm="Deseja realmente excluir o arquivo ODT?"><i class="far fa-trash-alt"></i> Excluir</a>                    
                </dtml-let>
              </div>
              <dtml-else>
@@ -200,7 +200,7 @@
           </a>
          </dtml-let>
          <button type="button" class="btn btn-light" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Assinaturas Digitais" data-src="<dtml-var portal_url>/cadastros/assinatura/assinatura_solicitar_form?codigo=<dtml-var cod_peticao missing>&tipo_doc=peticao&modal=1"><i class="fas fa-file-signature"></i> Assinaturas</button>
-         <a class="btn btn-danger" href="<dtml-var portal_url>/cadastros/peticionamento_eletronico/texto_pdf_excluir_proc?cod_peticao=<dtml-var cod_peticao>&modal=1" data-confirm="Deseja realmente excluir o texto PDF?"><i class="fas fa-trash"></i> Excluir</a>
+         <a class="btn btn-danger" href="<dtml-var portal_url>/cadastros/peticionamento_eletronico/texto_pdf_excluir_proc?cod_peticao=<dtml-var cod_peticao>&modal=1" data-confirm="Deseja realmente excluir o texto PDF?"><i class="far fa-trash-alt"></i> Excluir</a>
         </div>
        <dtml-elif expr="hasattr(sapl_documentos.peticao,id_documento)">
         <div class="btn-group">
@@ -213,7 +213,7 @@
          <dtml-if "sapl_documentos.props_sagl.restpki_access_token!=''">
             <button type="button" class="btn btn-light d-print-none " data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Assinatura Digital" data-src="<dtml-var portal_url>/generico/assinador/pades-signature_html?codigo=<dtml-var cod_peticao>&tipo_doc=peticao&modal=1"><i class="fas fa-file-signature"></i> Assinar</button>              
          </dtml-if>
-         <a class="btn btn-danger" href="<dtml-var portal_url>/cadastros/peticionamento_eletronico/texto_pdf_excluir_proc?cod_peticao=<dtml-var cod_peticao>&modal=1" data-confirm="Deseja realmente excluir o texto PDF?"><i class="fas fa-trash"></i> Excluir</a>
+         <a class="btn btn-danger" href="<dtml-var portal_url>/cadastros/peticionamento_eletronico/texto_pdf_excluir_proc?cod_peticao=<dtml-var cod_peticao>&modal=1" data-confirm="Deseja realmente excluir o texto PDF?"><i class="far fa-trash-alt"></i> Excluir</a>
         </div>
        <dtml-else>
           <div class="input-group">

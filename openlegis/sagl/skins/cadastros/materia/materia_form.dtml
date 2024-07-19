@@ -1,19 +1,19 @@
 <dtml-var header_html>
 
 <div class="row mb-2">
-  <div class="col-12 col-lg-6 d-flex align-items-center">
+  <div class="col-12 col-lg-6">
     <dtml-if expr="_.has_key('cod_materia')">
       <h1 class="firstHeading font-size-18"><dtml-var des_tipo_materia> nº <dtml-var num_ident_basica>/<dtml-var ano_ident_basica></h1>
     <dtml-else>
       <h1 class="firstHeading font-size-18">Cadastro de Matéria</h1> 
     </dtml-if>
   </div>
-  <div class="col-12 col-lg-6 d-flex justify-content-startend justify-content-lg-end">
+  <div class="col-12 col-lg-6 d-flex justify-content-start justify-content-lg-end">
      <div class="btn-group" role="group">
      <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia'])">         
         <a class="btn btn-primary" href="<dtml-var portal_url>/cadastros/materia/materia_form_resumido" ><i class="fa fa-fw fa-plus"></i> Incluir Matéria</a>
      </dtml-if>       
-      <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+      <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
         <i class="fas fa-fw fa-file-export"></i> Gerar <i class="mdi mdi-chevron-down ms-1"></i>
       </button>
       <div class="dropdown-menu">
@@ -43,8 +43,15 @@
     </a>
   </li>
   <li class="nav-item">
-    <a class="nav-link <dtml-unless cod_materia>disabled</dtml-unless>" id="autoria-tab" data-bs-toggle="tab" href="#autoria" role="tab" aria-controls="autoria" aria-selected="false">
-      Autoria
+    <a class="nav-link <dtml-unless cod_materia>disabled</dtml-unless>" id="autoria-tab" data-bs-toggle="tab" href="#autoria" role="tab" aria-controls="autoria" aria-selected="false">Autoria
+       <dtml-if cod_materia>
+         <dtml-in expr="zsql.autoria_obter_zsql(cod_materia=cod_materia, ind_excluido=0)">
+           <dtml-if sequence-start>
+             [<dtml-var sequence-length>]
+           </dtml-if sequence-start>
+         </dtml-in>
+       </dtml-if>
+
     </a>
   </li>
   <li class="nav-item">
@@ -75,7 +82,15 @@
     <a class="nav-link <dtml-unless cod_materia>disabled</dtml-unless>" id="numeracao-tab" data-bs-toggle="tab" href="#numeracao" role="tab" aria-controls="numeracao" aria-selected="false">Numeração</a>
   </li>
   <li class="nav-item">
-    <a class="nav-link <dtml-unless cod_materia>disabled</dtml-unless>" id="parecer-tab" data-bs-toggle="tab" href="#parecer" role="tab" aria-controls="parecer" aria-selected="false">Pareceres</a>
+    <a class="nav-link <dtml-unless cod_materia>disabled</dtml-unless>" id="parecer-tab" data-bs-toggle="tab" href="#parecer" role="tab" aria-controls="parecer" aria-selected="false">Pareceres
+       <dtml-if cod_materia>
+         <dtml-in expr="zsql.despacho_inicial_obter_zsql(cod_materia=cod_materia, ind_excluido=0)">
+           <dtml-if sequence-start>
+             [<dtml-var sequence-length>]
+           </dtml-if sequence-start>
+         </dtml-in>
+       </dtml-if>
+    </a>
   </li>
   <li class="nav-item">
     <a class="nav-link <dtml-unless cod_materia>disabled</dtml-unless>" id="substitutivo-tab" data-bs-toggle="tab" href="#substitutivo" role="tab" aria-controls="substitutivo" aria-selected="false">
@@ -92,6 +107,13 @@
   <li class="nav-item">
     <a class="nav-link <dtml-unless cod_materia>disabled</dtml-unless>" id="tramitacao-tab" data-bs-toggle="tab" href="#tramitacao" role="tab" aria-controls="tramitacao" aria-selected="false">
       Tramitações
+       <dtml-if cod_materia>
+         <dtml-in expr="zsql.tramitacao_obter_zsql(cod_materia=cod_materia, ind_excluido=0)">
+           <dtml-if sequence-start>
+            [<dtml-var sequence-length>]
+           </dtml-if sequence-start>
+         </dtml-in>
+       </dtml-if>
     </a>
   </li>
   <li class="nav-item">
@@ -328,7 +350,7 @@
                    <a class="btn btn-primary" href="<dtml-var portal_url>/generico/viewerJS/#<dtml-var documento_odt>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fa fa-fw fa-file-alt"></i>Visualizar</a>
                    <a class="btn btn-primary" href="<dtml-var portal_url>/webeditor/editorMateria?<dtml-var documento_odt>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fa fa-fw fa-edit"></i>Editar</a>
                    <button type="button" class="btn btn-primary" onclick="javascript:location.href='&dtml-URL1;/sapl_documentos/materia_odt/externalEdit_/<dtml-var nome_arquivo_odt>.zem'" data-bs-toggle="tooltip" data-placement="bottom" title="Editar no LibreOffice"><i class="fas fa-fw fa-external-link-alt"></i>LibreOffice</button>
-                   <a class="btn btn-danger" href="<dtml-var portal_url>/cadastros/materia/texto_odt_materia_excluir_proc?cod_materia=<dtml-var cod_materia missing>" data-confirm="Deseja realmente excluir o arquivo ODT da matéria?"><i class="fas fa-trash"></i> Excluir</a>
+                   <a class="btn btn-danger" href="<dtml-var portal_url>/cadastros/materia/texto_odt_materia_excluir_proc?cod_materia=<dtml-var cod_materia missing>" data-confirm="Deseja realmente excluir o arquivo ODT da matéria?"><i class="far fa-trash-alt"></i> Excluir</a>
                 </dtml-let>
                </div>
              <dtml-else>
@@ -367,7 +389,7 @@
                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Assinaturas Digitais" data-src="<dtml-var portal_url>/cadastros/assinatura/assinatura_solicitar_form?codigo=<dtml-var cod_materia>&tipo_doc=materia&modal=1"><i class="fas fa-file-signature"></i>Assinaturas</button>
                  </dtml-if>
                 </dtml-if>                 
-                <a class="btn btn-danger" href="<dtml-var portal_url>/cadastros/materia/texto_materia_excluir_proc?cod_materia=<dtml-var cod_materia missing>" data-confirm="Deseja realmente excluir o arquivo PDF do Texto Original?"><i class="fas fa-trash"></i> Excluir</a>           
+                <a class="btn btn-danger" href="<dtml-var portal_url>/cadastros/materia/texto_materia_excluir_proc?cod_materia=<dtml-var cod_materia missing>" data-confirm="Deseja realmente excluir o arquivo PDF do Texto Original?"><i class="far fa-trash-alt"></i> Excluir</a>           
              </dtml-let>
             </div>
           <dtml-elif "hasattr(sapl_documentos.materia,id_documento_assinado)">
@@ -376,7 +398,7 @@
                 <a class="btn btn-primary" target="_blank" href="<dtml-var documento>?<dtml-var expr="ZopeTime().timeTime()">">
                    <i class="fas fas-fw fa-certificate"></i>PDF Assinado
                 </a>
-                <a class="btn btn-danger" href="<dtml-var portal_url>/cadastros/materia/texto_materia_excluir_proc?cod_materia=<dtml-var cod_materia missing>" data-confirm="Deseja realmente excluir o arquivo PDF da matéria?"><i class="fas fa-trash"></i> Excluir</a>
+                <a class="btn btn-danger" href="<dtml-var portal_url>/cadastros/materia/texto_materia_excluir_proc?cod_materia=<dtml-var cod_materia missing>" data-confirm="Deseja realmente excluir o arquivo PDF da matéria?"><i class="far fa-trash-alt"></i> Excluir</a>
              </dtml-let>
            </div>
           <dtml-else>
@@ -423,7 +445,7 @@
                    <a class="btn btn-primary" href="<dtml-var portal_url>/generico/viewerJS/#<dtml-var documento_odt>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fa fa-fw fa-file-alt"></i>Visualizar</a>
                    <a class="btn btn-primary" href="<dtml-var portal_url>/webeditor/editorMateria?<dtml-var documento_odt>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fa fa-fw fa-edit"></i>Editar</a>
                    <button type="button" class="btn btn-primary" onclick="javascript:location.href='&dtml-URL1;/sapl_documentos/materia_odt/externalEdit_/<dtml-var nome_arquivo_odt>.zem'" data-bs-toggle="tooltip" data-placement="bottom" title="Editar no LibreOffice"><i class="fas fa-fw fa-external-link-alt"></i>LibreOffice</button>
-                   <a class="btn btn-danger" href="<dtml-var portal_url>/cadastros/materia/redacao_final_odt_excluir_proc?cod_materia=<dtml-var cod_materia missing>" data-confirm="Deseja realmente excluir o arquivo ODT da Redação Final?"><i class="fas fa-trash"></i> Excluir</a>
+                   <a class="btn btn-danger" href="<dtml-var portal_url>/cadastros/materia/redacao_final_odt_excluir_proc?cod_materia=<dtml-var cod_materia missing>" data-confirm="Deseja realmente excluir o arquivo ODT da Redação Final?"><i class="far fa-trash-alt"></i> Excluir</a>
                 </dtml-let>
                </div>
              <dtml-else>
@@ -455,7 +477,7 @@
              <dtml-if "sapl_documentos.props_sagl.restpki_access_token!=''">
                 <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Assinaturas Digitais" data-src="<dtml-var portal_url>/cadastros/assinatura/assinatura_solicitar_form?codigo=<dtml-var cod_materia>&tipo_doc=redacao_final&modal=1"><i class="fas fa-file-signature"></i>Assinaturas</button>
               </dtml-if>
-                 <a class="btn btn-danger" href="<dtml-var portal_url>/cadastros/materia/redacao_final_excluir_proc?cod_materia=<dtml-var cod_materia missing>" data-confirm="Deseja realmente excluir o arquivo PDF da Redação Final?"><i class="fas fa-trash"></i> Excluir</a>
+                 <a class="btn btn-danger" href="<dtml-var portal_url>/cadastros/materia/redacao_final_excluir_proc?cod_materia=<dtml-var cod_materia missing>" data-confirm="Deseja realmente excluir o arquivo PDF da Redação Final?"><i class="far fa-trash-alt"></i> Excluir</a>
             </div>
           <dtml-elif "hasattr(sapl_documentos.materia,id_documento_assinado)">
              <div class="btn-group btn-group-sm">
@@ -465,7 +487,7 @@
                    </a>
                 </dtml-let>
                 <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Solicitar Assinatura" data-src="<dtml-var portal_url>/cadastros/assinatura/assinatura_solicitar_form?codigo=<dtml-var cod_materia>&tipo_doc=redacao_final&modal=1"><i class="fas fa-file-signature"></i>Assinaturas</button>
-                <a class="btn btn-danger" href="<dtml-var portal_url>/cadastros/materia/redacao_final_excluir_proc?cod_materia=<dtml-var cod_materia missing>" data-confirm="Deseja realmente excluir o arquivo PDF da Redação Final?"><i class="fas fa-trash"></i> Excluir</a>
+                <a class="btn btn-danger" href="<dtml-var portal_url>/cadastros/materia/redacao_final_excluir_proc?cod_materia=<dtml-var cod_materia missing>" data-confirm="Deseja realmente excluir o arquivo PDF da Redação Final?"><i class="far fa-trash-alt"></i> Excluir</a>
              </div>               
           <dtml-else>
              <div class="input-group">

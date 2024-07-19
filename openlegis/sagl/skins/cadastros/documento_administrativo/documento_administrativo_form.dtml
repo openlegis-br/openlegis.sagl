@@ -14,7 +14,7 @@
    <dtml-if expr="_.has_key('cod_documento')">
     <div class="btn-group">
       <a class="btn btn-primary d-print-none" href="<dtml-var portal_url>/cadastros/documento_administrativo/documento_administrativo_form" ><i class="fa fa-fw fa-plus"></i> Incluir Processo</a>    
-      <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+      <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
         <i class="fas fa-fw fa-file-export"></i> Gerar <i class="mdi mdi-chevron-down ms-1"></i>
       </button>
       <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
@@ -245,7 +245,7 @@
                  <a class="btn btn-primary" href="<dtml-var portal_url>/webeditor/editorDocumento?<dtml-var documento>" target="_blank"><i class="fa fa-fw fa-edit"></i>Editar</a>
   	         <dtml-call expr="REQUEST.set('nome_arquivo_odt',str(cod_documento)+'_texto_integral.odt')">
                  <button type="button" class="btn btn-primary" onclick="javascript:location.href='&dtml-URL1;/sapl_documentos/administrativo/externalEdit_/<dtml-var nome_arquivo_odt>.zem'" data-bs-toggle="tooltip" data-placement="bottom" title="Editar no LibreOffice"><i class="fas fa-fw fa-external-link-alt"></i>LibreOffice</button>
-                 <a class="btn btn-danger" href="<dtml-var portal_url>/cadastros/documento_administrativo/texto_documento_administrativo_excluir_odt_proc?cod_documento=<dtml-var cod_documento missing>" data-confirm="Deseja realmente excluir o arquivo ODT?"><i class="fas fa-trash"></i> Excluir</a>
+                 <a class="btn btn-danger" href="<dtml-var portal_url>/cadastros/documento_administrativo/texto_documento_administrativo_excluir_odt_proc?cod_documento=<dtml-var cod_documento missing>" data-confirm="Deseja realmente excluir o arquivo ODT?"><i class="far fa-trash-alt"></i> Excluir</a>
   	       </dtml-let>
   	      </div>
             <dtml-else>
@@ -288,7 +288,7 @@
              <dtml-if expr="sapl_documentos.props_sagl.restpki_access_token!=''">
                 <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Assinaturas Digitais" data-src="<dtml-var portal_url>/cadastros/assinatura/assinatura_solicitar_form?codigo=<dtml-var cod_documento>&tipo_doc=documento&modal=1"><i class="fas fa-file-signature"></i>Assinaturas</button>
              </dtml-if>
-             <a class="btn btn-danger" href="<dtml-var portal_url>/cadastros/documento_administrativo/texto_documento_administrativo_excluir_proc?cod_documento=<dtml-var cod_documento missing>" data-confirm="Deseja realmente excluir o arquivo PDF?"><i class="fas fa-trash"></i> Excluir</a>              
+             <a class="btn btn-danger" href="<dtml-var portal_url>/cadastros/documento_administrativo/texto_documento_administrativo_excluir_proc?cod_documento=<dtml-var cod_documento missing>" data-confirm="Deseja realmente excluir o arquivo PDF?"><i class="far fa-trash-alt"></i> Excluir</a>              
  	  </dtml-let>
  	 </div>
 	<dtml-else>

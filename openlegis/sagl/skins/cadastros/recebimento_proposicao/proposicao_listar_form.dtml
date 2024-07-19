@@ -14,7 +14,7 @@ function refreshPage() {
     <dtml-in expr="proposicoes_contar_pysc(caixa='revisao')" mapping>
        <dtml-if sequence-start>
          <div class="table-responsive">
-	  <table class="table table-striped display w-100" id="pendentes">
+	  <table class="table display w-100" id="pendentes">
               <thead class="table-light">
 	        <tr>  
 	          <th width="15%">Envio</th>
@@ -32,7 +32,7 @@ function refreshPage() {
             </dtml-if> 
             <td>
                <a href="<dtml-var portal_url>/cadastros/proposicao/proposicao_mostrar_proc?cod_proposicao=<dtml-var cod_proposicao>&ind_pendente=1">
-                   <b><dtml-var dat_envio></b>
+                   <dtml-var dat_envio>
                </a>
             </td>
             <td><dtml-var des_tipo_proposicao></td>
@@ -61,7 +61,7 @@ function refreshPage() {
     <dtml-in expr="proposicoes_contar_pysc(caixa='assinatura')" mapping>
        <dtml-if sequence-start>
          <div class="table-responsive">
-	  <table class="table table-striped display w-100" id="assinatura">
+	  <table class="table display w-100" id="assinatura">
               <thead class="table-light">
 	        <tr>  
 	          <th width="15%">Envio</th>
@@ -79,7 +79,7 @@ function refreshPage() {
             </dtml-if> 
             <td>
                <a href="<dtml-var portal_url>/cadastros/proposicao/proposicao_mostrar_proc?cod_proposicao=<dtml-var cod_proposicao>&ind_pendente=1">
-                   <b><dtml-var dat_envio></b>
+                   <dtml-var dat_envio>
                </a>
             </td>
             <td><dtml-var des_tipo_proposicao></td>
@@ -108,7 +108,7 @@ function refreshPage() {
     <dtml-in expr="proposicoes_contar_pysc(caixa='pedido_devolucao')" mapping>
        <dtml-if sequence-start>
             <div class="table-responsive">
-		    <table class="table table-striped display w-100" id="pedido_devolucao">
+		    <table class="table display w-100" id="pedido_devolucao">
                        <thead class="table-light">
 		        <tr>  
 		            <th width="15%">Data do Pedido</th>
@@ -126,7 +126,7 @@ function refreshPage() {
                </dtml-if> 
                <td>
                   <a href="<dtml-var portal_url>/cadastros/proposicao/proposicao_mostrar_proc?cod_proposicao=<dtml-var cod_proposicao>&ind_pendente=1">
-                      <b><dtml-var dat_solicitacao_devolucao></b>
+                      <dtml-var dat_solicitacao_devolucao>
                   </a>
                </td>
                <td><dtml-var des_tipo_proposicao></td>
@@ -155,7 +155,7 @@ function refreshPage() {
     <dtml-in expr="proposicoes_contar_pysc(caixa='protocolo')" mapping>
        <dtml-if sequence-start>
             <div class="table-responsive">
-		    <table class="table table-striped display w-100" id="pendentes">
+		    <table class="table display w-100" id="pendentes">
                        <thead class="table-light">
 		        <tr>  
 		            <th width="15%">Envio</th>
@@ -173,7 +173,7 @@ function refreshPage() {
                </dtml-if> 
                <td>
                   <a href="<dtml-var portal_url>/cadastros/proposicao/proposicao_mostrar_proc?cod_proposicao=<dtml-var cod_proposicao>&ind_pendente=1">
-                      <b><dtml-var dat_envio></b>
+                      <dtml-var dat_envio>
                   </a>
                </td>
                <td><dtml-var des_tipo_proposicao></td>
@@ -202,7 +202,7 @@ function refreshPage() {
         <dtml-in expr="proposicoes_contar_pysc(caixa='incorporado')" mapping>
         <dtml-if sequence-start>
             <div class="table-responsive">
-            <table id="incorporadas" class="table table-striped display w-100">
+            <table id="incorporadas" class="table display w-100">
               <thead class="table-light">
                 <tr>  
                     <th width="15%">Incorporação</th>
@@ -219,7 +219,7 @@ function refreshPage() {
                 <dtml-else>
                   <tr class="even">
                 </dtml-if>
-                    <td><a href="<dtml-var portal_url>/cadastros/proposicao/proposicao_mostrar_proc?cod_proposicao=<dtml-var cod_proposicao >"><b><dtml-var dat_recebimento></b></a></td>
+                    <td><a href="<dtml-var portal_url>/cadastros/proposicao/proposicao_mostrar_proc?cod_proposicao=<dtml-var cod_proposicao >"><dtml-var dat_recebimento></a></td>
                     <td><dtml-var des_tipo_proposicao></td>
                     <td><dtml-var txt_descricao> [NPE<dtml-var cod_proposicao missing>]</td>
                     <td><dtml-var nom_autor></td>
@@ -248,7 +248,7 @@ function refreshPage() {
                   <dtml-elif expr="cod_mat==None">
                           <td><i>Não incorporada</i></td>
                   <dtml-else>
-                          <td><b><dtml-var cod_mat missing></b>Falha na identificação da matéria!</td>
+                          <td><dtml-var cod_mat missing> Falha na identificação da matéria!</td>
                   </dtml-if>
                 </tr>
         <dtml-if sequence-end>
@@ -274,7 +274,7 @@ function refreshPage() {
         <dtml-in expr="proposicoes_contar_pysc(caixa='devolvido')" mapping>
         <dtml-if sequence-start>
             <div class="table-responsive">
-            <table id="devolvidas" class="table table-striped display w-100">
+            <table id="devolvidas" class="table display w-100">
               <thead class="table-light">
                 <tr>  
                    <th width="15%">Devolução</th>
@@ -290,7 +290,7 @@ function refreshPage() {
          <dtml-else>
             <tr class="even">
          </dtml-if>
-           <td><a href="<dtml-var portal_url>/cadastros/proposicao/proposicao_mostrar_proc?cod_proposicao=<dtml-var cod_proposicao >"><b><dtml-var dat_devolucao missing null=""></b></a></td>
+           <td><a href="<dtml-var portal_url>/cadastros/proposicao/proposicao_mostrar_proc?cod_proposicao=<dtml-var cod_proposicao >"><dtml-var dat_devolucao missing null=""></a></td>
             <td><dtml-var des_tipo_proposicao></td>
             <td><dtml-var txt_descricao> [NPE<dtml-var cod_proposicao missing>]</td>
             <td><dtml-var nom_autor></td>

@@ -5,7 +5,7 @@
       </div>
       <div class="col-12 col-md-6 text-start text-md-end">
        <div class="btn-group" role="group">      
-        <a class="btn btn-primary" href="<dtml-var portal_url>/consultas/documento_administrativo" ><i class="fa fa-fw fa-search"></i> Pesquisa</a>
+        <a class="btn btn-light" href="<dtml-var portal_url>/consultas/documento_administrativo" ><i class="fa fa-fw fa-search"></i> Pesquisa</a>
          <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Modulo Administrativo', 'Operador Materia'])"> 
         <a class="btn btn-primary d-print-none" href="<dtml-var portal_url>/cadastros/documento_administrativo/documento_administrativo_form" ><i class="fa fa-fw fa-plus"></i> Incluir Processo</a>
          <dtml-elif expr="AUTHENTICATED_USER.has_role(['Authenticated'])">
@@ -51,12 +51,12 @@
     <div class="card mb-3">
       <div class="card-header">
        <div class="row">
-      <div class="col-10 col-sm-9 align-self-center">
+      <div class="col-8 align-self-center">
          <i class="far fa-list-alt"></i> Resultado: <dtml-var sequence-length> processo<dtml-if expr="_['sequence-length'] > 1">s</dtml-if>
       </div>
-      <div class="col-4 col-sm-3 text-end align-self-center">
+      <div class="col-4 d-flex justify-content-end justify-content-md-end align-self-center">
          <div class="btn-group">
-           <button class="btn btn-light" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+           <button class="btn btn-sm btn-white" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
              <i class="fas fa-file-export"></i> Exportar
            </button>
            <div class="dropdown-menu dropdown-menu-right">
@@ -74,7 +74,7 @@
   </dtml-if sequence-start>
         <li class="list-group-item">
         <div class="row">
-          <div class="col-12">
+          <div class="col-12 col-md-10 d-flex align-self-start">
             <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Modulo Administrativo'])">
                <a href="<dtml-var portal_url>/cadastros/documento_administrativo/documento_administrativo_mostrar_proc?cod_documento=<dtml-var cod_documento>">
             <dtml-elif expr="AUTHENTICATED_USER.has_role(['Authenticated']) and zsql.usuario_tipo_documento_obter_zsql(tip_documento=tip_documento, cod_usuario=cod_usuario_corrente, ind_excluido=0)">
@@ -82,8 +82,11 @@
             <dtml-else>
                <a href="<dtml-var portal_url>/consultas/documento_administrativo/documento_administrativo_mostrar_proc?cod_documento=<dtml-var cod_documento>">
             </dtml-if>
-           <span class="h6 font-size-14 font-weight-bold text-uppercase mb-1"><dtml-var des_tipo_documento> nº <dtml-var num_documento>, de <dtml-var dat_documento></span></a> <dtml-if expr="ind_tramitacao == 1"><span class="badge badge-primary float-right">Em Tramitação</span></dtml-if>
-          </div>
+             <span class="h6 font-size-14 font-weight-bold text-uppercase mb-1"><dtml-var des_tipo_documento> nº <dtml-var num_documento>, de <dtml-var dat_documento></span></a>
+           </div>
+           <div class="col-12 col-md-2 d-flex align-self-center justify-content-start justify-content-md-end">
+             <dtml-if expr="ind_tramitacao == 1"><span class="badge bg-dark-success">Em tramitação</span></dtml-if>
+           </div>
         </div>
         <div class="row">
            <div class="col-12">
@@ -221,7 +224,7 @@
                        <a class="btn btn-primary" href="<dtml-var portal_url>/consultas/documento_administrativo/pasta_digital/?cod_documento=<dtml-var cod_documento>&action=pasta" target="_blank"><i class="far fa-folder-open"></i> Pasta Digital</a>
                      </dtml-if>
                     </dtml-let>
-                    <a class="btn btn-primary" href="<dtml-var portal_url>/pysc/download_documento_pysc?cod_documento=<dtml-var cod_documento>" target="_blank"><i class="fas fa-file-pdf"></i> Texto Integral</a>
+                    <a class="btn btn-secondary" href="<dtml-var portal_url>/pysc/download_documento_pysc?cod_documento=<dtml-var cod_documento>" target="_blank"><i class="fas fa-file-pdf"></i> Texto Integral</a>
                  </dtml-if>    
                 </div>
              </div>

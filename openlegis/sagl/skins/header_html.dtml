@@ -98,7 +98,7 @@
                            <p class="siteSubTitle text-white mb-0">Plataforma de Processos Digitais</p>
                         </div>
                       </a>
-                     <dtml-if expr="AUTHENTICATED_USER.has_role(['Authenticated'])">
+
                         <!-- Tools -->
                         <div class="d-none d-md-block ms-1">
                             <div class="dropdown">
@@ -110,7 +110,7 @@
                                 </button>
                                 <ul class="dropdown-menu dropdown-menu-right">
                                    <dtml-if expr="AUTHENTICATED_USER.has_role(['Autor', 'Assessor Parlamentar', 'Operador', 'Operador Materia','Revisor Proposicao','Chefia Revisão'])">
-                                     <li class="dropdown-header">Processos Legislativos</li>
+                                     <li class="dropdown-header">Processos Digitais</li>
                                        <dtml-if expr="AUTHENTICATED_USER.has_role(['Autor', 'Assessor Parlamentar'])">
                                          <li><a class="dropdown-item" href="<dtml-var portal_url>/cadastros/proposicao?ind_enviado=0">Proposições Digitais</a></li>
                                        </dtml-if>
@@ -118,29 +118,22 @@
                                          <li><a class="dropdown-item" href="<dtml-var portal_url>/cadastros/recebimento_proposicao">Recebimento de Proposições</a></li>
                                       </dtml-if>
                                      <dtml-if cod_usuario_corrente>
-                                         <li><a class="dropdown-item" href="<dtml-var portal_url>/cadastros/tramitacao_materia/tramitacao_lote_form">Tramitação Eletrônica</a></li>
+                                         <li><a class="dropdown-item" href="<dtml-var portal_url>/cadastros/peticionamento_eletronico">Peticionamento Digital</a></li>
+                                         <li><a class="dropdown-item" href="<dtml-var portal_url>/cadastros/tramitacao_materia/tramitacao_lote_form">Tramitação de Processos</a></li>
+                                         <li><a href="<dtml-var portal_url>/cadastros/assinatura/assinaturas_pendentes" class="dropdown-item">Assinaturas Pendentes</a></li>
                                      </dtml-if> 
                                      <li class="dropdown-divider"></li>
                                    </dtml-if>
-                                   <li class="dropdown-header">Processos Administrativos</li>
-                                   <li><a class="dropdown-item" href="<dtml-var portal_url>/cadastros/peticionamento_eletronico">Peticionamento Digital</a></li>
-                                   <dtml-if cod_usuario_corrente>
-                                      <li><a class="dropdown-item" href="<dtml-var portal_url>/cadastros/tramitacao_documento/tramitacao_lote_form">Tramitação Eletrônica</a></li>
-                                      <li><a class="dropdown-item" href="<dtml-var portal_url>/consultas/documento_administrativo/visualizar_processos">Ciência de Processos</a></li>
-                                   </dtml-if>
                                    <dtml-if expr="sapl_documentos.props_sagl.restpki_access_token!=''">
-                                      <li class="dropdown-divider"></li>
-                                      <li class="dropdown-header">Assinaturas Digitais</li>
-                                      <dtml-if cod_usuario_corrente>
-                                         <li><a href="<dtml-var portal_url>/cadastros/assinatura/assinaturas_pendentes" class="dropdown-item">Assinaturas Pendentes</a></li>
-                                         <li><a href="<dtml-var portal_url>/cadastros/assinatura/assinaturas_efetivadas" class="dropdown-item">Histórico de Assinaturas</a></li>                               
+                                      <dtml-if expr="AUTHENTICATED_USER.has_role(['Authenticated'])">
+                                        <li class="dropdown-header">Validação Digital</li>
                                       </dtml-if>
                                       <li><a href="<dtml-var portal_url>/conferir_assinatura" class="dropdown-item">Validação de Documentos</a></li>
                                    </dtml-if>
                                  </ul>
                               </div>
                            </div>
-               </dtml-if>
+
                      <dtml-if expr="AUTHENTICATED_USER.has_role(['Authenticated'])">
                         <!-- Sistema -->
                         <div class="d-none d-md-block ms-1">
@@ -236,7 +229,13 @@
                                 <dtml-else>
                                    <a class="dropdown-item" href="<dtml-var portal_url>/cadastros/usuario/usuario_mostrar_proc"><i class="dripicons-user d-inline-block text-muted me-2"></i> Perfil</a>
                                 </dtml-if>
-                                <a class="dropdown-item" href="<dtml-var portal_url>/cadastros/peticionamento_eletronico"><i class="dripicons-document-new d-inline-block text-muted me-2"></i>Peticionamento Digital</a>
+                                <dtml-if expr="AUTHENTICATED_USER.has_role(['Autor','Assessor Parlamentar'])">
+                                   <a class="dropdown-item" href="<dtml-var portal_url>/cadastros/proposicao/proposicao_index_html?ind_enviado=0"><i class="mdi mdi-at d-inline-block text-muted me-2"></i>Proposições Digitais</a>
+                                </dtml-if>
+                                <dtml-if cod_usuario_corrente>
+                                   <a class="dropdown-item" href="<dtml-var portal_url>/cadastros/peticionamento_eletronico"><i class="dripicons-document-new d-inline-block text-muted me-2"></i>Peticionamento Digital</a>
+                                   <a class="dropdown-item" href="<dtml-var portal_url>/cadastros/assinatura/assinaturas_efetivadas"><i class="mdi mdi-file-certificate-outline d-inline-block text-muted me-2"></i>Registro de Assinaturas</a>
+                                </dtml-if>
                                 <dtml-if cod_parlamentar_corrente>
                                   <a class="dropdown-item" href="<dtml-var portal_url>/cadastros/gabinete_parlamentar/eleitor"><i class="dripicons-article d-inline-block text-muted me-2"></i>Eleitores</a>
                                   <a  class="dropdown-item" href="<dtml-var portal_url>/cadastros/gabinete_parlamentar/atendimento"><i class="dripicons-to-do d-inline-block text-muted me-2"></i>Atendimentos</a>
@@ -307,37 +306,6 @@
                                     </a>
                                     <div class="dropdown-menu dropdown-menu-left" aria-labelledby="topnav-atividade">
                                       <a class="dropdown-item" href="<dtml-var portal_url>/consultas/materia">Pesquisa de Matérias</a>
-                                      <dtml-if cod_usuario_corrente>
-                                       <div class="dropdown">
-                                          <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-tramMat" role="button">Tramitação de Matérias
-                                             <div class="arrow-down"></div>
-                                          </a>
-                                          <div class="dropdown-menu" aria-labelledby="topnav-tramMat">
-                                           <a class="dropdown-item" href="<dtml-var portal_url>/cadastros/tramitacao_materia/tramitacao_lote_form">Tramitação Eletrônica</a>
-                                           <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia'])">
-                                             <a class="dropdown-item" href="<dtml-var portal_url>/cadastros/tramitacao_materia/primeira_tramitacao_lote_form">Primeira Tramitação</a>
-                                           </dtml-if>
-                                          </div>
-                                       </div>
-                                      </dtml-if>
-                                      <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia', 'Autor', 'Assessor Parlamentar', 'Revisor Proposicao', 'Chefia Revisão'])">
-                                       <div class="dropdown">
-                                         <a class="dropdown-item dropdown-toggle arrow-none" href="#"  id="topnav-prop" role="button">Proposições Digitais
-                                            <div class="arrow-down"></div>
-                                         </a>
-                                         <div class="dropdown-menu" aria-labelledby="topnav-prop">
-                                          <dtml-if expr="AUTHENTICATED_USER.has_role(['Autor','Assessor Parlamentar'])">
-                                            <a class="dropdown-item" href="<dtml-var portal_url>/cadastros/proposicao/proposicao_form">Criar Proposição</a>
-                                            <a class="dropdown-item" href="<dtml-var portal_url>/cadastros/proposicao?ind_enviado=0">Proposições em Elaboração</a>
-                                            <a class="dropdown-item" href="<dtml-var portal_url>/cadastros/proposicao?ind_enviado=1">Proposições Enviadas</a>
-                                            <a class="dropdown-item" href="<dtml-var portal_url>/cadastros/proposicao?ind_devolvido=1">Proposições Devolvidas</a>
-                                          </dtml-if>
-                                          <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia', 'Revisor Proposicao', 'Chefia Revisão'])">
-                                            <a class="dropdown-item" href="<dtml-var portal_url>/cadastros/recebimento_proposicao">Recebimento de Proposições</a>
-                                          </dtml-if>
-                                         </div>
-                                       </div>
-                                      </dtml-if>
                                       <div class="dropdown">
                                         <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-sessao" role="button"><dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao_plural"> Plenárias <div class="arrow-down"></div></a>
                                           <div class="dropdown-menu" aria-labelledby="topnav-sessao">
@@ -382,19 +350,17 @@
                                     </a>
                                     <div class="dropdown-menu" aria-labelledby="topnav-adm">
                                        <a class="dropdown-item" href="<dtml-var portal_url>/consultas/documento_administrativo">Pesquisa de Processos</a>
+                                       <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Modulo Administrativo'])">
                                        <dtml-if cod_usuario_corrente>
-                                         <a class="dropdown-item" href="<dtml-var portal_url>/cadastros/peticionamento_eletronico">Peticionamento Digital</a>
                                          <div class="dropdown">
                                             <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-tramMat" role="button">Tramitação de Processos
                                               <div class="arrow-down"></div>
                                             </a>
                                            <div class="dropdown-menu" aria-labelledby="topnav-tramMat">
-                                             <a class="dropdown-item" href="<dtml-var portal_url>/cadastros/tramitacao_documento/tramitacao_lote_form">Tramitação Eletrônica</a>
-                                           <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Modulo Administrativo'])">
                                              <a class="dropdown-item" href="<dtml-var portal_url>/cadastros/tramitacao_documento/primeira_tramitacao_lote_form">Primeira Tramitação</a>
-                                           </dtml-if>
                                             </div>
                                          </div>
+                                       </dtml-if>
                                        </dtml-if>
                                        <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Recepção'])">
                                          <div class="dropdown">
@@ -418,9 +384,7 @@
                                       <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Arquivo'])">
                                          <a class="dropdown-item" href="<dtml-var portal_url>/cadastros/arquivo">Arquivo Permanente</a>
                                       </dtml-if>
-                                      <dtml-if expr="portal_membership.isAnonymousUser()">
-                                         <a class="dropdown-item" href="<dtml-var portal_url>/consultas/protocolo/pesquisa_publica_form">Consulta de Protocolo</a>
-                                     </dtml-if>
+                                      <a class="dropdown-item" href="<dtml-var portal_url>/consultas/protocolo/pesquisa_publica_form">Consulta de Protocolo</a>
                                     </div>
                                 </li>
 

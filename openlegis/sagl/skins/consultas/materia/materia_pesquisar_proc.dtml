@@ -6,7 +6,7 @@
   </div>
   <div class="col-12 col-md-6">
     <div class="input-group mt-1 mt-md-0 d-flex justify-content-start justify-content-md-end">
-     <a class="btn btn-primary" href="<dtml-var portal_url>/consultas/materia" ><i class="fa fa-fw fa-search"></i> Pesquisa</a>
+     <a class="btn btn-light" href="<dtml-var portal_url>/consultas/materia" ><i class="fa fa-fw fa-search"></i> Pesquisa</a>
      <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia'])">
         <a class="btn btn-primary" href="<dtml-var portal_url>/cadastros/materia/materia_form_resumido" ><i class="fa fa-fw fa-plus"></i> Incluir Matéria</a>
      </dtml-if>   
@@ -86,7 +86,7 @@
       </div>
       <div class="col-4 col-sm-3 text-end align-self-center">
          <div class="btn-group">
-           <button class="btn btn-light" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+           <button class="btn btn-sm btn-white" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
              <i class="fas fa-file-export"></i> Exportar
            </button>
            <div class="dropdown-menu dropdown-menu-right">
@@ -106,13 +106,16 @@
    </dtml-if sequence-start>
    <li class="list-group-item">
     <div class="row">
-      <div class="col-12">
+      <div class="col-12 col-md-10 d-flex align-self-start">
                <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia'])">
                  <a href="<dtml-var portal_url>/cadastros/materia/materia_mostrar_proc?cod_materia=<dtml-var cod_materia>">
                <dtml-else>
                  <a href="<dtml-var portal_url>/consultas/materia/materia_mostrar_proc?cod_materia=<dtml-var expr="pysc.b64encode_pysc(codigo=cod_materia)">" >
                </dtml-if>
-              <p class="h6 font-size-14 font-weight-bold text-uppercase mb-1"><dtml-var des_tipo_materia> nº <dtml-var num_ident_basica>/<dtml-var ano_ident_basica> <dtml-if expr="ind_tramitacao == 1"><span class="badge bg-dark-success align-text-top text-lowercase">tramitando</span></dtml-if></p></a> 
+               <span class="h6 font-size-14 font-weight-bold text-uppercase mb-1"><dtml-var des_tipo_materia> nº <dtml-var num_ident_basica>/<dtml-var ano_ident_basica></span></a>
+      </div> 
+      <div class="col-12 col-md-2 d-flex align-self-center justify-content-start justify-content-md-end">
+          <dtml-if expr="ind_tramitacao == 1"><span class="badge bg-dark-success align-text-top">Em tramitação</span></dtml-if></a> 
       </div>
     </div>
 
@@ -392,10 +395,10 @@
                 <a class="btn btn-primary" href="<dtml-var portal_url>/consultas/materia/pasta_digital/?cod_materia=<dtml-var cod_materia>&action=pasta" target="_blank"><i class="far fa-folder-open"></i> Pasta Digital</a>
              </dtml-if>
           </dtml-let>
-          <a class="btn btn-primary" href="<dtml-var portal_url>/pysc/download_materia_pysc?cod_materia=<dtml-var expr="pysc.b64encode_pysc(codigo=cod_materia)">&texto_original=1" target="_blank"><i class="far fa-file-pdf"></i> Texto Integral</a>
+          <a class="btn btn-secondary" href="<dtml-var portal_url>/pysc/download_materia_pysc?cod_materia=<dtml-var expr="pysc.b64encode_pysc(codigo=cod_materia)">&texto_original=1" target="_blank"><i class="far fa-file-pdf"></i> Texto Integral</a>
       </dtml-if> 
       <dtml-if "hasattr(sapl_documentos.materia,redacao_final)">
-          <a class="btn btn-primary" href="<dtml-var portal_url>/pysc/download_materia_pysc?cod_materia=<dtml-var expr="pysc.b64encode_pysc(codigo=cod_materia)">&redacao_final=1" target="_blank"><i class="fas fa-file-pdf"></i> Redação Final</a>
+          <a class="btn btn-light" href="<dtml-var portal_url>/pysc/download_materia_pysc?cod_materia=<dtml-var expr="pysc.b64encode_pysc(codigo=cod_materia)">&redacao_final=1" target="_blank"><i class="fas fa-file-pdf"></i> Redação Final</a>
       </dtml-if>    
      </div>
     </div>

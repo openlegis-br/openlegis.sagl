@@ -2,6 +2,8 @@
 
 <script src="<dtml-var portal_url>/javascript/data_validar.js"></script>
 
+
+
 <dtml-if cod_sessao_plen>
    <dtml-if ind_audiencia>
       <dtml-var audiencia_publica_menu>
@@ -214,8 +216,8 @@
                  <dtml-let documento_odt="getattr(sapl_documentos.pauta_sessao,id_documento_odt).absolute_url">
                     <dtml-call expr="REQUEST.set('nome_arquivo_odt',str(cod_sessao_plen)+'_pauta_sessao.odt')">
                     <a class="btn btn-primary" href="<dtml-var portal_url>/generico/viewerJS/#<dtml-var documento_odt>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fa fa-fw fa-file-alt"></i><span class="d-none d-lg-inline-block ms-1">Visualizar</span></a>
-                    <button type="button" class="btn btn-primary" onclick="javascript:location.href='<dtml-var portal_url>/sapl_documentos/pauta_sessao/externalEdit_/<dtml-var nome_arquivo_odt>.zem'" data-bs-toggle="tooltip" data-placement="bottom" title="Editar no LibreOffice"><i class="fas fa-fw fa-external-link-alt"></i><span class="d-none d-lg-inline-block ms-1">LibreOffice</span></button>
-                    <a class="btn btn-danger" href="pauta_odt_excluir_proc?cod_sessao_plen=<dtml-var cod_sessao_plen missing><dtml-if expr="_.has_key('ind_audiencia')">&ind_audiencia=1</dtml-if>" data-confirm="Deseja realmente excluir o arquivo ODT da pauta?"><i class="fas fas-fw fa-trash"></i><span class="d-none d-lg-inline-block ms-1">Excluir</span></a>
+                    <button type="button" class="btn btn-secondary" onclick="javascript:location.href='<dtml-var portal_url>/sapl_documentos/pauta_sessao/externalEdit_/<dtml-var nome_arquivo_odt>.zem'" data-bs-toggle="tooltip" data-placement="bottom" title="Editar no LibreOffice"><i class="fas fa-fw fa-external-link-alt"></i><span class="d-none d-lg-inline-block ms-1">LibreOffice</span></button>
+                    <a class="btn btn-danger" href="pauta_odt_excluir_proc?cod_sessao_plen=<dtml-var cod_sessao_plen missing><dtml-if expr="_.has_key('ind_audiencia')">&ind_audiencia=1</dtml-if>" data-confirm="Deseja realmente excluir o arquivo ODT da pauta?"><i class="far fa-trash-alt"></i><span class="d-none d-lg-inline-block ms-1">Excluir</span></a>
                  </dtml-let>
               <dtml-else>           
                  <a  class="btn btn-primary" href="javascript:pauta_odt_gerar();"><span class="d-none d-lg-inline-block ms-1">Gerar arquivo</span></a>
@@ -239,10 +241,10 @@
                   <i class="fa fa-fw fa-file-pdf"></i><span class="d-none d-lg-inline-block ms-1">Visualizar</span>
                 </a>             
                 <dtml-if "sapl_documentos.props_sagl.restpki_access_token!=''">
-                   <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Assinaturas Digitais" data-src="<dtml-var portal_url>/cadastros/assinatura/assinatura_solicitar_form?codigo=<dtml-var cod_sessao_plen>&tipo_doc=pauta&modal=1"><i class="fas fas-fw fa-file-signature"></i><span class="d-none d-lg-inline-block ms-1">Assinaturas</span></button>
+                   <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Assinaturas Digitais" data-src="<dtml-var portal_url>/cadastros/assinatura/assinatura_solicitar_form?codigo=<dtml-var cod_sessao_plen>&tipo_doc=pauta&modal=1"><i class="fas fas-fw fa-file-signature"></i><span class="d-none d-lg-inline-block ms-1">Assinaturas</span></button>
                 </dtml-if>
-                <a class="btn btn-primary" target="_blank" href="pauta_completa_pysc?cod_sessao_plen=<dtml-var cod_sessao_plen>"><i class="fas fa-fw fa-file-download"></i><span class="d-none d-lg-inline-block ms-1">Pauta Completa</span></a>
-                <a class="btn btn-danger" href="pauta_pdf_excluir_proc?cod_sessao_plen=<dtml-var cod_sessao_plen missing><dtml-if expr="_.has_key('ind_audiencia')">&ind_audiencia=1</dtml-if>" data-confirm="Deseja realmente excluir o arquivo PDF da pauta?"><i class="fas fas-fw fa-trash"></i><span class="d-none d-lg-inline-block ms-1">Excluir</span></a> 
+                <a class="btn btn-light" target="_blank" href="pauta_completa_pysc?cod_sessao_plen=<dtml-var cod_sessao_plen>"><i class="fas fa-fw fa-file-download"></i><span class="d-none d-lg-inline-block ms-1">Pauta Completa</span></a>
+                <a class="btn btn-danger" href="pauta_pdf_excluir_proc?cod_sessao_plen=<dtml-var cod_sessao_plen missing><dtml-if expr="_.has_key('ind_audiencia')">&ind_audiencia=1</dtml-if>" data-confirm="Deseja realmente excluir o arquivo PDF da pauta?"><i class="far fa-trash-alt"></i><span class="d-none d-lg-inline-block ms-1">Excluir</span></a> 
              </dtml-let>
           <dtml-elif "hasattr(sapl_documentos.pauta_sessao,id_pauta_assinada)">
              <dtml-let pauta="getattr(sapl_documentos.pauta_sessao,id_pauta_assinada).absolute_url">
@@ -250,7 +252,7 @@
                   <i class="fas fas-fw fa-certificate"></i><span class="d-none d-lg-inline-block ms-1">Arquivo Assinado</span>
                 </a>
                 <dtml-if "sapl_documentos.props_sagl.restpki_access_token!=''">
-                   <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Assinaturas Digitais" data-src="<dtml-var portal_url>/cadastros/assinatura/assinatura_solicitar_form?codigo=<dtml-var cod_sessao_plen>&tipo_doc=pauta&modal=1"><i class="fas fas-fw fa-file-signature"></i><span class="d-none d-lg-inline-block ms-1">Assinaturas</span></button>
+                   <button type="button" class="btn btn-scondary" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Assinaturas Digitais" data-src="<dtml-var portal_url>/cadastros/assinatura/assinatura_solicitar_form?codigo=<dtml-var cod_sessao_plen>&tipo_doc=pauta&modal=1"><i class="fas fas-fw fa-file-signature"></i><span class="d-none d-lg-inline-block ms-1">Assinaturas</span></button>
                 </dtml-if>
                 <a class="btn btn-primary" target="_blank" href="pauta_completa_pysc?cod_sessao_plen=<dtml-var cod_sessao_plen>"><i class="fas fa-fw fa-file-download"></i><span class="d-none d-lg-inline-block ms-1">Pauta Completa</span></a>              
              </dtml-let>
@@ -275,8 +277,8 @@
                 <dtml-let documento_odt="getattr(sapl_documentos.oradores_expediente,id_documento_odt).absolute_url">
                    <dtml-call expr="REQUEST.set('nome_arquivo_odt',str(cod_sessao_plen)+'_oradores_expediente.odt')">
                    <a class="btn btn-primary" href="<dtml-var portal_url>/generico/viewerJS/#<dtml-var documento_odt>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fa fa-fw fa-file-alt"></i><span class="d-none d-lg-inline-block ms-1">Visualizar</span></a>
-                   <button type="button" class="btn btn-primary" onclick="javascript:location.href='<dtml-var portal_url>/sapl_documentos/oradores_expediente/externalEdit_/<dtml-var nome_arquivo_odt>.zem'" data-bs-toggle="tooltip" data-placement="bottom" title="Editar no LibreOffice"><i class="fas fa-fw fa-external-link-alt"></i><span class="d-none d-lg-inline-block ms-1">LibreOffice</span></button>
-                   <a class="btn btn-danger" href="oradores_odt_excluir_proc?cod_sessao_plen=<dtml-var cod_sessao_plen missing><dtml-if expr="_.has_key('ind_audiencia')">&ind_audiencia=1</dtml-if>" data-confirm="Deseja realmente excluir o arquivo ODT da Lista de Oradores?"><i class="fas fa-trash"></i><span class="d-none d-lg-inline-block ms-1">Excluir</span></a> 
+                   <button type="button" class="btn btn-secondary" onclick="javascript:location.href='<dtml-var portal_url>/sapl_documentos/oradores_expediente/externalEdit_/<dtml-var nome_arquivo_odt>.zem'" data-bs-toggle="tooltip" data-placement="bottom" title="Editar no LibreOffice"><i class="fas fa-fw fa-external-link-alt"></i><span class="d-none d-lg-inline-block ms-1">LibreOffice</span></button>
+                   <a class="btn btn-danger" href="oradores_odt_excluir_proc?cod_sessao_plen=<dtml-var cod_sessao_plen missing><dtml-if expr="_.has_key('ind_audiencia')">&ind_audiencia=1</dtml-if>" data-confirm="Deseja realmente excluir o arquivo ODT da Lista de Oradores?"><i class="far fa-trash-alt"></i><span class="d-none d-lg-inline-block ms-1">Excluir</span></a> 
                 </dtml-let>
              <dtml-else>
                 <a class="btn btn-primary" href="javascript:oradores_odt_gerar();"><span class="d-none d-lg-inline-block ms-1">Gerar ODT</span></a>
@@ -296,7 +298,7 @@
                 <a class="btn btn-primary" target="_blank" href="<dtml-var oradores>?<dtml-var expr="ZopeTime().timeTime()">">
                   <i class="fa fa-fw fa-file-pdf"></i><span class="d-none d-lg-inline-block ms-1">Visualizar</span>
                 </a>  
-                <a class="btn btn-danger" href="oradores_pdf_excluir_proc?cod_sessao_plen=<dtml-var cod_sessao_plen missing><dtml-if expr="_.has_key('ind_audiencia')">&ind_audiencia=1</dtml-if>" data-confirm="Deseja realmente excluir o arquivo PDF da Lista de Oradores?"><i class="fas fa-trash"></i><span class="d-none d-lg-inline-block ms-1">Excluir</span></a>
+                <a class="btn btn-danger" href="oradores_pdf_excluir_proc?cod_sessao_plen=<dtml-var cod_sessao_plen missing><dtml-if expr="_.has_key('ind_audiencia')">&ind_audiencia=1</dtml-if>" data-confirm="Deseja realmente excluir o arquivo PDF da Lista de Oradores?"><i class="far fa-trash-alt"></i><span class="d-none d-lg-inline-block ms-1">Excluir</span></a>
              </dtml-let>
           <dtml-else>
              <dtml-if expr="_.has_key('temODTorador')">
@@ -324,8 +326,8 @@
              <dtml-let documento_odt="getattr(sapl_documentos.ata_sessao,id_documento_odt).absolute_url">
                 <dtml-call expr="REQUEST.set('nome_arquivo_odt',str(cod_sessao_plen)+'_ata_sessao.odt')">
                 <a class="btn btn-primary" href="<dtml-var portal_url>/generico/viewerJS/#<dtml-var documento_odt>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fa fa-fw fa-file-alt"></i><span class="d-none d-lg-inline-block ms-1">Visualizar</span></a>
-                <button type="button" class="btn btn-primary" onclick="javascript:location.href='<dtml-var portal_url>/sapl_documentos/ata_sessao/externalEdit_/<dtml-var nome_arquivo_odt>.zem'" data-bs-toggle="tooltip" data-placement="bottom" title="Editar no LibreOffice"><i class="fas fa-fw fa-external-link-alt"></i><span class="d-none d-lg-inline-block ms-1">LibreOffice</span></button>
-                <a class="btn btn-danger" href="ata_odt_excluir_proc?cod_sessao_plen=<dtml-var cod_sessao_plen missing><dtml-if expr="_.has_key('ind_audiencia')">&ind_audiencia=1</dtml-if>" data-confirm="Deseja realmente excluir o arquivo ODT da Ata?"><i class="fas fa-trash"></i><span class="d-none d-lg-inline-block ms-1">Excluir</span></a>                   
+                <button type="button" class="btn btn-secondary" onclick="javascript:location.href='<dtml-var portal_url>/sapl_documentos/ata_sessao/externalEdit_/<dtml-var nome_arquivo_odt>.zem'" data-bs-toggle="tooltip" data-placement="bottom" title="Editar no LibreOffice"><i class="fas fa-fw fa-external-link-alt"></i><span class="d-none d-lg-inline-block ms-1">LibreOffice</span></button>
+                <a class="btn btn-danger" href="ata_odt_excluir_proc?cod_sessao_plen=<dtml-var cod_sessao_plen missing><dtml-if expr="_.has_key('ind_audiencia')">&ind_audiencia=1</dtml-if>" data-confirm="Deseja realmente excluir o arquivo ODT da Ata?"><i class="far fa-trash-alt"></i><span class="d-none d-lg-inline-block ms-1">Excluir</span></a>                   
                </dtml-let>
             </div>
           <dtml-else>
@@ -345,9 +347,9 @@
                    <i class="fa fa-fw fa-file-pdf"></i><span class="d-none d-lg-inline-block ms-1">Visualizar</span>
                  </a>
                  <dtml-if expr="sapl_documentos.props_sagl.restpki_access_token!=''">
-                   <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Assinaturas Digitais" data-src="<dtml-var portal_url>/cadastros/assinatura/assinatura_solicitar_form?codigo=<dtml-var cod_sessao_plen>&tipo_doc=ata&modal=1"><i class="fas fa-file-signature"></i><span class="d-none d-lg-inline-block ms-1">Assinaturas</span></button>
+                   <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Assinaturas Digitais" data-src="<dtml-var portal_url>/cadastros/assinatura/assinatura_solicitar_form?codigo=<dtml-var cod_sessao_plen>&tipo_doc=ata&modal=1"><i class="fas fa-file-signature"></i><span class="d-none d-lg-inline-block ms-1">Assinaturas</span></button>
                  </dtml-if>
-                 <a class="btn btn-danger" href="ata_pdf_excluir_proc?cod_sessao_plen=<dtml-var cod_sessao_plen missing><dtml-if expr="_.has_key('ind_audiencia')">&ind_audiencia=1</dtml-if>" data-confirm="Deseja realmente excluir o arquivo PDF da Ata?"><i class="fas fa-trash"></i><span class="d-none d-lg-inline-block ms-1">Excluir</span></a>                                
+                 <a class="btn btn-danger" href="ata_pdf_excluir_proc?cod_sessao_plen=<dtml-var cod_sessao_plen missing><dtml-if expr="_.has_key('ind_audiencia')">&ind_audiencia=1</dtml-if>" data-confirm="Deseja realmente excluir o arquivo PDF da Ata?"><i class="far fa-trash-alt"></i><span class="d-none d-lg-inline-block ms-1">Excluir</span></a>                                
               </dtml-let>
            <dtml-elif "hasattr(sapl_documentos.ata_sessao,id_ata_assinada)">
               <dtml-let ata="getattr(sapl_documentos.ata_sessao,id_ata_assinada).absolute_url">
@@ -355,9 +357,9 @@
                    <i class="fas fa-certificate"></i><span class="d-none d-lg-inline-block ms-1">Arquivo Assinado</span>
                  </a>
                  <dtml-if "sapl_documentos.props_sagl.restpki_access_token!=''">
-                   <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Assinaturas Digitais" data-src="<dtml-var portal_url>/cadastros/assinatura/assinatura_solicitar_form?codigo=<dtml-var cod_sessao_plen>&tipo_doc=ata&modal=1"><i class="fas fa-file-signature"></i><span class="d-none d-lg-inline-block ms-1">Assinaturas</span></button>
+                   <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Assinaturas Digitais" data-src="<dtml-var portal_url>/cadastros/assinatura/assinatura_solicitar_form?codigo=<dtml-var cod_sessao_plen>&tipo_doc=ata&modal=1"><i class="fas fa-file-signature"></i><span class="d-none d-lg-inline-block ms-1">Assinaturas</span></button>
                  </dtml-if>
-                 <a class="btn btn-danger" href="ata_pdf_excluir_proc?cod_sessao_plen=<dtml-var cod_sessao_plen missing>" data-confirm="Deseja realmente excluir o arquivo PDF da Ata?"><i class="fas fa-trash"></i><span class="d-none d-lg-inline-block ms-1">Excluir</span></a>                    
+                 <a class="btn btn-danger" href="ata_pdf_excluir_proc?cod_sessao_plen=<dtml-var cod_sessao_plen missing>" data-confirm="Deseja realmente excluir o arquivo PDF da Ata?"><i class="far fa-trash-alt"></i><span class="d-none d-lg-inline-block ms-1">Excluir</span></a>                    
               </dtml-let>
             </div>
            <dtml-else>
@@ -387,7 +389,7 @@
                 <a class="btn btn-primary" target="_blank" href="<dtml-var roteiro>?<dtml-var expr="ZopeTime().timeTime()">">
                   <i class="fa fa-fw fa-file-pdf"></i><span class="d-none d-lg-inline-block ms-1">Visualizar</span>
                 </a>
-                <a class="btn btn-danger" href="roteiro_excluir_proc?cod_sessao_plen=<dtml-var cod_sessao_plen missing><dtml-if expr="_.has_key('ind_audiencia')">&ind_audiencia=1</dtml-if>" data-confirm="Deseja realmente excluir o arquivo PDF do Roteiro<dtml-if expr="_.has_key('ind_audiencia')"><dtml-else> da <dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao"></dtml-if>?"><i class="fas fa-fw fa-trash"></i><span class="d-none d-lg-inline-block ms-1">Excluir</span></a> 
+                <a class="btn btn-danger" href="roteiro_excluir_proc?cod_sessao_plen=<dtml-var cod_sessao_plen missing><dtml-if expr="_.has_key('ind_audiencia')">&ind_audiencia=1</dtml-if>" data-confirm="Deseja realmente excluir o arquivo PDF do Roteiro<dtml-if expr="_.has_key('ind_audiencia')"><dtml-else> da <dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao"></dtml-if>?"><i class="far fa-trash-alt"></i><span class="d-none d-lg-inline-block ms-1">Excluir</span></a> 
              </dtml-let>
             </div>
           <dtml-else>

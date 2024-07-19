@@ -1296,6 +1296,9 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
            outros = " e outro"
         if qtde_assinaturas > 2:
            outros = " e outros"
+        cod_validacao_doc = ''
+        for validacao in self.zsql.assinatura_documento_obter_zsql(codigo=cod_proposicao,tipo_doc='proposicao',ind_assinado=1):
+            cod_validacao_doc = str(self.cadastros.assinatura.format_verification_code(code=validacao.cod_assinatura_doc))
         for proposicao in self.zsql.proposicao_obter_zsql(cod_proposicao=cod_proposicao):
             num_proposicao = proposicao.cod_proposicao
             if nom_autor == None:
@@ -1306,8 +1309,8 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
                for materia in self.zsql.materia_obter_zsql(cod_materia=proposicao.cod_mat_ou_doc):
                    if materia.num_protocolo != None and materia.num_protocolo != '':
                       for protocolo in self.zsql.protocolo_obter_zsql(num_protocolo=materia.num_protocolo, ano_protocolo=materia.ano_ident_basica):
-                          info_protocolo = ' - Protocolo nº ' + str(protocolo.num_protocolo) + '/' + str(protocolo.ano_protocolo) + ', recebido em ' + str(DateTime(protocolo.dat_protocolo, datefmt='international').strftime('%d/%m/%Y')) + ' ' + protocolo.hor_protocolo + '.'
-                   texto = str(materia.des_tipo_materia) + ' nº ' + str(materia.num_ident_basica) + '/' + str(materia.ano_ident_basica)
+                          info_protocolo = ' - Prot. nº ' + str(protocolo.num_protocolo) + '/' + str(protocolo.ano_protocolo) + ' em ' + str(DateTime(protocolo.dat_protocolo, datefmt='international').strftime('%d/%m/%Y')) + ' ' + protocolo.hor_protocolo + '.'
+                   texto = str(materia.sgl_tipo_materia) + ' ' + str(materia.num_ident_basica) + '/' + str(materia.ano_ident_basica)
                    storage_path = self.sapl_documentos.materia
                    nom_pdf_saida = str(materia.cod_materia) + "_texto_integral.pdf"
             elif proposicao.ind_mat_ou_doc=='D' and (proposicao.des_tipo_proposicao!='Emenda' and proposicao.des_tipo_proposicao!='Mensagem Aditiva' and proposicao.des_tipo_proposicao!='Substitutivo' and proposicao.des_tipo_proposicao!='Parecer' and proposicao.des_tipo_proposicao!='Parecer de Comissão'):
@@ -1342,24 +1345,32 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
                    storage_path = self.sapl_documentos.parecer_comissao
                    nom_pdf_saida = str(relatoria.cod_relatoria) + "_parecer.pdf"
         mensagem1 = 'Esta é uma cópia do original assinado digitalmente por ' + nom_autor + outros
-        mensagem2 = 'Valide pelo qrcode ou acesse ' + self.url()+'/conferir_assinatura'+' com o código '+ cod_validacao_doc + '.'
+        mensagem2 = 'Valide em ' + self.url()+'/conferir_assinatura'+' com o código '+ cod_validacao_doc
         existing_pdf = pymupdf.open(stream=fileStream)
         numPages = existing_pdf.page_count
+        doc = pymupdf.open()
         for validacao in self.zsql.assinatura_documento_obter_zsql(codigo=cod_proposicao,tipo_doc='proposicao',ind_assinado=1):
-            stream = self.make_qrcode(text=self.url()+'/conferir_assinatura_proc?txt_codigo_verificacao='+str(validacao.cod_validacao_doc))
+            stream = self.make_qrcode(text=self.url()+'/conferir_assinatura_proc?txt_codigo_verificacao='+str(validacao.cod_assinatura_doc))
             for page_index, i in enumerate(range(len(existing_pdf))):
                 w = existing_pdf[page_index].rect.width
                 h = existing_pdf[page_index].rect.height
                 margin = 5
                 left = 10 - margin
-                bottom = h - 60 - margin
+                bottom = h - 50 - margin
                 black = pymupdf.pdfcolor["black"]
                 numero = "Pág. %s/%s" % (i+1, numPages)
-                rect = pymupdf.Rect(left, bottom, left + 60, bottom + 60)  # qrcode bottom left square
-                existing_pdf[page_index].insert_image(rect, stream=stream)
-                text2 = texto + info_protocolo + '\n' + mensagem1 + '\n' + mensagem2
-                p1 = pymupdf.Point(w - 60 - margin, h - 30) # numero de pagina documento
-                p2 = pymupdf.Point(70, h - 35) # margem inferior
+                # qrcode
+                rect = pymupdf.Rect(left, bottom, left + 50, bottom + 50)  # qrcode bottom left square
+                existing_pdf[page_index].insert_image(rect, stream=stream)             
+                text2 = mensagem2
+                # margem direita
+                text3 = texto + info_protocolo + ' ' + mensagem1
+                x = w - 8 - margin #largura
+                y = h - 30 - margin # altura
+                existing_pdf[page_index].insert_text((x, y), text3, fontsize=8, rotate=90)
+                # margem inferior
+                p1 = pymupdf.Point(w - 40 - margin, h - 12) # numero de pagina documento
+                p2 = pymupdf.Point(60, h - 12) # margem inferior
                 shape = existing_pdf[page_index].new_shape()
                 shape.draw_circle(p1,1)
                 shape.draw_circle(p2,1)
@@ -1369,6 +1380,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
             break
         w = existing_pdf[0].rect.width
         h = existing_pdf[0].rect.height
+        # tipo, numero e ano
         rect = pymupdf.Rect(40, 140, w-20, 170)
         existing_pdf[0].insert_textbox(rect, str(texto).upper(), fontname = "tibo", fontsize = 13, align=pymupdf.TEXT_ALIGN_CENTER)
         metadata = {"title": texto, "author": nom_autor}
@@ -1984,14 +1996,21 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
             h = existing_pdf[page_index].rect.height
             margin = 5
             left = 10 - margin
-            bottom = h - 60 - margin
+            bottom = h - 50 - margin           
             black = pymupdf.pdfcolor["black"]
             numero = "Pág. %s/%s" % (i+1, numPages)
-            rect = pymupdf.Rect(left, bottom, left + 60, bottom + 60)  # qrcode bottom left square
-            existing_pdf[page_index].insert_image(rect, stream=stream)
-            text2 = texto + '\n' + mensagem1 + '\n' + mensagem2
-            p1 = pymupdf.Point(w -60 -margin, h - 30) # numero de pagina documento
-            p2 = pymupdf.Point(70, h - 35) # margem inferior
+            # qrcode
+            rect = pymupdf.Rect(left, bottom, left + 50, bottom + 50)  # qrcode bottom left square
+            existing_pdf[page_index].insert_image(rect, stream=stream)               
+            text2 = mensagem2
+            # margem direita
+            text3 = texto + '\n' + mensagem1
+            x = w - 8 - margin #largura
+            y = h - 30 - margin # altura
+            existing_pdf[page_index].insert_text((x, y), text3, fontsize=8, rotate=90)
+            # margem inferior
+            p1 = pymupdf.Point(w - 40 - margin, h - 12) # numero de pagina documento
+            p2 = pymupdf.Point(60, h - 12) # margem inferior
             shape = existing_pdf[page_index].new_shape()
             shape.draw_circle(p1,1)
             shape.draw_circle(p2,1)
@@ -2060,14 +2079,21 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
                h = existing_pdf[page_index].rect.height
                margin = 5
                left = 10 - margin
-               bottom = h - 60 - margin
+               bottom = h - 50 - margin
                black = pymupdf.pdfcolor["black"]
                numero = "Pág. %s/%s" % (i+1, numPages)
-               rect = pymupdf.Rect(left, bottom, left + 60, bottom + 60)  # qrcode bottom left square
+               # qrcode
+               rect = pymupdf.Rect(left, bottom, left + 50, bottom + 50)  # qrcode bottom left square
                existing_pdf[page_index].insert_image(rect, stream=stream)
-               text2 = texto + '\n' + mensagem1 + '\n' + mensagem2
-               p1 = pymupdf.Point(w -60 -margin, h - 30) # numero de pagina documento
-               p2 = pymupdf.Point(70, h - 35) # margem inferior
+               text2 = mensagem2
+               # margem direita
+               text3 = texto + ' ' + mensagem1
+               x = w - 8 - margin #largura
+               y = h - 30 - margin # altura
+               existing_pdf[page_index].insert_text((x, y), text3, fontsize=8, rotate=90)
+               # margem inferior
+               p1 = pymupdf.Point(w - 40 - margin, h - 12) # numero de pagina documento
+               p2 = pymupdf.Point(60, h - 12) # margem inferior
                shape = existing_pdf[page_index].new_shape()
                shape.draw_circle(p1,1)
                shape.draw_circle(p2,1)

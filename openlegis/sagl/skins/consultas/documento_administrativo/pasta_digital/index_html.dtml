@@ -127,7 +127,7 @@
                         <div class="clearfix"></div>
                         <div class="form-inline">
                             <div class="form-group col-md-9">
-                                <div class="input-group">
+                                <div class="input-group input-group-sm">
                                     <div class="input-group-addon">
                                         Folhas
                                     </div>
@@ -157,15 +157,13 @@
                            <ol>
                        </dtml-if>
                            <li>
-                            <i aria-hidden="true" class="fa fa-file-pdf"></i>
-                            <span data-id="<dtml-var id>" data-pagina="<dtml-var id>" data-pagina-geral="<dtml-var id>" title="<dtml-var title>" class="link-pagina titulo <dtml-if sequence-start>pagina-atual</dtml-if>"><dtml-var title> </span> 
+                            <span data-id="<dtml-var id>" data-pagina="<dtml-var id>" data-pagina-geral="<dtml-var id>" title="<dtml-var title>" class="link-pagina titulo <dtml-if sequence-start>pagina-atual</dtml-if>"><dtml-var title></span> 
                             <span class="badge"><dtml-var paginas_doc> fls.</span>
                             <dtml-in expr="paginas" mapping>
                               <ul>
                                    <li>
                                       <a data-pagina="<dtml-var num_pagina missing>" data-pagina-geral="<dtml-var num_pagina missing>" href="<dtml-var portal_url>/js/pdfjs/web/viewer?file=<dtml-var url>" target="iframeViewer" class="link-pagina">
-                                      <i aria-hidden="true" class="fa fa-file"></i>
-                                         Folhas <dtml-var num_pagina missing> </a>
+                                         <i aria-hidden="true" class="fa fa-fw fa-file"></i>Folhas <dtml-var num_pagina missing></a>
                                    </li>
                               </ul>
                             </dtml-in>
@@ -176,7 +174,7 @@
                         </div>
                        </dtml-if>
                     </dtml-in>
-                    <div class="form-group col-lg-12"><a class="btn btn-primary btn-block" href="<dtml-var portal_url>/consultas/documento_administrativo/pasta_digital/pastadigital?cod_documento=<dtml-var cod_documento>&action=download" target="_blank"><i class="fa fa-print-pdf fa-lg"></i> Processo Integral</a></div>
+                    <div class="form-group col-lg-12"><a class="btn btn-sm btn-primary btn-block" href="<dtml-var portal_url>/consultas/documento_administrativo/pasta_digital/pastadigital?cod_documento=<dtml-var cod_documento>&action=download" target="_blank">Processo Integral</a></div>
                     <dtml-in expr="zsql.documento_administrativo_vinculado_obter_zsql(cod_documento_vinculado = cod_documento)">
                        <dtml-call expr="REQUEST.set('temVinculante', cod_vinculo)">
                     </dtml-in>
@@ -193,7 +191,7 @@
                             <li class="list-group-item list-group-item-light">
                                <dtml-in expr="zsql.documento_administrativo_vinculado_obter_zsql(cod_documento_vinculante = cod_documento)">
                               <dtml-if sequence-start>
-                                 <p><span class="h5 text-secondary"><strong>Documento<dtml-if expr="_['sequence-length'] > 1">s</dtml-if> Vinculado<dtml-if expr="_['sequence-length'] > 1">s</dtml-if>: </strong></span></p>
+                                 <p><span class="h5 text-secondary"><strong>Processo<dtml-if expr="_['sequence-length'] > 1">s</dtml-if> Vinculado<dtml-if expr="_['sequence-length'] > 1">s</dtml-if>: </strong></span></p>
                               </dtml-if>
                                 <a class="text-info" href="pasta_digital?cod_documento=<dtml-var cod_documento_vinculado>&action=pasta" target="_blank"> 
                                   <dtml-var sgl_tipo_documento_vinculado>-<dtml-var num_documento_vinculado>/<dtml-var ano_documento_vinculado>
@@ -201,7 +199,7 @@
                                </dtml-in>
                                <dtml-in expr="zsql.documento_administrativo_vinculado_obter_zsql(cod_documento_vinculado = cod_documento)">
                               <dtml-if sequence-start>
-                                 <p><span class="h5 text-secondary"><strong>Documento<dtml-if expr="_['sequence-length'] > 1">s</dtml-if> Vinculante<dtml-if expr="_['sequence-length'] > 1">s</dtml-if>: </strong></span></p>
+                                 <p><span class="h5 text-secondary"><strong>Processo<dtml-if expr="_['sequence-length'] > 1">s</dtml-if> Vinculante<dtml-if expr="_['sequence-length'] > 1">s</dtml-if>: </strong></span></p>
                               </dtml-if>
                                 <a class="text-info" href="pasta_digital?cod_documento=<dtml-var cod_documento_vinculante>&action=pasta" target="_blank"> 
                                   <dtml-var sgl_tipo_documento_vinculante>-<dtml-var num_documento_vinculante>/<dtml-var ano_documento_vinculante>

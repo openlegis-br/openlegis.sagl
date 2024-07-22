@@ -17,152 +17,155 @@
 </dtml-let>
 
 <dtml-if expr="(str(REQUEST['AUTHENTICATED_USER']).strip()=='Anonymous User')">
-
-  <div class="row">
-     
-      <div class="col-12 col-md-6 col-lg-4 mt-3 mb-3 text-center homeBlock">
-        <a href="<dtml-var portal_url>/consultas/parlamentar">      
-        <div class="homeContent rounded py-3 px-4">
-          <div class="homeTitle">
-            <img src="<dtml-var portal_url>/imagens/icon_parlamentares.png" alt="Lista dos Vereadores">
-            <h2 class="home">Vereadores</h2>
-          </div>
-          <p style="font-size: 90%;">
-            O Poder Legislativo Municipal tem nos vereadores a sua expressão
-            máxima. Devem transformar os anseios de seus representados em ações diretas, na forma de leis ou
-            buscando junto do Executivo ações que beneficiem a sua comunidade. Possuem funções
-            legisladora, administrativa, julgadora e de fiscalização sobre os atos do Executivo.
-          </p>
+   <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+     <div class="col">
+        <div class="card h-100 bg-primary">
+          <a href="<dtml-var portal_url>/consultas/parlamentar">      
+             <img class="card-img-top img-fluid bg-light" src="<dtml-var portal_url>/imagens/Vereadores.png" alt="Vereadores">
+             <div class="card-body p-3 text-white">
+               <blockquote class="card-bodyquote">
+                 <h4 class="card-title font-size-15">Vereadores</h4>
+                 <p class="card-text text-white font-size-13">
+                   O Poder Legislativo Municipal tem nos vereadores a sua expressão máxima. Possuem funções legisladora, administrativa, julgadora e de fiscalização sobre os atos do Executivo.
+                 </p>
+               </blockquote>
+             </div>
+          </a>
         </div>
-        </a>
       </div>
-  
-      <div class="col-12 col-md-6 col-lg-4 mt-3 mb-3 text-center homeBlock">
-        <a href="<dtml-var portal_url>/consultas/mesa_diretora">
-        <div class="homeContent rounded py-3 px-4">
-          <div class="homeTitle">
-            <img src="<dtml-var portal_url>/imagens/icon_mesa_diretora.png" alt="Dados da <dtml-var expr="sapl_documentos.props_sagl.nome_mesa">">
-            <h2 class="home"><dtml-var expr="sapl_documentos.props_sagl.nome_mesa"></h2>
-          </div>
-          <p style="font-size: 90%;">
-            Órgão colegiado a quem cabe a direção dos trabalhos legislativos. Os vereadores integrantes da <dtml-var expr="sapl_documentos.props_sagl.nome_mesa"> são
-            eleitos por seus pares na primeira reunião de instalação do período legislativo, para um mandato de
-            um a dois anos.
-          </p>
+     <!-- end card-->
+     <div class="col">
+        <div class="card h-100 bg-primary">
+          <a href="<dtml-var portal_url>/consultas/mesa_diretora">
+             <img class="card-img-top img-fluid bg-light" src="<dtml-var portal_url>/imagens/Mesa-Diretora.png" alt="<dtml-var expr="sapl_documentos.props_sagl.nome_mesa"><">
+             <div class="card-body p-3 text-white">
+               <blockquote class="card-bodyquote">
+                 <h4 class="card-title font-size-15"><dtml-var expr="sapl_documentos.props_sagl.nome_mesa"></h4>
+                 <p class="card-text text-white font-size-13">
+                     Órgão colegiado a quem cabe a direção dos trabalhos legislativos. Os integrantes da <dtml-var expr="sapl_documentos.props_sagl.nome_mesa"> são eleitos por seus pares na primeira reunião de instalação do período legislativo, para um mandato de um a dois anos.
+                 </p>
+               </blockquote>
+             </div>
+          </a>
         </div>
-        </a>        
       </div>
-
-      <div class="col-12 col-md-6 col-lg-4 mt-3 mb-3 text-center homeBlock">
-        <a href="<dtml-var portal_url>/consultas/comissao">      
-        <div class="homeContent rounded py-3 px-4">
-          <div class="homeTitle">
-            <img src="<dtml-var portal_url>/imagens/icon_comissoes.png" alt="Dados das Comissões">
-            <h2 class="home">Comissões</h2>
-          </div>
-          <p style="font-size: 90%;">
-            Órgãos da Casa Legislativa que têm por objetivo prestar
-            melhores esclarecimentos aos vereadores para a tomada de decisões. Assim, as comissões elaboram estudos,
-            pareceres a respeito de determinados projetos de lei e investigação de irregularidades sobre fato
-            determinado.
-          </p>
+     <!-- end card-->
+     <div class="col">
+        <div class="card h-100 bg-primary">
+          <a href="<dtml-var portal_url>/consultas/comissao">
+             <img class="card-img-top img-fluid bg-light" src="<dtml-var portal_url>/imagens/Comissoes.png" alt="Comissões">
+             <div class="card-body p-3 text-white">
+               <blockquote class="card-bodyquote">
+                 <h4 class="card-title font-size-15">Comissões</h4>
+                 <p class="card-text text-white font-size-13">
+                     Órgãos que têm por objetivo prestar esclarecimentos aos vereadores para a tomada de decisões. As comissões elaboram estudos, pareceres a respeito de projetos e investigação de irregularidades sobre fato determinado.
+                 </p>
+               </blockquote>
+             </div>
+          </a>
         </div>
-        </a>
       </div>
-      
-      <div class="col-12 col-md-6 col-lg-4 mt-3 mb-3 text-center homeBlock">
-        <a href="<dtml-var portal_url>/consultas/bancada">      
-        <div class="homeContent rounded py-3 px-4">
-          <div class="homeTitle">
-            <img src="<dtml-var portal_url>/imagens/icon_comissoes.png" alt="Lista de Bancadas">
-            <h2 class="home">Bancadas</h2>
-          </div>
-          <p style="font-size: 90%;">
-            Contêm informações sobre as bancadas partidárias e frentes parlamentares, suas lideranças e composições, por legislatura e período de composição.
-          </p>
+     <!-- end card-->
+     <div class="col">
+        <div class="card h-100 bg-primary">
+          <a href="<dtml-var portal_url>/consultas/bancada">
+             <img class="card-img-top img-fluid bg-light" src="<dtml-var portal_url>/imagens/Bancadas.png" alt="Bancadas">
+             <div class="card-body p-3 text-white">
+               <blockquote class="card-bodyquote">
+                 <h4 class="card-title font-size-15">Bancadas</h4>
+                 <p class="card-text text-white font-size-13">
+                     Contêm informações sobre as bancadas partidárias e frentes parlamentares, suas lideranças e composições, por legislatura e período de composição.
+                 </p>
+               </blockquote>
+             </div>
+          </a>
         </div>
-        </a>
       </div>
-
-      <div class="col-12 col-md-6 col-lg-4 mt-3 mb-3 text-center homeBlock">
-        <a href="<dtml-var portal_url>/consultas/pauta_sessao">      
-        <div class="homeContent rounded py-3 px-4">
-          <div class="homeTitle">
-            <img src="<dtml-var portal_url>/imagens/icon_pautas.png" alt="Lista de Pautas">
-            <h2 class="home">Pautas das <dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao_plural"></h2>
-          </div>
-          <p style="font-size: 90%;">
-            Utilizadas para se determinar quais matérias serão discutidas e votadas. A responsabilidade pela
-            elaboração das Pautas é definida no Regimento Interno que,
-            em geral, dá poderes ao Presidente da Casa Legislativa para a sua elaboração.
-          </p>
+     <!-- end card-->
+     <div class="col">
+        <div class="card h-100 bg-primary">
+          <a href="<dtml-var portal_url>/consultas/pauta_sessao">
+             <img class="card-img-top img-fluid bg-light" src="<dtml-var portal_url>/imagens/Pautas.png" alt="Pautas">
+             <div class="card-body p-3 text-white">
+               <blockquote class="card-bodyquote">
+                 <h4 class="card-title font-size-15">Pautas das <dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao_plural"></h4>
+                 <p class="card-text text-white font-size-13">
+                     Utilizadas para se determinar quais matérias serão discutidas e votadas. A responsabilidade pela elaboração das Pautas é definida no Regimento Interno que, em geral, dá poderes ao Presidente da Casa Legislativa para a sua elaboração.
+                 </p>
+               </blockquote>
+             </div>
+          </a>
         </div>
-        </a>
       </div>
-  
-      <div class="col-12 col-md-6 col-lg-4 mt-3 mb-3 text-center homeBlock">
-        <a href="<dtml-var portal_url>/consultas/sessao_plenaria">      
-        <div class="homeContent rounded py-3 px-4">
-          <div class="homeTitle">
-            <img src="<dtml-var portal_url>/imagens/icon_plenarias.png" alt="Lista de Sessões">          
-            <h2 class="home"><dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao_plural"> Plenárias</h2>
-          </div>
-          <p style="font-size: 90%;">
-            Foro apropriado para a tomada de decisões sobre os projetos de lei e outras matérias legislativas,        
-            aprovadas ou rejeitadas em votação pelos vereadores. É dirigida pela <dtml-var expr="sapl_documentos.props_sagl.nome_mesa"> de acordo com o Regimento Interno da Casa. As decisões votadas em Plenário são soberanas.
-          </p>
+     <!-- end card-->
+     <div class="col">
+        <div class="card h-100 bg-primary">
+          <a href="<dtml-var portal_url>/consultas/sessao_plenaria">
+             <img class="card-img-top img-fluid bg-light" src="<dtml-var portal_url>/imagens/Sessoes.png" alt="<dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao_plural"> Plenárias">
+             <div class="card-body p-3 text-white">
+               <blockquote class="card-bodyquote">
+                 <h4 class="card-title font-size-15"><dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao_plural"> Plenárias</h4>
+                 <p class="card-text text-white font-size-13">
+                     Foro apropriado para a tomada de decisões sobre os projetos de lei e outras matérias legislativas, aprovadas ou rejeitadas em votação pelos vereadores. É dirigida pela <dtml-var expr="sapl_documentos.props_sagl.nome_mesa"> de acordo com o Regimento Interno da Casa. As decisões votadas em Plenário são soberanas.
+                 </p>
+               </blockquote>
+             </div>
+          </a>
         </div>
-        </a>
       </div>
-
-      <div class="col-12 col-md-6 col-lg-4 mt-3 mb-3 text-center homeBlock">
-        <a href="<dtml-var portal_url>/consultas/materia">      
-        <div class="homeContent rounded py-3 px-4">
-          <div class="homeTitle">
-            <img src="<dtml-var portal_url>/imagens/icon_materia_legislativa.png" alt="Lista de Matérias">
-            <h2 class="home">Matérias Legislativas</h2>
-          </div>
-          <p style="font-size: 90%;">
-            Têm início com o processo de criação de leis e a apresentação de projetos no Poder Legislativo.
-          </p>
+     <!-- end card-->
+     <div class="col">
+        <div class="card h-100 bg-primary">
+          <a href="<dtml-var portal_url>/consultas/materia">
+             <img class="card-img-top img-fluid bg-light" src="<dtml-var portal_url>/imagens/Materias.png" alt="Matérias Legislativas">
+             <div class="card-body p-3 text-white">
+               <blockquote class="card-bodyquote">
+                 <h4 class="card-title font-size-15">Matérias Legislativas</h4>
+                 <p class="card-text text-white font-size-13">
+                     Têm início com o processo de criação de leis e a apresentação de projetos no Poder Legislativo.
+                 </p>
+               </blockquote>
+             </div>
+          </a>
         </div>
-        </a>
       </div>
-
-      <div class="col-12 col-md-6 col-lg-4 mt-3 mb-3 text-center homeBlock">
-        <a href="<dtml-var portal_url>/consultas/norma_juridica">      
-        <div class="homeContent rounded py-3 px-4">
-          <div class="homeTitle">
-            <img src="<dtml-var portal_url>/imagens/icon_normas_juridicas.png" alt="Legislação Municipal">
-            <h2 class="home">Legislação</h2>
-          </div>
-          <p style="font-size: 90%;">
-            Nos Municípios, referem-se às emendas à Lei Orgânica, às leis complementares, às leis ordinárias,
-            aos decretos legislativos e às resoluções.
-          </p>
+     <!-- end card-->
+     <div class="col">
+        <div class="card h-100 bg-primary">
+          <a href="<dtml-var portal_url>/consultas/norma_juridica">
+             <img class="card-img-top img-fluid bg-light" src="<dtml-var portal_url>/imagens/Legislacao.png" alt="Legislação">
+             <div class="card-body p-3 text-white">
+               <blockquote class="card-bodyquote">
+                 <h4 class="card-title font-size-15">Legislação</h4>
+                 <p class="card-text text-white font-size-13">
+                     Nos Municípios, referem-se às emendas à Lei Orgânica, às leis complementares, às leis ordinárias, aos decretos legislativos e às resoluções.
+                 </p>
+               </blockquote>
+             </div>
+          </a>
         </div>
-        </a>
       </div>
-
-      <div class="col-12 col-md-6 col-lg-4 mt-3 mb-3 text-center homeBlock">
-        <a href="<dtml-var portal_url>/relatorios_administrativos">      
-        <div class="homeContent rounded py-3 px-4">
-          <div class="homeTitle">
-            <img src="<dtml-var portal_url>/imagens/icon_relatorios.png" alt="Relatórios Estatísticos">
-            <h2 class="home">Relatórios</h2>
-          </div>
-          <p style="font-size: 90%;">
-            Contêm informações estatísticas sobre a produção legislativa dos vereadores e da Casa, dispostas
-            e agrupadas de diferentes formas de acordo com parâmetros fornecidos.
-          </p>
+     <!-- end card-->
+     <div class="col">
+        <div class="card h-100 bg-primary">
+          <a href="<dtml-var portal_url>/consultas/relatorios_administrativos">
+             <img class="card-img-top img-fluid bg-light" src="<dtml-var portal_url>/imagens/Relatorios.png" alt="Relatórios Estatísticos">
+             <div class="card-body p-3 text-white">
+               <blockquote class="card-bodyquote">
+                 <h4 class="card-title font-size-15">Relatórios</h4>
+                 <p class="card-text text-white font-size-13">
+                     Contêm informações estatísticas sobre a produção legislativa dos vereadores e da Casa, dispostas e agrupadas de diferentes formas de acordo com parâmetros fornecidos.
+                 </p>
+               </blockquote>
+             </div>
+          </a>
         </div>
-        </a>
       </div>
-     
+     <!-- end card-->
   </div>
+  <!-- end row-->
 
 <dtml-comment>
-
 <div class="row mt-2">
  <div class="col-12">
    <div class="card mb-3">

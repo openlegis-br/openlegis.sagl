@@ -40,7 +40,7 @@
 
 <div class="row">
    <div class="col-4 col-xl-2 mb-3">
-    <label class="form-label" for="lst_ano_sessao">Selecione o Ano</label>
+    <label class="form-label" for="lst_ano_sessao"><span class="d-none d-md-inline">Selecione o </span>Ano</label>
                 <select class="form-select" id="lst_ano_sessao" name="lst_ano_sessao"  onChange="atualiza_ano_sessao(document.sessao_plen_form.lst_ano_sessao[document.sessao_plen_form.lst_ano_sessao.selectedIndex].value)">
                     <dtml-in expr="zsql.sessao_plenaria_listar_ano_zsql()">
                         <option value="<dtml-var ano_sessao missing>" 
@@ -56,7 +56,7 @@
                 </select>
    </div>
    <div class="col-4 col-xl-3 mb-3">   
-    <label class="form-label" for="lst_mes_sessao">Selecione o Mês</label>
+    <label class="form-label" for="lst_mes_sessao"><span class="d-none d-md-inline">Selecione o </span>Mês</label>
                 <select class="form-select" id="lst_mes_sessao" name="lst_mes_sessao"  onChange="atualiza_mes_sessao(document.sessao_plen_form.lst_ano_sessao[document.sessao_plen_form.lst_ano_sessao.selectedIndex].value, document.sessao_plen_form.lst_mes_sessao[document.sessao_plen_form.lst_mes_sessao.selectedIndex].value)">
                         <dtml-if expr="not _.has_key('ano_sessao_sel')">
                             <dtml-call expr="REQUEST.set('ano_sessao_sel', DateTime().strftime('%Y'))">
@@ -74,7 +74,7 @@
                 </select>
   </div>
    <div class="col-4 col-xl-2 mb-3">     
-    <label class="form-label" for="lst_dia_sessao">Selecione o Dia</label>
+    <label class="form-label" for="lst_dia_sessao"><span class="d-none d-md-inline">Selecione o </span>Dia</label>
                 <select class="form-select" id="lst_dia_sessao" name="lst_dia_sessao" onChange="atualiza_dia_sessao(document.sessao_plen_form.lst_ano_sessao[document.sessao_plen_form.lst_ano_sessao.selectedIndex].value, document.sessao_plen_form.lst_mes_sessao[document.sessao_plen_form.lst_mes_sessao.selectedIndex].value,document.sessao_plen_form.lst_dia_sessao[document.sessao_plen_form.lst_dia_sessao.selectedIndex].value)">
                   <option value="-1">Todos</option>
                   <dtml-if expr="_.has_key('mes_sessao_sel')">
@@ -91,7 +91,7 @@
                 </select>
    </div>
    <div class="col-12 col-xl-5 mb-3">
-    <label class="form-label" for="lst_tip_sessao">Tipo de <dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao"></label>
+    <label class="form-label" for="lst_tip_sessao">Tipo<span class="d-none d-md-inline"> de <dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao"></span></label>
                 <select class="form-select" id="lst_tip_sessao" name="lst_tip_sessao" onChange="atualiza_tip_sessao(document.sessao_plen_form.lst_ano_sessao[document.sessao_plen_form.lst_ano_sessao.selectedIndex].value, document.sessao_plen_form.lst_mes_sessao[document.sessao_plen_form.lst_mes_sessao.selectedIndex].value,document.sessao_plen_form.lst_dia_sessao[document.sessao_plen_form.lst_dia_sessao.selectedIndex].value,document.sessao_plen_form.lst_tip_sessao[document.sessao_plen_form.lst_tip_sessao.selectedIndex].value)">
                   <option value="-1">Todos</option>
                     <dtml-in expr="zsql.tipo_sessao_plenaria_obter_zsql()">
@@ -149,7 +149,6 @@
        <ul class="list-group list-group-flush">
      </dtml-if sequence-start>
 
-
    <li class="list-group-item">
      <div class="row">
        <div class="col-12">
@@ -162,7 +161,7 @@ inicio_sessao=<dtml-var dat_inicio_sessao missing>&num_legislatura=<dtml-var num
                <dtml-else>
                   <p class="h4 card-title text-uppercase"><dtml-var num_sessao_plen>ª <dtml-if expr="nom_sessao!='Audiência Pública'"><dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao"></dtml-if> <dtml-var nom_sessao> <dtml-if expr="cod_periodo_sessao != None"><dtml-in expr="zsql.periodo_sessao_obter_zsql(cod_periodo=cod_periodo_sessao)"> do <dtml-var num_periodo>º Período</dtml-in></dtml-if></p>
                </dtml-if>     
-               <p class="mb-1"><dtml-var num_sessao_leg>ª Sessão Legislativa da <dtml-var num_legislatura>ª Legislatura</p>
+               <p class="mb-0"><dtml-var num_sessao_leg>ª Sessão Legislativa da <dtml-var num_legislatura>ª Legislatura</p>
                <p class=""><dtml-var expr="pysc.data_converter_por_extenso_pysc(data=dat_inicio_sessao)"><span class="d-none d-sm-inline"> (<dtml-var dia_sessao>) </span> <dtml-var expr="pysc.hora_formatar_pysc(hora=hr_inicio_sessao)"> <dtml-if hr_fim_sessao> - Encerramento: <dtml-var expr="pysc.hora_formatar_pysc(hora=hr_fim_sessao)"></dtml-if></p>
             </dtml-in>
           </div>
@@ -175,7 +174,6 @@ inicio_sessao=<dtml-var dat_inicio_sessao missing>&num_legislatura=<dtml-var num
                       </dtml-let>
                     </dtml-if>
                  </dtml-let>
-
                  <dtml-if expr="zsql.expediente_materia_obter_zsql(cod_sessao_plen = cod_sessao_plen, ind_excluido=0)">
                       <a href="<dtml-var portal_url>/relatorios/pdf_expediente_preparar_pysc?data=<dtml-var dat_inicio_sessao>&cod_sessao_plen=<dtml-var cod_sessao_plen>" class="btn btn-primary" target="_blank"><i class="fa fa-fw fa-file-pdf"></i> Leitura</a>
                  </dtml-if>        
@@ -187,16 +185,15 @@ inicio_sessao=<dtml-var dat_inicio_sessao missing>&num_legislatura=<dtml-var num
                         </dtml-let>
                     </dtml-if>
                  </dtml-let>
-
                  <dtml-let id_pauta="str(cod_sessao_plen)+'_pauta_sessao.pdf'">
                  <dtml-let id_pauta_completa="str(cod_sessao_plen)+'_pauta_completa.pdf'">   
                    <dtml-if "hasattr(sapl_documentos.pauta_sessao,id_pauta_completa)">
                       <dtml-let pauta_completa="getattr(sapl_documentos.pauta_sessao,id_pauta_completa).absolute_url">
-                        <a class="btn btn-primary" href="<dtml-var pauta_completa>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fas fa-file-pdf"></i> <span class="">Pauta</span></a>
+                        <a class="btn btn-primary" href="<dtml-var pauta_completa>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fas fa-file-pdf"></i> Pauta</a>
                       </dtml-let>               
                    <dtml-elif "hasattr(sapl_documentos.pauta_sessao,id_pauta)">
                       <dtml-let pauta="getattr(sapl_documentos.pauta_sessao,id_pauta).absolute_url">
-                        <a class="btn btn-primary" href="<dtml-var pauta>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fas fa-file-pdf"></i> <span class="">Pauta</span></a>
+                        <a class="btn btn-primary" href="<dtml-var pauta>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fas fa-file-pdf"></i> Pauta</a>
                       </dtml-let>
                   </dtml-if>
                  </dtml-let>  
@@ -211,7 +208,6 @@ inicio_sessao=<dtml-var dat_inicio_sessao missing>&num_legislatura=<dtml-var num
                    </dtml-in>
                 </dtml-if>
             </dtml-comment>
-            
                  <dtml-let id_ata="str(cod_sessao_plen)+'_ata_sessao.pdf'">
                    <dtml-if "hasattr(sapl_documentos.ata_sessao,id_ata)">
                       <dtml-let ata="getattr(sapl_documentos.ata_sessao,id_ata).absolute_url">
@@ -219,14 +215,12 @@ inicio_sessao=<dtml-var dat_inicio_sessao missing>&num_legislatura=<dtml-var num
                        </dtml-let>
                    </dtml-if>
                  </dtml-let>
-
                  <dtml-if url_video>
-                    <a target="_blank" href="#" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Reprodução de Vídeo" data-src="<dtml-var url_video>" class="btn btn-primary"><i class="fab fa-fw fa-youtube"></i>Vídeo</a>       
+                    <a target="_blank" href="#" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Reprodução de Vídeo" data-src="<dtml-var url_video>" class="btn btn-danger"><i class="fab fa-fw fa-youtube"></i>Vídeo</a>       
                  </dtml-if>
-
                  <dtml-if expr="zsql.expediente_materia_obter_zsql(cod_sessao_plen = cod_sessao_plen, ind_excluido=0)">
                        <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador','Operador Sessao Plenaria', 'Operador Ordem Dia']) and int(cod_sessao_plen) > 1360">
-                         <a class="btn btn-primary" target="_blank" href="<dtml-var portal_url>/expediente_pdf?cod_sessao_plen=<dtml-var cod_sessao_plen>"><i class="fa fa-download"></i> Expediente</a>
+                         <a class="btn btn-secondary" target="_blank" href="<dtml-var portal_url>/expediente_pdf?cod_sessao_plen=<dtml-var cod_sessao_plen>"><i class="fa fa-download"></i> Expediente</a>
                        </dtml-if>
                  </dtml-if>
        </div>          
@@ -249,8 +243,11 @@ inicio_sessao=<dtml-var dat_inicio_sessao missing>&num_legislatura=<dtml-var num
 <dtml-else>
   <p>Nenhuma <dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao"> encontrada.</p>
 </dtml-in>
-
 </form>
+</div>
+      <div class="col-12 small text-muted mt-1 text-end">
+        <a href="<dtml-var portal_url>/@@sessoes" target="_blank"> <i class="mdi mdi-database-arrow-down"></i> Dados abertos</a>  
+      </div>
 
 <dtml-var js_slot>
 <dtml-var footer_html>

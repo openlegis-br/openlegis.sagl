@@ -70,7 +70,7 @@ class ProcessoLeg(grok.View):
                        dic["data"] = DateTime(proposicao.dat_recebimento, datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
                    dic['path'] = self.context.sapl_documentos.emenda
                    dic["file"] = str(eme.cod_emenda) + '_emenda.pdf'
-                   dic["title"] = 'Emenda ' + eme.des_tipo_ementa +  ' nº ' + str(eme.num_emenda)
+                   dic["title"] = 'Emenda ' + eme.des_tipo_emenda +  ' nº ' + str(eme.num_emenda)
                    lst_arquivos.append(dic)
             for relat in self.context.zsql.relatoria_obter_zsql(cod_materia=materia.cod_materia,ind_excluido=0):
                 if hasattr(self.context.sapl_documentos.parecer_comissao, str(relat.cod_relatoria) + '_parecer.pdf'):

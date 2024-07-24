@@ -21,16 +21,6 @@
   </div>
  </div>
 
-<dtml-if txt_finalidade>
- <div class="row">
-  <div class="col-12 mb-3">
-     <dtml-in expr="zsql.tipo_comissao_obter_zsql(tip_comissao=tip_comissao)">
-        <b>Finalidade:</b> <dtml-var txt_finalidade>
-     </dtml-in>
-  </div>
- </div>
-</dtml-if>
-
 <div class="row">
  <div class="col-12 col-lg-4">
    <div class="card mb-4">
@@ -122,7 +112,7 @@
    <div class="row">
       <div class="col-12">
         <div class="card">
-           <h6 class="card-header">Composição Atual</h6>
+        <h6 class="card-header">Composição Atual</h6>
         <dtml-in expr="zsql.periodo_comp_comissao_obter_zsql(ind_excluido=0)">
            <dtml-if expr="(DateTime() >= DateTime(dat_inicio)) and (DateTime() <= DateTime(dat_fim))">
             <dtml-in expr="zsql.composicao_comissao_obter_zsql(cod_comissao=cod_comissao, cod_periodo_comp=cod_periodo_comp)">
@@ -175,6 +165,19 @@
          </dtml-in>
       </div>
      </div>
+    <dtml-if txt_finalidade>
+     <div class="row">
+      <div class="col-12">
+        <div class="card">
+          <h6 class="card-header">Finalidade</h6>
+          <dtml-in expr="zsql.tipo_comissao_obter_zsql(tip_comissao=tip_comissao)">
+             <dtml-var txt_finalidade>
+          </dtml-in>
+        </div>
+      </div>
+     </div>
+    </dtml-if>
+
   </div>
 </div>
 <div class="col-12 small d-flex align-items-start justify-content-end"><a href="<dtml-var portal_url>/@@comissoes/<dtml-var cod_comissao>" target="_blank"> <i class="mdi mdi-database-arrow-down"></i> Dados abertos</a></div>

@@ -33,35 +33,19 @@
    
    <div class="row">
      <div class="col-6 col-md-3 mb-3">
-            <label class="form-label" for="txt_dat_inicio_periodo" class="form-label required">Data Inicial</label>
-            <input class="form-control date" type="text" name="txt_dat_inicio_periodo" id="txt_dat_inicio_periodo" required />
+            <label class="form-label required" for="txt_dat_inicio_periodo">Data Inicial</label>
+            <div class="input-group" id="datepicker1">
+              <input type="text" class="form-control datepicker" placeholder="dd/mm/aaaa" name="txt_dat_inicio_periodo" id="txt_dat_inicio_periodo" data-provide="datepicker" data-date-autoclose="true" autocomplete="off" data-date-container="#datepicker1">
+              <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
+           </div>        
      </div>
      <div class="col-6 col-md-3 mb-3">
-           <label class="form-label" for="txt_dat_fim_periodo" class="form-label required">Data Final</label>
-           <input class="form-control date" type="text" name="txt_dat_fim_periodo" id="txt_dat_fim_periodo" required />
+           <label class="form-label required" for="txt_dat_fim_periodo">Data Final</label>
+            <div class="input-group" id="datepicker2">
+              <input type="text" class="form-control datepicker" placeholder="dd/mm/aaaa" name="txt_dat_fim_periodo" id="txt_dat_fim_periodo" data-provide="datepicker" data-date-autoclose="true" autocomplete="off" data-date-container="#datepicker2">
+              <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
+           </div>       
      </div>
-    <script>
-        $('#txt_dat_inicio_periodo').datepicker({
-            locale: 'pt-br',
-            icons: {rightIcon: '<i class="fa fa-fw fa-calendar-alt"></i>'},
-            format: 'dd/mm/yyyy',
-            uiLibrary: 'bootstrap4',
-            iconsLibrary: 'fontawesome',
-            maxDate: function () {
-                return $('#txt_dat_fim_periodo').val();
-            }
-        });
-        $('#txt_dat_fim_periodo').datepicker({
-            locale: 'pt-br',
-            icons: {rightIcon: '<i class="fa fa-fw fa-calendar-alt"></i>'},
-            format: 'dd/mm/yyyy',
-            uiLibrary: 'bootstrap4',
-            iconsLibrary: 'fontawesome',
-            minDate: function () {
-                return $('#txt_dat_inicio_periodo').val();
-            }
-        });
-    </script>
      <div class="col-12 col-md-6 mb-3">
              <label class="form-label" for="lst_cod_unid_tram_dest">Unidade de Tramitação</label>
              <select class="form-select" id="lst_cod_unid_tram_dest" name="lst_cod_unid_tram_dest">

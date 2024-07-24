@@ -1,27 +1,6 @@
 <dtml-var header_html>
 
-<style type="text/css">
-.linha div#menu {
-    display: none;
-}
-table {
-  width: 100%;
-}
-table tr th, table tr td {
-  padding: 6px 2px 6px 2px !important;
-  text-align: center !important;}
-  table tr:last-child td {
-}
-   table tr td {
-    border: 1px solid #dcdcdc !important;
-}
-table tr:first-child th {
-    border: 1px solid #dcdcdc !important;
-}
-table tr th {
-    border: 1px solid #dcdcdc !important;
-}
-</style>
+
 
 <dtml-in expr="legislatura_ano_obter_zsql(ano=lst_ano_sessao)">
    <dtml-call expr="REQUEST.set('hdn_num_legislatura', num_legislatura)">
@@ -32,17 +11,17 @@ table tr th {
         <h1 class="firstHeading font-size-18">Frequência nas Sessões - <dtml-var lst_ano_sessao></h1>
       </div>
       <div class="col-12 col-md-6 text-start text-md-end">
-         <div class="btn-group d-print-none ">
+         <div class="btn-group btn-sm d-print-none ">
            <input class="btn btn-primary" type="button" name="print_button" value="Imprimir" onClick="window.print();" />
-           <input class="btn btn-primary" type="button" value="Retornar" onclick="history.go(-1)">   
+           <input class="btn btn-secondary" type="button" value="Voltar" onclick="history.go(-1)">   
          </div>
       </div>
  </div>
 
-<div class="table-responsive">
-<table class="table table-sm" style="font-size: 14px; padding: 0;">
-  <thead>
-      <tr>
+<div class="table-responsive mt-3">
+<table class="table table-sm table-bordered">
+  <thead class="table-light">
+      <tr class="text-center">
         <th rowspan="2" style="vertical-align: middle">
           PARLAMENTAR
         </th>
@@ -92,58 +71,58 @@ table tr th {
          FREQUÊNCIA
         </th>
       </tr>
-   <tr>
-      <th>P</th>
-      <th>A</th>
-      <th>F</th>
+   <tr class="text-center">
+      <th class="bg-success-subtle">P</th>
+      <th class="bg-warning-subtle">A</th>
+      <th class="bg-danger-subtle">F</th>
 
-      <th>P</th>
-      <th>A</th>
-      <th>F</th>
+      <th class="bg-success-subtle">P</th>
+      <th class="bg-warning-subtle">A</th>
+      <th class="bg-danger-subtle">F</th>
 
-      <th>P</th>
-      <th>A</th>
-      <th>F</th>
+      <th class="bg-success-subtle">P</th>
+      <th class="bg-warning-subtle">A</th>
+      <th class="bg-danger-subtle">F</th>
 
-      <th>P</th>
-      <th>A</th>
-      <th>F</th>
+      <th class="bg-success-subtle">P</th>
+      <th class="bg-warning-subtle">A</th>
+      <th class="bg-danger-subtle">F</th>
 
-      <th>P</th>
-      <th>A</th>
-      <th>F</th>
+      <th class="bg-success-subtle">P</th>
+      <th class="bg-warning-subtle">A</th>
+      <th class="bg-danger-subtle">F</th>
 
-      <th>P</th>
-      <th>A</th>
-      <th>F</th>
+      <th class="bg-success-subtle">P</th>
+      <th class="bg-warning-subtle">A</th>
+      <th class="bg-danger-subtle">F</th>
 
-      <th>P</th>
-      <th>A</th>
-      <th>F</th>
+      <th class="bg-success-subtle">P</th>
+      <th class="bg-warning-subtle">A</th>
+      <th class="bg-danger-subtle">F</th>
 
-      <th>P</th>
-      <th>A</th>
-      <th>F</th>
+      <th class="bg-success-subtle">P</th>
+      <th class="bg-warning-subtle">A</th>
+      <th class="bg-danger-subtle">F</th>
 
-      <th>P</th>
-      <th>A</th>
-      <th>F</th>
+      <th class="bg-success-subtle">P</th>
+      <th class="bg-warning-subtle">A</th>
+      <th class="bg-danger-subtle">F</th>
 
-      <th>P</th>
-      <th>A</th>
-      <th>F</th>
+      <th class="bg-success-subtle">P</th>
+      <th class="bg-warning-subtle">A</th>
+      <th class="bg-danger-subtle">F</th>
 
-      <th>P</th>
-      <th>A</th>
-      <th>F</th>
+      <th class="bg-success-subtle">P</th>
+      <th class="bg-warning-subtle">A</th>
+      <th class="bg-danger-subtle">F</th>
 
-      <th>P</th>
-      <th>A</th>
-      <th>F</th>
+      <th class="bg-success-subtle">P</th>
+      <th class="bg-warning-subtle">A</th>
+      <th class="bg-danger-subtle">F</th>
 
-      <th>P</th>
-      <th>A</th>
-      <th>F</th>
+      <th class="bg-success-subtle">P</th>
+      <th class="bg-warning-subtle">A</th>
+      <th class="bg-danger-subtle">F</th>
 
       <th>(P+A+F)</th>
 
@@ -153,61 +132,59 @@ table tr th {
 
  <tbody>
  <dtml-in expr="parlamentar_listar_zsql(num_legislatura=hdn_num_legislatura,ano=lst_ano_sessao)">
-   <tr>
-     <td width="25%">
+   <tr class="text-center">
+     <td width="25%" class="bg-primary-subtle">
        <dtml-var nom_parlamentar> <dtml-if expr="ind_titular==0">(S)</dtml-if>
      </td>
-
      <dtml-in prefix="loop" expr="_.range(1,13)">
       <dtml-call expr="REQUEST.set('mes_sel', loop_item)">
       <dtml-in expr="parlamentar_presenca_mensal_zsql(cod_parlamentar=cod_parlamentar,ano=lst_ano_sessao,mes=mes_sel)">
-       <td>
+       <td class="bg-success-subtle">
          <dtml-var P>
        </td>
       </dtml-in>
       <dtml-in expr="parlamentar_ausencia_mensal_zsql(cod_parlamentar=cod_parlamentar,ano=lst_ano_sessao,mes=mes_sel)">
-       <td>
+       <td class="bg-warning-subtle">
          <dtml-var A>
        </td>
       </dtml-in>
       <dtml-in expr="parlamentar_falta_mensal_zsql(cod_parlamentar=cod_parlamentar,ano=lst_ano_sessao,mes=mes_sel)">
-       <td>
+       <td class="bg-danger-subtle">
          <dtml-var F>
        </td>
       </dtml-in>
       </dtml-in>
       <dtml-in expr="parlamentar_presenca_anual_zsql(cod_parlamentar=cod_parlamentar,ano=lst_ano_sessao)">
-       <td>
+       <td class="bg-success-subtle">
          <dtml-var P>
        </td>
       </dtml-in>
       <dtml-in expr="parlamentar_ausencia_anual_zsql(cod_parlamentar=cod_parlamentar,ano=lst_ano_sessao)">
-       <td>
+       <td class="bg-warning-subtle">
          <dtml-var A>
        </td>
       </dtml-in>
       <dtml-in expr="parlamentar_falta_anual_zsql(cod_parlamentar=cod_parlamentar,ano=lst_ano_sessao)">
-       <td>
+       <td class="bg-danger-subtle">
          <dtml-var F>
        </td>
       </dtml-in>
       <dtml-in expr="parlamentar_total_anual_zsql(cod_parlamentar=cod_parlamentar,ano=lst_ano_sessao)">
-       <td>
+       <td class="bg-primary-subtle">
          <dtml-var T>
        </td>
       </dtml-in>
       <dtml-in expr="parlamentar_frequencia_anual_zsql(cod_parlamentar=cod_parlamentar,ano=lst_ano_sessao)">
-       <td>
+       <td class="bg-primary-subtle">
          <dtml-var F>
        </td>
       </dtml-in>
   </tr> 
 </dtml-in>
  </tbody>
-
   <tfoot>
    <tr>
-      <th colspan="42">Legenda: P = presença, A = ausência justificada, F = falta, S = suplente</th>
+      <th colspan="42" class="table-light text-center">Legenda: P = presença, A = ausência justificada, F = falta, S = suplente</th>
    </tr>
   <tfoot>
 </table>
@@ -215,9 +192,9 @@ table tr th {
 
 <div style="page-break-after: always"></div>
 
-<legend class="font-size-16">Sessões Ordinárias</legend>
-<table class="table" style="font-size: 14px; padding: 0;">
- <thead>
+<legend class="font-size-16 text-center">Sessões Ordinárias</legend>
+<table class="table table-sm table-bordered text-center">
+ <thead class="table-light">
    <tr>
      <th width="25%">Número</th>
      <th>Data</th>
@@ -248,7 +225,7 @@ table tr th {
            <dtml-var A>
          <dtml-else>
            <dtml-in expr="sessao_listar_ausencia_zsql(cod_sessao_plen=cod_sessao_plen)">
-              <li style="display: inline;"><dtml-var sequence-number> - <dtml-var nom_parlamentar missing null=""> (<dtml-var txt_justif_ausencia missing null="">)</li><dtml-unless sequence-end><br /></dtml-unless>
+              <li style="display: inline;"><dtml-var sequence-number> - <dtml-var nom_parlamentar missing null=""> <span class="text-muted"><dtml-var txt_justif_ausencia missing null=""></span></li><dtml-unless sequence-end><br /></dtml-unless>
            </dtml-in>
          </dtml-if>
         </dtml-in>
@@ -272,9 +249,9 @@ table tr th {
 <br/>
 <div style="page-break-after: always"></div>
 
-<legend class="font-size-16">Sessões Extraordinárias</legend>
-<table class="table" style="font-size: 14px; padding: 0;">
- <thead>
+<legend class="font-size-16 text-center">Sessões Extraordinárias</legend>
+<table class="table table-sm table-bordered text-center">
+ <thead class="table-light">
    <tr>
      <th width="25%">Número</th>
      <th>Data</th>
@@ -305,7 +282,7 @@ table tr th {
            <dtml-var A>
          <dtml-else>
            <dtml-in expr="sessao_listar_ausencia_zsql(cod_sessao_plen=cod_sessao_plen)">
-              <li style="display: inline;"><dtml-var sequence-number> - <dtml-var nom_parlamentar missing null=""> (<dtml-var txt_justif_ausencia missing null="">)</li><dtml-unless sequence-end><br /></dtml-unless>
+              <li style="display: inline;"><dtml-var sequence-number> - <dtml-var nom_parlamentar missing null=""> <span class="text-muted"><dtml-var txt_justif_ausencia missing null=""></span></li><dtml-unless sequence-end><br /></dtml-unless>
            </dtml-in>
          </dtml-if>
         </dtml-in>
@@ -329,13 +306,13 @@ table tr th {
 <br/>
 <div style="page-break-after: always"></div>
 
-<legend class="font-size-16">Afastamentos / Licenças</legend>
+<legend class="font-size-16 text-center">Afastamentos / Licenças</legend>
 
 <dtml-in expr="zsql.afastamento_ano_obter_zsql(ano=lst_ano_sessao)">
 
   <dtml-if sequence-start>
-        <table class="table" style="font-size: 14px; padding: 0;">
-         <thead>
+        <table class="table table-sm table-bordered text-center">
+         <thead class="table-light">
            <tr>
              <th>Parlamentar</th>
              <th>Motivo</th>

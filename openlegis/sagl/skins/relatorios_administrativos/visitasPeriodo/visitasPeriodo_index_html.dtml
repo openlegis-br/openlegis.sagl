@@ -85,42 +85,25 @@ function clear_form_elements(ele) {
 
   <div class="row">
     <div class="col-6 mb-3">
-      <label class="form-label" for="txt_dat_visita" class="form-label required">Data Inicial</label>
-      <input class="form-control date" type="text" id="txt_dat_visita" name="txt_dat_visita" value="<dtml-var txt_dat_visita missing>" onblur="formata_data(form.txt_dat_visita)" />
+      <label class="form-label required" for="txt_dat_visita">Data Inicial</label>
+            <div class="input-group" id="datepicker1">
+              <input type="text" class="form-control datepicker" placeholder="dd/mm/aaaa" name="txt_dat_visita" id="txt_dat_visita" data-provide="datepicker" data-date-autoclose="true" autocomplete="off" data-date-container="#datepicker1" value="<dtml-var txt_dat_visita missing>">
+              <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
+           </div> 
     </div>
     <div class="col-6 mb-3">
-      <label class="form-label" for="txt_dat_visita2" class="form-label required">Data Final</label>
-      <input class="form-control date" type="text" id="txt_dat_visita2" name="txt_dat_visita2" value="<dtml-var txt_dat_visita2 missing>" onblur="formata_data(form.txt_dat_visita2)" />
+      <label class="form-label required" for="txt_dat_visita2">Data Final</label>
+            <div class="input-group" id="datepicker2">
+              <input type="text" class="form-control datepicker" placeholder="dd/mm/aaaa" name="txt_dat_visita2" id="txt_dat_visita2" data-provide="datepicker" data-date-autoclose="true" autocomplete="off" data-date-container="#datepicker2" value="<dtml-var txt_dat_visita2 missing>">
+              <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
+           </div> 
     </div>
   </div>
-
-    <script>
-        $('#txt_dat_visita').datepicker({
-            locale: 'pt-br',
-            icons: {rightIcon: '<i class="fa fa-fw fa-calendar-alt"></i>'},
-            format: 'dd/mm/yyyy',
-            uiLibrary: 'bootstrap4',
-            iconsLibrary: 'fontawesome',
-            maxDate: function () {
-                return $('#txt_dat_visita2').val();
-            }
-        });
-        $('#txt_dat_visita2').datepicker({
-            locale: 'pt-br',
-            icons: {rightIcon: '<i class="fa fa-fw fa-calendar-alt"></i>'},
-            format: 'dd/mm/yyyy',
-            uiLibrary: 'bootstrap4',
-            iconsLibrary: 'fontawesome',
-            minDate: function () {
-                return $('#txt_dat_visita').val();
-            }
-        });
-    </script> 
 
   <div class="row">
     <div class="col-12 mb-3">  
       <label class="form-label" for="lst_funcionario">Funcionário</label>
-      <select class="form-select" id="lst_funcionario" name="lst_funcionario" <dtml-if dat_saida>disabled</dtml-if> >
+      <select class="select2 form-select" id="lst_funcionario" name="lst_funcionario" <dtml-if dat_saida>disabled</dtml-if> style="width:100%">
         <option value=""></option>
         <dtml-in expr="zsql.funcionario_obter_zsql(ind_excluido=0)">
           <option
@@ -150,7 +133,7 @@ function clear_form_elements(ele) {
      </div>
     </div>
 
-    <div class="text-start">
+    <div class="tbtn-group">
         <input class="btn btn-primary" type="button" name="button" value="Gerar relatório" onClick="campos_criticar()" />
         <input class="btn btn-secondary" type="button" name="btn_materia_limpar" value="Limpar" onclick="clear_form_elements('#relvisita')" >
     </div>
@@ -163,7 +146,7 @@ function clear_form_elements(ele) {
  <h5>Visitas no período de <dtml-var txt_dat_visita> a <dtml-var txt_dat_visita2>: <dtml-var sequence-length> ocorrências</h5>
  <br />
     <table class="table">
-     <thead>
+     <thead class="table-light">
       <tr>
        <th>Data de Entrada</th>
        <th>Visitante</th>
@@ -195,7 +178,7 @@ function clear_form_elements(ele) {
      <h5>Visitantes no período de <dtml-var txt_dat_visita> a <dtml-var txt_dat_visita2></h5>
  <br />
     <table class="table">
-     <thead>
+     <thead class="table-light">
       <tr>
        <th>Funcionário</th>
        <th>Visitantes</th>
@@ -206,7 +189,7 @@ function clear_form_elements(ele) {
       <td><dtml-var nom_funcionario></td>
       <td>
         <dtml-in expr="qtdeFuncionario(cod_funcionario=cod_funcionario,dat_visita=txt_dat_visita,dat_visita2=txt_dat_visita2)">
-           <div align="center"><dtml-var qtde></div>
+           <dtml-var qtde>
         </dtml-in>
       </td>
      </tr>
@@ -215,7 +198,7 @@ function clear_form_elements(ele) {
       <td><b>TOTAL DE VISITANTES</b></td>
       <td>
         <dtml-in expr="qtdeTotal(dat_visita=txt_dat_visita,dat_visita2=txt_dat_visita2)">
-           <div align="center"><b><dtml-var qtde></b></div>
+           <b><dtml-var qtde></b>
         </dtml-in>
       </td>
      </tr>

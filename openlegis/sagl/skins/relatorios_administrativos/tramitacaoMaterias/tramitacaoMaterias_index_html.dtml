@@ -8,7 +8,7 @@
    <div class="row">
     <div class="col-12 col-md-6 mb-3">  
             <label class="form-label" for="lst_tip_materia">Tipo de Matéria</label>
-             <select id="lst_tip_materia" name="lst_tip_materia" class="form-control selectpicker" data-dropup-auto="false" data-size="6" multiple="multiple" data-actions-box="true" title="Todos" data-header="Tipo de Matéria" data-selected-text-format="count > 3">
+             <select id="lst_tip_materia" name="lst_tip_materia" class="select2 form-control selectpicker" data-dropup-auto="false" data-size="6" multiple="multiple" data-actions-box="true" title="Todos" data-header="Tipo de Matéria" style="width: 100%">
 	               <dtml-in expr="zsql.tipo_materia_legislativa_obter_zsql(ind_excluido=0)">
 	                 <option value="<dtml-var tip_materia>">
 	                  <dtml-var des_tipo_materia>
@@ -27,16 +27,10 @@
    </div> 
    <div class="col-6 col-md-3 mb-3">  
              <label class="form-label" for="dat_przlim">Prazo de Tramitação</label>
-             <input class="form-control date" type="text" id="dat_przlim" name="dat_przlim"  value="<dtml-var dat_przlim missing null=" ">" />
-    <script>
-        $('#dat_przlim').datepicker({
-            locale: 'pt-br',
-            icons: {rightIcon: '<i class="fa fa-fw fa-calendar-alt"></i>'},
-            format: 'dd/mm/yyyy',
-            uiLibrary: 'bootstrap4',
-            iconsLibrary: 'fontawesome'
-        });
-    </script>             
+            <div class="input-group" id="datepicker1">
+              <input type="text" class="form-control datepicker" placeholder="dd/mm/aaaa" name="dat_przlim" id="dat_przlim" data-provide="datepicker" data-date-autoclose="true" autocomplete="off" data-date-container="#datepicker1" value="<dtml-var dat_przlim missing>">
+              <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
+           </div>           
    </div> 
  
   </div>
@@ -45,7 +39,7 @@
   
     <div class="col-12 col-md-6 mb-3">
       <label class="form-label" for="hdn_cod_autor">Autoria</label>
-        <select id="hdn_cod_autor" name="hdn_cod_autor" class="form-control selectpicker show-tick" data-size="6" data-live-search="true" title="Todas" data-header="Pesquisar Autor">
+        <select id="hdn_cod_autor" name="hdn_cod_autor" class="select2 form-control selectpicker" data-size="6" data-live-search="true" title="Todas" data-header="Pesquisar Autor" style="width: 100%">
               <option value="">Todas</option>
               <dtml-in expr="zsql.autor_obter_zsql(ind_excluido=0)">
                 <option value="<dtml-var cod_autor>"><dtml-var nom_autor_join></option>
@@ -56,7 +50,7 @@
    
    <div class="col-12 col-md-6 mb-3">  
              <label class="form-label" for="Dst_cod_unid_tram_local">Localização</label>
-             <select class="form-select" id="Dst_cod_unid_tram_local" name="Dst_cod_unid_tram_local">
+             <select class="select2 form-select" id="Dst_cod_unid_tram_local" name="Dst_cod_unid_tram_local" style="width: 100%">
                <option value="">Todas</option>
                  <dtml-in expr="zsql.unidade_tramitacao_obter_zsql(ind_leg=1)">
                    <option 
@@ -71,7 +65,7 @@
 
    <div class="col-12 col-md-6 mb-3">  
             <label class="form-label" for="lst_status">Situação</label>
-            <select class="form-select" id="lst_status" name="lst_status">
+            <select class="select2 form-select" id="lst_status" name="lst_status" style="width: 100%">
               <option value="">Todas</option>
               <dtml-in expr="zsql.status_tramitacao_obter_zsql()">
                 <option <dtml-if expr="_.has_key('cod_status')">
@@ -89,9 +83,8 @@
    </div>
 
   </div>
-
      
-  <div class="text-start">
+  <div class="btn-group text-start">
     <input class="btn btn-primary" type="submit" value="Pesquisar">
     <input class="btn btn-secondary" type="reset" value="Limpar">
   </div>

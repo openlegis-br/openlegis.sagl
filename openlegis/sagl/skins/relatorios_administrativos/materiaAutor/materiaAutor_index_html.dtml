@@ -84,7 +84,7 @@ function clear_form_elements(ele) {
   <div class="row">
     <div class="col-12 col-sm-6 mb-3">
       <label class="form-label" for="txt_autor">Autor</label>
-        <select id="hdn_cod_autor" name="hdn_cod_autor" class="form-control selectpicker show-tick" data-size="6" data-live-search="true" data-header="Pesquisar Autor">
+        <select id="hdn_cod_autor" name="hdn_cod_autor" class="select2 form-control selectpicker show-tick" data-size="6" data-live-search="true" data-header="Pesquisar Autor" style="width: 100%">
               <option value="0">Selecione</option>
               <dtml-in expr="zsql.autor_obter_zsql(ind_excluido=0)">
                 <option value="<dtml-var cod_autor>"
@@ -96,7 +96,7 @@ function clear_form_elements(ele) {
      </div>
     <div class="col-12 col-sm-6 mb-3">
       <label class="form-label" for="lst_tip_materia">Tipo de Matéria</label>
-        <select  id="lst_tip_materia" name="lst_tip_materia" class="form-control selectpicker" data-dropup-auto="false" data-size="6" multiple="multiple" data-actions-box="true" title="Todos" data-header="Tipo de Matéria" data-selected-text-format="count > 3">
+        <select  id="lst_tip_materia" name="lst_tip_materia" class="select2 form-control selectpicker" data-dropup-auto="false" data-size="6" multiple="multiple" data-actions-box="true" title="Todos" data-header="Tipo de Matéria" style="width: 100%">
           <dtml-in expr="zsql.tipo_materia_legislativa_obter_zsql(tip_natureza='P', ind_excluido=0)">
             <option
              <dtml-if expr="_.has_key('lst_tip_materia') and pysc.verifica_lista_pysc(lst_tip_materia)">            
@@ -118,35 +118,19 @@ function clear_form_elements(ele) {
 
    <div class="row">
      <div class="col-6 col-md-3 mb-3">
-            <label class="form-label" for="dt_apres" class="form-label required">Data Inicial</label>
-            <input class="form-control date" type="text" name="dt_apres" id="dt_apres" value="<dtml-var dt_apres missing>" required />
+            <label class="form-label required" for="dt_apres">Data Inicial</label>
+            <div class="input-group" id="datepicker1">
+              <input type="text" class="form-control datepicker" placeholder="dd/mm/aaaa" name="dt_apres" id="dt_apres" data-provide="datepicker" data-date-autoclose="true" autocomplete="off" value="<dtml-var dt_apres missing>">
+              <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
+           </div>   
      </div>
      <div class="col-6 col-md-3 mb-3">
            <label class="form-label" for="dt_apres2" class="form-label required">Data Final</label>
-           <input class="form-control date" type="text" name="dt_apres2" id="dt_apres2" value="<dtml-var dt_apres2 missing>" required />
+            <div class="input-group" id="datepicker2">
+              <input type="text" class="form-control datepicker" placeholder="dd/mm/aaaa" name="dt_apres2" id="dt_apres2" data-provide="datepicker" data-date-autoclose="true" autocomplete="off" value="<dtml-var dt_apres2 missing>">
+              <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
+           </div> 
      </div>
-    <script>
-        $('#dt_apres').datepicker({
-            locale: 'pt-br',
-            icons: {rightIcon: '<i class="fa fa-fw fa-calendar-alt"></i>'},
-            format: 'dd/mm/yyyy',
-            uiLibrary: 'bootstrap4',
-            iconsLibrary: 'fontawesome',
-            maxDate: function () {
-                return $('#dt_apres2').val();
-            }
-        });
-        $('#dt_apres2').datepicker({
-            locale: 'pt-br',
-            icons: {rightIcon: '<i class="fa fa-fw fa-calendar-alt"></i>'},
-            format: 'dd/mm/yyyy',
-            uiLibrary: 'bootstrap4',
-            iconsLibrary: 'fontawesome',
-            minDate: function () {
-                return $('#dt_apres').val();
-            }
-        });
-    </script>
     <div class="col-6 col-md-3 mb-3">
       <label class="form-label d-block">Modo de Exibição</label>
           <dtml-in expr="['Resumido', 'Detalhado']">
@@ -161,10 +145,14 @@ function clear_form_elements(ele) {
        </div>
   </div>
 
-
       <div class="text-start">
         <input class="btn btn-primary" type="button" name="button" value="Gerar relatório" onClick="return campos_criticar(form)" />
       </div>
+<div class="row">
+    <div class="col-md-12 mt-2">
+       <p class="text-muted small font-size-12"><i class="fas fa-asterisk text-danger"></i> Campos obrigatórios</p>
+    </div>
+</div>
 
 </form>
 </dtml-if>
@@ -181,23 +169,23 @@ function clear_form_elements(ele) {
  <table class="table table-sm mt-4">
  <thead> 
   <tr>
-   <th colspan="3">
-     <h3 align="center">
+   <th colspan="3" class="table-light text-center">
+     <h5 class="mb-0">
        <dtml-var nom_autor_join missing> 
-     </h3>
+     </h5>
    </th>
   </tr>
  </thead>
   <tr>
-     <td width="90%"><b>Tipo de Matéria</b></td>
+     <td width="80%"><b>Tipo de Matéria</b></td>
      <td><b>Quantidade</b></td>
   </tr> 
  <dtml-in expr="tipoQtdeAutor(autor=cod_autor,tip_materia_sel=lst_tip_materia,dat_apresentacao=dt_apres,dat_apresentacao2=dt_apres2)">
   <tr>
-   <td width="90%">
+   <td>
      <dtml-var des_tipo_materia>
    </td>
-   <td align="center">
+   <td>
      <dtml-var qtde>
    </td>
   </tr>
@@ -207,7 +195,7 @@ function clear_form_elements(ele) {
    <td>
      <b>TOTAL DO AUTOR</b>
    </td>
-   <td align="center">
+   <td>
      <b><dtml-var qtde></b>
    </td>
   </tr>
@@ -218,10 +206,10 @@ function clear_form_elements(ele) {
  <dtml-in expr="materiaAutorAno(autor=cod_autor,tip_materia_sel=lst_tip_materia,dat_apresentacao=dt_apres,dat_apresentacao2=dt_apres2)">
  <dtml-if sequence-start>
    <table class="table table-sm">
-     <thead>
+     <thead class="table-light">
      <tr>
       <th>Identificação da Matéria</th>
-      <th>Situação</th>
+      <th width="20%">Situação</th>
      </thead>
   </dtml-if>
   </tr>
@@ -229,8 +217,8 @@ function clear_form_elements(ele) {
    <td>
      <dtml-var sequence-number>)
      <a href="<dtml-var portal_url>/consultas/materia/materia_mostrar_proc?cod_materia=<dtml-var expr="pysc.b64encode_pysc(codigo=cod_materia)">" target="_blank">
-      <b><dtml-var des_tipo_materia> nº <dtml-var num_ident_basica>/<dtml-var ano_ident_basica></a></b>
-     - <dtml-var txt_ementa> 
+      <dtml-var des_tipo_materia> nº <dtml-var num_ident_basica>/<dtml-var ano_ident_basica></a>
+     <br /> <b>Ementa:</b> <dtml-var txt_ementa> 
      <dtml-if expr="sgl_tipo_materia=='IND' and dat_fim_prazo and dat_fim_prazo!=''">
        - <b>Vencimento:</b> <dtml-var dat_fim_prazo>
      </dtml-if>
@@ -259,13 +247,13 @@ function clear_form_elements(ele) {
  <dtml-in expr="tipoQtdeGeral(tip_materia_sel=lst_tip_materia,dat_apresentacao=dt_apres,dat_apresentacao2=dt_apres2)">
   <dtml-if sequence-start>
   <table class="table table-sm">
-     <thead>
+     <thead class="table-light">
        <tr>
-        <th colspan="2" class="label"><h3 align="center">QUADRO GERAL</h3></th>
+        <th colspan="2" class="label text-center"><h5 class="mb-0">QUADRO GERAL</h5></th>
       </tr>
      </thead>
      <tr>
-       <td width="90%"><b>Tipo de Matéria</b></td>
+       <td width="80%"><b>Tipo de Matéria</b></td>
        <td><b>Quantidade</b></td>
     </tr>    
   </dtml-if>
@@ -273,7 +261,7 @@ function clear_form_elements(ele) {
    <td>
      <dtml-var sgl_tipo_materia> - <dtml-var des_tipo_materia>
    </td>
-   <td width="20%" align="center">
+   <td>
      <dtml-var qtde>
    </td>
   </tr>
@@ -283,7 +271,7 @@ function clear_form_elements(ele) {
    <td>
      <b>TOTAL GERAL</b>
    </td>
-   <td align="center">
+   <td>
      <b><dtml-var qtde></b>
    </td>
   </tr>

@@ -1,8 +1,41 @@
 <dtml-var header_html>
 
-<script src="<dtml-var portal_url>/js/moment.min.js""></script>
-<script src="<dtml-var portal_url>/js/datetime-moment.js"></script>
+<h1 class="firstHeading font-size-18">Prazos de Deliberação Vencidos</h1>
 
+    <dtml-in expr="zsql.materia_prazo_deliberacao_vencido_zsql()">
+        <dtml-if sequence-start>
+        <div class="table-responsive">        
+        <table class="table" id="jdTable">
+         <thead class="table-light">
+            <tr>
+                <th>Matéria</th>
+                <th>Vencimento</th>
+            </tr>
+         </thead>
+        </dtml-if sequence-start>
+          <tr>
+            <td>
+              <b><a href="<dtml-var portal_url>/cadastros/materia/materia_mostrar_proc?cod_materia=<dtml-var cod_materia>" target="_blank">
+                 <dtml-var des_tipo_materia missing> nº <dtml-var num_ident_basica missing>/<dtml-var ano_ident_basica missing></b></a> - 
+                 <dtml-in expr="zsql.autoria_obter_zsql(cod_materia=cod_materia)">
+                   <dtml-var nom_autor_join><dtml-unless sequence-end>,</dtml-unless>
+                 </dtml-in>
+                 - <dtml-var txt_ementa>
+            </td>
+            <td>
+               <dtml-var dat_fim_prazo>
+            </td>
+        </tr>
+    <dtml-if sequence-end>
+         <tbody>
+     </table>
+     </div>
+  </dtml-if sequence-end>
+  <dtml-else>
+     <p>Nenhuma ocorrência.</p>
+</dtml-in>
+
+<dtml-var js_slot>
 <script>
 
 $(document).ready(function() {
@@ -12,35 +45,6 @@ $(document).ready(function() {
         "lengthMenu": [[10, 25, 50, 100], [10, 25, 50, 100]],
         "lengthChange": true,
         "order": [[1, "asc"]],                                     
-        "buttons": [
-            {
-                extend: 'collection',
-                text: 'Exportar',
-                buttons: [ 
-                           {
-                             extend:    'excelHtml5',
-                             text:      '<i class="far fa-file-excel"></i> Excel',
-                             titleAttr: 'PDF'
-                           },
-                           {
-                             extend:    'pdfHtml5',
-                             download: 'open',
-                             text:      '<i class="fa fa-file-adobe"></i> PDF',
-                             titleAttr: 'PDF'
-                           },
-                           {
-                             extend:    'print',
-                             text:      '<i class="fa fa-print"></i> Impressão',
-                             titleAttr: 'Impressão'
-                           },
-                         ],
-               className: '',
-               dropup: true,
-               autoClose: true,
-               fade: true
-
-            }
-        ],
         "language": {
           search: "Pesquisar:",
           processing:     "Processando...",
@@ -72,41 +76,4 @@ $(document).ready(function() {
         .appendTo( '#panelBtn .col-sm-12:eq(0)' );  
 });
 </script>
-
-<h1 class="firstHeading font-size-18">Prazos de Deliberação Vencidos</h1>
-
-    <dtml-in expr="zsql.materia_prazo_deliberacao_vencido_zsql()">
-        <dtml-if sequence-start>
-        <div class="table-responsive">        
-        <table class="table" id="jdTable">
-         <thead>
-            <tr>
-                <th>Matéria</th>
-                <th>Vencimento</th>
-            </tr>
-         </thead>
-        </dtml-if sequence-start>
-          <tr>
-            <td>
-              <b><a href="<dtml-var portal_url>/cadastros/materia/materia_mostrar_proc?cod_materia=<dtml-var cod_materia>" target="_blank">
-                 <dtml-var des_tipo_materia missing> nº <dtml-var num_ident_basica missing>/<dtml-var ano_ident_basica missing></b></a> - 
-                 <dtml-in expr="zsql.autoria_obter_zsql(cod_materia=cod_materia)">
-                   <dtml-var nom_autor_join><dtml-unless sequence-end>,</dtml-unless>
-                 </dtml-in>
-                 - <dtml-var txt_ementa>
-            </td>
-            <td>
-               <dtml-var dat_fim_prazo>
-            </td>
-        </tr>
-    <dtml-if sequence-end>
-         <tbody>
-     </table>
-     </div>
-  </dtml-if sequence-end>
-  <dtml-else>
-     <p>Nenhuma ocorrência.</p>
-</dtml-in>
-
-<dtml-var js_slot>
 <dtml-var footer_html>

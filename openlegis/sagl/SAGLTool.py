@@ -1038,30 +1038,30 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
     def get_proposicao_image_one(self, num_proposicao):
         id_image1 = str(num_proposicao) + '_image_1.jpg'
         arq = getattr(self.sapl_documentos.proposicao, id_image1)
-        content = BytesIO(bytes(arq.data))
-        image_one = content.getvalue()
-        return image_one
+        with BytesIO(bytes(arq.data)) as content:
+             image_one = content.getvalue()
+             return image_one           
 
     def get_proposicao_image_two(self, num_proposicao):
         id_image2 = str(num_proposicao) + '_image_2.jpg'
         arq = getattr(self.sapl_documentos.proposicao, id_image2)
-        content = BytesIO(bytes(arq.data))
-        image_two = content.getvalue()
-        return image_two
+        with BytesIO(bytes(arq.data)) as content:
+             image_two = content.getvalue()
+             return image_two 
 
     def get_proposicao_image_three(self, num_proposicao):
         id_image3 = str(num_proposicao) + '_image_3.jpg'
         arq = getattr(self.sapl_documentos.proposicao, id_image3)
-        content = BytesIO(bytes(arq.data))
-        image_three = content.getvalue()
-        return image_three
+        with BytesIO(bytes(arq.data)) as content:
+             image_three = content.getvalue()
+             return image_three 
 
     def get_proposicao_image_four(self, num_proposicao):
         id_image4 = str(num_proposicao) + '_image_4.jpg'
         arq = getattr(self.sapl_documentos.proposicao, id_image4)
-        content = BytesIO(bytes(arq.data))
-        image_four = content.getvalue()
-        return image_four
+        with BytesIO(bytes(arq.data)) as content:
+             image_four = content.getvalue()
+             return image_four 
 
     def proposicao_gerar_odt(self, inf_basicas_dic, num_proposicao, nom_arquivo, des_tipo_materia, num_ident_basica, ano_ident_basica, txt_ementa, materia_vinculada, dat_apresentacao, nom_autor, apelido_autor, modelo_proposicao, modelo_path):
         utool = getToolByName(self, 'portal_url')
@@ -1078,25 +1078,25 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         exec('brasao = brasao_file')
         if (inf_basicas_dic['des_tipo_proposicao'] == 'Requerimento' or inf_basicas_dic['des_tipo_proposicao'] == 'Indicação'):
            id_imagem1 = str(num_proposicao)+'_image_1.jpg'
-           image1 = None
            if hasattr(self.sapl_documentos.proposicao, id_imagem1):
-              image_one = self.get_proposicao_image_one(num_proposicao=num_proposicao)
-              exec ('image1 = image_one')
+              image1 = self.get_proposicao_image_one(num_proposicao=num_proposicao)
+           else:
+              image1 = ''
            id_imagem2 = str(num_proposicao)+'_image_2.jpg'
-           image2 = None
            if hasattr(self.sapl_documentos.proposicao, id_imagem2):
-              image_two = self.get_proposicao_image_two(num_proposicao=num_proposicao)
-              exec ('image2 = image_two')
+              image2 = self.get_proposicao_image_two(num_proposicao=num_proposicao)
+           else:
+              image2 = ''
            id_imagem3 = str(num_proposicao)+'_image_3.jpg'
-           image3 = None
            if hasattr(self.sapl_documentos.proposicao, id_imagem3):
-              image_three = self.get_proposicao_image_three(num_proposicao=num_proposicao)
-              exec ('image3 = image_three')
+              image3 = self.get_proposicao_image_three(num_proposicao=num_proposicao)
+           else:
+              image3 = ''
            id_imagem4 = str(num_proposicao)+'_image_4.jpg'
-           image4 = None
            if hasattr(self.sapl_documentos.proposicao, id_imagem4):
-              image_four = self.get_proposicao_image_four(num_proposicao=num_proposicao)
-              exec ('image4 = image_four')
+              image4 = self.get_proposicao_image_four(num_proposicao=num_proposicao)
+           else:
+              image4 = ''          
         renderer = Renderer(template_file, locals(), nom_arquivo, pythonWithUnoPath='/usr/bin/python3',forceOoCall=True)
         renderer.run()
         data = open(nom_arquivo, "rb").read()

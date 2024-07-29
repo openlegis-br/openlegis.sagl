@@ -175,13 +175,12 @@ inicio_sessao=<dtml-var dat_inicio_sessao missing>&num_legislatura=<dtml-var num
                     </dtml-if>
                  </dtml-let>
                  <dtml-if expr="zsql.expediente_materia_obter_zsql(cod_sessao_plen = cod_sessao_plen, ind_excluido=0)">
-                      <a href="<dtml-var portal_url>/relatorios/pdf_expediente_preparar_pysc?data=<dtml-var dat_inicio_sessao>&cod_sessao_plen=<dtml-var cod_sessao_plen>" class="btn btn-primary" target="_blank"><i class="fa fa-fw fa-file-pdf"></i> Leitura</a>
+                      <a href="<dtml-var portal_url>/relatorios/pdf_expediente_preparar_pysc?data=<dtml-var dat_inicio_sessao>&cod_sessao_plen=<dtml-var cod_sessao_plen>" class="btn btn-light" target="_blank"><i class="fa fa-fw fa-file-pdf"></i> Leitura</a>
                  </dtml-if>        
-
                  <dtml-let id_oradores="str(cod_sessao_plen)+'_oradores_expediente.pdf'">
                     <dtml-if "hasattr(sapl_documentos.oradores_expediente,id_oradores)">
                         <dtml-let oradores="getattr(sapl_documentos.oradores_expediente,id_oradores).absolute_url">
-                             <a target="_blank" href="<dtml-var oradores>?<dtml-var expr="ZopeTime().timeTime()">" class="btn btn-primary"><i class="fa fa-fw fa-file-pdf"></i>Oradores</a>
+                             <a target="_blank" href="<dtml-var oradores>?<dtml-var expr="ZopeTime().timeTime()">" class="btn btn-secondary"><i class="fa fa-fw fa-file-pdf"></i>Oradores</a>
                         </dtml-let>
                     </dtml-if>
                  </dtml-let>
@@ -211,7 +210,7 @@ inicio_sessao=<dtml-var dat_inicio_sessao missing>&num_legislatura=<dtml-var num
                  <dtml-let id_ata="str(cod_sessao_plen)+'_ata_sessao.pdf'">
                    <dtml-if "hasattr(sapl_documentos.ata_sessao,id_ata)">
                       <dtml-let ata="getattr(sapl_documentos.ata_sessao,id_ata).absolute_url">
-                           <a target="_blank" href="<dtml-var ata>?<dtml-var expr="ZopeTime().timeTime()">" class="btn btn-primary"><i class="fa fa-fw fa-file-pdf"></i>Ata</a>    
+                           <a target="_blank" href="<dtml-var ata>?<dtml-var expr="ZopeTime().timeTime()">" class="btn btn-secondary"><i class="fa fa-fw fa-file-pdf"></i>Ata</a>    
                        </dtml-let>
                    </dtml-if>
                  </dtml-let>

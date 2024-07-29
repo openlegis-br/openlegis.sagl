@@ -1,6 +1,6 @@
 <dtml-var header_html>
 
-<h1 class="firstHeading font-size-18">Matérias com Tramitação Vencida</h1>
+<h1 class="firstHeading font-size-18">Matérias com Prazo de Tramitação Vencido</h1>
 
     <dtml-in expr="zsql.tramitacao_prazo_vencido_obter_zsql()">
         <dtml-if sequence-start>
@@ -22,7 +22,7 @@
                  <dtml-in expr="zsql.autoria_obter_zsql(cod_materia=cod_materia)">
                    <b><dtml-var nom_autor_join><dtml-unless sequence-end>,</dtml-unless></b>
                  </dtml-in>
-                 - <dtml-var txt_ementa>
+                 <br /> <b>Ementa:</b> <dtml-var txt_ementa>
             </td>
             <td>
               <dtml-if cod_unid_tram_dest>

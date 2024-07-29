@@ -1,6 +1,6 @@
 <dtml-var header_html>
 
-<h1 class="firstHeading font-size-18">Prazos de Deliberação Vencidos</h1>
+<h1 class="firstHeading font-size-18">Matérias com Prazo de Deliberação Vencido</h1>
 
     <dtml-in expr="zsql.materia_prazo_deliberacao_vencido_zsql()">
         <dtml-if sequence-start>
@@ -8,8 +8,8 @@
         <table class="table" id="jdTable">
          <thead class="table-light">
             <tr>
-                <th>Matéria</th>
-                <th>Vencimento</th>
+                <th>Identificação da Matéria</th>
+                <th>Prazo de Deliberação</th>
             </tr>
          </thead>
         </dtml-if sequence-start>
@@ -18,9 +18,9 @@
               <b><a href="<dtml-var portal_url>/cadastros/materia/materia_mostrar_proc?cod_materia=<dtml-var cod_materia>" target="_blank">
                  <dtml-var des_tipo_materia missing> nº <dtml-var num_ident_basica missing>/<dtml-var ano_ident_basica missing></b></a> - 
                  <dtml-in expr="zsql.autoria_obter_zsql(cod_materia=cod_materia)">
-                   <dtml-var nom_autor_join><dtml-unless sequence-end>,</dtml-unless>
+                   <b><dtml-var nom_autor_join><dtml-unless sequence-end>,</dtml-unless></b>
                  </dtml-in>
-                 - <dtml-var txt_ementa>
+                 <br /> <b>Ementa:</b><dtml-var txt_ementa>
             </td>
             <td>
                <dtml-var dat_fim_prazo>

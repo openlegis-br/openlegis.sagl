@@ -35,10 +35,6 @@ def rodape(dic_rodape):
         inha1 = linha1 + " " + dic_rodape['sgl_uf']
     if dic_rodape['num_tel']!="" and dic_rodape['num_tel']!=None:
         linha1 = linha1 + " Tel: "+ dic_rodape['num_tel']
-    if dic_rodape['end_web_casa']!="" and dic_rodape['end_web_casa']!=None:
-        linha2 = dic_rodape['end_web_casa']
-    if dic_rodape['end_email_casa']!="" and dic_rodape['end_email_casa']!=None:
-        linha2 = linha2 + " - E-mail: " + dic_rodape['end_email_casa']
     if dic_rodape['data_emissao']!="" and dic_rodape['data_emissao']!=None:
         data_emissao = dic_rodape['data_emissao']
 
@@ -47,7 +43,6 @@ def rodape(dic_rodape):
     tmp+='\t\t\t\t<drawString x="3.3cm" y="2.2cm">' + data_emissao + '</drawString>\n'
     tmp+='\t\t\t\t<drawString x="18.4cm" y="2.2cm">Página <pageNumber/></drawString>\n'
     tmp+='\t\t\t\t<drawCentredString x="11.5cm" y="1.6cm">' + linha1 + '</drawCentredString>\n'
-    tmp+='\t\t\t\t<drawCentredString x="11.5cm" y="1.2cm">' + linha2 + '</drawCentredString>\n'
 
     return tmp
 

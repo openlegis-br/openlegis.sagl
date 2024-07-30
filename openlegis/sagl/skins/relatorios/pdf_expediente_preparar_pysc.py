@@ -40,7 +40,7 @@ for sessao in context.zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=cod_sessao
   pauta_dic["dat_fim_sessao"] = sessao.dat_fim_sessao
   pauta_dic["hr_fim_sessao"] = sessao.hr_fim_sessao
   pauta_dic["num_periodo"] = ''
-  if sessao.cod_periodo != None:
+  if sessao.cod_periodo_sessao != None:
      for periodo in context.zsql.periodo_sessao_obter_zsql(cod_periodo=sessao.cod_periodo_sessao):
          pauta_dic["num_periodo"] = periodo.num_periodo
 

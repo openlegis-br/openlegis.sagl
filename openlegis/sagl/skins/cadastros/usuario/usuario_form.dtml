@@ -86,7 +86,7 @@ select#perfis, select#lst_unidade, select#lst_peticionamento {
        </div>
        <div class="col-12 col-md-6 mb-3">
        
-          <div class="form-check form-check-inline">
+          <div class="form-check form-check-inline d-block">
             <input class="form-check-input" type="checkbox" name="chk_ind_ativo" id="chk_ind_ativo" value="1" <dtml-if expr="_.has_key('cod_usuario') and _.has_key('ind_ativo') and ind_ativo==1">checked<dtml-elif expr="not _.has_key('cod_usuario')">checked</dtml-if> <dtml-unless expr="AUTHENTICATED_USER.has_role(['Administrador'])">onclick="return false;" onkeydown="return false;"</dtml-unless> />
             <label class="form-check-label" for="chk_ind_ativo">Ativo ?</label>
           </div>   
@@ -97,7 +97,7 @@ select#perfis, select#lst_unidade, select#lst_peticionamento {
                    <dtml-call expr="REQUEST.set('nom_completo', nom_assessor)">
                    <dtml-call expr="REQUEST.set('nom_cargo', des_cargo)">
                    <dtml-in expr="zsql.parlamentar_obter_zsql(cod_parlamentar=cod_parlamentar)"> 
-                      <label class="form-label" for="nome_autor">Parlamentar Vinculado</label>
+                      <label class="form-label" for="nome_autor">Gabinete do Vereador</label>
                       <input class="form-control" id="tipo_autor" type="text" value="<dtml-var nom_parlamentar>" disabled>                                                   
                    </dtml-in>
                  </dtml-if>
@@ -110,8 +110,8 @@ select#perfis, select#lst_unidade, select#lst_peticionamento {
                      <dtml-call expr="REQUEST.set('nom_cargo', 'Vereador')">                     
                    </dtml-in>
                    <label class="form-label" for="nome_autor">Nome do Vereador</label>
-                   <input class="form-control" id="nome_autor" type="text" value="<dtml-var nom_vereador>" disabled>
-                   <label class="form-label" for="tipo_autor" class="mt-3">Tipo de Autor</label>
+                   <input class="form-control mb-3" id="nome_autor" type="text" value="<dtml-var nom_vereador>" disabled>
+                   <label class="form-label" for="tipo_autor">Tipo de Autor</label>
                    <input class="form-control" id="tipo_autor" type="text" value="<dtml-var des_tipo_autor>" disabled>
                 </dtml-if>
              </dtml-in>

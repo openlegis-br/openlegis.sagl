@@ -16,8 +16,9 @@
  <thead class="table-light">
   <tr>
     <th width="20%">Nome do Usuário</th>
-    <th>Nome Completo</th>
+    <th width="30%">Nome Completo</th>
     <th>Perfil</th>
+    <th>Status</th>
   </tr>
  </thead>
  <tbody>
@@ -26,7 +27,7 @@
         <dtml-unless "('Manager' in user_roles)">
             <tr>
               <td>
-                <a href="usuario_mostrar_proc?nome=<dtml-var sequence-item>"><i class="fa fa-fw fa-user"></i> <dtml-var sequence-item></a>
+                <a class="btn btn-sm btn-link" href="usuario_mostrar_proc?nome=<dtml-var sequence-item>"><i class="fa fa-fw fa-user"></i> <dtml-var sequence-item></a>
               </td>
               <td>
                 <dtml-in expr="zsql.usuario_obter_zsql(col_username=_['sequence-item'])">
@@ -35,9 +36,26 @@
               </td>
               <td>
                  <dtml-in user_roles>
-                  <dtml-if expr="_['sequence-item'] != 'Authenticated'">             
-                    <i class="fas fa-fw fa-caret-right"></i><dtml-var sequence-item>
+                  <dtml-if expr="_['sequence-item'] == 'Administrador'">
+                     <span class="badge bg-danger font-size-12"><dtml-var sequence-item></span>
+                  <dtml-elif expr="_['sequence-item'] == 'Operador'">
+                     <span class="badge bg-primary font-size-12"><dtml-var sequence-item></span>
+                  <dtml-elif expr="_['sequence-item'] != 'Authenticated'">             
+                     <span class="badge bg-light font-size-12"><dtml-var sequence-item></span>
                   </dtml-if>
+                 </dtml-in>
+              </td>
+              <td>
+                 <dtml-in expr="zsql.usuario_obter_zsql(col_username=_['sequence-item'])">
+                   <dtml-if expr="_.has_key('cod_usuario')">
+                      <dtml-if expr="ind_ativo==1">
+                         Ativo
+                      <dtml-else>
+                         <span class="text-muted">Inativo</span>
+                      </dtml-if>
+                   </dtml-if>
+                 <dtml-else>
+                    <span class="text-muted">Incompleto</span>
                  </dtml-in>
               </td>
             </tr>

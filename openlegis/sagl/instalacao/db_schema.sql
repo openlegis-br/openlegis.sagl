@@ -366,6 +366,21 @@ CREATE TABLE IF NOT EXISTS `categoria_instituicao` (
   KEY `tip_instituicao` (`tip_instituicao`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE IF NOT EXISTS `cientificacao_documento` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `cod_documento` int NOT NULL,
+  `cod_cientificador` int NOT NULL,
+  `dat_envio` datetime NOT NULL,
+  `dat_expiracao` datetime DEFAULT NULL,
+  `cod_cientificado` int NOT NULL,
+  `dat_leitura` datetime DEFAULT NULL,
+  `ind_excluido` int NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  KEY `cod_documento` (`cod_documento`),
+  KEY `cod_cientificador` (`cod_cientificador`),
+  KEY `cod_cientificado` (`cod_cientificado`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 CREATE TABLE IF NOT EXISTS `coligacao` (
   `cod_coligacao` int NOT NULL AUTO_INCREMENT,
   `num_legislatura` int NOT NULL,
@@ -1349,7 +1364,7 @@ CREATE TABLE IF NOT EXISTS `pessoa` (
 CREATE TABLE IF NOT EXISTS `peticao` (
   `cod_peticao` int NOT NULL AUTO_INCREMENT,
   `tip_peticionamento` int NOT NULL,
-  `txt_descricao` varchar(400) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `txt_descricao` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `cod_usuario` int NOT NULL,
   `cod_materia` int DEFAULT NULL,
   `cod_doc_acessorio` int DEFAULT NULL,
@@ -2210,6 +2225,11 @@ ALTER TABLE `autoria_substitutivo`
 ALTER TABLE `bancada`
   ADD CONSTRAINT `bancada_ibfk_1` FOREIGN KEY (`cod_partido`) REFERENCES `partido` (`cod_partido`) ON DELETE RESTRICT,
   ADD CONSTRAINT `bancada_ibfk_2` FOREIGN KEY (`num_legislatura`) REFERENCES `legislatura` (`num_legislatura`) ON DELETE RESTRICT ON UPDATE RESTRICT;
+
+ALTER TABLE `cientificacao_documento`
+  ADD CONSTRAINT `cientificacao_documento_ibfk_1` FOREIGN KEY (`cod_documento`) REFERENCES `documento_administrativo` (`cod_documento`) ON DELETE RESTRICT ON UPDATE RESTRICT,
+  ADD CONSTRAINT `cientificacao_documento_ibfk_2` FOREIGN KEY (`cod_cientificador`) REFERENCES `usuario` (`cod_usuario`) ON DELETE RESTRICT ON UPDATE RESTRICT,
+  ADD CONSTRAINT `cientificacao_documento_ibfk_3` FOREIGN KEY (`cod_cientificado`) REFERENCES `usuario` (`cod_usuario`) ON DELETE RESTRICT ON UPDATE RESTRICT;
 
 ALTER TABLE `coligacao`
   ADD CONSTRAINT `coligacao_ibfk_1` FOREIGN KEY (`num_legislatura`) REFERENCES `legislatura` (`num_legislatura`) ON DELETE RESTRICT ON UPDATE RESTRICT;

@@ -1,3 +1,4 @@
+SET FOREIGN_KEY_CHECKS=0;
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
 SET time_zone = "+00:00";
@@ -388,6 +389,21 @@ CREATE TABLE IF NOT EXISTS `categoria_instituicao` (
   `ind_excluido` int NOT NULL DEFAULT '0',
   PRIMARY KEY (`cod_categoria`,`tip_instituicao`) USING BTREE,
   KEY `tip_instituicao` (`tip_instituicao`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `cientificacao_documento` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `cod_documento` int NOT NULL,
+  `cod_cientificador` int NOT NULL,
+  `dat_envio` datetime NOT NULL,
+  `dat_expiracao` datetime DEFAULT NULL,
+  `cod_cientificado` int NOT NULL,
+  `dat_leitura` datetime DEFAULT NULL,
+  `ind_excluido` int NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  KEY `cod_documento` (`cod_documento`),
+  KEY `cod_cientificador` (`cod_cientificador`),
+  KEY `cod_cientificado` (`cod_cientificado`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `coligacao` (
@@ -6976,7 +6992,7 @@ CREATE TABLE IF NOT EXISTS `pessoa` (
 CREATE TABLE IF NOT EXISTS `peticao` (
   `cod_peticao` int NOT NULL AUTO_INCREMENT,
   `tip_peticionamento` int NOT NULL,
-  `txt_descricao` varchar(400) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `txt_descricao` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `cod_usuario` int NOT NULL,
   `cod_materia` int DEFAULT NULL,
   `cod_doc_acessorio` int DEFAULT NULL,
@@ -7533,6 +7549,17 @@ CREATE TABLE IF NOT EXISTS `tipo_vinculo_norma` (
   KEY `tip_situacao` (`tip_situacao`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+INSERT INTO `tipo_vinculo_norma` (`cod_tip_vinculo`, `tipo_vinculo`, `des_vinculo`, `des_vinculo_passivo`, `tip_situacao`, `ind_excluido`) VALUES
+(1, 'A', 'Altera', 'Alterada por', 12, 0),
+(2, 'C', 'Norma correlata', 'Norma correlata', 1, 0),
+(3, 'G', 'Regulamenta', 'Regulamentada por', 1, 0),
+(4, 'H', 'Suspende a execução', 'Execução suspensa por ADIN', 5, 0),
+(5, 'P', 'Revoga parcialmente', 'Revogada parcialmente por', 3, 0),
+(6, 'R', 'Revoga', 'Revogada por', 2, 0),
+(7, 'T', 'Revoga por consolidação', 'Revogação por consolidação', 4, 0),
+(8, 'B', 'Suspende parcialmente', 'Parcialmente suspensa por ADIN', 5, 0),
+(9, 'D', 'Declaração de Constitucionalidade', 'Execução mantida por ADIN', 13, 0);
+
 CREATE TABLE IF NOT EXISTS `tipo_votacao` (
   `tip_votacao` int NOT NULL AUTO_INCREMENT,
   `des_tipo_votacao` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
@@ -7837,6 +7864,11 @@ ALTER TABLE `autoria_substitutivo`
 ALTER TABLE `bancada`
   ADD CONSTRAINT `bancada_ibfk_1` FOREIGN KEY (`cod_partido`) REFERENCES `partido` (`cod_partido`) ON DELETE RESTRICT,
   ADD CONSTRAINT `bancada_ibfk_2` FOREIGN KEY (`num_legislatura`) REFERENCES `legislatura` (`num_legislatura`) ON DELETE RESTRICT ON UPDATE RESTRICT;
+
+ALTER TABLE `cientificacao_documento`
+  ADD CONSTRAINT `cientificacao_documento_ibfk_1` FOREIGN KEY (`cod_documento`) REFERENCES `documento_administrativo` (`cod_documento`) ON DELETE RESTRICT ON UPDATE RESTRICT,
+  ADD CONSTRAINT `cientificacao_documento_ibfk_2` FOREIGN KEY (`cod_cientificador`) REFERENCES `usuario` (`cod_usuario`) ON DELETE RESTRICT ON UPDATE RESTRICT,
+  ADD CONSTRAINT `cientificacao_documento_ibfk_3` FOREIGN KEY (`cod_cientificado`) REFERENCES `usuario` (`cod_usuario`) ON DELETE RESTRICT ON UPDATE RESTRICT;
 
 ALTER TABLE `coligacao`
   ADD CONSTRAINT `coligacao_ibfk_1` FOREIGN KEY (`num_legislatura`) REFERENCES `legislatura` (`num_legislatura`) ON DELETE RESTRICT ON UPDATE RESTRICT;
@@ -8161,6 +8193,7 @@ ALTER TABLE `vinculo_norma_juridica`
 ALTER TABLE `visita`
   ADD CONSTRAINT `visita_ibfk_2` FOREIGN KEY (`cod_pessoa`) REFERENCES `pessoa` (`cod_pessoa`) ON DELETE CASCADE,
   ADD CONSTRAINT `visita_ibfk_3` FOREIGN KEY (`cod_funcionario`) REFERENCES `funcionario` (`cod_funcionario`) ON DELETE RESTRICT ON UPDATE RESTRICT;
+SET FOREIGN_KEY_CHECKS=1;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

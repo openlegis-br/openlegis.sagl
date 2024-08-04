@@ -32,6 +32,7 @@ class ProcessoNorma(grok.View):
         for norma in self.context.zsql.norma_juridica_obter_zsql(cod_norma=cod_norma):
             processo_integral = norma.sgl_tipo_norma+'-'+str(norma.num_norma)+'-'+str(norma.ano_norma)+'.pdf'
             id_processo = norma.sgl_tipo_norma + ' ' + str(norma.num_norma) + '/' +str(norma.ano_norma)
+            id_norma = norma.des_tipo_norma + ' nº ' + str(norma.num_norma) + '/' +str(norma.ano_norma)
 
             nom_arquivo_compilado = str(cod_norma) + '_texto_consolidado.pdf'
             nom_arquivo = str(cod_norma) + '_texto_integral.pdf'
@@ -41,7 +42,7 @@ class ProcessoNorma(grok.View):
                dic["data"] = DateTime(norma.dat_norma, datefmt='international').strftime('%Y-%m-%d 00:00:01')
                dic['path'] = self.context.sapl_documentos.norma_juridica
                dic['file'] = nom_arquivo_compilado
-               dic['title'] = 'Texto Compilado do ' + str(id_processo)
+               dic['title'] = 'Texto Compilado' + str(id_processo)
                lst_arquivos.append(dic)
 
             if hasattr(self.context.sapl_documentos.norma_juridica, nom_arquivo):
@@ -49,7 +50,7 @@ class ProcessoNorma(grok.View):
                dic["data"] = DateTime(norma.dat_norma, datefmt='international').strftime('%Y-%m-%d 00:00:02')
                dic['path'] = self.context.sapl_documentos.norma_juridica
                dic['file'] = nom_arquivo
-               dic['title'] = 'Texto Original do ' + str(id_processo)
+               dic['title'] = id_norma
                lst_arquivos.append(dic)
 
             for anexo in self.context.zsql.anexo_norma_obter_zsql(cod_norma=norma.cod_norma, ind_excluido=0):

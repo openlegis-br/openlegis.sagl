@@ -40,7 +40,7 @@ class otimizarADM(grok.View):
                     os.unlink(os.path.join(dirtemp) + '/' + file)
         
         if action == 'download':
-           db = MySQLdb.connect(host="localhost", user="sagl", passwd="sagl", db="cmuberlandia_openlegis")
+           db = MySQLdb.connect(host="localhost", user="sagl", passwd="sagl", db="openlegis")
            cur = db.cursor()
            lst_documentos = []
            cur.execute('SELECT cod_documento from documento_administrativo WHERE ind_excluido = 0 ORDER BY cod_documento;')
@@ -49,7 +49,7 @@ class otimizarADM(grok.View):
                lst_documentos.append(row_id)
            db.close()
 
-           db = MySQLdb.connect(host="localhost", user="sagl", passwd="sagl", db="cmuberlandia_openlegis")
+           db = MySQLdb.connect(host="localhost", user="sagl", passwd="sagl", db="openlegis")
            cur = db.cursor()
            lst_acessorios = []
            cur.execute('SELECT cod_documento_acessorio from documento_acessorio_administrativo WHERE ind_excluido = 0 ORDER BY cod_documento_acessorio;')
@@ -139,7 +139,7 @@ class otimizarTramADM(grok.View):
                     os.unlink(os.path.join(dirtemp) + '/' + file)
                      
         if action == 'download':
-           db = MySQLdb.connect(host="localhost", user="sagl", passwd="sagl", db="cmuberlandia_openlegis")
+           db = MySQLdb.connect(host="localhost", user="sagl", passwd="sagl", db="openlegis")
            cur = db.cursor()
            lst_tramitacoes = []
            cur.execute('SELECT cod_tramitacao from tramitacao_administrativo WHERE ind_excluido = 0 ORDER BY cod_tramitacao;')

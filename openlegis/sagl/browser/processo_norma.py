@@ -41,7 +41,7 @@ class ProcessoNorma(grok.View):
                dic["data"] = DateTime(norma.dat_norma, datefmt='international').strftime('%Y-%m-%d 00:00:01')
                dic['path'] = self.context.sapl_documentos.norma_juridica
                dic['file'] = nom_arquivo_compilado
-               dic['title'] = 'Texto Compilado'
+               dic['title'] = 'Texto Compilado do ' + str(id_processo)
                lst_arquivos.append(dic)
 
             if hasattr(self.context.sapl_documentos.norma_juridica, nom_arquivo):
@@ -49,7 +49,7 @@ class ProcessoNorma(grok.View):
                dic["data"] = DateTime(norma.dat_norma, datefmt='international').strftime('%Y-%m-%d 00:00:02')
                dic['path'] = self.context.sapl_documentos.norma_juridica
                dic['file'] = nom_arquivo
-               dic['title'] = 'Texto Original'
+               dic['title'] = 'Texto Original do ' + str(id_processo)
                lst_arquivos.append(dic)
 
             for anexo in self.context.zsql.anexo_norma_obter_zsql(cod_norma=norma.cod_norma, ind_excluido=0):

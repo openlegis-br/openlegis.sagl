@@ -42,7 +42,7 @@ class ProcessoNorma(grok.View):
                dic["data"] = DateTime(norma.dat_norma, datefmt='international').strftime('%Y-%m-%d 00:00:01')
                dic['path'] = self.context.sapl_documentos.norma_juridica
                dic['file'] = nom_arquivo_compilado
-               dic['title'] = 'Texto Compilado' + str(id_processo)
+               dic['title'] = 'Texto Compilado'
                lst_arquivos.append(dic)
 
             if hasattr(self.context.sapl_documentos.norma_juridica, nom_arquivo):

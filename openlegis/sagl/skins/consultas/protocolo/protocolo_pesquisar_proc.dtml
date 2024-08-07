@@ -120,15 +120,17 @@
                  <dtml-if sequence-start>
                     <b>Registro Derivado:</b> 
                  </dtml-if>
-                 <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia'])">
-                    <a href="<dtml-var portal_url>/cadastros/materia/materia_mostrar_proc?cod_materia=<dtml-var cod_materia>">
-                 <dtml-else>
-                    <a href="<dtml-var portal_url>/consultas/materia/materia_mostrar_proc?cod_materia=<dtml-var expr="pysc.b64encode_pysc(codigo=cod_materia)">" >
-                 </dtml-if>
+                 <dtml-if cod_materia>
+                    <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia'])">
+                       <a href="<dtml-var portal_url>/cadastros/materia/materia_mostrar_proc?cod_materia=<dtml-var cod_materia>">
+                    <dtml-else>
+                       <a href="<dtml-var portal_url>/consultas/materia/materia_mostrar_proc?cod_materia=<dtml-var expr="pysc.b64encode_pysc(codigo=cod_materia)">" >
+                    </dtml-if>
                  <dtml-var sgl_tipo_materia> <dtml-var num_ident_basica>/<dtml-var ano_ident_basica></a> 
                  <dtml-unless sequence-end>
                     -
                  </dtml-unless>
+                </dtml-if>
               </dtml-in>
               <br />
            <dtml-elif expr="tip_natureza_materia==2">

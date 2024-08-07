@@ -5,7 +5,6 @@
 <script src="<dtml-var portal_url>/js/datetime-moment.js"></script>
 
 <script>
-
   function campos_criticar(form){
 
       var form = document.auditoria_form;
@@ -48,6 +47,148 @@
 
 </script>
 
+<style>
+.display {
+    font-size: 90%;
+}
+</style>
+
+<div class="row mb-2">
+  <div class="col-12 col-lg-8">
+    <h1 class="firstHeading font-size-18">Logs de Auditoria</h1>
+  </div>
+  <div class="col-12 col-lg-4 text-end">
+    <button type="button" class="btn btn-white d-print-none" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Manutenção de Logs" data-src="gerenciar_logs?modal=1"><i class="fa fa-fw fa-wrench"></i> Manutenção</button>    
+  </div>
+</div>
+
+<dtml-if expr="not _.has_key('impressao') or (_.has_key('impressao') and not _.has_key('dat_inicial') and not _.has_key('dat_final'))">
+
+<form class="d-print-none mb-4" method="post" id="auditoria_form" name="auditoria_form" action="auditoria_index_html">
+
+   <div class="row">
+     <div class="col-6 col-md-3 mb-3">
+            <label class="form-label required" for="dat_inicial">Data Inicial</label>
+            <div class="input-group" id="datepicker1">
+              <input type="text" class="form-control datepicker" placeholder="dd/mm/aaaa" name="dat_inicial" id="dat_inicial" data-provide="datepicker" data-date-autoclose="true" autocomplete="off" data-date-container="#datepicker1" value="<dtml-var dat_inicial missing>">
+              <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
+           </div> 
+     </div>
+     <div class="col-6 col-md-3 mb-3">
+           <label class="form-label required" for="dat_final">Data Final</label>
+            <div class="input-group" id="datepicker2">
+              <input type="text" class="form-control datepicker" placeholder="dd/mm/aaaa" name="dat_final" id="dat_final" data-provide="datepicker" data-date-autoclose="true" autocomplete="off" data-date-container="#datepicker2" value="<dtml-var dat_final missing>">
+              <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
+           </div> 
+     </div>
+     <div class="col-6 col-md-3 mb-3">
+           <label class="form-label" for="usuario">Usuário</label>
+           <input class="form-control" type="text" name="usuario" id="usuario" value="<dtml-var usuario missing>" />
+     </div>
+     <div class="col-6 col-md-3 mb-3">
+           <label class="form-label" for="IP">Endereço IP</label>
+           <input class="form-control" type="text" name="IP" id="IP" value="<dtml-var IP missing>" />
+     </div>          
+  </div>
+  <div class="row">
+     <div class="col-6 col-md-3 mb-3">
+         <label class="form-label" for="cod_registro">ID do Registro</label>
+         <input class="form-control" type="text" name="cod_registro" id="cod_registro" value="<dtml-var cod_registro missing>" />
+     </div>
+     <div class="col-6 col-md-3 mb-3">
+         <label class="form-label" for="modulo">Módulo</label>
+         <input class="form-control" type="text" name="modulo" id="modulo" value="<dtml-var modulo missing>" />
+     </div>
+     <div class="col-12 col-md-6 mb-3">
+         <label class="form-label" for="metodo">Método</label>
+         <input class="form-control" type="text" name="metodo" id="metodo" value="<dtml-var metodo missing>" />
+     </div>          
+  </div>  
+
+  <div class="text-start">
+    <input class="btn btn-primary" type="button" name="button" value="Pesquisar" onClick="return campos_criticar(form)" />
+  </div>
+
+</form>
+</dtml-if>
+
+<dtml-if expr="_.has_key('dat_inicial') and _.has_key('dat_final')">
+ <dtml-call expr="REQUEST.set('dat_inicial1', DateTime(dat_inicial, datefmt='international').strftime('%Y-%m-%d'))">
+ <dtml-call expr="REQUEST.set('dat_final1', DateTime(dat_final, datefmt='international').strftime('%Y-%m-%d'))">
+
+ <dtml-in expr="zsql.logs_pesquisar_zsql(dat_inicial=dat_inicial1, dat_final=dat_final1, cod_registro=cod_registro, modulo=modulo, metodo=metodo, usuario=usuario, IP=IP)">
+
+   <dtml-if sequence-start>
+    <div class="table-responsive">
+    <table id="jdTable" class="table table-striped display mt-4">
+      <thead class="table-light"> 
+        <tr>
+          <th width="20%">
+              Data e Horário
+          </th>
+          <th>
+              Registro
+          </th>
+          <th>
+              Módulo
+          </th>
+          <th>
+              Método
+          </th>            
+          <th>
+              Usuário
+          </th>     
+          <th>
+              IP
+          </th>
+          <th data-col="0">Info</th>
+        </tr>
+      </thead>
+      <tbody>
+   </dtml-if sequence-start>
+     <tr>
+      <td>
+         <dtml-var data_hora>
+      </td>
+      <td>
+         <dtml-var cod_registro>
+      </td>
+      <td>
+         <dtml-var modulo>
+      </td>
+      <td>
+         <dtml-var metodo missing>
+      </td>           
+      <td>
+         <dtml-var usuario>
+      </td>
+      <td>
+         <dtml-var IP>
+      </td>
+      <td>
+         <dtml-if dados>
+            <i class="fas fa-info-circle d-print-none"  data-bs-toggle="tooltip" data-placement="left" title="<dtml-var dados html_quote>"></i>
+         </dtml-if> 
+      </td>               
+    </tr>   
+   <dtml-if sequence-end>
+      </tbody>
+     </table>
+    </div>
+   </dtml-if sequence-end>
+ <dtml-else>
+   <p>Nenhum registro encontrado.</p>
+ </dtml-in>
+
+ <div id="panelBtn" class="d-print-none" style="margin-bottom: 20px;">
+    <div class="row">
+       <div class="col-sm-12 mt-2"></div>
+    </div>
+ </div>
+
+</dtml-if>
+
+<dtml-var js_slot>
 <script>
 
 $(document).ready(function() {
@@ -112,160 +253,4 @@ $(document).ready(function() {
         .appendTo( '#panelBtn .col-sm-12:eq(0)' );  
 });
 </script>
-
-<style>
-.display {
-    font-size: 90%;
-}
-</style>
-
-<div class="row mb-2">
-  <div class="col-12 col-lg-8">
-    <h1 class="firstHeading font-size-18">Logs de Auditoria</h1>
-  </div>
-  <div class="col-12 col-lg-4 text-end">
-    <button type="button" class="btn btn-white d-print-none" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Manutenção de Logs" data-src="gerenciar_logs?modal=1"><i class="fa fa-fw fa-wrench"></i> Manutenção</button>    
-  </div>
-</div>
-
-<dtml-if expr="not _.has_key('impressao') or (_.has_key('impressao') and not _.has_key('dat_inicial') and not _.has_key('dat_final'))">
-
-<form class="d-print-none mb-4" method="post" id="auditoria_form" name="auditoria_form" action="auditoria_index_html">
-
-   <div class="row">
-     <div class="col-6 col-md-3 mb-3">
-            <label class="form-label" for="dat_inicial" class="form-label required">Data Inicial</label>
-            <input class="form-control date" type="text" name="dat_inicial" id="dat_inicial" value="<dtml-var dat_inicial missing>" required />
-     </div>
-     <div class="col-6 col-md-3 mb-3">
-           <label class="form-label" for="dat_final" class="form-label required">Data Final</label>
-           <input class="form-control date" type="text" name="dat_final" id="dat_final" value="<dtml-var dat_final missing>" required />
-     </div>
-     <div class="col-6 col-md-3 mb-3">
-           <label class="form-label" for="usuario">Usuário</label>
-           <input class="form-control" type="text" name="usuario" id="usuario" value="<dtml-var usuario missing>" />
-     </div>
-     <div class="col-6 col-md-3 mb-3">
-           <label class="form-label" for="IP">Endereço IP</label>
-           <input class="form-control" type="text" name="IP" id="IP" value="<dtml-var IP missing>" />
-     </div>          
-    <script>
-        $('#dat_inicial').datepicker({
-            locale: 'pt-br',
-            icons: {rightIcon: '<i class="fa fa-fw fa-calendar-alt"></i>'},
-            format: 'dd/mm/yyyy',
-            uiLibrary: 'bootstrap4',
-            iconsLibrary: 'fontawesome',
-            maxDate: function () {
-                return $('#dat_final').val();
-            }
-        });
-        $('#dat_final').datepicker({
-            locale: 'pt-br',
-            icons: {rightIcon: '<i class="fa fa-fw fa-calendar-alt"></i>'},
-            format: 'dd/mm/yyyy',
-            uiLibrary: 'bootstrap4',
-            iconsLibrary: 'fontawesome',
-            minDate: function () {
-                return $('#dat_inicial').val();
-            }
-        });
-    </script>
-  </div>
-  <div class="row">
-     <div class="col-6 col-md-3 mb-3">
-         <label class="form-label" for="cod_registro">ID do Registro</label>
-         <input class="form-control" type="text" name="cod_registro" id="cod_registro" value="<dtml-var cod_registro missing>" />
-     </div>
-     <div class="col-6 col-md-3 mb-3">
-         <label class="form-label" for="modulo">Módulo</label>
-         <input class="form-control" type="text" name="modulo" id="modulo" value="<dtml-var modulo missing>" />
-     </div>
-     <div class="col-12 col-md-6 mb-3">
-         <label class="form-label" for="metodo">Método</label>
-         <input class="form-control" type="text" name="metodo" id="metodo" value="<dtml-var metodo missing>" />
-     </div>          
-  </div>  
-
-  <div class="text-start">
-    <input class="btn btn-primary" type="button" name="button" value="Pesquisar" onClick="return campos_criticar(form)" />
-  </div>
-
-</form>
-</dtml-if>
-
-<dtml-if expr="_.has_key('dat_inicial') and _.has_key('dat_final')">
- <dtml-in expr="zsql.logs_pesquisar_zsql(dat_inicial=dat_inicial, dat_final=dat_final, cod_registro=cod_registro, modulo=modulo, metodo=metodo, usuario=usuario, IP=IP)">
-
-   <dtml-if sequence-start>
-    <div class="table-responsive">
-    <table id="jdTable" class="table table-striped display mt-4">
-      <thead> 
-        <tr>
-          <th width="20%">
-              Data
-          </th>
-          <th>
-              Registro
-          </th>
-          <th>
-              Módulo
-          </th>
-          <th>
-              Método
-          </th>            
-          <th>
-              Usuário
-          </th>     
-          <th>
-              IP
-          </th>
-          <th data-col="0">Info</th>
-        </tr>
-      </thead>
-      <tbody>
-   </dtml-if sequence-start>
-     <tr>
-      <td>
-         <dtml-var data_hora>
-      </td>
-      <td>
-         <dtml-var cod_registro>
-      </td>
-      <td>
-         <dtml-var modulo>
-      </td>
-      <td>
-         <dtml-var metodo missing>
-      </td>           
-      <td>
-         <dtml-var usuario>
-      </td>
-      <td>
-         <dtml-var IP>
-      </td>
-      <td>
-         <dtml-if dados>
-            <i class="fas fa-info-circle d-print-none"  data-bs-toggle="tooltip" data-placement="left" title="<dtml-var dados html_quote>"></i>
-         </dtml-if> 
-      </td>               
-    </tr>   
-   <dtml-if sequence-end>
-      </tbody>
-     </table>
-    </div>
-   </dtml-if sequence-end>
- <dtml-else>
-   <p>Nenhum registro encontrado.</p>
- </dtml-in>
-
- <div id="panelBtn" class="d-print-none" style="margin-bottom: 20px;">
-    <div class="row">
-       <div class="col-sm-12 mt-2"></div>
-    </div>
- </div>
- 
-</dtml-if>
-
-<dtml-var js_slot>
 <dtml-var footer_html>

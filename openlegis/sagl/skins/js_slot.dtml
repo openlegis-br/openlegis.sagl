@@ -146,7 +146,7 @@
             </div>
             <div class="modal-body">
                 <dtml-if expr="_.has_key('QUERY_STRING') and QUERY_STRING == 'retry=0'">
-                  <div class="alert alert-danger alert-dismissible fade show d-flex align-items-center mb-2" role="alert">
+                  <div class="alert alert-danger alert-dismissible fade show d-flex align-items-center mb-2" id="login-alert" role="alert">
                       <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                       <i class="mdi mdi-close-circle me-2"></i> Login falhou! Tente novamente.
                   </div>
@@ -270,6 +270,9 @@ $(document).ready(function() {
 });
 $(document).ready(function(){
      $('.datepicker').datepicker();
+     setTimeout(function() {
+         $("#login-alert").alert('close');
+     }, 3000);
 });
 autosize(document.querySelectorAll('textarea'));
 (function () {

@@ -43,6 +43,8 @@
       <select class="select2 form-select"  id="lst_tip_documento" name="lst_tip_documento" multiple="multiple" style="width: 100%; min-height:34px !important;" data-placeholder="Todos">
           <dtml-in expr="permissao_tipo()" mapping>
              <option value="<dtml-var tip_documento>"><dtml-var des_tipo_documento></option>
+          <dtml-else>
+            <dtml-call expr="REQUEST.set('nenhum_tipo_publico', '1')">
           </dtml-in>
       </select>
     </div>
@@ -160,7 +162,11 @@
                 <div class="g-recaptcha mb-3" data-sitekey="<dtml-var "sapl_documentos.props_sagl.recaptcha_key">"></div>
             </dtml-if>
          </dtml-let>
-         <button type="button" id="search-btn" class="btn btn-primary" onClick="return documento_criticar()"><i class="fa fa-fw fa-search"></i> Pesquisar</button>
+         <dtml-if nenhum_tipo_publico>
+            <button type="button" id="search-btn" class="btn btn-primary disabled" onClick="return documento_criticar()"><i class="fa fa-fw fa-search"></i> Pesquisar</button>
+         <dtml-else>
+            <button type="button" id="search-btn" class="btn btn-primary" onClick="return documento_criticar()"><i class="fa fa-fw fa-search"></i> Pesquisar</button>
+         </dtml-if>
          <input class="btn btn-light" type="reset" value="Limpar" />
     </div>
   </div>

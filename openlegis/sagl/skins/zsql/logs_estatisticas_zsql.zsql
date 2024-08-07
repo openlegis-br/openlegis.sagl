@@ -6,7 +6,9 @@ max_cache : 100
 </dtml-comment>
 SELECT
    COUNT(cod_log) as registros,
-   MIN(DATE_FORMAT(data, '%d/%m/%y %H:%i:%s')) as data_inicial,
-   MAX(DATE_FORMAT(data, '%d/%m/%y %H:%i:%s')) as data_final
+   MIN(DATE_FORMAT(data, '%Y/%m/%d %H:%i:%s')) as data_inicial,
+   MAX(DATE_FORMAT(data, '%Y/%m/%d %H:%i:%s')) as data_final
 FROM
    logs
+ORDER BY
+   cod_log DESC

@@ -8,7 +8,7 @@ SELECT
     cod_log,
     usuario,
     data,
-    DATE_FORMAT(data, '%d/%m/%y %H:%i:%s') as data_hora,
+    DATE_FORMAT(data, '%d/%m/%Y %H:%i:%s') as data_hora,
     modulo,
     metodo,
     cod_registro,
@@ -24,21 +24,21 @@ FROM
    <dtml-sqltest cod_registro     op="="     type="int"   optional> <dtml-and>   
     <dtml-if dat_inicial>
       <dtml-if dat_final>
-         DATE(data) >= <dtml-sqlvar "pysc.port_to_iso_pysc(dat_inicial)" type="nb"> AND
-         DATE(data) <= <dtml-sqlvar "pysc.port_to_iso_pysc(dat_final)" type="nb">
+         DATE(data) >= <dtml-sqlvar dat_inicial type="nb"> AND
+         DATE(data) <= <dtml-sqlvar dat_final type="nb">
       <dtml-else>
-         DATE(data) = <dtml-sqlvar "pysc.port_to_iso_pysc(dat_inicial)" type="nb">
+         DATE(data) = <dtml-sqlvar dat_inicial type="nb">
       </dtml-if>
     <dtml-else>
       <dtml-if dat_final>
-         DATE(data) = <dtml-sqlvar "pysc.port_to_iso_pysc(dat_final)" type="nb">
+         DATE(data) = <dtml-sqlvar dat_final type="nb">
       </dtml-if>
     </dtml-if>
 </dtml-sqlgroup>
 
 <dtml-if ordem>
-  ORDER BY data ASC
+  ORDER BY data_hora ASC
 <dtml-else>
-  ORDER BY data DESC
+  ORDER BY data_hora DESC
 </dtml-if>
  

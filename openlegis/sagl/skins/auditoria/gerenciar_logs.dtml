@@ -17,8 +17,8 @@
            </div> 
            <div class="col-12 col-md-6">
              <dtml-in expr="zsql.logs_estatisticas_zsql()">              
-               <b>Primeiro Registro:</b> <dtml-var data_inicial><br />
-               <b>Último Registro:</b> <dtml-var data_final><br />
+               <b>Primeiro Registro:</b> <dtml-var expr="DateTime(data_inicial, datefmt='international').strftime('%d/%m/%Y %H:%M:%S')"><br />
+               <b>Último Registro:</b> <dtml-var expr="DateTime(data_final, datefmt='international').strftime('%d/%m/%Y %H:%M:%S')"><br />
                <b>Total de Registros:</b> <dtml-var registros>
              </dtml-in>               
            </div>         
@@ -49,7 +49,7 @@
             </select>
             <input type="hidden" name="modal" value="1">
             <input type="hidden" name="hdn_url" value=gerenciar_logs?modal=1" />
-            <button class="btn btn-danger" name="btnEliminar" type="submit"><i class="fas fa-trash"></i> Limpar</button>
+            <button class="btn btn-danger" name="btnEliminar" type="submit"><i class="fas fa-trash-alt"></i> Limpar</button>
           </div>
           <div class="col-md-12 mt-3">
              <span class="text-muted small"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i>

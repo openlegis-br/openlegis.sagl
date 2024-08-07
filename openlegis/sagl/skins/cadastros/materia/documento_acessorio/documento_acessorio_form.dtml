@@ -200,13 +200,13 @@
     <dtml-let id_proposicao="str(cod_proposicao)+'_signed.pdf'">
       <dtml-if "hasattr(sapl_documentos.proposicao,id_proposicao)">
         <div class="row">
-          <div class="col-12">
+          <div class="col-12 mb-3">
             <dtml-let proposicao="getattr(sapl_documentos.proposicao,id_proposicao).absolute_url">
                <dtml-call expr="REQUEST.set('nome_arquivo',str(cod_proposicao)+'_signed.pdf')">
                <dtml-call expr="REQUEST.set('cod_doc',pysc.proposicao_calcular_checksum_pysc(cod_proposicao))">
                <legend class="font-size-16">Proposição Digital <dtml-var cod_doc></legend>
-               <a class="btn btn-light mb-3" target="blank" href="<dtml-var proposicao>">   
-                  <i class="fas fa-certificate" style="font-size:21px; margin-right: 3px;"></i>Documento Assinado 
+               <a class="btn btn-sm btn-light" target="blank" href="<dtml-var proposicao>">   
+                  <i class="fas fa-certificate"></i> Proposição Assinada 
                </a>
             </dtml-let>     
           </div>
@@ -219,7 +219,7 @@
  <div class="row">
   <dtml-if expr="_.has_key('cod_documento')">
    <div class="col-12 col-sm-6 mb-3">
-              <label class="form-label d-block" for="lst_modelo">ODT Texto Original</label>
+              <label class="form-label d-block" for="lst_modelo">Arquivo ODT</label>
                <div class="input-group">
                 <dtml-let id_documento_odt="str(cod_documento)+'.odt'">
                    <dtml-if "hasattr(sapl_documentos.materia_odt,id_documento_odt)">
@@ -249,13 +249,13 @@
  </dtml-if>
 
    <div class="col-12 col-sm-6 mb-3">
-             <label class="form-label d-block">PDF Texto Original</label>
+             <label class="form-label d-block">Arquivo PDF</label>
               <div class="input-group">
               <dtml-if expr="_.has_key('cod_documento')"> 
                <dtml-call expr="REQUEST.set('id_documento', str(cod_documento)+'.pdf')">
                <dtml-if "hasattr(sapl_documentos.materia,id_documento)">
                  <dtml-let documento="getattr(sapl_documentos.materia,id_documento).absolute_url">
-                    <a class="btn btn-light" target="_blank" href="<dtml-var documento>?<dtml-var expr="ZopeTime().timeTime()">">
+                    <a class="btn btn-secondary" target="_blank" href="<dtml-var documento>?<dtml-var expr="ZopeTime().timeTime()">">
                      <dtml-if expr="zsql.assinatura_documento_obter_zsql(codigo=cod_documento, tipo_doc='doc_acessorio',ind_assinado=1, cod_usuario=None)">
                         <i class="fa fa-fw fa-certificate"></i>Visualizar
                       <dtml-else>
@@ -263,7 +263,7 @@
                       </dtml-if>
                     </a>
                   <dtml-if "sapl_documentos.props_sagl.restpki_access_token!=''">
-                     <button type="button" class="btn btn-light" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Assinaturas Digitais" data-src="<dtml-var portal_url>/cadastros/assinatura/assinatura_solicitar_form?codigo=<dtml-var cod_documento>&tipo_doc=doc_acessorio&modal=1"><i class="fas fas-fw fa-file-signature"></i>Assinaturas</button>
+                     <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Assinaturas Digitais" data-src="<dtml-var portal_url>/cadastros/assinatura/assinatura_solicitar_form?codigo=<dtml-var cod_documento>&tipo_doc=doc_acessorio&modal=1"><i class="fas fas-fw fa-file-signature"></i>Assinaturas</button>
                   </dtml-if>
                    <a class="btn btn-danger" href="texto_documento_excluir_proc?cod_documento=<dtml-var cod_documento missing>&cod_materia=<dtml-var cod_materia missing>&modal=1" data-confirm="Deseja realmente excluir o arquivo PDF?"><i class="far fa-trash-alt"></i> Excluir</a>
                  </dtml-let>

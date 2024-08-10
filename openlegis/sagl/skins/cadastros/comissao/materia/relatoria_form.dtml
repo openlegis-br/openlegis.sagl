@@ -1,98 +1,6 @@
 <dtml-var header_html>
 
-<script>
-
-   function campos_criticar(form){
-
-     if (form.txt_dat_desig_relator.value==""){
-        $('#txt_dat_desig_relator').addClass('is-invalid');
-        bootstrap.showModal({title: "Mensagem do Sistema", body: "A data de designação deve ser preenchida!"});
-        form.txt_dat_desig_relator.focus();
-        return false;
-     }
-
-     if (form.lst_relator[form.lst_relator.selectedIndex].value=="0"){
-        $('#lst_relator').addClass('is-invalid');    
-        bootstrap.showModal({title: "Mensagem do Sistema", body: "A relatoria deve ser selecionada!"});
-        form.lst_relator.focus();
-        return false;
-     }
-
-     if (!IsValidDate(form.txt_dat_desig_relator.value)) {
-        bootstrap.showModal({title: "Mensagem do Sistema", body: "Digite uma data de designação válida!"});
-        form.txt_dat_desig_relator.focus();
-        return false;
-     }
-
-     if (form.txt_dat_destit_relator.value!=""){
-        if (!IsValidDate(form.txt_dat_destit_relator.value)){
-            bootstrap.showModal({title: "Mensagem do Sistema", body: "Digite uma data de parecer válida!"});
-            form.txt_dat_destit_relator.focus();
-            return false;
-        }else{
-            dat_desig=form.txt_dat_desig_relator.value;
-            dat_desig=dat_desig.substring(6,10)+dat_desig.substring(3,5)+dat_desig.substring(0,2);
-            dat_destit=form.txt_dat_destit_relator.value;
-            dat_destit=dat_destit.substring(6,10)+dat_destit.substring(3,5)+dat_destit.substring(0,2);
-            if (dat_desig > dat_destit){
-               bootstrap.showModal({title: "Mensagem do Sistema", body: "A data do parecer não pode ser anterior à data de designação!"});
-               form.txt_dat_destit_relator.focus();
-               form.txt_dat_destit_relator.select();
-               return false;      
-            }
-        }
-     }       
-    form.submit();   
-   }
-
-  function texto_odt_gerar(){
-      lst_modelo = document.getElementById("lst_modelo");
-      lst_modelo.options[lst_modelo.selectedIndex].value;     
-
-      if (lst_modelo.selectedIndex == 0) {
-         bootstrap.showModal({title: "Mensagem do Sistema", body: "É necessário selecionar um modelo!"});
-      }
-
-      if ((lst_modelo.selectedIndex != 0) && confirm("Confirma a geração do arquivo ODT?")) {
-         location.href="<dtml-var portal_url>/modelo_proposicao/parecer?cod_relatoria=<dtml-var cod_relatoria missing>&cod_materia=<dtml-var cod_materia missing>&cod_comissao=<dtml-var cod_comissao missing>&modelo_proposicao=" + lst_modelo.options[lst_modelo.selectedIndex].value + "&modal=1";
-         setTimeout(function(){window.location.reload(true)},2000);
-         return true;
-       }
-         return;
-  }
-
-  function texto_pdf_gerar(){
-    if (confirm("Confirma a geração do arquivo PDF?")) {
-       location.href="<dtml-var portal_url>/modelo_proposicao/parecer_gerar_pdf?cod_parecer=<dtml-var cod_relatoria missing>&modal=1";
-       setTimeout(function(){window.location.reload(true)},2000);
-       return true;
-     }
-  return;
-  }
-
-  function setar_data(data_desig) {
-    location.href='setar_data_desig_proc?dat_desig_relator='+data_desig+"&cod_materia=<dtml-var cod_materia missing>&cod_comissao=<dtml-var cod_comissao missing>&num_ordem=<dtml-var num_ordem missing>&modal=1";
-  }
-
-  function odt_proposicao_obter(cod_proposicao){
-      if (confirm("Copiar arquivo ODT da proposição?")) {
-         location.href="<dtml-var portal_url>/pysc/proposicao_salvar_como_texto_integral_materia_pysc?cod_proposicao="+cod_proposicao+"&cod_materia=<dtml-var cod_materia missing>";
-         setTimeout(function(){window.location.reload(true)},1500);
-         return true;
-       }
-         return;
-  }
-
-  function pdf_proposicao_obter(cod_proposicao){
-      if (confirm("Copiar e autuar o arquivo PDF da proposição?")) {
-         location.href="<dtml-var portal_url>/modelo_proposicao/proposicao_autuar?cod_proposicao="+cod_proposicao;
-         setTimeout(function(){window.location.reload(true)},1500);
-         return true;
-       }
-         return;
-  }  
-
-</script>
+<link href="<dtml-var portal_url>/assets/libs/bootstrap-datetimepicker/css/bootstrap-datetimepicker.min.css" rel="stylesheet">
 
 <dtml-in expr="zsql.comissao_obter_zsql(cod_comissao=cod_comissao)">
   <dtml-call expr="REQUEST.set('nom_comissao', nom_comissao)">
@@ -116,7 +24,7 @@
 <h1 class="firstHeading font-size-18"><dtml-var id_materia></h1>
 <p class="font-weight-bold"><dtml-var nom_comissao></p>
 
-<form name="relatoria_form" method="post" action="relatoria_salvar_proc" enctype="multipart/form-data">
+<form name="relatoria_form" id="relatoria_form" method="post" action="relatoria_salvar_proc" enctype="multipart/form-data">
   <input type="hidden" name="hdn_cod_materia" value="<dtml-var cod_materia>" />
   <input type="hidden" name="hdn_cod_relatoria" value="<dtml-var cod_relatoria missing>" />
   <input type="hidden" name="hdn_cod_comissao" value="<dtml-var cod_comissao missing>" />
@@ -252,8 +160,8 @@
                 <dtml-let documento_odt="getattr(sapl_documentos.parecer_comissao,id_documento_odt).absolute_url">
                    <dtml-call expr="REQUEST.set('nome_arquivo_odt',str(cod_relatoria)+'_parecer.odt')">
                    <a class="btn btn-light" href="<dtml-var portal_url>/generico/viewerJS/#<dtml-var documento_odt>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fa fa-fw fa-file-alt"></i> Visualizar</a>
-                   <button type="button" class="btn btn-light" onclick="javascript:location.href='<dtml-var portal_url>/sapl_documentos/parecer_comissao/externalEdit_/<dtml-var nome_arquivo_odt>.zem'" data-bs-toggle="tooltip" data-placement="bottom" title="Editar no LibreOffice"><i class="fas fa-fw fa-external-link-alt"></i>Editar</button>  
-                   <a class="btn btn-danger" href="<dtml-var portal_url>/cadastros/comissao/materia/texto_odt_parecer_excluir_proc?cod_relatoria=<dtml-var cod_relatoria missing>&modal=1" data-confirm="Deseja realmente excluir o arquivo ODT?"><i class="far fa-trash-alt"></i>Excluir</a>
+                   <button type="button" class="btn btn-light" onclick="javascript:location.href='<dtml-var portal_url>/sapl_documentos/parecer_comissao/externalEdit_/<dtml-var nome_arquivo_odt>.zem'" data-bs-toggle="tooltip" data-placement="bottom" title="Editar no LibreOffice"><i class="fas fa-fw fa-external-link-alt"></i> Editar</button>  
+                   <a class="btn btn-danger" href="<dtml-var portal_url>/cadastros/comissao/materia/texto_odt_parecer_excluir_proc?cod_relatoria=<dtml-var cod_relatoria missing>&modal=1" data-confirm="Deseja realmente excluir o arquivo ODT?"><i class="far fa-trash-alt"></i> Excluir</a>
                 </dtml-let>
              <dtml-else>
                <div class="input-group">
@@ -287,7 +195,7 @@
                       <button type="button" class="btn btn-light" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Assinaturas Digitais" data-src="<dtml-var portal_url>/cadastros/assinatura/assinatura_solicitar_form?codigo=<dtml-var cod_relatoria>&tipo_doc=parecer_comissao&modal=1"><i class="fas fas-fw fa-file-signature"></i> Assinaturas</button>
                    </dtml-if>
                  </dtml-unless>
-                 <a class="btn btn-danger" href="<dtml-var portal_url>/cadastros/comissao/materia/texto_pdf_parecer_excluir_proc?cod_relatoria=<dtml-var cod_relatoria missing>&modal=1" data-confirm="Deseja realmente excluir o arquivo PDF?"><i class="far fa-trash-alt"></i>Excluir</a>
+                 <a class="btn btn-danger" href="<dtml-var portal_url>/cadastros/comissao/materia/texto_pdf_parecer_excluir_proc?cod_relatoria=<dtml-var cod_relatoria missing>&modal=1" data-confirm="Deseja realmente excluir o arquivo PDF?"><i class="far fa-trash-alt"></i> Excluir</a>
                 </dtml-let>
                 </div>                   
              <dtml-else>
@@ -299,7 +207,7 @@
                      </dtml-if>
                    </dtml-let>
                    <dtml-if expr="_.has_key('temODT')">             
-                      <a class="btn btn-light" href="javascript:texto_pdf_gerar()">Converter</a>
+                      <a class="btn btn-light" href="javascript:texto_pdf_gerar()">Converter ODT</a>
                    </dtml-if>
                  </div>
              </dtml-if>
@@ -348,7 +256,8 @@
   </dtml-if>
 
   <div class="text-start">
-    <input type="button" class="btn btn-primary" value="Salvar" onClick="campos_criticar(document.relatoria_form)" />
+          <button type="button" id="save-rel" class="btn btn-primary" onClick="return campos_criticar(document.relatoria_form)">Salvar</button>
+
    <dtml-if hdnCodProposicao>
      <input type="button" class="btn btn-light" value="Voltar" onClick="javascript:history.back()" />   
    </dtml-if>
@@ -365,17 +274,126 @@
 
 </form>
 
-<link href="<dtml-var portal_url>/assets/libs/bootstrap-datetimepicker/css/bootstrap-datetimepicker.min.css" rel="stylesheet">
 <dtml-var js_slot>
 <script src="<dtml-var portal_url>/assets/libs/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js"></script>
 <script src="<dtml-var portal_url>/assets/libs/bootstrap-datetimepicker/locales/bootstrap-datetimepicker.pt-BR.js"></script>
 <script src="<dtml-var portal_url>/javascript/data_validar.js"></script>
- <script>
+<script>
+$(document).ready(function() {
+    var clicked = false;
+    $("#save-rel").on("click", function(event) {
+      if (clicked) {
+        event.preventDefault();
+        return;
+      }
+      clicked = true;
+      var $this = $(this);
+      $this.html("Aguarde...")
+      $this.addClass('disabled');
+      setTimeout(function() {
+        clicked = false;
+        $this.html("Salvar")
+        $this.removeClass('disabled');
+      }, 10000);
+    });
+});
+  
     $('#txt_dat_destit_relator').datetimepicker({
         language: 'pt-BR',
         formatViewType:'datetime',
         format: 'dd/mm/yyyy hh:ii:ss',
         minuteStep: 1
     });
+
+   function campos_criticar(form){
+
+     if (form.txt_dat_desig_relator.value==""){
+        $('#txt_dat_desig_relator').addClass('is-invalid');
+        bootstrap.showModal({title: "Mensagem do Sistema", body: "A data de designação deve ser preenchida!"});
+        form.txt_dat_desig_relator.focus();
+        return false;
+     }
+
+     if (form.lst_relator[form.lst_relator.selectedIndex].value=="0"){
+        $('#lst_relator').addClass('is-invalid');    
+        bootstrap.showModal({title: "Mensagem do Sistema", body: "A relatoria deve ser selecionada!"});
+        form.lst_relator.focus();
+        return false;
+     }
+
+     if (!IsValidDate(form.txt_dat_desig_relator.value)) {
+        bootstrap.showModal({title: "Mensagem do Sistema", body: "Digite uma data de designação válida!"});
+        form.txt_dat_desig_relator.focus();
+        return false;
+     }
+
+     if (form.txt_dat_destit_relator.value!=""){
+        if (!IsValidDate(form.txt_dat_destit_relator.value)){
+            bootstrap.showModal({title: "Mensagem do Sistema", body: "Digite uma data de parecer válida!"});
+            form.txt_dat_destit_relator.focus();
+            return false;
+        }else{
+            dat_desig=form.txt_dat_desig_relator.value;
+            dat_desig=dat_desig.substring(6,10)+dat_desig.substring(3,5)+dat_desig.substring(0,2);
+            dat_destit=form.txt_dat_destit_relator.value;
+            dat_destit=dat_destit.substring(6,10)+dat_destit.substring(3,5)+dat_destit.substring(0,2);
+            if (dat_desig > dat_destit){
+               bootstrap.showModal({title: "Mensagem do Sistema", body: "A data do parecer não pode ser anterior à data de designação!"});
+               form.txt_dat_destit_relator.focus();
+               form.txt_dat_destit_relator.select();
+               return false;      
+            }
+        }
+     }       
+    form.submit();   
+   }
+
+  function texto_odt_gerar(){
+      lst_modelo = document.getElementById("lst_modelo");
+      lst_modelo.options[lst_modelo.selectedIndex].value;     
+
+      if (lst_modelo.selectedIndex == 0) {
+         bootstrap.showModal({title: "Mensagem do Sistema", body: "É necessário selecionar um modelo!"});
+      }
+
+      if ((lst_modelo.selectedIndex != 0) && confirm("Confirma a geração do arquivo ODT?")) {
+         location.href="<dtml-var portal_url>/modelo_proposicao/parecer?cod_relatoria=<dtml-var cod_relatoria missing>&cod_materia=<dtml-var cod_materia missing>&cod_comissao=<dtml-var cod_comissao missing>&modelo_proposicao=" + lst_modelo.options[lst_modelo.selectedIndex].value + "&modal=1";
+         setTimeout(function(){window.location.reload(true)},2000);
+         return true;
+       }
+         return;
+  }
+
+  function texto_pdf_gerar(){
+    if (confirm("Confirma a geração do arquivo PDF?")) {
+       location.href="<dtml-var portal_url>/modelo_proposicao/parecer_gerar_pdf?cod_parecer=<dtml-var cod_relatoria missing>&modal=1";
+       setTimeout(function(){window.location.reload(true)},2000);
+       return true;
+     }
+  return;
+  }
+
+  function setar_data(data_desig) {
+    location.href='setar_data_desig_proc?dat_desig_relator='+data_desig+"&cod_materia=<dtml-var cod_materia missing>&cod_comissao=<dtml-var cod_comissao missing>&num_ordem=<dtml-var num_ordem missing>&modal=1";
+  }
+
+  function odt_proposicao_obter(cod_proposicao){
+      if (confirm("Copiar arquivo ODT da proposição?")) {
+         location.href="<dtml-var portal_url>/pysc/proposicao_salvar_como_texto_integral_materia_pysc?cod_proposicao="+cod_proposicao+"&cod_materia=<dtml-var cod_materia missing>";
+         setTimeout(function(){window.location.reload(true)},1500);
+         return true;
+       }
+         return;
+  }
+
+  function pdf_proposicao_obter(cod_proposicao){
+      if (confirm("Copiar e autuar o arquivo PDF da proposição?")) {
+         location.href="<dtml-var portal_url>/modelo_proposicao/proposicao_autuar?cod_proposicao="+cod_proposicao;
+         setTimeout(function(){window.location.reload(true)},1500);
+         return true;
+       }
+         return;
+  }  
+
 </script>
 <dtml-var footer_html>

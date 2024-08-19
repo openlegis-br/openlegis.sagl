@@ -2026,7 +2026,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
            pdf = getattr(storage_path, nom_pdf_documento)
         if tipo_doc == 'parecer_comissao':
            for relat in self.zsql.relatoria_obter_zsql(cod_relatoria=codigo):
-               for tipo in zsql.tipo_fim_relatoria_obter_zsql(tip_fim_relatoria = relat.tip_fim_relatoria):
+               for tipo in self.zsql.tipo_fim_relatoria_obter_zsql(tip_fim_relatoria = relat.tip_fim_relatoria):
                    if tipo.des_fim_relatoria=='Aguardando apreciação':
                       pdf.manage_permission('View', roles=['Manager','Authenticated'], acquire=0)
                    else:

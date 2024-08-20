@@ -10,7 +10,19 @@
 if listar:
     documentos = context.sapl_documentos.peticao.objectIds()
     existentes = [documento for documento in documentos if documento.startswith(cod_peticao) and len(documento) == len(cod_peticao) or documento.startswith(str(cod_peticao) + '_anexo_')]
-    return existentes
+    ordenados = []
+    for item in existentes:
+        dic = {}
+        i =  item.split('.')[0]
+        dic['seq'] = int(i.split('_')[-1])
+        dic['file'] = item
+        ordenados.append(dic)
+    ordenados.sort(key=lambda dic: dic['seq'], reverse=False)
+    lista = []
+    for item in ordenados:
+        lista.append(item['file'])
+
+    return lista
 
 if nomear:
     documentos = context.sapl_documentos.peticao.objectIds()

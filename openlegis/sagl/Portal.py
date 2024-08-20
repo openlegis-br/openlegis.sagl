@@ -82,13 +82,15 @@ def manage_addSAGL(context, id, title='SAGL', description='',
             id='dbcon_sagl',
             title='dbcon_sagl (MySQL)',
             use_unicode=True,
-            connection_string='*lock_name openlegis sagl sagl'
+            connection_string='*lock_name openlegis sagl sagl',
+            charset='utf8mb4'
         )
         site.manage_addProduct['ZMySQLDA'].manage_addZMySQLConnection(
             id='dbcon_logs',
             title='dbcon_logs (MySQL)',
             use_unicode=True,
-            connection_string='*lock_name openlegis_logs sagl sagl'
+            connection_string='*lock_name openlegis_logs sagl sagl',
+            charset='utf8mb4'
         )
     else:
         site.manage_addProduct['ZPsycopgDA'].manage_addZPsycopgConnection(

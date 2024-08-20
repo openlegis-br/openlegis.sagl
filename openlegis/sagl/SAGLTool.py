@@ -1310,7 +1310,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
                    if materia.num_protocolo != None and materia.num_protocolo != '':
                       for protocolo in self.zsql.protocolo_obter_zsql(num_protocolo=materia.num_protocolo, ano_protocolo=materia.ano_ident_basica):
                           info_protocolo = ' - Prot. nº ' + str(protocolo.num_protocolo) + '/' + str(protocolo.ano_protocolo) + ' em ' + str(DateTime(protocolo.dat_protocolo, datefmt='international').strftime('%d/%m/%Y')) + ' ' + protocolo.hor_protocolo + '.'
-                   texto = str(materia.sgl_tipo_materia) + ' ' + str(materia.num_ident_basica) + '/' + str(materia.ano_ident_basica)
+                   texto = str(materia.des_tipo_materia) + ' Nº ' + str(materia.num_ident_basica) + '/' + str(materia.ano_ident_basica)
                    storage_path = self.sapl_documentos.materia
                    nom_pdf_saida = str(materia.cod_materia) + "_texto_integral.pdf"
             elif proposicao.ind_mat_ou_doc=='D' and (proposicao.des_tipo_proposicao!='Emenda' and proposicao.des_tipo_proposicao!='Mensagem Aditiva' and proposicao.des_tipo_proposicao!='Substitutivo' and proposicao.des_tipo_proposicao!='Parecer' and proposicao.des_tipo_proposicao!='Parecer de Comissão'):

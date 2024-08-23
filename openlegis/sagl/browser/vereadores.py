@@ -6,6 +6,8 @@ from zope.interface import Interface
 from io import BytesIO
 from Acquisition import aq_inner
 import requests
+import PIL
+from PIL import UnidentifiedImageError
 from PIL import Image
 import json
 from DateTime import DateTime

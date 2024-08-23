@@ -300,7 +300,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
             img = img.crop(box)
         elif ratio < img_ratio:
             img = img.resize((int(round(size[1] * img.size[0] / img.size[1])), size[1]),
-                Image.ANTIALIAS)
+                Image.Resampling.LANCZOS)
             if crop_type == 'top':
                 box = (0, 0, size[0], img.size[1])
             elif crop_type == 'middle':
@@ -313,7 +313,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
             img = img.crop(box)
         else :
             img = img.resize((size[0], size[1]),
-                Image.ANTIALIAS)
+                Image.Resampling.LANCZOS)
         img.save(modified_path, format="PNG")
         modified_path.seek(0)
         content = modified_path.getvalue()

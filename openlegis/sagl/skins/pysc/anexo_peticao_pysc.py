@@ -21,7 +21,6 @@ if listar:
     lista = []
     for item in ordenados:
         lista.append(item['file'])
-
     return lista
 
 if nomear:

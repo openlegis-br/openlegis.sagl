@@ -8,7 +8,7 @@
         </dtml-in>
      </dtml-in>
    </dtml-in>
-   <dtml-let mensagem="'Não é possível excluir! Esta matéria consta na Ordem do Dia da ' + str(num_sessao)+'ª <dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao"> ' + nom_sessao +' de '+dat_sessao" url="'materia_mostrar_proc?cod_materia='+cod_materia">
+   <dtml-let mensagem="'Não foi possível excluir ! A matéria consta na Ordem do Dia da ' + str(num_sessao)+ 'ª Sessão ' + nom_sessao +', de '+dat_sessao" url="'materia_mostrar_proc?cod_materia='+cod_materia" tipo_mensagem="'warning'">
       <dtml-var mensagem_emitir>
    </dtml-let>
 <dtml-elif expr="zsql.expediente_materia_obter_zsql(cod_materia=cod_materia)">
@@ -21,7 +21,7 @@
         </dtml-in>
      </dtml-in>
    </dtml-in>
-   <dtml-let mensagem="'Não é possível excluir! Esta matéria consta no Expediente da ' + str(num_sessao)+'ª <dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao"> ' + nom_sessao +' de '+dat_sessao" url="'materia_mostrar_proc?cod_materia='+cod_materia">
+   <dtml-let mensagem="'Não foi possível excluir ! A matéria consta no Expediente da ' + str(num_sessao)+ 'ª Sessão ' + nom_sessao +', de '+dat_sessao" url="'materia_mostrar_proc?cod_materia='+cod_materia" tipo_mensagem="'warning'">
       <dtml-var mensagem_emitir>
    </dtml-let>
 <dtml-elif expr="zsql.materia_apresentada_sessao_obter_zsql(cod_materia=cod_materia)">
@@ -34,7 +34,7 @@
         </dtml-in>
      </dtml-in>
    </dtml-in>
-   <dtml-let mensagem="'Não é possível excluir! Esta matéria foi apresentada na ' + str(num_sessao)+'ª <dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao"> ' + nom_sessao +' de '+dat_sessao" url="'materia_mostrar_proc?cod_materia='+cod_materia">
+   <dtml-let mensagem="'Não foi possível excluir ! A matéria foi lida na ' + str(num_sessao)+ 'ª Sessão ' + nom_sessao +', de '+dat_sessao" url="'materia_mostrar_proc?cod_materia='+cod_materia" tipo_mensagem="'warning'">
       <dtml-var mensagem_emitir>
    </dtml-let>
 <dtml-else>

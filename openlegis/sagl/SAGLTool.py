@@ -1392,7 +1392,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         else:
            storage_path.manage_addFile(id=nom_pdf_saida,file=content,title=texto)
            pdf=storage_path[nom_pdf_saida]
-        pdf.manage_permission('View', roles=['Manager','Authenticated'], acquire=0)
+        pdf.manage_permission('View', roles=['Manager','Anonymous'], acquire=1)
 
     def peticao_autuar(self,cod_peticao):          
         for peticao in self.zsql.peticao_obter_zsql(cod_peticao=cod_peticao):

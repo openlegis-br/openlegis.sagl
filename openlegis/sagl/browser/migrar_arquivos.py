@@ -493,7 +493,7 @@ class migrarArquivos(grok.View):
     def migrarAssinados(self):
       items = []
       cur = self.db.cursor()
-      cur.execute('SELECT DISTINCT cod_assinatura_doc FROM assinatura_documento WHERE ind_assinado=1 ORDER BY id')
+      cur.execute('SELECT DISTINCT cod_assinatura_doc FROM assinatura_documento WHERE ind_assinado=1 and tipo_doc != "proposicao" ORDER BY id')
       for row in cur.fetchall():
           row_id = str(row[0]) + '.pdf'
           items.append(row_id)

@@ -5,7 +5,7 @@ from DateTime import DateTime
 from Acquisition import aq_inner
 from five import grok
 from zope.interface import Interface
-import uuid
+#import uuid
 import pymupdf
 
 
@@ -32,9 +32,10 @@ class ProcessoLeg(grok.View):
         for materia in self.context.zsql.materia_obter_zsql(cod_materia=cod_materia):
             processo_integral = materia.sgl_tipo_materia+'-'+str(materia.num_ident_basica)+'-'+str(materia.ano_ident_basica)+'.pdf'
             id_processo = materia.sgl_tipo_materia+' '+str(materia.num_ident_basica)+'/'+str(materia.ano_ident_basica)
-            id_capa = str(uuid.uuid4().hex)
+            id_capa = 'capa_' + materia.sgl_tipo_materia+'-'+str(materia.num_ident_basica)+'-'+str(materia.ano_ident_basica)
+            #id_capa = str(uuid.uuid4().hex)
             id_arquivo = "%s.pdf" % str(id_capa)
-            self.context.modelo_proposicao.capa_processo(cod_materia=materia.cod_materia, nom_arquivo=str(id_capa))
+            self.context.modelo_proposicao.capa_processo(cod_materia=materia.cod_materia, action='gerar')
             if hasattr(self.context.temp_folder, id_arquivo):
                dic = {}
                dic["data"] = DateTime(materia.dat_apresentacao, datefmt='international').strftime('%Y-%m-%d 00:00:01')

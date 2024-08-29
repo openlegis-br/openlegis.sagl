@@ -13,7 +13,7 @@ from Products.CMFCore.ActionProviderBase import ActionProviderBase
 from Products.CMFCore.utils import UniqueObject
 from zope.interface import Interface
 from Products.CMFCore.utils import getToolByName
-from io import BytesIO
+from io import BytesIO, StringIO
 from PIL import Image
 from appy.pod.renderer import Renderer
 import pymupdf
@@ -46,6 +46,7 @@ mailPassword = 'Mail forgotten password'
 addPermission(mailPassword, ('Anonymous', 'Manager',))
 from Acquisition import aq_base
 
+import urllib
 
 class ISAGLTool(Interface):
     """ Marker interface for SAGL Tool.
@@ -790,7 +791,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         os.unlink(nom_arquivo_pdf)
         self.sapl_documentos.emenda.manage_addFile(id=nom_arquivo_pdf,file=self.pysc.upload_file(file=content, title='Emenda'))
 
-    def capa_processo_gerar_odt(self, capa_dic):
+    def capa_processo_gerar_odt(self, capa_dic, action):
         arq = getattr(self.sapl_documentos.modelo.materia, "capa_processo.odt")
         template_file = BytesIO(bytes(arq.data))
         brasao_file = self.get_brasao()
@@ -807,9 +808,14 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         with open(output_file_pdf, 'rb') as dados:
            data = BytesIO(dados.read())
         os.unlink(output_file_pdf)
-        if hasattr(self.temp_folder,output_file_pdf):
-           self.temp_folder.manage_delObjects(ids=output_file_pdf)
-        self.temp_folder.manage_addFile(id=output_file_pdf, file=data)
+        if action == 'gerar':
+           if hasattr(self.temp_folder,output_file_pdf):
+              self.temp_folder.manage_delObjects(ids=output_file_pdf)
+           self.temp_folder.manage_addFile(id=output_file_pdf, file=data)
+        elif action == 'download':
+           self.REQUEST.RESPONSE.setHeader('Content-Type', 'application/pdf')
+           self.REQUEST.RESPONSE.setHeader('Content-Disposition','inline; filename=%s' %output_file_pdf)
+           return data
 
     def capa_processo_adm_gerar_odt(self, capa_dic):
         arq = getattr(self.sapl_documentos.modelo.documento_administrativo, "capa_processo_adm.odt")
@@ -884,9 +890,11 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
     def norma_gerar_odt(self, inf_basicas_dic, nom_arquivo, des_tipo_norma, num_norma, ano_norma, dat_norma, data_norma, txt_ementa, modelo_norma):
         arq = getattr(self.sapl_documentos.modelo.norma, modelo_norma)
         template_file = BytesIO(bytes(arq.data))
+        #url = self.sapl_documentos.modelo.norma.absolute_url() + "/%s" % modelo_norma
+        #template_file = BytesIO(urllib.request.urlopen(url).read())
         brasao_file = self.get_brasao()
         exec('brasao = brasao_file')
-        renderer = Renderer(template_file, locals(), nom_arquivo, pythonWithUnoPath='/usr/bin/python3',forceOoCall=True)
+        renderer = Renderer(template_file, locals(), nom_arquivo, pythonWithUnoPath='/usr/bin/python3', managePageStyles=None, forceOoCall=True)
         renderer.run()
         data = open(nom_arquivo, "rb").read()
         os.unlink(nom_arquivo)
@@ -1310,7 +1318,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
                    if materia.num_protocolo != None and materia.num_protocolo != '':
                       for protocolo in self.zsql.protocolo_obter_zsql(num_protocolo=materia.num_protocolo, ano_protocolo=materia.ano_ident_basica):
                           info_protocolo = ' - Prot. nº ' + str(protocolo.num_protocolo) + '/' + str(protocolo.ano_protocolo) + ' em ' + str(DateTime(protocolo.dat_protocolo, datefmt='international').strftime('%d/%m/%Y')) + ' ' + protocolo.hor_protocolo + '.'
-                   texto = str(materia.des_tipo_materia) + ' Nº ' + str(materia.num_ident_basica) + '/' + str(materia.ano_ident_basica)
+                   texto = str(materia.des_tipo_materia) + ' nº ' + str(materia.num_ident_basica) + '/' + str(materia.ano_ident_basica)
                    storage_path = self.sapl_documentos.materia
                    nom_pdf_saida = str(materia.cod_materia) + "_texto_integral.pdf"
             elif proposicao.ind_mat_ou_doc=='D' and (proposicao.des_tipo_proposicao!='Emenda' and proposicao.des_tipo_proposicao!='Mensagem Aditiva' and proposicao.des_tipo_proposicao!='Substitutivo' and proposicao.des_tipo_proposicao!='Parecer' and proposicao.des_tipo_proposicao!='Parecer de Comissão'):

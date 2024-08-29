@@ -595,8 +595,11 @@
                          </form> 
                       </div>
                      </div>  
-                     <a id="addDocAc" tabindex="0" class="btn btn-sm btn-light" role="button" data-bs-toggle="popover" title="title"><i class="fas fa-plus-circle"></i> Incluir documento</a>
-               </section>
+                     <a id="addDocAc" tabindex="0" class="btn btn-light" role="button" data-bs-toggle="popover" title="title"><i class="fas fa-plus-circle"></i> Incluir documento</a>
+               </section>   
+
+
+
        </dtml-if>
        </dtml-let>
 
@@ -668,10 +671,10 @@
                                 <div class="btn-group btn-group-sm ms-3">
                                   <dtml-if expr="zsql.assinatura_documento_obter_zsql(codigo=cod_documento, tipo_doc='doc_acessorio')">             
                                   <dtml-else>
-                                     <button type="button" class="btn btn-white" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Assinar Digitalmente" data-src="<dtml-var portal_url>/generico/assinador/pades-signature_html?codigo=<dtml-var cod_documento>&tipo_doc=doc_acessorio&modal=1"><i class="fas fa-file-signature"></i> Assinar</button>
+                                     <button type="button" class="btn btn-light" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Assinar Digitalmente" data-src="<dtml-var portal_url>/generico/assinador/pades-signature_html?codigo=<dtml-var cod_documento>&tipo_doc=doc_acessorio&modal=1"><i class="fas fa-file-signature"></i> Assinar</button>
                                   </dtml-if>
-                                  <button type="button" class="btn btn-white" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Assinaturas Digitais" data-src="<dtml-var portal_url>/cadastros/assinatura/assinatura_solicitar_form?codigo=<dtml-var cod_documento>&tipo_doc=doc_acessorio&modal=1"><i class="fas fa-file-signature"></i> Assinaturas</button>
-                                  <button type="button" class="btn btn-white text-danger" onClick="documento_acessorio_excluir(<dtml-var cod_documento missing>)"><i class="fas fa-trash"></i> Excluir</button>     
+                                  <button type="button" class="btn btn-light" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Assinaturas Digitais" data-src="<dtml-var portal_url>/cadastros/assinatura/assinatura_solicitar_form?codigo=<dtml-var cod_documento>&tipo_doc=doc_acessorio&modal=1"><i class="fas fa-file-signature"></i> Assinaturas</button>
+                                  <button type="button" class="btn btn-danger" onClick="documento_acessorio_excluir(<dtml-var cod_documento missing>)"><i class="fas fa-trash"></i> Excluir</button>     
                                 </div>     
                                  </dtml-if>
                               </dtml-if>                             
@@ -901,6 +904,7 @@
 <script src="<dtml-var portal_url>/assets/libs/tippy.js/tippy.all.min.js"></script>
 <script src="<dtml-var portal_url>/assets/js/pages/tooltipster.init.js"></script>
 <script>
+
  <dtml-let isAnon="portal_membership.isAnonymousUser()">
     <dtml-if expr="not isAnon">
   function documento_acessorio_excluir(cod_documento){ 
@@ -911,5 +915,19 @@
     </dtml-if> 
  </dtml-let>
 </script>
-
+<script type='text/javascript'>
+  $(document).ready(function() {    
+    var options = {
+        html: true,
+        title: "Incluir Documento Acessório",
+        //html element
+        //content: $("#popover-content")
+        content: $('[data-name="popover-content"]')
+        //Doing below won't work. Shows title only
+       //content: $("#popover-content").html()         
+    }
+    var exampleEl = document.getElementById('addDocAc')
+    var popover = new bootstrap.Popover(exampleEl, options)
+  })
+</script>
 <dtml-var footer_html>

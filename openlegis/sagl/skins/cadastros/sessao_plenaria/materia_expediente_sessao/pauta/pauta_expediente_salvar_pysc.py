@@ -29,7 +29,7 @@ for item in cod_materia:
     dic_materias = {}
     for materia in context.zsql.materia_obter_zsql(cod_materia = item, ind_excluido=0):
         dic_materias['cod_materia'] = materia.cod_materia
-        dic_materias['txt_observacao'] = pysc.convert_unicode_pysc(texto=str(materia.txt_ementa))
+        dic_materias['txt_observacao'] = context.pysc.convert_unicode_pysc(texto=str(materia.txt_ementa))
         lst_materias.append(dic_materias)
 
 lst_materias = [(i + 1, j) for i, j in enumerate(lst_materias)]

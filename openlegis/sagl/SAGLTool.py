@@ -2161,18 +2161,17 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
            arquivo = BytesIO(bytes(arq.data))
            existing_pdf = pymupdf.open(stream=arquivo)
            numPages = existing_pdf.page_count
-           stream = self.create_barcode(value=string)
            w = existing_pdf[0].rect.width
            h = existing_pdf[0].rect.height
            margin = 10
-           top = margin + 50
-           right = w - 40 -margin
+           #top = margin + 50
+           #right = w - 10 - margin
            black = pymupdf.pdfcolor["black"]
            text2 = texto + '\n' + sessao + '\n' + presidente
-           p2 = pymupdf.Point(w - 10 - margin, margin + 95) # margem superior
+           p2 = pymupdf.Point(w - 170 - margin, margin + 90) # margem superior
            shape = existing_pdf[0].new_shape()
            shape.draw_circle(p2,1)
-           shape.insert_text(p2, text2, fontname = "helv", fontsize = 7, rotate=0)
+           shape.insert_text(p2, text2, fontname = "helv", fontsize = 8, rotate=0)
            shape.commit()
            content = existing_pdf.tobytes(deflate=True, garbage=3, use_objstms=1)
            arq.manage_upload(file=content)

@@ -747,7 +747,7 @@
             <dtml-if expr="hasattr(sapl_documentos.proposicao, file_item)">
                <dtml-let documento="getattr(sapl_documentos.proposicao,file_item).absolute_url">
                 <div class="btn-group btn-group-sm me-2" data-bs-toggle="buttons">
-                  <a class="btn btn-secondary" target="_blank" href="<dtml-var documento>">
+                  <a class="btn btn-secondary" target="_blank" href="<dtml-var documento>?<dtml-var expr="ZopeTime().timeTime()">">
                     <i class="fa fa-fw fa-file-pdf"></i><dtml-var expr="'Anexo ' + file_item.split('anexo_')[1]">
                   </a>
                   <a class="btn btn-danger" href="javascript:void(0)" onclick="location.href='anexo_excluir?anexo=<dtml-var file_item>&cod_proposicao=<dtml-var cod_proposicao missing>'"> <i class="far fa-trash-alt"></i></a>

@@ -9,21 +9,19 @@
 ##
 if listar:
     documentos = context.sapl_documentos.proposicao.objectIds()
-    existentes = []
-    for documento in documentos:
-        if documento.startswith(cod_proposicao) and len(documento) == len(cod_proposicao) or documento.startswith(cod_proposicao + '_anexo_'):
-           dic = {}
-           dic['nom_documento'] = documento
-           nome_arquivo = str(documento).split('.')[0]
-           dic['sequencia'] = str(nome_arquivo).split('_')[2].zfill(2)
-           existentes.append(dic)
-    existentes.sort(key=lambda dic: dic['sequencia'])
+    existentes = [documento for documento in documentos if documento.startswith(cod_proposicao) and len(documento) == len(cod_proposicao) or documento.startswith(str(cod_proposicao) + '_anexo_')]
+    ordenados = []
+    for item in existentes:
+        dic = {}
+        i =  item.split('.')[0]
+        dic['seq'] = int(i.split('_')[-1])
+        dic['file'] = item
+        ordenados.append(dic)
+    ordenados.sort(key=lambda dic: dic['seq'], reverse=False)
     lista = []
-    for dic in existentes:
-        nome = dic.get('nom_documento',dic)
-        lista.append(nome)   
-    existentes = lista
-    return existentes
+    for item in ordenados:
+        lista.append(item['file'])
+    return lista
 
 if nomear:
     documentos = context.sapl_documentos.proposicao.objectIds()

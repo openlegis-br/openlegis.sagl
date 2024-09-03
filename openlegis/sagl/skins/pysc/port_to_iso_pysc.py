@@ -9,7 +9,7 @@
 ##
 from DateTime import DateTime
 
-data = DateTime(str(data)).strftime('%Y-%m-%d')
+data = DateTime(str(data), datefmt='international').strftime('%Y-%m-%d')
 
 return data
 

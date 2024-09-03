@@ -13,19 +13,19 @@
         }
 
         if ((tipo_votacao == 1) || (tipo_votacao == 3)) {
-            if (form.txt_votos_sim.value == 0 && form.rad_votacao_branco.checked == false) {
+            if (form.txt_votos_sim.value == '' && form.rad_votacao_branco.checked == false) {
                 alert("O numero de votos SIM deve ser preenchido!");
                 form.txt_votos_sim.focus();
                 return false;
             }
 
-            if (form.txt_votos_nao.value == 0 && form.rad_votacao_branco.checked == false) {
+            if (form.txt_votos_nao.value == '' && form.rad_votacao_branco.checked == false) {
                 alert("O numero de votos NÃO deve ser preenchido!");
                 form.txt_votos_nao.focus();
                 return false;
             }
 
-            if (form.txt_votos_abstencao.value == 0 && form.rad_votacao_branco.checked == false) {
+            if (form.txt_votos_abstencao.value == '' && form.rad_votacao_branco.checked == false) {
                 alert("O numero de abstenções deve ser preenchido!");
                 form.txt_votos_abstencao.focus();
                 return false;
@@ -208,7 +208,7 @@
          <tr>
             <td>
                <label class="form-label required" for="txt_votos_sim">Votos Sim</label>
-               <input class="form-control" type="number" name="txt_votos_sim" id="txt_votos_sim" value="<dtml-var num_votos_sim missing null>" size="3" maxlength="3" />
+               <input class="form-control" type="number" name="txt_votos_sim" id="txt_votos_sim" value="<dtml-var num_votos_sim missing null>" size="3" maxlength="3" >
                 </td>
             <td>
                <label class="form-label required" for="txt_votos_nao">Votos Não</label>
@@ -401,15 +401,15 @@
          <tr>
             <td>
                <label class="form-label" for="txt_votos_sim" class="form-label required">Votos Sim</label>
-               <input class="form-control" type="number" name="txt_votos_sim" id="txt_votos_sim" value="<dtml-var num_votos_sim missing null="">" size="3" maxlength="3" />
+               <input class="form-control" type="number" name="txt_votos_sim" id="txt_votos_sim" value="<dtml-var num_votos_sim missing null>" size="3" maxlength="3" />
                 </td>
             <td>
                <label class="form-label" for="txt_votos_nao" class="form-label required">Votos Não</label>
-               <input class="form-control" type="number" name="txt_votos_nao" id="txt_votos_nao" value="<dtml-var num_votos_nao missing null="">" size="3" maxlength="3" />
+               <input class="form-control" type="number" name="txt_votos_nao" id="txt_votos_nao" value="<dtml-var num_votos_nao missing null>" size="3" maxlength="3" />
             </td>
             <td>
                <label class="form-label" for="txt_votos_abstencao" class="form-label required">Abstenções</label>
-               <input class="form-control" type="number" name="txt_votos_abstencao" id="txt_votos_abstencao" value="<dtml-var num_abstencao missing null="">" size="3" maxlength="3" />
+               <input class="form-control" type="number" name="txt_votos_abstencao" id="txt_votos_abstencao" value="<dtml-var num_abstencao missing null>" size="3" maxlength="3"/>
             </td>
             </tr>
          <tr>

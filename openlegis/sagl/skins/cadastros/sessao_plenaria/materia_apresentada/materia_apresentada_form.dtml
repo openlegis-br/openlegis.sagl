@@ -135,7 +135,7 @@
           </div>
           <div class="col-3">
             <dtml-unless ano_ident_basica>
-              <dtml-call expr="REQUEST.set('ano_ident_basica', _.DateTime.year(DateTime()))">
+              <dtml-call expr="REQUEST.set('ano_ident_basica', _.DateTime.year(DateTime(datefmt='international')))">
             </dtml-unless>
             <label class="form-label required" for="txt_ano_ident_basica">Ano</label>
             <input class="form-control year" type="text" id="txt_ano_ident_basica" name="txt_ano_ident_basica"  onChange="ementa_buscar(document.materia_apresentada_form)"

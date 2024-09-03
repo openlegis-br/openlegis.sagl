@@ -18,7 +18,7 @@ aux=context.sapl_documentos.props_sagl.propertyItems()
 for item in aux:
   casa[item[0]]=item[1]
 localidade=context.zsql.localidade_obter_zsql(cod_localidade=casa["cod_localidade"])
-data_emissao= DateTime().strftime("%d/%m/%Y")
+data_emissao= DateTime(datefmt='international').strftime("%d/%m/%Y")
 rodape= casa 
 rodape['data_emissao']= data_emissao
 

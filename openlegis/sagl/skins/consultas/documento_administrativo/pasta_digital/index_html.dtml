@@ -235,7 +235,7 @@
     <dtml-if expr="dbcon_logs and cod_documento">
       <dtml-call expr="zsql.logs_registrar_zsql(
             usuario      = REQUEST['AUTHENTICATED_USER'].getUserName(), 
-            data         = DateTime().strftime('%Y-%m-%d %H:%M:%S'),
+            data         = DateTime(datefmt='international').strftime('%Y-%m-%d %H:%M:%S'),
             modulo       = 'documento_administrativo',
             metodo       = 'pasta_digital',
             IP           = pysc.get_ip(),

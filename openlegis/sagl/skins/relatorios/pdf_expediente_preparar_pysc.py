@@ -152,7 +152,7 @@ if casa["num_tel"]!=None and casa["num_tel"]!="":
 
 linha2 = casa["end_web_casa"]
 
-dat_emissao = DateTime().strftime("%d/%m/%Y")
+dat_emissao = DateTime(datefmt='international').strftime("%d/%m/%Y")
 rodape = [linha1, linha2, dat_emissao]
 
 caminho = context.pdf_expediente_gerar(cabecalho, rodape, imagem, pauta_dic)

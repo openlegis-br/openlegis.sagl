@@ -126,7 +126,7 @@
                 </div>
                  <div class="col-3">
                     <dtml-unless ano_documento>
-                     <dtml-call expr="REQUEST.set('ano_documento', _.DateTime.year(DateTime()))">
+                     <dtml-call expr="REQUEST.set('ano_documento', _.DateTime.year(DateTime(datefmt='international')))">
                     </dtml-unless>
                     <label class="form-label required" for="txt_ano_documento">Ano</label>
                     <input class="form-control year" type="number" id="txt_ano_documento" name="txt_ano_documento" onChange="ementa_buscar(document.materia_apresentada_documento_form)"

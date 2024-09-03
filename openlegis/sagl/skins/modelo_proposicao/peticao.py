@@ -33,7 +33,7 @@ for local in context.zsql.localidade_obter_zsql(cod_localidade = casa['cod_local
 for peticao in context.zsql.peticao_obter_zsql(cod_peticao=cod_peticao):
     nom_arquivo = str(peticao.cod_peticao)+'.odt'
     inf_basicas_dic['txt_descricao'] = peticao.txt_descricao
-    inf_basicas_dic['data'] = context.pysc.data_converter_por_extenso_pysc(data=DateTime().strftime("%d/%m/%Y"))
+    inf_basicas_dic['data'] = context.pysc.data_converter_por_extenso_pysc(data=DateTime(datefmt='international').strftime("%d/%m/%Y"))
     for usuario in context.zsql.usuario_obter_zsql(cod_usuario=peticao.cod_usuario):
         inf_basicas_dic['nom_completo'] = usuario.nom_completo
         inf_basicas_dic['num_matricula'] = usuario.num_matricula

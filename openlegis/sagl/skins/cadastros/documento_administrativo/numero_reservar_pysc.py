@@ -7,8 +7,8 @@
 ##parameters=tip_documento, txt_interessado, txt_assunto, txt_qtde, cod_materia, cod_documento_vinculado
 ##title=
 ##
-ano_documento = DateTime().strftime("%Y")
-dat_documento = DateTime().strftime("%Y/%m/%d")
+ano_documento = DateTime(datefmt='international').strftime("%Y")
+dat_documento = DateTime(datefmt='international').strftime("%Y/%m/%d")
 for numero in context.zsql.numero_documento_administrativo_obter_zsql(tip_documento=tip_documento, ano_documento=ano_documento):
     numero_inicial = numero.novo_numero 
 qtde = int(txt_qtde)
@@ -22,7 +22,7 @@ for i in range(qtde):
     txt_interessado = txt_interessado
     context.zsql.documento_administrativo_incluir_zsql(num_documento = num_documento, 
                                                      ano_documento = ano_documento, 
-                                                     dat_documento = DateTime().strftime("%Y/%m/%d"), 
+                                                     dat_documento = DateTime(datefmt='international').strftime("%Y/%m/%d"), 
                                                      tip_documento = tip_documento, 
                                                      txt_interessado = txt_interessado,
                                                      txt_assunto = txt_assunto,

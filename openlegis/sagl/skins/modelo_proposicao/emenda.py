@@ -36,7 +36,7 @@ for emenda in context.zsql.emenda_obter_zsql(cod_emenda=cod_emenda):
  num_proposicao = " "
  des_tipo_materia = emenda.des_tipo_emenda.upper()
  num_ident_basica = emenda.num_emenda
- ano_ident_basica = DateTime().strftime("%Y")
+ ano_ident_basica = DateTime(datefmt='international').strftime("%Y")
  txt_ementa = emenda.txt_ementa
  dat_apresentacao = context.pysc.data_converter_por_extenso_pysc(data=emenda.dat_apresentacao)
 

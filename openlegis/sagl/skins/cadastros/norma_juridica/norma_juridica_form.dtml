@@ -96,7 +96,7 @@
     <div class="col-6 col-sm-3 mb-3">
       <label class="form-label required" for="txt_ano_norma">Ano</label>
       <dtml-unless ano_norma>
-         <dtml-call expr="REQUEST.set('ano_norma', _.DateTime.year(DateTime()))">
+         <dtml-call expr="REQUEST.set('ano_norma', _.DateTime.year(DateTime(datefmt='international')))">
       </dtml-unless>
       <input class="form-control" type="number" id="txt_ano_norma" name="txt_ano_norma" value="<dtml-var ano_norma missing>" autocomplete="off" required />
       <div class="invalid-feedback">
@@ -109,7 +109,7 @@
     <div class="col-6 col-lg-3 mb-3">
       <label class="form-label required" for="txt_dat_norma">Data da Norma</label>
       <dtml-unless dat_norma>
-         <dtml-call expr="REQUEST.set('dat_norma', DateTime().strftime('%d/%m/%Y'))">
+         <dtml-call expr="REQUEST.set('dat_norma', DateTime(datefmt='international').strftime('%d/%m/%Y'))">
       </dtml-unless>
         <div class="input-group">
            <input type="text" class="form-control datepicker" placeholder="dd/mm/aaaa" name="txt_dat_norma" id="txt_dat_norma" data-provide="datepicker" data-date-autoclose="true" value="<dtml-var dat_norma missing null>" autocomplete="off" required>

@@ -1,7 +1,7 @@
 <dtml-if hdn_cod_proposicao>
    <dtml-call expr="REQUEST.set('temProposicao',hdn_cod_proposicao!='')">
    <dtml-if expr="sapl_documentos.props_sagl.numero_protocolo_anual == 1">
-      <dtml-in expr="zsql.protocolo_numero_obter_zsql(ano_protocolo = DateTime().strftime('%Y'))">
+      <dtml-in expr="zsql.protocolo_numero_obter_zsql(ano_protocolo = DateTime(datefmt='international').strftime('%Y'))">
          <dtml-call expr="REQUEST.set('txt_num_protocolo', int(novo_numero))">
       </dtml-in>
    <dtml-else>
@@ -65,7 +65,7 @@
     </dtml-if>
     <dtml-if expr="metodo==zsql.documento_acessorio_incluir_zsql">
      <dtml-if expr="txt_num_protocolo and txt_num_protocolo!=''">
-        <dtml-call expr="REQUEST.set('ano', DateTime().strftime('%Y'))">
+        <dtml-call expr="REQUEST.set('ano', DateTime(datefmt='international').strftime('%Y'))">
         <dtml-in expr="zsql.protocolo_obter_zsql(num_protocolo=txt_num_protocolo, ano_protocolo=ano)">
           <dtml-if sequence-start>
              <dtml-call expr="REQUEST.set('cod_protocolo', cod_protocolo)">
@@ -93,10 +93,10 @@
           <dtml-else>
              <dtml-call expr="REQUEST.set('cod_unid_tram_dest', int(sapl_documentos.props_sagl.destino))">
           </dtml-if>
-          <dtml-call expr="REQUEST.set('hdn_hor_tramitacao', DateTime().strftime('%d/%m/%Y às %H:%M'))">
+          <dtml-call expr="REQUEST.set('hdn_hor_tramitacao', DateTime(datefmt='international').strftime('%d/%m/%Y às %H:%M'))">
           <dtml-call expr="REQUEST.set('txt_tramitacao', '<p>' + str(txt_nom_documento) + ' anexado em ' + str(hdn_hor_tramitacao) + '</p>')">
-          <dtml-call expr="REQUEST.set('hdn_dat_tramitacao', DateTime().strftime('%Y-%m-%d %H:%M:%S'))">
-          <dtml-call expr="REQUEST.set('hdn_dat_encaminha', DateTime().strftime('%Y-%m-%d %H:%M:%S'))">
+          <dtml-call expr="REQUEST.set('hdn_dat_tramitacao', DateTime(datefmt='international').strftime('%Y-%m-%d %H:%M:%S'))">
+          <dtml-call expr="REQUEST.set('hdn_dat_encaminha', DateTime(datefmt='international').strftime('%Y-%m-%d %H:%M:%S'))">
           <dtml-call expr="REQUEST.set('cod_status', int(sapl_documentos.props_sagl.status_doc))">
           <dtml-try>
              <dtml-call expr="zsql.trans_begin_zsql()">           
@@ -179,7 +179,7 @@
 <dtml-if expr="dbcon_logs and hdn_cod_documento">
   <dtml-call expr="zsql.logs_registrar_zsql(
             usuario      = REQUEST['AUTHENTICATED_USER'].getUserName(), 
-            data         = DateTime().strftime('%Y-%m-%d %H:%M:%S'),
+            data         = DateTime(datefmt='international').strftime('%Y-%m-%d %H:%M:%S'),
             modulo       = 'documento_acessorio_materia',
             metodo       = 'documento_acessorio_salvar_proc',
             IP           = pysc.get_ip(),

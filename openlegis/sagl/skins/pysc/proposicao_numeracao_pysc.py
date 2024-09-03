@@ -15,7 +15,7 @@
 
 
 # Define o ano corrente
-ano_corrente = DateTime().year()
+ano_corrente = DateTime(datefmt='international').year()
 
 # Busca a proposição
 tip_proposicao = context.zsql.proposicao_obter_tipo_zsql(cod_proposicao = cod_proposicao)[0].tip_proposicao

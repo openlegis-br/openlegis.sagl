@@ -24,7 +24,7 @@ if context.REQUEST['data']!='':
         inf_basicas_dic["hr_inicio_sessao"] = sessao.hr_inicio_sessao
         inf_basicas_dic["dat_fim_sessao"] = sessao.dat_fim_sessao
         inf_basicas_dic["hr_fim_sessao"] = sessao.hr_fim_sessao
-        data_emissao= DateTime().strftime("%d/%m/%Y")
+        data_emissao= DateTime(datefmt='international').strftime("%d/%m/%Y")
         inf_basicas_dic['data_emissao']= data_emissao
  
         # Lista e exibe os Expedientes Diversos da Sessão
@@ -78,7 +78,7 @@ if context.REQUEST['data']!='':
     inf_basicas_dic['nom_camara']= casa['nom_casa']
     inf_basicas_dic["nom_estado"] = nom_estado
 
-    data_emissao= DateTime().strftime("%d/%m/%Y")
+    data_emissao= DateTime(datefmt='international').strftime("%d/%m/%Y")
     rodape= casa
     rodape['data_emissao']= data_emissao
 

@@ -202,7 +202,7 @@
     <div class="col-6 col-md-3 mb-3">
        <label class="form-label" for="txt_dat_destit_relator">Data do Parecer</label>
        <dtml-unless dat_destit_relator>
-          <dtml-call expr="REQUEST.set('dat_destit_relator', DateTime().strftime('%d/%m/%Y %H:%M:%S'))">
+          <dtml-call expr="REQUEST.set('dat_destit_relator', DateTime(datefmt='international').strftime('%d/%m/%Y %H:%M:%S'))">
        </dtml-unless>
         <div class="input-group">
            <input type="text" class="form-control" placeholder="dd/mm/aaaa" name="txt_dat_destit_relator" id="txt_dat_destit_relator" value="<dtml-var dat_destit_relator missing null>" autocomplete="off">
@@ -211,7 +211,7 @@
     </div>
     <div class="col-6 col-md-3 mb-3">
        <dtml-unless cod_relatoria>
-          <dtml-call expr="REQUEST.set('ano_parecer', DateTime().strftime('%Y'))">
+          <dtml-call expr="REQUEST.set('ano_parecer', DateTime(datefmt='international').strftime('%Y'))">
           <dtml-in expr="zsql.numero_parecer_obter_zsql(cod_comissao=cod_comissao,ano_parecer=ano_parecer)">
              <dtml-call expr="REQUEST.set('num_parecer', novo_numero)">
           </dtml-in>
@@ -222,7 +222,7 @@
     <div class="col-6 col-md-3 mb-3">
        <label class="form-label" for="txt_ano_parecer">Ano do Parecer</label>
        <dtml-unless ano_parecer>
-          <dtml-call expr="REQUEST.set('ano_parecer', DateTime().strftime('%Y'))">
+          <dtml-call expr="REQUEST.set('ano_parecer', DateTime(datefmt='international').strftime('%Y'))">
        </dtml-unless>
        <input class="form-control year" type="number" name="txt_ano_parecer" id="txt_ano_parecer" value="<dtml-var ano_parecer missing null="">" />    
     </div> 

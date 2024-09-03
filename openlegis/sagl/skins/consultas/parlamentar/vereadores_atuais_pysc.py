@@ -8,7 +8,7 @@
 ##title=
 ##
 
-data_atual = DateTime().strftime("%d/%m/%Y")
+data_atual = DateTime(datefmt='international').strftime("%d/%m/%Y")
 
 titulares = []
 suplentes = []

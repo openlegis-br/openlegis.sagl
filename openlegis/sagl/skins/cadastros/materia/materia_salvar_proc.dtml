@@ -104,7 +104,7 @@
         <dtml-in expr="zsql.proposicao_obter_zsql(cod_proposicao=hdn_cod_proposicao)">
           <dtml-call expr="REQUEST.set('des_tipo_proposicao', des_tipo_proposicao)">
           <dtml-call expr="REQUEST.set('cod_documento',pysc.proposicao_calcular_checksum_pysc(cod_proposicao))">
-          <dtml-call expr="REQUEST.set('hdn_hor_tramitacao', DateTime().strftime('%d/%m/%Y às %H:%M'))">
+          <dtml-call expr="REQUEST.set('hdn_hor_tramitacao', DateTime(datefmt='international').strftime('%d/%m/%Y às %H:%M'))">
           <dtml-call expr="REQUEST.set('txt_tramitacao', 'Proposição Digital ' + cod_documento + ' incorporada como matéria principal em ' + hdn_hor_tramitacao)">
           <dtml-comment>
             <dtml-call expr="zsql.autoria_incluir_zsql(cod_autor = cod_autor, cod_materia = codigo, ind_primeiro_autor = 0)">
@@ -114,8 +114,8 @@
                                                                     dat_recebimento = pysc.data_atual_iso_pysc(),
                                                                     cod_mat_ou_doc = _.int(hdn_cod_materia))">
         <dtml-call expr="pysc.proposicao_salvar_como_texto_integral_materia_pysc(hdn_cod_proposicao,hdn_cod_materia,0)">
-        <dtml-call expr="REQUEST.set('hdn_dat_tramitacao', DateTime().strftime('%d/%m/%Y'))">
-        <dtml-call expr="REQUEST.set('hdn_dat_encaminha', DateTime().strftime('%Y-%m-%d %H:%M:%S'))">
+        <dtml-call expr="REQUEST.set('hdn_dat_tramitacao', DateTime(datefmt='international').strftime('%d/%m/%Y'))">
+        <dtml-call expr="REQUEST.set('hdn_dat_encaminha', DateTime(datefmt='international').strftime('%Y-%m-%d %H:%M:%S'))">
         <dtml-call expr="REQUEST.set('cod_unid_tram_local', int(sapl_documentos.props_sagl.origem))"> 
         <dtml-if expr="des_tipo_proposicao=='Indicação' or des_tipo_proposicao=='Moção' or des_tipo_proposicao=='Requerimento'">
           <dtml-call expr="REQUEST.set('cod_unid_tram_dest', int(sapl_documentos.props_sagl.destino_outros))">
@@ -157,10 +157,10 @@
                  <dtml-call expr="REQUEST.set('cod_usuario_corrente', int(cod_usuario))">
               </dtml-if>
             </dtml-in>
-            <dtml-call expr="REQUEST.set('hdn_hor_tramitacao', DateTime().strftime('%d/%m/%Y às %H:%M'))">
+            <dtml-call expr="REQUEST.set('hdn_hor_tramitacao', DateTime(datefmt='international').strftime('%d/%m/%Y às %H:%M'))">
             <dtml-call expr="REQUEST.set('txt_tramitacao', 'Matéria incorporada em ' + hdn_hor_tramitacao)">
-            <dtml-call expr="REQUEST.set('hdn_dat_tramitacao', DateTime().strftime('%d/%m/%Y'))">
-            <dtml-call expr="REQUEST.set('hdn_dat_encaminha', DateTime().strftime('%Y-%m-%d %H:%M:%S'))">
+            <dtml-call expr="REQUEST.set('hdn_dat_tramitacao', DateTime(datefmt='international').strftime('%d/%m/%Y'))">
+            <dtml-call expr="REQUEST.set('hdn_dat_encaminha', DateTime(datefmt='international').strftime('%Y-%m-%d %H:%M:%S'))">
             <dtml-call expr="REQUEST.set('nom_unidade_origem', 'Protocolo')">
             <dtml-in expr="zsql.unidade_tramitacao_obter_zsql(nom_orgao=nom_unidade_origem)">
                <dtml-call expr="REQUEST.set('cod_unid_tram_local', cod_unid_tramitacao)">
@@ -255,7 +255,7 @@
 <dtml-if expr="dbcon_logs and hdn_cod_materia">
   <dtml-call expr="zsql.logs_registrar_zsql(
             usuario      = REQUEST['AUTHENTICATED_USER'].getUserName(), 
-            data         = DateTime().strftime('%Y-%m-%d %H:%M:%S'),
+            data         = DateTime(datefmt='international').strftime('%Y-%m-%d %H:%M:%S'),
             modulo       = str(_['REQUEST']['URL1']).split('/')[-1],
             metodo       = 'materia_salvar_proc',
             IP           = pysc.get_ip(),

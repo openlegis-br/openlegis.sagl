@@ -45,7 +45,7 @@
 				     <tbody>
 				   </dtml-if>
 				     <dtml-in expr="zsql.tramitacao_administrativo_obter_zsql(cod_tramitacao=_['sequence-item'])">
-					<dtml-call expr="REQUEST.set('prazo_a_vencer', DateTime()+3)">
+					<dtml-call expr="REQUEST.set('prazo_a_vencer', DateTime(datefmt='international')+3)">
 					<tr>
 					<form name="inbox_form_<dtml-var cod_tramitacao>" method="post" action="tramitacao_mostrar_proc"> 
 					<input type="hidden" name="hdn_cod_tramitacao" value="<dtml-var cod_tramitacao>" />

@@ -28,7 +28,7 @@ aux=context.sapl_documentos.props_sagl.propertyItems()
 for item in aux:
   casa[item[0]]=item[1]
 localidade=context.zsql.localidade_obter_zsql(cod_localidade=casa["cod_localidade"])
-data_emissao= DateTime().strftime("%d/%m/%Y")
+data_emissao= DateTime(datefmt='international').strftime("%d/%m/%Y")
 rodape= casa 
 rodape['data_emissao']= data_emissao
 
@@ -61,8 +61,8 @@ for tramitacao in context.zsql.tramitacao_administrativo_obter_zsql(cod_tramitac
   else:
     for prazo_status in context.zsql.status_tramitacao_administrativo_obter_zsql(cod_status=tramitacao.cod_status):
       if prazo_status.num_dias_prazo != None:
-        data_calculada = DateTime() + prazo_status.num_dias_prazo
-        tramitacao_dic['dat_fim_prazo'] = DateTime(data_calculada).strftime('%d/%m/%Y')
+        data_calculada = DateTime(datefmt='international') + prazo_status.num_dias_prazo
+        tramitacao_dic['dat_fim_prazo'] = DateTime(data_calculada,datefmt='international').strftime('%d/%m/%Y')
       else:
         tramitacao_dic['dat_fim_prazo'] = ''
 

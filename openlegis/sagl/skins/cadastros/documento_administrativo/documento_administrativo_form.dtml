@@ -144,7 +144,7 @@
     <div class="col-6 col-lg-3 mb-3">
        <label class="form-label" for="txt_ano_documento" class="form-label required">Ano</label>
        <dtml-unless ano_documento>
-          <dtml-call expr="REQUEST.set('ano_documento', _.DateTime.year(DateTime()))">
+          <dtml-call expr="REQUEST.set('ano_documento', _.DateTime.year(DateTime(datefmt='international')))">
        </dtml-unless>
        <input class="form-control year" type="number" id="txt_ano_documento" name="txt_ano_documento" value="<dtml-var ano_documento missing>" required />
     </div>    
@@ -154,7 +154,7 @@
     <div class="col-6 col-lg-3 mb-3">
        <label class="form-label required" for="txt_dat_documento">Data do Documento</label>
        <dtml-unless dat_documento>
-          <dtml-call expr="REQUEST.set('dat_documento', DateTime().strftime('%d/%m/%Y'))">
+          <dtml-call expr="REQUEST.set('dat_documento', DateTime(datefmt='international').strftime('%d/%m/%Y'))">
        </dtml-unless>
         <div class="input-group">
            <input type="text" class="form-control datepicker" placeholder="dd/mm/aaaa" name="txt_dat_documento" id="txt_dat_documento" data-provide="datepicker" data-date-autoclose="true" value="<dtml-var dat_documento missing null>" autocomplete="off" required>

@@ -120,7 +120,7 @@ function vinculado_criticar(){
      <div class="col-12 mb-3">
           <label class="form-label required" for="txt_dat_vinculacao">Data de Vinculação</label>
           <dtml-unless dat_vinculacao>
-             <dtml-call expr="REQUEST.set('dat_vinculacao', DateTime().strftime('%d/%m/%Y %H:%M:%S'))">
+             <dtml-call expr="REQUEST.set('dat_vinculacao', DateTime(datefmt='international').strftime('%d/%m/%Y %H:%M:%S'))">
           </dtml-unless>
           <div class="input-group">
             <input class="form-control" type="text" name="txt_dat_vinculacao" id="txt_dat_vinculacao" value="<dtml-var dat_vinculacao missing>" required <dtml-if cod_vinculo>disabled</dtml-if> />

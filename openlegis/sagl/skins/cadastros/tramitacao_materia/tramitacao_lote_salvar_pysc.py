@@ -34,7 +34,7 @@ for item in cod_materia:
         dic_ultimas['cod_tramitacao'] = tramitacao.cod_tramitacao    
         lst_ultimas.append(dic_ultimas)
 
-hdn_dat_encaminha = DateTime().strftime('%Y-%m-%d %H:%M:%S')
+hdn_dat_encaminha = DateTime(datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
 
 if lst_ultimas != []:
    for dic in lst_ultimas:
@@ -43,7 +43,7 @@ if lst_ultimas != []:
        context.pysc.atualiza_indicador_tramitacao_materia_pysc(cod_materia = dic['cod_materia'], cod_status = lst_cod_status)          
 
 if txt_dat_fim_prazo==None or txt_dat_fim_prazo=='':
-   data_atual = DateTime()
+   data_atual = DateTime(datefmt='international')
    for tramitacao in context.zsql.status_tramitacao_obter_zsql(cod_status=lst_cod_status, ind_excluido=0):
        if tramitacao.num_dias_prazo != None:
           data_calculada = data_atual + str(tramitacao.num_dias_prazo)
@@ -54,10 +54,10 @@ elif txt_dat_fim_prazo != '':
    txt_dat_fim_prazo = context.pysc.data_converter_pysc(data=txt_dat_fim_prazo)
 
 for item in cod_materia:
-    context.zsql.tramitacao_incluir_zsql(cod_materia = item, dat_tramitacao = DateTime().strftime('%Y-%m-%d %H:%M:%S'), cod_unid_tram_local = lst_cod_unid_tram_local, cod_usuario_local = hdn_cod_usuario_local, cod_unid_tram_dest = lst_cod_unid_tram_dest, cod_usuario_dest = lst_cod_usuario_dest, dat_encaminha = hdn_dat_encaminha, cod_status = lst_cod_status, ind_urgencia = rad_ind_urgencia, txt_tramitacao = txa_txt_tramitacao, dat_fim_prazo = txt_dat_fim_prazo, ind_ult_tramitacao = 1)
+    context.zsql.tramitacao_incluir_zsql(cod_materia = item, dat_tramitacao = DateTime(datefmt='international').strftime('%Y-%m-%d %H:%M:%S'), cod_unid_tram_local = lst_cod_unid_tram_local, cod_usuario_local = hdn_cod_usuario_local, cod_unid_tram_dest = lst_cod_unid_tram_dest, cod_usuario_dest = lst_cod_usuario_dest, dat_encaminha = hdn_dat_encaminha, cod_status = lst_cod_status, ind_urgencia = rad_ind_urgencia, txt_tramitacao = txa_txt_tramitacao, dat_fim_prazo = txt_dat_fim_prazo, ind_ult_tramitacao = 1)
 
     if context.dbcon_logs and (item != '' and item != None):
-       context.zsql.logs_registrar_zsql(usuario = REQUEST['AUTHENTICATED_USER'].getUserName(), data = DateTime().strftime('%Y-%m-%d %H:%M:%S'), modulo = 'tramitacao_materia', metodo = 'tramitacao_lote_salvar_pysc', cod_registro = item, IP = context.pysc.get_ip())         
+       context.zsql.logs_registrar_zsql(usuario = REQUEST['AUTHENTICATED_USER'].getUserName(), data = DateTime(datefmt='international').strftime('%Y-%m-%d %H:%M:%S'), modulo = 'tramitacao_materia', metodo = 'tramitacao_lote_salvar_pysc', cod_registro = item, IP = context.pysc.get_ip())         
 
 lst_novas = []
 for item in cod_materia:

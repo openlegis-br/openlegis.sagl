@@ -97,7 +97,7 @@
     </div>
     <div class="col-12 col-sm-4 mb-3" id="list3">
       <label class="form-label" for="lst_cod_parlamentar">Vereador</label>  
-             <dtml-call expr="REQUEST.set('data_atual', DateTime().strftime('%d/%m/%Y'))">                      
+             <dtml-call expr="REQUEST.set('data_atual', DateTime(datefmt='international').strftime('%d/%m/%Y'))">                      
              <select class="form-select" id="lst_cod_parlamentar" name="lst_cod_parlamentar">
                <option value=""></option>
                <dtml-in expr="zsql.autores_obter_zsql(txt_dat_apresentacao=data_atual)">

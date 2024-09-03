@@ -7,4 +7,4 @@
 ##parameters=
 ##title=
 ##
-return DateTime().ISO()
+return DateTime(datefmt='international').ISO()

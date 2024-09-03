@@ -163,7 +163,7 @@ if context.REQUEST['cod_reuniao']!='':
         if casa["end_web_casa"]!="" and casa["end_web_casa"]!=None:
             linha2= linha2 + " - "
         linha2 = linha2 +"E-mail: "+casa["end_email_casa"]
-    dat_emissao = DateTime().strftime("%d/%m/%Y")
+    dat_emissao = DateTime(datefmt='international').strftime("%d/%m/%Y")
     rodape = [linha1, linha2, dat_emissao]
 
 #    return imagem, dat_reuniao, cod_reuniao, reuniao, pauta, cabecalho, rodape

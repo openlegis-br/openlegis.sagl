@@ -17,9 +17,9 @@ for proposicao in context.zsql.proposicao_obter_zsql(cod_proposicao=cod_proposic
     cod_proposicao = proposicao.cod_proposicao
     des_tipo_proposicao = proposicao.des_tipo_proposicao    
     tip_materia = proposicao.tip_mat_ou_doc
-    ano_materia = DateTime().strftime("%Y")
+    ano_materia = DateTime(datefmt='international').strftime("%Y")
     cod_mat = proposicao.cod_mat_ou_doc
-    dat_apresentacao = DateTime().strftime("%Y-%m-%d")
+    dat_apresentacao = DateTime(datefmt='international').strftime("%Y-%m-%d")
     dat_envio = proposicao.dat_envio
     txt_ementa = proposicao.txt_descricao
     txt_observacao = proposicao.txt_observacao
@@ -43,7 +43,7 @@ ano_ident_basica = ano_materia, ind_excluido = 0):
 
 def criar_protocolo(tip_materia, num_ident_basica, ano_materia, dat_apresentacao, txt_ementa, txt_observacao, cod_autor, tip_quorum, ind_complementar, cod_proposicao):
     if context.sapl_documentos.props_sagl.numero_protocolo_anual == 1:
-       for numero in context.zsql.protocolo_numero_obter_zsql(ano_protocolo = DateTime().strftime('%Y')):
+       for numero in context.zsql.protocolo_numero_obter_zsql(ano_protocolo = DateTime(datefmt='international').strftime('%Y')):
            hdn_num_protocolo = int(numero.novo_numero)
     else:
        for numero in context.zsql.protocolo_codigo_obter_zsql():
@@ -61,7 +61,7 @@ def criar_materia(hdn_num_protocolo, tip_materia, num_ident_basica, ano_materia,
     for codigo in context.zsql.materia_incluida_codigo_obter_zsql():
         cod_materia = int(codigo.cod_materia)
     if context.dbcon_logs:
-       context.zsql.logs_registrar_zsql(usuario = REQUEST['AUTHENTICATED_USER'].getUserName(), data = DateTime().strftime('%Y-%m-%d %H:%M:%S'), modulo = 'materia', metodo = 'materia_incluir_zsql', cod_registro = cod_materia, IP = context.pysc.get_ip())
+       context.zsql.logs_registrar_zsql(usuario = REQUEST['AUTHENTICATED_USER'].getUserName(), data = DateTime(datefmt='international').strftime('%Y-%m-%d %H:%M:%S'), modulo = 'materia', metodo = 'materia_incluir_zsql', cod_registro = cod_materia, IP = context.pysc.get_ip())
     return inserir_autoria(cod_materia, cod_autor, cod_proposicao, hdn_num_protocolo)
 
 
@@ -91,11 +91,11 @@ def tramitar_materia(cod_materia, cod_proposicao, hdn_num_protocolo):
            cod_usuario_corrente = int(usuario.cod_usuario)
         else:
            cod_usuario_corrente = 0
-    hr_tramitacao = DateTime().strftime('%d/%m/%Y %H:%M:%S')
-    txt_tramitacao = '<p>Proposição eletrônica enviada em ' + dat_envio + '. Matéria incorporada em ' + hr_tramitacao + ', sob protocolo nº ' + str(hdn_num_protocolo) + '/' + DateTime().strftime("%Y") +'</p>'
+    hr_tramitacao = DateTime(datefmt='international').strftime('%d/%m/%Y %H:%M:%S')
+    txt_tramitacao = '<p>Proposição eletrônica enviada em ' + dat_envio + '. Matéria incorporada em ' + hr_tramitacao + ', sob protocolo nº ' + str(hdn_num_protocolo) + '/' + DateTime(datefmt='international').strftime("%Y") +'</p>'
     hdn_url = context.portal_url() + '/cadastros/recebimento_proposicao/recebimento_proposicao_index_html#incorporada'   
     if cod_unid_tram_local != None and cod_unid_tram_dest != None and cod_status != None:
-       context.zsql.tramitacao_incluir_zsql(cod_materia=cod_materia, dat_tramitacao=DateTime().strftime('%Y-%m-%d %H:%M:%S'), cod_unid_tram_local=cod_unid_tram_local, cod_usuario_local=cod_usuario_corrente, cod_unid_tram_dest=cod_unid_tram_dest, dat_encaminha=DateTime().strftime('%Y-%m-%d %H:%M:%S'), cod_status=cod_status, ind_urgencia=0, txt_tramitacao = txt_tramitacao, ind_ult_tramitacao=1)
+       context.zsql.tramitacao_incluir_zsql(cod_materia=cod_materia, dat_tramitacao=DateTime(datefmt='international').strftime('%Y-%m-%d %H:%M:%S'), cod_unid_tram_local=cod_unid_tram_local, cod_usuario_local=cod_usuario_corrente, cod_unid_tram_dest=cod_unid_tram_dest, dat_encaminha=DateTime(datefmt='international').strftime('%Y-%m-%d %H:%M:%S'), cod_status=cod_status, ind_urgencia=0, txt_tramitacao = txt_tramitacao, ind_ult_tramitacao=1)
     for tramitacao in context.zsql.tramitacao_incluida_codigo_obter_zsql():
         cod_tramitacao = tramitacao.cod_tramitacao
     odt_proposicao = str(cod_proposicao) + '.odt'

@@ -32,7 +32,7 @@ for item in cod_documento:
         dic_ultimas['cod_tramitacao'] = tramitacao.cod_tramitacao    
         lst_ultimas.append(dic_ultimas)
 
-hdn_dat_encaminha = DateTime().strftime('%Y-%m-%d %H:%M:%S')
+hdn_dat_encaminha = DateTime(datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
 
 if lst_ultimas != []:
    for dic in lst_ultimas:
@@ -47,7 +47,7 @@ if lst_ultimas != []:
 
 
 if txt_dat_fim_prazo==None or txt_dat_fim_prazo=='':
-   data_atual = DateTime()
+   data_atual = DateTime(datefmt='international')
    for tramitacao in context.zsql.status_tramitacao_administrativo_obter_zsql(cod_status=lst_cod_status, ind_excluido=0):
        if tramitacao.num_dias_prazo != None:
           data_calculada = data_atual + str(tramitacao.num_dias_prazo)
@@ -66,7 +66,7 @@ for item in cod_documento:
        context.zsql.trans_rollback_zsql() 
 
     if context.dbcon_logs and (item != '' and item != None):
-       context.zsql.logs_registrar_zsql(usuario = REQUEST['AUTHENTICATED_USER'].getUserName(), data = DateTime().strftime('%Y-%m-%d %H:%M:%S'), modulo = 'tramitacao_documento', metodo = 'tramitacao_lote_salvar_pysc', cod_registro = item, IP = context.pysc.get_ip())
+       context.zsql.logs_registrar_zsql(usuario = REQUEST['AUTHENTICATED_USER'].getUserName(), data = DateTime(datefmt='international').strftime('%Y-%m-%d %H:%M:%S'), modulo = 'tramitacao_documento', metodo = 'tramitacao_lote_salvar_pysc', cod_registro = item, IP = context.pysc.get_ip())
 
 
 lst_novas = []

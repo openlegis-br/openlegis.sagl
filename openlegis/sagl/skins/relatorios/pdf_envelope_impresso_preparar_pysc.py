@@ -4,7 +4,7 @@ request=context.REQUEST
 response=request.RESPONSE
 session= request.SESSION
 
-data=DateTime().strftime('%d/%m/%Y')
+data=DateTime(datefmt='international').strftime('%d/%m/%Y')
 
 #Abaixo é gerada a string para o remetente
 casa={}

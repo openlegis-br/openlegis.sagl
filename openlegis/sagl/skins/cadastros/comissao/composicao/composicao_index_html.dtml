@@ -11,7 +11,7 @@
               <dtml-if expr="(cod_periodo_comp==cod_periodo_comp_sel)"> 
                 selected
               </dtml-if>
-            <dtml-elif expr="(DateTime() <= DateTime(dat_fim) and DateTime() >= DateTime(dat_inicio))">
+            <dtml-elif expr="(DateTime(datefmt='international') <= DateTime(dat_fim, datefmt='international') and DateTime(datefmt='international') >= DateTime(dat_inicio, datefmt='international'))">
               <dtml-call expr="REQUEST.set('cod_periodo_comp_sel', cod_periodo_comp)">
               selected
             </dtml-if>

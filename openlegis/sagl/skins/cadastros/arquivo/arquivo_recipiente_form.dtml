@@ -103,7 +103,7 @@
     <div class="col-6 col-lg-3 mb-3">
       <label class="form-label required" for="txt_ano_recipiente">Ano</label>
       <dtml-unless ano_recipiente>
-         <dtml-call expr="REQUEST.set('ano_recipiente', _.DateTime.year(DateTime()))">
+         <dtml-call expr="REQUEST.set('ano_recipiente', _.DateTime.year(DateTime(datefmt='international')))">
       </dtml-unless>
       <input class="form-control year" type="number" id="txt_ano_recipiente" name="txt_ano_recipiente" maxlength="4" value="<dtml-var ano_recipiente missing>">
     </div>
@@ -130,7 +130,7 @@
     <div class="col-6 col-lg-3 mb-3">
       <label class="form-label required" for="txt_dat_recipiente">Data</label>
       <dtml-unless dat_recipiente>
-         <dtml-call expr="REQUEST.set('dat_recipiente', DateTime().strftime('%d/%m/%Y'))">
+         <dtml-call expr="REQUEST.set('dat_recipiente', DateTime(datefmt='international').strftime('%d/%m/%Y'))">
       </dtml-unless>
       <input class="form-control date" type="text" id="txt_dat_recipiente" name="txt_dat_recipiente" maxlength="10" value="<dtml-var dat_recipiente missing null="">" required />       
     </div>

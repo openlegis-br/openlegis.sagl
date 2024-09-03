@@ -12,7 +12,7 @@
 
 <dtml-unless erro>
 
-  <dtml-call expr="REQUEST.set('hdn_dat_insercao', DateTime().strftime('%d/%m/%Y'))">
+  <dtml-call expr="REQUEST.set('hdn_dat_insercao', DateTime(datefmt='international').strftime('%d/%m/%Y'))">
 
   <dtml-if hdn_cod_instituicao>
     <dtml-call expr="REQUEST.set('metodo', zsql.instituicao_atualizar_zsql)">

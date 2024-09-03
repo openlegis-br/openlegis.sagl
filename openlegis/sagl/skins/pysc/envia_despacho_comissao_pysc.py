@@ -12,7 +12,7 @@ response=request.RESPONSE
 
 mailhost = context.MailHost
 
-data_registro=DateTime().strftime('%d/%m/%Y às %H:%M')
+data_registro=DateTime(datefmt='international').strftime('%d/%m/%Y às %H:%M')
 
 casa={}
 aux=context.sapl_documentos.props_sagl.propertyItems()
@@ -48,12 +48,12 @@ for comissao in context.zsql.comissao_obter_zsql(cod_comissao=cod_comissao):
  cod_comissao = comissao.cod_comissao
  nom_comissao = comissao.nom_comissao
 
-for periodo in context.zsql.periodo_comp_comissao_obter_zsql(data = DateTime(),cod_comissao=comissao.cod_comissao):
+for periodo in context.zsql.periodo_comp_comissao_obter_zsql(data = DateTime(datefmt='international'),cod_comissao=comissao.cod_comissao):
  cod_periodo = periodo.cod_periodo_comp
 
 destinatarios=[]
 for composicao_comissao in context.zsql.composicao_comissao_obter_zsql(cod_comissao=comissao.cod_comissao,cod_periodo_comp=periodo.cod_periodo_comp):
- if composicao_comissao.dat_desligamento == None or composicao_comissao.dat_desligamento >= DateTime():
+ if composicao_comissao.dat_desligamento == None or composicao_comissao.dat_desligamento >= DateTime(datefmt='international'):
   for destinatario in context.zsql.autor_obter_zsql(cod_parlamentar=composicao_comissao.cod_parlamentar):
    dic={}
    dic['end_email'] = destinatario.end_email

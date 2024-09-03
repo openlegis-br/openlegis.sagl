@@ -15,8 +15,8 @@ for peticao in context.zsql.peticao_obter_zsql(cod_peticao=cod_peticao):
     cod_peticao = peticao.cod_peticao
     tip_peticionamento = peticao.tip_peticionamento
     cod_usuario = peticao.cod_usuario
-    data = DateTime().strftime('%Y-%m-%d')
-    ano = DateTime().strftime('%Y')
+    data = DateTime(datefmt='international').strftime('%Y-%m-%d')
+    ano = DateTime(datefmt='international').strftime('%Y')
     txt_assunto_ementa = peticao.txt_descricao
     lst_unidade = peticao.cod_unid_tram_dest
     tip_derivado = peticao.tip_derivado
@@ -42,7 +42,7 @@ for peticao in context.zsql.peticao_obter_zsql(cod_peticao=cod_peticao):
        cod_materia_principal = peticao.cod_materia
 
     if context.sapl_documentos.props_sagl.numero_protocolo_anual == 1:
-       for numero in context.zsql.protocolo_numero_obter_zsql(ano_protocolo = DateTime().strftime('%Y')):
+       for numero in context.zsql.protocolo_numero_obter_zsql(ano_protocolo = DateTime(datefmt='international').strftime('%Y')):
            hdn_num_protocolo = int(numero.novo_numero)
     else:
        for numero in context.zsql.protocolo_codigo_obter_zsql():
@@ -107,7 +107,7 @@ def criar_documento(numero,ano,data,tip_documento,hdn_num_protocolo,txt_interess
         context.zsql.documento_administrativo_vinculado_incluir_zsql(cod_documento_vinculante = cod_documento_vinculado, cod_documento_vinculado = cod_documento)
 
     if context.dbcon_logs:
-       context.zsql.logs_registrar_zsql(usuario = REQUEST['AUTHENTICATED_USER'].getUserName(), data = DateTime().strftime('%Y-%m-%d %H:%M:%S'), modulo = 'peticionamento_eletronico', metodo = 'documento_administrativo_incluir_zsql', cod_registro = cod_documento, IP = context.pysc.get_ip()) 
+       context.zsql.logs_registrar_zsql(usuario = REQUEST['AUTHENTICATED_USER'].getUserName(), data = DateTime(datefmt='international').strftime('%Y-%m-%d %H:%M:%S'), modulo = 'peticionamento_eletronico', metodo = 'documento_administrativo_incluir_zsql', cod_registro = cod_documento, IP = context.pysc.get_ip()) 
 
     return tramitar_documento(cod_documento)
 
@@ -117,10 +117,10 @@ def tramitar_documento(cod_documento):
     for status in context.zsql.status_tramitacao_administrativo_obter_zsql(sgl_status='PRT'):
         cod_status = status.cod_status
     cod_usuario_corrente = cod_usuario
-    hr_tramitacao = DateTime().strftime('%d/%m/%Y às %H:%M')
+    hr_tramitacao = DateTime(datefmt='international').strftime('%d/%m/%Y às %H:%M')
     txt_tramitacao = '<p>Protocolo nº ' + str(hdn_num_protocolo) + '/' + str(ano) + ' autuado em ' + hr_tramitacao +'</p>'
     if cod_unid_tram_local != None and cod_unid_tram_dest != None and cod_status != None:
-        context.zsql.tramitacao_administrativo_incluir_zsql(cod_documento=cod_documento, dat_tramitacao=DateTime().strftime('%Y-%m-%d %H:%M:%S'), cod_unid_tram_local=cod_unid_tram_local, cod_usuario_local=cod_usuario_corrente, cod_unid_tram_dest=cod_unid_tram_dest, dat_encaminha=DateTime().strftime('%Y-%m-%d %H:%M:%S'), cod_status=cod_status, txt_tramitacao=txt_tramitacao, ind_urgencia=0, ind_ult_tramitacao=1)
+        context.zsql.tramitacao_administrativo_incluir_zsql(cod_documento=cod_documento, dat_tramitacao=DateTime(datefmt='international').strftime('%Y-%m-%d %H:%M:%S'), cod_unid_tram_local=cod_unid_tram_local, cod_usuario_local=cod_usuario_corrente, cod_unid_tram_dest=cod_unid_tram_dest, dat_encaminha=DateTime(datefmt='international').strftime('%Y-%m-%d %H:%M:%S'), cod_status=cod_status, txt_tramitacao=txt_tramitacao, ind_urgencia=0, ind_ult_tramitacao=1)
 
     for tramitacao in context.zsql.tramitacao_administrativo_incluida_codigo_obter_zsql():
         cod_tramitacao = tramitacao.cod_tramitacao
@@ -144,7 +144,7 @@ elif ind_norma == '1':
 
 elif ind_doc_materia == '1':
 
-   context.zsql.documento_acessorio_incluir_zsql(cod_materia=cod_materia_principal, nom_documento=txt_assunto_ementa, dat_documento=DateTime().strftime('%Y-%m-%d %H:%M:%S'), nom_autor_documento=txt_interessado, tip_documento=tip_derivado, ind_publico=1)
+   context.zsql.documento_acessorio_incluir_zsql(cod_materia=cod_materia_principal, nom_documento=txt_assunto_ementa, dat_documento=DateTime(datefmt='international').strftime('%Y-%m-%d %H:%M:%S'), nom_autor_documento=txt_interessado, tip_documento=tip_derivado, ind_publico=1)
 
    for codigo in context.zsql.documento_acessorio_incluido_codigo_obter_zsql():
        cod_documento_acessorio = int(codigo.cod_documento)
@@ -156,7 +156,7 @@ elif ind_doc_materia == '1':
       context.modelo_proposicao.peticao_autuar(cod_peticao=cod_peticao)
 
    if context.dbcon_logs:
-      context.zsql.logs_registrar_zsql(usuario = REQUEST['AUTHENTICATED_USER'].getUserName(), data = DateTime().strftime('%Y-%m-%d %H:%M:%S'), modulo = 'documento_acessorio_materia', metodo = 'protocolo_pysc', cod_registro = cod_documento_acessorio, IP = context.pysc.get_ip()) 
+      context.zsql.logs_registrar_zsql(usuario = REQUEST['AUTHENTICATED_USER'].getUserName(), data = DateTime(datefmt='international').strftime('%Y-%m-%d %H:%M:%S'), modulo = 'documento_acessorio_materia', metodo = 'protocolo_pysc', cod_registro = cod_documento_acessorio, IP = context.pysc.get_ip()) 
 
    mensagem = 'Protocolo realizado com sucesso!'
    mensagem_obs = '' 

@@ -114,7 +114,7 @@
 </dtml-if>
 
 <dtml-if expr="not _.has_key('cod_documento') and _.has_key('num_protocolo')">
-  <dtml-call expr="REQUEST.set('ano', _.DateTime.year(DateTime()))">          
+  <dtml-call expr="REQUEST.set('ano', _.DateTime.year(DateTime(datefmt='international')))">          
   <dtml-in expr="zsql.protocolo_obter_zsql(num_protocolo=num_protocolo, ano_protocolo=ano)">
      <dtml-if cod_protocolo>
         <dtml-call expr="REQUEST.set('nom_documento', txt_assunto_ementa)">
@@ -169,7 +169,7 @@
      <div class="col-6 col-sm-3 mb-3">
           <label class="form-label required" for="txt_dat_documento">Data e Horário</label>
           <dtml-unless dat_documento>
-             <dtml-call expr="REQUEST.set('dat_documento', DateTime().strftime('%d/%m/%Y %H:%M:%S'))">
+             <dtml-call expr="REQUEST.set('dat_documento', DateTime(datefmt='international').strftime('%d/%m/%Y %H:%M:%S'))">
           </dtml-unless>
           <div class="input-group">
             <input class="form-control" type="text" name="txt_dat_documento" id="txt_dat_documento" value="<dtml-var dat_documento missing>" required />

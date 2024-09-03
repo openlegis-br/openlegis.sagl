@@ -44,7 +44,7 @@
              <dtml-if dat_atendimento>
                <input class="form-control" type="text" name="txt_dat_atendimento" size="18" value="<dtml-var dat_atendimento>" readonly />
              <dtml-else>
-               <dtml-call expr="REQUEST.set('dat_atendimento', DateTime().strftime('%d/%m/%Y'))">
+               <dtml-call expr="REQUEST.set('dat_atendimento', DateTime(datefmt='international').strftime('%d/%m/%Y'))">
                <input class="form-control" type="text" name="txt_dat_atendimento" size="18" value="<dtml-var dat_atendimento>" readonly />
              </dtml-if>
            </td>

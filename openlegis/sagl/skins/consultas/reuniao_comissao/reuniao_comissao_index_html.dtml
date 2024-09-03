@@ -28,15 +28,15 @@
 <div class="row">
   <div class="col-4 col-sm-4 col-xl-2 mb-3">
    <dtml-if expr="not _.has_key('ano_reuniao_sel')">
-      <dtml-call expr="REQUEST.set('ano_reuniao_sel', DateTime().year())">
+      <dtml-call expr="REQUEST.set('ano_reuniao_sel', DateTime(datefmt='international').year())">
    </dtml-if>
     <label class="form-label" for="lst_ano_reuniao">Selecione o Ano</label>
     <select class="form-select" id="lst_ano_reuniao" name="lst_ano_reuniao" onChange="atualiza_filtro(lst_ano_reuniao[lst_ano_reuniao.selectedIndex].value, lst_comissao[lst_comissao.selectedIndex].value, lst_tipo[lst_tipo.selectedIndex].value, lst_situacao[lst_situacao.selectedIndex].value)">
       <option value="">Todos</option>    
       <dtml-in expr="zsql.ano_reuniao_comissao_obter_zsql()">
         <option value="<dtml-var ano_reuniao missing>" 
-          <dtml-if expr="((not _.has_key('ano_reuniao_sel') and (_.DateTime().year() == ano_reuniao)))
-                           or (not _.has_key('ano_reuniao_sel') and (_.DateTime().year() > ano_reuniao))
+          <dtml-if expr="((not _.has_key('ano_reuniao_sel') and (_.DateTime(datefmt='international').year() == ano_reuniao)))
+                           or (not _.has_key('ano_reuniao_sel') and (_.DateTime(datefmt='international').year() > ano_reuniao))
                            or (_.has_key('ano_reuniao_sel') and str(ano_reuniao) == str(ano_reuniao_sel))">
                             selected
                           <dtml-call expr="REQUEST.set('ano_reuniao_sel', ano_reuniao)">

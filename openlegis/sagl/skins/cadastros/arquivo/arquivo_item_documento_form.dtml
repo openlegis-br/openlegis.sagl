@@ -90,7 +90,7 @@
       <tr>
         <td><label class="form-label required" for="txt_dat_arquivamento">Data de Arquivamento</label>
             <dtml-unless dat_arquivamento>
-               <dtml-call expr="REQUEST.set('dat_arquivamento', DateTime().strftime('%d/%m/%Y'))">
+               <dtml-call expr="REQUEST.set('dat_arquivamento', DateTime(datefmt='international').strftime('%d/%m/%Y'))">
             </dtml-unless>
             <input class="form-control date" type="text" id="txt_dat_arquivamento" name="txt_dat_arquivamento" value="<dtml-var dat_arquivamento missing null="">" />
         </td>

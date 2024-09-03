@@ -44,8 +44,8 @@
                 <select class="form-select" id="lst_ano_sessao" name="lst_ano_sessao"  onChange="atualiza_ano_sessao(document.sessao_plen_form.lst_ano_sessao[document.sessao_plen_form.lst_ano_sessao.selectedIndex].value)">
                     <dtml-in expr="zsql.sessao_plenaria_listar_ano_zsql()">
                         <option value="<dtml-var ano_sessao missing>" 
-                          <dtml-if expr="((not _.has_key('ano_sessao_sel') and (DateTime().strftime('%Y') == str(ano_sessao))))
-                                           or (not _.has_key('ano_sessao_sel') and (DateTime().strftime('%Y') > str(ano_sessao)))
+                          <dtml-if expr="((not _.has_key('ano_sessao_sel') and (DateTime(datefmt='international').strftime('%Y') == str(ano_sessao))))
+                                           or (not _.has_key('ano_sessao_sel') and (DateTime(datefmt='international').strftime('%Y') > str(ano_sessao)))
                                            or (_.has_key('ano_sessao_sel') and str(ano_sessao) == str(ano_sessao_sel))">
                             selected
                           <dtml-call expr="REQUEST.set('ano_sessao_sel', str(ano_sessao))">
@@ -59,7 +59,7 @@
     <label class="form-label" for="lst_mes_sessao"><span class="d-none d-md-inline">Selecione o </span>Mês</label>
                 <select class="form-select" id="lst_mes_sessao" name="lst_mes_sessao"  onChange="atualiza_mes_sessao(document.sessao_plen_form.lst_ano_sessao[document.sessao_plen_form.lst_ano_sessao.selectedIndex].value, document.sessao_plen_form.lst_mes_sessao[document.sessao_plen_form.lst_mes_sessao.selectedIndex].value)">
                         <dtml-if expr="not _.has_key('ano_sessao_sel')">
-                            <dtml-call expr="REQUEST.set('ano_sessao_sel', DateTime().strftime('%Y'))">
+                            <dtml-call expr="REQUEST.set('ano_sessao_sel', DateTime(datefmt='international').strftime('%Y'))">
                         </dtml-if>
                     <option value="-1">Todos</option>
                     <dtml-in expr="zsql.sessao_plenaria_listar_mes_zsql(ano_sessao=int(ano_sessao_sel))">

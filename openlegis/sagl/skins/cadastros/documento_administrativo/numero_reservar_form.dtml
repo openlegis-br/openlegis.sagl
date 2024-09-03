@@ -57,7 +57,7 @@
 <h1 class="firstHeading font-size-18">Reserva de Numeração</h1>
 
 <form action="numero_reservar_proc" name="numero_reservar_form">
-  <dtml-call expr="REQUEST.set('ano_documento', DateTime().strftime('%Y'))">
+  <dtml-call expr="REQUEST.set('ano_documento', DateTime(datefmt='international').strftime('%Y'))">
   <input type="hidden" name="txt_ano_documento" value="<dtml-var ano_documento>">
   <input type="hidden" name="hdn_url" value="<dtml-var portal_url>/consultas/documento_administrativo/documento_administrativo_index_html">
 

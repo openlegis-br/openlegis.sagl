@@ -114,7 +114,7 @@
         <div class="card">
         <h6 class="card-header">Composição Atual</h6>
         <dtml-in expr="zsql.periodo_comp_comissao_obter_zsql(ind_excluido=0)">
-           <dtml-if expr="(DateTime() >= DateTime(dat_inicio)) and (DateTime() <= DateTime(dat_fim))">
+           <dtml-if expr="(DateTime(datefmt='international') >= DateTime(dat_inicio, datefmt='international')) and (DateTime(datefmt='international') <= DateTime(dat_fim, datefmt='international'))">
             <dtml-in expr="zsql.composicao_comissao_obter_zsql(cod_comissao=cod_comissao, cod_periodo_comp=cod_periodo_comp)">
                 <dtml-if sequence-start>
                 <div class="table-responsive px-2">

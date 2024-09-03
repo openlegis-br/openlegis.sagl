@@ -15,7 +15,7 @@
                           nom_documento = txt_nom_documento,
                           nom_autor_documento = nom_usuario,
                           cod_materia = cod_materia,
-                          dat_documento = DateTime().strftime('%Y-%m-%d %H:%M:%S'),
+                          dat_documento = DateTime(datefmt='international').strftime('%Y-%m-%d %H:%M:%S'),
                           ind_publico = 1,
                           ind_excluido = 0)">
  <dtml-except>
@@ -62,7 +62,7 @@
 <dtml-if expr="dbcon_logs and hdn_cod_documento">
   <dtml-call expr="zsql.logs_registrar_zsql(
             usuario      = REQUEST['AUTHENTICATED_USER'].getUserName(), 
-            data         = DateTime().strftime('%Y-%m-%d %H:%M:%S'),
+            data         = DateTime(datefmt='international').strftime('%Y-%m-%d %H:%M:%S'),
             modulo       = 'documento_acessorio_materia',
             metodo       = 'documento_acessorio_salvar_proc',
             IP           = pysc.get_ip(),

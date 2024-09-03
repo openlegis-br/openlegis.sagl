@@ -3,7 +3,7 @@ import os
 request=context.REQUEST
 response=request.RESPONSE
 
-data=DateTime().strftime('%d/%m/%Y')
+data=DateTime(datefmt='international').strftime('%d/%m/%Y')
 
 # string para o rodapé da página
 casa={}
@@ -32,7 +32,7 @@ if casa["end_email_casa"]!="" and casa["end_email_casa"]!=None:
     linha2 = linha2 + " - "
   linha2 =  linha2 + "E-mail: "+casa["end_email_casa"]
 
-data_emissao=DateTime().strftime("%d/%m/%Y")
+data_emissao=DateTime(datefmt='international').strftime("%d/%m/%Y")
 rodape=[linha1,linha2,data_emissao]
 
 # gera as entradas para o cabeçalho

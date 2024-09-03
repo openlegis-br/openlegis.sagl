@@ -63,7 +63,7 @@ for peticao in context.zsql.peticao_obter_zsql(cod_peticao=cod_peticao, ind_norm
        odt.manage_permission('View', roles=['Anonymous'], acquire=1)
 
     if context.dbcon_logs:
-       context.zsql.logs_registrar_zsql(usuario = REQUEST['AUTHENTICATED_USER'].getUserName(), data = DateTime().strftime('%Y-%m-%d %H:%M:%S'), modulo = 'norma_juridica', metodo = 'incorporar_norma.pysc', cod_registro = cod_norma, IP = context.pysc.get_ip()) 
+       context.zsql.logs_registrar_zsql(usuario = REQUEST['AUTHENTICATED_USER'].getUserName(), data = DateTime(datefmt='international').strftime('%Y-%m-%d %H:%M:%S'), modulo = 'norma_juridica', metodo = 'incorporar_norma.pysc', cod_registro = cod_norma, IP = context.pysc.get_ip()) 
    
     hdn_url = context.portal_url()+'/cadastros/norma_juridica/norma_juridica_mostrar_proc?cod_norma=' + str(cod_norma)
     mensagem = 'Norma incorporada com sucesso!'

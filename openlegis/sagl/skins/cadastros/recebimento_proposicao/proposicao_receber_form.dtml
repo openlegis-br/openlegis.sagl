@@ -14,7 +14,7 @@
               <dtml-call expr="REQUEST.set('tip_mat_ou_doc,', tip_mat_ou_doc)">
           </dtml-in>
           <dtml-if expr="des_tipo_proposicao == 'Moção'">
-             <dtml-call expr="REQUEST.set('ano_corrente', DateTime().strftime('%Y'))">
+             <dtml-call expr="REQUEST.set('ano_corrente', DateTime(datefmt='international').strftime('%Y'))">
              <dtml-in expr="zsql.materia_pesquisar_zsql(cod_autor=cod_autor,tip_id_basica=tip_mat_ou_doc, ano_ident_basica=ano_corrente)">
                  <dtml-if sequence-start>
                     <dtml-if expr="_['sequence-length'] < 50">

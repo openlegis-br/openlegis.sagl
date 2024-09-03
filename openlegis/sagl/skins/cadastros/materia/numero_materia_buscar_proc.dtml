@@ -7,7 +7,7 @@
     </dtml-in>
     <dtml-call expr="REQUEST.set('hdn_cod_autor', cod_autor)"> 
   </dtml-in>
-  <dtml-call expr="REQUEST.set('ano_ident_basica', _.DateTime.year(DateTime()))">
+  <dtml-call expr="REQUEST.set('ano_ident_basica', _.DateTime.year(DateTime(datefmt='international')))">
 </dtml-if>
 
 <dtml-in expr="zsql.tipo_materia_legislativa_obter_zsql(tip_materia=tip_id_basica_sel)">

@@ -15,7 +15,7 @@ session = REQUEST.SESSION
 for protocolo in context.zsql.protocolo_obter_zsql(cod_protocolo=cod_protocolo):
     tip_materia = protocolo.tip_materia
     ano_materia = protocolo.ano_protocolo
-    dat_apresentacao = DateTime().strftime("%Y-%m-%d")
+    dat_apresentacao = DateTime(datefmt='international').strftime("%Y-%m-%d")
     num_protocolo = protocolo.num_protocolo
     txt_ementa = protocolo.txt_assunto_ementa
     txt_observacao = protocolo.txt_observacao
@@ -41,7 +41,7 @@ def criar_materia(tip_materia, num_ident_basica, ano_materia, dat_apresentacao, 
        tmp_id = context.sapl_documentos.materia.manage_pasteObjects(tmp_copy)[0]['new_id']
        context.sapl_documentos.materia.manage_renameObjects(ids=list([tmp_id]),new_ids=list([id_materia]))
     if context.dbcon_logs:
-       context.zsql.logs_registrar_zsql(usuario = REQUEST['AUTHENTICATED_USER'].getUserName(), data = DateTime().strftime('%Y-%m-%d %H:%M:%S'), modulo = 'materia', metodo = 'materia_incluir_zsql', cod_registro = cod_materia, IP = context.pysc.get_ip())
+       context.zsql.logs_registrar_zsql(usuario = REQUEST['AUTHENTICATED_USER'].getUserName(), data = DateTime(datefmt='international').strftime('%Y-%m-%d %H:%M:%S'), modulo = 'materia', metodo = 'materia_incluir_zsql', cod_registro = cod_materia, IP = context.pysc.get_ip())
     return inserir_autoria(cod_materia, cod_autor)
     
 
@@ -59,11 +59,11 @@ def tramitar_materia(cod_materia):
            cod_usuario_corrente = int(usuario.cod_usuario)
         else:
            cod_usuario_corrente = 0
-    hr_tramitacao = DateTime().strftime('%d/%m/%Y às %Hh%M')
+    hr_tramitacao = DateTime(datefmt='international').strftime('%d/%m/%Y às %Hh%M')
     txt_tramitacao = '<p>Matéria incorporada em ' + hr_tramitacao + ' - proveniente do Protocolo nº ' + str(num_protocolo) + '/' + str(ano_materia)+'</p>'
     hdn_url = 'protocolo_mostrar_proc?cod_protocolo=' + cod_protocolo
     if cod_unid_tram_local != None and cod_unid_tram_dest != None and cod_status != None:
-       context.zsql.tramitacao_incluir_zsql(cod_materia=cod_materia, dat_tramitacao=DateTime().strftime('%Y-%m-%d %H:%M:%S'), cod_unid_tram_local=cod_unid_tram_local, cod_usuario_local=cod_usuario_corrente, cod_unid_tram_dest=cod_unid_tram_dest, dat_encaminha=DateTime().strftime('%Y-%m-%d %H:%M:%S'), cod_status=cod_status, ind_urgencia=0, txt_tramitacao = txt_tramitacao, ind_ult_tramitacao=1)    
+       context.zsql.tramitacao_incluir_zsql(cod_materia=cod_materia, dat_tramitacao=DateTime(datefmt='international').strftime('%Y-%m-%d %H:%M:%S'), cod_unid_tram_local=cod_unid_tram_local, cod_usuario_local=cod_usuario_corrente, cod_unid_tram_dest=cod_unid_tram_dest, dat_encaminha=DateTime(datefmt='international').strftime('%Y-%m-%d %H:%M:%S'), cod_status=cod_status, ind_urgencia=0, txt_tramitacao = txt_tramitacao, ind_ult_tramitacao=1)    
     for tramitacao in context.zsql.tramitacao_incluida_codigo_obter_zsql():
         cod_tramitacao = tramitacao.cod_tramitacao
     return context.relatorios.pdf_tramitacao_preparar_pysc(hdn_cod_tramitacao=cod_tramitacao, hdn_url=hdn_url)

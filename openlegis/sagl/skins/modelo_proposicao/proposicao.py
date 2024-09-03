@@ -43,9 +43,9 @@ for proposicao in context.zsql.proposicao_obter_zsql(cod_proposicao=cod_proposic
     nom_arquivo = str(proposicao.cod_proposicao)+'.odt'
     des_tipo_materia = proposicao.des_tipo_proposicao.upper()
     num_ident_basica = ''
-    ano_ident_basica = DateTime().strftime("%Y")
+    ano_ident_basica = DateTime(datefmt='international').strftime("%Y")
     txt_ementa = proposicao.txt_descricao
-    dat_apresentacao = context.pysc.data_converter_por_extenso_pysc(data=DateTime().strftime("%d/%m/%Y"))
+    dat_apresentacao = context.pysc.data_converter_por_extenso_pysc(data=DateTime(datefmt='international').strftime("%d/%m/%Y"))
 
     inf_basicas_dic['des_assunto'] = ''
     inf_basicas_dic['orgao_responsavel'] = ''
@@ -73,7 +73,7 @@ for proposicao in context.zsql.proposicao_obter_zsql(cod_proposicao=cod_proposic
        if proposicao.des_tipo_proposicao == 'Parecer' or proposicao.des_tipo_proposicao == 'Parecer de Comissão':
           inf_basicas_dic['nom_comissao'] = 'COMISSÃO DE XXXXXXX'
           inf_basicas_dic['id_materia'] = materia_vinculada['id_materia']
-          inf_basicas_dic['data_parecer'] = context.pysc.data_converter_por_extenso_pysc(data=DateTime().strftime("%d/%m/%Y"))
+          inf_basicas_dic['data_parecer'] = context.pysc.data_converter_por_extenso_pysc(data=DateTime(datefmt='international').strftime("%d/%m/%Y"))
           for relator in context.zsql.autor_obter_zsql(cod_autor = proposicao.cod_autor):
               inf_basicas_dic['nom_relator'] = relator.nom_autor_join
           inf_basicas_dic['nom_presidente_comissao'] = 'XXXXXXXX'

@@ -16,7 +16,7 @@ request=context.REQUEST
 for item in context.zsql.legislatura_atual_obter_zsql():
     num_legislatura = item.num_legislatura
 
-data_atual = DateTime().strftime("%d/%m/%Y")
+data_atual = DateTime(datefmt='international').strftime("%d/%m/%Y")
 
 lista_exercicio = []
 exercicio = []

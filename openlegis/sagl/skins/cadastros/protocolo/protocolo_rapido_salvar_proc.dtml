@@ -1,6 +1,6 @@
 
 <dtml-if expr="int(sapl_documentos.props_sagl.numero_protocolo_anual)==1">
-   <dtml-in expr="zsql.protocolo_numero_obter_zsql(ano_protocolo = DateTime().strftime('%Y'))">
+   <dtml-in expr="zsql.protocolo_numero_obter_zsql(ano_protocolo = DateTime(datefmt='international').strftime('%Y'))">
      <dtml-call expr="REQUEST.set('hdn_num_protocolo', _.int(novo_numero))">
    </dtml-in>
 <dtml-else>

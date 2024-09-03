@@ -10,8 +10,8 @@
      <select class="form-select jumpmenu" id="lst_ano_sessao" name="lst_ano_sessao">
          <dtml-in expr="zsql.sessao_plenaria_listar_ano_zsql()">
              <option value="<dtml-var ACTUAL_URL>?ano_sessao_sel=<dtml-var ano_sessao missing>" 
-               <dtml-if expr="((not _.has_key('ano_sessao_sel') and (DateTime().year() == ano_sessao)))
-                                or (not _.has_key('ano_sessao_sel') and (DateTime().year() > ano_sessao))
+               <dtml-if expr="((not _.has_key('ano_sessao_sel') and (DateTime(datefmt='international').year() == ano_sessao)))
+                                or (not _.has_key('ano_sessao_sel') and (DateTime(datefmt='international').year() > ano_sessao))
                                 or (_.has_key('ano_sessao_sel') and ano_sessao == _.int(ano_sessao_sel))">
                  selected
                  <dtml-call expr="REQUEST.set('ano_sessao_sel', ano_sessao)">

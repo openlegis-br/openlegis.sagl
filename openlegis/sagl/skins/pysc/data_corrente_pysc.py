@@ -7,10 +7,10 @@
 ##parameters=ano_corrente=0
 ##title=
 ##
-x=DateTime()
+x=DateTime(datefmt='international')
 if ano_corrente:
    s=""
    s=DateTime.year(x)
    x=""
    x=s
-return DateTime.year(DateTime())
+return DateTime.year(DateTime(datefmt='international'))

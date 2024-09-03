@@ -124,11 +124,11 @@
 <h1 class="firstHeading font-size-18">Cadastro de Matéria</h1> 
 
 <dtml-unless dat_apresentacao>
-   <dtml-call expr="REQUEST.set('dat_apresentacao', DateTime().strftime('%d/%m/%Y'))">
+   <dtml-call expr="REQUEST.set('dat_apresentacao', DateTime(datefmt='international').strftime('%d/%m/%Y'))">
 </dtml-unless>
 
 <dtml-in expr="zsql.legislatura_obter_zsql(ind_excluido=0)">
-  <dtml-if expr="((DateTime(dat_apresentacao) >= DateTime(dat_inicio) and DateTime(dat_apresentacao) <= DateTime(dat_fim)))">
+  <dtml-if expr="((DateTime(dat_apresentacao, datefmt='international') >= DateTime(dat_inicio, datefmt='international') and DateTime(dat_apresentacao, datefmt='international') <= DateTime(dat_fim, datefmt='international')))">
     <dtml-call expr="REQUEST.set('num_legislatura_sel', num_legislatura)">
   </dtml-if>
 </dtml-in>
@@ -202,7 +202,7 @@
     <div class="col-6 col-sm-3 mb-3">
       <label class="form-label required" for="txt_ano_ident_basica">Ano</label>
       <dtml-unless ano_ident_basica>
-         <dtml-call expr="REQUEST.set('ano_ident_basica', _.DateTime.year(DateTime()))">
+         <dtml-call expr="REQUEST.set('ano_ident_basica', _.DateTime.year(DateTime(datefmt='international')))">
       </dtml-unless>
       <input class="form-control year" type="number" id="txt_ano_ident_basica" name="txt_ano_ident_basica" value="<dtml-var ano_ident_basica missing>" required />
       <div class="invalid-feedback">
@@ -215,7 +215,7 @@
     <div class="col-6 col-lg-3 mb-3">
       <label class="form-label required" for="txt_dat_apresentacao">Data de Apresentação</label>
       <dtml-unless dat_apresentacao>
-         <dtml-call expr="REQUEST.set('dat_apresentacao', DateTime().strftime('%d/%m/%Y'))">
+         <dtml-call expr="REQUEST.set('dat_apresentacao', DateTime(datefmt='international').strftime('%d/%m/%Y'))">
       </dtml-unless>
         <div class="input-group">
            <input type="text" class="form-control datepicker" placeholder="dd/mm/aaaa" name="txt_dat_apresentacao" id="txt_dat_apresentacao" data-provide="datepicker" data-date-autoclose="true" value="<dtml-var dat_apresentacao missing null>" autocomplete="off" required>

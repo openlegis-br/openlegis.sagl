@@ -25,7 +25,7 @@
   <dtml-call expr="REQUEST.set('metodo1', str(metodo1).split('>')[0])">
   <dtml-call expr="zsql.logs_registrar_zsql(
             usuario      = REQUEST['AUTHENTICATED_USER'].getUserName(), 
-            data         = DateTime().strftime('%Y-%m-%d %H:%M:%S'),
+            data         = DateTime(datefmt='international').strftime('%Y-%m-%d %H:%M:%S'),
             modulo       = 'vinculo_documento_adm_materia',
             metodo       = metodo1,
             IP           = pysc.get_ip(),

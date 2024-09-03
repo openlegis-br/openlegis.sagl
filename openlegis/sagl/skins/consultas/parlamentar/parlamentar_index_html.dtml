@@ -21,13 +21,13 @@
                <option 
                   <dtml-if expr="_.has_key('hdn_num_legislatura') and num_legislatura==_.int(hdn_num_legislatura)">
                      selected
-                  <dtml-elif expr="not _.has_key('hdn_num_legislatura') and DateTime() >= DateTime(dat_inicio) and DateTime() <= DateTime(dat_fim)">
+                  <dtml-elif expr="not _.has_key('hdn_num_legislatura') and DateTime(datefmt='international') >= DateTime(dat_inicio,datefmt='international') and DateTime(datefmt='international') <= DateTime(dat_fim,datefmt='international')">
                      <dtml-call expr="REQUEST.set('hdn_num_legislatura', num_legislatura)">
                      selected
                   </dtml-if>
                   value="<dtml-var ACTUAL_URL>?hdn_num_legislatura=<dtml-var num_legislatura>">
                   <dtml-var expr="str(num_legislatura) + 'ª Legislatura (' + DateTime(dat_inicio, datefmt='international').strftime('%Y') + ' - ' + DateTime(dat_fim, datefmt='international').strftime('%Y') + ')'">
-                  <dtml-if expr="(DateTime() >= DateTime(dat_inicio) and DateTime() <= DateTime(dat_fim))">
+                  <dtml-if expr="(DateTime(datefmt='international') >= DateTime(dat_inicio,datefmt='international') and DateTime(datefmt='international') <= DateTime(dat_fim,datefmt='international'))">
                      (Atual)
                   </dtml-if>
                </option>
@@ -57,8 +57,8 @@
 <dtml-call expr="REQUEST.set('primeiro_listado', 1)">
 <dtml-call expr="REQUEST.set('legislatura_atual', 0)">
 <dtml-in expr="zsql.legislatura_obter_zsql(num_legislatura=hdn_num_legislatura)">
-  <dtml-if expr="(DateTime() >= DateTime(dat_inicio) and DateTime() <= DateTime(dat_fim))">
-    <dtml-call expr="REQUEST.set('data_atual', DateTime().strftime('%d/%m/%Y'))">
+  <dtml-if expr="(DateTime(datefmt='international') >= DateTime(dat_inicio,datefmt='international') and DateTime(datefmt='international') <= DateTime(dat_fim,datefmt='international'))">
+    <dtml-call expr="REQUEST.set('data_atual', DateTime(datefmt='international').strftime('%d/%m/%Y'))">
     <dtml-call expr="REQUEST.set('legislatura_atual', 1)">
   </dtml-if>
 </dtml-in>

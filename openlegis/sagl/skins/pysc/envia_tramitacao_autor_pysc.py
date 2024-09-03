@@ -14,7 +14,7 @@ response=request.RESPONSE
 
 mailhost = context.MailHost
 
-data_registro=DateTime().strftime('%d/%m/%Y às %H:%M')
+data_registro=DateTime(datefmt='international').strftime('%d/%m/%Y às %H:%M')
 
 casa={}
 aux=context.sapl_documentos.props_sagl.propertyItems()

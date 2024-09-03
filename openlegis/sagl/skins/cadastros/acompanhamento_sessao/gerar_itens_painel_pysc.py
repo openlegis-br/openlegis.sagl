@@ -66,7 +66,7 @@ if len(lst_indicacoes) > 0:
   dic_indicacoes["tipo_item"] = 'Mensagem'
   dic_indicacoes["cod_sessao_plen"] = sessao.cod_sessao_plen
   dic_indicacoes["nom_fase"] = 'Expediente'
-  ano = DateTime().strftime('%Y')
+  ano = DateTime(datefmt='international').strftime('%Y')
   dic_indicacoes["txt_exibicao"] = '<b>Indicações de números '+str(min(lst_indicacoes))+'/'+ano+ ' a '+str(max(lst_indicacoes))+'/'+ano + '</b><br />' + dic_sessao["txt_exibicao"]
   dic_indicacoes["cod_materia"] = ''
   dic_indicacoes["txt_autoria"] = ''

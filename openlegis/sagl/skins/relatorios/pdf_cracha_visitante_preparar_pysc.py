@@ -4,8 +4,8 @@ request=context.REQUEST
 response=request.RESPONSE
 REQUEST=context.REQUEST
 
-data=DateTime().strftime('%d/%m/%Y')
-data_emissao=DateTime().strftime("%d/%m/%Y")
+data=DateTime(datefmt='international').strftime('%d/%m/%Y')
+data_emissao=DateTime(datefmt='international').strftime("%d/%m/%Y")
 
 #Abaixo é gerada a string para o rodapé da página
 casa={}

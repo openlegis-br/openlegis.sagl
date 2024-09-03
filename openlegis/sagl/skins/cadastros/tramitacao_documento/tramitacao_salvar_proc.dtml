@@ -16,7 +16,7 @@
 <dtml-if expr="txt_dat_fim_prazo==None or txt_dat_fim_prazo==''">
  <dtml-in expr="zsql.status_tramitacao_administrativo_obter_zsql(cod_status=lst_cod_status)">
   <dtml-if num_dias_prazo>
-   <dtml-let data_atual="DateTime()">
+   <dtml-let data_atual="DateTime(datefmt='international')">
      <dtml-call expr="REQUEST.set('data_calculada', data_atual+num_dias_prazo)">
      <dtml-call expr="REQUEST.set('txt_dat_fim_prazo', DateTime(data_calculada).strftime('%d/%m/%Y'))">
    </dtml-let>
@@ -31,7 +31,7 @@
   <dtml-call expr="metodo(   
         cod_tramitacao  = hdn_cod_tramitacao,     
         cod_documento = hdn_cod_documento,
-        dat_tramitacao = DateTime().strftime('%Y-%m-%d %H:%M:%S'),
+        dat_tramitacao = DateTime(datefmt='international').strftime('%Y-%m-%d %H:%M:%S'),
         cod_unid_tram_local = lst_cod_unid_tram_local,
         cod_usuario_local = hdn_cod_usuario_local,
         dat_encaminha = pysc.data_converter_pysc(data=txt_dat_encaminha),
@@ -140,7 +140,7 @@
 <dtml-if dbcon_logs>
   <dtml-call expr="zsql.logs_registrar_zsql(
             usuario      = REQUEST['AUTHENTICATED_USER'].getUserName(), 
-            data         = DateTime().strftime('%Y-%m-%d %H:%M:%S'),
+            data         = DateTime(datefmt='international').strftime('%Y-%m-%d %H:%M:%S'),
             modulo       = 'tramitacao_documento',
             metodo       = 'tramitacao_salvar_proc',
             IP           = pysc.get_ip(),

@@ -16,7 +16,7 @@ else:
  cod_documento = context.pysc.b64decode_pysc(codigo=str(cod_documento))
 
 if context.dbcon_logs:
-   context.zsql.logs_registrar_zsql(usuario = request['AUTHENTICATED_USER'].getUserName(), data=DateTime().strftime('%Y-%m-%d %H:%M:%S'), modulo='documento_administrativo', metodo='download_documento_pdf', cod_registro=cod_documento, IP=context.pysc.get_ip(), dados='visualizou ou baixou texto integral') 
+   context.zsql.logs_registrar_zsql(usuario = request['AUTHENTICATED_USER'].getUserName(), data=DateTime(datefmt='international').strftime('%Y-%m-%d %H:%M:%S'), modulo='documento_administrativo', metodo='download_documento_pdf', cod_registro=cod_documento, IP=context.pysc.get_ip(), dados='visualizou ou baixou texto integral') 
 
 for documento in context.zsql.documento_administrativo_obter_zsql(cod_documento = cod_documento):
     download_name = str(documento.sgl_tipo_documento) + "-" + str(documento.num_documento)+ "-" + str(documento.ano_documento) + ".pdf"

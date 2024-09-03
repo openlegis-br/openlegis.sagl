@@ -132,7 +132,7 @@
 <dtml-if expr="dbcon_logs and cod_materia">
   <dtml-call expr="zsql.logs_registrar_zsql(
             usuario      = REQUEST['AUTHENTICATED_USER'].getUserName(), 
-            data         = DateTime().strftime('%Y-%m-%d %H:%M:%S'),
+            data         = DateTime(datefmt='international').strftime('%Y-%m-%d %H:%M:%S'),
             modulo       = str(_['REQUEST']['URL1']).split('/')[-1],
             metodo       = 'materia_excluir_proc',
             IP           = pysc.get_ip(),

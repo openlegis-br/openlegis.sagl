@@ -87,7 +87,7 @@ $(document).ready(function() {
  <form class="form" method="post" name="lista_gerar_form" action="conteudo_gerar_proc">
    <div class="row">
      <div class="col-12 mb-3 form-group">
-       <dtml-call expr="REQUEST.set('ano_sessao', DateTime().strftime('%Y'))">
+       <dtml-call expr="REQUEST.set('ano_sessao', DateTime(datefmt='international').strftime('%Y'))">
        <select class="form-select form-select jumpmenu" data-dropup-auto="false" id="lst_cod_sessao" name="lst_cod_sessao">
          <option value="<dtml-var ACTUAL_URL>"> Selecione uma <dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao"></option>
          <dtml-in expr="zsql.sessao_plenaria_obter_zsql(ano_sessao=ano_sessao, ind_excluido=0)">

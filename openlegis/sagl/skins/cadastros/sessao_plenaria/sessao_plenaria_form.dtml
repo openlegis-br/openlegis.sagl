@@ -85,13 +85,13 @@
                    selected
                    <dtml-call expr="REQUEST.set('num_legislatura_sel', num_legislatura)">
                 </dtml-if>
-                <dtml-if expr="(not _.has_key('num_legislatura_sel') and (DateTime() >= DateTime(dat_inicio) and DateTime() <= DateTime(dat_fim))) or (_.has_key('num_legislatura_sel') and num_legislatura == _.int(num_legislatura_sel))">
+                <dtml-if expr="(not _.has_key('num_legislatura_sel') and (DateTime(datefmt='international') >= DateTime(dat_inicio, datefmt='international') and DateTime(datefmt='international') <= DateTime(dat_fim, datefmt='international'))) or (_.has_key('num_legislatura_sel') and num_legislatura == _.int(num_legislatura_sel))">
                    selected
                    <dtml-call expr="REQUEST.set('num_legislatura_sel', num_legislatura)">
                 </dtml-if>
                 value="<dtml-var num_legislatura>">
                  <dtml-var expr="pysc.periodo_legislatura_format_pysc(num_legislatura, dat_inicio, dat_fim)">
-                 <dtml-if expr="(DateTime() >= DateTime(dat_inicio)) and (DateTime() <= DateTime(dat_fim))"> (Atual) </dtml-if>
+                 <dtml-if expr="(DateTime(datefmt='international') >= DateTime(dat_inicio, datefmt='international')) and (DateTime(datefmt='international') <= DateTime(dat_fim, datefmt='international'))"> (Atual) </dtml-if>
               </option>
            <dtml-else>
               <option selected value="0">Selecione </option>
@@ -112,14 +112,14 @@
                     <dtml-call expr="REQUEST.set('prim_sel', cod_sessao_leg)">
                     <dtml-call expr="REQUEST.set('cod_sessao_leg_sel', cod_sessao_leg)">
                  </dtml-if>
-                 <dtml-if expr="(not _.has_key('cod_sessao_leg_sel') and (DateTime() >= DateTime(dat_inicio) and DateTime() <= DateTime(dat_fim))) or (_.has_key('cod_sessao_leg_sel') and cod_sessao_leg == cod_sessao_leg_sel)">
+                 <dtml-if expr="(not _.has_key('cod_sessao_leg_sel') and (DateTime(datefmt='international') >= DateTime(dat_inicio, datefmt='international') and DateTime(datefmt='international') <= DateTime(dat_fim, datefmt='international'))) or (_.has_key('cod_sessao_leg_sel') and cod_sessao_leg == cod_sessao_leg_sel)">
                     selected
                     <dtml-call expr="REQUEST.set('prim_sel', cod_sessao_leg)">
                     <dtml-call expr="REQUEST.set('cod_sessao_leg_sel', cod_sessao_leg)">
                  </dtml-if>
                  value="<dtml-var cod_sessao_leg>"> 
                  <dtml-var expr="pysc.periodo_legislatura_format_pysc(num_sessao_leg, dat_inicio, dat_fim)">
-                 <dtml-if expr="(DateTime() >= DateTime(dat_inicio)) and (DateTime() <= DateTime(dat_fim))">
+                 <dtml-if expr="(DateTime(datefmt='international') >= DateTime(dat_inicio, datefmt='international')) and (DateTime(datefmt='international') <= DateTime(dat_fim, datefmt='international'))">
                     (Atual)
                  </dtml-if>
               </option>
@@ -137,7 +137,7 @@
      <div class="col-6 col-md-3 mb-3">
         <label class="form-label required" for="txt_dat_inicio_sessao">Data de Abertura</label>
         <dtml-unless cod_sessao_plen>
-           <dtml-call expr="REQUEST.set('dat_inicio_sessao', DateTime().strftime('%d/%m/%Y'))">
+           <dtml-call expr="REQUEST.set('dat_inicio_sessao', DateTime(datefmt='international').strftime('%d/%m/%Y'))">
         </dtml-unless>
         <div class="input-group">
            <input type="text" class="form-control datepicker" placeholder="dd/mm/aaaa" name="txt_dat_inicio_sessao" id="txt_dat_inicio_sessao" data-provide="datepicker" data-date-autoclose="true" value="<dtml-var dat_inicio_sessao missing null>" autocomplete="off" required>
@@ -160,7 +160,7 @@
      <div class="col-6 col-md-3 mb-3">
         <label class="form-label" for="txt_dat_fim_sessao">Data de Encerramento </label>
         <dtml-unless dat_fim_sessao>
-           <dtml-call expr="REQUEST.set('dat_fim_sessao', DateTime().strftime('%d/%m/%Y'))">
+           <dtml-call expr="REQUEST.set('dat_fim_sessao', DateTime(datefmt='international').strftime('%d/%m/%Y'))">
         </dtml-unless>
         <div class="input-group">
            <input type="text" class="form-control datepicker" placeholder="dd/mm/aaaa" name="txt_dat_fim_sessao" id="txt_dat_fim_sessao" data-provide="datepicker" data-date-autoclose="true" value="<dtml-var dat_fim_sessao missing null>" autocomplete="off" required>

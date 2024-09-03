@@ -1,5 +1,5 @@
 <dtml-if expr="int(sapl_documentos.props_sagl.numero_protocolo_anual)==1">
-   <dtml-in expr="zsql.protocolo_numero_obter_zsql(ano_protocolo = DateTime().strftime('%Y'))">
+   <dtml-in expr="zsql.protocolo_numero_obter_zsql(ano_protocolo = DateTime(datefmt='international').strftime('%Y'))">
      <dtml-call expr="REQUEST.set('hdn_num_protocolo', _.int(novo_numero))">
    </dtml-in>
 <dtml-else>
@@ -58,7 +58,7 @@
   <dtml-call expr="REQUEST.set('metodo1', str(metodo1).split('>')[0])">
   <dtml-call expr="zsql.logs_registrar_zsql(
             usuario      = REQUEST['AUTHENTICATED_USER'].getUserName(), 
-            data         = DateTime().strftime('%Y-%m-%d %H:%M:%S'),
+            data         = DateTime(datefmt='international').strftime('%Y-%m-%d %H:%M:%S'),
             modulo       = str(_['REQUEST']['URL1']).split('/')[-1],
             metodo       = metodo1,
             IP           = pysc.get_ip(),

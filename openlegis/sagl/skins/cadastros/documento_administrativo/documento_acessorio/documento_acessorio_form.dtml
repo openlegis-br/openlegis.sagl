@@ -110,7 +110,7 @@
      <div class="col-4 col-sm-3 mb-3">
         <label class="form-label required" for="txt_dat_documento">Data e Horário</label>
         <dtml-unless dat_documento>
-          <dtml-call expr="REQUEST.set('dat_documento', DateTime().strftime('%d/%m/%Y %H:%M:%S'))">
+          <dtml-call expr="REQUEST.set('dat_documento', DateTime(datefmt='international').strftime('%d/%m/%Y %H:%M:%S'))">
         </dtml-unless>
           <div class="input-group">
             <input class="form-control" type="text" name="txt_dat_documento" id="txt_dat_documento" value="<dtml-var dat_documento missing>" required />

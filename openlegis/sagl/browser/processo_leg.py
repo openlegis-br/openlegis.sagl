@@ -48,7 +48,7 @@ class ProcessoLeg(grok.View):
                dic = {}
                dic["data"] = DateTime(materia.dat_apresentacao, datefmt='international').strftime('%Y-%m-%d 00:00:02')
                for proposicao in self.context.zsql.proposicao_obter_zsql(cod_mat_ou_doc=materia.cod_materia,ind_mat_ou_doc='M'):
-                   dic["data"] = DateTime(proposicao.dat_recebimento, datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
+                   dic["data"] = DateTime(proposicao.dat_recebimento, datefmt='international').strftime('%Y-%m-%d 00:00:02')
                dic['path'] = self.context.sapl_documentos.materia
                dic['file'] = nom_arquivo
                dic['title'] = materia.des_tipo_materia + ' nº ' + str(materia.num_ident_basica) + '/' +str(materia.ano_ident_basica)

@@ -1994,8 +1994,8 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
            for metodo in self.zsql.documento_comissao_obter_zsql(cod_documento=codigo):
                for comissao in self.zsql.comissao_obter_zsql(cod_comissao=metodo.cod_comissao):
                    texto = metodo.txt_descricao + ' da ' + comissao.sgl_comissao
-        mensagem1 = 'Esta é uma cópia do original assinado digitalmente por ' + nom_autor + outros + '.'
-        mensagem2 = 'Valide pelo qrcode ou acesse ' + self.url() + '/conferir_assinatura' + ' com o código ' + string
+        mensagem1 = 'Esta é uma cópia do original assinado digitalmente por ' + nom_autor + outros
+        mensagem2 = 'Valide em ' + self.url() + '/conferir_assinatura' + ' com o código ' + string
         existing_pdf = pymupdf.open(stream=fileStream)
         numPages = existing_pdf.page_count
         stream = self.make_qrcode(text=self.url()+'/conferir_assinatura_proc?txt_codigo_verificacao='+str(string))
@@ -2012,7 +2012,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
             existing_pdf[page_index].insert_image(rect, stream=stream)               
             text2 = mensagem2
             # margem direita
-            text3 = texto + '\n' + mensagem1
+            text3 = texto + ' - ' + mensagem1
             x = w - 8 - margin #largura
             y = h - 30 - margin # altura
             existing_pdf[page_index].insert_text((x, y), text3, fontsize=8, rotate=90)

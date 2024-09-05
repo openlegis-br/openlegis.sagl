@@ -24,6 +24,6 @@ for vereadora in context.consultas.vereadoras.vereadoras_obter_zsql():
     dic_vereadora['legislaturas'] = lst_legislaturas
     lst_vereadoras.append(dic_vereadora)
 
-lst_vereadoras.sort(key=lambda dic: dic['ult_legislatura'], reverse=True)
+lst_vereadoras.sort(key=lambda dic: int(dic['ult_legislatura']), reverse=True)
 
 return lst_vereadoras

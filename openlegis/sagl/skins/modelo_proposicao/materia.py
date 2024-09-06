@@ -86,4 +86,4 @@ for materia in context.zsql.materia_obter_zsql(cod_materia=cod_materia):
                 autor_dic['cod_autor'] = autor['cod_autor']
         nom_autor.append(autor_dic)
 
-return st.materia_gerar_odt(inf_basicas_dic, num_proposicao, nom_arquivo, des_tipo_materia, num_ident_basica, ano_ident_basica, txt_ementa, materia_vinculada, dat_apresentacao, nom_autor, apelido_autor, modelo_proposicao)
+return st.materia_gerar_odt(inf_basicas_dic, num_proposicao, nom_arquivo, des_tipo_materia, num_ident_basica, num_materia, ano_ident_basica, ano_materia, txt_ementa, materia_vinculada, dat_apresentacao, nom_autor, apelido_autor, modelo_proposicao)

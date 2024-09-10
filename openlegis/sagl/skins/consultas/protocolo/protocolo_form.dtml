@@ -140,12 +140,14 @@
              <dtml-else> 
               <dtml-call expr="REQUEST.set('id_documento', str(cod_protocolo)+'_protocolo.pdf')">
                 <dtml-if "hasattr(sapl_documentos.protocolo,id_documento)">             
-                 <button type="button" class="btn btn-sm btn-light" data-bs-toggle="popover" title="Unidade de Destino"><i class="fas fa-plus-circle"></i> Criar Processo</button>
-                 <div id="PopoverContent" class="d-none">
+                 <button id="btnCriar" type="button" class="btn btn-sm btn-light" data-bs-toggle="popover" title="Unidade de Destino"><i class="fas fa-plus-circle"></i> Criar Processo</button>
+                 <section class="body-content">
+                   <div hidden>  
+                 <div data-name="PopoverContent" id="PopoverContent">
                    <form id="myform" class="form-inline" role="form" method="post" action="criar_documento_pysc" onSubmit="return confirm('Confirma a criação do processo administrativo?');" class="was-validated">
                     <input type="hidden" name="cod_protocolo" value="<dtml-var cod_protocolo>" />                   
                     <div class="input-group">
-                     <select class="form-select" name="lst_cod_unid_tram_dest" id="lst_cod_unid_tram_dest" required>
+                     <select class="form-select form-select-sm" name="lst_cod_unid_tram_dest" id="lst_cod_unid_tram_dest" required>
                        <option></option>
                        <dtml-in expr="zsql.unidade_tramitacao_obter_zsql(ind_adm=1)">
                          <option value="<dtml-var cod_unid_tramitacao>"><dtml-var nom_unidade_join></option>
@@ -155,8 +157,9 @@
                         <button class="btn btn-sm btn-primary" type="submit" data-bs-toggle="popover" data-placement="bottom" data-html="true" data-title="OK">OK</button>                     
                      </div>
                     </div>     
-                   </form>  
-                 </div>
+                   </form>
+                  </div>
+                  </section>
                 <dtml-else>
                    <span class="text-danger"> <i class="fas fa-exclamation-triangle"></i> Carregue o documento digitalizado para habilitar a criação do processo.</span>
                 </dtml-if>                  
@@ -345,16 +348,15 @@
       form.submit();
   }
 
-$(function () {
-    $('[data-bs-toggle="popover"]').popover({
-    container: 'body',
-    html: true,
-    placement: 'right',
-    sanitize: false,
-    content: function() {
-        return $('#PopoverContent').html()
+  $(document).ready(function() {    
+    var options = {
+        html: true,
+        title: "Unidade de Destino",
+        content: $('[data-name="PopoverContent"]')       
     }
-    })
-}); 
+    var exampleEl = document.getElementById('btnCriar')
+    var popover = new bootstrap.Popover(exampleEl, options)
+  })
+
 </script>
 <dtml-var footer_html>

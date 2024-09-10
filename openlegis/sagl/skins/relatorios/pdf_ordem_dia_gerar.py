@@ -78,7 +78,7 @@ def pauta(pauta_dic):
        tmp+='\t\t\t<font color="white"> </font>\n'
        tmp+='\t\t</para>\n'
 
-    if pauta_dic["txt_tema"] != None:
+    if pauta_dic["txt_tema"] != None and pauta_dic["txt_tema"] != '':
        tmp+='\t\t<para style="P1" spaceBefore="20"><b><u>TEMA</u></b></para>\n\n'
        tmp+='\t\t<para style="P2" spaceAfter="5">\n'
        tmp+='\t\t\t<font color="white"> </font>\n'

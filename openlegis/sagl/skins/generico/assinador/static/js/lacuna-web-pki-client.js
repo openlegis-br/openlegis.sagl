@@ -3,18 +3,16 @@ var pki = new LacunaWebPKI('AqYBZGVtby5vcGVubGVnaXMuY29tLmJyLGUtcHJvY2Vzc28ucmVj
 var token = $("#token").val();
 
 function start() {
-    log('Initializing component ...');
+    log('Inicializando componente ...');
     pki.init({
         restPkiUrl: 'https://restpkiol.azurewebsites.net/',
         ready: onWebPkiReady,
         defaultFail: onWebPkiFail
     });
-
-    pki.init(onWebPkiReady);
 }
 
 function onWebPkiReady() {
-    log('Component ready, listing certificates ...');
+    log('Componente pronto, listando certificados.');
     pki.listCertificates().success(function (certs) {
         var select = $('#certificateSelect');
         for (var i = 0; i < certs.length; i++) {
@@ -36,9 +34,9 @@ function getCertText(cert) {
 
 function readCert() {
     var selectedCertThumb = $('#certificateSelect').val();
-    log('Reading certificate: ' + selectedCertThumb);
+    log('Certificado disponível: ' + selectedCertThumb);
     pki.readCertificate(selectedCertThumb).success(function (certEncoding) {
-        log('Result: ' + certEncoding);
+        log('Resultado: ' + certEncoding);
     });
 }
 
@@ -50,24 +48,19 @@ function log(message) {
 }
 
 function sign() {
-    // Block the UI while we perform the signature
     $.blockUI({message: '<i class="mdi mdi-spin mdi-loading mdi-36px mt-2"></i> <h4>Assinando documento...</h4>'});
-    // Get the thumbprint of the selected certificate
     var selectedCertThumbprint = $('#certificateSelect').val();
-    // Call signWithRestPki() on the Web PKI component passing the token received from REST PKI and the certificate
-    // selected by the user.
     pki.signWithRestPki({
         token: token,
         thumbprint: selectedCertThumbprint
     }).success(function() {
-        // Once the operation is completed, we submit the form
         $('#signForm').submit();
     });
 }
 
 function onWebPkiFail(ex) {
     alert(ex.userMessage + ' (' + ex.code + ')');
-    console.log('Web PKI error originated at ' + ex.origin + ': (' + ex.code + ') ' + ex.error);
+    console.log('Erro no WebPKI originado em ' + ex.origin + ': (' + ex.code + ') ' + ex.error);
 }
 
 $(function() {
@@ -75,3 +68,4 @@ $(function() {
     $('#refreshButton').click(readCert);
     start();
 });
+

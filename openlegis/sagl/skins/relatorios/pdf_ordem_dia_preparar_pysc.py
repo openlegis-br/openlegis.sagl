@@ -468,7 +468,7 @@ for uf in estados:
        nom_estado = uf.nom_localidade
        break
 cabecalho["nom_casa"] = casa["nom_casa"]
-cabecalho["nom_estado"] = 'Estado de ' + nom_estado
+cabecalho["nom_estado"] = nom_estado
 
 # tenta buscar o logotipo da casa LOGO_CASA
 if hasattr(context.sapl_documentos.props_sagl,'logo_casa.gif'):

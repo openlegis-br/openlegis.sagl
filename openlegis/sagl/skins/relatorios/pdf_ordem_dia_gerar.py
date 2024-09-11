@@ -9,7 +9,7 @@ from xml.sax.saxutils import escape
 def cabecalho(dic_cabecalho, imagem):
     """Gera o codigo rml do cabecalho"""
     tmp=''
-    tmp+='\t\t\t\t<image x="3.1cm" y="27.4cm" width="60" height="60" file="' + imagem + '"/>\n'
+    tmp+='\t\t\t\t<image x="2.5cm" y="27.4cm" width="74" height="60" file="' + imagem + '"/>\n'
     tmp+='\t\t\t\t<lines>1.7cm 27.1cm 19.3cm 27.1cm</lines>\n'
     tmp+='\t\t\t\t<setFont name="Helvetica-Bold" size="15"/>\n'
     tmp+='\t\t\t\t<drawString x="6cm" y="28.5cm">' + dic_cabecalho["nom_casa"] + '</drawString>\n'

@@ -84,6 +84,12 @@
 //-->
 </script>
 
+<dtml-if cod_materia_principal>
+   <dtml-call expr="REQUEST.set('cod_materia', cod_materia_principal)">
+<dtml-else>
+   <dtml-call expr="REQUEST.set('cod_materia', cod_materia)">
+</dtml-if>
+
 <dtml-in expr="zsql.materia_obter_zsql(cod_materia=cod_materia)">
    <dtml-call expr="REQUEST.set('id_materia', str(des_tipo_materia)+ ' nº  ' +str(num_ident_basica)+ '/' +str(ano_ident_basica))">
 </dtml-in>

@@ -86,4 +86,12 @@ for materia in context.zsql.materia_obter_zsql(cod_materia=cod_materia):
                 autor_dic['cod_autor'] = autor['cod_autor']
         nom_autor.append(autor_dic)
 
+    inf_basicas_dic['materia_anexada'] = ''
+    inf_basicas_dic['autoria_materia_anexada'] = ''
+    for anexada in context.zsql.anexada_obter_zsql(cod_materia_principal=cod_materia,ind_excluido=0):
+        inf_basicas_dic['materia_anexada'] = str(anexada.tip_materia_anexada) + ' ' + str(anexada.num_materia_anexada) + '/' + str(anexada.ano_materia_anexada)
+        for autoria in context.zsql.autoria_obter_zsql(cod_materia = anexada.cod_materia_anexada):
+            for autor in context.zsql.autor_obter_zsql(cod_autor = autoria.cod_autor, ind_primeiro_autor=1):
+                inf_basicas_dic['autoria_materia_anexada'] = 'Autoria do Projeto: ' + str(autor.nom_autor_join).upper()
+
 return st.materia_gerar_odt(inf_basicas_dic, num_proposicao, nom_arquivo, des_tipo_materia, num_ident_basica, num_materia, ano_ident_basica, ano_materia, txt_ementa, materia_vinculada, dat_apresentacao, nom_autor, apelido_autor, modelo_proposicao)

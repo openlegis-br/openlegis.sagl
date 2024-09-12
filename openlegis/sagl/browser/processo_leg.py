@@ -88,8 +88,8 @@ class ProcessoLeg(grok.View):
                 if hasattr(self.context.sapl_documentos.materia, str(anexada.cod_materia_anexada) + '_texto_integral.pdf'):
                    dic = {}
                    dic["data"] = DateTime(anexada.dat_anexacao, datefmt='international').strftime('%Y-%m-%d 23:58:00')
-                   for proposicao in self.context.zsql.proposicao_obter_zsql(cod_mat_ou_doc=anexada.cod_materia_anexada,ind_mat_ou_doc='M'):
-                       dic["data"] = DateTime(proposicao.dat_recebimento, datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
+                   #for proposicao in self.context.zsql.proposicao_obter_zsql(cod_mat_ou_doc=anexada.cod_materia_anexada,ind_mat_ou_doc='M'):
+                   #    dic["data"] = DateTime(proposicao.dat_recebimento, datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
                    dic['path'] = self.context.sapl_documentos.materia
                    dic["file"] = str(anexada.cod_materia_anexada) + '_texto_integral.pdf'
                    dic["title"] = anexada.tip_materia_anexada + ' ' + str(anexada.num_materia_anexada) + '/' +str(anexada.ano_materia_anexada) + ' (anexada)'
@@ -108,8 +108,8 @@ class ProcessoLeg(grok.View):
                 if hasattr(self.context.sapl_documentos.materia, str(anexada.cod_materia_principal) + '_texto_integral.pdf'):
                    dic = {}
                    dic["data"] = DateTime(anexada.dat_anexacao, datefmt='international').strftime('%Y-%m-%d 23:58:00')
-                   for proposicao in self.context.zsql.proposicao_obter_zsql(cod_mat_ou_doc=anexada.cod_materia_principal,ind_mat_ou_doc='M'):
-                       dic["data"] = DateTime(proposicao.dat_recebimento, datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
+                   #for proposicao in self.context.zsql.proposicao_obter_zsql(cod_mat_ou_doc=anexada.cod_materia_principal,ind_mat_ou_doc='M'):
+                   #    dic["data"] = DateTime(proposicao.dat_recebimento, datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
                    dic['path'] = self.context.sapl_documentos.materia
                    dic["file"] = str(anexada.cod_materia_principal) + '_texto_integral.pdf'
                    dic["title"] = anexada.tip_materia_principal + ' ' + str(anexada.num_materia_principal) + '/' +str(anexada.ano_materia_principal) + ' (anexadora)'

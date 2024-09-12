@@ -193,7 +193,9 @@
  <dtml-if temTramitacao>
    <dtml-in expr="zsql.tramitacao_obter_zsql(cod_materia=cod_materia, ind_excluido=0)">
      <dtml-if sequence-start>
-      <dtml-call expr="REQUEST.set('cod_ult_unidade', int(cod_unid_tram_dest))">
+      <dtml-call expr="REQUEST.set('cod_ult_origem', int(cod_unid_tram_local))">     
+      <dtml-call expr="REQUEST.set('cod_ult_dest', int(cod_unid_tram_dest))">
+      <dtml-call expr="REQUEST.set('dat_encaminha', dat_encaminha)">  
       <div class="card mb-3">
        <div class="card-body">
            <p class="card-text"><b>Último Local:</b> <dtml-var dat_tramitacao>
@@ -526,25 +528,20 @@
     <dtml-call expr="REQUEST.set('temDocADM', 1)">
  </dtml-in>
 
- <dtml-let isAnon="portal_membership.isAnonymousUser()">
-    <dtml-if expr="not isAnon">
-      <dtml-call expr="REQUEST.set('metodo_acessorio', zsql.documento_acessorio_obter_zsql(cod_materia=cod_materia, ind_excluido=0))">
-      <dtml-in metodo_acessorio>
-         <dtml-call expr="REQUEST.set('temDocAC', 1)">
-      </dtml-in>    
+ <dtml-in expr="zsql.documento_acessorio_obter_zsql(cod_materia=cod_materia,ind_excluido=0)">
+    <dtml-call expr="REQUEST.set('temDocAC', 1)">
+ </dtml-in>
+
+    <dtml-if expr="AUTHENTICATED_USER.has_role(['Authenticated']) and _.has_key('cod_usuario_corrente')">
       <dtml-in expr="zsql.usuario_unid_tram_obter_zsql(cod_usuario=cod_usuario_corrente)">
-         <dtml-if expr="_.has_key('cod_ult_unidade') and int(cod_ult_unidade) == int(cod_unid_tramitacao)">
+         <dtml-if expr="_.has_key('cod_ult_origem') and int(cod_ult_origem) == int(cod_unid_tramitacao) and dat_encaminha==None">
             <dtml-call expr="REQUEST.set('add_doc', 1)">
+         <dtml-elif expr="_.has_key('cod_ult_dest') and int(cod_ult_dest) == int(cod_unid_tramitacao)">
+            <dtml-call expr="REQUEST.set('add_doc', 1)">
+            <dtml-call expr="REQUEST.set('pode_tramitar', 1)">
          </dtml-if>
       </dtml-in>
-     <dtml-else>
-      <dtml-call expr="REQUEST.set('metodo_acessorio', zsql.documento_acessorio_obter_zsql(cod_materia=cod_materia, ind_excluido=0))">
-       <dtml-in metodo_acessorio>
-          <dtml-call expr="REQUEST.set('ind_publico', 1)">       
-          <dtml-call expr="REQUEST.set('temDocAC', 1)">
-       </dtml-in>  
      </dtml-if>
- </dtml-let>
 
  <dtml-if expr="_.has_key('temDocAC') or _.has_key('temDocADM') or _.has_key('add_doc')">
       <div class="accordion accordion-flush accordion-plus-icon" id="accordionDoc">
@@ -556,15 +553,15 @@
              </div>
              <div id="collapseDoc" class="collapse" aria-labelledby="headingDoc" data-bs-parent="#accordionDoc">
                  <div class="card-body">
-         <dtml-let isAnon="portal_membership.isAnonymousUser()">
-             <dtml-if expr="not isAnon and _.has_key('add_doc')">
+
+               <dtml-if expr="AUTHENTICATED_USER.has_role(['Authenticated']) and _.has_key('add_doc')">      
                 <section class="body-content mb-3">
                      <div hidden>
                          <div data-name="popover-content">
                             <form name="myform" id="myform" class="needs-validation" validate role="form" enctype="multipart/form-data" method="post" action="documento_acessorio_salvar_proc" onSubmit="return confirm('Confirma a inclusão do documento acessório?');">
                              <input type="hidden" name="cod_materia" value="<dtml-var cod_materia>" />
                              <input type="hidden" name="cod_usuario" value="<dtml-var cod_usuario_corrente missing>" />
-                             <input type="hidden" name="cod_unid_tram_local" value="<dtml-var cod_ult_unidade missing>" />
+                             <input type="hidden" name="cod_unid_tram_local" value="<dtml-var cod_ult_dest missing>" />
                              <div class="row">
                                <div class="col-12 mb-3">
                                  <label class="form-label required" for="lst_tip_documento">Tipo</label>
@@ -597,13 +594,9 @@
                      </div>  
                      <a id="addDocAc" tabindex="0" class="btn btn-light" role="button" data-bs-toggle="popover" title="title"><i class="fas fa-plus-circle"></i> Incluir documento</a>
                </section>   
-
-
-
        </dtml-if>
-       </dtml-let>
 
-         <dtml-in metodo_acessorio>
+         <dtml-in expr="zsql.documento_acessorio_obter_zsql(cod_materia=cod_materia, ind_excluido=0)">
             <dtml-if sequence-start>
               <div class="table-responsive">            
                <table class="table">
@@ -752,6 +745,11 @@
              </div>
              <div id="collapseTram" class="collapse" aria-labelledby="headingTram" data-bs-parent="#accordionTram">
                  <div class="card-body">
+                  <dtml-if expr="AUTHENTICATED_USER.has_role(['Authenticated']) and _.has_key('pode_tramitar')">
+                    <div class="mb-3">
+                      <a href="#" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Tramitação Individual" data-src="<dtml-var portal_url>/cadastros/tramitacao_materia/tramitacao_form?hdn_cod_materia=<dtml-var cod_materia>&modal=1" class="btn btn-light"><i class="fas fa-external-link-alt"></i><span> Tramitar</span></a>
+                    </div>
+                  </dtml-if>
           <dtml-in expr="zsql.tramitacao_obter_zsql(cod_materia=cod_materia)">
             <dtml-if sequence-start>
               <div class="col-md-10 offset-md-1">                     

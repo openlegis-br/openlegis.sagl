@@ -80,7 +80,9 @@ href="<dtml-var portal_url>/cadastros/proposicao/proposicao_index_html?ind_envia
      </dtml-if> 
   </dtml-in>
   <dtml-if assinarLote>
-     <a class="btn btn-light mb-3" href="<dtml-var portal_url>/cadastros/proposicao/assinar_lote_pdf" data-confirm="Confirma a assinatura simples em lote das Indicações, Moções e Requerimentos?">Assinatura Simples em Lote</a>
+    <dtml-if expr="int(sapl_documentos.props_sagl.assinatura_simples)==1"> 
+       <a class="btn btn-light mb-3" href="<dtml-var portal_url>/cadastros/proposicao/assinar_lote_pdf" data-confirm="Confirma a assinatura simples em lote das Indicações, Moções e Requerimentos?">Assinatura Simples em Lote</a>
+    </dtml-if>
   </dtml-if>
 </dtml-if>
  </div>

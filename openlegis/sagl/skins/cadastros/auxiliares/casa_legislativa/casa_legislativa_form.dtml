@@ -1,8 +1,8 @@
 <dtml-var header_html>
 
-<script type= "text/javascript" src="<dtml-var portal_url>/javascript/email_validar.js"></script>
+<script src="<dtml-var portal_url>/javascript/email_validar.js"></script>
 
-<script type= "text/javascript">
+<script>
 
   function campos_criticar(form){
        var regexp_digitos = /\D+/; 
@@ -247,11 +247,11 @@
   </div>
 
   <div class="row"> 
-     <div class="col-12 col-lg-6 mb-3">
+     <div class="col-12 col-sm-6 col-lg-3 mb-3">
         <label class="form-label" for="txt_recaptcha_key">Chave reCaptcha</label>
         <input class="form-control" type="text" id="txt_recaptcha_key" name="txt_recaptcha_key" value="<dtml-var expr="sapl_documentos.props_sagl.recaptcha_key" missing>" />     
      </div>
-     <div class="col-6 col-lg-3 mb-3">
+     <div class="col-12 col-sm-6 col-lg-3 mb-3">
         <label class="form-label d-block required">Numeração de Protocolo</label>
         <dtml-in expr="[('1', 'Anual'), ('0', 'Consecutiva')]">
           <div class="form-check form-check-inline">        
@@ -263,7 +263,7 @@
           </div>
         </dtml-in>
      </div>
-     <div class="col-6 col-lg-3 mb-3">
+     <div class="col-12 col-sm-6 col-lg-3 mb-3">
         <label class="form-label d-block required">Acompanhamento de Matérias</label>
         <dtml-in expr="[('1', 'Sim'), ('0', 'Não')]">
           <div class="form-check form-check-inline">                
@@ -274,7 +274,19 @@
              <label class="form-check-label" for="rad_rad<dtml-var expr="_['sequence-key']">"><dtml-var expr="_['sequence-item']"></label>  
           </div>
         </dtml-in>
-     </div>          
+     </div>
+     <div class="col-12 col-sm-6 col-lg-3 mb-3">
+        <label class="form-label d-block required">Assinatura Simples nas Proposições</label>
+        <dtml-in expr="[('1', 'Habilitar'), ('0', 'Desabilitar')]">
+          <div class="form-check form-check-inline">                
+           <input class="form-check-input" type="radio" id="rad_rad_rad<dtml-var expr="_['sequence-key']">" name="rad_assinatura" value="<dtml-var expr="_['sequence-key']">"
+             <dtml-if expr="_.int(sapl_documentos.props_sagl.assinatura_simples)==_.int(_['sequence-key'])">
+                checked=1
+             </dtml-if> />
+             <label class="form-check-label" for="rad_rad_rad<dtml-var expr="_['sequence-key']">"><dtml-var expr="_['sequence-item']"></label>  
+          </div>
+        </dtml-in>
+     </div>      
   </div>
 
   <div class="row"> 
@@ -307,7 +319,7 @@
   </div>
 
   <div class="row"> 
-     <div class="col-12 mb-3">
+     <div class="col-12">
         <label class="form-label d-block">Brasão</label>
         <div class="row">
           <input type="hidden" name="hdn_file" value="0"/>
@@ -330,7 +342,7 @@
                <label class="form-check-label" for="r3">Substituir</label>  
              </div>
            </div>
-           <div class="col-6 mb-3">
+           <div class="col-12 col-sm-6 mb-3">
                <input type="file" class="form-control" id="file_nom_logo" name="file_nom_logo" accept="image/png" disabled />
                <small id="passwordHelpBlock" class="form-text text-muted">
                 PNG com fundo transparente. Tamanho: 100x100px.
@@ -338,7 +350,7 @@
            </div>
           </div>  
         <dtml-else>
-          <div class="col-6 mb-3">
+          <div class="col-12 col-sm-6 mb-3">
            <div class="custom-file">
              <input type="file" class="form-control" id="file_nom_logo" name="file_nom_logo" accept="image/png" />
              <label class="custom-file-label" for="file_nom_logo">Selecione a imagem</label>
@@ -353,7 +365,7 @@
 
   <legend class="font-size-16">Protocolo de Processos Digitais</legend>
   <div class="row">
-    <div class="col-3 mb-3">
+    <div class="col-12 col-sm-6 col-lg-3 mb-3">
        <label class="form-label required" for="lst_origem">Origem</label>
        <select id="lst_origem" name="lst_origem" class="form-select">
           <option value="">Selecione</option>
@@ -366,7 +378,7 @@
          </dtml-in>     
        </select>
     </div> 
-    <div class="col-3 mb-3">
+    <div class="col-12 col-sm-6 col-lg-3 mb-3">
        <label class="form-label required" for="lst_destino">Destino Projetos</label>
        <select id="lst_destino" name="lst_destino" class="form-select">
           <option value="">Selecione</option>
@@ -379,7 +391,7 @@
          </dtml-in>     
        </select>
     </div> 
-    <div class="col-3 mb-3">
+    <div class="col-12 col-sm-6 col-lg-3 mb-3">
        <label class="form-label required" for="lst_destino_outros">Destino Outras Matérias</label>
        <select id="lst_destino_outros" name="lst_destino_outros" class="form-select">
           <option value="">Selecione</option>
@@ -392,7 +404,7 @@
          </dtml-in>     
        </select>
     </div> 
-    <div class="col-3 mb-3">
+    <div class="col-12 col-sm-6 col-lg-3 mb-3">
        <label class="form-label required" for="lst_status">Status Matérias</label>
        <select id="lst_status" name="lst_status" class="form-select">
           <option value="">Selecione</option>
@@ -408,7 +420,7 @@
   </div>
 
   <div class="row">
-    <div class="col-3 mb-3">
+    <div class="col-12 col-sm-6 col-lg-3 mb-3">
        <label class="form-label required" for="lst_status_doc">Status Docs. Acessórios</label>
        <select id="lst_status_doc" name="lst_status_doc" class="form-select">
           <option value="">Selecione</option>
@@ -421,7 +433,7 @@
          </dtml-in>     
        </select>
     </div> 
-    <div class="col-3 mb-3">
+    <div class="col-12 col-sm-6 col-lg-3 mb-3">
        <label class="form-label required" for="lst_status_eme">Status Emendas</label>
        <select id="lst_status_eme" name="lst_status_eme" class="form-select">
           <option value="">Selecione</option>
@@ -434,7 +446,7 @@
          </dtml-in>     
        </select>
     </div> 
-    <div class="col-3 mb-3">
+    <div class="col-12 col-sm-6 col-lg-3 mb-3">
        <label class="form-label required" for="lst_status_par">Status Pareceres</label>
        <select id="lst_status_par" name="lst_status_par" class="form-select">
           <option value="">Selecione</option>
@@ -447,7 +459,7 @@
          </dtml-in>     
        </select>
     </div> 
-    <div class="col-3 mb-3">
+    <div class="col-12 col-sm-6 col-lg-3 mb-3">
        <label class="form-label required" for="lst_status_sub">Status Substitutivos</label>
        <select id="lst_status_sub" name="lst_status_sub" class="form-select">
           <option value="">Selecione</option>

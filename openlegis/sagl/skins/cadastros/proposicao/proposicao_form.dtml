@@ -684,12 +684,19 @@
                   <i class="fa fa-fw fa-file-pdf"></i>Visualizar
                </a>
             <dtml-if "sapl_documentos.props_sagl.restpki_access_token!=''">               
-               <dtml-if expr="AUTHENTICATED_USER.has_role(['Autor']) and des_tipo_autor != 'Mesa Diretora' and des_tipo_autor != 'Comissao'">
+               <dtml-if expr="AUTHENTICATED_USER.has_role(['Autor']) and des_tipo_autor != 'Mesa Diretora' and des_tipo_autor != 'Comissao' and des_tipo_autor != 'Externo' and des_tipo_autor != 'Poder Executivo'">
                   <dtml-if expr="not prop_recebida and not prop_devolvida">
                      <dtml-if expr="(des_tipo_proposicao=='Requerimento' or des_tipo_proposicao=='Indicação' or des_tipo_proposicao=='Moção' or des_tipo_proposicao=='Pedido de Informação')">
                         <dtml-if expr="int(sapl_documentos.props_sagl.assinatura_simples)==1"> 
                            <a class="btn btn-secondary" href="<dtml-var portal_url>/cadastros/proposicao/assinar_pdf?cod_proposicao=<dtml-var cod_proposicao missing>" data-confirm="Confirma a assinatura simples da proposição?"><i class="fas fa-file-signature"></i> Assinatura Simples</a>
                         </dtml-if>
+                     </dtml-if>
+                     <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Assinar Digitalmente com ICP-Brasil" data-src="<dtml-var portal_url>/generico/assinador/pades-signature_html?codigo=<dtml-var cod_proposicao missing>&tipo_doc=proposicao&modal=1"><i class="fas fa-file-signature"></i> Assinar com ICP-Brasil</button>
+                  </dtml-if>
+               <dtml-elif expr="AUTHENTICATED_USER.has_role(['Autor']) and (des_tipo_autor == 'Externo' or des_tipo_autor == 'Poder Executivo')">
+                  <dtml-if expr="not prop_recebida and not prop_devolvida">
+                     <dtml-if expr="int(sapl_documentos.props_sagl.assinatura_simples)==1"> 
+                        <a class="btn btn-secondary" href="<dtml-var portal_url>/cadastros/proposicao/assinar_pdf?cod_proposicao=<dtml-var cod_proposicao missing>" data-confirm="Confirma a assinatura simples da proposição?"><i class="fas fa-file-signature"></i> Assinatura Simples</a>
                      </dtml-if>
                      <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Assinar Digitalmente com ICP-Brasil" data-src="<dtml-var portal_url>/generico/assinador/pades-signature_html?codigo=<dtml-var cod_proposicao missing>&tipo_doc=proposicao&modal=1"><i class="fas fa-file-signature"></i> Assinar com ICP-Brasil</button>
                   </dtml-if>

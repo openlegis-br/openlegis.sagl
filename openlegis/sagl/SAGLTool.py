@@ -1317,7 +1317,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
                for materia in self.zsql.materia_obter_zsql(cod_materia=proposicao.cod_mat_ou_doc):
                    if materia.num_protocolo != None and materia.num_protocolo != '':
                       for protocolo in self.zsql.protocolo_obter_zsql(num_protocolo=materia.num_protocolo, ano_protocolo=materia.ano_ident_basica):
-                          info_protocolo = ' - Prot. nº ' + str(protocolo.num_protocolo) + '/' + str(protocolo.ano_protocolo) + ' em ' + str(DateTime(protocolo.dat_protocolo, datefmt='international').strftime('%d/%m/%Y')) + ' ' + protocolo.hor_protocolo + '.'
+                          info_protocolo = ' - Prot. ' + str(protocolo.num_protocolo) + '/' + str(protocolo.ano_protocolo) + ' ' + str(DateTime(protocolo.dat_protocolo, datefmt='international').strftime('%d/%m/%Y')) + ' ' + protocolo.hor_protocolo + '.'
                    texto = str(materia.des_tipo_materia) + ' nº ' + str(materia.num_ident_basica) + '/' + str(materia.ano_ident_basica)
                    storage_path = self.sapl_documentos.materia
                    nom_pdf_saida = str(materia.cod_materia) + "_texto_integral.pdf"
@@ -1353,10 +1353,14 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
                    storage_path = self.sapl_documentos.parecer_comissao
                    nom_pdf_saida = str(relatoria.cod_relatoria) + "_parecer.pdf"
         mensagem1 = 'Esta é uma cópia do original assinado digitalmente por ' + nom_autor + outros
-        mensagem2 = 'Valide em ' + self.url()+'/conferir_assinatura'+' com o código '+ cod_validacao_doc
+        mensagem2 = 'Para validar visite ' + self.url()+'/conferir_assinatura'+' e informe o código '+ cod_validacao_doc
         existing_pdf = pymupdf.open(stream=fileStream)
         numPages = existing_pdf.page_count
         doc = pymupdf.open()
+        install_home = os.environ.get('INSTALL_HOME')
+        dirpath = os.path.join(install_home, 'src/openlegis.sagl/openlegis/sagl/skins/imagens/logo-icp2.png')
+        with open(dirpath, "rb") as arq:
+             image = arq.read()
         for validacao in self.zsql.assinatura_documento_obter_zsql(codigo=cod_proposicao,tipo_doc='proposicao',ind_assinado=1):
             stream = self.make_qrcode(text=self.url()+'/conferir_assinatura_proc?txt_codigo_verificacao='+str(validacao.cod_assinatura_doc))
             for page_index, i in enumerate(range(len(existing_pdf))):
@@ -1365,24 +1369,29 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
                 margin = 5
                 left = 10 - margin
                 bottom = h - 50 - margin
+                bottom2 = h - 38
+                right = w - 53
                 black = pymupdf.pdfcolor["black"]
-                numero = "Pág. %s/%s" % (i+1, numPages)
                 # qrcode
                 rect = pymupdf.Rect(left, bottom, left + 50, bottom + 50)  # qrcode bottom left square
                 existing_pdf[page_index].insert_image(rect, stream=stream)             
                 text2 = mensagem2
                 # margem direita
-                text3 = texto + info_protocolo + ' ' + mensagem1
+                numero = "Pág. %s/%s" % (i+1, numPages)
+                text3 = numero + ' - ' + texto + info_protocolo + ' ' + mensagem1
                 x = w - 8 - margin #largura
                 y = h - 30 - margin # altura
                 existing_pdf[page_index].insert_text((x, y), text3, fontsize=8, rotate=90)
+                # logo icp
+                rect_icp = pymupdf.Rect(right, bottom2, right + 45, bottom2 + 45)
+                existing_pdf[page_index].insert_image(rect_icp, stream=image)
                 # margem inferior
                 p1 = pymupdf.Point(w - 40 - margin, h - 12) # numero de pagina documento
                 p2 = pymupdf.Point(60, h - 12) # margem inferior
                 shape = existing_pdf[page_index].new_shape()
                 shape.draw_circle(p1,1)
                 shape.draw_circle(p2,1)
-                shape.insert_text(p1, numero, fontname = "helv", fontsize = 8)
+                #shape.insert_text(p1, numero, fontname = "helv", fontsize = 8)
                 shape.insert_text(p2, text2, fontname = "helv", fontsize = 8, rotate=0)
                 shape.commit()
             break
@@ -1464,11 +1473,11 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
            arq = getattr(self.sapl_documentos.documentos_assinados, nom_pdf_peticao)
            stream = self.make_qrcode(text=self.url()+'/conferir_assinatura_proc?txt_codigo_verificacao='+str(cod_validacao_doc))
            mensagem1 = 'Esta é uma cópia do original assinado digitalmente por ' + nom_autor + outros
-           mensagem2 = 'Valide pelo qrcode ou acesse ' + self.url()+'/conferir_assinatura'+' com o código '+ cod_validacao_doc + '.'
+           mensagem2 = 'Para validar visite ' + self.url()+'/conferir_assinatura'+' e informe o código '+ cod_validacao_doc + '.'
         else:
            arq = getattr(self.sapl_documentos.peticao, nom_pdf_peticao)
            stream = self.make_qrcode(text=self.url() + str(caminho) + str(nom_pdf_saida))
-           mensagem1 = 'Documento assinado com login e senha por ' + nom_autor
+           mensagem1 = 'Documento assinado digitalmente com usuário e senha por ' + nom_autor
            mensagem2 = ''
         arquivo = BytesIO(bytes(arq.data))
         existing_pdf = pymupdf.open(stream=arquivo)
@@ -1995,26 +2004,35 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
                for comissao in self.zsql.comissao_obter_zsql(cod_comissao=metodo.cod_comissao):
                    texto = metodo.txt_descricao + ' da ' + comissao.sgl_comissao
         mensagem1 = 'Esta é uma cópia do original assinado digitalmente por ' + nom_autor + outros
-        mensagem2 = 'Valide em ' + self.url() + '/conferir_assinatura' + ' com o código ' + string
+        mensagem2 = 'Para validar visite ' + self.url() + '/conferir_assinatura' + ' e informe o código ' + string
         existing_pdf = pymupdf.open(stream=fileStream)
         numPages = existing_pdf.page_count
         stream = self.make_qrcode(text=self.url()+'/conferir_assinatura_proc?txt_codigo_verificacao='+str(string))
+        install_home = os.environ.get('INSTALL_HOME')
+        dirpath = os.path.join(install_home, 'src/openlegis.sagl/openlegis/sagl/skins/imagens/logo-icp2.png')
+        with open(dirpath, "rb") as arq:
+             image = arq.read()
         for page_index, i in enumerate(range(len(existing_pdf))):
             w = existing_pdf[page_index].rect.width
             h = existing_pdf[page_index].rect.height
             margin = 5
             left = 10 - margin
-            bottom = h - 50 - margin           
+            bottom = h - 50 - margin
+            bottom2 = h - 38
+            right = w - 53
             black = pymupdf.pdfcolor["black"]
-            numero = "Pág. %s/%s" % (i+1, numPages)
             # qrcode
             rect = pymupdf.Rect(left, bottom, left + 50, bottom + 50)  # qrcode bottom left square
-            existing_pdf[page_index].insert_image(rect, stream=stream)               
+            existing_pdf[page_index].insert_image(rect, stream=stream)              
             text2 = mensagem2
+            # logo icp
+            rect_icp = pymupdf.Rect(right, bottom2, right + 45, bottom2 + 45)
+            existing_pdf[page_index].insert_image(rect_icp, stream=image)
             # margem direita
-            text3 = texto + ' - ' + mensagem1
+            numero = "Pág. %s/%s" % (i+1, numPages)
+            text3 = numero + ' - ' + texto + ' - ' + mensagem1
             x = w - 8 - margin #largura
-            y = h - 30 - margin # altura
+            y = h - 50 - margin # altura
             existing_pdf[page_index].insert_text((x, y), text3, fontsize=8, rotate=90)
             # margem inferior
             p1 = pymupdf.Point(w - 40 - margin, h - 12) # numero de pagina documento
@@ -2022,7 +2040,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
             shape = existing_pdf[page_index].new_shape()
             shape.draw_circle(p1,1)
             shape.draw_circle(p2,1)
-            shape.insert_text(p1, numero, fontname = "helv", fontsize = 8)
+            #shape.insert_text(p1, numero, fontname = "helv", fontsize = 8)
             shape.insert_text(p2, text2, fontname = "helv", fontsize = 8, rotate=0)
             shape.commit()
         content = existing_pdf.tobytes(deflate=True, garbage=3, use_objstms=1)
@@ -2076,7 +2094,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
                pdf_assinado = str(proposicao.cod_proposicao) + '_signed.pdf'
                texto = 'Proposição eletrônica ' + string
            mensagem1 = 'Documento assinado digitalmente com usuário e senha por ' + nom_autor + '.'
-           mensagem2 = 'Para verificação da autenticidade leia o qrcode ao lado.'
+           mensagem2 = 'Para verificar a autenticidade do documento leia o qrcode.'
            arq = getattr(storage_path, pdf_proposicao)
            arquivo = BytesIO(bytes(arq.data))
            existing_pdf = pymupdf.open(stream=arquivo)
@@ -2095,7 +2113,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
                existing_pdf[page_index].insert_image(rect, stream=stream)
                text2 = mensagem2
                # margem direita
-               text3 = texto + ' ' + mensagem1
+               text3 = texto + ' - ' + mensagem1
                x = w - 8 - margin #largura
                y = h - 30 - margin # altura
                existing_pdf[page_index].insert_text((x, y), text3, fontsize=8, rotate=90)

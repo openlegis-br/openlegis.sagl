@@ -2,7 +2,7 @@
 connection_id : dbcon_sagl
 max_rows : 1000
 max_cache : 100
-arguments: cod_documento cod_materia ind_excluido=0
+arguments: cod_documento cod_materia ind_publico="" ind_excluido=0
 </dtml-comment>
 
 SELECT 
@@ -11,17 +11,23 @@ SELECT
    dam.cod_materia,
    DATE_FORMAT(da.dat_documento, '%d/%m/%Y') as data_documento,
    da.num_protocolo as num_protocolo_documento,
-   da.ano_documento as ano_documento
+   da.ano_documento as ano_documento,
+   tp.ind_publico
 
 FROM 
   documento_administrativo_materia dam
   LEFT JOIN documento_administrativo da ON dam.cod_documento = da.cod_documento
+  LEFT JOIN tipo_documento_administrativo tp ON tp.tip_documento = da.tip_documento
 
 <dtml-sqlgroup where>
     <dtml-sqltest cod_documento column="dam.cod_documento" op="=" type="int" optional> <dtml-and>
     <dtml-sqltest cod_materia   column="dam.cod_materia"   op="=" type="int" optional> <dtml-and>
-    <dtml-sqltest ind_excluido  column="dam.ind_excluido"  op="="  type="int" optional> <dtml-and>
+    <dtml-sqltest ind_excluido  column="dam.ind_excluido"  op="="  type="int" optional>
 </dtml-sqlgroup>
+
+<dtml-if ind_publico>
+  AND tp.ind_publico = 1
+</dtml-if>
 
 ORDER BY
    cod_vinculo

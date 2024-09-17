@@ -26,8 +26,8 @@ SELECT
        documento_administrativo.cod_assunto  
 
 FROM   
-       documento_administrativo LEFT JOIN tipo_documento_administrativo ON
-       documento_administrativo.tip_documento=tipo_documento_administrativo.tip_documento
+       documento_administrativo 
+       LEFT JOIN tipo_documento_administrativo ON documento_administrativo.tip_documento=tipo_documento_administrativo.tip_documento
        
   <dtml-sqlgroup where>
     <dtml-sqltest cod_documento         column="documento_administrativo.cod_documento" op="="  type="int" optional> <dtml-and>

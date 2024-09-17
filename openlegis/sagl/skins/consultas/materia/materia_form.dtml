@@ -174,7 +174,7 @@
 
  <div class="row">
     <div class="col-12">
-      <div class="row mb-2">    
+      <div class="row mb-3">    
          <div class="col-6">
            <span class="h6 font-weight-bold">Situação Atual</span>
          </div>
@@ -524,10 +524,6 @@
       </div>
  </dtml-if>
 
- <dtml-in expr="zsql.documento_administrativo_materia_obter_zsql(cod_materia=cod_materia,ind_excluido=0)">
-    <dtml-call expr="REQUEST.set('temDocADM', 1)">
- </dtml-in>
-
  <dtml-in expr="zsql.documento_acessorio_obter_zsql(cod_materia=cod_materia,ind_excluido=0)">
     <dtml-call expr="REQUEST.set('temDocAC', 1)">
  </dtml-in>
@@ -543,12 +539,12 @@
       </dtml-in>
      </dtml-if>
 
- <dtml-if expr="_.has_key('temDocAC') or _.has_key('temDocADM') or _.has_key('add_doc')">
+ <dtml-if expr="_.has_key('temDocAC') or _.has_key('add_doc')">
       <div class="accordion accordion-flush accordion-plus-icon" id="accordionDoc">
          <div class="card mb-0 shadow">
              <div class="accordion-header" id="headingDoc">
                <h5 class="my-0">
-                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseDoc" aria-expanded="false" aria-controls="collapseDoc">Documentos</button>
+                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseDoc" aria-expanded="false" aria-controls="collapseDoc">Documentos Acessórios</button>
                </h5>
              </div>
              <div id="collapseDoc" class="collapse" aria-labelledby="headingDoc" data-bs-parent="#accordionDoc">
@@ -602,9 +598,9 @@
                <table class="table">
                  <thead class="table-light">
                    <tr>
-                     <th>Identificação do Documento</th>
+                     <th width="25%">Identificação do Documento</th>
                      <th>Autoria</th>                                          
-                     <th>Data e Horário</th>
+                     <th width="20%">Data e Hora</th>
                    </tr>
                  </thead>
              </dtml-if>
@@ -689,16 +685,38 @@
            </dtml-if sequence-end>  
          </dtml-in>           
 
-         <dtml-in expr="zsql.documento_administrativo_materia_obter_zsql(cod_materia=cod_materia,ind_excluido=0)">
-          <dtml-in expr="zsql.documento_administrativo_obter_publico_zsql(cod_documento=cod_documento,ind_excluido=0)">
+         </div>
+                 </div>
+             </div>
+         </div>
+      </div>
+ </dtml-if>
+
+ <dtml-in expr="zsql.documento_administrativo_materia_obter_zsql(cod_materia=cod_materia,ind_excluido=0)">
+    <dtml-call expr="REQUEST.set('temDocADM', 1)">
+ </dtml-in>
+
+<dtml-if expr="_.has_key('temDocADM')">
+      <div class="accordion accordion-flush accordion-plus-icon" id="accordionDocAdm">
+         <div class="card mb-0 shadow">
+             <div class="accordion-header" id="headingDocAdm">
+               <h5 class="my-0">
+                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseDocAdm" aria-expanded="false" aria-controls="collapseDocAdm">Processos Vinculados</button>
+               </h5>
+             </div>
+             <div id="collapseDocAdm" class="collapse" aria-labelledby="headingDocAdm" data-bs-parent="#accordionDocAdm">
+                 <div class="card-body">
+
+         <dtml-in expr="zsql.documento_administrativo_materia_obter_zsql(cod_materia=cod_materia,ind_publico=1,ind_excluido=0)">
             <dtml-if sequence-start> 
-              <p class="font-weight-bold h6">Processos Administrativos</p>
               <div class="table-responsive">            
                <table class="table">
-                 <thead class="table-secondary">
+                 <thead class="table-light">
                   <tr>
-                    <th>Identificação do Documento</th>
-                    <th>Data</th>
+                    <th width="25%">Processo Administrativo</th>
+                    <th width="20%">Interessado</th>
+                    <th>Assunto</th>
+                    <th width="20%">Data</th>
                   </tr>
                  </thead>
             </dtml-if sequence-start>
@@ -706,19 +724,18 @@
                 <tr>
                   <td>
                     <dtml-call expr="REQUEST.set('id_documento', str(cod_documento)+'_texto_integral.pdf')">
-                     <dtml-if "hasattr(sapl_documentos.administrativo,id_documento)">
-                       <dtml-let documento="getattr(sapl_documentos.administrativo,id_documento).absolute_url">
-                         <a target="_blank" href="<dtml-var documento>">
-                           <b><dtml-var des_tipo_documento> nº <dtml-var num_documento>/<dtml-var ano_documento></b>
-                         </a>
-                       </dtml-let>
-                     <dtml-else>
-                        <a href="<dtml-var portal_url>/consultas/documento_administrativo/documento_administrativo_mostrar_proc?cod_documento=<dtml-var cod_documento>">
-                           <b><dtml-var des_tipo_documento> nº <dtml-var num_documento>/<dtml-var ano_documento></b>
+                    <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Modulo Administrativo'])">
+                       <a href="<dtml-var portal_url>/cadastros/documento_administrativo/documento_administrativo_mostrar_proc?cod_documento=<dtml-var cod_documento>">
+                    <dtml-elif expr="AUTHENTICATED_USER.has_role(['Authenticated']) and zsql.usuario_tipo_documento_obter_zsql(tip_documento=tip_documento, cod_usuario=cod_usuario_corrente, ind_excluido=0)">
+                       <a href="<dtml-var portal_url>/cadastros/documento_administrativo/documento_administrativo_mostrar_proc?cod_documento=<dtml-var cod_documento>">
+                    <dtml-else>
+                       <a href="<dtml-var portal_url>/consultas/documento_administrativo/documento_administrativo_mostrar_proc?cod_documento=<dtml-var cod_documento>">
+                    </dtml-if>
+                           <dtml-var des_tipo_documento> nº <dtml-var num_documento>/<dtml-var ano_documento>
                         </a>
-                     </dtml-if>
-                     - <dtml-var txt_interessado> - <dtml-var txt_assunto>
                   </td>
+                  <td><dtml-var txt_interessado></td>
+                  <td><dtml-var txt_assunto></td>
                   <td><dtml-var dat_documento></td>
                 </tr>
             </dtml-in>
@@ -726,7 +743,6 @@
                </table>
              </div>
            </dtml-if sequence-end>  
-         </dtml-in> 
        </dtml-in>
          </div>
                  </div>
@@ -913,6 +929,7 @@
     </dtml-if> 
  </dtml-let>
 </script>
+<dtml-if expr="AUTHENTICATED_USER.has_role(['Authenticated']) and _.has_key('pode_tramitar')">
 <script type='text/javascript'>
   $(document).ready(function() {    
     var options = {
@@ -928,4 +945,5 @@
     var popover = new bootstrap.Popover(exampleEl, options)
   })
 </script>
+</dtml-if>
 <dtml-var footer_html>

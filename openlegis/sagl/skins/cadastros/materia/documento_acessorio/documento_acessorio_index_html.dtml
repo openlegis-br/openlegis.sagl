@@ -62,7 +62,47 @@
 <dtml-else>
        <p>Nenhum documento acessório cadastrado.</p>
 </dtml-in>
-
   <button type="button" class="btn btn-light d-print-none" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Cadastro de Documento Acessório" data-src="documento_acessorio/documento_acessorio_form?cod_materia=<dtml-var cod_materia>&modal=1">Incluir Documento</button>
 </form>
+
+         <dtml-in expr="zsql.documento_administrativo_materia_obter_zsql(cod_materia=cod_materia, ind_excluido=0)">
+            <dtml-if sequence-start>
+             <div class="row mt-4">
+              <legend class="font-size-16">Processos Administrativos</legend> 
+              <div class="table-responsive">            
+               <table class="table">
+                 <thead class="table-light">
+                  <tr>
+                    <th width="25%">Identificação do Processo</th>
+                    <th width="20%">Interessado</th>
+                    <th>Assunto</th>
+                    <th width="20%">Data</th>
+                  </tr>
+                 </thead>
+            </dtml-if sequence-start>
+            <dtml-in expr="zsql.documento_administrativo_obter_zsql(cod_documento=cod_documento, ind_excluido=0)">
+                <tr>
+                  <td>
+                    <dtml-call expr="REQUEST.set('id_documento', str(cod_documento)+'_texto_integral.pdf')">
+                    <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Modulo Administrativo'])">
+                       <a href="<dtml-var portal_url>/cadastros/documento_administrativo/documento_administrativo_mostrar_proc?cod_documento=<dtml-var cod_documento>">
+                    <dtml-elif expr="AUTHENTICATED_USER.has_role(['Authenticated']) and zsql.usuario_tipo_documento_obter_zsql(tip_documento=tip_documento, cod_usuario=cod_usuario_corrente, ind_excluido=0)">
+                       <a href="<dtml-var portal_url>/cadastros/documento_administrativo/documento_administrativo_mostrar_proc?cod_documento=<dtml-var cod_documento>">
+                    <dtml-else>
+                       <a href="<dtml-var portal_url>/consultas/documento_administrativo/documento_administrativo_mostrar_proc?cod_documento=<dtml-var cod_documento>">
+                    </dtml-if>
+                           <dtml-var des_tipo_documento> nº <dtml-var num_documento>/<dtml-var ano_documento>
+                        </a>
+                  </td>
+                  <td><dtml-var txt_interessado></td>
+                  <td><dtml-var txt_assunto></td>
+                  <td><dtml-var dat_documento></td>
+                </tr>
+            </dtml-in>
+            <dtml-if sequence-end>
+               </table>
+             </div>
+            </div>
+           </dtml-if sequence-end>  
+       </dtml-in>
 

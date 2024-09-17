@@ -80,7 +80,7 @@
 
  <div class="row">
     <div class="col-12">
-      <div class="row mb-2">    
+      <div class="row mb-3">    
          <div class="col-6">
            <span class="h6 font-weight-bold">Situação Atual</span>
          </div>
@@ -365,12 +365,15 @@
              <div id="collapseMat" class="collapse" aria-labelledby="headingMat" data-bs-parent="#accordionMat">
                  <div class="card-body">
          <dtml-in expr="zsql.documento_administrativo_materia_obter_zsql(cod_documento=cod_documento,ind_excluido=0)">
-           <dtml-if sequence-start>   
+           <dtml-if sequence-start>
+            <div class="table-responsive">
              <table class="table">
               <thead class="table-light">
                <tr>
-                 <th width="85%">Identificação da Matéria</th>
-                 <th width="15%">Arquivo</th>
+                 <th width="20%">Identificação da Matéria</th>
+                 <th width="20%">Autoria</th>
+                 <th>Ementa</th>
+                 <th width="10%">Arquivo</th>
                </tr>
               </thead>
            </dtml-if sequence-start>
@@ -378,13 +381,15 @@
               <tr>
                <td>
                  <a href="<dtml-var portal_url>/consultas/materia/materia_mostrar_proc?cod_materia=<dtml-var cod_materia>">
-                     <b><dtml-var des_tipo_materia> nº <dtml-var num_ident_basica>/<dtml-var ano_ident_basica></b>
-                 </a>
-                 <dtml-in expr="zsql.autoria_obter_zsql(cod_materia=cod_materia)">
-                   - <b><dtml-var nom_autor_join><dtml-unless sequence-end>,</dtml-unless></b>
-                 </dtml-in>           
-                 - <dtml-var txt_ementa>
+                     <dtml-var sgl_tipo_materia> <dtml-var num_ident_basica>/<dtml-var ano_ident_basica>
+                 </a>        
                </td>
+               <td>
+                 <dtml-in expr="zsql.autoria_obter_zsql(cod_materia=cod_materia)">
+                   <dtml-var nom_autor_join><dtml-unless sequence-end>,</dtml-unless>
+                 </dtml-in>  
+               </td>
+               <td><dtml-var txt_ementa></td>
                <td>
                  <dtml-call expr="REQUEST.set('id_materia', str(cod_materia)+'_texto_integral.pdf')">
                  <dtml-if "hasattr(sapl_documentos.materia,id_materia)">
@@ -399,6 +404,7 @@
            </dtml-in>
            <dtml-if sequence-end>
              </table>
+            </div>
            </dtml-if sequence-end>  
          </dtml-in>       
         </div>
@@ -545,7 +551,7 @@
 
 <div class="col-12">
   <div class="text-start btn-group mt-4">
-      <a class="btn btn-primary d-print-none" href="<dtml-var portal_url>/consultas/documento_administrativo" ><i class="fa fa-fw fa-search"></i> Pesquisa</a>
+      <a class="btn btn-primary text-white d-print-none" href="<dtml-var portal_url>/consultas/documento_administrativo" ><i class="fa fa-fw fa-search"></i> Pesquisa</a>
       <a class="btn btn-light" href="javascript:void(0)" onClick="window.history.go(-1); return false;"><i class="fa fa-fw fa-undo"></i> Voltar</a>  
   </div>
 </div>
@@ -564,6 +570,7 @@
  </dtml-let>
 
 </script>
+<dtml-if expr="AUTHENTICATED_USER.has_role(['Authenticated']) and _.has_key('pode_tramitar')">
 <script type='text/javascript'>
   $(document).ready(function() {    
     var options = {
@@ -579,5 +586,5 @@
     var popover = new bootstrap.Popover(exampleEl, options)
   })
 </script>
-
+</dtml-if>
 <dtml-var footer_html>

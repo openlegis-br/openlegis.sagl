@@ -458,12 +458,7 @@
                       <td>
                         <dtml-if expr="dat_encaminha!=None">
                          <dtml-call expr="REQUEST.set('pdf', str(cod_tramitacao)+'_tram.pdf')">
-                         <dtml-call expr="REQUEST.set('pdf_assinado', str(cod_tramitacao)+'_tram_signed.pdf')">
-                         <dtml-if "hasattr(sapl_documentos.administrativo.tramitacao,pdf_assinado)">
-                           <dtml-let pdf_assinado="getattr(sapl_documentos.administrativo.tramitacao,pdf_assinado).absolute_url">
-                             <a href="<dtml-var pdf_assinado>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fas fa-certificate"></i> <dtml-var expr="des_status"></a>
-                           </dtml-let>
-                         <dtml-elif expr="zsql.assinatura_documento_obter_zsql(codigo=cod_tramitacao,tipo_doc='tramitacao_adm', ind_assinado=1)">
+                         <dtml-if expr="zsql.assinatura_documento_obter_zsql(codigo=cod_tramitacao,tipo_doc='tramitacao_adm', ind_assinado=1)">
                             <dtml-in expr="zsql.assinatura_documento_obter_zsql(codigo=cod_tramitacao,tipo_doc='tramitacao_adm', ind_assinado=1, ind_prim_assinatura=1)"> 
                               <dtml-if "hasattr(sapl_documentos.administrativo.tramitacao,pdf)">
                                  <dtml-let pdf="getattr(sapl_documentos.administrativo.tramitacao,pdf).absolute_url">

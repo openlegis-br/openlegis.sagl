@@ -963,6 +963,10 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         outputStream.seek(0)
         content = outputStream.getvalue()
         self.sapl_documentos.administrativo.tramitacao.manage_addFile(id=arquivoPdf,file=content, title='Tramitação Documento')
+        for tram in self.zsql.tramitacao_administrativo_obter_zsql(cod_tramitacao=cod_tramitacao, ind_excluido=0):
+            if self.zsql.documento_administrativo_pesquisar_publico_zsql(cod_documento=tram.cod_documento, ind_excluido=0):
+               pdf = getattr(self.sapl_documentos.administrativo.tramitacao, arquivoPdf)
+               pdf.manage_permission('View', roles=['Manager','Authenticated','Anonymous'], acquire=1)
 
     def tramitacao_materia_juntar(self,cod_tramitacao):
         merger = pymupdf.open()

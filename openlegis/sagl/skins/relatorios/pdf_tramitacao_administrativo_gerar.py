@@ -1,4 +1,4 @@
-##parameters=imagem,dic_rodape,inf_basicas_dic,cod_tramitacao,tramitacao_dic,hdn_url,sessao=''
+##parameters=imagem, dic_rodape, inf_basicas_dic, cod_tramitacao, tramitacao_dic, hdn_url,sessao=''
 
 from trml2pdf import parseString
 from xml.sax.saxutils import escape
@@ -190,12 +190,18 @@ def principal(imagem,dic_rodape,inf_basicas_dic,tramitacao_dic,hdn_url,sessao=''
     tmp_pdf=parseString(tmp)
 
     if hasattr(context.sapl_documentos.administrativo.tramitacao,arquivoPdf):
-        arq=context.sapl_documentos.administrativo.tramitacao[arquivoPdf]
-        arq.manage_upload(file=tmp_pdf)
+       arq=context.sapl_documentos.administrativo.tramitacao[arquivoPdf]
+       arq.manage_upload(file=tmp_pdf)
     else:       
-        context.sapl_documentos.administrativo.tramitacao.manage_addFile(id=arquivoPdf,file=tmp_pdf,content_type='application/pdf',title='Tramitação de processo administrativo')
+       context.sapl_documentos.administrativo.tramitacao.manage_addFile(id=arquivoPdf,file=tmp_pdf,content_type='application/pdf',title='Tramitação de processo administrativo')
+
+    for tram in context.zsql.tramitacao_administrativo_obter_zsql(cod_tramitacao=cod_tramitacao, ind_excluido=0):
+        if context.zsql.documento_administrativo_pesquisar_publico_zsql(cod_documento=tram.cod_documento, ind_excluido=0):
+           arq =  str(tram.cod_tramitacao)+'_tram.pdf'
+           pdf = getattr(context.sapl_documentos.administrativo.tramitacao, arq)
+           pdf.manage_permission('View', roles=['Manager','Authenticated','Anonymous'], acquire=1)
 
     return hdn_url
 
-return principal(imagem, dic_rodape,inf_basicas_dic,tramitacao_dic,hdn_url,sessao)
+return principal(imagem, dic_rodape, inf_basicas_dic, tramitacao_dic, hdn_url,sessao)
 

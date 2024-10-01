@@ -128,7 +128,7 @@ def pauta(pauta_dic):
     for dic in pauta_dic["lst_mocoes_vereadores"]:
         tmp+='\t\t<para style="P2" spaceBefore="10"><b><u>' + dic['vereador'] + '</u></b>:</para>\n'
         for item in dic['materias']:
-            tmp+='\t\t<para style="P2" spaceBefore="5"><font color="#126e90"><b>' + item['id_materia'] + '</b></font> - ' + item['txt_ementa'] + '</para>\n'
+            tmp+='\t\t<para style="P2" spaceBefore="5"><font color="#126e90"><b>' + item['id_materia'] + '</b></font> - ' + escape(item['txt_ementa']) + '</para>\n'
 
 
     if pauta_dic["lst_urgencia"] != []:

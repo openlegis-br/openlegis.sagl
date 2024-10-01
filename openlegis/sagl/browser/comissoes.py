@@ -186,7 +186,7 @@ class Comissoes(grok.View):
                        lst_partido.append(dic_partido)
                 dic_membros['partido'] = lst_partido
             dic_composicao['items'] = lst_membros
-            if (DateTime().strftime("%Y-%m-%d") > DateTime(periodo.dat_inicio_periodo, datefmt='international').strftime("%Y-%m-%d")) and (DateTime().strftime("%Y-%m-%d") < DateTime(periodo.dat_fim_periodo, datefmt='international').strftime("%Y-%m-%d")):
+            if (DateTime(datefmt='international').strftime("%Y-%m-%d") > DateTime(periodo.dat_inicio_periodo, datefmt='international').strftime("%Y-%m-%d")) and (DateTime(datefmt='international').strftime("%Y-%m-%d") < DateTime(periodo.dat_fim_periodo, datefmt='international').strftime("%Y-%m-%d")):
                pass
             else:
                lst_composicao.append(dic_composicao)

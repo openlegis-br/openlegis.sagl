@@ -6,7 +6,7 @@ from zope.interface import Interface
 from io import BytesIO
 from Acquisition import aq_inner
 import requests
-from PIL import Image
+from PIL import Image, UnidentifiedImageError
 import json
 from DateTime import DateTime
 import re
@@ -86,17 +86,23 @@ class Legislaturas(grok.View):
             foto = str(mandato.cod_parlamentar) + "_foto_parlamentar"
             if hasattr(self.context.sapl_documentos.parlamentar.fotos, foto):
                url = portal_url + '/sapl_documentos/parlamentar/fotos/' + foto
+               dic_vereador['url_foto'] = url
                response = requests.get(url)
-               img = Image.open(BytesIO(response.content))
-               dic_image = {
-                 "content-type": 'image/' + str(img.format).lower(),
-                 "download": url,
-                 "filename": foto,
-                 "width": str(img.width),
-                 "height": str(img.height),
-                 "size": str(len(img.fp.read()))
-               }
+               try:
+                  img = Image.open(BytesIO(response.content))
+                  dic_image = {
+                    "content-type": 'image/' + str(img.format).lower(),
+                    "download": url,
+                    "filename": foto,
+                    "width": str(img.width),
+                    "height": str(img.height),
+                    "size": str(len(img.fp.read()))
+                  }
+               except UnidentifiedImageError:
+                  dic_image = {}
                lst_imagem.append(dic_image)
+            else:
+               dic_vereador['url_foto'] = self.portal_url + '/imagens/avatar.png' 
             dic_vereador['image'] = lst_imagem 
                     
             lst_partido = []

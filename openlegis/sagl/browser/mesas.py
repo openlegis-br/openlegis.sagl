@@ -101,6 +101,7 @@ class Mesas(grok.View):
             foto = str(composicao.cod_parlamentar) + "_foto_parlamentar"
             if hasattr(self.context.sapl_documentos.parlamentar.fotos, foto):
                url = self.portal_url + '/sapl_documentos/parlamentar/fotos/' + foto
+               dic_membros['url_foto'] = url
                response = requests.get(url)
                try:
                   img = Image.open(BytesIO(response.content))
@@ -115,6 +116,8 @@ class Mesas(grok.View):
                except UnidentifiedImageError:
                   dic_image = {}
                lst_imagem.append(dic_image)
+            else:
+               dic_membros['url_foto'] = self.portal_url + '/imagens/avatar.png'
             dic_membros['image'] = lst_imagem    
             lst_partido = []
             for filiacao in self.context.zsql.filiacao_obter_zsql(ind_excluido=0, cod_parlamentar=composicao.cod_parlamentar):    

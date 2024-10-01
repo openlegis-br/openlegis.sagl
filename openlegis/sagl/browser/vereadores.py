@@ -68,7 +68,12 @@ class Vereador(grok.View):
 	      "description": item.nom_completo,
 	      "dic_vereador": item.cod_autor,
 	    }
-            dic_item['image'] = self._get_imagem(item.cod_parlamentar)   
+            dic_item['image'] = self._get_imagem(item.cod_parlamentar)
+            foto = str(item.cod_parlamentar) + "_foto_parlamentar"
+            if hasattr(self.context.sapl_documentos.parlamentar.fotos, foto):    
+               dic_item['url_foto'] = self.portal_url + '/sapl_documentos/parlamentar/fotos/' + foto
+            else:
+               dic_item['url_foto'] = self.portal_url + '/imagens/avatar.png'   
             lst_partido = []
             for filiacao in self.context.zsql.parlamentar_data_filiacao_obter_zsql(num_legislatura=self._get_legislatura(), cod_parlamentar=item.cod_parlamentar):    
                 if filiacao.dat_filiacao != '0' and filiacao.dat_filiacao != None:

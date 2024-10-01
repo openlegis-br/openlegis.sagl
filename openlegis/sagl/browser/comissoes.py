@@ -157,7 +157,7 @@ class Comissoes(grok.View):
             dic_composicao['start'] = DateTime(periodo.dat_inicio_periodo, datefmt='international').strftime("%Y-%m-%d")
             dic_composicao['end'] = DateTime(periodo.dat_fim_periodo).strftime("%Y-%m-%d")
             dic_composicao['id'] = periodo.cod_periodo_comp
-            if (DateTime().strftime("%Y-%m-%d") > DateTime(periodo.dat_inicio_periodo, datefmt='international').strftime("%Y-%m-%d")) and (DateTime().strftime("%Y-%m-%d") < DateTime(periodo.dat_fim_periodo, datefmt='international').strftime("%Y-%m-%d")):
+            if (DateTime(datefmt='international').strftime("%Y-%m-%d") > DateTime(periodo.dat_inicio_periodo, datefmt='international').strftime("%Y-%m-%d")) and (DateTime(datefmt='international').strftime("%Y-%m-%d") < DateTime(periodo.dat_fim_periodo, datefmt='international').strftime("%Y-%m-%d")):
               dic_composicao['atual'] = True
             else:
               dic_composicao['atual'] = False

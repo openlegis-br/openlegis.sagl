@@ -5,7 +5,7 @@ from zope.interface import implementer
 from zope.interface import Interface
 from io import BytesIO
 import requests
-from PIL import Image
+from PIL import Image, UnidentifiedImageError
 import json
 from DateTime import DateTime
 import re
@@ -115,15 +115,18 @@ class Comissoes(grok.View):
                    if hasattr(self.context.sapl_documentos.parlamentar.fotos, foto):
                       url = self.portal_url + '/sapl_documentos/parlamentar/fotos/' + foto
                       response = requests.get(url)
-                      img = Image.open(BytesIO(response.content))
-                      dic_image = {
-                        "content-type": 'image/' + str(img.format).lower(),
-                        "download": url,
-                        "filename": foto,
-                        "width": str(img.width),
-                        "height": str(img.height),
-                        "size": str(len(img.fp.read()))
-                      }
+                      try:
+                         img = Image.open(BytesIO(response.content))
+                         dic_image = {
+                           "content-type": 'image/' + str(img.format).lower(),
+                           "download": url,
+                           "filename": foto,
+                           "width": str(img.width),
+                           "height": str(img.height),
+                           "size": str(len(img.fp.read()))
+                         }
+                      except UnidentifiedImageError:
+                         dic_image = {}
                       lst_imagem.append(dic_image)
                    dic_membros['image'] = lst_imagem
                    lst_partido = []

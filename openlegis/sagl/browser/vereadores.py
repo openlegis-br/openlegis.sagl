@@ -6,9 +6,7 @@ from zope.interface import Interface
 from io import BytesIO
 from Acquisition import aq_inner
 import requests
-import PIL
-from PIL import UnidentifiedImageError
-from PIL import Image
+from PIL import Image, UnidentifiedImageError
 import json
 from DateTime import DateTime
 from xml.sax.saxutils import escape
@@ -53,7 +51,7 @@ class Vereador(grok.View):
                 "height": str(img.height),
                 "size": str(len(img.fp.read())),
               }
-           except PIL.UnidentifiedImageError:
+           except UnidentifiedImageError:
               dic_image = {}
            lst_imagem.append(dic_image)
         return lst_imagem

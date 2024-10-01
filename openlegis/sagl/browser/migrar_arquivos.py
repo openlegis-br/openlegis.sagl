@@ -17,7 +17,7 @@ class migrarArquivos(grok.View):
     base_url = 'http://localhost:8180/sagl/'
 
     db = MySQLdb.connect(host="localhost", user="sagl", passwd="sagl", db="openlegis")
-    basic = HTTPBasicAuth('admin', 'gisla1978')
+    basic = HTTPBasicAuth('admin', 'openlegis')
 
     def publishTraverse(self, request, name):
         if not hasattr(self, 'subpath'):

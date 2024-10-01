@@ -201,9 +201,12 @@ class Vereador(grok.View):
         if item.txt_biografia != None:
            dic_vereador['biografia'] = escape(item.txt_biografia)
         else:
-           dic_vereador['biografia'] = '' 
-        #for item in results: 
-        #   lst_vereadores.append(dic_vereador)         
+           dic_vereador['biografia'] = ''
+        foto = str(item.cod_parlamentar) + "_foto_parlamentar"
+        if hasattr(self.context.sapl_documentos.parlamentar.fotos, foto):
+           dic_vereador['url_foto'] = self.portal_url + '/sapl_documentos/parlamentar/fotos/' + foto
+        else:
+           dic_vereador['url_foto'] = self.portal_url + '/imagens/avatar.png'
 
         # Dados gerais
         dic_vereador['image'] = self._get_imagem(item.cod_parlamentar)   

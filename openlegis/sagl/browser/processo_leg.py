@@ -134,7 +134,7 @@ class ProcessoLeg(grok.View):
                       dic["data"] = DateTime(docadm.data_documento, datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
                    dic['path'] = self.context.sapl_documentos.administrativo
                    dic["file"] = str(docadm.cod_documento) + '_texto_integral.pdf'
-                   doc = self.context.zsql.documento_admnistrativo_obter_zsql(cod_documento=docadm.cod_documento,ind_excluido=0)[0]
+                   doc = self.context.zsql.documento_administrativo_obter_zsql(cod_documento=docadm.cod_documento,ind_excluido=0)[0]
                    dic["title"] = doc.sgl_tipo_documento + ' nº ' + str(doc.num_documento) + '/' + str(doc.ano_documento) + '(doc. vinculado)'
                 lst_arquivos.append(dic)
             for documento in self.context.zsql.documento_acessorio_obter_zsql(cod_materia=materia.cod_materia, ind_excluido=0):

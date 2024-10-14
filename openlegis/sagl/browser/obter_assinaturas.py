@@ -20,26 +20,27 @@ class getSignatures(grok.View):
            f.value for f in fields if f.field_type == '/Sig']  
        lst_signers = []
        for v in signature_field_values:
-           v_type = v['/Type']
-           if '/M' in v:
-              signing_time = parse(v['/M'][2:].strip("'").replace("'", ":"))
-           else:
-              signing_time = None
-           if '/Name' in v:
-              name = v['/Name'].split(':')[0]
-              cpf = v['/Name'].split(':')[1]
-           else:
-              name = None
-              cpf = None
-           raw_signature_data = v['/Contents']
-           for attrdict in self.parse_signatures(raw_signature_data):
-              dic = {
-                     'signer_name':name or attrdict.get('signer'),
-                     'signer_cpf':cpf or attrdict.get('cpf'),
-                     'signing_time':str(signing_time) or attrdict.get('signing_time'),
-                     'signer_certificate': attrdict.get('oname')
-              }
-           lst_signers.append(dic)
+           if v != None:
+              v_type = v['/Type']
+              if '/M' in v:
+                 signing_time = parse(v['/M'][2:].strip("'").replace("'", ":"))
+              else:
+                 signing_time = None
+              if '/Name' in v:
+                 name = v['/Name'].split(':')[0]
+                 cpf = v['/Name'].split(':')[1]
+              else:
+                 name = None
+                 cpf = None
+              raw_signature_data = v['/Contents']
+              for attrdict in self.parse_signatures(raw_signature_data):
+                 dic = {
+                        'signer_name':name or attrdict.get('signer'),
+                        'signer_cpf':cpf or attrdict.get('cpf'),
+                        'signing_time':str(signing_time) or attrdict.get('signing_time'),
+                        'signer_certificate': attrdict.get('oname')
+                 }
+              lst_signers.append(dic)
        lst_signers.sort(key=lambda dic: dic['signing_time'])
        return lst_signers
  

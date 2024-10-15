@@ -75,7 +75,7 @@ for sessao in metodo:
       if materia_apresentada.cod_materia != None:
          materia = context.zsql.materia_obter_zsql(cod_materia=materia_apresentada.cod_materia)[0]
          autores = context.zsql.autoria_obter_zsql(cod_materia=materia_apresentada.cod_materia)
-         fields = autores.data_dictionary().keys()
+         fields = list(autores.data_dictionary().keys())
          lista_autor = []
          for autor in autores:
              for field in fields:
@@ -92,7 +92,7 @@ for sessao in metodo:
            for emenda in context.zsql.emenda_obter_zsql(cod_emenda=materia_apresentada.cod_emenda):
                materia = context.zsql.materia_obter_zsql(cod_materia=emenda.cod_materia)[0]
                autores = context.zsql.autoria_emenda_obter_zsql(cod_emenda=emenda.cod_emenda)
-               fields = autores.data_dictionary().keys()
+               fields = list(autores.data_dictionary().keys())
                lista_autor = []
                for autor in autores:
                    for field in fields:
@@ -109,7 +109,7 @@ for sessao in metodo:
            for substitutivo in context.zsql.substitutivo_obter_zsql(cod_substitutivo=materia_apresentada.cod_substitutivo):
                materia = context.zsql.materia_obter_zsql(cod_materia=substitutivo.cod_materia)[0]
                autores = context.zsql.autoria_substitutivo_obter_zsql(cod_substitutivo=substitutivo.cod_substitutivo)
-               fields = autores.data_dictionary().keys()
+               fields = list(autores.data_dictionary().keys())
                lista_autor = []
                for autor in autores:
                    for field in fields:
@@ -245,15 +245,17 @@ for sessao in metodo:
       dic["tip_votacao"]=""
       for tip_votacao in context.zsql.tipo_votacao_obter_zsql(tip_votacao=ordem.tip_votacao):
          dic["tip_votacao"] = tip_votacao.des_tipo_votacao
-      dic["nom_autor"] = ""
+
+      dic["nom_autor"] = ''
       autores = context.zsql.autoria_obter_zsql(cod_materia=ordem.cod_materia)
-      fields = autores.data_dictionary().keys()
+      fields = list(autores.data_dictionary().keys())
       lista_autor = []
       for autor in autores:
           for field in fields:
               nome_autor = autor['nom_autor_join']
           lista_autor.append(nome_autor)
       dic["nom_autor"] = ', '.join(['%s' % (value) for (value) in lista_autor])
+
       dic["parecer"] = ''
       lst_qtde_pareceres = []
       lst_pareceres = []
@@ -281,7 +283,7 @@ for sessao in metodo:
       for substitutivo in context.zsql.substitutivo_obter_zsql(cod_materia=ordem.cod_materia,ind_excluido=0):
           autores = context.zsql.autoria_substitutivo_obter_zsql(cod_substitutivo=substitutivo.cod_substitutivo, ind_excluido=0)
           dic_substitutivo = {}
-          fields = autores.data_dictionary().keys()
+          fields = list(autores.data_dictionary().keys())
           lista_autor = []
           for autor in autores:
               for field in fields:
@@ -304,7 +306,7 @@ for sessao in metodo:
       for emenda in context.zsql.emenda_obter_zsql(cod_materia=ordem.cod_materia,ind_excluido=0,exc_pauta=0):
           autores = context.zsql.autoria_emenda_obter_zsql(cod_emenda=emenda.cod_emenda,ind_excluido=0)
           dic_emenda = {}
-          fields = autores.data_dictionary().keys()
+          fields = list(autores.data_dictionary().keys())
           lista_autor = []
           for autor in autores:
               for field in fields:

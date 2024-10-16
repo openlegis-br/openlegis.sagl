@@ -21,6 +21,17 @@
       <dtml-call expr="sapl_documentos.materia.tramitacao.manage_delObjects(pdf_assinado)">
    </dtml-if>
 
+   <dtml-in expr="zsql.assinatura_documento_obter_zsql(codigo=cod_tramitacao,tipo_doc='tramitacao')">
+     <dtml-try>
+        <dtml-call expr="zsql.assinatura_documento_excluir_zsql(
+                         cod_assinatura_doc  = cod_assinatura_doc,
+                         codigo              = codigo,
+                         tipo_doc            = tipo_doc)">
+     <dtml-except>
+        <dtml-call expr="REQUEST.set('erro', 1)">
+     </dtml-try>
+   </dtml-in>
+
   <dtml-if cod_ult_tramitacao>
     <dtml-call expr="zsql.tramitacao_ind_ultima_atualizar_zsql(cod_tramitacao  = cod_ult_tramitacao,
                                                                cod_materia = cod_materia,  

@@ -1,71 +1,6 @@
 <dtml-var header_html>
 
-<script src="<dtml-var portal_url>/js/dataTables.rowReorder.min.js"></script>
 <link rel="stylesheet" href="<dtml-var portal_url>/css/rowReorder.bootstrap4.min.css" />
-
-<script>
-
-  function sessao_encerrar(){
-       if (confirm("Deseja excluir a lista de itens desta sessão?")) {
-          location.href="sessao_encerrar_proc?cod_sessao_plen=<dtml-var hdn_cod_sessao_plen missing>&url=<dtml-var portal_url>/cadastros/acompanhamento_sessao?hdn_cod_sessao_plen=<dtml-var hdn_cod_sessao_plen missing>";
-       }
-       return;
-  }
-  
-$(document).ready(function() {
-
-    var table = $('#painel').DataTable( {
-         "order": [[ 0, 'asc' ]],
-         "rowReorder": {
-             selector: 'td:nth-child(1)',       
-             //selector: 'tr',
-             //   update: true,
-         },      
-        "responsive": true,
-        "bStateSave": true,        
-        "fnStateSave": function (oSettings, oData) {
-            localStorage.setItem('painelDataTable<dtml-var hdn_cod_sessao_plen missing>', JSON.stringify(oData));
-        },
-        "fnStateLoad": function (oSettings) {
-            return JSON.parse(localStorage.getItem('painelDataTable<dtml-var hdn_cod_sessao_plen missing>'));
-        },
-        "lengthMenu": [[100, 200], [100, 200]],
-        "lengthChange": true,
-        "language": {
-          search: "Pesquisar:",
-          processing:     "Processando...",
-          loadingRecords: "Carregando...",
-          lengthMenu:     "Exibir _MENU_ registros por página",
-          info:           "Exibindo _START_ a _END_ de _TOTAL_ registros",
-          infoEmpty:      "Exibindo _START_ a _END_ de _TOTAL_ registros",
-          infoFiltered:   "(total de registros:_MAX_)",
-          emptyTable:     "Nenhum registro encontrado",
-          zeroRecords:     "Nenhum registro encontrado",
-          paginate: {
-            first:      "Primeiro",
-            previous:   "Anterior",
-            next:       "Próximo",
-            last:       "Último"
-          },
-        }
-    });
-    table.on('row-reorder.dt', function (dragEvent, data, nodes) {
-        for (var i = 0, ien = data.length ; i < ien ; i++) {
-            var rowData = table.row(data[i].node).data();
-            var codigo = table.row(data[i].node).id();
-            $.ajax({
-                type: "GET",
-                cache: false,
-                contentType: "application/json; charset=utf-8",
-                url: 'item_atualizar_posicao_proc',
-                data: {cod_sessao_plen: <dtml-var hdn_cod_sessao_plen missing="0">,  Id: codigo, fromPosition: data[i].oldData, toPosition: data[i].newData },
-                dataType: "json"
-            });
-            }
-    });    
-});
-
-</script>
 
 <dtml-if hdn_cod_sessao_plen>
   <dtml-in expr="zsql.sessao_plenaria_painel_obter_zsql(cod_sessao_plen=hdn_cod_sessao_plen)">
@@ -88,7 +23,7 @@ $(document).ready(function() {
    <div class="row">
      <div class="col-12 mb-3 form-group">
        <dtml-call expr="REQUEST.set('ano_sessao', DateTime(datefmt='international').strftime('%Y'))">
-       <select class="form-select form-select jumpmenu" data-dropup-auto="false" id="lst_cod_sessao" name="lst_cod_sessao">
+       <select class="form-select jumpmenu" data-dropup-auto="false" id="lst_cod_sessao" name="lst_cod_sessao">
          <option value="<dtml-var ACTUAL_URL>"> Selecione uma <dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao"></option>
          <dtml-in expr="zsql.sessao_plenaria_obter_zsql(ano_sessao=ano_sessao, ind_excluido=0)">
            <dtml-if expr="hr_fim_sessao==''">
@@ -225,7 +160,7 @@ $(document).ready(function() {
         var selectElements = document.getElementsByTagName("select");
         for( i = 0; i < selectElements.length; i++ ) {
             // Check for the class and make sure the element has an ID
-            if( selectElements[i].className == "form-control form-select jumpmenu" && document.getElementById(selectElements[i].id) != "" ) {
+            if( selectElements[i].className == "form-select jumpmenu" && document.getElementById(selectElements[i].id) != "" ) {
                 jumpmenu = document.getElementById(selectElements[i].id);
                 jumpmenu.onchange = function() {
                     if( this.options[this.selectedIndex].value != '' ) {
@@ -242,4 +177,43 @@ $(document).ready(function() {
 </script>
 
 <dtml-var js_slot>
+<script>
+  function sessao_encerrar(){
+       if (confirm("Deseja excluir a lista de itens desta sessão?")) {
+          location.href="sessao_encerrar_proc?cod_sessao_plen=<dtml-var hdn_cod_sessao_plen missing>&url=<dtml-var portal_url>/cadastros/acompanhamento_sessao?hdn_cod_sessao_plen=<dtml-var hdn_cod_sessao_plen missing>";
+       }
+       return;
+  }
+  
+</script>
+
+<script>
+$(document).ready(function() {
+  new DataTable('#painel', {
+      "responsive": true,
+      "rowReorder": true,
+      "lengthMenu": [[100, 200], [100, 200]],
+      "language": {
+          "url": '<dtml-var portal_url>/assets/libs/datatables.net/plugins/i18n/pt-BR.json',
+          },
+  });
+  var table = $('#painel').DataTable()
+    table.on('row-reorder.dt', function (dragEvent, data, nodes) {
+        for (var i = 0, ien = data.length ; i < ien ; i++) {
+            var rowData = table.row(data[i].node).data();
+            var codigo = table.row(data[i].node).id();
+            $.ajax({
+                type: "GET",
+                cache: false,
+                contentType: "application/json; charset=utf-8",
+                url: 'item_atualizar_posicao_proc',
+                data: {cod_sessao_plen: <dtml-var hdn_cod_sessao_plen missing="0">,  Id: codigo, fromPosition: data[i].oldData, toPosition: data[i].newData },
+                dataType: "json"
+            });
+            }
+    });
+});
+</script>
+
+
 <dtml-var footer_html>

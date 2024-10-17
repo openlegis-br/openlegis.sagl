@@ -8,7 +8,6 @@
 ##title=
 ##
 
-
 REQUEST = context.REQUEST
 RESPONSE =  REQUEST.RESPONSE
 session = REQUEST.SESSION
@@ -41,10 +40,10 @@ for row in results:
     elif row.end_instituicao!=None and (row.nom_bairro==None or row.nom_bairro ==''):
        r.append(row.end_instituicao)
 
-    nom_cidade = row.nom_localidade.upper().encode('utf-8') + ' - ' + row.sgl_uf
+    nom_cidade = row.nom_localidade.upper() + ' - ' + row.sgl_uf
 
     if row.num_cep != None:
-       r.append('CEP '+row.num_cep+' ' +str(nom_cidade))
+       r.append('CEP '+str(row.num_cep)+' ' +str(nom_cidade))
     else:
        r.append(str(nom_cidade))
 

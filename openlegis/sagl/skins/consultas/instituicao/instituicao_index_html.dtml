@@ -24,10 +24,11 @@
 
 <form class="pf-form" name="pesq_basica_form" action="instituicao_pesquisar_proc">
   <input type="hidden" name="existe_ocorrencia" value="0" />
+  <input type="hidden" name="lst_categoria" value="" />
   <div class="row">
-    <div class="col-12 col-md-6 mb-3">
+    <div class="col-12 col-md-4 mb-3">
        <label class="form-label" for="lst_tip_instituicao">Tipo de Entidade</label>    
-          <select class="form-select" id="lst_tip_instituicao" name="lst_tip_instituicao" onChange="categoria_listar(document.pesq_basica_form)">
+          <select class="form-select" id="lst_tip_instituicao" name="lst_tip_instituicao">
             <option value="">Todos</option>
             <dtml-in expr="zsql.tipo_instituicao_obter_zsql(ind_excluido=0)">
               <option value="<dtml-var tip_instituicao missing>"
@@ -44,17 +45,29 @@
             </dtml-if>
           </select>
     </div>
-    <div class="col-12 col-md-6 mb-3">
-       <label class="form-label" for="lst_categoria">Categoria</label>
-          <select class="form-select" id="lst_categoria" name="lst_categoria">
+    <div class="col-12 col-md-4 mb-3">
+       <label class="form-label" for="lst_txt_atividade">Atividade</label>
+          <select class="form-select" id="lst_txt_atividade" name="lst_txt_atividade">
             <option value="">Todas</option>
-            <dtml-in expr="zsql.categoria_instituicao_obter_zsql(tip_instituicao=hdn_tip_instituicao,ind_excluido=0)">
-              <option value="<dtml-var cod_categoria missing>">
-                <dtml-var des_categoria>
+            <dtml-in expr="zsql.instituicao_atividade_obter_zsql()">
+              <option value="<dtml-var txt_atividade missing>">
+                <dtml-var txt_atividade>
               </option>
             </dtml-in>
           </select>
-    </div>    
+    </div>
+    <div class="col-12 col-md-4 mb-3">
+       <label class="form-label" for="lst_txt_origem">Origem</label>
+          <select class="form-select" id="lst_txt_origem" name="lst_txt_origem">
+            <option value="">Todas</option>
+            <dtml-in expr="zsql.instituicao_origem_obter_zsql()">
+              <option value="<dtml-var txt_origem missing>">
+                <dtml-var txt_origem>
+              </option>
+            </dtml-in>
+          </select>
+    </div>
+    
   </div>
 
   <div class="row">
@@ -65,6 +78,17 @@
     <div class="col-12 col-md-6 mb-3">
          <label class="form-label" for="txa_txt_nom_responsavel">Nome do Responsável</label>
          <input class="form-control" id="txa_txt_nom_responsavel" type="text" name="txa_txt_nom_responsavel" null="" />
+    </div>    
+  </div>
+
+  <div class="row">
+    <div class="col-12 col-md-6 mb-3">
+         <label class="form-label" for="txt_cargo">Cargo</label>
+         <input class="form-control" id="txt_cargo" type="text" name="txt_cargo" null="" />
+    </div>
+    <div class="col-12 col-md-6 mb-3">
+         <label class="form-label" for="txt_email">Endereço de E-mail</label>
+         <input class="form-control" id="txt_email" type="text" name="txt_email" null="" />
     </div>    
   </div>
 

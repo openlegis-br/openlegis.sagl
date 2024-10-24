@@ -67,14 +67,14 @@ function vinculado_criticar(){
 
   function documento_vinculado_excluir(cod_vinculo) {
     var form=document.documento_vinculado_form;       
-    if (confirm("Deseja realmente excluir o vínculo com o documento?")) {
+    if (confirm("Deseja realmente excluir o vínculo?")) {
        location.href="documento_vinculado_excluir_proc?cod_vinculo=<dtml-var cod_vinculo missing>&cod_documento=<dtml-var cod_documento missing>&modal=1";
     }
   } 
 
 </script>
 
-<h1 class="firstHeading font-size-18">Processo Vinculado</h1>
+<h1 class="firstHeading font-size-18">Cadastro de Processo Vinculado</h1>
 
 <form name="documento_vinculado_form" method="post" action="documento_vinculado_salvar_proc">  
 
@@ -84,7 +84,7 @@ function vinculado_criticar(){
 
   <div class="row">
      <div class="col-12 col-sm-6 mb-3">
-           <label class="form-label required" for="lst_tip_documento">Tipo de Processo</label>
+           <label class="form-label required" for="lst_tip_documento">Tipo de Processo Administrativo</label>
            <select class="form-select" name="lst_tip_documento" id="lst_tip_documento" onChange="ementa_buscar(document.documento_vinculado_form)" required <dtml-if cod_vinculo>disabled</dtml-if>>
             <option>
               <dtml-in expr="zsql.tipo_documento_administrativo_obter_zsql(tip_natureza='P', ind_excluido=0)">
@@ -134,11 +134,11 @@ function vinculado_criticar(){
 
  <div class="btn-group text-start">
     <dtml-unless cod_vinculo>
-      <input class="btn btn-primary" type="button" name="button" value="Salvar" onClick="vinculado_criticar(document.documento_vinculado_form)"/>
+      <input class="btn btn-primary" type="button" name="button" value="Salvar Vínculo" onClick="vinculado_criticar(document.documento_vinculado_form)"/>
     </dtml-unless>
     <dtml-if cod_vinculo>
-      <a class="btn btn-primary" target="_blank" href="<dtml-var portal_url>/cadastros/documento_administrativo/documento_administrativo_mostrar_proc?cod_documento=<dtml-var hdn_cod_documento_vinculado>">Visualizar</a>
-      <input class="btn btn-danger" type="button" value="Excluir" onClick="documento_vinculado_excluir()" />
+      <a class="btn btn-primary" target="_blank" href="<dtml-var portal_url>/cadastros/documento_administrativo/documento_administrativo_mostrar_proc?cod_documento=<dtml-var hdn_cod_documento_vinculado>">Consultar Processo</a>
+      <input class="btn btn-danger" type="button" value="Excluir Vínculo" onClick="documento_vinculado_excluir()" />
       <input type="hidden" name="hdn_url" value="documento_vinculado_mostrar_proc?cod_vinculo=<dtml-var cod_vinculo>&modal=1" />          
     </dtml-if>    
  </div>

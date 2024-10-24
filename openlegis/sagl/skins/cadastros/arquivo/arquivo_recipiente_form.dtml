@@ -27,16 +27,16 @@
 
       var form = document.arquivo_recipiente_form;
 
+      if (form.txt_num_recipiente.value == "") {
+         alert("O identificador do recipiente deve ser preenchido!");
+         form.txt_num_recipiente.focus();
+         return false;
+      }
+
       if (form.lst_tip_recipiente.selectedIndex==0){
           alert("Selecione um tipo de recipiente!");
           form.lst_tip_recipiente.focus();
           return false;
-      }
-
-      if (form.txt_num_recipiente.value == "") {
-         alert("O número identificador do recipiente deve ser preenchido!");
-         form.txt_num_recipiente.focus();
-         return false;
       }
  
       if (form.txt_ano_recipiente.value == "") {
@@ -84,7 +84,7 @@
       </div>
       <div class="col-12 col-lg-6 text-start text-md-end">
          <div class="btn-group d-print-none ">
-            <a class="btn btn-primary btn-sm d-print-none" href="<dtml-var portal_url>/cadastros/arquivo"><i class="fa fa-fw fa-undo"></i> Voltar ao Arquivo</a>
+            <a class="btn btn-light d-print-none" href="<dtml-var portal_url>/cadastros/arquivo"><i class="fa fa-fw fa-undo"></i> Voltar</a>
          </div>
       </div>
  </div>

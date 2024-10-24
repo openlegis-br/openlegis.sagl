@@ -40,7 +40,7 @@ if lst_ultimas != []:
            context.zsql.trans_begin_zsql()
            context.zsql.tramitacao_administrativo_ind_ultima_atualizar_zsql(cod_documento = dic['cod_documento'], cod_tramitacao = dic['cod_tramitacao'], ind_ult_tramitacao = 0)
            context.zsql.tramitacao_adm_registrar_recebimento_zsql(cod_tramitacao = dic['cod_tramitacao'], cod_usuario_corrente = hdn_cod_usuario_local)    
-           context.zsql.trans_commit_zsql()           
+           context.zsql.trans_commit_zsql()
            context.pysc.atualiza_indicador_tramitacao_documento_pysc(cod_documento = dic['cod_documento'], cod_status = lst_cod_status) 
        except:
            context.zsql.trans_rollback_zsql()

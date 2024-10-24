@@ -5,14 +5,14 @@
      <table class="table">
       <thead class="table-light">
        <tr> 
-         <th>Identificação do Documento</th>
+         <th>Identificação do Processo</th>
          <th>Data de Vinculação</th>
        </tr>
       </thead>
       </dtml-if sequence-start>
          <tr> 
            <td>
-                 <a href="#" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Cadastro de Processo Vinculado" data-src="documento_vinculado/documento_vinculado_mostrar_proc?cod_documento=<dtml-var cod_documento>&cod_vinculo=<dtml-var cod_vinculo>&modal=1">             
+                 <a href="#" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Processo Vinculado" data-src="documento_vinculado/documento_vinculado_mostrar_proc?cod_documento=<dtml-var cod_documento>&cod_vinculo=<dtml-var cod_vinculo>&modal=1">             
                    <dtml-var sgl_tipo_documento_vinculado> nº <dtml-var num_documento_vinculado>/<dtml-var ano_documento_vinculado>
                  </a> - <dtml-var txt_interessado_vinculado> - <dtml-var txt_assunto_vinculado>
             </td>
@@ -28,15 +28,15 @@
        <p>Nenhum processo vinculado.</p></fieldset>
    </dtml-in>
 
-   <button type="button" class="btn btn-light d-print-none mb-3" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Cadastro de Documento Vinculado" data-src="documento_vinculado/documento_vinculado_form?cod_documento=<dtml-var cod_documento>&modal=1">Incluir Vínculo</button>
+   <button type="button" class="btn btn-light d-print-none mb-3" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Processo Vinculado" data-src="documento_vinculado/documento_vinculado_form?cod_documento=<dtml-var cod_documento>&modal=1">Vincular Processo</button>
 
   <dtml-in expr="zsql.documento_administrativo_vinculado_obter_zsql(cod_documento_vinculado=cod_documento)">
     <dtml-if sequence-start>
-      <legend class="font-size-16">Documentos Vinculantes</legend>
+      <legend class="font-size-16">Processos Vinculantes</legend>
       <table class="table">
         <thead class="table-light">
          <tr> 
-           <th>Identificação do Documento</th>
+           <th>Identificação do Processo</th>
            <th>Data de Vinculação</th>
          </tr>
         </thead>

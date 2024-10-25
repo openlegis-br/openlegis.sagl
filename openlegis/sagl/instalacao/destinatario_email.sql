@@ -19,3 +19,7 @@ ALTER TABLE `destinatario_oficio` ADD `dat_envio` DATETIME NULL AFTER `end_email
 ALTER TABLE `destinatario_oficio` ADD `cod_usuario` INT NULL AFTER `dat_envio`;
 
 ALTER TABLE `destinatario_oficio` ADD FOREIGN KEY (`cod_usuario`) REFERENCES `usuario`(`cod_usuario`) ON DELETE RESTRICT ON UPDATE RESTRICT;
+
+ALTER TABLE `instituicao` ADD `txt_atividade` VARCHAR(10) NULL AFTER `txt_ip_alteracao`; 
+
+ALTER TABLE `instituicao` ADD `txt_origem` VARCHAR(5) NULL AFTER `txt_atividade`; 

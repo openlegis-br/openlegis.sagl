@@ -30,7 +30,7 @@ function campos_criticar(){
 </script>
 
 <h1 class="firstHeading font-size-18">Histórico de Tramitações</h1> 
-<p class="text-muted font-weight-bold">Listagem de processos que tramitaram por unidade selecionada.</p>
+<p class="text-muted font-weight-bold">Listagem de processos que tramitaram pela unidade selecionada</p>
 <form class="mb-3" method="post" id="historico_form" name="historico_form" action="historico_html">
    <div class="row">
      <div class="col-8 col-md-6 mb-3">
@@ -51,16 +51,16 @@ function campos_criticar(){
           </select>    
      </div>
      <div class="col-6 col-md-3 mb-3">
-         <label class="form-label" for="dat_tram1" class="form-label required">Data Inicial</label>
-        <div class="input-group">
-           <input type="text" class="form-control datepicker" placeholder="dd/mm/aaaa" name="dat_tram1" id="dat_tram1" data-provide="datepicker" data-date-autoclose="true" autocomplete="off" alue="<dtml-var dat_tram1 missing>" required>
+       <label class="form-label" for="dat_tram1" class="form-label required">Data Inicial</label>
+      <div class="input-group" id="datepicker1">
+           <input type="text" class="form-control datepicker" placeholder="dd/mm/aaaa" name="dat_tram1" id="dat_tram1" data-provide="datepicker" data-date-autoclose="true" autocomplete="off" value="<dtml-var dat_tram1 missing>" data-date-container="#datepicker1" required>
            <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
         </div> 
      </div>
      <div class="col-6 col-md-3 mb-3">
          <label class="form-label" for="dat_tram2" class="form-label required">Data Final</label>
-        <div class="input-group">
-           <input type="text" class="form-control datepicker" placeholder="dd/mm/aaaa" name="dat_tram2" id="dat_tram2" data-provide="datepicker" data-date-autoclose="true" autocomplete="off" alue="<dtml-var dat_tram2 missing>" required>
+        <div class="input-group" id="datepicker2">
+           <input type="text" class="form-control datepicker" placeholder="dd/mm/aaaa" name="dat_tram2" id="dat_tram2" data-provide="datepicker" data-date-autoclose="true" autocomplete="off" value="<dtml-var dat_tram2 missing>" data-date-container="#datepicker2" required>
            <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
         </div> 
      </div>
@@ -71,8 +71,7 @@ function campos_criticar(){
 </form>
 
 <dtml-if expr="_.has_key('lst_tramitou') and _.has_key('dat_tram1') and _.has_key('dat_tram2')">
-  <hr class="d-print-none" />
-  <h2 class="d-print-none mb-3">Resultado da Pesquisa</h2> 
+  <h1 class="font-size-14 mt-3 mb-2">Resultado da Pesquisa</h1> 
   <dtml-in expr="zsql.documento_administrativo_pesquisar_zsql(cod_unid_tramitacao2=lst_tramitou, dat_tram1=dat_tram1, dat_tram2=dat_tram2, rd_ordem=2)">
     <dtml-if sequence-start>
      <div class="table-responsive">

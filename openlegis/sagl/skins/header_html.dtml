@@ -348,14 +348,17 @@
                                     </a>
                                     <div class="dropdown-menu" aria-labelledby="topnav-adm">
                                        <a class="dropdown-item" href="<dtml-var portal_url>/consultas/documento_administrativo">Pesquisa de Processos</a>
-                                       <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Modulo Administrativo'])">
+                                       <dtml-if expr="AUTHENTICATED_USER.has_role(['Authenticated'])">
                                        <dtml-if cod_usuario_corrente>
                                          <div class="dropdown">
                                             <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-tramMat" role="button">Tramitação de Processos
                                               <div class="arrow-down"></div>
                                             </a>
                                            <div class="dropdown-menu" aria-labelledby="topnav-tramMat">
-                                             <a class="dropdown-item" href="<dtml-var portal_url>/cadastros/tramitacao_documento/primeira_tramitacao_lote_form">Primeira Tramitação</a>
+                                             <a class="dropdown-item" href="<dtml-var portal_url>/cadastros/tramitacao_documento/historico_html">Histórico de Tramitações</a>
+                                             <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Modulo Administrativo'])">
+                                                <a class="dropdown-item" href="<dtml-var portal_url>/cadastros/tramitacao_documento/primeira_tramitacao_lote_form">Primeira Tramitação</a>
+                                             </dtml-if>
                                             </div>
                                          </div>
                                        </dtml-if>

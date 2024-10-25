@@ -32,13 +32,15 @@ for proposicao in context.zsql.proposicao_obter_zsql(cod_proposicao=cod_proposic
        ind_complementar = 0      
     for autor in context.zsql.autor_obter_zsql(cod_autor=proposicao.cod_autor):
         des_tipo_autor = autor.des_tipo_autor
-    if proposicao.tip_mat_ou_doc == 6 or proposicao.tip_mat_ou_doc == 7 or proposicao.tip_mat_ou_doc == 8:
-       for numero in context.zsql.numero_reqindmoc_obter_zsql(ano_ident_basica = ano_materia, ind_excluido = 0):
-           num_ident_basica = numero.novo_numero
-    else:
-       for numero in context.zsql.numero_materia_legislativa_obter_zsql(tip_id_basica_sel = proposicao.tip_mat_ou_doc,
-ano_ident_basica = ano_materia, ind_excluido = 0):
-           num_ident_basica = numero.novo_numero
+    for numero in context.zsql.numero_materia_legislativa_obter_zsql(tip_id_basica_sel = proposicao.tip_mat_ou_doc, ano_ident_basica = ano_materia, ind_excluido = 0):
+        num_ident_basica = numero.novo_numero
+    # numero agrupado
+    #if proposicao.tip_mat_ou_doc == 6 or proposicao.tip_mat_ou_doc == 7 or proposicao.tip_mat_ou_doc == 8:
+    #   for numero in context.zsql.numero_reqindmoc_obter_zsql(ano_ident_basica = ano_materia, ind_excluido = 0):
+    #       num_ident_basica = numero.novo_numero
+    #else:
+    #   for numero in context.zsql.numero_materia_legislativa_obter_zsql(tip_id_basica_sel = proposicao.tip_mat_ou_doc, ano_ident_basica = ano_materia, ind_excluido = 0):
+    #       num_ident_basica = numero.novo_numero
 
 
 def criar_protocolo(tip_materia, num_ident_basica, ano_materia, dat_apresentacao, txt_ementa, txt_observacao, cod_autor, tip_quorum, ind_complementar, cod_proposicao):

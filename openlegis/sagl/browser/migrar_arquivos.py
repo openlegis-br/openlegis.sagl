@@ -264,7 +264,7 @@ class migrarArquivos(grok.View):
     def migrarLegAcessorio(self):
       items = []
       cur = self.db.cursor()
-      cur.execute('SELECT cod_documento FROM documento_acessorio WHERE ind_excluido=0 ORDER BY cod_documento')
+      cur.execute('SELECT cod_documento FROM documento_acessorio_administrativo WHERE ind_excluido=0 ORDER BY cod_documento')
       for row in cur.fetchall():
           row_id = str(row[0]) + '.pdf'
           items.append(row_id)

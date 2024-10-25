@@ -36,6 +36,7 @@ class migrarArquivos(grok.View):
         dic = {
            'Documentos Assinados': 'assinados',
            'Documentos Administrativos': 'administrativo',
+           'Documentos Administrativos - acessorios': 'administrativo_doc',
            'Documentos Administrativos - tramitação': 'administrativo_tram',
            'Emendas': 'emenda',
            'Matérias Legislativas': 'materia',
@@ -108,6 +109,29 @@ class migrarArquivos(grok.View):
       convertidos = []
       for item in items:
           url = self.base_url + 'sapl_documentos/administrativo/tramitacao/' + item
+          response = requests.get(url, auth=self.basic)
+          if str(response.status_code) == '200':
+             contents = BytesIO(response.content)
+             if hasattr(caminho,item):
+                arq = getattr(caminho, item)
+                arq.manage_upload(file=contents)
+             else:
+                caminho.manage_addFile(id=item,file=contents)
+             convertidos.append(item)
+      return convertidos
+
+    def migrarAdmAcessorio(self):
+      items = []
+      cur = self.db.cursor()
+      cur.execute('SELECT cod_documento FROM documento_acessorio_administrativo WHERE ind_excluido=0 ORDER BY cod_documento')
+      for row in cur.fetchall():
+          row_id = str(row[0]) + '.pdf'
+          items.append(row_id)
+      
+      caminho = self.context.sapl_documentos.administrativo
+      convertidos = []
+      for item in items:
+          url = self.base_url + 'sapl_documentos/administrativo/' + item
           response = requests.get(url, auth=self.basic)
           if str(response.status_code) == '200':
              contents = BytesIO(response.content)
@@ -596,6 +620,8 @@ class migrarArquivos(grok.View):
            return self.migrarAdm()
         elif self.migrate and self.migrate == 'administrativo_tram':
            return self.migrarAdmTram()
+        elif self.migrate and self.migrate == 'administrativo_doc':
+           return self.migrarAdmAcessorio()
         elif self.migrate and self.migrate == 'emenda':
            return self.migrarEmendas()
         elif self.migrate and self.migrate == 'materia':

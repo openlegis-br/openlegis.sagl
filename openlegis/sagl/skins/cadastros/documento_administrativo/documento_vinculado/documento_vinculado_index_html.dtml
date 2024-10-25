@@ -6,7 +6,7 @@
       <thead class="table-light">
        <tr> 
          <th>Identificação do Processo</th>
-         <th>Data de Vinculação</th>
+         <th width="10%">Data de Vinculação</th>
        </tr>
       </thead>
       </dtml-if sequence-start>
@@ -17,7 +17,7 @@
                  </a> - <dtml-var txt_interessado_vinculado> - <dtml-var txt_assunto_vinculado>
             </td>
             <td>
-                <dtml-var dat_vinculacao>
+                <dtml-var dat_vinculacao missing null>
            </td>
         </tr>
     <dtml-if sequence-end>
@@ -33,11 +33,11 @@
   <dtml-in expr="zsql.documento_administrativo_vinculado_obter_zsql(cod_documento_vinculado=cod_documento)">
     <dtml-if sequence-start>
       <legend class="font-size-16">Processos Vinculantes</legend>
-      <table class="table">
-        <thead class="table-light">
+      <table class="table table-striped">
+        <thead class="table-secondary">
          <tr> 
            <th>Identificação do Processo</th>
-           <th>Data de Vinculação</th>
+           <th width="10%">Data de Vinculação</th>
          </tr>
         </thead>
       </dtml-if sequence-start>
@@ -48,7 +48,7 @@
                  </a> - <dtml-var txt_assunto_vinculante>
            </td>
            <td>
-                <dtml-var dat_vinculacao>
+                <dtml-var dat_vinculacao missing null>
            </td>
         </tr>
     <dtml-if sequence-end>

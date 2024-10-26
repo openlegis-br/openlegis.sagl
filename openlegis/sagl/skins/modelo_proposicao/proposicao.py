@@ -12,7 +12,6 @@ st = getToolByName(context, 'portal_sagl')
 
 REQUEST = context.REQUEST
 RESPONSE =  REQUEST.RESPONSE
-session = REQUEST.SESSION
 
 inf_basicas_dic = {}
 casa={}
@@ -99,23 +98,62 @@ for proposicao in context.zsql.proposicao_obter_zsql(cod_proposicao=cod_proposic
                       nom_cargo = 'Vereadora'
                       info_gabinete = 'Gabinete da ' + nom_cargo                 
                    if parlamentar.sgl_partido !=None:
-                      partido_autor = nom_cargo + ' - ' + parlamentar.sgl_partido
+                      partido_autor = parlamentar.sgl_partido
                    else:
-                      partido_autor = nom_cargo
-                   autor_dic['nome_autor'] = autor.nom_autor_join.upper() + '\n' + partido_autor
-                   autor_dic['apelido_autor'] = partido_autor
+                      partido_autor = ''
+                   autor_dic['nome_autor'] = parlamentar.nom_completo
+                   autor_dic['apelido_autor'] = parlamentar.nom_parlamentar
+                   autor_dic['cargo'] = nom_cargo
+                   autor_dic['partido'] = partido_autor
                    inf_basicas_dic['info_gabinete'] = info_gabinete.upper() + ' ' + autor.nom_autor_join.upper()
             elif autor.des_cargo == 'Prefeito Municipal' or autor.des_cargo == 'Prefeito Municipal':
                for usuario in context.zsql.usuario_obter_zsql(col_username=autor.col_username):
-                   autor_dic['nome_autor'] = usuario.nom_completo.upper() + '\n' + autor.des_cargo
+                   autor_dic['nome_autor'] = usuario.nom_completo.upper()
                    autor_dic['apelido_autor'] = ''
                    autor_dic['cod_autor'] = autor['cod_autor']
+                   autor_dic['cargo'] = autor.des_cargo
+                   autor_dic['partido'] = ''
                    inf_basicas_dic['info_gabinete'] = ''
             else:
                autor_dic['nome_autor'] = autor.nom_autor_join.upper()
                autor_dic['apelido_autor'] = ''
                autor_dic['cod_autor'] = autor['cod_autor']
+               autor_dic['cargo'] = ''
+               autor_dic['partido'] = ''
                inf_basicas_dic['info_gabinete'] = ''
+            autor_dic['cod_autor'] = int(autor['cod_autor'])
         nom_autor.append(autor_dic)
 
-return st.proposicao_gerar_odt(inf_basicas_dic, num_proposicao, nom_arquivo, des_tipo_materia, num_ident_basica, ano_ident_basica, txt_ementa, materia_vinculada, dat_apresentacao, nom_autor, apelido_autor, modelo_proposicao, modelo_path)
+data_atual = DateTime(datefmt='international').strftime("%d/%m/%Y")
+subscritores = []
+outros_autores = context.zsql.autores_obter_zsql(txt_dat_apresentacao=data_atual)
+fields = outros_autores.data_dictionary().keys()
+for autor in outros_autores:
+    outros_dic = {}
+    for field in fields:
+        if autor.cod_parlamentar != None:
+           parlamentares = context.zsql.parlamentar_obter_zsql(cod_parlamentar = autor.cod_parlamentar)
+           for parlamentar in parlamentares:
+               if parlamentar.sgl_partido != None:
+                  partido_autor = parlamentar.sgl_partido
+               else:
+                  partido_autor = "Sem partido"
+               if parlamentar.sex_parlamentar == 'M':
+                  cargo = "Vereador"
+               elif parlamentar.sex_parlamentar == 'F':
+                  cargo = "Vereadora"
+           outros_dic['nome_autor'] = parlamentar.nom_completo
+           outros_dic['apelido_autor'] = parlamentar.nom_parlamentar
+           outros_dic['partido'] = partido_autor
+           outros_dic['cargo'] = cargo
+        outros_dic['cod_autor'] = int(autor['cod_autor'])
+    subscritores.append(outros_dic)
+
+outros=[]
+for autor in nom_autor:
+    for subscritor in subscritores:
+        if autor.get('cod_autor',autor) != subscritor.get('cod_autor',subscritor):
+           outros.append(subscritor)
+subscritores = outros
+
+return st.proposicao_gerar_odt(inf_basicas_dic, num_proposicao, nom_arquivo, des_tipo_materia, num_ident_basica, ano_ident_basica, txt_ementa, materia_vinculada, dat_apresentacao, nom_autor, apelido_autor, subscritores, modelo_proposicao, modelo_path)

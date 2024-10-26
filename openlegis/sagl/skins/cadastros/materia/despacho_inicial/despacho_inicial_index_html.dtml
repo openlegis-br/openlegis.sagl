@@ -1,4 +1,44 @@
-<legend class="font-size-16">Pareceres de Comissão</legend>
+<script>
+function comunicado_odt_gerar(){
+  lst_modelo_com = document.getElementById("lst_modelo_com");
+  lst_modelo_com.options[lst_modelo_com.selectedIndex].value; 
+
+  if (lst_modelo_com.selectedIndex == 0) {
+   alert("É necessário selecionar um modelo de comunicado!");
+  }
+
+  if ((lst_modelo_com.selectedIndex != 0) && confirm("Confirma a geração do comunicado em ODT?")) {
+   location.href="&dtml-portal_url;/modelo_proposicao/comunicado_emendas?cod_materia=<dtml-var cod_materia missing>&modelo_comunicado="+lst_modelo_com.options[lst_modelo_com.selectedIndex].value;
+  return true;
+  }
+  return;
+}
+</script>
+
+
+<div class="row">
+  <div class="col-12 col-lg-8 col-md-6">
+     <legend class="font-size-16">Pareceres de Comissão</legend>
+  </div>
+  <div class="col-12 col-lg-4 col-md-6 mb-2">
+     <dtml-call expr="REQUEST.set('prefixo_arquivo', 'comunicado')">
+     <div class="input-group">
+       <select class="form-select form-select-sm" id="lst_modelo_com" name="lst_modelo_com">
+        <option value="0">Selecione um modelo</option>
+          <dtml-with expr="sapl_documentos.modelo">
+             <dtml-in expr="objectValues('File')" sort="title_or_id">
+                <dtml-if expr="id.startswith(prefixo_arquivo)">
+                   <option value="<dtml-var id>"><dtml-var title_or_id></option>
+                </dtml-if>
+             </dtml-in>
+          </dtml-with>
+       </select>
+       <div class="input-group-append">
+         <input type="button" class="btn btn-secondary btn-sm" value="Comunicado" onclick="javascript:comunicado_odt_gerar();" />
+       </div>
+     </div>
+  </div>
+</div>
 
   <dtml-in expr="zsql.despacho_inicial_obter_zsql(cod_materia=cod_materia, ind_excluido=0)">
        <dtml-if previous-sequence>

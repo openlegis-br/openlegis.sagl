@@ -383,6 +383,34 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         os.unlink(nom_arquivo_pdf)
         self.sapl_documentos.reuniao_comissao.manage_addFile(id=nom_arquivo_pdf,file=self.pysc.upload_file(file=content, title='Ata Comissão'))
 
+    def carga_comissao_gerar(self, inf_basicas_dic, dic_materia, nom_comissao, presidente, vicepresidente, membro, suplente):
+        arq = getattr(self.sapl_documentos.modelo, "carga_comissao.odt")
+        template_file = BytesIO(bytes(arq.data))
+        brasao_file = self.get_brasao()
+        exec('brasao = brasao_file')
+        output_file_odt = "carga_comissao.odt"
+        renderer = Renderer(template_file, locals(), output_file_odt, pythonWithUnoPath='/usr/bin/python3',forceOoCall=True)
+        renderer.run()
+        data = open(output_file_odt, "rb").read()
+        os.unlink(output_file_odt)
+        self.REQUEST.RESPONSE.headers['Content-Type'] = 'application/vnd.oasis.opendocument.text'
+        self.REQUEST.RESPONSE.headers['Content-Disposition'] = 'attachment; filename="%s"'%output_file_odt
+        return data
+
+    def comunicado_emendas_gerar_odt(self, inf_basicas_dic, dic_materia, lst_vereadores, nom_presidente, modelo_comunicado):
+        arq = getattr(self.sapl_documentos.modelo, modelo_comunicado)
+        template_file = BytesIO(bytes(arq.data))
+        brasao_file = self.get_brasao()
+        exec('brasao = brasao_file')
+        output_file_odt = "comunicado-emendas.odt"
+        renderer = Renderer(template_file, locals(), output_file_odt, pythonWithUnoPath='/usr/bin/python3', forceOoCall=True)
+        renderer.run()
+        data = open(output_file_odt, "rb").read()
+        os.unlink(output_file_odt)
+        self.REQUEST.RESPONSE.headers['Content-Type'] = 'application/vnd.oasis.opendocument.text'
+        self.REQUEST.RESPONSE.headers['Content-Disposition'] = 'attachment; filename="%s"'%output_file_odt
+        return data
+
     def iom_gerar_odt(self, inf_basicas_dic, lst_mesa, lst_presenca_sessao, lst_materia_apresentada, lst_reqplen, lst_reqpres, lst_indicacao, lst_presenca_ordem_dia, lst_votacao, lst_presenca_expediente, lst_oradores, lst_presenca_encerramento, lst_presidente, lst_psecretario, lst_ssecretario):
         arq = getattr(self.sapl_documentos.modelo.sessao_plenaria, "iom.odt")
         template_file = BytesIO(bytes(arq.data))

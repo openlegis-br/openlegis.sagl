@@ -127,7 +127,7 @@ for proposicao in context.zsql.proposicao_obter_zsql(cod_proposicao=cod_proposic
 data_atual = DateTime(datefmt='international').strftime("%d/%m/%Y")
 subscritores = []
 outros_autores = context.zsql.autores_obter_zsql(txt_dat_apresentacao=data_atual)
-fields = outros_autores.data_dictionary().keys()
+fields = list(outros_autores.data_dictionary().keys())
 for autor in outros_autores:
     outros_dic = {}
     for field in fields:

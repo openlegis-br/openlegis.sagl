@@ -44,6 +44,13 @@
         }
      }       
 
+     if (form.lst_tip_fim_relatoria[form.lst_tip_fim_relatoria.selectedIndex].value==""){
+        $('#lst_tip_fim_relatoria').addClass('is-invalid');     
+        alert('O resultado da comissão deve ser informado!');
+        form.lst_tip_fim_relatoria.focus();
+        return false;
+     }
+
      form.submit();   
   }
 
@@ -196,7 +203,7 @@
 
   <div class="row">
     <div class="col-6 col-md-3 mb-3">
-       <label class="form-label" for="txt_dat_destit_relator">Data do Parecer</label>
+       <label class="form-label required" for="txt_dat_destit_relator">Data do Parecer</label>
        <dtml-unless dat_destit_relator>
           <dtml-call expr="REQUEST.set('dat_destit_relator', DateTime(datefmt='international').strftime('%d/%m/%Y %H:%M:%S'))">
        </dtml-unless>
@@ -212,15 +219,15 @@
              <dtml-call expr="REQUEST.set('num_parecer', novo_numero)">
           </dtml-in>
        </dtml-unless>
-       <label class="form-label" for="txt_num_parecer">Número do Parecer</label>
-       <input class="form-control number" type="number" name="txt_num_parecer" id="txt_num_parecer" value="<dtml-var num_parecer missing null="">" />    
+       <label class="form-label required" for="txt_num_parecer">Número do Parecer</label>
+       <input class="form-control number" type="number" name="txt_num_parecer" id="txt_num_parecer" value="<dtml-var num_parecer missing null="">" required />    
     </div>  
     <div class="col-6 col-md-3 mb-3">
-       <label class="form-label" for="txt_ano_parecer">Ano do Parecer</label>
+       <label class="form-label required" for="txt_ano_parecer">Ano do Parecer</label>
        <dtml-unless ano_parecer>
           <dtml-call expr="REQUEST.set('ano_parecer', DateTime(datefmt='international').strftime('%Y'))">
        </dtml-unless>
-       <input class="form-control year" type="number" name="txt_ano_parecer" id="txt_ano_parecer" value="<dtml-var ano_parecer missing null="">" />    
+       <input class="form-control year" type="number" name="txt_ano_parecer" id="txt_ano_parecer" value="<dtml-var ano_parecer missing null="">" required />    
     </div> 
     <div class="col-6 col-md-3 mb-3">
        <label class="form-label" for="txt_num_protocolo">Protocolo</label>
@@ -230,7 +237,7 @@
 
   <div class="row">
     <div class="col-6 col-md-3 mb-3">
-       <label class="form-label d-block">Forma de Apresentação</label>
+       <label class="form-label d-block required">Forma de Apresentação</label>
        <dtml-in expr="['Escrita', 'Oral']">
           <input type="radio" id="rad<dtml-var expr="_['sequence-item'][0]">" name="rad_tip_apresentacao" value="<dtml-var expr="_['sequence-item'][0]">"
            <dtml-if expr="_.has_key('cod_relatoria') and tip_apresentacao==_['sequence-item'][0]">
@@ -241,7 +248,7 @@
        </dtml-in>    
     </div>   
     <div class="col-6 col-md-3 mb-3">
-       <label class="form-label d-block">Tipo de Parecer</label>
+       <label class="form-label d-block required">Tipo de Parecer</label>
        <dtml-in expr="['Favorável', 'Contrário']">
           <input type="radio" id="radt<dtml-var expr="_['sequence-item'][0]">" name="rad_tip_conclusao" value="<dtml-var expr="_['sequence-item'][0]">"
           <dtml-if expr="_.has_key('cod_relatoria') and tip_conclusao==_['sequence-item'][0]">
@@ -253,13 +260,13 @@
        </dtml-in>    
     </div>    
     <div class="col-12 col-md-6 mb-3">
-       <label class="form-label" for="lst_tip_fim_relatoria">Resultado na Comissão</label> 
-       <select class="form-select" id="lst_tip_fim_relatoria" name="lst_tip_fim_relatoria">
+       <label class="form-label required" for="lst_tip_fim_relatoria">Resultado na Comissão</label> 
+       <select class="form-select" id="lst_tip_fim_relatoria" name="lst_tip_fim_relatoria" required>
          <option value="">Selecione</option>
          <dtml-in expr="zsql.tipo_fim_relatoria_obter_zsql(tip_fim_relatoria='')">
             <option
               <dtml-if expr="(_.has_key('tip_fim_relatoria_sel') and tip_fim_relatoria_sel is not None) and (int(tip_fim_relatoria)==int(REQUEST['tip_fim_relatoria_sel']))">selected
-              <dtml-elif expr="des_fim_relatoria == 'Aprovado'">selected</dtml-if>
+              <dtml-elif expr="des_fim_relatoria == tip_fim_relatoria_sel">selected</dtml-if>
                  value="<dtml-var tip_fim_relatoria>"> 
                 <dtml-var des_fim_relatoria></option>
          </dtml-in>    

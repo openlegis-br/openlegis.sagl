@@ -81,7 +81,14 @@
                                                 </dtml-if>
                                                 <dtml-var sgl_tipo_documento> <dtml-var num_documento>/<dtml-var ano_documento>&nbsp;–&nbsp;</a>
                                                  <span class="title"><dtml-var expr="txt_interessado"></span>
-                                                 <br/> <span class="teaser"><dtml-var expr="txt_assunto"></span>
+                                                 <br/> 
+                                                 <span class="teaser">
+                                                   <dtml-var expr="txt_assunto">
+                                                   <dtml-call expr="REQUEST.set('texto_original', _.str(cod_documento)+'_texto_integral.pdf')">
+                                                    <dtml-if expr="_.hasattr(sapl_documentos.administrativo,texto_original)">
+                                                       <a href="<dtml-var portal_url>/sapl_documentos/administrativo/<dtml-var texto_original>" target="_blank"><i class="mdi mdi-file-pdf-box"></i></a> 
+                                                    </dtml-if>
+                                                 </span>
                                                  <span class="d-flex justify-content-end">
                                                     <a href="#" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Tramitação de Processo Administrativo" data-src="tramitacao_form?hdn_cod_documento=<dtml-var cod_documento>&modal=1" class=""><i class="mdi mdi-open-in-new"></i> Tramitar</a> 
                                                   </span>

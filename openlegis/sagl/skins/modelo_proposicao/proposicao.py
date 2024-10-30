@@ -101,8 +101,8 @@ for proposicao in context.zsql.proposicao_obter_zsql(cod_proposicao=cod_proposic
                       partido_autor = parlamentar.sgl_partido
                    else:
                       partido_autor = ''
-                   autor_dic['nome_autor'] = parlamentar.nom_completo
-                   autor_dic['apelido_autor'] = parlamentar.nom_parlamentar
+                   autor_dic['nome_autor'] = parlamentar.nom_completo.upper()
+                   autor_dic['apelido_autor'] = parlamentar.nom_parlamentar.upper()
                    autor_dic['cargo'] = nom_cargo
                    autor_dic['partido'] = partido_autor
                    inf_basicas_dic['info_gabinete'] = info_gabinete.upper() + ' ' + autor.nom_autor_join.upper()

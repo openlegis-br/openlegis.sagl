@@ -229,9 +229,7 @@
       </ul>
     </div>
     <dtml-if expr="zsql.ordem_dia_obter_zsql(cod_sessao_plen = cod_sessao_plen, ind_excluido=0)">
-      <dtml-comment>
-        <li><input class="btn-primary" type="button" name="btn_lote" value="Aprovação em Lote" onClick="aprovacao_lote()" /></li>
-      </dtml-comment> 
+       <li><input class="btn-light" type="button" name="btn_lote" value="Aprovação em Lote" onClick="aprovacao_lote()" /></li>
        <input class="btn btn-secondary" type="button" value="Atualizar" onClick="window.location.reload()">
     </dtml-if>
   </div>
@@ -268,7 +266,7 @@ $(document).ready(function() {
     }); 
 });
 function aprovacao_lote(){
-    if (confirm("Confirma a aprovação em lote dos Requerimentos?")) {
+    if (confirm("Confirma a aprovação em lote de Requerimentos na Ordem do Dia?")) {
         location.href="aprovacao_lote_salvar_pysc?<dtml-var "REQUEST.get('QUERY_STRING','')">";
     }
    return;

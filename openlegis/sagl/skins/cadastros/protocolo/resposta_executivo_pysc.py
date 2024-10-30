@@ -45,9 +45,9 @@ def criar_protocolo(cod_materia_respondida):
 
     autor = ''
     nome_autor = ''
-    for autor in context.zsql.autor_obter_zsql(col_username=REQUEST['AUTHENTICATED_USER'].getUserName()):
-        autor = autor.cod_autor
-        nome_autor = autor.nom_autor_join
+    for item in context.zsql.autor_obter_zsql(col_username=REQUEST['AUTHENTICATED_USER'].getUserName()):
+        cod_autor = item.cod_autor
+        nome_autor = item.nom_autor_join
 
     for tipo_doc in context.zsql.tipo_documento_obter_zsql(ind_excluido=0):
         if 'Ofício / Resposta' == tipo_doc.des_tipo_documento:
@@ -57,7 +57,7 @@ def criar_protocolo(cod_materia_respondida):
 
     txt_ementa = obter_materia(cod_materia_respondida)
 
-    context.zsql.protocolo_legislativo_incluir_zsql(num_protocolo=numero_protocolo(), tip_protocolo=0, tip_processo=1, tip_natureza_materia=3, tip_materia = tip_doc, cod_materia_principal = cod_materia_respondida, txt_assunto_ementa = txt_ementa, cod_autor=autor, txt_user_protocolo=login_usuario, txt_observacao=context.pysc.get_ip())
+    context.zsql.protocolo_legislativo_incluir_zsql(num_protocolo=numero_protocolo(), tip_protocolo=0, tip_processo=1, tip_natureza_materia=3, tip_materia = tip_doc, cod_materia_principal = cod_materia_respondida, txt_assunto_ementa = txt_ementa, cod_autor=cod_autor, txt_user_protocolo=login_usuario, txt_observacao=context.pysc.get_ip())
     
     for codigo in context.zsql.protocolo_incluido_codigo_obter_zsql():
         cod_protocolo = int(codigo.cod_protocolo)
@@ -70,7 +70,7 @@ def criar_protocolo(cod_materia_respondida):
     return criar_documento(tip_doc, txt_ementa, nome_autor, cod_materia_respondida, cod_protocolo, num_protocolo, cod_usuario)
 
 
-def criar_documento(tip_doc, txt_ementa, nom_autor, cod_materia_respondida, cod_protocolo, num_protocolo, cod_usuario):
+def criar_documento(tip_doc, txt_ementa, nome_autor, cod_materia_respondida, cod_protocolo, num_protocolo, cod_usuario):
 
     context.zsql.documento_acessorio_incluir_zsql(tip_documento = tip_doc, nom_documento = txt_ementa, nom_autor_documento = nome_autor, cod_materia = cod_materia_respondida, num_protocolo = num_protocolo, dat_documento = DateTime(datefmt='international').strftime('%d/%m/%Y %H:%M:%S'), ind_publico=1)
     

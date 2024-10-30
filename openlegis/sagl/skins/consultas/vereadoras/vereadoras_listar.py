@@ -21,6 +21,11 @@ for vereadora in context.consultas.vereadoras.vereadoras_obter_zsql():
         if vereadora.cod_parlamentar == item['cod_parlamentar']:
            dic_vereadora['ult_legislatura'] = str(item.get('num_legislatura',item))
         break
+    lst_legislaturas = [
+        e
+        for i, e in enumerate(lst_legislaturas)
+        if lst_legislaturas.index(e) == i
+    ]
     dic_vereadora['legislaturas'] = lst_legislaturas
     lst_vereadoras.append(dic_vereadora)
 

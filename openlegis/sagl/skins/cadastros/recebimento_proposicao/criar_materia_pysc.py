@@ -15,8 +15,10 @@ RESPONSE = REQUEST.RESPONSE
 
 for proposicao in context.zsql.proposicao_obter_zsql(cod_proposicao=cod_proposicao, ind_mat_ou_doc='M'):
     cod_proposicao = proposicao.cod_proposicao
-    des_tipo_proposicao = proposicao.des_tipo_proposicao    
+    des_tipo_proposicao = proposicao.des_tipo_proposicao
     tip_materia = proposicao.tip_mat_ou_doc
+    for tipomat in context.zsql.tipo_materia_legislativa_obter_zsql(tip_materia=proposicao.tip_mat_ou_doc):
+        des_tipo_materia = tipomat.des_tipo_materia 
     ano_materia = DateTime(datefmt='international').strftime("%Y")
     cod_mat = proposicao.cod_mat_ou_doc
     dat_apresentacao = DateTime(datefmt='international').strftime("%Y-%m-%d")
@@ -24,7 +26,7 @@ for proposicao in context.zsql.proposicao_obter_zsql(cod_proposicao=cod_proposic
     txt_ementa = proposicao.txt_descricao
     txt_observacao = proposicao.txt_observacao
     cod_autor = proposicao.cod_autor
-    if proposicao.tip_mat_ou_doc == 'Projeto de Lei Complementar':
+    if des_tipo_materia == 'Projeto de Lei Complementar':
        tip_quorum = 3
        ind_complementar = 1
     else:
@@ -35,7 +37,7 @@ for proposicao in context.zsql.proposicao_obter_zsql(cod_proposicao=cod_proposic
     for numero in context.zsql.numero_materia_legislativa_obter_zsql(tip_id_basica_sel = proposicao.tip_mat_ou_doc, ano_ident_basica = ano_materia, ind_excluido = 0):
         num_ident_basica = numero.novo_numero
     # numero agrupado
-    #if proposicao.tip_mat_ou_doc == 6 or proposicao.tip_mat_ou_doc == 7 or proposicao.tip_mat_ou_doc == 8:
+    #if des_tipo_materia == 'Requerimento' or des_tipo_materia == 'Indicação' or des_tipo_materia == 'Moção':
     #   for numero in context.zsql.numero_reqindmoc_obter_zsql(ano_ident_basica = ano_materia, ind_excluido = 0):
     #       num_ident_basica = numero.novo_numero
     #else:
@@ -83,7 +85,7 @@ def inserir_autoria(cod_materia, cod_autor, cod_proposicao, hdn_num_protocolo):
 
 def tramitar_materia(cod_materia, cod_proposicao, hdn_num_protocolo):
     cod_unid_tram_local = int(context.sapl_documentos.props_sagl.origem)
-    if des_tipo_proposicao == 'Requerimento' or des_tipo_proposicao == 'Indicação' or des_tipo_proposicao == 'Moção' or des_tipo_proposicao == 'Pedido de Informação':
+    if des_tipo_materia == 'Requerimento' or des_tipo_materia == 'Indicação' or des_tipo_materia == 'Moção' or des_tipo_materia == 'Pedido de Informação':
        cod_unid_tram_dest = int(context.sapl_documentos.props_sagl.destino_outros)
     else:
        cod_unid_tram_dest = int(context.sapl_documentos.props_sagl.destino)
@@ -94,7 +96,7 @@ def tramitar_materia(cod_materia, cod_proposicao, hdn_num_protocolo):
         else:
            cod_usuario_corrente = 0
     hr_tramitacao = DateTime(datefmt='international').strftime('%d/%m/%Y %H:%M:%S')
-    txt_tramitacao = '<p>Proposição eletrônica enviada em ' + dat_envio + '. Matéria incorporada em ' + hr_tramitacao + ', sob protocolo nº ' + str(hdn_num_protocolo) + '/' + DateTime(datefmt='international').strftime("%Y") +'</p>'
+    txt_tramitacao = '<p>Proposição eletrônica enviada em ' + dat_envio + '. Matéria incorporada em ' + hr_tramitacao + ' sob protocolo nº ' + str(hdn_num_protocolo) + '/' + DateTime(datefmt='international').strftime("%Y") +'</p>'
     hdn_url = context.portal_url() + '/cadastros/recebimento_proposicao/recebimento_proposicao_index_html#incorporada'   
     if cod_unid_tram_local != None and cod_unid_tram_dest != None and cod_status != None:
        context.zsql.tramitacao_incluir_zsql(cod_materia=cod_materia, dat_tramitacao=DateTime(datefmt='international').strftime('%Y-%m-%d %H:%M:%S'), cod_unid_tram_local=cod_unid_tram_local, cod_usuario_local=cod_usuario_corrente, cod_unid_tram_dest=cod_unid_tram_dest, dat_encaminha=DateTime(datefmt='international').strftime('%Y-%m-%d %H:%M:%S'), cod_status=cod_status, ind_urgencia=0, txt_tramitacao = txt_tramitacao, ind_ult_tramitacao=1)

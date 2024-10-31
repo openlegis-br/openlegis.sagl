@@ -677,5 +677,34 @@ function selectAllSelect2(that) {
   item.find("option").prop('selected', selectAll);
   item.trigger('change');
 }
+
+$(document).ready(function () {
+    $(document).on('click', '#master_table .add', function () {
+
+        var row = $(this).closest('tr');
+        var clone = row.clone();
+        var tr = clone.closest('tr');
+        tr.find('input[type=text]').val('');
+        $(this).closest('tr').after(clone);
+        var $span = $("#master_table tr");
+    });
+
+    $(document).on('click', '#master_table .removeRow', function () {
+        if ($('#master_table .add').length > 1) {
+            $(this).closest('tr').remove();
+        }
+
+    });
+
+});
+
+function myFunction() {
+    var form=$("#master_table").closest('form')
+    $(form.prop('elements')).each(function(){
+        var missing= $(this).val()===""
+        $(this).parent().toggleClass('error',missing)
+    })
+    return form.find(".error").length==0
+}
 </script>
 <dtml-var footer_html>

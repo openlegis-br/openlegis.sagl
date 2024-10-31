@@ -1,3 +1,6 @@
+<style>
+.error {background:#f1556c !important};
+</style>
 <legend class="font-size-16">Matérias Vinculadas</legend>
 
   <dtml-in expr="zsql.documento_administrativo_materia_obter_zsql(cod_documento=cod_documento)">
@@ -39,41 +42,41 @@
 
 <form name="materia_vinculada_form" method="post" action="materia_vinculada/materia_vinculada_salvar_proc">  
    <div class="table-resposive">
-    <table class="table" id="master_table">
+    <table class="table table-sm table-borderless" id="master_table">
+       <thead>
+        <tr>
+            <th><label for="lst_tip_id_basica" class="required">Tipo de Matéria</label></th>
+            <th><label for="txt_num_ident_basica" class="required">Número</label></th>
+            <th><label for="txt_ano_ident_basica" class="required">Ano</label></th>
+            <th><span class="d-none">Ações</span></th>
+        </tr>
+       </thead>
+        <tr>
         <tr>
             <td>
-                <label class="form-label required" for="lst_tip_id_basica">Tipo de Matéria</label>
                 <select class="form-select form-select-sm" name="lst_tip_id_basica" id="lst_tip_id_basica" required>
-                  <option value=""></option>
+                  <option value="">Selecione</option>
                     <dtml-in expr="zsql.tipo_materia_legislativa_obter_zsql(tip_natureza='P', ind_excluido=0)">
                       <option value="<dtml-var tip_materia missing>"><dtml-var des_tipo_materia></option>
                     </dtml-in>
                 </select>
-                <div class="invalid-feedback">
-                  Este campo é obrigatório!
-                </div>
             </td>
             <td>
-                <label class="form-label required" for="txt_num_ident_basica">Número</label>
-                <input class="form-control form-control-sm" type="number" name="txt_num_ident_basica" id="txt_num_ident_basica" size="5" value="<dtml-var num_ident_basica_sel missing>" required>
-                <div class="invalid-feedback">
-                  Este campo é obrigatório!
-                </div>                
+                <input class="form-control form-control-sm" type="number" name="txt_num_ident_basica" id="txt_num_ident_basica" size="5" value="<dtml-var num_ident_basica_sel missing>" required>            
             </td>
             <td>
-                <label class="form-label required" for="txt_ano_ident_basica">Número</label>
                 <input class="form-control form-control-sm" type="number" name="txt_ano_ident_basica" id="txt_ano_ident_basica" size="4" value="<dtml-var ano_ident_basica_sel missing>" required>
-                <div class="invalid-feedback">
-                  Este campo é obrigatório!
-                </div>
             </td>
             <td>
-                <label class="form-label d-block" for="submitForm">Ação</label>
-                <input id="submitForm" class="btn btn-sm btn-light" type="submit" name="button" value="Vincular Matéria" />
+                <a class="btn btn-sm btn-secondary add"><i class="fa fa-fw fa-plus"></i></a>
+                <a class="btn btn-sm btn-light removeRow"><i class="fa fa-fw fa-minus"></i></a>
             </td>
         </tr>
     </table>
    </div>
    <input type="hidden" name="hdn_cod_documento" value="<dtml-var cod_documento missing>" />
    <input type="hidden" name="hdn_url" value="<dtml-var ACTUAL_URL>?cod_documento=<dtml-var cod_documento>#materias" />
+   <div class="text-left">
+     <input class="btn btn-light" type="submit" name="button" value="Incluir Vínculos" onclick="return myFunction()" />
+   </div>
 </form>

@@ -1,14 +1,3 @@
-<script>
-window.onload = setupRefresh;
-
-function setupRefresh() {
-  setTimeout("refreshPage();", 600000);
-}
-function refreshPage() {
-   window.location = location.href;
-}
-</script>
-
 <dtml-if expr="envrec=='E' and AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia', 'Revisor Proposicao', 'Chefia Revisão'])">
     <legend class="font-size-16">Proposições em revisão textual</legend>
     <dtml-in expr="proposicoes_contar_pysc(caixa='revisao')" mapping>
@@ -313,3 +302,53 @@ function refreshPage() {
         </dtml-in>
 
 </dtml-if>
+
+<script>
+
+$(document).ready(function() {
+    // Setup - add a text input to each footer cell
+    $('table.display tfoot th').each(function () {
+        var title = $(this).text();
+        $(this).html('<input type="text" class="form-control form-control-sm" placeholder="Pesquisar ' + title + '" />');
+    });
+
+    $.fn.dataTable.moment( 'DD/MM/YYYY HH:mm:ss' );    //Formatação com Hora
+    $.fn.dataTable.moment('DD/MM/YYYY');    //Formatação sem Hora
+    $('table.display').DataTable( {
+        initComplete: function () {
+            // Apply the search
+            this.api()
+                .columns()
+                .every(function () {
+                    var that = this;
+                     $('input', this.footer()).on('keyup change clear', function () {
+                        if (that.search() !== this.value) {
+                            that.search(this.value).draw();
+                        }
+                    });
+                });
+        },
+        "responsive": true,
+        "order": [[0, "desc"]],
+        "lengthMenu": [[10, 25, 50, 100], [10, 25, 50, 100]],
+        "lengthChange": true,
+        "language": {
+          search: "Pesquisar:",
+          processing:     "Processando...",
+          loadingRecords: "Carregando...",
+          lengthMenu:     "Exibir _MENU_ registros por página",
+          info:           "Exibindo _START_ a _END_ de _TOTAL_ registros",
+          infoEmpty:      "Exibindo _START_ a _END_ de _TOTAL_ registros",
+          infoFiltered:   "(total de registros:_MAX_)",
+          emptyTable:     "Nenhum registro encontrado",
+          zeroRecords:     "Nenhum registro encontrado",
+          paginate: {
+            first:      "Primeiro",
+            previous:   "Anterior",
+            next:       "Próximo",
+            last:       "Último"
+          },
+        }
+    });
+});
+</script>

@@ -1,118 +1,49 @@
 <dtml-var header_html>
 
-<h1 class="firstHeading font-size-18">Recebimento de Proposições</h1> 
+<div class="row">
+  <div class="col-12">
+      <h1 class="firstHeading font-size-18 mb-0">Recebimento de Proposições
+        <img id="indicator" class="htmx-indicator" src="<dtml-var portal_url>/imagens/bars.svg"/>
+      </h1> 
+  </div>
+</div>
 
-<ul class="nav nav-tabs proposicao border-0 mt-4" id="nav_proposicao" role="tablist">
+<ul class="nav nav-tabs proposicao border-0 mt-4" id="nav_proposicao" role="tablist" hx-target="#tab-pane">
  <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia', 'Revisor Proposicao', 'Chefia Revisão'])">
     <li class="nav-item active">
-        <a class="nav-link active" id="pendente-tab" data-bs-toggle="tab" href="#pendente" role="tab" aria-controls="pendente" data-target="#pendente" aria-selected="true">Revisão <dtml-in expr="proposicoes_contar_pysc(caixa='revisao')" mapping><dtml-if sequence-start>[<dtml-var sequence-length>]</dtml-if></dtml-in></a>
+        <a class="nav-link active" id="pendente-tab" data-bs-toggle="tab" href="#pendente" role="tab" aria-controls="pendente" data-target="#pendente" aria-selected="true" hx-get="<dtml-var portal_url>/cadastros/recebimento_proposicao/proposicao_listar_form?envrec=E" hx-indicator="#indicator">Revisão <dtml-in expr="proposicoes_contar_pysc(caixa='revisao')" mapping><dtml-if sequence-start>[<dtml-var sequence-length>]</dtml-if></dtml-in></a>
     </li>
   <dtml-if "sapl_documentos.props_sagl.restpki_access_token!=''">                                            
     <li class="nav-item">
-        <a class="nav-link" id="assinatura-tab" data-bs-toggle="tab" href="#assinatura" role="tab" aria-controls="assinatura" data-target="#assinatura" aria-selected="true">Assinatura <dtml-in expr="proposicoes_contar_pysc(caixa='assinatura')" mapping><dtml-if sequence-start>[<dtml-var sequence-length>]</dtml-if></dtml-in></a>
+        <a class="nav-link" id="assinatura-tab" data-bs-toggle="tab" href="#assinatura" role="tab" aria-controls="assinatura" data-target="#assinatura" aria-selected="true" hx-get="<dtml-var portal_url>/cadastros/recebimento_proposicao/proposicao_listar_form?envrec=P" hx-indicator="#indicator">Assinatura <dtml-in expr="proposicoes_contar_pysc(caixa='assinatura')" mapping><dtml-if sequence-start>[<dtml-var sequence-length>]</dtml-if></dtml-in></a>
     </li>     
   </dtml-if>
  </dtml-if>
  <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia'])">
     <li class="nav-item">
-        <a class="nav-link" id="protocolo-tab" data-bs-toggle="tab" href="#protocolo" role="tab" aria-controls="protocolo" data-target="#protocolo" aria-selected="true">Protocolo <dtml-in expr="proposicoes_contar_pysc(caixa='protocolo')" mapping><dtml-if sequence-start>[<dtml-var sequence-length>]</dtml-if></dtml-in></a>
+        <a class="nav-link" id="protocolo-tab" data-bs-toggle="tab" href="#protocolo" role="tab" aria-controls="protocolo" data-target="#protocolo" aria-selected="true" hx-get="<dtml-var portal_url>/cadastros/recebimento_proposicao/proposicao_listar_form?envrec=A" hx-indicator="#indicator">Protocolo <dtml-in expr="proposicoes_contar_pysc(caixa='protocolo')" mapping><dtml-if sequence-start>[<dtml-var sequence-length>]</dtml-if></dtml-in></a>
     </li>    
  </dtml-if>
  <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia', 'Revisor Proposicao', 'Chefia Revisão'])">
     <li class="nav-item">
-       <a class="nav-link" id="incorporada-tab" data-bs-toggle="tab" href="#incorporada" role="tab" aria-controls="incorporada" data-target="#incorporada" aria-selected="true">Incorporadas </a>
+       <a class="nav-link" id="incorporada-tab" data-bs-toggle="tab" href="#incorporada" role="tab" aria-controls="incorporada" data-target="#incorporada" aria-selected="true" hx-get="<dtml-var portal_url>/cadastros/recebimento_proposicao/proposicao_listar_form?envrec=I" hx-indicator="#indicator">Incorporadas </a>
     </li>
     <li class="nav-item">
-        <a class="nav-link" id="protocolo-tab" data-bs-toggle="tab" href="#pedido_devolucao" role="tab" aria-controls="pedido_devolucao" data-target="#pedido_devolucao" aria-selected="true">Pedidos de Devolução <dtml-in expr="proposicoes_contar_pysc(caixa='pedido_devolucao')" mapping><dtml-if sequence-start>[<dtml-var sequence-length>]</dtml-if></dtml-in></a>
+        <a class="nav-link" id="protocolo-tab" data-bs-toggle="tab" href="#pedido_devolucao" role="tab" aria-controls="pedido_devolucao" data-target="#pedido_devolucao" aria-selected="true" hx-get="<dtml-var portal_url>/cadastros/recebimento_proposicao/proposicao_listar_form?envrec=S" hx-indicator="#indicator">Pedidos de Devolução <dtml-in expr="proposicoes_contar_pysc(caixa='pedido_devolucao')" mapping><dtml-if sequence-start>[<dtml-var sequence-length>]</dtml-if></dtml-in></a>
     </li> 
     <li class="nav-item">
-       <a class="nav-link" id="devolvida-tab" data-bs-toggle="tab" href="#devolvida" role="tab" aria-controls="devolvida" data-target="#devolvida" aria-selected="true">Devolvidas <dtml-in expr="proposicoes_contar_pysc(caixa='devolvido')" mapping><dtml-if sequence-start>[<dtml-var sequence-length>]</dtml-if></dtml-in></a>
+       <a class="nav-link" id="devolvida-tab" data-bs-toggle="tab" href="#devolvida" role="tab" aria-controls="devolvida" data-target="#devolvida" aria-selected="true" hx-get="<dtml-var portal_url>/cadastros/recebimento_proposicao/proposicao_listar_form?envrec=R" hx-indicator="#indicator">Devolvidas <dtml-in expr="proposicoes_contar_pysc(caixa='devolvido')" mapping><dtml-if sequence-start>[<dtml-var sequence-length>]</dtml-if></dtml-in></a>
     </li>
  </dtml-if>
 </ul>
 
 <div class="tab-content">
-    <div class="tab-pane p-3 border fade show active" id="pendente">
-       <dtml-let envrec="'E'" modal="1">
-          <dtml-var proposicao_listar_form>
-       </dtml-let>
-    </div>
-    <div class="tab-pane p-3 border fade show" id="assinatura">
-       <dtml-let envrec="'P'" modal="1">
-          <dtml-var proposicao_listar_form>
-       </dtml-let>
-    </div>
-    <div class="tab-pane p-3 border fade show" id="protocolo">
-       <dtml-let envrec="'A'" modal="1">
-          <dtml-var proposicao_listar_form>
-       </dtml-let>
-    </div>    
-    <div class="tab-pane p-3 border fade" id="incorporada">
-       <dtml-let envrec="'I'" modal="1">
-          <dtml-var proposicao_listar_form>
-       </dtml-let>
-    </div>
-    <div class="tab-pane p-3 border fade show" id="pedido_devolucao">
-       <dtml-let envrec="'S'" modal="1">
-          <dtml-var proposicao_listar_form>
-       </dtml-let>
-    </div> 
-    <div class="tab-pane p-3 border fade" id="devolvida">
-       <dtml-let envrec="'R'" modal="1">
-          <dtml-var proposicao_listar_form>
-       </dtml-let>
-    </div>           
+  <div id="tab-pane" class="tab-pane p-3 border fade show active" hx-get="<dtml-var portal_url>/cadastros/recebimento_proposicao/proposicao_listar_form?envrec=E" hx-trigger="load" hx-indicator="#indicator">
+  </div>
 </div>
 
 <dtml-var js_slot>
 <script>
-
-$(document).ready(function() {
-    // Setup - add a text input to each footer cell
-    $('table.display tfoot th').each(function () {
-        var title = $(this).text();
-        $(this).html('<input type="text" class="form-control form-control-sm" placeholder="Pesquisar ' + title + '" />');
-    });
-
-    $.fn.dataTable.moment( 'DD/MM/YYYY HH:mm:ss' );    //Formatação com Hora
-    $.fn.dataTable.moment('DD/MM/YYYY');    //Formatação sem Hora
-    $('table.display').DataTable( {
-        initComplete: function () {
-            // Apply the search
-            this.api()
-                .columns()
-                .every(function () {
-                    var that = this;
-                     $('input', this.footer()).on('keyup change clear', function () {
-                        if (that.search() !== this.value) {
-                            that.search(this.value).draw();
-                        }
-                    });
-                });
-        },
-        "responsive": true,
-        "order": [[0, "desc"]],
-        "lengthMenu": [[10, 25, 50, 100], [10, 25, 50, 100]],
-        "lengthChange": true,
-        "language": {
-          search: "Pesquisar:",
-          processing:     "Processando...",
-          loadingRecords: "Carregando...",
-          lengthMenu:     "Exibir _MENU_ registros por página",
-          info:           "Exibindo _START_ a _END_ de _TOTAL_ registros",
-          infoEmpty:      "Exibindo _START_ a _END_ de _TOTAL_ registros",
-          infoFiltered:   "(total de registros:_MAX_)",
-          emptyTable:     "Nenhum registro encontrado",
-          zeroRecords:     "Nenhum registro encontrado",
-          paginate: {
-            first:      "Primeiro",
-            previous:   "Anterior",
-            next:       "Próximo",
-            last:       "Último"
-          },
-        }
-    });
-});
 
 window.onload = function(){  
     var url = document.location.toString();
@@ -147,4 +78,5 @@ $(document).ready(() => {
   });
 });
 </script>
+
 <dtml-var footer_html>

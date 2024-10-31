@@ -176,7 +176,7 @@ class ProcessoLeg(grok.View):
             arquivo_doc = BytesIO(bytes(arq.data))
             with pymupdf.open(stream=arquivo_doc) as texto_anexo:
                texto_anexo = pymupdf.open(stream=arquivo_doc)
-               metadata = {"title": dic["title"]}
+               metadata = {"title": dic["title"], "modDate": dic["data"]}
                texto_anexo.set_metadata(metadata)
                texto_anexo.bake()
                merger.insert_pdf(texto_anexo)
@@ -200,7 +200,7 @@ class ProcessoLeg(grok.View):
             shape.draw_circle(p1,1)
             shape.insert_text(p1, id_processo+'\n'+text, fontname = "helv", fontsize = 8)
             shape.commit()
-        metadata = {"title": id_processo}
+        metadata = {"title": id_processo, "modDate": dic["data"]}
         existing_pdf.set_metadata(metadata)
         data = existing_pdf.tobytes(deflate=True, garbage=3, use_objstms=1)
         with open(os.path.join(dirpath) + '/' + processo_integral, 'wb') as f:
@@ -212,7 +212,7 @@ class ProcessoLeg(grok.View):
                file_name = os.path.join(os.path.join(pagepath), page_id)
                with pymupdf.open() as doc_tmp:
                    doc_tmp.insert_pdf(doc, from_page=i, to_page=i, rotate=-1, show_progress=False)
-                   metadata = {"title": page_id}
+                   metadata = {"title": page_id, "modDate": dic["data"]}
                    doc_tmp.set_metadata(metadata)
                    doc_tmp.save(file_name, deflate=True, garbage=3, use_objstms=1)
 
@@ -251,6 +251,7 @@ class ProcessoLeg(grok.View):
                      arq2 = pymupdf.open(arq)
                      dic['id'] = file
                      dic['title'] = arq2.metadata["title"]
+                     dic['date'] = arq2.metadata["modDate"]
                      num_pages = arq2.page_count
                      for page in range(num_pages):
                          lst_pages.append(page+1)
@@ -265,6 +266,7 @@ class ProcessoLeg(grok.View):
                dic = {}
                dic['id'] = item['id']
                dic['title'] = item['title']
+               dic['date'] = item["date"]
                for pagina in item['pages']:
                    indice.append(dic) 
 
@@ -275,6 +277,7 @@ class ProcessoLeg(grok.View):
                dic = {}
                dic['id'] = arquivo['id']
                dic['titulo'] = arquivo['title']
+               dic['data'] = arquivo['date']
                dic['num_pagina'] = str(i)
                dic['pagina'] = 'pg_' + str(i).rjust(4, '0') + '.pdf'
                lst_indice.append(dic)
@@ -285,6 +288,7 @@ class ProcessoLeg(grok.View):
                dic_indice= {}
                dic_indice['id'] = item['id']
                dic_indice['title'] = item['title']
+               dic_indice['data'] = item['date']
                dic_indice["url"] = str(portal_url) + '/@@pagina_processo_leg_integral?cod_materia=' + str(cod_materia) + '%26pagina=' +  'pg_0001.pdf'
                dic_indice["paginas_geral"] = len(page_paths)
                dic_indice['paginas'] = []

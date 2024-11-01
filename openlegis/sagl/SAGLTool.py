@@ -1933,7 +1933,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
               for metodo in self.zsql.documento_acessorio_obter_zsql(cod_documento=codigo):
                   for materia in self.zsql.materia_obter_zsql(cod_materia=metodo.cod_materia):
                       materia = str(materia.sgl_tipo_materia)+' '+ str(materia.num_ident_basica)+'/'+str(materia.ano_ident_basica)
-              texto = str(metodo.nom_documento) + ' - ' + str(materia)
+                  texto = str(metodo.nom_documento) + ' - ' + str(materia)
         elif tipo_doc == 'emenda':
            storage_path = self.sapl_documentos.emenda
            for metodo in self.zsql.emenda_obter_zsql(cod_emenda=codigo):
@@ -1950,7 +1950,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
            storage_path = self.sapl_documentos.materia.tramitacao
            for metodo in self.zsql.tramitacao_obter_zsql(cod_tramitacao=codigo):
                materia = str(metodo.sgl_tipo_materia)+' '+ str(metodo.num_ident_basica)+'/'+str(metodo.ano_ident_basica)
-           texto = 'Tramitação nº '+ str(metodo.cod_tramitacao) + ' - ' + str(materia)
+               texto = 'Tramitação nº '+ str(metodo.cod_tramitacao) + ' - ' + str(materia)
         elif tipo_doc == 'parecer_comissao':
            storage_path = self.sapl_documentos.parecer_comissao
            for metodo in self.zsql.relatoria_obter_zsql(cod_relatoria=codigo):
@@ -1975,7 +1975,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
                    sessao = str(metodo.num_sessao_plen) + 'ª ' + str(self.sapl_documentos.props_sagl.reuniao_sessao).upper() + ' ' + str(tipo.nom_sessao) + ' - ' + str(metodo.dat_inicio_sessao)
            for metodo in self.zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=codigo, ind_audiencia='1'):
                sessao = 'Audiência Pública nº ' + str(metodo.num_sessao_plen) + '/' + str(metodo.ano_sessao)
-           texto = 'Ata da ' + str(sessao)
+               texto = 'Ata da ' + str(sessao)
         elif tipo_doc == 'anexo_peticao':
            storage_path = self.sapl_documentos.peticao
            file_item =  str(codigo) + '_anexo_' + str(anexo) + '.pdf'
@@ -1998,17 +1998,17 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
            if tipo_doc == 'documento':
               for metodo in self.zsql.documento_administrativo_obter_zsql(cod_documento=codigo):
                   num_documento = metodo.num_documento
-              texto = str(metodo.des_tipo_documento)+ ' nº ' + str(metodo.num_documento)+ '/' +str(metodo.ano_documento)
+                  texto = str(metodo.des_tipo_documento)+ ' nº ' + str(metodo.num_documento)+ '/' +str(metodo.ano_documento)
            elif tipo_doc == 'doc_acessorio_adm':
               for metodo in self.zsql.documento_acessorio_administrativo_obter_zsql(cod_documento_acessorio=codigo):
                   for documento in self.zsql.documento_administrativo_obter_zsql(cod_documento=metodo.cod_documento):
                       documento = str(documento.sgl_tipo_documento) +' '+ str(documento.num_documento)+'/'+str(documento.ano_documento)
-              texto = 'Doumento Acessório do ' + str(documento)
+                  texto = 'Doumento Acessório do ' + str(documento)
         elif tipo_doc == 'tramitacao_adm':
            storage_path = self.sapl_documentos.administrativo.tramitacao
            for metodo in self.zsql.tramitacao_administrativo_obter_zsql(cod_tramitacao=codigo):
                documento = str(metodo.sgl_tipo_documento)+' '+ str(metodo.num_documento)+'/'+str(metodo.ano_documento)
-           texto = 'Tramitação nº '+ str(metodo.cod_tramitacao) + ' - ' + str(documento)
+               texto = 'Tramitação nº '+ str(metodo.cod_tramitacao) + ' - ' + str(documento)
         elif tipo_doc == 'proposicao':
            storage_path = self.sapl_documentos.proposicao
            for metodo in self.zsql.proposicao_obter_zsql(cod_proposicao=codigo):

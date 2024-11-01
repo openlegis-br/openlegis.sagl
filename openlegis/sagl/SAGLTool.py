@@ -531,12 +531,14 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
                           texto_anexo = pymupdf.open(stream=arquivo)
                           merger.insert_pdf(texto_anexo)
                    for relat in self.zsql.relatoria_obter_zsql(cod_materia=cod_materia,ind_excluido=0):
-                       relatoria = relat.cod_relatoria
-                       if hasattr(self.sapl_documentos.parecer_comissao, str(relatoria) + '_parecer.pdf'):
-                          arq = getattr(self.sapl_documentos.parecer_comissao, str(relatoria) + '_parecer.pdf')
-                          arquivo = BytesIO(bytes(arq.data))
-                          texto_anexo = pymupdf.open(stream=arquivo)
-                          merger.insert_pdf(texto_anexo)
+                       for tipo in self.zsql.tipo_fim_relatoria_obter_zsql(tip_fim_relatoria = relat.tip_fim_relatoria):
+                          if tipo.des_fim_relatoria!='Aguardando apreciação':
+                             relatoria = relat.cod_relatoria
+                             if hasattr(self.sapl_documentos.parecer_comissao, str(relatoria) + '_parecer.pdf'):
+                                arq = getattr(self.sapl_documentos.parecer_comissao, str(relatoria) + '_parecer.pdf')
+                                arquivo = BytesIO(bytes(arq.data))
+                                texto_anexo = pymupdf.open(stream=arquivo)
+                                merger.insert_pdf(texto_anexo)
           merged_pdf = merger.tobytes(deflate=True, garbage=3, use_objstms=1)
           existing_pdf = pymupdf.open(stream=merged_pdf)
           numPages = existing_pdf.page_count

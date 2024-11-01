@@ -150,10 +150,18 @@
               <div class="row mt-2">
                 <div class="col-12 col-md-10 ps-5">
                    <dtml-in expr="zsql.comissao_obter_zsql(cod_comissao=cod_comissao,ind_excluido=0)">
-                      <a class="fw-bolder" href="<dtml-var portal_url>/parecer_comissao/<dtml-var cod_relatoria>_parecer.pdf" target="blank">
-                             Parecer <dtml-var sgl_comissao> nº <dtml-var num_parecer>/<dtml-var ano_parecer>
-                      </a>
-                      - <b><dtml-var nom_comissao></b>
+                     <dtml-let id_parecer="str(cod_relatoria)+'_parecer.pdf'">
+                         <dtml-if "hasattr(sapl_documentos.parecer_comissao,id_parecer)">
+                           <dtml-let parecer="getattr(sapl_documentos.parecer_comissao,id_parecer).absolute_url">
+                              <a class="fw-bolder" href=""<dtml-var parecer>" target="blank">
+                                  Parecer <dtml-var sgl_comissao> nº <dtml-var num_parecer>/<dtml-var ano_parecer>
+                              </a>
+                              - <b><dtml-var nom_comissao></b>
+                           </dtml-let>
+                         <dtml-else>
+                            <b>Parecer <dtml-var sgl_comissao> nº <dtml-var num_parecer>/<dtml-var ano_parecer> - <dtml-var nom_comissao></b>
+                         </dtml-if>
+                     </dtml-let>
                    </dtml-in>
                    <dtml-in expr="zsql.parlamentar_obter_zsql(cod_parlamentar=cod_parlamentar)">
                       <br /><b>Relatoria:</b> <dtml-var nom_completo>

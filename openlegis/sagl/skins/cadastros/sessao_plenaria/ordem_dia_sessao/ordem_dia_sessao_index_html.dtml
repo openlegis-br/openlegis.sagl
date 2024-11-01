@@ -58,11 +58,11 @@
             <dtml-in expr="zsql.substitutivo_obter_zsql(cod_materia=cod_materia, ind_excluido=0)">
               <dtml-if sequence-start>             
                  <div class="mt-2 w-100">
-                   <a class="" data-bs-toggle="collapse" href="#collapseSub" role="button" aria-expanded="false" aria-controls="collapseSub"><b>Substitutivos</b> <i class="mdi mdi-chevron-down ms-1"></i></a>
-                   <div class="collapse" id="collapseSub">
+                   <a class="" data-bs-toggle="collapse" href="#collapseSub<dtml-var cod_ordem>" role="button" aria-expanded="false" aria-controls="collapseSub<dtml-var cod_ordem>"><b>Substitutivos</b> <i class="mdi mdi-chevron-down ms-1"></i></a>
+                   <div class="collapse" id="collapseSub<dtml-var cod_ordem>">
               </dtml-if>
               <div class="row mt-3">
-               <div class="col-12 col-md-10">
+               <div class="col-12 col-md-10 ps-5">
                   <a class="fw-bolder" href="#" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Edição de Substitutivo" data-src="<dtml-var portal_url>/cadastros/materia/substitutivo/substitutivo_mostrar_proc?cod_substitutivo=<dtml-var cod_substitutivo>&cod_materia=<dtml-var cod_materia>&modal=1">
                      <b>Substitutivo nº <dtml-var num_substitutivo></b>
                   </a> - 
@@ -92,16 +92,18 @@
                  </dtml-in>
                 </div>
                </div>
-              </div>
+              <dtml-if sequence-end>
+                 </div>
+              </dtml-if>
             </dtml-in>
             <dtml-in expr="zsql.emenda_obter_zsql(cod_materia=cod_materia, exc_pauta=0, ind_excluido=0)">
               <dtml-if sequence-start>             
                  <div class="mt-2 w-100">
-                   <a class="" data-bs-toggle="collapse" href="#collapseEme" role="button" aria-expanded="false" aria-controls="collapseEme"><b>Emendas</b> <i class="mdi mdi-chevron-down ms-1"></i></a>
-                   <div class="collapse" id="collapseEme">
+                   <a class="" data-bs-toggle="collapse" href="#collapseEme<dtml-var cod_ordem>" role="button" aria-expanded="false" aria-controls="collapseEme<dtml-var cod_ordem>"><b>Emendas</b> <i class="mdi mdi-chevron-down ms-1"></i></a>
+                   <div class="collapse" id="collapseEme<dtml-var cod_ordem>">
               </dtml-if>
               <div class="row mt-2">
-                <div class="col-12 col-md-10">
+                <div class="col-12 col-md-10 ps-5">
                    <a class="fw-bolder" href="#" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Edição de Emenda" data-src="<dtml-var portal_url>/cadastros/materia/emenda/emenda_mostrar_proc?cod_emenda=<dtml-var cod_emenda>&cod_materia=<dtml-var cod_materia>&modal=1">
                       Emenda <dtml-var des_tipo_emenda> nº <dtml-var num_emenda> - 
                    </a>
@@ -135,6 +137,36 @@
                    </dtml-in>
                 </div>
               </div>
+              <dtml-if sequence-end>
+                 </div>
+              </dtml-if>
+            </dtml-in>
+            <dtml-in expr="zsql.relatoria_obter_zsql(cod_materia=cod_materia,ind_excluido=0)">
+              <dtml-if sequence-start>             
+                 <div class="mt-2 w-100">
+                   <a class="" data-bs-toggle="collapse" href="#collapsePar<dtml-var cod_ordem>" role="button" aria-expanded="false" aria-controls="collapsePar<dtml-var cod_ordem>"><b>Pareceres</b> <i class="mdi mdi-chevron-down ms-1"></i></a>
+                   <div class="collapse" id="collapsePar<dtml-var cod_ordem>">
+              </dtml-if>
+              <div class="row mt-2">
+                <div class="col-12 col-md-10 ps-5">
+                   <dtml-in expr="zsql.comissao_obter_zsql(cod_comissao=cod_comissao,ind_excluido=0)">
+                      <a class="fw-bolder" href="<dtml-var portal_url>/parecer_comissao/<dtml-var cod_relatoria>_parecer.pdf" target="blank">
+                             Parecer <dtml-var sgl_comissao> nº <dtml-var num_parecer>/<dtml-var ano_parecer>
+                      </a>
+                      - <b><dtml-var nom_comissao></b>
+                   </dtml-in>
+                   <dtml-in expr="zsql.parlamentar_obter_zsql(cod_parlamentar=cod_parlamentar)">
+                      <br /><b>Relatoria:</b> <dtml-var nom_completo>
+                   </dtml-in>
+                   <br /><b>Voto:</b> <dtml-if expr="tip_conclusao=='F'">Favorável à aprovação da matéria </dtml-if><dtml-if expr="tip_conclusao=='C'">Contrário à aprovação da matéria</dtml-if>
+                   <dtml-if expr="tip_fim_relatoria!=None">
+                      <dtml-in expr="zsql.tipo_fim_relatoria_obter_zsql(tip_fim_relatoria=tip_fim_relatoria)"><br /><b>Resultado na Comissão:</b> <dtml-var des_fim_relatoria></dtml-in> 
+                   </dtml-if>
+                </div>
+              </div>
+              <dtml-if sequence-end>
+                 </div>
+              </dtml-if>
             </dtml-in>
          </td>
          <td>

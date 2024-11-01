@@ -57,12 +57,14 @@ for sessao in metodo:
            inf_basicas_dic["num_periodo"] = periodo.num_periodo
     nom_arquivo = str(cod_sessao_plen)+'_pauta_sessao.odt'
     # obtém o nome do Presidente da Câmara titular
-    inf_basicas_dic["lst_presidente"] = ''
-    lst_presidente = inf_basicas_dic["lst_presidente"]
+    for cargo in context.zsql.cargo_mesa_obter_zsql(ind_excluido=0):
+        if cargo.des_cargo == 'Presidente':
+           cod_cargo = cargo.cod_cargo
+    inf_basicas_dic["presidente"] = ""
     for sleg in context.zsql.periodo_comp_mesa_obter_zsql(num_legislatura=sessao.num_legislatura,data=data):
-        for cod_presidente in context.zsql.composicao_mesa_obter_zsql(cod_periodo_comp=sleg.cod_periodo_comp, cod_cargo=1):
+        for cod_presidente in context.zsql.composicao_mesa_obter_zsql(cod_periodo_comp=sleg.cod_periodo_comp,cod_cargo=cod_cargo):
             for presidencia in context.zsql.parlamentar_obter_zsql(cod_parlamentar=cod_presidente.cod_parlamentar):
-                inf_basicas_dic["lst_presidente"] = presidencia.nom_parlamentar
+                inf_basicas_dic["presidente"] = presidencia.nom_completo.upper()
     # Lista das matérias apresentadas
     inf_basicas_dic["apresentada"] = []
     for materia_apresentada in context.zsql.materia_apresentada_sessao_obter_zsql(dat_ordem=data,cod_sessao_plen=cod_sessao_plen,ind_excluido=0):
@@ -90,6 +92,7 @@ for sessao in metodo:
            dic_materia_apresentada["nom_autor"] = ', '.join(['%s' % (value) for (value) in lista_autor]) 
            inf_basicas_dic["apresentada"].append(dic_materia_apresentada)
     # Ordem do Dia
+    inf_basicas_dic["lst_pauta"] = []
     inf_basicas_dic["pdiscussao"] = []
     inf_basicas_dic["sdiscussao"] = []
     inf_basicas_dic["dunica"] = []
@@ -115,6 +118,9 @@ for sessao in metodo:
         if item.cod_materia != None:
            materia = context.zsql.materia_obter_zsql(cod_materia=item.cod_materia)[0]
            dic['materia'] = str(materia.des_tipo_materia.upper())+" N° "+str(materia.num_ident_basica) + '/' + str(materia.ano_ident_basica)
+           dic['tip_materia'] = str(materia.des_tipo_materia.upper())
+           dic['num_ident_basica'] = str(materia.num_ident_basica)
+           dic['ano_ident_basica'] = str(materia.ano_ident_basica)
            dic["link_materia"] = '<link href="'+context.sapl_documentos.absolute_url()+'/materia/'+ str(materia.cod_materia) + '_texto_integral.pdf' +'">'+materia.des_tipo_materia.upper()+' Nº '+str(materia.num_ident_basica)+'/'+str(materia.ano_ident_basica)+'</link>'
            dic["txt_ementa"] = materia.txt_ementa
            dic['nom_autor'] = ''
@@ -181,7 +187,7 @@ for sessao in metodo:
            dic["link_materia"] = '<link href="'+context.sapl_documentos.absolute_url()+'/parecer_comissao/'+ str(materia.cod_relatoria) + '_parecer.pdf' +'">' + 'PARECER ' + sgl_comissao + ' N° ' + str(materia.num_parecer) + '/' + str(materia.ano_parecer) + id_materia + resultado_comissao + '</link>'
            dic["txt_ementa"] = item.txt_observacao
            dic['nom_autor'] = str(nom_comissao)
-
+        inf_basicas_dic["lst_pauta"].append(dic)
         if item.urgencia == 1:
            inf_basicas_dic["urgencia"].append(dic)
         else:

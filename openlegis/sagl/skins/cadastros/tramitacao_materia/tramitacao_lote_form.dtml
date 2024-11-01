@@ -79,7 +79,7 @@
                                                 <dtml-else>
                                                   <a class="subject" href="<dtml-var portal_url>/consultas/materia/materia_mostrar_proc?cod_materia=<dtml-var cod_materia>&hdn_tramitacao=<dtml-var cod_tramitacao>" target="_blank">
                                                 </dtml-if>
-                                                <dtml-var sgl_tipo_materia> <dtml-var num_ident_basica>/<dtml-var ano_ident_basica></a>&nbsp;–&nbsp;</a>
+                                                <dtml-var des_tipo_materia upper> Nº <dtml-var num_ident_basica>/<dtml-var ano_ident_basica></a>&nbsp;–&nbsp;</a>
                                                 <dtml-in expr="zsql.autoria_obter_zsql(cod_materia=cod_materia)">
                                                    <span class="title"><dtml-var nom_autor_join><dtml-unless sequence-end>,</dtml-unless></span>
                                                 </dtml-in>
@@ -136,7 +136,7 @@
                                        </dtml-in>
                                          <dtml-if sequence-end>
                                                </tbody>
-                                               <tfoot class="d-none">
+                                               <tfoot>
                                                  <tr>
                                                    <th></th>
                                                    <th>Tramitação</th>
@@ -252,7 +252,7 @@
 <script>
 $(document).ready(function() {
     // Setup - add a text input to each footer cell
-    $('table.display tfoot td').each(function () {
+    $('table.display tfoot th').each(function () {
         var title = $(this).text();
         $(this).html('<input type="text" class="form-control form-control-sm" placeholder="' + title + '" />');
     });

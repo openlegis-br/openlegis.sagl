@@ -32,7 +32,7 @@
                                 <div class="my-3">
 				<dtml-in expr="arquivo_morto_pysc(cod_usuario=cod_usuario_corrente)">
 				  <dtml-if sequence-start>
-				    <table class="table" id="inbox">
+				    <table class="table display" id="inbox">
 				      <thead class="table-light">
 					 <tr>  
 					     <th>Tramitação</th>
@@ -61,7 +61,7 @@
 					       <dtml-else>
 						  <a href="<dtml-var portal_url>/consultas/documento_administrativo/documento_administrativo_mostrar_proc?cod_documento=<dtml-var cod_documento>" target="_blank">
 					       </dtml-if>
-					       <dtml-var sgl_tipo_documento> <dtml-var num_documento>/<dtml-var ano_documento></a> - 
+					       <dtml-var des_tipo_documento upper> Nº <dtml-var num_documento>/<dtml-var ano_documento></a> - 
 					       <dtml-var txt_interessado>
 					       <br /><dtml-var txt_assunto>
 					    </dtml-in>
@@ -72,7 +72,7 @@
 						<dtml-var nom_unidade_join>
 					     </dtml-in>
 					  </td>
-					  <td><<dtml-var dat_encaminha missing null></td>
+					  <td><dtml-var dat_encaminha missing null></td>
 					</form>
 					</tr>
 				     </dtml-in>

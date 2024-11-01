@@ -79,7 +79,7 @@
                                                 <dtml-else>
                                                    <a class="subject" href="<dtml-var portal_url>/consultas/documento_administrativo/documento_administrativo_mostrar_proc?cod_documento=<dtml-var cod_documento>&hdn_tramitacao=<dtml-var cod_tramitacao>" target="_blank">
                                                 </dtml-if>
-                                                <dtml-var sgl_tipo_documento> <dtml-var num_documento>/<dtml-var ano_documento>&nbsp;–&nbsp;</a>
+                                                <dtml-var des_tipo_documento upper> N° <dtml-var num_documento>/<dtml-var ano_documento>&nbsp;–&nbsp;</a>
                                                  <span class="title"><dtml-var expr="txt_interessado"></span>
                                                  <br/> 
                                                  <span class="teaser">
@@ -141,7 +141,7 @@
                                        </dtml-in>
                                          <dtml-if sequence-end>
                                                </tbody>
-                                               <tfoot class="d-none">
+                                               <tfoot>
                                                  <tr>
                                                    <th></th>
                                                    <th>Tramitação</th>
@@ -246,7 +246,7 @@
 <script>
 $(document).ready(function() {
     // Setup - add a text input to each footer cell
-    $('table.display tfoot td').each(function () {
+    $('table.display tfoot th').each(function () {
         var title = $(this).text();
         $(this).html('<input type="text" class="form-control form-control-sm" placeholder="' + title + '" />');
     });

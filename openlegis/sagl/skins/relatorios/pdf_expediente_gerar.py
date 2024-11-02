@@ -56,9 +56,9 @@ def pauta(pauta_dic):
     tmp+='\t<story>\n'
     # dados da sessao
     if pauta_dic["num_periodo"] != '':
-       tmp+='\t\t<para style="P0">'+ str(pauta_dic["num_sessao_plen"]) +'ª ' + str(context.sapl_documentos.props_sagl.reuniao_sessao).upper() + ' ' + pauta_dic["nom_sessao"] + ' DO ' + str(pauta_dic["num_periodo"]) + 'º PERÍODO - ' + pauta_dic["dat_inicio_sessao"] + '</para>\n'
+       tmp+='\t\t<para style="P0">'+ str(pauta_dic["num_sessao_plen"]) +'ª ' + str(context.sapl_documentos.props_sagl.reuniao_sessao).upper() + ' ' + pauta_dic["nom_sessao"] + ' DO ' + str(pauta_dic["num_periodo"]) + 'º PERÍODO - ' + pauta_dic["dat_inicio_sessao"] + ' ' + pauta_dic["hr_inicio_sessao"] + '</para>\n'
     else:
-       tmp+='\t\t<para style="P0">'+ str(pauta_dic["num_sessao_plen"]) +'ª ' + str(context.sapl_documentos.props_sagl.reuniao_sessao).upper() + ' ' + pauta_dic["nom_sessao"] + ' - ' + pauta_dic["dat_inicio_sessao"] + '</para>\n'
+       tmp+='\t\t<para style="P0">'+ str(pauta_dic["num_sessao_plen"]) +'ª ' + str(context.sapl_documentos.props_sagl.reuniao_sessao).upper() + ' ' + pauta_dic["nom_sessao"] + ' - ' + pauta_dic["dat_inicio_sessao"] + ' ÀS ' + pauta_dic["hr_inicio_sessao"] + '</para>\n'
     tmp+='\t\t<para style="P2" spaceAfter="4">\n'
     tmp+='\t\t\t<font color="white"> </font>\n'
     tmp+='\t\t</para>\n'
@@ -68,10 +68,31 @@ def pauta(pauta_dic):
     tmp+='\t\t</para>\n'
 
     if pauta_dic["lst_requerimentos_vereadores"] != []:
-        tmp+='\t\t<condPageBreak height="20mm"/>\n'
-        tmp+='\t\t<para style="P1" spaceBefore="10"><b>LISTAGEM DE LEITURA</b></para>\n'
+        tmp+='\t\t<condPageBreak height="10mm"/>\n'
+        tmp+='\t\t<para style="P1" spaceBefore="10" spaceAfter="10"><b><u>MATÉRIAS DO EXPEDIENTE</u></b></para>\n'
+
+    if pauta_dic["total_indicacoes"] != 0:
+        tmp+='\t\t<condPageBreak height="15"/>\n'
+        tmp+='\t\t<para style="P2" spaceBefore="5"><b>Número de Indicações:</b> ' + str(pauta_dic["total_indicacoes"]) + '</para>\n'
+
+    if pauta_dic["total_requerimentos"] != 0:
+        tmp+='\t\t<condPageBreak height="15mm"/>\n'
+        tmp+='\t\t<para style="P2" spaceBefore="5"><b>Número de Requerimentos:</b> ' + str(pauta_dic["total_requerimentos"]) + '</para>\n'
+
+    if pauta_dic["total_mocoes"] != 0:
+        tmp+='\t\t<condPageBreak height="15"/>\n'
+        tmp+='\t\t<para style="P2" spaceBefore="5"><b>Número de Moções:</b> ' + str(pauta_dic["total_mocoes"]) + '</para>\n'
+
+    if pauta_dic["total_pedidos"] != 0:
+        tmp+='\t\t<condPageBreak height="15"/>\n'
+        tmp+='\t\t<para style="P2" spaceBefore="5"><b>Número de Pedido de Informação:</b> ' + str(pauta_dic["total_pedidos"]) + '</para>\n'
+
+    if pauta_dic["total_materias"] != 0:
+        tmp+='\t\t<condPageBreak height="15"/>\n'
+        tmp+='\t\t<para style="P2" spaceBefore="5"><b>Total de Matérias:</b> ' + str(pauta_dic["total_materias"]) + '</para>\n'
+
     for dic in pauta_dic["lst_requerimentos_vereadores"]:
-        tmp+='\t\t<para style="P2" spaceBefore="20"><b><u>' + str(dic['vereador']) + ' [' + str(dic['qtde_materias']) + ']</u></b></para>\n'
+        tmp+='\t\t<para style="P2" spaceBefore="20"><b><u>' + str(dic['vereador']) + ' (' + str(dic['cargo']) + ' ' + str(dic['nom_parlamentar']) + ') ' + ' [' +str(dic['qtde_materias']) + ']</u></b></para>\n'
         for item in dic['materias']:
             tmp+='\t\t<para style="P2" spaceBefore="5"><font color="#126e90"><b>' + item['id_materia'] + '</b></font> - ' + escape(item['txt_ementa']) + '</para>\n'
     

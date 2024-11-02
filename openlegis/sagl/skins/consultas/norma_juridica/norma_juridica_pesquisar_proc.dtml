@@ -184,25 +184,17 @@
      <div class="btn-group btn-group-sm">
       <dtml-if "hasattr(sapl_documentos.norma_juridica,texto_original)">
           <a class="btn btn-primary" href="<dtml-var portal_url>/consultas/norma_juridica/pasta_digital/?cod_norma=<dtml-var cod_norma>&action=pasta" target="_blank"><i class="far fa-folder-open"></i> Pasta Digital</a>
-          <dtml-comment>
-          <a class="btn btn-primary" href="<dtml-var portal_url>/pysc/download_norma_pysc?cod_norma=<dtml-var cod_norma>&texto_original=1" target="_blank">
+          <a class="btn btn-secondary" href="<dtml-var portal_url>/pysc/download_norma_pysc?cod_norma=<dtml-var cod_norma>&texto_original=1" target="_blank">
             <dtml-if expr="zsql.assinatura_documento_obter_zsql(codigo=cod_norma, tipo_doc='norma',ind_assinado=1, cod_usuario=None)">
               <i class="fa fa-certificate"></i> Texto Original
             <dtml-else>
               <i class="fa fa-fw fa-file-pdf"></i> Texto Original
             </dtml-if>
           </a>
-          </dtml-comment>
       </dtml-if>
-      <dtml-comment>
-      <dtml-if "hasattr(sapl_documentos.norma_juridica,texto_odt) and hasattr(sapl_documentos.norma_juridica,texto_consolidado)">
-           <dtml-let documento_odt="getattr(sapl_documentos.norma_juridica,texto_odt).absolute_url">         
-               <a class="btn btn-primary" target="_blank" href="<dtml-var portal_url>/generico/viewerJS/?cod_norma=<dtml-var cod_norma>#<dtml-var documento_odt>?<dtml-var expr="ZopeTime().timeTime()"> "> <i class="fa fa-fw fa-file-code"></i> Texto Compilado</a>     
-           </dtml-let>
-      <dtml-elif "not hasattr(sapl_documentos.norma_juridica,texto_odt) and hasattr(sapl_documentos.norma_juridica,texto_consolidado)">
-         <a class="btn btn-primary" href="<dtml-var portal_url>/pysc/download_norma_pysc?cod_norma=<dtml-var cod_norma>&texto_consolidado=1" target="_blank"> <i class="fa fa-fw fa-file-code"></i> Texto Compilado</a>
+      <dtml-if "hasattr(sapl_documentos.norma_juridica,texto_consolidado)">
+         <a class="btn btn-light" href="<dtml-var portal_url>/pysc/download_norma_pysc?cod_norma=<dtml-var cod_norma>&texto_consolidado=1" target="_blank"> <i class="fa fa-fw fa-file-pdf"></i> Texto Compilado</a>
       </dtml-if> 
-      </dtml-comment>
      </div>
     </div>
  </div>

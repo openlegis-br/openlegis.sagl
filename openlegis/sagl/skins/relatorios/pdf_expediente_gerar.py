@@ -67,9 +67,8 @@ def pauta(pauta_dic):
     tmp+='\t\t\t<font color="white"> </font>\n'
     tmp+='\t\t</para>\n'
 
-    if pauta_dic["lst_requerimentos_vereadores"] != []:
-        tmp+='\t\t<condPageBreak height="10mm"/>\n'
-        tmp+='\t\t<para style="P1" spaceBefore="10" spaceAfter="10"><b><u>MATÉRIAS DO EXPEDIENTE</u></b></para>\n'
+    tmp+='\t\t<condPageBreak height="10mm"/>\n'
+    tmp+='\t\t<para style="P1" spaceBefore="10" spaceAfter="10"><b><u>MATÉRIAS DO EXPEDIENTE</u></b></para>\n'
 
     if pauta_dic["total_indicacoes"] != 0:
         tmp+='\t\t<condPageBreak height="15"/>\n'
@@ -106,7 +105,7 @@ def principal(dic_cabecalho, dic_rodape, imagem, pauta_dic):
     tmp+='<?xml version="1.0" encoding="utf-8" standalone="no" ?>\n'
     tmp+='<!DOCTYPE document SYSTEM "rml_1_0.dtd">\n'
     tmp+='<document filename="pauta_expediente.pdf">\n'
-    tmp+='\t<template pageSize="(21cm, 29.7cm)" title="Pauta de Leitura no Expediente" author="SAGL" allowSplitting="20">\n'
+    tmp+='\t<template pageSize="(21cm, 29.7cm)" title="Matérias do Expediente" author="SAGL" allowSplitting="20">\n'
     tmp+='\t\t<pageTemplate id="first">\n'
     tmp+='\t\t\t<pageGraphics>\n'
     tmp+=cabecalho(dic_cabecalho,imagem)

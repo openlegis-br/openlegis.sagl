@@ -15,6 +15,10 @@ lst_autores_mocoes = []
 lst_mocoes = []
 lst_qtde_mocoes = []
 
+lst_autores_pedidos = []
+lst_pedidos = []
+lst_qtde_pedidos = []
+
 lst_pauta = []
 lst_urgencia = []
 
@@ -165,7 +169,7 @@ for sessao in metodo:
                                   dic_autores["nom_parlamentar"] = 'Do Vereador' + ' ' + autoria['nom_autor_join']
                                if parlamentar.sex_parlamentar == 'F':
                                   dic_autores["nom_parlamentar"] = 'Da Vereadora' + ' ' + autoria['nom_autor_join']
-                    else:
+                    elif autoria.ind_primeiro_autor == 0:
                        dic_materia["cod_autor"] = int(autoria.cod_autor)
                        dic_autores["cod_autor"] = int(autoria.cod_autor)
                        for autor in context.zsql.autor_obter_zsql(cod_autor = autoria.cod_autor):
@@ -174,12 +178,13 @@ for sessao in metodo:
                                   dic_autores["nom_parlamentar"] = 'Do Vereador' + ' ' + autoria['nom_autor_join']
                                if parlamentar.sex_parlamentar == 'F':
                                   dic_autores["nom_parlamentar"] = 'Da Vereadora' + ' ' + autoria['nom_autor_join']
+                    break
                 lst_autores_indicacoes.append(dic_autores)
                 lst_indicacoes.append(dic_materia)
                 lst_qtde_indicacoes.append(materia.cod_materia)
              if materia.des_tipo_materia == 'Requerimento':
                 dic_autores = {}
-                for autoria in context.zsql.autoria_obter_zsql(cod_materia=materia.cod_materia, ind_primeiro_autor = 1):
+                for autoria in context.zsql.autoria_obter_zsql(cod_materia=materia.cod_materia):
                     if autoria.ind_primeiro_autor == 1:
                        dic_materia["cod_autor"] = int(autoria.cod_autor)
                        dic_autores["cod_autor"] = int(autoria.cod_autor)
@@ -189,7 +194,7 @@ for sessao in metodo:
                                   dic_autores["nom_parlamentar"] = 'Do Vereador' + ' ' + autoria['nom_autor_join']
                                if parlamentar.sex_parlamentar == 'F':
                                   dic_autores["nom_parlamentar"] = 'Da Vereadora' + ' ' + autoria['nom_autor_join']
-                    else:
+                    elif autoria.ind_primeiro_autor == 0:
                        dic_materia["cod_autor"] = int(autoria.cod_autor)
                        dic_autores["cod_autor"] = int(autoria.cod_autor)
                        for autor in context.zsql.autor_obter_zsql(cod_autor = autoria.cod_autor):
@@ -198,12 +203,13 @@ for sessao in metodo:
                                   dic_autores["nom_parlamentar"] = 'Do Vereador' + ' ' + autoria['nom_autor_join']
                                if parlamentar.sex_parlamentar == 'F':
                                   dic_autores["nom_parlamentar"] = 'Da Vereadora' + ' ' + autoria['nom_autor_join']
+                    break
                 lst_autores_requerimentos.append(dic_autores)
                 lst_requerimentos.append(dic_materia)
                 lst_qtde_requerimentos.append(materia.cod_materia)
              if materia.des_tipo_materia == 'Moção':
                 dic_autores = {}
-                for autoria in context.zsql.autoria_obter_zsql(cod_materia=materia.cod_materia, ind_primeiro_autor = 1):
+                for autoria in context.zsql.autoria_obter_zsql(cod_materia=materia.cod_materia):
                     if autoria.ind_primeiro_autor == 1:
                        dic_materia["cod_autor"] = int(autoria.cod_autor)
                        dic_autores["cod_autor"] = int(autoria.cod_autor)
@@ -213,7 +219,7 @@ for sessao in metodo:
                                   dic_autores["nom_parlamentar"] = 'Do Vereador' + ' ' + autoria['nom_autor_join']
                                if parlamentar.sex_parlamentar == 'F':
                                   dic_autores["nom_parlamentar"] = 'Da Vereadora' + ' ' + autoria['nom_autor_join']
-                    else:
+                    elif autoria.ind_primeiro_autor == 0:
                        dic_materia["cod_autor"] = int(autoria.cod_autor)
                        dic_autores["cod_autor"] = int(autoria.cod_autor)
                        for autor in context.zsql.autor_obter_zsql(cod_autor = autoria.cod_autor):
@@ -222,10 +228,35 @@ for sessao in metodo:
                                   dic_autores["nom_parlamentar"] = 'Do Vereador' + ' ' + autoria['nom_autor_join']
                                if parlamentar.sex_parlamentar == 'F':
                                   dic_autores["nom_parlamentar"] = 'Da Vereadora' + ' ' + autoria['nom_autor_join']
+                    break
                 lst_autores_mocoes.append(dic_autores)
                 lst_mocoes.append(dic_materia)
                 lst_qtde_mocoes.append(materia.cod_materia)
-
+             if materia.des_tipo_materia == 'Pedido de Informação':
+                dic_autores = {}
+                for autoria in context.zsql.autoria_obter_zsql(cod_materia=materia.cod_materia):
+                    if autoria.ind_primeiro_autor == 1:
+                       dic_materia["cod_autor"] = int(autoria.cod_autor)
+                       dic_autores["cod_autor"] = int(autoria.cod_autor)
+                       for autor in context.zsql.autor_obter_zsql(cod_autor = autoria.cod_autor):
+                           for parlamentar in context.zsql.parlamentar_obter_zsql(cod_parlamentar=autor.cod_parlamentar):
+                               if parlamentar.sex_parlamentar == 'M':
+                                  dic_autores["nom_parlamentar"] = 'Do Vereador' + ' ' + autoria['nom_autor_join']
+                               if parlamentar.sex_parlamentar == 'F':
+                                  dic_autores["nom_parlamentar"] = 'Da Vereadora' + ' ' + autoria['nom_autor_join']
+                    elif autoria.ind_primeiro_autor == 0:
+                       dic_materia["cod_autor"] = int(autoria.cod_autor)
+                       dic_autores["cod_autor"] = int(autoria.cod_autor)
+                       for autor in context.zsql.autor_obter_zsql(cod_autor = autoria.cod_autor):
+                           for parlamentar in context.zsql.parlamentar_obter_zsql(cod_parlamentar=autor.cod_parlamentar):
+                               if parlamentar.sex_parlamentar == 'M':
+                                  dic_autores["nom_parlamentar"] = 'Do Vereador' + ' ' + autoria['nom_autor_join']
+                               if parlamentar.sex_parlamentar == 'F':
+                                  dic_autores["nom_parlamentar"] = 'Da Vereadora' + ' ' + autoria['nom_autor_join']
+                    break
+                lst_autores_pedidos.append(dic_autores)
+                lst_pedidos.append(dic_materia)
+                lst_qtde_pedidos.append(materia.cod_materia)
   # Ordem do Dia
   for ordem in context.zsql.ordem_dia_obter_zsql(cod_sessao_plen=sessao.cod_sessao_plen, ind_excluido=0):
     dic = {}
@@ -261,19 +292,25 @@ for sessao in metodo:
       lst_pareceres = []
       for relatoria in context.zsql.relatoria_obter_zsql(cod_materia=ordem.cod_materia):
           dic_parecer = {}
-          comissao = context.zsql.comissao_obter_zsql(cod_comissao=relatoria.cod_comissao)[0]
-          relator = context.zsql.parlamentar_obter_zsql(cod_parlamentar=relatoria.cod_parlamentar)[0]
-          dic_parecer['relatoria'] = 'Relatoria: ' + relator.nom_parlamentar
-          dic_parecer['comissao'] = comissao.nom_comissao
-          dic_parecer['conclusao'] = ''
-          if relatoria.tip_conclusao == 'F':
-             dic_parecer['conclusao'] = 'Favorável à aprovação da matéria.'
-          elif relatoria.tip_conclusao == 'C':
-             dic_parecer['conclusao'] = 'Contrário à aprovação da matéria.'
-          dic_parecer["id_parecer"] = '<link href="' + context.sapl_documentos.absolute_url() + '/parecer_comissao/' + str(relatoria.cod_relatoria) + '_parecer.pdf' + '">' + 'Parecer ' + comissao.sgl_comissao + ' nº ' + str(relatoria.num_parecer) + '/' + str(relatoria.ano_parecer) + '</link>'
-          if relatoria.num_parecer != None and int(ordem.tip_turno) != 4 :
-             lst_pareceres.append(dic_parecer)
-             lst_qtde_pareceres.append(relatoria.cod_relatoria)
+          for tipo in context.zsql.tipo_fim_relatoria_obter_zsql(tip_fim_relatoria = relatoria.tip_fim_relatoria):
+              if tipo.des_fim_relatoria!='Aguardando apreciação':
+                 comissao = context.zsql.comissao_obter_zsql(cod_comissao=relatoria.cod_comissao)[0]
+                 relator = context.zsql.parlamentar_obter_zsql(cod_parlamentar=relatoria.cod_parlamentar)[0]
+                 if relator.sex_parlamentar == 'M':
+                    dic_parecer['relatoria'] = 'do relator ' + relator.nom_parlamentar
+                 if relator.sex_parlamentar == 'F':
+                    dic_parecer['relatoria'] = 'da relatora ' + relator.nom_parlamentar
+                 dic_parecer['comissao'] = comissao.nom_comissao
+                 dic_parecer['resultado'] = tipo.des_fim_relatoria.lower()
+                 dic_parecer['conclusao'] = ''
+                 if relatoria.tip_conclusao == 'F':
+                    dic_parecer['conclusao'] = 'voto favorável'
+                 elif relatoria.tip_conclusao == 'C':
+                    dic_parecer['conclusao'] = 'voto contrário'
+                 dic_parecer["id_parecer"] = '<link href="' + context.sapl_documentos.absolute_url() + '/parecer_comissao/' + str(relatoria.cod_relatoria) + '_parecer.pdf' + '">' + 'Parecer ' + comissao.sgl_comissao + ' nº ' + str(relatoria.num_parecer) + '/' + str(relatoria.ano_parecer) + '</link>'
+                 if relatoria.num_parecer != None and int(ordem.tip_turno) != 4 :
+                    lst_pareceres.append(dic_parecer)
+                    lst_qtde_pareceres.append(relatoria.cod_relatoria)
       dic["pareceres"] = lst_pareceres
       dic["parecer"] = len(lst_qtde_pareceres)
 
@@ -354,9 +391,10 @@ for sessao in metodo:
        lst_pauta.append(dic)
 
 # ordena materias por antiguidade
-lst_indicacoes.sort(key=lambda dic: dic['num_ident_basica'])
-lst_requerimentos.sort(key=lambda dic: dic['num_ident_basica'])
-lst_mocoes.sort(key=lambda dic: dic['num_ident_basica'])
+lst_indicacoes.sort(key=lambda dic_materia: dic_materia['num_ident_basica'])
+lst_requerimentos.sort(key=lambda dic_materia: dic_materia['num_ident_basica'])
+lst_mocoes.sort(key=lambda dic_materia: dic_materia['num_ident_basica'])
+lst_pedidos.sort(key=lambda dic_materia: dic_materia['num_ident_basica'])
 
 # setar apenas uma ocorrência de nome parlamentar
 lst_autores_indicacoes = [
@@ -373,6 +411,11 @@ lst_autores_mocoes = [
     e
     for i, e in enumerate(lst_autores_mocoes)
     if lst_autores_mocoes.index(e) == i
+]
+lst_autores_pedidos = [
+    e
+    for i, e in enumerate(lst_autores_pedidos)
+    if lst_autores_pedidos.index(e) == i
 ]
 
 lst_indicacoes_vereadores = []
@@ -426,8 +469,26 @@ for autor in lst_autores_mocoes:
     dic_vereador['qtde_materias'] = len(lst_qtde_materias)
     lst_mocoes_vereadores.append(dic_vereador)
 
-pauta_dic["lst_qtde_requerimentos"] = len(lst_qtde_requerimentos)
+lst_pedidos_vereadores = []
+for autor in lst_autores_pedidos:
+    dic_vereador = {}
+    dic_vereador['vereador'] = autor.get('nom_parlamentar',autor)
+    lst_materias=[]
+    lst_qtde_materias=[]
+    for materia in lst_pedidos:
+        dic_materias = {}
+        if materia.get('cod_autor',materia) == autor.get('cod_autor',autor):
+           dic_materias['id_materia'] = materia.get('id_materia',materia)
+           dic_materias['txt_ementa'] = materia.get('txt_ementa',materia)
+           lst_materias.append(dic_materias)
+           lst_qtde_materias.append(materia.get('cod_materia',materia))
+    dic_vereador['materias'] = lst_materias
+    dic_vereador['qtde_materias'] = len(lst_qtde_materias)
+    lst_pedidos_vereadores.append(dic_vereador)
+
 pauta_dic["lst_materia_apresentada"] = lst_materia_apresentada
+
+pauta_dic["lst_qtde_requerimentos"] = len(lst_qtde_requerimentos)
 pauta_dic["lst_autores_requerimentos"] = lst_autores_requerimentos
 pauta_dic["lst_requerimentos_vereadores"] = lst_requerimentos_vereadores
 
@@ -438,6 +499,10 @@ pauta_dic["lst_mocoes_vereadores"] = lst_mocoes_vereadores
 pauta_dic["lst_qtde_indicacoes"] = len(lst_qtde_indicacoes)
 pauta_dic["lst_autores_indicacoes"] = lst_autores_indicacoes
 pauta_dic["lst_indicacoes_vereadores"] = lst_indicacoes_vereadores
+
+pauta_dic["lst_qtde_pedidos"] = len(lst_qtde_pedidos)
+pauta_dic["lst_autores_pedidos"] = lst_autores_pedidos
+pauta_dic["lst_pedidos_vereadores"] = lst_pedidos_vereadores
 
 pauta_dic["lst_pauta"] = lst_pauta
 pauta_dic["lst_urgencia"] = lst_urgencia

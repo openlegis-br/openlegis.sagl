@@ -288,6 +288,13 @@ $(document).ready(function() {
       "language": {
           "url": '<dtml-var portal_url>/assets/libs/datatables.net/plugins/i18n/pt-BR.json',
           },
+        "bStateSave": true,
+        "fnStateSave": function (oSettings, oData) {
+            localStorage.setItem('ordemDataTable', JSON.stringify(oData));
+        },
+        "fnStateLoad": function (oSettings) {
+            return JSON.parse(localStorage.getItem('ordemDataTable'));
+        },
   });
   var table = $('#ordem_dia').DataTable()
    table.on('row-reorder.dt', function (dragEvent, data, nodes) {

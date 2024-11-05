@@ -87,13 +87,15 @@ def criar_documento(numero,ano,data,tip_documento,hdn_num_protocolo,txt_interess
        odt.manage_permission('View', roles=['Manager','Authenticated'], acquire=1)
 
     anexos = context.pysc.anexo_peticao_pysc(str(cod_peticao),listar=True)
+    i = 0
     for item in anexos:
+        i = i +1
         id_anexo = str(item).split('.')[0] + '.pdf'
         arquivo = context.sapl_documentos.peticao[id_anexo]
         nom_doc = arquivo.title
         tipo_doc_ac = int(arquivo.tip_documento)
         data_doc = container.last_modified(arquivo)
-        data = DateTime(data_doc, datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
+        data = DateTime(datefmt='international').strftime('%Y-%m-%d %H:%M:'+str(i).zfill(2))
         context.zsql.documento_acessorio_administrativo_incluir_zsql(tip_documento=tipo_doc_ac, cod_documento=int(cod_documento), nom_autor_documento=txt_interessado, dat_documento=data, nom_documento=nom_doc)
         for cod_acessorio in context.zsql.documento_acessorio_administrativo_incluido_codigo_obter_zsql():
             id_pdf = str(cod_acessorio.cod_documento_acessorio)+'.pdf'
@@ -109,18 +111,18 @@ def criar_documento(numero,ano,data,tip_documento,hdn_num_protocolo,txt_interess
     if context.dbcon_logs:
        context.zsql.logs_registrar_zsql(usuario = REQUEST['AUTHENTICATED_USER'].getUserName(), data = DateTime(datefmt='international').strftime('%Y-%m-%d %H:%M:%S'), modulo = 'peticionamento_eletronico', metodo = 'documento_administrativo_incluir_zsql', cod_registro = cod_documento, IP = context.pysc.get_ip()) 
 
-    return tramitar_documento(cod_documento)
+    return tramitar_documento(cod_documento, i)
 
-def tramitar_documento(cod_documento):
+def tramitar_documento(cod_documento, i):
     cod_unid_tram_local = int(context.sapl_documentos.props_sagl.origem)
     cod_unid_tram_dest = int(lst_unidade)            
     for status in context.zsql.status_tramitacao_administrativo_obter_zsql(sgl_status='PRT'):
         cod_status = status.cod_status
     cod_usuario_corrente = cod_usuario
-    hr_tramitacao = DateTime(datefmt='international').strftime('%d/%m/%Y às %H:%M')
+    hr_tramitacao = DateTime(datefmt='international').strftime('%d/%m/%Y às %H:%M:'+str(i+1).zfill(2))
     txt_tramitacao = '<p>Protocolo nº ' + str(hdn_num_protocolo) + '/' + str(ano) + ' autuado em ' + hr_tramitacao +'</p>'
     if cod_unid_tram_local != None and cod_unid_tram_dest != None and cod_status != None:
-        context.zsql.tramitacao_administrativo_incluir_zsql(cod_documento=cod_documento, dat_tramitacao=DateTime(datefmt='international').strftime('%Y-%m-%d %H:%M:%S'), cod_unid_tram_local=cod_unid_tram_local, cod_usuario_local=cod_usuario_corrente, cod_unid_tram_dest=cod_unid_tram_dest, dat_encaminha=DateTime(datefmt='international').strftime('%Y-%m-%d %H:%M:%S'), cod_status=cod_status, txt_tramitacao=txt_tramitacao, ind_urgencia=0, ind_ult_tramitacao=1)
+        context.zsql.tramitacao_administrativo_incluir_zsql(cod_documento=cod_documento, dat_tramitacao=DateTime(datefmt='international').strftime('%Y-%m-%d %H:%M:'+str(i+1).zfill(2)), cod_unid_tram_local=cod_unid_tram_local, cod_usuario_local=cod_usuario_corrente, cod_unid_tram_dest=cod_unid_tram_dest, dat_encaminha=DateTime(datefmt='international').strftime('%Y-%m-%d %H:%M:%S'), cod_status=cod_status, txt_tramitacao=txt_tramitacao, ind_urgencia=0, ind_ult_tramitacao=1)
 
     for tramitacao in context.zsql.tramitacao_administrativo_incluida_codigo_obter_zsql():
         cod_tramitacao = tramitacao.cod_tramitacao

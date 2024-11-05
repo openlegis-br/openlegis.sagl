@@ -70,6 +70,16 @@ class ProcessoAdm(grok.View):
                    dic['title'] = 'Tramitação (' + tram.des_status + ')'
                    lst_arquivos.append(dic)
 
+            for mat in self.context.zsql.documento_administrativo_materia_obter_zsql(cod_documento=documento.cod_documento, ind_excluido=0):
+                materia = self.context.zsql.materia_obter_zsql(cod_materia=mat.cod_materia,ind_excluido=0)[0]
+                if hasattr(self.context.sapl_documentos.materia, str(mat.cod_materia) + '_texto_integral.pdf'):
+                   dic = {}
+                   dic["data"] = DateTime(datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
+                   dic['path'] = self.context.sapl_documentos.materia
+                   dic['file'] = str(mat.cod_materia) + '_texto_integral.pdf'
+                   dic['title'] = str(materia.sgl_tipo_materia) + ' ' + str(materia.num_ident_basica) + '/' + str(materia.ano_ident_basica) +  '(mat. vinculada)'
+                   lst_arquivos.append(dic)
+
         lst_arquivos.sort(key=lambda dic: dic['data'])
 
         lst_arquivos = [(i + 1, j) for i, j in enumerate(lst_arquivos)]

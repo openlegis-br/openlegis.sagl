@@ -55,7 +55,7 @@
   <dtml-if sequence-end>
    </table>
 
-    <div id="panelBtn" class="d-print-none" style="margin-bottom: 20px;">
+    <div id="panelBtn" class="d-print-none">
       <div class="row">
          <div class="col-sm-12 mt-2"></div>
       </div>
@@ -69,13 +69,12 @@
 
 <dtml-var js_slot>
 <script>
-/* Formatting function for row details - modify as you need */
 $(document).ready(function() {
     var table = $('#jdTable').DataTable( {
         "responsive": true,
+        "order": [[ 0, "asc" ], [ 1, "asc" ]],
         "lengthMenu": [[10, 25, 50, 100], [10, 25, 50, 100]],
         "lengthChange": true,
-        "order": [[ 0, "asc" ], [ 1, "asc" ]],
         "buttons": [
             {
                 extend: 'collection',
@@ -89,7 +88,7 @@ $(document).ready(function() {
                            {
                              extend:    'pdfHtml5',
                              download: 'open',
-                             text:      '<i class="fa fa-file-adobe"></i> PDF',
+                             text:      '<i class="fa fa-file-pdf"></i> PDF',
                              titleAttr: 'PDF'
                            },
                            {
@@ -98,7 +97,7 @@ $(document).ready(function() {
                              titleAttr: 'Impressão'
                            },
                          ],
-               className: '',
+               className: 'btn-light',
                dropup: true,
                autoClose: true,
                fade: true

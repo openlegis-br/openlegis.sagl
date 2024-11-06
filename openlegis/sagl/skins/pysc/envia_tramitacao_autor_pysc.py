@@ -53,9 +53,7 @@ for materia in context.zsql.materia_obter_zsql(cod_materia=cod_materia):
 
 remetente = email_casa
 
-cod_materia_base64 = context.pysc.b64encode_pysc(codigo=str(cod_materia))
-
-linkMat = request.SERVER_URL+"/consultas/materia/materia_mostrar_proc?cod_materia=" + str(cod_materia_base64)
+linkMat = request.SERVER_URL+"/consultas/materia/materia_mostrar_proc?cod_materia=" + str(cod_materia)
 
 destinatarios=[]
 for item in lista_codigo:
@@ -87,8 +85,10 @@ for dic in destinatarios:
 
    mMsg = MIMEText(html, 'html', "utf-8")
 
+   mFrom = remetente
+   
    mTo = dic['end_email']
 
    mSubj = projeto +" - Aviso de tramitação em " + data_registro
 
-   mailhost.send(mMsg, mTo, remetente, subject=mSubj)
+   mailhost.send(mMsg, mTo, mFrom, subject=mSubj)

@@ -71,6 +71,10 @@ def initialize(context):
     allow_module('xml')
     allow_module('xml.sax')
     allow_module('xml.sax.saxutils')
+    allow_module('email.encoders')
+    allow_module('email.utils')
+    allow_module('email.mime.application')
+    allow_module('email.mime.multipart')
     allow_module('email.mime.text')
     allow_module('AccessControl.PermissionRole')
     allow_module('collections.Counter')
@@ -79,7 +83,6 @@ def initialize(context):
     allow_module('reportlab.lib.utils')
     allow_module('operator')
     allow_module('locale')
-
 
     tools = (SAGLTool.SAGLTool,)
     ToolInit('SAGL Tool',

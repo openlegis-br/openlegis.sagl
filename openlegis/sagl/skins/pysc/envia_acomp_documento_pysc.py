@@ -6,6 +6,7 @@
 ##bind subpath=traverse_subpath
 ##parameters=cod_documento
 ##title=
+from xml.sax.saxutils import escape
 from Products.PythonScripts.standard import url_unquote
 from email.mime.text import MIMEText
 request=context.REQUEST
@@ -85,9 +86,11 @@ if txt_nome != '' and end_email != '':
    """.format(proc_adm=proc_adm, ementa=ementa, nom_autor=nom_autor, unidade_local=unidade_local, txt_nome=txt_nome, status=status, data_registro=data_registro, linkDoc=linkDoc, casa_legislativa=casa_legislativa)
 
    mMsg = MIMEText(html, 'html', "utf-8")
+   
+   mFrom = remetente
  
    mTo = end_email
 
    mSubj = "Processo Administrativo - " + proc_adm +" - Notificação de Despacho em " + data_registro
 
-   mailhost.send(mMsg, mTo, remetente, subject=mSubj)
+   mailhost.send(mMsg, mTo, mFrom, subject=mSubj)

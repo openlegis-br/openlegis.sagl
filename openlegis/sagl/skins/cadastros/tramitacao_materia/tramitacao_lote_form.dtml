@@ -25,7 +25,7 @@
                             </div>
                             <!-- End Left sidebar -->
 
-                            <form class="needs-validation" name="tramitacao_form" id="tramitacao_form" method="post" action="tramitacao_lote_salvar_pysc" novalidate>
+                            <form class="needs-validation" name="tramitacao_form" id="tramitacao_form" method="post" action="tramitacao_lote_salvar_pysc" enctype="multipart/form-data" novalidate>
                             <!-- Right Sidebar -->
                             <div class="row">
                                 <div class="col-12 mt-3" role="toolbar">
@@ -217,14 +217,18 @@
 						      </dtml-in>    
 						    </div>     
 						  </div> 
-
 						  <div class="row">
 						    <div class="col-12 mb-3">
 						      <label class="form-label" for="txa_txt_tramitacao">Texto do Despacho</label>
 						      <textarea class="form-control" name="txa_txt_tramitacao" id="txa_txt_tramitacao" rows="1"><dtml-var txt_tramitacao missing></textarea>
 						    </div>
 						  </div>
-
+                                                 <div class="row">
+                                                    <div class="col-12 mb-2">
+                                                      <label for="file_nom_anexo" class="form-label d-block">Anexo do Despacho</label>
+                                                      <input type="file" class="form-control" id="file_nom_anexo" name="file_nom_anexo" accept="application/pdf">
+                                                    </div>
+                                                 </div>
 						 <div class="row">
 						   <div class="col-6 text-start mt-2">
 						    <button type="submit" id="btnTramitar" class="btn btn-primary text-white">Tramitar Processos</button>

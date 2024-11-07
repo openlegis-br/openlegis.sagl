@@ -4,7 +4,7 @@
 ##bind namespace=
 ##bind script=script
 ##bind subpath=traverse_subpath
-##parameters=check_tram, txt_dat_tramitacao, lst_cod_unid_tram_local, hdn_cod_usuario_local, lst_cod_unid_tram_dest, lst_cod_usuario_dest, lst_cod_status, rad_ind_urgencia, txa_txt_tramitacao, txt_dat_fim_prazo
+##parameters=check_tram, txt_dat_tramitacao, lst_cod_unid_tram_local, hdn_cod_usuario_local, lst_cod_unid_tram_dest, lst_cod_usuario_dest, lst_cod_status, rad_ind_urgencia, txa_txt_tramitacao, txt_dat_fim_prazo, file_nom_anexo
 ##title=
 ##
 from Products.CMFCore.utils import getToolByName
@@ -12,7 +12,6 @@ st = getToolByName(context, 'portal_sagl')
 
 REQUEST = context.REQUEST
 RESPONSE = REQUEST.RESPONSE
-session = REQUEST.SESSION
 
 v=str(check_tram)
 if v.isdigit():
@@ -69,7 +68,6 @@ for item in cod_materia:
         dic_novas['des_status'] = tramitacao.des_status
         lst_novas.append(dic_novas)
 
-
 for dic in lst_novas:
     #carimbo deferimento
     #if dic['des_status'] == 'Deferido':
@@ -87,6 +85,11 @@ for dic in lst_novas:
     #hdn_url = '/tramitacao_mostrar_proc?hdn_cod_tramitacao=' + str(dic['cod_tramitacao'])+ '&hdn_cod_materia=' + str(dic['cod_materia'])+'&lote=1'
     hdn_url = context.portal_url() + '/cadastros/tramitacao_materia/itens_enviados_html'
     context.relatorios.pdf_tramitacao_preparar_pysc(hdn_cod_tramitacao = dic['cod_tramitacao'], hdn_url = hdn_url)
+    arquivoPdf=str(dic['cod_tramitacao'])+"_tram_anexo1.pdf"
+    if file_nom_anexo != '' and len(file_nom_anexo.read())!=0:
+       context.sapl_documentos.materia.tramitacao.manage_addFile(id=arquivoPdf, content_type='application/pdf', file=file_nom_anexo, title='Anexo de Tramitação')
+       if hasattr(context.sapl_documentos.materia.tramitacao,arquivoPdf):
+          context.cadastros.tramitacao_materia.tramitacao_juntar_pdf(cod_tramitacao=dic['cod_tramitacao'])
 
 mensagem = 'Processos legislativos tramitados com sucesso!'
 mensagem_obs = ''

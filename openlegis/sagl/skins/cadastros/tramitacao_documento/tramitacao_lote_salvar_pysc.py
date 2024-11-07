@@ -36,15 +36,9 @@ hdn_dat_encaminha = DateTime(datefmt='international').strftime('%Y-%m-%d %H:%M:%
 
 if lst_ultimas != []:
    for dic in lst_ultimas:
-       try:
-           context.zsql.trans_begin_zsql()
-           context.zsql.tramitacao_administrativo_ind_ultima_atualizar_zsql(cod_documento = dic['cod_documento'], cod_tramitacao = dic['cod_tramitacao'], ind_ult_tramitacao = 0)
-           context.zsql.tramitacao_adm_registrar_recebimento_zsql(cod_tramitacao = dic['cod_tramitacao'], cod_usuario_corrente = hdn_cod_usuario_local)    
-           context.zsql.trans_commit_zsql()
-           context.pysc.atualiza_indicador_tramitacao_documento_pysc(cod_documento = dic['cod_documento'], cod_status = lst_cod_status) 
-       except:
-           context.zsql.trans_rollback_zsql()
-
+       context.zsql.tramitacao_administrativo_ind_ultima_atualizar_zsql(cod_documento = dic['cod_documento'], cod_tramitacao = dic['cod_tramitacao'], ind_ult_tramitacao = 0)
+       context.zsql.tramitacao_adm_registrar_recebimento_zsql(cod_tramitacao = dic['cod_tramitacao'], cod_usuario_corrente = hdn_cod_usuario_local)
+       context.pysc.atualiza_indicador_tramitacao_documento_pysc(cod_documento = dic['cod_documento'], cod_status = lst_cod_status)
 
 if txt_dat_fim_prazo==None or txt_dat_fim_prazo=='':
    data_atual = DateTime(datefmt='international')
@@ -58,16 +52,10 @@ elif txt_dat_fim_prazo != '':
    txt_dat_fim_prazo = context.pysc.data_converter_pysc(data=txt_dat_fim_prazo)
 
 for item in cod_documento:
-    try:
-       context.zsql.trans_begin_zsql()  
-       context.zsql.tramitacao_administrativo_incluir_zsql(cod_documento = item, dat_tramitacao = hdn_dat_encaminha, cod_unid_tram_local = lst_cod_unid_tram_local, cod_usuario_local = hdn_cod_usuario_local, cod_unid_tram_dest = lst_cod_unid_tram_dest, cod_usuario_dest = lst_cod_usuario_dest, dat_encaminha = hdn_dat_encaminha, cod_status = lst_cod_status, txt_tramitacao = txa_txt_tramitacao, dat_fim_prazo = txt_dat_fim_prazo, ind_ult_tramitacao = 1)
-       context.zsql.trans_commit_zsql()
-    except:
-       context.zsql.trans_rollback_zsql() 
+    context.zsql.tramitacao_administrativo_incluir_zsql(cod_documento = item, dat_tramitacao = hdn_dat_encaminha, cod_unid_tram_local = lst_cod_unid_tram_local, cod_usuario_local = hdn_cod_usuario_local, cod_unid_tram_dest = lst_cod_unid_tram_dest, cod_usuario_dest = lst_cod_usuario_dest, dat_encaminha = hdn_dat_encaminha, cod_status = lst_cod_status, txt_tramitacao = txa_txt_tramitacao, dat_fim_prazo = txt_dat_fim_prazo, ind_ult_tramitacao = 1)
 
     if context.dbcon_logs and (item != '' and item != None):
        context.zsql.logs_registrar_zsql(usuario = REQUEST['AUTHENTICATED_USER'].getUserName(), data = DateTime(datefmt='international').strftime('%Y-%m-%d %H:%M:%S'), modulo = 'tramitacao_documento', metodo = 'tramitacao_lote_salvar_pysc', cod_registro = item, IP = context.pysc.get_ip())
-
 
 lst_novas = []
 for item in cod_documento:

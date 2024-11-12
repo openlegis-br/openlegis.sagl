@@ -55,13 +55,13 @@
  <input type="hidden" name="hdn_cod_norma" value="<dtml-var cod_norma missing>"/>
 
  <div class="row">
-  <div class="col-8 col-sm-6">
+  <div class="col-12 col-sm-6">
     <legend class="font-size-16">Dados Básicos</legend>
   </div>
-  <div class="col-4 col-sm-6 text-start text-sm-end">
-    <div class="custom-control custom-switch">
-      <input type="checkbox" class="custom-control-input" name ="chk_ind_publico" id="chk_ind_publico" <dtml-if expr="_.has_key('cod_norma') and ind_publico==1">checked</dtml-if>>
-      <label class="custom-control-label" for="chk_ind_publico"><span class="small">Acesso Público</span></label>
+  <div class="col-12 col-sm-6 d-inline-flex justify-content-end">
+    <div class="form-check form-switch">
+      <input type="checkbox" class="form-check-input" name="chk_ind_publico" id="chk_ind_publico" <dtml-if expr="_.has_key('cod_norma') and ind_publico==1">checked<dtml-elif expr="not _.has_key('cod_norma')">checked</dtml-if>>
+      <label class="form-check-label" for="chk_ind_publico"><span class="small">Acesso Público</span></label>
     </div>
   </div> 
   

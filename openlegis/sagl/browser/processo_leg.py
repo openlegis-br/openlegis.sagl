@@ -33,7 +33,6 @@ class ProcessoLeg(grok.View):
             processo_integral = materia.sgl_tipo_materia+'-'+str(materia.num_ident_basica)+'-'+str(materia.ano_ident_basica)+'.pdf'
             id_processo = materia.sgl_tipo_materia+' '+str(materia.num_ident_basica)+'/'+str(materia.ano_ident_basica)
             id_capa = 'capa_' + materia.sgl_tipo_materia+'-'+str(materia.num_ident_basica)+'-'+str(materia.ano_ident_basica)
-            #id_capa = str(uuid.uuid4().hex)
             id_arquivo = "%s.pdf" % str(id_capa)
             self.context.modelo_proposicao.capa_processo(cod_materia=materia.cod_materia, action='gerar')
             if hasattr(self.context.temp_folder, id_arquivo):
@@ -52,6 +51,16 @@ class ProcessoLeg(grok.View):
                dic['path'] = self.context.sapl_documentos.materia
                dic['file'] = nom_arquivo
                dic['title'] = materia.des_tipo_materia + ' nº ' + str(materia.num_ident_basica) + '/' +str(materia.ano_ident_basica)
+               lst_arquivos.append(dic)
+            nom_redacao = str(materia.cod_materia) + '_redacao_final.pdf'
+            if hasattr(self.context.sapl_documentos.materia, nom_redacao):
+               dic = {}
+               dic["data"] = DateTime(materia.dat_apresentacao, datefmt='international').strftime('%Y-%m-%d 00:00:03')
+               for proposicao in self.context.zsql.proposicao_obter_zsql(cod_mat_ou_doc=materia.cod_materia,ind_mat_ou_doc='M'):
+                   dic["data"] = DateTime(proposicao.dat_recebimento, datefmt='international').strftime('%Y-%m-%d 00:00:03')
+               dic['path'] = self.context.sapl_documentos.materia
+               dic['file'] = nom_redacao
+               dic['title'] = 'Redação Final'
                lst_arquivos.append(dic)
             for substitutivo in self.context.zsql.substitutivo_obter_zsql(cod_materia=materia.cod_materia,ind_excluido=0):
                 if hasattr(self.context.sapl_documentos.substitutivo, str(substitutivo.cod_substitutivo) + '_substitutivo.pdf'):
@@ -135,7 +144,7 @@ class ProcessoLeg(grok.View):
                    dic['path'] = self.context.sapl_documentos.administrativo
                    dic["file"] = str(docadm.cod_documento) + '_texto_integral.pdf'
                    doc = self.context.zsql.documento_administrativo_obter_zsql(cod_documento=docadm.cod_documento,ind_excluido=0)[0]
-                   dic["title"] = doc.sgl_tipo_documento + ' nº ' + str(doc.num_documento) + '/' + str(doc.ano_documento) + '(doc. vinculado)'
+                   dic["title"] = doc.sgl_tipo_documento + ' nº ' + str(doc.num_documento) + '/' + str(doc.ano_documento) + ' (doc. vinculado)'
                 lst_arquivos.append(dic)
             for documento in self.context.zsql.documento_acessorio_obter_zsql(cod_materia=materia.cod_materia, ind_excluido=0):
                 if hasattr(self.context.sapl_documentos.materia, str(documento.cod_documento) + '.pdf'):

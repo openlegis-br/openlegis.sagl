@@ -23,6 +23,8 @@ for proposicao in context.zsql.proposicao_obter_zsql(cod_proposicao=cod_proposic
     cod_mat = proposicao.cod_mat_ou_doc
     dat_apresentacao = DateTime(datefmt='international').strftime("%Y-%m-%d")
     dat_envio = proposicao.dat_envio
+    dat_solicitacao_devolucao = proposicao.dat_solicitacao_devolucao
+    dat_devolucao = proposicao.dat_devolucao
     txt_ementa = proposicao.txt_descricao
     txt_observacao = proposicao.txt_observacao
     cod_autor = proposicao.cod_autor
@@ -114,10 +116,20 @@ def tramitar_materia(cod_materia, cod_proposicao, hdn_num_protocolo):
     return context.relatorios.pdf_tramitacao_preparar_pysc(hdn_cod_tramitacao=cod_tramitacao, hdn_url=hdn_url)
 
 
-if cod_mat == None:
-   return criar_protocolo(tip_materia, num_ident_basica, ano_materia, dat_apresentacao, txt_ementa, txt_observacao, cod_autor, tip_quorum, ind_complementar, cod_proposicao)
-else:
+if cod_mat != None:
    mensagem = 'Proposição já convertida em matéria legislativa!'
-   mensagem_obs = 'Verifique a listagem de proposições incorporadas.'   
+   mensagem_obs = 'Verifique a lista de proposições incorporadas.'   
    redirect_url=context.portal_url()+'/mensagem_emitir?tipo_mensagem=danger&mensagem=' + mensagem + '&mensagem_obs=' + mensagem_obs
    RESPONSE.redirect(redirect_url)
+elif dat_solicitacao_devolucao != None:
+   mensagem = 'Proposição com devolução solicitada pelo autor!'
+   mensagem_obs = 'Verifique a lista das solicitações de devolução.'   
+   redirect_url=context.portal_url()+'/mensagem_emitir?tipo_mensagem=danger&mensagem=' + mensagem + '&mensagem_obs=' + mensagem_obs
+   RESPONSE.redirect(redirect_url) 
+elif dat_devolucao != None:
+   mensagem = 'Proposição devolvida ao autor!'
+   mensagem_obs = 'Verifique a lista das proposições devolvidas.'   
+   redirect_url=context.portal_url()+'/mensagem_emitir?tipo_mensagem=danger&mensagem=' + mensagem + '&mensagem_obs=' + mensagem_obs
+   RESPONSE.redirect(redirect_url)  
+else:
+   return criar_protocolo(tip_materia, num_ident_basica, ano_materia, dat_apresentacao, txt_ementa, txt_observacao, cod_autor, tip_quorum, ind_complementar, cod_proposicao)

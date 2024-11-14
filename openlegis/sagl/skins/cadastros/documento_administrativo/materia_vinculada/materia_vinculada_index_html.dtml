@@ -1,7 +1,15 @@
 <style>
 .error {background:#f1556c !important};
 </style>
-<legend class="font-size-16">Matérias Vinculadas</legend>
+
+   <div class="row mb-2">
+     <div class="col-6 text-start">
+       <legend class="font-size-16">Matérias Vinculadas</legend>
+     </div>
+     <div class="col-6 text-end">
+       <button type="button" class="btn btn-sm btn-light" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Expedientes de <dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao"> Plenária" data-src="materia_vinculada/listar_sessoes?cod_documento=<dtml-var cod_documento>&modal=1"><dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao_plural"> Plenárias</button>
+     </div>
+  </div>
 
   <dtml-in expr="zsql.documento_administrativo_materia_obter_zsql(cod_documento=cod_documento)">
     <dtml-if sequence-start>
@@ -18,19 +26,19 @@
            <td>
               <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia'])">
                  <a href="<dtml-var portal_url>/cadastros/materia/materia_mostrar_proc?cod_materia=<dtml-var cod_materia>">
-                   <dtml-var des_tipo_materia> nº <dtml-var num_ident_basica>/<dtml-var ano_ident_basica>
+                   <b><dtml-var des_tipo_materia> nº <dtml-var num_ident_basica>/<dtml-var ano_ident_basica></b>
                  </a>
               <dtml-else>
                  <a href="<dtml-var portal_url>/consultas/materia/materia_mostrar_proc?cod_materia=<dtml-var cod_materia>">
-                   <dtml-var des_tipo_materia> nº <dtml-var num_ident_basica>/<dtml-var ano_ident_basica>
+                   <b><dtml-var des_tipo_materia> nº <dtml-var num_ident_basica>/<dtml-var ano_ident_basica></b>
               </dtml-if>
               <dtml-in expr="zsql.autoria_obter_zsql(cod_materia=cod_materia)">
-                - <dtml-var nom_autor_join><dtml-unless sequence-end>,</dtml-unless>
+                - <b><dtml-var nom_autor_join></b><dtml-unless sequence-end>,</dtml-unless>
               </dtml-in>
-              - <dtml-var txt_ementa>
+              <br /> <b>Ementa:</b> <dtml-var txt_ementa>
            </td>
-           <td width="15%">
-                <a class="btn btn-sm btn-white text-danger" href="<dtml-var portal_url>/cadastros/documento_administrativo/materia_vinculada/materia_vinculada_excluir_proc?cod_vinculo=<dtml-var cod_vinculo>&cod_documento=<dtml-var cod_documento>&hdn_url=<dtml-var ACTUAL_URL>?cod_documento=<dtml-var cod_documento>#materias" data-confirm="Deseja realmente excluir o vínculo?"><i class="far fa-trash-alt"></i> Excluir</a>
+           <td width="15%" valign="middle">
+                <a class="btn btn-sm btn-white text-danger" href="<dtml-var portal_url>/cadastros/documento_administrativo/materia_vinculada/materia_vinculada_excluir_proc?cod_vinculo=<dtml-var cod_vinculo>&cod_documento=<dtml-var cod_documento>&hdn_url=<dtml-var ACTUAL_URL>?cod_documento=<dtml-var cod_documento>#materias" data-confirm="Deseja realmente excluir o vínculo?"><i class="far fa-trash-alt"></i> Excluir Vínculo</a>
         </tr>
        </dtml-in>
     <dtml-if sequence-end>
@@ -68,15 +76,19 @@
                 <input class="form-control form-control-sm" type="number" name="txt_ano_ident_basica" id="txt_ano_ident_basica" size="4" value="<dtml-var ano_ident_basica_sel missing>" required>
             </td>
             <td>
+               <div class="btn-group">
                 <a class="btn btn-sm btn-secondary add"><i class="fa fa-fw fa-plus"></i></a>
                 <a class="btn btn-sm btn-light removeRow"><i class="fa fa-fw fa-minus"></i></a>
+               </div>
             </td>
         </tr>
     </table>
    </div>
    <input type="hidden" name="hdn_cod_documento" value="<dtml-var cod_documento missing>" />
    <input type="hidden" name="hdn_url" value="<dtml-var ACTUAL_URL>?cod_documento=<dtml-var cod_documento>#materias" />
-   <div class="text-left">
-     <input class="btn btn-light" type="submit" name="button" value="Incluir Vínculos" onclick="return myFunction()" />
-   </div>
+   <div class="row">
+     <div class="col-12 text-start">
+       <input class="btn btn-light" type="submit" name="button" value="Vincular Matéria" onclick="return myFunction()" />
+     </div>
+  </div>
 </form>

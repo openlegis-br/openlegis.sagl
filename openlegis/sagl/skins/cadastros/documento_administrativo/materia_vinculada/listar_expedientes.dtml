@@ -1,0 +1,180 @@
+ <div class="fade-in" id="resultado">
+  <dtml-in expr="zsql.sessao_plenaria_obter_zsql(cod_sessao_plen = lst_cod_sessao, ind_excluido=0)">
+  <dtml-in expr="zsql.expediente_materia_obter_zsql(cod_sessao_plen = cod_sessao_plen, ind_excluido=0)">
+
+     <dtml-if sequence-start>
+       <form class="needs-validation" name="expediente_form" id="expediente_form" method="post" action="materia_vinculada_salvar_pysc" novalidate>
+       <input type="hidden" name="cod_documento" value="<dtml-var cod_documento>">
+       <div class="table-responsive mb-3">     
+          <table class="table table-hover table-border display w-100" id="expediente">
+           <thead class="table-light">
+            <tr>
+                <th></th>
+                <th>Item</th>
+                <th>Identificação da Matéria</th>
+                <th>cod_materia</th>
+            </tr>
+          </thead> 
+     </dtml-if sequence-start>
+        <tr id="<dtml-var cod_ordem>">
+           <td></td>
+           <td class="text-end">
+              <dtml-var num_ordem>
+           </td>
+           <dtml-if cod_materia>
+              <td>
+                 <dtml-in expr="zsql.materia_obter_zsql(cod_materia=cod_materia, ind_excluido=0)">
+                    <span class="fw-bolder">
+                     <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia'])">
+                        <a href="<dtml-var portal_url>/cadastros/materia/materia_mostrar_proc?cod_materia=<dtml-var cod_materia>">
+                          <dtml-var des_tipo_materia> nº <dtml-var num_ident_basica>/<dtml-var ano_ident_basica>
+                        </a>
+                     <dtml-else>
+                        <a href="<dtml-var portal_url>/consultas/materia/materia_mostrar_proc?cod_materia=<dtml-var cod_materia>">
+                          <dtml-var des_tipo_materia> nº <dtml-var num_ident_basica>/<dtml-var ano_ident_basica>
+                        </a>
+                     </dtml-if>
+                     </span> - 
+                    <dtml-in expr="zsql.autoria_obter_zsql(cod_materia=cod_materia)">
+                       <span class="fw-bolder"><dtml-var nom_autor_join><dtml-unless sequence-end>,</dtml-unless></span>
+                    </dtml-in>
+                 </dtml-in>
+                 <br/> <span class="fw-bolder">Ementa</span>: <dtml-var txt_observacao> <br/>
+              </td>
+              <td>
+                <dtml-var cod_materia>  
+              </td>
+            </dtml-if>
+        </tr>
+  <dtml-if sequence-end>
+           <tfoot>
+            <tr>
+                <th></th>
+                <th>Item</th>
+                <th>Identificação da Matéria</th>
+                <th>cod_materia</th>
+            </tr>
+          </tfoot> 
+    </table>
+   </div>
+   <div class="col-6 text-start mt-2">
+      <button type="submit" id="btnVincular" class="btn btn-primary text-white">Vincular Matérias</button>
+   </div>
+   </form>
+  </dtml-if sequence-end>
+<dtml-else>
+    <p>Não constam matérias no Expediente.</p>
+</dtml-in>
+</dtml-in>
+</div>
+
+ <script>
+$(document).ready(function() {
+    // Setup - add a text input to each footer cell
+    $('table.display tfoot th').each(function () {
+        var title = $(this).text();
+        $(this).html('<input type="text" class="form-control form-control-sm" placeholder="' + title + '" />');
+    });
+    $.fn.dataTable.moment( 'DD/MM/YYYY HH:mm:ss' );
+    $('table.display').DataTable( {
+        initComplete: function () {
+            // Apply the search
+            this.api()
+                .columns()
+                .every(function () {
+                    var that = this;
+                     $('input', this.footer()).on('keyup change clear', function () {
+                        if (that.search() !== this.value) {
+                            that.search(this.value).draw();
+                        }
+                    });
+                });
+        },
+        "bFilter": true,
+        "responsive": true,
+        "order": [[1, "asc"]],
+        "columnDefs": [
+            {
+                orderable: false,
+                render: DataTable.render.select(),
+                targets: 0
+            },
+            { visible: false, targets: 3 }
+        ],
+        "select": {
+        style: 'os',
+        selector: 'td:first-child',
+        style: 'multi'
+        },
+        "language": {
+            "url": '<dtml-var portal_url>/assets/libs/datatables.net/plugins/i18n/pt-BR.json',
+            "select": {
+                "rows": {
+                    "_": '%d matérias selecionadas',
+                    "0": 'Nenhuma matéria selecionada',
+                    "1": '1 matéria selecionada'
+                },
+               "cells": {
+                  "1": "",
+                  "_": ""
+                },
+                "columns": {
+                  "1": "",
+                  "_": ""
+                }
+            }
+        },
+        "lengthMenu": [[10, 25, 50, 100], [10, 25, 50, 100]],
+        "lengthChange": true,
+    });
+
+    var table = $('#expediente').DataTable();
+ 
+  function checkedTargets(checkboxes) {
+    return checkboxes.filter(function (index) {
+      return $(checkboxes[index]).prop('checked');
+    });
+  }
+
+  $('#btnVincular').on('click', function () {
+    var data = table
+    .rows( function ( idx, data, node ) {
+        // Get all the checkboxes in the row
+        var cells = $(node).find('input[type="checkbox"]');   
+        // Keep the rows with checked checkboxes
+        return checkedTargets(cells).length;
+    } ).data().toArray();
+    
+    var form = $('#expediente_form');
+    
+    if (data.length) {
+      for (var i = 0; i < data.length; i++) {
+         $(form).append(
+             $('<input>')
+                .attr('type', 'hidden')
+                .attr('name', 'cod_materia')
+                .attr('required', 'required')
+                .val(data[i][3])
+         );
+      }
+    } else {
+      bootstrap.showModal({title: "Mensagem do Sistema", body: "Nenhuma matéria foi selecionada para vinculação. Marque as matérias que deseja vincular e tente novamente."});
+      return false;
+    }
+    var clicked = false;
+    if (clicked) {
+      event.preventDefault();
+      return;
+    }
+    clicked = true;
+    var $this = $(this);
+    $this.html("Vinculando...")
+    $this.addClass('disabled');
+    setTimeout(function() {
+      clicked = false;
+      $this.html("Vincular Matérias")
+      $this.removeClass('disabled');
+    }, 10000);
+  });     
+});
+</script>

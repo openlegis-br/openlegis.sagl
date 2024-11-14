@@ -1,0 +1,39 @@
+<dtml-var header_html>
+
+<legend class="font-size-16">Matérias do Expediente
+   <img id="indicator" class="htmx-indicator" src="<dtml-var portal_url>/imagens/bars.svg"/>
+</legend>
+
+   <div class="row">
+     <div class="col-12 mb-3 form-group">
+       <label for="lst_cod_sessao" class="form-label required">Selecione a <dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao"> Plenária</label>
+       <dtml-call expr="REQUEST.set('ano_sessao', DateTime(datefmt='international').strftime('%Y'))">
+       <dtml-in expr="zsql.sessao_plenaria_obter_zsql(ano_sessao=ano_sessao, tip_sessao=3, ind_excluido=0)">
+       <dtml-if sequence-start>
+         <form>
+          <input type="hidden" name="cod_documento" value="<dtml-var cod_documento>">
+          <select class="form-select" id="lst_cod_sessao" name="lst_cod_sessao" hx-post="listar_expedientes" hx-trigger="change" hx-target="#resultado" hx-swap="outerHTML" hx-indicator=".htmx-indicator">
+            <option value="0"></option>
+       </dtml-if>
+                 <option 
+                    <dtml-if expr="_.has_key('hdn_cod_sessao_plen') and int(cod_sessao_plen)==int(hdn_cod_sessao_plen)">
+                       selected
+                    </dtml-if> 
+                    value="<dtml-var cod_sessao_plen>">
+                   <dtml-in expr="zsql.tipo_sessao_plenaria_obter_zsql(tip_sessao=tip_sessao)">
+                      <dtml-var num_sessao_plen missing>ª <dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao"> <dtml-var nom_sessao> - <dtml-var dat_inicio_sessao>
+                   </dtml-in>
+                  </option>
+        <dtml-if sequence-end>
+          </select>
+         </form>
+        </dtml-if>
+      </dtml-in>
+     </div>
+   </div>
+
+ <div class="fade-in" id="resultado">
+ </div>
+ 
+ <dtml-var js_slot>
+ <dtml-var footer_html>

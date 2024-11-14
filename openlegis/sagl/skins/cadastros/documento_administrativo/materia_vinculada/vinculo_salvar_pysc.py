@@ -11,8 +11,9 @@
 
 if context.pysc.verifica_lista_pysc(valor=num_materia) == 1:
   for materia in context.zsql.materia_obter_zsql(tip_id_basica = tip_materia, num_ident_basica = num_materia, ano_ident_basica = ano_materia,ind_excluido=0):
-    context.zsql.documento_administrativo_materia_incluir_zsql(cod_documento=cod_documento,cod_materia=materia.cod_materia)
-    return 1
+      if not context.zsql.documento_administrativo_materia_obter_zsql(cod_documento=cod_documento,cod_materia=materia.cod_materia):
+         context.zsql.documento_administrativo_materia_incluir_zsql(cod_documento=cod_documento,cod_materia=materia.cod_materia)
+         return 1
 
 else:
   lst_materias = []
@@ -28,8 +29,9 @@ else:
   codigos = []
   for dic in lst_materias:
     for materia in context.zsql.materia_obter_zsql(tip_id_basica=dic.get('tipo',dic), num_ident_basica=dic.get('numero',dic), ano_ident_basica=dic.get('ano',dic),ind_excluido=0):
-        codigo = int(materia.cod_materia)
-        codigos.append(codigo)
+        if not context.zsql.documento_administrativo_materia_obter_zsql(cod_documento=cod_documento,cod_materia=materia.cod_materia):
+            codigo = int(materia.cod_materia)
+            codigos.append(codigo)
 
   for c in codigos:
     context.zsql.documento_administrativo_materia_incluir_zsql(cod_documento=cod_documento,cod_materia=c)

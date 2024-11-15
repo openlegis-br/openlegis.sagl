@@ -102,7 +102,7 @@
             <dtml-else>
                <a href="<dtml-var portal_url>/consultas/materia/materia_mostrar_proc?cod_materia=<dtml-var cod_materia>">
             </dtml-if>
-            <b><dtml-var sgl_tipo_materia> <dtml-var num_ident_basica missing>/<dtml-var ano_ident_basica missing></b></a>
+            <dtml-var sgl_tipo_materia> <dtml-var num_ident_basica missing>/<dtml-var ano_ident_basica missing></a>
             <dtml-in expr="zsql.autoria_obter_zsql(cod_materia=cod_materia)">
                <dtml-if sequence-start> - <strong>Autoria</strong>: </dtml-if> <dtml-var nom_autor_join><dtml-unless sequence-end>,</dtml-unless>
             </dtml-in>
@@ -181,10 +181,10 @@
 <dtml-if "hasattr(sapl_documentos.norma_juridica,texto_original) or hasattr(sapl_documentos.norma_juridica,texto_consolidado)">
  <div class="row d-print-none">
     <div class="col-12 text-start mt-2"> 
-     <div class="btn-group btn-group-sm">
+     <div class="">
       <dtml-if "hasattr(sapl_documentos.norma_juridica,texto_original)">
-          <a class="btn btn-primary" href="<dtml-var portal_url>/consultas/norma_juridica/pasta_digital/?cod_norma=<dtml-var cod_norma>&action=pasta" target="_blank"><i class="far fa-folder-open"></i> Pasta Digital</a>
-          <a class="btn btn-secondary" href="<dtml-var portal_url>/pysc/download_norma_pysc?cod_norma=<dtml-var cod_norma>&texto_original=1" target="_blank">
+          <a class="btn btn-sm btn-primary" href="<dtml-var portal_url>/consultas/norma_juridica/pasta_digital/?cod_norma=<dtml-var cod_norma>&action=pasta" target="_blank"><i class="far fa-folder-open"></i> Pasta Digital</a>
+          <a class="btn btn-sm btn-secondary" href="<dtml-var portal_url>/pysc/download_norma_pysc?cod_norma=<dtml-var cod_norma>&texto_original=1" target="_blank">
             <dtml-if expr="zsql.assinatura_documento_obter_zsql(codigo=cod_norma, tipo_doc='norma',ind_assinado=1, cod_usuario=None)">
               <i class="fa fa-certificate"></i> Texto Original
             <dtml-else>
@@ -193,7 +193,7 @@
           </a>
       </dtml-if>
       <dtml-if "hasattr(sapl_documentos.norma_juridica,texto_consolidado)">
-         <a class="btn btn-light" href="<dtml-var portal_url>/pysc/download_norma_pysc?cod_norma=<dtml-var cod_norma>&texto_consolidado=1" target="_blank"> <i class="fa fa-fw fa-file-pdf"></i> Texto Compilado</a>
+         <a class="btn btn-sm btn-light" href="<dtml-var portal_url>/pysc/download_norma_pysc?cod_norma=<dtml-var cod_norma>&texto_consolidado=1" target="_blank"> <i class="fa fa-fw fa-file-pdf"></i> Texto Compilado</a>
       </dtml-if> 
      </div>
     </div>

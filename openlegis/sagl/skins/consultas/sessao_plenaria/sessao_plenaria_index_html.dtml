@@ -166,21 +166,21 @@ inicio_sessao=<dtml-var dat_inicio_sessao missing>&num_legislatura=<dtml-var num
             </dtml-in>
           </div>
        </div>
-       <div class="btn-group btn-group-sm">
+       <div class="">
                  <dtml-let id_roteiro="str(cod_sessao_plen)+'_roteiro_sessao.pdf'">
                     <dtml-if "hasattr(sapl_documentos.pauta_sessao,id_roteiro)">
                       <dtml-let roteiro="getattr(sapl_documentos.pauta_sessao,id_roteiro).absolute_url">
-                             <a target="_blank" href="<dtml-var roteiro>" class="btn btn-primary" target="_blank"><i class="fa fa-fw fa-file-pdf"></i>Roteiro</a>    
+                             <a target="_blank" href="<dtml-var roteiro>?<dtml-var expr="ZopeTime().timeTime()">" class="btn btn-sm btn-primary" target="_blank"><i class="fa fa-fw fa-file-pdf"></i>Roteiro</a>    
                       </dtml-let>
                     </dtml-if>
                  </dtml-let>
                  <dtml-if expr="zsql.expediente_materia_obter_zsql(cod_sessao_plen = cod_sessao_plen, ind_excluido=0)">
-                      <a href="<dtml-var portal_url>/relatorios/pdf_expediente_preparar_pysc?data=<dtml-var dat_inicio_sessao>&cod_sessao_plen=<dtml-var cod_sessao_plen>" class="btn btn-light" target="_blank"><i class="fa fa-fw fa-file-pdf"></i> Expediente</a>
+                      <a href="<dtml-var portal_url>/relatorios/pdf_expediente_preparar_pysc?data=<dtml-var dat_inicio_sessao>&cod_sessao_plen=<dtml-var cod_sessao_plen>" class="btn btn-sm btn-light" target="_blank"><i class="fa fa-fw fa-file-pdf"></i> Expediente</a>
                  </dtml-if>        
                  <dtml-let id_oradores="str(cod_sessao_plen)+'_oradores_expediente.pdf'">
                     <dtml-if "hasattr(sapl_documentos.oradores_expediente,id_oradores)">
                         <dtml-let oradores="getattr(sapl_documentos.oradores_expediente,id_oradores).absolute_url">
-                             <a target="_blank" href="<dtml-var oradores>?<dtml-var expr="ZopeTime().timeTime()">" class="btn btn-secondary"><i class="fa fa-fw fa-file-pdf"></i>Oradores</a>
+                             <a target="_blank" href="<dtml-var oradores>?<dtml-var expr="ZopeTime().timeTime()">" class="btn btn-sm btn-secondary"><i class="fa fa-fw fa-file-pdf"></i>Oradores</a>
                         </dtml-let>
                     </dtml-if>
                  </dtml-let>
@@ -188,11 +188,11 @@ inicio_sessao=<dtml-var dat_inicio_sessao missing>&num_legislatura=<dtml-var num
                  <dtml-let id_pauta_completa="str(cod_sessao_plen)+'_pauta_completa.pdf'">   
                    <dtml-if "hasattr(sapl_documentos.pauta_sessao,id_pauta_completa)">
                       <dtml-let pauta_completa="getattr(sapl_documentos.pauta_sessao,id_pauta_completa).absolute_url">
-                        <a class="btn btn-primary" href="<dtml-var pauta_completa>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fas fa-file-pdf"></i> Pauta</a>
+                        <a class="btn btn-sm btn-primary" href="<dtml-var pauta_completa>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fas fa-file-pdf"></i> Pauta</a>
                       </dtml-let>               
                    <dtml-elif "hasattr(sapl_documentos.pauta_sessao,id_pauta)">
                       <dtml-let pauta="getattr(sapl_documentos.pauta_sessao,id_pauta).absolute_url">
-                        <a class="btn btn-primary" href="<dtml-var pauta>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fas fa-file-pdf"></i> Pauta</a>
+                        <a class="btn btn-sm btn-primary" href="<dtml-var pauta>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fas fa-file-pdf"></i> Pauta</a>
                       </dtml-let>
                   </dtml-if>
                  </dtml-let>  
@@ -202,7 +202,7 @@ inicio_sessao=<dtml-var dat_inicio_sessao missing>&num_legislatura=<dtml-var num
                 <dtml-if expr="ZopeTime().strftime('%Y%m%d') > dat_inicio">
                    <dtml-in expr="zsql.ordem_dia_obter_zsql(cod_sessao_plen = cod_sessao_plen, ind_excluido=0)">
                       <dtml-if sequence-start>
-                         <a target="_blank" href="#" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Resultado da Ordem do Dia" data-src="materias_ordem_dia_sessao_form?cod_sessao_plen=<dtml-var cod_sessao_plen>&modal=1"><i class="far fa-fw fa-calendar-check"></i><span>Votação</span></a> 
+                         <a target="_blank" href="#" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Resultado da Ordem do Dia" data-src="materias_ordem_dia_sessao_form?cod_sessao_plen=<dtml-var cod_sessao_plen>&modal=1"><i class="far fa-fw fa-calendar-check"></i><span>Votação</span></a> 
                       </dtml-if>
                    </dtml-in>
                 </dtml-if>
@@ -210,16 +210,16 @@ inicio_sessao=<dtml-var dat_inicio_sessao missing>&num_legislatura=<dtml-var num
                  <dtml-let id_ata="str(cod_sessao_plen)+'_ata_sessao.pdf'">
                    <dtml-if "hasattr(sapl_documentos.ata_sessao,id_ata)">
                       <dtml-let ata="getattr(sapl_documentos.ata_sessao,id_ata).absolute_url">
-                           <a target="_blank" href="<dtml-var ata>?<dtml-var expr="ZopeTime().timeTime()">" class="btn btn-secondary"><i class="fa fa-fw fa-file-pdf"></i>Ata</a>    
+                           <a target="_blank" href="<dtml-var ata>?<dtml-var expr="ZopeTime().timeTime()">" class="btn btn-sm btn-secondary"><i class="fa fa-fw fa-file-pdf"></i>Ata</a>    
                        </dtml-let>
                    </dtml-if>
                  </dtml-let>
                  <dtml-if url_video>
-                    <a target="_blank" href="#" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Reprodução de Vídeo" data-src="<dtml-var url_video>" class="btn btn-danger"><i class="fab fa-fw fa-youtube"></i>Vídeo</a>       
+                    <a target="_blank" href="#" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Reprodução de Vídeo" data-src="<dtml-var url_video>" class="btn btn-sm btn-danger"><i class="fab fa-fw fa-youtube"></i>Vídeo</a>       
                  </dtml-if>
                  <dtml-if expr="zsql.expediente_materia_obter_zsql(cod_sessao_plen = cod_sessao_plen, ind_excluido=0)">
                        <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador','Operador Sessao Plenaria', 'Operador Ordem Dia']) and int(cod_sessao_plen) > 1360">
-                         <a class="btn btn-secondary" target="_blank" href="<dtml-var portal_url>/expediente_pdf?cod_sessao_plen=<dtml-var cod_sessao_plen>"><i class="fa fa-download"></i> Expediente</a>
+                         <a class="btn btn-sm btn-secondary" target="_blank" href="<dtml-var portal_url>/expediente_pdf?cod_sessao_plen=<dtml-var cod_sessao_plen>"><i class="fa fa-download"></i> Expediente</a>
                        </dtml-if>
                  </dtml-if>
        </div>          
@@ -244,9 +244,10 @@ inicio_sessao=<dtml-var dat_inicio_sessao missing>&num_legislatura=<dtml-var num
 </dtml-in>
 </form>
 </div>
-      <div class="col-12 small text-muted mt-1 text-end">
-        <a href="<dtml-var portal_url>/@@sessoes" target="_blank"> <i class="mdi mdi-database-arrow-down"></i> Dados abertos</a>  
-      </div>
+
+  <div class="col-12 small text-muted mt-1 text-end">
+    <a href="<dtml-var portal_url>/@@sessoes" target="_blank"> <i class="mdi mdi-database-arrow-down"></i> Dados abertos</a>  
+  </div>
 
 <dtml-var js_slot>
 <dtml-var footer_html>

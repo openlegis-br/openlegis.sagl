@@ -148,23 +148,23 @@
                 <p class="mb-1"><dtml-in expr="zsql.comissao_obter_zsql(cod_comissao=cod_comissao)"><dtml-var nom_comissao></dtml-in></p>                                           
                 <p class=""><dtml-var dat_inicio_reuniao> <dtml-if hr_inicio_reuniao><dtml-var expr="pysc.hora_formatar_pysc(hora=hr_inicio_reuniao)"></dtml-if></p>
          </dtml-if>
-                <div class="btn-group btn-group-sm">
+                <div class="">
                 <dtml-let id_pauta="_.str(cod_reuniao)+'_pauta.pdf'">
                   <dtml-if "_.hasattr(sapl_documentos.reuniao_comissao,id_pauta)">
                     <dtml-let pauta="_.getattr(sapl_documentos.reuniao_comissao,id_pauta).absolute_url">
-                      <a class="btn btn-primary" href="<dtml-var pauta>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fas fa-file-pdf"></i> <span class="">Pauta</span></a>
+                      <a class="btn btn-sm btn-primary" href="<dtml-var pauta>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fas fa-file-pdf"></i> <span class="">Pauta</span></a>
                     </dtml-let>
                   </dtml-if>
                 </dtml-let>
                 <dtml-let id_ata="_.str(cod_reuniao)+'_ata.pdf'">
                   <dtml-if "_.hasattr(sapl_documentos.reuniao_comissao,id_ata)">
                     <dtml-let ata="_.getattr(sapl_documentos.reuniao_comissao,id_ata).absolute_url">
-                      <a class="btn btn-secondary" href="<dtml-var ata>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fas fa-file-pdf"></i> <span class="">Ata</span></a>
+                      <a class="btn btn-sm btn-secondary" href="<dtml-var ata>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fas fa-file-pdf"></i> <span class="">Ata</span></a>
                     </dtml-let>
                   </dtml-if>
                 </dtml-let>
                  <dtml-if url_video>
-                    <a href="<dtml-var url_video>" class="popup-youtube btn btn-danger"><i class="fab fa-fw fa-youtube"></i> Vídeo</a>       
+                    <a href="<dtml-var url_video>" class="popup-youtube btn btb-sm btn-danger"><i class="fab fa-fw fa-youtube"></i> Vídeo</a>       
                  </dtml-if>
                </div>             
        </div>

@@ -10,13 +10,13 @@
 
  <div class="row mb-2">
       <div class="col-12 col-md-7 align-self-center">
-        <h1 class="firstHeading font-size-18">Processos Administrativos</h1>
+        <h1 class="firstHeading font-size-18">Pesquisa de Processos Administrativos</h1>
       </div>
       <div class="col-12 col-md-5 text-start text-md-end">
         <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Modulo Administrativo', 'Operador Materia'])">
           <div class="btn-group">  
             <a class="btn btn-primary d-print-none" href="<dtml-var portal_url>/cadastros/documento_administrativo/documento_administrativo_form" ><i class="fa fa-fw fa-plus"></i> Incluir Processo</a>
-            <a class="btn btn-primary d-print-none" href="<dtml-var portal_url>/cadastros/documento_administrativo/numero_reservar_form" ><i class="fas fa-fw fa-list-ol"></i> Reservar</a>
+            <a class="btn btn-secondary d-print-none" href="<dtml-var portal_url>/cadastros/documento_administrativo/numero_reservar_form" ><i class="fas fa-fw fa-list-ol"></i> Reservar</a>
           </div>
         <dtml-elif expr="AUTHENTICATED_USER.has_role(['Authenticated'])">
           <dtml-if expr="zsql.usuario_tipo_documento_obter_zsql(cod_usuario=cod_usuario_corrente, ind_excluido=0)">

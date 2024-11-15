@@ -107,17 +107,17 @@
  <div class="row">
     <div class="col-12">
       <dtml-if expr="zsql.materia_obter_zsql(cod_materia=cod_materia,ind_excluido=0)">
-        <b>Matéria:</b>
+        <b>Matéria Originária:</b>
         <dtml-in expr="zsql.materia_obter_zsql(cod_materia=cod_materia,ind_excluido=0)">
             <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia'])">
                <a href="<dtml-var portal_url>/cadastros/materia/materia_mostrar_proc?cod_materia=<dtml-var cod_materia>">
             <dtml-else>
                <a href="<dtml-var portal_url>/consultas/materia/materia_mostrar_proc?cod_materia=<dtml-var cod_materia>">
             </dtml-if>
-            <b><dtml-var sgl_tipo_materia> <dtml-var num_ident_basica missing>/<dtml-var ano_ident_basica missing></b></a>
+            <dtml-var sgl_tipo_materia> <dtml-var num_ident_basica missing>/<dtml-var ano_ident_basica missing></a>
             - 
             <dtml-in expr="zsql.autoria_obter_zsql(cod_materia=cod_materia)">
-               <dtml-var nom_autor_join><dtml-unless sequence-end>,</dtml-unless>
+               <b>Autoria: </b> <dtml-var nom_autor_join><dtml-unless sequence-end>,</dtml-unless>
             </dtml-in>
         </dtml-in>
       </dtml-if>
@@ -139,22 +139,24 @@
 
  <dtml-call expr="REQUEST.set('texto_consolidado', str(cod_norma)+'_texto_consolidado.pdf')">
  <dtml-call expr="REQUEST.set('texto_original', str(cod_norma)+'_texto_integral.pdf')">
+ <dtml-call expr="REQUEST.set('texto_odt', str(cod_norma)+'_texto_integral.odt')">                   
 <dtml-if "hasattr(sapl_documentos.norma_juridica,texto_original) or hasattr(sapl_documentos.norma_juridica,texto_consolidado)">
  <div class="row d-print-none">
-    <div class="col-12 text-start mt-1"> 
-     <div class="btn-group btn-group-sm">
+    <div class="col-12 text-start mt-2"> 
+     <div class="">
       <dtml-if "hasattr(sapl_documentos.norma_juridica,texto_original)">
-          <a class="btn btn-primary" href="<dtml-var portal_url>/pysc/download_norma_pysc?cod_norma=<dtml-var cod_norma>&texto_original=1" target="_blank"><i class="far fa-file-pdf"></i> Texto Original</a>
+          <a class="btn btn-sm btn-primary" href="<dtml-var portal_url>/consultas/norma_juridica/pasta_digital/?cod_norma=<dtml-var cod_norma>&action=pasta" target="_blank"><i class="far fa-folder-open"></i> Pasta Digital</a>
+          <a class="btn btn-sm btn-secondary" href="<dtml-var portal_url>/pysc/download_norma_pysc?cod_norma=<dtml-var cod_norma>&texto_original=1" target="_blank">
+            <dtml-if expr="zsql.assinatura_documento_obter_zsql(codigo=cod_norma, tipo_doc='norma',ind_assinado=1, cod_usuario=None)">
+              <i class="fa fa-certificate"></i> Texto Original
+            <dtml-else>
+              <i class="fa fa-fw fa-file-pdf"></i> Texto Original
+            </dtml-if>
+          </a>
       </dtml-if>
-         <dtml-call expr="REQUEST.set('texto_consolidado', str(cod_norma)+'_texto_consolidado.pdf')">
-         <dtml-call expr="REQUEST.set('texto_odt', str(cod_norma)+'_texto_integral.odt')">        
-      <dtml-if "hasattr(sapl_documentos.norma_juridica,texto_odt) and hasattr(sapl_documentos.norma_juridica,texto_consolidado)">
-           <dtml-let documento_odt="getattr(sapl_documentos.norma_juridica,texto_odt).absolute_url">         
-               <a class="btn btn-primary" target="_blank" href="<dtml-var portal_url>/generico/viewerJS/?cod_norma=<dtml-var cod_norma>#<dtml-var documento_odt>?<dtml-var expr="ZopeTime().timeTime()"> "> <i class="fa fa-fw fa-file-code"></i> Texto Compilado</a>     
-           </dtml-let>
-      <dtml-elif "not hasattr(sapl_documentos.norma_juridica,texto_odt) and hasattr(sapl_documentos.norma_juridica,texto_consolidado)">
-         <a class="btn btn-primary" href="<dtml-var portal_url>/pysc/download_norma_pysc?cod_norma=<dtml-var cod_norma>&texto_consolidado=1" target="_blank"> <i class="fa fa-fw fa-file-code"></i> Texto Compilado</a>
-      </dtml-if>    
+      <dtml-if "hasattr(sapl_documentos.norma_juridica,texto_consolidado)">
+         <a class="btn btn-sm btn-light" href="<dtml-var portal_url>/pysc/download_norma_pysc?cod_norma=<dtml-var cod_norma>&texto_consolidado=1" target="_blank"> <i class="fa fa-fw fa-file-pdf"></i> Texto Compilado</a>
+      </dtml-if> 
      </div>
     </div>
  </div>

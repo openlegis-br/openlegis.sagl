@@ -1,7 +1,7 @@
 <dtml-var header_html>
  <div class="row mb-3">
       <div class="col-12 col-md-6 d-flex align-items-center">
-        <h1 class="firstHeading font-size-18">Processos Administrativos</h1>
+        <h1 class="firstHeading font-size-18">Pesquisa de Processos Administrativos</h1>
       </div>
       <div class="col-12 col-md-6 text-start text-md-end">
        <div class="btn-group" role="group">      
@@ -114,7 +114,66 @@
                  <b>Prazo de Conclusão: </b> <dtml-var dat_fim_prazo>
              </dtml-if>
             </div>
-        </div>   
+        </div>
+        <dtml-call expr="REQUEST.set('temDoc', '0')">
+        <dtml-let isAnon="portal_membership.isAnonymousUser()">
+           <dtml-if expr="not isAnon">
+             <dtml-call expr="REQUEST.set('metodo_acessorio', zsql.documento_acessorio_administrativo_obter_zsql(cod_documento=cod_documento, ind_excluido=0))">
+             <dtml-in metodo_acessorio>
+                <dtml-call expr="REQUEST.set('temDoc', '1')">
+             </dtml-in> 
+           <dtml-else>
+             <dtml-call expr="REQUEST.set('metodo_acessorio', zsql.documento_acessorio_administrativo_obter_zsql(cod_documento=cod_documento, ind_excluido=0))">
+              <dtml-in metodo_acessorio>
+                 <dtml-call expr="REQUEST.set('temDoc', '1')">
+              </dtml-in>  
+           </dtml-if>
+        </dtml-let>
+ <dtml-if expr="temDoc=='1'">
+    <div class="row">
+      <div class="col-12">
+          <dtml-in metodo_acessorio>
+            <dtml-if sequence-start>            
+               <b>Documento<dtml-if expr="_['sequence-length'] > 1">s</dtml-if> Acessório<dtml-if expr="_['sequence-length'] > 1">s</dtml-if>:</b>
+            </dtml-if>
+             <dtml-call expr="REQUEST.set('id_documento', str(cod_documento_acessorio)+'.pdf')">
+             <dtml-if expr="AUTHENTICATED_USER.has_role(['Authenticated'])">
+               <dtml-if expr="hasattr(sapl_documentos.administrativo,id_documento)">
+                 <dtml-let documento="getattr(sapl_documentos.administrativo,id_documento).absolute_url">
+                   <a href="<dtml-var documento>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank">
+                        <dtml-if expr="nom_documento != None">
+                          <dtml-var nom_documento>
+                        <dtml-else>
+                          <dtml-var des_tipo_documento>
+                        </dtml-if>
+                   </a>
+                </dtml-let>
+               </dtml-if>
+             <dtml-else>
+               <dtml-if expr="hasattr(sapl_documentos.administrativo,id_documento)">
+                 <dtml-let documento="getattr(sapl_documentos.administrativo,id_documento).absolute_url">
+                   <a href="<dtml-var documento>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank">
+                        <dtml-if expr="nom_documento != None">
+                          <dtml-var nom_documento>
+                        <dtml-else>
+                          <dtml-var des_tipo_documento>
+                        </dtml-if>
+                   </a>
+                 </dtml-let>
+               <dtml-else>
+                  <dtml-if expr="nom_documento != None">
+                    <dtml-var nom_documento>
+                  <dtml-else>
+                    <dtml-var des_tipo_documento>
+                  </dtml-if>
+               </dtml-if>
+             </dtml-if>
+             <dtml-unless sequence-end>,</dtml-unless><dtml-if sequence-end></dtml-if>
+          </dtml-in>
+      </div>
+    </div>
+ </dtml-if>
+
         <dtml-in expr="zsql.documento_administrativo_materia_obter_zsql(cod_documento=cod_documento)">
            <dtml-if sequence-start>
               <div class="row">
@@ -127,13 +186,13 @@
               <dtml-else>
 	         <a href="<dtml-var portal_url>/consultas/materia/materia_mostrar_proc?cod_materia=<dtml-var expr="pysc.b64encode_pysc(codigo=cod_materia)">">
               </dtml-if>                     
-              <b><dtml-var sgl_tipo_materia> <dtml-var num_ident_basica>/<dtml-var ano_ident_basica></b></a>
-              <dtml-unless sequence-end>,</dtml-unless>
+              <dtml-var sgl_tipo_materia> <dtml-var num_ident_basica>/<dtml-var ano_ident_basica></a>
            </dtml-in>
            <dtml-if sequence-end>
                 </div>
               </div>   
            </dtml-if>
+              <dtml-unless sequence-end>,</dtml-unless><dtml-if sequence-end></dtml-if>
         </dtml-in>
         <dtml-in expr="zsql.documento_administrativo_vinculado_obter_zsql(cod_documento_vinculado = cod_documento)">
            <dtml-if sequence-start>
@@ -146,14 +205,14 @@
            <dtml-elif expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia'])">
               <a href="<dtml-var portal_url>/cadastros/documento_administrativo/documento_administrativo_mostrar_proc?cod_documento=<dtml-var cod_documento_vinculante>">
            <dtml-else>
-              <a href="<dtml-var portal_url>/consultas/documento_administrativo/documento_administrativo_mostrar_proc?cod_documento=<dtml-var cod_documento_vinculante>" >
+              <a href="<dtml-var portal_url>/consultas/documento_administrativo/documento_administrativo_mostrar_proc?cod_documento=<dtml-var cod_documento_vinculante>">
            </dtml-if>             
-           <b><dtml-var sgl_tipo_documento_vinculante> <dtml-var num_documento_vinculante>/<dtml-var ano_documento_vinculante></b></a>
-           <dtml-unless sequence-end>,</dtml-unless>
+           <dtml-var sgl_tipo_documento_vinculante> <dtml-var num_documento_vinculante>/<dtml-var ano_documento_vinculante></a>
            <dtml-if sequence-end>
                 </div>
               </div>   
            </dtml-if>
+           <dtml-unless sequence-end>,</dtml-unless><dtml-if sequence-end></dtml-if>
         </dtml-in>
         <dtml-in expr="zsql.documento_administrativo_vinculado_obter_zsql(cod_documento_vinculante = cod_documento)">
            <dtml-if sequence-start>
@@ -168,12 +227,12 @@
            <dtml-else>
               <a href="<dtml-var portal_url>/consultas/documento_administrativo/documento_administrativo_mostrar_proc?cod_documento=<dtml-var cod_documento_vinculado>" >  
            </dtml-if>                            
-           <b><dtml-var sgl_tipo_documento_vinculado> <dtml-var num_documento_vinculado>/<dtml-var ano_documento_vinculado></b></a>
-           <dtml-unless sequence-end>,</dtml-unless>
+           <dtml-var sgl_tipo_documento_vinculado> <dtml-var num_documento_vinculado>/<dtml-var ano_documento_vinculado></a>
            <dtml-if sequence-end>
                 </div>
               </div>   
            </dtml-if>
+           <dtml-unless sequence-end>,</dtml-unless><dtml-if sequence-end></dtml-if>
         </dtml-in>
         <dtml-call expr="REQUEST.set('des_status', '')">
         <dtml-call expr="REQUEST.set('txt_tramitacao', '')">
@@ -187,11 +246,11 @@
              <div class="row">
                <div class="col-12">
                   <dtml-if cod_orgao>
-                     <b>Localização: </b><dtml-var nom_orgao>
+                     <b>Localização Atual: </b><dtml-var nom_orgao>
                   <dtml-elif cod_comissao>
-                     <b>Localização: </b><dtml-var nom_comissao>
+                     <b>Localização Atual: </b><dtml-var nom_comissao>
                   <dtml-else> 
-                     <b>Localização: </b><dtml-var nom_parlamentar> 
+                     <b>Localização Atual: </b><dtml-var nom_parlamentar> 
                   </dtml-if>
                </div>
              </div>
@@ -201,7 +260,7 @@
            <dtml-if des_status>
               <div class="row">
                 <div class="col-12">
-                   <b>Situação: </b><dtml-var des_status null="">
+                   <b>Situação em <dtml-var dat_tramitacao>: </b><dtml-var des_status null="">
                 </div>
               </div>
            </dtml-if>
@@ -214,17 +273,17 @@
         <dtml-if "hasattr(sapl_documentos.administrativo,texto_assinado) or hasattr(sapl_documentos.administrativo,texto_original)">
            <div class="row d-print-none">
              <div class="col-12 text-start mt-1"> 
-                <div class="btn-group btn-group-sm">
+                <div class="">
                   <dtml-if "hasattr(sapl_documentos.administrativo,texto_assinado)">
-                     <a class="btn btn-primary" href="<dtml-var portal_url>/sapl_documentos/administrativo/<dtml-var texto_assinado>" target="_blank"><i class="far fa-file-pdf"></i> Documento Assinado</a>
+                     <a class="btn btn-sm btn-primary" href="<dtml-var portal_url>/sapl_documentos/administrativo/<dtml-var texto_assinado>" target="_blank"><i class="far fa-file-pdf"></i> Documento Assinado</a>
                   </dtml-if>
                   <dtml-if "hasattr(sapl_documentos.administrativo,texto_original)">
                     <dtml-let isAnon="portal_membership.isAnonymousUser()">
                      <dtml-if expr="not isAnon">
-                       <a class="btn btn-primary" href="<dtml-var portal_url>/consultas/documento_administrativo/pasta_digital/?cod_documento=<dtml-var cod_documento>&action=pasta" target="_blank"><i class="far fa-folder-open"></i> Pasta Digital</a>
+                       <a class="btn btn-sm btn-primary" href="<dtml-var portal_url>/consultas/documento_administrativo/pasta_digital/?cod_documento=<dtml-var cod_documento>&action=pasta" target="_blank"><i class="far fa-folder-open"></i> Pasta Digital</a>
                      </dtml-if>
                     </dtml-let>
-                    <a class="btn btn-secondary" href="<dtml-var portal_url>/pysc/download_documento_pysc?cod_documento=<dtml-var cod_documento>" target="_blank"><i class="fas fa-file-pdf"></i> Texto Integral</a>
+                    <a class="btn btn-sm btn-secondary" href="<dtml-var portal_url>/pysc/download_documento_pysc?cod_documento=<dtml-var cod_documento>" target="_blank"><i class="fas fa-file-pdf"></i> Texto Integral</a>
                  </dtml-if>    
                 </div>
              </div>

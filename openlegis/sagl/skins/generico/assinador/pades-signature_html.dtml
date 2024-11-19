@@ -49,8 +49,8 @@
     </div> 
 </dtml-in>
 
-<dtml-if expr="zsql.assinatura_documento_obter_zsql(codigo=codigo, anexo=anexo, tipo_doc=tipo_doc)">
-  <dtml-with expr="_.namespace(assinaturas=zsql.assinatura_documento_obter_zsql(codigo=codigo, anexo=anexo, tipo_doc=tipo_doc))">
+<dtml-if expr="zsql.assinatura_documento_obter_zsql(codigo=codigo, anexo=anexo, tipo_doc=tipo_doc, ind_assinado=1)">
+  <dtml-with expr="_.namespace(assinaturas=zsql.assinatura_documento_obter_zsql(codigo=codigo, anexo=anexo, tipo_doc=tipo_doc, ind_assinado=1))">
     <dtml-call expr="REQUEST.set('txt_qtde_assinaturas', len(assinaturas))">
   </dtml-with>
 <dtml-else>

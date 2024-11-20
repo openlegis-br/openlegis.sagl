@@ -88,7 +88,7 @@ for rc in context.zsql.reuniao_comissao_obter_zsql(cod_reuniao=cod_reuniao,ind_e
            dic_votacao["materia"] = '<span><b>' + str(item.num_ordem) + '</b>) <a href="' +context.consultas.absolute_url() + '/parecer_comissao/' + str(item.cod_parecer) + '_parecer.pdf"><b>Parecer ' +  sgl_comissao + ' nº ' + str(parecer.num_parecer)+ '/' +str(parecer.ano_parecer) + '</b></a> - ' + dic_votacao['conclusao'] + ' ao ' + sgl_tipo_materia + ' nº ' + str(num_ident_basica) + '/' + str(ano_ident_basica) + ' - ' + ementa_materia + '</span>'
            dic_votacao["resultado"] = ''
            if item.tip_resultado_votacao != None:
-              for resultado in context.zsql.tipo_resultado_votacao_obter_zsql(tip_resultado_votacao=item.tip_resultado_votacao, ind_excluido=0):
+              for resultado in context.zsql.tipo_fim_relatoria_obter_zsql(tip_fim_relatoria=item.tip_resultado_votacao, ind_excluido=0):
                   dic_votacao["resultado"] = '. Resultado: ' + resultado.nom_resultado
            materia = dic_votacao["materia"] + ' ' + dic_votacao["nom_relator"] + dic_votacao["resultado"]
            dic_votacao["nom_autor"] = ""
@@ -121,7 +121,7 @@ for rc in context.zsql.reuniao_comissao_obter_zsql(cod_reuniao=cod_reuniao,ind_e
                    dic_votacao["nom_relator"] = 'Relatoria: ' + parlamentar.nom_parlamentar
            dic_votacao["resultado"] = ''
            if item.tip_resultado_votacao != None:
-              for resultado in context.zsql.tipo_resultado_votacao_obter_zsql(tip_resultado_votacao=item.tip_resultado_votacao, ind_excluido=0):
+              for resultado in context.zsql.tipo_fim_relatoria_obter_zsql(tip_fim_relatoria=item.tip_resultado_votacao, ind_excluido=0):
                   dic_votacao["resultado"] = '. Resultado: ' + resultado.nom_resultado
 
            materia = dic_votacao["materia"] + ' ' + dic_votacao["nom_relator"] + dic_votacao["resultado"] + dic_votacao["parecer"]

@@ -14,7 +14,7 @@ def cabecalho(inf_basicas_dic,imagem):
     tmp_data+='\t\t\t\t<setFont name="Helvetica" size="11"/>\n'
     tmp_data+='\t\t\t\t<drawString x="6.7cm" y="27.6cm">' + dic_cabecalho['nom_estado'] + '</drawString>\n'
     tmp_data+='\t\t\t\t<setFont name="Helvetica-Bold" size="12"/>\n'
-    tmp_data+='\t\t\t\t<drawCentredString x="11.5cm" y="25.2cm">RELATÓRIO DE DOCUMENTOS ADMINISTRATIVOS</drawCentredString>\n'
+    tmp_data+='\t\t\t\t<drawCentredString x="11.5cm" y="25.2cm">RELATÓRIO DE PROCESSOS ADMINISTRATIVOS</drawCentredString>\n'
 
     return tmp_data
 
@@ -50,7 +50,7 @@ def paraStyle():
     return tmp_data
 
 def documentos(lst_documentos):
-    """Gera o codigo rml do conteudo da pesquisa de documentos administrativos"""
+    """Gera o codigo rml do conteudo da pesquisa de processos administrativos"""
 
     tmp_data=''
 
@@ -94,7 +94,7 @@ def principal(sessao,imagem,data,lst_documentos,dic_cabecalho,lst_rodape,dic_fil
     tmp_data+='<?xml version="1.0" encoding="utf-8" standalone="no" ?>\n'
     tmp_data+='<!DOCTYPE document SYSTEM "rml_1_0.dtd">\n'
     tmp_data+='<document filename="relatorio.pdf">\n'
-    tmp_data+='\t<template pageSize="(21cm, 29.7cm)" title="Documentos Administrativos" author="OpenLegis" allowSplitting="20">\n'
+    tmp_data+='\t<template pageSize="(21cm, 29.7cm)" title="Processos Administrativos" author="OpenLegis" allowSplitting="20">\n'
     tmp_data+='\t\t<pageTemplate id="first">\n'
     tmp_data+='\t\t\t<pageGraphics>\n'
     tmp_data+=cabecalho(dic_cabecalho,imagem)

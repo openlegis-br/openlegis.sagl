@@ -89,7 +89,7 @@ for rc in context.zsql.reuniao_comissao_obter_zsql(cod_reuniao=cod_reuniao,ind_e
            dic_votacao["resultado"] = ''
            if item.tip_resultado_votacao != None:
               for resultado in context.zsql.tipo_fim_relatoria_obter_zsql(tip_fim_relatoria=item.tip_resultado_votacao, ind_excluido=0):
-                  dic_votacao["resultado"] = '. Resultado: ' + resultado.nom_resultado
+                  dic_votacao["resultado"] = '. Resultado: ' + resultado.des_fim_relatoria
            materia = dic_votacao["materia"] + ' ' + dic_votacao["nom_relator"] + dic_votacao["resultado"]
            dic_votacao["nom_autor"] = ""
            dic_votacao["substitutivo"] = ''
@@ -122,7 +122,7 @@ for rc in context.zsql.reuniao_comissao_obter_zsql(cod_reuniao=cod_reuniao,ind_e
            dic_votacao["resultado"] = ''
            if item.tip_resultado_votacao != None:
               for resultado in context.zsql.tipo_fim_relatoria_obter_zsql(tip_fim_relatoria=item.tip_resultado_votacao, ind_excluido=0):
-                  dic_votacao["resultado"] = '. Resultado: ' + resultado.nom_resultado
+                  dic_votacao["resultado"] = '. Resultado: ' + resultado.des_fim_relatoria
 
            materia = dic_votacao["materia"] + ' ' + dic_votacao["nom_relator"] + dic_votacao["resultado"] + dic_votacao["parecer"]
 

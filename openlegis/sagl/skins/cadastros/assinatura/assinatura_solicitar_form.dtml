@@ -83,7 +83,7 @@
              <label class="form-label required d-none" for="lst_cod_usuario">Selecione o usuário</label>
                <div class="input-group w-100">
                 <select class="select2 users form-select bg-light" name="lst_cod_usuario:list:int" id="lst_cod_usuario" multiple="multiple" required style="width:90%">
-                   <dtml-if expr="tipo_doc=='proposicao'">
+                   <dtml-if expr="tipo_doc=='proposicao' or tipo_doc=='pauta_comissao' or tipo_doc=='ata_comissao' or tipo_doc=='parecer_comissao'">
                      <dtml-call expr="REQUEST.set('data_atual', DateTime(datefmt='international').strftime('%d/%m/%Y'))">
                      <dtml-if expr="AUTHENTICATED_USER.has_role(['Autor'])">
                         <dtml-in expr="zsql.usuario_obter_zsql(col_username=AUTHENTICATED_USER.getUserName())">

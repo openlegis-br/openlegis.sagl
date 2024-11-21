@@ -29,8 +29,8 @@
   <dtml-let mensagem="'Tramitação encaminhada com sucesso!'">
     <dtml-var mensagem_emitir>
   </dtml-let>
-
   <dtml-call expr="pysc.envia_tramitacao_autor_pysc(cod_materia=hdn_cod_materia)">
+  <dtml-call expr="pysc.envia_acomp_materia_pysc(cod_materia=hdn_cod_materia)">
   <dtml-call expr="pysc.atualiza_indicador_tramitacao_materia_pysc(cod_materia=hdn_cod_materia, cod_status=cod_status)">
   <dtml-comment>  
   <dtml-in expr="zsql.unidade_tramitacao_obter_zsql(cod_unid_tramitacao=cod_destino, ind_leg=1, ind_excluido=0)">
@@ -40,8 +40,6 @@
      <dtml-call "REQUEST.set('info_protocolo', cadastros.tramitacao_materia.protocolo_prefeitura_pysc(cod_materia=hdn_cod_materia))">         
      <dtml-call expr="zsql.tramitacao_prefeitura_registrar_zsql(cod_tramitacao=cod_tramitacao, texto_protocolo=info_protocolo)">
   </dtml-if>
-  <dtml-call expr="pysc.envia_tramitacao_autor_pysc(cod_materia=hdn_cod_materia)">
-  <dtml-call expr="pysc.envia_acomp_materia_pysc(cod_materia=hdn_cod_materia)">
   </dtml-comment>
 
 </dtml-try>

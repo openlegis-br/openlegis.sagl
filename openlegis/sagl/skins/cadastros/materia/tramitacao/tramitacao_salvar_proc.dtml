@@ -65,6 +65,7 @@
          <dtml-call expr="REQUEST.set('hdn_cod_tramitacao', int(cod_tramitacao))">
      </dtml-in>
      <dtml-call expr="pysc.envia_tramitacao_autor_pysc(cod_materia=hdn_cod_materia)">
+     <dtml-call expr="pysc.envia_acomp_materia_pysc(cod_materia=hdn_cod_materia)">
      <dtml-comment>
      <dtml-in expr="zsql.unidade_tramitacao_obter_zsql(cod_unid_tramitacao=lst_cod_unid_tram_dest, ind_leg=1, ind_excluido=0)">
        <dtml-call expr="REQUEST.set('nom_unidade', nom_unidade_join)">
@@ -73,8 +74,6 @@
         <dtml-call "REQUEST.set('info_protocolo', cadastros.tramitacao_materia.protocolo_prefeitura_pysc(cod_materia=hdn_cod_materia))">
         <dtml-try>
            <dtml-call expr="zsql.tramitacao_prefeitura_registrar_zsql(cod_tramitacao=hdn_cod_tramitacao, texto_protocolo=info_protocolo)">
-           <dtml-call expr="pysc.envia_tramitacao_autor_pysc(cod_materia=hdn_cod_materia)">
-           <dtml-call expr="pysc.envia_acomp_materia_pysc(cod_materia=hdn_cod_materia)">
         </dtml-try>
      </dtml-if>
      </dtml-comment>

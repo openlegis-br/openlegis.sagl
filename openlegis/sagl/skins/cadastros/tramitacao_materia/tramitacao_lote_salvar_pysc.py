@@ -81,7 +81,7 @@ for dic in lst_novas:
     # fim protocolo executivo
 
     context.pysc.envia_tramitacao_autor_pysc(cod_materia = dic['cod_materia'])
-    #context.pysc.envia_acomp_materia_pysc(cod_materia = dic['cod_materia'])         
+    context.pysc.envia_acomp_materia_pysc(cod_materia = dic['cod_materia'])         
     #hdn_url = '/tramitacao_mostrar_proc?hdn_cod_tramitacao=' + str(dic['cod_tramitacao'])+ '&hdn_cod_materia=' + str(dic['cod_materia'])+'&lote=1'
     hdn_url = context.portal_url() + '/cadastros/tramitacao_materia/itens_enviados_html'
     context.relatorios.pdf_tramitacao_preparar_pysc(hdn_cod_tramitacao = dic['cod_tramitacao'], hdn_url = hdn_url)

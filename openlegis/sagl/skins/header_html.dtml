@@ -114,9 +114,11 @@
                                        <dtml-if expr="AUTHENTICATED_USER.has_role(['Autor', 'Assessor Parlamentar'])">
                                          <li><a class="dropdown-item" href="<dtml-var portal_url>/cadastros/proposicao?ind_enviado=0">Proposições Digitais</a></li>
                                        </dtml-if>
-                                       <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia','Revisor Proposicao','Chefia Revisão'])">
-                                         <li><a class="dropdown-item" href="<dtml-var portal_url>/cadastros/recebimento_proposicao">Recebimento de Proposições</a></li>
-                                      </dtml-if>
+                                       <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia'])">
+                                         <li><a class="dropdown-item" href="<dtml-var portal_url>/cadastros/recebimento_proposicao#protocolo">Recebimento de Proposições</a></li>
+                                       <dtml-elif expr="AUTHENTICATED_USER.has_role(['Revisor Proposicao','Chefia Revisão'])">
+                                         <li><a class="dropdown-item" href="<dtml-var portal_url>/cadastros/recebimento_proposicao#pendente">Recebimento de Proposições</a></li>
+                                       </dtml-if>
                                      <dtml-if cod_usuario_corrente>
                                          <li><a class="dropdown-item" href="<dtml-var portal_url>/cadastros/peticionamento_eletronico">Peticionamento Digital</a></li>
                                          <li><a class="dropdown-item" href="<dtml-var portal_url>/cadastros/tramitacao_materia/tramitacao_lote_form">Tramitação de Processos</a></li>

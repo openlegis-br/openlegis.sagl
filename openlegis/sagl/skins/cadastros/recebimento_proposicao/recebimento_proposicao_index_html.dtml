@@ -10,36 +10,39 @@
 
 <ul class="nav nav-tabs proposicao border-0 mt-4" id="nav_proposicao" role="tablist" hx-target="#tab-pane">
  <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia', 'Revisor Proposicao', 'Chefia Revisão'])">
-    <li class="nav-item active">
-        <a class="nav-link active" id="pendente-tab" data-bs-toggle="tab" href="#pendente" role="tab" aria-controls="pendente" data-target="#pendente" aria-selected="true" hx-get="<dtml-var portal_url>/cadastros/recebimento_proposicao/proposicao_listar_form?envrec=E" hx-indicator="#indicator">Revisão <dtml-in expr="proposicoes_contar_pysc(caixa='revisao')" mapping><dtml-if sequence-start>[<dtml-var sequence-length>]</dtml-if></dtml-in></a>
+    <li class="nav-item">
+        <a class="nav-link" id="pendente-tab" data-bs-toggle="tab" href="#pendente" role="tab" aria-controls="pendente" data-target="#pendente" aria-selected="true" hx-get="<dtml-var portal_url>/cadastros/recebimento_proposicao/proposicao_listar_form?envrec=E" hx-indicator="#indicator" hx-trigger="click">Revisão <dtml-in expr="proposicoes_contar_pysc(caixa='revisao')" mapping><dtml-if sequence-start>[<dtml-var sequence-length>]</dtml-if></dtml-in></a>
     </li>
   <dtml-if "sapl_documentos.props_sagl.restpki_access_token!=''">                                            
     <li class="nav-item">
-        <a class="nav-link" id="assinatura-tab" data-bs-toggle="tab" href="#assinatura" role="tab" aria-controls="assinatura" data-target="#assinatura" aria-selected="true" hx-get="<dtml-var portal_url>/cadastros/recebimento_proposicao/proposicao_listar_form?envrec=P" hx-indicator="#indicator">Assinatura <dtml-in expr="proposicoes_contar_pysc(caixa='assinatura')" mapping><dtml-if sequence-start>[<dtml-var sequence-length>]</dtml-if></dtml-in></a>
+        <a class="nav-link" id="assinatura-tab" data-bs-toggle="tab" href="#assinatura" role="tab" aria-controls="assinatura" data-target="#assinatura" aria-selected="true" hx-get="<dtml-var portal_url>/cadastros/recebimento_proposicao/proposicao_listar_form?envrec=P" hx-indicator="#indicator" hx-trigger="click">Assinatura <dtml-in expr="proposicoes_contar_pysc(caixa='assinatura')" mapping><dtml-if sequence-start>[<dtml-var sequence-length>]</dtml-if></dtml-in></a>
     </li>     
   </dtml-if>
  </dtml-if>
  <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia'])">
     <li class="nav-item">
-        <a class="nav-link" id="protocolo-tab" data-bs-toggle="tab" href="#protocolo" role="tab" aria-controls="protocolo" data-target="#protocolo" aria-selected="true" hx-get="<dtml-var portal_url>/cadastros/recebimento_proposicao/proposicao_listar_form?envrec=A" hx-indicator="#indicator">Protocolo <dtml-in expr="proposicoes_contar_pysc(caixa='protocolo')" mapping><dtml-if sequence-start>[<dtml-var sequence-length>]</dtml-if></dtml-in></a>
+        <a class="nav-link" id="protocolo-tab" data-bs-toggle="tab" href="#protocolo" role="tab" aria-controls="protocolo" data-target="#protocolo" aria-selected="true" hx-get="<dtml-var portal_url>/cadastros/recebimento_proposicao/proposicao_listar_form?envrec=A" hx-indicator="#indicator" hx-trigger="click">Protocolo <dtml-in expr="proposicoes_contar_pysc(caixa='protocolo')" mapping><dtml-if sequence-start>[<dtml-var sequence-length>]</dtml-if></dtml-in></a>
     </li>    
  </dtml-if>
  <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia', 'Revisor Proposicao', 'Chefia Revisão'])">
     <li class="nav-item">
-       <a class="nav-link" id="incorporada-tab" data-bs-toggle="tab" href="#incorporada" role="tab" aria-controls="incorporada" data-target="#incorporada" aria-selected="true" hx-get="<dtml-var portal_url>/cadastros/recebimento_proposicao/proposicao_listar_form?envrec=I" hx-indicator="#indicator">Incorporadas </a>
+       <a class="nav-link" id="incorporada-tab" data-bs-toggle="tab" href="#incorporada" role="tab" aria-controls="incorporada" data-target="#incorporada" aria-selected="true" hx-get="<dtml-var portal_url>/cadastros/recebimento_proposicao/proposicao_listar_form?envrec=I" hx-indicator="#indicator" hx-trigger="click">Incorporadas </a>
     </li>
     <li class="nav-item">
-        <a class="nav-link" id="protocolo-tab" data-bs-toggle="tab" href="#pedido_devolucao" role="tab" aria-controls="pedido_devolucao" data-target="#pedido_devolucao" aria-selected="true" hx-get="<dtml-var portal_url>/cadastros/recebimento_proposicao/proposicao_listar_form?envrec=S" hx-indicator="#indicator">Pedidos de Devolução <dtml-in expr="proposicoes_contar_pysc(caixa='pedido_devolucao')" mapping><dtml-if sequence-start>[<dtml-var sequence-length>]</dtml-if></dtml-in></a>
+        <a class="nav-link" id="protocolo-tab" data-bs-toggle="tab" href="#pedido_devolucao" role="tab" aria-controls="pedido_devolucao" data-target="#pedido_devolucao" aria-selected="true" hx-get="<dtml-var portal_url>/cadastros/recebimento_proposicao/proposicao_listar_form?envrec=S" hx-indicator="#indicator" hx-trigger="click">Pedidos de Devolução <dtml-in expr="proposicoes_contar_pysc(caixa='pedido_devolucao')" mapping><dtml-if sequence-start>[<dtml-var sequence-length>]</dtml-if></dtml-in></a>
     </li> 
     <li class="nav-item">
-       <a class="nav-link" id="devolvida-tab" data-bs-toggle="tab" href="#devolvida" role="tab" aria-controls="devolvida" data-target="#devolvida" aria-selected="true" hx-get="<dtml-var portal_url>/cadastros/recebimento_proposicao/proposicao_listar_form?envrec=R" hx-indicator="#indicator">Devolvidas <dtml-in expr="proposicoes_contar_pysc(caixa='devolvido')" mapping><dtml-if sequence-start>[<dtml-var sequence-length>]</dtml-if></dtml-in></a>
+       <a class="nav-link" id="devolvida-tab" data-bs-toggle="tab" href="#devolvida" role="tab" aria-controls="devolvida" data-target="#devolvida" aria-selected="true" hx-get="<dtml-var portal_url>/cadastros/recebimento_proposicao/proposicao_listar_form?envrec=R" hx-indicator="#indicator" hx-trigger="click">Devolvidas <dtml-in expr="proposicoes_contar_pysc(caixa='devolvido')" mapping><dtml-if sequence-start>[<dtml-var sequence-length>]</dtml-if></dtml-in></a>
     </li>
  </dtml-if>
 </ul>
 
 <div class="tab-content">
-  <div id="tab-pane" class="tab-pane p-3 border fade show active" hx-get="<dtml-var portal_url>/cadastros/recebimento_proposicao/proposicao_listar_form?envrec=E" hx-trigger="load" hx-indicator="#indicator">
-  </div>
+   <dtml-if expr="AUTHENTICATED_USER.has_role(['Revisor Proposicao', 'Chefia Revisão'])">
+      <div id="tab-pane" class="tab-pane p-3 border fade show active" hx-get="<dtml-var portal_url>/cadastros/recebimento_proposicao/proposicao_listar_form?envrec=E" hx-trigger="load" hx-indicator="#indicator"></div>
+   <dtml-elif expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia'])">
+      <div id="tab-pane" class="tab-pane p-3 border fade show active" hx-get="<dtml-var portal_url>/cadastros/recebimento_proposicao/proposicao_listar_form?envrec=A" hx-trigger="load" hx-indicator="#indicator"></div>
+   </dtml-if>
 </div>
 
 <dtml-var js_slot>

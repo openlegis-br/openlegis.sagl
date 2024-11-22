@@ -172,9 +172,9 @@ for sessao in metodo:
                        nome_autor = autor['nom_autor_join']
                    lista_autor.append(nome_autor)
                autoria = ', '.join(['%s' % (value) for (value) in lista_autor])
-               dic_emenda["id_emenda"] = '<a href="' + context.sapl_documentos.absolute_url() + '/emenda/' + str(emenda.cod_emenda) + '_emenda.pdf' + '">' + 'Emenda ' + emenda.des_tipo_emenda + ' nº ' + str(emenda.num_emenda) + '</a>'
-               dic_emenda["txt_ementa"] = emenda.txt_ementa
                dic_emenda["autoria"] = autoria
+               dic_emenda["id_emenda"] = '<a href="' + context.sapl_documentos.absolute_url() + '/emenda/' + str(emenda.cod_emenda) + '_emenda.pdf' + '">' + 'Emenda ' + emenda.des_tipo_emenda + ' nº ' + str(emenda.num_emenda) + '</a> - ' +  autoria
+               dic_emenda["txt_ementa"] = emenda.txt_ementa
                lst_emendas.append(dic_emenda)
                cod_emenda = emenda.cod_emenda
                lst_qtde_emendas.append(cod_emenda)
@@ -193,9 +193,9 @@ for sessao in metodo:
                        nome_autor = autor['nom_autor_join']
                    lista_autor.append(nome_autor)
                autoria = ', '.join(['%s' % (value) for (value) in lista_autor])
-               dic_substitutivo["id_substitutivo"] = '<a href="' + context.sapl_documentos.absolute_url() + '/substitutivo/' + str(substitutivo.cod_substitutivo) + '_substitutivo.pdf' + '">' + 'Substitutivo nº ' + str(substitutivo.num_substitutivo) + '</a>'
-               dic_substitutivo["txt_ementa"] = substitutivo.txt_ementa
                dic_substitutivo["autoria"] = autoria
+               dic_substitutivo["id_substitutivo"] = '<a href="' + context.sapl_documentos.absolute_url() + '/substitutivo/' + str(substitutivo.cod_substitutivo) + '_substitutivo.pdf' + '">' + 'Substitutivo nº ' + str(substitutivo.num_substitutivo) + '</a> - ' +  autoria
+               dic_substitutivo["txt_ementa"] = substitutivo.txt_ementa
                lst_substitutivos.append(dic_substitutivo)
                cod_substitutivo = substitutivo.cod_substitutivo
                lst_qtde_substitutivos.append(cod_substitutivo)
@@ -221,7 +221,7 @@ for sessao in metodo:
                          dic_parecer['conclusao'] = 'voto favorável'
                       elif relatoria.tip_conclusao == 'C':
                          dic_parecer['conclusao'] = 'voto contrário'
-                      dic_parecer["id_parecer"] = '<a href="' + context.sapl_documentos.absolute_url() + '/parecer_comissao/' + str(relatoria.cod_relatoria) + '_parecer.pdf' + '">' + 'Parecer ' + comissao.sgl_comissao + ' nº ' + str(relatoria.num_parecer) + '/' + str(relatoria.ano_parecer) + '</a>'
+                      dic_parecer["id_parecer"] = '<a href="' + context.sapl_documentos.absolute_url() + '/parecer_comissao/' + str(relatoria.cod_relatoria) + '_parecer.pdf' + '">' + 'Parecer ' + comissao.sgl_comissao + ' nº ' + str(relatoria.num_parecer) + '/' + str(relatoria.ano_parecer) + '</a>, com <b>' + dic_parecer['conclusao'] + '</b> ' +  dic_parecer['relatoria'] + ', ' +  dic_parecer['resultado'] + ' na ' + dic_parecer['comissao']
                       if relatoria.num_parecer != None and int(item.tip_turno) != 4 :
                          lst_pareceres.append(dic_parecer)
                          lst_qtde_pareceres.append(relatoria.cod_relatoria)

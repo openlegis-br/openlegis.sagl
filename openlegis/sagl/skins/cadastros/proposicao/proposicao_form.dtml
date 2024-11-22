@@ -312,14 +312,16 @@
            <dtml-if cod_proposicao>        
               <input class="btn btn-danger btn-sm" type="button" value="Excluir Proposição" onClick="proposicao_excluir()" />
            </dtml-if>
-        <dtml-elif expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia', 'Revisor Proposicao', 'Chefia Revisao'])">
-           <a class="btn btn-light btn-sm" href="<dtml-var portal_url>/cadastros/recebimento_proposicao/"><i class="fas fa-undo"></i> Voltar</a>                        
+        <dtml-elif expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia'])">
+           <a class="btn btn-light btn-sm" href="<dtml-var portal_url>/cadastros/recebimento_proposicao/#protocolo"><i class="fas fa-undo"></i> Voltar</a> 
+        <dtml-elif expr="AUTHENTICATED_USER.has_role(['Revisor Proposicao', 'Chefia Revisao'])">
+           <a class="btn btn-light btn-sm" href="<dtml-var portal_url>/cadastros/recebimento_proposicao/#pendente"><i class="fas fa-undo"></i> Voltar</a>                        
         </dtml-if>
         <dtml-if expr="AUTHENTICATED_USER.has_role(['Autor', 'Assessor Parlamentar'])">
-           <a class="btn btn-sm btn-light" href="<dtml-var portal_url>/cadastros/proposicao/"><i class="fas fa-undo"></i> Voltar</a>                            
+           <a class="btn btn-sm btn-light" href="<dtml-var portal_url>/cadastros/proposicao/?ind_enviado=0"><i class="fas fa-undo"></i> Voltar</a>                            
         </dtml-if>
         <dtml-else>
-           <a class="btn btn-sm btn-light" href="<dtml-var portal_url>/cadastros/proposicao/"><i class="fas fa-undo"></i> Voltar</a>                              
+           <a class="btn btn-sm btn-light" href="<dtml-var portal_url>/cadastros/proposicao/?ind_enviado=0"><i class="fas fa-undo"></i> Voltar</a>                              
        </dtml-if>   
       </div>    
       </div>
@@ -328,10 +330,9 @@
 <dtml-if dat_solicitacao_devolucao>
    <div class="alert alert-dismissible alert-danger">
       <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-      <h5 class="alert-heading"><i class="fas fa-exclamation-circle"></i> Devolução solicitada pelo autor em <dtml-var dat_solicitacao_devolucao missing null></h5>
-      <p class="mb-0">
-        <a href="<dtml-var portal_url>/cadastros/proposicao/proposicao_cancelar_devolucao_proc?cod_proposicao=<dtml-var cod_proposicao missing>" class="btn btn-sm btn-danger">Cancelar Solicitação</a>
-      </p>
+      <h5 class="alert-heading"><i class="fas fa-exclamation-circle"></i> Devolução solicitada pelo autor em <dtml-var dat_solicitacao_devolucao missing null>  
+        <a href="<dtml-var portal_url>/cadastros/proposicao/proposicao_cancelar_devolucao_proc?cod_proposicao=<dtml-var cod_proposicao missing>" class="btn btn-sm btn-secondary ms-2">Cancelar</a>
+      </h5>
    </div>
 </dtml-if>
 
@@ -423,7 +424,8 @@
   <dtml-if prop_devolvida>
     <div class="row">
        <div class="col-12 mb-2">
-         <span class="text-danger">Justificativa da devolução:</span> <dtml-var txt_justif_devolucao missing>
+         <label class="form-label" for="txa_txt_justif_devolucao"><span class="text-danger">Justificativa de Devolução</span></label>
+         <input class="form-control" type="text" id="txa_txt_justif_devolucao" name="txatxt_justif_devolucao" value=" <dtml-var txt_justif_devolucao missing>" disabled />               
        </div>
     </div>
   </dtml-if>
@@ -451,7 +453,7 @@
   <div class="row" id="divAssunto" <dtml-if expr="(not _.has_key('cod_proposicao') or ind_mat_ou_doc=='D') or (_.has_key('cod_proposicao') and (des_tipo_proposicao!='Requerimento' and des_tipo_proposicao!='Indicação' and des_tipo_proposicao!='Moção'))">style="display:none;"</dtml-if>>
     <div class="col-12 mb-3">
       <label class="form-label required" for="lst_assunto">Assunto</label>
-          <select class="select2 form-select selectpicker show-tick" data-actions-box="true" data-size="10" data-selected-text-format="count > 4" data-live-search="true" id="lst_assunto" name="lst_assunto" <dtml-if "prop_recebida"> disabled </dtml-if> style="width: 100%;">
+          <select class="select2 form-select selectpicker show-tick" data-actions-box="true" data-size="10" data-selected-text-format="count > 4" data-live-search="true" id="lst_assunto" name="lst_assunto" <dtml-if expr="(AUTHENTICATED_USER.has_role(['Autor', 'Assessor Parlamentar']) and prop_enviada)">disabled<dtml-elif expr="prop_recebida">disabled </dtml-if> style="width: 100%;">
              <option value="">Selecione</option>
              <dtml-in expr="zsql.assunto_proposicao_obter_zsql()" mapping>
                 <option
@@ -556,13 +558,17 @@
                    <div align="center">
                       <img align="absmiddle" class="img-fluid img-thumbnail mb-2" src="&dtml-portal_url;/sapl_documentos/proposicao/<dtml-var id_foto1>?<dtml-var expr="ZopeTime().timeTime()">" style="max-height: 400px">
                    </div>
-                   <div class="text-center">
-                      <input type="button" name="delFoto1" class="btn btn-sm btn-danger" value="Excluir" onClick="javascript:fotografia1_excluir()" />
-                   </div>
+                  <dtml-if expr="(not prop_enviada)">
+                     <div class="text-center">
+                        <input type="button" name="delFoto1" class="btn btn-sm btn-danger" value="Excluir" onClick="javascript:fotografia1_excluir()" />
+                     </div>
+                  </dtml-if>
                  <dtml-else>
-                  <div class="custom-file">
-                    <input type="file" class="form-control" id="file_nom_image1" name="file_nom_image1" accept="image/jpeg" />
-                  </div>
+                  <dtml-if expr="(not prop_enviada)">
+                    <div class="custom-file">
+                      <input type="file" class="form-control" id="file_nom_image1" name="file_nom_image1" accept="image/jpeg" />
+                    </div>
+                  </dtml-if>
                  </dtml-if>
         </div>
         <div class="col-12 col-md-6 mb-3">
@@ -572,13 +578,17 @@
                    <div align="center">
                       <img align="absmiddle" class="img-fluid img-thumbnail mb-2" src="&dtml-portal_url;/sapl_documentos/proposicao/<dtml-var id_foto2>?<dtml-var expr="ZopeTime().timeTime()">" style="max-height: 400px">
                    </div>
-                    <div class="text-center">
-                      <input type="button" name="delFoto2" class="btn btn-sm btn-danger" value="Excluir" onClick="javascript:fotografia2_excluir()" />
-                    </div>
+                   <dtml-if expr="(not prop_enviada)">
+                      <div class="text-center">
+                        <input type="button" name="delFoto2" class="btn btn-sm btn-danger" value="Excluir" onClick="javascript:fotografia2_excluir()" />
+                      </div>
+                   </dtml-if>
                  <dtml-else>
-                  <div class="custom-file">
-                    <input type="file" class="form-control" id="file_nom_image2" name="file_nom_image2" accept="image/jpeg" />
-                  </div>
+                   <dtml-if expr="(not prop_enviada)">
+                    <div class="custom-file">
+                      <input type="file" class="form-control" id="file_nom_image2" name="file_nom_image2" accept="image/jpeg" />
+                    </div>
+                   </dtml-if>
                  </dtml-if>
         </div>
         <div class="col-12 col-md-6 mb-3">
@@ -588,14 +598,18 @@
                    <div align="center">
                       <img align="absmiddle" class="img-fluid img-thumbnail mb-2" src="&dtml-portal_url;/sapl_documentos/proposicao/<dtml-var id_foto3>?<dtml-var expr="ZopeTime().timeTime()">" style="max-height: 400px">
                    </div>
-                    <div class="text-center">
-                      <input type="button" name="delFoto3" class="btn btn-sm btn-danger" value="Excluir" onClick="javascript:fotografia3_excluir()" />
-                    </div>
+                    <dtml-if expr="(not prop_enviada)">
+                      <div class="text-center">
+                        <input type="button" name="delFoto3" class="btn btn-sm btn-danger" value="Excluir" onClick="javascript:fotografia3_excluir()" />
+                      </div>
+                    </dtml-if>
                  <dtml-else>
-                  <div class="custom-file">
-                    <input type="file" class="form-control" id="file_nom_image3" name="file_nom_image3" accept="image/jpeg" />
-                  </div>
-                 </dtml-if>
+                    <dtml-if expr="(not prop_enviada)">
+                       <div class="custom-file">
+                         <input type="file" class="form-control" id="file_nom_image3" name="file_nom_image3" accept="image/jpeg" />
+                       </div>
+                    </dtml-if>
+                  </dtml-if>
         </div>
         <div class="col-12 col-md-6 mb-3">
            <label class="form-label d-block">Fotografia 4</label>
@@ -604,13 +618,17 @@
                    <div align="center">
                       <img align="absmiddle" class="img-fluid img-thumbnail mb-2" src="&dtml-portal_url;/sapl_documentos/proposicao/<dtml-var id_foto4>?<dtml-var expr="ZopeTime().timeTime()">" style="max-height: 400px">
                    </div>
-                    <div class="text-center">
-                      <input type="button" name="delFoto4" class="btn btn-sm btn-danger" value="Excluir" onClick="javascript:fotografia4_excluir()" />
-                    </div>
+                     <dtml-if expr="(not prop_enviada)">
+                       <div class="text-center">
+                         <input type="button" name="delFoto4" class="btn btn-sm btn-danger" value="Excluir" onClick="javascript:fotografia4_excluir()" />
+                       </div>
+                     </dtml-if>
                  <dtml-else>
-                  <div class="custom-file">
-                    <input type="file" class="form-control" id="file_nom_image4" name="file_nom_image4" accept="image/jpeg" />
-                  </div>
+                  <dtml-if expr="(not prop_enviada)">
+                    <div class="custom-file">
+                      <input type="file" class="form-control" id="file_nom_image4" name="file_nom_image4" accept="image/jpeg" />
+                    </div>
+                  </dtml-if>
                  </dtml-if>
         </div>
    </div>
@@ -627,7 +645,7 @@
          <dtml-let id_original="str(cod_proposicao)+'_original.odt'">
            <dtml-if "hasattr(sapl_documentos.proposicao,id_original)">
              <dtml-let documento="getattr(sapl_documentos.proposicao,id_original).absolute_url">
-               <a class="btn btn-sm btn-light" href="<dtml-var portal_url>/generico/viewerJS/#<dtml-var documento>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fa fa-fw fa-file-alt"></i>Original</a>
+               <a class="btn btn-sm btn-light" href="<dtml-var portal_url>/generico/viewerJS/#<dtml-var documento>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fa fa-fw fa-file-alt"></i>Texto Original</a>
              </dtml-let>
            </dtml-if>
          </dtml-let>  
@@ -637,7 +655,7 @@
                <dtml-let documento="getattr(sapl_documentos.proposicao,id_documento).absolute_url">
                   <dtml-call expr="REQUEST.set('nome_arquivo',str(cod_proposicao)+'.odt')">
                   <dtml-if prop_enviada>
-                    <a class="btn btn-sm btn-light" href="<dtml-var portal_url>/generico/viewerJS/#<dtml-var documento>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fa fa-fw fa-file-alt"></i>Revisado</a>
+                    <a class="btn btn-sm btn-light" href="<dtml-var portal_url>/generico/viewerJS/#<dtml-var documento>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fa fa-fw fa-file-alt"></i>Texto Revisado</a>
                   <dtml-else>                 
                       <a class="btn btn-sm btn-primary" href="<dtml-var portal_url>/webeditor/editorProposicao?<dtml-var documento>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fa fa-fw fa-edit"></i>Editar</a>
                       <button type="button" class="btn btn-sm btn-secondary" onclick="javascript:location.href='&dtml-URL1;/sapl_documentos/proposicao/externalEdit_/<dtml-var nome_arquivo>.zem'" data-bs-toggle="tooltip" data-placement="bottom" title="Editar no LibreOffice"><i class="fas fa-fw fa-external-link-alt"></i>LibreOffice</button>
@@ -741,18 +759,20 @@
      </div>     
    </div>
   </dtml-if>
-  <dtml-if expr="(not prop_recebida)">
-    <div class="row mb-2">
-       <div class="col-12 col-md-2">
+    <div class="row">
+       <div class="col-12">
          <label class="form-label d-block">Anexos PDF</label>
-          <dtml-if expr="not cod_mat_ou_doc and not prop_devolvida">   
+       </div>
+    </div>
+    <div class="row mb-2">
+     <dtml-if expr="not prop_enviada">   
+       <div class="col-12 col-md-2">
            <small id="link_add_file">
              <a class="btn btn-sm btn-light w-100" onclick="addFileField(); return false;" href="#">Anexar</a>
            </small>
-          </dtml-if>
        </div>
+     </dtml-if>
        <div class="col-12 col-md-10">
-         <label class="form-label d-block">&nbsp;<span class="d-none">Arquivos anexados</span></label>
          <span class="d-block" id="arquivos_anexos"></span>	                  
          <dtml-in expr="pysc.anexo_proposicao_pysc(cod_proposicao, listar=True)" prefix="file">
             <dtml-if expr="hasattr(sapl_documentos.proposicao, file_item)">
@@ -761,13 +781,16 @@
                   <a class="btn btn-secondary" target="_blank" href="<dtml-var documento>?<dtml-var expr="ZopeTime().timeTime()">">
                     <i class="fa fa-fw fa-file-pdf"></i><dtml-var expr="'Anexo ' + file_item.split('anexo_')[1]">
                   </a>
-                  <a class="btn btn-danger" href="javascript:void(0)" onclick="location.href='anexo_excluir?anexo=<dtml-var file_item>&cod_proposicao=<dtml-var cod_proposicao missing>'"> <i class="far fa-trash-alt"></i></a>
+                    <dtml-if expr="(not prop_enviada)">
+                        <a class="btn btn-danger" href="javascript:void(0)" onclick="location.href='anexo_excluir?anexo=<dtml-var file_item>&cod_proposicao=<dtml-var cod_proposicao missing>'"> <i class="far fa-trash-alt"></i></a>
+                    </dtml-if>
                 </div>
                </dtml-let>
             </dtml-if>
          </dtml-in>
        </div>
     </div>
+
   <dtml-if expr="AUTHENTICATED_USER.has_role(['Autor', 'Assessor Parlamentar']) and (des_tipo_autor == 'Parlamentar')">
    <div class="row mb-4">
      <div class="col-12 col-md-6">
@@ -827,7 +850,6 @@
      <dtml-else>
         <input type="hidden" name="lst_assessor" value="<dtml-var cod_assessor_sel missing null>">
      </dtml-if> 
-  </dtml-if>
 
    <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia', 'Revisor Proposicao', 'Chefia Revisao'])">
       <div class="row mb-2">
@@ -836,7 +858,7 @@
            <dtml-let id_original="str(cod_proposicao)+'_original.odt'">
              <dtml-if "hasattr(sapl_documentos.proposicao,id_original)">
                <dtml-let documento="getattr(sapl_documentos.proposicao,id_original).absolute_url">
-                 <a class="btn btn-sm btn-light" href="<dtml-var portal_url>/generico/viewerJS/#<dtml-var documento>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fa fa-fw fa-file-alt"></i>Original</a>
+                 <a class="btn btn-sm btn-light" href="<dtml-var portal_url>/generico/viewerJS/#<dtml-var documento>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fa fa-fw fa-file-alt"></i>Texto Original</a>
                </dtml-let>
              </dtml-if>
            </dtml-let>           

@@ -51,8 +51,9 @@
     <dtml-if expr="hasattr(sapl_documentos.proposicao,id_odt) and not hasattr(sapl_documentos.proposicao,id_pdf)">
       <dtml-call expr="proposicao_guardar_odt_pysc(cod_proposicao=hdn_cod_proposicao)">
     </dtml-if>
+    <dtml-call expr="REQUEST.set('hdn_url', portal_url() + '/cadastros/proposicao/proposicao_index_html?ind_enviado=1')">
     <dtml-let cod_doc="str(pysc.proposicao_calcular_checksum_pysc(hdn_cod_proposicao))"
-              mensagem="'Proposição enviada com sucesso!'" cod_doc_prop=cod_doc mensagem_obs="'Código de Autenticidade: ' + cod_doc">
+              mensagem="'Proposição enviada com sucesso!'" url="hdn_url" cod_doc_prop=cod_doc mensagem_obs="'Código de Autenticidade: ' + cod_doc">
       <dtml-var mensagem_emitir>
     </dtml-let>
   </dtml-try>

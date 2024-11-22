@@ -453,7 +453,7 @@
   <div class="row" id="divAssunto" <dtml-if expr="(not _.has_key('cod_proposicao') or ind_mat_ou_doc=='D') or (_.has_key('cod_proposicao') and (des_tipo_proposicao!='Requerimento' and des_tipo_proposicao!='Indicação' and des_tipo_proposicao!='Moção'))">style="display:none;"</dtml-if>>
     <div class="col-12 mb-3">
       <label class="form-label required" for="lst_assunto">Assunto</label>
-          <select class="select2 form-select selectpicker show-tick" data-actions-box="true" data-size="10" data-selected-text-format="count > 4" data-live-search="true" id="lst_assunto" name="lst_assunto" <dtml-if expr="(AUTHENTICATED_USER.has_role(['Autor', 'Assessor Parlamentar']) and prop_enviada)">disabled<dtml-elif expr="prop_recebida">disabled </dtml-if> style="width: 100%;">
+          <select class="select2 form-select selectpicker show-tick" data-actions-box="true" data-size="10" data-selected-text-format="count > 4" data-live-search="true" id="lst_assunto" name="lst_assunto" <dtml-if expr="(AUTHENTICATED_USER.has_role(['Autor', 'Assessor Parlamentar']) and prop_enviada)">disabled<dtml-elif expr="prop_recebida or prop_devolvida">disabled </dtml-if> style="width: 100%;">
              <option value="">Selecione</option>
              <dtml-in expr="zsql.assunto_proposicao_obter_zsql()" mapping>
                 <option

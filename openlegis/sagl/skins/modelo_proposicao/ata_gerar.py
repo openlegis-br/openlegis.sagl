@@ -430,7 +430,13 @@ for sessao in metodo:
                     abstencoes = ' - ' + str(votacao.num_abstencao) + " abstenção"
                  elif votacao.num_abstencao > 1:
                     abstencoes =  ' - ' + str(votacao.num_abstencao) + " abstenções"
-                 contagem_votos = votos_favoraveis + votos_contrarios + abstencoes
+                 if votacao.num_ausentes == 0 or votacao.num_ausentes == None:
+                    ausentes = ''
+                 elif votacao.num_ausentes == 1:
+                    ausentes = ' - ' + str(votacao.num_ausentes) + " ausência"
+                 elif votacao.num_ausentes > 1:
+                    ausentes =  ' - ' + str(votacao.num_ausentes) + " ausências"
+                 contagem_votos = votos_favoraveis + votos_contrarios + abstencoes + ausentes
              if votacao.votacao_observacao != '':
                 votacao_observacao = ' - ' + votacao.votacao_observacao
              else:
@@ -566,7 +572,13 @@ for sessao in metodo:
                       abstencoes = ' - ' + str(votacao.num_abstencao) + " abstenção"
                    elif votacao.num_abstencao > 1:
                       abstencoes =  ' - ' + str(votacao.num_abstencao) + " abstenções"
-                   contagem_votos = votos_favoraveis + votos_contrarios + abstencoes
+                   if votacao.num_ausentes == 0 or votacao.num_ausentes == None:
+                      ausentes = ''
+                   elif votacao.num_ausentes == 1:
+                      ausentes = ' - ' + str(votacao.num_ausentes) + " ausência"
+                   elif votacao.num_ausentes > 1:
+                      ausentes =  ' - ' + str(votacao.num_ausentes) + " ausências"
+                   contagem_votos = votos_favoraveis + votos_contrarios + abstencoes + ausentes
                if votacao.votacao_observacao != '':
                   votacao_observacao = ' - ' + votacao.votacao_observacao
                else:

@@ -81,7 +81,13 @@ for sessao in context.zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=cod_sessao
                  abstencoes = ' - ' + str(votacao.num_abstencao) + " abstenção"
               elif votacao.num_abstencao > 1:
                  abstencoes =  ' - ' + str(votacao.num_abstencao) + " abstenções"
-              contagem_votos = votos_favoraveis + votos_contrarios + abstencoes
+              if votacao.num_ausentes == 0 or votacao.num_ausentes == None:
+                 num_ausentes = ''
+              elif votacao.num_ausentes == 1:
+                 num_ausentes = ' - ' + str(votacao.num_ausentes) + " ausência"
+              elif votacao.num_ausentes > 1:
+                 num_ausentes =  ' - ' + str(votacao.num_ausentes) + " ausências"
+              contagem_votos = votos_favoraveis + votos_contrarios + abstencoes + num_ausentes
           if votacao.votacao_observacao != '':
              votacao_observacao = ' - ' + votacao.votacao_observacao
           else:

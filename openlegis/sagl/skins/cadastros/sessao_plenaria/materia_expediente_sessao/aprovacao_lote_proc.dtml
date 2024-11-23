@@ -11,6 +11,7 @@
    <dtml-if expr="des_tipo_materia=='Requerimento' or des_tipo_materia=='Moção' or des_tipo_materia=='Pedido de Informação'">
      <dtml-call expr="REQUEST.set('txt_votos_nao', '0')">
      <dtml-call expr="REQUEST.set('txt_votos_abstencao', '0')">
+     <dtml-call expr="REQUEST.set('txt_votos_ausentes', '0')">
      <dtml-call expr="REQUEST.set('txa_txt_observacao', '')">
      <dtml-call expr="REQUEST.set('hdn_cod_ordem', cod_ordem)">
      <dtml-call expr="REQUEST.set('hdn_cod_materia', cod_materia)">
@@ -25,6 +26,7 @@
         <dtml-call expr="metodo(num_votos_sim = pysc.quantidade_presentes_sessao_plenaria_contar_pysc(cod_sessao_plen=cod_sessao_plen),
                              num_votos_nao         = txt_votos_nao,
                              num_abstencao         = txt_votos_abstencao,
+                             num_ausentes          = txt_votos_ausentes,
                              txt_observacao        = txa_txt_observacao,
                              cod_ordem             = hdn_cod_ordem,
                              cod_materia           = hdn_cod_materia,

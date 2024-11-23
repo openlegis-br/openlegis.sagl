@@ -45,7 +45,7 @@ for resultado in context.zsql.tipo_resultado_votacao_obter_zsql(nom_resultado='A
 for dic in nao_votadas:
     try:
        context.zsql.trans_begin_zsql()
-       context.zsql.votacao_incluir_zsql(num_votos_sim=votos_sim, num_votos_nao='0', num_abstencao='0', cod_ordem=dic.get('cod_ordem',dic), cod_materia=dic.get('cod_materia',dic), tip_resultado_votacao=lst_tip_resultado)
+       context.zsql.votacao_incluir_zsql(num_votos_sim=votos_sim, num_votos_nao='0', num_abstencao='0', num_ausentes='0', cod_ordem=dic.get('cod_ordem',dic), cod_materia=dic.get('cod_materia',dic), tip_resultado_votacao=lst_tip_resultado)
        context.modelo_proposicao.requerimento_aprovar(cod_sessao_plen=cod_sessao_plen, nom_resultado=nom_resultado, cod_materia=dic.get('cod_materia',dic))
        context.zsql.trans_commit_zsql()       
     except:
@@ -54,7 +54,7 @@ for dic in nao_votadas:
 for dic in anuladas:
     try:
        context.zsql.trans_begin_zsql()
-       context.zsql.votacao_atualizar_zsql(cod_votacao=dic.get('cod_votacao',dic), num_votos_sim=votos_sim, num_votos_nao='0', num_abstencao='0', cod_ordem=dic.get('cod_ordem',dic), cod_materia=dic.get('cod_materia',dic), tip_resultado_votacao=lst_tip_resultado)
+       context.zsql.votacao_atualizar_zsql(cod_votacao=dic.get('cod_votacao',dic), num_votos_sim=votos_sim, num_votos_nao='0', num_abstencao='0', num_ausentes='0', cod_ordem=dic.get('cod_ordem',dic), cod_materia=dic.get('cod_materia',dic), tip_resultado_votacao=lst_tip_resultado)
        context.modelo_proposicao.requerimento_aprovar(cod_sessao_plen=cod_sessao_plen, nom_resultado=nom_resultado, cod_materia=dic.get('cod_materia',dic))
        context.zsql.trans_commit_zsql()       
     except:

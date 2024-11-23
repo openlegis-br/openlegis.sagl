@@ -10,11 +10,15 @@ SELECT DISTINCT
    rv.num_votos_sim,
    rv.num_votos_nao,
    rv.num_abstencao,
+   rv.num_ausentes,
    rv.tip_resultado_votacao,
    rv.txt_observacao as observacao_votacao,
    rv.cod_votacao,
+   od.cod_ordem,
+   od.num_ordem,
    od.tip_votacao,
-   od.tip_turno
+   od.tip_turno,
+   od.tip_quorum
 FROM
    registro_votacao rv
    LEFT JOIN ordem_dia od ON rv.cod_ordem = od.cod_ordem

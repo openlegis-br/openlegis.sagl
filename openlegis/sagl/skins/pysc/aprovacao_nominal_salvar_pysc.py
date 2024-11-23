@@ -13,18 +13,17 @@ dic={}
 votos_sim=[]
 votos_nao=[]
 votos_abstencao=[]
+votos_ausentes=[]
 
 for voto in vot_parlamentar:
     if voto=='Sim':
         votos_sim.append(voto)
-
-for voto in vot_parlamentar:
-    if voto=='Nao':
+    elif voto=='Nao':
         votos_nao.append(voto)
-
-for voto in vot_parlamentar:
-    if voto=='Abstencao':
+    elif voto=='Abstencao':
         votos_abstencao.append(voto)
+    elif voto=='Ausente':
+        votos_ausentes.append(voto)
 
 for n in range(len(cod_parlamentar)):
     dic = dict(list(zip(cod_parlamentar, vot_parlamentar)))
@@ -44,9 +43,9 @@ for materia in lst_materias:
     except:
         cod_votacao = None
     if cod_votacao is None:
-        context.zsql.votacao_incluir_zsql(num_votos_sim=len(votos_sim),num_votos_nao=len(votos_nao),num_abstencao=len(votos_abstencao),txt_observacao=txt_observacao,cod_ordem=materia.get('cod_ordem',materia),cod_materia=materia.get('cod_materia',materia), tip_resultado_votacao=tip_resultado_votacao)
+        context.zsql.votacao_incluir_zsql(num_votos_sim=len(votos_sim), num_votos_nao=len(votos_nao), num_abstencao=len(votos_abstencao), num_ausentes=len(votos_ausentes), txt_observacao=txt_observacao, cod_ordem=materia.get('cod_ordem',materia), cod_materia=materia.get('cod_materia',materia), tip_resultado_votacao=tip_resultado_votacao)
     else:
-        context.zsql.votacao_atualizar_zsql(cod_votacao=cod_votacao,num_votos_sim=len(votos_sim),num_votos_nao=len(votos_nao),num_abstencao=len(votos_abstencao),txt_observacao=txt_observacao,cod_ordem=materia.get('cod_ordem',materia),cod_materia=materia.get('cod_materia',materia),tip_resultado_votacao=tip_resultado_votacao)
+        context.zsql.votacao_atualizar_zsql(cod_votacao=cod_votacao, num_votos_sim=len(votos_sim), num_votos_nao=len(votos_nao), num_abstencao=len(votos_abstencao), num_ausentes=len(votos_ausentes), txt_observacao=txt_observacao, cod_ordem=materia.get('cod_ordem',materia), cod_materia=materia.get('cod_materia',materia), tip_resultado_votacao=tip_resultado_votacao)
 
     parlamentares=[]
     if cod_votacao is not None:

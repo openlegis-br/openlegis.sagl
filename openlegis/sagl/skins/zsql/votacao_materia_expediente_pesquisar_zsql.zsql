@@ -10,10 +10,15 @@ SELECT DISTINCT
    rv.num_votos_sim,
    rv.num_votos_nao,
    rv.num_abstencao,
+   rv.num_ausentes,
    rv.tip_resultado_votacao,
    rv.txt_observacao as observacao_votacao,
    rv.cod_votacao,
-   em.tip_votacao
+   em.cod_ordem,
+   em.num_ordem,
+   em.tip_votacao,
+   em.tip_turno,
+   em.tip_quorum
 FROM
    sessao_plenaria sp 
    LEFT JOIN expediente_materia em ON sp.cod_sessao_plen=em.cod_sessao_plen 

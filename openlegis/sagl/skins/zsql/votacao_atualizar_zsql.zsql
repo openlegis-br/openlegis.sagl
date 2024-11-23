@@ -1,7 +1,7 @@
 <dtml-comment>
 connection_id : dbcon_sagl
-arguments : cod_votacao num_votos_sim num_votos_nao num_abstencao txt_observacao cod_ordem cod_materia cod_parecer cod_emenda cod_subemenda cod_substitutivo tip_resultado_votacao ind_excluido=0
-max_rows : 1000
+arguments : cod_votacao num_votos_sim num_votos_nao num_abstencao num_ausentes txt_observacao cod_ordem cod_materia cod_parecer cod_emenda cod_subemenda cod_substitutivo tip_resultado_votacao ind_excluido=0
+max_rows : 1
 max_cache : 100
 </dtml-comment>
 UPDATE
@@ -10,6 +10,7 @@ SET
     num_votos_sim         = <dtml-sqlvar num_votos_sim         type="int">,
     num_votos_nao         = <dtml-sqlvar num_votos_nao         type="int">,
     num_abstencao         = <dtml-sqlvar num_abstencao         type="int">,
+    num_ausentes          = <dtml-sqlvar num_ausentes          type="int">,
     txt_observacao        = <dtml-sqlvar txt_observacao        type="string" optional>,
     cod_ordem             = <dtml-sqlvar cod_ordem             type="int">,
     cod_materia           = <dtml-sqlvar cod_materia           type="int">,

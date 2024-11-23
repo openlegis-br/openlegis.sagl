@@ -4,11 +4,11 @@ arguments : dat_ordem="" cod_sessao_plen="" cod_materia="" ind_excluido=0
 max_rows : 1000
 max_cache : 100
 </dtml-comment>
-<dtml-if expr="pysc.verifica_conector_bd_pysc() == 1">
 SELECT DISTINCT
    num_votos_nao,
    num_votos_sim,
-   num_abstencao
+   num_abstencao,
+   num_ausentes
 
 FROM
    ordem_dia
@@ -23,8 +23,3 @@ FROM
     <dtml-sqltest ind_excluido     column="registro_votacao.ind_excluido" op="=" type="int" optional>
     and ordem_dia.cod_materia = registro_votacao.cod_materia
   </dtml-sqlgroup>
-
-<dtml-else>
-
-
-</dtml-if>

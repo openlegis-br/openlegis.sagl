@@ -31,6 +31,11 @@
                 return false;
             }
 
+            if (form.txt_ausentes.value == '' && form.rad_votacao_branco.checked == false) {
+                alert("O numero de ausentes deve ser preenchido!");
+                form.txt_ausentes.focus();
+                return false;
+            }
 <dtml-comment>                            
             if (tipo_votacao != 2) {
               if (!(form.rad_ind_votacao_presidente[0].checked || form.rad_ind_votacao_presidente[1].checked)){
@@ -44,9 +49,10 @@
               var qvs = parseInt(form.txt_votos_sim.value,10); 
               var qvn = parseInt(form.txt_votos_nao.value,10);
               var qab = parseInt(form.txt_votos_abstencao.value,10);
+              var qvau = parseInt(form.txt_ausentes.value,10);
               var quo = parseInt(form.hdn_nro_presentes.value,10);
               qp = quo;
-              qtv = qvs + qvn + qab;
+              qtv = qvs + qvn + qab + qvau;
               if (form.rad_ind_votacao_presidente[0].checked) {
                  qp = quo - 1;
               }
@@ -67,10 +73,11 @@
                var qvs = parseInt(form.txt_votos_sim.value,10);
                var qvn = parseInt(form.txt_votos_nao.value,10);
                var qva = parseInt(form.txt_votos_abstencao.value,10);
+               var qvau = parseInt(form.txt_ausentes.value,10);
                var quo = parseInt(form.hdn_nro_presentes.value,10);
-               qtv = qvs + qvn + qva;
+               qtv = qvs + qvn + qva + qvau;
                if (quo != qtv) {
-                  alert("Votos indicados não conferem com o quorum de presentes na Ordem do Dia. Reinforme! - quorum= " + quo + " - Sim= " + qvs + " - Não= " + qvn + " - Abstenção= " + qva);
+                  alert("Votos indicados não conferem com o quorum de presentes na Ordem do Dia. Reinforme! - quorum= " + quo + " - Sim= " + qvs + " - Não= " + qvn + " - Abstenção= " + qva + " - Aussntes= " + qvau);
                   form.txt_votos_sim.focus();
                   return false;
                }   
@@ -78,7 +85,7 @@
         }
 
         if (form.lst_tip_resultado.selectedIndex == 0 && form.rad_votacao_branco.checked == false){
-            alert("Selecione o Resultado da Votação!");
+            alert("Selecione o resultado da votação!");
             form.lst_tip_resultado.focus();
             return false;
         }
@@ -110,12 +117,14 @@
                     form.txt_votos_sim.disabled=1;
                     form.txt_votos_nao.disabled=1;
                     form.txt_votos_abstencao.disabled=1;
+                    form.txt_ausentes.disabled=1;
                     form.lst_tip_resultado.disabled=1;
                     }
                 else {
                     form.txt_votos_sim.disabled=0;
                     form.txt_votos_nao.disabled=0;
                     form.txt_votos_abstencao.disabled=0;
+                    form.txt_ausentes.disabled=0;
                     form.lst_tip_resultado.disabled=0;
                     }
                 }
@@ -136,12 +145,14 @@
                 	form.txt_votos_sim.disabled=1;
                     form.txt_votos_nao.disabled=1;
                     form.txt_votos_abstencao.disabled=1;
+                    form.txt_ausentes.disabled=1;
                     form.lst_tip_resultado.disabled=1;
                     }
                 else {
                     form.txt_votos_sim.disabled=0;
                     form.txt_votos_nao.disabled=0;
                     form.txt_votos_abstencao.disabled=0;
+                    form.txt_ausentes.disabled=0;
                     form.lst_tip_resultado.disabled=0;
                     }
                 }
@@ -177,7 +188,7 @@
      <legend class="font-size-16 ms-2">Registro de Votação Simbólica</legend>
       <table class="table table-borderless">
        <tr>
-         <td colspan="2">
+         <td colspan="4">
               <dtml-if cod_parecer>
                  <dtml-in expr="zsql.relatoria_obter_zsql(cod_relatoria=cod_parecer,ind_excluido=0)">
                     <dtml-in expr="zsql.comissao_obter_zsql(cod_comissao=cod_comissao)">
@@ -200,7 +211,7 @@
               <b><dtml-var des_tipo_materia missing> nº <dtml-var num_ident_basica missing>/<dtml-var ano_ident_basica missing></b>
               <dtml-in expr="zsql.autoria_obter_zsql(cod_materia=cod_materia)"> - 
                  <b><dtml-var nom_autor_join><dtml-unless sequence-end>,</dtml-unless></b>
-              </dtml-in> -
+              </dtml-in>
                <br /><b>Ementa:</b> <dtml-var txt_ementa>
            </dtml-in>
          </td>
@@ -218,10 +229,14 @@
                <label class="form-label required" for="txt_votos_abstencao">Abstenções</label>
                <input class="form-control" type="number" name="txt_votos_abstencao" id="txt_votos_abstencao" value="<dtml-var num_abstencao missing null>" size="3" maxlength="3" />
             </td>
+            <td>
+               <label class="form-label required" for="txt_ausentes">Ausentes</label>
+               <input class="form-control" type="number" name="txt_ausentes" id="txt_ausentes" value="<dtml-var num_ausentes missing null>" size="3" maxlength="3" />
+            </td>
             </tr>
          <tr>
          <tr>
-            <td colspan="2">
+            <td colspan="3">
                <label class="form-label required" for="lst_tip_resultado">Resultado da Votação</label>
                <select class="form-select" id="lst_tip_resultado" name="lst_tip_resultado" required>
                    <option value="0">Selecione </option>
@@ -236,7 +251,7 @@
                     </select>
             </td>
             <td colspan="1">
-               <label class="form-label required d-block" for="lst_tip_resultado">Anulação</label>    
+               <label class="form-label required d-block" for="rad_votacao_branco">Anulação</label>    
                <div class="form-check">   
                  <input class="form-check-input" type="checkbox" id="rad_votacao_branco" name="rad_votacao_branco" onchange="javascript:votacao_em_branco(tip_votacao=1)">
                  <label class="form-check-label" for="rad_votacao_branco">Anular Votação?</label>
@@ -244,7 +259,7 @@
             </td>
          </tr>
          <tr>
-            <td colspan="2">
+            <td colspan="4">
                  <label class="form-label" for="txa_txt_observacao">Observações</label>
                  <textarea class="form-control auto-resize" id="txa_txt_observacao" name="txa_txt_observacao" rows="1"><dtml-var txt_observacao missing null=""></textarea>
             </td>
@@ -259,7 +274,7 @@
    <legend class="font-size-16">Registro de Votação Nominal</legend>
      <table class="table table-striped table-sm w-100 align-middle">
        <tr>
-         <td colspan="2">
+         <td colspan="4">
               <dtml-if cod_parecer>
                  <dtml-in expr="zsql.relatoria_obter_zsql(cod_relatoria=cod_parecer,ind_excluido=0)">
                     <dtml-in expr="zsql.comissao_obter_zsql(cod_comissao=cod_comissao)">
@@ -356,7 +371,7 @@
               </select>
            </div>
            <div class="col-4">
-               <label class="form-label" for="lst_tip_resultado" class="d-block">Anulação</label>    
+               <label class="form-label" for="rad_votacao_branco" class="d-block">Anulação</label>    
                <div class="form-check">   
                  <input class="form-check-input" type="checkbox" id="rad_votacao_branco" name="rad_votacao_branco" onchange="javascript:votacao_em_branco(tip_votacao=2)">
                  <label class="form-check-label" for="rad_votacao_branco">Anular Votação?</label>
@@ -378,7 +393,7 @@
     <legend class="font-size-16">Votação Secreta</legend>
      <table class="table table-borderless">
        <tr>
-         <td colspan="2">
+         <td colspan="4">
            <dtml-if cod_emenda>
                 <dtml-in expr="zsql.emenda_obter_zsql(cod_materia=cod_materia, cod_emenda=cod_emenda, ind_excluido=0)">
                   <b>Emenda nº <dtml-var num_emenda> (<dtml-var des_tipo_emenda>)</b> ao
@@ -393,29 +408,33 @@
               <b><dtml-var des_tipo_materia missing> nº <dtml-var num_ident_basica missing>/<dtml-var ano_ident_basica missing></b>
               <dtml-in expr="zsql.autoria_obter_zsql(cod_materia=cod_materia)">
                  - <b><dtml-var nom_autor_join><dtml-unless sequence-end>,</dtml-unless></b>
-              </dtml-in> -
+              </dtml-in>
                <dtml-var txt_ementa>
            </dtml-in>
          </td>
        </tr>
          <tr>
             <td>
-               <label class="form-label" for="txt_votos_sim" class="form-label required">Votos Sim</label>
+               <label class="form-label required" for="txt_votos_sim">Votos Sim</label>
                <input class="form-control" type="number" name="txt_votos_sim" id="txt_votos_sim" value="<dtml-var num_votos_sim missing null>" size="3" maxlength="3" />
                 </td>
             <td>
-               <label class="form-label" for="txt_votos_nao" class="form-label required">Votos Não</label>
+               <label class="form-label required" for="txt_votos_nao">Votos Não</label>
                <input class="form-control" type="number" name="txt_votos_nao" id="txt_votos_nao" value="<dtml-var num_votos_nao missing null>" size="3" maxlength="3" />
             </td>
             <td>
-               <label class="form-label" for="txt_votos_abstencao" class="form-label required">Abstenções</label>
+               <label class="form-label required" for="txt_votos_abstencao">Abstenções</label>
                <input class="form-control" type="number" name="txt_votos_abstencao" id="txt_votos_abstencao" value="<dtml-var num_abstencao missing null>" size="3" maxlength="3"/>
+            </td>
+            <td>
+               <label class="form-label required" for="txt_ausentes">Ausentes</label>
+               <input class="form-control" type="number" name="txt_ausentes" id="txt_ausentes" value="<dtml-var num_ausentes missing null>" size="3" maxlength="3" />
             </td>
             </tr>
          <tr>
          <tr>
-            <td colspan="2">
-               <label class="form-label" for="lst_tip_resultado" class="form-label required">Resultado da Votação</label>
+            <td colspan="3">
+               <label class="form-label required" for="lst_tip_resultado" >Resultado da Votação</label>
                <select class="form-select" id="lst_tip_resultado" name="lst_tip_resultado" required>
                    <option value="0">Selecione </option>
                         <dtml-in expr="zsql.tipo_resultado_votacao_obter_zsql()">
@@ -429,7 +448,7 @@
                     </select>
             </td>
             <td colspan="1">
-               <label class="form-label" for="lst_tip_resultado" class="d-block">Anulação</label>    
+               <label class="form-label" for="rad_votacao_branco" class="d-block">Anulação</label>    
                <div class="form-check">   
                  <input class="form-check-input" type="checkbox" id="rad_votacao_branco" name="rad_votacao_branco" onchange="javascript:votacao_em_branco(tip_votacao=1)">
                  <label class="form-check-label" for="rad_votacao_branco">Anular Votação?</label>
@@ -437,7 +456,7 @@
             </td>
          </tr>
          <tr>
-            <td colspan="2">
+            <td colspan="4">
                  <label class="form-label" for="txa_txt_observacao">Observações</label>
                  <textarea class="form-control auto-resize" id="txa_txt_observacao" name="txa_txt_observacao" rows="1"><dtml-var txt_observacao missing null=""></textarea>
             </td>

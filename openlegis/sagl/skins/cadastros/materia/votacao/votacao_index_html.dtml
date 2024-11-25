@@ -2,18 +2,17 @@
 
 <dtml-in expr="pysc.votacao_obter_pysc(cod_materia=cod_materia)" mapping>
    <dtml-if sequence-start>
-   <div class="card-header">
+      <div class="card-header">
         <div class="row">
           <div class="col-12">
             <i class="far fa-list-alt"></i> Número de <span ><dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao_plural"></span>: <dtml-var sequence-length>
           </div>
         </div>
-       </div>
+      </div>
       <div class="card">
         <div class="list-group list-group-flush mb-2">
    </dtml-if>
      <div class="list-group-item">
-      <div class="col=12">
        <p class="h4 card-title mb-1"><a href="<dtml-var portal_url>/cadastros/sessao_plenaria/sessao_plenaria_mostrar_proc?cod_sessao_plen=<dtml-var cod_sessao_plen>&dat_
 inicio_sessao=<dtml-var dat_sessao>&num_legislatura=<dtml-var legislatura>" target="_blank"><dtml-var sessao></a></p>
        <p class="mb-0"><b>Data</b>: <dtml-var data_sessao></p>
@@ -28,18 +27,18 @@ inicio_sessao=<dtml-var dat_sessao>&num_legislatura=<dtml-var legislatura>" targ
             <div class="collapse" id="collapse<dtml-var cod_ordem>">
                <div class="card-body py-0">
                   <dtml-in expr="votos_nominais" mapping>
-                  <dtml-if sequence-start>
-                   <div class="row">
-                       <div class="col-12 col-sm-6 fw-bolder">Vereador</div>
-                       <div class="col-6 col-sm-3 fw-bolder">Partido</div>
-                       <div class="col-6 col-sm-3 fw-bolder">Voto</div>
-                   </div>
-                  </dtml-if>
-                   <div class="row">
+                    <dtml-if sequence-start>
+                     <div class="row">
+                         <div class="col-12 col-sm-6 fw-bolder">Vereador</div>
+                         <div class="col-6 col-sm-3 fw-bolder">Partido</div>
+                         <div class="col-6 col-sm-3 fw-bolder">Voto</div>
+                     </div>
+                    </dtml-if>
+                    <div class="row">
                        <div class="col-12 col-sm-6"><dtml-var nom_parlamentar></div>
                        <div class="col-6 col-sm-3"><dtml-var partido></div>
                        <div class="col-6 col-sm-3"><dtml-var voto></div>
-                   </div>
+                    </div>
                   </dtml-in>
                </div>
             </div>
@@ -54,24 +53,23 @@ inicio_sessao=<dtml-var dat_sessao>&num_legislatura=<dtml-var legislatura>" targ
             <div class="collapse" id="collapse<dtml-var cod_ordem>">
                <div class="card-body py-0">
                   <dtml-in expr="votos_nominais" mapping>
-                  <dtml-if sequence-start>
-                   <div class="row">
+                    <dtml-if sequence-start>
+                     <div class="row">
                        <div class="col-12 col-sm-6 fw-bolder">Vereador</div>
                        <div class="col-6 col-sm-3 fw-bolder">Partido</div>
                        <div class="col-6 col-sm-3 fw-bolder">Voto</div>
-                   </div>
-                  </dtml-if>
-                   <div class="row">
+                     </div>
+                    </dtml-if>
+                    <div class="row">
                        <div class="col-12 col-sm-6"><dtml-var nom_parlamentar></div>
                        <div class="col-6 col-sm-3"><dtml-var partido></div>
                        <div class="col-6 col-sm-3"><dtml-var voto></div>
-                   </div>
+                    </div>
                   </dtml-in>
                </div>
             </div>
          </dtml-if>
        </dtml-if>
-      </div>
      </div>
    <dtml-if sequence-end>
         </div>

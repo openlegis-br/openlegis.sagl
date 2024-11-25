@@ -100,6 +100,8 @@ for materia in context.zsql.materia_obter_zsql(cod_materia=cod_materia):
      if str(item['fase']) == 'Expediente' or str(item['fase']) == 'Ordem do Dia':
         if str(item['fase']) == 'Ordem do Dia':
            item['fase'] = ' na Ordem do Dia'
+        elif str(item['fase']) == 'Expediente':
+           item['fase'] = ' no Expediente'
         if str(item['txt_turno']) == 'Único':
            item['txt_turno'] = 'Turno Único'
         id_resultado = str(item['txt_resultado']) + ' em ' +  str(item['txt_turno']) + str(item['fase']) + ' da ' + str(item['sessao']) + ' de ' + str(item['dat_sessao'])

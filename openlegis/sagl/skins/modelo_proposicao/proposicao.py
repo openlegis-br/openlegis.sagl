@@ -109,14 +109,14 @@ for proposicao in context.zsql.proposicao_obter_zsql(cod_proposicao=cod_proposic
             elif autor.des_cargo == 'Prefeito Municipal' or autor.des_cargo == 'Prefeito Municipal':
                for usuario in context.zsql.usuario_obter_zsql(col_username=autor.col_username):
                    autor_dic['nome_autor'] = usuario.nom_completo.upper()
-                   autor_dic['apelido_autor'] = ''
+                   autor_dic['apelido_autor'] = usuario.nom_completo.upper()
                    autor_dic['cod_autor'] = autor['cod_autor']
                    autor_dic['cargo'] = autor.des_cargo
                    autor_dic['partido'] = ''
                    inf_basicas_dic['info_gabinete'] = ''
             else:
                autor_dic['nome_autor'] = autor.nom_autor_join.upper()
-               autor_dic['apelido_autor'] = ''
+               autor_dic['apelido_autor'] = autor.nom_autor_join.upper()
                autor_dic['cod_autor'] = autor['cod_autor']
                autor_dic['cargo'] = ''
                autor_dic['partido'] = ''

@@ -1,112 +1,80 @@
-<legend class="font-size-16">Votações</legend>
+<p class="font-size-16">Deliberações em Plenário</p>
 
-<dtml-if expr="zsql.materia_apresentada_sessao_obter_zsql(cod_materia=cod_materia) or zsql.votacao_materia_expediente_pesquisar_zsql(cod_materia=cod_materia) or zsql.votacao_materia_ordem_dia_pesquisar_zsql(cod_materia=cod_materia)">
-
-  <div id="accordion" class="plenario">
-    <div class="card mb-4">
-      <div class="card-header" id="headingOne">
-        <p class="h5 mb-0">
-          <a href="#" class="d-block text-start" data-bs-toggle="collapse" data-target="#collapseSessao" aria-expanded="true" aria-controls="collapseSessao"> 
-            <i class="fa float-right pt-1 align-self-center" aria-hidden="true"></i>
-             <span class="h6 font-weight-bold">Deliberações em Plenário</span>
-          </a>
-        </p>
-      </div>
-      <div id="collapseSessao" class="collapse show" aria-labelledby="headingOne" data-parent=".plenario">
-        <div class="card-body">
-          <div class="table-responsive">
-            <table class="table table-sm mb-0">
-              <thead class="table-light">
-                <tr>
-                   <th>Resultado</th>
-                   <th><dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao"></th>
-                </tr>
-              </thead>
-              <dtml-in expr="zsql.materia_apresentada_sessao_obter_zsql(cod_materia=cod_materia)">
-                <tr>
-                  <td>Leitura da matéria no Plenário</td>                 
-                  <td>
-                  <dtml-in expr="zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=cod_sessao_plen)">
-                    <a href="<dtml-var portal_url>/consultas/sessao_plenaria/agenda_sessao_plen_mostrar_proc?cod_sessao_plen=<dtml-var cod_sessao_plen>&dat_sessao=<dtml-var dat_inicio_sessao>">
-                       <dtml-var num_sessao_plen>ª <dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao"> <dtml-in expr="zsql.tipo_sessao_plenaria_obter_zsql(tip_sessao=tip_sessao)"><dtml-var nom_sessao>, em <dtml-var dat_inicio_sessao></dtml-in>
-                    </a>
+<dtml-in expr="pysc.votacao_obter_pysc(cod_materia=cod_materia)" mapping>
+   <dtml-if sequence-start>
+   <div class="card-header">
+        <div class="row">
+          <div class="col-12">
+            <i class="far fa-list-alt"></i> Número de <span ><dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao_plural"></span>: <dtml-var sequence-length>
+          </div>
+        </div>
+       </div>
+      <div class="card">
+        <div class="list-group list-group-flush mb-2">
+   </dtml-if>
+     <div class="list-group-item">
+      <div class="col=12">
+       <p class="h4 card-title mb-1"><a href="<dtml-var portal_url>/cadastros/sessao_plenaria/sessao_plenaria_mostrar_proc?cod_sessao_plen=<dtml-var cod_sessao_plen>&dat_
+inicio_sessao=<dtml-var dat_sessao>&num_legislatura=<dtml-var legislatura>" target="_blank"><dtml-var sessao></a></p>
+       <p class="mb-0"><b>Data</b>: <dtml-var data_sessao></p>
+       <p class="mb-0"><b>Fase</b>: <dtml-var fase> / <b>Item</b>: <dtml-var num_ordem></p>
+       <dtml-if expr="fase == 'Expediente'">
+         <p class="mb-1"><b>Turno</b>: <dtml-var txt_turno> / <b>Quorum</b>: <dtml-var txt_quorum> / <b>Tipo de Votação</b>: <dtml-var txt_tipo_votacao></p>
+         <p class="mb-0"><span class="badge bg-success font-size-13">Sim: <dtml-var num_votos_sim></span> <span class="badge bg-danger font-size-13">Não: <dtml-var num_votos_nao></span> <span class="badge bg-primary font-size-13">Abstenções: <dtml-var num_abstencao></span> <span class="badge bg-secondary font-size-13">Ausentes: <dtml-var num_abstencao></span></p>
+         <p class="mb-0"><b>Resultado da Votação</b>: <dtml-var txt_resultado upper></p>
+         <dtml-if expr="txt_tipo_votacao=='Nominal'">
+            <p class="mb-0"><a class="fw-bolder" data-bs-toggle="collapse" href="#collapse<dtml-var cod_ordem>" role="button" aria-expanded="false" aria-controls="collapse<dtml-var cod_ordem>"><i class="mdi mdi-chevron-down ms-1"></i> Votação Nominal</a></p>
+</div>
+            <div class="collapse" id="collapse<dtml-var cod_ordem>">
+               <div class="card-body py-0">
+                  <dtml-in expr="votos_nominais" mapping>
+                  <dtml-if sequence-start>
+                   <div class="row">
+                       <div class="col-12 col-sm-6 fw-bolder">Vereador</div>
+                       <div class="col-6 col-sm-3 fw-bolder">Partido</div>
+                       <div class="col-6 col-sm-3 fw-bolder">Voto</div>
+                   </div>
+                  </dtml-if>
+                   <div class="row">
+                       <div class="col-12 col-sm-6"><dtml-var nom_parlamentar></div>
+                       <div class="col-6 col-sm-3"><dtml-var partido></div>
+                       <div class="col-6 col-sm-3"><dtml-var voto></div>
+                   </div>
                   </dtml-in>
-                  </td>
-                </tr>
-              </dtml-in>
-              
-              <dtml-in expr="zsql.votacao_materia_expediente_pesquisar_zsql(cod_materia=cod_materia)">
-                <dtml-in expr="zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=cod_sessao_plen)">
-                  <tr>
-                    <td>
-                       <dtml-in expr="zsql.votacao_expediente_materia_obter_zsql(cod_materia=cod_materia, ind_excluido=0)">
-                          <dtml-if sequence-start>   
-                            <dtml-if tip_resultado_votacao>
-                               <dtml-in expr="zsql.tipo_resultado_votacao_obter_zsql(tip_resultado_votacao=tip_resultado_votacao, ind_excluido=0)">
-                                 <dtml-call expr="REQUEST.set('nom_resultado', nom_resultado)">
-                                 <dtml-if expr="tip_votacao == 2">
-                                    <a href="#" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Resultado de Votação" data-src="<dtml-var portal_url>/consultas/sessao_plenaria/sessao_plenaria_mostrar_painel_proc?cod_sessao_plen=<dtml-var cod_sessao_plen>&cod_ordem=<dtml-var cod_ordem>&cod_materia=<dtml-var cod_materia>&tipo_materia=expediente&modal=1"><dtml-var nom_resultado></a>
-                                 <dtml-else>
-                                   <b><dtml-var nom_resultado></b>
-                                 </dtml-if>
-                               </dtml-in>
-                               <a href="<dtml-var portal_url>/cadastros/materia/votacao/carimbo_adicionar_proc?hdn_cod_sessao_plen=<dtml-var cod_sessao_plen>&nom_resultado=<dtml-var nom_resultado>&cod_materia=<dtml-var cod_materia>"> <i class="fa fa-fw fa-stamp"></i> </a>
-                             <dtml-else>
-                               <i>Matéria não votada</i>
-                            </dtml-if>
-                          </dtml-if sequence-start>   
-                       <dtml-else>
-                          <i>Matéria não votada</i>
-                       </dtml-in>
-                    </td>
-                    <td>
-                      <a href="<dtml-var portal_url>/consultas/sessao_plenaria/agenda_sessao_plen_mostrar_proc?cod_sessao_plen=<dtml-var cod_sessao_plen>&dat_sessao=<dtml-var dat_inicio_sessao>">
-                        <dtml-var num_sessao_plen>ª <dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao"> <dtml-in expr="zsql.tipo_sessao_plenaria_obter_zsql(tip_sessao=tip_sessao)"><dtml-var nom_sessao></dtml-in>, em <dtml-var dat_inicio_sessao></a>
-                    </td>
-                  </tr>
-                </dtml-in>
-              </dtml-in>
-
-              <dtml-in expr="zsql.votacao_materia_ordem_dia_pesquisar_zsql(cod_materia=cod_materia)">
-                <dtml-in expr="zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=cod_sessao_plen)">
-                  <tr>
-                   <td>
-                     <dtml-in expr="zsql.votacao_ordem_dia_obter_zsql(cod_materia=cod_materia, ind_excluido=0)">
-                       <dtml-if sequence-start>   
-                         <dtml-if tip_resultado_votacao>
-                            <dtml-in expr="zsql.tipo_resultado_votacao_obter_zsql(tip_resultado_votacao=tip_resultado_votacao, ind_excluido=0)">
-                              <dtml-call expr="REQUEST.set('nom_resultado', nom_resultado)">
-                              <dtml-if expr="tip_votacao == 2 ">
-                                 <a href="#" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Resultado de Votação" data-src="<dtml-var portal_url>/consultas/sessao_plenaria/sessao_plenaria_mostrar_painel_proc?cod_sessao_plen=<dtml-var cod_sessao_plen>&cod_ordem=<dtml-var cod_ordem>&cod_materia=<dtml-var cod_materia>&tipo_materia=ordemdia&modal=1">
-                                  <dtml-var nom_resultado> em <dtml-in expr="zsql.turno_discussao_obter_zsql(cod_turno=tip_turno)"><dtml-var des_turno></dtml-in>
-                                </a>
-                              <dtml-else>
-                                 <dtml-var nom_resultado> em <dtml-in expr="zsql.turno_discussao_obter_zsql(cod_turno=tip_turno)"><dtml-var des_turno></dtml-in>
-                              </dtml-if>
-                            </dtml-in>
-                            <a href="<dtml-var portal_url>/cadastros/materia/votacao/carimbo_adicionar_proc?hdn_cod_sessao_plen=<dtml-var cod_sessao_plen>&nom_resultado=<dtml-var nom_resultado>&cod_materia=<dtml-var cod_materia>"> <i class="fa fa-fw fa-stamp"></i> </a>
-                         </dtml-if>
-                       </dtml-if sequence-start>   
-                     </dtml-in>                     
-                   </td>                   
-                   <td>
-                     <a href="<dtml-var portal_url>/consultas/sessao_plenaria/agenda_sessao_plen_mostrar_proc?cod_sessao_plen=<dtml-var cod_sessao_plen>&dat_sessao=<dtml-var dat_inicio_sessao>">
-                      <dtml-var num_sessao_plen>ª <dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao"> <dtml-in expr="zsql.tipo_sessao_plenaria_obter_zsql(tip_sessao=tip_sessao)"><dtml-var nom_sessao></dtml-in>, em <dtml-var dat_inicio_sessao></a>
-                   </td>
-                 </tr>
-               </dtml-in>
-            </dtml-in>
-              
-            </table>
-          </div>           
+               </div>
+            </div>
+         </dtml-if>
+       <dtml-elif expr="fase == 'Ordem do Dia'">
+         <p class="mb-1"><b>Turno</b>: <dtml-var txt_turno> / <b>Quorum</b>: <dtml-var txt_quorum> / <b>Tipo de Votação</b>: <dtml-var txt_tipo_votacao></p>
+         <p class="mb-0"><span class="badge bg-success font-size-13">Sim: <dtml-var num_votos_sim></span> <span class="badge bg-danger font-size-13">Não: <dtml-var num_votos_nao></span> <span class="badge bg-primary font-size-13">Abstenções: <dtml-var num_abstencao></span> <span class="badge bg-secondary font-size-13">Ausentes: <dtml-var num_abstencao></span></p>
+         <p class="mb-0"><b>Resultado da Votação</b>: <dtml-var txt_resultado upper></p>
+         <dtml-if expr="txt_tipo_votacao=='Nominal'">
+            <p class="mb-0"><a class="fw-bolder" data-bs-toggle="collapse" href="#collapse<dtml-var cod_ordem>" role="button" aria-expanded="false" aria-controls="collapse<dtml-var cod_ordem>"><i class="mdi mdi-chevron-down ms-1"></i> Votação Nominal</a></p>
+</div>
+            <div class="collapse" id="collapse<dtml-var cod_ordem>">
+               <div class="card-body py-0">
+                  <dtml-in expr="votos_nominais" mapping>
+                  <dtml-if sequence-start>
+                   <div class="row">
+                       <div class="col-12 col-sm-6 fw-bolder">Vereador</div>
+                       <div class="col-6 col-sm-3 fw-bolder">Partido</div>
+                       <div class="col-6 col-sm-3 fw-bolder">Voto</div>
+                   </div>
+                  </dtml-if>
+                   <div class="row">
+                       <div class="col-12 col-sm-6"><dtml-var nom_parlamentar></div>
+                       <div class="col-6 col-sm-3"><dtml-var partido></div>
+                       <div class="col-6 col-sm-3"><dtml-var voto></div>
+                   </div>
+                  </dtml-in>
+               </div>
+            </div>
+         </dtml-if>
+       </dtml-if>
+      </div>
+   <dtml-if sequence-end>
+          </div>
         </div>
       </div>
-  </div>
- </div>
- <dtml-else>
-   <div class="row">
-     <div class="col-12">
-        Não há registros de votação desta matéria.
-     </div>
-   </div>
- </dtml-if>
+   </dtml-if>
+</dtml-in>

@@ -133,19 +133,19 @@ class ProcessoLeg(grok.View):
                           dic["file"] = str(documento.cod_documento) + '.pdf'
                           dic["title"] = documento.nom_documento + ' (acess. de anexadora)'
                           lst_arquivos.append(dic)
-            for docadm in self.context.zsql.documento_administrativo_materia_obter_zsql(cod_materia=materia.cod_materia, ind_excluido=0):
-                if hasattr(self.context.sapl_documentos.administrativo, str(docadm.cod_documento) + '_texto_integral.pdf'):
-                   dic = {}
-                   if docadm.num_protocolo_documento != '' and docadm.num_protocolo_documento != None:
-                      for protocolo in self.context.zsql.protocolo_obter_zsql(num_protocolo=docadm.num_protocolo_documento, ano_protocolo=docadm.ano_documento):
-                          dic["data"] = DateTime(protocolo.dat_timestamp, datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
-                   else:
-                      dic["data"] = DateTime(docadm.data_documento, datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
-                   dic['path'] = self.context.sapl_documentos.administrativo
-                   dic["file"] = str(docadm.cod_documento) + '_texto_integral.pdf'
-                   doc = self.context.zsql.documento_administrativo_obter_zsql(cod_documento=docadm.cod_documento,ind_excluido=0)[0]
-                   dic["title"] = doc.sgl_tipo_documento + ' nº ' + str(doc.num_documento) + '/' + str(doc.ano_documento) + ' (doc. vinculado)'
-                lst_arquivos.append(dic)
+            #for docadm in self.context.zsql.documento_administrativo_materia_obter_zsql(cod_materia=materia.cod_materia, ind_excluido=0):
+            #    if hasattr(self.context.sapl_documentos.administrativo, str(docadm.cod_documento) + '_texto_integral.pdf'):
+            #       dic = {}
+            #       if docadm.num_protocolo_documento != '' and docadm.num_protocolo_documento != None:
+            #          for protocolo in self.context.zsql.protocolo_obter_zsql(num_protocolo=docadm.num_protocolo_documento, ano_protocolo=docadm.ano_documento):
+            #              dic["data"] = DateTime(protocolo.dat_timestamp, datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
+            #       else:
+            #          dic["data"] = DateTime(docadm.data_documento, datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
+            #       dic['path'] = self.context.sapl_documentos.administrativo
+            #       dic["file"] = str(docadm.cod_documento) + '_texto_integral.pdf'
+            #       doc = self.context.zsql.documento_administrativo_obter_zsql(cod_documento=docadm.cod_documento,ind_excluido=0)[0]
+            #       dic["title"] = doc.sgl_tipo_documento + ' nº ' + str(doc.num_documento) + '/' + str(doc.ano_documento) + ' (doc. vinculado)'
+            #    lst_arquivos.append(dic)
             for documento in self.context.zsql.documento_acessorio_obter_zsql(cod_materia=materia.cod_materia, ind_excluido=0):
                 if hasattr(self.context.sapl_documentos.materia, str(documento.cod_documento) + '.pdf'):
                    dic = {}

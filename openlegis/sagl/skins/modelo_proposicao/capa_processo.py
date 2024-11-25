@@ -95,6 +95,18 @@ for materia in context.zsql.materia_obter_zsql(cod_materia=cod_materia):
  if len(lst_comissao) > 0:
     capa_dic['comissao'] = lst_comissao
 
+ lst_votacao = []
+ for item in context.pysc.votacao_obter_pysc(cod_materia=cod_materia):
+     if str(item['fase']) == 'Expediente' or str(item['fase']) == 'Ordem do Dia':
+        if str(item['fase']) == 'Ordem do Dia':
+           item['fase'] = ' na Ordem do Dia'
+        if str(item['txt_turno']) == 'Único':
+           item['txt_turno'] = 'Turno Único'
+        id_resultado = str(item['txt_resultado']) + ' em ' +  str(item['txt_turno']) + str(item['fase']) + ' da ' + str(item['sessao']) + ' de ' + str(item['dat_sessao'])
+        lst_votacao.append(id_resultado)
+ 
+ capa_dic['votacao'] = ', '.join(['%s' % (value) for (value) in lst_votacao])
+
  lst_acessorios = []
  for substitutivo in context.zsql.substitutivo_obter_zsql(cod_materia=materia.cod_materia,ind_excluido=0):
      dic_substitutivo = {}
@@ -142,34 +154,6 @@ for materia in context.zsql.materia_obter_zsql(cod_materia=cod_materia):
      lst_acessorios.append(id_emenda)
 
  capa_dic['acessorios'] = ', '.join(['%s' % (value) for (value) in lst_acessorios])
-
- lst_votacao = []
-
- for votacao in context.zsql.votacao_materia_expediente_pesquisar_zsql(cod_materia=materia.cod_materia):
-     for sessao in context.zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=votacao.cod_sessao_plen):
-         num_sessao = sessao.num_sessao_plen
-         data_sessao = sessao.dat_inicio_sessao
-         for tipo_sessao in context.zsql.tipo_sessao_plenaria_obter_zsql(tip_sessao=sessao.tip_sessao):
-             tipo_sessao = tipo_sessao.nom_sessao
-     for tipo_resultado in context.zsql.tipo_resultado_votacao_obter_zsql(tip_resultado_votacao=votacao.tip_resultado_votacao, ind_excluido=0):
-         resultado = tipo_resultado.nom_resultado
-     id_resultado = resultado + ' no Expediente da ' + str(num_sessao) + 'ª ' + str(context.sapl_documentos.props_sagl.reuniao_sessao) + ' ' + tipo_sessao + ' de ' + data_sessao
-     lst_votacao.append(id_resultado)
-
- for votacao in context.zsql.votacao_materia_ordem_dia_pesquisar_zsql(cod_materia=materia.cod_materia):
-     for sessao in context.zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=votacao.cod_sessao_plen):
-         num_sessao = sessao.num_sessao_plen
-         data_sessao = sessao.dat_inicio_sessao
-         for tipo_sessao in context.zsql.tipo_sessao_plenaria_obter_zsql(tip_sessao=sessao.tip_sessao):
-             tipo_sessao = tipo_sessao.nom_sessao
-     for turno in context.zsql.turno_discussao_obter_zsql(cod_turno=votacao.tip_turno):
-         des_turno = turno.des_turno
-     for tipo_resultado in context.zsql.tipo_resultado_votacao_obter_zsql(tip_resultado_votacao=votacao.tip_resultado_votacao, ind_excluido=0):
-         resultado = tipo_resultado.nom_resultado
-     id_resultado = resultado + ' em ' + des_turno + ' na Ordem do Dia da ' + str(num_sessao) + 'ª ' + str(context.sapl_documentos.props_sagl.reuniao_sessao) + ' ' + tipo_sessao + ' de ' + data_sessao
-     lst_votacao.append(id_resultado)
-
- capa_dic['votacao'] = ', '.join(['%s' % (value) for (value) in lst_votacao])
 
  capa_dic['autografo'] = ''
  for documento in context.zsql.documento_acessorio_obter_zsql(cod_materia=materia.cod_materia, ind_excluido=0):
@@ -244,4 +228,4 @@ for materia in context.zsql.materia_obter_zsql(cod_materia=cod_materia):
  capa_dic['nom_arquivo_odt'] = "%s.odt" % id_capa
  capa_dic['nom_arquivo_pdf'] = "%s.pdf" % id_capa
     
-return st.capa_processo_gerar_odt(capa_dic,action)
+ return st.capa_processo_gerar_odt(capa_dic,action)

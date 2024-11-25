@@ -765,7 +765,7 @@
        </div>
     </div>
     <div class="row mb-2">
-     <dtml-if expr="not prop_enviada">   
+     <dtml-if expr="not prop_recebida">   
        <div class="col-12 col-md-2">
            <small id="link_add_file">
              <a class="btn btn-sm btn-light w-100" onclick="addFileField(); return false;" href="#">Anexar</a>
@@ -781,7 +781,7 @@
                   <a class="btn btn-secondary" target="_blank" href="<dtml-var documento>?<dtml-var expr="ZopeTime().timeTime()">">
                     <i class="fa fa-fw fa-file-pdf"></i><dtml-var expr="'Anexo ' + file_item.split('anexo_')[1]">
                   </a>
-                    <dtml-if expr="(not prop_enviada)">
+                    <dtml-if expr="(not prop_recebida)">
                         <a class="btn btn-danger" href="javascript:void(0)" onclick="location.href='anexo_excluir?anexo=<dtml-var file_item>&cod_proposicao=<dtml-var cod_proposicao missing>'"> <i class="far fa-trash-alt"></i></a>
                     </dtml-if>
                 </div>

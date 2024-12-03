@@ -1,6 +1,13 @@
-<dtml-call expr="REQUEST.set('hdn_url', 'materia_mostrar_proc?cod_materia=' + str(cod_materia) + '#votacao')">
-<dtml-call expr="modelo_proposicao.requerimento_aprovar(cod_sessao_plen=hdn_cod_sessao_plen, nom_resultado=nom_resultado, cod_materia=cod_materia)">
-<dtml-let mensagem="'Carimbo adicionado com sucesso!'" url="hdn_url" >
-  <dtml-var mensagem_emitir>
-</dtml-let>
+<dtml-call expr="REQUEST.set('id_pdf', str(cod_materia)+'_texto_integral.pdf')">   
 
+<dtml-if expr="hasattr(sapl_documentos.materia,id_pdf)">
+   <dtml-call expr="REQUEST.set('hdn_url', 'materia_mostrar_proc?cod_materia=' + str(cod_materia))">
+   <dtml-call expr="modelo_proposicao.requerimento_aprovar(cod_sessao_plen=hdn_cod_sessao_plen, nom_resultado=nom_resultado, cod_materia=cod_materia)">
+   <dtml-let mensagem="'Resultado carimbado no arquivo PDF da matéria!'" url="hdn_url" >
+      <dtml-var mensagem_emitir>
+   </dtml-let>
+<dtml-else>
+   <dtml-let mensagem="'A matéria não possui arquivo PDF para carimbar o resultado !'" tipo_mensagem="'danger'">
+      <dtml-var mensagem_emitir>
+   </dtml-let>
+</dtml-if>

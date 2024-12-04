@@ -146,7 +146,7 @@ def tramitacao(tramitacao_dic):
       tmp+='\t\t<para style="P2">\n'
       tmp+='\t\t\t<font color="white">-</font>\n'
       tmp+='\t\t</para>\n'
-      tmp+=html2rml(tramitacao_dic['txt_tramitacao'])
+      tmp+=html2rml(tramitacao_dic['txt_tramitacao']).replace('&','&amp;')
       tmp+='\t\t<para style="P2">\n'
       tmp+='\t\t\t<font color="white">-</font>\n'
       tmp+='\t\t</para>\n'

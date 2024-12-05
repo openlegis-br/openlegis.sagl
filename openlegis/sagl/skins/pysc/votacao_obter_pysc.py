@@ -81,6 +81,7 @@ if cod_materia != '':
              dic_votacao = {}
              dic_votacao['nom_completo'] = voto.nom_completo
              dic_votacao['nom_parlamentar'] = voto.nom_parlamentar
+             dic_votacao['partido'] = 'Sem Registro'
              for filiacao in  context.zsql.parlamentar_data_filiacao_obter_zsql(num_legislatura = num_legislatura, cod_parlamentar=voto.cod_parlamentar):
                  for partido in context.zsql.parlamentar_partido_obter_zsql(dat_filiacao=filiacao.dat_filiacao, cod_parlamentar=voto.cod_parlamentar):
                      dic_votacao['partido'] = partido.sgl_partido
@@ -135,6 +136,7 @@ if cod_materia != '':
              dic_votacao = {}
              dic_votacao['nom_completo'] = voto.nom_completo
              dic_votacao['nom_parlamentar'] = voto.nom_parlamentar
+             dic_votacao['partido'] = 'Sem Registro'
              for filiacao in  context.zsql.parlamentar_data_filiacao_obter_zsql(num_legislatura = num_legislatura, cod_parlamentar=voto.cod_parlamentar):
                  for partido in context.zsql.parlamentar_partido_obter_zsql(dat_filiacao=filiacao.dat_filiacao, cod_parlamentar=voto.cod_parlamentar):
                      dic_votacao['partido'] = partido.sgl_partido

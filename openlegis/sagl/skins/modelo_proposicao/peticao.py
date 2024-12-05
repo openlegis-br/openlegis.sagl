@@ -80,4 +80,17 @@ for peticao in context.zsql.peticao_obter_zsql(cod_peticao=cod_peticao):
 
     inf_basicas_dic['materia_vinculada'] = materia_vinculada
 
+# Presidente e Secretário
+inf_basicas_dic["lst_presidente"] = ''
+inf_basicas_dic["lst_psecretario"] = ''
+data = context.pysc.data_converter_pysc(dat_documento)
+for legislatura in context.zsql.legislatura_obter_zsql(data=data):
+    for periodo in context.zsql.periodo_comp_mesa_obter_zsql(num_legislatura=legislatura.num_legislatura,data=data):
+        for membro in context.zsql.composicao_mesa_obter_zsql(cod_periodo_comp=periodo.cod_periodo_comp):
+            for parlamentar in context.zsql.parlamentar_obter_zsql(cod_parlamentar=membro.cod_parlamentar):
+                if membro.des_cargo == 'Presidente':
+                   inf_basicas_dic["lst_presidente"] = parlamentar.nom_parlamentar
+                elif membro.des_cargo == '1º Secretário':
+                   inf_basicas_dic["lst_psecretario"] = parlamentar.nom_parlamentar
+
 return st.peticao_gerar_odt(inf_basicas_dic, nom_arquivo, modelo_path)

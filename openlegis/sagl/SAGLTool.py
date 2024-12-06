@@ -1525,7 +1525,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
             h = existing_pdf[page_index].rect.height
             margin = 5
             left = 10 - margin
-            bottom = h - 60 - margin
+            bottom = h - 50 - margin
             bottom2 = h - 38
             right = w - 53
             black = pymupdf.pdfcolor["black"]

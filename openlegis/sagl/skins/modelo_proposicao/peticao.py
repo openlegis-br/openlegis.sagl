@@ -47,10 +47,10 @@ for peticao in context.zsql.peticao_obter_zsql(cod_peticao=cod_peticao):
            inf_basicas_dic['sexo_servidor'] = 'servidor'
         elif usuario.sex_usuario == 'F':
            inf_basicas_dic['sexo'] = 'Feminino'
-           inf_basicas_dic['sexo_servidor'] = 'servidora'           
+           inf_basicas_dic['sexo_servidor'] = 'servidora'
         else:
            inf_basicas_dic['sexo'] = ''
-           inf_basicas_dic['sexo_servidor'] = 'servidor(a)'           
+           inf_basicas_dic['sexo_servidor'] = 'servidor(a)'
         inf_basicas_dic['num_cpf'] = usuario.num_cpf
         inf_basicas_dic['num_rg'] = usuario.num_rg
         inf_basicas_dic['num_ctps'] = usuario.num_ctps
@@ -61,7 +61,7 @@ for peticao in context.zsql.peticao_obter_zsql(cod_peticao=cod_peticao):
         inf_basicas_dic['num_tel_resid'] = usuario.num_tel_resid
         inf_basicas_dic['num_tel_celular'] = usuario.num_tel_celular
         inf_basicas_dic['num_tel_comercial'] = usuario.num_tel_comercial
-        
+
     materia_vinculada = {}
     if peticao.cod_materia == '' and peticao.cod_materia != None:
        for materia in context.zsql.materia_obter_zsql(cod_materia = peticao.cod_materia):
@@ -74,7 +74,7 @@ for peticao in context.zsql.peticao_obter_zsql(cod_peticao=cod_peticao):
            for autor in autores:
                for field in fields:
                    nome_autor = autor['nom_autor_join']
-                   inf_basicas_dic['nome_autor'] = autor['nom_autor_join']       
+                   inf_basicas_dic['nome_autor'] = autor['nom_autor_join']
                lista_autor.append(nome_autor)
            materia_vinculada['autoria'] = ', '.join(['%s' % (value) for (value) in lista_autor])
 
@@ -83,7 +83,7 @@ for peticao in context.zsql.peticao_obter_zsql(cod_peticao=cod_peticao):
 # Presidente e Secretário
 inf_basicas_dic["lst_presidente"] = ''
 inf_basicas_dic["lst_psecretario"] = ''
-data = context.pysc.data_converter_pysc(dat_documento)
+data = DateTime(datefmt='international').strftime("%Y/%m/%d")
 for legislatura in context.zsql.legislatura_obter_zsql(data=data):
     for periodo in context.zsql.periodo_comp_mesa_obter_zsql(num_legislatura=legislatura.num_legislatura,data=data):
         for membro in context.zsql.composicao_mesa_obter_zsql(cod_periodo_comp=periodo.cod_periodo_comp):

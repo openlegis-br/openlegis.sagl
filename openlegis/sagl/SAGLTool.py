@@ -1516,6 +1516,10 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         arquivo = BytesIO(bytes(arq.data))
         existing_pdf = pymupdf.open(stream=arquivo)
         numPages = existing_pdf.page_count
+        install_home = os.environ.get('INSTALL_HOME')
+        dirpath = os.path.join(install_home, 'src/openlegis.sagl/openlegis/sagl/skins/imagens/logo-icp2.png')
+        with open(dirpath, "rb") as arq:
+             image = arq.read()
         for page_index, i in enumerate(range(len(existing_pdf))):
             w = existing_pdf[page_index].rect.width
             h = existing_pdf[page_index].rect.height

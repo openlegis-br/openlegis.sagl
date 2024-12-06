@@ -1522,17 +1522,28 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
             margin = 5
             left = 10 - margin
             bottom = h - 60 - margin
+            bottom2 = h - 38
+            right = w - 53
             black = pymupdf.pdfcolor["black"]
-            numero = "Pág. %s/%s" % (i+1, numPages)
-            rect = pymupdf.Rect(left, bottom, left + 60, bottom + 60)  # qrcode bottom left square
+            # qrcode
+            rect = pymupdf.Rect(left, bottom, left + 50, bottom + 50)  # qrcode bottom left square
             existing_pdf[page_index].insert_image(rect, stream=stream)
-            text2 = texto + info_protocolo + '\n' + mensagem1 + '\n' + mensagem2
-            p1 = pymupdf.Point(w - 60 - margin, h - 30) # numero de pagina documento
-            p2 = pymupdf.Point(70, h - 35) # margem inferior
+            text2 = mensagem2
+            # logo icp
+            rect_icp = pymupdf.Rect(right, bottom2, right + 45, bottom2 + 45)
+            existing_pdf[page_index].insert_image(rect_icp, stream=image)
+            # margem direita
+            numero = "Pág. %s/%s" % (i+1, numPages)
+            text3 = numero + ' - ' + texto + info_protocolo + ' ' + mensagem1
+            x = w - 8 - margin #largura
+            y = h - 50 - margin # altura
+            existing_pdf[page_index].insert_text((x, y), text3, fontsize=8, rotate=90)
+            # margem inferior
+            p1 = pymupdf.Point(w - 40 - margin, h - 12) # numero de pagina documento
+            p2 = pymupdf.Point(60, h - 12) # margem inferior
             shape = existing_pdf[page_index].new_shape()
             shape.draw_circle(p1,1)
             shape.draw_circle(p2,1)
-            shape.insert_text(p1, numero, fontname = "helv", fontsize = 8)
             shape.insert_text(p2, text2, fontname = "helv", fontsize = 8, rotate=0)
             shape.commit()
         w = existing_pdf[0].rect.width

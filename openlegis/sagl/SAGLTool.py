@@ -1082,28 +1082,28 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         arq = getattr(self.sapl_documentos.proposicao, id_image1)
         with BytesIO(bytes(arq.data)) as content:
              image_one = content.getvalue()
-             return image_one           
+             return image_one
 
     def get_proposicao_image_two(self, num_proposicao):
         id_image2 = str(num_proposicao) + '_image_2.jpg'
         arq = getattr(self.sapl_documentos.proposicao, id_image2)
         with BytesIO(bytes(arq.data)) as content:
              image_two = content.getvalue()
-             return image_two 
+             return image_two
 
     def get_proposicao_image_three(self, num_proposicao):
         id_image3 = str(num_proposicao) + '_image_3.jpg'
         arq = getattr(self.sapl_documentos.proposicao, id_image3)
         with BytesIO(bytes(arq.data)) as content:
              image_three = content.getvalue()
-             return image_three 
+             return image_three
 
     def get_proposicao_image_four(self, num_proposicao):
         id_image4 = str(num_proposicao) + '_image_4.jpg'
         arq = getattr(self.sapl_documentos.proposicao, id_image4)
         with BytesIO(bytes(arq.data)) as content:
              image_four = content.getvalue()
-             return image_four 
+             return image_four
 
     def proposicao_gerar_odt(self, inf_basicas_dic, num_proposicao, nom_arquivo, des_tipo_materia, num_ident_basica, ano_ident_basica, txt_ementa, materia_vinculada, dat_apresentacao, nom_autor, apelido_autor, subscritores, modelo_proposicao, modelo_path):
         utool = getToolByName(self, 'portal_url')
@@ -1138,7 +1138,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
            if hasattr(self.sapl_documentos.proposicao, id_imagem4):
               image4 = self.get_proposicao_image_four(num_proposicao=num_proposicao)
            else:
-              image4 = ''          
+              image4 = ''
         renderer = Renderer(template_file, locals(), nom_arquivo, pythonWithUnoPath='/usr/bin/python3',forceOoCall=True)
         renderer.run()
         data = open(nom_arquivo, "rb").read()
@@ -1408,7 +1408,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
                 black = pymupdf.pdfcolor["black"]
                 # qrcode
                 rect = pymupdf.Rect(left, bottom, left + 50, bottom + 50)  # qrcode bottom left square
-                existing_pdf[page_index].insert_image(rect, stream=stream)             
+                existing_pdf[page_index].insert_image(rect, stream=stream)
                 text2 = mensagem2
                 # margem direita
                 numero = "Pág. %s/%s" % (i+1, numPages)
@@ -1445,7 +1445,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
            pdf=storage_path[nom_pdf_saida]
         pdf.manage_permission('View', roles=['Manager','Anonymous'], acquire=1)
 
-    def peticao_autuar(self,cod_peticao):          
+    def peticao_autuar(self,cod_peticao):
         for peticao in self.zsql.peticao_obter_zsql(cod_peticao=cod_peticao):
             cod_validacao_doc = ''
             nom_autor = None
@@ -1538,7 +1538,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
             existing_pdf[page_index].insert_image(rect_icp, stream=image)
             # margem direita
             numero = "Pág. %s/%s" % (i+1, numPages)
-            text3 = numero + ' - ' + texto + info_protocolo + ' ' + mensagem1
+            text3 = numero + ' - ' + texto + ' - ' + mensagem1
             x = w - 8 - margin #largura
             y = h - 50 - margin # altura
             existing_pdf[page_index].insert_text((x, y), text3, fontsize=8, rotate=90)
@@ -1847,7 +1847,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         reader = pypdf.PdfReader(fileStream)
         fields = reader.get_fields().values()
         signature_field_values = [
-            f.value for f in fields if f.field_type == '/Sig']  
+            f.value for f in fields if f.field_type == '/Sig']
         lst_signers = []
         for v in signature_field_values:
             v_type = v['/Type']
@@ -2072,7 +2072,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
             black = pymupdf.pdfcolor["black"]
             # qrcode
             rect = pymupdf.Rect(left, bottom, left + 50, bottom + 50)  # qrcode bottom left square
-            existing_pdf[page_index].insert_image(rect, stream=stream)              
+            existing_pdf[page_index].insert_image(rect, stream=stream)
             text2 = mensagem2
             # logo icp
             rect_icp = pymupdf.Rect(right, bottom2, right + 45, bottom2 + 45)
@@ -2248,7 +2248,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         for usuario in self.zsql.usuario_obter_zsql(col_username=member):
             email = usuario.end_email
         return email
-        
+
     security.declarePublic('mailPassword')
 
     def mailPassword(self, forgotten_userid, REQUEST):

@@ -1534,8 +1534,9 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
             existing_pdf[page_index].insert_image(rect, stream=stream)
             text2 = mensagem2
             # logo icp
-            rect_icp = pymupdf.Rect(right, bottom2, right + 45, bottom2 + 45)
-            existing_pdf[page_index].insert_image(rect_icp, stream=image)
+            if cod_validacao_doc != '':
+               rect_icp = pymupdf.Rect(right, bottom2, right + 45, bottom2 + 45)
+               existing_pdf[page_index].insert_image(rect_icp, stream=image)
             # margem direita
             numero = "Pág. %s/%s" % (i+1, numPages)
             text3 = numero + ' - ' + texto + ' - ' + mensagem1

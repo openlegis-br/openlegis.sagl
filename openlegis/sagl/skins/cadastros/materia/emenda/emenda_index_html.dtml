@@ -69,3 +69,6 @@
    </dtml-in>
     
   <button type="button" class="btn btn-light d-print-none" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Cadastro de Emenda" data-src="emenda/emenda_form?cod_materia=<dtml-var cod_materia>&modal=1">Incluir Emenda</button>
+  <dtml-if expr="zsql.emenda_obter_zsql(cod_materia=cod_materia, ind_excluido=0)">
+    <a class="btn btn-secondary" target="_blank" href="<dtml-var portal_url>/cadastros/materia/emenda/emendas_pdf?cod_materia=<dtml-var cod_materia>"><i class="fa fa-download"></i> Baixar Emendas</a>
+  </dtml-if>

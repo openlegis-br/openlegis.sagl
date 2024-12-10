@@ -15,26 +15,25 @@ def baixar_pdf(context):
     for item in context.zsql.expediente_materia_obter_zsql(cod_sessao_plen=cod_sessao_plen,ind_excluido=0):
         if item.cod_materia != None:
            for materia in context.zsql.materia_obter_zsql(cod_materia=item.cod_materia,ind_excluido=0):
-               if materia.des_tipo_materia == 'Indicação' or materia.des_tipo_materia == 'Requerimento' or materia.des_tipo_materia == 'Pedido de Informação' or materia.des_tipo_materia == 'Moção':
-                  dic = {}
-                  dic['id_pdf'] = str(materia.cod_materia) + "_texto_integral.pdf"
-                  dic['nom_pdf'] = str(materia.sgl_tipo_materia) + '-' + str(materia.num_ident_basica) + '-' + str(materia.ano_ident_basica) + '.pdf'
-                  id_pdf = str(materia.cod_materia) + "_texto_integral.pdf"
-                  if hasattr(context.sapl_documentos.materia, id_pdf):
-                     dic['nom_orgao'] = 'OUTROS'
-                     for proposicao in context.zsql.proposicao_obter_zsql(ind_mat_ou_doc='M',cod_mat_ou_doc=materia.cod_materia):
-                         if proposicao.cod_assunto != None:
-                            for assunto in context.zsql.assunto_proposicao_obter_zsql(cod_assunto = proposicao.cod_assunto):
-                                dic['nom_orgao'] = str(assunto.nom_orgao)
-                                cod_assunto = assunto.cod_assunto
-                                nom_orgao = str(assunto.nom_orgao)
-                                orgaos.append(nom_orgao)
-                                arquivos.append(dic)
-                         else:
-                                dic['nom_orgao'] = 'OUTROS'
-                                nom_orgao = 'OUTROS'
-                                orgaos.append(nom_orgao)
-                                arquivos.append(dic)
+               dic = {}
+               dic['id_pdf'] = str(materia.cod_materia) + "_texto_integral.pdf"
+               dic['nom_pdf'] = str(materia.sgl_tipo_materia) + '-' + str(materia.num_ident_basica) + '-' + str(materia.ano_ident_basica) + '.pdf'
+               id_pdf = str(materia.cod_materia) + "_texto_integral.pdf"
+               if hasattr(context.sapl_documentos.materia, id_pdf):
+                  dic['nom_orgao'] = 'OUTROS'
+                  for proposicao in context.zsql.proposicao_obter_zsql(ind_mat_ou_doc='M',cod_mat_ou_doc=materia.cod_materia):
+                      if proposicao.cod_assunto != None:
+                         for assunto in context.zsql.assunto_proposicao_obter_zsql(cod_assunto = proposicao.cod_assunto):
+                             dic['nom_orgao'] = str(assunto.nom_orgao)
+                             cod_assunto = assunto.cod_assunto
+                             nom_orgao = str(assunto.nom_orgao)
+                             orgaos.append(nom_orgao)
+                             arquivos.append(dic)
+                      else:
+                             dic['nom_orgao'] = 'OUTROS'
+                             nom_orgao = 'OUTROS'
+                             orgaos.append(nom_orgao)
+                             arquivos.append(dic)
 
     orgaos = [
      e

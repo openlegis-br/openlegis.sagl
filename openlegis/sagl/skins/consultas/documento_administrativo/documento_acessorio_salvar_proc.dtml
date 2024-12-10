@@ -2,7 +2,7 @@
 
 <dtml-in expr="zsql.usuario_obter_zsql(col_username=REQUEST['AUTHENTICATED_USER'].getUserName())">
   <dtml-if expr="nom_cargo != '' and nom_cargo != None">
-     <dtml-call expr="REQUEST.set('nom_usuario', nom_cargo)">
+     <dtml-call expr="REQUEST.set('nom_usuario', nom_completo)">
   <dtml-else>
      <dtml-call expr="REQUEST.set('nom_usuario', nom_completo)">
   </dtml-if>

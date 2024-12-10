@@ -24,7 +24,7 @@ FROM
 
 <dtml-if expr="ind_pendente==1">
     and dat_leitura IS NULL
-    and DATE(dat_expiracao) > DATE(NOW())
+    and NOW() < DATE_FORMAT(dat_expiracao, '%Y/%m/%d %H:%i:%s')
 </dtml-if>
 
 

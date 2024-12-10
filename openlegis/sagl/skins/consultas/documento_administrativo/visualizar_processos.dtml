@@ -60,10 +60,10 @@
           </td>
           <td><dtml-var expr="DateTime(dat_envio, datefmt='international').strftime('%d/%m/%Y %Hh%M')"> por <dtml-in expr="zsql.usuario_obter_zsql(cod_usuario=cod_cientificador)"><dtml-var col_username></dtml-in></td>
           <td>
-             <dtml-if expr="dat_leitura == None and DateTime(datefmt='international').strftime('%Y/%m/%d') > DateTime(dat_expiracao, datefmt='international').strftime('%Y/%m/%d')">
-                <span class="text-danger">
-             <dtml-elif expr="dat_leitura != None and DateTime(datefmt='international').strftime('%Y/%m/%d') > DateTime(dat_expiracao, datefmt='international').strftime('%Y/%m/%d')">      
+             <dtml-if expr="dat_leitura == None and DateTime(datefmt='international').strftime('%Y/%m/%d %H:%M') < DateTime(dat_expiracao, datefmt='international').strftime('%Y/%m/%d %H:%M')">
                 <span class="text-dark">
+             <dtml-elif expr="dat_leitura == None and  DateTime(datefmt='international').strftime('%Y/%m/%d %H:%M') > DateTime(dat_expiracao, datefmt='international').strftime('%Y/%m/%d %H:%M')">     
+                <span class="text-danger">
              <dtml-else>
                 <span class="text-dark">
              </dtml-if>
@@ -79,9 +79,9 @@
           <td>
             <dtml-if expr="dat_leitura != None">
                <a id="reset" class="btn btn-sm btn-outline-dark" href="<dtml-var portal_url>/consultas/documento_administrativo/visualizacao_registrar_pysc?hdn_id=<dtml-var id>&hdn_cod_documento=<dtml-var cod_documento>&hdn_lido=1" target="_blank"><i class="far fa-fw fa-folder-open"></i> Pasta Digital</a>
-            <dtml-elif expr="dat_leitura == None and DateTime(datefmt='international').strftime('%Y/%m/%d') < DateTime(dat_expiracao, datefmt='international').strftime('%Y/%m/%d')"> 
+            <dtml-elif expr="dat_leitura == None and DateTime(datefmt='international').strftime('%Y/%m/%d %H:%M') < DateTime(dat_expiracao, datefmt='international').strftime('%Y/%m/%d %H:%M')"> 
                <a id="reset" class="btn btn-sm btn-outline-dark" href="<dtml-var portal_url>/consultas/documento_administrativo/visualizacao_registrar_pysc?hdn_id=<dtml-var id>&hdn_cod_documento=<dtml-var cod_documento>&hdn_lido=0" target="_blank"><i class="far fa-fw fa-folder-open"></i> Pasta Digital</a>
-            <dtml-elif expr="dat_leitura == None and DateTime(datefmt='international').strftime('%Y/%m/%d') > DateTime(dat_expiracao, datefmt='international').strftime('%Y/%m/%d')">        
+            <dtml-elif expr="dat_leitura == None and  DateTime(datefmt='international').strftime('%Y/%m/%d %H:%M') > DateTime(dat_expiracao, datefmt='international').strftime('%Y/%m/%d %H:%M')">        
                <span class="text-danger">expirado</span>
             <dtml-else>
                <a id="reset" class="btn btn-sm btn-sm btn-link" href="<dtml-var portal_url>/consultas/documento_administrativo/visualizacao_registrar_pysc?hdn_id=<dtml-var id>&hdn_cod_documento=<dtml-var cod_documento>&hdn_lido=1" target="_blank"><i class="far fa-fw fa-folder-open"></i> Pasta Digital</a>

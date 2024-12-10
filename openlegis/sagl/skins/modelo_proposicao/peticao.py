@@ -89,8 +89,8 @@ for legislatura in context.zsql.legislatura_obter_zsql(data=data):
         for membro in context.zsql.composicao_mesa_obter_zsql(cod_periodo_comp=periodo.cod_periodo_comp):
             for parlamentar in context.zsql.parlamentar_obter_zsql(cod_parlamentar=membro.cod_parlamentar):
                 if membro.des_cargo == 'Presidente':
-                   inf_basicas_dic["lst_presidente"] = parlamentar.nom_parlamentar
+                   inf_basicas_dic["lst_presidente"] = parlamentar.nom_completo
                 elif membro.des_cargo == '1º Secretário':
-                   inf_basicas_dic["lst_psecretario"] = parlamentar.nom_parlamentar
+                   inf_basicas_dic["lst_psecretario"] = parlamentar.nom_completo
 
 return st.peticao_gerar_odt(inf_basicas_dic, nom_arquivo, modelo_path)

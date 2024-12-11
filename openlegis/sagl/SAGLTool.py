@@ -1425,7 +1425,6 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
                 shape = existing_pdf[page_index].new_shape()
                 shape.draw_circle(p1,1)
                 shape.draw_circle(p2,1)
-                #shape.insert_text(p1, numero, fontname = "helv", fontsize = 8)
                 shape.insert_text(p2, text2, fontname = "helv", fontsize = 8, rotate=0)
                 shape.commit()
             break
@@ -1539,7 +1538,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
                existing_pdf[page_index].insert_image(rect_icp, stream=image)
             # margem direita
             numero = "Pág. %s/%s" % (i+1, numPages)
-            text3 = numero + ' - ' + texto + ' - ' + mensagem1
+            text3 = numero + ' - ' + texto + info_protocolo + ' ' + mensagem1
             x = w - 8 - margin #largura
             y = h - 50 - margin # altura
             existing_pdf[page_index].insert_text((x, y), text3, fontsize=8, rotate=90)

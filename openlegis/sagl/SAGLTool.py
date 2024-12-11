@@ -1614,7 +1614,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
                       storage_path = self.sapl_documentos.materia.tramitacao
                    elif tipo_doc == 'parecer_comissao':
                       storage_path = self.sapl_documentos.parecer_comissao
-                   elif tipo_doc == 'pauta':
+                   elif tipo_doc == 'pauta' or tipo_doc == 'resumo_sessao':
                       storage_path = self.sapl_documentos.pauta_sessao
                    elif tipo_doc == 'ata':
                       storage_path = self.sapl_documentos.ata_sessao
@@ -1986,6 +1986,14 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
            for metodo in self.zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=codigo, ind_audiencia='1'):
                sessao = 'Audiência Pública nº ' + str(metodo.num_sessao_plen) + '/' + str(metodo.ano_sessao)
            texto = 'Pauta da ' + str(sessao)
+        elif tipo_doc == 'resumo_sessao':
+           storage_path = self.sapl_documentos.pauta_sessao
+           for metodo in self.zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=codigo):
+               for tipo in self.zsql.tipo_sessao_plenaria_obter_zsql(tip_sessao=metodo.tip_sessao):
+                   sessao = str(metodo.num_sessao_plen) + 'ª ' + str(self.sapl_documentos.props_sagl.reuniao_sessao) + ' ' + str(tipo.nom_sessao) + ' - ' + str(metodo.dat_inicio_sessao)
+           for metodo in self.zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=codigo, ind_audiencia='1'):
+               sessao = 'Audiência Pública nº ' + str(metodo.num_sessao_plen) + '/' + str(metodo.ano_sessao)
+           texto = 'Roteiro da ' + str(sessao)
         elif tipo_doc == 'ata':
            storage_path = self.sapl_documentos.ata_sessao
            for metodo in self.zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=codigo):

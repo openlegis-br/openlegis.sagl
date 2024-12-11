@@ -1512,7 +1512,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
            arq = getattr(self.sapl_documentos.peticao, nom_pdf_peticao)
            stream = self.make_qrcode(text=self.url() + str(caminho) + str(nom_pdf_saida))
            mensagem1 = 'Documento assinado digitalmente com usuário e senha por ' + nom_autor
-           mensagem2 = ''
+           mensagem2 = 'Para verificar a autenticidade do documento leia o qrcode.'
         arquivo = BytesIO(bytes(arq.data))
         existing_pdf = pymupdf.open(stream=arquivo)
         numPages = existing_pdf.page_count

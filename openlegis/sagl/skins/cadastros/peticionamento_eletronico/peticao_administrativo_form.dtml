@@ -1,4 +1,66 @@
 <dtml-var header_html>
+<script>
+  function campos_criticar(){
+  var form = document.peticionamento_form;
+      if (form.lst_tip_peticionamento.selectedIndex==''){
+          bootstrap.showModal({title: "Mensagem do Sistema", body: "O tipo de petição deve ser selecionado !"});
+          form.lst_tip_peticionamento.focus();
+          return false;
+      }
+
+      if (form.lst_cod_unid_tram_dest.selectedIndex==''){
+          bootstrap.showModal({title: "Mensagem do Sistema", body: "A unidade de destino deve ser selecionada !"});
+          form.lst_cod_unid_tram_dest.focus();
+          return false;
+      }
+
+      if (form.txa_txt_descricao.value == "") {
+         bootstrap.showModal({title: "Mensagem do Sistema", body: "O resumo do pedido deve ser preenchido !"});
+         form.txa_txt_descricao.focus();
+         return false;
+      }
+
+  var processo_principal = form.lst_tip_documento[form.lst_tip_documento.selectedIndex].value;
+
+
+  if (processo_principal != ""){
+     if ((form.lst_tip_documento[form.lst_tip_documento.selectedIndex].value == "") ||
+        (form.txt_num_documento.value == "") || (form.txt_ano_documento.value == "")) {
+         bootstrap.showModal({title: "Mensagem do Sistema", body: "Informe tipo, número e ano do processo administrativo !"});       
+         form.txt_num_documento.focus(); 
+         return false;
+     }
+  }
+
+  form.submit();
+}
+
+  function texto_odt_gerar(){
+      var lst_modelo = document.getElementById("lst_modelo");
+      var value = lst_modelo.options[lst_modelo.selectedIndex].value;
+      var selected = lst_modelo.options[lst_modelo.selectedIndex];
+      var path = selected.getAttribute('data-path');
+  
+      if (lst_modelo.selectedIndex == 0) {
+         bootstrap.showModal({title: "Mensagem do Sistema", body: "É necessário selecionar um modelo!"});        
+         return false;
+      }
+
+      if ((lst_modelo.selectedIndex != 0) && confirm("Confirma a geração do arquivo ODT?")) {
+         location.href="<dtml-var portal_url>/modelo_proposicao/peticao?cod_peticao=<dtml-var cod_peticao missing>&modelo_path="+path;
+         setTimeout(function(){window.location.reload(true)},3000);
+       }
+         return;
+  }
+
+ function texto_pdf_gerar(){
+      if (confirm("Confirma a geração do arquivo PDF?")) {
+         location.href="<dtml-var portal_url>/modelo_proposicao/peticao_gerar_pdf?cod_peticao=<dtml-var cod_peticao missing>";
+         setTimeout(function(){window.location.reload(true)},3000);
+       }
+         return;
+  }
+</script>
 
    <dtml-call "REQUEST.set('username', AUTHENTICATED_USER)">
 
@@ -310,66 +372,6 @@
 
 <dtml-var js_slot>
 <script>
-  function campos_criticar(){
-  var form = document.peticionamento_form;
-      if (form.lst_tip_peticionamento.selectedIndex==''){
-          bootstrap.showModal({title: "Mensagem do Sistema", body: "O tipo de petição deve ser selecionado !"});
-          form.lst_tip_peticionamento.focus();
-          return false;
-      }
-
-      if (form.lst_cod_unid_tram_dest.selectedIndex==''){
-          bootstrap.showModal({title: "Mensagem do Sistema", body: "A unidade de destino deve ser selecionada !"});
-          form.lst_cod_unid_tram_dest.focus();
-          return false;
-      }
-
-      if (form.txa_txt_descricao.value == "") {
-         bootstrap.showModal({title: "Mensagem do Sistema", body: "O resumo do pedido deve ser preenchido !"});
-         form.txa_txt_descricao.focus();
-         return false;
-      }
-
-  var processo_principal = form.lst_tip_documento[form.lst_tip_documento.selectedIndex].value;
-
-
-  if (processo_principal != ""){
-     if ((form.lst_tip_documento[form.lst_tip_documento.selectedIndex].value == "") ||
-        (form.txt_num_documento.value == "") || (form.txt_ano_documento.value == "")) {
-         bootstrap.showModal({title: "Mensagem do Sistema", body: "Informe tipo, número e ano do processo administrativo !"});       
-         form.txt_num_documento.focus(); 
-         return false;
-     }
-  }
-
-  form.submit();
-}
-
-  function texto_odt_gerar(){
-      var lst_modelo = document.getElementById("lst_modelo");
-      var value = lst_modelo.options[lst_modelo.selectedIndex].value;
-      var selected = lst_modelo.options[lst_modelo.selectedIndex];
-      var path = selected.getAttribute('data-path');
-  
-      if (lst_modelo.selectedIndex == 0) {
-         bootstrap.showModal({title: "Mensagem do Sistema", body: "É necessário selecionar um modelo!"});        
-         return false;
-      }
-
-      if ((lst_modelo.selectedIndex != 0) && confirm("Confirma a geração do arquivo ODT?")) {
-         location.href="<dtml-var portal_url>/modelo_proposicao/peticao?cod_peticao=<dtml-var cod_peticao missing>&modelo_path="+path;
-         setTimeout(function(){window.location.reload(true)},3000);
-       }
-         return;
-  }
-
- function texto_pdf_gerar(){
-      if (confirm("Confirma a geração do arquivo PDF?")) {
-         location.href="<dtml-var portal_url>/modelo_proposicao/peticao_gerar_pdf?cod_peticao=<dtml-var cod_peticao missing>";
-         setTimeout(function(){window.location.reload(true)},3000);
-       }
-         return;
-  }
 
   $(document).ready(function () {
     $('#lst_tip_documento').change(function() {
@@ -442,6 +444,24 @@ $(document).ready(() => {
   });
 });
 
+$(document).ready(function() {
+    var clicked = false;
+    $("#btn_protocolo").on("click", function(event) {
+      if (clicked) {
+        event.preventDefault();
+        return;
+      }
+      clicked = true;
+      var $this = $(this);
+      $this.html("Aguarde...")
+      $this.addClass('disabled');
+      setTimeout(function() {
+        clicked = false;
+        $this.html("Protocolar")
+        $this.removeClass('disabled');
+      }, 20000);
+    });
+});
 </script>
 
 <script>

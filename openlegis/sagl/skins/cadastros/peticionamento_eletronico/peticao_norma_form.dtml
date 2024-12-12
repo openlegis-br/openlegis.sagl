@@ -310,6 +310,26 @@ $(document).ready(function(){
         });     
     });     
 });
+
+$(document).ready(function() {
+    var clicked = false;
+    $("#btn_protocolo").on("click", function(event) {
+      if (clicked) {
+        event.preventDefault();
+        return;
+      }
+      clicked = true;
+      var $this = $(this);
+      $this.html("Aguarde...")
+      $this.addClass('disabled');
+      setTimeout(function() {
+        clicked = false;
+        $this.html("Protocolar")
+        $this.removeClass('disabled');
+      }, 10000);
+    });
+});
+
 </script>
 </dtml-if>
 <dtml-var footer_html>

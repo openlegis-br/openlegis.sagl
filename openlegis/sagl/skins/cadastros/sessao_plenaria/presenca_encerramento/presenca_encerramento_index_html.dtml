@@ -41,8 +41,8 @@ $(document).ready(function() {
    <input type="hidden" name="hdn_cod_sessao_plen" value="<dtml-var cod_sessao_plen missing>">
    <input type="hidden" name="dat_inicio_sessao" value="<dtml-var dat_sessao missing>"/>
    
-        <table class="table">
-          <thead class="table-light">
+        <table class="table table-sm table-striped w-100 align-middle">
+          <thead>
             <tr>
               <th width="6%">
                 <div class="form-check">    
@@ -50,7 +50,7 @@ $(document).ready(function() {
                   <label class="form-check-label" for="checkedAll"><b>Todos</b></label> 
                 </div>
               </th>
-              <th>Parlamentar</th>
+              <th>Vereador</th>
             </tr>
           </thead>
        <dtml-in expr="zsql.autores_obter_zsql(txt_dat_apresentacao=dat_sessao)">
@@ -65,9 +65,9 @@ $(document).ready(function() {
                </div> 
             </td>
             <td>
-                <label class="form-label" for="chk_presen_parlamentar">
+                <span>
                     <dtml-var nom_parlamentar>
-                </label>
+                </span>
             </td>
         </tr>
        <dtml-else>

@@ -1,17 +1,17 @@
 <dtml-try>
    <dtml-call expr="REQUEST.set('metodo', zsql.destinatario_oficio_incluir_zsql)">
-   <dtml-call expr="metodo(cod_documento = cod_documento, cod_instituicao = txt_cod_instituicao)">
+   <dtml-call expr="metodo(cod_documento = cod_documento, nom_destinatario = txt_nom_destinatario, end_email=txt_end_email)">
 <dtml-except>
-  <dtml-let mensagem="'Ocorreu um erro ao adicionar o destinatário! Tente novamente.'" tipo_mensagem="'danger'">
+  <dtml-let mensagem="'Ocorreu um erro ao incluir o destinatário! O endereço de e-mail já se encontra cadastrado!'" tipo_mensagem="'danger'" modal="1">
      <dtml-var mensagem_emitir>
   </dtml-let>
 <dtml-else>  
-  <dtml-let mensagem="'Destinatário adicionado com sucesso!'">
+  <dtml-let mensagem="'Destinatário incluído com sucesso!'" modal="1">
      <dtml-var mensagem_emitir>
   </dtml-let>
 </dtml-try>
 
-<dtml-if dbcon_logs>
+<dtml-if expr="dbcon_logs and cod_documento">
   <dtml-call expr="REQUEST.set('metodo1', str(metodo).split('/')[-1])">
   <dtml-call expr="REQUEST.set('metodo1', str(metodo1).split(' at ')[-1])">
   <dtml-call expr="REQUEST.set('metodo1', str(metodo1).split('>')[0])">

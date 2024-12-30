@@ -71,6 +71,7 @@ def initialize(context):
     allow_module('xml')
     allow_module('xml.sax')
     allow_module('xml.sax.saxutils')
+    allow_module('email.message')
     allow_module('email.encoders')
     allow_module('email.utils')
     allow_module('email.mime.application')

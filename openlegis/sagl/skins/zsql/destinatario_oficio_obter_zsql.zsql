@@ -1,34 +1,30 @@
 <dtml-comment>
 connection_id : dbcon_sagl
-arguments : cod_documento
+arguments : cod_destinatario="" cod_materia="" cod_proposicao="" cod_documento=""
 max_rows : 1000
 max_cache : 100
 </dtml-comment>
 SELECT
   d.cod_destinatario,
+  d.cod_materia,
+  d.cod_proposicao,
   d.cod_documento,
   d.cod_instituicao,
-  i.nom_instituicao,
-  i.txt_forma_tratamento,
-  i.nom_responsavel,
-  i.des_cargo,
-  i.end_instituicao,
-  i.nom_bairro,
-  i.num_cep,
-  i.cod_localidade,
-  t.nom_tipo_instituicao
+  d.end_email,
+  d.nom_destinatario,
+  DATE_FORMAT(d.dat_envio, '%d/%m/%Y %H:%i:%s') as dat_envio,
+  d.cod_usuario
 
 FROM 
   destinatario_oficio d
-  LEFT JOIN instituicao i ON i.cod_instituicao = d.cod_instituicao
-  LEFT JOIN tipo_instituicao t ON i.tip_instituicao = t.tip_instituicao
-
 
 <dtml-sqlgroup where>
-  <dtml-sqltest cod_documento op="=" type="int"><dtml-and>
-  d.ind_excluido = 0 and
-  i.ind_excluido = 0
+  <dtml-sqltest cod_destinatario  op="=" type="int" optional><dtml-and>
+  <dtml-sqltest cod_documento     op="=" type="int" optional><dtml-and>
+  <dtml-sqltest cod_materia       op="=" type="int" optional><dtml-and>
+  <dtml-sqltest cod_proposicao    op="=" type="int" optional><dtml-and>
+  d.ind_excluido = 0 
 </dtml-sqlgroup>
 
 ORDER BY
-      t.nom_tipo_instituicao, i.nom_instituicao
+  d.nom_destinatario, d.end_email

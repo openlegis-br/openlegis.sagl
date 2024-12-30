@@ -12,38 +12,51 @@ REQUEST = context.REQUEST
 RESPONSE =  REQUEST.RESPONSE
 session = REQUEST.SESSION
 
-results = context.zsql.destinatario_oficio_obter_zsql(cod_documento=REQUEST['cod_documento'])
+results=[]
+REQUEST=context.REQUEST
+for item in context.zsql.destinatario_oficio_obter_zsql(cod_documento=REQUEST['cod_documento']):
+    if item.cod_instituicao != None:
+        destinatario = context.zsql.instituicao_obter_zsql(cod_instituicao=item.cod_instituicao)[0]
+        dic={}
+        dic['txt_forma_tratamento']=destinatario.txt_forma_tratamento
+        dic['nom_responsavel']=destinatario.nom_responsavel
+        dic['des_cargo']=destinatario.des_cargo
+        dic['nom_instituicao']=destinatario.nom_instituicao
+        dic['end_instituicao']=destinatario.end_instituicao
+        dic['nom_bairro']=destinatario.nom_bairro
+        dic['num_cep']=destinatario.num_cep
+        dic['nom_cidade']=destinatario.nom_localidade.upper() + ' - ' + destinatario.sgl_uf
+        results.append(dic)
+
+#results = context.zsql.destinatario_oficio_obter_zsql(cod_documento=REQUEST['cod_documento'])
 
 dados = []
-for row in results:
+
+for dic in results:
     r=[]
     # Label, Data
-    if row.txt_forma_tratamento != None:
-       r.append(row.txt_forma_tratamento)
+    if dic['txt_forma_tratamento'] != None:
+       r.append(dic['txt_forma_tratamento'].title())
 
-    if (row.nom_responsavel != None and row.nom_responsavel != '') and (row.nom_responsavel != row.nom_instituicao):
-       r.append(row.nom_responsavel)
+    if (dic['nom_responsavel'] != None and dic['nom_responsavel'] != '') and (dic['nom_responsavel'] != dic['nom_instituicao']):
+       r.append(dic['nom_responsavel'].upper())
 
-    if row.des_cargo != None and row.des_cargo != '':
-       r.append(row.des_cargo)
+    if (dic['des_cargo'] != None and dic['des_cargo'] != '') and (dic['des_cargo'] != dic['nom_instituicao']):
+       r.append(dic['des_cargo'].title())
 
-    if row.nom_instituicao != None and row.nom_instituicao != '':
-       r.append(row.nom_instituicao)
+    if dic['nom_instituicao'] != None and dic['nom_instituicao'] != '':
+       r.append(dic['nom_instituicao'].title())
 
-    if row.end_instituicao != None and row.nom_bairro != None and row.nom_bairro != '':
-       r.append(row.end_instituicao + " - " +row.nom_bairro)
+    if dic['end_instituicao'] != None and dic['nom_bairro'] != None and dic['nom_bairro'] != '':
+       r.append(dic['end_instituicao'].title() + " - " +dic['nom_bairro'].title())
 
-    elif row.end_instituicao!=None and row.nom_bairro==None:
-       r.append(row.end_instituicao)
+    elif dic['end_instituicao']!=None and dic['nom_bairro']==None:
+       r.append(dic['end_instituicao'].title())
 
-    nom_cidade = ""
-    for localidade in context.zsql.localidade_obter_zsql(cod_localidade=row.cod_localidade):
-        nom_cidade = str(localidade.nom_localidade_pesq).upper() + ' - ' + str(localidade.sgl_uf)
-
-    if row.num_cep != None:
-       r.append('CEP '+row.num_cep+' ' +str(nom_cidade))
+    if dic['num_cep'] != None:
+       r.append('CEP '+dic['num_cep']+' ' +str(dic['nom_cidade']))
     else:
-       r.append(str(nom_cidade))
+       r.append(str(dic['nom_cidade']))
 
     dados.append(r)
 

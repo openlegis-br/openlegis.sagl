@@ -33,9 +33,10 @@ remetente=[linha1,linha2]
 
 destinatarios=[]
 REQUEST=context.REQUEST
-for destinatario in context.zsql.destinatario_oficio_obter_zsql(cod_documento=REQUEST['cod_documento']):
+for item in context.zsql.destinatario_oficio_obter_zsql(cod_documento=REQUEST['cod_documento']):
+    if item.cod_instituicao != None:
+        destinatario = context.zsql.instituicao_obter_zsql(cod_instituicao=item.cod_instituicao)[0]
         dic={}
-        dic['codigo']=str(destinatario.cod_documento)
         dic['forma_tratamento']=str(destinatario.txt_forma_tratamento)
         dic['nome_responsavel']=destinatario.nom_responsavel
         dic['cargo']=destinatario.des_cargo
@@ -43,9 +44,7 @@ for destinatario in context.zsql.destinatario_oficio_obter_zsql(cod_documento=RE
         dic['endereco']=destinatario.end_instituicao
         dic['bairro']=destinatario.nom_bairro
         dic['cep']=destinatario.num_cep
-        dic['localidade']=''
-        for localidade in context.zsql.localidade_obter_zsql(cod_localidade=destinatario.cod_localidade):
-               dic['localidade']=localidade.nom_localidade_pesq+' '+localidade.sgl_uf
+        dic['localidade']=destinatario.nom_localidade.upper() + ' - ' + destinatario.sgl_uf
         destinatarios.append(dic)
 
 sessao=session.id

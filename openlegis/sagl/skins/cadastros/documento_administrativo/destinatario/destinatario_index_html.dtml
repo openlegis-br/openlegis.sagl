@@ -10,6 +10,15 @@
     function excluir(cod_destinatario,cod_documento) {
        location.href = "<dtml-var absolute_url>/destinatario_excluir_proc?cod_documento="+cod_documento+"&cod_destinatario="+cod_destinatario+"&hdn_url=<dtml-var ACTUAL_URL>?cod_documento=<dtml-var cod_documento>#destinatarios";
     }
+
+    function enviar(cod_destinatario,cod_documento) {
+       location.href = "<dtml-var absolute_url>/email_enviar?cod_documento="+cod_documento+"&cod_destinatario="+cod_destinatario+"&hdn_url=<dtml-var ACTUAL_URL>?cod_documento=<dtml-var cod_documento>";
+    }
+
+    function enviar_lote(cod_documento) {
+       location.href = "<dtml-var absolute_url>/email_enviar_lote?cod_documento="+cod_documento+"&hdn_url=<dtml-var ACTUAL_URL>?cod_documento=<dtml-var cod_documento>";
+    }
+
 </script>
 
  <div class="row">
@@ -18,6 +27,7 @@
   </div>
   <div class="col-12 col-md-6 text-start text-md-end">
      <dtml-if expr="zsql.destinatario_oficio_obter_zsql(cod_documento = cod_documento, ind_excluido=0)">
+           <a class="btn btn-sm btn-light" data-confirm="Confirma o envio de e-mail para todos os destinatários habilitados?" href="javascript:enviar_lote(<dtml-var cod_documento>)"><i class="fa fa-envelope"></i> E-Mail em Lote</a>
          <div class="btn-group btn-group-sm">
            <button class="btn btn-sm btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
              <i class="fas fa-file-export"></i> Impressos <i class="mdi mdi-chevron-down ms-1"></i>
@@ -34,31 +44,64 @@
 
 <dtml-in expr="zsql.destinatario_oficio_obter_zsql(cod_documento = cod_documento, ind_excluido=0)">
     <dtml-if sequence-start>
-        <table id="table_dest" class="table datatable w-100">
+      <div class="table-responsive">
+        <table id="table_dest" class="table table-sm datatable w-100">
           <thead class="table-light">
             <tr>
-                <th>Nome do Destinatário</th>
-                <th>Responsável</th>
-                <th>Ações</th>
+                <th width="40%">Destinatário</th>
+                <th width="25%">Endereço Eletrônico</th>
+                <th width="20%">Envio de E-mail</th>
+                <th width="15%">Ações</th>
             </tr>
           </thead>
     </dtml-if sequence-start>
         <tr>
-                <td>
-                  <a href="<dtml-var portal_url>/cadastros/instituicao/instituicao_mostrar_proc?cod_instituicao=<dtml-var cod_instituicao>" target="_blank">
-                   <dtml-var nom_instituicao>
-                  </a>
+                <td valign="middle">
+                  <dtml-if expr="cod_instituicao!=None">
+                    <dtml-in expr="zsql.instituicao_obter_zsql(cod_instituiocao=cod_instituicao)">
+                      <a href="<dtml-var portal_url>/cadastros/instituicao/instituicao_mostrar_proc?cod_instituicao=<dtml-var cod_instituicao>" target="_blank">
+                       <dtml-var nom_instituicao>
+                      </a>
+                    </dtml-in>
+                  <dtml-else>
+                    <dtml-var nom_destinatario>
+                  </dtml-if>
                 </td>
-               <td>
-                   <dtml-var nom_responsavel missing null="">
+               <td valign="middle">
+                  <dtml-if expr="cod_instituicao!=None">
+                    <dtml-in expr="zsql.instituicao_obter_zsql(cod_instituiocao=cod_instituicao)">
+                       <dtml-call expr="REQUEST.set('end_email_inst', end_email)">
+                       <dtml-var end_email_inst>
+                    </dtml-in>
+                  <dtml-else>
+                    <dtml-var end_email>
+                  </dtml-if>
                </td>
-            <td>
-             <a class="btn btn-sm btn-white text-danger" data-confirm="Deseja realmente excluir o destinatário?" href="javascript:excluir(<dtml-var cod_destinatario>,<dtml-var cod_documento>)"><i class="far fa-trash-alt"></i> Excluir</a>
-             <a class="btn btn-sm btn-white text-primary" data-confirm="Confirma o envio de e-mail para o destinatário selecionado?" href="javascript:enviar(<dtml-var cod_destinatario>,<dtml-var cod_documento>)"><i class="fa fa-paper-plane"></i> Enviar</a>
+            <td valign="middle">
+              <dtml-if expr="dat_envio!=None">
+                 <dtml-var dat_envio> por <dtml-in expr="zsql.usuario_obter_zsql(cod_usuario=cod_usuario)"><dtml-var col_username></dtml-in>
+              <dtml-elif expr="dat_envio==None and (end_email==None) and (end_email_inst=='' or end_email_inst==None)">
+                 <span class="text-muted"><i>desabilitado</i></span>
+              <dtml-else>
+                 <span class="text-muted">pendente</span>
+              </dtml-if>
+            </td>
+            <td valign="middle">
+             <dtml-if expr="dat_envio==None">
+               <div class="btn-group btn-group-sm">
+               <dtml-if expr="end_email!=None or (end_email_inst!='' and end_email_inst!=None)">
+                 <a class="btn btn-sm btn-white text-primary" data-confirm="Confirma o envio de e-mail para o destinatário selecionado?" href="javascript:enviar(<dtml-var cod_destinatario>,<dtml-var cod_documento>)"><i class="fa-regular fa-envelope"></i> Enviar</a>
+               </dtml-if>
+               <a class="btn btn-sm btn-white text-danger" data-confirm="Deseja realmente excluir o destinatário?" href="javascript:excluir(<dtml-var cod_destinatario>,<dtml-var cod_documento>)"><i class="far fa-trash-alt"></i> Excluir</a>
+               </div>
+             <dtml-else>
+               <a class="btn btn-sm btn-white text-success" data-confirm="Confirma o reenvio de e-mail para o destinatário selecionado?" href="javascript:enviar(<dtml-var cod_destinatario>,<dtml-var cod_documento>)"><i class="fa-regular fa-envelope"></i> Reenviar</a>
+             </dtml-if>
             </td>
         </tr>
    <dtml-if sequence-end>
       </table>
+     </div>
    </dtml-if sequence-end>
 <dtml-else>
      <p>Nenhum destinatário cadastrado.</p>
@@ -67,7 +110,7 @@
 <div class="btn-group text-start mt-2">
   <a class="btn btn-light" href="#" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Inclusão de Destinatário" data-src="destinatario/destinatario_pesquisar_form?hdn_cod_documento=<dtml-var cod_documento>&modal=1"> Incluir Destinatário </a>
   <a class="btn btn-primary" href="#" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Geração de Lista" data-src="destinatario/destinatario_form?cod_documento=<dtml-var cod_documento>&modal=1"> Gerar Lista </a>
-  <dtml-if expr="zsql.destinatario_oficio_obter_zsql(cod_documento = cod_documento, ind_excluido=0) and AUTHENTICATED_USER.has_role(['Operador','Operador Modulo Administrativo', 'Operador Materia'])">
+  <dtml-if expr="zsql.destinatario_oficio_obter_zsql(cod_documento = cod_documento, ind_excluido=0) and AUTHENTICATED_USER.has_role(['Authenticated'])">
     <input class="btn btn-danger" type="button" value="Excluir Lista" onClick="lista_destinatarios_excluir()" />
   </dtml-if>
 </div>

@@ -2,24 +2,23 @@
 
 <h1 class="firstHeading font-size-18 mb-3"><dtml-var expr="sapl_documentos.props_sagl.nome_mesa"></h1>
 
-<form name="composicao_mesa_form">
- <div class="row">
-  <div class="col-12 col-sm-6 mb-3">
+  <div class="row">
+    <div class="col-12 col-sm-6 mb-3">
       <label class="form-label" for="lst_num_legislatura">Selecione a Legislatura</label>
-      <select class="form-select jumpmenu" data-dropup-auto="false" data-size="6" id="lst_num_legislatura" name="lst_num_legislatura">
+        <select class="form-select jumpmenu" data-size="6" id="lst_num_legislatura" name="lst_num_legislatura" size="1" onChange="atualiza_num_leg(form.lst_num_legislatura [form.lst_num_legislatura.selectedIndex].value)">
           <dtml-in expr="zsql.legislatura_obter_zsql(ind_excluido=0)">
              <option
-               <dtml-if expr="(not _.has_key('num_legislatura_sel') and (DateTime(datefmt='international') >= DateTime(dat_inicio, datefmt='international') and DateTime(datefmt='international') <= DateTime(dat_fim, datefmt='international')))
+               <dtml-if expr="(not _.has_key('num_legislatura_sel') and (DateTime(datefmt='international').strftime('%Y-%m-%d') >= DateTime(dat_inicio, datefmt='international').strftime('%Y-%m-%d') and DateTime(datefmt='international').strftime('%Y-%m-%d') <= DateTime(dat_fim, datefmt='international').strftime('%Y-%m-%d')))
                            or (_.has_key('num_legislatura_sel') and num_legislatura == _.int(num_legislatura_sel))">
                  selected
                  <dtml-call expr="REQUEST.set('num_legislatura_sel', num_legislatura)">
                </dtml-if>
                  value="<dtml-var ACTUAL_URL>?num_legislatura_sel=<dtml-var num_legislatura>">
                <dtml-var expr="pysc.periodo_legislatura_format_pysc(num_legislatura, dat_inicio, dat_fim)">
-               <dtml-if expr="(DateTime(datefmt='international') >= DateTime(dat_inicio, datefmt='international')) and (DateTime(datefmt='international') <= DateTime(dat_fim, datefmt='international'))">(Atual)</dtml-if>
+               <dtml-if expr="(DateTime(datefmt='international').strftime('%Y-%m-%d') >= DateTime(dat_inicio, datefmt='international').strftime('%Y-%m-%d')) and (DateTime(datefmt='international').strftime('%Y-%m-%d') <= DateTime(dat_fim, datefmt='international').strftime('%Y-%m-%d'))">(Atual)</dtml-if>
              </option>
           <dtml-else>
-             <option selected value="<dtml-var ACTUAL_URL>?num_legislatura_sel=-1"></option>
+             <option selected value="-1"></option>
              <dtml-call expr="REQUEST.set('num_legislatura_sel', '-1')">
           </dtml-in>
         </select>
@@ -30,15 +29,14 @@
             </dtml-if>
           </dtml-in>
         </dtml-if>
-  </div>
-  <div class="col-12 col-sm-6 mb-3">
+      </div>
+    <div class="col-12 col-sm-6 mb-3">
       <label class="form-label" for="lst_periodo_comp">Selecione o Período</label>
-        <div class="input-group">
-         <select class="form-select jumpmenu" data-dropup-auto="false" data-size="6" id="lst_periodo_comp" name="lst_periodo_comp">
+         <select class="form-select jumpmenu" id="lst_periodo_comp" name="lst_periodo_comp" size="1" onChange="atualiza_periodo_comp(form.lst_periodo_comp[form.lst_periodo_comp.selectedIndex].value, form.lst_num_legislatura[form.lst_num_legislatura.selectedIndex].value)">
            <dtml-in expr="zsql.periodo_comp_mesa_obter_zsql(num_legislatura=num_legislatura_sel)">
               <option
                 <dtml-if expr="((not _.has_key('cod_periodo_comp_sel') and not _.has_key('prim_sel') 
-                                and (DateTime(datefmt='international') >= DateTime(dat_inicio, datefmt='international') and DateTime(datefmt='international') <= DateTime(dat_fim, datefmt='international'))))
+                                and (DateTime(datefmt='international').strftime('%Y-%m-%d') >= DateTime(dat_inicio, datefmt='international').strftime('%Y-%m-%d') and DateTime(datefmt='international').strftime('%Y-%m-%d') <= DateTime(dat_fim, datefmt='international').strftime('%Y-%m-%d'))))
                                 or (not _.has_key('cod_periodo_comp_sel') and not _.has_key('prim_sel')) 
                                 or (_.has_key('cod_periodo_comp_sel') and cod_periodo_comp == cod_periodo_comp_sel)">
                      selected
@@ -47,19 +45,13 @@
                 </dtml-if>
                 value="<dtml-var ACTUAL_URL>?cod_periodo_comp_sel=<dtml-var cod_periodo_comp>&num_legislatura_sel=<dtml-var num_legislatura>">
                 <dtml-var dat_inicio_periodo> a <dtml-var dat_fim_periodo>
-		<dtml-if expr="(DateTime(datefmt='international') >= DateTime(dat_inicio, datefmt='international')) and (DateTime(datefmt='international') <= DateTime(dat_fim, datefmt='international'))">(Atual)</dtml-if>
+		<dtml-if expr="(DateTime(datefmt='international').strftime('%Y-%m-%d') >= DateTime(dat_inicio, datefmt='international').strftime('%Y-%m-%d')) and (DateTime(datefmt='international').strftime('%Y-%m-%d') <= DateTime(dat_fim, datefmt='international').strftime('%Y-%m-%d'))">(Atual)</dtml-if>
               </option>
            </dtml-in>
          </select>
-         <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Mesa Diretora'])">
-            <dtml-if cod_periodo_comp_sel>
-                <a class="btn btn-primary" href="<dtml-var portal_url>/cadastros/mesa_diretora/mesa_diretora_index_html?cod_periodo_comp_sel=<dtml-var cod_periodo_comp_sel>&num_legislatura_sel=<dtml-var num_legislatura_sel>"><i class="fa fa-fw fa-edit"></i> Composição</a>
-            </dtml-if>
-         </dtml-if> 
-       </div>
     </div>
   </div>
-</form>
+
   <div class="mt-2 mb-3">
       <p class="h6">Composição da <dtml-var expr="sapl_documentos.props_sagl.nome_mesa"></p>
   </div>

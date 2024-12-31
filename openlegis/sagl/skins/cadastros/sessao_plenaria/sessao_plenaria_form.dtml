@@ -66,28 +66,20 @@
      <div class="col-6 col-md-3 mb-3">
         <label class="form-label required" for="lst_num_legislatura">Legislatura</label>
         <select class="form-select" id="lst_num_legislatura" name="lst_num_legislatura" onChange="atualiza_num_leg(document.sessao_plenaria_form.lst_num_legislatura[document.sessao_plenaria_form.lst_num_legislatura.selectedIndex].value,<dtml-var cod_sessao_plen missing="-1">)" required>
-           <option 
-             <dtml-if expr="_.has_key('num_legislatura')">
-               <dtml-call expr="REQUEST.set('num_legislatura_sel', num_legislatura)">
-               selected
-               value="<dtml-var num_legislatura>">
-             <dtml-else>
-               value="0">
-             </dtml-if>
-           </option>      
+    
            <dtml-in expr="zsql.legislatura_obter_zsql(ind_excluido=0)">
               <option 
                 <dtml-if expr="(not _.has_key('num_legislatura_sel')) and _.has_key('cod_sessao_plen') and _.int(num_legislatura) == _.int(sessao_plenaria_form.num_legislatura)">
                    selected
                    <dtml-call expr="REQUEST.set('num_legislatura_sel', num_legislatura)">
                 </dtml-if>
-                <dtml-if expr="(not _.has_key('num_legislatura_sel') and (DateTime(datefmt='international') >= DateTime(dat_inicio, datefmt='international') and DateTime(datefmt='international') <= DateTime(dat_fim, datefmt='international'))) or (_.has_key('num_legislatura_sel') and num_legislatura == _.int(num_legislatura_sel))">
+                <dtml-if expr="(not _.has_key('num_legislatura_sel') and (DateTime(datefmt='international').strftime('%Y-%m-%d') >= DateTime(dat_inicio, datefmt='international').strftime('%Y-%m-%d') and DateTime(datefmt='international').strftime('%Y-%m-%d') <= DateTime(dat_fim, datefmt='international').strftime('%Y-%m-%d'))) or (_.has_key('num_legislatura_sel') and num_legislatura == _.int(num_legislatura_sel))">
                    selected
                    <dtml-call expr="REQUEST.set('num_legislatura_sel', num_legislatura)">
                 </dtml-if>
                 value="<dtml-var num_legislatura>">
                  <dtml-var expr="pysc.periodo_legislatura_format_pysc(num_legislatura, dat_inicio, dat_fim)">
-                 <dtml-if expr="(DateTime(datefmt='international') >= DateTime(dat_inicio, datefmt='international')) and (DateTime(datefmt='international') <= DateTime(dat_fim, datefmt='international'))"> (Atual) </dtml-if>
+                 <dtml-if expr="(DateTime(datefmt='international').strftime('%Y-%m-%d') >= DateTime(dat_inicio, datefmt='international').strftime('%Y-%m-%d')) and (DateTime(datefmt='international').strftime('%Y-%m-%d') <= DateTime(dat_fim, datefmt='international').strftime('%Y-%m-%d'))"> (Atual) </dtml-if>
               </option>
            <dtml-else>
               <option selected value="0">Selecione </option>
@@ -108,14 +100,14 @@
                     <dtml-call expr="REQUEST.set('prim_sel', cod_sessao_leg)">
                     <dtml-call expr="REQUEST.set('cod_sessao_leg_sel', cod_sessao_leg)">
                  </dtml-if>
-                 <dtml-if expr="(not _.has_key('cod_sessao_leg_sel') and (DateTime(datefmt='international') >= DateTime(dat_inicio, datefmt='international') and DateTime(datefmt='international') <= DateTime(dat_fim, datefmt='international'))) or (_.has_key('cod_sessao_leg_sel') and cod_sessao_leg == cod_sessao_leg_sel)">
+                 <dtml-if expr="(not _.has_key('cod_sessao_leg_sel') and (DateTime(datefmt='international').strftime('%Y-%m-%d') >= DateTime(dat_inicio, datefmt='international').strftime('%Y-%m-%d') and DateTime(datefmt='international').strftime('%Y-%m-%d') <= DateTime(dat_fim, datefmt='international').strftime('%Y-%m-%d'))) or (_.has_key('cod_sessao_leg_sel') and cod_sessao_leg == cod_sessao_leg_sel)">
                     selected
                     <dtml-call expr="REQUEST.set('prim_sel', cod_sessao_leg)">
                     <dtml-call expr="REQUEST.set('cod_sessao_leg_sel', cod_sessao_leg)">
                  </dtml-if>
                  value="<dtml-var cod_sessao_leg>"> 
                  <dtml-var expr="pysc.periodo_legislatura_format_pysc(num_sessao_leg, dat_inicio, dat_fim)">
-                 <dtml-if expr="(DateTime(datefmt='international') >= DateTime(dat_inicio, datefmt='international')) and (DateTime(datefmt='international') <= DateTime(dat_fim, datefmt='international'))">
+                 <dtml-if expr="(DateTime(datefmt='international').strftime('%Y-%m-%d') >= DateTime(dat_inicio, datefmt='international').strftime('%Y-%m-%d')) and (DateTime(datefmt='international').strftime('%Y-%m-%d') <= DateTime(dat_fim, datefmt='international').strftime('%Y-%m-%d'))">
                     (Atual)
                  </dtml-if>
               </option>

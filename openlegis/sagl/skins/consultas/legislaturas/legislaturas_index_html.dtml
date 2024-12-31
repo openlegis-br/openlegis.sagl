@@ -12,13 +12,13 @@
                <option 
                   <dtml-if expr="_.has_key('hdn_num_legislatura') and num_legislatura==_.int(hdn_num_legislatura)">
                      selected
-                  <dtml-elif expr="not _.has_key('hdn_num_legislatura') and DateTime(datefmt='international') >= DateTime(dat_inicio, datefmt='international') and DateTime(datefmt='international') <= DateTime(dat_fim, datefmt='international')">
+                  <dtml-elif expr="not _.has_key('hdn_num_legislatura') and DateTime(datefmt='international').strftime('%Y-%m-%d') >= DateTime(dat_inicio, datefmt='international').strftime('%Y-%m-%d') and DateTime(datefmt='international').strftime('%Y-%m-%d') <= DateTime(dat_fim, datefmt='international').strftime('%Y-%m-%d')">
                      <dtml-call expr="REQUEST.set('hdn_num_legislatura', num_legislatura)">
                      selected
                   </dtml-if>
                   value="<dtml-var ACTUAL_URL>?hdn_num_legislatura=<dtml-var num_legislatura>">
                   <dtml-var expr="str(num_legislatura) + 'ª Legislatura (' + DateTime(dat_inicio, datefmt='international').strftime('%Y') + ' - ' + DateTime(dat_fim, datefmt='international').strftime('%Y') + ')'">
-                  <dtml-if expr="(DateTime(datefmt='international') >= DateTime(dat_inicio, datefmt='international') and DateTime(datefmt='international') <= DateTime(dat_fim, datefmt='international'))">
+                  <dtml-if expr="(DateTime(datefmt='international').strftime('%Y-%m-%d') >= DateTime(dat_inicio, datefmt='international').strftime('%Y-%m-%d') and DateTime(datefmt='international').strftime('%Y-%m-%d') <= DateTime(dat_fim, datefmt='international').strftime('%Y-%m-%d'))">
                      (Atual)
                   </dtml-if>
                </option>

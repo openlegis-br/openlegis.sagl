@@ -34,14 +34,14 @@
               <option 
                  <dtml-if expr="_.has_key('hdn_num_legislatura') and num_legislatura==_.int(hdn_num_legislatura)"> 
                  selected
-                 <dtml-elif expr="not _.has_key('hdn_num_legislatura') and (DateTime(datefmt='international') <= DateTime(dat_fim, datefmt='international') and DateTime(datefmt='international') >= DateTime(dat_inicio, datefmt='international'))">
+                 <dtml-elif expr="not _.has_key('hdn_num_legislatura') and (DateTime(datefmt='international').strftime('%Y-%m-%d') <= DateTime(dat_fim, datefmt='international').strftime('%Y-%m-%d') and DateTime(datefmt='international').strftime('%Y-%m-%d') >= DateTime(dat_inicio, datefmt='international').strftime('%Y-%m-%d'))">
                     <dtml-call expr="REQUEST.set('hdn_num_legislatura', num_legislatura)">
                     <dtml-call expr="REQUEST.set('atual', 1)">
                     selected
                   </dtml-if>
                   value="<dtml-var num_legislatura>">
                  <dtml-var expr="pysc.periodo_legislatura_format_pysc(num_legislatura,dat_inicio,dat_fim)">
-                  <dtml-if expr="(DateTime(datefmt='international') <= DateTime(dat_fim, datefmt='international') and DateTime(datefmt='international') >= DateTime(dat_inicio, datefmt='international'))">   
+                  <dtml-if expr="(DateTime(datefmt='international').strftime('%Y-%m-%d') <= DateTime(dat_fim, datefmt='international').strftime('%Y-%m-%d') and DateTime(datefmt='international').strftime('%Y-%m-%d') >= DateTime(dat_inicio, datefmt='international').strftime('%Y-%m-%d'))">   
                     (Atual)
                   </dtml-if>
               </option>

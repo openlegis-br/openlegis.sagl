@@ -103,7 +103,8 @@ class EmailDoc(grok.View):
                     <div style="min-width:300px; margin:0 auto; font-family:Arial, Helvetica, sans-serif; font-size:15px; margin-top: 40px; margin-bottom: 40px">
                      <p style="margin-bottom:30px;">Prezado(a) Senhor(a),</p>
                      <p style="margin-bottom:30px;">Encaminhamos para seu conhecimento, por meio do arquivo digital em anexo, o conteúdo do documento administrativo abaixo identificado.</p>
-                     <p><b>Processo:</b> {id_processo} - <b>Interessado:</b> {nom_autor}</p>
+                     <p><b>Processo:</b> {id_processo}</p>
+                     <p><b>Interessado:</b> {nom_autor}</p>
                      <p><b>Assunto:</b> {ementa}</p>
                      <p style="margin-top:30px; margin-bottom:30px">Cordialmente,</p>
                      <p><b>{usuario}</b></p>
@@ -177,7 +178,8 @@ class EmailDoc(grok.View):
                     <div style="min-width:300px; margin:0 auto; font-family:Arial, Helvetica, sans-serif; font-size:15px; margin-top: 40px; margin-bottom: 40px">
                      <p style="margin-bottom:30px;">Prezado(a) Senhor(a),</p>
                      <p style="margin-bottom:30px;">Encaminhamos para seu conhecimento, por meio do arquivo digital em anexo, o conteúdo da matéria legislativa abaixo identificada.</p>
-                     <p><b>Matéria:</b> {id_processo} - <b>Autoria:</b> {nom_autor}</p>
+                     <p><b>Matéria:</b> {id_processo}</p>
+                     <p><b>Autoria:</b> {nom_autor}</p>
                      <p><b>Ementa:</b> {ementa}</p>
                      <p style="margin-top:30px; margin-bottom:30px">
                        Para consultar o processo integral, <a href="{link_processo}" target="blank">clique aqui</a>.
@@ -194,7 +196,7 @@ class EmailDoc(grok.View):
                     </div>
                   </body>
                 </html>
-                """.format(id_processo=id_processo, ementa=txt_assunto, nom_autor=nom_autor, casa_legislativa=casa_legislativa, estado=estado, portal_url=portal_url, logo_casa=logo_casa, usuario=usuario, cargo_usuario=cargo_usuario)
+                """.format(id_processo=id_processo, ementa=txt_assunto, nom_autor=nom_autor, casa_legislativa=casa_legislativa, estado=estado, portal_url=portal_url, logo_casa=logo_casa, usuario=usuario, cargo_usuario=cargo_usuario, link_processo=link_processo)
 
                arquivo = str(cod_materia) + "_texto_integral.pdf"
                if hasattr(self.context.sapl_documentos.materia, arquivo):

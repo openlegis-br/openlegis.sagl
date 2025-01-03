@@ -1,0 +1,83 @@
+<dtml-var header_html>
+ <script>
+    function campos_criticar(form) {
+
+      if (form.txt_destinatario.value == ""){
+         alert("Preencha parte do nome da entidade cadastrada!");
+         form.txt_destinatario.focus();
+         return false;        
+      }    
+     return true;
+    }
+
+    function submitForm()
+      {
+        document.getElementById("destinatario_pesquisar_form").action ="destinatario_salvar_proc";
+        document.getElementById("destinatario_pesquisar_form").submit();      
+      }    
+ </script>
+
+<h1 class="firstHeading font-size-16">Cadastro de Destinatário</h1>
+
+<form class="mb-5 needs-validation" novalidate name="destinatario_incluir_form" id="destinatario_incluir_form" action="destinatario_incluir_proc">
+  <div class="row">
+    <input type="hidden" name="modal" value="1"/>
+    <input type="hidden" name="cod_materia" value="<dtml-var hdn_cod_materia missing>" />
+    <div class="col-12 col-md-6 mb-3">
+      <label class="form-label required" for="txt_nom_destinatario">Nome do Destinatário</label>     
+      <input class="form-control" type="text" id="txt_nom_destinatario" name="txt_nom_destinatario" required>
+      <div class="invalid-feedback">
+        Favor informar o nome do destinatário.
+      </div>
+    </div>
+    <div class="col-12 col-md-6 mb-3">
+      <label class="form-label required" for="txt_end_email">Endereço Eletrônico</label>     
+      <input class="form-control" type="email" id="txt_end_email" name="txt_end_email" required>
+      <div class="invalid-feedback">
+        Um endereço de e-mail válido deve ser preenchido neste campo.
+      </div>
+    </div>
+  </div>
+  <div class="row">
+   <div class="col-12 col-md-6 mb-3">
+     <input class="btn btn-primary mt-2" type="submit" value="Incluir Destinatário"">
+  </div>
+  </div>
+</form>
+
+<h1 class="firstHeading font-size-16">Pesquisa de Entidades</h1> 
+<form name="destinatario_pesquisar_form" id="destinatario_pesquisar_form" action="destinatario_pesquisar_form" onsubmit="return false;">
+  <div class="row">
+    <div class="col-12 mb-3">
+      <label class="form-label required" for="txt_destinatario">Nome da Entidade</label>     
+      <input class="form-control" type="text" id="txt_destinatario" name="txt_destinatario" value="<dtml-var txt_destinatario missing="">">
+    </div>
+  </div>
+  
+  <div class="text-start mb-3">
+     <a class="btn btn-primary" href="javascript:if (campos_criticar(document.destinatario_pesquisar_form)) {document.destinatario_pesquisar_form.submit()}" class="btn btn-light">Pesquisar</a>
+  </div>
+  
+ <input type="hidden" name="modal" value="1" />   
+ <input type="hidden" name="cod_materia" value="<dtml-var hdn_cod_materia missing>" />
+ <dtml-if expr="REQUEST.has_key('txt_destinatario')">
+    <input type="hidden" name="hdn_cod_materia" value="<dtml-var cod_materia missing>" />
+    <div class="row">
+       <div class="col-12 mb-3">
+         <label class="form-label" for="lst_cod_instituicao" class="form-label required">Selecione uma ou mais Entidades:</label>
+         <select class="form-select" id="lst_cod_instituicao" name="lst_cod_instituicao" size="10" multiple>
+           <dtml-in expr="zsql.instituicao_obter_zsql(txt_nom_instituicao=txt_destinatario)">
+              <option value="<dtml-var cod_instituicao>"> <dtml-var nom_instituicao> <dtml-if expr="nom_responsavel!=None">(<dtml-var nom_responsavel>)</dtml-if></option>
+           </dtml-in>
+         </select>
+       </div>
+     </div>
+     <div class="text-start">
+       <input class="btn btn-primary mt-2" type="button" value="Incluir como Destinatário(s)" onclick="return submitForm()">
+     </div>
+ </dtml-if>
+
+</form>
+
+<dtml-var js_slot>
+<dtml-var footer_html>

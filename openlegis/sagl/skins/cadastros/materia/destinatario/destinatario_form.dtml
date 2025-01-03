@@ -1,0 +1,40 @@
+<dtml-var header_html>
+
+<script>
+   function campos_criticar(form){
+      if (form.lst_tip_instituicao.selectedIndex == 0){
+          alert("O tipo de entidade deve ser selecionado!");
+          form.lst_tip_instituicao.focus();
+          return false;
+      }
+
+      form.submit();
+  }
+</script>
+
+<legend class="font-size-16">Gerar Lista de Destinatários</legend>
+
+ <form name="destinatario_form" method="post" action="destinatario_gerar_proc">
+    <div class="row">
+      <div class="col-12 mb-3">
+	  <label class="form-label required" for="lst_tip_instituicao" class="form-label required">Selecione o Tipo de Entidade</label>     
+          <select class="form-select" id="lst_tip_instituicao" name="lst_tip_instituicao">
+            <option value=""></option>
+            <dtml-in expr="zsql.tipo_instituicao_obter_zsql(ind_excluido=0)">
+              <option value="<dtml-var tip_instituicao missing>">
+                <dtml-var nom_tipo_instituicao>
+              </option>
+            </dtml-in>
+          </select>
+      </div>
+   </div>
+   <div class="text-start">
+     <input class="btn btn-primary" type="button" name="btn_destinatario_form" value="Continuar" 
+         onClick="campos_criticar(document.destinatario_form)">
+     <input type="hidden" name="cod_materia" value="<dtml-var cod_materia missing>" />
+     <input type="hidden" name="modal" value="1" />           
+   </div>
+ </form>
+
+<dtml-var js_slot>
+<dtml-var footer_html>

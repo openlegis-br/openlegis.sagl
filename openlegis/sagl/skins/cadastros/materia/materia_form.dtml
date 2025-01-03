@@ -120,6 +120,19 @@
   <li class="nav-item">
     <a class="nav-link <dtml-unless cod_materia>disabled</dtml-unless>" id="votacao-tab" data-bs-toggle="tab" href="#votacao" role="tab" aria-controls="votacao" aria-selected="false">Votação</a>
   </li>
+ <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia'])">
+  <li class="nav-item">
+    <a class="nav-link <dtml-unless cod_materia>disabled</dtml-unless>" id="destinatarios-tab" data-bs-toggle="tab" href="#destinatarios" role="tab" aria-controls="destinatarios" aria-selected="false">Destinatários
+       <dtml-if cod_materia>
+         <dtml-in expr="zsql.destinatario_oficio_obter_zsql(cod_materia=cod_materia, ind_excluido=0)">
+           <dtml-if sequence-start>
+            [<dtml-var sequence-length>]
+           </dtml-if sequence-start>
+         </dtml-in>
+       </dtml-if>
+    </a>
+  </li>  
+ </dtml-if>
 </ul>
 <div class="tab-content" style="margin-top: -1px;">
   <div class="tab-pane p-3 border fade show active" id="home">
@@ -803,6 +816,12 @@
      <dtml-var votacao_index_html>
    </dtml-with>
 </div>
+
+<div class="tab-pane p-3 border fade" id="destinatarios">
+   <dtml-with destinatario>
+     <dtml-var destinatario_index_html>
+   </dtml-with>
+</div>  
 
 </div>
 

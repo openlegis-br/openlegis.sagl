@@ -130,17 +130,32 @@ class EmailDoc(grok.View):
            if recipients != []:
               return msg, destinatarios, cod_usuario
 
+        # MATERIA LEGISLATIVA
         if cod_materia != '' and cod_documento == '':
            if cod_destinatario == '':
               for item in self.context.zsql.destinatario_oficio_obter_zsql(cod_materia=cod_materia, ind_excluido=0):
-                  destinatario = item.end_email
-                  recipients.append(destinatario)
-                  destinatarios.append(item.cod_destinatario)
+                  if item.cod_instituicao != None:
+                      for inst in self.context.zsql.instituicao_obter_zsql(cod_instituicao=item.cod_instituicao):
+                          destinatario = inst.end_email
+                      if destinatario != '':
+                         recipients.append(destinatario)
+                         destinatarios.append(item.cod_destinatario)
+                  elif item.cod_instituicao == None:
+                     destinatario = item.end_email
+                     recipients.append(destinatario)
+                     destinatarios.append(item.cod_destinatario)
            elif cod_destinatario != '':
               for item in self.context.zsql.destinatario_oficio_obter_zsql(cod_destinatario=cod_destinatario, cod_materia=cod_materia, ind_excluido=0):
-                  destinatario = item.end_email
-                  recipients.append(destinatario)
-                  destinatarios.append(item.cod_destinatario)
+                  if item.cod_instituicao != None:
+                      for inst in self.context.zsql.instituicao_obter_zsql(cod_instituicao=item.cod_instituicao):
+                          destinatario = inst.end_email
+                      if destinatario != '':
+                         recipients.append(destinatario)
+                         destinatarios.append(item.cod_destinatario)
+                  elif item.cod_instituicao == None:
+                     destinatario = item.end_email
+                     recipients.append(destinatario)
+                     destinatarios.append(item.cod_destinatario)
 
            recipients = [
                e

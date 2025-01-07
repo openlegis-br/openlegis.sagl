@@ -61,4 +61,27 @@ for norma in context.zsql.norma_juridica_obter_zsql(cod_norma=cod_norma):
      inf_basicas_dic['nom_prefeito'] = prefeito.nom_completo
      inf_basicas_dic['par_prefeito'] = prefeito.sgl_partido   
 
+ # Presidente e Secretários
+ dat_norma = DateTime(norma.dat_norma, datefmt='international').strftime('%d/%m/%Y')
+ inf_basicas_dic["lst_presidente"] = ''
+ inf_basicas_dic["lst_vpresidente"] = ''
+ inf_basicas_dic["lst_1secretario"] = ''
+ inf_basicas_dic["lst_2secretario"] = ''
+ inf_basicas_dic["lst_3secretario"] = ''
+ data = context.pysc.data_converter_pysc(dat_norma)
+ for legislatura in context.zsql.legislatura_obter_zsql(data=data):
+     for periodo in context.zsql.periodo_comp_mesa_obter_zsql(num_legislatura=legislatura.num_legislatura,data=data):
+         for membro in context.zsql.composicao_mesa_obter_zsql(cod_periodo_comp=periodo.cod_periodo_comp):
+             for parlamentar in context.zsql.parlamentar_obter_zsql(cod_parlamentar=membro.cod_parlamentar):
+                 if membro.des_cargo == 'Presidente':
+                    inf_basicas_dic["lst_presidente"] = parlamentar.nom_completo
+                 if membro.des_cargo == 'Vice-Presidente':
+                    inf_basicas_dic["lst_vpresidente"] = parlamentar.nom_completo
+                 elif membro.des_cargo == '1º Secretário':
+                    inf_basicas_dic["lst_1secretario"] = parlamentar.nom_completo
+                 elif membro.des_cargo == '2º Secretário':
+                    inf_basicas_dic["lst_2secretario"] = parlamentar.nom_completo
+                 elif membro.des_cargo == '3º Secretário':
+                    inf_basicas_dic["lst_3secretario"] = parlamentar.nom_completo
+
 return st.norma_gerar_odt(inf_basicas_dic, nom_arquivo, des_tipo_norma, num_norma, ano_norma, dat_norma, data_norma, txt_ementa, modelo_norma)

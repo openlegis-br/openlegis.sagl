@@ -1,0 +1,24 @@
+<dtml-try>
+   <dtml-call expr="REQUEST.set('metodo', zsql.destinatario_oficio_excluir_zsql)">        
+   <dtml-call expr="metodo(cod_proposicao=cod_proposicao, cod_destinatario=cod_destinatario)">
+<dtml-except>
+  <dtml-let mensagem="'Houve um erro! O destinatário não foi excluído!'" tipo_mensagem="'danger'">
+    <dtml-var mensagem_emitir>
+  </dtml-let>  
+<dtml-else>
+  <dtml-let mensagem="'Destinatário excluído com sucesso!'" url="'proposicao_mostrar_proc?cod_proposicao='+cod_proposicao">
+    <dtml-var mensagem_emitir>
+  </dtml-let>
+</dtml-try>
+
+<dtml-comment>LOG DE AUDITORIA</dtml-comment>
+<dtml-if expr="cod_destinatario and dbcon_logs">
+  <dtml-call expr="zsql.logs_registrar_zsql(
+            usuario      = REQUEST['AUTHENTICATED_USER'].getUserName(), 
+            data         = DateTime(datefmt='international').strftime('%Y-%m-%d %H:%M:%S'),
+            modulo       = str(_['REQUEST']['URL1']).split('/')[-1],
+            metodo       = 'destinatario_excluir_proc',
+            IP           = pysc.get_ip(),
+            cod_registro = cod_proposicao)"> 
+</dtml-if>
+

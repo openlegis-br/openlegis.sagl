@@ -82,8 +82,14 @@ def inserir_autoria(cod_materia, cod_autor, cod_proposicao, hdn_num_protocolo):
                          context.zsql.autoria_incluir_zsql(cod_autor = autor.cod_autor, cod_materia = cod_materia, ind_primeiro_autor = 0) 
     else:
        context.zsql.autoria_incluir_zsql(cod_autor = cod_autor, cod_materia = cod_materia, ind_primeiro_autor = 1)       
+    return copiar_destinatarios(cod_materia, cod_proposicao, hdn_num_protocolo)
+
+
+def copiar_destinatarios(cod_materia, cod_proposicao, hdn_num_protocolo):
+    for item in context.zsql.destinatario_oficio_obter_zsql(cod_proposicao=cod_proposicao):
+        context.zsql.destinatario_oficio_incluir_zsql(cod_materia = cod_materia, nom_destinatario = item.nom_destinatario, end_email=item.end_email)
     return tramitar_materia(cod_materia, cod_proposicao, hdn_num_protocolo)
-    
+
 
 def tramitar_materia(cod_materia, cod_proposicao, hdn_num_protocolo):
     cod_unid_tram_local = int(context.sapl_documentos.props_sagl.origem)

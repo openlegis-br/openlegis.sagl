@@ -413,6 +413,9 @@
          <dtml-elif prop_devolvida>
            <label class="form-label" for="txt_dat_devolucao" class="d-block"><span class="text-danger">Data de Devolução</span></label>
            <input class="form-control" type="text" id="txt_dat_devolucao" name="txt_dat_devolucao" value="<dtml-var dat_devolucao missing>" disabled />
+         <dtml-elif expr="not prop_enviada">
+           <label class="form-label" for="txt_situacao" class="d-block"><span>Status da Proposição</span></label>
+           <input class="form-control" type="text" id="txt_situacao" name="txt_situacao" value="Em elaboração pelo autor" disabled />
          <dtml-else>
            <label class="form-label" for="txt_situacao" class="d-block"><span>Status da Proposição</span></label>
            <input class="form-control" type="text" id="txt_situacao" name="txt_situacao" value="Aguardando análise do setor responsável" disabled />
@@ -636,7 +639,6 @@
       </div>
     </div>
  </div>
-
 </dtml-if>
   <dtml-if expr="AUTHENTICATED_USER.has_role(['Autor', 'Assessor Parlamentar'])">
    <div class="row">  
@@ -1031,35 +1033,129 @@
 </dtml-if>
 
  <div class="row">
-    <div class="col-md-12 mt-2">
+    <div class="col-md-12 mt-2 mb-3">
        <p class="text-muted small font-size-12"><i class="fas fa-asterisk text-danger"></i> Campos obrigatórios</p>
     </div>
 </div>
 
-<dtml-if expr="_.has_key('cod_proposicao') and AUTHENTICATED_USER.has_role(['Autor','Operador', 'Operador Materia', 'Revisor Proposicao', 'Chefia Revisao'])">
-  <form name="observacao_form" method="post" action="proposicao_salvar_observacao_proc">
-    <input type="hidden" name="hdn_cod_proposicao" value="<dtml-var cod_proposicao missing>" />
-    <div class="row mt-3">
-       <div class="col-12 mb-3">
-         <dtml-if cod_mat_ou_doc>
-            <dtml-var txt_observacao missing null="">
-         <dtml-else>
-            <legend class="font-size-16">Observações</legend>
-            <textarea class="form-control" name="txa_txt_observacao" id="txa_txt_observacao" rows="2" <dtml-if expr="cod_mat_ou_doc or prop_devolvida">readonly</dtml-if>><dtml-if txt_observacao><dtml-var txt_observacao missing></dtml-if></textarea>
-         </dtml-if cod_mat_ou_doc>	
-       </div>
-    </div>
+<dtml-if expr="_.has_key('cod_proposicao') and (AUTHENTICATED_USER.has_role(['Autor', 'Assessor Parlamentar']) and des_tipo_autor == 'Parlamentar') or AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia', 'Revisor Proposicao', 'Chefia Revisao'])">
+      <div class="accordion accordion-flush accordion-plus-icon mb-3" id="accordionDest">
+         <div class="card mb-0 shadow">
+             <div class="accordion-header" id="headingDest">
+               <h5 class="my-0">
+                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseDest" aria-expanded="false" aria-controls="collapseDest">Destinatários para Remessa Eletrônica</button>
+               </h5>
+             </div>
+             <div id="collapseDest" class="collapse" aria-labelledby="headingDest" data-bs-parent="#accordionDest">
+                 <div class="card-body">
+		   <div class="table-resposive">
+		    <table class="table table-sm table-borderless mb-0">
+		       <thead>
+			<tr>
+			    <th><label for="txt_nom_destinatario">Nome do Destinatário</label></th>
+			    <th width="50%"><label for="txt_end_email">Endereço de E-mail</label></th>
+			</tr>
+		       </thead>
+		             <dtml-in expr="zsql.destinatario_oficio_obter_zsql(cod_proposicao = cod_proposicao, ind_excluido=0)">
+			<tr>
+			    <td>
+		               <input class="form-control form-control-sm" type="text" id="txt_nom_destinatario" name="txt_nom_destinatario" value="<dtml-var nom_destinatario>" readonly>
+			    </td>
+			    <td>
+                               <div class="input-group">
+                                  <input type="email" class="form-control form-control-sm" id="txt_end_email" name="txt_end_email" value="<dtml-var end_email>" readonly>
+                                  <dtml-if expr="_.has_key('cod_proposicao') and (AUTHENTICATED_USER.has_role(['Autor', 'Assessor Parlamentar']) and des_tipo_autor == 'Parlamentar') and not prop_recebida">
+                                     <a class="btn btn-sm btn-danger text-white" href="destinatario_excluir?cod_proposicao=<dtml-var cod_proposicao>&cod_destinatario=<dtml-var cod_destinatario>"><i class="fa fa-fw fa-trash-alt"></i></a>
+                                  </dtml-if>
+                               </div>
+			    </td>
+			</tr>
+	             <dtml-else>
+	               <div class="row">
+	                 <div class="col-12 ms-1 mb-3 text-muted">
+		            Nenhum destinatário cadastrado.
+	                 </div>
+	               </div>
+                     </dtml-in>
+		    </table>
+		   </div>
+              <dtml-if expr="_.has_key('cod_proposicao') and (AUTHENTICATED_USER.has_role(['Autor', 'Assessor Parlamentar']) and des_tipo_autor == 'Parlamentar') and not prop_recebida">
+		<form class="needs-validation" novalidate name="destinatario_form" id="destinatario_incluir_form" action="destinatario_incluir">
+		   <div class="table-resposive">
+		    <table class="table table-sm table-borderless" id="master_table">
+		       <thead class="d-none">
+			<tr>
+			    <th><label for="txt_nom_destinatario" class="required">Nome</label></th>
+			    <th><label for="txt_end_email" class="required">E-mail</label></th>
+			</tr>
+		       </thead>
+			<tr>
+			    <td width="50%">
+		               <input class="form-control form-control-sm" type="text" id="txt_nom_destinatario" name="txt_nom_destinatario" required>
+			    </td>
+			    <td>
+                               <div class="input-group">
+                                   <input type="email" class="form-control form-control-sm" id="txt_end_email" name="txt_end_email" required>
+                                   <a class="btn btn-sm btn-light add"><i class="fa fa-fw fa-plus"></i></a>
+                                   <a class="btn btn-sm btn-light removeRow"><i class="fa fa-fw fa-minus"></i></a>
+                               </div>
+			    </td>
+			</tr>
+		    </table>
+		   </div>
+		   <input type="hidden" name="cod_proposicao" value="<dtml-var cod_proposicao>" />
+		   <input type="hidden" name="hdn_url" value="<dtml-var ACTUAL_URL>?cod_proposicao=<dtml-var cod_proposicao>" />
+		   <div class="row">
+		     <div class="col-12 text-start">
+		       <input class="btn btn-sm btn-light text-white ms-1" type="submit" name="button" value="Incluir Destinatários" />
+		     </div>
+		  </div>
+		</form>
+	        </dtml-if>
+               </div>
+             </div>
+         </div>
+      </div>
+</dtml-if>
 
-    <dtml-if expr="not cod_mat_ou_doc and not prop_devolvida">
-       <input class="btn btn-primary" type="button" value="Salvar Observações" onClick="observacao_salvar(document.observacao_form)" />
-    </dtml-if>
-  </form>
+<dtml-if expr="_.has_key('cod_proposicao') and AUTHENTICATED_USER.has_role(['Autor','Operador', 'Operador Materia', 'Revisor Proposicao', 'Chefia Revisao'])">
+      <div class="accordion accordion-flush accordion-plus-icon" id="accordionObs">
+       <div class="accordion-item">
+         <div class="card mb-0 shadow">
+             <div class="accordion-header" id="headingObs">
+               <h5 class="my-0">
+                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseObs" aria-expanded="false" aria-controls="collapseObs">Observações</button>
+               </h5>
+             </div>
+             <div id="collapseObs" class="accordion-collapse collapse" aria-labelledby="headingObs" data-bs-parent="#accordionObs">
+                 <div class="card-body">
+		  <form name="observacao_form" method="post" action="proposicao_salvar_observacao_proc">
+		    <input type="hidden" name="hdn_cod_proposicao" value="<dtml-var cod_proposicao missing>" />
+		    <div class="row mt-3">
+		       <div class="col-12 mb-3">
+			 <dtml-if cod_mat_ou_doc>
+			    <dtml-var txt_observacao missing null="">
+			 <dtml-else>
+			    <textarea class="form-control" name="txa_txt_observacao" id="txa_txt_observacao" rows="2" <dtml-if expr="cod_mat_ou_doc or prop_devolvida">readonly</dtml-if>><dtml-if txt_observacao><dtml-var txt_observacao missing></dtml-if></textarea>
+			 </dtml-if cod_mat_ou_doc>
+		       </div>
+		    </div>
+
+		    <dtml-if expr="not cod_mat_ou_doc and not prop_devolvida">
+		       <input class="btn btn-sm btn-light text-white" type="button" value="Gravar Observações" onClick="observacao_salvar(document.observacao_form)" />
+		    </dtml-if>
+		  </form>
+                 </div>
+             </div>
+         </div>
+        </div>
+      </div>
 </dtml-if>
 
 <dtml-if expr="_.has_key('cod_proposicao')">
   <dtml-if dbcon_logs>
     <div class="row">
-      <div class="col-12 text-end">
+      <div class="col-12 text-end mt-3">
         <i class="fa fa-clock small"></i>      
         <a href="#" class="text-muted small" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Histórico" data-src="<dtml-var portal_url>/historico?cod_registro=<dtml-var cod_proposicao>&modulo=proposicao&modal=1">Histórico</a>  
       </div>
@@ -1154,6 +1250,36 @@ $(document).ready(function(){
         });
     });  
 });
+
+$(document).ready(function () {
+    $(document).on('click', '#master_table .add', function () {
+        var row = $(this).closest('tr');
+        var clone = row.clone();
+        var tr = clone.closest('tr');
+        $(this).closest('tr').after(clone);
+        tr.find('input[type=text]').val('');
+        tr.find('input[type=email]').val('');
+        var $span = $("#master_table tr");
+    });
+
+    $(document).on('click', '#master_table .removeRow', function () {
+        if ($('#master_table .add').length > 1) {
+            $(this).closest('tr').remove();
+        }
+
+    });
+
+});
+
+function myFunction() {
+    var form=$("#master_table").closest('form')
+    $(form.prop('elements')).each(function(){
+        var missing= $(this).val()===""
+        $(this).parent().toggleClass('error',missing)
+    })
+    return form.find(".error").length==0
+}
+
 
 </script>
 

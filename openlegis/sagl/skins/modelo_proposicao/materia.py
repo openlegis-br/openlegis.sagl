@@ -48,6 +48,7 @@ for materia in context.zsql.materia_obter_zsql(cod_materia=cod_materia):
     ano_ident_basica = materia.ano_ident_basica
     ano_materia = materia.ano_ident_basica
     txt_ementa = materia.txt_ementa
+    dat_materia = DateTime(materia.dat_apresentacao, datefmt='international').strftime('%d/%m/%Y')
     dat_apresentacao = context.pysc.data_converter_por_extenso_pysc(data=materia.dat_apresentacao)
     for prefeito in context.zsql.prefeito_atual_obter_zsql(data_composicao = materia.dat_apresentacao):
         inf_basicas_dic['nom_prefeito'] = prefeito.nom_completo
@@ -134,5 +135,27 @@ for autor in nom_autor:
         if autor.get('cod_autor',autor) != subscritor.get('cod_autor',subscritor):
            outros.append(subscritor)
 subscritores = outros
+
+# Presidente e Secretários
+inf_basicas_dic["lst_presidente"] = ''
+inf_basicas_dic["lst_vpresidente"] = ''
+inf_basicas_dic["lst_1secretario"] = ''
+inf_basicas_dic["lst_2secretario"] = ''
+inf_basicas_dic["lst_3secretario"] = ''
+data = context.pysc.data_converter_pysc(dat_materia)
+for legislatura in context.zsql.legislatura_obter_zsql(data=data):
+    for periodo in context.zsql.periodo_comp_mesa_obter_zsql(num_legislatura=legislatura.num_legislatura,data=data):
+        for membro in context.zsql.composicao_mesa_obter_zsql(cod_periodo_comp=periodo.cod_periodo_comp):
+            for parlamentar in context.zsql.parlamentar_obter_zsql(cod_parlamentar=membro.cod_parlamentar):
+                if membro.des_cargo == 'Presidente':
+                   inf_basicas_dic["lst_presidente"] = parlamentar.nom_completo
+                if membro.des_cargo == 'Vice-Presidente':
+                   inf_basicas_dic["lst_vpresidente"] = parlamentar.nom_completo
+                elif membro.des_cargo == '1º Secretário':
+                   inf_basicas_dic["lst_1secretario"] = parlamentar.nom_completo
+                elif membro.des_cargo == '2º Secretário':
+                   inf_basicas_dic["lst_2secretario"] = parlamentar.nom_completo
+                elif membro.des_cargo == '3º Secretário':
+                   inf_basicas_dic["lst_3secretario"] = parlamentar.nom_completo
 
 return st.materia_gerar_odt(inf_basicas_dic, num_proposicao, nom_arquivo, des_tipo_materia, num_ident_basica, num_materia, ano_ident_basica, ano_materia, txt_ementa, materia_vinculada, dat_apresentacao, nom_autor, apelido_autor, subscritores, modelo_proposicao)

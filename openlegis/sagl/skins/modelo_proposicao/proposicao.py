@@ -156,4 +156,26 @@ for autor in nom_autor:
            outros.append(subscritor)
 subscritores = outros
 
+# Presidente e Secretários
+inf_basicas_dic["lst_presidente"] = ''
+inf_basicas_dic["lst_vpresidente"] = ''
+inf_basicas_dic["lst_1secretario"] = ''
+inf_basicas_dic["lst_2secretario"] = ''
+inf_basicas_dic["lst_3secretario"] = ''
+data = context.pysc.data_converter_pysc(data_atual)
+for legislatura in context.zsql.legislatura_obter_zsql(data=data):
+    for periodo in context.zsql.periodo_comp_mesa_obter_zsql(num_legislatura=legislatura.num_legislatura,data=data):
+        for membro in context.zsql.composicao_mesa_obter_zsql(cod_periodo_comp=periodo.cod_periodo_comp):
+            for parlamentar in context.zsql.parlamentar_obter_zsql(cod_parlamentar=membro.cod_parlamentar):
+                if membro.des_cargo == 'Presidente':
+                   inf_basicas_dic["lst_presidente"] = parlamentar.nom_completo
+                if membro.des_cargo == 'Vice-Presidente':
+                   inf_basicas_dic["lst_vpresidente"] = parlamentar.nom_completo
+                elif membro.des_cargo == '1º Secretário':
+                   inf_basicas_dic["lst_1secretario"] = parlamentar.nom_completo
+                elif membro.des_cargo == '2º Secretário':
+                   inf_basicas_dic["lst_2secretario"] = parlamentar.nom_completo
+                elif membro.des_cargo == '3º Secretário':
+                   inf_basicas_dic["lst_3secretario"] = parlamentar.nom_completo
+
 return st.proposicao_gerar_odt(inf_basicas_dic, num_proposicao, nom_arquivo, des_tipo_materia, num_ident_basica, ano_ident_basica, txt_ementa, materia_vinculada, dat_apresentacao, nom_autor, apelido_autor, subscritores, modelo_proposicao, modelo_path)

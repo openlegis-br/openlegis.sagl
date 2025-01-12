@@ -1,0 +1,590 @@
+<dtml-var header_html>
+
+<h1 class="firstHeading font-size-18 mb-3">Assinador Digital de Documentos</h1> 
+
+<legend class="font-size-14 mb-3">Documentos para Assinatura do Usuário</legend>
+
+<ul class="nav nav-tabs assinatura border-0 mt-4" id="nav_assinatura" role="tablist">
+    <li class="nav-item active">
+        <a class="nav-link active" id="principal-tab" data-bs-toggle="tab" href="#principal" role="tab" aria-controls="principal" data-target="#principal" aria-selected="true">Lista Principal <dtml-in expr="zsql.assinatura_documento_obter_zsql(cod_usuario=cod_usuario_corrente, ind_assinado=0, ind_recusado=0, ind_separado=0)"><dtml-if sequence-start>[<dtml-var sequence-length>]</dtml-if></dtml-in></a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" id="analise-tab" data-bs-toggle="tab" href="#analise" role="tab" aria-controls="analise" data-target="#analise" aria-selected="false">Itens Postergados <dtml-in expr="zsql.assinatura_documento_obter_zsql(cod_usuario=cod_usuario_corrente, ind_assinado=0, ind_recusado=0, ind_separado=1)"><dtml-if sequence-start>[<dtml-var sequence-length>]</dtml-if></dtml-in></a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" id="analise-tab" data-bs-toggle="tab" href="#registro" role="tab" aria-controls="registro" data-target="#registro" aria-selected="false">Registro de Assinaturas <dtml-in expr="zsql.assinatura_documento_obter_zsql(cod_usuario=cod_usuario_corrente, ind_assinado=1, rd_ordenacao=1)"><dtml-if sequence-start>[<dtml-var sequence-length>]</dtml-if></dtml-in></a>
+    </li> 
+</ul>
+
+<div class="tab-content">
+ <div class="tab-pane p-3 border fade show active" id="principal">
+  <dtml-call expr="REQUEST.set('get_assinaturas', get_pendentes(cod_usuario=cod_usuario_corrente, ind_assinado=0, ind_separado=0))">
+  <dtml-in get_assinaturas mapping>
+    <dtml-if cod_assinatura_doc>
+       <dtml-call expr="REQUEST.set('cod_assinatura_doc', cod_assinatura_doc)">
+       <dtml-call expr="REQUEST.set('formatted_code', format_verification_code(cod_assinatura_doc))">
+    </dtml-if>
+    <dtml-if sequence-start>
+     <div class="table-responsive" style="overflow-x: visible;">
+      <table class="table display w-100 align-middle" id="pendentes">
+        <thead class="table-light">
+         <tr>
+           <th width="20%">Solicitação</th>
+           <th width="20%">Tipo de Documento</th>
+           <th>Identificação do Documento</th>
+           <th width="12%">Ações</th>
+         </tr>
+        </thead>
+    </dtml-if>
+        <tr>
+           <td valign="top"><dtml-in expr="zsql.assinatura_documento_obter_zsql(codigo=codigo,tipo_doc=tipo_doc, cod_usuario=cod_usuario_corrente, ind_assinado=0)" mapping><dtml-var dat_solicitacao></dtml-in><dtml-if expr="nome_solicitante_documento!=None"> por <dtml-var nome_solicitante_documento></dtml-if></td>
+           <td valign="top"><dtml-var tipo_documento></td>
+           <td valign="top"><dtml-var id_documento></td>
+           <td valign="top">
+              <div class="btn-group" role="group">
+                  <dtml-if expr="link_pdf != None">
+                    <a class="btn btn-light" title="Visualizar" href="<dtml-var link_pdf>" target="_blank"><i class="far fa-file-pdf"></i></a>
+                    <button type="button" class="btn btn-light" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Assinar Digitalmente" data-src="<dtml-var portal_url>/generico/assinador/pades-signature_html?codigo=<dtml-var codigo>&anexo=<dtml-var anexo missing null>&tipo_doc=<dtml-var tipo_doc>&modal=1" title="Assinar"><i class="fas fa-file-signature"></i></button>
+                  <dtml-else>
+                    <button class="btn btn-danger text-white" title="Documento removido do sistema!"><i class="fa fa-exclamation-circle"></i></button>
+                  </dtml-if>
+                 <div class="btn-group dropstart" role="group">
+                 <button id="btnGroupDrop" type="button" class="btn btn-light dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" title="Informações">
+                      <i class="fa fa-info-circle"></i>
+                 </button>
+                 <div class="dropdown-menu dropdown-menu-end p-4 overflow-scroll dropup" aria-labelledby="btnGroupDrop">
+                    <div class="row px-8 py-6 overflow-scroll" style="z-index:1000; min-width: 500px; max-height: 400px">
+                      <dtml-if expr="cod_solicitante_documento!=None and cod_solicitante_documento==cod_usuario_corrente">
+                       <div class="col-12">
+                          <div class="row">
+                             <a class="" href="<dtml-var link_registro>" target="_blank"><i class="fa fa-edit"></i> Gerenciar Solicitações de Assinatura</a>
+                          </div>
+                       </div>
+                      </dtml-if>
+                       <div class="col-12">
+                          <div class="row">
+				<dtml-if expr="pendentes!=None">
+				  <dtml-in pendentes mapping>
+				     <dtml-if sequence-start>
+				       <div class="table-responsive">
+				       <table class="table table-sm caption-top">
+					<caption class="text-dark">Assinaturas Pendentes</caption>
+					<thead class="table-light">
+					  <tr>
+					    <th>Usuário</th>
+					    <th>Solicitação</th>
+					  </tr>
+					</thead>
+				     </dtml-if>
+					  <tr>
+					     <td><dtml-var nome_usuario></td>
+					     <td><dtml-var dat_solicitacao> <dtml-if expr="nom_solicitante!=None"> por <dtml-var nom_solicitante></dtml-if></td>
+					  </tr>
+				     <dtml-if sequence-end>
+				       </table>
+				      </div>
+				     </dtml-if>
+				  </dtml-in>
+				 </dtml-if>
+                          </div>
+                       </div>
+                       <div class="col-12">
+                          <div class="row">
+				<dtml-if expr="assinados!=None">
+				  <dtml-in assinados mapping>
+				     <dtml-if sequence-start>
+				       <div class="table-responsive">
+				       <table class="table table-sm caption-top">
+					<caption class="text-success">Assinaturas Registradas</caption>
+					<thead class="table-light">
+					  <tr>
+					    <th>Usuário</th>
+					    <th>Assinatura</th>
+					  </tr>
+					</thead>
+				     </dtml-if>
+					  <tr>
+					     <td><dtml-var nome_usuario></td>
+					     <td><dtml-var dat_assinatura></td>
+					  </tr>
+				     <dtml-if sequence-end>
+				       </table>
+				      </div>
+				     </dtml-if>
+				  </dtml-in>
+				 </dtml-if>
+                          </div>
+                       </div>
+                       <div class="col-12">
+                          <div class="row">
+				<dtml-if expr="recusados!=None">
+				  <dtml-in recusados mapping>
+				     <dtml-if sequence-start>
+				       <div class="table-responsive">
+				       <table class="table table-sm caption-top">
+					<caption class="text-danger">Assinaturas Recusadas</caption>
+					<thead class="table-light">
+					  <tr>
+					    <th>Usuário</th>
+					    <th>Motivo</th>
+					  </tr>
+					</thead>
+				     </dtml-if>
+					  <tr>
+					     <td><dtml-var nome_usuario></td>
+					     <td><dtml-var txt_motivo_recusa></td>
+					  </tr>
+				     <dtml-if sequence-end>
+				       </table>
+				      </div>
+				     </dtml-if>
+				  </dtml-in>
+				 </dtml-if>
+                          </div>
+                       </div>
+                    </div>
+                 </div>
+                 </div>
+                 <dtml-if expr="link_pdf != None">
+                 <div class="btn-group dropdown" role="group">
+                   <button id="btnGroupDrop1" type="button" class="btn btn-light dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                      <i class="fa fa-ellipsis-v "></i>
+                   </button>
+                   <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="btnGroupDrop1">
+                      <li>
+                         <a class="btn btn-white text-primary dropdown-item" href="<dtml-var portal_url>/cadastros/assinatura/assinatura_postergar_proc?cod_usuario=<dtml-var cod_usuario_corrente missing>&codigo=<dtml-var codigo missing>&anexo=<dtml-var anexo missing null>&tipo_doc=<dtml-var tipo_doc missing>" data-confirm="Postergar a assinatura?"><i class="fa fa-hourglass-end"></i> Postergar</a>
+                      </li>
+                      <li>
+			    <button type="button" class="btn btn-white text-primary text-danger dropdown-item" data-bs-toggle="modal" data-bs-target="#recusaModal<dtml-var formatted_code>"><i class="fas fa-window-close"></i> Recusar</button>                      
+                      </li>
+                   </ul>
+                 </div>
+			     <div class="modal fade" id="recusaModal<dtml-var formatted_code>" tabindex="-1" aria-labelledby="recusaModalLabel" aria-hidden="true">
+			      <div class="modal-dialog">
+				<div class="modal-content">
+				  <div class="modal-header">
+				    <h5 class="modal-title" id="ModalLabel">Recusa de Assinatura</h5>
+				    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				  </div>
+				  <div class="modal-body">
+				   <form id="myform" role="form" method="post" action="assinatura_recusar_proc" onSubmit="return confirm('Confirma a recusa da assinatura?');" class="was-validated">
+				     <input type="hidden" name="cod_usuario" value="<dtml-var cod_usuario_corrente missing>" />
+				     <input type="hidden" name="tipo_doc" value="<dtml-var tipo_doc missing>" />
+				     <input type="hidden" name="codigo" value="<dtml-var codigo missing>" />
+				     <input type="hidden" name="anexo" value="<dtml-var anexo missing null>" />
+				     <div class="row">
+				       <div class="col-12 mb-3">
+				        <label class="form-label required" for="txa_txt_motivo_recusa">Motivo da Recusa</label>
+				        <textarea class="form-control" name="txa_txt_motivo_recusa" rows="3" required></textarea>
+				       </div>
+				     </div>
+				     <div class="row">
+				       <div class="col-12 mb-2">
+				        <button class="btn btn-danger" method="post" action="assinatura_recusar_proc">Recusar Assinatura</button>
+				       </div>
+				     </div>
+				     <div class="row">
+				       <div class="col-md-12">
+				         <p class="text-muted small font-size-12"><i class="fas fa-asterisk text-danger"></i> Campo obrigatório</p>
+				       </div>
+				     </div>
+				   </form> 
+				  </div>
+				</div>
+			      </div>
+			    </div>  
+             </dtml-if>
+           </td>
+        </tr>
+    <dtml-if sequence-end>
+      </table>
+     </div>
+    </dtml-if>
+  <dtml-else>
+     <p>Não há documentos pendentes de assinatura.</p>
+  </dtml-in>
+ </div>
+
+ <div class="tab-pane p-3 border fade show" id="analise">
+  <dtml-call expr="REQUEST.set('get_postergados', get_pendentes(cod_usuario=cod_usuario_corrente, ind_assinado=0, ind_separado=1))">
+  <dtml-in get_postergados mapping>
+    <dtml-if cod_assinatura_doc>
+       <dtml-call expr="REQUEST.set('cod_assinatura_doc', cod_assinatura_doc)">
+       <dtml-call expr="REQUEST.set('formatted_code', format_verification_code(cod_assinatura_doc))">
+    </dtml-if>
+    <dtml-if sequence-start>
+     <div class="table-responsive" style="overflow-x: visible;">
+      <table class="table display w-100 align-middle" id="pendentes">
+        <thead class="table-light">
+         <tr>
+           <th width="20%">Solicitação</th>
+           <th width="20%">Tipo de Documento</th>
+           <th>Identificação do Documento</th>
+           <th width="12%">Ações</th>
+         </tr>
+        </thead>
+    </dtml-if>
+        <tr>
+           <td valign="top"><dtml-in expr="zsql.assinatura_documento_obter_zsql(codigo=codigo,tipo_doc=tipo_doc, cod_usuario=cod_usuario_corrente, ind_assinado=0)" mapping><dtml-var dat_solicitacao></dtml-in><dtml-if expr="nome_solicitante_documento!=None"> por <dtml-var nome_solicitante_documento></dtml-if></td>
+           <td valign="top"><dtml-var tipo_documento></td>
+           <td valign="top"><dtml-var id_documento></td>
+           <td valign="top">
+              <div class="btn-group" role="group">
+                  <dtml-if expr="link_pdf != None">
+                    <a class="btn btn-light" title="Visualizar" href="<dtml-var link_pdf>" target="_blank"><i class="far fa-file-pdf"></i></a>
+                    <button type="button" class="btn btn-light" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Assinar Digitalmente" data-src="<dtml-var portal_url>/generico/assinador/pades-signature_html?codigo=<dtml-var codigo>&anexo=<dtml-var anexo missing null>&tipo_doc=<dtml-var tipo_doc>&modal=1" title="Assinar"><i class="fas fa-file-signature"></i></button>
+                  <dtml-else>
+                    <button class="btn btn-danger text-white" title="Documento removido do sistema!"><i class="fa fa-exclamation-circle"></i></button>
+                  </dtml-if>
+                 <div class="btn-group dropstart" role="group">
+                 <button id="btnGroupDrop" type="button" class="btn btn-light dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" title="Informações">
+                      <i class="fa fa-info-circle"></i>
+                 </button>
+                 <div class="dropdown-menu dropdown-menu-end p-4 overflow-scroll dropup" aria-labelledby="btnGroupDrop">
+                    <div class="row px-8 py-6 overflow-scroll" style="z-index:1000; min-width: 500px; max-height: 400px">
+                      <dtml-if expr="cod_solicitante_documento!=None and cod_solicitante_documento==cod_usuario_corrente">
+                       <div class="col-12">
+                          <div class="row">
+                             <a class="" href="<dtml-var link_registro>" target="_blank"><i class="fa fa-edit"></i> Gerenciar Solicitações de Assinatura</a>
+                          </div>
+                       </div>
+                      </dtml-if>
+                       <div class="col-12">
+                          <div class="row">
+				<dtml-if expr="pendentes!=None">
+				  <dtml-in pendentes mapping>
+				     <dtml-if sequence-start>
+				       <div class="table-responsive">
+				       <table class="table table-sm caption-top">
+					<caption class="text-dark">Assinaturas Pendentes</caption>
+					<thead class="table-light">
+					  <tr>
+					    <th>Usuário</th>
+					    <th>Solicitação</th>
+					  </tr>
+					</thead>
+				     </dtml-if>
+					  <tr>
+					     <td><dtml-var nome_usuario></td>
+					     <td><dtml-var dat_solicitacao> <dtml-if expr="nom_solicitante!=None"> por <dtml-var nom_solicitante></dtml-if></td>
+					  </tr>
+				     <dtml-if sequence-end>
+				       </table>
+				      </div>
+				     </dtml-if>
+				  </dtml-in>
+				 </dtml-if>
+                          </div>
+                       </div>
+                       <div class="col-12">
+                          <div class="row">
+				<dtml-if expr="assinados!=None">
+				  <dtml-in assinados mapping>
+				     <dtml-if sequence-start>
+				       <div class="table-responsive">
+				       <table class="table table-sm caption-top">
+					<caption class="text-success">Assinaturas Registradas</caption>
+					<thead class="table-light">
+					  <tr>
+					    <th>Usuário</th>
+					    <th>Assinatura</th>
+					  </tr>
+					</thead>
+				     </dtml-if>
+					  <tr>
+					     <td><dtml-var nome_usuario></td>
+					     <td><dtml-var dat_assinatura></td>
+					  </tr>
+				     <dtml-if sequence-end>
+				       </table>
+				      </div>
+				     </dtml-if>
+				  </dtml-in>
+				 </dtml-if>
+                          </div>
+                       </div>
+                       <div class="col-12">
+                          <div class="row">
+				<dtml-if expr="recusados!=None">
+				  <dtml-in recusados mapping>
+				     <dtml-if sequence-start>
+				       <div class="table-responsive">
+				       <table class="table table-sm caption-top">
+					<caption class="text-danger">Assinaturas Recusadas</caption>
+					<thead class="table-light">
+					  <tr>
+					    <th>Usuário</th>
+					    <th>Motivo</th>
+					  </tr>
+					</thead>
+				     </dtml-if>
+					  <tr>
+					     <td><dtml-var nome_usuario></td>
+					     <td><dtml-var txt_motivo_recusa></td>
+					  </tr>
+				     <dtml-if sequence-end>
+				       </table>
+				      </div>
+				     </dtml-if>
+				  </dtml-in>
+				 </dtml-if>
+                          </div>
+                       </div>
+                    </div>
+                 </div>
+                      <dtml-if expr="link_pdf != None">
+			    <button type="button" class="btn btn-light text-danger" data-bs-toggle="modal" title="Recusar" data-bs-target="#recusaModal<dtml-var formatted_code>"><i class="fas fa-window-close"></i></button>
+			     <div class="modal fade" id="recusaModal<dtml-var formatted_code>" tabindex="-1" aria-labelledby="recusaModalLabel" aria-hidden="true">
+			      <div class="modal-dialog">
+				<div class="modal-content">
+				  <div class="modal-header">
+				    <h5 class="modal-title" id="ModalLabel">Recusa de Assinatura</h5>
+				    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				  </div>
+				  <div class="modal-body">
+				   <form id="myform" role="form" method="post" action="assinatura_recusar_proc" onSubmit="return confirm('Confirma a recusa da assinatura?');" class="was-validated">
+				     <input type="hidden" name="cod_usuario" value="<dtml-var cod_usuario_corrente missing>" />
+				     <input type="hidden" name="tipo_doc" value="<dtml-var tipo_doc missing>" />
+				     <input type="hidden" name="codigo" value="<dtml-var codigo missing>" />
+				     <input type="hidden" name="anexo" value="<dtml-var anexo missing null>" />
+				     <div class="row">
+				       <div class="col-12 mb-3">
+				        <label class="form-label required" for="txa_txt_motivo_recusa">Motivo da Recusa</label>
+				        <textarea class="form-control" name="txa_txt_motivo_recusa" rows="3" required></textarea>
+				       </div>
+				     </div>
+				     <div class="row">
+				       <div class="col-12 mb-2">
+				        <button class="btn btn-danger" method="post" action="assinatura_recusar_proc">Recusar Assinatura</button>
+				       </div>
+				     </div>
+				     <div class="row">
+				       <div class="col-md-12">
+				         <p class="text-muted small font-size-12"><i class="fas fa-asterisk text-danger"></i> Campo obrigatório</p>
+				       </div>
+				     </div>
+				   </form> 
+				  </div>
+				</div>
+			      </div>
+			    </div>
+		      </dtml-if>
+               </div>
+           </td>
+        </tr>
+    <dtml-if sequence-end>
+      </table>
+     </div>
+    </dtml-if>
+  <dtml-else>
+     <p>Não há documentos com assinatura postergada.</p>
+  </dtml-in>
+ </div>
+
+ <div class="tab-pane p-3 border fade show" id="registro">
+  <dtml-call expr="REQUEST.set('get_assinados', get_pendentes(cod_usuario=cod_usuario_corrente, ind_assinado=1))">
+  <dtml-in get_assinados mapping>
+    <dtml-if cod_assinatura_doc>
+       <dtml-call expr="REQUEST.set('cod_assinatura_doc', cod_assinatura_doc)">
+       <dtml-call expr="REQUEST.set('formatted_code', format_verification_code(cod_assinatura_doc))">
+    </dtml-if>
+    <dtml-if sequence-start>
+     <div class="table-responsive" style="overflow-x: visible;">
+      <table class="table display w-100 align-middle" id="pendentes">
+        <thead class="table-light">
+         <tr>
+           <th width="15%">Assinatura</th>
+           <th width="20%">Tipo de Documento</th>
+           <th>Identificação do Documento</th>
+           <th width="12%">Ações</th>
+         </tr>
+        </thead>
+    </dtml-if>
+        <tr>
+           <td valign="top"><dtml-in expr="zsql.assinatura_documento_obter_zsql(codigo=codigo,tipo_doc=tipo_doc, cod_usuario=cod_usuario_corrente, ind_assinado=1)" mapping><dtml-var dat_assinatura></dtml-in></td>
+           <td valign="top"><dtml-var tipo_documento></td>
+           <td valign="top"><dtml-var id_documento></td>
+           <td valign="top">
+              <div class="btn-group" role="group">
+                 <a class="btn btn-light" title="Visualizar" href="<dtml-var link_pdf>" target="_blank"><i class="far fa-file-pdf"></i></a>
+                 <div class="btn-group dropstart" role="group">
+                 <button id="btnGroupDrop" type="button" class="btn btn-light dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" title="Informações">
+                      <i class="fa fa-info-circle"></i>
+                 </button>
+                 <div class="dropdown-menu dropdown-menu-end p-4 overflow-scroll dropup" aria-labelledby="btnGroupDrop">
+                    <div class="row px-8 py-6 overflow-scroll" style="z-index:1000; min-width: 500px; max-height: 400px">
+                      <dtml-if expr="cod_solicitante_documento!=None and cod_solicitante_documento==cod_usuario_corrente">
+                       <div class="col-12">
+                          <div class="row">
+                             <a class="" href="<dtml-var link_registro>" target="_blank"><i class="fa fa-edit"></i> Gerenciar Solicitações de Assinatura</a>
+                          </div>
+                       </div>
+                      </dtml-if>
+                       <div class="col-12">
+                          <div class="row">
+				<dtml-if expr="pendentes!=None">
+				  <dtml-in pendentes mapping>
+				     <dtml-if sequence-start>
+				       <div class="table-responsive">
+				       <table class="table table-sm caption-top">
+					<caption class="text-dark">Assinaturas Pendentes</caption>
+					<thead class="table-light">
+					  <tr>
+					    <th>Usuário</th>
+					    <th>Solicitação</th>
+					  </tr>
+					</thead>
+				     </dtml-if>
+					  <tr>
+					     <td><dtml-var nome_usuario></td>
+					     <td><dtml-var dat_solicitacao> <dtml-if expr="nom_solicitante!=None"> por <dtml-var nom_solicitante></dtml-if></td>
+					  </tr>
+				     <dtml-if sequence-end>
+				       </table>
+				      </div>
+				     </dtml-if>
+				  </dtml-in>
+				 </dtml-if>
+                          </div>
+                       </div>
+                       <div class="col-12">
+                          <div class="row">
+				<dtml-if expr="assinados!=None">
+				  <dtml-in assinados mapping>
+				     <dtml-if sequence-start>
+				       <div class="table-responsive">
+				       <table class="table table-sm caption-top">
+					<caption class="text-success">Assinaturas Registradas</caption>
+					<thead class="table-light">
+					  <tr>
+					    <th>Usuário</th>
+					    <th>Assinatura</th>
+					  </tr>
+					</thead>
+				     </dtml-if>
+					  <tr>
+					     <td><dtml-var nome_usuario></td>
+					     <td><dtml-var dat_assinatura></td>
+					  </tr>
+				     <dtml-if sequence-end>
+				       </table>
+				      </div>
+				     </dtml-if>
+				  </dtml-in>
+				 </dtml-if>
+                          </div>
+                       </div>
+                       <div class="col-12">
+                          <div class="row">
+				<dtml-if expr="recusados!=None">
+				  <dtml-in recusados mapping>
+				     <dtml-if sequence-start>
+				       <div class="table-responsive">
+				       <table class="table table-sm caption-top">
+					<caption class="text-danger">Assinaturas Recusadas</caption>
+					<thead class="table-light">
+					  <tr>
+					    <th>Usuário</th>
+					    <th>Motivo</th>
+					  </tr>
+					</thead>
+				     </dtml-if>
+					  <tr>
+					     <td><dtml-var nome_usuario></td>
+					     <td><dtml-var txt_motivo_recusa></td>
+					  </tr>
+				     <dtml-if sequence-end>
+				       </table>
+				      </div>
+				     </dtml-if>
+				  </dtml-in>
+				 </dtml-if>
+                          </div>
+                       </div>
+                    </div>
+                 </div>
+               </div>
+           </td>
+        </tr>
+    <dtml-if sequence-end>
+      </table>
+     </div>
+    </dtml-if>
+  <dtml-else>
+     <p>Não há registro de documentos assinados.</p>
+  </dtml-in>
+ </div>
+</div>
+  
+<dtml-var js_slot>
+<script>
+$(document).ready(function() {
+    $.fn.dataTable.moment( 'DD/MM/YYYY HH:mm:ss' );    //Formatação com Hora
+    $.fn.dataTable.moment('DD/MM/YYYY');    //Formatação sem Hora
+    var table = $('.display').DataTable( {
+        "responsive": true,
+        "order": [[ 0, "desc" ]],
+        "language": {
+          search: "Pesquisar:",
+          processing:     "Processando...",
+          loadingRecords: "Carregando...",
+          lengthMenu:     "Exibir _MENU_ registros por página",
+          info:           "Exibindo _START_ a _END_ de _TOTAL_ registros",
+          infoEmpty:      "Exibindo _START_ a _END_ de _TOTAL_ registros",
+          infoFiltered:   "(total de registros:_MAX_)",
+          emptyTable:     "Nenhum registro encontrado",
+          zeroRecords:     "Nenhum registro encontrado",
+          paginate: {
+            first:      "Primeiro",
+            previous:   "Anterior",
+            next:       "Próximo",
+            last:       "Último"
+          },
+         "buttons": {
+           print: "Imprimir",
+           copy: "Copiar",
+           copyTitle: "Cópia bem sucedida",
+           copySuccess: {
+            1: "Uma linha copiada com sucesso",
+            _: "%d linhas copiadas com sucesso"
+          }
+        }
+        }
+    });
+});
+
+window.onload = function(){  
+    var url = document.location.toString();
+    if (url.match('#')) {
+        $('.nav-tabs a[href="#' + url.split('#')[1] + '"]').tab('show');
+    }
+    //Change hash for page-reload
+    $('.nav-tabs a[href="#' + url.split('#')[1] + '"]').on('shown', function (e) {
+        window.location.hash = e.target.hash;
+    }); 
+} 
+
+$(document).ready(() => {
+  let url = location.href.replace(/\/$/, "");
+   if (location.hash) {
+    const hash = url.split("#");
+    $('#nav_assinatura a[href="#'+hash[1]+'"]').tab("show");
+    url = location.href.replace(/\/#/, "#");
+    history.replaceState(null, null, url);
+  } 
+
+  $('a[data-bs-toggle="tab"]').on("click", function() {
+    let newUrl;
+    const hash = $(this).attr("href");
+    if(hash == "#home") {
+      newUrl = url.split("#")[0];
+    } else {
+      newUrl = url.split("#")[0] + hash;
+    }
+    newUrl += "";
+    history.replaceState(null, null, newUrl);
+  });
+});
+
+</script>
+<dtml-var footer_html>

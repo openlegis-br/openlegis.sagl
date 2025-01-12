@@ -1,0 +1,41 @@
+<dtml-comment>
+connection_id : dbcon_sagl
+arguments : cod_assinatura_doc codigo anexo tipo_doc cod_solicitante cod_usuario ind_separado ind_assinado ind_excluido=0
+max_rows : 1000
+max_cache : 100
+</dtml-comment>
+
+SELECT DISTINCT
+  cod_assinatura_doc,
+  codigo,
+  anexo,
+  tipo_doc,
+  cod_solicitante
+  
+FROM 
+  assinatura_documento
+  
+<dtml-sqlgroup where>
+  <dtml-sqltest cod_assinatura_doc  op="=" type="nb"  optional><dtml-and>
+  <dtml-sqltest codigo              op="=" type="int" optional><dtml-and>
+  <dtml-sqltest tipo_doc            op="=" type="nb"  optional><dtml-and>
+  <dtml-sqltest ind_separado        op="=" type="int" optional><dtml-and>
+  <dtml-sqltest ind_assinado        op="=" type="int"><dtml-and>
+  <dtml-sqltest ind_excluido        op="=" type="int">
+  and ind_recusado = 0
+</dtml-sqlgroup>
+
+<dtml-if anexo>
+  AND anexo = <dtml-sqlvar anexo type="int">
+</dtml-if>
+
+<dtml-if cod_solicitante>
+  AND cod_solicitante = <dtml-sqlvar cod_solicitante type="int">
+</dtml-if>
+
+<dtml-if cod_usuario>
+  AND cod_usuario = <dtml-sqlvar cod_usuario type="int">
+</dtml-if>
+
+ORDER BY
+    dat_solicitacao ASC

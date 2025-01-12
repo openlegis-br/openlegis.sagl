@@ -27,8 +27,11 @@ try:
    nom_arquivo = nom_arquivo_assinado
    link = pdf_signed
 except:
-   arquivo = context.restrictedTraverse(pdf_file)
-   nom_arquivo = nom_arquivo
-   link = pdf_file
+   try:
+      arquivo = context.restrictedTraverse(pdf_file)
+      nom_arquivo = nom_arquivo
+      link = pdf_file
+   except:
+      link = ''
 
 return link

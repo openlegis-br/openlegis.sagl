@@ -36,6 +36,8 @@
 </dtml-unless>
 
 <dtml-in expr="zsql.usuario_obter_zsql(col_username=AUTHENTICATED_USER.getUserName())">
+   <dtml-call expr="REQUEST.set('nom_completo', str(nom_completo))">
+   <dtml-call expr="REQUEST.set('num_cpf', str(num_cpf))">
    <dtml-call expr="REQUEST.set('cod_usuario', int(cod_usuario))">
 </dtml-in>
 
@@ -86,7 +88,22 @@
     <input type="hidden" id="cod_usuario" name="cod_usuario" value="<dtml-var cod_usuario>">  
     <input type="hidden" id="tipo_doc" name="tipo_doc" value="<dtml-var tipo_doc>">
     <input type="hidden" id="modal" name="modal" value="1" />
-    <input type="hidden" id="txt_qtde_assinaturas" name="txt_qtde_assinaturas" value="<dtml-var txt_qtde_assinaturas>">  
+    <input type="hidden" id="txt_qtde_assinaturas" name="txt_qtde_assinaturas" value="<dtml-var txt_qtde_assinaturas>"> 
+    <div class="row">
+       <div class="col-12 mb-3">
+          <div class="alert alert-light alert-dismissible fade show mb-0" role="alert">
+             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+             <div class="row">
+               <div class="col-6">
+                  <strong>Usuário Autenticado: </strong> <dtml-var nom_completo>
+               </div>
+               <div class="col-6">
+                  <strong>CPF:</strong> <dtml-var num_cpf>
+               </div>
+             </div> 
+          </div>
+       </div>     
+    </div>
     <div class="row">
        <div class="col-12 mb-3">
          <label class="form-label" for="certificateSelect">Selecione um Certificado ICP-Brasil</label>

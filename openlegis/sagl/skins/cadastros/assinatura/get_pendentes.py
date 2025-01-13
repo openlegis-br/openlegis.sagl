@@ -265,4 +265,3 @@ for item in context.zsql.assinatura_documento_pendente_obter_zsql(codigo=codigo,
     lista.append(dic_documento)
 
 return lista
-

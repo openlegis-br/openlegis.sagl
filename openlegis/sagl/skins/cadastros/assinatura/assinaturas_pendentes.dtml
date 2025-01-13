@@ -11,7 +11,7 @@
   <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador'])">
      <dtml-call expr="REQUEST.set('get_assinados', get_pendentes(ind_assinado=0))">
   <dtml-else>
-     <dtml-call expr="REQUEST.set('get_assinados', get_pendentes(cod_usuario=cod_usuario_corrente, ind_assinado=0))">
+     <dtml-call expr="REQUEST.set('get_assinados', get_pendentes(cod_solicitante=cod_usuario_corrente, ind_assinado=0))">
   </dtml-if>
   <dtml-in get_assinados mapping>
     <dtml-if sequence-start>

@@ -12,6 +12,8 @@ def get_info(codigo, tipo_doc, anexo):
         tipo_doc = storage.tip_documento
         usuario = None
         descricao = None
+        url = None
+        tipo_documento = None
         if tipo_doc == 'proposicao':
            for metodo in context.zsql.proposicao_obter_zsql(cod_proposicao=codigo):
                tipo_documento = 'Proposição Digital'

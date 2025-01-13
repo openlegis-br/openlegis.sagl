@@ -4,12 +4,14 @@
 ##bind namespace=
 ##bind script=script
 ##bind subpath=traverse_subpath
-##parameters=tipo_doc='', cod_solicitante='', cod_usuario='', ind_assinado='', ind_separado=''
+##parameters=codigo='', tipo_doc='', cod_solicitante='', cod_usuario='', ind_assinado='', ind_separado=''
 ##title=
 ##
 def get_info(codigo, tipo_doc, anexo):
     for storage in context.zsql.assinatura_storage_obter_zsql(tip_documento=tipo_doc):
         tipo_doc = storage.tip_documento
+        usuario = None
+        descricao = None
         if tipo_doc == 'proposicao':
            for metodo in context.zsql.proposicao_obter_zsql(cod_proposicao=codigo):
                tipo_documento = 'Proposição Digital'
@@ -209,7 +211,7 @@ def get_info(codigo, tipo_doc, anexo):
 
 # Gerar itens pendentes de assinatura
 lista = []
-for item in context.zsql.assinatura_documento_pendente_obter_zsql(tipo_doc=tipo_doc, cod_solicitante=cod_solicitante, cod_usuario=cod_usuario, ind_assinado=ind_assinado, ind_separado=ind_separado):
+for item in context.zsql.assinatura_documento_pendente_obter_zsql(codigo=codigo, tipo_doc=tipo_doc, cod_solicitante=cod_solicitante, cod_usuario=cod_usuario, ind_assinado=ind_assinado, ind_separado=ind_separado):
     dic_documento = {}
     dic_documento['cod_assinatura_doc'] = item['cod_assinatura_doc']
     dic_documento['codigo'] = item['codigo']

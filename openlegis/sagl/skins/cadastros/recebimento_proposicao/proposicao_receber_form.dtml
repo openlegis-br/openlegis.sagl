@@ -1,6 +1,21 @@
 <dtml-var header_html>
  
-  <h1 class="firstHeading font-size-18">Incorporação de Proposição Digital</h1> 
+  <h1 class="firstHeading font-size-18 mb-3">Incorporação de Proposição Digital</h1> 
+
+        <dtml-if expr="zsql.assinatura_documento_obter_zsql(codigo=cod_proposicao, tipo_doc='proposicao')">
+           <dtml-call expr="REQUEST.set('assinaturas', cadastros.assinatura.get_pendentes(codigo=cod_proposicao, tipo_doc='proposicao', ind_assinado=0))">
+           <dtml-in assinaturas mapping>
+                <dtml-if expr="len(pendentes) > 0">
+                   <div class="alert alert-danger alert-dismissible fade show " role="alert">
+                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                     <p class="mb-0">
+                       <i class="fa fa-exclamation-triangle" aria-hidden="true"></i> A proposição possui <dtml-var expr="len(pendentes)"> <dtml-if expr="len(pendentes) > 1">assinaturas digitais pendentes<dtml-else>assinatura digital pendente</dtml-if>
+                     <a class="btn btn-sm btn-danger" href="#" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Assinaturas Digitais" data-src="<dtml-var portal_url>/cadastros/assinatura/assinatura_solicitar_form?codigo=<dtml-var cod_proposicao>&tipo_doc=proposicao&modal=1">Gerenciar</a>  
+                     </p>
+                   </div>
+                </dtml-if>
+           </dtml-in>
+        </dtml-if>
 
         <dtml-if txtCodDoc>
           <dtml-in expr="zsql.autor_obter_zsql(cod_autor=cod_autor)">
@@ -13,26 +28,17 @@
               <dtml-call expr="REQUEST.set('des_tipo_proposicao', des_tipo_proposicao)">
               <dtml-call expr="REQUEST.set('tip_mat_ou_doc,', tip_mat_ou_doc)">
           </dtml-in>
-          <dtml-if expr="des_tipo_proposicao == 'Moção'">
-             <dtml-call expr="REQUEST.set('ano_corrente', DateTime(datefmt='international').strftime('%Y'))">
-             <dtml-in expr="zsql.materia_pesquisar_zsql(cod_autor=cod_autor,tip_id_basica=tip_mat_ou_doc, ano_ident_basica=ano_corrente)">
-                 <dtml-if sequence-start>
-                    <dtml-if expr="_['sequence-length'] < 50">
-                       <div class="alert alert-success alert-dismissible fade show" role="alert">
-                         <h5>Contador de Moções</h5>
-                         <p class="mb-0">O autor apresentou <b><dtml-var sequence-length> proposições</b> no exercício de <dtml-var ano_corrente>.</p>
-                       </div>
-                     <dtml-else>
-                       <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                         <h5>Controle de Moções</h5>
-                         <p class="mb-0">O autor apresentou <b><dtml-var sequence-length> proposições</b> no exercício de <dtml-var ano_corrente>.</p>
-                       </div>
-                     </dtml-if>
-                 </dtml-if>
-             </dtml-in>
-          </dtml-if>
+          <dtml-call expr="REQUEST.set('ano_corrente', DateTime(datefmt='international').strftime('%Y'))">
+          <dtml-in expr="zsql.materia_pesquisar_zsql(cod_autor=cod_autor,tip_id_basica=tip_mat_ou_doc, ano_ident_basica=ano_corrente)">
+             <dtml-if sequence-start>
+                <div class="alert alert-info alert-dismissible fade show " role="alert">
+                  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                  <p class="mb-0"><i class="fa fa-info-circle"></i> O autor já apresentou <b><dtml-var sequence-length> matéria<dtml-if expr="_['sequence-length'] > 1">s</dtml-if> legislativa<dtml-if expr="_['sequence-length'] > 1">s</dtml-if></b>  do tipo "<dtml-var des_tipo_proposicao>" no exercício de <dtml-var ano_corrente></p>
+                </div>
+             </dtml-if>
+          </dtml-in>
         </dtml-if>
-          
+     
         <table class="table table-bordered">
             <thead class="table-light">
         	<tr>
@@ -85,7 +91,7 @@
             <form name="materia_form" method="post" action="criar_materia_pysc" onSubmit="return confirm('Confirma a criação da matéria legislativa?');">
                <dtml-call expr="REQUEST.set('txt_user', AUTHENTICATED_USER.getUserName())">            
                <input type="hidden" name="cod_proposicao" value="<dtml-var cod_proposicao>" />
-               <div class="text-center">
+               <div class="text-left">
                   <input class="btn btn-primary" type="submit" name="cmdCriarMat" value="Criar Matéria" />
 
         <dtml-elif expr="ind_mat_ou_doc=='D' and des_tipo_proposicao!='Emenda' and des_tipo_proposicao!='Mensagem Aditiva' and des_tipo_proposicao!='Substitutivo' and des_tipo_proposicao!='Parecer' and des_tipo_proposicao!='Parecer de Comissão'">

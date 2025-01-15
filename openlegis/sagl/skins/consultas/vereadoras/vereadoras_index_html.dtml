@@ -13,7 +13,7 @@
 
         <!-- Parlamentar -->
         <div class="col-md-6 col-lg-4 col-xl-3">
-          <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia'])">
+          <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Parlamentar'])">
             <a href="<dtml-var portal_url>/cadastros/parlamentar/parlamentar_mostrar_proc?cod_parlamentar=<dtml-var cod_parlamentar>" title="<dtml-var nome_completo>" >
           <dtml-else>
             <a href="<dtml-var portal_url>/consultas/parlamentar/parlamentar_mostrar_proc?cod_parlamentar=<dtml-var cod_parlamentar>" title="<dtml-var nome_completo>">
@@ -35,7 +35,6 @@
                        <i class="fa fa-caret-right"></i> <dtml-var num_legislatura>ª Legislatura (<dtml-var inicio> / <dtml-var fim>) <dtml-unless sequence-end><br /></dtml-unless>
                    </dtml-in>
                 </p>
-                <button class="btn btn-outline-secondary btn-rounded py-1">Dados da Vereadora</button>
             </div>
            </div>
         </div>

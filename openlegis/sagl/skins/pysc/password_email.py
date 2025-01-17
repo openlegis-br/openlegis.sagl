@@ -17,11 +17,10 @@ request=context.REQUEST
 response=request.RESPONSE
 session= request.SESSION
 
-
 atool = getToolByName(script, 'portal_actions')
 ptool = getUtilityByInterfaceName('Products.CMFCore.interfaces.IPropertiesTool')
-utool = getToolByName(script, 'portal_url')
-portal_url = utool()
+
+portal_url = context.portal_url.portal_url()
 
 casa={}
 aux=context.sapl_documentos.props_sagl.propertyItems()
@@ -34,10 +33,8 @@ options = {}
 options['password'] = password
 
 headers = {}
-headers['Subject'] = _('${portal_title}: Lembrete de senha',
-                      mapping={'portal_title': decode(ptool.title(), script)})
-headers['From'] = '%s <%s>' % (casa_legislativa,
-                               email_casa)
+headers['Subject'] = '%s: Lembrete de senha' % (portal_url)
+headers['From'] = '%s <%s>' % (casa_legislativa, email_casa)
 headers['To'] = '<%s>' % (email)
 
 mtext = context.generico.password_email_template(**decode(options, script))

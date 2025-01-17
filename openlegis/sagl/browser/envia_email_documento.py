@@ -8,6 +8,7 @@ from io import BytesIO
 from email.message import EmailMessage
 from email.mime.text import MIMEText
 
+
 @implementer(IPublishTraverse)
 class EmailDoc(grok.View):
     grok.context(Interface)
@@ -43,7 +44,7 @@ class EmailDoc(grok.View):
             cargo_usuario = user.nom_cargo
 
         msg = EmailMessage()
-        msg['From'] = email_casa
+        msg['From'] = '%s <%s>' % (casa_legislativa, email_casa)
 
         recipients = []
         destinatarios = []

@@ -89,6 +89,11 @@ class EmailDoc(grok.View):
                id_processo = str(documento.des_tipo_documento)+' n° '+str(documento.num_documento)+'/'+str(documento.ano_documento)
                txt_assunto = documento.txt_assunto
                nom_autor = documento.txt_interessado
+               chave_acesso = 'KEY_NOT_FOUND'
+               for protocolo in self.context.zsql.protocolo_obter_zsql(num_protocolo=documento.num_protocolo, ano_protocolo=documento.ano_documento):
+                   if protocolo.codigo_acesso != None:
+                      chave_acesso = protocolo.codigo_acesso
+               link_processo = self.context.portal_url.portal_url() + '/consultas/protocolo/pesquisa_publica_proc?txt_chave_acesso=' + str(chave_acesso)
 
                msg['Subject'] = 'Encaminha ' + id_processo
 
@@ -107,6 +112,9 @@ class EmailDoc(grok.View):
                      <p><b>Processo:</b> {id_processo}</p>
                      <p><b>Interessado:</b> {nom_autor}</p>
                      <p><b>Assunto:</b> {ementa}</p>
+                     <p style="margin-top:30px; margin-bottom:30px">
+                       Para consultar o andamento do processo, <a href="{link_processo}" target="blank">clique aqui</a>.
+                     </p>
                      <p style="margin-top:30px; margin-bottom:30px">Cordialmente,</p>
                      <p><b>{usuario}</b></p>
                      <p>{cargo_usuario}</p>
@@ -119,7 +127,7 @@ class EmailDoc(grok.View):
                     </div>
                   </body>
                 </html>
-                """.format(id_processo=id_processo, ementa=txt_assunto, nom_autor=nom_autor, casa_legislativa=casa_legislativa, estado=estado, portal_url=portal_url, logo_casa=logo_casa, usuario=usuario, cargo_usuario=cargo_usuario)
+                """.format(id_processo=id_processo, ementa=txt_assunto, nom_autor=nom_autor, casa_legislativa=casa_legislativa, estado=estado, portal_url=portal_url, logo_casa=logo_casa, usuario=usuario, cargo_usuario=cargo_usuario, link_processo=link_processo)
 
                arquivo = str(cod_documento) + "_texto_integral.pdf"
                if hasattr(self.context.sapl_documentos.administrativo, arquivo):

@@ -18,6 +18,10 @@ for peticao in context.zsql.peticao_obter_zsql(cod_peticao=cod_peticao, ind_norm
     num_norma = peticao.num_norma
     ano_norma = peticao.ano_norma
     dat_norma = peticao.data_norma
+    dat_publicacao = peticao.data_publicacao
+    des_veiculo_publicacao = peticao.des_veiculo_publicacao
+    num_pag_inicio_publ = peticao.num_pag_inicio_publ
+    num_pag_fim_publ = peticao.num_pag_fim_publ
     txt_ementa = peticao.txt_descricao
     if peticao.cod_materia != None:
        cod_materia = peticao.cod_materia
@@ -34,7 +38,7 @@ for peticao in context.zsql.peticao_obter_zsql(cod_peticao=cod_peticao, ind_norm
     for validacao in context.zsql.assinatura_documento_obter_zsql(tipo_doc='peticao', codigo=cod_peticao, ind_assinado=1):
         nom_pdf_assinado = str(validacao.cod_assinatura_doc) + ".pdf"
 
-    context.zsql.norma_juridica_incluir_zsql(tip_norma=tip_norma, num_norma=num_norma, ano_norma=ano_norma, tip_esfera_federacao='M', cod_materia=cod_materia, dat_norma=dat_norma, txt_ementa=txt_ementa, ind_complemento=ind_complemento, cod_situacao=cod_situacao, ind_publico=1)
+    context.zsql.norma_juridica_incluir_zsql(tip_norma=tip_norma, num_norma=num_norma, ano_norma=ano_norma, tip_esfera_federacao='M', cod_materia=cod_materia, dat_norma=dat_norma, dat_publicacao=dat_publicacao, des_veiculo_publicacao=des_veiculo_publicacao, num_pag_inicio_publ=num_pag_inicio_publ, num_pag_fim_publ=num_pag_fim_publ, txt_ementa=txt_ementa, ind_complemento=ind_complemento, cod_situacao=cod_situacao, ind_publico=1)
 
     for codigo in context.zsql.norma_juridica_incluida_codigo_obter_zsql():
         cod_norma = codigo.cod_norma

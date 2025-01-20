@@ -90,9 +90,10 @@ class EmailDoc(grok.View):
                txt_assunto = documento.txt_assunto
                nom_autor = documento.txt_interessado
                chave_acesso = 'KEY_NOT_FOUND'
-               for protocolo in self.context.zsql.protocolo_obter_zsql(num_protocolo=documento.num_protocolo, ano_protocolo=documento.ano_documento):
-                   if protocolo.codigo_acesso != None:
-                      chave_acesso = protocolo.codigo_acesso
+               if documento.num_protocolo != None and documento.num_protocolo != '':
+                  for protocolo in self.context.zsql.protocolo_obter_zsql(num_protocolo=documento.num_protocolo, ano_protocolo=documento.ano_documento):
+                      if protocolo.codigo_acesso != None:
+                         chave_acesso = protocolo.codigo_acesso
                link_processo = self.context.portal_url.portal_url() + '/consultas/protocolo/pesquisa_publica_proc?txt_chave_acesso=' + str(chave_acesso)
 
                msg['Subject'] = 'Encaminha ' + id_processo

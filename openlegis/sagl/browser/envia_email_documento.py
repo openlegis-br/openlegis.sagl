@@ -89,7 +89,7 @@ class EmailDoc(grok.View):
                id_processo = str(documento.des_tipo_documento)+' n° '+str(documento.num_documento)+'/'+str(documento.ano_documento)
                txt_assunto = documento.txt_assunto
                nom_autor = documento.txt_interessado
-               chave_acesso = 'KEY_NOT_FOUND'
+               chave_acesso = ''
                if documento.num_protocolo != None and documento.num_protocolo != '':
                   for protocolo in self.context.zsql.protocolo_obter_zsql(num_protocolo=documento.num_protocolo, ano_protocolo=documento.ano_documento):
                       if protocolo.codigo_acesso != None:
@@ -98,37 +98,67 @@ class EmailDoc(grok.View):
 
                msg['Subject'] = 'Encaminha ' + id_processo
 
-               html = """\
-                <html>
-                  <head></head>
-                  <body style="margin: 25px">
-                    <div style=min-width::300px; margin:0 auto;">
-                        <img style="display: block; margin: 0 auto;" src="{logo_casa}" width="90px" height="90px">
-                        <p align="center" style="font-family:Arial, Helvetica, sans-serif; font-size:20px; font-weight: bold; margin-top: 10px; margin-bottom: 5px; text-transform: uppercase">{casa_legislativa}</p>
-                        <p align="center" style="font-family:Arial, Helvetica, sans-serif; font-size:14px;margin-top: 5px">Estado de {estado}</p>
-                    </div>
-                    <div style="min-width:300px; margin:0 auto; font-family:Arial, Helvetica, sans-serif; font-size:15px; margin-top: 40px; margin-bottom: 40px">
-                     <p style="margin-bottom:30px;">Prezado(a) Senhor(a),</p>
-                     <p style="margin-bottom:30px;">Encaminhamos para seu conhecimento, por meio do arquivo digital em anexo, o conteúdo do documento administrativo abaixo identificado.</p>
-                     <p><b>Processo:</b> {id_processo}</p>
-                     <p><b>Interessado:</b> {nom_autor}</p>
-                     <p><b>Assunto:</b> {ementa}</p>
-                     <p style="margin-top:30px; margin-bottom:30px">
-                       Para consultar o andamento do processo, <a href="{link_processo}" target="blank">clique aqui</a>.
-                     </p>
-                     <p style="margin-top:30px; margin-bottom:30px">Cordialmente,</p>
-                     <p><b>{usuario}</b></p>
-                     <p>{cargo_usuario}</p>
-                    </div>
-                    <hr>
-                    <div style="min-width:300px; margin:0 auto; font-family:Arial, Helvetica, sans-serif; font-size:13px; color: #555">
-                      <p>Este e-mail e quaisquer arquivos anexados são confidenciais e destinados exclusivamente ao(s) destinatário(s) indicado(s). Se você não for o destinatário, por favor, notifique o remetente imediatamente e exclua esta mensagem de seu sistema. </p>
-                      <p>Em conformidade com a Lei Geral de Proteção de Dados (LGPD), informamos que os dados pessoais contidos neste e-mail podem ser coletados e tratados pela {casa_legislativa} para fins de comunicação institucional. Você tem o direito de acessar, corrigir ou solicitar a exclusão de seus dados pessoais a qualquer momento, conforme previsto na legislação.</p>
-                      <p>A {casa_legislativa} não se responsabiliza por quaisquer danos resultantes do uso indevido das informações contidas neste e-mail.</p>
-                    </div>
-                  </body>
-                </html>
-                """.format(id_processo=id_processo, ementa=txt_assunto, nom_autor=nom_autor, casa_legislativa=casa_legislativa, estado=estado, portal_url=portal_url, logo_casa=logo_casa, usuario=usuario, cargo_usuario=cargo_usuario, link_processo=link_processo)
+               if chave_acesso != '':
+                  html = """\
+                   <html>
+                     <head></head>
+                     <body style="margin: 25px">
+                       <div style=min-width::300px; margin:0 auto;">
+                           <img style="display: block; margin: 0 auto;" src="{logo_casa}" width="90px" height="90px">
+                           <p align="center" style="font-family:Arial, Helvetica, sans-serif; font-size:20px; font-weight: bold; margin-top: 10px; margin-bottom: 5px; text-transform: uppercase">{casa_legislativa}</p>
+                           <p align="center" style="font-family:Arial, Helvetica, sans-serif; font-size:14px;margin-top: 5px">Estado de {estado}</p>
+                       </div>
+                       <div style="min-width:300px; margin:0 auto; font-family:Arial, Helvetica, sans-serif; font-size:15px; margin-top: 40px; margin-bottom: 40px">
+                        <p style="margin-bottom:30px;">Prezado(a) Senhor(a),</p>
+                        <p style="margin-bottom:30px;">Encaminhamos para seu conhecimento, por meio do arquivo digital em anexo, o conteúdo do documento administrativo abaixo identificado.</p>
+                        <p><b>Processo:</b> {id_processo}</p>
+                        <p><b>Interessado:</b> {nom_autor}</p>
+                        <p><b>Assunto:</b> {ementa}</p>
+                        <p style="margin-top:30px; margin-bottom:30px">
+                          Para consultar o andamento do processo, <a href="{link_processo}" target="blank">clique aqui</a>.
+                        </p>
+                        <p style="margin-top:30px; margin-bottom:30px">Cordialmente,</p>
+                        <p><b>{usuario}</b></p>
+                        <p>{cargo_usuario}</p>
+                       </div>
+                       <hr>
+                       <div style="min-width:300px; margin:0 auto; font-family:Arial, Helvetica, sans-serif; font-size:13px; color: #555">
+                         <p>Este e-mail e quaisquer arquivos anexados são confidenciais e destinados exclusivamente ao(s) destinatário(s) indicado(s). Se você não for o destinatário, por favor, notifique o remetente imediatamente e exclua esta mensagem de seu sistema. </p>
+                         <p>Em conformidade com a Lei Geral de Proteção de Dados (LGPD), informamos que os dados pessoais contidos neste e-mail podem ser coletados e tratados pela {casa_legislativa} para fins de comunicação institucional. Você tem o direito de acessar, corrigir ou solicitar a exclusão de seus dados pessoais a qualquer momento, conforme previsto na legislação.</p>
+                         <p>A {casa_legislativa} não se responsabiliza por quaisquer danos resultantes do uso indevido das informações contidas neste e-mail.</p>
+                       </div>
+                     </body>
+                   </html>
+                   """.format(id_processo=id_processo, ementa=txt_assunto, nom_autor=nom_autor, casa_legislativa=casa_legislativa, estado=estado, portal_url=portal_url, logo_casa=logo_casa, usuario=usuario, cargo_usuario=cargo_usuario, link_processo=link_processo)
+               else:
+                  html = """\
+                   <html>
+                     <head></head>
+                     <body style="margin: 25px">
+                       <div style=min-width::300px; margin:0 auto;">
+                           <img style="display: block; margin: 0 auto;" src="{logo_casa}" width="90px" height="90px">
+                           <p align="center" style="font-family:Arial, Helvetica, sans-serif; font-size:20px; font-weight: bold; margin-top: 10px; margin-bottom: 5px; text-transform: uppercase">{casa_legislativa}</p>
+                           <p align="center" style="font-family:Arial, Helvetica, sans-serif; font-size:14px;margin-top: 5px">Estado de {estado}</p>
+                       </div>
+                       <div style="min-width:300px; margin:0 auto; font-family:Arial, Helvetica, sans-serif; font-size:15px; margin-top: 40px; margin-bottom: 40px">
+                        <p style="margin-bottom:30px;">Prezado(a) Senhor(a),</p>
+                        <p style="margin-bottom:30px;">Encaminhamos para seu conhecimento, por meio do arquivo digital em anexo, o conteúdo do documento administrativo abaixo identificado.</p>
+                        <p><b>Processo:</b> {id_processo}</p>
+                        <p><b>Interessado:</b> {nom_autor}</p>
+                        <p><b>Assunto:</b> {ementa}</p>
+                        <p style="margin-top:30px; margin-bottom:30px">Cordialmente,</p>
+                        <p><b>{usuario}</b></p>
+                        <p>{cargo_usuario}</p>
+                       </div>
+                       <hr>
+                       <div style="min-width:300px; margin:0 auto; font-family:Arial, Helvetica, sans-serif; font-size:13px; color: #555">
+                         <p>Este e-mail e quaisquer arquivos anexados são confidenciais e destinados exclusivamente ao(s) destinatário(s) indicado(s). Se você não for o destinatário, por favor, notifique o remetente imediatamente e exclua esta mensagem de seu sistema. </p>
+                         <p>Em conformidade com a Lei Geral de Proteção de Dados (LGPD), informamos que os dados pessoais contidos neste e-mail podem ser coletados e tratados pela {casa_legislativa} para fins de comunicação institucional. Você tem o direito de acessar, corrigir ou solicitar a exclusão de seus dados pessoais a qualquer momento, conforme previsto na legislação.</p>
+                         <p>A {casa_legislativa} não se responsabiliza por quaisquer danos resultantes do uso indevido das informações contidas neste e-mail.</p>
+                       </div>
+                     </body>
+                   </html>
+                   """.format(id_processo=id_processo, ementa=txt_assunto, nom_autor=nom_autor, casa_legislativa=casa_legislativa, estado=estado, portal_url=portal_url, logo_casa=logo_casa, usuario=usuario, cargo_usuario=cargo_usuario)
 
                arquivo = str(cod_documento) + "_texto_integral.pdf"
                if hasattr(self.context.sapl_documentos.administrativo, arquivo):

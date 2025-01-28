@@ -236,7 +236,8 @@
 <!-- Start Footer -->
 <script src="<dtml-var portal_url>/assets/libs/jquery/jquery.min.js"></script>
 <script src="<dtml-var portal_url>/assets/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
-<script src="<dtml-var portal_url>/assets/libs/select2/js/select2.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.5/js/select2.full.min.js"></script>
+
 <script src="<dtml-var portal_url>/assets/libs/select2/js/i18n/pt-BR.js"></script>
 <script>
 $(document).ready(function() {
@@ -278,41 +279,64 @@ $(document).ready(function() {
 })()
 </script>
 
-<script>
-$('.select2.users').select2({
-  placeholder: 'CTRL+A para marcar ou desmarcar todos'
+<script>     
+$.fn.select2.amd.define('select2/selectAllAdapter', [
+    'select2/utils',
+    'select2/dropdown',
+    'select2/dropdown/attachBody'
+], function (Utils, Dropdown, AttachBody) {
+
+    function SelectAll() { }
+    SelectAll.prototype.render = function (decorated) {
+        var self = this,
+            $rendered = decorated.call(this),
+            $selectAll = $(
+                '<button class="btn btn-sm btn-default" type="button" style="margin-left:6px;"><i class="fa fa-check-square" aria-hidden="true"></i> Selecionar Todos</button>'
+            ),
+            $unselectAll = $(
+                '<button class="btn btn-sm btn-default" type="button" style="margin-left:6px;"><i class="fa fa-square" aria-hidden="true"></i> Desmarcar Todos</button>'
+            ),
+            $btnContainer = $('<div style="margin-top:3px;">').append($selectAll).append($unselectAll);
+        if (!this.$element.prop("multiple")) {
+            // this isn't a multi-select -> don't add the buttons!
+            return $rendered;
+        }
+        $rendered.find('.select2-dropdown').prepend($btnContainer);
+        $selectAll.on('click', function (e) {
+            var $results = $rendered.find('.select2-results__option[aria-selected=false]');
+            $results.each(function () {
+                self.trigger('select', {
+                    data: $(this).data('data')
+                });
+            });
+            self.trigger('close');
+        });
+        $unselectAll.on('click', function (e) {
+            var $results = $rendered.find('.select2-results__option[aria-selected=true]');
+            $results.each(function () {
+                self.trigger('unselect', {
+                    data: $(this).data('data')
+                });
+            });
+            self.trigger('close');
+        });
+        return $rendered;
+    };
+
+    return Utils.Decorate(
+        Utils.Decorate(
+            Dropdown,
+            AttachBody
+        ),
+        SelectAll
+    );
+
 });
 
-$('.select2[multiple]').siblings('.select2-container').append('<span class="select-all"></span>');
-
-$(document).on('click', '.select-all', function (e) {
-  selectAllSelect2($(this).siblings('.selection').find('.select2-search__field'));
+$('#lst_cod_usuario').select2({
+    placeholder: 'Clique para selecionar',
+    dropdownAdapter: $.fn.select2.amd.require('select2/selectAllAdapter')
 });
-
-$(document).on("keyup", ".select2-search__field", function (e) {
-  var eventObj = window.event ? event : e;
-  if (eventObj.keyCode === 65 && eventObj.ctrlKey)
-     selectAllSelect2($(this));
-});
-        
-function selectAllSelect2(that) {
-
-  var selectAll = true;
-  var existUnselected = false;
-  var item = $(that.parents("span[class*='select2-container']").siblings('select[multiple]'));
-
-  item.find("option").each(function (k, v) {
-      if (!$(v).prop('selected')) {
-          existUnselected = true;
-          return false;
-      }
-  });
-
-  selectAll = existUnselected ? selectAll : !selectAll;
-
-  item.find("option").prop('selected', selectAll);
-  item.trigger('change');
-}
 </script>
 </body>
 </html>

@@ -11,73 +11,244 @@
       </div>
  </div>
 
+<ul class="nav nav-tabs border-0 mt-2" id="nav_materia" role="tablist">
+  <li class="nav-item">
+    <a class="nav-link active" id="index-tab" data-bs-toggle="tab" href="#ativos" role="tab" aria-controls="ativos" aria-selected="true">Ativos</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link id="incompletos" data-bs-toggle="tab" href="#incompletos" role="tab" aria-controls="incompletos" aria-selected="false">
+      Incompletos
+    </a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link id="inativos" data-bs-toggle="tab" href="#inativos" role="tab" aria-controls="inativos" aria-selected="false">
+      Inativos
+    </a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link id="excluidos" data-bs-toggle="tab" href="#excluidos" role="tab" aria-controls="excluidos" aria-selected="false">
+      Excluídos
+    </a>
+  </li>
+</ul>
+
+<div class="tab-content">
+<div class="tab-pane p-3 border fade show active" id="ativos">
+<legend class="font-size-16">Usuários Ativos</legend>
+<legend class="text-muted font-size-12">Possuem cadastro completo e podem realizar assinatura digital, tramitação e login no sistema.</legend>
 <div class="table-responsive">
-<table id="jdTable" class="table w-100">
+<table id="ativos" class="userTable table w-100">
  <thead class="table-light">
   <tr>
-    <th width="20%">Nome do Usuário</th>
-    <th width="30%">Nome Completo</th>
-    <th>Perfil</th>
+    <th width="20%">Login</th>
+    <th>Nome Completo</th>
+    <th>Perfis Habilitados</th>
     <th>Status</th>
+    <th width="10%">Código</th>
   </tr>
  </thead>
  <tbody>
-    <dtml-in "acl_users.getUsers()">
-      <dtml-let user_roles="_.getitem('sequence-item').getRoles()">
-        <dtml-unless "('Manager' in user_roles)">
-            <tr>
+    <dtml-in expr="usuarios_listar(tipo_listagem='ativos')" mapping>
+           <tr>
               <td>
-                <a class="btn btn-sm btn-link" href="usuario_mostrar_proc?nome=<dtml-var sequence-item>"><i class="fa fa-fw fa-user"></i> <dtml-var sequence-item></a>
+                <dtml-if expr="zope_user == True">
+                  <a class="" href="usuario_mostrar_proc?nome=<dtml-var login>"><i class="fa fa-fw fa-user"></i> <dtml-var login></a>
+                <dtml-else>
+                  <i class="fa fa-fw fa-user"></i> <dtml-var login>
+                </dtml-if>
               </td>
               <td>
-                <dtml-in expr="zsql.usuario_obter_zsql(col_username=_['sequence-item'])">
-                  <dtml-var nom_completo missing>
-                </dtml-in>
+                 <dtml-var nom_completo>
               </td>
               <td>
-                 <dtml-in user_roles>
+                 <dtml-in expr="roles">
                   <dtml-if expr="_['sequence-item'] == 'Administrador'">
                      <span class="badge bg-danger font-size-12"><dtml-var sequence-item></span>
                   <dtml-elif expr="_['sequence-item'] == 'Operador'">
                      <span class="badge bg-primary font-size-12"><dtml-var sequence-item></span>
-                  <dtml-elif expr="_['sequence-item'] != 'Authenticated'">             
+                  <dtml-else>             
                      <span class="badge bg-light font-size-12"><dtml-var sequence-item></span>
                   </dtml-if>
+                 <dtml-else>
+                    <span class="badge bg-white text-muted font-size-12">Nenhum</span>
                  </dtml-in>
               </td>
               <td>
-                 <dtml-in expr="zsql.usuario_obter_zsql(col_username=_['sequence-item'])">
-                   <dtml-if expr="_.has_key('cod_usuario')">
-                      <dtml-if expr="ind_ativo==1">
-                         Ativo
-                      <dtml-else>
-                         <span class="text-muted">Inativo</span>
-                      </dtml-if>
-                   </dtml-if>
-                 <dtml-else>
-                    <span class="text-muted">Incompleto</span>
-                 </dtml-in>
+                 <dtml-var status>
+              </td>
+              <td>
+                 <dtml-var id>
               </td>
             </tr>
-        </dtml-unless>
-      </dtml-let>
     </dtml-in>
   </tbody>
 </table>
 </div>
+</div>
 
-<div id="panelBtn" class="d-print-none" style="margin-bottom: 20px;">
-  <div class="row">
-     <div class="col-sm-12 mt-2"></div>
-  </div>
+<div class="tab-pane p-3 border fade" id="inativos">
+<legend class="font-size-16">Usuários Inativos</legend>
+<legend class="text-muted font-size-12">Não possuem login no sistema, porém são listados nas tramitações e solicitações de assinatura digital.</legend>
+<div class="table-responsive">
+<table id="inativos" class="userTable table w-100">
+ <thead class="table-light">
+  <tr>
+    <th width="20%">Login</th>
+    <th>Nome Completo</th>
+    <th>Perfis Habilitados</th>
+    <th>Status</th>
+    <th width="10%">Código</th>
+  </tr>
+ </thead>
+ <tbody>
+    <dtml-in expr="usuarios_listar(tipo_listagem='inativos')" mapping>
+           <tr>
+              <td>
+                <dtml-if expr="zope_user == True">
+                  <a class="" href="usuario_mostrar_proc?nome=<dtml-var login>"><i class="fa fa-fw fa-user"></i> <dtml-var login></a>
+                <dtml-else>
+                  <i class="fa fa-fw fa-user"></i> <dtml-var login>
+                  <a class="btn btn-sm btn-link" href="usuario_recriar?username=<dtml-var login>">Reativar</a>
+                </dtml-if>
+              </td>
+              <td>
+                 <dtml-var nom_completo>
+              </td>
+              <td>
+                 <dtml-in expr="roles">
+                  <dtml-if expr="_['sequence-item'] == 'Administrador'">
+                     <span class="badge bg-danger font-size-12"><dtml-var sequence-item></span>
+                  <dtml-elif expr="_['sequence-item'] == 'Operador'">
+                     <span class="badge bg-primary font-size-12"><dtml-var sequence-item></span>
+                  <dtml-else>             
+                     <span class="badge bg-light font-size-12"><dtml-var sequence-item></span>
+                  </dtml-if>
+                 <dtml-else>
+                    <span class="badge bg-white text-muted font-size-12">Nenhum</span>
+                 </dtml-in>
+              </td>
+              <td>
+                 <dtml-var status>
+              </td>
+              <td>
+                 <dtml-var id>
+              </td>
+            </tr>
+    </dtml-in>
+  </tbody>
+</table>
+</div>
+</div>
+
+<div class="tab-pane p-3 border fade " id="excluidos">
+<legend class="font-size-16">Usuários Excluídos</legend>
+<legend class="text-muted font-size-12">Excluídos logicamente no banco de dados. Não são visíveis para tramitação e assinatura, nem possuem login no sistema.</legend>
+<div class="table-responsive">
+<table id="inativos" class="userTable table w-100">
+ <thead class="table-light">
+  <tr>
+    <th width="20%">Login</th>
+    <th>Nome Completo</th>
+    <th>Perfis Habilitados</th>
+    <th>Status</th>
+    <th width="10%">Código</th>
+  </tr>
+ </thead>
+ <tbody>
+    <dtml-in expr="usuarios_listar(tipo_listagem='excluidos')" mapping>
+           <tr>
+              <td>
+                <dtml-if expr="zope_user == True">
+                  <a class="" href="usuario_mostrar_proc?nome=<dtml-var login>"><i class="fa fa-fw fa-user"></i> <dtml-var login></a>
+                <dtml-else>
+                  <i class="fa fa-fw fa-user"></i> <dtml-var login>
+                </dtml-if>
+              </td>
+              <td>
+                 <dtml-var nom_completo>
+              </td>
+              <td>
+                 <dtml-in expr="roles">
+                  <dtml-if expr="_['sequence-item'] == 'Administrador'">
+                     <span class="badge bg-danger font-size-12"><dtml-var sequence-item></span>
+                  <dtml-elif expr="_['sequence-item'] == 'Operador'">
+                     <span class="badge bg-primary font-size-12"><dtml-var sequence-item></span>
+                  <dtml-else>             
+                     <span class="badge bg-light font-size-12"><dtml-var sequence-item></span>
+                  </dtml-if>
+                 <dtml-else>
+                    <span class="badge bg-white text-muted font-size-12">Nenhum</span>
+                 </dtml-in>
+              </td>
+              <td>
+                 <dtml-var status>
+              </td>
+              <td>
+                 <dtml-var id>
+              </td>
+            </tr>
+    </dtml-in>
+  </tbody>
+</table>
+</div>
+</div>
+
+<div class="tab-pane p-3 border fade" id="incompletos">
+<legend class="font-size-16">Usuários com Cadastro Incompleto</legend>
+<legend class="text-muted font-size-12">Apesar de possuírem login no sistema, não são visíveis para tramitação e assinatura digital.</legend>
+<div class="table-responsive">
+<table id="imcompletos" class="userTable table w-100">
+ <thead class="table-light">
+  <tr>
+    <th width="20%">Login</th>
+    <th>Nome Completo</th>
+    <th>Perfis Habilitados</th>
+    <th>Status</th>
+  </tr>
+ </thead>
+ <tbody>
+    <dtml-in expr="usuarios_listar(tipo_listagem='incompletos')" mapping>
+           <tr>
+              <td>
+                <dtml-if expr="zope_user == True">
+                  <a class="" href="usuario_mostrar_proc?nome=<dtml-var login>"><i class="fa fa-fw fa-user"></i> <dtml-var login></a>
+                <dtml-else>
+                  <i class="fa fa-fw fa-user"></i> <dtml-var login>
+                </dtml-if>
+              </td>
+              <td>
+                 <dtml-var nom_completo>
+              </td>
+              <td>
+                 <dtml-in expr="roles">
+                  <dtml-if expr="_['sequence-item'] == 'Administrador'">
+                     <span class="badge bg-danger font-size-12"><dtml-var sequence-item></span>
+                  <dtml-elif expr="_['sequence-item'] == 'Operador'">
+                     <span class="badge bg-primary font-size-12"><dtml-var sequence-item></span>
+                  <dtml-else>             
+                     <span class="badge bg-light font-size-12"><dtml-var sequence-item></span>
+                  </dtml-if>
+                 <dtml-else>
+                    <span class="badge bg-white text-muted font-size-12">Nenhum</span>
+                 </dtml-in>
+              </td>
+              <td>
+                 <dtml-var status>
+              </td>
+            </tr>
+    </dtml-in>
+  </tbody>
+</table>
+</div>
+</div>
 </div>
 
 <dtml-var js_slot>
 <script>
 $(document).ready(function() {
-    var table = $('#jdTable').DataTable( {
+    var table = $('.userTable').DataTable( {
         "responsive": true,
-        "order": [[ 0, "asc" ], [ 1, "asc" ]],
+        "order": [[ 1, "asc" ]],
         "language": {
           search: "Pesquisar:",
           processing:     "Processando...",

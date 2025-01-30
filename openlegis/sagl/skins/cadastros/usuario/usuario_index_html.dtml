@@ -196,10 +196,10 @@
     <dtml-in expr="usuarios_listar(tipo_listagem='incompletos')" mapping>
            <tr>
               <td>
-                <dtml-if expr="zope_user == True">
+                <dtml-if expr="zope_user == True and id!=''">
                   <a class="" href="usuario_mostrar_proc?cod_usuario=<dtml-var id>"><i class="fa fa-fw fa-user"></i> <dtml-var login></a>
                 <dtml-else>
-                  <i class="fa fa-fw fa-user"></i> <dtml-var login>
+                  <a class="" href="usuario_mostrar_proc?nome=<dtml-var login>"><i class="fa fa-fw fa-user"></i> <dtml-var login></a>
                 </dtml-if>
               </td>
               <td>

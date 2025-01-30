@@ -11,6 +11,9 @@ REQUEST = context.REQUEST
 RESPONSE = REQUEST.RESPONSE
 passwd = context.sapl_documentos.props_sagl.txt_senha_inicial
 
+for usuario in context.zsql.usuario_obter_zsql(col_username=username):
+    cod_usuario = usuario.cod_usuario
+
 if username in context.acl_users.getUserNames():
   mensagem = 'Não foi possível recriar o login do usuário!'
   mensagem_obs = 'Login "' + username + '" já existe'
@@ -21,7 +24,7 @@ else:
   context.zsql.usuario_ativar_zsql(col_username=username)   
   mensagem = 'Login do usuário recriado com sucesso!'
   mensagem_obs = 'Usuário: ' + username + ' / Senha inicial: ' + passwd + '. Verifique a necessidade de redefinir os perfis do usuário.'
-  url = context.portal_url() + '/cadastros/usuario/usuario_mostrar_proc?nome=' + username
+  url = context.portal_url() + '/cadastros/usuario/usuario_mostrar_proc?cod_usuario=' + cod_usuario
   redirect_url=context.portal_url()+'/mensagem_emitir?tipo_mensagem=success&mensagem=' + mensagem + '&mensagem_obs=' + mensagem_obs + '&url=' + url
 
 REQUEST.RESPONSE.redirect(redirect_url)

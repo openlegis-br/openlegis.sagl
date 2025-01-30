@@ -47,21 +47,22 @@
             </div>
         </div>
 
-        <dtml-unless senha>
-          <dtml-if expr="AUTHENTICATED_USER.has_role(['Alterar Senha'])">
-          <dtml-call expr="REQUEST.RESPONSE.redirect(portal_url() +'/cadastros/usuario/usuario_mostrar_proc?senha=1')">
-          </dtml-if>
-       </dtml-unless>
-
        <dtml-if expr="not portal_membership.isAnonymousUser()">
-            <dtml-in expr="zsql.usuario_obter_zsql(col_username=AUTHENTICATED_USER.getUserName())">
+          <dtml-unless senha>
+            <dtml-if expr="AUTHENTICATED_USER.has_role(['Alterar Senha'])">
+               <dtml-call expr="REQUEST.RESPONSE.redirect(portal_url() +'/cadastros/usuario/usuario_mostrar_proc?senha=1')">
+            <dtml-elif expr="not AUTHENTICATED_USER.has_role(['Administrador']) and not zsql.usuario_obter_zsql(col_username=AUTHENTICATED_USER.getUserName())">
+               <dtml-call expr="REQUEST.RESPONSE.redirect(portal_url() +'/cadastros/usuario/usuario_mostrar_proc?senha=1')">
+            </dtml-if>
+          </dtml-unless>
+          <dtml-in expr="zsql.usuario_obter_zsql(col_username=AUTHENTICATED_USER.getUserName())">
                <dtml-if cod_usuario>
                   <dtml-call expr="REQUEST.set('cod_usuario_corrente', int(cod_usuario))">
                   <dtml-in expr="zsql.funcionario_obter_zsql(cod_usuario=cod_usuario)">
                      <dtml-call expr="REQUEST.set('cod_funcionario_corrente', int(cod_funcionario))">
                   </dtml-in>
                </dtml-if>
-           </dtml-in>
+          </dtml-in>
           <dtml-if expr="AUTHENTICATED_USER.has_role(['Assessor Parlamentar'])">
              <dtml-in expr="zsql.assessor_parlamentar_obter_zsql(col_username=AUTHENTICATED_USER.getUserName())">
                 <dtml-call expr="REQUEST.set('cod_parlamentar_corrente', int(cod_parlamentar))">
@@ -72,8 +73,8 @@
                   <dtml-call expr="REQUEST.set('cod_parlamentar_corrente', int(cod_parlamentar))">
               </dtml-if>
             </dtml-in>
-           </dtml-if>
-         </dtml-if>
+          </dtml-if>
+       </dtml-if>
 
         <!-- Begin page -->
         <div id="layout-wrapper">
@@ -226,7 +227,7 @@
                             <div class="dropdown-menu dropdown-menu-end">
                                 <!-- item-->
                                 <dtml-if expr="AUTHENTICATED_USER.has_role(['Administrador'])">
-                                   <a class="dropdown-item" href="<dtml-var portal_url>/cadastros/usuario/usuario_mostrar_proc?nome=<dtml-var AUTHENTICATED_USER>"><i class="dripicons-user d-inline-block text-muted me-2"></i> Perfil</a>
+                                   <a class="dropdown-item" href="<dtml-var portal_url>/cadastros/usuario/usuario_mostrar_proc"><i class="dripicons-user d-inline-block text-muted me-2"></i> Perfil</a>
                                 <dtml-else>
                                    <a class="dropdown-item" href="<dtml-var portal_url>/cadastros/usuario/usuario_mostrar_proc"><i class="dripicons-user d-inline-block text-muted me-2"></i> Perfil</a>
                                 </dtml-if>

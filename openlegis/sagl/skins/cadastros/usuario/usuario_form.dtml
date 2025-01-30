@@ -26,18 +26,21 @@ select#perfis, select#lst_unidade, select#lst_peticionamento {
   </div>
 </dtml-if>
 
- <div class="row">
-      <div class="col-12 col-md-8 align-self-center">
-        <h1 class="firstHeading font-size-18">Cadastro de Usuário</h1>
-      </div>
-      <div class="col-12 col-md-4 text-start text-md-end">
-         <dtml-if expr="AUTHENTICATED_USER.has_role(['Administrador'])">      
-             <a class="btn btn-primary d-print-none" href="<dtml-var portal_url>/cadastros/usuario"><i class="fa fa-fw fa-undo"></i>Voltar</a>
-         </dtml-if>
-      </div>
- </div>
-
-   <form name="usuario_form" action="usuario_salvar_proc" method="post">
+<form name="usuario_form" action="usuario_salvar_proc" method="post">
+ <div class="row mb-2">
+  <div class="col-12 col-sm-6">
+    <h1 class="firstHeading font-size-18">Cadastro de Usuário</h1>
+  </div>
+  <div class="col-12 col-sm-6 d-inline-flex justify-content-end">
+    <div class="form-check form-switch mt-1">
+      <input type="checkbox" class="form-check-input" name="chk_ind_ativo" id="chk_ind_ativo" <dtml-if expr="_.has_key('cod_usuario') and ind_ativo==1">checked<dtml-elif expr="not _.has_key('cod_usuario')">checked</dtml-if> <dtml-unless expr="AUTHENTICATED_USER.has_role(['Administrador'])">onclick="return false;" onkeydown="return false;"</dtml-unless>>
+      <label class="form-check-label" for="chk_ind_ativo"><span class="small">Ativo</span></label>
+    </div>
+    <dtml-if expr="AUTHENTICATED_USER.has_role(['Administrador'])">      
+        <a class="btn btn-sm btn-primary d-print-none ms-2" href="<dtml-var portal_url>/cadastros/usuario"><i class="fa fa-fw fa-undo"></i>Voltar</a>
+    </dtml-if>
+  </div> 
+</div>
     <input type="hidden" name="hdn_cod_usuario" value="<dtml-var cod_usuario missing>" />
     <dtml-if nome>
        <input type="hidden" name="atualizar" value="1"/>
@@ -85,20 +88,15 @@ select#perfis, select#lst_unidade, select#lst_peticionamento {
           </select>                        
        </div>
        <div class="col-12 col-md-6 mb-3">
-       
-          <div class="form-check form-check-inline d-block">
-            <input class="form-check-input" type="checkbox" name="chk_ind_ativo" id="chk_ind_ativo" value="1" <dtml-if expr="_.has_key('cod_usuario') and _.has_key('ind_ativo') and ind_ativo==1">checked<dtml-elif expr="not _.has_key('cod_usuario')">checked</dtml-if> <dtml-unless expr="AUTHENTICATED_USER.has_role(['Administrador'])">onclick="return false;" onkeydown="return false;"</dtml-unless> />
-            <label class="form-check-label" for="chk_ind_ativo">Ativo ?</label>
-          </div>   
-
+   
           <dtml-if nome>
             <dtml-in expr="zsql.assessor_parlamentar_obter_zsql(col_username=nome)">
                 <dtml-if sequence-start>
                    <dtml-call expr="REQUEST.set('nom_completo', nom_assessor)">
                    <dtml-call expr="REQUEST.set('nom_cargo', des_cargo)">
                    <dtml-in expr="zsql.parlamentar_obter_zsql(cod_parlamentar=cod_parlamentar)"> 
-                      <label class="form-label" for="nome_autor">Gabinete do Vereador</label>
-                      <input class="form-control" id="tipo_autor" type="text" value="<dtml-var nom_parlamentar>" disabled>                                                   
+                      <label class="form-label" for="nome_autor">Vereador Vinculado</label>
+                      <input class="form-control" id="nome_autor" type="text" value="<dtml-var nom_parlamentar>" disabled>                                                   
                    </dtml-in>
                  </dtml-if>
             </dtml-in>
@@ -109,10 +107,8 @@ select#perfis, select#lst_unidade, select#lst_peticionamento {
                      <dtml-call expr="REQUEST.set('nom_vereador', nom_completo)">
                      <dtml-call expr="REQUEST.set('nom_cargo', 'Vereador')">                     
                    </dtml-in>
-                   <label class="form-label" for="nome_autor">Nome do Vereador</label>
+                   <label class="form-label" for="nome_autor">Vereador</label>
                    <input class="form-control mb-3" id="nome_autor" type="text" value="<dtml-var nom_vereador>" disabled>
-                   <label class="form-label" for="tipo_autor">Tipo de Autor</label>
-                   <input class="form-control" id="tipo_autor" type="text" value="<dtml-var des_tipo_autor>" disabled>
                 </dtml-if>
              </dtml-in>
           </dtml-if>

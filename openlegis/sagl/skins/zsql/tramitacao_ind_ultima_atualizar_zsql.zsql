@@ -8,8 +8,12 @@ UPDATE
     tramitacao
 
 SET
-    ind_ult_tramitacao = <dtml-sqlvar ind_ult_tramitacao type="int">,
-    dat_recebimento = null
+   ind_ult_tramitacao = <dtml-sqlvar ind_ult_tramitacao type="int">,
+   <dtml-if expr="ind_ult_tramitacao == 1 or ind_ult_tramitacao == '1'">
+     ,dat_recebimento = null
+     ,cod_usuario_dest = null
+   </dtml-if>
+
 
 WHERE
     cod_materia    = <dtml-sqlvar cod_materia type="int"> and

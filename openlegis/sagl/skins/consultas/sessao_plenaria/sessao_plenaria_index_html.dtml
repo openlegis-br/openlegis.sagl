@@ -220,11 +220,22 @@ inicio_sessao=<dtml-var dat_inicio_sessao missing>&num_legislatura=<dtml-var num
                  <dtml-if url_video>
                     <a target="_blank" href="#" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Reprodução de Vídeo" data-src="<dtml-var url_video>" class="btn btn-sm btn-danger"><i class="fab fa-fw fa-youtube"></i>Vídeo</a>       
                  </dtml-if>
-                 <dtml-if expr="zsql.expediente_materia_obter_zsql(cod_sessao_plen = cod_sessao_plen, ind_excluido=0)">
-                       <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador','Operador Sessao Plenaria', 'Operador Ordem Dia']) and int(cod_sessao_plen) > 1360">
-                         <a class="btn btn-sm btn-secondary" target="_blank" href="<dtml-var portal_url>/expediente_pdf?cod_sessao_plen=<dtml-var cod_sessao_plen>"><i class="fa fa-download"></i> Expediente</a>
-                       </dtml-if>
+                 <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador','Operador Sessao Plenaria', 'Operador Ordem Dia']) and int(cod_sessao_plen) > 1360">
+                    <dtml-if expr="zsql.expediente_materia_obter_zsql(cod_sessao_plen = cod_sessao_plen, ind_excluido=0)">
+                         <a class="btn btn-sm btn-secondary" target="_blank" href="arquivos_expediente?cod_sessao_plen=<dtml-var cod_sessao_plen>"><i class="fa fa-download"></i> Expediente</a>
+                    </dtml-if>
                  </dtml-if>
+                 <dtml-if expr="AUTHENTICATED_USER.has_role(['Authenticated'])">
+                   <dtml-in expr="zsql.expediente_materia_obter_zsql(cod_sessao_plen = cod_sessao_plen, ind_excluido=0)">
+                     <dtml-if sequence-start>
+                        <dtml-in expr="zsql.materia_obter_zsql(cod_materia=cod_materia, ind_excluido=0)">
+                           <dtml-if expr="materia.des_tipo_materia == 'Indicação'">
+                              <a class="btn btn-sm btn-secondary" target="_blank" href="arquivos_indicacao?cod_sessao_plen=<dtml-var cod_sessao_plen>"><i class="fa fa-download"></i> Indicações</a>
+                           </dtml-if>
+                        </dtml-in>
+                    </dtml-if>
+                   </dtml-in>
+               </dtml-if>
        </div>          
      </li>
      

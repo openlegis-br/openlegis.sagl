@@ -1870,7 +1870,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
                       'signer_certificate': attrdict.get('oname')
                }
             lst_signers.append(dic)
-        lst_signers.sort(key=lambda dic: dic['signing_time'])
+        lst_signers.sort(key=lambda dic: dic['signing_time'], reverse=True)
         return lst_signers
  
     def parse_signatures(self, raw_signature_data):

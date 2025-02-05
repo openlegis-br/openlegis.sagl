@@ -16,9 +16,10 @@ def baixar_pdf(context):
         if item.cod_materia != None:
            for materia in context.zsql.materia_obter_zsql(cod_materia=item.cod_materia,ind_excluido=0):
                if materia.des_tipo_materia == 'Indicação':
-                  nom_pdf = str(materia.cod_materia) + "_texto_integral.pdf"
-                  if hasattr(context.sapl_documentos.materia, nom_pdf):
-                     arq = getattr(context.sapl_documentos.materia, nom_pdf)
+                  id_pdf = str(materia.cod_materia) + "_texto_integral.pdf"
+                  nom_pdf = str(materia.sgl_tipo_materia) + '-' + str(materia.num_ident_basica) + '-' + str(materia.ano_ident_basica) + '.pdf'
+                  if hasattr(context.sapl_documentos.materia, id_pdf):
+                     arq = getattr(context.sapl_documentos.materia, id_pdf)
                      try:
                         f = open(os.path.join(dirpath) + '/' + str(nom_pdf), 'wb').write(bytes(arq.data))
                      except:

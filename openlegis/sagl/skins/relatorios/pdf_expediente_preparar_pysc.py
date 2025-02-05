@@ -57,6 +57,7 @@ for sessao in context.zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=cod_sessao
          for materia in context.zsql.materia_obter_zsql(cod_materia=item.cod_materia,ind_excluido=0):
              cod_materia = materia.cod_materia
              dic_materia = {}
+             dic_materia['num_ordem']= str(item.num_ordem)
              dic_materia['cod_materia']= str(materia.cod_materia)
              dic_materia['num_ident_basica']= str(materia.num_ident_basica)
              dic_materia["id_materia"] = '<link href="' + context.sapl_documentos.absolute_url() + '/materia/' + str(materia.cod_materia) + '_texto_integral.pdf' + '">'+materia.des_tipo_materia +' nº '+ str(materia.num_ident_basica)+'/'+str(materia.ano_ident_basica)+'</link>'
@@ -115,7 +116,7 @@ for sessao in context.zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=cod_sessao
              if materia.des_tipo_materia == 'Pedido de Informação':
                 total_pedidos.append(materia.cod_materia)
 # ordena materias por antiguidade
-lst_requerimentos.sort(key=lambda dic_materia: dic_materia['num_ident_basica'])
+lst_requerimentos.sort(key=lambda dic_materia: dic_materia['num_ordem'])
 
 # setar apenas uma ocorrência de nome parlamentar
 lst_autores_requerimentos = [

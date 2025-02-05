@@ -15,6 +15,8 @@ lst_requerimentos = []
 lst_qtde_requerimentos = []
 
 total_requerimentos = []
+total_requerimentos_plen = []
+total_requerimentos_presid = []
 total_indicacoes = []
 total_mocoes = []
 total_pedidos = []
@@ -60,31 +62,41 @@ for sessao in context.zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=cod_sessao
              dic_materia["id_materia"] = '<link href="' + context.sapl_documentos.absolute_url() + '/materia/' + str(materia.cod_materia) + '_texto_integral.pdf' + '">'+materia.des_tipo_materia +' nº '+ str(materia.num_ident_basica)+'/'+str(materia.ano_ident_basica)+'</link>'
              dic_materia['txt_ementa'] = context.pysc.convert_unicode_pysc(texto=str(materia.txt_ementa))
 
-             if materia.des_tipo_materia == 'Requerimento' or materia.des_tipo_materia == 'Indicação' or materia.des_tipo_materia == 'Moção' or materia.des_tipo_materia == 'Pedido de Informação' :
+             if materia.des_tipo_materia == 'Requerimento' or materia.des_tipo_materia == 'Requerimento ao Plenário' or materia.des_tipo_materia == 'Requerimento à Presidência' or materia.des_tipo_materia == 'Indicação' or materia.des_tipo_materia == 'Moção' or materia.des_tipo_materia == 'Pedido de Informação' :
                 dic_autores = {}
                 for autoria in context.zsql.autoria_obter_zsql(cod_materia=materia.cod_materia):
                     if autoria.ind_primeiro_autor == 1:
                        dic_materia["cod_autor"] = int(autoria.cod_autor)
                        dic_autores["cod_autor"] = int(autoria.cod_autor)
                        for autor in context.zsql.autor_obter_zsql(cod_autor = autoria.cod_autor):
-                           for parlamentar in context.zsql.parlamentar_obter_zsql(cod_parlamentar=autor.cod_parlamentar):
-                               if parlamentar.sex_parlamentar == 'M':
-                                  dic_autores["cargo"] = 'Vereador'
-                               if parlamentar.sex_parlamentar == 'F':
-                                  dic_autores["cargo"] = 'Vereadora'
-                               dic_autores["nom_completo"] = parlamentar.nom_completo.upper()
-                               dic_autores["nom_parlamentar"] = parlamentar.nom_parlamentar
+                           if autor.cod_parlamentar != None:
+                              for parlamentar in context.zsql.parlamentar_obter_zsql(cod_parlamentar=autor.cod_parlamentar):
+                                  if parlamentar.sex_parlamentar == 'M':
+                                     dic_autores["cargo"] = 'Vereador'
+                                  if parlamentar.sex_parlamentar == 'F':
+                                     dic_autores["cargo"] = 'Vereadora'
+                                  dic_autores["nom_completo"] = parlamentar.nom_completo.upper()
+                                  dic_autores["nom_parlamentar"] = parlamentar.nom_parlamentar
+                           else:
+                                  dic_autores["cargo"] = ''
+                                  dic_autores["nom_completo"] = autor.nom_autor_join.upper()
+                                  dic_autores["nom_parlamentar"] = autor.nom_autor_join
                     elif autoria.ind_primeiro_autor == 0:
                        dic_materia["cod_autor"] = int(autoria.cod_autor)
                        dic_autores["cod_autor"] = int(autoria.cod_autor)
                        for autor in context.zsql.autor_obter_zsql(cod_autor = autoria.cod_autor):
-                           for parlamentar in context.zsql.parlamentar_obter_zsql(cod_parlamentar=autor.cod_parlamentar):
-                               if parlamentar.sex_parlamentar == 'M':
-                                  dic_autores["cargo"] = 'Vereador'
-                               if parlamentar.sex_parlamentar == 'F':
-                                  dic_autores["cargo"] = 'Vereadora'
-                               dic_autores["nom_completo"] = parlamentar.nom_completo.upper()
-                               dic_autores["nom_parlamentar"] = parlamentar.nom_parlamentar
+                           if autor.cod_parlamentar != None:
+                              for parlamentar in context.zsql.parlamentar_obter_zsql(cod_parlamentar=autor.cod_parlamentar):
+                                  if parlamentar.sex_parlamentar == 'M':
+                                     dic_autores["cargo"] = 'Vereador'
+                                  if parlamentar.sex_parlamentar == 'F':
+                                     dic_autores["cargo"] = 'Vereadora'
+                                  dic_autores["nom_completo"] = parlamentar.nom_completo.upper()
+                                  dic_autores["nom_parlamentar"] = parlamentar.nom_parlamentar
+                           else:
+                                  dic_autores["cargo"] = ''
+                                  dic_autores["nom_completo"] = autor.nom_autor_join.upper()
+                                  dic_autores["nom_parlamentar"] = autor.nom_autor_join
                     break
                 lst_autores_requerimentos.append(dic_autores)
                 lst_requerimentos.append(dic_materia)
@@ -92,6 +104,10 @@ for sessao in context.zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=cod_sessao
              total_materias.append(materia.cod_materia)
              if materia.des_tipo_materia == 'Requerimento':
                 total_requerimentos.append(materia.cod_materia)
+             if materia.des_tipo_materia == 'Requerimento ao Plenário':
+                total_requerimentos_plen.append(materia.cod_materia)
+             if materia.des_tipo_materia == 'Requerimento à Presidência':
+                total_requerimentos_presid.append(materia.cod_materia)
              if materia.des_tipo_materia == 'Indicação':
                 total_indicacoes.append(materia.cod_materia)
              if materia.des_tipo_materia == 'Moção':
@@ -135,6 +151,8 @@ pauta_dic["lst_requerimentos_vereadores"] = lst_requerimentos_vereadores
 
 
 pauta_dic["total_requerimentos"] = len(total_requerimentos)
+pauta_dic["total_requerimentos_plen"] = len(total_requerimentos_plen)
+pauta_dic["total_requerimentos_presid"] = len(total_requerimentos_presid)
 pauta_dic["total_indicacoes"] = len(total_indicacoes)
 pauta_dic["total_mocoes"] = len(total_mocoes)
 pauta_dic["total_pedidos"] = len(total_pedidos)

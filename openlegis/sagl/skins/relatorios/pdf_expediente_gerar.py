@@ -78,6 +78,14 @@ def pauta(pauta_dic):
         tmp+='\t\t<condPageBreak height="15mm"/>\n'
         tmp+='\t\t<para style="P2" spaceBefore="5"><b>Número de Requerimentos:</b> ' + str(pauta_dic["total_requerimentos"]) + '</para>\n'
 
+    if pauta_dic["total_requerimentos_plen"] != 0:
+        tmp+='\t\t<condPageBreak height="15mm"/>\n'
+        tmp+='\t\t<para style="P2" spaceBefore="5"><b>Número de Requerimentos ao Plenário:</b> ' + str(pauta_dic["total_requerimentos_plen"]) + '</para>\n'
+        
+    if pauta_dic["total_requerimentos_presid"] != 0:
+        tmp+='\t\t<condPageBreak height="15mm"/>\n'
+        tmp+='\t\t<para style="P2" spaceBefore="5"><b>Número de Requerimentos à Presidência:</b> ' + str(pauta_dic["total_requerimentos_presid"]) + '</para>\n'
+
     if pauta_dic["total_mocoes"] != 0:
         tmp+='\t\t<condPageBreak height="15"/>\n'
         tmp+='\t\t<para style="P2" spaceBefore="5"><b>Número de Moções:</b> ' + str(pauta_dic["total_mocoes"]) + '</para>\n'
@@ -91,7 +99,10 @@ def pauta(pauta_dic):
         tmp+='\t\t<para style="P2" spaceBefore="5"><b>Total de Matérias:</b> ' + str(pauta_dic["total_materias"]) + '</para>\n'
 
     for dic in pauta_dic["lst_requerimentos_vereadores"]:
-        tmp+='\t\t<para style="P2" spaceBefore="20"><b><u>' + str(dic['vereador']) + ' (' + str(dic['cargo']) + ' ' + str(dic['nom_parlamentar']) + ') ' + ' [' +str(dic['qtde_materias']) + ']</u></b></para>\n'
+        if dic['cargo'] != '':
+           tmp+='\t\t<para style="P2" spaceBefore="20"><b><u>' + str(dic['vereador']) + ' (' + str(dic['cargo']) + ' ' + str(dic['nom_parlamentar']) + ') ' + ' [' +str(dic['qtde_materias']) + ']</u></b></para>\n'
+        else:
+           tmp+='\t\t<para style="P2" spaceBefore="20"><b><u>' + str(dic['vereador']) + ' [' +str(dic['qtde_materias']) + ']</u></b></para>\n'
         for item in dic['materias']:
             tmp+='\t\t<para style="P2" spaceBefore="5"><font color="#126e90"><b>' + item['id_materia'] + '</b></font> - ' + escape(item['txt_ementa']) + '</para>\n'
     

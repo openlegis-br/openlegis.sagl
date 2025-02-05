@@ -7,6 +7,6 @@
 ##parameters=texto
 ##title=
 ##
-string = str(texto).encode('iso-8859-1', 'ignore')
-result = string.decode("iso-8859-1")
+string = str(texto).encode('utf-8')
+result = string.decode('utf-8')
 return result

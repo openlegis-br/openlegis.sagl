@@ -160,9 +160,15 @@ inicio_sessao=<dtml-var dat_inicio_sessao missing>&num_legislatura=<dtml-var num
                    <p class="h4 card-title text-uppercase"><dtml-var num_sessao_plen>ª <dtml-if expr="nom_sessao!='Audiência Pública'"><dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao"></dtml-if> <dtml-var nom_sessao> <dtml-if expr="cod_periodo_sessao != None"><dtml-in expr="zsql.periodo_sessao_obter_zsql(cod_periodo=cod_periodo_sessao)"> do <dtml-var num_periodo>º Período</dtml-in></dtml-if></p>
                  </a>
                <dtml-else>
-                <a href="<dtml-var portal_url>/consultas/sessao_plenaria/agenda_sessao_plen_mostrar_proc?cod_sessao_plen=<dtml-var cod_sessao_plen>&dat_sessao=<dtml-var dat_inicio_sessao>">
-                  <p class="h4 card-title text-uppercase"><dtml-var num_sessao_plen>ª <dtml-if expr="nom_sessao!='Audiência Pública'"><dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao"></dtml-if> <dtml-var nom_sessao> <dtml-if expr="cod_periodo_sessao != None"><dtml-in expr="zsql.periodo_sessao_obter_zsql(cod_periodo=cod_periodo_sessao)"> do <dtml-var num_periodo>º Período</dtml-in></dtml-if></p>
-                </a>
+                <dtml-let id_pauta="_.str(cod_sessao_plen)+'_pauta_sessao.pdf'">
+                  <dtml-if "_.hasattr(sapl_documentos.pauta_sessao,id_pauta)">
+                    <a href="<dtml-var portal_url>/consultas/sessao_plenaria/agenda_sessao_plen_mostrar_proc?cod_sessao_plen=<dtml-var cod_sessao_plen>&dat_sessao=<dtml-var dat_inicio_sessao>">
+                      <p class="h4 card-title text-uppercase"><dtml-var num_sessao_plen>ª <dtml-if expr="nom_sessao!='Audiência Pública'"><dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao"></dtml-if> <dtml-var nom_sessao> <dtml-if expr="cod_periodo_sessao != None"><dtml-in expr="zsql.periodo_sessao_obter_zsql(cod_periodo=cod_periodo_sessao)"> do <dtml-var num_periodo>º Período</dtml-in></dtml-if></p>
+                    </a>
+                    <dtml-else>
+                      <p class="h4 card-title text-uppercase"><dtml-var num_sessao_plen>ª <dtml-if expr="nom_sessao!='Audiência Pública'"><dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao"></dtml-if> <dtml-var nom_sessao> <dtml-if expr="cod_periodo_sessao != None"><dtml-in expr="zsql.periodo_sessao_obter_zsql(cod_periodo=cod_periodo_sessao)"> do <dtml-var num_periodo>º Período</dtml-in></dtml-if></p>
+                  </dtml-if>
+                </dtml-let>
                </dtml-if>     
                <p class="mb-0"><dtml-var num_sessao_leg>ª Sessão Legislativa da <dtml-var num_legislatura>ª Legislatura</p>
                <p class=""><dtml-var expr="pysc.data_converter_por_extenso_pysc(data=dat_inicio_sessao)"><span class="d-none d-sm-inline"> (<dtml-var dia_sessao>) </span> <dtml-var expr="pysc.hora_formatar_pysc(hora=hr_inicio_sessao)"> <dtml-if hr_fim_sessao> - Encerramento: <dtml-var expr="pysc.hora_formatar_pysc(hora=hr_fim_sessao)"></dtml-if></p>

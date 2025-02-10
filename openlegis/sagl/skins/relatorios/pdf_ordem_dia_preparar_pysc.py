@@ -164,20 +164,34 @@ for sessao in metodo:
                        dic_materia["cod_autor"] = int(autoria.cod_autor)
                        dic_autores["cod_autor"] = int(autoria.cod_autor)
                        for autor in context.zsql.autor_obter_zsql(cod_autor = autoria.cod_autor):
-                           for parlamentar in context.zsql.parlamentar_obter_zsql(cod_parlamentar=autor.cod_parlamentar):
-                               if parlamentar.sex_parlamentar == 'M':
-                                  dic_autores["nom_parlamentar"] = 'Do Vereador' + ' ' + autoria['nom_autor_join']
-                               if parlamentar.sex_parlamentar == 'F':
-                                  dic_autores["nom_parlamentar"] = 'Da Vereadora' + ' ' + autoria['nom_autor_join']
+                           if autor.cod_parlamentar != None:
+                              for parlamentar in context.zsql.parlamentar_obter_zsql(cod_parlamentar=autor.cod_parlamentar):
+                                  if parlamentar.sex_parlamentar == 'M':
+                                     dic_autores["cargo"] = 'Vereador'
+                                  if parlamentar.sex_parlamentar == 'F':
+                                     dic_autores["cargo"] = 'Vereadora'
+                                  dic_autores["nom_completo"] = parlamentar.nom_completo.upper()
+                                  dic_autores["nom_parlamentar"] = parlamentar.nom_parlamentar
+                           else:
+                                  dic_autores["cargo"] = ''
+                                  dic_autores["nom_completo"] = autor.nom_autor_join.upper()
+                                  dic_autores["nom_parlamentar"] = autor.nom_autor_join
                     elif autoria.ind_primeiro_autor == 0:
                        dic_materia["cod_autor"] = int(autoria.cod_autor)
                        dic_autores["cod_autor"] = int(autoria.cod_autor)
                        for autor in context.zsql.autor_obter_zsql(cod_autor = autoria.cod_autor):
-                           for parlamentar in context.zsql.parlamentar_obter_zsql(cod_parlamentar=autor.cod_parlamentar):
-                               if parlamentar.sex_parlamentar == 'M':
-                                  dic_autores["nom_parlamentar"] = 'Do Vereador' + ' ' + autoria['nom_autor_join']
-                               if parlamentar.sex_parlamentar == 'F':
-                                  dic_autores["nom_parlamentar"] = 'Da Vereadora' + ' ' + autoria['nom_autor_join']
+                           if autor.cod_parlamentar != None:
+                              for parlamentar in context.zsql.parlamentar_obter_zsql(cod_parlamentar=autor.cod_parlamentar):
+                                  if parlamentar.sex_parlamentar == 'M':
+                                     dic_autores["cargo"] = 'Vereador'
+                                  if parlamentar.sex_parlamentar == 'F':
+                                     dic_autores["cargo"] = 'Vereadora'
+                                  dic_autores["nom_completo"] = parlamentar.nom_completo.upper()
+                                  dic_autores["nom_parlamentar"] = parlamentar.nom_parlamentar
+                           else:
+                                  dic_autores["cargo"] = ''
+                                  dic_autores["nom_completo"] = autor.nom_autor_join.upper()
+                                  dic_autores["nom_parlamentar"] = autor.nom_autor_join
                     break
                 lst_autores_indicacoes.append(dic_autores)
                 lst_indicacoes.append(dic_materia)
@@ -189,20 +203,34 @@ for sessao in metodo:
                        dic_materia["cod_autor"] = int(autoria.cod_autor)
                        dic_autores["cod_autor"] = int(autoria.cod_autor)
                        for autor in context.zsql.autor_obter_zsql(cod_autor = autoria.cod_autor):
-                           for parlamentar in context.zsql.parlamentar_obter_zsql(cod_parlamentar=autor.cod_parlamentar):
-                               if parlamentar.sex_parlamentar == 'M':
-                                  dic_autores["nom_parlamentar"] = 'Do Vereador' + ' ' + autoria['nom_autor_join']
-                               if parlamentar.sex_parlamentar == 'F':
-                                  dic_autores["nom_parlamentar"] = 'Da Vereadora' + ' ' + autoria['nom_autor_join']
+                           if autor.cod_parlamentar != None:
+                              for parlamentar in context.zsql.parlamentar_obter_zsql(cod_parlamentar=autor.cod_parlamentar):
+                                  if parlamentar.sex_parlamentar == 'M':
+                                     dic_autores["cargo"] = 'Vereador'
+                                  if parlamentar.sex_parlamentar == 'F':
+                                     dic_autores["cargo"] = 'Vereadora'
+                                  dic_autores["nom_completo"] = parlamentar.nom_completo.upper()
+                                  dic_autores["nom_parlamentar"] = parlamentar.nom_parlamentar
+                           else:
+                                  dic_autores["cargo"] = ''
+                                  dic_autores["nom_completo"] = autor.nom_autor_join.upper()
+                                  dic_autores["nom_parlamentar"] = autor.nom_autor_join
                     elif autoria.ind_primeiro_autor == 0:
                        dic_materia["cod_autor"] = int(autoria.cod_autor)
                        dic_autores["cod_autor"] = int(autoria.cod_autor)
                        for autor in context.zsql.autor_obter_zsql(cod_autor = autoria.cod_autor):
-                           for parlamentar in context.zsql.parlamentar_obter_zsql(cod_parlamentar=autor.cod_parlamentar):
-                               if parlamentar.sex_parlamentar == 'M':
-                                  dic_autores["nom_parlamentar"] = 'Do Vereador' + ' ' + autoria['nom_autor_join']
-                               if parlamentar.sex_parlamentar == 'F':
-                                  dic_autores["nom_parlamentar"] = 'Da Vereadora' + ' ' + autoria['nom_autor_join']
+                           if autor.cod_parlamentar != None:
+                              for parlamentar in context.zsql.parlamentar_obter_zsql(cod_parlamentar=autor.cod_parlamentar):
+                                  if parlamentar.sex_parlamentar == 'M':
+                                     dic_autores["cargo"] = 'Vereador'
+                                  if parlamentar.sex_parlamentar == 'F':
+                                     dic_autores["cargo"] = 'Vereadora'
+                                  dic_autores["nom_completo"] = parlamentar.nom_completo.upper()
+                                  dic_autores["nom_parlamentar"] = parlamentar.nom_parlamentar
+                           else:
+                                  dic_autores["cargo"] = ''
+                                  dic_autores["nom_completo"] = autor.nom_autor_join.upper()
+                                  dic_autores["nom_parlamentar"] = autor.nom_autor_join
                     break
                 lst_autores_requerimentos.append(dic_autores)
                 lst_requerimentos.append(dic_materia)
@@ -214,20 +242,34 @@ for sessao in metodo:
                        dic_materia["cod_autor"] = int(autoria.cod_autor)
                        dic_autores["cod_autor"] = int(autoria.cod_autor)
                        for autor in context.zsql.autor_obter_zsql(cod_autor = autoria.cod_autor):
-                           for parlamentar in context.zsql.parlamentar_obter_zsql(cod_parlamentar=autor.cod_parlamentar):
-                               if parlamentar.sex_parlamentar == 'M':
-                                  dic_autores["nom_parlamentar"] = 'Do Vereador' + ' ' + autoria['nom_autor_join']
-                               if parlamentar.sex_parlamentar == 'F':
-                                  dic_autores["nom_parlamentar"] = 'Da Vereadora' + ' ' + autoria['nom_autor_join']
+                           if autor.cod_parlamentar != None:
+                              for parlamentar in context.zsql.parlamentar_obter_zsql(cod_parlamentar=autor.cod_parlamentar):
+                                  if parlamentar.sex_parlamentar == 'M':
+                                     dic_autores["cargo"] = 'Vereador'
+                                  if parlamentar.sex_parlamentar == 'F':
+                                     dic_autores["cargo"] = 'Vereadora'
+                                  dic_autores["nom_completo"] = parlamentar.nom_completo.upper()
+                                  dic_autores["nom_parlamentar"] = parlamentar.nom_parlamentar
+                           else:
+                                  dic_autores["cargo"] = ''
+                                  dic_autores["nom_completo"] = autor.nom_autor_join.upper()
+                                  dic_autores["nom_parlamentar"] = autor.nom_autor_join
                     elif autoria.ind_primeiro_autor == 0:
                        dic_materia["cod_autor"] = int(autoria.cod_autor)
                        dic_autores["cod_autor"] = int(autoria.cod_autor)
                        for autor in context.zsql.autor_obter_zsql(cod_autor = autoria.cod_autor):
-                           for parlamentar in context.zsql.parlamentar_obter_zsql(cod_parlamentar=autor.cod_parlamentar):
-                               if parlamentar.sex_parlamentar == 'M':
-                                  dic_autores["nom_parlamentar"] = 'Do Vereador' + ' ' + autoria['nom_autor_join']
-                               if parlamentar.sex_parlamentar == 'F':
-                                  dic_autores["nom_parlamentar"] = 'Da Vereadora' + ' ' + autoria['nom_autor_join']
+                           if autor.cod_parlamentar != None:
+                              for parlamentar in context.zsql.parlamentar_obter_zsql(cod_parlamentar=autor.cod_parlamentar):
+                                  if parlamentar.sex_parlamentar == 'M':
+                                     dic_autores["cargo"] = 'Vereador'
+                                  if parlamentar.sex_parlamentar == 'F':
+                                     dic_autores["cargo"] = 'Vereadora'
+                                  dic_autores["nom_completo"] = parlamentar.nom_completo.upper()
+                                  dic_autores["nom_parlamentar"] = parlamentar.nom_parlamentar
+                           else:
+                                  dic_autores["cargo"] = ''
+                                  dic_autores["nom_completo"] = autor.nom_autor_join.upper()
+                                  dic_autores["nom_parlamentar"] = autor.nom_autor_join
                     break
                 lst_autores_mocoes.append(dic_autores)
                 lst_mocoes.append(dic_materia)

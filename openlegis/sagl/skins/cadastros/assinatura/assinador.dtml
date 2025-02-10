@@ -48,6 +48,9 @@
                   <dtml-else>
                     <button class="btn btn-danger text-white" title="Documento removido do sistema!"><i class="fa fa-exclamation-circle"></i></button>
                   </dtml-if>
+                  <dtml-if expr="url_pasta != None and AUTHENTICATED_USER.has_role(['Operador', 'Consulta Modulo Administrativo'])">
+                     <a class="btn btn-light" title="Pasta do Processo" href="<dtml-var url_pasta>" target="_blank"><i class="far fa-folder-open"></i></a>
+                  </dtml-if>
                  <div class="btn-group dropstart" role="group">
                  <button id="btnGroupDrop" type="button" class="btn btn-light dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" title="Informações">
                       <i class="fa fa-info-circle"></i>

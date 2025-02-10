@@ -14,6 +14,7 @@ def get_info(codigo, tipo_doc, anexo):
         descricao = None
         url = None
         tipo_documento = None
+        url_pasta = None
         if tipo_doc == 'proposicao':
            for metodo in context.zsql.proposicao_obter_zsql(cod_proposicao=codigo):
                tipo_documento = 'Proposição Digital'
@@ -27,6 +28,7 @@ def get_info(codigo, tipo_doc, anexo):
                    nom_autor = autor.nom_autor_join
                descricao = str(metodo.des_tipo_materia) + ' nº ' + str(metodo.num_ident_basica) + '/' + str(metodo.ano_ident_basica) + ' - ' + str(nom_autor) +  ' - ' + str(metodo.txt_ementa)
                url = context.portal_url() + '/cadastros/materia/materia_mostrar_proc?cod_materia=' + str(codigo)
+               url_pasta = context.portal_url() + '/consultas/materia/pasta_digital/?cod_materia=' + str(codigo) + '&action=pasta'
         elif tipo_doc == 'redacao_final':
            for metodo in context.zsql.materia_obter_zsql(cod_materia=codigo):
                tipo_documento = 'Matéria Legislativa - Redação Final'
@@ -35,6 +37,7 @@ def get_info(codigo, tipo_doc, anexo):
                    nom_autor = autor.nom_autor_join
                descricao = str(metodo.des_tipo_materia) + ' nº ' + str(metodo.num_ident_basica) + '/' + str(metodo.ano_ident_basica) + ' - ' + str(nom_autor) +  ' - ' + str(metodo.txt_ementa)
                url = context.portal_url() + '/cadastros/materia/materia_mostrar_proc?cod_materia=' + str(codigo)
+               url_pasta = context.portal_url() + '/consultas/materia/pasta_digital/?cod_materia=' + str(codigo) + '&action=pasta'
         elif tipo_doc == 'doc_acessorio':
            for metodo in context.zsql.documento_acessorio_obter_zsql(cod_documento=codigo):
                tipo_documento = 'Matéria Legislativa - Documento Acessório'
@@ -42,6 +45,7 @@ def get_info(codigo, tipo_doc, anexo):
                    materia = str(materia.des_tipo_materia) + ' nº ' + str(materia.num_ident_basica) + '/' + str(materia.ano_ident_basica) + ' - ' + str(materia.txt_ementa)
                descricao = str(metodo.des_tipo_documento) + ' - ' + str(metodo.nom_documento) + ' - ' + str(materia)
                url = context.portal_url() + '/cadastros/materia/materia_mostrar_proc?cod_materia=' + str(metodo.cod_materia) + '#acessorio'
+               url_pasta = context.portal_url() + '/consultas/materia/pasta_digital/?cod_materia=' + str(metodo.cod_materia) + '&action=pasta'
         elif tipo_doc == 'emenda':
            for metodo in context.zsql.emenda_obter_zsql(cod_emenda=codigo):
                tipo_documento = 'Matéria Legislativa - Emenda'
@@ -51,6 +55,7 @@ def get_info(codigo, tipo_doc, anexo):
                    nom_autor = autor.nom_autor_join
                descricao = 'Emenda ' + str(metodo.des_tipo_emenda) + ' nº ' + str(metodo.num_emenda) +  ' - ' + str(nom_autor) + ', ao ' + str(materia)
                url = context.portal_url() + '/cadastros/materia/materia_mostrar_proc?cod_materia=' + str(metodo.cod_materia) + '#emenda'
+               url_pasta = context.portal_url() + '/consultas/materia/pasta_digital/?cod_materia=' + str(metodo.cod_materia) + '&action=pasta'
         elif tipo_doc == 'substitutivo':
            for metodo in context.zsql.substitutivo_obter_zsql(cod_substitutivo=codigo):
                tipo_documento = 'Matéria Legislativa - Substitutivo'
@@ -60,15 +65,17 @@ def get_info(codigo, tipo_doc, anexo):
                    nom_autor = autor.nom_autor_join
                descricao = 'Substitutivo nº ' + str(metodo.num_substitutivo) +  ' - ' + str(nom_autor) + ', ao ' + str(materia)
                url = context.portal_url() + '/cadastros/materia/materia_mostrar_proc?cod_materia=' + str(metodo.cod_materia) + '#substitutivo'
+               url_pasta = context.portal_url() + '/consultas/materia/pasta_digital/?cod_materia=' + str(metodo.cod_materia) + '&action=pasta'
         elif tipo_doc == 'tramitacao':
            for metodo in context.zsql.tramitacao_obter_zsql(cod_tramitacao=codigo):
                tipo_documento = 'Matéria Legislativa - Tramitação'
                for materia in context.zsql.materia_obter_zsql(cod_materia=metodo.cod_materia):
                    materia = str(materia.des_tipo_materia)+ ' nº ' + str(materia.num_ident_basica)+'/'+str(materia.ano_ident_basica) + ' - ' + str(materia.txt_ementa)
-               for usuario in context.zsql.usuario_obter_zsql(cod_usario = metodo.cod_usuario_local):
+               for usuario in context.zsql.usuario_obter_zsql(cod_usuario = metodo.cod_usuario_local):
                   nom_usuario = usuario.nom_completo
                descricao = 'Despacho de ' + str(nom_usuario) + ' - ' + str(metodo.des_status) +  ' - '  + str(materia)
                url = context.portal_url() + '/cadastros/materia/materia_mostrar_proc?cod_materia=' + str(metodo.cod_materia) + '#tramitacao'
+               url_pasta = context.portal_url() + '/consultas/materia/pasta_digital/?cod_materia=' + str(metodo.cod_materia) + '&action=pasta'
         elif tipo_doc == 'parecer_comissao':
            for metodo in context.zsql.relatoria_obter_zsql(cod_relatoria=codigo):
                tipo_documento = 'Matéria Legislativa - Parecer de Comissão'
@@ -79,6 +86,7 @@ def get_info(codigo, tipo_doc, anexo):
                    materia = str(materia.des_tipo_materia)+ ' nº '+ str(materia.num_ident_basica)+'/'+str(materia.ano_ident_basica) + ' - ' + str(materia.txt_ementa)
                descricao = 'Parecer ' + str(sgl_comissao) + ' nº ' + str(parecer) + ' ao ' + str(materia)
                url = context.portal_url() + '/cadastros/materia/materia_mostrar_proc?cod_materia=' + str(metodo.cod_materia) + '#parecer'
+               url_pasta = context.portal_url() + '/consultas/materia/pasta_digital/?cod_materia=' + str(metodo.cod_materia) + '&action=pasta'
         elif tipo_doc == 'pauta':
            for metodo in context.zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=codigo):
                tipo_documento = str(context.sapl_documentos.props_sagl.reuniao_sessao) + ' Plenária - Pauta'
@@ -90,7 +98,7 @@ def get_info(codigo, tipo_doc, anexo):
                tipo_documento = 'Audiência Pública - Pauta'
                sessao = 'Audiência Pública nº ' + str(metodo.num_sessao_plen) + '/' + str(metodo.ano_sessao)
                descricao = 'Pauta da ' + str(sessao)
-               url = url = context.portal_url() + '/cadastros/sessao_plenaria/audiencia_publica_mostrar_proc?cod_sessao_plen=' + str(metodo.cod_sessao_plen) + '&ind_audiencia=1'
+               url = context.portal_url() + '/cadastros/sessao_plenaria/audiencia_publica_mostrar_proc?cod_sessao_plen=' + str(metodo.cod_sessao_plen) + '&ind_audiencia=1'
         elif tipo_doc == 'resumo_sessao':
            for metodo in context.zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=codigo):
                tipo_documento = str(context.sapl_documentos.props_sagl.reuniao_sessao) + ' Plenária - Roteiro / Resenha'
@@ -120,11 +128,13 @@ def get_info(codigo, tipo_doc, anexo):
                tipo_documento = 'Norma Jurídica - Texto Integral'
                descricao = str(metodo.des_tipo_norma) + ' nº ' + str(metodo.num_norma) + '/' + str(metodo.ano_norma) + ' - ' + str(metodo.txt_ementa)
                url = context.portal_url() + '/cadastros/norma_juridica/norma_juridica_mostrar_proc?cod_norma=' + str(metodo.cod_norma)
+               url_pasta = context.portal_url() + '/consultas/norma_juridica/pasta_digital/?cod_norma=' + str(metodo.cod_norma) + '&action=pasta'
         elif tipo_doc == 'documento':
            for metodo in context.zsql.documento_administrativo_obter_zsql(cod_documento=codigo):
                tipo_documento = 'Processo Administrativo - Texto Integral'
                descricao = str(metodo.des_tipo_documento) + ' nº ' + str(metodo.num_documento) + '/' +str(metodo.ano_documento) + ' - ' + str(metodo.txt_interessado) + ' - ' + str(metodo.txt_assunto)
                url = context.portal_url() + '/cadastros/documento_administrativo/documento_administrativo_mostrar_proc?cod_documento=' + str(metodo.cod_documento)
+               url_pasta = context.portal_url() + '/consultas/documento_administrativo/pasta_digital/?cod_documento=' + str(metodo.cod_documento) + '&action=pasta'
         elif tipo_doc == 'doc_acessorio_adm':
            for metodo in context.zsql.documento_acessorio_administrativo_obter_zsql(cod_documento_acessorio=codigo):
                tipo_documento = 'Processo Administrativo - Documento Acessório'
@@ -132,15 +142,17 @@ def get_info(codigo, tipo_doc, anexo):
                    documento = str(documento.sgl_tipo_documento) +' '+ str(documento.num_documento)+'/'+str(documento.ano_documento) + ' - ' + str(documento.txt_interessado) + ' - ' + str(documento.txt_assunto)
                descricao = str(metodo.des_tipo_documento) + ' ' + str(metodo.nom_documento) + ' - ' + str(metodo.nom_autor_documento) + ', juntado ao ' + str(documento)
                url = context.portal_url() + '/cadastros/documento_administrativo/documento_administrativo_mostrar_proc?cod_documento=' + str(metodo.cod_documento) + '#acessorios'
+               url_pasta = context.portal_url() + '/consultas/documento_administrativo/pasta_digital/?cod_documento=' + str(metodo.cod_documento) + '&action=pasta'
         elif tipo_doc == 'tramitacao_adm':
            for metodo in context.zsql.tramitacao_administrativo_obter_zsql(cod_tramitacao=codigo):
                tipo_documento = 'Processo Administrativo - Tramitação'
                for documento in context.zsql.documento_administrativo_obter_zsql(cod_documento=metodo.cod_documento):
                    documento = str(documento.sgl_tipo_documento) +' '+ str(documento.num_documento)+'/'+str(documento.ano_documento) + ' - ' + str(documento.txt_interessado) + ' - ' + str(documento.txt_assunto)
-               for usuario in context.zsql.usuario_obter_zsql(cod_usario = metodo.cod_usuario_local):
+               for usuario in context.zsql.usuario_obter_zsql(cod_usuario = metodo.cod_usuario_local):
                    nom_usuario = usuario.nom_completo
                descricao = 'Despacho de ' + str(nom_usuario) + ' - ' + str(metodo.des_status) +  ' - '  + str(documento)
                url = context.portal_url() + '/cadastros/documento_administrativo/documento_administrativo_mostrar_proc?cod_documento=' + str(metodo.cod_documento) + '#tramitacao'
+               url_pasta = context.portal_url() + '/consultas/documento_administrativo/pasta_digital/?cod_documento=' + str(metodo.cod_documento) + '&action=pasta'
         elif tipo_doc == 'protocolo':
            for metodo in context.zsql.protocolo_obter_zsql(cod_protocolo=codigo):
                tipo_documento = 'Protocolo - Documento'
@@ -207,7 +219,7 @@ def get_info(codigo, tipo_doc, anexo):
                titulo = getattr(context.sapl_documentos.anexo_sessao,arquivo).title_or_id()
                descricao =  str(titulo) + ' da ' + str(sessao)
                url = context.portal_url() + '/cadastros/sessao_plenaria/audiencia_publica_mostrar_proc?cod_sessao_plen=' + str(metodo.cod_sessao_plen) + '&ind_audiencia=1'
-    return descricao, url, tipo_documento
+    return descricao, url, tipo_documento, url_pasta
 
 
 
@@ -229,6 +241,7 @@ for item in context.zsql.assinatura_documento_pendente_obter_zsql(codigo=codigo,
     dic_documento['id_documento'] = dados[0]
     dic_documento['link_registro'] = dados[1]
     dic_documento['tipo_documento'] = dados[2]
+    dic_documento['url_pasta'] = dados[3]
     link_pdf = context.cadastros.assinatura.gerar_link_pysc(codigo=item['codigo'], tip_documento=item['tipo_doc'], anexo=item['anexo'])
     if link_pdf != '':
        dic_documento['link_pdf'] = context.portal_url() + '/' + context.cadastros.assinatura.gerar_link_pysc(codigo=item['codigo'], tip_documento=item['tipo_doc'], anexo=item['anexo'])

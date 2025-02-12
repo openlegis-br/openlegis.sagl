@@ -21,7 +21,10 @@
      <dtml-in expr="zsql.votacao_expediente_materia_obter_zsql(cod_sessao_plen = cod_sessao_plen, cod_ordem=cod_ordem, cod_materia=cod_materia)">
         <dtml-call expr="REQUEST.set('temVotacao', cod_votacao)">
      </dtml-in>
-     <dtml-if temVotacao>
+     <dtml-in expr="zsql.votacao_obter_zsql(cod_materia=hdn_cod_materia)">
+        <dtml-call expr="REQUEST.set('votacaoAnterior', 1)">
+     </dtml-in>
+     <dtml-if expr="temVotacao or _.has_key('votacaoAnterior')">
         <dtml-in expr="zsql.proposicao_obter_zsql(ind_mat_ou_doc='M',cod_mat_ou_doc=hdn_cod_materia)">
            <dtml-if sequence-start>
               <dtml-if expr="hasattr(sapl_documentos.proposicao, str(cod_proposicao) + '_signed.pdf')">

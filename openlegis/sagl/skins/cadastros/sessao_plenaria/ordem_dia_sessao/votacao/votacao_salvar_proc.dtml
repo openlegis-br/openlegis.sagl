@@ -36,6 +36,10 @@
    </dtml-if>
 </dtml-if>
 
+<dtml-in expr="zsql.votacao_obter_zsql(cod_materia=hdn_cod_materia)">
+  <dtml-call expr="REQUEST.set('votacaoAnterior', 1)">
+</dtml-in>
+
 <dtml-unless erro>
 <dtml-if expr="hdn_tip_votacao == '2' ">
     <dtml-try>
@@ -63,7 +67,7 @@
              <dtml-call expr="REQUEST.set('nom_resultado', nom_resultado)">       
           </dtml-in>
           <dtml-if expr="hdn_cod_materia != ''">
-             <dtml-if hdn_cod_votacao>
+             <dtml-if expr="hdn_cod_votacao or _.has_key('votacaoAnterior')">
                 <dtml-in expr="zsql.proposicao_obter_zsql(ind_mat_ou_doc='M',cod_mat_ou_doc=hdn_cod_materia)">
                    <dtml-if sequence-start>
                       <dtml-try>
@@ -126,7 +130,7 @@
           <dtml-call expr="REQUEST.set('nom_resultado', nom_resultado)">       
        </dtml-in>
        <dtml-if expr="hdn_cod_materia != ''">
-          <dtml-if hdn_cod_votacao>
+          <dtml-if expr="hdn_cod_votacao or _.has_key('votacaoAnterior')">
              <dtml-in expr="zsql.proposicao_obter_zsql(ind_mat_ou_doc='M',cod_mat_ou_doc=hdn_cod_materia)">
                 <dtml-if sequence-start>
                    <dtml-try>

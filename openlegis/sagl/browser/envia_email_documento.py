@@ -253,12 +253,19 @@ class EmailDoc(grok.View):
                 </html>
                 """.format(id_processo=id_processo, ementa=txt_assunto, nom_autor=nom_autor, casa_legislativa=casa_legislativa, estado=estado, portal_url=portal_url, logo_casa=logo_casa, usuario=usuario, cargo_usuario=cargo_usuario, link_processo=link_processo)
 
+               redacao_final = str(cod_materia) + "_redacao_final.pdf"
                arquivo = str(cod_materia) + "_texto_integral.pdf"
-               if hasattr(self.context.sapl_documentos.materia, arquivo):
+               if hasattr(self.context.sapl_documentos.materia, redacao_final):
+                  arq = getattr(self.context.sapl_documentos.materia, redacao_final)
+                  arquivo_pdf = BytesIO(bytes(arq.data))
+                  msg.add_attachment(arquivo_pdf.getvalue(), maintype='application', subtype='pdf', filename=nom_anexo)
+                  msg.attach(MIMEText(html, "html", "utf-8"))
+               elif hasattr(self.context.sapl_documentos.materia, arquivo) and not hasattr(self.context.sapl_documentos.materia, redacao_final):
                   arq = getattr(self.context.sapl_documentos.materia, arquivo)
                   arquivo_pdf = BytesIO(bytes(arq.data))
                   msg.add_attachment(arquivo_pdf.getvalue(), maintype='application', subtype='pdf', filename=nom_anexo)
-                  msg.attach(MIMEText(html, "html", "utf-8"))                       
+                  msg.attach(MIMEText(html, "html", "utf-8"))
+
            if recipients != []:
               return msg, destinatarios, cod_usuario
 

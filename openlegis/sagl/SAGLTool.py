@@ -2231,6 +2231,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         for materia in self.zsql.materia_obter_zsql(cod_materia=cod_materia):
             storage_path = self.sapl_documentos.materia
             nom_pdf_saida = str(materia.cod_materia) + "_texto_integral.pdf"
+            nom_pdf_redacao = str(materia.cod_materia) + "_redacao_final.pdf"
         if hasattr(storage_path, nom_pdf_saida):
            arq = getattr(storage_path, nom_pdf_saida)
            arquivo = BytesIO(bytes(arq.data))
@@ -2239,8 +2240,23 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
            w = existing_pdf[0].rect.width
            h = existing_pdf[0].rect.height
            margin = 10
-           #top = margin + 50
-           #right = w - 10 - margin
+           black = pymupdf.pdfcolor["black"]
+           text2 = texto + '\n' + sessao + '\n' + presidente
+           p2 = pymupdf.Point(w - 170 - margin, margin + 90) # margem superior
+           shape = existing_pdf[0].new_shape()
+           shape.draw_circle(p2,1)
+           shape.insert_text(p2, text2, fontname = "helv", fontsize = 8, rotate=0)
+           shape.commit()
+           content = existing_pdf.tobytes(deflate=True, garbage=3, use_objstms=1)
+           arq.manage_upload(file=content)
+        if hasattr(storage_path, nom_pdf_redacao):
+           arq = getattr(storage_path, nom_pdf_redacao)
+           arquivo = BytesIO(bytes(arq.data))
+           existing_pdf = pymupdf.open(stream=arquivo)
+           numPages = existing_pdf.page_count
+           w = existing_pdf[0].rect.width
+           h = existing_pdf[0].rect.height
+           margin = 10
            black = pymupdf.pdfcolor["black"]
            text2 = texto + '\n' + sessao + '\n' + presidente
            p2 = pymupdf.Point(w - 170 - margin, margin + 90) # margem superior

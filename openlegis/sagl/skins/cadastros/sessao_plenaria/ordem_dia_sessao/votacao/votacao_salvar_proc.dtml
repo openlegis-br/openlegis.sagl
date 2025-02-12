@@ -1,10 +1,10 @@
 <dtml-unless hdn_cod_votacao>
-<dtml-if rad_votacao_branco>
-    <dtml-call expr="REQUEST.set('erro', 1)">
-    <dtml-let mensagem="'Resultado da votação não cadastrado'" tipo_mensagem="'danger'">
-        <dtml-var mensagem_emitir>
-    </dtml-let>
-</dtml-if>
+   <dtml-if rad_votacao_branco>
+      <dtml-call expr="REQUEST.set('erro', 1)">
+      <dtml-let mensagem="'Resultado da votação não cadastrado'" tipo_mensagem="'danger'">
+         <dtml-var mensagem_emitir>
+      </dtml-let>
+   </dtml-if>
 </dtml-unless>
 
 <dtml-if expr="hdn_tip_votacao != '2' ">
@@ -21,6 +21,14 @@
            </dtml-if>
          </dtml-if>
       </dtml-in>
+      <dtml-in expr="zsql.assinatura_documento_obter_zsql(codigo=hdn_cod_materia, tipo_doc='materia', ind_assinado=1)">
+         <dtml-if sequence-start>
+            <dtml-call expr="REQUEST.set('filename', str(cod_assinatura_doc) + '.pdf')">
+            <dtml-if expr="hasattr(sapl_documentos.documentos_assinados, filename)">
+               <dtml-call expr="modelo_proposicao.margem_inferior(codigo=codigo, anexo=anexo, tipo_doc=tipo_doc, cod_assinatura_doc=cod_assinatura_doc, cod_usuario=cod_usuario, filename=filename)">
+            </dtml-if>
+         </dtml-if>
+      </dtml-in>
    </dtml-if>
 </dtml-if>
 
@@ -31,6 +39,14 @@
       <dtml-in expr="zsql.proposicao_obter_zsql(ind_mat_ou_doc='M',cod_mat_ou_doc=hdn_cod_materia)">
          <dtml-if sequence-start>
             <dtml-call expr="modelo_proposicao.proposicao_autuar(cod_proposicao=cod_proposicao)">
+         </dtml-if>
+      </dtml-in>
+      <dtml-in expr="zsql.assinatura_documento_obter_zsql(codigo=hdn_cod_materia, tipo_doc='materia', ind_assinado=1)">
+         <dtml-if sequence-start>
+            <dtml-call expr="REQUEST.set('filename', str(cod_assinatura_doc) + '.pdf')">
+            <dtml-if expr="hasattr(sapl_documentos.documentos_assinados, filename)">
+               <dtml-call expr="modelo_proposicao.margem_inferior(codigo=codigo, anexo=anexo, tipo_doc=tipo_doc, cod_assinatura_doc=cod_assinatura_doc, cod_usuario=cod_usuario, filename=filename)">
+            </dtml-if>
          </dtml-if>
       </dtml-in>
    </dtml-if>
@@ -62,7 +78,7 @@
        <dtml-let mensagem="'Votação salva com sucesso!'">
           <dtml-var mensagem_emitir>
        </dtml-let>
-       <dtml-if expr="lst_tip_resultado != ''">
+       <dtml-if expr="lst_tip_resultado != '' and lst_tip_resultado!='0'">
           <dtml-in expr="zsql.tipo_resultado_votacao_obter_zsql(tip_resultado_votacao=lst_tip_resultado)">
              <dtml-call expr="REQUEST.set('nom_resultado', nom_resultado)">       
           </dtml-in>
@@ -73,6 +89,18 @@
                       <dtml-try>
                          <dtml-if expr="hasattr(sapl_documentos.proposicao, str(cod_proposicao) + '_signed.pdf')">
                             <dtml-call expr="modelo_proposicao.proposicao_autuar(cod_proposicao=cod_proposicao)">
+                         </dtml-if>
+                      <dtml-else>
+                         <dtml-call expr="modelo_proposicao.requerimento_aprovar(cod_sessao_plen=hdn_cod_sessao_plen, nom_resultado=nom_resultado, cod_materia=hdn_cod_materia)">
+                      </dtml-try>
+                   </dtml-if>
+                </dtml-in>
+                <dtml-in expr="zsql.assinatura_documento_obter_zsql(codigo=hdn_cod_materia, tipo_doc='materia', ind_assinado=1)">
+                   <dtml-if sequence-start>
+                      <dtml-call expr="REQUEST.set('filename', str(cod_assinatura_doc) + '.pdf')">
+                      <dtml-try>
+                         <dtml-if expr="hasattr(sapl_documentos.documentos_assinados, filename)">
+                            <dtml-call expr="modelo_proposicao.margem_inferior(codigo=codigo, anexo=anexo, tipo_doc=tipo_doc, cod_assinatura_doc=cod_assinatura_doc, cod_usuario=cod_usuario, filename=filename)">
                          </dtml-if>
                       <dtml-else>
                          <dtml-call expr="modelo_proposicao.requerimento_aprovar(cod_sessao_plen=hdn_cod_sessao_plen, nom_resultado=nom_resultado, cod_materia=hdn_cod_materia)">
@@ -125,7 +153,7 @@
     <dtml-let mensagem="'Votação salva com sucesso!'">
       <dtml-var mensagem_emitir>
     </dtml-let>
-    <dtml-if expr="lst_tip_resultado == ''">
+    <dtml-if expr="lst_tip_resultado != '' and lst_tip_resultado!='0'">
        <dtml-in expr="zsql.tipo_resultado_votacao_obter_zsql(tip_resultado_votacao=lst_tip_resultado)">
           <dtml-call expr="REQUEST.set('nom_resultado', nom_resultado)">       
        </dtml-in>
@@ -136,6 +164,18 @@
                    <dtml-try>
                       <dtml-if expr="hasattr(sapl_documentos.proposicao, str(cod_proposicao) + '_signed.pdf')">
                          <dtml-call expr="modelo_proposicao.proposicao_autuar(cod_proposicao=cod_proposicao)">
+                      </dtml-if>
+                   <dtml-else>
+                      <dtml-call expr="modelo_proposicao.requerimento_aprovar(cod_sessao_plen=hdn_cod_sessao_plen, nom_resultado=nom_resultado, cod_materia=hdn_cod_materia)">
+                   </dtml-try>
+                </dtml-if>
+             </dtml-in>
+             <dtml-in expr="zsql.assinatura_documento_obter_zsql(codigo=hdn_cod_materia, tipo_doc='materia', ind_assinado=1)">
+                <dtml-if sequence-start>
+                   <dtml-call expr="REQUEST.set('filename', str(cod_assinatura_doc) + '.pdf')">
+                   <dtml-try>
+                      <dtml-if expr="hasattr(sapl_documentos.documentos_assinados, filename)">
+                         <dtml-call expr="modelo_proposicao.margem_inferior(codigo=codigo, anexo=anexo, tipo_doc=tipo_doc, cod_assinatura_doc=cod_assinatura_doc, cod_usuario=cod_usuario, filename=filename)">
                       </dtml-if>
                    <dtml-else>
                       <dtml-call expr="modelo_proposicao.requerimento_aprovar(cod_sessao_plen=hdn_cod_sessao_plen, nom_resultado=nom_resultado, cod_materia=hdn_cod_materia)">

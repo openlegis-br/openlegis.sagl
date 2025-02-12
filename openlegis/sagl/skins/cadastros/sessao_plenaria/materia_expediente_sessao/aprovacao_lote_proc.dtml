@@ -36,6 +36,18 @@
               </dtml-if>
            </dtml-if>
         </dtml-in>
+        <dtml-in expr="zsql.assinatura_documento_obter_zsql(codigo=hdn_cod_materia, tipo_doc='materia', ind_assinado=1)">
+           <dtml-if sequence-start>
+              <dtml-call expr="REQUEST.set('filename', str(cod_assinatura_doc) + '.pdf')">
+              <dtml-try>
+                 <dtml-if expr="hasattr(sapl_documentos.documentos_assinados, filename)">
+                    <dtml-call expr="modelo_proposicao.margem_inferior(codigo=codigo, anexo=anexo, tipo_doc=tipo_doc, cod_assinatura_doc=cod_assinatura_doc, cod_usuario=cod_usuario, filename=filename)">
+                 </dtml-if>
+              <dtml-else>
+                 <dtml-call expr="modelo_proposicao.requerimento_aprovar(cod_sessao_plen=hdn_cod_sessao_plen, nom_resultado=nom_resultado, cod_materia=hdn_cod_materia)">
+              </dtml-try>
+           </dtml-if>
+        </dtml-in>
      <dtml-else>
         <dtml-call expr="REQUEST.set('metodo', zsql.votacao_incluir_zsql)">
         <dtml-call expr="metodo(num_votos_sim = pysc.quantidade_presentes_sessao_plenaria_contar_pysc(cod_sessao_plen=cod_sessao_plen),

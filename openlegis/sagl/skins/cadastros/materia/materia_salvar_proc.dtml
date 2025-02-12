@@ -88,7 +88,7 @@
      </dtml-in>
 
      <dtml-if hdn_cod_autor>
-        <dtml-call expr="zsql.autoria_incluir_zsql(cod_autor = _.int(hdn_cod_autor), cod_materia = codigo, ind_primeiro_autor = 0)">
+        <dtml-call expr="zsql.autoria_incluir_zsql(cod_autor = _.int(hdn_cod_autor), cod_materia = codigo, ind_primeiro_autor = 1)">
      </dtml-if>
 
      <dtml-if chk_cod_autor>
@@ -107,7 +107,7 @@
           <dtml-call expr="REQUEST.set('hdn_hor_tramitacao', DateTime(datefmt='international').strftime('%d/%m/%Y às %H:%M'))">
           <dtml-call expr="REQUEST.set('txt_tramitacao', 'Proposição Digital ' + cod_documento + ' incorporada como matéria principal em ' + hdn_hor_tramitacao)">
           <dtml-comment>
-            <dtml-call expr="zsql.autoria_incluir_zsql(cod_autor = cod_autor, cod_materia = codigo, ind_primeiro_autor = 0)">
+            <dtml-call expr="zsql.autoria_incluir_zsql(cod_autor = cod_autor, cod_materia = codigo, ind_primeiro_autor = 1)">
           </dtml-comment>
         </dtml-in>
         <dtml-call expr="zsql.proposicao_registrar_recebimento_zsql(cod_proposicao = hdn_cod_proposicao,
@@ -138,7 +138,7 @@
      </dtml-if temProposicao>
 
   <dtml-if protAutor>
-      <dtml-call expr="zsql.autoria_incluir_zsql(cod_autor = protAutor, cod_materia = codigo, ind_primeiro_autor = 0)">
+      <dtml-call expr="zsql.autoria_incluir_zsql(cod_autor = protAutor, cod_materia = codigo, ind_primeiro_autor = 1)">
   </dtml-if>
 
   <dtml-if expr="txt_num_protocolo!=''">

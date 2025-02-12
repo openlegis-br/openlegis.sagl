@@ -1,27 +1,41 @@
 <dtml-unless hdn_cod_votacao>
-<dtml-if rad_votacao_branco>
-    <dtml-call expr="REQUEST.set('erro', 1)">
-    <dtml-let mensagem="'Resultado da votação não cadastrado'" tipo_mensagem="'danger'">
-        <dtml-var mensagem_emitir>
-    </dtml-let>
-</dtml-if>
+   <dtml-if rad_votacao_branco>
+      <dtml-call expr="REQUEST.set('erro', 1)">
+      <dtml-let mensagem="'Resultado da votação não cadastrado'" tipo_mensagem="'danger'">
+         <dtml-var mensagem_emitir>
+      </dtml-let>
+   </dtml-if>
 </dtml-unless>
 
 <dtml-if expr="hdn_tip_votacao != '2' ">
-<dtml-if rad_votacao_branco>
-    <dtml-call expr="REQUEST.set('txt_votos_sim', '0')">
-    <dtml-call expr="REQUEST.set('txt_votos_nao', '0')">
-    <dtml-call expr="REQUEST.set('txt_votos_abstencao', '0')">
-    <dtml-call expr="REQUEST.set('txt_ausentes', '0')">
-    <dtml-call expr="REQUEST.set('lst_tip_resultado', '0')">
-</dtml-if>
+  <dtml-if rad_votacao_branco>
+     <dtml-call expr="REQUEST.set('txt_votos_sim', '0')">
+     <dtml-call expr="REQUEST.set('txt_votos_nao', '0')">
+     <dtml-call expr="REQUEST.set('txt_votos_abstencao', '0')">
+     <dtml-call expr="REQUEST.set('txt_ausentes', '0')">
+     <dtml-call expr="REQUEST.set('lst_tip_resultado', '0')">
+     <dtml-in expr="zsql.proposicao_obter_zsql(ind_mat_ou_doc='M',cod_mat_ou_doc=hdn_cod_materia)">
+        <dtml-if sequence-start>
+           <dtml-if expr="hasattr(sapl_documentos.proposicao, str(cod_proposicao) + '_signed.pdf')">
+              <dtml-call expr="modelo_proposicao.proposicao_autuar(cod_proposicao=cod_proposicao)">
+           </dtml-if>
+        </dtml-if>
+     </dtml-in>
+  </dtml-if>
 </dtml-if>
 
 <dtml-if expr="hdn_tip_votacao == '2' ">
-<dtml-if rad_votacao_branco>
-    <dtml-call expr="REQUEST.set('lst_voto_parlamentar', '[]')">
-    <dtml-call expr="REQUEST.set('lst_tip_resultado', '0')">
-</dtml-if>
+  <dtml-if rad_votacao_branco>
+     <dtml-call expr="REQUEST.set('lst_voto_parlamentar', '[]')">
+     <dtml-call expr="REQUEST.set('lst_tip_resultado', '0')">
+     <dtml-in expr="zsql.proposicao_obter_zsql(ind_mat_ou_doc='M',cod_mat_ou_doc=hdn_cod_materia)">
+        <dtml-if sequence-start>
+           <dtml-if expr="hasattr(sapl_documentos.proposicao, str(cod_proposicao) + '_signed.pdf')">
+              <dtml-call expr="modelo_proposicao.proposicao_autuar(cod_proposicao=cod_proposicao)">
+           </dtml-if>
+        </dtml-if>
+     </dtml-in>
+  </dtml-if>
 </dtml-if>
 
 <dtml-unless erro>
@@ -41,7 +55,7 @@
         <dtml-let mensagem="'Houve um erro ao inserir os votos dos parlamentares!'" url="hdn_url">
             <dtml-var mensagem_emitir>
         </dtml-let>
-
+        <dtml-var REQUEST>
     <dtml-else>
        <dtml-let mensagem="'Votação salva com sucesso!'">
           <dtml-var mensagem_emitir>
@@ -51,21 +65,26 @@
              <dtml-call expr="REQUEST.set('nom_resultado', nom_resultado)">
           </dtml-in>
           <dtml-if expr="hdn_cod_materia != ''">
-             <dtml-call expr="modelo_proposicao.requerimento_aprovar(cod_sessao_plen=hdn_cod_sessao_plen, nom_resultado=nom_resultado, cod_materia=hdn_cod_materia)">
+             <dtml-if hdn_cod_votacao>
+                <dtml-in expr="zsql.proposicao_obter_zsql(ind_mat_ou_doc='M',cod_mat_ou_doc=hdn_cod_materia)">
+                   <dtml-if sequence-start>
+                      <dtml-try>
+                         <dtml-if expr="hasattr(sapl_documentos.proposicao, str(cod_proposicao) + '_signed.pdf')">
+                            <dtml-call expr="modelo_proposicao.proposicao_autuar(cod_proposicao=cod_proposicao)">
+                         </dtml-if>
+                      <dtml-else>
+                         <dtml-call expr="modelo_proposicao.requerimento_aprovar(cod_sessao_plen=hdn_cod_sessao_plen, nom_resultado=nom_resultado, cod_materia=hdn_cod_materia)">
+                      </dtml-try>
+                   </dtml-if>
+                </dtml-in>
+             <dtml-else>
+                <dtml-call expr="modelo_proposicao.requerimento_aprovar(cod_sessao_plen=hdn_cod_sessao_plen, nom_resultado=nom_resultado, cod_materia=hdn_cod_materia)">
+             </dtml-if> 
           </dtml-if>
        </dtml-if>
     </dtml-try>
 </dtml-if>
 </dtml-unless>
-
-<dtml-in expr="zsql.votacao_obter_zsql(cod_ordem=hdn_cod_ordem,
-                                       cod_materia=hdn_cod_materia,
-                                       cod_parecer=hdn_cod_parecer,
-                                       cod_emenda=hdn_cod_emenda,
-                                       cod_subemenda=hdn_cod_subemenda,
-                                       cod_substitutivo=hdn_cod_substitutivo)">
-  <dtml-call expr="REQUEST.set('metodo', zsql.votacao_atualizar_zsql)">
-</dtml-in>
 
 <dtml-if hdn_cod_votacao>
   <dtml-call expr="REQUEST.set('metodo', zsql.votacao_atualizar_zsql)">
@@ -76,7 +95,7 @@
 <dtml-unless erro>
   <dtml-if expr="hdn_tip_votacao != '2' ">
   <dtml-try>
-    <dtml-call expr="metodo(cod_votacao           = hdn_cod_votacao,
+     <dtml-call expr="metodo(cod_votacao          = hdn_cod_votacao,
                             num_votos_sim         = txt_votos_sim,
                             num_votos_nao         = txt_votos_nao,
                             num_abstencao         = txt_votos_abstencao,
@@ -89,12 +108,11 @@
                             cod_subemenda         = hdn_cod_subemenda,
                             cod_substitutivo      = hdn_cod_substitutivo,
                             tip_resultado_votacao = lst_tip_resultado)">
-
   <dtml-except>
-    <dtml-let mensagem="'Não foi possível salvar a votação. Tente novamente!'">
-      <dtml-var mensagem_emitir>
-    </dtml-let>
-
+     <dtml-let mensagem="'Não foi possível salvar a votação. Tente novamente!'">
+        <dtml-var mensagem_emitir>
+     </dtml-let>
+     <dtml-var REQUEST>
   <dtml-else>
     <dtml-let mensagem="'Votação salva com sucesso!'">
       <dtml-var mensagem_emitir>
@@ -104,10 +122,23 @@
           <dtml-call expr="REQUEST.set('nom_resultado', nom_resultado)">
        </dtml-in>
        <dtml-if expr="hdn_cod_materia != ''">
-          <dtml-call expr="modelo_proposicao.requerimento_aprovar(cod_sessao_plen=hdn_cod_sessao_plen, nom_resultado=nom_resultado, cod_materia=hdn_cod_materia)">
+          <dtml-if hdn_cod_votacao>
+             <dtml-in expr="zsql.proposicao_obter_zsql(ind_mat_ou_doc='M',cod_mat_ou_doc=hdn_cod_materia)">
+                <dtml-if sequence-start>
+                   <dtml-try>
+                      <dtml-if expr="hasattr(sapl_documentos.proposicao, str(cod_proposicao) + '_signed.pdf')">
+                         <dtml-call expr="modelo_proposicao.proposicao_autuar(cod_proposicao=cod_proposicao)">
+                      </dtml-if>
+                   <dtml-else>
+                      <dtml-call expr="modelo_proposicao.requerimento_aprovar(cod_sessao_plen=hdn_cod_sessao_plen, nom_resultado=nom_resultado, cod_materia=hdn_cod_materia)">
+                   </dtml-try>
+                </dtml-if>
+             </dtml-in>
+          <dtml-else>
+             <dtml-call expr="modelo_proposicao.requerimento_aprovar(cod_sessao_plen=hdn_cod_sessao_plen, nom_resultado=nom_resultado, cod_materia=hdn_cod_materia)">
+          </dtml-if> 
        </dtml-if>
     </dtml-if>
   </dtml-try>
   </dtml-if>
 </dtml-unless>
-

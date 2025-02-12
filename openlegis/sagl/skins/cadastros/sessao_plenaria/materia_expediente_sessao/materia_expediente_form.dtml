@@ -183,7 +183,7 @@
                 <select class="form-select" id="lst_turno" name="lst_tip_turno">
                   <option value="0"></option>
                   <dtml-in expr="zsql.turno_discussao_obter_zsql()">
-                    <option <dtml-if expr="_.has_key('tip_turno') and _.int(cod_turno)==_.int(materia_expediente_form.tip_turno)"> selected</dtml-if> value="<dtml-var cod_turno>"><dtml-var des_turno></option>
+                    <option <dtml-if expr="_.has_key('tip_turno') and _.int(cod_turno)==_.int(materia_expediente_form.tip_turno)"> selected<dtml-elif expr="not _.has_key('tip_turno') and (des_turno == 'Turno Único' or des_turno=='Único' or des_turno=='Discussão Única')">selected</dtml-if> value="<dtml-var cod_turno>"><dtml-var des_turno></option>
                   </dtml-in>
                 </select>
               </div>  

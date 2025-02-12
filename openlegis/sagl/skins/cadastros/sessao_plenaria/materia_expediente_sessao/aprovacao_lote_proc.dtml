@@ -8,10 +8,10 @@
 <dtml-in expr="zsql.expediente_materia_obter_zsql(cod_sessao_plen = cod_sessao_plen, ind_excluido=0)">
  <dtml-if cod_materia>
   <dtml-in expr="zsql.materia_obter_zsql(cod_materia=cod_materia)">
-   <dtml-if expr="des_tipo_materia=='Requerimento' or des_tipo_materia=='Moção' or des_tipo_materia=='Pedido de Informação'">
+   <dtml-if expr="des_tipo_materia=='Requerimento' or des_tipo_materia=='Moção' or des_tipo_materia=='Pedido de Informação' or des_tipo_materia=='Requerimento ao Plenário' or des_tipo_materia=='Requerimento à Presidência'">
      <dtml-call expr="REQUEST.set('txt_votos_nao', '0')">
      <dtml-call expr="REQUEST.set('txt_votos_abstencao', '0')">
-     <dtml-call expr="REQUEST.set('txt_votos_ausentes', '0')">
+     <dtml-call expr="REQUEST.set('txt_ausentes', '0')">
      <dtml-call expr="REQUEST.set('txa_txt_observacao', '')">
      <dtml-call expr="REQUEST.set('hdn_cod_ordem', cod_ordem)">
      <dtml-call expr="REQUEST.set('hdn_cod_materia', cod_materia)">
@@ -21,12 +21,24 @@
      <dtml-in expr="zsql.votacao_expediente_materia_obter_zsql(cod_sessao_plen = cod_sessao_plen, cod_ordem=cod_ordem, cod_materia=cod_materia)">
         <dtml-call expr="REQUEST.set('temVotacao', cod_votacao)">
      </dtml-in>
-     <dtml-unless temVotacao>
+     <dtml-if temVotacao>
+        <dtml-in expr="zsql.proposicao_obter_zsql(ind_mat_ou_doc='M',cod_mat_ou_doc=hdn_cod_materia)">
+           <dtml-if sequence-start>
+              <dtml-if expr="hasattr(sapl_documentos.proposicao, str(cod_proposicao) + '_signed.pdf')">
+                 <dtml-try>
+                    <dtml-call expr="modelo_proposicao.proposicao_autuar(cod_proposicao=cod_proposicao)">
+                 <dtml-else>
+                    <dtml-call expr="modelo_proposicao.requerimento_aprovar(cod_sessao_plen=cod_sessao_plen, nom_resultado=nom_resultado, cod_materia=hdn_cod_materia)">
+                 </dtml-try>
+              </dtml-if>
+           </dtml-if>
+        </dtml-in>
+     <dtml-else>
         <dtml-call expr="REQUEST.set('metodo', zsql.votacao_incluir_zsql)">
         <dtml-call expr="metodo(num_votos_sim = pysc.quantidade_presentes_sessao_plenaria_contar_pysc(cod_sessao_plen=cod_sessao_plen),
                              num_votos_nao         = txt_votos_nao,
                              num_abstencao         = txt_votos_abstencao,
-                             num_ausentes          = txt_votos_ausentes,
+                             num_ausentes          = txt_ausentes,
                              txt_observacao        = txa_txt_observacao,
                              cod_ordem             = hdn_cod_ordem,
                              cod_materia           = hdn_cod_materia,
@@ -35,8 +47,8 @@
                              cod_substitutivo      = hdn_cod_substitutivo,
                              tip_resultado_votacao = lst_tip_resultado
                             )">
-     </dtml-unless>
-     <dtml-call expr="modelo_proposicao.requerimento_aprovar(cod_sessao_plen=cod_sessao_plen, nom_resultado=nom_resultado, cod_materia=cod_materia)">
+        <dtml-call expr="modelo_proposicao.requerimento_aprovar(cod_sessao_plen=cod_sessao_plen, nom_resultado=nom_resultado, cod_materia=cod_materia)">
+     </dtml-if>
    </dtml-if>
   </dtml-in>
  </dtml-if>

@@ -188,14 +188,14 @@ inicio_sessao=<dtml-var dat_inicio_sessao missing>&num_legislatura=<dtml-var num
        </div> 
   <dtml-in expr="cadastros.sessao_plenaria.anexo_sessao.anexo_sessao_pysc(str(cod_sessao_plen), listar=True)" prefix="file">
       <dtml-if sequence-start>
-      <div class="accordion accordion-flush accordion-plus-icon mt-3" id="accordionAnexo">
+      <div class="accordion accordion-flush accordion-plus-icon mt-3" id="accordionAnexo<dtml-var cod_sessao_plen>">
          <div class="card mb-1 shadow">
-             <div class="accordion-header" id="headingDocAdm">
+             <div class="accordion-header" id="headingAnexo">
                <h5 class="my-0">
-                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseAnexo" aria-expanded="false" aria-controls="collapseAnexo">Documentos Anexados</button>
+                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseAnexo<dtml-var cod_sessao_plen>" aria-expanded="false" aria-controls="collapseAnexo<dtml-var cod_sessao_plen>">Documentos Anexados</button>
                </h5>
              </div>
-             <div id="collapseAnexo" class="collapse" aria-labelledby="headingAnexo" data-bs-parent="#accordionDocAdm">
+             <div id="collapseAnexo<dtml-var cod_sessao_plen>" class="collapse" aria-labelledby="headingAnexo" data-bs-parent="#accordionAnexo<dtml-var cod_sessao_plen>">
                  <div class="card-body">
 			<div class="table-responsive mb-0">           
 			<table class="table table-sm">

@@ -16,14 +16,14 @@
    <dtml-call expr="REQUEST.set('id_documento', str(cod_sessao_plen)+ '_' + 'ata_sessao.pdf')">
    <dtml-if "hasattr(sapl_documentos.ata_sessao,id_documento)">
       <dtml-let documento="getattr(sapl_documentos.ata_sessao,id_documento).absolute_url">
-             <a class="btn btn-light" href="<dtml-var documento>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fas fa-file-pdf"></i> <span class="">Ata da <dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao"></span></a>             
+             <a class="btn btn-sm btn-light" href="<dtml-var documento>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fas fa-file-pdf"></i> <span class="">Ata da <dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao"></span></a>             
       </dtml-let>
    </dtml-if>
     <dtml-if url_audio>
            <button type="button" class="btn btn-sm btn-light" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Reprodução de Áudio" data-src="sessao_plenaria_player_audio?url_audio=<dtml-var url_audio>&modal=1"><i class="fas fa-fw fa-volume-up"></i></i> Áudio</button>
     </dtml-if>
     <dtml-if url_video>
-         <button type="button" class="btn btn-sm btn-light" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Reprodução de Vídeo" data-src="<dtml-var url_video>"><i class="fab fa-fw fa-youtube"></i> Vídeo</button>
+         <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Reprodução de Vídeo" data-src="<dtml-var url_video>"><i class="fab fa-fw fa-youtube"></i> Vídeo</button>
     </dtml-if>
     <dtml-if url_fotos>
            <a class="btn btn-block btn-sm btn-light" href="<dtml-var url_fotos>" target="_blank"><i class="fas fa-fw fa-images"></i><span class="d-none">Fotos</span></a> 

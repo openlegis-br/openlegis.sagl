@@ -1,3 +1,35 @@
+<dtml-try>
+ <dtml-in expr="zsql.documento_administrativo_obter_zsql(cod_documento=cod_documento,ind_excluido=0)">
+  <dtml-if expr="AUTHENTICATED_USER.has_role(['Authenticated'])">
+    <dtml-in expr="zsql.usuario_obter_zsql(col_username=AUTHENTICATED_USER.getUserName())">
+       <dtml-call expr="REQUEST.set('cod_usuario_corrente', int(cod_usuario))">
+    </dtml-in>
+    <dtml-if expr="_.has_key('hdn_tramitacao')">
+       <dtml-call expr="zsql.tramitacao_administrativo_visualizacao_zsql(cod_tramitacao=hdn_tramitacao, cod_usuario=cod_usuario_corrente)">
+    </dtml-if>
+    <dtml-if expr="verifica_permissao(cod_documento=cod_documento) == True">
+       <dtml-call expr="REQUEST.set('autorizacao', 'concedido')">
+    <dtml-elif expr="ind_publico==1">
+       <dtml-call expr="REQUEST.set('autorizacao', 'concedido')">
+    <dtml-else>
+       <dtml-call expr="REQUEST.set('autorizacao', 'autenticado negado')">
+       <dtml-let mensagem="'Acesso não autorizado!'" mensagem_obs="'A tentativa do usuário ' + AUTHENTICATED_USER.getUserName() + ' foi registrada no banco de dados.'" tipo_mensagem="'danger'">
+          <dtml-var mensagem_emitir>
+       </dtml-let>
+    </dtml-if>
+  <dtml-elif expr="ind_publico==1">
+      dtml-call expr="REQUEST.set('autorizacao', 'público concedido')">
+  <dtml-else>
+    <dtml-call expr="REQUEST.set('autorizacao', 'negado')">
+    <dtml-let mensagem="'Acesso não autorizado!'" tipo_mensagem="'danger'">
+       <dtml-var mensagem_emitir>
+    </dtml-let>
+  </dtml-if>
+ </dtml-in>
+</dtml-try>
+
+<dtml-if expr="str(autorizacao)=='concedido'">
+
 <html lang="pt-br">
 <head>
     <meta charset="utf-8">
@@ -232,13 +264,16 @@
 <script src="<dtml-var portal_url>/assets/libs/jquery/jquery.min.js"></script>
 <script src="<dtml-var portal_url>/assets/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
 </html>
-    <dtml-if expr="dbcon_logs and cod_documento">
-      <dtml-call expr="zsql.logs_registrar_zsql(
-            usuario      = REQUEST['AUTHENTICATED_USER'].getUserName(), 
-            data         = DateTime(datefmt='international').strftime('%Y-%m-%d %H:%M:%S'),
-            modulo       = 'documento_administrativo',
-            metodo       = 'pasta_digital',
-            IP           = pysc.get_ip(),
-            dados        = 'acessou pasta digital',
-            cod_registro = cod_documento)"> 
-    </dtml-if>
+
+</dtml-if>
+
+<dtml-if expr="dbcon_logs and cod_documento">
+  <dtml-call expr="zsql.logs_registrar_zsql(
+        usuario      = REQUEST['AUTHENTICATED_USER'].getUserName(), 
+        data         = DateTime(datefmt='international').strftime('%Y-%m-%d %H:%M:%S'),
+        modulo       = 'documento_administrativo',
+        metodo       = 'pasta_digital',
+        IP           = pysc.get_ip(),
+        dados        = 'acessou pasta digital',
+        cod_registro = cod_documento)"> 
+</dtml-if>

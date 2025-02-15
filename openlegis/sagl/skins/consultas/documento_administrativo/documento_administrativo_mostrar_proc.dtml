@@ -7,11 +7,24 @@
     <dtml-if expr="_.has_key('hdn_tramitacao')">
        <dtml-call expr="zsql.tramitacao_administrativo_visualizacao_zsql(cod_tramitacao=hdn_tramitacao, cod_usuario=cod_usuario_corrente)">
     </dtml-if>
-    <dtml-var documento_administrativo_form>
+    <dtml-if expr="verifica_permissao(cod_documento=cod_documento) == True">
+       <dtml-var documento_administrativo_form>
+       <dtml-call expr="REQUEST.set('autorizacao', 'concedido')">
+    <dtml-elif expr="ind_publico==1">
+       <dtml-call expr="REQUEST.set('autorizacao', 'concedido')">
+       <dtml-var documento_administrativo_form>
+    <dtml-else>
+       <dtml-call expr="REQUEST.set('autorizacao', 'autenticado negado')">
+       <dtml-let mensagem="'Acesso não autorizado!'" mensagem_obs="'A tentativa do usuário ' + AUTHENTICATED_USER.getUserName() + ' foi registrada no banco de dados.'" tipo_mensagem="'danger'">
+          <dtml-var mensagem_emitir>
+       </dtml-let>
+   </dtml-if>
   <dtml-elif expr="ind_publico==1">
+      <dtml-call expr="REQUEST.set('autorizacao', 'público concedido')">
      <dtml-var documento_administrativo_form>
   <dtml-else>
-    <dtml-let mensagem="'Acesso negado!'" tipo_mensagem="'danger'">
+    <dtml-call expr="REQUEST.set('autorizacao', 'negado')">
+    <dtml-let mensagem="'Acesso não autorizado!'" tipo_mensagem="'danger'">
        <dtml-var mensagem_emitir>
     </dtml-let>
   </dtml-if>
@@ -23,12 +36,11 @@
          modulo       = str(_['REQUEST']['URL1']).split('/')[-1],
          metodo       = 'consultas/documento_administrativo_mostrar_proc',
          IP           = pysc.get_ip(),
-         dados        = 'acessou form de consulta',
+         dados        = 'Acesso ' + autorizacao + ' ao form de consulta',
          cod_registro = cod_documento)"> 
  </dtml-if>
 <dtml-except>
-  <dtml-let mensagem="'Houve um erro!'" tipo_mensagem="'danger'">
+  <dtml-let mensagem="'Houve um erro geral!'" tipo_mensagem="'danger'">
      <dtml-var mensagem_emitir>
   </dtml-let>
 </dtml-try>
-

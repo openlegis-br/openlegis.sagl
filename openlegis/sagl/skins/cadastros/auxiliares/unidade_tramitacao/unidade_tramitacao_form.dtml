@@ -208,7 +208,7 @@
 </form>
 
  <dtml-if expr="_.has_key('cod_unid_tramitacao')">
-  <dtml-in expr="zsql.usuario_unid_tram_obter_zsql(cod_unid_tramitacao=cod_unid_tramitacao)">
+  <dtml-in expr="zsql.usuario_unid_tram_obter_zsql(cod_unid_tramitacao=cod_unid_tramitacao, ind_excluido=0)">
    <dtml-if sequence-start>
      <dtml-call expr="REQUEST.set('temVinculo', 1)">
      <legend class="font-size-16 mb-3">Usuários Vinculados</legend>
@@ -221,11 +221,10 @@
        </tr>
        </thead>
    </dtml-if>
-     <dtml-in expr="zsql.usuario_obter_zsql(cod_usuario=cod_usuario)">
        <tr>
          <td>
           <dtml-if expr="AUTHENTICATED_USER.has_role(['Administrador'])">
-            <a href="<dtml-var portal_url>/cadastros/usuario/usuario_mostrar_proc?nome=<dtml-var col_username>"><dtml-var col_username></a>
+            <a href="<dtml-var portal_url>/cadastros/usuario/usuario_mostrar_proc?cod_usuario=<dtml-var cod_usuario>"><dtml-var col_username></a>
           <dtml-else>
             <dtml-var col_username>
           </dtml-if>
@@ -237,7 +236,6 @@
              <dtml-var nom_cargo missing>
          </td>
        </tr>
-     </dtml-in>
    <dtml-if sequence-end>
       </table>
    </dtml-if>

@@ -39,31 +39,31 @@
 </dtml-in>
 
 <dtml-if temMesa>
-  <div id="accordion" class="mesa">
-    <div class="card mb-4">
-      <div class="card-header" id="headingOne">
+  <div id="accordion accordion-flush accordion-plus-icon" class="mesa">
+    <div class="card mb-4 shadow">
+      <div class="card-header bg-light" id="headingOne">
         <p class="h5 mb-0">
-          <a href="#" class="d-block text-start collapsed" data-bs-toggle="collapse" data-bs-target="#collapseMesa" aria-expanded="false" aria-controls="collapseMesa"> 
+          <a href="#" class="d-block text-start collapsed" data-bs-toggle="collapse" data-bs-target="#collapseMesa" aria-expanded="true" aria-controls="collapseMesa"> 
             <i class="fa float-right pt-1 align-self-center" aria-hidden="true"></i>
-             <span class="h6 font-weight-bold"><dtml-var expr="sapl_documentos.props_sagl.nome_mesa"></span>
+             <span class="h5 font-weight-bold"><dtml-var expr="sapl_documentos.props_sagl.nome_mesa"></span>
           </a>
         </p>
       </div>
-      <div id="collapseMesa" class="collapse" aria-labelledby="headingOne" data-parent=".mesa">
+      <div id="collapseMesa" class="collapse show" aria-labelledby="headingOne" data-parent=".mesa">
         <div class="card-body">
-        <dtml-in expr="zsql.composicao_mesa_sessao_obter_zsql(cod_sessao_plen=cod_sessao_plen,ind_excluido=0)">
-         <dtml-in expr="zsql.parlamentar_obter_zsql(cod_parlamentar=cod_parlamentar, ind_excluido=0)">
-          <dtml-in expr="zsql.cargo_mesa_obter_zsql(cod_cargo=cod_cargo, ind_excluido=0)">
-            <dtml-if cod_sessao_leg>
-              <p><b><dtml-var des_cargo>: </b><dtml-var nom_parlamentar> / <dtml-var sgl_partido missing null=""></p>
-            </dtml-if>
+          <dtml-in expr="zsql.composicao_mesa_sessao_obter_zsql(cod_sessao_plen=cod_sessao_plen,ind_excluido=0)">
+           <dtml-in expr="zsql.parlamentar_obter_zsql(cod_parlamentar=cod_parlamentar, ind_excluido=0)">
+            <dtml-in expr="zsql.cargo_mesa_obter_zsql(cod_cargo=cod_cargo, ind_excluido=0)">
+              <dtml-if cod_sessao_leg>
+                <p><b><dtml-var des_cargo>: </b><dtml-var nom_parlamentar> / <dtml-var sgl_partido missing null=""></p>
+              </dtml-if>
+            </dtml-in>
+           </dtml-in>
           </dtml-in>
-         </dtml-in>
-        </dtml-in>
-     </div>
         </div>
       </div>
     </div>
+  </div>
 </dtml-if>
 
 <dtml-in expr="zsql.presenca_sessao_obter_zsql(cod_sessao_plen=cod_sessao_plen, ind_excluido=0)">
@@ -75,15 +75,15 @@
 <dtml-if temPresencaAbertura>
   <div id="accordion" class="presenca">
     <div class="card mb-4">
-      <div class="card-header" id="headingOne">
+      <div class="card-header bg-light" id="headingOne">
         <p class="h5 mb-0">
-          <a href="#" class="d-block text-start collapsed" data-bs-toggle="collapse" data-bs-target="#collapsePres" aria-expanded="false" aria-controls="collapsePres"> 
+          <a href="#" class="d-block text-start collapsed" data-bs-toggle="collapse" data-bs-target="#collapsePres" aria-expanded="true" aria-controls="collapsePres"> 
             <i class="fa float-right pt-1 align-self-center" aria-hidden="true"></i>
-             <span class="h6 font-weight-bold">Chamada da Abertura</span>
+             <span class="h5 font-weight-bold">Chamada da Abertura</span>
           </a>
         </p>
       </div>
-      <div id="collapsePres" class="collapse" aria-labelledby="headingOne" data-parent=".presenca">
+      <div id="collapsePres" class="collapse show" aria-labelledby="headingOne" data-parent=".presenca">
         <div class="card-body">
          <dtml-in expr="zsql.presenca_sessao_obter_zsql(cod_sessao_plen=cod_sessao_plen, tip_frequencia='P', ind_excluido=0)">
             <dtml-if sequence-start>
@@ -132,15 +132,15 @@
 <dtml-if temExpedienteDiverso>
   <div id="accordion" class="diversos">
     <div class="card mb-4">
-      <div class="card-header" id="headingOne">
+      <div class="card-header bg-light" id="headingOne">
         <p class="h5 mb-0">
-          <a href="#" class="d-block text-start collapsed" data-bs-toggle="collapse" data-bs-target="#collapseDiv" aria-expanded="false" aria-controls="collapseDiv"> 
+          <a href="#" class="d-block text-start collapsed" data-bs-toggle="collapse" data-bs-target="#collapseDiv" aria-expanded="true" aria-controls="collapseDiv"> 
             <i class="fa float-right pt-1 align-self-center" aria-hidden="true"></i>
-             <span class="h6 font-weight-bold">Expedientes Diversos</span>
+             <span class="h5 font-weight-bold">Expedientes Diversos</span>
           </a>
         </p>
       </div>
-      <div id="collapseDiv" class="collapse" aria-labelledby="headingOne" data-parent=".diversos">
+      <div id="collapseDiv" class="collapse show" aria-labelledby="headingOne" data-parent=".diversos">
         <div class="card-body">      
          <table class="table">
            <dtml-in expr="zsql.tipo_expediente_obter_zsql(ind_excluido=0)">
@@ -165,6 +165,7 @@
         </div>
       </div>
    </div>
+  </div>
 </dtml-if>
 
 
@@ -177,15 +178,15 @@
 <dtml-if temMateriaApresentada>
   <div id="accordion" class="leitura">
     <div class="card mb-4">
-      <div class="card-header" id="headingOne">
+      <div class="card-header bg-light" id="headingOne">
         <p class="h5 mb-0">
-          <a href="#" class="d-block text-start collapsed" data-bs-toggle="collapse" data-bs-target="#collapseLeit" aria-expanded="false" aria-controls="collapseLeit"> 
+          <a href="#" class="d-block text-start collapsed" data-bs-toggle="collapse" data-bs-target="#collapseLeit" aria-expanded="true" aria-controls="collapseLeit"> 
             <i class="fa float-right pt-1 align-self-center" aria-hidden="true"></i>
-             <span class="h6 font-weight-bold">Objeto de Deliberação / Encaminhar para Comissão</span>
+             <span class="h5 font-weight-bold">Leitura de Matérias</span>
           </a>
         </p>
       </div>
-      <div id="collapseLeit" class="collapse" aria-labelledby="headingOne" data-parent=".leitura">
+      <div id="collapseLeit" class="collapse show" aria-labelledby="headingOne" data-parent=".leitura">
         <div class="card-body"> 
     <table class="table table-striped">
         <dtml-in expr="zsql.materia_apresentada_sessao_obter_zsql(cod_sessao_plen = cod_sessao_plen, ind_excluido=0)">
@@ -308,15 +309,15 @@
 <dtml-if temMateriaExpediente>
   <div id="accordion" class="expediente">
     <div class="card mb-4">
-      <div class="card-header" id="headingOne">
+      <div class="card-header bg-light" id="headingOne">
         <p class="h5 mb-0">
-          <a href="#" class="d-block text-start collapsed" data-bs-toggle="collapse" data-bs-target="#collapseExp" aria-expanded="false" aria-controls="collapseExp"> 
+          <a href="#" class="d-block text-start collapsed" data-bs-toggle="collapse" data-bs-target="#collapseExp" aria-expanded="true" aria-controls="collapseExp"> 
             <i class="fa float-right pt-1 align-self-center" aria-hidden="true"></i>
-             <span class="h6 font-weight-bold">Matérias do Expediente</span>
+             <span class="h5 font-weight-bold">Matérias do Expediente</span>
           </a>
         </p>
       </div>
-      <div id="collapseExp" class="collapse" aria-labelledby="headingOne" data-parent=".expediente">
+      <div id="collapseExp" class="collapse show" aria-labelledby="headingOne" data-parent=".expediente">
         <div class="card-body">
     <div class="table-responsive">
     <table class="table table-striped datatable w-100">
@@ -409,6 +410,7 @@
         </tr>
         </dtml-in>
     </table>
+      </div>
          </div>
         </div>
       </div>
@@ -424,15 +426,15 @@
 <dtml-if temOradorExpediente>
   <div id="accordion" class="oradores">
     <div class="card mb-4">
-      <div class="card-header" id="headingOne">
+      <div class="card-header bg-light" id="headingOne">
         <p class="h5 mb-0">
-          <a href="#" class="d-block text-start collapsed" data-bs-toggle="collapse" data-bs-target="#collapseOra" aria-expanded="false" aria-controls="collapseOra"> 
+          <a href="#" class="d-block text-start collapsed" data-bs-toggle="collapse" data-bs-target="#collapseOra" aria-expanded="true" aria-controls="collapseOra"> 
             <i class="fa float-right pt-1 align-self-center" aria-hidden="true"></i>
-             <span class="h6 font-weight-bold">Oradores</span>
+             <span class="h5 font-weight-bold">Oradores</span>
           </a>
         </p>
       </div>
-      <div id="collapseOra" class="collapse" aria-labelledby="headingOne" data-parent=".expediente">
+      <div id="collapseOra" class="collapse show" aria-labelledby="headingOne" data-parent=".expediente">
         <div class="card-body">
     <div class="table-responsive">        
     <table class="table table-striped">
@@ -478,6 +480,7 @@
         </dtml-in>
         </dtml-in>
     </table>
+           </div>
          </div>
         </div>
       </div>
@@ -493,15 +496,15 @@
 <dtml-if temPresencaOrdemDia>
   <div id="accordion" class="pres1">
     <div class="card mb-4">
-      <div class="card-header" id="headingOne">
+      <div class="card-header bg-light" id="headingOne">
         <p class="h5 mb-0">
-          <a href="#" class="d-block text-start collapsed" data-bs-toggle="collapse" data-bs-target="#collapsePres1" aria-expanded="false" aria-controls="collapsePres1"> 
+          <a href="#" class="d-block text-start collapsed" data-bs-toggle="collapse" data-bs-target="#collapsePres1" aria-expanded="true" aria-controls="collapsePres1"> 
             <i class="fa float-right pt-1 align-self-center" aria-hidden="true"></i>
-             <span class="h6 font-weight-bold">Chamada da Ordem do Dia</span>
+             <span class="h5 font-weight-bold">Chamada da Ordem do Dia</span>
           </a>
         </p>
       </div>
-      <div id="collapsePres1" class="collapse" aria-labelledby="headingOne" data-parent=".pres1">
+      <div id="collapsePres1" class="collapse show" aria-labelledby="headingOne" data-parent=".pres1">
         <div class="card-body"> 
          <dtml-in expr="zsql.presenca_ordem_dia_obter_zsql(dat_sessao=dat_sessao, cod_sessao_plen=cod_sessao_plen, tip_frequencia='P', ind_excluido=0)">
             <dtml-if sequence-start>
@@ -550,15 +553,15 @@
 <dtml-if temMateriaOrdemDia>
   <div id="accordion" class="ord">
     <div class="card mb-4">
-      <div class="card-header" id="headingOne">
+      <div class="card-header bg-light" id="headingOne">
         <p class="h5 mb-0">
-          <a href="#" class="d-block text-start collapsed" data-bs-toggle="collapse" data-bs-target="#collapseOrd" aria-expanded="false" aria-controls="collapseOrd"> 
+          <a href="#" class="d-block text-start collapsed" data-bs-toggle="collapse" data-bs-target="#collapseOrd" aria-expanded="true" aria-controls="collapseOrd"> 
             <i class="fa float-right pt-1 align-self-center" aria-hidden="true"></i>
-             <span class="h6 font-weight-bold">Matérias da Ordem do Dia</span>
+             <span class="h5 font-weight-bold">Matérias da Ordem do Dia</span>
           </a>
         </p>
       </div>
-      <div id="collapseOrd" class="collapse" aria-labelledby="headingOne" data-parent=".ord">
+      <div id="collapseOrd" class="collapse show" aria-labelledby="headingOne" data-parent=".ord">
         <div class="card-body"> 
     <div class="table-responsive">  
     <table class="table table-striped">
@@ -793,7 +796,8 @@
                   </td>
    </dtml-if>
        </dtml-in>
-    </table>
+    </table> 
+          </div>
          </div>
         </div>
       </div>
@@ -809,15 +813,15 @@
 <dtml-if temOradorGrandeExpediente>
   <div id="accordion" class="pess">
     <div class="card mb-4">
-      <div class="card-header" id="headingOne">
+      <div class="card-header bg-light" id="headingOne">
         <p class="h5 mb-0">
-          <a href="#" class="d-block text-start collapsed" data-bs-toggle="collapse" data-bs-target="#collapsePess" aria-expanded="false" aria-controls="collapsePess"> 
+          <a href="#" class="d-block text-start collapsed" data-bs-toggle="collapse" data-bs-target="#collapsePess" aria-expanded="true" aria-controls="collapsePess"> 
             <i class="fa float-right pt-1 align-self-center" aria-hidden="true"></i>
-             <span class="h6 font-weight-bold">Explicações Pessoais</span>
+             <span class="h5 font-weight-bold">Explicações Pessoais</span>
           </a>
         </p>
       </div>
-      <div id="collapsePess" class="collapse" aria-labelledby="headingOne" data-parent=".pess">
+      <div id="collapsePess" class="collapse show" aria-labelledby="headingOne" data-parent=".pess">
         <div class="card-body"> 
     <div class="table-responsive">
     <table class="table">
@@ -868,8 +872,8 @@
 <dtml-if hr_fim_sessao>
   <div class="row mb-3">
     <div class="col-12 mb-3">
-      <b>Encerramento:</b> 
-         às <dtml-var hr_fim_sessao null=""> hs
+      <span class="h5">Encerramento:</span>
+         <dtml-var hr_fim_sessao null=""> hs
     </div>
   </div>
 </dtml-if>

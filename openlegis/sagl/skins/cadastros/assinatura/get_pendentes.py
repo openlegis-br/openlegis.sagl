@@ -71,6 +71,7 @@ def get_info(codigo, tipo_doc, anexo):
                tipo_documento = 'Matéria Legislativa - Tramitação'
                for materia in context.zsql.materia_obter_zsql(cod_materia=metodo.cod_materia):
                    materia = str(materia.des_tipo_materia)+ ' nº ' + str(materia.num_ident_basica)+'/'+str(materia.ano_ident_basica) + ' - ' + str(materia.txt_ementa)
+               nom_usuario = ''
                for usuario in context.zsql.usuario_obter_zsql(cod_usuario = metodo.cod_usuario_local):
                   nom_usuario = usuario.nom_completo
                descricao = 'Despacho de ' + str(nom_usuario) + ' - ' + str(metodo.des_status) +  ' - '  + str(materia)
@@ -148,6 +149,7 @@ def get_info(codigo, tipo_doc, anexo):
                tipo_documento = 'Processo Administrativo - Tramitação'
                for documento in context.zsql.documento_administrativo_obter_zsql(cod_documento=metodo.cod_documento):
                    documento = str(documento.sgl_tipo_documento) +' '+ str(documento.num_documento)+'/'+str(documento.ano_documento) + ' - ' + str(documento.txt_interessado) + ' - ' + str(documento.txt_assunto)
+               nom_usuario = ''
                for usuario in context.zsql.usuario_obter_zsql(cod_usuario = metodo.cod_usuario_local):
                    nom_usuario = usuario.nom_completo
                descricao = 'Despacho de ' + str(nom_usuario) + ' - ' + str(metodo.des_status) +  ' - '  + str(documento)

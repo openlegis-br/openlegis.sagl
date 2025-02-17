@@ -2114,8 +2114,6 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
                       pdf.manage_permission('View', roles=['Manager','Authenticated'], acquire=0)
                    else:
                       pdf.manage_permission('View', roles=['Manager','Anonymous'], acquire=1)
-               else:
-                   pdf.manage_permission('View', roles=['Manager','Anonymous'], acquire=1)
         elif tipo_doc == 'doc_acessorio':
            for documento in self.zsql.documento_acessorio_obter_zsql(cod_documento=codigo):
                if str(documento.ind_publico) == '1':

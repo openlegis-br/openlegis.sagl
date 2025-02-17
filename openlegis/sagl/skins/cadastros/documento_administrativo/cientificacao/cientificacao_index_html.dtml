@@ -9,9 +9,11 @@
         <select class="select2 form-select" id="lst_unidade" name="lst_unidade" data-live-search="true" style="width:100%">
           <option value="">Todas</option> 
                  <dtml-in expr="zsql.unidade_tramitacao_obter_zsql()">
+                    <dtml-if expr="ind_leg!=0 or ind_adm!=0">
                        <option value="<dtml-var cod_unid_tramitacao>">
                          <dtml-var nom_unidade_join>
                        </option>
+                    </dtml-if>
                  </dtml-in>                 
           </option>
         </select>
@@ -54,7 +56,7 @@
      </thead>
    </dtml-if sequence-start>
    <tr>
-      <td><dtml-var expr="DateTime(dat_envio, datefmt='international').strftime('%d/%m/%Y %Hh%M')">, por <dtml-in expr="zsql.usuario_obter_zsql(cod_usuario=cod_cientificador)"><dtml-var col_username></dtml-in></td>
+      <td><dtml-var expr="DateTime(dat_envio, datefmt='international').strftime('%d/%m/%Y %Hh%M')">, por <dtml-in expr="zsql.usuario_obter_zsql(cod_usuario=cod_cientificador)" mapping><dtml-var col_username></dtml-in></td>
       <td><dtml-in expr="zsql.usuario_obter_zsql(cod_usuario=cod_cientificado)"><dtml-var nom_completo></dtml-in></td>
       <td>
          <dtml-if expr="dat_expiracao != None">

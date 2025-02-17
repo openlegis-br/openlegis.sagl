@@ -26,8 +26,11 @@ usuarioArray.append(dic)
 for usuario in usuarios:
     usuarioDict = {}
     for field in fields:
-                usuarioDict['name'] = usuario['nom_completo']
-                usuarioDict['id'] = usuario['cod_usuario']
+        nom_cargo = ''
+        if usuario['nom_cargo'] != '':
+           nom_cargo = ' (' + usuario['nom_cargo'] + ')'    
+        usuarioDict['name'] = usuario['nom_completo'] + nom_cargo
+        usuarioDict['id'] = usuario['cod_usuario']
     usuarioArray.append(usuarioDict)
 usuarioArray.sort(key=lambda dic: dic['name'])
 listaDic.update({'options': usuarioArray})

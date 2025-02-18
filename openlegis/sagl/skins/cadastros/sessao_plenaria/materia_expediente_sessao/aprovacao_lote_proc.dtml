@@ -29,6 +29,7 @@
            <dtml-if sequence-start>
               <dtml-if expr="hasattr(sapl_documentos.proposicao, str(cod_proposicao) + '_signed.pdf')">
                  <dtml-call expr="modelo_proposicao.proposicao_autuar(cod_proposicao=cod_proposicao)">
+                 <dtml-call expr="modelo_proposicao.requerimento_aprovar(cod_sessao_plen=cod_sessao_plen, nom_resultado=nom_resultado, cod_materia=hdn_cod_materia)">
               </dtml-if>
            </dtml-if>
         </dtml-in>
@@ -37,6 +38,7 @@
               <dtml-call expr="REQUEST.set('filename', str(cod_assinatura_doc) + '.pdf')">
               <dtml-if expr="hasattr(sapl_documentos.documentos_assinados, filename)">
                  <dtml-call expr="modelo_proposicao.margem_inferior(codigo=codigo, anexo=anexo, tipo_doc=tipo_doc, cod_assinatura_doc=cod_assinatura_doc, cod_usuario=cod_usuario, filename=filename)">
+                 <dtml-call expr="modelo_proposicao.requerimento_aprovar(cod_sessao_plen=cod_sessao_plen, nom_resultado=nom_resultado, cod_materia=hdn_cod_materia)">
               </dtml-if>
            </dtml-if>
         </dtml-in>
@@ -45,13 +47,13 @@
               <dtml-call expr="REQUEST.set('filename', str(cod_assinatura_doc) + '.pdf')">
               <dtml-if expr="hasattr(sapl_documentos.documentos_assinados, filename)">
                  <dtml-call expr="modelo_proposicao.margem_inferior(codigo=codigo, anexo=anexo, tipo_doc=tipo_doc, cod_assinatura_doc=cod_assinatura_doc, cod_usuario=cod_usuario, filename=filename)">
+                 <dtml-call expr="modelo_proposicao.requerimento_aprovar(cod_sessao_plen=cod_sessao_plen, nom_resultado=nom_resultado, cod_materia=hdn_cod_materia)">
               </dtml-if>
            </dtml-if>
         </dtml-in>
-        <dtml-call expr="modelo_proposicao.requerimento_aprovar(cod_sessao_plen=cod_sessao_plen, nom_resultado=nom_resultado, cod_materia=hdn_cod_materia)">
-     <dtml-else>
-        <dtml-call expr="REQUEST.set('metodo', zsql.votacao_incluir_zsql)">
-        <dtml-call expr="metodo(num_votos_sim = pysc.quantidade_presentes_sessao_plenaria_contar_pysc(cod_sessao_plen=cod_sessao_plen),
+     </dtml-if>
+     <dtml-unless temVotacao>
+        <dtml-call expr="zsql.votacao_incluir_zsql(num_votos_sim = pysc.quantidade_presentes_sessao_plenaria_contar_pysc(cod_sessao_plen=cod_sessao_plen),
                              num_votos_nao         = txt_votos_nao,
                              num_abstencao         = txt_votos_abstencao,
                              num_ausentes          = txt_ausentes,
@@ -64,7 +66,7 @@
                              tip_resultado_votacao = lst_tip_resultado
                             )">
         <dtml-call expr="modelo_proposicao.requerimento_aprovar(cod_sessao_plen=cod_sessao_plen, nom_resultado=nom_resultado, cod_materia=cod_materia)">
-     </dtml-if>
+     </dtml-unless>
    </dtml-if>
   </dtml-in>
  </dtml-if>

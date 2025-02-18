@@ -21,6 +21,9 @@ elif REQUEST['AUTHENTICATED_USER'].has_role(['Authenticated']):
        else:
           cod_usuario = None
    if cod_usuario != None:
+      # permissao para autor de peticao
+      for documento in context.zsql.peticao_obter_zsql(cod_usuario=cod_usuario, cod_documento=cod_documento, ind_excluido=0):
+          can_view = True 
       # permissao no tipo de documento
       for documento in context.zsql.documento_administrativo_obter_zsql(cod_documento=cod_documento, ind_excluido=0):
           if context.zsql.usuario_tipo_documento_obter_zsql(tip_documento=documento.tip_documento, cod_usuario=cod_usuario, ind_excluido=0):

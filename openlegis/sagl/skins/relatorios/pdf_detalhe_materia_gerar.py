@@ -10,19 +10,23 @@ def cabecalho(dic_inf_basicas,imagem):
     Função que gera o código rml do cabeçalho da página
     """
     tmp=''
-    tmp+='\t\t\t\t<image x="3.1cm" y="26.9cm" width="60" height="60" file="' + imagem + '"/>\n'
-    tmp+='\t\t\t\t<lines>3.3cm 26.3cm 19.5cm 26.3cm</lines>\n'
-    tmp+='\t\t\t\t<setFont name="Helvetica-Bold" size="15"/>\n'
-    tmp+='\t\t\t\t<drawString x="6.7cm" y="28.1cm">' + dic_inf_basicas['nom_camara'] + '</drawString>\n'
-    tmp+='\t\t\t\t<setFont name="Helvetica" size="11"/>\n'
-    tmp+='\t\t\t\t<drawString x="6.7cm" y="27.6cm">' + dic_inf_basicas['nom_estado'] + '</drawString>\n'
+    tmp=''
+    if dic_inf_basicas['custom_image'] == True:
+       tmp+='\t\t\t\t<image x="3.1cm" y="26.9cm" width="350" height="67" file="' + imagem + '"/>\n'
+       tmp+='\t\t\t\t<lines>3.3cm 26.3cm 19.5cm 26.3cm</lines>\n'
+    elif inf_basicas_dic['custom_image'] == False:
+       tmp+='\t\t\t\t<image x="3.1cm" y="26.9cm" width="60" height="60" file="' + imagem + '"/>\n'
+       tmp+='\t\t\t\t<lines>3.3cm 26.3cm 19.5cm 26.3cm</lines>\n'
+       tmp+='\t\t\t\t<setFont name="Helvetica-Bold" size="15"/>\n'
+       tmp+='\t\t\t\t<drawString x="6.7cm" y="28.1cm">' + dic_inf_basicas['nom_casa'] + '</drawString>\n'
+       tmp+='\t\t\t\t<setFont name="Helvetica" size="11"/>\n'
+       tmp+='\t\t\t\t<drawString x="6.7cm" y="27.6cm">' + dic_inf_basicas['nom_estado'] + '</drawString>\n'
     return tmp
 
 def rodape(dic_rodape):
     """
     Função que gera o codigo rml do rodape da pagina.
     """
-
     tmp=''
     linha1 = dic_rodape['end_casa']
     if dic_rodape['end_casa']!="" and dic_rodape['end_casa']!=None:

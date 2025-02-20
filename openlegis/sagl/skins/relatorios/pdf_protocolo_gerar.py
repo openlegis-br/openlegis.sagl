@@ -4,31 +4,39 @@ from trml2pdf import parseString
 from xml.sax.saxutils import escape
 import time
 
-def cabecalho(inf_basicas_dic,imagem):
+def cabecalho(dic_cabecalho,imagem):
     """Gera o codigo rml do cabecalho"""
     tmp_data=''
-    tmp_data+='\t\t\t\t<image x="4cm" y="26.7cm" width="70" height="70" file="' + imagem + '"/>\n'
-    tmp_data+='\t\t\t\t<lines>3.3cm 26.3cm 19.5cm 26.3cm</lines>\n'
-    tmp_data+='\t\t\t\t<setFont name="Helvetica-Bold" size="15"/>\n'
-    tmp_data+='\t\t\t\t<drawString x="6.7cm" y="28.1cm">' + dic_cabecalho['nom_casa'] + '</drawString>\n'
-    tmp_data+='\t\t\t\t<setFont name="Helvetica" size="11"/>\n'
-    tmp_data+='\t\t\t\t<drawString x="6.7cm" y="27.6cm">' + dic_cabecalho['nom_estado'] + '</drawString>\n'
-    tmp_data+='\t\t\t\t<setFont name="Helvetica-Bold" size="12"/>\n'
-    tmp_data+='\t\t\t\t<drawCentredString x="11.5cm" y="25.6cm">Relatório de Protocolos</drawCentredString>\n'
-
+    if dic_cabecalho['custom_image'] == True:
+       tmp_data+='\t\t\t\t<image x="3.1cm" y="26.9cm" width="350" height="67" file="' + imagem + '"/>\n'
+       tmp_data+='\t\t\t\t<lines>3.3cm 26.3cm 19.5cm 26.3cm</lines>\n'
+    elif dic_cabecalho['custom_image'] == False:
+       tmp_data+='\t\t\t\t<image x="3.1cm" y="26.9cm" width="60" height="60" file="' + imagem + '"/>\n'
+       tmp_data+='\t\t\t\t<lines>3.3cm 26.3cm 19.5cm 26.3cm</lines>\n'
+       tmp_data+='\t\t\t\t<setFont name="Helvetica-Bold" size="15"/>\n'
+       tmp_data+='\t\t\t\t<drawString x="6.7cm" y="28.1cm">' + dic_cabecalho['nom_casa'] + '</drawString>\n'
+       tmp_data+='\t\t\t\t<setFont name="Helvetica" size="11"/>\n'
+       tmp_data+='\t\t\t\t<drawString x="6.7cm" y="27.6cm">' + dic_cabecalho['nom_estado'] + '</drawString>\n'
+    tmp_data+='\t\t\t\t<setFont name="Helvetica-Bold" size="11"/>\n'
+    tmp_data+='\t\t\t\t<drawCentredString x="11.5cm" y="25.6cm">RELATÓRIO DE PROTOCOLOS</drawCentredString>\n'
     return tmp_data
 
 def rodape(lst_rodape):
     """Gera o codigo rml do rodape"""
 
     tmp_data=''
-    tmp_data+='\t\t\t\t<lines>3.3cm 2.2cm 19.5cm 2.2cm</lines>\n'
-    tmp_data+='\t\t\t\t<setFont name="Helvetica" size="8"/>\n'
-    tmp_data+='\t\t\t\t<drawString x="3.3cm" y="2.4cm">' + lst_rodape[2] + '</drawString>\n'
-    tmp_data+='\t\t\t\t<drawString x="18.4cm" y="2.4cm">Página <pageNumber/></drawString>\n'
-    tmp_data+='\t\t\t\t<drawCentredString x="11.5cm" y="1.7cm">' + lst_rodape[0] + '</drawCentredString>\n'
-    tmp_data+='\t\t\t\t<drawCentredString x="11.5cm" y="1.3cm">' + lst_rodape[1] + '</drawCentredString>\n'
-
+    if dic_cabecalho['custom_image'] == True:
+       tmp_data+='\t\t\t\t<lines>3.3cm 2.0cm 19.5cm 2.0cm</lines>\n'
+       tmp_data+='\t\t\t\t<setFont name="Helvetica" size="8"/>\n'
+       tmp_data+='\t\t\t\t<drawString x="3.3cm" y="2.2cm">' + lst_rodape[2] + '</drawString>\n'
+       tmp_data+='\t\t\t\t<drawString x="18.4cm" y="2.2cm">Página <pageNumber/></drawString>\n'
+    elif dic_cabecalho['custom_image'] == False:
+       tmp_data+='\t\t\t\t<lines>3.3cm 2.0cm 19.5cm 2.0cm</lines>\n'
+       tmp_data+='\t\t\t\t<setFont name="Helvetica" size="8"/>\n'
+       tmp_data+='\t\t\t\t<drawString x="3.3cm" y="2.2cm">' + lst_rodape[2] + '</drawString>\n'
+       tmp_data+='\t\t\t\t<drawString x="18.4cm" y="2.2cm">Página <pageNumber/></drawString>\n'
+       tmp_data+='\t\t\t\t<drawCentredString x="11.5cm" y="1.6cm">' + lst_rodape[0] + '</drawCentredString>\n'
+       tmp_data+='\t\t\t\t<drawCentredString x="11.5cm" y="1.2cm">' + lst_rodape[1] + '</drawCentredString>\n'
     return tmp_data
 
 def paraStyle():

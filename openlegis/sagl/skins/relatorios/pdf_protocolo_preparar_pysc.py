@@ -47,11 +47,16 @@ cabecalho={}
 cabecalho["nom_casa"]=casa["nom_casa"]
 cabecalho["nom_estado"]="Estado de "+nom_estado
 
-# tenta buscar o logotipo da casa LOGO_CASA
-if hasattr(context.sapl_documentos.props_sagl,'logo_casa.gif'):
-  imagem = context.sapl_documentos.props_sagl['logo_casa.gif'].absolute_url()
+#tenta buscar o logotipo da casa LOGO_CASA
+if hasattr(context.sapl_documentos.props_sagl,'cabecalho.png'):
+   imagem = context.sapl_documentos.props_sagl['cabecalho.png'].absolute_url()
+   cabecalho["custom_image"]=True
+elif hasattr(context.sapl_documentos.props_sagl,'logo_casa.gif'):
+   imagem = context.sapl_documentos.props_sagl['logo_casa.gif'].absolute_url()
+   cabecalho["custom_image"]=False
 else:
-  imagem = context.imagens.absolute_url() + "/brasao.gif"
+   imagem = context.imagens.absolute_url() + "/brasao.gif"
+   cabecalho["custom_image"]=False
 
 #Por fim, utiliza o PythonScript para pesquisar os protocolos e gerar os dados
 

@@ -14,14 +14,6 @@ request=context.REQUEST
 response=request.RESPONSE
 session=request.SESSION
 
-cabecalho={}
-
-#tenta buscar o logotipo da casa LOGO_CASA
-if hasattr(context.sapl_documentos.props_sagl,'logo_casa.gif'):
-  imagem = context.sapl_documentos.props_sagl['logo_casa.gif'].absolute_url()
-else:
-  imagem = context.imagens.absolute_url() + "/brasao.gif"
-
 #abaixo é gerado o dic do rodapé da página
 casa={}
 aux=context.sapl_documentos.props_sagl.propertyItems()
@@ -44,6 +36,17 @@ REQUEST=context.REQUEST
 for local in context.zsql.localidade_obter_zsql(cod_localidade = casa['cod_localidade']):
   rodape['nom_localidade']= "   "+local.nom_localidade
   rodape['sgl_uf']= local.sgl_uf
+
+#tenta buscar o logotipo da casa LOGO_CASA
+if hasattr(context.sapl_documentos.props_sagl,'cabecalho.png'):
+   imagem = context.sapl_documentos.props_sagl['cabecalho.png'].absolute_url()
+   inf_basicas_dic["custom_image"]=True
+elif hasattr(context.sapl_documentos.props_sagl,'logo_casa.gif'):
+   imagem = context.sapl_documentos.props_sagl['logo_casa.gif'].absolute_url()
+   inf_basicas_dic["custom_image"]=False
+else:
+   imagem = context.imagens.absolute_url() + "/brasao.gif"
+   inf_basicas_dic["custom_image"]=False
 
 cod_tramitacao=hdn_cod_tramitacao
 

@@ -6,16 +6,20 @@ from trml2pdf import parseString
 from xml.sax.saxutils import escape
 from html2rml import html2rml
 
+
 def cabecalho(inf_basicas_dic,imagem):
     """
     Função que gera o código rml do cabeçalho da página
     """
     tmp=''
-    tmp+='\t\t\t\t<image x="3.1cm" y="26.9cm" width="60" height="60" file="' + imagem + '"/>\n'
-    tmp+='\t\t\t\t<setFont name="Helvetica-Bold" size="15"/>\n'
-    tmp+='\t\t\t\t<drawString x="6.7cm" y="28.1cm">' + inf_basicas_dic['nom_camara'] + '</drawString>\n'
-    tmp+='\t\t\t\t<setFont name="Helvetica" size="11"/>\n'
-    tmp+='\t\t\t\t<drawString x="6.7cm" y="27.6cm">' + inf_basicas_dic['nom_estado'] + '</drawString>\n'
+    if inf_basicas_dic['custom_image'] == True:
+       tmp+='\t\t\t\t<image x="3.1cm" y="26.9cm" width="350" height="67" file="' + imagem + '"/>\n'
+    elif inf_basicas_dic['custom_image'] == False:
+       tmp+='\t\t\t\t<image x="3.1cm" y="26.9cm" width="74" height="60" file="' + imagem + '"/>\n'
+       tmp+='\t\t\t\t<setFont name="Helvetica-Bold" size="15"/>\n'
+       tmp+='\t\t\t\t<drawString x="6.7cm" y="28.1cm">' + inf_basicas_dic['nom_camara'] + '</drawString>\n'
+       tmp+='\t\t\t\t<setFont name="Helvetica" size="11"/>\n'
+       tmp+='\t\t\t\t<drawString x="6.7cm" y="27.6cm">' + inf_basicas_dic['nom_estado'] + '</drawString>\n'
     if str(tramitacao_dic['id_materia']) != "" and str(tramitacao_dic['id_materia']) != None:
         tmp+='\t\t\t\t<setFont name="Helvetica-Bold" size="12"/>\n'
     return tmp
@@ -24,31 +28,7 @@ def rodape(dic_rodape):
     """
     Função que gera o codigo rml do rodape da pagina.
     """
-
     tmp=''
-    linha1 = dic_rodape['end_casa']
-    if dic_rodape['end_casa']!="" and dic_rodape['end_casa']!=None:
-        linha1 = linha1 + " - "
-    if dic_rodape['num_cep']!="" and dic_rodape['num_cep']!=None:
-        linha1 = linha1 + "CEP " + dic_rodape['num_cep']
-    if dic_rodape['nom_localidade']!="" and dic_rodape['nom_localidade']!=None:
-        linha1 = linha1 + " - " + dic_rodape['nom_localidade']
-    if dic_rodape['sgl_uf']!="" and dic_rodape['sgl_uf']!=None:
-        inha1 = linha1 + " " + dic_rodape['sgl_uf']
-    if dic_rodape['num_tel']!="" and dic_rodape['num_tel']!=None:
-        linha1 = linha1 + " Tel: "+ dic_rodape['num_tel']
-    if dic_rodape['end_web_casa']!="" and dic_rodape['end_web_casa']!=None:
-        linha2 = dic_rodape['end_web_casa']
-    if dic_rodape['end_email_casa']!="" and dic_rodape['end_email_casa']!=None:
-        linha2 = linha2 + " - E-mail: " + dic_rodape['end_email_casa']
-    if dic_rodape['data_emissao']!="" and dic_rodape['data_emissao']!=None:
-        data_emissao = dic_rodape['data_emissao']
-
-#    tmp+='\t\t\t\t<lines>3.3cm 2.2cm 19.5cm 2.2cm</lines>\n'
-#    tmp+='\t\t\t\t<setFont name="Helvetica" size="8"/>\n'
-#    tmp+='\t\t\t\t<drawString x="3.3cm" y="2.4cm">' + data_emissao + '</drawString>\n'
-#    tmp+='\t\t\t\t<drawString x="18.4cm" y="1cm">Página <pageNumber/></drawString>\n'
-
     return tmp
 
 def paraStyle():

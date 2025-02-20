@@ -6,19 +6,20 @@ import time
 
 def cabecalho(dic_cabecalho,dat_reuniao,imagem):
     """Gera o codigo rml do cabecalho"""
-
     tmp=''
-    tmp+='\t\t\t\t<image x="4.1cm" y="26.9cm" width="74" height="60" file="' + imagem + '"/>\n'
-    tmp+='\t\t\t\t<lines>3.3cm 26.3cm 19.5cm 26.3cm</lines>\n'
-    tmp+='\t\t\t\t<setFont name="Helvetica-Bold" size="15"/>\n'
-    tmp+='\t\t\t\t<drawString x="6.7cm" y="28.1cm">' + dic_cabecalho['nom_casa'] + '</drawString>\n'
-    tmp+='\t\t\t\t<setFont name="Helvetica" size="11"/>\n'
-    tmp+='\t\t\t\t<drawString x="6.7cm" y="27.6cm">' + 'Estado de ' + dic_cabecalho['nom_estado'] + '</drawString>\n'
+    if dic_cabecalho['custom_image'] == True:
+       tmp+='\t\t\t\t<image x="3.1cm" y="26.9cm" width="350" height="67" file="' + imagem + '"/>\n'
+    elif dic_cabecalho['custom_image'] == False:
+       tmp+='\t\t\t\t<image x="2.5cm" y="27.4cm" width="74" height="60" file="' + imagem + '"/>\n'
+       tmp+='\t\t\t\t<lines>1.7cm 27.1cm 19.3cm 27.1cm</lines>\n'
+       tmp+='\t\t\t\t<setFont name="Helvetica-Bold" size="15"/>\n'
+       tmp+='\t\t\t\t<drawString x="6cm" y="28.5cm">' + dic_cabecalho["nom_casa"] + '</drawString>\n'
+       tmp+='\t\t\t\t<setFont name="Helvetica" size="11"/>\n'
+       tmp+='\t\t\t\t<drawString x="6cm" y="28cm">' + 'Estado de ' + dic_cabecalho["nom_estado"] + '</drawString>\n'
     return tmp
 
 def rodape(lst_rodape):
     """ Gera o codigo rml do rodape"""
-
     tmp=''
     tmp=''
     tmp+='\t\t\t\t<lines>3.3cm 2.2cm 19.5cm 2.2cm</lines>\n'
@@ -27,9 +28,7 @@ def rodape(lst_rodape):
     tmp+='\t\t\t\t<drawString x="18.4cm" y="2.4cm">Página <pageNumber/></drawString>\n'
     tmp+='\t\t\t\t<drawCentredString x="11.5cm" y="1.7cm">' + lst_rodape[0] + '</drawCentredString>\n'
     tmp+='\t\t\t\t<drawCentredString x="11.5cm" y="1.3cm">' + lst_rodape[1] + '</drawCentredString>\n'
-
     return tmp
-
 
 def paraStyle():
     """ Gera o codigo rml que define o estilo dos paragrafos"""

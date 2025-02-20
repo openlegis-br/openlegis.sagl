@@ -178,11 +178,16 @@ for uf in estado:
 cabecalho["nom_casa"] = casa["nom_casa"]
 cabecalho["nom_estado"] = nom_estado
 
-# tenta buscar o logotipo da casa LOGO_CASA
-if hasattr(context.sapl_documentos.props_sagl,'logo_casa.gif'):
+#tenta buscar o logotipo da casa LOGO_CASA
+if hasattr(context.sapl_documentos.props_sagl,'cabecalho.png'):
+   imagem = context.sapl_documentos.props_sagl['cabecalho.png'].absolute_url()
+   cabecalho["custom_image"]=True
+elif hasattr(context.sapl_documentos.props_sagl,'logo_casa.gif'):
    imagem = context.sapl_documentos.props_sagl['logo_casa.gif'].absolute_url()
+   cabecalho["custom_image"]=False
 else:
    imagem = context.imagens.absolute_url() + "/brasao.gif"
+   cabecalho["custom_image"]=False
    
 # monta o rodapé da página
 num_cep = casa["num_cep"]

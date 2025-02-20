@@ -6,30 +6,36 @@ from trml2pdf import parseString
 from io import BytesIO
 from xml.sax.saxutils import escape
 
-def cabecalho(dic_cabecalho, imagem):
+def cabecalho(dic_cabecalho,imagem):
     """Gera o codigo rml do cabecalho"""
     tmp=''
-    tmp+='\t\t\t\t<image x="2.5cm" y="27.4cm" width="74" height="60" file="' + imagem + '"/>\n'
-    tmp+='\t\t\t\t<lines>1.7cm 27.1cm 19.3cm 27.1cm</lines>\n'
-    tmp+='\t\t\t\t<setFont name="Helvetica-Bold" size="15"/>\n'
-    tmp+='\t\t\t\t<drawString x="6cm" y="28.5cm">' + dic_cabecalho["nom_casa"] + '</drawString>\n'
-    tmp+='\t\t\t\t<setFont name="Helvetica" size="11"/>\n'
-    tmp+='\t\t\t\t<drawString x="6cm" y="28cm">' + 'Estado de ' + dic_cabecalho["nom_estado"] + '</drawString>\n'
+    if dic_cabecalho['custom_image'] == True:
+       tmp+='\t\t\t\t<image x="2cm" y="26.9cm" width="350" height="67" file="' + imagem + '"/>\n'
+    elif dic_cabecalho['custom_image'] == False:
+       tmp+='\t\t\t\t<image x="2.5cm" y="27.4cm" width="74" height="60" file="' + imagem + '"/>\n'
+       tmp+='\t\t\t\t<lines>1.7cm 27.1cm 19.3cm 27.1cm</lines>\n'
+       tmp+='\t\t\t\t<setFont name="Helvetica-Bold" size="15"/>\n'
+       tmp+='\t\t\t\t<drawString x="6cm" y="28.5cm">' + dic_cabecalho["nom_casa"] + '</drawString>\n'
+       tmp+='\t\t\t\t<setFont name="Helvetica" size="11"/>\n'
+       tmp+='\t\t\t\t<drawString x="6cm" y="28cm">' + 'Estado de ' + dic_cabecalho["nom_estado"] + '</drawString>\n'
+
     return tmp
 
 def rodape(dic_rodape):
-    """ Gera o codigo rml do rodape"""
+    """Gera o codigo rml do rodape"""
     tmp=''
-    tmp=''
-    tmp+='\t\t\t\t<lines>1.7cm 1.3cm 19.3cm 1.3cm</lines>\n'
-    tmp+='\t\t\t\t<setFont name="Helvetica" size="8"/>\n'
-    tmp+='\t\t\t\t<drawString x="1.7cm" y="1.4cm">' + dic_rodape[2] + '</drawString>\n'
-    tmp+='\t\t\t\t<drawString x="18.1cm" y="1.4cm">Página <pageNumber/></drawString>\n'
-    tmp+='\t\t\t\t<drawCentredString x="10.5cm" y="0.9cm">' + dic_rodape[0] + '</drawCentredString>\n'
-    tmp+='\t\t\t\t<drawCentredString x="10.5cm" y="0.6cm">' + dic_rodape[1] + '</drawCentredString>\n'
-
+    if dic_cabecalho['custom_image'] == True:
+       tmp+='\t\t\t\t<setFont name="Helvetica" size="8"/>\n'
+       tmp+='\t\t\t\t<drawString x="1.7cm" y="1cm">' + dic_rodape[2] + '</drawString>\n'
+       tmp+='\t\t\t\t<drawString x="18.1cm" y="1cm">Página <pageNumber/></drawString>\n'
+    elif dic_cabecalho['custom_image'] == False:
+       tmp+='\t\t\t\t<lines>1.7cm 1.2cm 19.3cm 1.2cm</lines>\n'
+       tmp+='\t\t\t\t<setFont name="Helvetica" size="8"/>\n'
+       tmp+='\t\t\t\t<drawString x="1.7cm" y="1.4cm">' + dic_rodape[2] + '</drawString>\n'
+       tmp+='\t\t\t\t<drawString x="18.1cm" y="1.4cm">Página <pageNumber/></drawString>\n'
+       tmp+='\t\t\t\t<drawCentredString x="10.5cm" y="0.8cm">' + dic_rodape[0] + '</drawCentredString>\n'
+       tmp+='\t\t\t\t<drawCentredString x="10.5cm" y="0.5cm">' + dic_rodape[1] + '</drawCentredString>\n'
     return tmp
-
 
 def paraStyle():
     """ Gera o codigo rml que define o estilo dos paragrafos"""

@@ -491,6 +491,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
              arq = getattr(self.sapl_documentos.pauta_sessao, str(cod_sessao_plen) + '_pauta_sessao.pdf')
              arquivo = BytesIO(bytes(arq.data))
              texto_anexo = pymupdf.open(stream=arquivo)
+             texto_anexo.bake()
              merger.insert_pdf(texto_anexo)
           lst_materia = []
           for materia in self.zsql.ordem_dia_obter_zsql(cod_sessao_plen=pauta.cod_sessao_plen,ind_excluido=0):
@@ -503,11 +504,13 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
                  arq = getattr(self.sapl_documentos.materia, str(cod_materia) + '_redacao_final.pdf')
                  arquivo = BytesIO(bytes(arq.data))
                  texto_anexo = pymupdf.open(stream=arquivo)
+                 texto_anexo.bake()
                  merger.insert_pdf(texto_anexo)
               elif hasattr(self.sapl_documentos.materia, str(cod_materia) + '_texto_integral.pdf'):
                    arq = getattr(self.sapl_documentos.materia, str(cod_materia) + '_texto_integral.pdf')
                    arquivo = BytesIO(bytes(arq.data))
                    texto_anexo = pymupdf.open(stream=arquivo)
+                   texto_anexo.bake()
                    merger.insert_pdf(texto_anexo)
                    for anexada in self.zsql.anexada_obter_zsql(cod_materia_principal=cod_materia,ind_excluido=0):
                        anexada = anexada.cod_materia_anexada
@@ -515,6 +518,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
                           arq = getattr(self.sapl_documentos.materia, str(anexada) + '_texto_integral.pdf')
                           arquivo = BytesIO(bytes(arq.data))
                           texto_anexo = pymupdf.open(stream=arquivo)
+                          texto_anexo.bake()
                           merger.insert_pdf(texto_anexo)
                    for subst in self.zsql.substitutivo_obter_zsql(cod_materia=cod_materia,ind_excluido=0):
                        substitutivo = subst.cod_substitutivo
@@ -522,6 +526,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
                           arq = getattr(self.sapl_documentos.substitutivo, str(substitutivo) + '_substitutivo.pdf')
                           arquivo = BytesIO(bytes(arq.data))
                           texto_anexo = pymupdf.open(stream=arquivo)
+                          texto_anexo.bake()
                           merger.insert_pdf(texto_anexo)
                    for eme in self.zsql.emenda_obter_zsql(cod_materia=cod_materia,ind_excluido=0):
                        emenda = eme.cod_emenda
@@ -529,6 +534,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
                           arq = getattr(self.sapl_documentos.emenda, str(emenda) + '_emenda.pdf')
                           arquivo = BytesIO(bytes(arq.data))
                           texto_anexo = pymupdf.open(stream=arquivo)
+                          texto_anexo.bake()
                           merger.insert_pdf(texto_anexo)
                    for relat in self.zsql.relatoria_obter_zsql(cod_materia=cod_materia,ind_excluido=0):
                        for tipo in self.zsql.tipo_fim_relatoria_obter_zsql(tip_fim_relatoria = relat.tip_fim_relatoria):
@@ -538,6 +544,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
                                 arq = getattr(self.sapl_documentos.parecer_comissao, str(relatoria) + '_parecer.pdf')
                                 arquivo = BytesIO(bytes(arq.data))
                                 texto_anexo = pymupdf.open(stream=arquivo)
+                                texto_anexo.bake()
                                 merger.insert_pdf(texto_anexo)
           merged_pdf = merger.tobytes(deflate=True, garbage=3, use_objstms=1)
           existing_pdf = pymupdf.open(stream=merged_pdf)
@@ -573,6 +580,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
              arq = getattr(self.sapl_documentos.pauta_sessao, str(cod_sessao_plen) + '_pauta_expediente.pdf')
              arquivo = BytesIO(bytes(arq.data))
              texto_anexo = pymupdf.open(stream=arquivo)
+             texto_anexo.bake()
              merger.insert_pdf(texto_anexo)
           for item in self.zsql.materia_apresentada_sessao_obter_zsql(cod_sessao_plen = pauta.cod_sessao_plen, ind_excluido = 0):
               if item.cod_materia != None:
@@ -580,30 +588,35 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
                     arq = getattr(self.sapl_documentos.materia, str(item.cod_materia) + '_texto_integral.pdf')
                     arquivo = BytesIO(bytes(arq.data))
                     texto_anexo = pymupdf.open(stream=arquivo)
+                    texto_anexo.bake()
                     merger.insert_pdf(texto_anexo)
               elif item.cod_emenda != None:
                    if hasattr(self.sapl_documentos.emenda, str(item.cod_emenda) + '_emenda.pdf'):
                       arq = getattr(self.sapl_documentos.emenda, str(item.cod_emenda) + '_emenda.pdf')
                       arquivo = BytesIO(bytes(arq.data))
                       texto_anexo = pymupdf.open(stream=arquivo)
+                      texto_anexo.bake()
                       merger.insert_pdf(texto_anexo)
               elif item.cod_substitutivo != None:
                    if hasattr(self.sapl_documentos.substitutivo, str(item.cod_substitutivo) + '_substitutivo.pdf'):
                       arq = getattr(self.sapl_documentos.substitutivo, str(item.cod_substitutivo) + '_substitutivo.pdf')
                       arquivo = BytesIO(bytes(arq.data))
                       texto_anexo = pymupdf.open(stream=arquivo)
+                      texto_anexo.bake()
                       merger.insert_pdf(texto_anexo)
               elif item.cod_parecer != None:
                    if hasattr(self.sapl_documentos.parecer_comissao, str(item.cod_parecer) + '_parecer.pdf'):
                       arq = getattr(self.sapl_documentos.parecer_comissao, str(item.cod_parecer) + '_parecer.pdf')
                       arquivo = BytesIO(bytes(arq.data))
                       texto_anexo = pymupdf.open(stream=arquivo)
+                      texto_anexo.bake()
                       merger.insert_pdf(texto_anexo)
               elif item.cod_documento != None:
                    if hasattr(self.sapl_documentos.administrativo, str(item.cod_documento) + '_texto_integral.pdf'):
                       arq = getattr(self.sapl_documentos.administrativo, str(item.cod_documento) + '_texto_integral.pdf')
                       arquivo = BytesIO(bytes(arq.data))
                       texto_anexo = pymupdf.open(stream=arquivo)
+                      texto_anexo.bake()
                       merger.insert_pdf(texto_anexo)
           for item in self.zsql.expediente_materia_obter_zsql(cod_sessao_plen = pauta.cod_sessao_plen, ind_excluido = 0):
               if item.cod_materia != None:
@@ -611,12 +624,14 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
                     arq = getattr(self.sapl_documentos.materia, str(item.cod_materia) + '_texto_integral.pdf')
                     arquivo = BytesIO(bytes(arq.data))
                     texto_anexo = pymupdf.open(stream=arquivo)
+                    texto_anexo.bake()
                     merger.insert_pdf(texto_anexo)
               elif item.cod_parecer != None:
                    if hasattr(self.sapl_documentos.parecer_comissao, str(item.cod_parecer) + '_parecer.pdf'):
                       arq = getattr(self.sapl_documentos.parecer_comissao, str(item.cod_parecer) + '_parecer.pdf')
                       arquivo = BytesIO(bytes(arq.data))
                       texto_anexo = pymupdf.open(stream=arquivo)
+                      texto_anexo.bake()
                       merger.insert_pdf(texto_anexo)
           merged_pdf = merger.tobytes(deflate=True, garbage=3, use_objstms=1)
           existing_pdf = pymupdf.open(stream=merged_pdf)

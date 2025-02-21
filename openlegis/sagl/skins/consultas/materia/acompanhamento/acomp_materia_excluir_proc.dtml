@@ -5,48 +5,39 @@
 </dtml-if>
 
 <dtml-if erro>
-     <dtml-var header_html>
-     <table class="table"  border=0 align="center"> 
-      <tr><td colspan="2" class="titulo"></td></tr>
-      <tr>
-       <td width="20%" class="exclama" align="center"> ! </td>   
-       <td width="80%">Houve um erro ao localizar seu e-mail<br />
-      </td></tr>
-     </table>
-     <dtml-var js_slot>
-<dtml-var footer_html>
+   <dtml-var header_html> 
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <h6 class="fw-bolder font-size-14 mt-2 mb-1">Não foi possível localizar seu endereço e-mail!</h6>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+   <dtml-var js_slot>
+   <dtml-var footer_html>
 </dtml-if>
 
 <dtml-unless erro>
 
-<dtml-try>
-        <dtml-call expr="REQUEST.set('ind_excluido', 1)">
-        <dtml-call expr="metodo(txt_hash            = txt_hash,
-                                ind_excluido        = ind_excluido)">
-    <dtml-except>
-     <dtml-var header_html>
-     <table class="table"  border=0 align="center"> 
-      <tr><td colspan="2" class="titulo"></td></tr>
-      <tr>
-       <td width="20%" class="exclama" align="center"> ! </td>   
-       <td width="80%">Houve um erro<br />
-      </td></tr>
-     </table>
-     <dtml-var js_slot>
-<dtml-var footer_html>
+   <dtml-try>
+      <dtml-call expr="REQUEST.set('ind_excluido', 1)">
+         <dtml-call expr="metodo(txt_hash            = txt_hash,
+                                 ind_excluido        = ind_excluido)">
+   <dtml-except>
+      <dtml-var header_html>
+      <div class="alert alert-danger alert-dismissible fade show" role="alert">
+         <h6 class="fw-bolder font-size-14 mt-2 mb-1">Houve um erro!</h6>
+         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+      <dtml-var js_slot>
+      <dtml-var footer_html>
 
-    <dtml-else>
-     <dtml-var header_html>
-     <table class="table"  border=0 align="center"> 
-      <tr><td colspan="2" class="titulo"></td></tr>
-      <tr>
-       <td width="20%" class="exclama" align="center"> ! </td>   
-       <td width="80%">E-mail exclu&iacute;do com sucesso<br />
-      </td></tr>
-     </table>
-     <dtml-var js_slot>
-<dtml-var footer_html>
+   <dtml-else>
+      <dtml-var header_html>
+      <div class="alert alert-success alert-dismissible fade show" role="alert">
+         <h6 class="fw-bolder font-size-14 mt-2 mb-1">Endereço de e-mail removido com sucesso!</h6>
+         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+      <dtml-var js_slot>
+      <dtml-var footer_html>
 
-</dtml-try>
+   </dtml-try>
 
 </dtml-unless>

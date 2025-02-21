@@ -2217,7 +2217,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
 
     def requerimento_aprovar(self, cod_sessao_plen, nom_resultado, cod_materia):
         id_sessao = ''
-        data = ''
+        data = DateTime().strftime('%d/%m/%Y')
         data1 = DateTime().strftime('%Y/%m/%d')
         nom_presidente = ''
         # obtem dados da sessao

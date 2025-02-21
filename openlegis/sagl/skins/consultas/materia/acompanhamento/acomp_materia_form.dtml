@@ -37,12 +37,12 @@
   </div>
   <div class="row mb-2">  
     <div class="col-12">
-      <dtml-var txt_ementa>    
+      <b>Ementa</b>: <dtml-var txt_ementa>    
     </div>
   </div>    
   <div class="row mb-3">  
     <div class="col-12">
-       Autoria:
+       <b>Autoria</b>:
       <dtml-in expr="zsql.autoria_obter_zsql(cod_materia=cod_materia)">
          <dtml-var nom_autor_join><dtml-unless sequence-end>,</dtml-unless>
       </dtml-in>  
@@ -50,14 +50,12 @@
   </div>         
 </dtml-in>
 
-<hr />
-
 <form action="acomp_materia_salvar_proc" name="acomp_materia_form" method="post">
   <input type="hidden" name="hdn_cod_materia" value="<dtml-var cod_materia>" />
   <input type="hidden" name="modal" value="1" />  
   <div class="row">
     <div class="col-12 mb-3">
-       <label class="form-label" for="txt_end_email" class="form-label required">E-mail </label>
+       <label class="form-label required" for="txt_end_email" class="form-label required">Endereço de E-mail </label>
        <input class="form-control" type="text" id="txt_end_email" name="txt_end_email" maxlength="100" required/>
     </div>
    </div>

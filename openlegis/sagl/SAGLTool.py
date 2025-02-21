@@ -2218,6 +2218,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
     def requerimento_aprovar(self, cod_sessao_plen, nom_resultado, cod_materia):
         id_sessao = ''
         data = ''
+        data1 = DateTime().strftime('%Y/%m/%d')
         nom_presidente = ''
         # obtem dados da sessao
         if cod_sessao_plen != '0' and cod_sessao_plen != '':
@@ -2230,11 +2231,11 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
            for composicao in self.zsql.composicao_mesa_sessao_obter_zsql(cod_sessao_plen=cod_sessao_plen, cod_cargo=1, ind_excluido=0):
                for parlamentar in self.zsql.parlamentar_obter_zsql(cod_parlamentar=composicao.cod_parlamentar):
                    nom_presidente = str(parlamentar.nom_parlamentar.upper())
-           if nom_presidente == '':
-              for sleg in self.zsql.periodo_comp_mesa_obter_zsql(data=data1):
-                  for cod_presidente in self.zsql.composicao_mesa_obter_zsql(cod_periodo_comp=sleg.cod_periodo_comp, cod_cargo=1):
-                      for presidencia in self.zsql.parlamentar_obter_zsql(cod_parlamentar=cod_presidente.cod_parlamentar):
-                          nom_presidente = str(presidencia.nom_parlamentar.upper())
+        if nom_presidente == '':
+           for sleg in self.zsql.periodo_comp_mesa_obter_zsql(data=data1):
+               for cod_presidente in self.zsql.composicao_mesa_obter_zsql(cod_periodo_comp=sleg.cod_periodo_comp, cod_cargo=1):
+                   for presidencia in self.zsql.parlamentar_obter_zsql(cod_parlamentar=cod_presidente.cod_parlamentar):
+                       nom_presidente = str(presidencia.nom_parlamentar.upper())
         # dados carimbo
         texto = "%s" % (str(nom_resultado.upper()))
         sessao = "%s - %s" % (id_sessao, data)

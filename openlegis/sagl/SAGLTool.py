@@ -883,6 +883,32 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
            self.temp_folder.manage_delObjects(ids=output_file_pdf)
         self.temp_folder.manage_addFile(id=output_file_pdf, file=data)
 
+    def capa_norma_gerar_odt(self, capa_dic, action):
+        arq = getattr(self.sapl_documentos.modelo.norma, "capa_norma.odt")
+        template_file = BytesIO(bytes(arq.data))
+        brasao_file = self.get_brasao()
+        exec('brasao = brasao_file')
+        output_file_odt = "%s" % capa_dic['nom_arquivo_odt']
+        output_file_pdf = "%s" % capa_dic['nom_arquivo_pdf']
+        renderer = Renderer(template_file, locals(), output_file_odt, pythonWithUnoPath='/usr/bin/python3',forceOoCall=True)
+        renderer.run()
+        with open(output_file_odt, 'rb') as data:
+           odtFile = BytesIO(data.read())
+        os.unlink(output_file_odt)
+        renderer = Renderer(odtFile,locals(),output_file_pdf,pythonWithUnoPath='/usr/bin/python3',forceOoCall=True)
+        renderer.run()
+        with open(output_file_pdf, 'rb') as dados:
+           data = BytesIO(dados.read())
+        os.unlink(output_file_pdf)
+        if action == 'gerar':
+           if hasattr(self.temp_folder,output_file_pdf):
+              self.temp_folder.manage_delObjects(ids=output_file_pdf)
+           self.temp_folder.manage_addFile(id=output_file_pdf, file=data)
+        elif action == 'download':
+           self.REQUEST.RESPONSE.setHeader('Content-Type', 'application/pdf')
+           self.REQUEST.RESPONSE.setHeader('Content-Disposition','inline; filename=%s' %output_file_pdf)
+           return data
+
     def materia_gerar_odt(self, inf_basicas_dic, num_proposicao, nom_arquivo, des_tipo_materia, num_ident_basica, num_materia, ano_ident_basica, ano_materia, txt_ementa, materia_vinculada, dat_apresentacao, nom_autor, apelido_autor, subscritores, modelo_proposicao):
         arq = getattr(self.sapl_documentos.modelo.materia, modelo_proposicao)
         template_file = BytesIO(bytes(arq.data))

@@ -33,13 +33,23 @@ class ProcessoNorma(grok.View):
             processo_integral = norma.sgl_tipo_norma+'-'+str(norma.num_norma)+'-'+str(norma.ano_norma)+'.pdf'
             id_processo = norma.sgl_tipo_norma + ' ' + str(norma.num_norma) + '/' +str(norma.ano_norma)
             id_norma = norma.des_tipo_norma + ' nº ' + str(norma.num_norma) + '/' +str(norma.ano_norma)
-
+            id_capa = 'capa_' + norma.sgl_tipo_norma+'-'+str(norma.num_norma)+'-'+str(norma.ano_norma)
+            id_arquivo = "%s.pdf" % str(id_capa)
             nom_arquivo_compilado = str(cod_norma) + '_texto_consolidado.pdf'
             nom_arquivo = str(cod_norma) + '_texto_integral.pdf'
+
+            self.context.modelo_proposicao.capa_norma(cod_norma=norma.cod_norma, action='gerar')
+            if hasattr(self.context.temp_folder, id_arquivo):
+               dic = {}
+               dic["data"] = DateTime(norma.dat_norma, datefmt='international').strftime('%Y-%m-%d 00:00:01')
+               dic['path'] = self.context.temp_folder
+               dic['file'] = id_arquivo
+               dic['title'] = 'Capa da Norma'
+               lst_arquivos.append(dic)
             
             if hasattr(self.context.sapl_documentos.norma_juridica, nom_arquivo_compilado):
                dic = {}
-               dic["data"] = DateTime(norma.dat_norma, datefmt='international').strftime('%Y-%m-%d 00:00:01')
+               dic["data"] = DateTime(norma.dat_norma, datefmt='international').strftime('%Y-%m-%d 00:00:02')
                dic['path'] = self.context.sapl_documentos.norma_juridica
                dic['file'] = nom_arquivo_compilado
                dic['title'] = 'Texto Compilado'
@@ -47,7 +57,7 @@ class ProcessoNorma(grok.View):
 
             if hasattr(self.context.sapl_documentos.norma_juridica, nom_arquivo):
                dic = {}
-               dic["data"] = DateTime(norma.dat_norma, datefmt='international').strftime('%Y-%m-%d 00:00:02')
+               dic["data"] = DateTime(norma.dat_norma, datefmt='international').strftime('%Y-%m-%d 00:00:03')
                dic['path'] = self.context.sapl_documentos.norma_juridica
                dic['file'] = nom_arquivo
                dic['title'] = id_norma
@@ -57,7 +67,7 @@ class ProcessoNorma(grok.View):
                 nom_anexo = str(cod_norma) + '_anexo_' + anexo.cod_anexo 
                 if hasattr(self.context.sapl_documentos.norma_juridica, nom_anexo):
                    dic = {}
-                   dic["data"] = DateTime(norma.dat_norma, datefmt='international').strftime('%Y-%m-%d 00:00:02') + anexo.cod_anexo
+                   dic["data"] = DateTime(norma.dat_norma, datefmt='international').strftime('%Y-%m-%d 00:00:03') + anexo.cod_anexo
                    dic['path'] = self.context.sapl_documentos.norma_juridica
                    dic['file'] = nom_anexo
                    dic['title'] = anexo.txt_descricao

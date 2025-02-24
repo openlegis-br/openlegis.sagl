@@ -42,9 +42,11 @@ class EmailDoc(grok.View):
             cod_usuario = user.cod_usuario
             usuario = user.nom_completo
             cargo_usuario = user.nom_cargo
+            email_usuario = user.end_email
 
         msg = EmailMessage()
         msg['From'] = '%s <%s>' % (casa_legislativa, email_casa)
+        msg['reply-to'] = '%s <%s>' % (usuario, email_usuario)
 
         recipients = []
         destinatarios = []
@@ -82,8 +84,12 @@ class EmailDoc(grok.View):
                if recipients.index(e) == i
            ]
 
-           msg['To'] = ", ".join(recipients)
-           
+           if len(recipients) > 1:
+              msg['To'] = '%s <%s>' % (casa_legislativa, email_casa)
+              msg['Bcc'] = ", ".join(recipients)
+           else:
+              msg['To'] = ", ".join(recipients)
+            
            for documento in self.context.zsql.documento_administrativo_obter_zsql(cod_documento=cod_documento):
                nom_anexo = str(documento.sgl_tipo_documento)+'-'+str(documento.num_documento)+'-'+str(documento.ano_documento)+'.pdf'
                id_processo = str(documento.des_tipo_documento)+' n° '+str(documento.num_documento)+'/'+str(documento.ano_documento)
@@ -203,7 +209,11 @@ class EmailDoc(grok.View):
                if recipients.index(e) == i
            ]
 
-           msg['To'] = ", ".join(recipients)
+           if len(recipients) > 1:
+              msg['To'] = '%s <%s>' % (casa_legislativa, email_casa)
+              msg['Bcc'] = ", ".join(recipients)
+           else:
+              msg['To'] = ", ".join(recipients)
 
            for materia in self.context.zsql.materia_obter_zsql(cod_materia=cod_materia):
                nom_anexo = str(materia.sgl_tipo_materia)+'-'+str(materia.num_ident_basica)+'-'+str(materia.ano_ident_basica)+'.pdf'
@@ -280,5 +290,3 @@ class EmailDoc(grok.View):
         else:
             for item in msg[1]:
                 self.context.zsql.destinatario_oficio_enviar_zsql(cod_destinatario=item,cod_usuario=msg[2])
-        
-        #return msg[0]

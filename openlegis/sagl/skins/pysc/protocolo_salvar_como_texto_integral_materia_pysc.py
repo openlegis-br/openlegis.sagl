@@ -17,10 +17,14 @@ try:
         tmp_copy = context.sapl_documentos.protocolo.manage_copyObjects(ids=str(cod_protocolo)+'_protocolo.pdf')
         tmp_id = context.sapl_documentos.materia.manage_pasteObjects(tmp_copy)[0]['new_id']
         context.sapl_documentos.materia.manage_renameObjects(ids=list([tmp_id]),new_ids=list([id]))
+        documento = getattr(context.sapl_documentos.materia,id)
+        documento.manage_permission('View', roles=['Anonymous','Manager'], acquire=1)
         ok = 1
 except KeyError:
     tmp_copy = context.sapl_documentos.protocolo.manage_copyObjects(ids=str(cod_protocolo)+ '_protocolo.pdf')
     tmp_id = context.sapl_documentos.materia.manage_pasteObjects(tmp_copy)[0]['new_id']
     context.sapl_documentos.materia.manage_renameObjects(ids=list([tmp_id]),new_ids=list([id]))
+    documento = getattr(context.sapl_documentos.materia,id)
+    documento.manage_permission('View', roles=['Anonymous','Manager'], acquire=1)
     ok = 1
 return ok

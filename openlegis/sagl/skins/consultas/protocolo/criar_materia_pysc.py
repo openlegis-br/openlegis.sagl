@@ -36,10 +36,14 @@ def criar_materia(tip_materia, num_ident_basica, ano_materia, dat_apresentacao, 
        tmp_copy = context.sapl_documentos.protocolo.manage_copyObjects(ids=id_protocolo_signed)
        tmp_id = context.sapl_documentos.materia.manage_pasteObjects(tmp_copy)[0]['new_id']
        context.sapl_documentos.materia.manage_renameObjects(ids=list([tmp_id]),new_ids=list([id_materia]))
+       documento = getattr(context.sapl_documentos.materia,id_materia)
+       documento.manage_permission('View', roles=['Anonymous','Manager'], acquire=1)
     elif hasattr(context.sapl_documentos.protocolo,id_protocolo):
        tmp_copy = context.sapl_documentos.protocolo.manage_copyObjects(ids=id_protocolo)
        tmp_id = context.sapl_documentos.materia.manage_pasteObjects(tmp_copy)[0]['new_id']
        context.sapl_documentos.materia.manage_renameObjects(ids=list([tmp_id]),new_ids=list([id_materia]))
+       documento = getattr(context.sapl_documentos.materia,id_materia)
+       documento.manage_permission('View', roles=['Anonymous','Manager'], acquire=1)
     if context.dbcon_logs:
        context.zsql.logs_registrar_zsql(usuario = REQUEST['AUTHENTICATED_USER'].getUserName(), data = DateTime(datefmt='international').strftime('%Y-%m-%d %H:%M:%S'), modulo = 'materia', metodo = 'materia_incluir_zsql', cod_registro = cod_materia, IP = context.pysc.get_ip())
     return inserir_autoria(cod_materia, cod_autor)

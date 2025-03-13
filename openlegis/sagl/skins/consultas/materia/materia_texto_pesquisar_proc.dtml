@@ -90,13 +90,13 @@
 
    <li class="list-group-item">
     <div class="row">
-      <div class="col-12">
+      <div class="col-12 col-md-10 d-flex align-self-start">
                <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia'])">
                  <a href="<dtml-var portal_url>/cadastros/materia/materia_mostrar_proc?cod_materia=<dtml-var cod_materia>">
                <dtml-else>
                  <a href="<dtml-var portal_url>/consultas/materia/materia_mostrar_proc?cod_materia=<dtml-var expr="pysc.b64encode_pysc(codigo=cod_materia)">" >
                </dtml-if>
-              <span class="h6 font-weight-bold text-uppercase"><i class="fas fa-caret-right"></i> <dtml-var des_tipo_materia> nº <dtml-var num_ident_basica>/<dtml-var ano_ident_basica></span></a> <dtml-if expr="ind_tramitacao == 1"><span class="badge badge-primary float-right">Tramitando</span></dtml-if>              
+               <span class="h6 font-size-14 font-weight-bold text-uppercase mb-1"><dtml-var des_tipo_materia> nº <dtml-var num_ident_basica>/<dtml-var ano_ident_basica></span></a>
       </div>
     </div>
 

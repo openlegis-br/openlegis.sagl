@@ -10,6 +10,8 @@
 request=context.REQUEST
 response=request.RESPONSE
 
+lst_materia_apresentada=[]
+
 lst_autores_requerimentos = []
 lst_requerimentos = []
 lst_qtde_requerimentos = []
@@ -52,6 +54,84 @@ for sessao in context.zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=cod_sessao
      for periodo in context.zsql.periodo_sessao_obter_zsql(cod_periodo=sessao.cod_periodo_sessao):
          pauta_dic["num_periodo"] = periodo.num_periodo
 
+  # Leitura de Matérias
+  for materia_apresentada in context.zsql.materia_apresentada_sessao_obter_zsql(cod_sessao_plen=sessao.cod_sessao_plen, ind_excluido=0):
+      # materias principais
+      if materia_apresentada.cod_materia != None:
+         materia = context.zsql.materia_obter_zsql(cod_materia=materia_apresentada.cod_materia)[0]
+         autores = context.zsql.autoria_obter_zsql(cod_materia=materia_apresentada.cod_materia)
+         fields = list(autores.data_dictionary().keys())
+         lista_autor = []
+         for autor in autores:
+             for field in fields:
+                 nome_autor = autor['nom_autor_join']
+             lista_autor.append(nome_autor)
+         dic_materia = {}
+         dic_materia["num_ordem"] = materia_apresentada.num_ordem
+         dic_materia["id_materia"] = '<link href="' + context.sapl_documentos.absolute_url() + '/materia/' + str(materia.cod_materia) + '_texto_integral.pdf' + '">'+materia.des_tipo_materia +' nº '+ str(materia.num_ident_basica)+'/'+str(materia.ano_ident_basica)+'</link>'
+         dic_materia['autoria'] = ', '.join(['%s' % (value) for (value) in lista_autor])
+         dic_materia['txt_ementa'] = context.pysc.convert_unicode_pysc(texto=str(materia.txt_ementa))
+         lst_materia_apresentada.append(dic_materia)
+      # emendas
+      elif materia_apresentada.cod_emenda != None:
+           for emenda in context.zsql.emenda_obter_zsql(cod_emenda=materia_apresentada.cod_emenda):
+               materia = context.zsql.materia_obter_zsql(cod_materia=emenda.cod_materia)[0]
+               autores = context.zsql.autoria_emenda_obter_zsql(cod_emenda=emenda.cod_emenda)
+               fields = list(autores.data_dictionary().keys())
+               lista_autor = []
+               for autor in autores:
+                   for field in fields:
+                       nome_autor = autor['nom_autor_join']
+                   lista_autor.append(nome_autor)
+               dic_materia = {}
+               dic_materia["num_ordem"] = materia_apresentada.num_ordem
+               dic_materia["id_materia"] = '<link href="' + context.sapl_documentos.absolute_url() + '/emenda/' + str(materia_apresentada.cod_emenda) + '_emenda.pdf' + '">' + 'Emenda ' + emenda.des_tipo_emenda + ' nº ' + str(emenda.num_emenda) + " ao " +  materia.sgl_tipo_materia +' ' + str(materia.num_ident_basica) + '/' + str(materia.ano_ident_basica) + '</link>'
+               dic_materia['autoria'] = ', '.join(['%s' % (value) for (value) in lista_autor]) 
+               dic_materia['txt_ementa'] = emenda.txt_ementa
+           lst_materia_apresentada.append(dic_materia)
+      # substitutivos
+      elif materia_apresentada.cod_substitutivo != None:
+           for substitutivo in context.zsql.substitutivo_obter_zsql(cod_substitutivo=materia_apresentada.cod_substitutivo):
+               materia = context.zsql.materia_obter_zsql(cod_materia=substitutivo.cod_materia)[0]
+               autores = context.zsql.autoria_substitutivo_obter_zsql(cod_substitutivo=substitutivo.cod_substitutivo)
+               fields = list(autores.data_dictionary().keys())
+               lista_autor = []
+               for autor in autores:
+                   for field in fields:
+                       nome_autor = autor['nom_autor_join']
+                   lista_autor.append(nome_autor)
+               dic_materia = {}
+               dic_materia["num_ordem"] = materia_apresentada.num_ordem
+               dic_materia["id_materia"] = '<link href="' + context.sapl_documentos.absolute_url() + '/substitutivo/' + str(materia_apresentada.cod_substitutivo) + '_substitutivo.pdf' + '">' + 'Substitutivo nº ' + str(substitutivo.num_substitutivo) + " ao " +  materia.sgl_tipo_materia + ' ' + str(materia.num_ident_basica) + '/' + str(materia.ano_ident_basica) + '</link>'
+               dic_materia['autoria'] = ', '.join(['%s' % (value) for (value) in lista_autor]) 
+               dic_materia['txt_ementa'] = substitutivo.txt_ementa
+           lst_materia_apresentada.append(dic_materia)
+      # pareceres
+      elif materia_apresentada.cod_parecer != None:
+           for parecer in context.zsql.relatoria_obter_zsql(cod_relatoria=materia_apresentada.cod_parecer):
+               materia = context.zsql.materia_obter_zsql(cod_materia=parecer.cod_materia)[0]
+               for comissao in context.zsql.comissao_obter_zsql(cod_comissao=parecer.cod_comissao):
+                   sgl_comissao = comissao.sgl_comissao
+                   nom_comissao = comissao.nom_comissao
+               autoria = nom_comissao
+               dic_materia = {}
+               dic_materia["num_ordem"] = materia_apresentada.num_ordem
+               dic_materia["id_materia"] = '<link href="' + context.sapl_documentos.absolute_url() + '/parecer_comissao/' + str(materia_apresentada.cod_parecer) + '_parecer.pdf' + '">' + 'Parecer ' + sgl_comissao+ ' nº ' + str(parecer.num_parecer) + '/' + str(parecer.ano_parecer) + " ao " +  materia.sgl_tipo_materia +' ' + str(materia.num_ident_basica) + '/' + str(materia.ano_ident_basica) + '</link>'
+               dic_materia['autoria'] = nom_comissao
+               dic_materia['txt_ementa'] = ''
+           lst_materia_apresentada.append(dic_materia)
+      # documentos administrativos
+      elif materia_apresentada.cod_documento != None:
+           materia = context.zsql.documento_administrativo_obter_zsql(cod_documento=materia_apresentada.cod_documento)[0]
+           dic_materia = {}
+           dic_materia["num_ordem"] = materia_apresentada.num_ordem
+           dic_materia["link_materia"] = '<link href="'+context.sapl_documentos.absolute_url()+'/administrativo/'+ str(materia_apresentada.cod_documento) + '_texto_integral.pdf' +'">'+materia.des_tipo_documento+' nº '+str(materia.num_documento)+'/'+str(materia.ano_documento)+'</link>'
+           dic_materia['autoria'] = materia.txt_interessado
+           dic_materia['txt_ementa'] = context.pysc.convert_unicode_pysc(texto=str(materia.txt_assunto))
+           lst_materia_apresentada.append(materia)
+
+
+  # Materias do Expediente
   for item in context.zsql.expediente_materia_obter_zsql(cod_sessao_plen=sessao.cod_sessao_plen,ind_excluido=0):
       if item.cod_materia != None:
          for materia in context.zsql.materia_obter_zsql(cod_materia=item.cod_materia,ind_excluido=0):
@@ -150,7 +230,6 @@ pauta_dic["lst_qtde_requerimentos"] = len(lst_qtde_requerimentos)
 pauta_dic["lst_autores_requerimentos"] = lst_autores_requerimentos
 pauta_dic["lst_requerimentos_vereadores"] = lst_requerimentos_vereadores
 
-
 pauta_dic["total_requerimentos"] = len(total_requerimentos)
 pauta_dic["total_requerimentos_plen"] = len(total_requerimentos_plen)
 pauta_dic["total_requerimentos_presid"] = len(total_requerimentos_presid)
@@ -158,6 +237,7 @@ pauta_dic["total_indicacoes"] = len(total_indicacoes)
 pauta_dic["total_mocoes"] = len(total_mocoes)
 pauta_dic["total_pedidos"] = len(total_pedidos)
 pauta_dic["total_materias"] = len(total_materias)
+pauta_dic["lst_materia_apresentada"] = lst_materia_apresentada
 
 # obtém as propriedades da casa legislativa para montar o cabeçalho e o rodapé da página
 casa = {}

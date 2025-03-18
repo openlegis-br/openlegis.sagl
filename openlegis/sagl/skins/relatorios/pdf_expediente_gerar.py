@@ -73,8 +73,14 @@ def pauta(pauta_dic):
     tmp+='\t\t\t<font color="white"> </font>\n'
     tmp+='\t\t</para>\n'
 
+    if pauta_dic["lst_materia_apresentada"] != []:
+        tmp+='\t\t<para style="P1" spaceBefore="10" spaceAfter="15"><b><u>LEITURA DE MATÉRIAS</u></b></para>\n'
+    for dic in pauta_dic["lst_materia_apresentada"]:
+        tmp+='\t\t<condPageBreak height="20mm"/>\n'
+        tmp+='\t\t<para style="P2" spaceAfter="10">' + str(dic['num_ordem']) +') <font color="#126e90"><b>' + dic['id_materia'] + '</b></font> - Autoria: ' + dic['autoria'] + ' - ' + escape(dic['txt_ementa']) + '</para>\n'
+
     tmp+='\t\t<condPageBreak height="10mm"/>\n'
-    tmp+='\t\t<para style="P1" spaceBefore="10" spaceAfter="10"><b><u>MATÉRIAS DO EXPEDIENTE</u></b></para>\n'
+    tmp+='\t\t<para style="P1" spaceBefore="15" spaceAfter="10"><b><u>MATÉRIAS DO EXPEDIENTE</u></b></para>\n'
 
     if pauta_dic["total_indicacoes"] != 0:
         tmp+='\t\t<condPageBreak height="15"/>\n'

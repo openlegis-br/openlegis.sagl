@@ -158,4 +158,9 @@ for legislatura in context.zsql.legislatura_obter_zsql(data=data):
                 elif membro.des_cargo == '3º Secretário':
                    inf_basicas_dic["lst_3secretario"] = parlamentar.nom_completo
 
+# Prefeito
+inf_basicas_dic['lst_prefeito'] = 'Não Cadastrado'
+for prefeito in context.zsql.prefeito_atual_obter_zsql(data_composicao = data):
+   inf_basicas_dic['lst_prefeito'] = prefeito.nom_completo
+
 return st.materia_gerar_odt(inf_basicas_dic, num_proposicao, nom_arquivo, des_tipo_materia, num_ident_basica, num_materia, ano_ident_basica, ano_materia, txt_ementa, materia_vinculada, dat_apresentacao, nom_autor, apelido_autor, subscritores, modelo_proposicao)

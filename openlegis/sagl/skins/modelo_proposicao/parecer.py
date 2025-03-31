@@ -67,7 +67,7 @@ for relatoria in context.zsql.relatoria_obter_zsql(cod_relatoria=cod_relatoria, 
         inf_basicas_dic['nom_relator'] = relator.nom_parlamentar
         nom_relator = relator.nom_parlamentar
 
-    for periodo in context.zsql.periodo_comp_comissao_obter_zsql(data=DateTime(relatoria.dat_desig_relator), cod_comissao=relatoria.cod_comissao):
+    for periodo in context.zsql.periodo_comp_comissao_obter_zsql(data=DateTime(relatoria.dat_desig_relator, datefmt='international').strftime('%Y/%m/%d'), cod_comissao=relatoria.cod_comissao):
         cod_periodo = periodo.cod_periodo_comp
 
     nom_presidente_comissao = ""

@@ -72,7 +72,7 @@ for relatoria in context.zsql.relatoria_obter_zsql(cod_relatoria=cod_relatoria, 
 
     nom_presidente_comissao = ""
     lst_composicao = []
-    for composicao_comissao in context.zsql.composicao_comissao_obter_zsql(cod_comissao=relatoria.cod_comissao, cod_periodo_comp=periodo.cod_periodo_comp):
+    for composicao_comissao in context.zsql.composicao_comissao_obter_zsql(cod_comissao=relatoria.cod_comissao, cod_periodo_comp=cod_periodo):
         if composicao_comissao.des_cargo == 'Presidente':
            nom_presidente_comissao = composicao_comissao.nom_completo
            inf_basicas_dic['nom_presidente_comissao'] = nom_presidente_comissao

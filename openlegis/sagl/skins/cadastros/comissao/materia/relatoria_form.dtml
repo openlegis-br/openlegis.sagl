@@ -177,12 +177,12 @@
     
     <div class="col-12 col-md-9 mb-3">
         <label class="form-label required" for="lst_relator">Relatoria</label>
-        <dtml-if expr="_.has_key('cod_periodo_comp_sel')">
+            <dtml-in expr="zsql.periodo_comp_comissao_obter_zsql(cod_comissao=cod_comissao, data=str(DateTime(dat_desig_relator, datefmt='international').strftime('%Y/%m/%d')), ind_excluido=0)">
+               <dtml-call expr="REQUEST.set('cod_periodo_comp_sel', int(cod_periodo_comp))">
+            </dtml-in>
             <select class="form-select" id="lst_relator" name="lst_relator" required>
              <option value="0">Selecione</option>
-                 <dtml-in expr="zsql.periodo_comp_comissao_obter_zsql(cod_comissao=cod_comissao, data=str(DateTime(dat_desig_relator, datefmt='international').strftime('%Y/%m/%d')), ind_excluido=0)">
-                    <dtml-call expr="REQUEST.set('cod_periodo_comp_sel', int(cod_periodo_comp))">
-                 </dtml-in>
+               <dtml-if expr="_.has_key('cod_periodo_comp_sel')">
                  <dtml-in expr="zsql.composicao_comissao_obter_zsql(cod_comissao=cod_comissao, cod_periodo_comp=cod_periodo_comp_sel)">
 	           <option
 	              <dtml-if expr="REQUEST.has_key('cod_parlamentar') and (cod_parlamentar==REQUEST['cod_parlamentar'])">
@@ -191,10 +191,12 @@
 			value="<dtml-var cod_parlamentar>"> <dtml-var nom_parlamentar> 
                    </option>
                 <dtml-else>
-                   <option value="0">Não há membros na data de designação informada!</value>
-	        </dtml-in> 
+                   <option value="0">Não há membros na comissão na data de designação informada!</value>
+	        </dtml-in>
+	      <dtml-else>
+	           <option value="0">Perído de composição inexistente na data informada.</value>
+	      </dtml-if>
             </select>
-       </dtml-if>  
        <div class="invalid-feedback">
          Este campo é obrigatório!
        </div>   

@@ -707,7 +707,6 @@ window.Wodo = window.Wodo || (function () {
                 directParagraphStylingEnabled: directParagraphStylingEnabled,
                 paragraphStyleSelectingEnabled: paragraphStyleSelectingEnabled,
                 paragraphStyleEditingEnabled: paragraphStyleEditingEnabled,
-                imageInsertingEnabled: imageEditingEnabled,
                 hyperlinkEditingEnabled: hyperlinkEditingEnabled,
                 annotationsEnabled: annotationsEnabled,
                 undoRedoEnabled: undoRedoEnabled,

@@ -34,7 +34,7 @@ class ProcessoAdm(grok.View):
             id_processo = documento.sgl_tipo_documento + ' ' + str(documento.num_documento) + '/' +str(documento.ano_documento)
             id_capa = str(uuid.uuid4().hex)
             id_arquivo = "%s.pdf" % str(id_capa)
-            self.context.modelo_proposicao.capa_processo_adm(cod_documento=cod_documento, nom_arquivo=str(id_capa))
+            self.context.modelo_proposicao.capa_processo_adm(cod_documento=cod_documento, nom_arquivo=str(id_capa), action='gerar')
             if hasattr(self.context.temp_folder, id_arquivo):
                dic = {}
                dic["data"] = DateTime(documento.dat_documento, datefmt='international').strftime('%Y-%m-%d 00:00:01')

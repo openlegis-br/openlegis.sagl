@@ -11,4 +11,5 @@ from Products.CMFCore.utils import getToolByName
 
 st = getToolByName(context, 'portal_sagl')
 
-return st.requerimento_aprovar(cod_sessao_plen, nom_resultado, cod_materia)
+return st.adicionar_carimbo(cod_sessao_plen, nom_resultado, cod_materia)
+

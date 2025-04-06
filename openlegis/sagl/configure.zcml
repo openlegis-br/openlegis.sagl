@@ -4,6 +4,7 @@
     xmlns:genericsetup="http://namespaces.zope.org/genericsetup"
     xmlns:grok="http://namespaces.zope.org/grok"
     xmlns:five="http://namespaces.zope.org/five"
+    xmlns:browser="http://namespaces.zope.org/browser"
     i18n_domain="OpenLegis">
 
   <five:registerPackage package="." initialize=".initialize" />
@@ -23,5 +24,20 @@
 
   <cmf:registerDirectory name="skins" directory="skins" recursive="True" />
 
+  <!-- views para assinatura digital -->
+
+  <browser:page
+      name="start"
+      for="*"
+      class=".browser.signature_starter.StartPadesSignature"
+      permission="zope2.WebDAVAccess"
+      />
+
+  <browser:page
+      name="complete"
+      for="*"
+      class=".browser.signature_starter.FinishPadesSignature"
+      permission="zope2.WebDAVAccess"
+      />
 
 </configure>

@@ -683,4 +683,20 @@ for sessao in metodo:
       ata_dic['nom_localidade']= local.nom_localidade
       ata_dic['sgl_uf']= local.sgl_uf
 
-return st.ata_gerar_odt(ata_dic, nom_arquivo, nom_modelo)
+argumentos = {
+    'ata_dic': ata_dic,
+    'nome_arquivo': nom_arquivo,
+    'nom_modelo': nom_modelo
+}
+
+def ata_gerar_odt(**kwargs):
+    kwargs = {
+        'modelo': getattr(context.sapl_documentos.modelo.sessao_plenaria, kwargs.get('nom_modelo')),
+        'dicionario_dados': kwargs.copy(),
+        'nome_arquivo': kwargs.get('nome_arquivo'),
+        'pasta_destino': context.sapl_documentos.ata_sessao,
+        'permissions': {'View': {'roles': ['Manager', 'Authenticated'], 'acquire': 0}}
+    }
+    return st.gerar_odt(**kwargs)
+
+return ata_gerar_odt(**argumentos)

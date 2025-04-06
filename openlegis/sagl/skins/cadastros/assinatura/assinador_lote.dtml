@@ -1,0 +1,163 @@
+<dtml-var header_html>
+
+       <h1 class="firstHeading font-size-18 mb-3">Assinatura de Documentos em Lote</h1> 
+
+        <form id="signForm" method="post">
+
+<dtml-comment>
+           <dtml-in expr="zsql.usuario_obter_zsql(col_username=AUTHENTICATED_USER.getUserName())">
+             <dtml-call expr="REQUEST.set('nom_completo', str(nom_completo))">
+             <dtml-call expr="REQUEST.set('num_cpf', str(num_cpf))">
+           </dtml-in>
+
+            <div class="row">
+              <div class="col-12 mb-3">
+                 <div class="alert alert-light alert-dismissible fade show mb-0" role="alert">
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    <div class="row">
+                      <div class="col-6">
+                         <strong>Usuário Autenticado: </strong> <dtml-var nom_completo>
+                      </div>
+                      <div class="col-6">
+                         <strong>CPF:</strong> <dtml-var num_cpf>
+                      </div>
+                    </div> 
+                 </div>
+              </div>     
+            </div>
+</dtml-comment>
+
+            <div class="row mb-3">
+                <div class="col-md-12">
+                    <label class="form-label required" for="certificateSelect">Escolha um certificado ICP-Brasil</label>
+                    <select class="form-select"  id="certificateSelect" class="form-control"></select>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-12">
+                    <button id="processSelectedFiles" type="button" class="btn btn-primary" disabled><i class="mdi mdi-certificate me-1"></i> Assinar Documentos</button>
+                    <button id="refreshButton" type="button" class="btn btn-light"><i class="mdi mdi-reload me-1"></i> Atualizar Certificados</button>
+                </div>
+            </div>
+
+            <div id="alerts" class="mt-3"></div>
+
+            <div class="form-group">
+                <label class="mb-2">Documentos para Assinatura Digital</label>
+
+                <p class="mb-2">
+                    Selecione os documentos que você deseja assinar:
+                </p>
+                <div class="table-responsive"">
+                    <table class="table display" id="fileList">
+                        <thead class="table-light">
+                            <tr>
+                                <th scope="col" class="text-center" style="width: 5%;">
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input" id="checkAllFiles">
+                                        <label class="form-check-label" for="checkAllFiles">Todos</label>
+                                    </div>
+                                </th>
+                                <th scope="col"">Documento</th>
+                                <th scope="col" style="width: 25%;">Tipo</th>
+                                <th scope="col" style="width: 15%;">Solicitação</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <dtml-call expr="REQUEST.set('get_assinaturas', cadastros.assinatura.get_pendentes(cod_usuario=cod_usuario_corrente, ind_assinado=0, ind_separado=0))">
+                                <dtml-in get_assinaturas mapping>
+                                    <tr>
+                                        <td class="text-center">
+                                            <div class="form-check1">
+                                                <input name="<dtml-var cod_assinatura_doc>" type="checkbox" class="form-check-input file-checkbox" id="<dtml-var pdf_to_sign>" value="<dtml-var pdf_to_sign>" />
+                                                <label for="<dtml-var pdf_to_sign>"></label>
+                                                <input name="codigo" type="hidden" value="<dtml-var codigo>" />
+                                                <input name="tipo_doc" type="hidden" value="<dtml-var tipo_doc>" />
+                                                <input name="anexo" type="hidden" value="<dtml-var anexo missing null>" />
+                                                <dtml-with expr="_.namespace(assinaturas=zsql.assinatura_documento_obter_zsql(codigo=codigo, anexo=anexo, tipo_doc=tipo_doc, ind_assinado=0))">
+                                                   <dtml-call expr="REQUEST.set('txt_qtde_assinaturas', len(assinaturas))">
+                                                </dtml-with>
+                                                <input name="qtde_assinaturas" type="hidden" value="<dtml-var txt_qtde_assinaturas>" />
+                                                <input name="cod_usuario" type="hidden" value="<dtml-var cod_usuario_corrente>" />
+                                            </div>
+                                        </td>
+                                        <td><a href="<dtml-var link_pdf>" target="_blank"><dtml-var id_documento></a></td>
+                                        <td><dtml-var tipo_documento></td>
+                                        <td><dtml-in expr="zsql.assinatura_documento_obter_zsql(codigo=codigo,tipo_doc=tipo_doc, cod_usuario=cod_usuario_corrente, ind_assinado=0)" mapping><dtml-var expr="DateTime(dat_solicitacao, datefmt='international').strftime('%d/%m/%Y %H:%M')"></dtml-in></td>
+                                    </tr>
+                                </dtml-in>
+                                <dtml-unless get_assinaturas>
+                                    <tr><td colspan="4"><p class="alert alert-info m-0">Nenhum documento pendente de assinatura encontrado.</p></td></tr>
+                                </dtml-unless>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </form>
+
+<dtml-var js_slot>
+    <script src="<dtml-var portal_url>/generico/assinador/static/js/jquery.blockUI.js"></script>
+    <script src="<dtml-var portal_url>/generico/assinador/static/js/lacuna-web-pki-2.12.0.min.js"></script>
+    <script src="<dtml-var portal_url>/generico/assinador/static/js/batch-signature-restpki-form.js"></script>
+    <script>
+        function toggleAllCheckboxes(className, checkAllCheckboxId) {
+            const checkboxes = document.querySelectorAll('.' + className);
+            const checkAllCheckbox = document.getElementById(checkAllCheckboxId);
+            const checkAllLabel = document.querySelector(`label[for="${checkAllCheckboxId}"]`);
+
+            if (!checkAllCheckbox || !checkAllLabel) {
+                console.error(`Elemento com ID "${checkAllCheckboxId}" ou seu label não encontrado.`);
+                return;
+            }
+
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = checkAllCheckbox.checked;
+                checkbox.dispatchEvent(new Event('change')); // Dispara o evento change
+            });
+
+            // Atualizar o estado do botão "Assinar Selecionados"
+            var checkedCount = $('#fileList').find('.file-checkbox:checked').length;
+            $('#processSelectedFiles').prop('disabled', checkedCount === 0);
+
+            // Trocar o texto do label
+            checkAllLabel.textContent = checkAllCheckbox.checked ? 'Nenhum' : 'Todos';
+        }
+
+        $(document).ready(function () {
+            // Assim que a página estiver pronta, chamamos a função init() no
+            // código javascript (veja batch-signature-restpki-form.js).
+            batchSignatureRestPkiForm.init({
+                fileList: $('#fileList'), // Referência para a lista de arquivos
+                processSelectedFilesButton: $('#processSelectedFiles'), // Referência para o botão de processamento
+                certificateSelect: $('#certificateSelect'),  // O elemento <select> (caixa de combinação) para listar os certificados.
+                refreshButton: $('#refreshButton')            // O botão "Atualizar".
+                // ctrlEndpoint: '/api/batch-pades-rest'          // O endpoint do controlador da API a ser chamado por Ajax.
+            });
+
+            $('#checkAllFiles').on('click', function() {
+                toggleAllCheckboxes('file-checkbox', 'checkAllFiles');
+            });
+
+            // Garante que o botão "Assinar Selecionados" seja atualizado
+            // quando um checkbox individual é marcado/desmarcado.
+            $('#fileList').on('change', '.file-checkbox', function() {
+                var checkedCount = $('#fileList').find('.file-checkbox:checked').length;
+                $('#processSelectedFiles').prop('disabled', checkedCount === 0);
+
+                // Atualizar o texto do "Marcar Todos" e o estado do checkbox pai
+                const allChecked = $('.file-checkbox:checked').length === $('.file-checkbox').length;
+                const checkAllCheckbox = $('#checkAllFiles');
+                const checkAllLabel = $('label[for="checkAllFiles"]');
+                if (checkAllCheckbox.prop('checked') !== allChecked) {
+                    checkAllCheckbox.prop('checked', allChecked);
+                    checkAllLabel.text(allChecked ? 'Nenhum' : 'Todos');
+                } else if ($('.file-checkbox:checked').length === 0) {
+                    checkAllLabel.text('Todos');
+                    checkAllCheckbox.prop('checked', false);
+                }
+            });
+        });
+    </script>
+<dtml-var footer_html>

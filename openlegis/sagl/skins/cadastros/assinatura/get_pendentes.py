@@ -249,6 +249,10 @@ for item in context.zsql.assinatura_documento_pendente_obter_zsql(codigo=codigo,
        dic_documento['link_pdf'] = context.portal_url() + '/' + context.cadastros.assinatura.gerar_link_pysc(codigo=item['codigo'], tip_documento=item['tipo_doc'], anexo=item['anexo'])
     else:
         dic_documento['link_pdf'] = None
+    if hasattr(context.sapl_documentos.documentos_assinados, item['cod_assinatura_doc'] + '.pdf'):
+       dic_documento['pdf_to_sign'] = context.portal_url() + '/sapl_documentos/documentos_assinados/' + item['cod_assinatura_doc'] + '.pdf'
+    else:
+       dic_documento['pdf_to_sign'] = dic_documento['link_pdf']
     #dic_documento['assinaturas'] = []
     dic_documento['assinados'] = []
     dic_documento['pendentes'] = []

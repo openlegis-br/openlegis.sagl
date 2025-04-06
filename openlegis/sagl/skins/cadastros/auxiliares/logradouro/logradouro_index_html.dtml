@@ -1,147 +1,186 @@
 <dtml-var header_html>
 
- <div class="row mb-3">
-      <div class="col-12 col-md-8 align-self-center">
+<div class="row mb-2">
+    <div class="col-12 col-md-8 align-self-center">
         <h1 class="firstHeading font-size-18">Cadastro de Logradouros</h1>
-      </div>
-      <div class="col-12 col-md-4 text-start text-md-end">
-         <div class="btn-group d-print-none ">
-          <a class="btn btn-primary d-print-none" href="logradouro_form"><i class="fa fa-fw fa-plus"></i> Incluir Logradouro</a>
-         </div>
-      </div>
- </div>
-
- <dtml-in expr="zsql.logradouro_obter_zsql(ind_excluido=0)">
-  <dtml-if sequence-start>
-    <table class="table" id="logradouros">
-    <thead class="table-light">
-     <tr>
-      <th>Nome do Logradouro</th>
-      <th>Bairro</th>
-      <th>CEP</th>
-      <th>Localidade</th>
-     </tr>
-    </thead>
-  </dtml-if sequence-start>
-        <tr>
-           <td><a href="logradouro_mostrar_proc?cod_logradouro=<dtml-var cod_logradouro>" target="_blank"><dtml-var nom_logradouro></a></td>
-           <td><dtml-var nom_bairro missing null=""></td>
-           <td><dtml-var num_cep missing null=""></td>
-           <td>
-            <dtml-if expr="cod_localidade_sel!=None">
-              <dtml-in expr="zsql.localidade_obter_zsql(cod_localidade=cod_localidade_sel)">
-                 <dtml-var nom_localidade missing null=""> - <dtml-var sgl_uf missing null="">
-              </dtml-in>
-            </dtml-if>
-        </tr>
-    <dtml-if sequence-end>
-    <tfoot>
-     <tr>  
-      <td>Logradouro</td>
-      <td>Bairro</td>
-      <td>CEP</td>
-      <td>Localidade</td>
-     </tr>
-    </tfoot>
-   </table>
-    <div id="panelBtn" class="d-print-none" style="margin-bottom: 20px;">
-      <div class="row">
-         <div class="col-sm-12 mt-2"></div>
-      </div>
     </div>
-    </dtml-if sequence-end>
- <dtml-else>
-   <p>Nenhum logradouro cadastrado.</td>
- </dtml-in>
+    <div class="col-12 col-md-4 text-start text-md-end">
+        <div class="btn-group d-print-none ">
+            <a class="btn btn-primary d-print-none" href="logradouro_form"><i class="fa fa-fw fa-plus"></i> Incluir Logradouro</a>
+        </div>
+    </div>
+</div>
+<div class="table-responsive">
+    <table id="logradouros-table" class="table w-100">
+        <thead class="table-light">
+            <tr>
+                <th></th>
+                <th>Nome</th>
+                <th>Bairro</th>
+                <th>CEP</th>
+                <th>Localidade</th>
+            </tr>
+        </thead>
+        <tfoot>
+            <tr>
+                <th></th>
+                <th>Nome</th>
+                <th>Bairro</th>
+                <th>CEP</th>
+                <th>Localidade</th>
+            </tr>
+        </tfoot>
+        <tbody>
+        </tbody>
+    </table>
+</div>
+
+<div id="panelBtn" class="d-print-none" style="margin-bottom: 20px;">
+    <div class="row">
+        <div class="col-sm-12 mt-2"></div>
+    </div>
+</div>
+
+<div id="buttons-container"></div>
 
 <dtml-var js_slot>
 
-<script>
+<script type="text/javascript">
+    $(document).ready(function() {
+        var table = $('#logradouros-table').DataTable({
+            "processing": true,
+            "serverSide": true,
+            "responsive": true,
+            "ajax": {
+                "url": "@@logradouro_table_view",
+                "type": "GET",
+                "data": function(d) {}
+            },
+            "columns": [
+                { "data": 0, "title": "", "name": "cod_logradouro", "orderable": false },
+                {
+                    "data": 1,
+                    "title": "Nome",
+                    "name": "nom_logradouro",
+                    "render": function(data, type, row) {
+                        return '<a href="logradouro_mostrar_proc?cod_logradouro=' + row[0] + '">' + data + '</a>';
+                    }
+                },
+                { "data": 2, "title": "Bairro", "name": "nom_bairro" },
+                { "data": 3, "title": "CEP", "name": "num_cep" },
+                { "data": 4, "title": "Localidade", "name": "nom_localidade" }
+            ],
+            "order": [[ 1, "asc" ]],
+            "initComplete": function() {
+                $('#logradouros-table tfoot th').each(function(i) {
+                    var title = $(this).text();
+                    $(this).html('<input type="text" class="form-control form-control-sm" placeholder=" ' + title + '" />');
+                });
 
-$(document).ready(function() {
-    // Setup - add a text input to each footer cell
-    $('#logradouros tfoot td').each(function () {
-        var title = $(this).text();
-        $(this).html('<input type="text" class="form-control form-control-sm" placeholder="' + title + '" />');
-    });
-    var table = $('#logradouros').DataTable( {
-        initComplete: function () {
-            // Apply the search
-            this.api()
-                .columns()
-                .every(function () {
+                var table = $('#logradouros-table').DataTable();
+
+                table.columns().every(function(i) {
                     var that = this;
-                     $('input', this.footer()).on('keyup change clear', function () {
+                    $('input', this.footer()).on('keyup change clear', function() {
                         if (that.search() !== this.value) {
-                            that.search(this.value).draw();
+                            that
+                                .search(this.value)
+                                .draw();
                         }
                     });
                 });
-        },
-        "responsive": true,
-        "bStateSave": true,        
-        "lengthMenu": [[10, 25, 50, 100], [10, 25, 50, 100]],
-        "lengthChange": true,
-        "order": [[ 0, "asc" ]],
-        "buttons": [
-            {
-                extend: 'collection',
-                text: 'Exportar',
-                buttons: [ 
-                           {
-                             extend:    'excelHtml5',
-                             text:      '<i class="far fa-file-excel"></i> Excel',
-                             titleAttr: 'PDF'
-                           },
-                           {
-                             extend:    'pdfHtml5',
-                             download: 'open',
-                             text:      '<i class="fa fa-file-adobe"></i> PDF',
-                             titleAttr: 'PDF'
-                           },
-                           {
-                             extend:    'print',
-                             text:      '<i class="fa fa-print"></i> Impressão',
-                             titleAttr: 'Impressão'
-                           },
-                         ],
-               className: '',
-               dropup: true,
-               autoClose: true,
-               fade: true
 
+                new $.fn.dataTable.Buttons(table, [
+                    {
+                        extend: 'csvHtml5',
+                        text: 'CSV',
+                        action: function(e, dt, button, config) {
+                            exportData(dt, '@@exportar_logradouros_csv', 'logradouros.csv');
+                        }
+                    },
+                    {
+                        extend: 'excelHtml5',
+                        text: 'Excel',
+                        action: function(e, dt, button, config) {
+                            exportData(dt, '@@exportar_logradouros_excel', 'logradouros.xlsx');
+                        }
+                    },
+                    {
+                        text: 'PDF',
+                        action: function(e, dt, button, config) {
+                            exportData(dt, '@@exportar_logradouros_pdf', 'logradouros.pdf');
+                        }
+                    },
+                    'print'
+                ]).container().appendTo($('#panelBtn .col-sm-12:eq(0)'));
+            },
+            "language": {
+              search: "Pesquisar:",
+              processing:     "Processando...",
+              loadingRecords: "Carregando...",
+              lengthMenu:     "Exibir _MENU_ registros por página",
+              info:           "Exibindo _START_ a _END_ de _TOTAL_ registros",
+              infoEmpty:      "Exibindo _START_ a _END_ de _TOTAL_ registros",
+              infoFiltered:   "(total de registros:_MAX_)",
+              emptyTable:     "Nenhum registro encontrado",
+              zeroRecords:     "Nenhum registro encontrado",
+              paginate: {
+                first:      "Primeiro",
+                previous:   "Anterior",
+                next:       "Próximo",
+                last:       "Último"
+              },
+             "buttons": {
+               print: "Imprimir",
+               copy: "Copiar",
+               copyTitle: "Cópia bem sucedida",
+               copySuccess: {
+                1: "Uma linha copiada com sucesso",
+                _: "%d linhas copiadas com sucesso"
+              } }
             }
-        ],
-        "language": {
-          search: "Pesquisar:",
-          processing:     "Processando...",
-          loadingRecords: "Carregando...",
-          lengthMenu:     "Exibir _MENU_ registros por página",
-          info:           "Exibindo _START_ a _END_ de _TOTAL_ registros",
-          infoEmpty:      "Exibindo _START_ a _END_ de _TOTAL_ registros",
-          infoFiltered:   "(total de registros:_MAX_)",
-          emptyTable:     "Nenhum registro encontrado",
-          zeroRecords:     "Nenhum registro encontrado",
-          paginate: {
-            first:      "Primeiro",
-            previous:   "Anterior",
-            next:       "Próximo",
-            last:       "Último"
-          },
-         "buttons": {
-           print: "Imprimir",
-           copy: "Copiar",
-           copyTitle: "Cópia bem sucedida",
-           copySuccess: {
-            1: "Uma linha copiada com sucesso",
-            _: "%d linhas copiadas com sucesso"
-          }
-        }
+        });
+
+        $('#logradouros-table tfoot').insertAfter('#logradouros-table thead');
+
+        function exportData(dt, url, filename) {
+            var data = dt.ajax.params();
+            console.log("Parâmetros de exportação (dt.ajax.params()):", data); // Depuração
+
+            // Alternativa para construir os parâmetros manualmente (se dt.ajax.params() não funcionar)
+            // var data = {};
+            // data['search[value]'] = dt.search(); // Filtro global
+            // dt.columns().every(function(i) {
+            //     var searchValue = this.search();
+            //     if (searchValue) {
+            //         data['columns[' + i + '][search][value]'] = searchValue;
+            //     }
+            // });
+            // console.log("Parâmetros de exportação (manual):", data); // Depuração
+
+            $.ajax({
+                url: url,
+                type: 'GET',
+                data: data,
+                xhrFields: {
+                    responseType: 'blob'
+                },
+                success: function(blob) {
+                    var a = document.createElement('a');
+                    var url = window.URL.createObjectURL(blob);
+                    a.href = url;
+                    a.download = filename;
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    window.URL.revokeObjectURL(url);
+                },
+                error: function() {
+                    alert('Erro ao exportar os dados.');
+                }
+            });
         }
     });
-    table.buttons().container()
-        .appendTo( '#panelBtn .col-sm-12:eq(0)' );  
-});
 </script>
-<dtml-var footer_html>
 
+<dtml-var footer_html>

@@ -4,7 +4,7 @@
 ##bind namespace=
 ##bind script=script
 ##bind subpath=traverse_subpath
-##parameters=cod_documento, nom_arquivo
+##parameters=cod_documento, nom_arquivo, action
 ##title=
 ##
 from DateTime import DateTime
@@ -98,4 +98,4 @@ for documento in context.zsql.documento_administrativo_obter_zsql(cod_documento=
  capa_dic['nom_arquivo_odt'] = "%s.odt" % nom_arquivo
  capa_dic['nom_arquivo_pdf'] = "%s.pdf" % nom_arquivo
 
- return st.capa_processo_adm_gerar_odt(capa_dic)
+ return st.capa_processo_adm_gerar_odt(capa_dic,action)

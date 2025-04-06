@@ -51,6 +51,7 @@ class migrarArquivos(grok.View):
            'Proposições': 'proposicao',
            'Proposições Assinadas': 'proposicao_signed',
            'Proposições ODT': 'proposicao_odt',
+           'Proposições - anexos': 'proposicao_anexo',
            'Protocolo': 'protocolo',
            'Reuniões Comissões - atas': 'reuniao_ata',
            'Reuniões Comissões - pautas': 'reuniao_pauta',
@@ -514,6 +515,29 @@ class migrarArquivos(grok.View):
              convertidos.append(item)
       return convertidos
 
+    def migrarProposicaoAnexo(self):
+      items = []
+      cur = self.db.cursor()
+      cur.execute('SELECT cod_proposicao FROM proposicao WHERE cod_proposicao > 50000 AND ind_excluido=0 ORDER BY cod_proposicao')
+      for row in cur.fetchall():
+          for anexo in self.context.pysc.anexo_proposicao_pysc(str(row[0]), listar=True):
+              row_id = anexo
+              items.append(row_id)
+      caminho = self.context.sapl_documentos.proposicao
+      convertidos = []
+      for item in items:
+          url = self.base_url + 'sapl_documentos/proposicao/' + item
+          response = requests.get(url, auth=self.basic)
+          if str(response.status_code) == '200':
+             contents = BytesIO(response.content)
+             if hasattr(caminho,item):
+                arq = getattr(caminho, item)
+                arq.manage_upload(file=contents)
+             else:
+                caminho.manage_addFile(id=item,file=contents)
+             convertidos.append(item)
+      return convertidos
+
     def migrarAssinados(self):
       items = []
       cur = self.db.cursor()
@@ -648,6 +672,8 @@ class migrarArquivos(grok.View):
            return self.migrarProposicaoAssinada()
         elif self.migrate and self.migrate == 'proposicao_odt':
            return self.migrarProposicaoODT()
+        elif self.migrate and self.migrate == 'proposicao_anexo':
+           return self.migrarProposicaoAnexo()
         elif self.migrate and self.migrate == 'protocolo':
            return self.migrarProtocolo()
         elif self.migrate and self.migrate == 'reuniao_ata':

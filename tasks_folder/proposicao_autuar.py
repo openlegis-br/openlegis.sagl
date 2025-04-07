@@ -87,7 +87,7 @@ def proposicao_autuar_task(portal, cod_proposicao, portal_url):
     with open(dirpath, "rb") as arq:
          image = arq.read()
     for validacao in skins.zsql.assinatura_documento_obter_zsql(codigo=cod_proposicao,tipo_doc='proposicao',ind_assinado=1):
-        stream = self.make_qrcode(text=portal_url+'/conferir_assinatura_proc?txt_codigo_verificacao='+str(validacao.cod_assinatura_doc))
+        stream = make_qrcode(text=portal_url+'/conferir_assinatura_proc?txt_codigo_verificacao='+str(validacao.cod_assinatura_doc))
         for page_index, i in enumerate(range(len(existing_pdf))):
             w = existing_pdf[page_index].rect.width
             h = existing_pdf[page_index].rect.height

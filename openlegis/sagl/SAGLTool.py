@@ -1940,8 +1940,11 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
     def assinar_proposicao(self, lista):
         portal_url = str(self.url())
         async_result = tasks.assinar_proposicao_task.delay(lista, portal_url)
+        for item in lista:
+            for proposicao in self.zsql.proposicao_obter_zsql(cod_proposicao=int(item)):
+                cod_proposicao = proposicao.cod_proposicao
         if len(lista) == 1:
-           redirect_url = self.portal_url()+'/cadastros/proposicao/proposicao_mostrar_proc?cod_proposicao=' + proposicao.cod_proposicao
+           redirect_url = self.portal_url()+'/cadastros/proposicao/proposicao_mostrar_proc?cod_proposicao=' + cod_proposicao
            REQUEST = self.REQUEST
            RESPONSE = REQUEST.RESPONSE
            RESPONSE.redirect(redirect_url)

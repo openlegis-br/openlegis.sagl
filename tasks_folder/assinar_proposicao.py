@@ -75,7 +75,7 @@ def processar_proposicao(portal, portal_url, item):
     try:
         for proposicao in portal.portal_skins.sk_sagl.zsql.proposicao_obter_zsql(cod_proposicao=int(item)):
             try:
-                string = portal.pysc.proposicao_calcular_checksum_pysc(
+                string = portal.portal_skins.sk_sagl.pysc.proposicao_calcular_checksum_pysc(
                     proposicao.cod_proposicao, senha=1
                 )
                 nome_autor = proposicao.nom_autor

@@ -16,8 +16,6 @@ from Products.CMFCore.utils import getToolByName
 from zlib import crc32
 from io import BytesIO
 
-#from restpki_client import RestPkiClient, PadesSignatureStarter, StandardSecurityContexts, StandardSignaturePolicies, PadesVisualPositioningPresets, PadesSignatureFinisher
-
 grok.templatedir('templates')
 logger = logging.getLogger(__name__)
 
@@ -171,9 +169,6 @@ class StartPadesSignature(grok.View):
             signature_starter.security_context_id = StandardSecurityContexts.PKI_BRAZIL
             signature_starter.visual_representation = await build_visual_representation(self.context, qtde_assinaturas)
             result = await asyncio.to_thread(signature_starter.start_with_webpki)
-            #crc = crc32(bytes(arquivo.data))
-            #crc_arquivo = str(crc) if crc >= 0 else str(-1 * crc)
-            #result_data = {'token': result, 'crc32': crc_arquivo}
             self.request.response.setStatus(HTTPStatus.OK)
             self.request.response.setHeader('Content-Type', 'application/json')
             return json.dumps(result)
@@ -181,7 +176,6 @@ class StartPadesSignature(grok.View):
         except KeyError:
             self.request.response.setStatus(HTTPStatus.NOT_FOUND)
             return json.dumps({'error': 'Arquivo não encontrado.'}, ensure_ascii=False)
-        #    return json.dumps({'error': 'Arquivo não encontrado.'}, ensure_ascii=False)
         except ValueError as e:
             self.request.response.setStatus(HTTPStatus.BAD_REQUEST)
             return json.dumps({'error': str(e)}, ensure_ascii=False)

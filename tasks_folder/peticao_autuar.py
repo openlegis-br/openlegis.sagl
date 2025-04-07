@@ -72,12 +72,12 @@ def peticao_autuar_task(portal, cod_peticao, portal_url):
                caminho = '/sapl_documentos/norma_juridica/'
     if cod_validacao_doc != '':
        arq = getattr(portal.sapl_documentos.documentos_assinados, nom_pdf_peticao)
-       stream = self.make_qrcode(text=portal_url+'/conferir_assinatura_proc?txt_codigo_verificacao='+str(cod_validacao_doc))
+       stream = make_qrcode(text=portal_url+'/conferir_assinatura_proc?txt_codigo_verificacao='+str(cod_validacao_doc))
        mensagem1 = 'Esta é uma cópia do original assinado digitalmente por ' + nom_autor + outros
        mensagem2 = 'Para validar visite ' + portal_url+'/conferir_assinatura'+' e informe o código '+ cod_validacao_doc + '.'
     else:
        arq = getattr(portal.sapl_documentos.peticao, nom_pdf_peticao)
-       stream = self.make_qrcode(text=portal_url + str(caminho) + str(nom_pdf_saida))
+       stream = make_qrcode(text=portal_url + str(caminho) + str(nom_pdf_saida))
        mensagem1 = 'Documento assinado digitalmente com usuário e senha por ' + nom_autor
        mensagem2 = 'Para verificar a autenticidade do documento leia o qrcode.'
     arquivo = BytesIO(bytes(arq.data))

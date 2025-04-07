@@ -92,8 +92,7 @@ async def _build_base_visual_representation(image_content: bytes) -> dict:
                 'content': base64.b64encode(image_content).decode('utf8'),
                 'mimeType': VISUAL_REPRESENTATION_IMAGE_MIME_TYPE
             },
-            'horizontalAlign': 'Right',
-            'verticalAlign': 'Center'
+            'horizontalAlign': 'Right'
         }
     }
 
@@ -135,11 +134,24 @@ class StartPadesSignature(grok.View):
         self.request = request
 
     async def render(self):
-        file_path = self.context.absolute_url_path()
         portal = self.context.portal_url.getPortalObject()
+        file_path = self.context.absolute_url_path()
+        logger.info(f"Arquivo para assinatura (path): {file_path}")
+
+        # Remove the leading slash if present
+        if file_path.startswith('/'):
+            relative_path_str = file_path[1:]
+        else:
+            relative_path_str = file_path
+        path_segments = tuple(relative_path_str.split('/'))
+        portal_physical_path = portal.getPhysicalPath()
+        full_physical_path = portal_physical_path + path_segments
+        full_path_to_traverse = '/' + '/'.join(full_physical_path[1:])
+
+        logger.info(f"Tentando traversar para (dinâmico): {full_path_to_traverse}")
 
         try:
-            arquivo = portal.unrestrictedTraverse(file_path)
+            arquivo = portal.unrestrictedTraverse(full_path_to_traverse)
             logger.info(f"Arquivo para assinatura: {repr(arquivo)}")
 
             if not hasattr(arquivo, 'data'):
@@ -169,6 +181,7 @@ class StartPadesSignature(grok.View):
         except KeyError:
             self.request.response.setStatus(HTTPStatus.NOT_FOUND)
             return json.dumps({'error': 'Arquivo não encontrado.'}, ensure_ascii=False)
+        #    return json.dumps({'error': 'Arquivo não encontrado.'}, ensure_ascii=False)
         except ValueError as e:
             self.request.response.setStatus(HTTPStatus.BAD_REQUEST)
             return json.dumps({'error': str(e)}, ensure_ascii=False)

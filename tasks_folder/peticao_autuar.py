@@ -132,9 +132,10 @@ def peticao_autuar_task(portal, cod_peticao, portal_url):
             for documento in skins.zsql.documento_acessorio_obter_zsql(
                 cod_documento=peticao.cod_doc_acessorio
             ):
-                # Assuming 'materia' is defined elsewhere and accessible
-                materia = "Nome da Matéria"  # Placeholder
-                texto = str(documento.des_tipo_documento) + ' - ' + str(materia)
+                id_materia = ''
+                for materia in self.zsql.materia_obter_zsql(cod_materia=documento.cod_materia):
+                    id_materia = materia.sgl_tipo_materia + ' ' + str(materia.num_ident_basica) + '/' + str(materia.ano_ident_basica)
+                texto = str(documento.des_tipo_documento) + ' - ' + id_materia
                 storage_path = portal.sapl_documentos.materia
                 nom_pdf_saida = str(documento.cod_documento) + ".pdf"
                 caminho = '/sapl_documentos/materia/'

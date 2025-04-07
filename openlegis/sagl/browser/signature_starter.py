@@ -253,9 +253,6 @@ class FinishPadesSignature(grok.View):
                 for storage in skins.zsql.assinatura_storage_obter_zsql(tip_documento=tipo_doc):
                     filename = f"{codigo}{storage.pdf_signed}"
                     break
-            elif tipo_doc == 'peticao':
-                storage_path = portal.sapl_documentos.peticao
-                filename = f"{codigo}_signed.pdf"
             else:
                 storage_path = portal.sapl_documentos.documentos_assinados
                 filename = f"{cod_assinatura_doc}.pdf" if cod_assinatura_doc else None

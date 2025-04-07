@@ -60,7 +60,8 @@ def adicionar_carimbo_task(portal, cod_sessao_plen, nom_resultado, cod_materia):
        shape.insert_text(p2, text2, fontname = "helv", fontsize = 8, rotate=0)
        shape.commit()
        content = existing_pdf.tobytes(deflate=True, garbage=3, use_objstms=1)
-       arq.manage_upload(file=content)
+       arq.update_data(content)
+       #arq.manage_upload(file=content)
     if hasattr(storage_path, nom_pdf_redacao):
        arq = getattr(storage_path, nom_pdf_redacao)
        arquivo = BytesIO(bytes(arq.data))
@@ -78,5 +79,6 @@ def adicionar_carimbo_task(portal, cod_sessao_plen, nom_resultado, cod_materia):
        shape.insert_text(p2, text2, fontname = "helv", fontsize = 8, rotate=0)
        shape.commit()
        content = existing_pdf.tobytes(deflate=True, garbage=3, use_objstms=1)
-       arq.manage_upload(file=content)
+       arq.update_data(content)
+       #arq.manage_upload(file=content)
     return nom_pdf_saida

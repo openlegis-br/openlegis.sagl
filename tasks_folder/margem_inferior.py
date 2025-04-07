@@ -286,7 +286,8 @@ def margem_inferior_task(portal, codigo, anexo, tipo_doc, cod_assinatura_doc, co
     content = existing_pdf.tobytes(deflate=True, garbage=3, use_objstms=1)
     if hasattr(storage_path, nom_pdf_documento):
        pdf = getattr(storage_path, nom_pdf_documento)
-       pdf.manage_upload(file=content)
+       pdf.update_data(content)
+       #pdf.manage_upload(file=content)
     else:
        storage_path.manage_addFile(id=nom_pdf_documento,file=content,title=texto)
        pdf = getattr(storage_path, nom_pdf_documento)

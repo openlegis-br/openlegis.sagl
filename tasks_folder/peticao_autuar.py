@@ -244,7 +244,8 @@ def peticao_autuar_task(portal, cod_peticao, portal_url):
             content = existing_pdf.tobytes(deflate=True, garbage=3, use_objstms=1)
             if nom_pdf_saida in storage_path:
                 arq = storage_path[nom_pdf_saida]
-                arq.manage_upload(file=content)
+                arq.update_data(content)
+                #arq.manage_upload(file=content)
                 arq.manage_permission(
                     'View', roles=['Manager', 'Authenticated'], acquire=0
                 )

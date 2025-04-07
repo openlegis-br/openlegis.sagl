@@ -275,7 +275,8 @@ def proposicao_autuar_task(portal, cod_proposicao, portal_url):
             content = existing_pdf.tobytes(deflate=True, garbage=3, use_objstms=1)
             if nom_pdf_saida in storage_path:
                 pdf = storage_path[nom_pdf_saida]
-                pdf.manage_upload(file=content)
+                pdf.update_data(content)
+                #pdf.manage_upload(file=content)
             else:
                 storage_path.manage_addFile(id=nom_pdf_saida, file=content, title=texto)
                 pdf = storage_path[nom_pdf_saida]

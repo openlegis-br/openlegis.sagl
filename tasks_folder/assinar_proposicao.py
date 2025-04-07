@@ -58,7 +58,8 @@ def _salvar_pdf_modificado(caminho_armazenamento, pdf_assinado, conteudo, item):
     try:
         if hasattr(caminho_armazenamento, pdf_assinado):
             pdf = getattr(caminho_armazenamento, pdf_assinado)
-            pdf.manage_upload(file=conteudo)
+            pdf.update_data(conteudo)
+            #pdf.manage_upload(file=conteudo)
         else:
             caminho_armazenamento.manage_addFile(
                 id=pdf_assinado, file=conteudo, title="Proposição " + str(item)

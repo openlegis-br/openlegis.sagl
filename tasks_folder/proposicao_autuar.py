@@ -122,7 +122,7 @@ def proposicao_autuar_task(portal, cod_proposicao, portal_url):
     w = existing_pdf[0].rect.width
     h = existing_pdf[0].rect.height
     # tipo, numero e ano
-    rect = pymupdf.Rect(40, 140, w-20, 170)
+    rect = pymupdf.Rect(40, 120, w-20, 170)
     existing_pdf[0].insert_textbox(rect, str(texto).upper(), fontname = "tibo", fontsize = 13, align=pymupdf.TEXT_ALIGN_CENTER)
     metadata = {"title": texto, "author": nom_autor}
     existing_pdf.set_metadata(metadata)

@@ -117,7 +117,7 @@ def peticao_autuar_task(portal, cod_peticao, portal_url):
         shape.commit()
     w = existing_pdf[0].rect.width
     h = existing_pdf[0].rect.height
-    rect = pymupdf.Rect(40, 140, w-20, 170)
+    rect = pymupdf.Rect(40, 120, w-20, 170)
     existing_pdf[0].insert_textbox(rect, str(texto).upper(), fontname = "tibo", fontsize = 13, align=pymupdf.TEXT_ALIGN_CENTER)
     metadata = {"title": texto, "author": nom_autor}
     existing_pdf.set_metadata(metadata)

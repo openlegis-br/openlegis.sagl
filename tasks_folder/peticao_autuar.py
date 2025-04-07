@@ -29,7 +29,7 @@ def peticao_autuar_task(portal, cod_peticao, portal_url):
             if fields != None:
                signature_field_values = [f.value for f in fields.values() if f.field_type == '/Sig']
                if signature_field_values is not None:
-                  signers = self.get_signatures(fileStream)
+                  signers = get_signatures(fileStream)
             qtde_assinaturas = len(signers)
             for signer in signers:
                 nom_autor = signer['signer_name']

@@ -41,6 +41,8 @@ addPermission(mailPassword, ('Anonymous', 'Manager',))
 from Acquisition import aq_base
 import logging
 import tasks
+import qrcode
+
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)

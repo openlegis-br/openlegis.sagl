@@ -1920,6 +1920,20 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
            cepArray.append(cepDict)
            return json.dumps(cepDict)
 
+    def make_qrcode(self, text):
+        qr = qrcode.QRCode(
+            version=1,
+            error_correction=qrcode.constants.ERROR_CORRECT_L,
+            box_size=10,
+            border=4,
+        )
+        qr.add_data(text)
+        qr.make(fit=True)
+        img = qr.make_image(fill_color="black", back_color="white")
+        fp = BytesIO()
+        img.save(fp, "PNG")
+        return fp
+
     def assinar_proposicao(self, lista):
         for item in lista:
            storage_path = self.sapl_documentos.proposicao

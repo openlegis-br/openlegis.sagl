@@ -21,9 +21,7 @@ logger = logging.getLogger(__name__)
 
 # --- Configurações ---
 RESTPKI_URL = 'https://restpkiol.azurewebsites.net/'
-IMAGE_PATH = 'src/openlegis.sagl/openlegis/sagl/skins/imagens/brasao.gif'
 VISUAL_REPRESENTATION_TEXT = 'Assinado digitalmente por {{signerName}}'
-VISUAL_REPRESENTATION_IMAGE_MIME_TYPE = 'image/png'
 VISUAL_REPRESENTATION_FOOTNOTE_HEIGHT = 4.94
 VISUAL_REPRESENTATION_FOOTNOTE_WIDTH = 8.0
 
@@ -38,6 +36,7 @@ def get_restpki_access_token(context):
     except AttributeError:
         raise ValueError("As configurações do Rest PKI não foram encontradas.")
 
+
 async def create_restpki_client(context):
     """Cria e retorna uma instância do RestPkiClient."""
     try:
@@ -50,32 +49,22 @@ async def create_restpki_client(context):
         logger.error(f"Erro ao inicializar o RestPkiClient: {e}")
         raise
 
-async def async_read_file(filepath: str, mode: str = "rb") -> bytes:
-    """Lê o conteúdo de um arquivo de forma assíncrona."""
-    try:
-        async with aiofiles.open(filepath, mode) as f:
-            return await f.read()
-    except FileNotFoundError:
-        raise FileNotFoundError(f"Arquivo não encontrado: {filepath}")
-    except Exception as e:
-        logger.error(f"Erro ao ler o arquivo {filepath}: {e}")
-        raise
 
-async def get_image_content() -> bytes:
+async def get_image_content(self) -> bytes:
     """Obtém o conteúdo da imagem do brasão."""
-    install_home = os.environ.get('INSTALL_HOME')
-    if not install_home:
-        raise EnvironmentError("Variável de ambiente INSTALL_HOME não configurada.")
+    portal = self.portal_url.getPortalObject()
+    id_logo = portal.sapl_documentos.props_sagl.id_logo
+    if hasattr(portal.sapl_documentos.props_sagl, id_logo):
+       arq = getattr(portal.sapl_documentos.props_sagl, id_logo)
+       with BytesIO(bytes(arq.data)) as arq1:
+            image = base64.b64encode(arq1.getvalue()).decode('utf8')
+    else:
+       install_home = os.environ.get('INSTALL_HOME')
+       dirpath = os.path.join(install_home, 'src/openlegis.sagl/openlegis/sagl/skins/imagens/brasao.gif')
+       with open(dirpath, "rb") as arq1:
+            image = base64.b64encode(arq1.read()).decode('utf8')
+    return image
 
-    image_filepath = os.path.join(install_home, IMAGE_PATH)
-
-    try:
-        return await async_read_file(image_filepath)
-    except FileNotFoundError:
-        raise FileNotFoundError(f"Arquivo de imagem não encontrado em: {image_filepath}")
-    except Exception as e:
-        logger.error(f"Erro ao obter o conteúdo da imagem: {e}")
-        raise
 
 async def _build_base_visual_representation(image_content: bytes) -> dict:
     """Constrói a representação visual base da assinatura."""
@@ -87,8 +76,8 @@ async def _build_base_visual_representation(image_content: bytes) -> dict:
         },
         'image': {
             'resource': {
-                'content': base64.b64encode(image_content).decode('utf8'),
-                'mimeType': VISUAL_REPRESENTATION_IMAGE_MIME_TYPE
+                'content': image_content,
+                'mimeType': 'image/png'
             },
             'horizontalAlign': 'Right'
         }
@@ -96,7 +85,7 @@ async def _build_base_visual_representation(image_content: bytes) -> dict:
 
 async def build_visual_representation(context, qtde_assinaturas=None) -> dict:
     """Constrói a representação visual da assinatura."""
-    image_content = await get_image_content()
+    image_content = await get_image_content(context)
     base_representation = await _build_base_visual_representation(image_content)
     restpki_client = await create_restpki_client(context)
 

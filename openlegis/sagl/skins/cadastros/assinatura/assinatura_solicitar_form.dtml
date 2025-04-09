@@ -211,17 +211,19 @@
         <caption>Assinaturas Existentes no Documento</caption>
         <thead class="table-light">
           <tr>
-            <th width="60%">Nome do Signatário</th>
+            <th width="40%">Nome do Signatário</th>
             <th width="20%">CPF</th>
             <th width="20%">Data da Assinatura</th>
+            <th width="20%">Tipo de Assinatura</th>
           </tr>
         </thead>
         <tbody class="table-group-divider">
      </dtml-if>
           <tr>
              <td><dtml-var expr="str(signer_name).title()"></td>
-             <td><dtml-var expr="pysc.cpf_formatar_pysc(numero=signer_cpf)"></td>
+             <td><dtml-var expr="str(signer_cpf)"></td>
              <td><dtml-var expr="str(DateTime(signing_time, datefmt='international').strftime('%d/%m/%Y %H:%M:%S'))"></td>
+             <td><dtml-var expr="str(signer_certificate)"></td>
           </tr>
      <dtml-if sequence-end>
          </tbody>

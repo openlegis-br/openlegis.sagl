@@ -13,8 +13,15 @@ RESPONSE =  request.RESPONSE
 filename = str(uuid.uuid4())+'.pdf'
 
 def upload_file(file, title):
-    context.temp_folder.manage_addFile(id=filename,file=file)
-    return otimize_file(filename, title)
+    #context.temp_folder.manage_addFile(id=filename,file=file)
+    result = otimize_file(file, title)
+    if isinstance(result, bytes):
+       file_stream = result
+       return file_stream
+    else:
+       file_stream = result['file_stream']
+       signatures = result['signatures']
+       return file_stream
 
 def otimize_file(filename=filename, title=title):
     request.set('filename', filename)

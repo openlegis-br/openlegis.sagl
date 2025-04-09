@@ -1286,81 +1286,54 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
             return None
 
     def pessoas_exportar(self, pessoas):
-        try:
-            arq = getattr(self.sapl_documentos.modelo, "planilha-visitantes.ods")
-            template_file = BytesIO(bytes(arq.data))
-            output_file_ods = "contatos.ods"
-            brasao = self.get_brasao()
-            renderer_vars = {'pessoas': pessoas, 'brasao': brasao}
-            renderer = Renderer(template_file, renderer_vars, output_file_ods, pythonWithUnoPath='/usr/bin/python3', forceOoCall=True)
-            renderer.run()
-            with open(output_file_ods, "rb") as file:
-                data = file.read()
-            os.unlink(output_file_ods)
-            self.REQUEST.RESPONSE.headers['Content-Type'] = 'vnd.oasis.opendocument.spreadsheet'
-            self.REQUEST.RESPONSE.headers['Content-Disposition'] = f'attachment; filename="{output_file_ods}"'
-            return data
-        except Exception as e:
-            # Log de Erro
-            print(f"Erro ao exportar pessoas em ODS: {e}")
-            return None
+        arq = getattr(self.sapl_documentos.modelo, "planilha-visitantes.ods")
+        template_file = BytesIO(bytes(arq.data))
+        brasao_file = self.get_brasao()
+        exec('brasao = brasao_file')
+        output_file_ods = "contatos.ods"
+        renderer = Renderer(template_file, locals(), output_file_ods, pythonWithUnoPath='/usr/bin/python3',forceOoCall=True)
+        renderer.run()
+        data = open(output_file_ods, "rb").read()
+        os.unlink(output_file_ods)
+        self.REQUEST.RESPONSE.headers['Content-Type'] = 'vnd.oasis.opendocument.spreadsheet'
+        self.REQUEST.RESPONSE.headers['Content-Disposition'] = 'attachment; filename="%s"'%output_file_ods
+        return data
 
     def eleitores_exportar(self, eleitores):
-        try:
-            arq = getattr(self.sapl_documentos.modelo, "planilha-eleitores.ods")
-            template_file = BytesIO(bytes(arq.data))
-            output_file_ods = "eleitores.ods"
-            renderer_vars = {'eleitores': eleitores}
-            renderer = Renderer(template_file, renderer_vars, output_file_ods, pythonWithUnoPath='/usr/bin/python3', forceOoCall=True)
-            renderer.run()
-            with open(output_file_ods, "rb") as file:
-                data = file.read()
-            os.unlink(output_file_ods)
-            self.REQUEST.RESPONSE.headers['Content-Type'] = 'vnd.oasis.opendocument.spreadsheet'
-            self.REQUEST.RESPONSE.headers['Content-Disposition'] = 'attachment; filename="%s"'%output_file_ods
-            return data
-        except Exception as e:
-            # Log de Erro
-            print(f"Erro ao exportar eleitores em ODS: {e}")
-            return None
+        arq = getattr(self.sapl_documentos.modelo, "planilha-eleitores.ods")
+        template_file = BytesIO(bytes(arq.data))
+        output_file_ods = "eleitores.ods"
+        renderer = Renderer(template_file, locals(), output_file_ods, pythonWithUnoPath='/usr/bin/python3',forceOoCall=True)
+        renderer.run()
+        data = open(output_file_ods, "rb").read()
+        os.unlink(output_file_ods)
+        self.REQUEST.RESPONSE.headers['Content-Type'] = 'vnd.oasis.opendocument.spreadsheet'
+        self.REQUEST.RESPONSE.headers['Content-Disposition'] = 'attachment; filename="%s"'%output_file_ods
+        return data
 
     def materias_exportar(self, materias):
-        try:
-            arq = getattr(self.sapl_documentos.modelo, "planilha-materias.ods")
-            template_file = BytesIO(bytes(arq.data))
-            output_file_ods = "materias.ods"
-            renderer_vars = {'materias': materias}
-            renderer = Renderer(template_file, materias, output_file_ods, pythonWithUnoPath='/usr/bin/python3', forceOoCall=True)
-            renderer.run()
-            with open(output_file_ods, "rb") as file:
-                data = file.read()
-            os.unlink(output_file_ods)
-            self.REQUEST.RESPONSE.headers['Content-Type'] = 'vnd.oasis.opendocument.spreadsheet'
-            self.REQUEST.RESPONSE.headers['Content-Disposition'] = 'attachment; filename="%s"'%output_file_ods
-            return data
-        except Exception as e:
-            # Log de Erro
-            print(f"Erro ao exportar matérias legislativas em ODS: {e}")
-            return None
+        arq = getattr(self.sapl_documentos.modelo, "planilha-materias.ods")
+        template_file = BytesIO(bytes(arq.data))
+        output_file_ods = "materias.ods"
+        renderer = Renderer(template_file, locals(), output_file_ods, pythonWithUnoPath='/usr/bin/python3',forceOoCall=True)
+        renderer.run()
+        data = open(output_file_ods, "rb").read()
+        os.unlink(output_file_ods)
+        self.REQUEST.RESPONSE.headers['Content-Type'] = 'vnd.oasis.opendocument.spreadsheet'
+        self.REQUEST.RESPONSE.headers['Content-Disposition'] = 'attachment; filename="%s"'%output_file_ods
+        return data
 
     def normas_exportar(self, normas):
-        try:
-            arq = getattr(self.sapl_documentos.modelo, "planilha-normas.ods")
-            template_file = BytesIO(bytes(arq.data))
-            output_file_ods = "normas.ods"
-            renderer_vars = {'normas': normas}
-            renderer = Renderer(template_file, renderer_vars, output_file_ods, pythonWithUnoPath='/usr/bin/python3', forceOoCall=True)
-            renderer.run()
-            with open(output_file_ods, "rb") as file:
-                data = file.read()
-            os.unlink(output_file_ods)
-            self.REQUEST.RESPONSE.headers['Content-Type'] = 'vnd.oasis.opendocument.spreadsheet'
-            self.REQUEST.RESPONSE.headers['Content-Disposition'] = 'attachment; filename="%s"'%output_file_ods
-            return data
-        except Exception as e:
-            # Log de Erro
-            print(f"Erro ao exportar normas em ODS: {e}")
-            return None
+        arq = getattr(self.sapl_documentos.modelo, "planilha-normas.ods")
+        template_file = BytesIO(bytes(arq.data))
+        output_file_ods = "normas.ods"
+        renderer = Renderer(template_file, locals(), output_file_ods, pythonWithUnoPath='/usr/bin/python3',forceOoCall=True)
+        renderer.run()
+        data = open(output_file_ods, "rb").read()
+        os.unlink(output_file_ods)
+        self.REQUEST.RESPONSE.headers['Content-Type'] = 'vnd.oasis.opendocument.spreadsheet'
+        self.REQUEST.RESPONSE.headers['Content-Disposition'] = 'attachment; filename="%s"'%output_file_ods
+        return data
 
     def protocolo_barcode(self, cod_protocolo):
         """

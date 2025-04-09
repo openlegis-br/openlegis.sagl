@@ -856,7 +856,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
             with open(nom_arquivo_pdf, "rb") as pdf_file:
                 content = pdf_file.read()
             os.unlink(nom_arquivo_pdf)
-            upload_kwargs = {'file': self.pysc.upload_file(file=content, title=titulo)}
+            upload_kwargs = {'file': self.pysc.upload_file(file=BytesIO(content), title=titulo)}
             upload_kwargs.update(kwargs.get('upload_kwargs', {}))
             destino.manage_addFile(id=nom_arquivo_pdf, **upload_kwargs)
         except Exception as e:

@@ -353,7 +353,8 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
             img.save(modified_path, format="PNG")
             modified_path.seek(0)
             content = modified_path.getvalue()
-            foto_obj.manage_upload(file=content)
+            foto_obj.update_data(content)
+
         except (AttributeError, FileNotFoundError, OSError) as e:
             print(f"Erro ao processar foto de {cod_parlamentar}: {e}")
 
@@ -1093,7 +1094,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
             # Salvar ou atualizar o PDF
             if nom_arquivo_pdf in self.sapl_documentos.pauta_sessao:
                 arq = getattr(self.sapl_documentos.pauta_sessao, nom_arquivo_pdf)
-                arq.manage_upload(file=content)
+                arq.update_data(content)
             else:
                 self.sapl_documentos.pauta_sessao.manage_addFile(id=nom_arquivo_pdf, file=content, title='Ordem do Dia')
             # Configurar cabeçalhos da resposta HTTP
@@ -1455,7 +1456,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
             content = existing_pdf.tobytes(deflate=True, garbage=3, use_objstms=1)
             if nom_pdf_protocolo in self.sapl_documentos.protocolo:
                 documento = getattr(self.sapl_documentos.protocolo, nom_pdf_protocolo)
-                documento.manage_upload(file=content)
+                documento.update_data(content)
             else:
                 self.sapl_documentos.protocolo.manage_addFile(
                     id=nom_pdf_protocolo, file=content, title="Protocolo"
@@ -1691,7 +1692,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
             # Armazena o PDF assinado
             f = signature_finisher.stream_signed_pdf()
             if hasattr(storage_path, filename):
-                storage_path[filename].manage_upload(file=f.getvalue())
+                storage_path[filename].update_data(f.getvalue())
             else:
                 storage_path.manage_addFile(id=filename, file=f.getvalue(), title=filename)
             # Adiciona margem inferior (se aplicável)
@@ -1954,7 +1955,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
            content = existing_pdf.tobytes(deflate=True, garbage=3, use_objstms=1)
            if hasattr(storage_path,pdf_assinado):
               pdf = getattr(storage_path, pdf_assinado)
-              pdf.manage_upload(file=content)
+              pdf.update_data(content)
            else:
               storage_path.manage_addFile(id=pdf_assinado,file=content, title='Proposição '+ str(item))
               pdf = getattr(storage_path, pdf_assinado)

@@ -984,7 +984,7 @@
                           <option value></option>
                             <dtml-in "acl_users.getUsers()">
                               <dtml-let user_roles="_.getitem('sequence-item').getRoles()">
-                               <dtml-if "('Revisor Proposicao' in user_roles)">
+                               <dtml-if expr="('Revisor Proposicao' in user_roles) or ('Chefia Revisão' in user_roles)">
                                  <dtml-in expr="zsql.usuario_obter_zsql(col_username=_['sequence-item'])">
                                      <option value="<dtml-var cod_usuario>"><dtml-var nom_completo></option>
                                  </dtml-in>

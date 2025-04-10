@@ -273,7 +273,7 @@
                 <a class="btn btn-primary btn-sm d-print-none" target="_blank" href="proposicao_recibo_imprimir?cod_documento=<dtml-var cod_doc>"><i class="fas fa-print"></i> Recibo</a>
               </dtml-let>                
              </dtml-if>
-        <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia', 'Revisor Proposicao', 'Chefia Revisao']) and not prop_recebida and not prop_devolvida">                         
+        <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia', 'Revisor Proposicao', 'Chefia Revisão']) and not prop_recebida and not prop_devolvida">
              <!-- Modal -->
              <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#devolucaoModal"><i class="fas fa-angle-double-left"></i> Devolver</button>
              <div class="modal fade" id="devolucaoModal" tabindex="-1" aria-labelledby="devolucaoModalLabel" aria-hidden="true">
@@ -314,7 +314,7 @@
            </dtml-if>
         <dtml-elif expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia'])">
            <a class="btn btn-light btn-sm" href="<dtml-var portal_url>/cadastros/recebimento_proposicao/#protocolo"><i class="fas fa-undo"></i> Voltar</a> 
-        <dtml-elif expr="AUTHENTICATED_USER.has_role(['Revisor Proposicao', 'Chefia Revisao'])">
+        <dtml-elif expr="AUTHENTICATED_USER.has_role(['Revisor Proposicao', 'Chefia Revisão'])">
            <a class="btn btn-light btn-sm" href="<dtml-var portal_url>/cadastros/recebimento_proposicao/#pendente"><i class="fas fa-undo"></i> Voltar</a>                        
         </dtml-if>
         <dtml-if expr="AUTHENTICATED_USER.has_role(['Autor', 'Assessor Parlamentar'])">
@@ -336,7 +336,7 @@
    </div>
 </dtml-if>
 
-<dtml-if expr="usr_eh_autor or (AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia', 'Revisor Proposicao', 'Chefia Revisao']) and prop_enviada)"> 
+<dtml-if expr="usr_eh_autor or (AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia', 'Revisor Proposicao', 'Chefia Revisão']) and prop_enviada)">
   <form name="proposicao_form" method="post" action="proposicao_salvar_proc" enctype="multipart/form-data">
     <input type="hidden" name="hdn_alterou" value="0" />                      
     <input type="hidden" name="hdn_tip_proposicao" value="" />
@@ -349,9 +349,9 @@
          <select class="select2 form-select" id="lst_tip_proposicao" name="lst_tip_proposicao" data-minimum-results-for-search="Infinity" style="width: 100%;" onChange="javascript:tipo_proposicao_mudou()"
             <dtml-if expr="(AUTHENTICATED_USER.has_role(['Autor', 'Assessor Parlamentar']) and prop_enviada)">
                disabled
-            <dtml-elif expr="(AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia', 'Revisor Proposicao', 'Chefia Revisao']) and prop_recebida)">
+            <dtml-elif expr="(AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia', 'Revisor Proposicao', 'Chefia Revisão']) and prop_recebida)">
                disabled
-            <dtml-elif expr="(AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia', 'Revisor Proposicao', 'Chefia Revisao']) and prop_devolvida)">
+            <dtml-elif expr="(AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia', 'Revisor Proposicao', 'Chefia Revisão']) and prop_devolvida)">
                disabled               
             </dtml-if>>                                 
             <option value="">Selecione</option>
@@ -403,7 +403,7 @@
                </dtml-if>
                <label class="form-label" for="txt_materia" class="d-block">Matéria Legislativa</label>       
                <dtml-in expr="zsql.materia_obter_zsql(cod_materia=cod_mat)">
-                  <dtml-if expr="(AUTHENTICATED_USER.has_role(['Autor', 'Assessor Parlamentar', 'Revisor Proposicao', 'Chefia Revisao']))">
+                  <dtml-if expr="(AUTHENTICATED_USER.has_role(['Autor', 'Assessor Parlamentar', 'Revisor Proposicao', 'Chefia Revisão']))">
                      <a class="btn btn-light w-100" href="<dtml-var portal_url>/consultas/materia/materia_mostrar_proc?cod_materia=<dtml-var cod_mat>" target="_blank"><i class="fas fa-eye"></i> <dtml-var des_tipo_materia> nº <dtml-var num_ident_basica>/<dtml-var ano_ident_basica></a>
                   <dtml-else>
                      <a class="btn btn-light w-100" href="<dtml-var portal_url>/cadastros/materia/materia_mostrar_proc?cod_materia=<dtml-var cod_mat>"><i class="fas fa-eye"></i> <dtml-var des_tipo_materia> nº <dtml-var num_ident_basica>/<dtml-var ano_ident_basica></a>
@@ -449,7 +449,7 @@
     <div class="row">       
       <div class="col-12 mb-3">
         <label class="form-label required" for="txt_descricao">Ementa</label>      
-        <textarea class="form-control auto-resize" id="txt_descricao" name="txt_descricao" rows="2" <dtml-if expr="prop_recebida and AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia', 'Revisor Proposicao', 'Chefia Revisao'])">readonly</dtml-if><dtml-if expr="(AUTHENTICATED_USER.has_role(['Autor', 'Assessor Parlamentar']) and prop_enviada or prop_devolvida)">readonly</dtml-if>><dtml-var txt_descricao missing></textarea>
+        <textarea class="form-control auto-resize" id="txt_descricao" name="txt_descricao" rows="2" <dtml-if expr="prop_recebida and AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia', 'Revisor Proposicao', 'Chefia Revisão'])">readonly</dtml-if><dtml-if expr="(AUTHENTICATED_USER.has_role(['Autor', 'Assessor Parlamentar']) and prop_enviada or prop_devolvida)">readonly</dtml-if>><dtml-var txt_descricao missing></textarea>
       </div>
     </div>
 
@@ -823,7 +823,7 @@
          </dtml-if>
      </div>
     </div>
-  <dtml-elif expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia', 'Revisor Proposicao', 'Chefia Revisao'])">
+  <dtml-elif expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia', 'Revisor Proposicao', 'Chefia Revisão'])">
       <dtml-if expr="(prop_enviada)">
         <div class="row mb-3">
          <div class="col-12 col-md-6">
@@ -853,7 +853,7 @@
         <input type="hidden" name="lst_assessor" value="<dtml-var cod_assessor_sel missing null>">
      </dtml-if> 
 
-   <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia', 'Revisor Proposicao', 'Chefia Revisao'])">
+   <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia', 'Revisor Proposicao', 'Chefia Revisão'])">
       <div class="row mb-2">
         <div class="col-12 col-md-6 mb-3">
            <label class="form-label d-block">Texto Editável</label>
@@ -914,7 +914,7 @@
             </dtml-let>
            </div>              
            <dtml-else>
-              <dtml-if expr="AUTHENTICATED_USER.has_role(['Autor', 'Assessor Parlamentar', 'Operador', 'Operador Materia', 'Revisor Proposicao', 'Chefia Revisao'])">   
+              <dtml-if expr="AUTHENTICATED_USER.has_role(['Autor', 'Assessor Parlamentar', 'Operador', 'Operador Materia', 'Revisor Proposicao', 'Chefia Revisão'])">
               <dtml-if expr="not cod_mat_ou_doc and not prop_devolvida">         
                <div class="input-group">
                   <input type="file" class="form-control" id="file_nom_arquivo" name="file_nom_arquivo" accept="application/pdf">
@@ -940,7 +940,7 @@
 
 <dtml-if expr="(AUTHENTICATED_USER.has_role(['Autor', 'Assessor Parlamentar']) and not prop_enviada and not prop_devolvida)">
    <input class="btn btn-primary" type="button" value="Salvar Proposição" onClick="campos_criticar(document.proposicao_form)" />
-<dtml-elif expr="(AUTHENTICATED_USER.has_role(['Operador','Operador Materia', 'Revisor Proposicao', 'Chefia Revisao']) and not prop_recebida and not prop_devolvida)">
+<dtml-elif expr="(AUTHENTICATED_USER.has_role(['Operador','Operador Materia', 'Revisor Proposicao', 'Chefia Revisão']) and not prop_recebida and not prop_devolvida)">
    <input class="btn btn-primary" type="button" value="Salvar Proposição" onClick="campos_criticar(document.proposicao_form)" /> 
 </dtml-if>
 
@@ -1038,7 +1038,7 @@
     </div>
 </div>
 
-<dtml-if expr="_.has_key('cod_proposicao') and (AUTHENTICATED_USER.has_role(['Autor', 'Assessor Parlamentar']) and des_tipo_autor == 'Parlamentar') or AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia', 'Revisor Proposicao', 'Chefia Revisao'])">
+<dtml-if expr="_.has_key('cod_proposicao') and (AUTHENTICATED_USER.has_role(['Autor', 'Assessor Parlamentar']) and des_tipo_autor == 'Parlamentar') or AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia', 'Revisor Proposicao', 'Chefia Revisão'])">
       <div class="accordion accordion-flush accordion-plus-icon mb-3" id="accordionDest">
          <div class="card mb-0 shadow">
              <div class="accordion-header" id="headingDest">
@@ -1118,7 +1118,7 @@
       </div>
 </dtml-if>
 
-<dtml-if expr="_.has_key('cod_proposicao') and AUTHENTICATED_USER.has_role(['Autor','Operador', 'Operador Materia', 'Revisor Proposicao', 'Chefia Revisao'])">
+<dtml-if expr="_.has_key('cod_proposicao') and AUTHENTICATED_USER.has_role(['Autor','Operador', 'Operador Materia', 'Revisor Proposicao', 'Chefia Revisão'])">
       <div class="accordion accordion-flush accordion-plus-icon" id="accordionObs">
        <div class="accordion-item">
          <div class="card mb-0 shadow">

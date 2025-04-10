@@ -263,6 +263,9 @@
                       </dtml-if>
                     </a>
                   <dtml-if "sapl_documentos.props_sagl.restpki_access_token!=''">
+                     <dtml-unless expr="zsql.assinatura_documento_obter_zsql(codigo=cod_documento, tipo_doc='doc_acessorio',ind_assinado=1, cod_usuario=None)">
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Assinar Digitalmente com ICP-Brasil" data-src="<dtml-var portal_url>/generico/assinador/pades-signature_html?codigo=<dtml-var cod_documento>&tipo_doc=doc_acessorio&modal=1"><i class="fas fas-fw fa-file-signature"></i> Assinar</button>
+                     </dtml-unless>
                      <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Assinaturas Digitais" data-src="<dtml-var portal_url>/cadastros/assinatura/assinatura_solicitar_form?codigo=<dtml-var cod_documento>&tipo_doc=doc_acessorio&modal=1"><i class="fas fas-fw fa-file-signature"></i>Assinaturas</button>
                   </dtml-if>
                    <a class="btn btn-danger" href="texto_documento_excluir_proc?cod_documento=<dtml-var cod_documento missing>&cod_materia=<dtml-var cod_materia missing>&modal=1" data-confirm="Deseja realmente excluir o arquivo PDF?"><i class="far fa-trash-alt"></i> Excluir</a>

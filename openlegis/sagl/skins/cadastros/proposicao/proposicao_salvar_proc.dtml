@@ -106,7 +106,7 @@
 
     <dtml-if file_nom_arquivo>
       <dtml-call expr="REQUEST.set('id_documento', str(cod_proposicao)+'.pdf')">
-      <dtml-call expr="sapl_documentos.proposicao.manage_addFile(id=id_documento,file=pysc.upload_file(file=file_nom_arquivo, title='Proposicao'))">
+      <dtml-call expr="sapl_documentos.proposicao.manage_addFile(id=id_documento,file=pysc.upload_file(file=file_nom_arquivo, title='Proposicao', tipo_doc='proposicao', codigo=cod_proposicao))">
     </dtml-if>
 
     <dtml-if file_nom_image1>

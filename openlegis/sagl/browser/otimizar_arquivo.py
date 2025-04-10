@@ -26,6 +26,18 @@ class PDFUploadProcessorView(grok.View):  # Renamed class for clarity
     grok.require('zope2.Public')
     grok.name('otimizar_arquivo')
 
+    def _format_cpf(self, cpf):
+        """Formata o CPF no padrão 000.000.000-00."""
+        if cpf and len(cpf) == 11 and cpf.isdigit():
+            return f"{cpf[:3]}.{cpf[3:6]}.{cpf[6:9]}-{cpf[9:]}"
+        return cpf
+
+    def _format_datetime(self, dt):
+        """Formata o objeto datetime no padrão YYYY-MM-DD HH:MM:SS."""
+        if dt:
+            return dt.strftime('%Y-%m-%d %H:%M:%S')
+        return None
+
     def parse_signatures(self, raw_signature_data):
         """Parses the raw signature data to extract signer information."""
         try:
@@ -44,6 +56,7 @@ class PDFUploadProcessorView(grok.View):  # Renamed class for clarity
                     lista = common_name.split(':') if common_name else []  # Corrigido para evitar AttributeError
                     signer = lista[0] if lista else ''
                     cpf_certificado = lista[1] if len(lista) > 1 else ''
+                    cpf_certificado = self._format_cpf(cpf_certificado)
                     dic = {
                         'type': subject.get('organization_name', ''),
                         'signer': signer,
@@ -68,12 +81,14 @@ class PDFUploadProcessorView(grok.View):  # Renamed class for clarity
                 correspondencia_cpf = re.search(rb'L\x01\x03\x01\xa0/\x04-\d{8}(\d{11})\d*\x00*\xa0\x17\x06\x05`L', conteudo_decodificado)
                 if correspondencia_cpf:
                     cpf_contents = correspondencia_cpf.group(1).decode('ascii')
+                    cpf_contents = self._format_cpf(cpf_contents)
                     logging.info(f"CPF encontrado em '/Contents' (padrão ajustado): {cpf_contents}")
                 else:
                     # Se o padrão específico não for encontrado, tenta a busca genérica por 11 dígitos (backup)
                     correspondencia_generica = re.search(rb'(\d{11})', conteudo_decodificado)
                     if correspondencia_generica:
                         cpf_contents = correspondencia_generica.group(1).decode('ascii')
+                        cpf_contents = self._format_cpf(cpf_contents)
                         logging.info(f"CPF encontrado em '/Contents' (genérico): {cpf_contents}")
                     else:
                         logging.info(f"Nenhum CPF encontrado em '/Contents' (arquivo: {original_filename})")
@@ -96,6 +111,7 @@ class PDFUploadProcessorView(grok.View):  # Renamed class for clarity
                 if v is not None:
                     signing_time_raw = v.get('/M')
                     signing_time = parse(signing_time_raw[2:].strip("'").replace("'", ":")) if signing_time_raw else None
+                    signing_time_formatted = self._format_datetime(signing_time)
                     signer_name = None
                     signer_cpf_name = None
                     if '/Name' in v:
@@ -107,6 +123,8 @@ class PDFUploadProcessorView(grok.View):  # Renamed class for clarity
                                 signer_cpf_name = signer_cpf_name.strip()
                                 if not signer_cpf_name or len(signer_cpf_name) != 11 or not signer_cpf_name.isdigit():
                                     signer_cpf_name = None
+                                else:
+                                    signer_cpf_name = self._format_cpf(signer_cpf_name)
                         except Exception as e:
                             logging.warning(f"Erro ao extrair nome/CPF de '/Name' (arquivo: {original_filename}): {e}")
                             signer_name = v.get('/Name', '').strip()
@@ -129,9 +147,6 @@ class PDFUploadProcessorView(grok.View):  # Renamed class for clarity
                             'signer_cpf': signer_cpf_final or attrdict.get('cpf'), # Garante que o CPF do certificado seja usado se parseado
                             'signing_time': signing_time,
                             'signer_certificate': attrdict.get('oname'),
-                            'cpf_contents': cpf_contents, # Adiciona o CPF encontrado no Contents para inspeção
-                            'cpf_name_field': signer_cpf_name, # Adiciona o CPF encontrado no /Name para inspeção
-                            'cpf_certificate_field': cpf_certificado # Adiciona o CPF parseado do certificado
                         }
                         lst_signers.append(dic)
 
@@ -161,20 +176,7 @@ class PDFUploadProcessorView(grok.View):  # Renamed class for clarity
             If no signatures are found and no signature fields are present, optimizes the file.
             Returns the original file data if signature fields are present or any error occurs.
         """
-        #temp_path = self.context.temp_folder
-        #if not hasattr(temp_path, filename):
-        #    logging.error(f"Arquivo '{filename}' não encontrado.")
-        #    return None
-
-        #arq = getattr(temp_path, filename)
-        #try:
-        #    file_stream = BytesIO(bytes(arq.data))  # Directly access arq.data
-        #except Exception as e:
-        #    logging.error(f"Erro ao ler dados do arquivo '{filename}': {e}")
-        #    return "Erro ao ler dados do arquivo."
-       
         file_stream = BytesIO(filename.read())  # Directly access arq.data
-
         original_data = file_stream.getvalue()  # Store the original data
 
         try:
@@ -187,8 +189,7 @@ class PDFUploadProcessorView(grok.View):  # Renamed class for clarity
                 logging.info(f"Campos: {signers_data}")
                 return {
                     'file_stream': BytesIO(original_data),
-                    'fields': fields,
-                    'signatures': signers_data  # Include signatures with CPF information
+                    'signatures': signers_data 
                 }
 
             if fields:

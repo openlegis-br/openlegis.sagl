@@ -24,12 +24,12 @@ def upload_file(file, title):
 
     result = otimize_file(file, title)
     
-    if isinstance(result, bytes):  # Use type(b'') to represent the bytes type
+    if isinstance(result, bytes):
         file_stream = result
         return file_stream
     elif hasattr(result, 'read'):
         return result.read()
-    else:  # Use type({}) to represent the dict type
+    else:
         file_stream = result['file_stream']
         signatures = result['file_stream']
         return file_stream

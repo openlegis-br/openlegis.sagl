@@ -1971,6 +1971,23 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
            RESPONSE = REQUEST.RESPONSE
            RESPONSE.redirect(redirect_url)
 
+    def baixar_atas_comissao(self, lista):
+        merger = pymupdf.open()
+        for item in lista:
+           storage_path = self.sapl_documentos.reuniao_comissao
+           arq = getattr(storage_path, item['ata'])
+           arquivo_ata = BytesIO(bytes(arq.data))
+           arquivo_ata.seek(0)
+           texto_ata = pymupdf.open(stream=arquivo_ata)
+           texto_ata.bake()
+           merger.insert_pdf(texto_ata)
+           arquivo_ata.close()
+        final_pdf_content = merger.tobytes()
+        download_name = 'Atas de Comissão'
+        self.REQUEST.RESPONSE.setHeader('Content-Type', 'application/pdf')
+        self.REQUEST.RESPONSE.setHeader('Content-Disposition', f'inline; filename={download_name}')
+        return final_pdf_content
+
     # Tarefas assincronas
 
     def index_file(self, url):

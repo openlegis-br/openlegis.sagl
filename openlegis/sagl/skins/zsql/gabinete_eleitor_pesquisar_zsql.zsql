@@ -64,7 +64,7 @@ FROM
   <dtml-if dat_atualizacao>
      <dtml-if dat_atualizacao2>
         AND DATE(e.dat_atualizacao) >= <dtml-sqlvar "pysc.port_to_iso_pysc(dat_atualizacao)" type="nb">
-        AND DATE(e.dat_atualizacao2) <= <dtml-sqlvar "pysc.port_to_iso_pysc(dat_atualizacao2)" type="nb">
+        AND DATE(e.dat_atualizacao) <= <dtml-sqlvar "pysc.port_to_iso_pysc(dat_atualizacao2)" type="nb">
      <dtml-else>
         AND DATE(e.dat_atualizacao) = <dtml-sqlvar "pysc.port_to_iso_pysc(dat_atualizacao)" type="nb">
      </dtml-if>

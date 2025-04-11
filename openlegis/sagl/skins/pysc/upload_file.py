@@ -33,23 +33,26 @@ def upload_file(file, title):
         file_stream = result['file_stream']
         signatures = result['signatures']
         if str(tipo_doc) == 'proposicao':
+           cpfs_inseridos = []
            cod_assinatura_doc = context.cadastros.assinatura.generate_verification_code()
            for i, item in enumerate(signatures):
                signer_cpf = item['signer_cpf']
-               usuarios = context.zsql.usuario_obter_zsql(num_cpf=signer_cpf)
-               for usuario in usuarios:
-                   ind_prim_assinatura = 1 if i == 0 else 0
-                   context.zsql.assinaturas_capturadas_incluir_zsql(
-                               cod_assinatura_doc=cod_assinatura_doc,
-                               codigo=codigo,
-                               tipo_doc=tipo_doc,
-                               cod_solicitante=usuario.cod_usuario,
-                               cod_usuario=usuario.cod_usuario,
-                               ind_prim_assinatura=ind_prim_assinatura,
-                               ind_assinado = 1,
-                               dat_solicitacao=DateTime(item['signing_time'], datefmt='international').strftime('%Y/%m/%d %H:%M:%S'),
-                               dat_assinatura=DateTime(item['signing_time'], datefmt='international').strftime('%Y/%m/%d %H:%M:%S')
-                               )
+               if signer_cpf not in cpfs_inseridos:
+                  usuarios = context.zsql.usuario_obter_zsql(num_cpf=signer_cpf)
+                  for usuario in usuarios:
+                      ind_prim_assinatura = 1 if i == 0 else 0
+                      context.zsql.assinaturas_capturadas_incluir_zsql(
+                                  cod_assinatura_doc=cod_assinatura_doc,
+                                  codigo=codigo,
+                                  tipo_doc=tipo_doc,
+                                  cod_solicitante=usuario.cod_usuario,
+                                  cod_usuario=usuario.cod_usuario,
+                                  ind_prim_assinatura=ind_prim_assinatura,
+                                  ind_assinado = 1,
+                                  dat_solicitacao=DateTime(item['signing_time'], datefmt='international').strftime('%Y/%m/%d %H:%M:%S'),
+                                  dat_assinatura=DateTime(item['signing_time'], datefmt='international').strftime('%Y/%m/%d %H:%M:%S')
+                                  )
+                      cpfs_inseridos.append(signer_cpf)
            nom_pdf = str(codigo)+'_signed.pdf'
            context.sapl_documentos.proposicao.manage_addFile(id=nom_pdf, file=file_stream)  
 

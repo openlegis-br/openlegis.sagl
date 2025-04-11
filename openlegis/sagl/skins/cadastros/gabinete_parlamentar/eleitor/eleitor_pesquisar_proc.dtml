@@ -39,11 +39,7 @@
 </dtml-if>
 
 <fieldset>
-<dtml-in expr="zsql.gabinete_eleitor_pesquisar_zsql(nom_eleitor=txt_nom_eleitor,dat_atendimento=txt_dat_atendimento,dat_atendimento2=txt_dat_atendimento2,
- dia_aniversario=txt_dia_aniversario, dia_aniversario2=txt_dia_aniversario2, mes_aniversario=lst_mes_aniversario,sex_eleitor=rad_sex_eleitor, 
- des_estado_civil=txt_des_estado_civil,rad_filhos=rad_filhos, des_profissao=txt_des_profissao,
- des_local_trabalho=txt_des_local_trabalho,end_residencial=txt_end_residencial,nom_bairro=txt_nom_bairro,  
-num_cep=txt_num_cep,nom_localidade=txt_nom_localidade,cod_parlamentar=cod_parlamentar_corrente,txt_classe=lst_txt_classe,cod_assessor=lst_assessor)" 
+<dtml-in expr="zsql.gabinete_eleitor_pesquisar_zsql(nom_eleitor=txt_nom_eleitor, dat_atendimento=txt_dat_atendimento, dat_atendimento2=txt_dat_atendimento2, dia_aniversario=txt_dia_aniversario, dia_aniversario2=txt_dia_aniversario2, mes_aniversario=lst_mes_aniversario, sex_eleitor=rad_sex_eleitor, des_estado_civil=txt_des_estado_civil, rad_filhos=rad_filhos, des_profissao=txt_des_profissao,  des_local_trabalho=txt_des_local_trabalho, end_residencial=txt_end_residencial, nom_bairro=txt_nom_bairro,  num_cep=txt_num_cep, nom_localidade=txt_nom_localidade, cod_parlamentar=cod_parlamentar_corrente, txt_classe=lst_txt_classe, cod_assessor=lst_assessor, dat_atualizacao=txt_dat_atualizacao, dat_atualizacao2=txt_dat_atualizacao2)" 
  size="step" start="start" orphan=0>
   <dtml-if sequence-start>
    <table class="table">
@@ -61,17 +57,20 @@ num_cep=txt_num_cep,nom_localidade=txt_nom_localidade,cod_parlamentar=cod_parlam
          <tr>            
            <td>
               <a href="#" data-src="<dtml-var portal_url>/cadastros/gabinete_parlamentar/eleitor/eleitor_mostrar_proc?hdn_cod_eleitor=<dtml-var cod_eleitor missing>&modal=1" data-title="Edição de Eleitor" data-bs-toggle="modal" data-bs-target="#iFrameModal" /><span class="d-block"><b><dtml-var nom_eleitor></b></span></a>            
-            <dtml-if dat_nascimento><span class="d-block"><b>Data de Nascimento:</b> <dtml-var dat_nascimento></span></dtml-if>
-            <dtml-if doc_identidade><span class="d-block"><b>Documento:</b> <dtml-var doc_identidade missing null=""></span></dtml-if>
-            <dtml-if end_residencial>
-              <dtml-if end_residencial><span class="d-block"><b>Endereço</b>: <dtml-var end_residencial></span></dtml-if> 
-              <dtml-if nom_bairro><span class="d-block"><b>Bairro: </b><dtml-var nom_bairro missing null=""></span</dtml-if> 
-              <dtml-if nom_localidade><span class="d-block"><dtml-if num_cep><b>CEP:</b> <dtml-var num_cep missing null=""></dtml-if> <b>Localidade:</b> <dtml-var nom_localidade> - <dtml-var sgl_uf></span></dtml-if>
-            </dtml-if>
-            <dtml-if expr="num_telefone or num_celular">
-               <dtml-if num_telefone><span class="d-block"><b>Telefone Fixo:</b> <dtml-var num_telefone missing null></span></dtml-if> 
-               <dtml-if num_celular><span class="d-block"><b>Celular:</b> <dtml-var num_celular missing null></span></dtml-if>
-            </dtml-if>
+              <dtml-if dat_nascimento><span class="d-block"><b>Data de Nascimento:</b> <dtml-var dat_nascimento></span></dtml-if>
+              <dtml-if doc_identidade><span class="d-block"><b>Documento:</b> <dtml-var doc_identidade missing null=""></span></dtml-if>
+              <dtml-if end_residencial>
+                <dtml-if end_residencial><span class="d-block"><b>Endereço</b>: <dtml-var end_residencial></span></dtml-if> 
+                <dtml-if nom_bairro><span class="d-block"><b>Bairro: </b><dtml-var nom_bairro missing null=""></span</dtml-if> 
+                <dtml-if nom_localidade><span class="d-block"><dtml-if num_cep><b>CEP:</b> <dtml-var num_cep missing null=""></dtml-if> <b>Localidade:</b> <dtml-var nom_localidade> - <dtml-var sgl_uf></span></dtml-if>
+              </dtml-if>
+              <dtml-if expr="num_telefone or num_celular">
+                 <dtml-if num_telefone><span class="d-block"><b>Telefone Fixo:</b> <dtml-var num_telefone missing null></span></dtml-if> 
+                 <dtml-if num_celular><span class="d-block"><b>Celular:</b> <dtml-var num_celular missing null></span></dtml-if>
+              </dtml-if>
+              <dtml-if expr="dat_atualizacao">
+                <span class="d-block"><b>Última Atualização</b>: <dtml-var dat_atualizacao missing></span>
+              </dtml-if>
            </td>
           </tr>
   <dtml-if sequence-end>
@@ -84,6 +83,7 @@ num_cep=txt_num_cep,nom_localidade=txt_nom_localidade,cod_parlamentar=cod_parlam
         <ul class="pagination justify-content-center">
           <dtml-var "pysc.PageListOutput_pysc('eleitor_pesquisar_proc', page, step, _['sequence-length'],
                      txt_dat_atendimento=txt_dat_atendimento, txt_dat_atendimento2=txt_dat_atendimento2,
+                     txt_dat_atualizacao=txt_dat_atualizacao, txt_dat_atualizacao2=txt_dat_atualizacao2,
                      txt_dia_aniversario=txt_dia_aniversario, txt_dia_aniversario2=txt_dia_aniversario2,
                      lst_mes_aniversario=lst_mes_aniversario, rad_sex_eleitor=rad_sex_eleitor, 
                      txt_des_estado_civil=txt_des_estado_civil, rad_filhos=rad_filhos, lst_txt_classe = lst_txt_classe,

@@ -4,12 +4,12 @@
 ##bind namespace=
 ##bind script=script
 ##bind subpath=traverse_subpath
-##parameters= cod_parlamentar_corrente, txt_nom_eleitor, txt_dat_atendimento, txt_dat_atendimento2, txt_dia_aniversario, lst_mes_aniversario, rad_sex_eleitor, txt_des_estado_civil, rad_filhos, txt_des_profissao, txt_des_local_trabalho, txt_end_residencial, txt_nom_bairro, txt_num_cep, txt_nom_localidade, lst_txt_classe, lst_assessor
+##parameters= cod_parlamentar_corrente, txt_nom_eleitor, txt_dat_atendimento, txt_dat_atendimento2, txt_dia_aniversario, lst_mes_aniversario, rad_sex_eleitor, txt_des_estado_civil, rad_filhos, txt_des_profissao, txt_des_local_trabalho, txt_end_residencial, txt_nom_bairro, txt_num_cep, txt_nom_localidade, lst_txt_classe, lst_assessor, txt_dat_atualizacao, txt_dat_atualizacao2
 ##title=
 ##
 
 REQUEST = context.REQUEST
-RESPONSE =  REQUEST.RESPONSE
+RESPONSE = REQUEST.RESPONSE
 session = REQUEST.SESSION
 
 results =  context.zsql.gabinete_eleitor_pesquisar_zsql(
@@ -30,7 +30,9 @@ results =  context.zsql.gabinete_eleitor_pesquisar_zsql(
                                                num_cep=REQUEST['txt_num_cep'],
                                                nom_localidade=REQUEST['txt_nom_localidade'],
                                                txt_classe=REQUEST['lst_txt_classe'],
-                                               cod_assessor=REQUEST['lst_assessor']
+                                               cod_assessor=REQUEST['lst_assessor'],
+                                               dat_atualizacao=REQUEST['txt_dat_atualizacao'],
+                                               dat_atualizacao2=REQUEST['txt_dat_atualizacao2']
                                                )
 dados = []
 for row in results:

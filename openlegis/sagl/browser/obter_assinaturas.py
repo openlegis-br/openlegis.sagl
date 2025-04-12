@@ -104,8 +104,8 @@ class PDFProcessorView(grok.View):  # Renamed class for clarity
             for v in signature_field_values:
                 if v is not None:
                     signing_time_raw = v.get('/M')
-                    signing_time_obj = parse(signing_time_raw[2:].strip("'").replace("'", ":")) if signing_time_raw else None
-                    signing_time_formatted = self._format_datetime(signing_time_obj)
+                    signing_time = parse(signing_time_raw[2:].strip("'").replace("'", ":")) if signing_time_raw else None
+                    signing_time_formatted = self._format_datetime(signing_time)
                     signer_name = None
                     signer_cpf_name_formatado = None
                     signer_cpf_name_raw = None

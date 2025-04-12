@@ -140,7 +140,7 @@ class PDFProcessorView(grok.View):  # Renamed class for clarity
                         dic = {
                             'signer_name': signer_name or attrdict.get('signer'),
                             'signer_cpf': signer_cpf_final or attrdict.get('cpf'), # Garante que o CPF do certificado seja usado se parseado
-                            'signing_time': signing_time_formatted,
+                            'signing_time': signing_time,
                             'signer_certificate': attrdict.get('oname')
                         }
                         lst_signers.append(dic)

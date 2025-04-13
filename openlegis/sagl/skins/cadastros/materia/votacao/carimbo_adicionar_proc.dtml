@@ -2,6 +2,25 @@
 
 <dtml-if expr="hasattr(sapl_documentos.materia,id_pdf)">
    <dtml-call expr="REQUEST.set('hdn_url', 'materia_mostrar_proc?cod_materia=' + str(cod_materia))">
+
+   <dtml-if expr="zsql.proposicao_obter_zsql(ind_mat_ou_doc='M',cod_mat_ou_doc=cod_materia)">
+     <dtml-in expr="zsql.proposicao_obter_zsql(ind_mat_ou_doc='M',cod_mat_ou_doc=cod_materia)">
+        <dtml-if sequence-start>
+           <dtml-if expr="hasattr(sapl_documentos.proposicao, str(cod_proposicao) + '_signed.pdf')">
+              <dtml-call expr="modelo_proposicao.proposicao_autuar(cod_proposicao=cod_proposicao)">
+           </dtml-if>
+        </dtml-if>
+     </dtml-in>
+   <dtml-elif expr="zsql.assinatura_documento_obter_zsql(codigo=cod_materia, tipo_doc='materia', ind_assinado=1)">
+     <dtml-in expr="zsql.assinatura_documento_obter_zsql(codigo=cod_materia, tipo_doc='materia', ind_assinado=1)">
+        <dtml-if sequence-start>
+           <dtml-call expr="REQUEST.set('filename', str(cod_assinatura_doc) + '.pdf')">
+           <dtml-if expr="hasattr(sapl_documentos.documentos_assinados, filename)">
+              <dtml-call expr="modelo_proposicao.margem_inferior(codigo=codigo, anexo=anexo, tipo_doc=tipo_doc, cod_assinatura_doc=cod_assinatura_doc, cod_usuario=cod_usuario, filename=filename)">
+           </dtml-if>
+        </dtml-if>
+     </dtml-in>
+   </dtml-if>
    <dtml-call expr="modelo_proposicao.requerimento_aprovar(cod_sessao_plen=hdn_cod_sessao_plen, nom_resultado=nom_resultado, cod_materia=cod_materia)">
    <dtml-let mensagem="'Resultado carimbado no arquivo PDF da matéria!'" url="hdn_url" >
       <dtml-var mensagem_emitir>

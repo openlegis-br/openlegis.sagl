@@ -153,8 +153,8 @@
         <dtml-comment>
         <a class="btn btn-light mb-3" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Aprovação Nominal" data-src="aprovacao_nominal_form?cod_sessao_plen=<dtml-var cod_sessao_plen>&dat_sessao=<dtml-var dat_sessao>&modal=1" ><i class="fa fa-check"></i> Aprovação Nominal</a>
         </dtml-comment>
-       <input class="btn btn-light" type="button" name="btn_lote" value="Aprovação em Lote" onClick="aprovacao_lote()" />
-       <input class="btn btn-light" type="button" name="btn_ind" value="Despachar Indicações" onClick="indicacao_despachar()" />
+        <button class="btn btn-light" type="button" name="btn_lote" onclick="aprovacao_lote()">Aprovação em Lote</button>
+        <button class="btn btn-light" type="button" name="btn_ind" onclick="indicacao_despachar()">Despachar Indicações</button>
        <input class="btn btn-danger" type="button" name="btn_excluir" value="Excluir Lista" onClick="pauta_expediente_excluir()" />
     </dtml-if>
   </div>
@@ -200,23 +200,51 @@ $(document).ready(function() {
 </script>
 
 <script>
+    function exibirMensagemProcessamento(mensagem) {
+        // Crie um elemento div para a mensagem de processamento
+        var mensagemDiv = document.createElement('div');
+        mensagemDiv.id = 'mensagem-processamento';
+        mensagemDiv.style.position = 'fixed';
+        mensagemDiv.style.top = '50%';
+        mensagemDiv.style.left = '50%';
+        mensagemDiv.style.transform = 'translate(-50%, -50%)';
+        mensagemDiv.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+        mensagemDiv.style.color = '#fff';
+        mensagemDiv.style.padding = '20px';
+        mensagemDiv.style.borderRadius = '5px';
+        mensagemDiv.style.zIndex = '1000';
+        mensagemDiv.innerHTML = mensagem + ' <i class="mdi mdi-loading mdi-spin"></i>'; // Adiciona um ícone de loading
+
+        // Adicione a mensagem ao corpo do documento
+        document.body.appendChild(mensagemDiv);
+    }
+
+    function removerMensagemProcessamento() {
+        var mensagemDiv = document.getElementById('mensagem-processamento');
+        if (mensagemDiv) {
+            document.body.removeChild(mensagemDiv);
+        }
+    }
+
     function pauta_expediente_excluir(){
         if (confirm("Deseja realmente excluir a pauta do expediente?")) {
-            location.href="pauta_expediente_excluir_proc?<dtml-var "REQUEST.get('QUERY_STRING','')">";
+            location.href="pauta_expediente_excluir_proc?<dtml-var expr="REQUEST.get('QUERY_STRING','')">";
         }
-       return;
+        return;
     }
     function aprovacao_lote(){
         if (confirm("Confirma a aprovação em lote dos Requerimentos e das Moções?")) {
-            location.href="aprovacao_lote_proc?<dtml-var "REQUEST.get('QUERY_STRING','')">";
+            exibirMensagemProcessamento('Aprovando Requerimentos em Lote...');
+            location.href="aprovacao_lote_proc?<dtml-var expr="REQUEST.get('QUERY_STRING','')">";
         }
-       return;
+        return;
     }
     function indicacao_despachar(){
         if (confirm("Confirma o despacho de todas as Indicações?")) {
-            location.href="indicacao_despachar_proc?<dtml-var "REQUEST.get('QUERY_STRING','')">";
+            exibirMensagemProcessamento('Despachando Indicações...');
+            location.href="indicacao_despachar_proc?<dtml-var expr="REQUEST.get('QUERY_STRING','')">";
         }
-       return;
+        return;
     }
 </script>
 <dtml-var footer_html>

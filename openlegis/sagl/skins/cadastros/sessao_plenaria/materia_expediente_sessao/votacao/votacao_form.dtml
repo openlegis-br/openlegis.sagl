@@ -1,165 +1,196 @@
 <dtml-var header_html>
 
 <script>
+  function campos_criticar(){
+    var form = document.votacao_form;
+    var regexp_digitos = /\D+/;
+    var tipo_votacao = "<dtml-var tip_votacao>";
 
-    function campos_criticar(){
-
-        var form = document.votacao_form;
-        var regexp_digitos = /\D+/;
-        var tipo_votacao = "<dtml-var tip_votacao>";
-
-        if (form.rad_votacao_branco.checked == true) { 
-            form.submit(); 
-        }
-
-        if ((tipo_votacao != 2) || (tipo_votacao == 3)) {
-            if (form.txt_votos_sim.value == '' && form.rad_votacao_branco.checked == false) {
-                alert("O número de votos SIM deve ser preenchido!");
-                form.txt_votos_sim.focus();
-                return false;
-            }
-
-            if (form.txt_votos_nao.value == '' && form.rad_votacao_branco.checked == false) {
-                alert("O número de votos NÃO deve ser preenchido!");
-                form.txt_votos_nao.focus();
-                return false;
-            }
-
-            if (form.txt_votos_abstencao.value == '' && form.rad_votacao_branco.checked == false) {
-                alert("O número de abstenções deve ser preenchido!");
-                form.txt_votos_abstencao.focus();
-                return false;
-            }
-
-            if (form.txt_ausentes.value == '' && form.rad_votacao_branco.checked == false) {
-                alert("O número de ausentes deve ser preenchido!");
-                form.txt_ausentes.focus();
-                return false;
-            }
-
-
-<dtml-comment>                            
-	    if (tipo_votacao == 1) {
-               if (!(form.rad_ind_votacao_presidente[0].checked || form.rad_ind_votacao_presidente[1].checked)){
-                  alert("Indique se o total de votos inclui o voto do Presidente!");
-                  form.rad_ind_votacao_presidente[0].focus();
-                  return false;
-               }
-            
-               var qtv = 0;
-               var qp  = 0;
-               var qvs = parseInt(form.txt_votos_sim.value,10); 
-               var qvn = parseInt(form.txt_votos_nao.value,10);
-               var qab = parseInt(form.txt_votos_abstencao.value,10);
-               var quo = parseInt(form.hdn_nro_presentes.value,10);
-               qp = quo;
-               qtv = qvs + qvn + qab;
-               if (form.rad_ind_votacao_presidente[0].checked) {
-                  qp = quo - 1;
-               }
-	       if (qtv != qp) {
-                  alert("O total de votos não confere com o quorum de presentes na <dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao">. Reinforme corretamente!"); 
-                  form.rad_ind_votacao_presidente[0].focus();
-                  return false;
-                } 
-                if (qp == quo) {
-                   form.rad_ind_votacao_presidente[1].focus();
-                }
-             form.submit();
-            }
-</dtml-comment>
-
-            if (tipo_votacao == 3) {
-               var qtv = 0
-               var qvs = parseInt(form.txt_votos_sim.value,10);
-               var qvn = parseInt(form.txt_votos_nao.value,10);
-               var qva = parseInt(form.txt_votos_abstencao.value,10);
-               var qvau = parseInt(form.txt_ausentes.value,10);
-               var quo = parseInt(form.hdn_nro_presentes.value,10);
-               qtv = qvs + qvn + qva;
-               if (quo != qtv) {
-                  alert("Votos indicados não conferem com o quorum de presentes na <dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao">. Reinforme! - quorum= " + quo + " - Sim= " + qvs + " - Não= " + qvn + " - Abstenção= " + qva) + " - Ausentes= " + qvau;
-                  form.txt_votos_sim.focus();
-                  return false;
-               }   
-            }
-        }
-
-        if (form.lst_tip_resultado.selectedIndex == 0 && form.rad_votacao_branco.checked == false){
-            alert("Selecione o resultado da votação!");
-            form.lst_tip_resultado.focus();
-            return false;
-        }
-        form.submit();
+    if (form.rad_votacao_branco.checked == true) {
+      exibirMensagemProcessamento();
+      form.submit();
+      return true;
     }
 
-    function submeter(endereco){
+    var valido = true;
 
-            var form = document.votacao_form;
-            endereco += '?cod_sessao_plen=<dtml-var cod_sessao_plen>';
-            endereco += '&cod_sessao_leg=<dtml-var cod_sessao_leg>';
-            endereco += '&num_legislatura=<dtml-var num_legislatura>';
-            endereco += '&dat_sessao=<dtml-var dat_sessao>';
-            endereco += '&tip_sessao=<dtml-var tip_sessao missing>';
+    if ((tipo_votacao == 1) || (tipo_votacao == 3)) {
+      if (form.txt_votos_sim.value == '' && form.rad_votacao_branco.checked == false) {
+        alert("O numero de votos SIM deve ser preenchido!");
+        form.txt_votos_sim.focus();
+        valido = false;
+      }
 
-            if (form.hdn_cod_sessao_plen.value!=""){
-                location.href = endereco;
+      if (valido && form.txt_votos_nao.value == '' && form.rad_votacao_branco.checked == false) {
+        alert("O numero de votos NÃO deve ser preenchido!");
+        form.txt_votos_nao.focus();
+        valido = false;
+      }
+
+      if (valido && form.txt_votos_abstencao.value == '' && form.rad_votacao_branco.checked == false) {
+        alert("O numero de abstenções deve ser preenchido!");
+        form.txt_votos_abstencao.focus();
+        valido = false;
+      }
+
+      if (valido && form.txt_ausentes.value == '' && form.rad_votacao_branco.checked == false) {
+        alert("O numero de ausentes deve ser preenchido!");
+        form.txt_ausentes.focus();
+        valido = false;
+      }
+      <dtml-comment>
+        if (tipo_votacao != 2) {
+          if (!(form.rad_ind_votacao_presidente[0].checked || form.rad_ind_votacao_presidente[1].checked)){
+            alert("Indique se o total de votos inclui o voto do Presidente!");
+            form.rad_ind_votacao_presidente[0].focus();
+            valido = false;
+          }
+
+          if (valido) {
+            var qtv = 0;
+            var qp  = 0;
+            var qvs = parseInt(form.txt_votos_sim.value,10);
+            var qvn = parseInt(form.txt_votos_nao.value,10);
+            var qab = parseInt(form.txt_votos_abstencao.value,10);
+            var qvau = parseInt(form.txt_ausentes.value,10);
+            var quo = parseInt(form.hdn_nro_presentes.value,10);
+            qp = quo;
+            qtv = qvs + qvn + qab + qvau;
+            if (form.rad_ind_votacao_presidente[0].checked) {
+              qp = quo - 1;
             }
-            return;
-     }
+            if (qtv != qp) {
+              alert("O total de votos não confere com o quorum de presentes na Ordem do Dia. Reinforme corretamente!");
+              form.rad_ind_votacao_presidente[0].focus();
+              valido = false;
+            }
+            if (valido && qp == quo) {
+              form.rad_ind_votacao_presidente[1].focus();
+            }
+          }
+        }
+      </dtml-comment>
 
-     function votacao_em_branco(tip_votacao){
-             
-            var form = document.votacao_form;
+      if (valido && tipo_votacao == 3) {
+        var qtv = 0
+        var qvs = parseInt(form.txt_votos_sim.value,10);
+        var qvn = parseInt(form.txt_votos_nao.value,10);
+        var qva = parseInt(form.txt_votos_abstencao.value,10);
+        var qvau = parseInt(form.txt_ausentes.value,10);
+        var quo = parseInt(form.hdn_nro_presentes.value,10);
+        qtv = qvs + qvn + qva + qvau;
+        if (quo != qtv) {
+          alert("Votos indicados não conferem com o quorum de presentes na Ordem do Dia. Reinforme! - quorum= " + quo + " - Sim= " + qvs + " - Não= " + qvn + " - Abstenção= " + qva + " - Aussntes= " + qvau);
+          form.txt_votos_sim.focus();
+          valido = false;
+        }
+      }
+    }
 
-            if (tip_votacao == 1) {
-                if (form.rad_votacao_branco.checked == true) {
-                        bootstrap.showModal({title: "Mensagem do Sistema", body: "Ao salvar, os dados desta votação serão excluídos!"});
-                	form.txt_votos_sim.disabled=1;
-                    form.txt_votos_nao.disabled=1;
-                    form.txt_votos_abstencao.disabled=1;
-                    form.txt_ausentes.disabled=1;
-                    form.lst_tip_resultado.disabled=1;
-                    }
-                else {
-                	form.txt_votos_sim.disabled=0;
-                    form.txt_votos_nao.disabled=0;
-                    form.txt_votos_abstencao.disabled=0;
-                    form.txt_ausentes.disabled=0;
-                    form.lst_tip_resultado.disabled=0;
-                    }
-                }
-            if (tip_votacao == 2) {
-            	  if (form.rad_votacao_branco.checked == true) {
-                          bootstrap.showModal({title: "Mensagem do Sistema", body: "Ao salvar, os dados desta votação serão excluídos!"});
-            		  form.lst_voto_parlamentar.disabled=1;
-            		  form.lst_tip_resultado.disabled=1;
-            		  }
-            	  else {
-                	  form.lst_voto_parlamentar.disabled=0;
-                	  form.lst_tip_resultado.disabled=0;
-                	  }
-            	  }
-            if (tip_votacao == 3) {
-                if (form.rad_votacao_branco.checked == true) {
-                        bootstrap.showModal({title: "Mensagem do Sistema", body: "Ao salvar, os dados desta votação serão excluídos!"});
-                	form.txt_votos_sim.disabled=1;
-                    form.txt_votos_nao.disabled=1;
-                    form.txt_votos_abstencao.disabled=1;
-                    form.txt_votos_ausentes.disabled=1;
-                    form.lst_tip_resultado.disabled=1;
-                    }
-                else {
-                    form.txt_votos_sim.disabled=0;
-                    form.txt_votos_nao.disabled=0;
-                    form.txt_votos_abstencao.disabled=0;
-                    form.txt_votos_ausentes.disabled=0;
-                    form.lst_tip_resultado.disabled=0;
-                    }
-                }
-            return;
-     } 
+    if (valido && form.lst_tip_resultado.selectedIndex == 0 && form.rad_votacao_branco.checked == false){
+      alert("Selecione o resultado da votação!");
+      form.lst_tip_resultado.focus();
+      valido = false;
+    }
 
+    if (valido) {
+      exibirMensagemProcessamento();
+      form.submit();
+    }
+
+    return valido;
+  }
+
+  function exibirMensagemProcessamento() {
+    // Crie um elemento div para a mensagem de processamento
+    var mensagemDiv = document.createElement('div');
+    mensagemDiv.id = 'mensagem-processamento';
+    mensagemDiv.style.position = 'fixed';
+    mensagemDiv.style.top = '50%';
+    mensagemDiv.style.left = '50%';
+    mensagemDiv.style.transform = 'translate(-50%, -50%)';
+    mensagemDiv.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+    mensagemDiv.style.color = '#fff';
+    mensagemDiv.style.padding = '20px';
+    mensagemDiv.style.borderRadius = '5px';
+    mensagemDiv.style.zIndex = '1000';
+    mensagemDiv.innerHTML = 'Processando... <i class="mdi mdi-loading mdi-spin"></i>'; // Você pode adicionar um indicador visual aqui
+
+    // Adicione a mensagem ao corpo do documento
+    document.body.appendChild(mensagemDiv);
+
+    // Desabilite o botão de salvar para evitar múltiplos envios
+    var botaoSalvar = document.querySelector('input[value="Salvar"]');
+    if (botaoSalvar) {
+      botaoSalvar.disabled = true;
+    }
+  }
+
+  function submeter(endereco){
+    var form = document.votacao_form;
+    endereco += '?cod_sessao_plen=<dtml-var cod_sessao_plen>';
+    endereco += '&cod_sessao_leg=<dtml-var cod_sessao_leg>';
+    endereco += '&num_legislatura=<dtml-var num_legislatura>';
+    endereco += '&dat_sessao=<dtml-var dat_sessao>';
+    endereco += '&tip_sessao=<dtml-var tip_sessao missing>';
+
+    if (form.hdn_cod_sessao_plen.value!=""){
+      location.href = endereco;
+    }
+    return;
+  }
+
+  function votacao_em_branco(tip_votacao){
+
+    var form = document.votacao_form;
+
+    if (tip_votacao == 1) {
+      if (form.rad_votacao_branco.checked == true) {
+        bootstrap.showModal({title: "Mensagem do Sistema", body: "Ao salvar, os dados desta votação serão excluídos!"});
+        form.txt_votos_sim.disabled=1;
+        form.txt_votos_nao.disabled=1;
+        form.txt_votos_abstencao.disabled=1;
+        form.txt_ausentes.disabled=1;
+        form.lst_tip_resultado.disabled=1;
+      }
+      else {
+        form.txt_votos_sim.disabled=0;
+        form.txt_votos_nao.disabled=0;
+        form.txt_votos_abstencao.disabled=0;
+        form.txt_ausentes.disabled=0;
+        form.lst_tip_resultado.disabled=0;
+      }
+    }
+    if (tip_votacao == 2) {
+      if (form.rad_votacao_branco.checked == true) {
+        bootstrap.showModal({title: "Mensagem do Sistema", body: "Ao salvar, os dados desta votação serão excluídos!"});
+        form.lst_voto_parlamentar.disabled=1;
+        form.lst_tip_resultado.disabled=1;
+      }
+      else {
+        form.lst_voto_parlamentar.disabled=0;
+        form.lst_tip_resultado.disabled=0;
+      }
+    }
+    if (tip_votacao == 3) {
+      if (form.rad_votacao_branco.checked == true) {
+        bootstrap.showModal({title: "Mensagem do Sistema", body: "Ao salvar, os dados desta votação serão excluídos!"});
+        form.txt_votos_sim.disabled=1;
+        form.txt_votos_nao.disabled=1;
+        form.txt_votos_abstencao.disabled=1;
+        form.txt_ausentes.disabled=1;
+        form.lst_tip_resultado.disabled=1;
+      }
+      else {
+        form.txt_votos_sim.disabled=0;
+        form.txt_votos_nao.disabled=0;
+        form.txt_votos_abstencao.disabled=0;
+        form.txt_ausentes.disabled=0;
+        form.lst_tip_resultado.disabled=0;
+      }
+    }
+    return;
+  }
 </script>
 
 <form action="votacao_salvar_proc" name="votacao_form">

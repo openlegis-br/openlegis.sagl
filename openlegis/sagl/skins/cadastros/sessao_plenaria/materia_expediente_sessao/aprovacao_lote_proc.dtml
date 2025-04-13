@@ -60,8 +60,7 @@
                  </dtml-if>
               </dtml-if>
            </dtml-in>
-        </dtml-if>
-        <dtml-if expr="zsql.assinatura_documento_obter_zsql(codigo=hdn_cod_materia, tipo_doc='materia', ind_assinado=1)">
+        <dtml-elif expr="zsql.assinatura_documento_obter_zsql(codigo=hdn_cod_materia, tipo_doc='materia', ind_assinado=1)">
            <dtml-in expr="zsql.assinatura_documento_obter_zsql(codigo=hdn_cod_materia, tipo_doc='materia', ind_assinado=1)">
               <dtml-if sequence-start>
                  <dtml-call expr="REQUEST.set('filename', str(cod_assinatura_doc) + '.pdf')">
@@ -80,8 +79,8 @@
                  </dtml-if>
               </dtml-if>
            </dtml-in>
-           <dtml-call expr="modelo_proposicao.requerimento_aprovar(cod_sessao_plen=cod_sessao_plen, nom_resultado=nom_resultado, cod_materia=hdn_cod_materia)">
-        </dtml-if>   
+         </dtml-if>
+         <dtml-call expr="modelo_proposicao.requerimento_aprovar(cod_sessao_plen=cod_sessao_plen, nom_resultado=nom_resultado, cod_materia=hdn_cod_materia)">
       </dtml-if>
       
       <dtml-if expr="not _.has_key('temVotacao')">

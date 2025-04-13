@@ -130,8 +130,8 @@ def proposicao_autuar_task(portal, cod_proposicao, portal_url):
     if nom_pdf_saida in storage_path:
        pdf=storage_path[nom_pdf_saida]
        pdf.update_data(content)
-       #pdf.manage_upload(file=content)
     else:
        storage_path.manage_addFile(id=nom_pdf_saida,file=content,title=texto)
        pdf=storage_path[nom_pdf_saida]
     pdf.manage_permission('View', roles=['Manager','Anonymous'], acquire=1)
+    return nom_pdf_saida

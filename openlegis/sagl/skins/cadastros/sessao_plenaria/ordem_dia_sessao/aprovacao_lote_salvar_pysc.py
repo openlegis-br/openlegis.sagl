@@ -48,6 +48,10 @@ for dic in nao_votadas:
     try:
        context.zsql.trans_begin_zsql()
        context.zsql.votacao_incluir_zsql(num_votos_sim=votos_sim, num_votos_nao='0', num_abstencao='0', num_ausentes='0', cod_ordem=dic.get('cod_ordem',dic), cod_materia=dic.get('cod_materia',dic), tip_resultado_votacao=lst_tip_resultado)
+       if context.zsql.proposicao_obter_zsql(ind_mat_ou_doc='M',cod_mat_ou_doc=dic.get('cod_materia',dic)):
+          for proposicao in context.zsql.proposicao_obter_zsql(ind_mat_ou_doc='M',cod_mat_ou_doc=dic.get('cod_materia',dic)):
+              if hasattr(context.sapl_documentos.proposicao, str(proposicao.cod_proposicao) + '_signed.pdf'):
+                 context.modelo_proposicao.proposicao_autuar(cod_proposicao=proposicao.cod_proposicao)        
        context.modelo_proposicao.requerimento_aprovar(cod_sessao_plen=cod_sessao_plen, nom_resultado=nom_resultado, cod_materia=dic.get('cod_materia',dic))
        context.zsql.trans_commit_zsql()       
     except:
@@ -57,6 +61,10 @@ for dic in anuladas:
     try:
        context.zsql.trans_begin_zsql()
        context.zsql.votacao_atualizar_zsql(cod_votacao=dic.get('cod_votacao',dic), num_votos_sim=votos_sim, num_votos_nao='0', num_abstencao='0', num_ausentes='0', cod_ordem=dic.get('cod_ordem',dic), cod_materia=dic.get('cod_materia',dic), tip_resultado_votacao=lst_tip_resultado)
+       if context.zsql.proposicao_obter_zsql(ind_mat_ou_doc='M',cod_mat_ou_doc=dic.get('cod_materia',dic)):
+          for proposicao in context.zsql.proposicao_obter_zsql(ind_mat_ou_doc='M',cod_mat_ou_doc=dic.get('cod_materia',dic)):
+              if hasattr(context.sapl_documentos.proposicao, str(proposicao.cod_proposicao) + '_signed.pdf'):
+                 context.modelo_proposicao.proposicao_autuar(cod_proposicao=proposicao.cod_proposicao)    
        context.modelo_proposicao.requerimento_aprovar(cod_sessao_plen=cod_sessao_plen, nom_resultado=nom_resultado, cod_materia=dic.get('cod_materia',dic))
        context.zsql.trans_commit_zsql()       
     except:

@@ -42,7 +42,9 @@ from Acquisition import aq_base
 import logging
 import tasks
 import qrcode
-
+import pypdf
+from dateutil.parser import parse
+from asn1crypto import cms
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -1988,6 +1990,497 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         self.REQUEST.RESPONSE.setHeader('Content-Disposition', f'inline; filename={download_name}')
         return final_pdf_content
 
+    def adicionar_carimbo(self, cod_sessao_plen, nom_resultado, cod_materia):
+        id_sessao = ''
+        data = DateTime().strftime('%d/%m/%Y')
+        data1 = DateTime().strftime('%Y/%m/%d')
+        nom_presidente = ''
+        # Obtém dados da sessão
+        if cod_sessao_plen != '0' and cod_sessao_plen != '':
+            for item in self.zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=cod_sessao_plen):
+                for tipo in self.zsql.tipo_sessao_plenaria_obter_zsql(tip_sessao=item.tip_sessao):
+                    id_sessao = f"{item.num_sessao_plen}ª {self.sapl_documentos.props_sagl.reuniao_sessao} {tipo.nom_sessao}"
+                data = item.dat_inicio_sessao
+                data1 = item.dat_inicio
+                num_legislatura = item.num_legislatura
+            for composicao in self.zsql.composicao_mesa_sessao_obter_zsql(cod_sessao_plen=cod_sessao_plen, cod_cargo=1, ind_excluido=0):
+                for parlamentar in self.zsql.parlamentar_obter_zsql(cod_parlamentar=composicao.cod_parlamentar):
+                    nom_presidente = str(parlamentar.nom_parlamentar.upper())
+        if nom_presidente == '':
+            for sleg in self.zsql.periodo_comp_mesa_obter_zsql(data=data1):
+                for cod_presidente in self.zsql.composicao_mesa_obter_zsql(cod_periodo_comp=sleg.cod_periodo_comp, cod_cargo=1):
+                    for presidencia in self.zsql.parlamentar_obter_zsql(cod_parlamentar=cod_presidente.cod_parlamentar):
+                        nom_presidente = str(presidencia.nom_parlamentar.upper())
+        # Dados do carimbo
+        texto = f"{nom_resultado.upper()}"
+        sessao = f"{id_sessao} - {data}"
+        cargo = "Presidente"
+        presidente = f"{cargo}: {nom_presidente} "
+        texto_completo = f"{texto}\n{sessao}\n{presidente}"
+        # Adiciona carimbo aos documentos
+        for materia in self.zsql.materia_obter_zsql(cod_materia=cod_materia):
+            storage_path = self.sapl_documentos.materia
+            nom_pdf_saida = f"{materia.cod_materia}_texto_integral.pdf"
+            nom_pdf_redacao = f"{materia.cod_materia}_redacao_final.pdf"
+            # Adiciona carimbo no texto integral
+            if hasattr(storage_path, nom_pdf_saida):
+                arq = getattr(storage_path, nom_pdf_saida)
+                arquivo = BytesIO(bytes(arq.data))
+                existing_pdf = pymupdf.open(stream=arquivo)
+                if existing_pdf.page_count > 0:
+                    page = existing_pdf[0]
+                    w = page.rect.width
+                    h = page.rect.height
+                    margin = 10
+                    black = pymupdf.pdfcolor["black"]
+                    p2 = pymupdf.Point(w - 170 - margin, margin + 90) # Margem superior
+                    shape = page.new_shape()
+                    shape.draw_circle(p2,1)
+                    shape.insert_text(p2, texto_completo, fontname = "helv", fontsize = 8, rotate=0)
+                    shape.commit()
+                    content = existing_pdf.tobytes(deflate=True, garbage=3, use_objstms=1)
+                    arq.manage_upload(file=content)
+            # Adiciona carimbo na redação final
+            if hasattr(storage_path, nom_pdf_redacao):
+                arq = getattr(storage_path, nom_pdf_redacao)
+                arquivo = BytesIO(bytes(arq.data))
+                existing_pdf = pymupdf.open(stream=arquivo)
+                if existing_pdf.page_count > 0:
+                    page = existing_pdf[0]
+                    w = page.rect.width
+                    h = page.rect.height
+                    margin = 10
+                    black = pymupdf.pdfcolor["black"]
+                    p2 = pymupdf.Point(w - 170 - margin, margin + 90) # Margem superior
+                    shape = page.new_shape()
+                    shape.draw_circle(p2,1)
+                    shape.insert_text(p2, texto_completo, fontname = "helv", fontsize = 8, rotate=0)
+                    shape.commit()
+                    content = existing_pdf.tobytes(deflate=True, garbage=3, use_objstms=1)
+                    arq.manage_upload(file=content)
+
+    def get_signatures(self, fileStream):
+        reader = pypdf.PdfReader(fileStream)
+        fields = reader.get_fields().values()
+        signature_field_values = [
+            f.value for f in fields if f.field_type == '/Sig']
+        lst_signers = []
+        for v in signature_field_values:
+            v_type = v['/Type']
+            if '/M' in v:
+               signing_time = parse(v['/M'][2:].strip("'").replace("'", ":"))
+            else:
+               signing_time = None
+            if '/Name' in v:
+               name = v['/Name'].split(':')[0]
+               cpf = v['/Name'].split(':')[1]
+            else:
+               name = None
+               cpf = None
+            raw_signature_data = v['/Contents']
+            for attrdict in self.parse_signatures(raw_signature_data):
+               dic = {
+                      'signer_name':name or attrdict.get('signer'),
+                      'signer_cpf':cpf or attrdict.get('cpf'),
+                      'signing_time':str(signing_time) or attrdict.get('signing_time'),
+                      'signer_certificate': attrdict.get('oname')
+               }
+            lst_signers.append(dic)
+        lst_signers.sort(key=lambda dic: dic['signing_time'], reverse=True)
+        return lst_signers
+ 
+    def parse_signatures(self, raw_signature_data):
+        info = cms.ContentInfo.load(raw_signature_data)
+        signed_data = info['content']
+        certificates = signed_data['certificates']
+        signer_infos = signed_data['signer_infos'][0]
+        signed_attrs = signer_infos['signed_attrs']
+        signers = []
+        for signer_info in signer_infos:
+            for cert in certificates:
+                cert = cert.native['tbs_certificate']
+                issuer = cert['issuer']
+                subject = cert['subject']
+                oname = issuer.get('organization_name', '')
+                lista = subject['common_name'].split(':')
+                if len(lista) > 1:
+                   signer = subject['common_name'].split(':')[0]
+                   cpf = subject['common_name'].split(':')[1]
+                else:
+                   signer = subject['common_name'].split(':')[0]
+                   cpf = ''
+                dic = {
+                   'type': subject.get('organization_name', ''),
+                   'signer': signer,
+                   'cpf':  cpf,
+                   'oname': oname
+                }
+        signers.append(dic)
+        return signers
+
+    def proposicao_autuar(self,cod_proposicao):
+        nom_pdf_proposicao = str(cod_proposicao) + "_signed.pdf"
+        arq = getattr(self.sapl_documentos.proposicao, nom_pdf_proposicao)
+        fileStream = BytesIO(bytes(arq.data))
+        reader = pypdf.PdfReader(fileStream)
+        fields = reader.get_fields()
+        signers = []
+        nom_autor = None
+        if fields != None:
+            signature_field_values = [f.value for f in fields.values() if f.field_type == '/Sig']
+            if signature_field_values is not None:
+               signers = self.get_signatures(fileStream)
+        qtde_assinaturas = len(signers)
+        for signer in signers:
+            nom_autor = signer['signer_name']
+        outros = ''
+        if qtde_assinaturas == 2:
+           outros = " e outro"
+        if qtde_assinaturas > 2:
+           outros = " e outros"
+        cod_validacao_doc = ''
+        for validacao in self.zsql.assinatura_documento_obter_zsql(codigo=cod_proposicao,tipo_doc='proposicao',ind_assinado=1):
+            cod_validacao_doc = str(self.cadastros.assinatura.format_verification_code(code=validacao.cod_assinatura_doc))
+        for proposicao in self.zsql.proposicao_obter_zsql(cod_proposicao=cod_proposicao):
+            num_proposicao = proposicao.cod_proposicao
+            if nom_autor == None:
+               nom_autor = proposicao.nom_autor
+            info_protocolo = '- Recebido em ' + proposicao.dat_recebimento + '.'
+            tipo_proposicao = proposicao.des_tipo_proposicao
+            if proposicao.ind_mat_ou_doc == "M":
+               for materia in self.zsql.materia_obter_zsql(cod_materia=proposicao.cod_mat_ou_doc):
+                   if materia.num_protocolo != None and materia.num_protocolo != '':
+                      for protocolo in self.zsql.protocolo_obter_zsql(num_protocolo=materia.num_protocolo, ano_protocolo=materia.ano_ident_basica):
+                          info_protocolo = ' - Prot. ' + str(protocolo.num_protocolo) + '/' + str(protocolo.ano_protocolo) + ' ' + str(DateTime(protocolo.dat_protocolo, datefmt='international').strftime('%d/%m/%Y')) + ' ' + protocolo.hor_protocolo + '.'
+                   texto = str(materia.des_tipo_materia) + ' nº ' + str(materia.num_ident_basica) + '/' + str(materia.ano_ident_basica)
+                   storage_path = self.sapl_documentos.materia
+                   nom_pdf_saida = str(materia.cod_materia) + "_texto_integral.pdf"
+            elif proposicao.ind_mat_ou_doc=='D' and (proposicao.des_tipo_proposicao!='Emenda' and proposicao.des_tipo_proposicao!='Mensagem Aditiva' and proposicao.des_tipo_proposicao!='Substitutivo' and proposicao.des_tipo_proposicao!='Parecer' and proposicao.des_tipo_proposicao!='Parecer de Comissão'):
+               for documento in self.zsql.documento_acessorio_obter_zsql(cod_documento=proposicao.cod_mat_ou_doc):
+                   for materia in self.zsql.materia_obter_zsql(cod_materia=documento.cod_materia):
+                       materia = str(materia.sgl_tipo_materia)+' nº '+ str(materia.num_ident_basica)+'/'+str(materia.ano_ident_basica)
+                   texto = str(documento.des_tipo_documento) + ' - ' + str(materia)
+                   storage_path = self.sapl_documentos.materia
+                   nom_pdf_saida = str(documento.cod_documento) + ".pdf"
+            elif proposicao.ind_mat_ou_doc=='D' and (proposicao.des_tipo_proposicao=='Emenda' or proposicao.des_tipo_proposicao=='Mensagem Aditiva'):
+               for emenda in self.zsql.emenda_obter_zsql(cod_emenda=proposicao.cod_emenda):
+                   for materia in self.zsql.materia_obter_zsql(cod_materia=emenda.cod_materia):
+                       materia = str(materia.sgl_tipo_materia)+' nº '+ str(materia.num_ident_basica)+'/'+str(materia.ano_ident_basica)
+                   info_protocolo = '- Recebida em ' + proposicao.dat_recebimento + '.'
+                   texto = 'Emenda ' + str(emenda.des_tipo_emenda)+ ' nº ' + str(emenda.num_emenda) + ' ao ' + str(materia)
+                   storage_path = self.sapl_documentos.emenda
+                   nom_pdf_saida = str(emenda.cod_emenda) + "_emenda.pdf"
+            elif proposicao.ind_mat_ou_doc=='D' and (proposicao.des_tipo_proposicao=='Substitutivo'):
+               for substitutivo in self.zsql.substitutivo_obter_zsql(cod_substitutivo=proposicao.cod_substitutivo):
+                   for materia in self.zsql.materia_obter_zsql(cod_materia=substitutivo.cod_materia):
+                       materia = str(materia.sgl_tipo_materia)+ ' nº ' + str(materia.num_ident_basica) + '/' + str(materia.ano_ident_basica)
+                   texto = 'Substitutivo nº ' + str(substitutivo.num_substitutivo) + ' ao ' + str(materia)
+                   storage_path = self.sapl_documentos.substitutivo
+                   nom_pdf_saida = str(substitutivo.cod_substitutivo) + "_substitutivo.pdf"
+            elif proposicao.ind_mat_ou_doc=='D' and (proposicao.des_tipo_proposicao=='Parecer' or proposicao.des_tipo_proposicao=='Parecer de Comissão'):
+               for relatoria in self.zsql.relatoria_obter_zsql(cod_relatoria=proposicao.cod_parecer, ind_excluido=0): 
+                   for comissao in self.zsql.comissao_obter_zsql(cod_comissao=relatoria.cod_comissao):
+                       sgl_comissao = comissao.sgl_comissao
+                   for materia in self.zsql.materia_obter_zsql(cod_materia=relatoria.cod_materia):
+                       materia = str(materia.sgl_tipo_materia) + ' nº ' + str(materia.num_ident_basica) + '/' + str(materia.ano_ident_basica)
+                   texto = 'Parecer ' + sgl_comissao + ' nº ' + str(relatoria.num_parecer) + '/' + str(relatoria.ano_parecer) + ' ao ' + str(materia)
+                   storage_path = self.sapl_documentos.parecer_comissao
+                   nom_pdf_saida = str(relatoria.cod_relatoria) + "_parecer.pdf"
+        mensagem1 = 'Esta é uma cópia do original assinado digitalmente por ' + nom_autor + outros
+        mensagem2 = 'Para validar visite ' + self.url()+'/conferir_assinatura'+' e informe o código '+ cod_validacao_doc
+        existing_pdf = pymupdf.open(stream=fileStream)
+        numPages = existing_pdf.page_count
+        doc = pymupdf.open()
+        install_home = os.environ.get('INSTALL_HOME')
+        dirpath = os.path.join(install_home, 'src/openlegis.sagl/openlegis/sagl/skins/imagens/logo-icp2.png')
+        with open(dirpath, "rb") as arq:
+             image = arq.read()
+        for validacao in self.zsql.assinatura_documento_obter_zsql(codigo=cod_proposicao,tipo_doc='proposicao',ind_assinado=1):
+            stream = self.make_qrcode(text=self.url()+'/conferir_assinatura_proc?txt_codigo_verificacao='+str(validacao.cod_assinatura_doc))
+            for page_index, i in enumerate(range(len(existing_pdf))):
+                w = existing_pdf[page_index].rect.width
+                h = existing_pdf[page_index].rect.height
+                margin = 5
+                left = 10 - margin
+                bottom = h - 50 - margin
+                bottom2 = h - 38
+                right = w - 53
+                black = pymupdf.pdfcolor["black"]
+                # qrcode
+                rect = pymupdf.Rect(left, bottom, left + 50, bottom + 50)  # qrcode bottom left square
+                existing_pdf[page_index].insert_image(rect, stream=stream)
+                text2 = mensagem2
+                # margem direita
+                numero = "Pág. %s/%s" % (i+1, numPages)
+                text3 = numero + ' - ' + texto + info_protocolo + ' ' + mensagem1
+                x = w - 8 - margin #largura
+                y = h - 30 - margin # altura
+                existing_pdf[page_index].insert_text((x, y), text3, fontsize=8, rotate=90)
+                # logo icp
+                rect_icp = pymupdf.Rect(right, bottom2, right + 45, bottom2 + 45)
+                existing_pdf[page_index].insert_image(rect_icp, stream=image)
+                # margem inferior
+                p1 = pymupdf.Point(w - 40 - margin, h - 12) # numero de pagina documento
+                p2 = pymupdf.Point(60, h - 12) # margem inferior
+                shape = existing_pdf[page_index].new_shape()
+                shape.draw_circle(p1,1)
+                shape.draw_circle(p2,1)
+                shape.insert_text(p2, text2, fontname = "helv", fontsize = 8, rotate=0)
+                shape.commit()
+            break
+        w = existing_pdf[0].rect.width
+        h = existing_pdf[0].rect.height
+        # tipo, numero e ano
+        rect = pymupdf.Rect(40, 140, w-20, 170)
+        existing_pdf[0].insert_textbox(rect, str(texto).upper(), fontname = "tibo", fontsize = 13, align=pymupdf.TEXT_ALIGN_CENTER)
+        metadata = {"title": texto, "author": nom_autor}
+        existing_pdf.set_metadata(metadata)
+        content = existing_pdf.tobytes(deflate=True, garbage=3, use_objstms=1)
+        if nom_pdf_saida in storage_path:
+           pdf=storage_path[nom_pdf_saida]
+           pdf.manage_upload(file=content)
+        else:
+           storage_path.manage_addFile(id=nom_pdf_saida,file=content,title=texto)
+           pdf=storage_path[nom_pdf_saida]
+        pdf.manage_permission('View', roles=['Manager','Anonymous'], acquire=1)
+
+    def margem_inferior(self, codigo, anexo, tipo_doc, cod_assinatura_doc, cod_usuario, filename):
+        arq = getattr(self.sapl_documentos.documentos_assinados, filename)
+        fileStream = BytesIO(bytes(arq.data))
+        reader = pypdf.PdfReader(fileStream)
+        fields = reader.get_fields()
+        signers = []
+        nom_autor = None
+        if fields != None:
+            signature_field_values = [f.value for f in fields.values() if f.field_type == '/Sig']
+            if signature_field_values is not None:
+               signers = self.get_signatures(fileStream)
+        qtde_assinaturas = len(signers)
+        for signer in signers:
+            nom_autor = signer['signer_name']
+        outros = ''
+        if qtde_assinaturas == 2:
+           outros = " e outro"
+        if qtde_assinaturas > 2:
+           outros = " e outros"
+        if nom_autor == None:
+            for usuario in self.zsql.usuario_obter_zsql(cod_usuario=cod_usuario):
+                nom_autor = usuario.nom_completo
+                break
+        string = str(self.cadastros.assinatura.format_verification_code(cod_assinatura_doc))
+        # Variáveis para obtenção de dados e local de armazenamento por tipo de documento
+        for storage in self.zsql.assinatura_storage_obter_zsql(tip_documento=tipo_doc):
+            if tipo_doc == 'anexo_sessao':
+               nom_pdf_assinado = str(cod_assinatura_doc) + '.pdf'
+               nom_pdf_documento = str(codigo) + '_anexo_' + str(anexo) + '.pdf'
+            elif tipo_doc == 'anexo_peticao':
+               nom_pdf_assinado = str(cod_assinatura_doc) + '.pdf'
+               nom_pdf_documento = str(codigo) + '_anexo_' + str(anexo) + '.pdf'
+            else:
+               nom_pdf_assinado = str(cod_assinatura_doc) + '.pdf'
+               nom_pdf_documento = str(codigo) + str(storage.pdf_file)
+        if tipo_doc == 'materia' or tipo_doc == 'doc_acessorio' or tipo_doc == 'redacao_final':
+           storage_path = self.sapl_documentos.materia
+           if tipo_doc == 'materia' or tipo_doc == 'redacao_final':
+              for metodo in self.zsql.materia_obter_zsql(cod_materia=codigo):
+                  num_documento = metodo.num_ident_basica
+                  if tipo_doc == 'materia':
+                     texto = str(metodo.des_tipo_materia)+' nº '+ str(metodo.num_ident_basica) + '/' + str(metodo.ano_ident_basica)
+                  elif tipo_doc == 'redacao_final':
+                     texto = 'Redação Final do ' + str(metodo.sgl_tipo_materia)+' nº '+ str(metodo.num_ident_basica) + '/' + str(metodo.ano_ident_basica)
+           elif tipo_doc == 'doc_acessorio':
+              for metodo in self.zsql.documento_acessorio_obter_zsql(cod_documento=codigo):
+                  for materia in self.zsql.materia_obter_zsql(cod_materia=metodo.cod_materia):
+                      materia = str(materia.sgl_tipo_materia)+' '+ str(materia.num_ident_basica)+'/'+str(materia.ano_ident_basica)
+                  texto = str(metodo.nom_documento) + ' - ' + str(materia)
+        elif tipo_doc == 'emenda':
+           storage_path = self.sapl_documentos.emenda
+           for metodo in self.zsql.emenda_obter_zsql(cod_emenda=codigo):
+               for materia in self.zsql.materia_obter_zsql(cod_materia=metodo.cod_materia):
+                   materia = str(materia.sgl_tipo_materia)+' '+ str(materia.num_ident_basica)+'/'+str(materia.ano_ident_basica)
+               texto = 'Emenda ' + str(metodo.des_tipo_emenda) + ' nº ' + str(metodo.num_emenda) + ' ao ' + str(materia)
+        elif tipo_doc == 'substitutivo':
+           storage_path = self.sapl_documentos.substitutivo
+           for metodo in self.zsql.substitutivo_obter_zsql(cod_substitutivo=codigo):
+               for materia in self.zsql.materia_obter_zsql(cod_materia=metodo.cod_materia):
+                   materia = str(materia.sgl_tipo_materia)+' '+ str(materia.num_ident_basica)+'/'+str(materia.ano_ident_basica)
+               texto = 'Substitutivo nº ' + str(metodo.num_substitutivo) + ' ao ' + str(materia)
+        elif tipo_doc == 'tramitacao':
+           storage_path = self.sapl_documentos.materia.tramitacao
+           for metodo in self.zsql.tramitacao_obter_zsql(cod_tramitacao=codigo):
+               materia = str(metodo.sgl_tipo_materia)+' '+ str(metodo.num_ident_basica)+'/'+str(metodo.ano_ident_basica)
+               texto = 'Tramitação nº '+ str(metodo.cod_tramitacao) + ' - ' + str(materia)
+        elif tipo_doc == 'parecer_comissao':
+           storage_path = self.sapl_documentos.parecer_comissao
+           for metodo in self.zsql.relatoria_obter_zsql(cod_relatoria=codigo):
+               for comissao in self.zsql.comissao_obter_zsql(cod_comissao=metodo.cod_comissao):
+                   sgl_comissao = str(comissao.sgl_comissao)
+               parecer = str(metodo.num_parecer)+'/'+str(metodo.ano_parecer)
+               for materia in self.zsql.materia_obter_zsql(cod_materia=metodo.cod_materia):
+                   materia = str(materia.sgl_tipo_materia)+' '+ str(materia.num_ident_basica)+'/'+str(materia.ano_ident_basica)
+           texto = 'Parecer ' + str(sgl_comissao) + ' nº ' + str(parecer) + ' ao ' + str(materia)
+        elif tipo_doc == 'pauta':
+           storage_path = self.sapl_documentos.pauta_sessao
+           for metodo in self.zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=codigo):
+               for tipo in self.zsql.tipo_sessao_plenaria_obter_zsql(tip_sessao=metodo.tip_sessao):
+                   sessao = str(metodo.num_sessao_plen) + 'ª ' + str(self.sapl_documentos.props_sagl.reuniao_sessao).upper() + ' ' + str(tipo.nom_sessao) + ' - ' + str(metodo.dat_inicio_sessao)
+           for metodo in self.zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=codigo, ind_audiencia='1'):
+               sessao = 'Audiência Pública nº ' + str(metodo.num_sessao_plen) + '/' + str(metodo.ano_sessao)
+           texto = 'Pauta da ' + str(sessao)
+        elif tipo_doc == 'resumo_sessao':
+           storage_path = self.sapl_documentos.pauta_sessao
+           for metodo in self.zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=codigo):
+               for tipo in self.zsql.tipo_sessao_plenaria_obter_zsql(tip_sessao=metodo.tip_sessao):
+                   sessao = str(metodo.num_sessao_plen) + 'ª ' + str(self.sapl_documentos.props_sagl.reuniao_sessao) + ' ' + str(tipo.nom_sessao) + ' - ' + str(metodo.dat_inicio_sessao)
+           for metodo in self.zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=codigo, ind_audiencia='1'):
+               sessao = 'Audiência Pública nº ' + str(metodo.num_sessao_plen) + '/' + str(metodo.ano_sessao)
+           texto = 'Roteiro da ' + str(sessao)
+        elif tipo_doc == 'ata':
+           storage_path = self.sapl_documentos.ata_sessao
+           for metodo in self.zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=codigo):
+               for tipo in self.zsql.tipo_sessao_plenaria_obter_zsql(tip_sessao=metodo.tip_sessao):
+                   sessao = str(metodo.num_sessao_plen) + 'ª ' + str(self.sapl_documentos.props_sagl.reuniao_sessao).upper() + ' ' + str(tipo.nom_sessao) + ' - ' + str(metodo.dat_inicio_sessao)
+           for metodo in self.zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=codigo, ind_audiencia='1'):
+               sessao = 'Audiência Pública nº ' + str(metodo.num_sessao_plen) + '/' + str(metodo.ano_sessao)
+           texto = 'Ata da ' + str(sessao)
+        elif tipo_doc == 'anexo_peticao':
+           storage_path = self.sapl_documentos.peticao
+           file_item =  str(codigo) + '_anexo_' + str(anexo) + '.pdf'
+           title = getattr(self.sapl_documentos.peticao,file_item).title_or_id()
+           texto = 'Anexo de petição: ' + str(title)
+        elif tipo_doc == 'anexo_sessao':
+           storage_path = self.sapl_documentos.anexo_sessao
+           for metodo in self.zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=codigo):
+               for tipo in self.zsql.tipo_sessao_plenaria_obter_zsql(tip_sessao=metodo.tip_sessao):
+                   sessao = str(metodo.num_sessao_plen) + 'ª ' + str(self.sapl_documentos.props_sagl.reuniao_sessao) + ' ' + str(tipo.nom_sessao) + ', de ' + str(metodo.dat_inicio_sessao)
+           file_item =  str(codigo) + '_anexo_' + str(anexo) + '.pdf'
+           title = getattr(self.sapl_documentos.anexo_sessao,file_item).title_or_id()
+           texto = str(title) + ' da ' + str(sessao)
+        elif tipo_doc == 'norma':
+           storage_path = self.sapl_documentos.norma_juridica
+           for metodo in self.zsql.norma_juridica_obter_zsql(cod_norma=codigo):
+               texto = str(metodo.des_tipo_norma) + ' nº ' + str(metodo.num_norma) + '/' + str(metodo.ano_norma)
+        elif tipo_doc == 'documento' or tipo_doc == 'doc_acessorio_adm':
+           storage_path = self.sapl_documentos.administrativo
+           if tipo_doc == 'documento':
+              for metodo in self.zsql.documento_administrativo_obter_zsql(cod_documento=codigo):
+                  num_documento = metodo.num_documento
+                  texto = str(metodo.des_tipo_documento)+ ' nº ' + str(metodo.num_documento)+ '/' +str(metodo.ano_documento)
+           elif tipo_doc == 'doc_acessorio_adm':
+              for metodo in self.zsql.documento_acessorio_administrativo_obter_zsql(cod_documento_acessorio=codigo):
+                  for documento in self.zsql.documento_administrativo_obter_zsql(cod_documento=metodo.cod_documento):
+                      documento = str(documento.sgl_tipo_documento) +' '+ str(documento.num_documento)+'/'+str(documento.ano_documento)
+                  texto = 'Doumento Acessório do ' + str(documento)
+        elif tipo_doc == 'tramitacao_adm':
+           storage_path = self.sapl_documentos.administrativo.tramitacao
+           for metodo in self.zsql.tramitacao_administrativo_obter_zsql(cod_tramitacao=codigo):
+               documento = str(metodo.sgl_tipo_documento)+' '+ str(metodo.num_documento)+'/'+str(metodo.ano_documento)
+               texto = 'Tramitação nº '+ str(metodo.cod_tramitacao) + ' - ' + str(documento)
+        elif tipo_doc == 'proposicao':
+           storage_path = self.sapl_documentos.proposicao
+           for metodo in self.zsql.proposicao_obter_zsql(cod_proposicao=codigo):
+               texto = str(metodo.des_tipo_proposicao) +' nº ' + str(metodo.cod_proposicao)
+        elif tipo_doc == 'protocolo':
+           storage_path = self.sapl_documentos.protocolo
+           for metodo in self.zsql.protocolo_obter_zsql(cod_protocolo=codigo):
+               texto = 'Protocolo nº '+ str(metodo.num_protocolo) +'/' + str(metodo.ano_protocolo)
+        elif tipo_doc == 'peticao':
+           storage_path = self.sapl_documentos.peticao
+           texto = 'Petição Eletrônica'
+        elif tipo_doc == 'pauta_comissao':
+           storage_path = self.sapl_documentos.reuniao_comissao
+           for metodo in self.zsql.reuniao_comissao_obter_zsql(cod_reuniao=codigo):
+               for comissao in self.zsql.comissao_obter_zsql(cod_comissao=metodo.cod_comissao):
+                   texto = 'Pauta da ' + str(metodo.num_reuniao) + 'ª Reunião da ' + comissao.sgl_comissao + ', em ' + str(metodo.dat_inicio_reuniao)
+        elif tipo_doc == 'ata_comissao':
+           storage_path = self.sapl_documentos.reuniao_comissao
+           for metodo in self.zsql.reuniao_comissao_obter_zsql(cod_reuniao=codigo):
+               for comissao in self.zsql.comissao_obter_zsql(cod_comissao=metodo.cod_comissao):
+                   texto = 'Ata da ' + str(metodo.num_reuniao) + 'ª Reunião da ' + comissao.sgl_comissao + ', em ' + str(metodo.dat_inicio_reuniao)
+        elif tipo_doc == 'documento_comissao':
+           storage_path = self.sapl_documentos.documento_comissao
+           for metodo in self.zsql.documento_comissao_obter_zsql(cod_documento=codigo):
+               for comissao in self.zsql.comissao_obter_zsql(cod_comissao=metodo.cod_comissao):
+                   texto = metodo.txt_descricao + ' da ' + comissao.sgl_comissao
+        mensagem1 = 'Esta é uma cópia do original assinado digitalmente por ' + nom_autor + outros
+        mensagem2 = 'Para validar visite ' + self.url() + '/conferir_assinatura' + ' e informe o código ' + string
+        existing_pdf = pymupdf.open(stream=fileStream)
+        numPages = existing_pdf.page_count
+        stream = self.make_qrcode(text=self.url()+'/conferir_assinatura_proc?txt_codigo_verificacao='+str(string))
+        install_home = os.environ.get('INSTALL_HOME')
+        dirpath = os.path.join(install_home, 'src/openlegis.sagl/openlegis/sagl/skins/imagens/logo-icp2.png')
+        with open(dirpath, "rb") as arq:
+             image = arq.read()
+        for page_index, i in enumerate(range(len(existing_pdf))):
+            w = existing_pdf[page_index].rect.width
+            h = existing_pdf[page_index].rect.height
+            margin = 5
+            left = 10 - margin
+            bottom = h - 50 - margin
+            bottom2 = h - 38
+            right = w - 53
+            black = pymupdf.pdfcolor["black"]
+            # qrcode
+            rect = pymupdf.Rect(left, bottom, left + 50, bottom + 50)  # qrcode bottom left square
+            existing_pdf[page_index].insert_image(rect, stream=stream)
+            text2 = mensagem2
+            # logo icp
+            rect_icp = pymupdf.Rect(right, bottom2, right + 45, bottom2 + 45)
+            existing_pdf[page_index].insert_image(rect_icp, stream=image)
+            # margem direita
+            numero = "Pág. %s/%s" % (i+1, numPages)
+            text3 = numero + ' - ' + texto + ' - ' + mensagem1
+            x = w - 8 - margin #largura
+            y = h - 50 - margin # altura
+            existing_pdf[page_index].insert_text((x, y), text3, fontsize=8, rotate=90)
+            # margem inferior
+            p1 = pymupdf.Point(w - 40 - margin, h - 12) # numero de pagina documento
+            p2 = pymupdf.Point(60, h - 12) # margem inferior
+            shape = existing_pdf[page_index].new_shape()
+            shape.draw_circle(p1,1)
+            shape.draw_circle(p2,1)
+            #shape.insert_text(p1, numero, fontname = "helv", fontsize = 8)
+            shape.insert_text(p2, text2, fontname = "helv", fontsize = 8, rotate=0)
+            shape.commit()
+        content = existing_pdf.tobytes(deflate=True, garbage=3, use_objstms=1)
+        if hasattr(storage_path, nom_pdf_documento):
+           pdf = getattr(storage_path, nom_pdf_documento)
+           pdf.manage_upload(file=content)
+        else:
+           storage_path.manage_addFile(id=nom_pdf_documento,file=content,title=texto)
+           pdf = getattr(storage_path, nom_pdf_documento)
+        if tipo_doc == 'parecer_comissao':
+           for relat in self.zsql.relatoria_obter_zsql(cod_relatoria=codigo):
+               for tipo in self.zsql.tipo_fim_relatoria_obter_zsql(tip_fim_relatoria = relat.tip_fim_relatoria):
+                   if tipo.des_fim_relatoria=='Aguardando apreciação':
+                      pdf.manage_permission('View', roles=['Manager','Authenticated'], acquire=0)
+                   else:
+                      pdf.manage_permission('View', roles=['Manager','Anonymous'], acquire=1)
+        elif tipo_doc == 'doc_acessorio':
+           for documento in self.zsql.documento_acessorio_obter_zsql(cod_documento=codigo):
+               if str(documento.ind_publico) == '1':
+                  pdf.manage_permission('View', roles=['Manager','Anonymous'], acquire=1)
+               elif str(documento.ind_publico) == '0':
+                  pdf.manage_permission('View', roles=['Manager','Authenticated'], acquire=0)
+        elif tipo_doc == 'documento':
+           for documento in self.zsql.documento_administrativo_obter_zsql(cod_documento=codigo):
+               if str(documento.ind_publico) == '1':
+                  pdf.manage_permission('View', roles=['Manager', 'Anonymous'], acquire=1)
+               elif str(documento.ind_publico) == '0':
+                  pdf.manage_permission('View', roles=['Manager','Authenticated'], acquire=0)
+        elif tipo_doc == 'doc_acessorio_adm':
+           for doc in self.zsql.documento_acessorio_administrativo_obter_zsql(cod_documento_acessorio=codigo):
+               if str(doc.ind_publico) == '1':
+                  pdf.manage_permission('View', roles=['Manager','Anonymous'], acquire=1)
+               if str(doc.ind_publico) == '0':
+                  pdf.manage_permission('View', roles=['Manager','Authenticated'], acquire=0)
+        elif tipo_doc == 'peticao' or tipo_doc == 'anexo_peticao':
+           pdf.manage_permission('View', roles=['Manager','Authenticated'], acquire=0)
+        else:
+           pdf.manage_permission('View', roles=['Manager','Anonymous'], acquire=1)
+
+        return 'ok'
+
     # Tarefas assincronas
 
     def index_file(self, url):
@@ -2001,28 +2494,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
             print(f"Erro ao processar o arquivo PDF: {e}")
             return []
 
-    def adicionar_carimbo(self, cod_sessao_plen, nom_resultado, cod_materia):
-        async_result = tasks.adicionar_carimbo_task.delay(cod_sessao_plen, nom_resultado, cod_materia)
-        return async_result
-
-    def assinar_proposicao_new(self, lista):
-        portal_url = str(self.url())
-        async_result = tasks.assinar_proposicao_task.delay(lista, portal_url)
-        for item in lista:
-            for proposicao in self.zsql.proposicao_obter_zsql(cod_proposicao=int(item)):
-                cod_proposicao = proposicao.cod_proposicao
-        if len(lista) == 1:
-           redirect_url = self.portal_url()+'/cadastros/proposicao/proposicao_mostrar_proc?cod_proposicao=' + cod_proposicao
-           REQUEST = self.REQUEST
-           RESPONSE = REQUEST.RESPONSE
-           RESPONSE.redirect(redirect_url)
-        else:
-           redirect_url = self.portal_url()+'/cadastros/proposicao/proposicao_index_html?ind_enviado=0'
-           REQUEST = self.REQUEST
-           RESPONSE = REQUEST.RESPONSE
-           RESPONSE.redirect(redirect_url)
-
-    def margem_inferior(self, codigo, anexo, tipo_doc, cod_assinatura_doc, cod_usuario, filename):
+    def margem_inferior_async(self, codigo, anexo, tipo_doc, cod_assinatura_doc, cod_usuario, filename):
         portal_url = str(self.url())
         async_result = tasks.margem_inferior_task.delay(codigo, anexo, tipo_doc, cod_assinatura_doc, cod_usuario, filename, portal_url)
         return async_result
@@ -2031,10 +2503,14 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         portal_url = str(self.url())
         async_result = tasks.peticao_autuar_task.delay(cod_peticao, portal_url)
         return async_result
-           
-    def proposicao_autuar(self, cod_proposicao):
+
+    def proposicao_autuar_async(self, cod_proposicao):
         portal_url = str(self.url())
         async_result = tasks.proposicao_autuar_task.delay(cod_proposicao, portal_url)
+        return async_result
+
+    def adicionar_carimbo_async(self, cod_sessao_plen, nom_resultado, cod_materia):
+        async_result = tasks.adicionar_carimbo_task_original.delay(cod_sessao_plen, nom_resultado, cod_materia)
         return async_result
 
 InitializeClass(SAGLTool)

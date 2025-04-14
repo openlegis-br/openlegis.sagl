@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 import os, shutil
+import asyncio
+import aiofiles
 from io import BytesIO
 from DateTime import DateTime
 from Acquisition import aq_inner
@@ -19,7 +21,7 @@ class ProcessoAdm(grok.View):
     grok.name('processo_adm_integral')
     install_home = os.environ.get('INSTALL_HOME')
 
-    def download_files(self, cod_documento):       
+    async def download_files(self, cod_documento):       
         dirpath = os.path.join(self.install_home, 'var/tmp/processo_adm_integral_' + str(cod_documento))
         pagepath = os.path.join(dirpath, 'pages')
         
@@ -112,8 +114,8 @@ class ProcessoAdm(grok.View):
                     texto_anexo.bake()
                     merger.insert_pdf(texto_anexo)
                     arq2 = texto_anexo.tobytes()
-                    with open(os.path.join(dirpath) + '/' + downloaded_pdf, 'wb') as f:
-                        f.write(arq2)
+                    async with aiofiles.open(os.path.join(dirpath) + '/' + downloaded_pdf, 'wb') as f:
+                        await f.write(arq2)
                 logger.info(f"Arquivo adicionado com sucesso: {dic['title']} ({dic['path']}/{dic['file']})")
             except Exception as e:
                 logger.error(f"Erro ao processar o arquivo {dic['title']} ({dic['path']}/{dic['file']}): {e}")
@@ -139,20 +141,27 @@ class ProcessoAdm(grok.View):
             metadata = {"title": id_processo, "modDate": dic["data"]}
             existing_pdf.set_metadata(metadata)
             data = existing_pdf.tobytes(deflate=True, garbage=3, use_objstms=1)
-            with open(os.path.join(dirpath) + '/' + processo_integral, 'wb') as f:
-                f.write(data)
+            async with aiofiles.open(os.path.join(dirpath) + '/' + processo_integral, 'wb') as f:
+                await f.write(data)
             logger.info(f"PDF final do processo {cod_documento} salvo.") # Adicionado log
 
             with pymupdf.open(stream=data) as doc:
+                tasks = []
                 for i, page in enumerate(doc):
                     page_id = 'pg_' + str(i+1).rjust(4, '0') + '.pdf'
                     file_name = os.path.join(os.path.join(pagepath), page_id)
-                    with pymupdf.open() as doc_tmp:
-                        doc_tmp.insert_pdf(doc, from_page=i, to_page=i, rotate=-1, show_progress=False)
-                        metadata = {"title": page_id, "modDate": dic["data"]}
-                        doc_tmp.set_metadata(metadata)
-                        doc_tmp.save(file_name, deflate=True, garbage=3, use_objstms=1)
-                    logger.info(f"Página {i+1} do documento {cod_documento} salva em {file_name}") # Adicionado log
+
+                    async def process_page(doc, i, file_name):
+                        with pymupdf.open() as doc_tmp:
+                            doc_tmp.insert_pdf(doc, from_page=i, to_page=i, rotate=-1, show_progress=False)
+                            metadata = {"title": page_id}
+                            doc_tmp.set_metadata(metadata)
+                            doc_tmp.save(file_name, deflate=True, garbage=3, use_objstms=1)
+                        logging.debug(f"Página {file_name} extraída.")
+
+                    tasks.append(process_page(doc, i, file_name))
+                await asyncio.gather(*tasks)
+                logging.info("Processamento de páginas concluído.")
         except Exception as e:
             logger.error(f"Erro ao finalizar a geração do PDF integral para o documento {cod_documento}: {e}")
 
@@ -162,7 +171,7 @@ class ProcessoAdm(grok.View):
         dirpath = os.path.join(self.install_home, 'var/tmp/processo_adm_integral_' + str(cod_documento))
         pagepath = os.path.join(dirpath, 'pages')
 
-        self.download_files(cod_documento=cod_documento)
+        asyncio.run(self.download_files(cod_documento=cod_documento))
 
         if action == 'download':
            for documento in self.context.zsql.documento_administrativo_obter_zsql(cod_documento=cod_documento):
@@ -269,13 +278,27 @@ class PaginaProcessoAdm(grok.View):
     grok.name('pagina_processo_adm_integral')
     install_home = os.environ.get('INSTALL_HOME')
 
-    def render(self, cod_documento, pagina):
+    async def render(self, cod_documento, pagina):
         portal_url = self.context.portal_url.portal_url()
         portal = self.context.portal_url.getPortalObject()
         dirpath = os.path.join(self.install_home, 'var/tmp/processo_adm_integral_' + str(cod_documento))
         pagepath = os.path.join(dirpath, 'pages')      
-        with open(os.path.join(pagepath) +'/' + pagina, 'rb') as download:
-           arquivo = download.read()
-           self.context.REQUEST.RESPONSE.setHeader('Content-Type', 'application/pdf')
-           self.context.REQUEST.RESPONSE.setHeader('Content-Disposition','inline; filename=%s' %str(pagina))
-           return arquivo
+        try:
+            file_path = os.path.join(pagepath, pagina)
+            async with aiofiles.open(file_path, 'rb') as download:
+                arquivo = await download.read()
+                self.context.REQUEST.RESPONSE.setHeader('Content-Type', 'application/pdf')
+                self.context.REQUEST.RESPONSE.setHeader('Content-Disposition','inline; filename=%s' % str(pagina))
+                logging.info(f"Página '{pagina}' exibida para o processo adminisrativo '{cod_documento}' from '{file_path}'")
+                return arquivo
+        except FileNotFoundError:
+            logging.error(f"Arquivo '{pagina}' não encontrado no diretório '{pagepath}'do processo adminisrativo '{cod_documento}'")
+            self.context.REQUEST.RESPONSE.setStatus(404)
+            return "Arquivo não encontrado"
+        except Exception as e:
+            logging.exception(f"Erro ao exibir a página '{pagina}' do processo administrativo '{cod_documento}': {e}")
+            self.context.REQUEST.RESPONSE.setStatus(500)
+            return "Erro ao processar o arquivo"
+
+    def __call__(self, cod_documento, pagina):
+        return asyncio.run(self.render(cod_documento, pagina))

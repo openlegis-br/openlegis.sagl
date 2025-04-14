@@ -2510,7 +2510,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         return async_result
 
     def adicionar_carimbo_async(self, cod_sessao_plen, nom_resultado, cod_materia):
-        async_result = tasks.adicionar_carimbo_task_original.delay(cod_sessao_plen, nom_resultado, cod_materia)
+        async_result = tasks.adicionar_carimbo_task.delay(cod_sessao_plen, nom_resultado, cod_materia)
         return async_result
 
 InitializeClass(SAGLTool)

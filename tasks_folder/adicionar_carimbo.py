@@ -80,5 +80,4 @@ def adicionar_carimbo_task(portal, cod_sessao_plen, nom_resultado, cod_materia):
        shape.commit()
        content = existing_pdf.tobytes(deflate=True, garbage=3, use_objstms=1)
        arq.update_data(content)
-       #arq.manage_upload(file=content)
     return nom_pdf_saida

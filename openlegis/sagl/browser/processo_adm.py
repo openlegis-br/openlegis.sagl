@@ -7,7 +7,11 @@ from five import grok
 from zope.interface import Interface
 import uuid
 import pymupdf
+import logging
 
+# Configurar logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
 
 class ProcessoAdm(grok.View):
     grok.context(Interface)
@@ -95,49 +99,62 @@ class ProcessoAdm(grok.View):
 
         for i, dic in lst_arquivos:
             downloaded_pdf = str(i).rjust(4, '0') + '.pdf'
-            arq = getattr(dic['path'], dic['file'])
-            arquivo_doc = BytesIO(bytes(arq.data))
-            with pymupdf.open(stream=arquivo_doc) as texto_anexo:
-               texto_anexo = pymupdf.open(stream=arquivo_doc)
-               metadata = {"title": dic["title"], "modDate": dic["data"]}
-               texto_anexo.set_metadata(metadata)
-               texto_anexo.bake()
-               merger.insert_pdf(texto_anexo)
-               arq2 = texto_anexo.tobytes()
-               with open(os.path.join(dirpath) + '/' + downloaded_pdf, 'wb') as f:
-                    f.write(arq2)
-               texto_anexo.close()
-        merged_pdf = merger.tobytes()
-        existing_pdf = pymupdf.open(stream=merged_pdf)
-        numPages = existing_pdf.page_count
-        for page_index, i in enumerate(range(len(existing_pdf))):
-            w = existing_pdf[page_index].rect.width
-            h = existing_pdf[page_index].rect.height
-            margin = 5
-            left = 10 - margin
-            bottom = h - 60 - margin
-            black = pymupdf.pdfcolor["black"]
-            text = "Fls. %s/%s" % (i+1, numPages)
-            p1 = pymupdf.Point(w - 70 - margin, margin + 20) # numero de pagina
-            shape = existing_pdf[page_index].new_shape()
-            shape.draw_circle(p1,1)
-            shape.insert_text(p1, id_processo+'\n'+text, fontname = "helv", fontsize = 8)
-            shape.commit()
-        metadata = {"title": id_processo, "modDate": dic["data"]}
-        existing_pdf.set_metadata(metadata)
-        data = existing_pdf.tobytes(deflate=True, garbage=3, use_objstms=1)
-        with open(os.path.join(dirpath) + '/' + processo_integral, 'wb') as f:
-             f.write(data)
+            arq = getattr(dic['path'], dic['file'], None)  # Obter o arquivo, None se não existir
+            if arq is None:
+                logger.error(f"Arquivo não encontrado: {dic['path']}/{dic['file']}")
+                continue  # Pular para o próximo arquivo
 
-        with pymupdf.open(stream=data) as doc:
-           for i, page in enumerate(doc):
-               page_id = 'pg_' + str(i+1).rjust(4, '0') + '.pdf'
-               file_name = os.path.join(os.path.join(pagepath), page_id)
-               with pymupdf.open() as doc_tmp:
-                   doc_tmp.insert_pdf(doc, from_page=i, to_page=i, rotate=-1, show_progress=False)
-                   metadata = {"title": page_id, "modDate": dic["data"]}
-                   doc_tmp.set_metadata(metadata)
-                   doc_tmp.save(file_name, deflate=True, garbage=3, use_objstms=1)
+            try:
+                arquivo_doc = BytesIO(bytes(arq.data))
+                with pymupdf.open(stream=arquivo_doc) as texto_anexo:
+                    metadata = {"title": dic["title"], "modDate": dic["data"]}
+                    texto_anexo.set_metadata(metadata)
+                    texto_anexo.bake()
+                    merger.insert_pdf(texto_anexo)
+                    arq2 = texto_anexo.tobytes()
+                    with open(os.path.join(dirpath) + '/' + downloaded_pdf, 'wb') as f:
+                        f.write(arq2)
+                logger.info(f"Arquivo adicionado com sucesso: {dic['title']} ({dic['path']}/{dic['file']})")
+            except Exception as e:
+                logger.error(f"Erro ao processar o arquivo {dic['title']} ({dic['path']}/{dic['file']}): {e}")
+
+        try:
+            merged_pdf = merger.tobytes()
+            logger.info(f"PDFs combinados para o documento {cod_documento}. Tamanho: {len(merged_pdf)} bytes.") # Adicionado log
+            existing_pdf = pymupdf.open(stream=merged_pdf)
+            numPages = existing_pdf.page_count
+            for page_index, i in enumerate(range(len(existing_pdf))):
+                w = existing_pdf[page_index].rect.width
+                h = existing_pdf[page_index].rect.height
+                margin = 5
+                left = 10 - margin
+                bottom = h - 60 - margin
+                black = pymupdf.pdfcolor["black"]
+                text = "Fls. %s/%s" % (i+1, numPages)
+                p1 = pymupdf.Point(w - 70 - margin, margin + 20) # numero de pagina
+                shape = existing_pdf[page_index].new_shape()
+                shape.draw_circle(p1,1)
+                shape.insert_text(p1, id_processo+'\n'+text, fontname = "helv", fontsize = 8)
+                shape.commit()
+            metadata = {"title": id_processo, "modDate": dic["data"]}
+            existing_pdf.set_metadata(metadata)
+            data = existing_pdf.tobytes(deflate=True, garbage=3, use_objstms=1)
+            with open(os.path.join(dirpath) + '/' + processo_integral, 'wb') as f:
+                f.write(data)
+            logger.info(f"PDF final do processo {cod_documento} salvo.") # Adicionado log
+
+            with pymupdf.open(stream=data) as doc:
+                for i, page in enumerate(doc):
+                    page_id = 'pg_' + str(i+1).rjust(4, '0') + '.pdf'
+                    file_name = os.path.join(os.path.join(pagepath), page_id)
+                    with pymupdf.open() as doc_tmp:
+                        doc_tmp.insert_pdf(doc, from_page=i, to_page=i, rotate=-1, show_progress=False)
+                        metadata = {"title": page_id, "modDate": dic["data"]}
+                        doc_tmp.set_metadata(metadata)
+                        doc_tmp.save(file_name, deflate=True, garbage=3, use_objstms=1)
+                    logger.info(f"Página {i+1} do documento {cod_documento} salva em {file_name}") # Adicionado log
+        except Exception as e:
+            logger.error(f"Erro ao finalizar a geração do PDF integral para o documento {cod_documento}: {e}")
 
     def render(self, cod_documento, action):
         portal_url = self.context.portal_url.portal_url()

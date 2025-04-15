@@ -6,7 +6,7 @@
   </div>
   <div class="col-12 col-sm-4 text-start text-sm-end mb-2">
     <div class="btn-group" role="group" aria-label="Button group with nested dropdown">
-     <a class="btn btn-primary" href="<dtml-var portal_url>/consultas/norma_juridica" ><i class="fa fa-fw fa-search"></i> Pesquisa</a>
+     <a class="btn btn-light" href="<dtml-var portal_url>/consultas/norma_juridica" ><i class="fa fa-fw fa-search"></i> Pesquisa</a>
      <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Norma'])">          
         <a class="btn btn-primary" href="<dtml-var portal_url>/cadastros/norma_juridica/norma_juridica_form" ><i class="fa fa-fw fa-plus"></i> Incluir Norma</a>
      </dtml-if>   
@@ -17,7 +17,7 @@
 <dtml-if lst_tip_norma>
     <dtml-call expr="REQUEST.set('lst_tip_norma', str(lst_tip_norma))">
 <dtml-else>
-    <dtml-call expr="REQUEST.set('lst_tip_norma', '')">
+    <dtml-call expr="REQUEST.set('lst_tip_norma', [])">
 </dtml-if>
 
 <dtml-if expr="REQUEST.get('g-recaptcha-response')!=''">
@@ -32,20 +32,11 @@
 <dtml-if step>
    <dtml-call "REQUEST.set('step', _.int(step))">
 <dtml-else>
-   <dtml-call "REQUEST.set('step', 12)">
+   <dtml-call "REQUEST.set('step', 10)">
 </dtml-if>
+
 <dtml-call "REQUEST.set('start',(page-1) * step + 1)">
-<dtml-if expr="lst_tip_norma == ''">
-   <dtml-call "REQUEST.set('tipo', '')">
-<dtml-else>
-   <dtml-if expr="pysc.verifica_lista_pysc(lst_tip_norma)">
-     <dtml-in expr="zsql.tipo_norma_juridica_obter_zsql(tip_norma=lst_tip_norma,ind_excluido=0)">
-       <dtml-call "REQUEST.set('tipo', str(sgl_tipo_norma +' - ' + des_tipo_norma))">
-     </dtml-in>
-   <dtml-else>
-      <dtml-call "REQUEST.set('tipo', '')">
-   </dtml-if>
-</dtml-if>
+
 <dtml-if expr="txt_numero == ''">
   <dtml-call "REQUEST.set('txt_numero', '')">
 <dtml-else>
@@ -64,7 +55,7 @@
   <dtml-call "REQUEST.set(txt_assunto, 'txt_assunto')">
 </dtml-if>
 
-<dtml-in expr="pysc.norma_texto_buscar_pysc(assunto=txt_assunto,tipo=tipo)" size="step" start="start" orphan=0>
+<dtml-in expr="pysc.norma_texto_buscar_pysc(assunto=txt_assunto,tipo=lst_tip_norma,ano=txt_ano)" size="step" start="start" orphan=0>
  <dtml-if sequence-start>
     <dtml-if next-sequence>
        <dtml-call "REQUEST.set('existe_seq_posterior', 1)">

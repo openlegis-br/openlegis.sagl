@@ -49,53 +49,6 @@
   <dtml-call "REQUEST.set(txt_assunto, 'txt_assunto')">
 </dtml-if>
 
-  <div class="accordion mb-3" id="accordionSearchParams">
-    <div class="accordion-item">
-      <h2 class="accordion-header" id="headingSearchParams">
-        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSearchParams" aria-expanded="true" aria-controls="collapseSearchParams">
-          Parâmetros da Pesquisa Textual
-        </button>
-      </h2>
-      <div id="collapseSearchParams" class="accordion-collapse collapse show" aria-labelledby="headingSearchParams" data-bs-parent="#accordionSearchParams">
-        <div class="accordion-body">
-          <div class="row">
-            <dtml-if txt_assunto>
-              <div class="col-md-4"><strong>Assunto:</strong> <dtml-var txt_assunto></div>
-            </dtml-if>
-            <dtml-if lst_tip_norma>
-              <div class="col-md-6">
-                   <dtml-if expr="pysc.verifica_string_pysc(lst_tip_norma)">
-                      <strong>Tipo de Norma:</strong>
-                      <dtml-in expr="zsql.tipo_norma_juridica_obter_zsql(tip_norma=int(lst_tip_norma))">
-                          <span><dtml-var des_tipo_norma></span>
-                      </dtml-in>
-                   <dtml-else>
-                      <strong>Tipos de Norma:</strong>
-                      <dtml-in lst_tip_norma>
-                         <dtml-call expr="REQUEST.set('tipo_norma', int(_['sequence-item']))">
-                         <dtml-in expr="zsql.tipo_norma_juridica_obter_zsql(tip_norma=tipo_norma)"><span><dtml-var des_tipo_norma></span></dtml-in><dtml-unless sequence-end>,</dtml-unless>
-                      </dtml-in>
-                   </dtml-if>
-              </div>
-            <dtml-else>
-              <div class="col-md-6">
-                <strong>Tipos de Norma:</strong> Todos
-              </div>
-            </dtml-if>
-            <dtml-if txt_ano>
-              <div class="col-md-2"><strong>Ano:</strong> <dtml-var txt_ano></div>
-            <dtml-else>
-              <div class="col-md-2"><strong>Ano:</strong> Indiferente</div>
-            </dtml-if>
-            <dtml-if expr="not (txt_numero or txt_ano or txt_assunto or lst_tip_norma)">
-              <div class="col-md-12">Nenhum parâmetro de pesquisa definido.</div>
-            </dtml-if>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
 <dtml-if lst_tip_norma>
     <dtml-call expr="REQUEST.set('lst_tip_norma', str(lst_tip_norma))">
 <dtml-else>

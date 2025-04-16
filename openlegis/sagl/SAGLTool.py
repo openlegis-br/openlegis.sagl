@@ -1884,20 +1884,6 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
             print(f"Erro ao decodificar JSON: {e}")
             return None # Retorna None se o JSON estiver malformado.
 
-    def cep_buscar1(self, numcep):
-        url = 'https://viacep.com.br/ws/%s/json/'%numcep
-        resposta = requests.get(url)
-        dic_requisicao = resposta.json()
-        cepArray=[]
-        if 'errors' not in dic_requisicao:
-           cepDict = {}
-           cepDict['logradouro'] = dic_requisicao['logradouro']
-           cepDict['bairro'] = dic_requisicao['bairro']
-           cepDict['cidade'] = dic_requisicao['localidade']
-           cepDict['estado'] = dic_requisicao['uf']
-           cepArray.append(cepDict)
-           return json.dumps(cepDict)
-
     def make_qrcode(self, text):
         qr = qrcode.QRCode(
             version=1,
@@ -2231,8 +2217,8 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         w = existing_pdf[0].rect.width
         h = existing_pdf[0].rect.height
         # tipo, numero e ano
-        rect = pymupdf.Rect(40, 140, w-20, 170)
-        existing_pdf[0].insert_textbox(rect, str(texto).upper(), fontname = "tibo", fontsize = 13, align=pymupdf.TEXT_ALIGN_CENTER)
+        rect = pymupdf.Rect(40, 120, w-20, 170)
+        existing_pdf[0].insert_textbox(rect, str(texto).upper(), fontname = "hebo", fontsize = 12, align=pymupdf.TEXT_ALIGN_CENTER)
         metadata = {"title": texto, "author": nom_autor}
         existing_pdf.set_metadata(metadata)
         content = existing_pdf.tobytes(deflate=True, garbage=3, use_objstms=1)

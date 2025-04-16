@@ -1854,7 +1854,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         async_result = tasks.protocolo_prefeitura_task.delay(API_ENDPOINT, API_USER, API_PASSWORD, cod_materia, payload)
         return async_result.get()
 
-    def cep_buscar(numcep):
+    def cep_buscar(self, numcep):
         """
         Busca informações de endereço com base em um CEP (Código de Endereçamento Postal) fornecido.
         Args:

@@ -51,7 +51,7 @@
           <dtml-in expr="zsql.peticao_obter_zsql(cod_peticao = cod_peticao)">
              <dtml-call expr="REQUEST.set('titulo', 'Petição Digital' + ' n° ' + str(cod_peticao))">
           </dtml-in>
-          <dtml-call expr="sapl_documentos.peticao.manage_addFile(id=id_documento,file=pysc.upload_file(file=file_nom_arquivo, title=titulo))">
+          <dtml-call expr="sapl_documentos.peticao.manage_addFile(id=id_documento, file=pysc.upload_file(file=file_nom_arquivo, title=titulo, tipo_doc='peticao', codigo=cod_peticao))">
        </dtml-if>
     <dtml-elif expr="zsql.peticao_incluir_zsql">
        <dtml-in expr="zsql.peticao_incluida_codigo_obter_zsql()">

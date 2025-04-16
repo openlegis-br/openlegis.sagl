@@ -2,78 +2,79 @@
 
 <script>
   function campos_criticar(){
-  var form = document.peticionamento_form;
-      if (form.lst_tip_peticionamento.selectedIndex==''){
-          bootstrap.showModal({title: "Mensagem do Sistema", body: "O tipo de norma deve ser selecionado !"});
-          form.lst_tip_peticionamento.focus();
-          return false;
+    var form = document.peticionamento_form;
+    if (form.lst_tip_peticionamento.selectedIndex==''){
+      bootstrap.showModal({title: "Mensagem do Sistema", body: "O tipo de norma deve ser selecionado !"});
+      form.lst_tip_peticionamento.focus();
+      return false;
+    }
+
+    if (form.txt_num_norma.value == "") {
+      bootstrap.showModal({title: "Mensagem do Sistema", body: "O número da norma deve ser informado !"});
+      form.txt_num_norma.focus();
+      return false;
+    }
+
+    if (form.txt_ano_norma.value == "") {
+      bootstrap.showModal({title: "Mensagem do Sistema", body: "O ano da norma deve ser informado !"});
+      form.txt_ano_norma.focus();
+      return false;
+    }
+
+    if (form.txt_dat_norma.value == "") {
+      bootstrap.showModal({title: "Mensagem do Sistema", body: "A data da norma deve ser preenchida !"});
+      form.txt_dat_norma.focus();
+      return false;
+    }
+
+
+    if (form.txa_txt_descricao.value == "") {
+      bootstrap.showModal({title: "Mensagem do Sistema", body: "A ementa deve ser preenchida !"});
+      form.txa_txt_descricao.focus();
+      return false;
+    }
+
+
+    var processo_principal = form.lst_tip_materia[form.lst_tip_materia.selectedIndex].value;
+
+
+    if (processo_principal != ""){
+      if ((form.lst_tip_materia[form.lst_tip_materia.selectedIndex].value == "") ||
+          (form.txt_num_materia.value == "") || (form.txt_ano_materia.value == "")) {
+        bootstrap.showModal({title: "Mensagem do Sistema", body: "Informe tipo, número e ano da matéria originária !"});          
+        form.txt_num_materia.focus();    
+        return false;
       }
+    }
 
-      if (form.txt_num_norma.value == "") {
-         bootstrap.showModal({title: "Mensagem do Sistema", body: "O número da norma deve ser informado !"});
-         form.txt_num_norma.focus();
-         return false;
-      }
-
-      if (form.txt_ano_norma.value == "") {
-         bootstrap.showModal({title: "Mensagem do Sistema", body: "O ano da norma deve ser informado !"});
-         form.txt_ano_norma.focus();
-         return false;
-      }
-
-      if (form.txt_dat_norma.value == "") {
-         bootstrap.showModal({title: "Mensagem do Sistema", body: "A data da norma deve ser preenchida !"});
-         form.txt_dat_norma.focus();
-         return false;
-      }
-
-
-      if (form.txa_txt_descricao.value == "") {
-         bootstrap.showModal({title: "Mensagem do Sistema", body: "A ementa deve ser preenchida !"});
-         form.txa_txt_descricao.focus();
-         return false;
-      }
-
-
-  var processo_principal = form.lst_tip_materia[form.lst_tip_materia.selectedIndex].value;
-
-
-  if (processo_principal != ""){
-     if ((form.lst_tip_materia[form.lst_tip_materia.selectedIndex].value == "") ||
-        (form.txt_num_materia.value == "") || (form.txt_ano_materia.value == "")) {
-         bootstrap.showModal({title: "Mensagem do Sistema", body: "Informe tipo, número e ano da matéria originária !"});       
-         form.txt_num_materia.focus(); 
-         return false;
-     }
+    exibirMensagemProcessamento(); // Adicionado: Exibe a mensagem de processamento
+    form.submit();
   }
 
-  form.submit();
-}
-
   function texto_odt_gerar(){
-      var lst_modelo = document.getElementById("lst_modelo");
-      var value = lst_modelo.options[lst_modelo.selectedIndex].value;
-      var selected = lst_modelo.options[lst_modelo.selectedIndex];
-      var path = selected.getAttribute('data-path');
-  
-      if (lst_modelo.selectedIndex == 0) {
-         bootstrap.showModal({title: "Mensagem do Sistema", body: "É necessário selecionar um modelo!"});        
-         return false;
-      }
+    var lst_modelo = document.getElementById("lst_modelo");
+    var value = lst_modelo.options[lst_modelo.selectedIndex].value;
+    var selected = lst_modelo.options[lst_modelo.selectedIndex];
+    var path = selected.getAttribute('data-path');
+   
+    if (lst_modelo.selectedIndex == 0) {
+      bootstrap.showModal({title: "Mensagem do Sistema", body: "É necessário selecionar um modelo!"});        
+      return false;
+    }
 
-      if ((lst_modelo.selectedIndex != 0) && confirm("Confirma a geração do arquivo ODT?")) {
-         location.href="<dtml-var portal_url>/modelo_proposicao/peticao?cod_peticao=<dtml-var cod_peticao missing>&modelo_path="+path;
-         setTimeout(function(){window.location.reload(true)},3000);
-       }
-         return;
+    if ((lst_modelo.selectedIndex != 0) && confirm("Confirma a geração do arquivo ODT?")) {
+      location.href="<dtml-var portal_url>/modelo_proposicao/peticao?cod_peticao=<dtml-var cod_peticao missing>&modelo_path="+path;
+      setTimeout(function(){window.location.reload(true)},3000);
+     }
+      return;
   }
 
  function texto_pdf_gerar(){
-      if (confirm("Confirma a geração do arquivo PDF?")) {
-         location.href="<dtml-var portal_url>/modelo_proposicao/peticao_gerar_pdf?cod_peticao=<dtml-var cod_peticao missing>";
-         setTimeout(function(){window.location.reload(true)},3000);
-       }
-         return;
+    if (confirm("Confirma a geração do arquivo PDF?")) {
+      location.href="<dtml-var portal_url>/modelo_proposicao/peticao_gerar_pdf?cod_peticao=<dtml-var cod_peticao missing>";
+      setTimeout(function(){window.location.reload(true)},3000);
+     }
+      return;
   }
 
   $(document).ready(function () {
@@ -81,10 +82,38 @@
       // Set the input's value to the current value of the list
       $('#hdn_cod_materia').val("");
       $('#txt_num_materia').val("");
-      $('#txt_ano_materia').val("");  
+      $('#txt_ano_materia').val("");      
       $('#txa_txt_ementa').val("");
     });
   })
+
+  function exibirMensagemProcessamento() {
+    // Crie um elemento div para a mensagem de processamento
+    var mensagemDiv = document.createElement('div');
+    mensagemDiv.id = 'mensagem-processamento';
+    mensagemDiv.style.position = 'fixed';
+    mensagemDiv.style.top = '50%';
+    mensagemDiv.style.left = '50%';
+    mensagemDiv.style.transform = 'translate(-50%, -50%)';
+    mensagemDiv.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+    mensagemDiv.style.color = '#fff';
+    mensagemDiv.style.padding = '20px';
+    mensagemDiv.style.borderRadius = '5px';
+    mensagemDiv.style.zIndex = '1000';
+    mensagemDiv.innerHTML = 'Processando... <div class="spinner-border spinner-border-sm text-light" role="status"><span class="visually-hidden">Carregando...</span></div>'; // Adiciona um spinner do Bootstrap
+
+    // Adicione a mensagem ao corpo do documento
+    document.body.appendChild(mensagemDiv);
+
+    // Desabilite o botão de salvar para evitar múltiplos envios
+    var botaoSalvar = document.querySelector('input[value="Cadastrar Petição"]'); // Ajuste o seletor conforme necessário
+    if (!botaoSalvar) {
+      botaoSalvar = document.querySelector('input[value="Salvar"]'); // Tentativa alternativa
+    }
+    if (botaoSalvar) {
+      botaoSalvar.disabled = true;
+    }
+  }
 
 </script>
 

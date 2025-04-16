@@ -21,7 +21,6 @@ def upload_file(file, title):
         file = BytesIO(file)
     elif hasattr(file, 'filename') and hasattr(file, 'data'):
         file = BytesIO(file.data)
-
     result = otimize_file(file, title)
     # trata o resultado
     if isinstance(result, bytes):
@@ -32,7 +31,7 @@ def upload_file(file, title):
     else:
         file_stream = result['file_stream']
         signatures = result['signatures']
-        if str(tipo_doc) == 'proposicao':
+        if str(tipo_doc) == 'proposicao' or str(tipo_doc) == 'peticao':
            cpfs_inseridos = []
            cod_assinatura_doc = context.cadastros.assinatura.generate_verification_code()
            for i, item in enumerate(signatures):
@@ -53,9 +52,13 @@ def upload_file(file, title):
                                   dat_assinatura=DateTime(item['signing_time'], datefmt='international').strftime('%Y/%m/%d %H:%M:%S')
                                   )
                       cpfs_inseridos.append(signer_cpf)
-           nom_pdf = str(codigo)+'_signed.pdf'
-           context.sapl_documentos.proposicao.manage_addFile(id=nom_pdf, file=file_stream)  
+           if str(tipo_doc) == 'proposicao':
+              nom_pdf = str(codigo)+'_signed.pdf'
+              context.sapl_documentos.proposicao.manage_addFile(id=nom_pdf, file=file_stream)  
 
+           elif str(tipo_doc) == 'peticao':
+              nom_pdf = str(cod_assinatura_doc)+'.pdf'
+              context.sapl_documentos.documentos_assinados.manage_addFile(id=nom_pdf, file=file_stream)         
         return file_stream
 
 def otimize_file(filename=file, title=title):

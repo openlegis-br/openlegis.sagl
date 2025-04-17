@@ -207,11 +207,18 @@ class FinishPadesSignature(grok.View):
             return json.dumps({'error': 'Token não fornecido.'}, ensure_ascii=False)
 
         post_data = self.request.form
+        crc_arquivo = post_data.get('crc_arquivo')
         codigo = post_data.get('codigo')
         tipo_doc = post_data.get('tipo_doc')
         anexo = post_data.get('anexo')
         cod_usuario = post_data.get('cod_usuario')
-        logger.info(f"Dados do POST: codigo={codigo}, tipo_doc={tipo_doc}, anexo={anexo}, usuario={cod_usuario}")
+        logger.info(f"Dados do POST: codigo={codigo}, tipo_doc={tipo_doc}, anexo={anexo}, usuario={cod_usuario}, crc_arquivo={crc_arquivo}")
+
+        pdf_tosign, storage_path, crc_arquivo_atualizado = portal_sagl.get_file_tosign(codigo, anexo, tipo_doc)
+
+        if crc_arquivo !=  crc_arquivo_atualizado:
+            self.request.response.setStatus(HTTPStatus.BAD_REQUEST)
+            return json.dumps({'error': 'Arquivo modificado durante a assinatura! Atualize a página e tente novamente.'}, ensure_ascii=False)
 
         try:
             restpki_client = await create_restpki_client(self.context)

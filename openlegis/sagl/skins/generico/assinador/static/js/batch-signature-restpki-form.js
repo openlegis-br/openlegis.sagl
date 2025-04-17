@@ -1,11 +1,10 @@
 // ------------------------------------------------------------------------------------------------
 // Este arquivo contém a lógica para chamar o componente Web PKI para assinar um lote de documentos
-// selecionados de uma lista. É apenas um exemplo, sinta-se à vontade para alterá-lo para atender
-// às necessidades do seu aplicativo.
+// selecionados de uma lista.
 // ------------------------------------------------------------------------------------------------
 var batchSignatureRestPkiForm = (function () {
 
-	// A classe Javascript "Queue" (mantida como estava)
+	// A classe Javascript "Queue"
 	(function () {
 		window.Queue = function () {
 			this.items = [];
@@ -172,6 +171,7 @@ var batchSignatureRestPkiForm = (function () {
 
             if (row.length) {
                 // Extraia os valores dos campos hidden
+                step.crc_arquivo = row.find('input[name="crc_arquivo"]').val();
                 step.codigo = row.find('input[name="codigo"]').val();
                 step.tipo_doc = row.find('input[name="tipo_doc"]').val();
                 step.anexo = row.find('input[name="anexo"]').val();
@@ -183,7 +183,7 @@ var batchSignatureRestPkiForm = (function () {
                 done();
                 return;
             }
-	    console.log('Iniciando assinatura para:', 'Quantidade:', step.qtde_assinaturas);
+	    console.log('Iniciando assinatura para:', 'Documento:', step.docId);
             $.ajax({
                 url: step.docId + '/start/',
                 method: 'POST',
@@ -191,6 +191,7 @@ var batchSignatureRestPkiForm = (function () {
                 // Se você precisar enviar os valores para o backend na conclusão:
                 data: {
                       qtde_assinaturas: step.qtde_assinaturas,
+                      crc_arquivo: step.crc_arquivo,
                 },
                 success: function (token) {
                     step.token = token;
@@ -202,22 +203,6 @@ var batchSignatureRestPkiForm = (function () {
                 }
             });
         }
-
-	//function startSignature(step, done) {
-	//	$.ajax({
-	//		url: step.docId + '/start/',
-	//		method: 'POST',
-	//		dataType: 'json',
-	//		success: function (token) {
-	//			step.token = token;
-	//			done(step);
-	//		},
-	//		error: function (jqXHR, textStatus, errorThrown) {
-	//			renderFail(step, errorThrown || textStatus);
-	//			done();
-	//		}
-	//	});
-	//}
 
 	// ---------------------------------------------------------------------------------------------
 	// Função que realiza a segunda etapa para cada documento.
@@ -238,13 +223,14 @@ var batchSignatureRestPkiForm = (function () {
 	// Função que realiza a terceira etapa para cada documento.
 	// ---------------------------------------------------------------------------------------------
 	function completeSignature(step, done) {
-	        console.log('Finalizando assinatura para:', step.docId, 'Codigo:', step.codigo, 'Tipo:', step.tipo_doc, 'Anexo:', step.anexo, 'Usuario:', step.cod_usuario);
+	        console.log('Finalizando assinatura para:', step.docId, 'Codigo:', step.codigo, 'Tipo:', step.tipo_doc, 'Anexo:', step.anexo, 'Usuario:', step.cod_usuario, 'CRC:', step.crc_arquivo);
                 $.ajax({
                     url: step.docId + '/complete/' + step.token,
                     method: 'POST',
                     dataType: 'json',
                    // Se você precisar enviar os valores para o backend na conclusão:
                    data: {
+                         crc_arquivo: step.crc_arquivo,
                          codigo: step.codigo,
                          tipo_doc: step.tipo_doc,
                          anexo: step.anexo,
@@ -260,21 +246,6 @@ var batchSignatureRestPkiForm = (function () {
                        done();
                    }
                 });
-
-		//$.ajax({
-		//	url: step.docId + '/complete/' + step.token,
-		//	method: 'POST',
-		//	dataType: 'json',
-		//	success: function (fileId) {
-		//		step.fileId = fileId;
-		//		renderSuccess(step);
-		//		done(step);
-		//	},
-		//	error: function (jqXHR, textStatus, errorThrown) {
-		//		renderFail(step, errorThrown || textStatus);
-		//		done();
-		//	}
-		//});
 	}
 
 	// ---------------------------------------------------------------------------------------------

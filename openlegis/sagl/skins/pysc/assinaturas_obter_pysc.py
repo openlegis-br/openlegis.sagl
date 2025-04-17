@@ -15,6 +15,7 @@ for item in context.zsql.assinatura_documento_obter_zsql(codigo=codigo_origem,ti
     dic_assinaturas["cod_assinatura_doc"] = item.cod_assinatura_doc
     dic_assinaturas["codigo"] = codigo_destino
     dic_assinaturas["tipo_doc"] = tipo_doc_destino
+    dic_assinaturas["cod_solicitante"] = item.cod_solicitante
     dic_assinaturas["dat_solicitacao"] = item.data_solicitacao
     dic_assinaturas["cod_usuario"] = item.cod_usuario
     dic_assinaturas["dat_assinatura"] = item.data_assinatura
@@ -25,5 +26,5 @@ for item in context.zsql.assinatura_documento_obter_zsql(codigo=codigo_origem,ti
 itens = [(i + 1, j) for i, j in enumerate(itens)]
 
 for i, dic in itens:
-    context.zsql.assinatura_documento_copiar_zsql(cod_assinatura_doc=dic.get('cod_assinatura_doc',dic), codigo=dic.get('codigo',dic), tipo_doc=dic.get('tipo_doc',dic), dat_solicitacao=dic.get('dat_solicitacao',dic),cod_usuario=dic.get('cod_usuario',dic),dat_assinatura=dic.get('dat_assinatura',dic),ind_assinado=dic.get('ind_assinado',dic),ind_prim_assinatura=dic.get('ind_prim_assinatura',dic))
+    context.zsql.assinatura_documento_copiar_zsql(cod_assinatura_doc=dic.get('cod_assinatura_doc',dic), codigo=dic.get('codigo',dic), tipo_doc=dic.get('tipo_doc',dic), cod_solicitante=dic.get('cod_solicitante',dic), dat_solicitacao=dic.get('dat_solicitacao', dic), cod_usuario=dic.get('cod_usuario',dic), dat_assinatura=dic.get('dat_assinatura',dic), ind_assinado=dic.get('ind_assinado',dic), ind_prim_assinatura=dic.get('ind_prim_assinatura',dic))
 

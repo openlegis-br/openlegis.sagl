@@ -52,8 +52,8 @@
            <td valign="top"><dtml-var id_documento></td>
            <td valign="top">
               <div class="btn-group" role="group">
-                  <dtml-if expr="link_pdf != None">
-                    <a class="btn btn-light" title="Visualizar" href="<dtml-var link_pdf>" target="_blank"><i class="far fa-file-pdf"></i></a>
+                  <dtml-if expr="pdf_to_sign != None">
+                    <a class="btn btn-light" title="Visualizar" href="<dtml-var pdf_to_sign>" target="_blank"><i class="far fa-file-pdf"></i></a>
                     <button type="button" class="btn btn-light" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Assinar Digitalmente" data-src="<dtml-var portal_url>/generico/assinador/pades-signature_html?codigo=<dtml-var codigo>&anexo=<dtml-var anexo missing null>&tipo_doc=<dtml-var tipo_doc>&modal=1" title="Assinar"><i class="fas fa-file-signature"></i></button>
                   <dtml-else>
                     <button class="btn btn-danger text-white" title="Documento removido do sistema!"><i class="fa fa-exclamation-circle"></i></button>
@@ -158,7 +158,7 @@
                     </div>
                  </div>
                  </div>
-                 <dtml-if expr="link_pdf != None">
+                 <dtml-if expr="pdf_to_sign != None">
                  <div class="btn-group dropdown" role="group">
                    <button id="btnGroupDrop1" type="button" class="btn btn-light dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
                       <i class="fa fa-ellipsis-v "></i>
@@ -243,8 +243,8 @@
            <td valign="top"><dtml-var id_documento></td>
            <td valign="top">
               <div class="btn-group" role="group">
-                  <dtml-if expr="link_pdf != None">
-                    <a class="btn btn-light" title="Visualizar" href="<dtml-var link_pdf>" target="_blank"><i class="far fa-file-pdf"></i></a>
+                  <dtml-if expr="pdf_to_sign != None">
+                    <a class="btn btn-light" title="Visualizar" href="<dtml-var pdf_to_sign>" target="_blank"><i class="far fa-file-pdf"></i></a>
                     <button type="button" class="btn btn-light" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Assinar Digitalmente" data-src="<dtml-var portal_url>/generico/assinador/pades-signature_html?codigo=<dtml-var codigo>&anexo=<dtml-var anexo missing null>&tipo_doc=<dtml-var tipo_doc>&modal=1" title="Assinar"><i class="fas fa-file-signature"></i></button>
                   <dtml-else>
                     <button class="btn btn-danger text-white" title="Documento removido do sistema!"><i class="fa fa-exclamation-circle"></i></button>
@@ -345,7 +345,7 @@
                        </div>
                     </div>
                  </div>
-                      <dtml-if expr="link_pdf != None">
+                      <dtml-if expr="pdf_to_sign != None">
 			    <button type="button" class="btn btn-light text-danger" data-bs-toggle="modal" title="Recusar" data-bs-target="#recusaModal<dtml-var formatted_code>"><i class="fas fa-window-close"></i></button>
 			     <div class="modal fade" id="recusaModal<dtml-var formatted_code>" tabindex="-1" aria-labelledby="recusaModalLabel" aria-hidden="true">
 			      <div class="modal-dialog">
@@ -395,7 +395,7 @@
  </div>
 
  <div class="tab-pane p-3 border fade show" id="registro">
-  <dtml-in expr="zsql.assinatura_documento_obter_zsql(cod_usuario=cod_usuario_corrente, ind_assinado=1, rd_ordenacao=1)">
+  <dtml-in expr="zsql.assinatura_documento_obter_zsql(cod_usuario=cod_usuario_corrente, ind_assinado=1, rd_ordenacao=1)" mapping>
     <dtml-if expr="cod_assinatura_doc">
        <dtml-call expr="REQUEST.set('cod_assinatura_doc', cod_assinatura_doc)">
        <dtml-call expr="REQUEST.set('formatted_code', format_verification_code(cod_assinatura_doc))">
@@ -405,8 +405,8 @@
       <table class="table datatable-tramitacao w-100 align-middle" id="registro">
         <thead class="table-light">      
          <tr>
-           <th>Data da Assinatura</th>
-           <th>Solicitante</th>
+           <th width="20%">Data da Assinatura</th>
+           <th width="20%">Solicitante</th>
            <th>Documento Assinado</th>
            <th>Código de Validação</th>
          </tr>

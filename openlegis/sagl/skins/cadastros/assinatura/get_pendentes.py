@@ -7,6 +7,11 @@
 ##parameters=codigo='', tipo_doc='', cod_solicitante='', cod_usuario='', ind_assinado='', ind_separado=''
 ##title=
 ##
+from Products.CMFCore.utils import getToolByName
+st = getToolByName(context, 'portal_sagl')
+
+from zlib import crc32
+
 def get_info(codigo, tipo_doc, anexo):
     for storage in context.zsql.assinatura_storage_obter_zsql(tip_documento=tipo_doc):
         tipo_doc = storage.tip_documento
@@ -221,6 +226,20 @@ def get_info(codigo, tipo_doc, anexo):
                titulo = getattr(context.sapl_documentos.anexo_sessao,arquivo).title_or_id()
                descricao =  str(titulo) + ' da ' + str(sessao)
                url = context.portal_url() + '/cadastros/sessao_plenaria/audiencia_publica_mostrar_proc?cod_sessao_plen=' + str(metodo.cod_sessao_plen) + '&ind_audiencia=1'
+
+        location = storage.pdf_location
+        if anexo != None and anexo != '':
+           codigo = str(codigo) + '_anexo_' + str(anexo)
+           pdf_signed = str(location) + str(codigo) + str(storage.pdf_signed)
+           pdf_file = str(location) + str(codigo) + str(storage.pdf_file)
+           nom_arquivo = str(codigo) + str(storage.pdf_file)
+           nom_arquivo_assinado = str(codigo) + str(storage.pdf_signed)
+        else:
+           pdf_signed = str(location) + str(codigo) + str(storage.pdf_signed)
+           pdf_file = str(location) + str(codigo) + str(storage.pdf_file)
+           nom_arquivo = str(codigo) + str(storage.pdf_file)
+           nom_arquivo_assinado = str(codigo) + str(storage.pdf_signed)
+
     return descricao, url, tipo_documento, url_pasta
 
 
@@ -244,16 +263,11 @@ for item in context.zsql.assinatura_documento_pendente_obter_zsql(codigo=codigo,
     dic_documento['link_registro'] = dados[1]
     dic_documento['tipo_documento'] = dados[2]
     dic_documento['url_pasta'] = dados[3]
-    link_pdf = context.cadastros.assinatura.gerar_link_pysc(codigo=item['codigo'], tip_documento=item['tipo_doc'], anexo=item['anexo'])
-    if link_pdf != '':
-       dic_documento['link_pdf'] = context.portal_url() + '/' + context.cadastros.assinatura.gerar_link_pysc(codigo=item['codigo'], tip_documento=item['tipo_doc'], anexo=item['anexo'])
-    else:
-        dic_documento['link_pdf'] = None
-    if hasattr(context.sapl_documentos.documentos_assinados, item['cod_assinatura_doc'] + '.pdf'):
-       dic_documento['pdf_to_sign'] = context.portal_url() + '/sapl_documentos/documentos_assinados/' + item['cod_assinatura_doc'] + '.pdf'
-    else:
-       dic_documento['pdf_to_sign'] = dic_documento['link_pdf']
-    #dic_documento['assinaturas'] = []
+
+    pdf_tosign, storage_path, crc_arquivo = st.get_file_tosign(item['codigo'], item['anexo'], item['tipo_doc'])
+    arq = getattr(storage_path, pdf_tosign)
+    dic_documento['pdf_to_sign'] = arq.absolute_url()
+    dic_documento['crc_arquivo'] = crc_arquivo
     dic_documento['assinados'] = []
     dic_documento['pendentes'] = []
     dic_documento['recusados'] = []

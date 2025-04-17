@@ -84,6 +84,8 @@ def initialize(context):
     allow_module('reportlab.lib.utils')
     allow_module('operator')
     allow_module('locale')
+    allow_module('zlib')
+    allow_module('zlib.crc32')
 
     tools = (SAGLTool.SAGLTool,)
     ToolInit('SAGL Tool',

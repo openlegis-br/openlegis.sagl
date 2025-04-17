@@ -72,6 +72,7 @@
                                             <div class="form-check1">
                                                 <input name="<dtml-var cod_assinatura_doc>" type="checkbox" class="form-check-input file-checkbox" id="<dtml-var pdf_to_sign>" value="<dtml-var pdf_to_sign>" />
                                                 <label for="<dtml-var pdf_to_sign>"></label>
+                                                <input name="crc_arquivo" type="hidden" value="<dtml-var crc_arquivo>" />
                                                 <input name="codigo" type="hidden" value="<dtml-var codigo>" />
                                                 <input name="tipo_doc" type="hidden" value="<dtml-var tipo_doc>" />
                                                 <input name="anexo" type="hidden" value="<dtml-var anexo missing null>" />
@@ -82,7 +83,7 @@
                                                 <input name="cod_usuario" type="hidden" value="<dtml-var cod_usuario_corrente>" />
                                             </div>
                                         </td>
-                                        <td><a href="<dtml-var link_pdf>" target="_blank"><dtml-var id_documento></a></td>
+                                        <td><a href="<dtml-var pdf_to_sign>" target="_blank"><dtml-var id_documento></a></td>
                                         <td><dtml-var tipo_documento></td>
                                         <td><dtml-in expr="zsql.assinatura_documento_obter_zsql(codigo=codigo,tipo_doc=tipo_doc, cod_usuario=cod_usuario_corrente, ind_assinado=0)" mapping><dtml-var expr="DateTime(dat_solicitacao, datefmt='international').strftime('%d/%m/%Y %H:%M')"></dtml-in></td>
                                     </tr>

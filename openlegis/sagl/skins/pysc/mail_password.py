@@ -7,5 +7,12 @@
 ##parameters=userid
 ##title=
 ##
-REQUEST=context.REQUEST
-return context.portal_sagl.mailPassword(userid, REQUEST)
+REQUEST = context.REQUEST
+try:
+    return context.portal_sagl.mailPassword(userid, REQUEST)
+except ValueError as e:
+    REQUEST.set('error_message', str(e))
+    return context.REQUEST.RESPONSE.redirect(context.portal_url() + '/mail_password_form?error_message=' + str(e))
+except Exception as e:
+    REQUEST.set('error_message', 'Ocorreu um erro inesperado.')
+    return context.REQUEST.RESPONSE.redirect(context.portal_url() + '/mail_password_form?error_message=Ocorreu%20um%20erro%20inesperado.')

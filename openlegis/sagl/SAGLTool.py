@@ -1801,12 +1801,12 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         membership = getToolByName(self, 'portal_membership')
         member = membership.getMemberById(forgotten_userid)
         if member is None:
-            msg = 'Usuário não encontrado'
+            msg = 'Usuário não encontrado!'
             raise ValueError(msg)
         email = self._getValidEmailAddress(member)
         if email is None or email == '':
-           msg = 'Endereço de email não cadastrado'
-           raise ValueError(msg)
+            msg = 'Endereço de email não cadastrado!'
+            raise ValueError(msg)
         method = self.pysc.password_email
         kw = {'email': email, 'member': member, 'password': member.getPassword()}
         if getattr(aq_base(method), 'isDocTemp', 0):
@@ -1814,8 +1814,12 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         else:
             mail_text = method(**kw)
         host = self.MailHost
-        host.send( mail_text )
-        return self.generico.mail_password_response( self, REQUEST )
+        try:
+            host.send(mail_text)
+            return self.generico.mail_password_response(self, REQUEST)
+        except Exception as e:
+            REQUEST.set('error_message', 'Ocorreu um erro ao enviar o email!')
+            return self.REQUEST.RESPONSE.redirect(self.portal_url() + '/mail_password_form?error_message=' + str(e))
 
     def create_payload(self, cod_materia):
         data = {}

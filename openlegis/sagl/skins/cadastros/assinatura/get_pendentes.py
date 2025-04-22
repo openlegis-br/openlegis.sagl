@@ -266,6 +266,7 @@ for item in context.zsql.assinatura_documento_pendente_obter_zsql(codigo=codigo,
 
     pdf_tosign, storage_path, crc_arquivo = st.get_file_tosign(item['codigo'], item['anexo'], item['tipo_doc'])
     arq = getattr(storage_path, pdf_tosign)
+    dic_documento['link_pdf'] = arq.absolute_url()
     dic_documento['pdf_to_sign'] = arq.absolute_url()
     dic_documento['crc_arquivo'] = crc_arquivo
     dic_documento['assinados'] = []

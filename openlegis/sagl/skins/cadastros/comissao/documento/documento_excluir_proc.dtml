@@ -1,10 +1,18 @@
 <dtml-call expr="REQUEST.set('id_documento', str(cod_documento)+'_documento.pdf')">
 <dtml-if expr="hasattr(sapl_documentos.documento_comissao,id_documento)">
-    <dtml-try>
-	  <dtml-call expr="sapl_documentos.documento_comissao.manage_delObjects(id_documento)">
-	  <dtml-except>
-        <dtml-call expr="REQUEST.set('erro', 1)">
-    </dtml-try>
+   <dtml-call expr="sapl_documentos.documento_comissao.manage_delObjects(id_documento)">
+   <dtml-in expr="zsql.assinatura_documento_obter_zsql(codigo=cod_documento,tipo_doc='documento_comissao')">
+      <dtml-try>
+         <dtml-call expr="zsql.assinatura_documento_excluir_zsql(
+                          cod_assinatura_doc  = cod_assinatura_doc,
+                          codigo              = codigo,
+                          tipo_doc            = tipo_doc)">
+      <dtml-except>
+        <dtml-let mensagem="'Houve um erro! Remova qualquer pedido de assinatura antes de excluir o documento!'" tipo_mensagem="'danger'">
+           <dtml-var mensagem_emitir>
+        </dtml-let> 
+      </dtml-try>
+   </dtml-in>
 </dtml-if>
 
 <dtml-unless erro>
@@ -21,7 +29,7 @@
 </dtml-unless>
 
 <dtml-if erro>
-  <dtml-let mensagem="'Não foi possível excluir o Documento. Tente novamente!'" tipo_mensagem="'danger'">
+  <dtml-let mensagem="'Não foi possível excluir o documento. Tente novamente!'" tipo_mensagem="'danger'">
     <dtml-var mensagem_emitir>
   </dtml-let>
 </dtml-if>

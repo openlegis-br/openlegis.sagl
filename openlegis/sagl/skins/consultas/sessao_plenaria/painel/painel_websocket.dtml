@@ -209,15 +209,9 @@
     
     <script>
         // Configurações
-        <dtml-call expr="REQUEST.set('host', HTTP_HOST.split(':')[0])">
-        <dtml-if expr="host == 'localhost' or host.startswith('192.168.')">
-           <dtml-call expr="REQUEST.set('protocol', 'ws')">
-           const WS_URL = "<dtml-var protocol>://<dtml-var host>:8765";
-        <dtml-else>
-           <dtml-call expr="REQUEST.set('protocol', 'wss')">
-            const WS_URL = "<dtml-var protocol>://<dtml-var host>";
-        </dtml-if>
-        
+
+         const WS_URL = "wss://<dtml-var "portal_url().split('://')[1].split('/')[0]">/ws";    
+
         // Elementos DOM
         const elements = {
             mainTitle: document.getElementById('main-title'),

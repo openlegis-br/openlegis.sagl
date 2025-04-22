@@ -22,7 +22,7 @@ for sessao in context.zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=int(contex
   cod_sessao_plen = sessao.cod_sessao_plen
   dic_sessao["cod_sessao_plen"] = sessao.cod_sessao_plen
   dic_sessao["nom_fase"] = 'Abertura'
-  dic_sessao["txt_exibicao"] = str(sessao.num_sessao_plen)+'ª ' + str(context.sapl_documentos.props_sagl.reuniao_sessao) + ' ' + tipo_sessao.nom_sessao + ' (' + context.pysc.data_converter_por_extenso_pysc(data=sessao.dat_inicio_sessao) + ' - ' + sessao.hr_inicio_sessao + 'hs)'
+  dic_sessao["txt_exibicao"] = '<h1><strong>Abertura da Sessão</strong></h1>'
   dic_sessao["cod_materia"] = ''
   dic_sessao["txt_autoria"] = ''
   dic_sessao["txt_turno"] = ''
@@ -35,8 +35,8 @@ for sessao in context.zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=int(contex
 dic_presenca = {}
 dic_presenca["tipo_item"] = 'Mensagem'
 dic_presenca["cod_sessao_plen"] = sessao.cod_sessao_plen
-dic_presenca["nom_fase"] = 'Presença'
-dic_presenca["txt_exibicao"] = 'Registro de Presença'
+dic_presenca["nom_fase"] = 'Abertura'
+dic_presenca["txt_exibicao"] = '<h1><strong>Registro de Presença</strong></h1>'
 dic_presenca["cod_materia"] = ''
 dic_presenca["txt_autoria"] = ''
 dic_presenca["txt_turno"] = ''
@@ -48,7 +48,7 @@ dic_correspondencias = {}
 dic_correspondencias["tipo_item"] = 'Mensagem'
 dic_correspondencias["cod_sessao_plen"] = sessao.cod_sessao_plen
 dic_correspondencias["nom_fase"] = 'Expediente'
-dic_correspondencias["txt_exibicao"] = '<h2><strong>Correspondências Recebidas</strong></h2>'
+dic_correspondencias["txt_exibicao"] = '<h1><strong>Leitura de Correspondências</strong></h1>'
 dic_correspondencias["cod_materia"] = ''
 dic_correspondencias["txt_autoria"] = ''
 dic_correspondencias["txt_turno"] = ''
@@ -68,7 +68,7 @@ if len(lst_indicacoes) > 0:
   dic_indicacoes["cod_sessao_plen"] = sessao.cod_sessao_plen
   dic_indicacoes["nom_fase"] = 'Expediente'
   ano = DateTime(datefmt='international').strftime('%Y')
-  dic_indicacoes["txt_exibicao"] = '<b>Indicações de números '+str(min(lst_indicacoes))+'/'+ano+ ' a '+str(max(lst_indicacoes))+'/'+ano + '</b><br />' + dic_sessao["txt_exibicao"]
+  dic_indicacoes["txt_exibicao"] = '<b>Indicações de números '+str(min(lst_indicacoes))+'/'+ano+ ' a '+str(max(lst_indicacoes))+'/'+ano
   dic_indicacoes["cod_materia"] = ''
   dic_indicacoes["txt_autoria"] = ''
   dic_indicacoes["txt_turno"] = ''
@@ -80,7 +80,7 @@ dic_requerimentos_p = {}
 dic_requerimentos_p["tipo_item"] = 'Mensagem'
 dic_requerimentos_p["cod_sessao_plen"] = sessao.cod_sessao_plen
 dic_requerimentos_p["nom_fase"] = 'Expediente'
-dic_requerimentos_p["txt_exibicao"] = '<h2><strong>Requerimentos de Pesar</strong></h2>'
+dic_requerimentos_p["txt_exibicao"] = '<h1><strong>Requerimentos de Pesar</strong></h1>'
 dic_requerimentos_p["cod_materia"] = ''
 dic_requerimentos_p["txt_autoria"] = ''
 dic_requerimentos_p["txt_turno"] = ''
@@ -93,7 +93,7 @@ dic_requerimentos_c = {}
 dic_requerimentos_c["tipo_item"] = 'Mensagem'
 dic_requerimentos_c["cod_sessao_plen"] = sessao.cod_sessao_plen
 dic_requerimentos_c["nom_fase"] = 'Expediente'
-dic_requerimentos_c["txt_exibicao"] = '<h2><strong>Requerimentos de Congratulações</strong></h2>'
+dic_requerimentos_c["txt_exibicao"] = '<h1><strong>Requerimentos de Congratulações</strong></h1>'
 dic_requerimentos_c["cod_materia"] = ''
 dic_requerimentos_c["txt_autoria"] = ''
 dic_requerimentos_c["txt_turno"] = ''
@@ -107,7 +107,7 @@ for requerimentos in context.zsql.expediente_materia_obter_zsql(cod_sessao_plen=
     dic_requerimentos["tipo_item"] = 'Matéria'
     dic_requerimentos["cod_sessao_plen"] = sessao.cod_sessao_plen
     dic_requerimentos["nom_fase"] = 'Expediente'
-    dic_requerimentos["txt_exibicao"] = materia.sgl_tipo_materia.upper()+' Nº '+str(materia.num_ident_basica)+"/"+str(context.pysc.ano_abrevia_pysc(ano=str(materia.ano_ident_basica)))+" - "+ str(materia.txt_ementa)
+    dic_requerimentos["txt_exibicao"] =  '<span class="fw-bold">' + materia.des_tipo_materia.upper()+' Nº '+str(materia.num_ident_basica)+"/"+str(materia.ano_ident_basica)+"</span><br/> "+ str(materia.txt_ementa)
     dic_requerimentos["cod_materia"] = materia.cod_materia
     dic_requerimentos["txt_autoria"] = ''
     autores = context.zsql.autoria_obter_zsql(cod_materia=materia.cod_materia)
@@ -128,7 +128,7 @@ for requerimentos in context.zsql.expediente_materia_obter_zsql(cod_sessao_plen=
 #  for materia in context.zsql.materia_obter_zsql(cod_materia=mocoes.cod_materia, des_tipo_materia='Moção', ind_excluido=0):
 #    dic_mocoes["tipo_item"] = 'Matéria'
 #    dic_mocoes["nom_fase"] = 'Expediente'
-#    dic_mocoes["txt_exibicao"] = materia.sgl_tipo_materia.upper()+' Nº '+str(materia.num_ident_basica)+"/"+str(context.pysc.ano_abrevia_pysc(ano=str(materia.ano_ident_basica)))+" - "+ materia.txt_ementa 
+#    dic_mocoes["txt_exibicao"] = materia.des_tipo_materia.upper()+' Nº '+str(materia.num_ident_basica)+"/"+str(context.pysc.ano_abrevia_pysc(ano=str(materia.ano_ident_basica)))+" - "+ materia.txt_ementa 
 #    dic_mocoes["cod_materia"] = materia.cod_materia
 #    dic_mocoes["txt_autoria"] = ''
 #    autores = context.zsql.autoria_obter_zsql(cod_materia=materia.cod_materia)
@@ -148,7 +148,7 @@ dic_peq_expediente = {}
 dic_peq_expediente["tipo_item"] = 'Mensagem'
 dic_peq_expediente["cod_sessao_plen"] = sessao.cod_sessao_plen
 dic_peq_expediente["nom_fase"] = 'Expediente'
-dic_peq_expediente["txt_exibicao"] = '<h2><strong>Pequeno Expediente</strong></h2>'
+dic_peq_expediente["txt_exibicao"] = '<h1><strong>Pequeno Expediente</strong></h1>'
 dic_peq_expediente["cod_materia"] = ''
 dic_peq_expediente["txt_autoria"] = ''
 dic_peq_expediente["txt_turno"] = ''
@@ -160,7 +160,7 @@ dic_orddia = {}
 dic_orddia["tipo_item"] = 'Mensagem'
 dic_orddia["cod_sessao_plen"] = cod_sessao_plen
 dic_orddia["nom_fase"] = 'Ordem do Dia'
-dic_orddia["txt_exibicao"] = '<b>Ordem do Dia' + '</b><br />' + dic_sessao["txt_exibicao"]
+dic_orddia["txt_exibicao"] = '<h1><strong>Ordem do Dia</strong></h1>'
 dic_orddia["cod_materia"] = ''
 dic_orddia["txt_autoria"] = ''
 dic_orddia["txt_turno"] = ''
@@ -180,7 +180,7 @@ for ordem_dia in context.zsql.ordem_dia_obter_zsql(cod_sessao_plen=int(context.R
     for quorum in context.zsql.quorum_votacao_obter_zsql(cod_quorum=ordem_dia.tip_quorum):
         dic_ordem_dia["txt_quorum"] = quorum.des_quorum
         quorum = quorum.des_quorum
-    dic_ordem_dia["txt_exibicao"] =  materia.sgl_tipo_materia.upper()+' Nº '+str(materia.num_ident_basica)+"/"+str(context.pysc.ano_abrevia_pysc(ano=str(materia.ano_ident_basica)))+" - "+ str(materia.txt_ementa)  + ' Turno: ' + str(turno) + ' | Quórum: ' +str(quorum)
+    dic_ordem_dia["txt_exibicao"] =  '<span class="fw-bold">' + materia.des_tipo_materia.upper()+' Nº '+str(materia.num_ident_basica)+"/"+str(materia.ano_ident_basica)+"</span><br/> "+ str(materia.txt_ementa)
     dic_ordem_dia["cod_materia"] = ordem_dia.cod_materia
     dic_ordem_dia["txt_autoria"] = ''
     autores = context.zsql.autoria_obter_zsql(cod_materia=ordem_dia.cod_materia)
@@ -199,7 +199,7 @@ dic_exp_pessoais = {}
 dic_exp_pessoais["tipo_item"] = 'Mensagem'
 dic_exp_pessoais["cod_sessao_plen"] = cod_sessao_plen
 dic_exp_pessoais["nom_fase"] = 'Explicações Pessoais'
-dic_exp_pessoais["txt_exibicao"] = '<h2><strong>Explicações Pessoais</strong></h2>'
+dic_exp_pessoais["txt_exibicao"] = '<h1><strong>Explicações Pessoais</strong></h1>'
 dic_exp_pessoais["cod_materia"] = ''
 dic_exp_pessoais["txt_autoria"] = ''
 dic_exp_pessoais["txt_turno"] = ''

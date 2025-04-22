@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel de Sessão Plenária</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css?family=Oswald:700,300" rel="stylesheet" type="text/css">
+    <style>
+        :root {
+            --tv-font-scale: 1.5;
+            --tv-padding: 2rem;
+            --primary-color: #0a58ca;
+            --success-color: #146c43;
+            --warning-color: #e0a800;
+            --danger-color: #bd2130;
+            --text-color: #212529;
+            --bg-color: #f8f9fa;
+        }
+        
+        body {
+	        font-family: 'Oswald', sans-serif;
+            font-size: calc(1rem * var(--tv-font-scale));
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            overflow-x: hidden;
+            height: 100vh;
+            margin: 0;
+            padding: var(--tv-padding);
+        }
+        
+        .tv-container {
+            display: grid;
+            grid-template-areas:
+                "header"
+                "current-item";
+            grid-template-rows: auto 1fr;
+            gap: 1.5rem;
+            height: 100%;
+            max-width: 3840px;
+            margin: 0 auto;
+        }
+        
+        .header-area {
+            grid-area: header;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .current-item-area {
+            grid-area: current-item;
+        }
+        
+        .card {
+            border: none;
+            border-radius: 1rem;
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            background-color: white;
+        }
+        
+        .card-header {
+            font-size: calc(1.25rem * var(--tv-font-scale));
+            padding: 1.5rem;
+            border-bottom: 3px solid rgba(0,0,0,0.1);
+        }
+        
+        .card-body {
+            padding: 2rem;
+            flex-grow: 1;
+            overflow-y: auto;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        /* Status Connection */
+        #status-conexao-icon {
+            transition: all 0.3s ease;
+            filter: drop-shadow(0 0 2px rgba(0,0,0,0.3));
+        }
+        
+        .connection-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .icon-success { color: #28a745 !important; }
+        .icon-warning { color: #ffc107 !important; }
+        .icon-danger { color: #dc3545 !important; }
+        .icon-neutral { color: #ffffff !important; }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .connecting {
+            animation: spin 1.5s linear infinite;
+        }
+        
+        /* Modo de espera */
+        .waiting-mode {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 0.8; }
+            50% { opacity: 1; }
+            100% { opacity: 0.8; }
+        }
+        
+        /* Destaque para o item atual */
+        .current-item-card {
+            border: 4px solid var(--success-color);
+            background-color: rgba(20, 108, 67, 0.05);
+            animation: highlight 2s infinite alternate;
+        }
+        
+        @keyframes highlight {
+            0% { box-shadow: 0 0 1rem rgba(20, 108, 67, 0.3); }
+            100% { box-shadow: 0 0 2rem rgba(20, 108, 67, 0.7); }
+        }
+        
+        .no-item-display {
+            text-align: center;
+            color: #6c757d;
+        }
+        
+        .no-item-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+        
+        /* Responsividade */
+        @media (max-width: 1920px) {
+            :root {
+                --tv-font-scale: 1.2;
+                --tv-padding: 1.5rem;
+            }
+        }
+        
+        @media (max-width: 1366px) {
+            :root {
+                --tv-font-scale: 1;
+                --tv-padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="tv-container">
+        <!-- Cabeçalho -->
+        <div class="header-area">
+            <div>
+                <h1 class="display-6 fw-bold" id="main-title" aria-live="polite"></h1>
+                <div id="sessao-info" aria-live="polite">
+                    <div id="sessao-detalhes" class="d-flex gap-3 mt-2"></div>
+                </div>
+            </div>
+            <div class="d-flex gap-3">
+                <div class="bg-dark text-white p-3 rounded-3 text-center" aria-label="Data e hora atual">
+                    <div class="fs-6" id="relogio-data"></div>
+                    <div class="fs-2 fw-bold" id="relogio-hora"></div>
+                </div>
+                <div class="bg-primary text-white p-3 rounded-3 connection-status">
+                    <i class="bi bi-arrow-repeat fs-6 connecting icon-neutral" id="status-conexao-icon"></i>
+                    <span class="fs-6" id="status-conexao-text">Conectando...</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Item em Exibição -->
+        <div class="current-item-area">
+            <div class="card current-item-card" id="current-item-card" aria-live="polite">
+                <div class="card-header bg-success text-white fs-1 text-center">
+                    <span id="item-titulo">Fase da Sessão</span>
+                </div>
+                <div class="card-body" id="item-conteudo">
+                    <div class="d-flex flex-column justify-content-center align-items-center h-100 waiting-mode" id="waiting-mode">
+                        <div class="spinner-border text-success" style="width: 3rem; height: 3rem;" role="status">
+                            <span class="visually-hidden">Carregando...</span>
+                        </div>
+                        <p class="mt-3 text-muted">Aguardando item para exibição...</p>
+                    </div>
+                </div>
+                <div class="card-footer bg-light">
+                    <div class="row">
+                        <div class="col">
+                            <strong>Última atualização:</strong> <span id="ultima-atualizacao">-</span>
+                        </div>
+                        <div class="col text-end">
+                            <strong>Duração:</strong> <span id="item-tempo" class="fw-bold font-monospace">00:00:00</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5 JS + Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Configurações
+        <dtml-call expr="REQUEST.set('host', HTTP_HOST.split(':')[0])">
+        <dtml-if expr="host == 'localhost' or host.startswith('192.168.')">
+           <dtml-call expr="REQUEST.set('protocol', 'ws')">
+           const WS_URL = "<dtml-var protocol>://<dtml-var host>:8765";
+        <dtml-else>
+           <dtml-call expr="REQUEST.set('protocol', 'wss')">
+            const WS_URL = "<dtml-var protocol>://<dtml-var host>";
+        </dtml-if>
+        
+        // Elementos DOM
+        const elements = {
+            mainTitle: document.getElementById('main-title'),
+            sessaoDetalhes: document.getElementById('sessao-detalhes'),
+            itemConteudo: document.getElementById('item-conteudo'),
+            itemTitulo: document.getElementById('item-titulo'),
+            ultimaAtualizacao: document.getElementById('ultima-atualizacao'),
+            itemTempo: document.getElementById('item-tempo'),
+            statusConexaoText: document.getElementById('status-conexao-text'),
+            statusConexaoIcon: document.getElementById('status-conexao-icon'),
+            relogioData: document.getElementById('relogio-data'),
+            relogioHora: document.getElementById('relogio-hora'),
+            currentItemCard: document.getElementById('current-item-card'),
+            waitingMode: document.getElementById('waiting-mode')
+        };
+        
+        // Variáveis de estado
+        const state = {
+            ws: null,
+            sessaoAtual: null,
+            itemAtual: null,
+            itemTimerInterval: null,
+            itemStartTime: null,
+            connectionActive: false,
+            isWaiting: true
+        };
+        
+        // ================== FUNÇÕES DO RELÓGIO ==================
+        function atualizarRelogio() {
+            const agora = new Date();
+            
+            // Formata a data
+            elements.relogioData.textContent = agora.toLocaleDateString('pt-BR', { 
+                weekday: 'long', 
+                day: '2-digit', 
+                month: 'long', 
+                year: 'numeric' 
+            });
+            
+            // Formata a hora
+            elements.relogioHora.textContent = agora.toLocaleTimeString('pt-BR', { 
+                hour: '2-digit', 
+                minute: '2-digit', 
+                second: '2-digit',
+                hour12: false 
+            });
+        }
+        
+        // ================== WEBSOCKET ==================
+        function conectarWebSocket() {
+            updateConnectionStatus('connecting', 'Conectando...');
+            
+            state.ws = new WebSocket(WS_URL);
+            
+            state.ws.onopen = () => {
+                updateConnectionStatus('connected', 'Conectado');
+                console.log("Conexão WebSocket estabelecida");
+                entrarModoEspera();
+            };
+            
+            state.ws.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                console.log("Dados recebidos:", data);
+                
+                elements.ultimaAtualizacao.textContent = new Date().toLocaleTimeString();
+                
+                switch(data.event) {
+                    case "connected":
+                        console.log("Conectado ao servidor");
+                        break;
+                        
+                    case "session_update":
+                        atualizarSessaoAtual(data.data);
+                        sairModoEspera();
+                        break;
+                        
+                    case "item_update":
+                        if (data.data.item.ind_exibicao === 1) {
+                            atualizarSessaoAtual(data.data.sessao);
+                            atualizarItemAtual(data.data.item);
+                            sairModoEspera();
+                        } else if (data.data.item.ind_exibicao === 0 && data.data.item.dat_fim) {
+                            limparItemAtual();
+                        }
+                        break;
+                        
+                    case "current_item":
+                        if (data.data && data.data.item.ind_exibicao === 1) {
+                            atualizarSessaoAtual(data.data.sessao);
+                            atualizarItemAtual(data.data.item);
+                            sairModoEspera();
+                        } else {
+                            limparItemAtual();
+                        }
+                        break;
+                        
+                    case "item_removed":
+                        if (data.data.sessao) {
+                            atualizarSessaoAtual(data.data.sessao);
+                        }
+                        limparItemAtual();
+                        break;
+                        
+                    case "item_finalized":
+                        if (data.data.sessao) {
+                            atualizarSessaoAtual(data.data.sessao);
+                        }
+                        mostrarItemFinalizado(data.data.item);
+                        break;
+                        
+                    case "session_ended":
+                        encerrarSessaoAtual(data.data.sessao);
+                        break;
+                        
+                    case "no_active_session":
+                        entrarModoEspera("Nenhuma sessão ativa no momento");
+                        break;
+                }
+            };
+            
+            state.ws.onclose = () => {
+                updateConnectionStatus('disconnected', 'Desconectado');
+                entrarModoEspera("Tentando reconectar...");
+                setTimeout(conectarWebSocket, 5000);
+            };
+            
+            state.ws.onerror = (error) => {
+                console.error("Erro WebSocket:", error);
+                updateConnectionStatus('error', 'Erro na conexão');
+                entrarModoEspera("Erro de conexão");
+            };
+        }
+        
+        function updateConnectionStatus(status, text) {
+            const icon = elements.statusConexaoIcon;
+            const textElement = elements.statusConexaoText;
+            
+            // Remove todas as classes de status
+            icon.classList.remove(
+                'bi-arrow-repeat', 
+                'bi-check-circle-fill', 
+                'bi-x-circle-fill', 
+                'bi-exclamation-triangle-fill',
+                'connecting',
+                'icon-success',
+                'icon-warning',
+                'icon-danger',
+                'icon-neutral'
+            );
+            
+            switch(status) {
+                case 'connecting':
+                    icon.classList.add('bi-arrow-repeat', 'connecting', 'icon-neutral');
+                    break;
+                case 'connected':
+                    icon.classList.add('bi-check-circle-fill', 'icon-success');
+                    break;
+                case 'disconnected':
+                    icon.classList.add('bi-x-circle-fill', 'icon-danger');
+                    break;
+                case 'error':
+                    icon.classList.add('bi-exclamation-triangle-fill', 'icon-warning');
+                    break;
+                case 'reconnecting':
+                    icon.classList.add('bi-arrow-repeat', 'connecting', 'icon-warning');
+                    break;
+            }
+            
+            textElement.textContent = text;
+        }
+        
+        // ================== ATUALIZAÇÃO DE SESSÃO ==================
+        function atualizarSessaoAtual(sessaoInfo) {
+            state.sessaoAtual = sessaoInfo;
+            
+            // Atualiza informações fixas da sessão
+            document.title = `${sessaoInfo.num_sessao_plen}ª Sessão ${sessaoInfo.tipo_sessao.nome}`;
+            elements.mainTitle.textContent = `${sessaoInfo.num_sessao_plen}ª Sessão ${sessaoInfo.tipo_sessao.nome} da ${sessaoInfo.sessao_legislativa.numero}ª Sessão Legislativa`;
+            
+            // Informações detalhadas da sessão
+            elements.sessaoDetalhes.innerHTML = `
+                <span class="badge bg-secondary fs-6">${formatarData(sessaoInfo.datas.inicio_sessao)}</span>
+                ${sessaoInfo.legislatura ? `
+                <span class="badge bg-info text-dark fs-6">
+                    ${sessaoInfo.legislatura.numero}ª Legislatura
+                </span>
+                <span class="badge ${sessaoInfo.status === 'ABERTA' ? 'bg-success' : 'bg-warning'} fs-6">
+                    ${sessaoInfo.status || 'EM ANDAMENTO'}
+                </span>
+                ` : ''}
+            `;
+        }
+
+        function encerrarSessaoAtual(sessaoInfo) {
+            if (state.sessaoAtual?.cod_sessao_plen === sessaoInfo.cod_sessao_plen) {
+                document.title = `[ENCERRADA] Sessão ${sessaoInfo.num_sessao_plen}`;
+                
+                // Atualiza o status para "ENCERRADA"
+                const badges = elements.sessaoDetalhes.querySelectorAll('.badge');
+                if (badges.length > 1) {
+                    badges[1].className = 'badge bg-danger fs-6';
+                    badges[1].textContent = 'ENCERRADA';
+                }
+                
+                entrarModoEspera("Sessão encerrada");
+            }
+        }
+
+        // ================== ATUALIZAÇÃO DE ITEM ==================
+        function atualizarItemAtual(itemInfo) {
+            state.itemAtual = itemInfo;
+            
+            // Timer
+            if (state.itemTimerInterval) {
+                clearInterval(state.itemTimerInterval);
+            }
+            
+            state.itemStartTime = new Date();
+            atualizarItemTimer();
+            state.itemTimerInterval = setInterval(atualizarItemTimer, 1000);
+            
+            // Conteúdo
+            elements.itemTitulo.textContent = itemInfo.fase || "Fase da Sessão";
+            elements.itemConteudo.innerHTML = `
+                <p class="lead fs-1" aria-label="Texto do item">${itemInfo.texto_exibicao}</p>
+                ${itemInfo.autoria ? `<p class="h2 mb-3" aria-label="Autoria"><b>Autoria</b>: <em>${itemInfo.autoria}</em></p>` : ''}
+                <div class="d-flex flex-wrap gap-2 mt-4">
+                    ${itemInfo.cod_materia ? `<span class="badge bg-info text-dark fs-6">Matéria: ${itemInfo.cod_materia}</span>` : ''}
+                    ${itemInfo.turno ? `<span class="badge bg-warning text-dark fs-6">Turno: ${itemInfo.turno}</span>` : ''}
+                    ${itemInfo.extrapauta ? `<span class="badge bg-dark fs-6">Extra Pauta</span>` : ''}
+                </div>
+            `;
+        }
+        
+        function mostrarItemFinalizado(itemInfo) {
+            const fimItem = itemInfo.dat_fim ? new Date(itemInfo.dat_fim).toLocaleTimeString() : '';
+            
+            elements.itemTitulo.textContent = "Item Finalizado";
+            elements.itemConteudo.innerHTML = `
+                <div class="alert alert-success d-flex align-items-center">
+                    <i class="bi bi-check-circle-fill me-3 fs-1"></i>
+                    <div>
+                        <h4 class="alert-heading">Item ${itemInfo.cod_item} finalizado</h4>
+                        <p class="mb-0">${itemInfo.texto_exibicao}</p>
+                        ${fimItem ? `<hr><p class="mb-0"><small>Finalizado às ${fimItem}</small></p>` : ''}
+                    </div>
+                </div>
+            `;
+            
+            // Para o timer mas mantém o último tempo
+            if (state.itemTimerInterval) {
+                clearInterval(state.itemTimerInterval);
+                state.itemTimerInterval = null;
+            }
+        }
+        
+        function limparItemAtual() {
+            elements.itemTitulo.textContent = "Fase da Sessão";
+            elements.itemConteudo.innerHTML = `
+                <div class="no-item-display">
+                    <i class="bi bi-x-circle no-item-icon"></i>
+                    <p class="fs-4">Nenhum item em exibição no momento</p>
+                </div>
+            `;
+            elements.itemTempo.textContent = '00:00:00';
+            
+            // Limpa o estado do item atual
+            state.itemAtual = null;
+            if (state.itemTimerInterval) {
+                clearInterval(state.itemTimerInterval);
+                state.itemTimerInterval = null;
+            }
+            state.itemStartTime = null;
+        }
+        
+        function atualizarItemTimer() {
+            if (!state.itemStartTime) return;
+            
+            const now = new Date();
+            const diff = new Date(now - state.itemStartTime);
+            const hours = diff.getUTCHours().toString().padStart(2, '0');
+            const minutes = diff.getUTCMinutes().toString().padStart(2, '0');
+            const seconds = diff.getUTCSeconds().toString().padStart(2, '0');
+            
+            elements.itemTempo.textContent = `${hours}:${minutes}:${seconds}`;
+        }
+        
+        // ================== MODOS DE ESPERA ==================
+        function entrarModoEspera(mensagem = "Aguardando dados da sessão...") {
+            if (state.isWaiting) return;
+            
+            state.isWaiting = true;
+            elements.currentItemCard.classList.add('waiting-mode');
+            elements.waitingMode.innerHTML = `
+                <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
+                    <span class="visually-hidden">Carregando...</span>
+                </div>
+                <p class="mt-3 text-muted">${mensagem}</p>
+            `;
+            elements.itemTitulo.textContent = "Aguardando dados...";
+            limparItemAtual();
+        }
+        
+        function sairModoEspera() {
+            if (!state.isWaiting) return;
+            
+            state.isWaiting = false;
+            elements.currentItemCard.classList.remove('waiting-mode');
+        }
+        
+        // ================== UTILITÁRIOS ==================
+        function formatarData(dataString) {
+            if (!dataString) return '';
+            const data = new Date(dataString);
+            return data.toLocaleDateString('pt-BR');
+        }
+        
+        // ================== INICIALIZAÇÃO ==================
+        document.addEventListener('DOMContentLoaded', () => {
+            atualizarRelogio();
+            setInterval(atualizarRelogio, 1000);
+            conectarWebSocket();
+            entrarModoEspera();
+        });
+    </script>
+</body>
+</html>

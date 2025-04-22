@@ -103,3 +103,44 @@ def initialize(context):
                                             SAGLOAIServer.manage_addSAGLOAIServer, ),
                             icon='oai_service.png')
 
+
+# __init__.py
+from zope.component import provideUtility
+from openlegis.sagl.interfaces import IWebSocketServerUtility, IWebSocketServerService
+from openlegis.sagl.browser.websocket_server import WebSocketServerService
+import asyncio
+import logging
+from App.config import getConfiguration
+
+logger = logging.getLogger(__name__)
+
+async def startup(app):
+    """Hook de inicialização assíncrona para Zope 5+"""
+    service = WebSocketServerService()
+    provideUtility(service, IWebSocketServerUtility)
+    provideUtility(service, IWebSocketServerService)
+    
+    # Inicia o servidor WebSocket como uma task em background
+    asyncio.create_task(service._start_server_task())
+    logger.info("Serviço WebSocket registrado e iniciado")
+
+def initialize(context):
+    """Inicialização tradicional"""
+    config = getConfiguration()
+    
+    # Para Zope 5 com asyncio
+    if hasattr(config, 'asyncio'):
+        config.asyncio['on_startup'].append(startup)
+    else:
+        # Fallback para versões mais antigas
+        service = WebSocketServerService()
+        provideUtility(service, IWebSocketServerUtility)
+        provideUtility(service, IWebSocketServerService)
+        
+        # Inicia em thread separada
+        import threading
+        thread = threading.Thread(
+            target=lambda: asyncio.run(service._start_server_task()),
+            daemon=True
+        )
+        thread.start()

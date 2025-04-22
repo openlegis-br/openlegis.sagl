@@ -13,9 +13,12 @@
 		<dtml-in expr="zsql.assinatura_documento_obter_zsql(codigo=cod_documento, tipo_doc='documento',cod_usuario=None)">
 		  <dtml-call "REQUEST.set('cod_assinatura_doc', cod_assinatura_doc)">
 		</dtml-in>
-		    <dtml-if expr="AUTHENTICATED_USER.has_role(['Authenticated'])">
-		       <a href="#" class="btn btn-primary" data-bs-target="#iFrameModal" data-title="<dtml-var des_tipo_documento> nº <dtml-var num_documento>/<dtml-var ano_documento>" data-src="<dtml-var portal_url>/consultas/documento_administrativo/pasta_digital/?cod_documento=<dtml-var cod_documento>&action=pasta&modal=1"><i class="far fa-fw fa-folder-open"></i> Pasta Digital</a>
-		   </dtml-if>
+                    <dtml-if expr="AUTHENTICATED_USER.has_role(['Authenticated'])">
+                       <a href="#" class="btn btn-primary" data-bs-target="#iFrameModal" data-title="<dtml-var des_tipo_documento> nº <dtml-var num_documento>/<dtml-var ano_documento>" data-src="<dtml-var portal_url>/consultas/documento_administrativo/pasta_digital/?cod_documento=<dtml-var cod_documento>&action=pasta&modal=1"><i class="far fa-fw fa-folder-open"></i> Pasta Digital</a>
+                    <dtml-else>
+                       <a href="#" class="btn btn-primary" data-bs-target="#iFrameModal" data-title="<dtml-var des_tipo_documento> nº <dtml-var num_documento>/<dtml-var ano_documento>" data-src="<dtml-var portal_url>/consultas/documento_administrativo/pasta_digital/pastadigital?cod_documento=<dtml-var cod_documento>&action=download"><i class="far fa-fw fa-folder-open"></i> Processo Integral</a>
+                    </dtml-if>
+
 		<dtml-call expr="REQUEST.set('id_odt', str(cod_documento)+'_texto_integral.odt')">
 		<dtml-if expr="_.hasattr(sapl_documentos.administrativo,id_odt)">
 		   <dtml-let documento_odt="_.getattr(sapl_documentos.administrativo,id_odt).absolute_url">

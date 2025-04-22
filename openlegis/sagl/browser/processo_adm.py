@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-import os, shutil
+import os
+import shutil
 import asyncio
 import aiofiles
 from io import BytesIO
@@ -11,7 +12,7 @@ import uuid
 import pymupdf
 import logging
 
-# Configurar logging
+# Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
@@ -21,149 +22,228 @@ class ProcessoAdm(grok.View):
     grok.name('processo_adm_integral')
     install_home = os.environ.get('INSTALL_HOME')
 
+    def _get_document_by_path(self, path):
+        """Get document using unrestrictedTraverse with proper path handling"""
+        if not path or not isinstance(path, str):
+            logger.error(f"Invalid path: {path}")
+            return None
+            
+        try:
+            # Remove leading slash if present
+            clean_path = path[1:] if path.startswith('/') else path
+            return self.context.unrestrictedTraverse(clean_path)
+        except Exception as e:
+            logger.error(f"Error accessing document at {path}: {e}")
+            return None
+
+    async def _ensure_directory(self, dirpath, pagepath):
+        """Ensure directory structure exists"""
+        try:
+            if os.path.exists(dirpath):
+                shutil.rmtree(dirpath)
+            os.makedirs(pagepath, exist_ok=True)
+        except OSError as e:
+            logger.error(f"Error creating directory structure: {e}")
+            raise
+
     async def download_files(self, cod_documento):       
-        dirpath = os.path.join(self.install_home, 'var/tmp/processo_adm_integral_' + str(cod_documento))
+        dirpath = os.path.join(self.install_home, f'var/tmp/processo_adm_integral_{cod_documento}')
         pagepath = os.path.join(dirpath, 'pages')
         
-        if os.path.exists(dirpath) and os.path.isdir(dirpath):
-           shutil.rmtree(dirpath) 
-           os.makedirs(dirpath)
-           os.makedirs(pagepath)
-        elif not os.path.exists(dirpath):
-           os.makedirs(dirpath)
-           os.makedirs(pagepath)
-      
-        lst_arquivos = []
-               
-        for documento in self.context.zsql.documento_administrativo_obter_zsql(cod_documento=cod_documento):
-            processo_integral = documento.sgl_tipo_documento+'-'+str(documento.num_documento)+'-'+str(documento.ano_documento)+'.pdf'
-            id_processo = documento.sgl_tipo_documento + ' ' + str(documento.num_documento) + '/' +str(documento.ano_documento)
-            id_capa = str(uuid.uuid4().hex)
-            id_arquivo = "%s.pdf" % str(id_capa)
-            self.context.modelo_proposicao.capa_processo_adm(cod_documento=cod_documento, nom_arquivo=str(id_capa), action='gerar')
-            if hasattr(self.context.temp_folder, id_arquivo):
-               dic = {}
-               dic["data"] = DateTime(documento.dat_documento, datefmt='international').strftime('%Y-%m-%d 00:00:01')
-               dic['path'] = self.context.temp_folder
-               dic['file'] = id_arquivo
-               dic['title'] = 'Capa do Processo'
-               lst_arquivos.append(dic)
-
-            nom_arquivo = str(cod_documento) + '_texto_integral.pdf'
-            if hasattr(self.context.sapl_documentos.administrativo, nom_arquivo):
-               dic = {}
-               dic["data"] = DateTime(documento.dat_documento, datefmt='international').strftime('%Y-%m-%d 00:00:02')
-               dic['path'] = self.context.sapl_documentos.administrativo
-               dic['file'] = nom_arquivo
-               dic['title'] = documento.des_tipo_documento + ' ' + str(documento.num_documento) + '/' +str(documento.ano_documento)
-               lst_arquivos.append(dic)
-
-            for docadm in self.context.zsql.documento_acessorio_administrativo_obter_zsql(cod_documento=documento.cod_documento, ind_excluido=0):
-                if hasattr(self.context.sapl_documentos.administrativo, str(docadm.cod_documento_acessorio) + '.pdf'):
-                   dic = {}
-                   dic["data"] = DateTime(docadm.dat_documento, datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
-                   dic['path'] = self.context.sapl_documentos.administrativo
-                   dic['file'] = str(docadm.cod_documento_acessorio) + '.pdf'
-                   dic['title'] = docadm.nom_documento
-                   lst_arquivos.append(dic)
-
-            for tram in self.context.zsql.tramitacao_administrativo_obter_zsql(cod_documento=documento.cod_documento, rd_ordem='1', ind_excluido=0):
-                if hasattr(self.context.sapl_documentos.administrativo.tramitacao, str(tram.cod_tramitacao) + '_tram.pdf'):
-                   dic = {}
-                   dic["data"] = DateTime(tram.dat_tramitacao, datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
-                   dic['path'] = self.context.sapl_documentos.administrativo.tramitacao
-                   dic['file'] = str(tram.cod_tramitacao) + '_tram.pdf'
-                   dic['title'] = 'Tramitação (' + tram.des_status + ')'
-                   lst_arquivos.append(dic)
-
-            for mat in self.context.zsql.documento_administrativo_materia_obter_zsql(cod_documento=documento.cod_documento, ind_excluido=0):
-                materia = self.context.zsql.materia_obter_zsql(cod_materia=mat.cod_materia,ind_excluido=0)[0]
-                if hasattr(self.context.sapl_documentos.materia, str(mat.cod_materia) + '_redacao_final.pdf'):
-                   dic = {}
-                   dic["data"] = DateTime(datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
-                   dic['path'] = self.context.sapl_documentos.materia
-                   dic['file'] = str(mat.cod_materia) + '_redacao_final.pdf'
-                   dic['title'] = str(materia.sgl_tipo_materia) + ' ' + str(materia.num_ident_basica) + '/' + str(materia.ano_ident_basica) +  ' (mat. vinculada)'
-                   lst_arquivos.append(dic)
-                elif hasattr(self.context.sapl_documentos.materia, str(mat.cod_materia) + '_texto_integral.pdf'):
-                   dic = {}
-                   dic["data"] = DateTime(datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
-                   dic['path'] = self.context.sapl_documentos.materia
-                   dic['file'] = str(mat.cod_materia) + '_texto_integral.pdf'
-                   dic['title'] = str(materia.sgl_tipo_materia) + ' ' + str(materia.num_ident_basica) + '/' + str(materia.ano_ident_basica) +  ' (mat. vinculada)'
-                   lst_arquivos.append(dic)
-
-        lst_arquivos.sort(key=lambda dic: dic['data'])
-
-        lst_arquivos = [(i + 1, j) for i, j in enumerate(lst_arquivos)]
-       
-        merger = pymupdf.open()
-
-        for i, dic in lst_arquivos:
-            downloaded_pdf = str(i).rjust(4, '0') + '.pdf'
-            arq = getattr(dic['path'], dic['file'], None)  # Obter o arquivo, None se não existir
-            if arq is None:
-                logger.error(f"Arquivo não encontrado: {dic['path']}/{dic['file']}")
-                continue  # Pular para o próximo arquivo
-
-            try:
-                arquivo_doc = BytesIO(bytes(arq.data))
-                with pymupdf.open(stream=arquivo_doc) as texto_anexo:
-                    metadata = {"title": dic["title"], "modDate": dic["data"]}
-                    texto_anexo.set_metadata(metadata)
-                    texto_anexo.bake()
-                    merger.insert_pdf(texto_anexo)
-                    arq2 = texto_anexo.tobytes()
-                    async with aiofiles.open(os.path.join(dirpath) + '/' + downloaded_pdf, 'wb') as f:
-                        await f.write(arq2)
-                logger.info(f"Arquivo adicionado com sucesso: {dic['title']} ({dic['path']}/{dic['file']})")
-            except Exception as e:
-                logger.error(f"Erro ao processar o arquivo {dic['title']} ({dic['path']}/{dic['file']}): {e}")
-
         try:
-            merged_pdf = merger.tobytes()
-            logger.info(f"PDFs combinados para o documento {cod_documento}. Tamanho: {len(merged_pdf)} bytes.") # Adicionado log
-            existing_pdf = pymupdf.open(stream=merged_pdf)
-            numPages = existing_pdf.page_count
-            for page_index, i in enumerate(range(len(existing_pdf))):
-                w = existing_pdf[page_index].rect.width
-                h = existing_pdf[page_index].rect.height
-                margin = 5
-                left = 10 - margin
-                bottom = h - 60 - margin
-                black = pymupdf.pdfcolor["black"]
-                text = "Fls. %s/%s" % (i+1, numPages)
-                p1 = pymupdf.Point(w - 70 - margin, margin + 20) # numero de pagina
-                shape = existing_pdf[page_index].new_shape()
-                shape.draw_circle(p1,1)
-                shape.insert_text(p1, id_processo+'\n'+text, fontname = "helv", fontsize = 8)
-                shape.commit()
-            metadata = {"title": id_processo, "modDate": dic["data"]}
-            existing_pdf.set_metadata(metadata)
-            data = existing_pdf.tobytes(deflate=True, garbage=3, use_objstms=1)
-            async with aiofiles.open(os.path.join(dirpath) + '/' + processo_integral, 'wb') as f:
-                await f.write(data)
-            logger.info(f"PDF final do processo {cod_documento} salvo.") # Adicionado log
-
-            with pymupdf.open(stream=data) as doc:
-                tasks = []
-                for i, page in enumerate(doc):
-                    page_id = 'pg_' + str(i+1).rjust(4, '0') + '.pdf'
-                    file_name = os.path.join(os.path.join(pagepath), page_id)
-
-                    async def process_page(doc, i, file_name):
-                        with pymupdf.open() as doc_tmp:
-                            doc_tmp.insert_pdf(doc, from_page=i, to_page=i, rotate=-1, show_progress=False)
-                            metadata = {"title": page_id}
-                            doc_tmp.set_metadata(metadata)
-                            doc_tmp.save(file_name, deflate=True, garbage=3, use_objstms=1)
-                        logging.debug(f"Página {file_name} extraída.")
-
-                    tasks.append(process_page(doc, i, file_name))
-                await asyncio.gather(*tasks)
-                logging.info("Processamento de páginas concluído.")
+            await self._ensure_directory(dirpath, pagepath)
         except Exception as e:
-            logger.error(f"Erro ao finalizar a geração do PDF integral para o documento {cod_documento}: {e}")
+            logger.error(f"Failed to create directories: {e}")
+            return
+
+        lst_arquivos = []
+        
+        try:
+            documentos = self.context.zsql.documento_administrativo_obter_zsql(cod_documento=cod_documento)
+            if not documentos:
+                logger.error(f"No document found for cod_documento: {cod_documento}")
+                return
+
+            documento = documentos[0]
+            processo_integral = f"{documento.sgl_tipo_documento}-{documento.num_documento}-{documento.ano_documento}.pdf"
+            id_processo = f"{documento.sgl_tipo_documento} {documento.num_documento}/{documento.ano_documento}"
+            
+            # Process cover
+            id_capa = uuid.uuid4().hex
+            id_arquivo = f"{id_capa}.pdf"
+            self.context.modelo_proposicao.capa_processo_adm(
+                cod_documento=cod_documento,
+                nom_arquivo=id_capa,
+                action='gerar'
+            )
+            
+            temp_file_path = f"temp_folder/{id_arquivo}"
+            temp_file = self._get_document_by_path(temp_file_path)
+            if temp_file:
+                lst_arquivos.append({
+                    "data": DateTime(documento.dat_documento, datefmt='international').strftime('%Y-%m-%d 00:00:01'),
+                    'path': temp_file_path,
+                    'file': id_arquivo,
+                    'title': 'Capa do Processo'
+                })
+
+            # Process main document
+            admin_file_path = f"sapl_documentos/administrativo/{cod_documento}_texto_integral.pdf"
+            admin_file = self._get_document_by_path(admin_file_path)
+            if admin_file:
+                lst_arquivos.append({
+                    "data": DateTime(documento.dat_documento, datefmt='international').strftime('%Y-%m-%d 00:00:02'),
+                    'path': admin_file_path,
+                    'file': f"{cod_documento}_texto_integral.pdf",
+                    'title': f"{documento.des_tipo_documento} {documento.num_documento}/{documento.ano_documento}"
+                })
+
+            # Process accessory documents
+            for docadm in self.context.zsql.documento_acessorio_administrativo_obter_zsql(
+                cod_documento=documento.cod_documento, 
+                ind_excluido=0
+            ):
+                docadm_path = f"sapl_documentos/administrativo/{docadm.cod_documento_acessorio}.pdf"
+                docadm_file = self._get_document_by_path(docadm_path)
+                if docadm_file:
+                    lst_arquivos.append({
+                        "data": DateTime(docadm.dat_documento, datefmt='international').strftime('%Y-%m-%d %H:%M:%S'),
+                        'path': docadm_path,
+                        'file': f"{docadm.cod_documento_acessorio}.pdf",
+                        'title': docadm.nom_documento
+                    })
+
+            # Process tramitation documents
+            for tram in self.context.zsql.tramitacao_administrativo_obter_zsql(
+                cod_documento=documento.cod_documento,
+                rd_ordem='1',
+                ind_excluido=0
+            ):
+                tram_path = f"sapl_documentos/administrativo/tramitacao/{tram.cod_tramitacao}_tram.pdf"
+                tram_file = self._get_document_by_path(tram_path)
+                if tram_file:
+                    lst_arquivos.append({
+                        "data": DateTime(tram.dat_tramitacao, datefmt='international').strftime('%Y-%m-%d %H:%M:%S'),
+                        'path': tram_path,
+                        'file': f"{tram.cod_tramitacao}_tram.pdf",
+                        'title': f"Tramitação ({tram.des_status})"
+                    })
+
+            # Process linked materials
+            for mat in self.context.zsql.documento_administrativo_materia_obter_zsql(
+                cod_documento=documento.cod_documento,
+                ind_excluido=0
+            ):
+                materia = self.context.zsql.materia_obter_zsql(cod_materia=mat.cod_materia, ind_excluido=0)[0]
+                
+                # Try redacao_final first
+                materia_rf_path = f"sapl_documentos/materia/{mat.cod_materia}_redacao_final.pdf"
+                materia_rf_file = self._get_document_by_path(materia_rf_path)
+                if materia_rf_file:
+                    lst_arquivos.append({
+                        "data": DateTime(datefmt='international').strftime('%Y-%m-%d %H:%M:%S'),
+                        'path': materia_rf_path,
+                        'file': f"{mat.cod_materia}_redacao_final.pdf",
+                        'title': f"{materia.sgl_tipo_materia} {materia.num_ident_basica}/{materia.ano_ident_basica} (mat. vinculada)"
+                    })
+                else:
+                    # Fall back to texto_integral
+                    materia_ti_path = f"sapl_documentos/materia/{mat.cod_materia}_texto_integral.pdf"
+                    materia_ti_file = self._get_document_by_path(materia_ti_path)
+                    if materia_ti_file:
+                        lst_arquivos.append({
+                            "data": DateTime(datefmt='international').strftime('%Y-%m-%d %H:%M:%S'),
+                            'path': materia_ti_path,
+                            'file': f"{mat.cod_materia}_texto_integral.pdf",
+                            'title': f"{materia.sgl_tipo_materia} {materia.num_ident_basica}/{materia.ano_ident_basica} (mat. vinculada)"
+                        })
+
+            # Sort files by date
+            lst_arquivos.sort(key=lambda dic: dic['data'])
+            lst_arquivos = [(i + 1, j) for i, j in enumerate(lst_arquivos)]
+            
+            # Merge PDFs
+            merger = pymupdf.open()
+            for i, dic in lst_arquivos:
+                downloaded_pdf = f"{i:04d}.pdf"
+                file_obj = self._get_document_by_path(dic['path'])
+                if file_obj is None:
+                    logger.error(f"File not found: {dic['path']}")
+                    continue
+
+                try:
+                    arquivo_doc = BytesIO(bytes(file_obj.data))
+                    with pymupdf.open(stream=arquivo_doc) as texto_anexo:
+                        metadata = {"title": dic["title"], "modDate": dic["data"]}
+                        texto_anexo.set_metadata(metadata)
+                        texto_anexo.bake()
+                        merger.insert_pdf(texto_anexo)
+                        async with aiofiles.open(os.path.join(dirpath, downloaded_pdf), 'wb') as f:
+                            await f.write(texto_anexo.tobytes())
+                    logger.info(f"File added successfully: {dic['title']}")
+                except Exception as e:
+                    logger.error(f"Error processing file {dic['title']}: {e}")
+                    continue
+
+            # Finalize merged PDF
+            try:
+                with pymupdf.open(stream=merger.tobytes()) as existing_pdf:
+                    numPages = existing_pdf.page_count
+                    
+                    for page_index in range(len(existing_pdf)):
+                        page = existing_pdf[page_index]
+                        w = page.rect.width
+                        h = page.rect.height
+                        margin = 5
+                        text = f"Fls. {page_index+1}/{numPages}"
+                        p1 = pymupdf.Point(w - 70 - margin, margin + 20)
+                        
+                        shape = page.new_shape()
+                        shape.draw_circle(p1, 1)
+                        shape.insert_text(p1, f"{id_processo}\n{text}", fontname="helv", fontsize=8)
+                        shape.commit()
+                    
+                    metadata = {"title": id_processo, "modDate": lst_arquivos[-1][1]["data"] if lst_arquivos else ""}
+                    existing_pdf.set_metadata(metadata)
+                    
+                    async with aiofiles.open(os.path.join(dirpath, processo_integral), 'wb') as f:
+                        await f.write(existing_pdf.tobytes(deflate=True, garbage=3, use_objstms=1))
+                
+                logger.info(f"Final PDF saved: {processo_integral}")
+
+                # Extract individual pages
+                async with aiofiles.open(os.path.join(dirpath, processo_integral), 'rb') as f:
+                    content = await f.read()
+                    with pymupdf.open(stream=content) as doc:
+                        tasks = []
+                        
+                        for i in range(len(doc)):
+                            page_id = f"pg_{i+1:04d}.pdf"
+                            file_name = os.path.join(pagepath, page_id)
+                            tasks.append(self._save_single_page(doc, i, file_name, page_id))
+                        
+                        await asyncio.gather(*tasks)
+                        logger.info("Page extraction completed.")
+
+            except Exception as e:
+                logger.error(f"Error finalizing PDF: {e}")
+                raise
+
+        except Exception as e:
+            logger.error(f"Error in document processing: {e}")
+            raise
+
+    async def _save_single_page(self, doc, page_num, file_name, page_id):
+        """Save a single page as separate PDF"""
+        try:
+            with pymupdf.open() as doc_tmp:
+                doc_tmp.insert_pdf(doc, from_page=page_num, to_page=page_num, rotate=-1, show_progress=False)
+                doc_tmp.set_metadata({"title": page_id})
+                doc_tmp.save(file_name, deflate=True, garbage=3, use_objstms=1)
+            logger.debug(f"Page {file_name} extracted.")
+        except Exception as e:
+            logger.error(f"Error saving page {page_num}: {e}")
+            raise
 
     def render(self, cod_documento, action):
         portal_url = self.context.portal_url.portal_url()

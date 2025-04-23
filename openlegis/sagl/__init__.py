@@ -1,146 +1,137 @@
 ###############################################################################
-#
-# Copyright (c) 2005 by Interlegis
-#
+# Cabeçalho de Licença
+###############################################################################
+# Copyright (c) 2025 by OpenLegis
 # GNU General Public Licence (GPL)
-#
-# This program is free software; you can redistribute it and/or modify it under
-# the terms of the GNU General Public License as published by the Free Software
-# Foundation; either version 2 of the License, or (at your option) any later
-# version.
-# This program is distributed in the hope that it will be useful, but WITHOUT
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-# FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
-# details.
-# You should have received a copy of the GNU General Public License along with
-# this program; if not, write to the Free Software Foundation, Inc., 59 Temple
-# Place, Suite 330, Boston, MA  02111-1307  USA
-#
+# Este programa é software livre sob os termos da GPL v2 ou superior
 ###############################################################################
 
-from openlegis.sagl import Portal
-from openlegis.sagl.lexml import SAGLOAIServer
-
-from openlegis.sagl.config import PROJECTNAME
-
+# Importações padrão
 from AccessControl import ModuleSecurityInfo
-from Products.PythonScripts.Utility import allow_module
-
 from Products.CMFCore.utils import ToolInit
-
-from openlegis.sagl import SAGLTool
-
-def initialize(context):
-    # inicializa a instalacao e estrutura do SAGL-OpenLegis
-
-    ModuleSecurityInfo('socket.socket').declarePublic('fileno')
-    ModuleSecurityInfo('tempfile.NamedTemporaryFile').declarePublic('flush')
-
-    allow_module('zlib')
-    allow_module('sys')
-    allow_module('os')
-    allow_module('restpki_client')
-    allow_module('Acquisition')
-    allow_module('ExtensionClass')
-    allow_module('App.FindHomes')
-    allow_module('trml2pdf')
-    allow_module('html2rml')
-    allow_module('time')
-    allow_module('_strptime')
-    allow_module('csv')
-    allow_module('pdb')
-    allow_module('json')
-    allow_module('tempfile.NamedTemporaryFile')
-    allow_module('collections')
-    allow_module('base64')
-    allow_module('socket')
-    allow_module('fcntl')
-    allow_module('struct')
-    allow_module('array')
-    allow_module('datetime')
-    allow_module('datetime.datetime.timetuple')
-    allow_module('pypdf')
-    allow_module('pymupdf')
-    allow_module('io')
-    allow_module('io.BytesIO')
-    allow_module('PIL')
-    allow_module('uuid')
-    allow_module('binascii')
-    allow_module('re')
-    allow_module('collections')
-    allow_module('xml')
-    allow_module('xml.sax')
-    allow_module('xml.sax.saxutils')
-    allow_module('email.message')
-    allow_module('email.encoders')
-    allow_module('email.utils')
-    allow_module('email.mime.application')
-    allow_module('email.mime.multipart')
-    allow_module('email.mime.text')
-    allow_module('AccessControl.PermissionRole')
-    allow_module('collections.Counter')
-    allow_module('reportlab')
-    allow_module('reportlab.lib')
-    allow_module('reportlab.lib.utils')
-    allow_module('operator')
-    allow_module('locale')
-    allow_module('zlib')
-    allow_module('zlib.crc32')
-
-    tools = (SAGLTool.SAGLTool,)
-    ToolInit('SAGL Tool',
-                tools = tools,
-                icon = 'tool.gif'
-                ).initialize( context )
-
-    context.registerClass( Portal.SAGL,
-                           constructors=( Portal.manage_addSAGLForm,
-                                          Portal.manage_addSAGL,),
-                           icon='openlegisIcon.gif')
-
-    context.registerClass( lexml.SAGLOAIServer.SAGLOAIServer,
-                           constructors = ( SAGLOAIServer.manage_addSAGLOAIServerForm,
-                                            SAGLOAIServer.manage_addSAGLOAIServer, ),
-                            icon='oai_service.png')
-
-
-# __init__.py
+from Products.PythonScripts.Utility import allow_module
 from zope.component import provideUtility
-from openlegis.sagl.interfaces import IWebSocketServerUtility, IWebSocketServerService
+
+# Importações do projeto
+from openlegis.sagl import Portal, SAGLTool
+from openlegis.sagl.config import PROJECTNAME
+from openlegis.sagl.lexml import SAGLOAIServer
+from openlegis.sagl.interfaces import (
+    IWebSocketServerUtility, 
+    IWebSocketServerService
+)
 from openlegis.sagl.browser.websocket_server import WebSocketServerService
-import asyncio
+
+# Configuração de logging
 import logging
-from App.config import getConfiguration
+import asyncio
+import threading
 
 logger = logging.getLogger(__name__)
 
-async def startup(app):
-    """Hook de inicialização assíncrona para Zope 5+"""
+###############################################################################
+# CONFIGURAÇÃO DE SEGURANÇA
+###############################################################################
+
+def configure_module_security():
+    """Configura permissões para módulos Python usados em código restrito"""
+    
+    # Permite métodos específicos de socket
+    ModuleSecurityInfo('socket.socket').declarePublic('fileno')
+    
+    # Permite uso de arquivos temporários
+    ModuleSecurityInfo('tempfile.NamedTemporaryFile').declarePublic('flush')
+    
+    # Lista de módulos permitidos
+    allowed_modules = [
+        'zlib', 'sys', 'os', 'restpki_client', 'Acquisition',
+        'ExtensionClass', 'App.FindHomes', 'trml2pdf', 'html2rml',
+        'time', '_strptime', 'csv', 'pdb', 'json', 'collections',
+        'base64', 'socket', 'fcntl', 'struct', 'array', 'datetime',
+        'datetime.datetime.timetuple', 'pypdf', 'pymupdf', 'io',
+        'io.BytesIO', 'PIL', 'uuid', 'binascii', 're', 'xml',
+        'xml.sax', 'xml.sax.saxutils', 'email.message', 'email.encoders',
+        'email.utils', 'email.mime.application', 'email.mime.multipart',
+        'email.mime.text', 'AccessControl.PermissionRole',
+        'collections.Counter', 'reportlab', 'reportlab.lib',
+        'reportlab.lib.utils', 'operator', 'locale', 'zlib.crc32'
+    ]
+    
+    for module in allowed_modules:
+        allow_module(module)
+
+###############################################################################
+# INICIALIZAÇÃO DO WEBSOCKET
+###############################################################################
+
+def initialize_websocket_service():
+    """Configura e inicia o serviço WebSocket em background"""
+    
     service = WebSocketServerService()
+    
+    # Registra o serviço como utilitário Zope
     provideUtility(service, IWebSocketServerUtility)
     provideUtility(service, IWebSocketServerService)
     
-    # Inicia o servidor WebSocket como uma task em background
-    asyncio.create_task(service._start_server_task())
+    # Inicia em thread separada
+    thread = threading.Thread(
+        target=lambda: asyncio.run(service._start_server_task()),
+        daemon=True,
+        name="WebSocketServerThread"
+    )
+    thread.start()
+    
     logger.info("Serviço WebSocket registrado e iniciado")
 
-def initialize(context):
-    """Inicialização tradicional"""
-    config = getConfiguration()
+###############################################################################
+# REGISTRO DE COMPONENTES PRINCIPAIS
+###############################################################################
+
+def register_main_components(context):
+    """Registra os principais componentes do sistema"""
     
-    # Para Zope 5 com asyncio
-    if hasattr(config, 'asyncio'):
-        config.asyncio['on_startup'].append(startup)
-    else:
-        # Fallback para versões mais antigas
-        service = WebSocketServerService()
-        provideUtility(service, IWebSocketServerUtility)
-        provideUtility(service, IWebSocketServerService)
-        
-        # Inicia em thread separada
-        import threading
-        thread = threading.Thread(
-            target=lambda: asyncio.run(service._start_server_task()),
-            daemon=True
-        )
-        thread.start()
+    # Ferramentas do SAGL
+    tools = (SAGLTool.SAGLTool,)
+    
+    # Inicialização da ferramenta
+    ToolInit(
+        'SAGL Tool',
+        tools=tools,
+        icon='tool.gif'
+    ).initialize(context)
+
+    # Portal SAGL
+    context.registerClass(
+        Portal.SAGL,
+        constructors=(
+            Portal.manage_addSAGLForm,
+            Portal.manage_addSAGL,
+        ),
+        icon='openlegisIcon.gif'
+    )
+
+    # Servidor OAI LexML
+    context.registerClass(
+        SAGLOAIServer.SAGLOAIServer,
+        constructors=(
+            SAGLOAIServer.manage_addSAGLOAIServerForm,
+            SAGLOAIServer.manage_addSAGLOAIServer,
+        ),
+        icon='oai_service.png'
+    )
+
+###############################################################################
+# INICIALIZAÇÃO PRINCIPAL
+###############################################################################
+
+def initialize(context):
+    """Função principal de inicialização do pacote"""
+    
+    # 1. Configura segurança
+    configure_module_security()
+    
+    # 2. Registra componentes principais
+    register_main_components(context)
+    
+    # 3. Inicia serviço WebSocket
+    initialize_websocket_service()

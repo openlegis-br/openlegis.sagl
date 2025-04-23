@@ -1,4 +1,3 @@
-SET FOREIGN_KEY_CHECKS=0;
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
 SET time_zone = "+00:00";
@@ -255,7 +254,8 @@ INSERT INTO `assinatura_storage` (`id`, `tip_documento`, `pdf_location`, `storag
 (19, 'tramitacao_adm', 'sapl_documentos/administrativo/tramitacao/', 'sapl_documentos.administrativo.tramitacao', '_tram.pdf', '_tram_signed.pdf'),
 (20, 'anexo_sessao', 'sapl_documentos/anexo_sessao/', 'sapl_documentos.anexo_sessao', '.pdf', '_signed.pdf'),
 (21, 'anexo_norma', 'sapl_documentos/norma_juridica/', 'sapl_documentos.norma_juridica', '.pdf', '_signed.pdf'),
-(22, 'anexo_peticao', 'sapl_documentos/peticao/', 'sapl_documentos.peticao', '.pdf', '_signed.pdf');
+(22, 'anexo_peticao', 'sapl_documentos/peticao/', 'sapl_documentos.peticao', '.pdf', '_signed.pdf'),
+(23, 'resumo_sessao', 'sapl_documentos/pauta_sessao/', 'sapl_documentos.pauta_sessao', '_roteiro_sessao.pdf', '_roteiro_sessao_signed.pdf');
 
 CREATE TABLE IF NOT EXISTS `assunto_materia` (
   `cod_assunto` int NOT NULL AUTO_INCREMENT,
@@ -556,12 +556,21 @@ CREATE TABLE IF NOT EXISTS `despacho_inicial` (
 
 CREATE TABLE IF NOT EXISTS `destinatario_oficio` (
   `cod_destinatario` int NOT NULL AUTO_INCREMENT,
-  `cod_documento` int NOT NULL,
-  `cod_instituicao` int NOT NULL,
-  `ind_excluido` int NOT NULL,
+  `cod_materia` int DEFAULT NULL,
+  `cod_proposicao` int DEFAULT NULL,
+  `cod_documento` int DEFAULT NULL,
+  `cod_instituicao` int DEFAULT NULL,
+  `nom_destinatario` varchar(300) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `end_email` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `dat_envio` datetime DEFAULT NULL,
+  `cod_usuario` int DEFAULT NULL,
+  `ind_excluido` int NOT NULL DEFAULT '0',
   PRIMARY KEY (`cod_destinatario`),
-  KEY `cod_documento` (`cod_documento`),
-  KEY `cod_instituicao` (`cod_instituicao`)
+  KEY `idx_cod_materia` (`cod_materia`),
+  KEY `idx_cod_proposicao` (`cod_proposicao`),
+  KEY `idx_cod_documento` (`cod_documento`) USING BTREE,
+  KEY `idx_cod_instituicao` (`cod_instituicao`) USING BTREE,
+  KEY `cod_usuario` (`cod_usuario`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `documento_acessorio` (
@@ -834,7 +843,7 @@ CREATE TABLE IF NOT EXISTS `gabinete_eleitor` (
 CREATE TABLE IF NOT EXISTS `instituicao` (
   `cod_instituicao` int NOT NULL AUTO_INCREMENT,
   `tip_instituicao` int NOT NULL,
-  `cod_categoria` int NOT NULL,
+  `cod_categoria` int DEFAULT NULL,
   `nom_instituicao` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `end_instituicao` tinytext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `nom_bairro` varchar(80) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
@@ -855,6 +864,8 @@ CREATE TABLE IF NOT EXISTS `instituicao` (
   `timestamp_alteracao` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `txt_user_alteracao` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `txt_ip_alteracao` varchar(15) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `txt_atividade` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `txt_origem` varchar(5) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`cod_instituicao`),
   KEY `tip_instituicao` (`tip_instituicao`),
   KEY `cod_categoria` (`cod_categoria`),
@@ -4330,7 +4341,7 @@ INSERT INTO `localidade` (`cod_localidade`, `nom_localidade`, `nom_localidade_pe
 (3507605, 'Braganca Paulista', 'BRAGANCA PAULISTA', 'M', 'SP', 'SD', 0),
 (3507704, 'Braúna', 'BRAUNA', 'M', 'SP', 'SD', 0),
 (3507753, 'Brejo Alegre', 'BREJO ALEGRE', 'M', 'SP', 'SD', 0),
-(3507803, 'Brodowski', 'BRODOWSKI', 'M', 'SP', 'SD', 0),
+(3507803, 'Brodósqui', 'BRODOWSKI', 'M', 'SP', 'SD', 0),
 (3507902, 'Brotas', 'BROTAS', 'M', 'SP', 'SD', 0),
 (3508009, 'Buri', 'BURI', 'M', 'SP', 'SD', 0),
 (3508108, 'Buritama', 'BURITAMA', 'M', 'SP', 'SD', 0),
@@ -7002,6 +7013,10 @@ CREATE TABLE IF NOT EXISTS `peticao` (
   `num_norma` int DEFAULT NULL,
   `ano_norma` int DEFAULT NULL,
   `dat_norma` date DEFAULT NULL,
+  `dat_publicacao` date DEFAULT NULL,
+  `des_veiculo_publicacao` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `num_pag_inicio_publ` int DEFAULT NULL,
+  `num_pag_fim_publ` int DEFAULT NULL,
   `dat_envio` datetime DEFAULT NULL,
   `dat_recebimento` datetime DEFAULT NULL,
   `num_protocolo` int DEFAULT NULL,
@@ -7251,12 +7266,11 @@ CREATE TABLE IF NOT EXISTS `sessao_legislativa` (
 
 CREATE TABLE IF NOT EXISTS `sessao_plenaria` (
   `cod_sessao_plen` int NOT NULL AUTO_INCREMENT,
-  `cod_andamento_sessao` int DEFAULT NULL,
   `tip_sessao` int NOT NULL,
+  `num_tip_sessao` int DEFAULT NULL,
   `cod_periodo_sessao` int DEFAULT NULL,
   `cod_sessao_leg` int NOT NULL,
   `num_legislatura` int NOT NULL,
-  `tip_expediente` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `dat_inicio_sessao` date NOT NULL,
   `dia_sessao` varchar(15) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `hr_inicio_sessao` varchar(5) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
@@ -7266,14 +7280,7 @@ CREATE TABLE IF NOT EXISTS `sessao_plenaria` (
   `url_fotos` varchar(150) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `url_audio` varchar(150) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `url_video` varchar(150) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `sepl_termo_encerramento` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-  `sepl_consideracoes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-  `sepl_local_sessao` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `numero_ata` int DEFAULT NULL,
-  `ano_ata` int DEFAULT NULL,
-  `votacao_requerimento_ata` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-  `votacao_mocao_ata` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-  `votacao_ordem_dia_ata` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `ind_excluido` int NOT NULL DEFAULT '0',
   PRIMARY KEY (`cod_sessao_plen`),
   KEY `cod_sessao_leg` (`cod_sessao_leg`),
@@ -7549,17 +7556,6 @@ CREATE TABLE IF NOT EXISTS `tipo_vinculo_norma` (
   KEY `tip_situacao` (`tip_situacao`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-INSERT INTO `tipo_vinculo_norma` (`cod_tip_vinculo`, `tipo_vinculo`, `des_vinculo`, `des_vinculo_passivo`, `tip_situacao`, `ind_excluido`) VALUES
-(1, 'A', 'Altera', 'Alterada por', 12, 0),
-(2, 'C', 'Norma correlata', 'Norma correlata', 1, 0),
-(3, 'G', 'Regulamenta', 'Regulamentada por', 1, 0),
-(4, 'H', 'Suspende a execução', 'Execução suspensa por ADIN', 5, 0),
-(5, 'P', 'Revoga parcialmente', 'Revogada parcialmente por', 3, 0),
-(6, 'R', 'Revoga', 'Revogada por', 2, 0),
-(7, 'T', 'Revoga por consolidação', 'Revogação por consolidação', 4, 0),
-(8, 'B', 'Suspende parcialmente', 'Parcialmente suspensa por ADIN', 5, 0),
-(9, 'D', 'Declaração de Constitucionalidade', 'Execução mantida por ADIN', 13, 0);
-
 CREATE TABLE IF NOT EXISTS `tipo_votacao` (
   `tip_votacao` int NOT NULL AUTO_INCREMENT,
   `des_tipo_votacao` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
@@ -7772,8 +7768,8 @@ ALTER TABLE `documento_acessorio` ADD FULLTEXT KEY `idx_ementa` (`txt_ementa`);
 
 ALTER TABLE `documento_acessorio_administrativo` ADD FULLTEXT KEY `idx_assunto` (`txt_assunto`);
 
-ALTER TABLE `documento_administrativo` ADD FULLTEXT KEY `idx_busca_documento` (`txt_assunto`,`txt_observacao`);
 ALTER TABLE `documento_administrativo` ADD FULLTEXT KEY `txt_interessado` (`txt_interessado`);
+ALTER TABLE `documento_administrativo` ADD FULLTEXT KEY `idx_busca_documento` (`txt_assunto`,`txt_observacao`);
 
 ALTER TABLE `documento_comissao` ADD FULLTEXT KEY `txt_descricao` (`txt_descricao`);
 
@@ -7912,7 +7908,10 @@ ALTER TABLE `despacho_inicial`
 
 ALTER TABLE `destinatario_oficio`
   ADD CONSTRAINT `destinatario_oficio_ibfk_1` FOREIGN KEY (`cod_documento`) REFERENCES `documento_administrativo` (`cod_documento`) ON DELETE RESTRICT ON UPDATE RESTRICT,
-  ADD CONSTRAINT `destinatario_oficio_ibfk_2` FOREIGN KEY (`cod_instituicao`) REFERENCES `instituicao` (`cod_instituicao`) ON DELETE RESTRICT ON UPDATE RESTRICT;
+  ADD CONSTRAINT `destinatario_oficio_ibfk_2` FOREIGN KEY (`cod_instituicao`) REFERENCES `instituicao` (`cod_instituicao`) ON DELETE RESTRICT ON UPDATE RESTRICT,
+  ADD CONSTRAINT `destinatario_oficio_ibfk_3` FOREIGN KEY (`cod_materia`) REFERENCES `materia_legislativa` (`cod_materia`) ON DELETE RESTRICT ON UPDATE RESTRICT,
+  ADD CONSTRAINT `destinatario_oficio_ibfk_4` FOREIGN KEY (`cod_proposicao`) REFERENCES `proposicao` (`cod_proposicao`) ON DELETE RESTRICT ON UPDATE RESTRICT,
+  ADD CONSTRAINT `destinatario_oficio_ibfk_5` FOREIGN KEY (`cod_usuario`) REFERENCES `usuario` (`cod_usuario`) ON DELETE RESTRICT ON UPDATE RESTRICT;
 
 ALTER TABLE `documento_acessorio`
   ADD CONSTRAINT `documento_acessorio_ibfk_1` FOREIGN KEY (`cod_materia`) REFERENCES `materia_legislativa` (`cod_materia`) ON DELETE RESTRICT,
@@ -8029,8 +8028,8 @@ ALTER TABLE `norma_juridica`
   ADD CONSTRAINT `norma_juridica_ibfk_3` FOREIGN KEY (`tip_norma`) REFERENCES `tipo_norma_juridica` (`tip_norma`) ON DELETE RESTRICT ON UPDATE RESTRICT;
 
 ALTER TABLE `numeracao`
-  ADD CONSTRAINT `numeracao_ibfk_1` FOREIGN KEY (`cod_materia`) REFERENCES `materia_legislativa` (`cod_materia`) ON DELETE CASCADE,
-  ADD CONSTRAINT `numeracao_ibfk_2` FOREIGN KEY (`tip_materia`) REFERENCES `tipo_materia_legislativa` (`tip_materia`) ON DELETE CASCADE;
+  ADD CONSTRAINT `numeracao_ibfk_1` FOREIGN KEY (`cod_materia`) REFERENCES `materia_legislativa` (`cod_materia`) ON DELETE RESTRICT,
+  ADD CONSTRAINT `numeracao_ibfk_2` FOREIGN KEY (`tip_materia`) REFERENCES `tipo_materia_legislativa` (`tip_materia`) ON DELETE RESTRICT;
 
 ALTER TABLE `oradores`
   ADD CONSTRAINT `oradores_ibfk_1` FOREIGN KEY (`cod_sessao_plen`) REFERENCES `sessao_plenaria` (`cod_sessao_plen`) ON DELETE CASCADE,
@@ -8193,7 +8192,6 @@ ALTER TABLE `vinculo_norma_juridica`
 ALTER TABLE `visita`
   ADD CONSTRAINT `visita_ibfk_2` FOREIGN KEY (`cod_pessoa`) REFERENCES `pessoa` (`cod_pessoa`) ON DELETE CASCADE,
   ADD CONSTRAINT `visita_ibfk_3` FOREIGN KEY (`cod_funcionario`) REFERENCES `funcionario` (`cod_funcionario`) ON DELETE RESTRICT ON UPDATE RESTRICT;
-SET FOREIGN_KEY_CHECKS=1;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

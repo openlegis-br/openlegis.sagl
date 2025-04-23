@@ -1,16 +1,18 @@
 from typing import List, Optional
 
-from sqlalchemy import Column, DECIMAL, Date, DateTime, ForeignKey, ForeignKeyConstraint, Index, Integer, String, TIMESTAMP, Text, Time, text
-from sqlalchemy.dialects.mysql import CHAR, ENUM, INTEGER, LONGTEXT, MEDIUMTEXT, TEXT, TINYINT, TINYTEXT, VARCHAR
+from sqlalchemy import Column, DECIMAL, Date, DateTime, ForeignKeyConstraint, Index, Integer, TIMESTAMP, Time, text
+from sqlalchemy.dialects.mysql import CHAR, INTEGER, LONGTEXT, MEDIUMTEXT, TEXT, TINYINT, TINYTEXT, VARCHAR
 from sqlalchemy.orm import Mapped, declarative_base, mapped_column, relationship
 from sqlalchemy.orm.base import Mapped
 
 Base = declarative_base()
 
+
 class AcompMateria(Base):
     __tablename__ = 'acomp_materia'
     __table_args__ = (
-        Index('idx_email_materia', 'cod_materia', 'end_email', unique=True),
+        Index('cod_materia', 'cod_materia'),
+        Index('fk_{CCECA63D-5992-437B-BCD3-D7C98DA3E926}', 'cod_materia', 'end_email', unique=True)
     )
 
     cod_cadastro = mapped_column(Integer, primary_key=True)
@@ -161,8 +163,6 @@ class AssinaturaStorage(Base):
     pdf_file = mapped_column(VARCHAR(50), nullable=False)
     pdf_signed = mapped_column(VARCHAR(50), nullable=False)
 
-    assinatura_documento: Mapped[List['AssinaturaDocumento']] = relationship('AssinaturaDocumento', uselist=True, back_populates='assinatura_storage')
-
 
 class AssuntoMateria(Base):
     __tablename__ = 'assunto_materia'
@@ -223,7 +223,7 @@ class CargoMesa(Base):
     des_cargo = mapped_column(VARCHAR(50))
 
     composicao_mesa: Mapped[List['ComposicaoMesa']] = relationship('ComposicaoMesa', uselist=True, back_populates='cargo_mesa')
-    registro_mesa_parlamentar: Mapped[List['RegistroMesaParlamentar']] = relationship('RegistroMesaParlamentar', uselist=True, back_populates='cargo_mesa')
+    mesa_sessao_plenaria: Mapped[List['MesaSessaoPlenaria']] = relationship('MesaSessaoPlenaria', uselist=True, back_populates='cargo_mesa')
 
 
 class CategoriaInstituicao(Base):
@@ -295,20 +295,19 @@ class LexmlRegistroPublicador(Base):
 class Localidade(Base):
     __tablename__ = 'localidade'
     __table_args__ = (
-        Index('idx_nom_localidade', 'nom_localidade'),
-        Index('idx_nom_localidade_pesq', 'nom_localidade_pesq'),
-        Index('idx_sgl_uf', 'sgl_uf'),
-        Index('idx_tip_localidade', 'tip_localidade')
+        Index('nom_localidade', 'nom_localidade'),
+        Index('nom_localidade_pesq', 'nom_localidade_pesq'),
+        Index('sgl_uf', 'sgl_uf'),
+        Index('tip_localidade', 'tip_localidade')
     )
 
-    cod_localidade = mapped_column(Integer, primary_key=True)  # Removed server_default
+    cod_localidade = mapped_column(Integer, primary_key=True, server_default=text("'0'"))
     ind_excluido = mapped_column(Integer, nullable=False, server_default=text("'0'"))
-    nom_localidade = Column(String(100))  # Added length restriction (example)
+    nom_localidade = mapped_column(VARCHAR(50))
     nom_localidade_pesq = mapped_column(VARCHAR(50))
     tip_localidade = mapped_column(CHAR(1))
     sgl_uf = mapped_column(CHAR(2))
     sgl_regiao = mapped_column(CHAR(2))
-    #cod_uf = mapped_column(Integer, nullable=False) # Keep as Integer or CHAR(2) based on requirements
 
     instituicao: Mapped[List['Instituicao']] = relationship('Instituicao', uselist=True, back_populates='localidade')
     parlamentar: Mapped[List['Parlamentar']] = relationship('Parlamentar', uselist=True, back_populates='localidade')
@@ -367,6 +366,7 @@ class Partido(Base):
     composicao_executivo: Mapped[List['ComposicaoExecutivo']] = relationship('ComposicaoExecutivo', uselist=True, back_populates='partido')
     autor: Mapped[List['Autor']] = relationship('Autor', uselist=True, back_populates='partido')
     filiacao: Mapped[List['Filiacao']] = relationship('Filiacao', uselist=True, back_populates='partido')
+    liderancas_partidarias: Mapped[List['LiderancasPartidarias']] = relationship('LiderancasPartidarias', uselist=True, back_populates='partido')
 
 
 class PeriodoCompComissao(Base):
@@ -442,7 +442,6 @@ class QuorumVotacao(Base):
     materia_legislativa: Mapped[List['MateriaLegislativa']] = relationship('MateriaLegislativa', uselist=True, back_populates='quorum_votacao')
     expediente_materia: Mapped[List['ExpedienteMateria']] = relationship('ExpedienteMateria', uselist=True, back_populates='quorum_votacao')
     ordem_dia: Mapped[List['OrdemDia']] = relationship('OrdemDia', uselist=True, back_populates='quorum_votacao')
-    registro_itens_diversos: Mapped[List['RegistroItensDiversos']] = relationship('RegistroItensDiversos', uselist=True, back_populates='quorum_votacao')
 
 
 class RegimeTramitacao(Base):
@@ -519,16 +518,6 @@ class TipoAutor(Base):
     autor: Mapped[List['Autor']] = relationship('Autor', uselist=True, back_populates='tipo_autor')
 
 
-class TipoChamada(Base):
-    __tablename__ = 'tipo_chamada'
-
-    id = mapped_column(Integer, primary_key=True)
-    tip_chamada = mapped_column(VARCHAR(100), nullable=False)
-    ind_excluido = mapped_column(Integer, nullable=False, server_default=text("'0'"))
-
-    registro_presenca: Mapped[List['RegistroPresenca']] = relationship('RegistroPresenca', uselist=True, back_populates='tipo_chamada')
-
-
 class TipoComissao(Base):
     __tablename__ = 'tipo_comissao'
     __table_args__ = (
@@ -557,19 +546,6 @@ class TipoDependente(Base):
     des_tipo_dependente = mapped_column(VARCHAR(50))
 
     dependente: Mapped[List['Dependente']] = relationship('Dependente', uselist=True, back_populates='tipo_dependente')
-
-
-class TipoDiscurso(Base):
-    __tablename__ = 'tipo_discurso'
-
-    id = mapped_column(Integer, primary_key=True)
-    txt_nome = mapped_column(String(50, 'utf8mb4_unicode_ci'), nullable=False)
-    tempo_discurso = mapped_column(Time, nullable=False)
-    ind_aparte = mapped_column(Integer, nullable=False, server_default=text("'1'"))
-    ind_excluido = mapped_column(Integer, nullable=False, server_default=text("'0'"))
-    tempo_aparte = mapped_column(Time)
-
-    registro_discurso: Mapped[List['RegistroDiscurso']] = relationship('RegistroDiscurso', uselist=True, back_populates='tipo_discurso')
 
 
 class TipoDocumento(Base):
@@ -631,20 +607,6 @@ class TipoExpediente(Base):
     expediente_sessao_plenaria: Mapped[List['ExpedienteSessaoPlenaria']] = relationship('ExpedienteSessaoPlenaria', uselist=True, back_populates='tipo_expediente')
 
 
-class TipoFaseSessao(Base):
-    __tablename__ = 'tipo_fase_sessao'
-
-    id = mapped_column(Integer, primary_key=True)
-    nom_fase = mapped_column(String(50, 'utf8mb4_unicode_ci'), nullable=False)
-    num_ordem = mapped_column(Integer, nullable=False, server_default=text("'1'"))
-    ind_ativo = mapped_column(Integer, nullable=False, server_default=text("'1'"))
-    duracao = mapped_column(Time)
-
-    tipo_subfase_sessao: Mapped[List['TipoSubfaseSessao']] = relationship('TipoSubfaseSessao', uselist=True, back_populates='tipo_fase_sessao')
-    registro_fase: Mapped[List['RegistroFase']] = relationship('RegistroFase', uselist=True, back_populates='tipo_fase_sessao')
-    registro_itens_diversos: Mapped[List['RegistroItensDiversos']] = relationship('RegistroItensDiversos', uselist=True, back_populates='tipo_fase_sessao')
-
-
 class TipoFimRelatoria(Base):
     __tablename__ = 'tipo_fim_relatoria'
 
@@ -660,7 +622,7 @@ class TipoInstituicao(Base):
 
     tip_instituicao = mapped_column(Integer, primary_key=True)
     ind_excluido = mapped_column(Integer, nullable=False, server_default=text("'0'"))
-    nom_tipo_instituicao = mapped_column(String)
+    nom_tipo_instituicao = mapped_column(VARCHAR(80))
 
     instituicao: Mapped[List['Instituicao']] = relationship('Instituicao', uselist=True, back_populates='tipo_instituicao')
 
@@ -700,17 +662,6 @@ class TipoNormaJuridica(Base):
     norma_juridica: Mapped[List['NormaJuridica']] = relationship('NormaJuridica', uselist=True, back_populates='tipo_norma_juridica')
 
 
-class TipoOrador(Base):
-    __tablename__ = 'tipo_orador'
-
-    id = mapped_column(Integer, primary_key=True)
-    txt_nome = mapped_column(String(50, 'utf8mb4_unicode_ci'), nullable=False)
-    txt_descricao = mapped_column(Text(collation='utf8mb4_unicode_ci'), nullable=False)
-    ind_excluido = mapped_column(Integer, nullable=False, server_default=text("'0'"))
-
-    registro_discurso: Mapped[List['RegistroDiscurso']] = relationship('RegistroDiscurso', uselist=True, back_populates='tipo_orador')
-
-
 class TipoPeticionamento(Base):
     __tablename__ = 'tipo_peticionamento'
     __table_args__ = (
@@ -730,16 +681,6 @@ class TipoPeticionamento(Base):
     peticao: Mapped[List['Peticao']] = relationship('Peticao', uselist=True, back_populates='tipo_peticionamento')
 
 
-class TipoPresenca(Base):
-    __tablename__ = 'tipo_presenca'
-
-    id = mapped_column(Integer, primary_key=True)
-    tip_presenca = mapped_column(VARCHAR(100), nullable=False)
-    ind_excluido = mapped_column(Integer, nullable=False, server_default=text("'0'"))
-
-    registro_presenca_parlamentar: Mapped[List['RegistroPresencaParlamentar']] = relationship('RegistroPresencaParlamentar', uselist=True, back_populates='tipo_presenca')
-
-
 class TipoProposicao(Base):
     __tablename__ = 'tipo_proposicao'
     __table_args__ = (
@@ -752,7 +693,6 @@ class TipoProposicao(Base):
     des_tipo_proposicao = mapped_column(VARCHAR(50))
     ind_mat_ou_doc = mapped_column(CHAR(1))
     nom_modelo = mapped_column(VARCHAR(50))
-    txt_enunciado = mapped_column(String(350, 'utf8mb4_unicode_ci'))
 
     assunto_proposicao: Mapped[List['AssuntoProposicao']] = relationship('AssuntoProposicao', uselist=True, back_populates='tipo_proposicao')
     proposicao: Mapped[List['Proposicao']] = relationship('Proposicao', uselist=True, back_populates='tipo_proposicao')
@@ -764,11 +704,9 @@ class TipoResultadoVotacao(Base):
         Index('nom_resultado', 'nom_resultado'),
     )
 
-    tip_resultado_votacao = mapped_column(Integer, primary_key=True)
-    ind_excluido = mapped_column(Integer, nullable=False, server_default=text("'0'"))
+    tip_resultado_votacao = mapped_column(INTEGER, primary_key=True)
+    ind_excluido = mapped_column(INTEGER, nullable=False)
     nom_resultado = mapped_column(VARCHAR(100))
-
-    registro_votacao: Mapped[List['RegistroVotacao']] = relationship('RegistroVotacao', uselist=True, back_populates='tipo_resultado_votacao')
 
 
 class TipoSessaoPlenaria(Base):
@@ -845,17 +783,6 @@ class TipoVotacao(Base):
 
     expediente_materia: Mapped[List['ExpedienteMateria']] = relationship('ExpedienteMateria', uselist=True, back_populates='tipo_votacao')
     ordem_dia: Mapped[List['OrdemDia']] = relationship('OrdemDia', uselist=True, back_populates='tipo_votacao')
-    registro_itens_diversos: Mapped[List['RegistroItensDiversos']] = relationship('RegistroItensDiversos', uselist=True, back_populates='tipo_votacao')
-
-
-class TipoVoto(Base):
-    __tablename__ = 'tipo_voto'
-
-    id = mapped_column(Integer, primary_key=True)
-    tip_voto = mapped_column(String(30, 'utf8mb4_unicode_ci'), nullable=False)
-    ind_excluido = mapped_column(Integer, nullable=False, server_default=text("'0'"))
-
-    registro_votacao_parlamentar: Mapped[List['RegistroVotacaoParlamentar']] = relationship('RegistroVotacaoParlamentar', uselist=True, back_populates='tipo_voto')
 
 
 class TurnoDiscussao(Base):
@@ -1058,7 +985,6 @@ class DocumentoAdministrativo(Base):
 
     tipo_documento_administrativo: Mapped['TipoDocumentoAdministrativo'] = relationship('TipoDocumentoAdministrativo', back_populates='documento_administrativo')
     cientificacao_documento: Mapped[List['CientificacaoDocumento']] = relationship('CientificacaoDocumento', uselist=True, back_populates='documento_administrativo')
-    destinatario_oficio: Mapped[List['DestinatarioOficio']] = relationship('DestinatarioOficio', uselist=True, back_populates='documento_administrativo')
     documento_acessorio_administrativo: Mapped[List['DocumentoAcessorioAdministrativo']] = relationship('DocumentoAcessorioAdministrativo', uselist=True, back_populates='documento_administrativo')
     documento_administrativo_materia: Mapped[List['DocumentoAdministrativoMateria']] = relationship('DocumentoAdministrativoMateria', uselist=True, back_populates='documento_administrativo')
     documento_administrativo_vinculado: Mapped[List['DocumentoAdministrativoVinculado']] = relationship('DocumentoAdministrativoVinculado', uselist=True, foreign_keys='[DocumentoAdministrativoVinculado.cod_documento_vinculado]', back_populates='documento_administrativo')
@@ -1066,6 +992,7 @@ class DocumentoAdministrativo(Base):
     peticao: Mapped[List['Peticao']] = relationship('Peticao', uselist=True, foreign_keys='[Peticao.cod_documento]', back_populates='documento_administrativo')
     peticao_: Mapped[List['Peticao']] = relationship('Peticao', uselist=True, foreign_keys='[Peticao.cod_documento_vinculado]', back_populates='documento_administrativo_')
     tramitacao_administrativo: Mapped[List['TramitacaoAdministrativo']] = relationship('TramitacaoAdministrativo', uselist=True, back_populates='documento_administrativo')
+    destinatario_oficio: Mapped[List['DestinatarioOficio']] = relationship('DestinatarioOficio', uselist=True, back_populates='documento_administrativo')
     materia_apresentada_sessao: Mapped[List['MateriaApresentadaSessao']] = relationship('MateriaApresentadaSessao', uselist=True, back_populates='documento_administrativo')
 
 
@@ -1079,21 +1006,19 @@ class Instituicao(Base):
         Index('idx_cod_cat', 'tip_instituicao', 'cod_categoria'),
         Index('idx_nom_instituicao', 'nom_instituicao'),
         Index('idx_nom_responsavel', 'nom_responsavel'),
-        Index('idx_txt_atividade', 'txt_atividade'),
-        Index('idx_txt_origem', 'txt_origem'),
         Index('ind_excluido', 'ind_excluido'),
         Index('tip_instituicao', 'tip_instituicao')
     )
 
     cod_instituicao = mapped_column(Integer, primary_key=True)
-    tip_instituicao = Column(Integer, ForeignKey('tipo_instituicao.tip_instituicao'))
-    cod_localidade = Column(Integer, ForeignKey('localidade.cod_localidade'))
+    tip_instituicao = mapped_column(Integer, nullable=False)
     ind_excluido = mapped_column(Integer, nullable=False, server_default=text("'0'"))
     timestamp_alteracao = mapped_column(TIMESTAMP, nullable=False, server_default=text('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'))
     cod_categoria = mapped_column(Integer)
     nom_instituicao = mapped_column(VARCHAR(200))
     end_instituicao = mapped_column(TINYTEXT)
     nom_bairro = mapped_column(VARCHAR(80))
+    cod_localidade = mapped_column(Integer)
     num_cep = mapped_column(VARCHAR(9))
     num_telefone = mapped_column(VARCHAR(50))
     num_fax = mapped_column(VARCHAR(50))
@@ -1108,8 +1033,8 @@ class Instituicao(Base):
     txt_ip_insercao = mapped_column(VARCHAR(15))
     txt_user_alteracao = mapped_column(VARCHAR(20))
     txt_ip_alteracao = mapped_column(VARCHAR(15))
-    txt_atividade = mapped_column(String(10, 'utf8mb4_unicode_ci'))
-    txt_origem = mapped_column(String(5, 'utf8mb4_unicode_ci'))
+    txt_atividade = mapped_column(VARCHAR(10))
+    txt_origem = mapped_column(VARCHAR(5))
 
     localidade: Mapped[Optional['Localidade']] = relationship('Localidade', back_populates='instituicao')
     tipo_instituicao: Mapped['TipoInstituicao'] = relationship('TipoInstituicao', back_populates='instituicao')
@@ -1180,7 +1105,6 @@ class MateriaLegislativa(Base):
     anexada: Mapped[List['Anexada']] = relationship('Anexada', uselist=True, foreign_keys='[Anexada.cod_materia_anexada]', back_populates='materia_legislativa')
     anexada_: Mapped[List['Anexada']] = relationship('Anexada', uselist=True, foreign_keys='[Anexada.cod_materia_principal]', back_populates='materia_legislativa_')
     despacho_inicial: Mapped[List['DespachoInicial']] = relationship('DespachoInicial', uselist=True, back_populates='materia_legislativa')
-    destinatario_oficio: Mapped[List['DestinatarioOficio']] = relationship('DestinatarioOficio', uselist=True, back_populates='materia_legislativa')
     documento_acessorio: Mapped[List['DocumentoAcessorio']] = relationship('DocumentoAcessorio', uselist=True, back_populates='materia_legislativa')
     documento_administrativo_materia: Mapped[List['DocumentoAdministrativoMateria']] = relationship('DocumentoAdministrativoMateria', uselist=True, back_populates='materia_legislativa')
     emenda: Mapped[List['Emenda']] = relationship('Emenda', uselist=True, back_populates='materia_legislativa')
@@ -1194,13 +1118,13 @@ class MateriaLegislativa(Base):
     peticao: Mapped[List['Peticao']] = relationship('Peticao', uselist=True, back_populates='materia_legislativa')
     proposicao: Mapped[List['Proposicao']] = relationship('Proposicao', uselist=True, back_populates='materia_legislativa')
     protocolo: Mapped[List['Protocolo']] = relationship('Protocolo', uselist=True, back_populates='materia_legislativa')
+    registro_votacao: Mapped[List['RegistroVotacao']] = relationship('RegistroVotacao', uselist=True, back_populates='materia_legislativa')
     reuniao_comissao_pauta: Mapped[List['ReuniaoComissaoPauta']] = relationship('ReuniaoComissaoPauta', uselist=True, back_populates='materia_legislativa')
     tramitacao: Mapped[List['Tramitacao']] = relationship('Tramitacao', uselist=True, back_populates='materia_legislativa')
+    destinatario_oficio: Mapped[List['DestinatarioOficio']] = relationship('DestinatarioOficio', uselist=True, back_populates='materia_legislativa')
     expediente_materia: Mapped[List['ExpedienteMateria']] = relationship('ExpedienteMateria', uselist=True, back_populates='materia_legislativa')
-    ordem_dia: Mapped[List['OrdemDia']] = relationship('OrdemDia', uselist=True, back_populates='materia_legislativa')
     materia_apresentada_sessao: Mapped[List['MateriaApresentadaSessao']] = relationship('MateriaApresentadaSessao', uselist=True, back_populates='materia_legislativa')
-    registro_discurso: Mapped[List['RegistroDiscurso']] = relationship('RegistroDiscurso', uselist=True, back_populates='materia_legislativa')
-    registro_votacao: Mapped[List['RegistroVotacao']] = relationship('RegistroVotacao', uselist=True, back_populates='materia_legislativa')
+    ordem_dia: Mapped[List['OrdemDia']] = relationship('OrdemDia', uselist=True, back_populates='materia_legislativa')
 
 
 class Parlamentar(Base):
@@ -1268,13 +1192,18 @@ class Parlamentar(Base):
     gabinete_eleitor: Mapped[List['GabineteEleitor']] = relationship('GabineteEleitor', uselist=True, back_populates='parlamentar')
     reuniao_comissao_pauta: Mapped[List['ReuniaoComissaoPauta']] = relationship('ReuniaoComissaoPauta', uselist=True, back_populates='parlamentar')
     reuniao_comissao_presenca: Mapped[List['ReuniaoComissaoPresenca']] = relationship('ReuniaoComissaoPresenca', uselist=True, back_populates='parlamentar')
+    encerramento_presenca: Mapped[List['EncerramentoPresenca']] = relationship('EncerramentoPresenca', uselist=True, back_populates='parlamentar')
+    expediente_presenca: Mapped[List['ExpedientePresenca']] = relationship('ExpedientePresenca', uselist=True, back_populates='parlamentar')
     gabinete_atendimento: Mapped[List['GabineteAtendimento']] = relationship('GabineteAtendimento', uselist=True, back_populates='parlamentar')
-    registro_itens_diversos: Mapped[List['RegistroItensDiversos']] = relationship('RegistroItensDiversos', uselist=True, back_populates='parlamentar')
-    registro_discurso: Mapped[List['RegistroDiscurso']] = relationship('RegistroDiscurso', uselist=True, back_populates='parlamentar')
-    registro_aparte: Mapped[List['RegistroAparte']] = relationship('RegistroAparte', uselist=True, back_populates='parlamentar')
-    registro_mesa_parlamentar: Mapped[List['RegistroMesaParlamentar']] = relationship('RegistroMesaParlamentar', uselist=True, back_populates='parlamentar')
-    registro_presenca_parlamentar: Mapped[List['RegistroPresencaParlamentar']] = relationship('RegistroPresencaParlamentar', uselist=True, back_populates='parlamentar')
+    liderancas_partidarias: Mapped[List['LiderancasPartidarias']] = relationship('LiderancasPartidarias', uselist=True, back_populates='parlamentar')
+    mesa_sessao_plenaria: Mapped[List['MesaSessaoPlenaria']] = relationship('MesaSessaoPlenaria', uselist=True, back_populates='parlamentar')
+    oradores: Mapped[List['Oradores']] = relationship('Oradores', uselist=True, back_populates='parlamentar')
+    oradores_expediente: Mapped[List['OradoresExpediente']] = relationship('OradoresExpediente', uselist=True, back_populates='parlamentar')
+    ordem_dia_presenca: Mapped[List['OrdemDiaPresenca']] = relationship('OrdemDiaPresenca', uselist=True, back_populates='parlamentar')
     registro_votacao_parlamentar: Mapped[List['RegistroVotacaoParlamentar']] = relationship('RegistroVotacaoParlamentar', uselist=True, back_populates='parlamentar')
+    sessao_plenaria_presenca: Mapped[List['SessaoPlenariaPresenca']] = relationship('SessaoPlenariaPresenca', uselist=True, back_populates='parlamentar')
+    expediente_discussao: Mapped[List['ExpedienteDiscussao']] = relationship('ExpedienteDiscussao', uselist=True, back_populates='parlamentar')
+    ordem_dia_discussao: Mapped[List['OrdemDiaDiscussao']] = relationship('OrdemDiaDiscussao', uselist=True, back_populates='parlamentar')
 
 
 class PeriodoCompBancada(Base):
@@ -1337,30 +1266,7 @@ class SessaoLegislativa(Base):
     composicao_mesa: Mapped[List['ComposicaoMesa']] = relationship('ComposicaoMesa', uselist=True, back_populates='sessao_legislativa')
     periodo_sessao: Mapped[List['PeriodoSessao']] = relationship('PeriodoSessao', uselist=True, back_populates='sessao_legislativa')
     sessao_plenaria: Mapped[List['SessaoPlenaria']] = relationship('SessaoPlenaria', uselist=True, back_populates='sessao_legislativa')
-
-
-class TipoSubfaseSessao(Base):
-    __tablename__ = 'tipo_subfase_sessao'
-    __table_args__ = (
-        ForeignKeyConstraint(['id_fase'], ['tipo_fase_sessao.id'], ondelete='RESTRICT', onupdate='RESTRICT', name='tipo_subfase_sessao_ibfk_1'),
-        Index('id_fase', 'id_fase')
-    )
-
-    id = mapped_column(Integer, primary_key=True)
-    id_fase = mapped_column(Integer, nullable=False)
-    nom_subfase = mapped_column(String(50, 'utf8mb4_unicode_ci'), nullable=False)
-    num_ordem = mapped_column(Integer, nullable=False)
-    ind_ativo = mapped_column(Integer, nullable=False, server_default=text("'1'"))
-    duracao = mapped_column(Time)
-    modulo = mapped_column(String(100, 'utf8mb4_unicode_ci'))
-    model = mapped_column(VARCHAR(100))
-
-    tipo_fase_sessao: Mapped['TipoFaseSessao'] = relationship('TipoFaseSessao', back_populates='tipo_subfase_sessao')
-    expediente_materia: Mapped[List['ExpedienteMateria']] = relationship('ExpedienteMateria', uselist=True, back_populates='tipo_subfase_sessao')
-    ordem_dia: Mapped[List['OrdemDia']] = relationship('OrdemDia', uselist=True, back_populates='tipo_subfase_sessao')
-    registro_itens_diversos: Mapped[List['RegistroItensDiversos']] = relationship('RegistroItensDiversos', uselist=True, back_populates='tipo_subfase_sessao')
-    registro_subfase: Mapped[List['RegistroSubfase']] = relationship('RegistroSubfase', uselist=True, back_populates='tipo_subfase_sessao')
-    materia_apresentada_sessao: Mapped[List['MateriaApresentadaSessao']] = relationship('MateriaApresentadaSessao', uselist=True, back_populates='tipo_subfase_sessao')
+    mesa_sessao_plenaria: Mapped[List['MesaSessaoPlenaria']] = relationship('MesaSessaoPlenaria', uselist=True, back_populates='sessao_legislativa')
 
 
 class Usuario(Base):
@@ -1375,14 +1281,13 @@ class Usuario(Base):
 
     cod_usuario = mapped_column(Integer, primary_key=True)
     col_username = mapped_column(VARCHAR(50), nullable=False)
+    ind_interno = mapped_column(Integer, nullable=False, server_default=text("'1'"))
     nom_completo = mapped_column(VARCHAR(50), nullable=False)
     num_cpf = mapped_column(VARCHAR(14), nullable=False)
     end_email = mapped_column(VARCHAR(100), nullable=False)
-    ind_interno = mapped_column(Integer, nullable=False, server_default=text("'1'"))
     ind_ativo = mapped_column(Integer, nullable=False, server_default=text("'1'"))
     ind_excluido = mapped_column(Integer, nullable=False)
     password = mapped_column(VARCHAR(255))
-    roles = mapped_column(VARCHAR(200))
     dat_nascimento = mapped_column(Date)
     des_estado_civil = mapped_column(VARCHAR(20))
     sex_usuario = mapped_column(CHAR(1))
@@ -1409,9 +1314,7 @@ class Usuario(Base):
     assinatura_documento_: Mapped[List['AssinaturaDocumento']] = relationship('AssinaturaDocumento', uselist=True, foreign_keys='[AssinaturaDocumento.cod_usuario]', back_populates='usuario_')
     cientificacao_documento: Mapped[List['CientificacaoDocumento']] = relationship('CientificacaoDocumento', uselist=True, foreign_keys='[CientificacaoDocumento.cod_cientificado]', back_populates='usuario')
     cientificacao_documento_: Mapped[List['CientificacaoDocumento']] = relationship('CientificacaoDocumento', uselist=True, foreign_keys='[CientificacaoDocumento.cod_cientificador]', back_populates='usuario_')
-    destinatario_oficio: Mapped[List['DestinatarioOficio']] = relationship('DestinatarioOficio', uselist=True, back_populates='usuario')
     funcionario: Mapped[List['Funcionario']] = relationship('Funcionario', uselist=True, back_populates='usuario')
-    usuario_biometria: Mapped[List['UsuarioBiometria']] = relationship('UsuarioBiometria', uselist=True, back_populates='usuario')
     usuario_peticionamento: Mapped[List['UsuarioPeticionamento']] = relationship('UsuarioPeticionamento', uselist=True, back_populates='usuario')
     usuario_tipo_documento: Mapped[List['UsuarioTipoDocumento']] = relationship('UsuarioTipoDocumento', uselist=True, back_populates='usuario')
     peticao: Mapped[List['Peticao']] = relationship('Peticao', uselist=True, back_populates='usuario')
@@ -1423,6 +1326,8 @@ class Usuario(Base):
     tramitacao_administrativo_: Mapped[List['TramitacaoAdministrativo']] = relationship('TramitacaoAdministrativo', uselist=True, foreign_keys='[TramitacaoAdministrativo.cod_usuario_local]', back_populates='usuario_')
     tramitacao_administrativo1: Mapped[List['TramitacaoAdministrativo']] = relationship('TramitacaoAdministrativo', uselist=True, foreign_keys='[TramitacaoAdministrativo.cod_usuario_visualiza]', back_populates='usuario1')
     usuario_unid_tram: Mapped[List['UsuarioUnidTram']] = relationship('UsuarioUnidTram', uselist=True, back_populates='usuario')
+    destinatario_oficio: Mapped[List['DestinatarioOficio']] = relationship('DestinatarioOficio', uselist=True, back_populates='usuario')
+
 
 class Anexada(Base):
     __tablename__ = 'anexada'
@@ -1481,7 +1386,6 @@ class AssinaturaDocumento(Base):
     __table_args__ = (
         ForeignKeyConstraint(['cod_solicitante'], ['usuario.cod_usuario'], ondelete='RESTRICT', onupdate='RESTRICT', name='assinatura_documento_ibfk_2'),
         ForeignKeyConstraint(['cod_usuario'], ['usuario.cod_usuario'], ondelete='RESTRICT', name='assinatura_documento_ibfk_1'),
-        ForeignKeyConstraint(['tipo_doc'], ['assinatura_storage.tip_documento'], ondelete='RESTRICT', onupdate='RESTRICT', name='assinatura_documento_ibfk_3'),
         Index('assinatura_documento_ibfk', 'cod_usuario'),
         Index('cod_solicitante', 'cod_solicitante'),
         Index('idx_cod_assinatura_doc', 'cod_assinatura_doc', 'codigo', 'tipo_doc', 'cod_usuario', unique=True),
@@ -1509,7 +1413,6 @@ class AssinaturaDocumento(Base):
 
     usuario: Mapped[Optional['Usuario']] = relationship('Usuario', foreign_keys=[cod_solicitante], back_populates='assinatura_documento')
     usuario_: Mapped['Usuario'] = relationship('Usuario', foreign_keys=[cod_usuario], back_populates='assinatura_documento_')
-    assinatura_storage: Mapped['AssinaturaStorage'] = relationship('AssinaturaStorage', back_populates='assinatura_documento')
 
 
 class Autor(Base):
@@ -1711,39 +1614,6 @@ class DespachoInicial(Base):
     materia_legislativa: Mapped['MateriaLegislativa'] = relationship('MateriaLegislativa', back_populates='despacho_inicial')
 
 
-class DestinatarioOficio(Base):
-    __tablename__ = 'destinatario_oficio'
-    __table_args__ = (
-        ForeignKeyConstraint(['cod_documento'], ['documento_administrativo.cod_documento'], ondelete='RESTRICT', onupdate='RESTRICT', name='destinatario_oficio_ibfk_1'),
-        ForeignKeyConstraint(['cod_instituicao'], ['instituicao.cod_instituicao'], ondelete='RESTRICT', onupdate='RESTRICT', name='destinatario_oficio_ibfk_2'),
-        ForeignKeyConstraint(['cod_materia'], ['materia_legislativa.cod_materia'], ondelete='RESTRICT', onupdate='RESTRICT', name='destinatario_oficio_ibfk_3'),
-        ForeignKeyConstraint(['cod_usuario'], ['usuario.cod_usuario'], ondelete='RESTRICT', onupdate='RESTRICT', name='destinatario_oficio_ibfk_4'),
-        Index('cod_documento', 'cod_documento', 'end_email', unique=True),
-        Index('cod_materia', 'cod_destinatario', 'cod_materia', unique=True),
-        Index('idx_cod_documento', 'cod_documento'),
-        Index('idx_cod_instituicao', 'cod_instituicao'),
-        Index('idx_cod_materia', 'cod_materia'),
-        Index('idx_cod_proposicao', 'cod_proposicao'),
-        Index('idx_cod_usuario', 'cod_usuario')
-    )
-
-    cod_destinatario = mapped_column(Integer, primary_key=True)
-    ind_excluido = mapped_column(Integer, nullable=False, server_default=text("'0'"))
-    cod_materia = mapped_column(Integer)
-    cod_proposicao = mapped_column(Integer)
-    cod_documento = mapped_column(Integer)
-    cod_instituicao = mapped_column(Integer)
-    nom_destinatario = mapped_column(String(300, 'utf8mb4_unicode_ci'))
-    end_email = mapped_column(String(100, 'utf8mb4_unicode_ci'))
-    dat_envio = mapped_column(DateTime)
-    cod_usuario = mapped_column(Integer)
-
-    documento_administrativo: Mapped[Optional['DocumentoAdministrativo']] = relationship('DocumentoAdministrativo', back_populates='destinatario_oficio')
-    instituicao: Mapped[Optional['Instituicao']] = relationship('Instituicao', back_populates='destinatario_oficio')
-    materia_legislativa: Mapped[Optional['MateriaLegislativa']] = relationship('MateriaLegislativa', back_populates='destinatario_oficio')
-    usuario: Mapped[Optional['Usuario']] = relationship('Usuario', back_populates='destinatario_oficio')
-
-
 class DocumentoAcessorio(Base):
     __tablename__ = 'documento_acessorio'
     __table_args__ = (
@@ -1885,8 +1755,8 @@ class Emenda(Base):
     tipo_emenda: Mapped['TipoEmenda'] = relationship('TipoEmenda', back_populates='emenda')
     autoria_emenda: Mapped[List['AutoriaEmenda']] = relationship('AutoriaEmenda', uselist=True, back_populates='emenda')
     proposicao: Mapped[List['Proposicao']] = relationship('Proposicao', uselist=True, back_populates='emenda')
-    materia_apresentada_sessao: Mapped[List['MateriaApresentadaSessao']] = relationship('MateriaApresentadaSessao', uselist=True, back_populates='emenda')
     registro_votacao: Mapped[List['RegistroVotacao']] = relationship('RegistroVotacao', uselist=True, back_populates='emenda')
+    materia_apresentada_sessao: Mapped[List['MateriaApresentadaSessao']] = relationship('MateriaApresentadaSessao', uselist=True, back_populates='emenda')
 
 
 class Filiacao(Base):
@@ -1966,48 +1836,43 @@ class Mandato(Base):
     afastamento: Mapped[List['Afastamento']] = relationship('Afastamento', uselist=True, back_populates='mandato')
 
 
-from sqlalchemy import String, Date, Integer, CHAR, TEXT, TIMESTAMP
-from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy.sql import text
-from sqlalchemy import ForeignKeyConstraint, Index
-
 class NormaJuridica(Base):
     __tablename__ = 'norma_juridica'
     __table_args__ = (
         ForeignKeyConstraint(['cod_materia'], ['materia_legislativa.cod_materia'], ondelete='SET NULL', name='norma_juridica_ibfk_1'),
         ForeignKeyConstraint(['cod_situacao'], ['tipo_situacao_norma.tip_situacao_norma'], ondelete='SET NULL', onupdate='RESTRICT', name='norma_juridica_ibfk_2'),
         ForeignKeyConstraint(['tip_norma'], ['tipo_norma_juridica.tip_norma'], ondelete='RESTRICT', onupdate='RESTRICT', name='norma_juridica_ibfk_3'),
-        Index('idx_cod_assunto', 'cod_assunto'),
-        Index('idx_cod_materia', 'cod_materia'),
-        Index('idx_cod_situacao', 'cod_situacao'),
-        Index('idx_dat_norma', 'dat_norma'),
-        Index('idx_ano_numero_excluido', 'ano_norma', 'num_norma', 'ind_excluido'),
+        Index('cod_assunto', 'cod_assunto'),
+        Index('cod_materia', 'cod_materia'),
+        Index('cod_situacao', 'cod_situacao'),
+        Index('dat_norma', 'dat_norma'),
+        Index('idx_ano_numero', 'ano_norma', 'num_norma', 'ind_excluido'),
         Index('idx_busca', 'txt_ementa', 'txt_observacao', 'txt_indexacao'),
-        Index('idx_ind_publico', 'ind_publico'),
-        Index('idx_tip_norma', 'tip_norma')
+        Index('ind_publico', 'ind_publico'),
+        Index('tip_norma', 'tip_norma')
     )
 
-    cod_norma: Mapped[int] = mapped_column(Integer, primary_key=True)
-    tip_norma: Mapped[int] = mapped_column(Integer, nullable=False)
-    num_norma: Mapped[int] = mapped_column(Integer, nullable=False)
-    ano_norma: Mapped[int] = mapped_column(Integer, nullable=False)
-    timestamp: Mapped[TIMESTAMP] = mapped_column(TIMESTAMP, nullable=False, server_default=text('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'))
-    ind_publico: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'0'"))
-    ind_excluido: Mapped[int] = mapped_column(Integer, nullable=False)
-    cod_materia: Mapped[int] = mapped_column(Integer)
-    tip_esfera_federacao: Mapped[str] = mapped_column(CHAR(1))
-    dat_norma: Mapped[Date] = mapped_column(Date)
-    dat_publicacao: Mapped[Date] = mapped_column(Date)
-    des_veiculo_publicacao: Mapped[str] = mapped_column(String(50))
-    num_pag_inicio_publ: Mapped[int] = mapped_column(Integer)
-    num_pag_fim_publ: Mapped[int] = mapped_column(Integer)
-    txt_ementa: Mapped[str] = mapped_column(TEXT)
-    txt_indexacao: Mapped[str] = mapped_column(TEXT)
-    txt_observacao: Mapped[str] = mapped_column(TEXT)
-    ind_complemento: Mapped[int] = mapped_column(Integer)
-    cod_assunto: Mapped[str] = mapped_column(CHAR(16))
-    cod_situacao: Mapped[int] = mapped_column(Integer)
-    dat_vigencia: Mapped[Date] = mapped_column(Date)
+    cod_norma = mapped_column(Integer, primary_key=True)
+    tip_norma = mapped_column(Integer, nullable=False)
+    num_norma = mapped_column(Integer, nullable=False)
+    ano_norma = mapped_column(Integer, nullable=False)
+    timestamp = mapped_column(TIMESTAMP, nullable=False, server_default=text('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'))
+    ind_publico = mapped_column(Integer, nullable=False, server_default=text("'0'"))
+    ind_excluido = mapped_column(Integer, nullable=False)
+    cod_materia = mapped_column(Integer)
+    tip_esfera_federacao = mapped_column(CHAR(1))
+    dat_norma = mapped_column(Date)
+    dat_publicacao = mapped_column(Date)
+    des_veiculo_publicacao = mapped_column(VARCHAR(50))
+    num_pag_inicio_publ = mapped_column(Integer)
+    num_pag_fim_publ = mapped_column(Integer)
+    txt_ementa = mapped_column(TEXT)
+    txt_indexacao = mapped_column(TEXT)
+    txt_observacao = mapped_column(TEXT)
+    ind_complemento = mapped_column(Integer)
+    cod_assunto = mapped_column(CHAR(16))
+    cod_situacao = mapped_column(Integer)
+    dat_vigencia = mapped_column(Date)
 
     materia_legislativa: Mapped[Optional['MateriaLegislativa']] = relationship('MateriaLegislativa', back_populates='norma_juridica')
     tipo_situacao_norma: Mapped[Optional['TipoSituacaoNorma']] = relationship('TipoSituacaoNorma', back_populates='norma_juridica')
@@ -2015,15 +1880,15 @@ class NormaJuridica(Base):
     anexo_norma: Mapped[List['AnexoNorma']] = relationship('AnexoNorma', uselist=True, back_populates='norma_juridica')
     legislacao_citada: Mapped[List['LegislacaoCitada']] = relationship('LegislacaoCitada', uselist=True, back_populates='norma_juridica')
     logradouro: Mapped[List['Logradouro']] = relationship('Logradouro', uselist=True, back_populates='norma_juridica')
-    referencing_normas: Mapped[List['VinculoNormaJuridica']] = relationship('VinculoNormaJuridica', uselist=True, foreign_keys='[VinculoNormaJuridica.cod_norma_referente]', back_populates='norma_juridica')
-    referenced_normas: Mapped[List['VinculoNormaJuridica']] = relationship('VinculoNormaJuridica', uselist=True, foreign_keys='[VinculoNormaJuridica.cod_norma_referida]', back_populates='norma_juridica_')
+    vinculo_norma_juridica: Mapped[List['VinculoNormaJuridica']] = relationship('VinculoNormaJuridica', uselist=True, foreign_keys='[VinculoNormaJuridica.cod_norma_referente]', back_populates='norma_juridica')
+    vinculo_norma_juridica_: Mapped[List['VinculoNormaJuridica']] = relationship('VinculoNormaJuridica', uselist=True, foreign_keys='[VinculoNormaJuridica.cod_norma_referida]', back_populates='norma_juridica_')
 
 
 class Numeracao(Base):
     __tablename__ = 'numeracao'
     __table_args__ = (
-        ForeignKeyConstraint(['cod_materia'], ['materia_legislativa.cod_materia'], ondelete='CASCADE', name='numeracao_ibfk_1'),
-        ForeignKeyConstraint(['tip_materia'], ['tipo_materia_legislativa.tip_materia'], ondelete='CASCADE', name='numeracao_ibfk_2'),
+        ForeignKeyConstraint(['cod_materia'], ['materia_legislativa.cod_materia'], ondelete='RESTRICT', name='numeracao_ibfk_1'),
+        ForeignKeyConstraint(['tip_materia'], ['tipo_materia_legislativa.tip_materia'], ondelete='RESTRICT', name='numeracao_ibfk_2'),
         Index('cod_materia', 'cod_materia'),
         Index('idx_numer_identificacao', 'tip_materia', 'num_materia', 'ano_materia', 'ind_excluido'),
         Index('tip_materia', 'tip_materia')
@@ -2108,10 +1973,10 @@ class Relatoria(Base):
     parlamentar: Mapped['Parlamentar'] = relationship('Parlamentar', back_populates='relatoria')
     tipo_fim_relatoria: Mapped[Optional['TipoFimRelatoria']] = relationship('TipoFimRelatoria', back_populates='relatoria')
     parecer: Mapped[List['Parecer']] = relationship('Parecer', uselist=True, back_populates='relatoria')
-    expediente_materia: Mapped[List['ExpedienteMateria']] = relationship('ExpedienteMateria', uselist=True, back_populates='relatoria')
-    ordem_dia: Mapped[List['OrdemDia']] = relationship('OrdemDia', uselist=True, back_populates='relatoria')
-    materia_apresentada_sessao: Mapped[List['MateriaApresentadaSessao']] = relationship('MateriaApresentadaSessao', uselist=True, back_populates='relatoria')
     registro_votacao: Mapped[List['RegistroVotacao']] = relationship('RegistroVotacao', uselist=True, back_populates='relatoria')
+    expediente_materia: Mapped[List['ExpedienteMateria']] = relationship('ExpedienteMateria', uselist=True, back_populates='relatoria')
+    materia_apresentada_sessao: Mapped[List['MateriaApresentadaSessao']] = relationship('MateriaApresentadaSessao', uselist=True, back_populates='relatoria')
+    ordem_dia: Mapped[List['OrdemDia']] = relationship('OrdemDia', uselist=True, back_populates='relatoria')
 
 
 class ReuniaoComissao(Base):
@@ -2162,8 +2027,8 @@ class Substitutivo(Base):
     materia_legislativa: Mapped['MateriaLegislativa'] = relationship('MateriaLegislativa', back_populates='substitutivo')
     autoria_substitutivo: Mapped[List['AutoriaSubstitutivo']] = relationship('AutoriaSubstitutivo', uselist=True, back_populates='substitutivo')
     proposicao: Mapped[List['Proposicao']] = relationship('Proposicao', uselist=True, back_populates='substitutivo')
-    materia_apresentada_sessao: Mapped[List['MateriaApresentadaSessao']] = relationship('MateriaApresentadaSessao', uselist=True, back_populates='substitutivo')
     registro_votacao: Mapped[List['RegistroVotacao']] = relationship('RegistroVotacao', uselist=True, back_populates='substitutivo')
+    materia_apresentada_sessao: Mapped[List['MateriaApresentadaSessao']] = relationship('MateriaApresentadaSessao', uselist=True, back_populates='substitutivo')
 
 
 class UnidadeTramitacao(Base):
@@ -2203,23 +2068,6 @@ class UnidadeTramitacao(Base):
     tramitacao_administrativo: Mapped[List['TramitacaoAdministrativo']] = relationship('TramitacaoAdministrativo', uselist=True, foreign_keys='[TramitacaoAdministrativo.cod_unid_tram_dest]', back_populates='unidade_tramitacao')
     tramitacao_administrativo_: Mapped[List['TramitacaoAdministrativo']] = relationship('TramitacaoAdministrativo', uselist=True, foreign_keys='[TramitacaoAdministrativo.cod_unid_tram_local]', back_populates='unidade_tramitacao_')
     usuario_unid_tram: Mapped[List['UsuarioUnidTram']] = relationship('UsuarioUnidTram', uselist=True, back_populates='unidade_tramitacao')
-
-
-class UsuarioBiometria(Base):
-    __tablename__ = 'usuario_biometria'
-    __table_args__ = (
-        ForeignKeyConstraint(['cod_usuario'], ['usuario.cod_usuario'], ondelete='RESTRICT', onupdate='RESTRICT', name='usuario_biometria_ibfk_1'),
-        Index('cod_usuario', 'cod_usuario')
-    )
-
-    id = mapped_column(Integer, primary_key=True)
-    cod_usuario = mapped_column(Integer, nullable=False)
-    biometria_digital = mapped_column(TEXT, nullable=False)
-    dat_cadastro = mapped_column(TIMESTAMP, nullable=False)
-    ind_excluido = mapped_column(Integer, nullable=False, server_default=text("'0'"))
-    dedo = mapped_column(String(50, 'utf8mb4_unicode_ci'))
-
-    usuario: Mapped['Usuario'] = relationship('Usuario', back_populates='usuario_biometria')
 
 
 class UsuarioPeticionamento(Base):
@@ -2447,17 +2295,17 @@ class Logradouro(Base):
     __table_args__ = (
         ForeignKeyConstraint(['cod_localidade'], ['localidade.cod_localidade'], ondelete='RESTRICT', name='logradouro_ibfk_1'),
         ForeignKeyConstraint(['cod_norma'], ['norma_juridica.cod_norma'], ondelete='CASCADE', name='logradouro_ibfk_2'),
-        Index('idx_cod_localidade', 'cod_localidade'),  # Added prefix for consistency
-        Index('idx_cod_norma', 'cod_norma'),           # Added prefix for consistency
-        Index('idx_nom_logradouro', 'nom_logradouro'),  # Added prefix for consistency
-        Index('idx_num_cep', 'num_cep')                # Added prefix for consistency
+        Index('cod_localidade', 'cod_localidade'),
+        Index('logradouro_ibfk_2', 'cod_norma'),
+        Index('nom_logradouro', 'nom_logradouro'),
+        Index('num_cep', 'num_cep')
     )
 
     cod_logradouro = mapped_column(Integer, primary_key=True)
-    nom_logradouro = mapped_column(String(100), nullable=False)  # Explicit String type
+    nom_logradouro = mapped_column(VARCHAR(100), nullable=False)
     ind_excluido = mapped_column(Integer, nullable=False, server_default=text("'0'"))
-    nom_bairro = mapped_column(String(100))        # Explicit String type
-    num_cep = mapped_column(String(9))            # Explicit String type
+    nom_bairro = mapped_column(VARCHAR(100))
+    num_cep = mapped_column(VARCHAR(9))
     cod_localidade = mapped_column(Integer)
     cod_norma = mapped_column(Integer)
 
@@ -2526,7 +2374,7 @@ class Peticao(Base):
     ano_norma = mapped_column(Integer)
     dat_norma = mapped_column(Date)
     dat_publicacao = mapped_column(Date)
-    des_veiculo_publicacao = mapped_column(String(50, 'utf8mb4_unicode_ci'))
+    des_veiculo_publicacao = mapped_column(VARCHAR(50))
     num_pag_inicio_publ = mapped_column(Integer)
     num_pag_fim_publ = mapped_column(Integer)
     dat_envio = mapped_column(DateTime)
@@ -2585,8 +2433,6 @@ class Proposicao(Base):
     cod_assessor = mapped_column(Integer)
     cod_assunto = mapped_column(Integer)
     cod_revisor = mapped_column(Integer)
-    txt_consideracoes = mapped_column(Text(collation='utf8mb4_unicode_ci'))
-    txt_pedido = mapped_column(Text(collation='utf8mb4_unicode_ci'))
 
     assessor_parlamentar: Mapped[Optional['AssessorParlamentar']] = relationship('AssessorParlamentar', back_populates='proposicao')
     assunto_proposicao: Mapped[Optional['AssuntoProposicao']] = relationship('AssuntoProposicao', back_populates='proposicao')
@@ -2596,6 +2442,7 @@ class Proposicao(Base):
     usuario: Mapped[Optional['Usuario']] = relationship('Usuario', back_populates='proposicao')
     substitutivo: Mapped[Optional['Substitutivo']] = relationship('Substitutivo', back_populates='proposicao')
     tipo_proposicao: Mapped['TipoProposicao'] = relationship('TipoProposicao', back_populates='proposicao')
+    destinatario_oficio: Mapped[List['DestinatarioOficio']] = relationship('DestinatarioOficio', uselist=True, back_populates='proposicao')
     proposicao_geocode: Mapped[List['ProposicaoGeocode']] = relationship('ProposicaoGeocode', uselist=True, back_populates='proposicao')
 
 
@@ -2628,7 +2475,6 @@ class Protocolo(Base):
     num_protocolo = mapped_column(INTEGER(7))
     tip_processo = mapped_column(Integer)
     txt_interessado = mapped_column(VARCHAR(60))
-    txt_destinatario = mapped_column(String(255, 'utf8mb4_unicode_ci'))
     cod_autor = mapped_column(Integer)
     cod_entidade = mapped_column(Integer)
     txt_assunto_ementa = mapped_column(TEXT)
@@ -2644,10 +2490,49 @@ class Protocolo(Base):
     txt_just_anulacao = mapped_column(VARCHAR(400))
     timestamp_anulacao = mapped_column(DateTime)
     codigo_acesso = mapped_column(VARCHAR(18))
-    user_insercao = mapped_column(String(255, 'utf8mb4_unicode_ci'))
 
     autor: Mapped[Optional['Autor']] = relationship('Autor', back_populates='protocolo')
     materia_legislativa: Mapped[Optional['MateriaLegislativa']] = relationship('MateriaLegislativa', back_populates='protocolo')
+
+
+class RegistroVotacao(Base):
+    __tablename__ = 'registro_votacao'
+    __table_args__ = (
+        ForeignKeyConstraint(['cod_emenda'], ['emenda.cod_emenda'], ondelete='RESTRICT', name='registro_votacao_ibfk_1'),
+        ForeignKeyConstraint(['cod_materia'], ['materia_legislativa.cod_materia'], ondelete='RESTRICT', name='registro_votacao_ibfk_2'),
+        ForeignKeyConstraint(['cod_parecer'], ['relatoria.cod_relatoria'], ondelete='RESTRICT', onupdate='RESTRICT', name='registro_votacao_ibfk_3'),
+        ForeignKeyConstraint(['cod_substitutivo'], ['substitutivo.cod_substitutivo'], ondelete='RESTRICT', name='registro_votacao_ibfk_4'),
+        Index('cod_emenda', 'cod_emenda'),
+        Index('cod_materia', 'cod_materia'),
+        Index('cod_ordem', 'cod_ordem'),
+        Index('cod_parecer', 'cod_parecer'),
+        Index('cod_subemenda', 'cod_subemenda'),
+        Index('cod_substitutivo', 'cod_substitutivo'),
+        Index('idx_unique', 'cod_materia', 'cod_ordem', 'cod_emenda', 'cod_substitutivo', unique=True),
+        Index('tip_resultado_votacao', 'tip_resultado_votacao')
+    )
+
+    cod_votacao = mapped_column(Integer, primary_key=True)
+    tip_resultado_votacao = mapped_column(INTEGER, nullable=False)
+    cod_materia = mapped_column(Integer, nullable=False)
+    cod_ordem = mapped_column(Integer, nullable=False)
+    num_votos_sim = mapped_column(INTEGER, nullable=False)
+    num_votos_nao = mapped_column(INTEGER, nullable=False)
+    num_abstencao = mapped_column(INTEGER, nullable=False)
+    ind_excluido = mapped_column(INTEGER, nullable=False)
+    cod_parecer = mapped_column(Integer)
+    cod_emenda = mapped_column(Integer)
+    cod_subemenda = mapped_column(Integer)
+    cod_substitutivo = mapped_column(Integer)
+    num_ausentes = mapped_column(INTEGER)
+    txt_observacao = mapped_column(TEXT)
+    txt_obs_anterior = mapped_column(TEXT)
+
+    emenda: Mapped[Optional['Emenda']] = relationship('Emenda', back_populates='registro_votacao')
+    materia_legislativa: Mapped['MateriaLegislativa'] = relationship('MateriaLegislativa', back_populates='registro_votacao')
+    relatoria: Mapped[Optional['Relatoria']] = relationship('Relatoria', back_populates='registro_votacao')
+    substitutivo: Mapped[Optional['Substitutivo']] = relationship('Substitutivo', back_populates='registro_votacao')
+    registro_votacao_parlamentar: Mapped[List['RegistroVotacaoParlamentar']] = relationship('RegistroVotacaoParlamentar', uselist=True, back_populates='registro_votacao')
 
 
 class ReuniaoComissaoPauta(Base):
@@ -2716,40 +2601,40 @@ class SessaoPlenaria(Base):
     )
 
     cod_sessao_plen = mapped_column(Integer, primary_key=True)
-    num_sessao_plen = mapped_column(INTEGER, nullable=False)
     tip_sessao = mapped_column(Integer, nullable=False)
-    num_legislatura = mapped_column(Integer, nullable=False)
     cod_sessao_leg = mapped_column(Integer, nullable=False)
+    num_legislatura = mapped_column(Integer, nullable=False)
     dat_inicio_sessao = mapped_column(Date, nullable=False)
+    num_sessao_plen = mapped_column(INTEGER, nullable=False)
     ind_excluido = mapped_column(Integer, nullable=False, server_default=text("'0'"))
+    num_tip_sessao = mapped_column(Integer)
     cod_periodo_sessao = mapped_column(Integer)
     dia_sessao = mapped_column(VARCHAR(15))
     hr_inicio_sessao = mapped_column(VARCHAR(5))
-    dat_fim_sessao = mapped_column(Date)
     hr_fim_sessao = mapped_column(VARCHAR(5))
+    dat_fim_sessao = mapped_column(Date)
     url_fotos = mapped_column(VARCHAR(150))
     url_audio = mapped_column(VARCHAR(150))
     url_video = mapped_column(VARCHAR(150))
     numero_ata = mapped_column(Integer)
-    ano_ata = mapped_column(Integer)
 
     periodo_sessao: Mapped[Optional['PeriodoSessao']] = relationship('PeriodoSessao', back_populates='sessao_plenaria')
     sessao_legislativa: Mapped['SessaoLegislativa'] = relationship('SessaoLegislativa', back_populates='sessao_plenaria')
     legislatura: Mapped['Legislatura'] = relationship('Legislatura', back_populates='sessao_plenaria')
     tipo_sessao_plenaria: Mapped['TipoSessaoPlenaria'] = relationship('TipoSessaoPlenaria', back_populates='sessao_plenaria')
+    encerramento_presenca: Mapped[List['EncerramentoPresenca']] = relationship('EncerramentoPresenca', uselist=True, back_populates='sessao_plenaria')
     expediente_materia: Mapped[List['ExpedienteMateria']] = relationship('ExpedienteMateria', uselist=True, back_populates='sessao_plenaria')
+    expediente_presenca: Mapped[List['ExpedientePresenca']] = relationship('ExpedientePresenca', uselist=True, back_populates='sessao_plenaria')
     expediente_sessao_plenaria: Mapped[List['ExpedienteSessaoPlenaria']] = relationship('ExpedienteSessaoPlenaria', uselist=True, back_populates='sessao_plenaria')
-    ordem_dia: Mapped[List['OrdemDia']] = relationship('OrdemDia', uselist=True, back_populates='sessao_plenaria')
-    registro_fase: Mapped[List['RegistroFase']] = relationship('RegistroFase', uselist=True, back_populates='sessao_plenaria')
-    registro_itens_diversos: Mapped[List['RegistroItensDiversos']] = relationship('RegistroItensDiversos', uselist=True, back_populates='sessao_plenaria')
-    sessao_plenaria_painel: Mapped[List['SessaoPlenariaPainel']] = relationship('SessaoPlenariaPainel', uselist=True, back_populates='sessao_plenaria')
-    registro_mensagem: Mapped[List['RegistroMensagem']] = relationship('RegistroMensagem', uselist=True, back_populates='sessao_plenaria')
-    registro_subfase: Mapped[List['RegistroSubfase']] = relationship('RegistroSubfase', uselist=True, back_populates='sessao_plenaria')
+    liderancas_partidarias: Mapped[List['LiderancasPartidarias']] = relationship('LiderancasPartidarias', uselist=True, back_populates='sessao_plenaria')
     materia_apresentada_sessao: Mapped[List['MateriaApresentadaSessao']] = relationship('MateriaApresentadaSessao', uselist=True, back_populates='sessao_plenaria')
-    registro_discurso: Mapped[List['RegistroDiscurso']] = relationship('RegistroDiscurso', uselist=True, back_populates='sessao_plenaria')
-    registro_mesa: Mapped[List['RegistroMesa']] = relationship('RegistroMesa', uselist=True, back_populates='sessao_plenaria')
-    registro_presenca: Mapped[List['RegistroPresenca']] = relationship('RegistroPresenca', uselist=True, back_populates='sessao_plenaria')
-    registro_votacao: Mapped[List['RegistroVotacao']] = relationship('RegistroVotacao', uselist=True, back_populates='sessao_plenaria')
+    mesa_sessao_plenaria: Mapped[List['MesaSessaoPlenaria']] = relationship('MesaSessaoPlenaria', uselist=True, back_populates='sessao_plenaria')
+    oradores: Mapped[List['Oradores']] = relationship('Oradores', uselist=True, back_populates='sessao_plenaria')
+    oradores_expediente: Mapped[List['OradoresExpediente']] = relationship('OradoresExpediente', uselist=True, back_populates='sessao_plenaria')
+    ordem_dia: Mapped[List['OrdemDia']] = relationship('OrdemDia', uselist=True, back_populates='sessao_plenaria')
+    ordem_dia_presenca: Mapped[List['OrdemDiaPresenca']] = relationship('OrdemDiaPresenca', uselist=True, back_populates='sessao_plenaria')
+    sessao_plenaria_painel: Mapped[List['SessaoPlenariaPainel']] = relationship('SessaoPlenariaPainel', uselist=True, back_populates='sessao_plenaria')
+    sessao_plenaria_presenca: Mapped[List['SessaoPlenariaPresenca']] = relationship('SessaoPlenariaPresenca', uselist=True, back_populates='sessao_plenaria')
 
 
 class Tramitacao(Base):
@@ -2871,30 +2756,22 @@ class VinculoNormaJuridica(Base):
     __table_args__ = (
         ForeignKeyConstraint(['cod_norma_referente'], ['norma_juridica.cod_norma'], ondelete='CASCADE', name='vinculo_norma_juridica_ibfk_1'),
         ForeignKeyConstraint(['cod_norma_referida'], ['norma_juridica.cod_norma'], ondelete='CASCADE', name='vinculo_norma_juridica_ibfk_2'),
-        Index('idx_cod_norma_referente', 'cod_norma_referente'),
-        Index('idx_cod_norma_referida', 'cod_norma_referida'),
+        Index('cod_norma_referente', 'cod_norma_referente'),
+        Index('cod_norma_referida', 'cod_norma_referida'),
         Index('idx_vnj_norma_referente', 'cod_norma_referente', 'cod_norma_referida', 'ind_excluido'),
         Index('idx_vnj_norma_referida', 'cod_norma_referida', 'cod_norma_referente', 'ind_excluido'),
-        Index('idx_tip_vinculo', 'tip_vinculo')
+        Index('tip_vinculo', 'tip_vinculo')
     )
 
-    cod_vinculo: Mapped[int] = mapped_column(Integer, primary_key=True)
-    cod_norma_referente: Mapped[int] = mapped_column(Integer, nullable=False)
-    cod_norma_referida: Mapped[int] = mapped_column(Integer)
-    tip_vinculo: Mapped[str] = mapped_column(CHAR(1))
-    txt_observacao_vinculo: Mapped[str] = mapped_column(VARCHAR(250))
-    ind_excluido: Mapped[int] = mapped_column(Integer, server_default=text("'0'"))
+    cod_vinculo = mapped_column(Integer, primary_key=True)
+    cod_norma_referente = mapped_column(Integer, nullable=False)
+    cod_norma_referida = mapped_column(Integer)
+    tip_vinculo = mapped_column(CHAR(1))
+    txt_observacao_vinculo = mapped_column(VARCHAR(250))
+    ind_excluido = mapped_column(Integer, server_default=text("'0'"))
 
-    norma_juridica: Mapped['NormaJuridica'] = relationship(
-        'NormaJuridica',
-        foreign_keys=[cod_norma_referente],
-        back_populates='referencing_normas'  # Corrected back_populates name
-    )
-    norma_juridica_: Mapped[Optional['NormaJuridica']] = relationship(
-        'NormaJuridica',
-        foreign_keys=[cod_norma_referida],
-        back_populates='referenced_normas'  # Corrected back_populates name
-    )
+    norma_juridica: Mapped['NormaJuridica'] = relationship('NormaJuridica', foreign_keys=[cod_norma_referente], back_populates='vinculo_norma_juridica')
+    norma_juridica_: Mapped[Optional['NormaJuridica']] = relationship('NormaJuridica', foreign_keys=[cod_norma_referida], back_populates='vinculo_norma_juridica_')
 
 
 class Visita(Base):
@@ -2924,6 +2801,60 @@ class Visita(Base):
     pessoa: Mapped['Pessoa'] = relationship('Pessoa', back_populates='visita')
 
 
+class DestinatarioOficio(Base):
+    __tablename__ = 'destinatario_oficio'
+    __table_args__ = (
+        ForeignKeyConstraint(['cod_documento'], ['documento_administrativo.cod_documento'], ondelete='RESTRICT', onupdate='RESTRICT', name='destinatario_oficio_ibfk_1'),
+        ForeignKeyConstraint(['cod_instituicao'], ['instituicao.cod_instituicao'], ondelete='RESTRICT', onupdate='RESTRICT', name='destinatario_oficio_ibfk_2'),
+        ForeignKeyConstraint(['cod_materia'], ['materia_legislativa.cod_materia'], ondelete='RESTRICT', onupdate='RESTRICT', name='destinatario_oficio_ibfk_3'),
+        ForeignKeyConstraint(['cod_proposicao'], ['proposicao.cod_proposicao'], ondelete='RESTRICT', onupdate='RESTRICT', name='destinatario_oficio_ibfk_4'),
+        ForeignKeyConstraint(['cod_usuario'], ['usuario.cod_usuario'], ondelete='RESTRICT', onupdate='RESTRICT', name='destinatario_oficio_ibfk_5'),
+        Index('cod_usuario', 'cod_usuario'),
+        Index('idx_cod_documento', 'cod_documento'),
+        Index('idx_cod_instituicao', 'cod_instituicao'),
+        Index('idx_cod_materia', 'cod_materia'),
+        Index('idx_cod_proposicao', 'cod_proposicao')
+    )
+
+    cod_destinatario = mapped_column(Integer, primary_key=True)
+    ind_excluido = mapped_column(Integer, nullable=False, server_default=text("'0'"))
+    cod_materia = mapped_column(Integer)
+    cod_proposicao = mapped_column(Integer)
+    cod_documento = mapped_column(Integer)
+    cod_instituicao = mapped_column(Integer)
+    nom_destinatario = mapped_column(VARCHAR(300))
+    end_email = mapped_column(VARCHAR(100))
+    dat_envio = mapped_column(DateTime)
+    cod_usuario = mapped_column(Integer)
+
+    documento_administrativo: Mapped[Optional['DocumentoAdministrativo']] = relationship('DocumentoAdministrativo', back_populates='destinatario_oficio')
+    instituicao: Mapped[Optional['Instituicao']] = relationship('Instituicao', back_populates='destinatario_oficio')
+    materia_legislativa: Mapped[Optional['MateriaLegislativa']] = relationship('MateriaLegislativa', back_populates='destinatario_oficio')
+    proposicao: Mapped[Optional['Proposicao']] = relationship('Proposicao', back_populates='destinatario_oficio')
+    usuario: Mapped[Optional['Usuario']] = relationship('Usuario', back_populates='destinatario_oficio')
+
+
+class EncerramentoPresenca(Base):
+    __tablename__ = 'encerramento_presenca'
+    __table_args__ = (
+        ForeignKeyConstraint(['cod_parlamentar'], ['parlamentar.cod_parlamentar'], ondelete='RESTRICT', name='encerramento_presenca_ibfk_1'),
+        ForeignKeyConstraint(['cod_sessao_plen'], ['sessao_plenaria.cod_sessao_plen'], ondelete='CASCADE', name='encerramento_presenca_ibfk_2'),
+        Index('cod_parlamentar', 'cod_parlamentar'),
+        Index('cod_sessao_plen', 'cod_sessao_plen'),
+        Index('dat_ordem', 'dat_ordem'),
+        Index('idx_sessao_parlamentar', 'cod_sessao_plen', 'cod_parlamentar', unique=True)
+    )
+
+    cod_presenca_encerramento = mapped_column(Integer, primary_key=True)
+    cod_sessao_plen = mapped_column(Integer, nullable=False, server_default=text("'0'"))
+    cod_parlamentar = mapped_column(Integer, nullable=False)
+    dat_ordem = mapped_column(Date, nullable=False)
+    ind_excluido = mapped_column(Integer, nullable=False, server_default=text("'0'"))
+
+    parlamentar: Mapped['Parlamentar'] = relationship('Parlamentar', back_populates='encerramento_presenca')
+    sessao_plenaria: Mapped['SessaoPlenaria'] = relationship('SessaoPlenaria', back_populates='encerramento_presenca')
+
+
 class ExpedienteMateria(Base):
     __tablename__ = 'expediente_materia'
     __table_args__ = (
@@ -2931,14 +2862,12 @@ class ExpedienteMateria(Base):
         ForeignKeyConstraint(['cod_parecer'], ['relatoria.cod_relatoria'], ondelete='RESTRICT', onupdate='RESTRICT', name='expediente_materia_ibfk_2'),
         ForeignKeyConstraint(['cod_sessao_plen'], ['sessao_plenaria.cod_sessao_plen'], ondelete='CASCADE', name='expediente_materia_ibfk_3'),
         ForeignKeyConstraint(['tip_quorum'], ['quorum_votacao.cod_quorum'], ondelete='RESTRICT', name='expediente_materia_ibfk_4'),
-        ForeignKeyConstraint(['tip_subfase'], ['tipo_subfase_sessao.id'], ondelete='RESTRICT', onupdate='RESTRICT', name='expediente_materia_ibfk_7'),
         ForeignKeyConstraint(['tip_turno'], ['turno_discussao.cod_turno'], ondelete='RESTRICT', onupdate='RESTRICT', name='expediente_materia_ibfk_6'),
         ForeignKeyConstraint(['tip_votacao'], ['tipo_votacao.tip_votacao'], ondelete='RESTRICT', name='expediente_materia_ibfk_5'),
         Index('cod_materia', 'cod_materia'),
         Index('cod_parecer', 'cod_parecer'),
         Index('cod_sessao_plen', 'cod_sessao_plen'),
         Index('idx_exped_datord', 'dat_ordem', 'ind_excluido'),
-        Index('subfase_sesssao', 'tip_subfase'),
         Index('tip_quorum', 'tip_quorum'),
         Index('tip_turno', 'tip_turno'),
         Index('tip_votacao', 'tip_votacao')
@@ -2950,20 +2879,41 @@ class ExpedienteMateria(Base):
     tip_votacao = mapped_column(Integer, nullable=False)
     tip_quorum = mapped_column(Integer, nullable=False)
     ind_excluido = mapped_column(Integer, nullable=False, server_default=text("'0'"))
-    tip_subfase = mapped_column(Integer)
-    num_ordem = mapped_column(Integer)
     cod_materia = mapped_column(Integer)
     cod_parecer = mapped_column(Integer)
-    tip_turno = mapped_column(Integer)
     txt_observacao = mapped_column(TEXT)
+    num_ordem = mapped_column(Integer)
+    txt_resultado = mapped_column(TEXT)
+    tip_turno = mapped_column(Integer)
 
     materia_legislativa: Mapped[Optional['MateriaLegislativa']] = relationship('MateriaLegislativa', back_populates='expediente_materia')
     relatoria: Mapped[Optional['Relatoria']] = relationship('Relatoria', back_populates='expediente_materia')
     sessao_plenaria: Mapped['SessaoPlenaria'] = relationship('SessaoPlenaria', back_populates='expediente_materia')
     quorum_votacao: Mapped['QuorumVotacao'] = relationship('QuorumVotacao', back_populates='expediente_materia')
-    tipo_subfase_sessao: Mapped[Optional['TipoSubfaseSessao']] = relationship('TipoSubfaseSessao', back_populates='expediente_materia')
     turno_discussao: Mapped[Optional['TurnoDiscussao']] = relationship('TurnoDiscussao', back_populates='expediente_materia')
     tipo_votacao: Mapped['TipoVotacao'] = relationship('TipoVotacao', back_populates='expediente_materia')
+    expediente_discussao: Mapped[List['ExpedienteDiscussao']] = relationship('ExpedienteDiscussao', uselist=True, back_populates='expediente_materia')
+
+
+class ExpedientePresenca(Base):
+    __tablename__ = 'expediente_presenca'
+    __table_args__ = (
+        ForeignKeyConstraint(['cod_parlamentar'], ['parlamentar.cod_parlamentar'], ondelete='RESTRICT', name='expediente_presenca_ibfk_1'),
+        ForeignKeyConstraint(['cod_sessao_plen'], ['sessao_plenaria.cod_sessao_plen'], ondelete='CASCADE', name='expediente_presenca_ibfk_2'),
+        Index('cod_parlamentar', 'cod_parlamentar'),
+        Index('cod_sessao_plen', 'cod_sessao_plen'),
+        Index('dat_ordem', 'dat_ordem', 'ind_excluido'),
+        Index('idx_sessao_parlamentar', 'cod_sessao_plen', 'cod_parlamentar', unique=True)
+    )
+
+    cod_presenca_expediente = mapped_column(Integer, primary_key=True)
+    cod_sessao_plen = mapped_column(Integer, nullable=False, server_default=text("'0'"))
+    cod_parlamentar = mapped_column(Integer, nullable=False)
+    dat_ordem = mapped_column(Date, nullable=False)
+    ind_excluido = mapped_column(Integer, nullable=False, server_default=text("'0'"))
+
+    parlamentar: Mapped['Parlamentar'] = relationship('Parlamentar', back_populates='expediente_presenca')
+    sessao_plenaria: Mapped['SessaoPlenaria'] = relationship('SessaoPlenaria', back_populates='expediente_presenca')
 
 
 class ExpedienteSessaoPlenaria(Base):
@@ -3011,6 +2961,143 @@ class GabineteAtendimento(Base):
     parlamentar: Mapped['Parlamentar'] = relationship('Parlamentar', back_populates='gabinete_atendimento')
 
 
+class LiderancasPartidarias(Base):
+    __tablename__ = 'liderancas_partidarias'
+    __table_args__ = (
+        ForeignKeyConstraint(['cod_parlamentar'], ['parlamentar.cod_parlamentar'], ondelete='RESTRICT', name='liderancas_partidarias_ibfk_1'),
+        ForeignKeyConstraint(['cod_partido'], ['partido.cod_partido'], ondelete='RESTRICT', name='liderancas_partidarias_ibfk_2'),
+        ForeignKeyConstraint(['cod_sessao_plen'], ['sessao_plenaria.cod_sessao_plen'], ondelete='RESTRICT', name='liderancas_partidarias_ibfk_3'),
+        Index('cod_parlamentar', 'cod_parlamentar'),
+        Index('cod_partido', 'cod_partido'),
+        Index('cod_sessao_plen', 'cod_sessao_plen'),
+        Index('idx_num_ordem', 'cod_sessao_plen', 'num_ordem', 'ind_excluido', unique=True)
+    )
+
+    id = mapped_column(Integer, primary_key=True)
+    cod_sessao_plen = mapped_column(Integer, nullable=False)
+    cod_parlamentar = mapped_column(Integer, nullable=False)
+    cod_partido = mapped_column(Integer, nullable=False)
+    num_ordem = mapped_column(TINYINT, nullable=False)
+    ind_excluido = mapped_column(Integer, nullable=False)
+    url_discurso = mapped_column(VARCHAR(150))
+
+    parlamentar: Mapped['Parlamentar'] = relationship('Parlamentar', back_populates='liderancas_partidarias')
+    partido: Mapped['Partido'] = relationship('Partido', back_populates='liderancas_partidarias')
+    sessao_plenaria: Mapped['SessaoPlenaria'] = relationship('SessaoPlenaria', back_populates='liderancas_partidarias')
+
+
+class MateriaApresentadaSessao(Base):
+    __tablename__ = 'materia_apresentada_sessao'
+    __table_args__ = (
+        ForeignKeyConstraint(['cod_doc_acessorio'], ['documento_acessorio.cod_documento'], ondelete='RESTRICT', name='materia_apresentada_sessao_ibfk_2'),
+        ForeignKeyConstraint(['cod_documento'], ['documento_administrativo.cod_documento'], ondelete='RESTRICT', name='materia_apresentada_sessao_ibfk_1'),
+        ForeignKeyConstraint(['cod_emenda'], ['emenda.cod_emenda'], ondelete='RESTRICT', name='materia_apresentada_sessao_ibfk_7'),
+        ForeignKeyConstraint(['cod_materia'], ['materia_legislativa.cod_materia'], ondelete='RESTRICT', name='materia_apresentada_sessao_ibfk_3'),
+        ForeignKeyConstraint(['cod_parecer'], ['relatoria.cod_relatoria'], ondelete='RESTRICT', onupdate='RESTRICT', name='materia_apresentada_sessao_ibfk_4'),
+        ForeignKeyConstraint(['cod_sessao_plen'], ['sessao_plenaria.cod_sessao_plen'], ondelete='RESTRICT', name='materia_apresentada_sessao_ibfk_6'),
+        ForeignKeyConstraint(['cod_substitutivo'], ['substitutivo.cod_substitutivo'], ondelete='RESTRICT', name='materia_apresentada_sessao_ibfk_5'),
+        Index('cod_doc_acessorio', 'cod_doc_acessorio'),
+        Index('cod_emenda', 'cod_emenda'),
+        Index('cod_materia', 'cod_materia'),
+        Index('cod_materia_2', 'cod_materia'),
+        Index('cod_parecer', 'cod_parecer'),
+        Index('cod_sessao_plen', 'cod_sessao_plen'),
+        Index('cod_substitutivo', 'cod_substitutivo'),
+        Index('fk_cod_materia', 'cod_materia'),
+        Index('idx_apres_datord', 'dat_ordem'),
+        Index('idx_cod_documento', 'cod_documento')
+    )
+
+    cod_ordem = mapped_column(Integer, primary_key=True)
+    cod_sessao_plen = mapped_column(Integer, nullable=False)
+    dat_ordem = mapped_column(Date, nullable=False)
+    ind_excluido = mapped_column(Integer, nullable=False)
+    cod_materia = mapped_column(Integer)
+    cod_emenda = mapped_column(Integer)
+    cod_substitutivo = mapped_column(Integer)
+    cod_parecer = mapped_column(Integer)
+    cod_doc_acessorio = mapped_column(Integer)
+    cod_documento = mapped_column(Integer)
+    txt_observacao = mapped_column(TEXT)
+    num_ordem = mapped_column(Integer)
+
+    documento_acessorio: Mapped[Optional['DocumentoAcessorio']] = relationship('DocumentoAcessorio', back_populates='materia_apresentada_sessao')
+    documento_administrativo: Mapped[Optional['DocumentoAdministrativo']] = relationship('DocumentoAdministrativo', back_populates='materia_apresentada_sessao')
+    emenda: Mapped[Optional['Emenda']] = relationship('Emenda', back_populates='materia_apresentada_sessao')
+    materia_legislativa: Mapped[Optional['MateriaLegislativa']] = relationship('MateriaLegislativa', back_populates='materia_apresentada_sessao')
+    relatoria: Mapped[Optional['Relatoria']] = relationship('Relatoria', back_populates='materia_apresentada_sessao')
+    sessao_plenaria: Mapped['SessaoPlenaria'] = relationship('SessaoPlenaria', back_populates='materia_apresentada_sessao')
+    substitutivo: Mapped[Optional['Substitutivo']] = relationship('Substitutivo', back_populates='materia_apresentada_sessao')
+
+
+class MesaSessaoPlenaria(Base):
+    __tablename__ = 'mesa_sessao_plenaria'
+    __table_args__ = (
+        ForeignKeyConstraint(['cod_cargo'], ['cargo_mesa.cod_cargo'], ondelete='RESTRICT', onupdate='RESTRICT', name='mesa_sessao_plenaria_ibfk_5'),
+        ForeignKeyConstraint(['cod_parlamentar'], ['parlamentar.cod_parlamentar'], ondelete='RESTRICT', onupdate='RESTRICT', name='mesa_sessao_plenaria_ibfk_2'),
+        ForeignKeyConstraint(['cod_sessao_leg'], ['sessao_legislativa.cod_sessao_leg'], ondelete='RESTRICT', onupdate='RESTRICT', name='mesa_sessao_plenaria_ibfk_3'),
+        ForeignKeyConstraint(['cod_sessao_plen'], ['sessao_plenaria.cod_sessao_plen'], ondelete='RESTRICT', onupdate='RESTRICT', name='mesa_sessao_plenaria_ibfk_4'),
+        Index('cod_cargo', 'cod_cargo'),
+        Index('cod_parlamentar', 'cod_parlamentar'),
+        Index('cod_sessao_leg', 'cod_sessao_leg'),
+        Index('cod_sessao_plen', 'cod_sessao_plen')
+    )
+
+    id = mapped_column(Integer, primary_key=True)
+    cod_cargo = mapped_column(Integer, nullable=False)
+    cod_sessao_leg = mapped_column(Integer, nullable=False)
+    cod_parlamentar = mapped_column(Integer, nullable=False)
+    cod_sessao_plen = mapped_column(Integer, nullable=False)
+    ind_excluido = mapped_column(INTEGER)
+
+    cargo_mesa: Mapped['CargoMesa'] = relationship('CargoMesa', back_populates='mesa_sessao_plenaria')
+    parlamentar: Mapped['Parlamentar'] = relationship('Parlamentar', back_populates='mesa_sessao_plenaria')
+    sessao_legislativa: Mapped['SessaoLegislativa'] = relationship('SessaoLegislativa', back_populates='mesa_sessao_plenaria')
+    sessao_plenaria: Mapped['SessaoPlenaria'] = relationship('SessaoPlenaria', back_populates='mesa_sessao_plenaria')
+
+
+class Oradores(Base):
+    __tablename__ = 'oradores'
+    __table_args__ = (
+        ForeignKeyConstraint(['cod_parlamentar'], ['parlamentar.cod_parlamentar'], ondelete='RESTRICT', name='oradores_ibfk_2'),
+        ForeignKeyConstraint(['cod_sessao_plen'], ['sessao_plenaria.cod_sessao_plen'], ondelete='CASCADE', name='oradores_ibfk_1'),
+        Index('cod_parlamentar', 'cod_parlamentar'),
+        Index('cod_sessao_plen', 'cod_sessao_plen'),
+        Index('idx_num_ordem', 'cod_sessao_plen', 'num_ordem', 'ind_excluido', unique=True)
+    )
+
+    id = mapped_column(Integer, primary_key=True)
+    cod_sessao_plen = mapped_column(Integer, nullable=False)
+    cod_parlamentar = mapped_column(Integer, nullable=False)
+    num_ordem = mapped_column(Integer, nullable=False)
+    ind_excluido = mapped_column(Integer, nullable=False)
+    url_discurso = mapped_column(VARCHAR(150))
+
+    parlamentar: Mapped['Parlamentar'] = relationship('Parlamentar', back_populates='oradores')
+    sessao_plenaria: Mapped['SessaoPlenaria'] = relationship('SessaoPlenaria', back_populates='oradores')
+
+
+class OradoresExpediente(Base):
+    __tablename__ = 'oradores_expediente'
+    __table_args__ = (
+        ForeignKeyConstraint(['cod_parlamentar'], ['parlamentar.cod_parlamentar'], ondelete='RESTRICT', name='oradores_expediente_ibfk_2'),
+        ForeignKeyConstraint(['cod_sessao_plen'], ['sessao_plenaria.cod_sessao_plen'], ondelete='CASCADE', name='oradores_expediente_ibfk_1'),
+        Index('cod_parlamentar', 'cod_parlamentar'),
+        Index('cod_sessao_plen', 'cod_sessao_plen'),
+        Index('idx_num_ordem', 'cod_sessao_plen', 'num_ordem', 'ind_excluido', unique=True)
+    )
+
+    id = mapped_column(Integer, primary_key=True)
+    cod_sessao_plen = mapped_column(Integer, nullable=False)
+    cod_parlamentar = mapped_column(Integer, nullable=False)
+    num_ordem = mapped_column(Integer, nullable=False)
+    ind_excluido = mapped_column(Integer, nullable=False)
+    url_discurso = mapped_column(VARCHAR(150))
+
+    parlamentar: Mapped['Parlamentar'] = relationship('Parlamentar', back_populates='oradores_expediente')
+    sessao_plenaria: Mapped['SessaoPlenaria'] = relationship('SessaoPlenaria', back_populates='oradores_expediente')
+
+
 class OrdemDia(Base):
     __tablename__ = 'ordem_dia'
     __table_args__ = (
@@ -3018,7 +3105,6 @@ class OrdemDia(Base):
         ForeignKeyConstraint(['cod_parecer'], ['relatoria.cod_relatoria'], ondelete='RESTRICT', onupdate='RESTRICT', name='ordem_dia_ibfk_6'),
         ForeignKeyConstraint(['cod_sessao_plen'], ['sessao_plenaria.cod_sessao_plen'], ondelete='CASCADE', name='ordem_dia_ibfk_2'),
         ForeignKeyConstraint(['tip_quorum'], ['quorum_votacao.cod_quorum'], ondelete='RESTRICT', name='ordem_dia_ibfk_3'),
-        ForeignKeyConstraint(['tip_subfase'], ['tipo_subfase_sessao.id'], ondelete='RESTRICT', onupdate='RESTRICT', name='ordem_dia_ibfk_7'),
         ForeignKeyConstraint(['tip_turno'], ['turno_discussao.cod_turno'], ondelete='RESTRICT', name='ordem_dia_ibfk_5'),
         ForeignKeyConstraint(['tip_votacao'], ['tipo_votacao.tip_votacao'], ondelete='RESTRICT', name='ordem_dia_ibfk_4'),
         Index('cod_materia', 'cod_materia'),
@@ -3026,7 +3112,6 @@ class OrdemDia(Base):
         Index('idx_cod_parecer', 'cod_parecer'),
         Index('idx_dat_ordem', 'dat_ordem'),
         Index('num_ordem', 'num_ordem'),
-        Index('ordem_dia_ibfk_7', 'tip_subfase'),
         Index('tip_quorum', 'tip_quorum'),
         Index('tip_turno', 'tip_turno'),
         Index('tip_votacao', 'tip_votacao')
@@ -3037,22 +3122,48 @@ class OrdemDia(Base):
     dat_ordem = mapped_column(Date, nullable=False)
     tip_votacao = mapped_column(Integer, nullable=False)
     ind_excluido = mapped_column(Integer, nullable=False)
-    tip_subfase = mapped_column(Integer)
-    num_ordem = mapped_column(Integer)
     cod_materia = mapped_column(Integer)
     cod_parecer = mapped_column(Integer)
+    txt_observacao = mapped_column(TEXT)
+    num_ordem = mapped_column(Integer)
+    txt_resultado = mapped_column(TEXT)
     tip_turno = mapped_column(Integer)
     tip_quorum = mapped_column(Integer)
     urgencia = mapped_column(Integer)
-    txt_observacao = mapped_column(TEXT)
+    tipo_discussao_ordem = mapped_column(Integer)
 
     materia_legislativa: Mapped[Optional['MateriaLegislativa']] = relationship('MateriaLegislativa', back_populates='ordem_dia')
     relatoria: Mapped[Optional['Relatoria']] = relationship('Relatoria', back_populates='ordem_dia')
     sessao_plenaria: Mapped['SessaoPlenaria'] = relationship('SessaoPlenaria', back_populates='ordem_dia')
     quorum_votacao: Mapped[Optional['QuorumVotacao']] = relationship('QuorumVotacao', back_populates='ordem_dia')
-    tipo_subfase_sessao: Mapped[Optional['TipoSubfaseSessao']] = relationship('TipoSubfaseSessao', back_populates='ordem_dia')
     turno_discussao: Mapped[Optional['TurnoDiscussao']] = relationship('TurnoDiscussao', back_populates='ordem_dia')
     tipo_votacao: Mapped['TipoVotacao'] = relationship('TipoVotacao', back_populates='ordem_dia')
+    ordem_dia_discussao: Mapped[List['OrdemDiaDiscussao']] = relationship('OrdemDiaDiscussao', uselist=True, back_populates='ordem_dia')
+
+
+class OrdemDiaPresenca(Base):
+    __tablename__ = 'ordem_dia_presenca'
+    __table_args__ = (
+        ForeignKeyConstraint(['cod_parlamentar'], ['parlamentar.cod_parlamentar'], ondelete='RESTRICT', name='ordem_dia_presenca_ibfk_2'),
+        ForeignKeyConstraint(['cod_sessao_plen'], ['sessao_plenaria.cod_sessao_plen'], ondelete='CASCADE', name='ordem_dia_presenca_ibfk_1'),
+        Index('cod_parlamentar', 'cod_parlamentar'),
+        Index('cod_sessao_plen', 'cod_sessao_plen'),
+        Index('dat_ordem', 'dat_ordem'),
+        Index('idx_sessao_parlamentar', 'cod_sessao_plen', 'cod_parlamentar'),
+        Index('tip_frequencia', 'tip_frequencia')
+    )
+
+    cod_presenca_ordem_dia = mapped_column(Integer, primary_key=True)
+    cod_sessao_plen = mapped_column(Integer, nullable=False, server_default=text("'0'"))
+    cod_parlamentar = mapped_column(Integer, nullable=False)
+    tip_frequencia = mapped_column(CHAR(1), nullable=False, server_default=text("'P'"))
+    dat_ordem = mapped_column(Date, nullable=False)
+    ind_excluido = mapped_column(Integer, nullable=False, server_default=text("'0'"))
+    txt_justif_ausencia = mapped_column(VARCHAR(200))
+    flag_presenca = mapped_column(Integer)
+
+    parlamentar: Mapped['Parlamentar'] = relationship('Parlamentar', back_populates='ordem_dia_presenca')
+    sessao_plenaria: Mapped['SessaoPlenaria'] = relationship('SessaoPlenaria', back_populates='ordem_dia_presenca')
 
 
 class ProposicaoGeocode(Base):
@@ -3072,68 +3183,22 @@ class ProposicaoGeocode(Base):
     proposicao: Mapped['Proposicao'] = relationship('Proposicao', back_populates='proposicao_geocode')
 
 
-class RegistroFase(Base):
-    __tablename__ = 'registro_fase'
+class RegistroVotacaoParlamentar(Base):
+    __tablename__ = 'registro_votacao_parlamentar'
     __table_args__ = (
-        ForeignKeyConstraint(['cod_sessao_plen'], ['sessao_plenaria.cod_sessao_plen'], ondelete='RESTRICT', onupdate='RESTRICT', name='registro_fase_ibfk_1'),
-        ForeignKeyConstraint(['tipo_fase'], ['tipo_fase_sessao.id'], ondelete='RESTRICT', onupdate='RESTRICT', name='registro_fase_ibfk_2'),
-        Index('cod_sessao_plen', 'cod_sessao_plen'),
-        Index('tip_fase', 'tipo_fase')
-    )
-
-    id = mapped_column(Integer, primary_key=True)
-    cod_sessao_plen = mapped_column(Integer, nullable=False)
-    tipo_fase = mapped_column(Integer, nullable=False)
-    hor_inicio = mapped_column(Time)
-    hor_fim = mapped_column(Time)
-    duracao = mapped_column(Time)
-    ind_excluido = mapped_column(Integer, server_default=text("'0'"))
-
-    sessao_plenaria: Mapped['SessaoPlenaria'] = relationship('SessaoPlenaria', back_populates='registro_fase')
-    tipo_fase_sessao: Mapped['TipoFaseSessao'] = relationship('TipoFaseSessao', back_populates='registro_fase')
-    registro_mensagem: Mapped[List['RegistroMensagem']] = relationship('RegistroMensagem', uselist=True, back_populates='registro_fase')
-    registro_subfase: Mapped[List['RegistroSubfase']] = relationship('RegistroSubfase', uselist=True, back_populates='registro_fase')
-    materia_apresentada_sessao: Mapped[List['MateriaApresentadaSessao']] = relationship('MateriaApresentadaSessao', uselist=True, back_populates='registro_fase')
-    registro_discurso: Mapped[List['RegistroDiscurso']] = relationship('RegistroDiscurso', uselist=True, back_populates='registro_fase')
-    registro_mesa: Mapped[List['RegistroMesa']] = relationship('RegistroMesa', uselist=True, back_populates='registro_fase')
-    registro_presenca: Mapped[List['RegistroPresenca']] = relationship('RegistroPresenca', uselist=True, back_populates='registro_fase')
-    registro_votacao: Mapped[List['RegistroVotacao']] = relationship('RegistroVotacao', uselist=True, back_populates='registro_fase')
-
-
-class RegistroItensDiversos(Base):
-    __tablename__ = 'registro_itens_diversos'
-    __table_args__ = (
-        ForeignKeyConstraint(['cod_parlamentar'], ['parlamentar.cod_parlamentar'], ondelete='RESTRICT', onupdate='RESTRICT', name='registro_itens_diversos_ibfk_2'),
-        ForeignKeyConstraint(['cod_sessao_plen'], ['sessao_plenaria.cod_sessao_plen'], ondelete='RESTRICT', onupdate='RESTRICT', name='registro_itens_diversos_ibfk_1'),
-        ForeignKeyConstraint(['fase_sessao'], ['tipo_fase_sessao.id'], ondelete='RESTRICT', onupdate='RESTRICT', name='registro_itens_diversos_ibfk_5'),
-        ForeignKeyConstraint(['subfase_sesssao'], ['tipo_subfase_sessao.id'], ondelete='RESTRICT', onupdate='RESTRICT', name='registro_itens_diversos_ibfk_6'),
-        ForeignKeyConstraint(['tip_quorum'], ['quorum_votacao.cod_quorum'], ondelete='RESTRICT', onupdate='RESTRICT', name='registro_itens_diversos_ibfk_4'),
-        ForeignKeyConstraint(['tip_votacao'], ['tipo_votacao.tip_votacao'], ondelete='RESTRICT', onupdate='RESTRICT', name='registro_itens_diversos_ibfk_3'),
+        ForeignKeyConstraint(['cod_parlamentar'], ['parlamentar.cod_parlamentar'], ondelete='RESTRICT', name='registro_votacao_parlamentar_ibfk_1'),
+        ForeignKeyConstraint(['cod_votacao'], ['registro_votacao.cod_votacao'], ondelete='CASCADE', name='registro_votacao_parlamentar_ibfk_2'),
         Index('cod_parlamentar', 'cod_parlamentar'),
-        Index('cod_sessao_plen', 'cod_sessao_plen'),
-        Index('registro_itens_diversos_ibfk_5', 'fase_sessao'),
-        Index('subfase_sesssao', 'subfase_sesssao'),
-        Index('tip_quorum', 'tip_quorum'),
-        Index('tip_votacao', 'tip_votacao')
+        Index('cod_votacao', 'cod_votacao')
     )
 
-    id = mapped_column(Integer, primary_key=True)
-    cod_sessao_plen = mapped_column(Integer, nullable=False)
-    cod_parlamentar = mapped_column(Integer, nullable=False)
-    fase_sessao = mapped_column(Integer, nullable=False)
-    txt_descricao = mapped_column(Text(collation='utf8mb4_unicode_ci'), nullable=False)
-    tip_votacao = mapped_column(Integer, nullable=False)
-    tip_quorum = mapped_column(Integer, nullable=False)
-    ind_excluido = mapped_column(Integer, nullable=False, server_default=text("'0'"))
-    subfase_sesssao = mapped_column(Integer)
+    cod_votacao = mapped_column(Integer, primary_key=True, nullable=False)
+    cod_parlamentar = mapped_column(Integer, primary_key=True, nullable=False)
+    ind_excluido = mapped_column(INTEGER, nullable=False)
+    vot_parlamentar = mapped_column(VARCHAR(10))
 
-    parlamentar: Mapped['Parlamentar'] = relationship('Parlamentar', back_populates='registro_itens_diversos')
-    sessao_plenaria: Mapped['SessaoPlenaria'] = relationship('SessaoPlenaria', back_populates='registro_itens_diversos')
-    tipo_fase_sessao: Mapped['TipoFaseSessao'] = relationship('TipoFaseSessao', back_populates='registro_itens_diversos')
-    tipo_subfase_sessao: Mapped[Optional['TipoSubfaseSessao']] = relationship('TipoSubfaseSessao', back_populates='registro_itens_diversos')
-    quorum_votacao: Mapped['QuorumVotacao'] = relationship('QuorumVotacao', back_populates='registro_itens_diversos')
-    tipo_votacao: Mapped['TipoVotacao'] = relationship('TipoVotacao', back_populates='registro_itens_diversos')
-    registro_votacao: Mapped[List['RegistroVotacao']] = relationship('RegistroVotacao', uselist=True, back_populates='item')
+    parlamentar: Mapped['Parlamentar'] = relationship('Parlamentar', back_populates='registro_votacao_parlamentar')
+    registro_votacao: Mapped['RegistroVotacao'] = relationship('RegistroVotacao', back_populates='registro_votacao_parlamentar')
 
 
 class SessaoPlenariaPainel(Base):
@@ -3160,362 +3225,61 @@ class SessaoPlenariaPainel(Base):
     sessao_plenaria: Mapped['SessaoPlenaria'] = relationship('SessaoPlenaria', back_populates='sessao_plenaria_painel')
 
 
-class RegistroMensagem(Base):
-    __tablename__ = 'registro_mensagem'
+class SessaoPlenariaPresenca(Base):
+    __tablename__ = 'sessao_plenaria_presenca'
     __table_args__ = (
-        ForeignKeyConstraint(['cod_sessao_plen'], ['sessao_plenaria.cod_sessao_plen'], ondelete='RESTRICT', onupdate='RESTRICT', name='registro_mensagem_ibfk_1'),
-        ForeignKeyConstraint(['fase_sessao'], ['registro_fase.id'], ondelete='RESTRICT', onupdate='RESTRICT', name='registro_mensagem_ibfk_2'),
-        Index('cod_sessao_plen', 'cod_sessao_plen'),
-        Index('fase_sessao', 'fase_sessao')
-    )
-
-    id = mapped_column(Integer, primary_key=True)
-    cod_sessao_plen = mapped_column(Integer, nullable=False)
-    txt_mensagem = mapped_column(Text(collation='utf8mb4_unicode_ci'), nullable=False)
-    ind_excluido = mapped_column(Integer, nullable=False, server_default=text("'0'"))
-    fase_sessao = mapped_column(Integer)
-    hor_inicio = mapped_column(Time)
-    hor_fim = mapped_column(Time)
-
-    sessao_plenaria: Mapped['SessaoPlenaria'] = relationship('SessaoPlenaria', back_populates='registro_mensagem')
-    registro_fase: Mapped[Optional['RegistroFase']] = relationship('RegistroFase', back_populates='registro_mensagem')
-
-
-class RegistroSubfase(Base):
-    __tablename__ = 'registro_subfase'
-    __table_args__ = (
-        ForeignKeyConstraint(['cod_sessao_plen'], ['sessao_plenaria.cod_sessao_plen'], ondelete='RESTRICT', onupdate='RESTRICT', name='registro_subfase_ibfk_3'),
-        ForeignKeyConstraint(['fase_sessao'], ['registro_fase.id'], ondelete='RESTRICT', onupdate='RESTRICT', name='registro_subfase_ibfk_1'),
-        ForeignKeyConstraint(['tipo_subfase'], ['tipo_subfase_sessao.id'], ondelete='RESTRICT', onupdate='RESTRICT', name='registro_subfase_ibfk_2'),
-        Index('cod_fase', 'fase_sessao'),
-        Index('cod_sessao_plen', 'cod_sessao_plen'),
-        Index('tip_fase', 'tipo_subfase')
-    )
-
-    id = mapped_column(Integer, primary_key=True)
-    tipo_subfase = mapped_column(Integer, nullable=False)
-    cod_sessao_plen = mapped_column(Integer, nullable=False)
-    fase_sessao = mapped_column(Integer, nullable=False)
-    hor_inicio = mapped_column(Time)
-    hor_fim = mapped_column(Time)
-    duracao = mapped_column(Time)
-    ind_excluido = mapped_column(Integer, server_default=text("'0'"))
-
-    sessao_plenaria: Mapped['SessaoPlenaria'] = relationship('SessaoPlenaria', back_populates='registro_subfase')
-    registro_fase: Mapped['RegistroFase'] = relationship('RegistroFase', back_populates='registro_subfase')
-    tipo_subfase_sessao: Mapped['TipoSubfaseSessao'] = relationship('TipoSubfaseSessao', back_populates='registro_subfase')
-    materia_apresentada_sessao: Mapped[List['MateriaApresentadaSessao']] = relationship('MateriaApresentadaSessao', uselist=True, back_populates='registro_subfase')
-    registro_discurso: Mapped[List['RegistroDiscurso']] = relationship('RegistroDiscurso', uselist=True, back_populates='registro_subfase')
-    registro_mesa: Mapped[List['RegistroMesa']] = relationship('RegistroMesa', uselist=True, back_populates='registro_subfase')
-    registro_presenca: Mapped[List['RegistroPresenca']] = relationship('RegistroPresenca', uselist=True, back_populates='registro_subfase')
-    registro_votacao: Mapped[List['RegistroVotacao']] = relationship('RegistroVotacao', uselist=True, back_populates='registro_subfase')
-
-
-class MateriaApresentadaSessao(Base):
-    __tablename__ = 'materia_apresentada_sessao'
-    __table_args__ = (
-        ForeignKeyConstraint(['cod_doc_acessorio'], ['documento_acessorio.cod_documento'], ondelete='RESTRICT', name='materia_apresentada_sessao_ibfk_2'),
-        ForeignKeyConstraint(['cod_documento'], ['documento_administrativo.cod_documento'], ondelete='RESTRICT', name='materia_apresentada_sessao_ibfk_1'),
-        ForeignKeyConstraint(['cod_emenda'], ['emenda.cod_emenda'], ondelete='RESTRICT', name='materia_apresentada_sessao_ibfk_7'),
-        ForeignKeyConstraint(['cod_materia'], ['materia_legislativa.cod_materia'], ondelete='RESTRICT', name='materia_apresentada_sessao_ibfk_3'),
-        ForeignKeyConstraint(['cod_parecer'], ['relatoria.cod_relatoria'], ondelete='RESTRICT', onupdate='RESTRICT', name='materia_apresentada_sessao_ibfk_4'),
-        ForeignKeyConstraint(['cod_sessao_plen'], ['sessao_plenaria.cod_sessao_plen'], ondelete='RESTRICT', name='materia_apresentada_sessao_ibfk_6'),
-        ForeignKeyConstraint(['cod_substitutivo'], ['substitutivo.cod_substitutivo'], ondelete='RESTRICT', name='materia_apresentada_sessao_ibfk_5'),
-        ForeignKeyConstraint(['fase_sessao'], ['registro_fase.id'], ondelete='RESTRICT', onupdate='RESTRICT', name='materia_apresentada_sessao_ibfk_9'),
-        ForeignKeyConstraint(['subfase_sessao'], ['registro_subfase.id'], ondelete='RESTRICT', onupdate='RESTRICT', name='materia_apresentada_sessao_ibfk_8'),
-        ForeignKeyConstraint(['tip_subfase'], ['tipo_subfase_sessao.id'], ondelete='RESTRICT', onupdate='RESTRICT', name='materia_apresentada_sessao_ibfk_10'),
-        Index('cod_doc_acessorio', 'cod_doc_acessorio'),
-        Index('cod_emenda', 'cod_emenda'),
-        Index('cod_materia', 'cod_materia'),
-        Index('cod_parecer', 'cod_parecer'),
-        Index('cod_sessao_plen', 'cod_sessao_plen'),
-        Index('cod_substitutivo', 'cod_substitutivo'),
-        Index('fase_sessao', 'fase_sessao'),
-        Index('fk_cod_materia', 'cod_materia'),
-        Index('idx_apres_datord', 'dat_ordem'),
-        Index('idx_cod_documento', 'cod_documento'),
-        Index('materia_apresentada_sessao_ibfk_8', 'subfase_sessao'),
-        Index('tip_subfase', 'tip_subfase')
-    )
-
-    cod_ordem = mapped_column(Integer, primary_key=True)
-    cod_sessao_plen = mapped_column(Integer, nullable=False)
-    dat_ordem = mapped_column(Date, nullable=False)
-    ind_excluido = mapped_column(Integer, nullable=False)
-    fase_sessao = mapped_column(Integer)
-    subfase_sessao = mapped_column(Integer)
-    tip_subfase = mapped_column(Integer)
-    hor_inicio = mapped_column(Time)
-    hor_fim = mapped_column(Time)
-    num_ordem = mapped_column(Integer)
-    cod_materia = mapped_column(Integer)
-    cod_emenda = mapped_column(Integer)
-    cod_substitutivo = mapped_column(Integer)
-    cod_parecer = mapped_column(Integer)
-    cod_doc_acessorio = mapped_column(Integer)
-    cod_documento = mapped_column(Integer)
-    txt_observacao = mapped_column(TEXT)
-
-    documento_acessorio: Mapped[Optional['DocumentoAcessorio']] = relationship('DocumentoAcessorio', back_populates='materia_apresentada_sessao')
-    documento_administrativo: Mapped[Optional['DocumentoAdministrativo']] = relationship('DocumentoAdministrativo', back_populates='materia_apresentada_sessao')
-    emenda: Mapped[Optional['Emenda']] = relationship('Emenda', back_populates='materia_apresentada_sessao')
-    materia_legislativa: Mapped[Optional['MateriaLegislativa']] = relationship('MateriaLegislativa', back_populates='materia_apresentada_sessao')
-    relatoria: Mapped[Optional['Relatoria']] = relationship('Relatoria', back_populates='materia_apresentada_sessao')
-    sessao_plenaria: Mapped['SessaoPlenaria'] = relationship('SessaoPlenaria', back_populates='materia_apresentada_sessao')
-    substitutivo: Mapped[Optional['Substitutivo']] = relationship('Substitutivo', back_populates='materia_apresentada_sessao')
-    registro_fase: Mapped[Optional['RegistroFase']] = relationship('RegistroFase', back_populates='materia_apresentada_sessao')
-    registro_subfase: Mapped[Optional['RegistroSubfase']] = relationship('RegistroSubfase', back_populates='materia_apresentada_sessao')
-    tipo_subfase_sessao: Mapped[Optional['TipoSubfaseSessao']] = relationship('TipoSubfaseSessao', back_populates='materia_apresentada_sessao')
-
-
-class RegistroDiscurso(Base):
-    __tablename__ = 'registro_discurso'
-    __table_args__ = (
-        ForeignKeyConstraint(['cod_materia'], ['materia_legislativa.cod_materia'], ondelete='RESTRICT', onupdate='RESTRICT', name='registro_discurso_ibfk_6'),
-        ForeignKeyConstraint(['cod_parlamentar'], ['parlamentar.cod_parlamentar'], ondelete='RESTRICT', onupdate='RESTRICT', name='registro_discurso_ibfk_1'),
-        ForeignKeyConstraint(['cod_sessao_plen'], ['sessao_plenaria.cod_sessao_plen'], ondelete='RESTRICT', onupdate='RESTRICT', name='registro_discurso_ibfk_2'),
-        ForeignKeyConstraint(['fase_sessao'], ['registro_fase.id'], ondelete='RESTRICT', onupdate='RESTRICT', name='registro_discurso_ibfk_7'),
-        ForeignKeyConstraint(['subfase_sesssao'], ['registro_subfase.id'], ondelete='RESTRICT', onupdate='RESTRICT', name='registro_discurso_ibfk_5'),
-        ForeignKeyConstraint(['tip_discurso'], ['tipo_discurso.id'], ondelete='RESTRICT', onupdate='RESTRICT', name='registro_discurso_ibfk_3'),
-        ForeignKeyConstraint(['tip_orador'], ['tipo_orador.id'], ondelete='RESTRICT', onupdate='RESTRICT', name='registro_discurso_ibfk_4'),
-        Index('cod_materia', 'cod_materia'),
+        ForeignKeyConstraint(['cod_parlamentar'], ['parlamentar.cod_parlamentar'], ondelete='RESTRICT', name='sessao_plenaria_presenca_ibfk_1'),
+        ForeignKeyConstraint(['cod_sessao_plen'], ['sessao_plenaria.cod_sessao_plen'], ondelete='CASCADE', name='sessao_plenaria_presenca_ibfk_2'),
         Index('cod_parlamentar', 'cod_parlamentar'),
         Index('cod_sessao_plen', 'cod_sessao_plen'),
-        Index('registro_discurso_ibfk_5', 'subfase_sesssao'),
-        Index('registro_discurso_ibfk_7', 'fase_sessao'),
-        Index('tipo_discurso', 'tip_discurso'),
-        Index('tipo_orador', 'tip_orador')
+        Index('dat_sessao', 'dat_sessao'),
+        Index('idx_sessao_parlamentar', 'cod_sessao_plen', 'cod_parlamentar'),
+        Index('tip_frequencia', 'tip_frequencia')
     )
 
-    id = mapped_column(Integer, primary_key=True)
+    cod_presenca_sessao = mapped_column(Integer, primary_key=True)
     cod_sessao_plen = mapped_column(Integer, nullable=False)
-    fase_sessao = mapped_column(Integer, nullable=False)
-    tip_discurso = mapped_column(Integer, nullable=False)
-    tip_orador = mapped_column(Integer, nullable=False)
+    cod_parlamentar = mapped_column(Integer, nullable=False)
+    tip_frequencia = mapped_column(CHAR(1), nullable=False, server_default=text("'P'"))
     ind_excluido = mapped_column(Integer, nullable=False, server_default=text("'0'"))
-    subfase_sesssao = mapped_column(Integer)
-    cod_ordem = mapped_column(Integer)
-    cod_materia = mapped_column(Integer)
-    cod_parlamentar = mapped_column(Integer)
-    nom_orador = mapped_column(VARCHAR(100))
-    duracao = mapped_column(Time)
-    hor_inicio = mapped_column(Time)
-    hor_fim = mapped_column(Time)
-    tempo_utilizado = mapped_column(Time)
-    txt_observacao = mapped_column(TEXT)
+    txt_justif_ausencia = mapped_column(VARCHAR(200))
+    dat_sessao = mapped_column(Date)
 
-    materia_legislativa: Mapped[Optional['MateriaLegislativa']] = relationship('MateriaLegislativa', back_populates='registro_discurso')
-    parlamentar: Mapped[Optional['Parlamentar']] = relationship('Parlamentar', back_populates='registro_discurso')
-    sessao_plenaria: Mapped['SessaoPlenaria'] = relationship('SessaoPlenaria', back_populates='registro_discurso')
-    registro_fase: Mapped['RegistroFase'] = relationship('RegistroFase', back_populates='registro_discurso')
-    registro_subfase: Mapped[Optional['RegistroSubfase']] = relationship('RegistroSubfase', back_populates='registro_discurso')
-    tipo_discurso: Mapped['TipoDiscurso'] = relationship('TipoDiscurso', back_populates='registro_discurso')
-    tipo_orador: Mapped['TipoOrador'] = relationship('TipoOrador', back_populates='registro_discurso')
-    registro_aparte: Mapped[List['RegistroAparte']] = relationship('RegistroAparte', uselist=True, back_populates='registro_discurso')
+    parlamentar: Mapped['Parlamentar'] = relationship('Parlamentar', back_populates='sessao_plenaria_presenca')
+    sessao_plenaria: Mapped['SessaoPlenaria'] = relationship('SessaoPlenaria', back_populates='sessao_plenaria_presenca')
 
 
-class RegistroMesa(Base):
-    __tablename__ = 'registro_mesa'
+class ExpedienteDiscussao(Base):
+    __tablename__ = 'expediente_discussao'
     __table_args__ = (
-        ForeignKeyConstraint(['cod_sessao_plen'], ['sessao_plenaria.cod_sessao_plen'], ondelete='RESTRICT', onupdate='RESTRICT', name='registro_mesa_ibfk_4'),
-        ForeignKeyConstraint(['fase_sessao'], ['registro_fase.id'], ondelete='RESTRICT', onupdate='RESTRICT', name='registro_mesa_ibfk_5'),
-        ForeignKeyConstraint(['subfase_sessao'], ['registro_subfase.id'], ondelete='RESTRICT', onupdate='RESTRICT', name='registro_mesa_ibfk_6'),
-        Index('cod_sessao_plen', 'cod_sessao_plen'),
-        Index('registro_mesa_ibfk_5', 'fase_sessao'),
-        Index('registro_mesa_ibfk_6', 'subfase_sessao')
-    )
-
-    id = mapped_column(Integer, primary_key=True)
-    hor_inicio = mapped_column(Time, nullable=False)
-    cod_sessao_plen = mapped_column(Integer)
-    fase_sessao = mapped_column(Integer)
-    subfase_sessao = mapped_column(Integer)
-    hor_fim = mapped_column(Time)
-    ind_excluido = mapped_column(Integer, server_default=text("'0'"))
-
-    sessao_plenaria: Mapped[Optional['SessaoPlenaria']] = relationship('SessaoPlenaria', back_populates='registro_mesa')
-    registro_fase: Mapped[Optional['RegistroFase']] = relationship('RegistroFase', back_populates='registro_mesa')
-    registro_subfase: Mapped[Optional['RegistroSubfase']] = relationship('RegistroSubfase', back_populates='registro_mesa')
-    registro_mesa_parlamentar: Mapped[List['RegistroMesaParlamentar']] = relationship('RegistroMesaParlamentar', uselist=True, back_populates='registro_mesa')
-
-
-class RegistroPresenca(Base):
-    __tablename__ = 'registro_presenca'
-    __table_args__ = (
-        ForeignKeyConstraint(['cod_sessao_plen'], ['sessao_plenaria.cod_sessao_plen'], ondelete='RESTRICT', onupdate='RESTRICT', name='registro_presenca_ibfk_1'),
-        ForeignKeyConstraint(['fase_sessao'], ['registro_fase.id'], ondelete='RESTRICT', onupdate='RESTRICT', name='registro_presenca_ibfk_4'),
-        ForeignKeyConstraint(['subfase_sesssao'], ['registro_subfase.id'], ondelete='RESTRICT', onupdate='RESTRICT', name='registro_presenca_ibfk_3'),
-        ForeignKeyConstraint(['tip_chamada'], ['tipo_chamada.id'], ondelete='RESTRICT', onupdate='RESTRICT', name='registro_presenca_ibfk_2'),
-        Index('cod_sessao_plen', 'cod_sessao_plen'),
-        Index('registro_presenca_ibfk_3', 'subfase_sesssao'),
-        Index('registro_presenca_ibfk_4', 'fase_sessao'),
-        Index('tip_chamada', 'tip_chamada')
-    )
-
-    id = mapped_column(Integer, primary_key=True)
-    cod_sessao_plen = mapped_column(Integer, nullable=False)
-    fase_sessao = mapped_column(Integer, nullable=False)
-    tip_chamada = mapped_column(Integer, nullable=False)
-    subfase_sesssao = mapped_column(Integer)
-    hor_inicio = mapped_column(Time)
-    hor_fim = mapped_column(Time)
-    ind_excluido = mapped_column(Integer, server_default=text("'0'"))
-
-    sessao_plenaria: Mapped['SessaoPlenaria'] = relationship('SessaoPlenaria', back_populates='registro_presenca')
-    registro_fase: Mapped['RegistroFase'] = relationship('RegistroFase', back_populates='registro_presenca')
-    registro_subfase: Mapped[Optional['RegistroSubfase']] = relationship('RegistroSubfase', back_populates='registro_presenca')
-    tipo_chamada: Mapped['TipoChamada'] = relationship('TipoChamada', back_populates='registro_presenca')
-    registro_presenca_parlamentar: Mapped[List['RegistroPresencaParlamentar']] = relationship('RegistroPresencaParlamentar', uselist=True, back_populates='registro_presenca')
-
-
-class RegistroVotacao(Base):
-    __tablename__ = 'registro_votacao'
-    __table_args__ = (
-        ForeignKeyConstraint(['cod_emenda'], ['emenda.cod_emenda'], ondelete='RESTRICT', name='registro_votacao_ibfk_1'),
-        ForeignKeyConstraint(['cod_materia'], ['materia_legislativa.cod_materia'], ondelete='RESTRICT', name='registro_votacao_ibfk_2'),
-        ForeignKeyConstraint(['cod_parecer'], ['relatoria.cod_relatoria'], ondelete='RESTRICT', onupdate='RESTRICT', name='registro_votacao_ibfk_3'),
-        ForeignKeyConstraint(['cod_sessao_plen'], ['sessao_plenaria.cod_sessao_plen'], ondelete='RESTRICT', onupdate='RESTRICT', name='registro_votacao_ibfk_7'),
-        ForeignKeyConstraint(['cod_substitutivo'], ['substitutivo.cod_substitutivo'], ondelete='RESTRICT', name='registro_votacao_ibfk_4'),
-        ForeignKeyConstraint(['fase_sessao'], ['registro_fase.id'], ondelete='RESTRICT', onupdate='RESTRICT', name='registro_votacao_ibfk_9'),
-        ForeignKeyConstraint(['item_id'], ['registro_itens_diversos.id'], ondelete='RESTRICT', onupdate='RESTRICT', name='registro_votacao_ibfk_8'),
-        ForeignKeyConstraint(['subfase_sesssao'], ['registro_subfase.id'], ondelete='RESTRICT', onupdate='RESTRICT', name='registro_votacao_ibfk_6'),
-        ForeignKeyConstraint(['tip_resultado_votacao'], ['tipo_resultado_votacao.tip_resultado_votacao'], ondelete='RESTRICT', onupdate='RESTRICT', name='registro_votacao_ibfk_5'),
-        Index('cod_emenda', 'cod_emenda'),
-        Index('cod_item', 'item_id'),
-        Index('cod_materia', 'cod_materia'),
+        ForeignKeyConstraint(['cod_ordem'], ['expediente_materia.cod_ordem'], ondelete='CASCADE', name='fk_cod_ordem'),
+        ForeignKeyConstraint(['cod_parlamentar'], ['parlamentar.cod_parlamentar'], ondelete='RESTRICT', name='expediente_discussao_ibfk_1'),
         Index('cod_ordem', 'cod_ordem'),
-        Index('cod_parecer', 'cod_parecer'),
-        Index('cod_sessao_plen', 'cod_sessao_plen'),
-        Index('cod_subemenda', 'cod_subemenda'),
-        Index('cod_substitutivo', 'cod_substitutivo'),
-        Index('fase_sessao', 'fase_sessao'),
-        Index('idx_unique', 'cod_materia', 'cod_ordem', 'cod_emenda', 'cod_substitutivo', unique=True),
-        Index('registro_votacao_ibfk_6', 'subfase_sesssao'),
-        Index('tip_resultado_votacao', 'tip_resultado_votacao')
-    )
-
-    cod_votacao = mapped_column(Integer, primary_key=True)
-    ind_excluido = mapped_column(Integer, nullable=False)
-    cod_sessao_plen = mapped_column(Integer)
-    fase_sessao = mapped_column(Integer)
-    subfase_sesssao = mapped_column(Integer)
-    cod_ordem = mapped_column(Integer)
-    cod_materia = mapped_column(Integer)
-    cod_parecer = mapped_column(Integer)
-    cod_emenda = mapped_column(Integer)
-    cod_subemenda = mapped_column(Integer)
-    cod_substitutivo = mapped_column(Integer)
-    item_id = mapped_column(Integer)
-    hor_inicio = mapped_column(Time)
-    hor_fim = mapped_column(Time)
-    num_votos_sim = mapped_column(Integer)
-    num_votos_nao = mapped_column(Integer)
-    num_abstencao = mapped_column(Integer)
-    num_ausentes = mapped_column(Integer)
-    txt_observacao = mapped_column(TEXT)
-    tip_resultado_votacao = mapped_column(Integer)
-
-    emenda: Mapped[Optional['Emenda']] = relationship('Emenda', back_populates='registro_votacao')
-    materia_legislativa: Mapped[Optional['MateriaLegislativa']] = relationship('MateriaLegislativa', back_populates='registro_votacao')
-    relatoria: Mapped[Optional['Relatoria']] = relationship('Relatoria', back_populates='registro_votacao')
-    sessao_plenaria: Mapped[Optional['SessaoPlenaria']] = relationship('SessaoPlenaria', back_populates='registro_votacao')
-    substitutivo: Mapped[Optional['Substitutivo']] = relationship('Substitutivo', back_populates='registro_votacao')
-    registro_fase: Mapped[Optional['RegistroFase']] = relationship('RegistroFase', back_populates='registro_votacao')
-    item: Mapped[Optional['RegistroItensDiversos']] = relationship('RegistroItensDiversos', back_populates='registro_votacao')
-    registro_subfase: Mapped[Optional['RegistroSubfase']] = relationship('RegistroSubfase', back_populates='registro_votacao')
-    tipo_resultado_votacao: Mapped[Optional['TipoResultadoVotacao']] = relationship('TipoResultadoVotacao', back_populates='registro_votacao')
-    registro_votacao_parlamentar: Mapped[List['RegistroVotacaoParlamentar']] = relationship('RegistroVotacaoParlamentar', uselist=True, back_populates='registro_votacao')
-
-
-class RegistroAparte(Base):
-    __tablename__ = 'registro_aparte'
-    __table_args__ = (
-        ForeignKeyConstraint(['cod_aparteante'], ['parlamentar.cod_parlamentar'], ondelete='RESTRICT', onupdate='RESTRICT', name='registro_aparte_ibfk_1'),
-        ForeignKeyConstraint(['id_discurso'], ['registro_discurso.id'], ondelete='RESTRICT', onupdate='RESTRICT', name='registro_aparte_ibfk_2'),
-        Index('cod_aparteante', 'cod_aparteante'),
-        Index('cod_discurso', 'id_discurso')
-    )
-
-    id = mapped_column(Integer, primary_key=True)
-    id_discurso = mapped_column(Integer, nullable=False)
-    cod_aparteante = mapped_column(Integer, nullable=False)
-    ind_excluido = mapped_column(Integer, nullable=False, server_default=text("'0'"))
-    duracao = mapped_column(Time)
-    hor_inicio = mapped_column(Time)
-    hor_fim = mapped_column(Time)
-    tempo_utilizado = mapped_column(Time)
-
-    parlamentar: Mapped['Parlamentar'] = relationship('Parlamentar', back_populates='registro_aparte')
-    registro_discurso: Mapped['RegistroDiscurso'] = relationship('RegistroDiscurso', back_populates='registro_aparte')
-
-
-class RegistroMesaParlamentar(Base):
-    __tablename__ = 'registro_mesa_parlamentar'
-    __table_args__ = (
-        ForeignKeyConstraint(['cod_cargo'], ['cargo_mesa.cod_cargo'], ondelete='RESTRICT', onupdate='RESTRICT', name='registro_mesa_parlamentar_ibfk_4'),
-        ForeignKeyConstraint(['cod_mesa_sessao'], ['registro_mesa.id'], ondelete='RESTRICT', onupdate='RESTRICT', name='registro_mesa_parlamentar_ibfk_2'),
-        ForeignKeyConstraint(['cod_parlamentar'], ['parlamentar.cod_parlamentar'], ondelete='RESTRICT', onupdate='RESTRICT', name='registro_mesa_parlamentar_ibfk_3'),
-        Index('cod_cargo', 'cod_cargo'),
-        Index('cod_mesa_sessao', 'cod_mesa_sessao'),
         Index('cod_parlamentar', 'cod_parlamentar')
     )
 
     id = mapped_column(Integer, primary_key=True)
-    cod_mesa_sessao = mapped_column(Integer, nullable=False)
+    cod_ordem = mapped_column(Integer, nullable=False)
     cod_parlamentar = mapped_column(Integer, nullable=False)
-    cod_cargo = mapped_column(Integer, nullable=False)
     ind_excluido = mapped_column(Integer, nullable=False, server_default=text("'0'"))
 
-    cargo_mesa: Mapped['CargoMesa'] = relationship('CargoMesa', back_populates='registro_mesa_parlamentar')
-    registro_mesa: Mapped['RegistroMesa'] = relationship('RegistroMesa', back_populates='registro_mesa_parlamentar')
-    parlamentar: Mapped['Parlamentar'] = relationship('Parlamentar', back_populates='registro_mesa_parlamentar')
+    expediente_materia: Mapped['ExpedienteMateria'] = relationship('ExpedienteMateria', back_populates='expediente_discussao')
+    parlamentar: Mapped['Parlamentar'] = relationship('Parlamentar', back_populates='expediente_discussao')
 
 
-class RegistroPresencaParlamentar(Base):
-    __tablename__ = 'registro_presenca_parlamentar'
+class OrdemDiaDiscussao(Base):
+    __tablename__ = 'ordem_dia_discussao'
     __table_args__ = (
-        ForeignKeyConstraint(['cod_parlamentar'], ['parlamentar.cod_parlamentar'], ondelete='RESTRICT', onupdate='RESTRICT', name='registro_presenca_parlamentar_ibfk_2'),
-        ForeignKeyConstraint(['cod_presenca'], ['registro_presenca.id'], ondelete='RESTRICT', onupdate='RESTRICT', name='registro_presenca_parlamentar_ibfk_1'),
-        ForeignKeyConstraint(['tip_presenca'], ['tipo_presenca.id'], ondelete='RESTRICT', onupdate='RESTRICT', name='registro_presenca_parlamentar_ibfk_3'),
-        Index('cod_presenca', 'cod_presenca'),
-        Index('idx_parlamentar_presenca', 'cod_parlamentar', 'cod_presenca', unique=True),
-        Index('tip_presenca', 'tip_presenca')
+        ForeignKeyConstraint(['cod_ordem'], ['ordem_dia.cod_ordem'], ondelete='CASCADE', name='ordem_dia_discussao_ibfk_1'),
+        ForeignKeyConstraint(['cod_parlamentar'], ['parlamentar.cod_parlamentar'], ondelete='RESTRICT', name='ordem_dia_discussao_ibfk_2'),
+        Index('cod_ordem', 'cod_ordem'),
+        Index('cod_parlamentar', 'cod_parlamentar')
     )
 
     id = mapped_column(Integer, primary_key=True)
-    cod_presenca = mapped_column(Integer, nullable=False)
+    cod_ordem = mapped_column(Integer, nullable=False)
     cod_parlamentar = mapped_column(Integer, nullable=False)
-    tip_presenca = mapped_column(Integer, nullable=False)
-    hor_registro = mapped_column(Time, nullable=False)
-    mod_registro = mapped_column(ENUM('digital', 'facial', 'operador', ''), nullable=False)
     ind_excluido = mapped_column(Integer, nullable=False, server_default=text("'0'"))
-    txt_observacao = mapped_column(String(200, 'utf8mb4_unicode_ci'))
 
-    parlamentar: Mapped['Parlamentar'] = relationship('Parlamentar', back_populates='registro_presenca_parlamentar')
-    registro_presenca: Mapped['RegistroPresenca'] = relationship('RegistroPresenca', back_populates='registro_presenca_parlamentar')
-    tipo_presenca: Mapped['TipoPresenca'] = relationship('TipoPresenca', back_populates='registro_presenca_parlamentar')
-
-
-class RegistroVotacaoParlamentar(Base):
-    __tablename__ = 'registro_votacao_parlamentar'
-    __table_args__ = (
-        ForeignKeyConstraint(['cod_parlamentar'], ['parlamentar.cod_parlamentar'], ondelete='RESTRICT', name='registro_votacao_parlamentar_ibfk_1'),
-        ForeignKeyConstraint(['cod_votacao'], ['registro_votacao.cod_votacao'], ondelete='CASCADE', name='registro_votacao_parlamentar_ibfk_2'),
-        ForeignKeyConstraint(['tip_voto'], ['tipo_voto.id'], ondelete='RESTRICT', onupdate='RESTRICT', name='registro_votacao_parlamentar_ibfk_3'),
-        Index('cod_parlamentar', 'cod_parlamentar'),
-        Index('cod_votacao', 'cod_votacao'),
-        Index('tip_voto', 'tip_voto')
-    )
-
-    id = mapped_column(Integer, primary_key=True)
-    cod_votacao = mapped_column(Integer, nullable=False)
-    cod_parlamentar = mapped_column(Integer, nullable=False)
-    mod_registro = mapped_column(ENUM('digital', 'facial', 'manual', ''), nullable=False, server_default=text("'manual'"))
-    ind_excluido = mapped_column(INTEGER, nullable=False)
-    tip_voto = mapped_column(Integer)
-    txt_observacao = mapped_column(String(200, 'utf8mb4_unicode_ci'))
-    hor_registro = mapped_column(Time)
-
-    parlamentar: Mapped['Parlamentar'] = relationship('Parlamentar', back_populates='registro_votacao_parlamentar')
-    registro_votacao: Mapped['RegistroVotacao'] = relationship('RegistroVotacao', back_populates='registro_votacao_parlamentar')
-    tipo_voto: Mapped[Optional['TipoVoto']] = relationship('TipoVoto', back_populates='registro_votacao_parlamentar')
+    ordem_dia: Mapped['OrdemDia'] = relationship('OrdemDia', back_populates='ordem_dia_discussao')
+    parlamentar: Mapped['Parlamentar'] = relationship('Parlamentar', back_populates='ordem_dia_discussao')

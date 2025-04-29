@@ -83,7 +83,7 @@
                                                 <input name="cod_usuario" type="hidden" value="<dtml-var cod_usuario_corrente>" />
                                             </div>
                                         </td>
-                                        <td><a href="<dtml-var pdf_to_sign>" target="_blank"><dtml-var id_documento></a></td>
+                                        <td><a href="<dtml-var pdf_to_sign>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><dtml-var id_documento></a></td>
                                         <td><dtml-var tipo_documento></td>
                                         <td><dtml-in expr="zsql.assinatura_documento_obter_zsql(codigo=codigo,tipo_doc=tipo_doc, cod_usuario=cod_usuario_corrente, ind_assinado=0)" mapping><dtml-var expr="DateTime(dat_solicitacao, datefmt='international').strftime('%d/%m/%Y %H:%M')"></dtml-in></td>
                                     </tr>

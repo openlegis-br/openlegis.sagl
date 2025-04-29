@@ -35,12 +35,12 @@
                   <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                   <p class="mb-0"><i class="fa fa-info-circle"></i> O autor já apresentou <b><dtml-var sequence-length> matéria<dtml-if expr="_['sequence-length'] > 1">s</dtml-if> legislativa<dtml-if expr="_['sequence-length'] > 1">s</dtml-if></b>  do tipo "<dtml-var des_tipo_proposicao>" no exercício de <dtml-var ano_corrente></p>
                 </div>
-             </dtml-if>
-             <dtml-if expr="(des_tipo_proposicao == 'Moção' and _['sequence-length'] > 50)">
-                <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                  <p class="mb-0"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> O autor ultrapassou o número de <b>50 Moções</b> apresentadas no exercício de <dtml-var ano_corrente>.</p>
-                </div>
+                <dtml-if expr="(des_tipo_proposicao == 'Moção' and _['sequence-length'] > 50)">
+                   <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                     <p class="mb-0"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> O autor ultrapassou o número de <b>50 Moções</b> apresentadas no exercício de <dtml-var ano_corrente>.</p>
+                   </div>
+                </dtml-if>
              </dtml-if>
           </dtml-in>
         </dtml-if>

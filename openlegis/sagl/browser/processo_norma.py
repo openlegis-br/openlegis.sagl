@@ -1,17 +1,42 @@
 # -*- coding: utf-8 -*-
 import os
 import shutil
-import asyncio
-import aiofiles
-import pymupdf
+import time
+import random
+import fcntl
+import logging
 from io import BytesIO
 from DateTime import DateTime
+from datetime import datetime, timedelta
 from five import grok
 from zope.interface import Interface
-import logging
+import fitz
+import asyncio
+import aiofiles
 
-# Configuração do logger
+# Configurar logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
+def sanear_pdf(pdf_bytes, title=None, mod_date=None):
+    try:
+        with fitz.open(stream=BytesIO(pdf_bytes), filetype="pdf") as doc:
+            _ = doc.page_count  # força leitura
+            metadata = doc.metadata or {}
+            if title:
+                metadata["title"] = title
+            if mod_date:
+                metadata["modDate"] = mod_date
+            doc.set_metadata(metadata)
+            doc.bake()
+            output_stream = BytesIO()
+            doc.save(output_stream, garbage=3, deflate=True)
+            output_stream.seek(0)
+
+        return fitz.open(stream=output_stream, filetype="pdf")
+    except Exception as e:
+        logging.error(f"[sanear_pdf] Erro ao limpar PDF: {e}")
+        return None
+
 
 class ProcessoNorma(grok.View):
     grok.context(Interface)
@@ -19,239 +44,233 @@ class ProcessoNorma(grok.View):
     grok.name('norma_integral')
     install_home = os.environ.get('INSTALL_HOME')
 
-    async def download_files(self, cod_norma):
-        dirpath = os.path.join(self.install_home, 'var/tmp/processo_norma_' + str(cod_norma))
+    def download_files(self, cod_norma, forcar_regeneracao=False):
+        dirpath = os.path.join(self.install_home, f'var/tmp/processo_norma_{cod_norma}')
         pagepath = os.path.join(dirpath, 'pages')
+        ready_file = os.path.join(dirpath, ".ready")
+        lock_file = os.path.join(dirpath, ".lock")
+
+        if os.path.exists(ready_file) and not forcar_regeneracao:
+            try:
+                with open(ready_file, 'r') as f:
+                    ultima_geracao = datetime.strptime(f.read(), '%Y-%m-%d %H:%M:%S')
+                if (datetime.now() - ultima_geracao) < timedelta(minutes=5):
+                    logging.info(f"[cache-hit] Usando versão em cache para {cod_norma}")
+                    return
+            except Exception as e:
+                logging.warning(f"Erro ao verificar ready_file: {e}")
+
+        os.makedirs(dirpath, exist_ok=True)
+        os.makedirs(pagepath, exist_ok=True)
 
         try:
-            if os.path.exists(dirpath) and os.path.isdir(dirpath):
-                shutil.rmtree(dirpath)
-                os.makedirs(dirpath)
-                os.makedirs(pagepath)
-                logging.info(f"O diretório {dirpath} já existe, por isso foi removido e criado novamente.")
-            elif not os.path.exists(dirpath):
-                os.makedirs(dirpath)
-                os.makedirs(pagepath)
-                logging.info(f"Diretório {dirpath} criado.")
-            else:
-                logging.warning(f"O caminho {dirpath} existe, mas não é um diretório.")
+            with open(lock_file, 'w') as f:
+                try:
+                    fcntl.flock(f, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                except IOError:
+                    logging.warning(f"[lock] Norma {cod_norma} já está sendo processada por outro processo")
+                    return
 
-            lst_arquivos = []
+                if os.path.exists(dirpath):
+                    shutil.rmtree(dirpath)
+                    os.makedirs(dirpath)
+                    os.makedirs(pagepath)
 
-            for norma in self.context.zsql.norma_juridica_obter_zsql(cod_norma=cod_norma):
-                processo_integral = norma.sgl_tipo_norma+'-'+str(norma.num_norma)+'-'+str(norma.ano_norma)+'.pdf'
-                id_processo = norma.sgl_tipo_norma + ' ' + str(norma.num_norma) + '/' +str(norma.ano_norma)
-                id_norma = norma.des_tipo_norma + ' nº ' + str(norma.num_norma) + '/' +str(norma.ano_norma)
-                id_capa = 'capa_' + norma.sgl_tipo_norma+'-'+str(norma.num_norma)+'-'+str(norma.ano_norma)
-                id_arquivo = "%s.pdf" % str(id_capa)
+                lst_arquivos = []
+                for norma in self.context.zsql.norma_juridica_obter_zsql(cod_norma=cod_norma):
+                    processo_integral = f"{norma.sgl_tipo_norma}-{norma.num_norma}-{norma.ano_norma}.pdf"
+                    id_processo = f"{norma.sgl_tipo_norma} {norma.num_norma}/{norma.ano_norma}"
+                    id_norma = f"{norma.des_tipo_norma} nº {norma.num_norma}/{norma.ano_norma}"
+                    id_capa = f"capa_{norma.sgl_tipo_norma}-{norma.num_norma}-{norma.ano_norma}"
+                    id_arquivo = f"{id_capa}.pdf"
 
-                nom_arquivo_compilado = str(cod_norma) + '_texto_consolidado.pdf'
-                nom_arquivo = str(cod_norma) + '_texto_integral.pdf'
+                    nom_arquivo_compilado = f"{cod_norma}_texto_consolidado.pdf"
+                    nom_arquivo = f"{cod_norma}_texto_integral.pdf"
 
-                self.context.modelo_proposicao.capa_norma(cod_norma=norma.cod_norma, action='gerar')
-                logging.info(f"Capa da norma gerada para norma {norma.cod_norma}")
-                if hasattr(self.context.temp_folder, id_arquivo):
-                    dic = {}
-                    dic["data"] = DateTime(norma.dat_norma, datefmt='international').strftime('%Y-%m-%d 00:00:01')
-                    dic['path'] = self.context.temp_folder
-                    dic['file'] = id_arquivo
-                    dic['title'] = 'Capa da Norma'
-                    lst_arquivos.append(dic)
-                    logging.debug(f"Capa da Norma encontrada: {id_arquivo}")
-                else:
-                    logging.warning(f"Capa da Norma não encontrada: {id_arquivo}")
+                    self.context.modelo_proposicao.capa_norma(cod_norma=norma.cod_norma, action='gerar')
 
-                if hasattr(self.context.sapl_documentos.norma_juridica, nom_arquivo_compilado):
-                    dic = {}
-                    dic["data"] = DateTime(norma.dat_norma, datefmt='international').strftime('%Y-%m-%d 00:00:02')
-                    dic['path'] = self.context.sapl_documentos.norma_juridica
-                    dic['file'] = nom_arquivo_compilado
-                    dic['title'] = 'Texto Compilado'
-                    lst_arquivos.append(dic)
-                    logging.debug(f"Texto Compilado encontrado: {nom_arquivo_compilado}")
-                else:
-                   logging.warning(f"Texto Compilado não encontrado: {nom_arquivo_compilado}")
+                    if hasattr(self.context.temp_folder, id_arquivo):
+                        lst_arquivos.append({
+                            "data": DateTime(norma.dat_norma, datefmt='international').strftime('%Y-%m-%d 00:00:01'),
+                            'path': self.context.temp_folder,
+                            'file': id_arquivo,
+                            'title': 'Capa da Norma'
+                        })
 
-                if hasattr(self.context.sapl_documentos.norma_juridica, nom_arquivo):
-                    dic = {}
-                    dic["data"] = DateTime(norma.dat_norma, datefmt='international').strftime('%Y-%m-%d 00:00:03')
-                    dic['path'] = self.context.sapl_documentos.norma_juridica
-                    dic['file'] = nom_arquivo
-                    dic['title'] = id_norma
-                    lst_arquivos.append(dic)
-                    logging.debug(f"Texto Integral encontrado: {nom_arquivo}")
-                else:
-                    logging.warning(f"Texto Integral não encontrado: {nom_arquivo}")
+                    if hasattr(self.context.sapl_documentos.norma_juridica, nom_arquivo_compilado):
+                        lst_arquivos.append({
+                            "data": DateTime(norma.dat_norma, datefmt='international').strftime('%Y-%m-%d 00:00:02'),
+                            'path': self.context.sapl_documentos.norma_juridica,
+                            'file': nom_arquivo_compilado,
+                            'title': 'Texto Compilado'
+                        })
 
-                for anexo in self.context.zsql.anexo_norma_obter_zsql(cod_norma=norma.cod_norma, ind_excluido=0):
-                    nom_anexo = str(cod_norma) + '_anexo_' + anexo.cod_anexo
-                    if hasattr(self.context.sapl_documentos.norma_juridica, nom_anexo):
-                        dic = {}
-                        dic["data"] = DateTime(norma.dat_norma, datefmt='international').strftime('%Y-%m-%d 00:00:03') + anexo.cod_anexo
-                        dic['path'] = self.context.sapl_documentos.norma_juridica
-                        dic['file'] = nom_anexo
-                        dic['title'] = anexo.txt_descricao
-                        lst_arquivos.append(dic)
-                        logging.debug(f"Anexo encontrado: {nom_anexo}")
+                    if hasattr(self.context.sapl_documentos.norma_juridica, nom_arquivo):
+                        lst_arquivos.append({
+                            "data": DateTime(norma.dat_norma, datefmt='international').strftime('%Y-%m-%d 00:00:03'),
+                            'path': self.context.sapl_documentos.norma_juridica,
+                            'file': nom_arquivo,
+                            'title': id_norma
+                        })
+
+                lst_arquivos.sort(key=lambda dic: dic['data'])
+                lst_arquivos = [(i + 1, j) for i, j in enumerate(lst_arquivos)]
+
+                merger = fitz.open()
+                for i, dic in lst_arquivos:
+                    downloaded_pdf = str(i).rjust(4, '0') + '.pdf'
+                    arq = getattr(dic['path'], dic['file'], None)
+                    if arq is None:
+                        logging.error(f"Arquivo não encontrado: {dic['path']}/{dic['file']}")
+                        continue
+
+                    doc_tmp = sanear_pdf(BytesIO(bytes(arq.data)).read(), title=dic["title"], mod_date=dic["data"])
+                    if doc_tmp:
+                        try:
+                            merger.insert_pdf(doc_tmp)
+                            with open(os.path.join(dirpath, downloaded_pdf), 'wb') as f:
+                                f.write(doc_tmp.tobytes())
+                            logging.info(f"Arquivo adicionado: {dic['title']}")
+                        except Exception as e:
+                            logging.error(f"Erro ao inserir PDF: {dic['title']}: {e}")
                     else:
-                        logging.warning(f"Anexo não encontrado: {nom_anexo}")
+                        logging.error(f"Falha ao sanear PDF: {dic['title']}")
 
-            lst_arquivos.sort(key=lambda dic: dic['data'])
-            lst_arquivos = [(i + 1, j) for i, j in enumerate(lst_arquivos)]
+                merged_pdf = merger.tobytes()
+                existing_pdf = fitz.open(stream=merged_pdf)
+                numPages = existing_pdf.page_count
 
-            merger = pymupdf.open()
+                for page_index in range(numPages):
+                    w = existing_pdf[page_index].rect.width
+                    text = f"Fls. {page_index + 1}/{numPages}"
+                    p1 = fitz.Point(w - 70, 25)
+                    shape = existing_pdf[page_index].new_shape()
+                    shape.insert_text(p1, id_processo + '\n' + text, fontname="helv", fontsize=8)
+                    shape.commit()
 
-            for i, dic in lst_arquivos:
-                downloaded_pdf = str(i).rjust(4, '0') + '.pdf'
-                arq = getattr(dic['path'], dic['file'])
-                arquivo_doc = BytesIO(bytes(arq.data))
+                metadata = {"title": id_processo, "modDate": dic["data"]}
+                existing_pdf.set_metadata(metadata)
+                data = existing_pdf.tobytes(deflate=True, garbage=3, use_objstms=1)
 
-                with pymupdf.open(stream=arquivo_doc) as texto_anexo:
-                    metadata = {"title": dic["title"]}
-                    texto_anexo.set_metadata(metadata)
-                    texto_anexo.bake()
-                    merger.insert_pdf(texto_anexo)
-                    arq2 = texto_anexo.tobytes()
-                    async with aiofiles.open(os.path.join(dirpath) + '/' + downloaded_pdf, 'wb') as f:
-                        await f.write(arq2)
-                logging.info(f"Arquivo {downloaded_pdf} processado e salvo.")
+                with open(os.path.join(dirpath, processo_integral), 'wb') as f:
+                    f.write(data)
 
-            merged_pdf = merger.tobytes()
-            existing_pdf = pymupdf.open(stream=merged_pdf)
-            numPages = existing_pdf.page_count
+                for i, page in enumerate(existing_pdf):
+                    file_name = os.path.join(pagepath, f"pg_{str(i+1).rjust(4, '0')}.pdf")
+                    with fitz.open() as doc_tmp:
+                        doc_tmp.insert_pdf(existing_pdf, from_page=i, to_page=i)
+                        doc_tmp.set_metadata({"title": f"pg_{str(i+1).rjust(4, '0')}.pdf", "modDate": dic["data"]})
+                        doc_tmp.save(file_name, deflate=True, garbage=3, use_objstms=1)
 
-            loop = asyncio.get_event_loop()
+                with open(ready_file, 'w') as ready_f:
+                    ready_f.write(datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+                logging.info(f"[finalizado] Norma {cod_norma} gerada com sucesso")
 
-            for page_index, i in enumerate(range(len(existing_pdf))):
-                w = existing_pdf[page_index].rect.width
-                h = existing_pdf[page_index].rect.height
-                margin = 5
-                left = 10 - margin
-                bottom = h - 60 - margin
-                black = pymupdf.pdfcolor["black"]
-                text = "Fls. %s/%s" % (i+1, numPages)
-                p1 = pymupdf.Point(w - 70 - margin, margin + 20)
-                shape = existing_pdf[page_index].new_shape()
-                shape.draw_circle(p1,1)
-                shape.insert_text(p1, id_processo+'\n'+text, fontname = "helv", fontsize = 8)
-                shape.commit()
-            metadata = {"title": id_processo}
-            existing_pdf.set_metadata(metadata)
-            data = existing_pdf.tobytes(deflate=True, garbage=3, use_objstms=1)
-            async with aiofiles.open(os.path.join(dirpath) + '/' + processo_integral, 'wb') as f:
-                await f.write(data)
-            logging.info(f"Arquivo {processo_integral} gerado com sucesso.")
-
-            with pymupdf.open(stream=data) as doc:
-                tasks = []
-                for i, page in enumerate(doc):
-                    page_id = 'pg_' + str(i+1).rjust(4, '0') + '.pdf'
-                    file_name = os.path.join(os.path.join(pagepath), page_id)
-
-                    async def process_page(doc, i, file_name):
-                        with pymupdf.open() as doc_tmp:
-                            doc_tmp.insert_pdf(doc, from_page=i, to_page=i, rotate=-1, show_progress=False)
-                            metadata = {"title": page_id}
-                            doc_tmp.set_metadata(metadata)
-                            doc_tmp.save(file_name, deflate=True, garbage=3, use_objstms=1)
-                        logging.debug(f"Página {file_name} extraída.")
-
-                    tasks.append(process_page(doc, i, file_name))
-                await asyncio.gather(*tasks)
-                logging.info("Processamento de páginas concluído.")
         except Exception as e:
-            logging.error(f"Erro ao processar arquivos: {e}", exc_info=True)
+            logging.error(f"Erro crítico ao processar {cod_norma}: {e}")
+            if os.path.exists(dirpath):
+                try:
+                    shutil.rmtree(dirpath)
+                except:
+                    pass
+            raise
+        finally:
+            if os.path.exists(lock_file):
+                try:
+                    os.remove(lock_file)
+                except:
+                    pass
 
     def render(self, cod_norma, action):
         portal_url = self.context.portal_url.portal_url()
-        portal = self.context.portal_url.getPortalObject()
-        dirpath = os.path.join(self.install_home, 'var/tmp/processo_norma_' + str(cod_norma))
+        dirpath = os.path.join(self.install_home, f'var/tmp/processo_norma_{cod_norma}')
         pagepath = os.path.join(dirpath, 'pages')
+        ready_file = os.path.join(dirpath, ".ready")
 
-        asyncio.run(self.download_files(cod_norma=cod_norma))
+        # Pequeno atraso aleatório para evitar corrida de condições
+        time.sleep(random.uniform(0.1, 0.3))
+
+        if action != 'pagina':
+            self.download_files(cod_norma, forcar_regeneracao=(action == 'force'))
 
         if action == 'download':
-            try:
-                for norma in self.context.zsql.norma_juridica_obter_zsql(cod_norma=cod_norma):
-                    arquivo_final = str(norma.sgl_tipo_norma)+'-'+str(norma.num_norma)+'-'+str(norma.ano_norma)+'.pdf'
-                with open(os.path.join(dirpath) + '/' + arquivo_final, 'rb') as download:
-                    arquivo = download.read()
-                    self.context.REQUEST.RESPONSE.setHeader('Content-Type', 'application/pdf')
-                    self.context.REQUEST.RESPONSE.setHeader('Content-Disposition','inline; filename=%s' %str(arquivo_final))
-                    logging.info(f"Arquivo {arquivo_final} enviado para download.")
-                    return arquivo
-            except Exception as e:
-                logging.error(f"Erro ao preparar o download: {e}", exc_info=True)
-        elif action == 'pasta' or action == '' or action == None:
-            try:
-                page_paths = []
-                for file in os.listdir(pagepath):
-                    if file.startswith("pg_"):
-                        page_paths.append(file)
+            for norma in self.context.zsql.norma_juridica_obter_zsql(cod_norma=cod_norma):
+                arquivo_final = f"{norma.sgl_tipo_norma}-{norma.num_norma}-{norma.ano_norma}.pdf"
+            with open(os.path.join(dirpath, arquivo_final), 'rb') as download:
+                arquivo = download.read()
+                self.context.REQUEST.RESPONSE.setHeader('Content-Type', 'application/pdf')
+                self.context.REQUEST.RESPONSE.setHeader('Content-Disposition', f'inline; filename={arquivo_final}')
+                return arquivo
 
+        elif action in ('pasta', '', None):
+            if not os.path.exists(ready_file):
+                self.context.REQUEST.RESPONSE.setStatus(202)
+                return {"status": "processing"}
+
+            try:
+                page_paths = [f for f in os.listdir(pagepath) if f.startswith("pg_")]
                 file_paths = []
+
                 for file in os.listdir(dirpath):
-                    dic = {}
-                    dic_indice = {}
                     if file.startswith("0") and file.endswith(".pdf"):
                         filepath = os.path.join(dirpath, file)
-                        lst_pages = []
-                        lst_geral = []
                         with open(filepath, 'rb') as arq:
-                            arq2 = pymupdf.open(arq)
-                            dic['id'] = file
-                            dic['title'] = arq2.metadata["title"]
-                            num_pages = arq2.page_count
-                            for page in range(num_pages):
-                                lst_pages.append(page+1)
-                        dic['pages'] = lst_pages
-                        file_paths.append(dic)
+                            arq2 = fitz.open(arq)
+                            file_paths.append({
+                                'id': file,
+                                'title': arq2.metadata.get("title", ""),
+                                'date': arq2.metadata.get("modDate", ""),
+                                'pages': list(range(1, arq2.page_count + 1))
+                            })
 
                 file_paths.sort(key=lambda dic: dic['id'])
-                files = ' '.join(['%s' % (value) for (value) in file_paths])
-
                 indice = []
+
                 for item in file_paths:
-                    dic = {}
-                    dic['id'] = item['id']
-                    dic['title'] = item['title']
                     for pagina in item['pages']:
-                        indice.append(dic)
+                        indice.append({'id': item['id'], 'title': item['title'], 'date': item["date"]})
 
                 indice1 = [(i + 1, j) for i, j in enumerate(indice)]
-
                 lst_indice = []
+
                 for i, arquivo in indice1:
-                    dic = {}
-                    dic['id'] = arquivo['id']
-                    dic['titulo'] = arquivo['title']
-                    dic['num_pagina'] = str(i)
-                    dic['pagina'] = 'pg_' + str(i).rjust(4, '0') + '.pdf'
-                    lst_indice.append(dic)
+                    lst_indice.append({
+                        'id': arquivo['id'],
+                        'titulo': arquivo['title'],
+                        'data': arquivo['date'],
+                        'num_pagina': str(i),
+                        'pagina': 'pg_' + str(i).rjust(4, '0') + '.pdf'
+                    })
 
                 pasta = []
-
                 for item in file_paths:
-                    dic_indice = {}
-                    dic_indice['id'] = item['id']
-                    dic_indice['title'] = item['title']
-                    dic_indice["url"] = str(portal_url)  + '/@@pagina_processo_norma?cod_norma=' + str(cod_norma) + '%26pagina=' +  'pg_0001.pdf'
-                    dic_indice["paginas_geral"] = len(page_paths)
-                    dic_indice['paginas'] = []
-                    dic_indice['id_paginas'] = []
+                    dic_indice = {
+                        'id': item['id'],
+                        'title': item['title'],
+                        'date': item['date'],
+                        "url": f"{portal_url}/@@pagina_processo_norma?cod_norma={cod_norma}%26pagina=pg_0001.pdf",
+                        "paginas_geral": len(page_paths),
+                        'paginas': [],
+                        'paginas_doc': 0
+                    }
+
                     for pag in lst_indice:
-                        dic_pagina = {}
-                        if item['id'] == str(pag.get('id',pag)):
-                            dic_pagina['num_pagina'] = pag['num_pagina']
-                            dic_pagina['id_pagina'] = pag['pagina']
-                            dic_pagina["url"] = str(portal_url) + '/@@pagina_processo_norma?cod_norma=' + str(cod_norma) + '%26pagina=' +  pag['pagina']
-                            dic_indice['paginas'].append(dic_pagina)
+                        if item['id'] == str(pag.get('id', pag)):
+                            dic_indice['paginas'].append({
+                                'num_pagina': pag['num_pagina'],
+                                'id_pagina': pag['pagina'],
+                                "url": f"{portal_url}/@@pagina_processo_norma?cod_norma={cod_norma}%26pagina={pag['pagina']}"
+                            })
+
                     dic_indice['paginas_doc'] = len(dic_indice['paginas'])
                     pasta.append(dic_indice)
-                logging.info("Dados da pasta processados e retornados.")
+
                 return pasta
+
             except Exception as e:
-                logging.error(f"Erro ao renderizar a pasta: {e}", exc_info=True)
+                logging.error(f"Erro ao renderizar pasta: {e}")
+                self.context.REQUEST.RESPONSE.setStatus(500)
+                return {"error": str(e)}
 
 
 class LimparPasta(grok.View):
@@ -261,16 +280,16 @@ class LimparPasta(grok.View):
     install_home = os.environ.get('INSTALL_HOME')
 
     def render(self, cod_norma):
-        portal_url = self.context.portal_url.portal_url()
-        portal = self.context.portal_url.getPortalObject()
-        dirpath = os.path.join(self.install_home, 'var/tmp/processo_norma_' + str(cod_norma))
+        dirpath = os.path.join(self.install_home, f'var/tmp/processo_norma_{cod_norma}')
+        lock_file = os.path.join(dirpath, ".lock")
         if os.path.exists(dirpath) and os.path.isdir(dirpath):
+            if os.path.exists(lock_file):
+                return f"Não foi possível remover {dirpath} - processo em andamento"
             shutil.rmtree(dirpath)
-            logging.info(f"Diretório temporário {dirpath} removido.")
-            return 'Diretório temporário "' + dirpath + '" removido com sucesso.'
+            return f'Diretório {dirpath} removido com sucesso.'
         else:
-            logging.warning(f"Diretório temporário {dirpath} não existe.")
-            return 'Diretório temporário "' + dirpath + '" não existe.'
+            return f'Diretório {dirpath} não existe.'
+
 
 class PaginaProcessoNorma(grok.View):
     grok.context(Interface)
@@ -279,9 +298,7 @@ class PaginaProcessoNorma(grok.View):
     install_home = os.environ.get('INSTALL_HOME')
 
     async def render(self, cod_norma, pagina):
-        portal_url = self.context.portal_url.portal_url()
-        portal = self.context.portal_url.getPortalObject()
-        dirpath = os.path.join(self.install_home, 'var/tmp/processo_norma_' + str(cod_norma))
+        dirpath = os.path.join(self.install_home, f'var/tmp/processo_norma_{cod_norma}')
         pagepath = os.path.join(dirpath, 'pages')
         try:
             file_path = os.path.join(pagepath, pagina)
@@ -289,16 +306,34 @@ class PaginaProcessoNorma(grok.View):
                 arquivo = await download.read()
                 self.context.REQUEST.RESPONSE.setHeader('Content-Type', 'application/pdf')
                 self.context.REQUEST.RESPONSE.setHeader('Content-Disposition','inline; filename=%s' % str(pagina))
-                logging.info(f"Página '{pagina}' exibida para a norma '{cod_norma}' from '{file_path}'")
+                logging.info(f"Página '{pagina}' exibida para a norma '{cod_norma}'")
                 return arquivo
         except FileNotFoundError:
-            logging.error(f"Arquivo '{pagina}' não encontrado no diretório '{pagepath}'da norma '{cod_norma}'")
+            logging.error(f"Página '{pagina}' não encontrada para norma '{cod_norma}'")
             self.context.REQUEST.RESPONSE.setStatus(404)
             return "Arquivo não encontrado"
         except Exception as e:
-            logging.exception(f"Erro ao exibir a página '{pagina}' da norma '{cod_norma}': {e}")
+            logging.exception(f"Erro ao exibir página '{pagina}' da norma '{cod_norma}': {e}")
             self.context.REQUEST.RESPONSE.setStatus(500)
             return "Erro ao processar o arquivo"
 
     def __call__(self, cod_norma, pagina):
         return asyncio.run(self.render(cod_norma, pagina))
+
+class ProcessoNormaStatus(grok.View):
+    grok.context(Interface)
+    grok.require('zope2.View')
+    grok.name('norma_integral_status')
+    install_home = os.environ.get('INSTALL_HOME')
+
+    def render(self, cod_norma):
+        dirpath = os.path.join(self.install_home, f'var/tmp/processo_norma_{cod_norma}')
+        ready_file = os.path.join(dirpath, ".ready")
+        lock_file = os.path.join(dirpath, ".lock")
+
+        if os.path.exists(lock_file):
+            return "processing"
+        elif os.path.exists(ready_file):
+            return "ready"
+        else:
+            return "pending"

@@ -6,8 +6,53 @@ from Acquisition import aq_inner
 from five import grok
 from zope.interface import Interface
 #import uuid
-import pymupdf
+import fitz
+import logging
 
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler('processo_leg_integral.log'),
+        logging.StreamHandler()
+    ]
+)
+
+# Constants
+CACHE_TIMEOUT = 30  # seconds
+PDF_OPTIONS = {
+    'garbage': 3,
+    'deflate': True,
+    'clean': True,
+    'use_objstms': True
+}
+
+def sanear_pdf(pdf_bytes, title=None, mod_date=None):
+    """Clean and optimize PDF document."""
+    try:
+        with fitz.open(stream=BytesIO(pdf_bytes), filetype="pdf") as doc:
+            # Validate document
+            if not doc.page_count:
+                raise ValueError("Empty PDF document")
+            
+            # Update metadata
+            metadata = doc.metadata or {}
+            if title:
+                metadata["title"] = str(title)
+            if mod_date:
+                metadata["modDate"] = str(mod_date)
+            doc.set_metadata(metadata)
+            doc.bake()
+            # Optimize and return
+            output_stream = BytesIO()
+            doc.save(output_stream, **PDF_OPTIONS)
+            output_stream.seek(0)
+            return fitz.open(stream=output_stream, filetype="pdf")
+
+    except Exception as e:
+        logging.error(f"[sanear_pdf] Erro ao processar o PDF: {str(e)}", exc_info=True)
+        return None
 
 class ProcessoLeg(grok.View):
     grok.context(Interface)
@@ -177,24 +222,25 @@ class ProcessoLeg(grok.View):
 
         lst_arquivos = [(i + 1, j) for i, j in enumerate(lst_arquivos)]
        
-        merger = pymupdf.open()
+        merger = fitz.open()
 
         for i, dic in lst_arquivos:
             downloaded_pdf = str(i).rjust(4, '0') + '.pdf'
-            arq = getattr(dic['path'], dic['file'])
-            arquivo_doc = BytesIO(bytes(arq.data))
-            with pymupdf.open(stream=arquivo_doc) as texto_anexo:
-               texto_anexo = pymupdf.open(stream=arquivo_doc)
-               metadata = {"title": dic["title"], "modDate": dic["data"]}
-               texto_anexo.set_metadata(metadata)
-               texto_anexo.bake()
+            try:
+               arq = getattr(dic['path'], dic['file'])
+               arquivo_doc = BytesIO(bytes(arq.data))
+               texto_anexo = sanear_pdf(arquivo_doc.getvalue(), title=dic["title"], mod_date=dic["data"])
+               if not texto_anexo:
+                  raise RuntimeError(f"Erro ao processar o documento corrompido: {dic['title']}")
                merger.insert_pdf(texto_anexo)
-               arq2 = texto_anexo.tobytes()
                with open(os.path.join(dirpath) + '/' + downloaded_pdf, 'wb') as f:
-                    f.write(arq2)
-               texto_anexo.close()
+                    f.write(texto_anexo.tobytes(**PDF_OPTIONS))
+            except Exception as e:
+                logging.error(f"[merge-error] Erro ao inserir o documento {dic['file']} ({dic['title']}): {e}", exc_info=True)
+                raise RuntimeError(f"Erro ao processar o documento corrompido: {dic['title']}")
+                
         merged_pdf = merger.tobytes()
-        existing_pdf = pymupdf.open(stream=merged_pdf)
+        existing_pdf = fitz.open(stream=merged_pdf)
         numPages = existing_pdf.page_count
         for page_index, i in enumerate(range(len(existing_pdf))):
             w = existing_pdf[page_index].rect.width
@@ -202,9 +248,9 @@ class ProcessoLeg(grok.View):
             margin = 5
             left = 10 - margin
             bottom = h - 60 - margin
-            black = pymupdf.pdfcolor["black"]
+            black = fitz.pdfcolor["black"]
             text = "Fls. %s/%s" % (i+1, numPages)
-            p1 = pymupdf.Point(w - 70 - margin, margin + 20) # numero de pagina
+            p1 = fitz.Point(w - 70 - margin, margin + 20) # numero de pagina
             shape = existing_pdf[page_index].new_shape()
             shape.draw_circle(p1,1)
             shape.insert_text(p1, id_processo+'\n'+text, fontname = "helv", fontsize = 8)
@@ -215,11 +261,11 @@ class ProcessoLeg(grok.View):
         with open(os.path.join(dirpath) + '/' + processo_integral, 'wb') as f:
              f.write(data)
 
-        with pymupdf.open(stream=data) as doc:
+        with fitz.open(stream=data) as doc:
            for i, page in enumerate(doc):
                page_id = 'pg_' + str(i+1).rjust(4, '0') + '.pdf'
                file_name = os.path.join(os.path.join(pagepath), page_id)
-               with pymupdf.open() as doc_tmp:
+               with fitz.open() as doc_tmp:
                    doc_tmp.insert_pdf(doc, from_page=i, to_page=i, rotate=-1, show_progress=False)
                    metadata = {"title": page_id, "modDate": dic["data"]}
                    doc_tmp.set_metadata(metadata)
@@ -257,7 +303,7 @@ class ProcessoLeg(grok.View):
                   lst_pages = []
                   lst_geral = []
                   with open(filepath, 'rb') as arq:
-                     arq2 = pymupdf.open(arq)
+                     arq2 = fitz.open(arq)
                      dic['id'] = file
                      dic['title'] = arq2.metadata["title"]
                      dic['date'] = arq2.metadata["modDate"]

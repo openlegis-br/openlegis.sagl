@@ -15,8 +15,6 @@ import logging
 import asyncio
 import aiofiles
 from datetime import datetime, timedelta
-from contextlib import contextmanager
-
 
 # Configurar logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -35,7 +33,7 @@ def sanear_pdf(pdf_bytes, title=None, mod_date=None):
             if mod_date:
                 metadata["modDate"] = mod_date
             doc.set_metadata(metadata)
-
+            doc.bake()
             output_stream = BytesIO()
             doc.save(output_stream, garbage=3, deflate=True)
             output_stream.seek(0)

@@ -2,6 +2,7 @@
 
 from trml2pdf import parseString
 from xml.sax.saxutils import escape
+from html2rml import html2rml
 import time
 
 def cabecalho(dic_cabecalho,dat_reuniao,imagem):
@@ -64,6 +65,11 @@ def pauta(lst_reuniao, lst_pauta):
 
         # reuniao de comissao
         if dicrc['reuniao']!=None:
+           if dicrc['tema']!=None and dicrc['tema']!='':
+              tmp+=html2rml(dicrc['tema']).replace('&','&amp;')
+              tmp+='\t\t<para style="P2" spaceAfter="16">\n'
+              tmp+='\t\t\t<font color="white"> </font>\n'
+              tmp+='\t\t</para>\n' 
            tmp+='\t\t<para style="P5">' + dicrc['reuniao'].replace('&','&amp;') + '</para>\n'
            tmp+='\t\t<para style="P2" spaceAfter="2">\n'
            tmp+='\t\t\t<font color="white"> </font>\n'
@@ -76,11 +82,7 @@ def pauta(lst_reuniao, lst_pauta):
            tmp+='\t\t<para style="P2" spaceAfter="16">\n'
            tmp+='\t\t\t<font color="white"> </font>\n'
            tmp+='\t\t</para>\n'
-           if dicrc['tema']!=None and dicrc['tema']!='':
-              tmp+='\t\t<para style="P1"><b>TEMA:</b> ' + dicrc['tema'] + '</para>\n'
-              tmp+='\t\t<para style="P2" spaceAfter="16">\n'
-              tmp+='\t\t\t<font color="white"> </font>\n'
-              tmp+='\t\t</para>\n'                        
+                      
 
     #inicio do bloco que contem os flowables
     

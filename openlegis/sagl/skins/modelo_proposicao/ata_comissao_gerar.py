@@ -44,21 +44,28 @@ for rc in context.zsql.reuniao_comissao_obter_zsql(cod_reuniao=cod_reuniao, ind_
         "datareuniao": dia,
     })
 
-    # Presenças e composição
-    ata_dic["presidente"] = ''
-    lst_membros, lst_presenca, lst_ausencia = [], [], []
+    # Cache de presenças com cod_parlamentar como string
     presencas = {
-        p.cod_parlamentar: p.nom_completo
+        str(p.cod_parlamentar): p.nom_completo
         for p in context.zsql.reuniao_comissao_presenca_obter_zsql(cod_reuniao=rc.cod_reuniao, ind_excluido=0)
     }
 
+    ata_dic["presidente"] = ''
+    lst_membros, lst_presenca, lst_ausencia = [], [], []
+
     for periodo in context.zsql.periodo_comp_comissao_obter_zsql(data=DateTime(rc.dat_inicio_reuniao_ord), ind_excluido=0):
         for membro in context.zsql.composicao_comissao_obter_zsql(cod_comissao=rc.cod_comissao, cod_periodo_comp=periodo.cod_periodo_comp, ind_excluido=0):
-            lst_membros.append({"nome": membro.nom_completo, "cargo": membro.des_cargo})
+            dic_composicao = {
+                "nome": membro.nom_completo,
+                "cargo": membro.des_cargo
+            }
+            lst_membros.append(dic_composicao)
+
             if membro.des_cargo == 'Presidente':
                 ata_dic["presidente"] = membro.nom_completo
-            if membro.cod_parlamentar in presencas:
-                lst_presenca.append(presencas[membro.cod_parlamentar])
+
+            if str(membro.cod_parlamentar) in presencas:
+                lst_presenca.append(membro.nom_completo)
             else:
                 lst_ausencia.append(membro.nom_completo)
 
@@ -68,7 +75,6 @@ for rc in context.zsql.reuniao_comissao_obter_zsql(cod_reuniao=cod_reuniao, ind_
     ata_dic["qtde_ausencia"] = len(lst_ausencia)
     ata_dic["ausencia"] = ', '.join(lst_ausencia)
 
-    # Matérias e pauta
     lst_pauta, lst_votacao = [], []
     for item in context.zsql.reuniao_comissao_pauta_obter_zsql(cod_reuniao=rc.cod_reuniao, ind_excluido=0):
         dic_votacao = {
@@ -129,7 +135,7 @@ for rc in context.zsql.reuniao_comissao_obter_zsql(cod_reuniao=cod_reuniao, ind_
                 resultado = context.zsql.tipo_fim_relatoria_obter_zsql(tip_fim_relatoria=item.tip_resultado_votacao, ind_excluido=0)[0]
                 dic_votacao["resultado"] = f". Resultado: {resultado.des_fim_relatoria}"
 
-            materia = dic_votacao["materia"] + ' ' + dic_votacao["nom_relator"] + dic_votacao["resultado"] + dic_votacao["parecer"]
+            materia_str = dic_votacao["materia"] + ' ' + dic_votacao["nom_relator"] + dic_votacao["resultado"] + dic_votacao["parecer"]
 
             # Substitutivos
             substitutivos = []
@@ -155,13 +161,12 @@ for rc in context.zsql.reuniao_comissao_obter_zsql(cod_reuniao=cod_reuniao, ind_
             dic_votacao["emendas"] = emendas
             dic_votacao["emenda"] = len(emendas)
 
-        lst_pauta.append(materia)
+        lst_pauta.append(dic_votacao["materia"])
         lst_votacao.append(dic_votacao)
 
     ata_dic["lst_pauta"] = '; '.join(lst_pauta)
     ata_dic["lst_votacao"] = lst_votacao
 
-    # Dados da casa
     casa = dict(context.sapl_documentos.props_sagl.propertyItems())
     localidade = context.zsql.localidade_obter_zsql(cod_localidade=casa["cod_localidade"])[0]
     estado = next(

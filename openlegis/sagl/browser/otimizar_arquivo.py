@@ -11,6 +11,7 @@ from pypdf import PdfReader
 from pypdf.errors import PdfReadError
 import fitz
 from fitz import FileDataError, EmptyFileError
+import pikepdf
 from dateutil.parser import parse
 from dateutil.parser._parser import ParserError
 from asn1crypto import cms
@@ -23,7 +24,6 @@ from zope.interface import Interface
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 warnings.simplefilter("once", RuntimeWarning)
 
-# Redireciona todos os warnings para o logger padrão
 def custom_warning_to_log(message, category, filename, lineno, file=None, line=None):
     logging.getLogger().warning(f"{category.__name__}: {message} (linha {lineno})")
 
@@ -48,10 +48,10 @@ class PDFUploadProcessorView(grok.View):
                 self._cached_pdf_reader = PdfReader(BytesIO(self._cached_pdf_stream))
             yield self._cached_pdf_reader
         except PdfReadError as e:
-            logging.warn(f"Erro na leitura do PDF: {e}", exc_info=True)
+            logging.warning(f"Erro na leitura do PDF: {e}", exc_info=True)
             raise ValueError("O arquivo PDF está corrompido ou não é válido") from e
         except Exception as e:
-            logging.warn(f"Erro inesperado ao acessar PDF: {e}", exc_info=True)
+            logging.warning(f"Erro inesperado ao acessar PDF: {e}", exc_info=True)
             raise RuntimeError("Erro ao processar o arquivo PDF") from e
 
     @lru_cache(maxsize=32)
@@ -212,8 +212,20 @@ class PDFUploadProcessorView(grok.View):
                 return unique_signers
 
         except Exception as e:
-            logging.warn(f"Erro geral ao extrair assinaturas: {e}", exc_info=True)
+            logging.warning(f"Erro geral ao extrair assinaturas: {e}", exc_info=True)
             return []
+
+    def _repair_pdf_with_pikepdf(self, pdf_bytes):
+        try:
+            repaired_stream = BytesIO()
+            with pikepdf.open(BytesIO(pdf_bytes)) as pdf:
+                pdf.save(repaired_stream)
+            repaired_stream.seek(0)
+            logging.info("PDF recuperado com sucesso via pikepdf")
+            return repaired_stream.getvalue()
+        except Exception as e:
+            logging.warning(f"Erro ao tentar reparar PDF com pikepdf: {e}", exc_info=True)
+            return None
 
     def _optimize_pdf(self, file_stream, title):
         try:
@@ -224,7 +236,16 @@ class PDFUploadProcessorView(grok.View):
             try:
                 doc = fitz.open(stream=pdf_data)
             except (FileDataError, EmptyFileError) as e:
-                raise ValueError(f"Arquivo PDF inválido: {e}") from e
+                logging.warning(f"Falha inicial ao abrir com fitz: {e}")
+                repaired_data = self._repair_pdf_with_pikepdf(pdf_data)
+                if repaired_data:
+                    try:
+                        doc = fitz.open(stream=repaired_data)
+                        pdf_data = repaired_data
+                    except Exception as e2:
+                        raise ValueError(f"Mesmo após pikepdf, PDF inválido: {e2}") from e2
+                else:
+                    raise ValueError(f"Arquivo PDF inválido e pikepdf falhou: {e}") from e
 
             if title and isinstance(title, str):
                 doc.set_metadata({'title': title[:200]})
@@ -241,11 +262,11 @@ class PDFUploadProcessorView(grok.View):
                 logging.info("PDF otimizado com sucesso.")
                 return output_stream.getvalue()
             except Exception as e:
-                logging.warn(f"Erro ao salvar PDF otimizado: {e}")
+                logging.warning(f"Erro ao salvar PDF otimizado: {e}")
                 return pdf_data
 
         except Exception as e:
-            logging.warn(f"Falha crítica na otimização do PDF: {e}", exc_info=True)
+            logging.warning(f"Falha crítica na otimização do PDF: {e}", exc_info=True)
             raise RuntimeError(f"Falha ao otimizar PDF: {e}") from e
 
     def optimizeFile(self, filename, title):
@@ -259,45 +280,31 @@ class PDFUploadProcessorView(grok.View):
 
             file_stream = BytesIO(original_data)
 
+            # Verifica se o PDF tem assinatura — não otimizar se tiver
             try:
                 with self._get_pdf_reader(file_stream) as reader:
                     signers_data = self.get_signatures_from_stream(file_stream, getattr(filename, 'filename', 'unknown'))
-
                     if signers_data:
-                        logging.info(f"Documento assinado encontrado: {len(signers_data)} assinaturas")
-                        return {
-                            'file_stream': BytesIO(original_data),
-                            'signatures': signers_data 
-                        }
-
-                    try:
-                        if reader.get_fields():
-                            logging.info("Documento com campos de formulário encontrado")
-                            return original_data
-                    except Exception as e:
-                        logging.warning(f"Erro ao verificar campos do formulário: {e}")
-
-                    try:
-                        optimized_data = self._optimize_pdf(BytesIO(original_data), title)
-                        if optimized_data and len(optimized_data) < len(original_data):
-                            logging.info(f"PDF otimizado: redução de {len(original_data)} para {len(optimized_data)} bytes")
-                            return optimized_data
-                    except Exception as e:
-                        logging.warn(f"Falha na otimização: {e}")
-
-                    return original_data
-
-            except ValueError as e:
-                logging.warn(f"Arquivo PDF inválido: {e}")
-                return original_data
+                        logging.info(f"Arquivo assinado detectado: {len(signers_data)} assinaturas — não será otimizado")
+                        return original_data
             except Exception as e:
-                logging.warn(f"Erro inesperado: {e}", exc_info=True)
-                return original_data
+                logging.warning(f"Erro ao verificar assinatura: {e}")
+
+            # Tenta otimizar (com fallback via pikepdf)
+            try:
+                optimized_data = self._optimize_pdf(BytesIO(original_data), title)
+                if optimized_data and len(optimized_data) < len(original_data):
+                    logging.info(f"PDF otimizado: redução de {len(original_data)} para {len(optimized_data)} bytes")
+                    return optimized_data
+            except Exception as e:
+                logging.warning(f"Falha na otimização: {e}")
+
+            return original_data
 
         except Exception as e:
-            logging.critical(f"Falha catastrófica no processamento: {e}", exc_info=True)
+            logging.critical(f"Falha crítica no processamento: {e}", exc_info=True)
             raise RuntimeError("Falha ao processar documento") from e
-
+  
     def render(self, filename, title):
         try:
             return self.optimizeFile(filename, title)

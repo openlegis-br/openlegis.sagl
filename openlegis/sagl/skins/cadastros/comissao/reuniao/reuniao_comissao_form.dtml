@@ -284,7 +284,7 @@
   <dtml-in prefix="loop" expr="zsql.reuniao_comissao_pauta_obter_zsql(cod_reuniao=cod_reuniao, ind_excluido=0)">
      <dtml-if sequence-start>
        <div class="table-responsive font-size-13 mb-3">     
-        <table class="table table-striped display" id="expediente">
+        <table class="table table-striped display w-100" id="expediente">
           <thead class="">
             <tr>
                 <th width="5%">Item</th>
@@ -507,6 +507,32 @@ tinymce.init({
     ' link image | print preview media fullpage | ',
   menubar: 'edit view insert format tools help',
   content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }'
+});
+</script>
+<script>
+$(document).ready(function() {
+  new DataTable('#expediente', {
+      "responsive": true,
+      "rowReorder": true,
+      "language": {
+          "url": '<dtml-var portal_url>/assets/libs/datatables.net/plugins/i18n/pt-BR.json',
+          },
+  });
+  var table = $('#expediente').DataTable()
+  table.on('row-reorder.dt', function (dragEvent, data, nodes) {
+      for (var i = 0, ien = data.length ; i < ien ; i++) {
+          var rowData = table.row(data[i].node).data();
+          var codigo = table.row(data[i].node).id();
+          $.ajax({
+              type: "GET",
+              cache: false,
+              contentType: "application/json; charset=utf-8",
+              url: 'reuniao_comissao_item_atualizar_proc',
+              data: {cod_reuniao: <dtml-var cod_reuniao>,  Id: codigo, fromPosition: data[i].oldData, toPosition: data[i].newData },
+              dataType: "json"
+          });
+          }
+  });
 });
 </script>
 <dtml-var footer_html>

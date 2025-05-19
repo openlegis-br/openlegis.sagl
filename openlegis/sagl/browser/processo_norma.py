@@ -13,29 +13,58 @@ from zope.interface import Interface
 import fitz
 import asyncio
 import aiofiles
+import pikepdf
 
 # Configurar logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 def sanear_pdf(pdf_bytes, title=None, mod_date=None):
-    try:
-        with fitz.open(stream=BytesIO(pdf_bytes), filetype="pdf") as doc:
+    """
+    Tenta reprocessar e limpar um PDF corrompido usando fitz e pikepdf.
+    """
+    def tentar_fitz(stream):
+        try:
+            doc = fitz.open(stream=stream, filetype="pdf")
             _ = doc.page_count  # força leitura
-            metadata = doc.metadata or {}
-            if title:
-                metadata["title"] = title
-            if mod_date:
-                metadata["modDate"] = mod_date
-            doc.set_metadata(metadata)
+            if title or mod_date:
+                metadata = doc.metadata or {}
+                if title:
+                    metadata["title"] = title
+                if mod_date:
+                    metadata["modDate"] = mod_date
+                doc.set_metadata(metadata)
             doc.bake()
             output_stream = BytesIO()
             doc.save(output_stream, garbage=3, deflate=True)
             output_stream.seek(0)
+            return fitz.open(stream=output_stream, filetype="pdf")
+        except Exception as e:
+            logger.warning(f"[sanear_pdf] Falha no fitz: {e}")
+            return None
 
-        return fitz.open(stream=output_stream, filetype="pdf")
+    # 1. Primeira tentativa com fitz
+    result = tentar_fitz(BytesIO(pdf_bytes))
+    if result:
+        return result
+
+    # 2. Tentativa de recuperação com pikepdf
+    try:
+        logger.info("[sanear_pdf] Tentando reparar com pikepdf")
+        with pikepdf.open(BytesIO(pdf_bytes)) as pdf:
+            output_stream = BytesIO()
+            pdf.save(output_stream)
+            output_stream.seek(0)
+            # 3. Nova tentativa com fitz após pikepdf
+            result = tentar_fitz(output_stream)
+            if result:
+                logger.info("[sanear_pdf] PDF recuperado com sucesso via pikepdf")
+                return result
+            else:
+                logger.error("[sanear_pdf] pikepdf salvou, mas fitz ainda não abre")
     except Exception as e:
-        logging.error(f"[sanear_pdf] Erro ao limpar PDF: {e}")
-        return None
+        logger.error(f"[sanear_pdf] Erro ao tentar reparar com pikepdf: {e}")
+
+    return None
 
 
 class ProcessoNorma(grok.View):

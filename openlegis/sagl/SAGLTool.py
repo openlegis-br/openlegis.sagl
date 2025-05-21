@@ -2221,9 +2221,9 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         w = existing_pdf[0].rect.width
         h = existing_pdf[0].rect.height
         # tipo, numero e ano
-        if tipo_proposicao != 'Parecer' and tipo_proposicao != 'Parecer de Comissão':
-          rect = pymupdf.Rect(40, 120, w-20, 170)
-          existing_pdf[0].insert_textbox(rect, str(texto).upper(), fontname = "hebo", fontsize = 12, align=pymupdf.TEXT_ALIGN_CENTER)
+        #if tipo_proposicao != 'Parecer' and tipo_proposicao != 'Parecer de Comissão':
+        rect = pymupdf.Rect(40, 120, w-20, 170)
+        existing_pdf[0].insert_textbox(rect, str(texto).upper(), fontname = "hebo", fontsize = 12, align=pymupdf.TEXT_ALIGN_CENTER)
         metadata = {"title": texto, "author": nom_autor}
         existing_pdf.set_metadata(metadata)
         content = existing_pdf.tobytes(deflate=True, garbage=3, use_objstms=1)

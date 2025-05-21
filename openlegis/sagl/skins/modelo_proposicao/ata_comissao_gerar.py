@@ -161,8 +161,8 @@ for rc in context.zsql.reuniao_comissao_obter_zsql(cod_reuniao=cod_reuniao, ind_
             dic_votacao["emendas"] = emendas
             dic_votacao["emenda"] = len(emendas)
 
-        lst_pauta.append(dic_votacao["materia"])
-        lst_votacao.append(dic_votacao)
+        lst_pauta.append(materia_str)
+        lst_votacao.append(materia_str)
 
     ata_dic["lst_pauta"] = '; '.join(lst_pauta)
     ata_dic["lst_votacao"] = lst_votacao

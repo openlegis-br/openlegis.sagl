@@ -229,13 +229,14 @@ class PDFUploadProcessorView(grok.View):
 
     def _optimize_pdf(self, file_stream, title):
         try:
+            file_stream.seek(0)
             pdf_data = file_stream.getvalue()
             if not pdf_data:
                 raise ValueError("O arquivo PDF está vazio")
 
             try:
                 doc = fitz.open(stream=pdf_data)
-            except (FileDataError, EmptyFileError) as e:
+            except (FileDataError, EmptyFileError, RuntimeError) as e:
                 logging.warning(f"Falha inicial ao abrir com fitz: {e}")
                 repaired_data = self._repair_pdf_with_pikepdf(pdf_data)
                 if repaired_data:
@@ -248,7 +249,10 @@ class PDFUploadProcessorView(grok.View):
                     raise ValueError(f"Arquivo PDF inválido e pikepdf falhou: {e}") from e
 
             if title and isinstance(title, str):
-                doc.set_metadata({'title': title[:200]})
+                try:
+                    doc.set_metadata({'title': title[:200]})
+                except Exception as e:
+                    logging.warning(f"Falha ao definir metadados do título: {e}")
 
             output_stream = BytesIO()
             try:
@@ -257,13 +261,21 @@ class PDFUploadProcessorView(grok.View):
                     garbage=3,
                     deflate=True,
                     clean=True,
-                    use_objstms=True
+                    incremental=False,
+                    encryption=fitz.PDF_ENCRYPT_NONE
                 )
-                logging.info("PDF otimizado com sucesso.")
+                logging.info("PDF otimizado com sucesso via fitz.")
                 return output_stream.getvalue()
+
             except Exception as e:
-                logging.warning(f"Erro ao salvar PDF otimizado: {e}")
-                return pdf_data
+                logging.warning(f"Erro ao salvar PDF com fitz: {e} — tentando pikepdf como fallback")
+                repaired = self._repair_pdf_with_pikepdf(pdf_data)
+                if repaired:
+                    logging.info("PDF reparado com sucesso via pikepdf após falha no fitz.")
+                    return repaired
+                else:
+                    logging.warning("Falha também com pikepdf — retornando PDF original.")
+                    return pdf_data
 
         except Exception as e:
             logging.warning(f"Falha crítica na otimização do PDF: {e}", exc_info=True)

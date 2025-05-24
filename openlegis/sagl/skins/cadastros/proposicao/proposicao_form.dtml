@@ -196,7 +196,6 @@
     }
 </script>
 
-
 <dtml-unless dat_envio>
     <dtml-call expr="REQUEST.set('dat_envio',None)">
 </dtml-unless>
@@ -336,6 +335,20 @@
    </div>
 </dtml-if>
 
+<dtml-if cod_proposicao>        
+   <dtml-call expr="REQUEST.set('id_pdf_normal', str(cod_proposicao)+'.pdf')">
+   <dtml-call expr="REQUEST.set('id_pdf_assinado', str(cod_proposicao)+'_signed.pdf')">
+   <dtml-if expr="hasattr(sapl_documentos.proposicao, id_pdf_normal) or hasattr(sapl_documentos.proposicao, id_pdf_assinado)">
+     <dtml-call expr="REQUEST.set('tem_pdf', '1')">
+   </dtml-if>
+   <dtml-if expr="_.has_key('tem_pdf')">
+     <div class="alert alert-dismissible alert-info small mt-2">
+       <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+       <i class="fas fa-lock"></i> Edição bloqueada: o texto final em PDF já foi gerado.
+     </div>
+   </dtml-if>
+</dtml-if>
+
 <dtml-if expr="usr_eh_autor or (AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia', 'Revisor Proposicao', 'Chefia Revisão']) and prop_enviada)">
   <form name="proposicao_form" method="post" action="proposicao_salvar_proc" enctype="multipart/form-data">
     <input type="hidden" name="hdn_alterou" value="0" />                      
@@ -347,7 +360,9 @@
        <div class="col-12 <dtml-if expr="_.has_key('cod_proposicao')">col-md-6</dtml-if> mb-3">
          <label class="form-label required" for="lst_tip_proposicao">Tipo de Proposição</label>
          <select class="select2 form-select" id="lst_tip_proposicao" name="lst_tip_proposicao" data-minimum-results-for-search="Infinity" style="width: 100%;" onChange="javascript:tipo_proposicao_mudou()"
-            <dtml-if expr="(AUTHENTICATED_USER.has_role(['Autor', 'Assessor Parlamentar']) and prop_enviada)">
+            <dtml-if expr="_.has_key('tem_pdf')">
+               disabled
+            <dtml-elif expr="(AUTHENTICATED_USER.has_role(['Autor', 'Assessor Parlamentar']) and prop_enviada)">
                disabled
             <dtml-elif expr="(AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia', 'Revisor Proposicao', 'Chefia Revisão']) and prop_recebida)">
                disabled
@@ -449,14 +464,22 @@
     <div class="row">       
       <div class="col-12 mb-3">
         <label class="form-label required" for="txt_descricao">Ementa</label>      
-        <textarea class="form-control auto-resize" id="txt_descricao" name="txt_descricao" rows="2" <dtml-if expr="prop_recebida and AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia', 'Revisor Proposicao', 'Chefia Revisão'])">readonly</dtml-if><dtml-if expr="(AUTHENTICATED_USER.has_role(['Autor', 'Assessor Parlamentar']) and prop_enviada or prop_devolvida)">readonly</dtml-if>><dtml-var txt_descricao missing></textarea>
+        <textarea class="form-control auto-resize" id="txt_descricao" name="txt_descricao" rows="2"
+          <dtml-if expr="_.has_key('tem_pdf')">
+            readonly
+          <dtml-elif expr="(prop_recebida and AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia', 'Revisor Proposicao', 'Chefia Revisão']))">
+            readonly
+          <dtml-elif expr="(AUTHENTICATED_USER.has_role(['Autor', 'Assessor Parlamentar']) and (prop_enviada or prop_devolvida))">
+            readonly
+          </dtml-if>
+        ><dtml-var txt_descricao missing></textarea>
       </div>
     </div>
 
   <div class="row" id="divAssunto" <dtml-if expr="(not _.has_key('cod_proposicao') or ind_mat_ou_doc=='D') or (_.has_key('cod_proposicao') and (des_tipo_proposicao!='Requerimento' and des_tipo_proposicao!='Indicação' and des_tipo_proposicao!='Moção'))">style="display:none;"</dtml-if>>
     <div class="col-12 mb-3">
       <label class="form-label required" for="lst_assunto">Assunto</label>
-          <select class="select2 form-select selectpicker show-tick" data-actions-box="true" data-size="10" data-selected-text-format="count > 4" data-live-search="true" id="lst_assunto" name="lst_assunto" <dtml-if expr="(AUTHENTICATED_USER.has_role(['Autor', 'Assessor Parlamentar']) and prop_enviada)">disabled<dtml-elif expr="prop_recebida or prop_devolvida">disabled </dtml-if> style="width: 100%;">
+          <select class="select2 form-select selectpicker show-tick" data-actions-box="true" data-size="10" data-selected-text-format="count > 4" data-live-search="true" id="lst_assunto" name="lst_assunto" <dtml-if expr="(AUTHENTICATED_USER.has_role(['Autor', 'Assessor Parlamentar']) and prop_enviada)">disabled<dtml-elif expr="_.has_key('tem_pdf') or prop_recebida or prop_devolvida">readonly </dtml-if> style="width: 100%;">
              <option value="">Selecione</option>
              <dtml-in expr="zsql.assunto_proposicao_obter_zsql()" mapping>
                 <option
@@ -476,7 +499,7 @@
   <div class="row" id="divMat" <dtml-if expr="not _.has_key('cod_proposicao') or ind_mat_ou_doc=='M'">style="display:none;"</dtml-if>>
     <div class="col-12 col-md-6 mb-3">
       <label class="form-label required" for="lst_tip_id_basica">Matéria Vinculada</label>
-          <select class="select2 form-select" id="lst_tip_id_basica" name="lst_tip_id_basica" <dtml-if "not _.has_key('tip_id_basica_sel') or prop_recebida or prop_devolvida"> disabled </dtml-if> data-minimum-results-for-search="Infinity" style="width: 100%;">
+          <select class="select2 form-select" id="lst_tip_id_basica" name="lst_tip_id_basica" <dtml-if expr="_.has_key('tem_pdf') or not _.has_key('tip_id_basica_sel') or prop_recebida or prop_devolvida"> disabled </dtml-if> data-minimum-results-for-search="Infinity" style="width: 100%;">
              <option value="">Selecione</option>
              <dtml-in expr="zsql.tipo_materia_legislativa_obter_zsql(tip_natureza='P')">
                 <option
@@ -494,14 +517,14 @@
     <div class="col-4 col-md-2 mb-3">
       <label class="form-label required" for="txt_num_ident_basica">Número</label> 
       <input class="form-control number" type="number" id="txt_num_ident_basica" name="txt_num_ident_basica" value="<dtml-var num_ident_basica_sel missing null="1">" 
-        <dtml-if "not _.has_key('num_ident_basica_sel') or prop_recebida">
+        <dtml-if expr="_.has_key('tem_pdf') or not _.has_key('num_ident_basica_sel') or prop_recebida">
            disabled 
         </dtml-if>  />    
     </div>
     <div class="col-4 col-md-2 mb-3">
       <label class="form-label required" for="txt_ano_ident_basica">Ano</label>
       <input class="form-control year" type="number" id="txt_ano_ident_basica" name="txt_ano_ident_basica" value="<dtml-var ano_ident_basica_sel missing>" 
-        <dtml-if "not _.has_key('ano_ident_basica_sel') or prop_recebida"> 
+        <dtml-if expr="_.has_key('tem_pdf') or not _.has_key('ano_ident_basica_sel') or prop_recebida"> 
            disabled
         </dtml-if> />
     </div>
@@ -561,13 +584,13 @@
                    <div align="center">
                       <img align="absmiddle" class="img-fluid img-thumbnail mb-2" src="&dtml-portal_url;/sapl_documentos/proposicao/<dtml-var id_foto1>?<dtml-var expr="ZopeTime().timeTime()">" style="max-height: 400px">
                    </div>
-                  <dtml-if expr="(not prop_enviada)">
+                  <dtml-if expr="not _.has_key('tem_pdf') and not prop_enviada">
                      <div class="text-center">
                         <input type="button" name="delFoto1" class="btn btn-sm btn-danger" value="Excluir" onClick="javascript:fotografia1_excluir()" />
                      </div>
                   </dtml-if>
                  <dtml-else>
-                  <dtml-if expr="(not prop_enviada)">
+                  <dtml-if expr="not _.has_key('tem_pdf') and not prop_enviada">
                     <div class="custom-file">
                       <input type="file" class="form-control" id="file_nom_image1" name="file_nom_image1" accept="image/jpeg" />
                     </div>
@@ -581,13 +604,13 @@
                    <div align="center">
                       <img align="absmiddle" class="img-fluid img-thumbnail mb-2" src="&dtml-portal_url;/sapl_documentos/proposicao/<dtml-var id_foto2>?<dtml-var expr="ZopeTime().timeTime()">" style="max-height: 400px">
                    </div>
-                   <dtml-if expr="(not prop_enviada)">
+                   <dtml-if expr="not _.has_key('tem_pdf') and not prop_enviada">
                       <div class="text-center">
                         <input type="button" name="delFoto2" class="btn btn-sm btn-danger" value="Excluir" onClick="javascript:fotografia2_excluir()" />
                       </div>
                    </dtml-if>
                  <dtml-else>
-                   <dtml-if expr="(not prop_enviada)">
+                   <dtml-if expr="not _.has_key('tem_pdf') and not prop_enviada">
                     <div class="custom-file">
                       <input type="file" class="form-control" id="file_nom_image2" name="file_nom_image2" accept="image/jpeg" />
                     </div>
@@ -601,13 +624,13 @@
                    <div align="center">
                       <img align="absmiddle" class="img-fluid img-thumbnail mb-2" src="&dtml-portal_url;/sapl_documentos/proposicao/<dtml-var id_foto3>?<dtml-var expr="ZopeTime().timeTime()">" style="max-height: 400px">
                    </div>
-                    <dtml-if expr="(not prop_enviada)">
+                    <dtml-if expr="not _.has_key('tem_pdf') and not prop_enviada">
                       <div class="text-center">
                         <input type="button" name="delFoto3" class="btn btn-sm btn-danger" value="Excluir" onClick="javascript:fotografia3_excluir()" />
                       </div>
                     </dtml-if>
                  <dtml-else>
-                    <dtml-if expr="(not prop_enviada)">
+                    <dtml-if expr="not _.has_key('tem_pdf') and not prop_enviada">
                        <div class="custom-file">
                          <input type="file" class="form-control" id="file_nom_image3" name="file_nom_image3" accept="image/jpeg" />
                        </div>
@@ -621,13 +644,13 @@
                    <div align="center">
                       <img align="absmiddle" class="img-fluid img-thumbnail mb-2" src="&dtml-portal_url;/sapl_documentos/proposicao/<dtml-var id_foto4>?<dtml-var expr="ZopeTime().timeTime()">" style="max-height: 400px">
                    </div>
-                     <dtml-if expr="(not prop_enviada)">
+                     <dtml-if expr="not _.has_key('tem_pdf') and not prop_enviada">
                        <div class="text-center">
                          <input type="button" name="delFoto4" class="btn btn-sm btn-danger" value="Excluir" onClick="javascript:fotografia4_excluir()" />
                        </div>
                      </dtml-if>
                  <dtml-else>
-                  <dtml-if expr="(not prop_enviada)">
+                  <dtml-if expr="not _.has_key('tem_pdf') and not prop_enviada">
                     <div class="custom-file">
                       <input type="file" class="form-control" id="file_nom_image4" name="file_nom_image4" accept="image/jpeg" />
                     </div>
@@ -658,10 +681,14 @@
                   <dtml-call expr="REQUEST.set('nome_arquivo',str(cod_proposicao)+'.odt')">
                   <dtml-if prop_enviada>
                     <a class="btn btn-sm btn-light" href="<dtml-var portal_url>/generico/viewerJS/#<dtml-var documento>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fa fa-fw fa-file-alt"></i>Texto Revisado</a>
-                  <dtml-else>                 
-                      <a class="btn btn-sm btn-primary" href="<dtml-var portal_url>/webeditor/editorProposicao?<dtml-var documento>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fa fa-fw fa-edit"></i>Editar</a>
-                      <button type="button" class="btn btn-sm btn-secondary" onclick="javascript:location.href='&dtml-URL1;/sapl_documentos/proposicao/externalEdit_/<dtml-var nome_arquivo>.zem'" data-bs-toggle="tooltip" data-placement="bottom" title="Editar no LibreOffice"><i class="fas fa-fw fa-external-link-alt"></i>LibreOffice</button>
-                      <a class="btn btn-sm btn-danger" href="<dtml-var portal_url>/cadastros/proposicao/texto_proposicao_excluir_proc?cod_proposicao=<dtml-var cod_proposicao missing>" data-confirm="Deseja realmente excluir o arquivo ODT da Proposição?"><i class="far fa-trash-alt"></i> Excluir</a>                    
+                  <dtml-else>
+                     <dtml-if expr="not _.has_key('tem_pdf')">
+                         <a class="btn btn-sm btn-primary" href="<dtml-var portal_url>/webeditor/editorProposicao?<dtml-var documento>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fa fa-fw fa-edit"></i>Editar</a>
+                         <button type="button" class="btn btn-sm btn-secondary" onclick="javascript:location.href='&dtml-URL1;/sapl_documentos/proposicao/externalEdit_/<dtml-var nome_arquivo>.zem'" data-bs-toggle="tooltip" data-placement="bottom" title="Editar no LibreOffice"><i class="fas fa-fw fa-external-link-alt"></i>LibreOffice</button>
+                         <a class="btn btn-sm btn-danger" href="<dtml-var portal_url>/cadastros/proposicao/texto_proposicao_excluir_proc?cod_proposicao=<dtml-var cod_proposicao missing>" data-confirm="Deseja realmente excluir o arquivo ODT da Proposição?"><i class="far fa-trash-alt"></i> Excluir</a>
+                     <dtml-else>
+                        <a class="btn btn-sm btn-light" href="<dtml-var portal_url>/generico/viewerJS/#<dtml-var documento>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fa fa-fw fa-file-alt"></i>Visualizar</a>            
+                     </dtml-if>
                   </dtml-if>
                </dtml-let>
               </div>
@@ -751,9 +778,9 @@
                    </dtml-if>
                </dtml-let>
                <dtml-if expr="_.has_key('temODT')">
-                  <input type="button" class="btn btn-sm btn-light" value="Converter ODT" onclick="javascript:texto_pdf_gerar()" />
+                  <input type="button" id="btn-gerar-pdf" class="btn btn-sm btn-light" value="Converter ODT" onclick="javascript:texto_pdf_gerar()" />
                <dtml-else>
-                  <input type="button" class="btn btn-sm btn-light" value="Converter ODT" disabled />
+                  <input type="button" id="btn-gerar-pdf" class="btn btn-sm btn-light" value="Converter ODT" disabled />
                </dtml-if>
               </div>
           </dtml-if>
@@ -767,7 +794,7 @@
        </div>
     </div>
     <div class="row mb-2">
-     <dtml-if expr="not prop_recebida">   
+     <dtml-if expr="not _.has_key('tem_pdf') or not prop_recebida">   
        <div class="col-12 col-md-2">
            <small id="link_add_file">
              <a class="btn btn-sm btn-light w-100" onclick="addFileField(); return false;" href="#">Anexar</a>
@@ -783,7 +810,7 @@
                   <a class="btn btn-secondary" target="_blank" href="<dtml-var documento>?<dtml-var expr="ZopeTime().timeTime()">">
                     <i class="fa fa-fw fa-file-pdf"></i><dtml-var expr="'Anexo ' + file_item.split('anexo_')[1]">
                   </a>
-                    <dtml-if expr="(not prop_recebida)">
+                    <dtml-if expr="not _.has_key('tem_pdf') or not prop_recebida">
                         <a class="btn btn-danger" href="javascript:void(0)" onclick="location.href='anexo_excluir?anexo=<dtml-var file_item>&cod_proposicao=<dtml-var cod_proposicao missing>'"> <i class="far fa-trash-alt"></i></a>
                     </dtml-if>
                 </div>
@@ -797,7 +824,7 @@
    <div class="row mb-4">
      <div class="col-12 col-md-6">
            <label class="form-label" for="lst_assessor">Assessor Responsável</label>
-           <select class="form-select form-control-sm" id="lst_assessor" name="lst_assessor" <dtml-if expr="(prop_enviada)">disabled</dtml-if>>
+           <select class="form-select form-control-sm" id="lst_assessor" name="lst_assessor" <dtml-if expr="_.has_key('tem_pdf') or prop_enviada">disabled</dtml-if>>
              <option value =""></option>
              <dtml-in expr="zsql.assessor_parlamentar_obter_zsql(cod_parlamentar=cod_parlamentar_sel)" mapping>
                <dtml-if expr="dat_exoneracao == None or dat_exoneracao == ''">
@@ -858,18 +885,18 @@
         <div class="col-12 col-md-6 mb-3">
            <label class="form-label d-block">Texto Editável</label>
            <dtml-let id_original="str(cod_proposicao)+'_original.odt'">
-             <dtml-if "hasattr(sapl_documentos.proposicao,id_original)">
+             <dtml-if expr="hasattr(sapl_documentos.proposicao,id_original)">
                <dtml-let documento="getattr(sapl_documentos.proposicao,id_original).absolute_url">
                  <a class="btn btn-sm btn-light" href="<dtml-var portal_url>/generico/viewerJS/#<dtml-var documento>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fa fa-fw fa-file-alt"></i>Texto Original</a>
                </dtml-let>
              </dtml-if>
            </dtml-let>           
            <dtml-let id_documento="str(cod_proposicao)+'.odt'">
-              <dtml-if "hasattr(sapl_documentos.proposicao,id_documento)">
+              <dtml-if expr="hasattr(sapl_documentos.proposicao,id_documento)">
                <div class="btn-group btn-group-sm">
                  <dtml-let documento="getattr(sapl_documentos.proposicao,id_documento).absolute_url">
                    <dtml-call expr="REQUEST.set('nome_arquivo',str(cod_proposicao)+'.odt')">
-                   <dtml-if expr="(prop_enviada and (dat_recebimento==None)) and (not prop_devolvida)">
+                   <dtml-if expr="not _.has_key('tem_pdf') and (prop_enviada and (dat_recebimento==None)) and (not prop_devolvida)">
                        <a class="btn btn-sm btn-primary" href="<dtml-var portal_url>/webeditor/editorProposicao?<dtml-var documento>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fa fa-fw fa-edit"></i>Editar</a>
                        <button type="button" class="btn btn-sm btn-secondary" onclick="javascript:location.href='&dtml-URL1;/sapl_documentos/proposicao/externalEdit_/<dtml-var nome_arquivo>.zem'" data-bs-toggle="tooltip" data-placement="bottom" title="Editar no LibreOffice"><i class="fas fa-fw fa-external-link-alt"></i>LibreOffice</button>
                    <dtml-else>
@@ -892,19 +919,19 @@
                  </a>
               </dtml-let>
               <dtml-if expr="prop_enviada and not prop_devolvida">
-               <dtml-if "sapl_documentos.props_sagl.restpki_access_token!=''">                           
+               <dtml-if expr="sapl_documentos.props_sagl.restpki_access_token!=''">                           
                 <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Assinaturas Digitais" data-src="<dtml-var portal_url>/cadastros/assinatura/assinatura_solicitar_form?codigo=<dtml-var cod_proposicao missing>&tipo_doc=proposicao&modal=1"><i class="fas fa-file-signature"></i> Assinaturas</button>         
               </dtml-if>    
              </dtml-if>
            </div>
-          <dtml-elif "hasattr(sapl_documentos.proposicao,id_documento)">
+          <dtml-elif expr="hasattr(sapl_documentos.proposicao,id_documento)">
            <div class="btn-group btn-group-sm">          
             <dtml-let documento="getattr(sapl_documentos.proposicao,id_documento).absolute_url">
                <a class="btn btn-primary" target="_blank" href="<dtml-var documento>?<dtml-var expr="ZopeTime().timeTime()">">
                   <i class="fa fa-fw fa-file-pdf"></i>Visualizar
                </a>
                <dtml-if expr="not prop_recebida and not prop_devolvida">  
-                <dtml-if "sapl_documentos.props_sagl.restpki_access_token!=''">
+                <dtml-if expr="sapl_documentos.props_sagl.restpki_access_token!=''">
                  <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Assinaturas Digitais" data-src="<dtml-var portal_url>/cadastros/assinatura/assinatura_solicitar_form?codigo=<dtml-var cod_proposicao>&tipo_doc=proposicao&modal=1"><i class="fas fa-file-signature"></i> Assinaturas</button>  
                 </dtml-if>
                </dtml-if>
@@ -919,7 +946,7 @@
                <div class="input-group">
                   <input type="file" class="form-control" id="file_nom_arquivo" name="file_nom_arquivo" accept="application/pdf">
                   <dtml-let id_documento_odt="str(cod_proposicao)+'.odt'">
-                     <dtml-if "hasattr(sapl_documentos.proposicao,id_documento_odt)">
+                     <dtml-if expr="hasattr(sapl_documentos.proposicao,id_documento_odt)">
                         <dtml-call expr="REQUEST.set('temODT', 1)">
                      </dtml-if>
                   </dtml-let>
@@ -1191,7 +1218,6 @@ tinymce.init({
 </script>
 <script>
 $(document).ready(function(){
-
     var tipo_prop = $("#lst_tip_proposicao").val();
     tipo_propo = tipo_prop.split("&")[0]
   <dtml-if expr="_.has_key('cod_proposicao')">
@@ -1279,7 +1305,6 @@ function myFunction() {
     })
     return form.find(".error").length==0
 }
-
 
 </script>
 

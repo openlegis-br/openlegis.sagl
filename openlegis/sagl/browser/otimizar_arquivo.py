@@ -3,76 +3,116 @@ from io import BytesIO
 import logging
 import re
 import warnings
-from functools import lru_cache
+from functools import lru_cache, wraps
 from contextlib import contextmanager
+from datetime import datetime, timedelta
+import time
+from typing import Optional, List, Dict, Any, Union, BinaryIO, Iterator
 
-# Third-party imports
+# Bibliotecas de terceiros
 from pypdf import PdfReader
 from pypdf.errors import PdfReadError
-import fitz
+import fitz  # PyMuPDF
 from fitz import FileDataError, EmptyFileError
 import pikepdf
 from dateutil.parser import parse
 from dateutil.parser._parser import ParserError
 from asn1crypto import cms
 
-# Zope imports
+# Zope
 from five import grok
 from zope.interface import Interface
 
-# Logging
+# Constantes
+CPF_LENGTH = 11
+MAX_TITLE_LENGTH = 200
+DATE_FORMAT = '%Y-%m-%d %H:%M:%S'
+
+# Tipos
+PDFData = Union[bytes, bytearray]
+SignatureData = Dict[str, Any]
+SignerInfo = Dict[str, Optional[str]]
+
+# Configuração de logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 warnings.simplefilter("once", RuntimeWarning)
 
-def custom_warning_to_log(message, category, filename, lineno, file=None, line=None):
+def warning_to_log(message: str, category: type, filename: str, lineno: int, file=None, line=None) -> None:
+    """Redireciona avisos do Python para o sistema de logs."""
     logging.getLogger().warning(f"{category.__name__}: {message} (linha {lineno})")
 
-warnings.showwarning = custom_warning_to_log
+warnings.showwarning = warning_to_log
 
-class PDFUploadProcessorView(grok.View):
-    grok.context(Interface)
-    grok.require('zope2.Public')
-    grok.name('otimizar_arquivo')
+def timed_lru_cache(seconds: int = 300, maxsize: int = 128):
+    """Decorador que adiciona timeout ao lru_cache"""
+    def wrapper_cache(func):
+        func = lru_cache(maxsize=maxsize)(func)
+        func.lifetime = timedelta(seconds=seconds)
+        func.expiration = datetime.now() + func.lifetime
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        @wraps(func)
+        def wrapped_func(*args, **kwargs):
+            if datetime.now() >= func.expiration:
+                func.cache_clear()
+                func.expiration = datetime.now() + func.lifetime
+            return func(*args, **kwargs)
+        return wrapped_func
+    return wrapper_cache
+
+class PDFProcessor:
+    """Classe base para operações comuns com PDF."""
+
+    def __init__(self):
         self._cached_pdf_reader = None
         self._cached_pdf_stream = None
 
     @contextmanager
-    def _get_pdf_reader(self, file_stream):
-        try:
-            current_stream = file_stream.getvalue()
-            if self._cached_pdf_reader is None or self._cached_pdf_stream != current_stream:
-                self._cached_pdf_stream = current_stream
+    def _get_pdf_reader(self, file_stream: BytesIO) -> Iterator[PdfReader]:
+        current_stream = file_stream.getvalue()
+        if (self._cached_pdf_reader is None or self._cached_pdf_stream != current_stream):
+            self._cached_pdf_stream = current_stream
+            try:
                 self._cached_pdf_reader = PdfReader(BytesIO(self._cached_pdf_stream))
-            yield self._cached_pdf_reader
-        except PdfReadError as e:
-            logging.warning(f"Erro na leitura do PDF: {e}", exc_info=True)
-            raise ValueError("O arquivo PDF está corrompido ou não é válido") from e
-        except Exception as e:
-            logging.warning(f"Erro inesperado ao acessar PDF: {e}", exc_info=True)
-            raise RuntimeError("Erro ao processar o arquivo PDF") from e
+            except PdfReadError as e:
+                logging.warning("Erro ao ler o PDF (tentando recuperar): %s", e)
+                # Tenta reparar com pikepdf e reler
+                repaired = self.repair_with_pikepdf(current_stream)
+                if repaired:
+                    self._cached_pdf_reader = PdfReader(BytesIO(repaired))
+                else:
+                    raise ValueError("PDF corrompido e irrecuperável") from e
+        yield self._cached_pdf_reader
 
+    @staticmethod
     @lru_cache(maxsize=32)
-    def _format_cpf(self, cpf):
+    def format_cpf(cpf: Optional[str]) -> str:
+        """Formata um CPF com pontuação padrão."""
         if not cpf or not isinstance(cpf, str):
             return ""
-        cleaned_cpf = re.sub(r'[^0-9]', '', cpf)
-        if len(cleaned_cpf) != 11 or not cleaned_cpf.isdigit():
+        cleaned = re.sub(r'[^0-9]', '', cpf)
+        if len(cleaned) != CPF_LENGTH:
             return cpf
-        return f"{cleaned_cpf[:3]}.{cleaned_cpf[3:6]}.{cleaned_cpf[6:9]}-{cleaned_cpf[9:]}"
+        return f"{cleaned[:3]}.{cleaned[3:6]}.{cleaned[6:9]}-{cleaned[9:]}"
 
-    def _format_datetime(self, dt):
+    @staticmethod
+    @timed_lru_cache(seconds=3600, maxsize=32)  # 1 hora de cache
+    @staticmethod
+    def format_datetime(dt: Optional[Any]) -> Optional[str]:
+        """Formata data/hora para string padrão."""
         if not dt:
             return None
         try:
-            return dt.strftime('%Y-%m-%d %H:%M:%S')
-        except (AttributeError, TypeError) as e:
-            logging.warning(f"Formato de data inválido: {e}")
+            return dt.strftime(DATE_FORMAT)
+        except Exception as e:
+            logging.warning("Erro ao formatar data: %s", e)
             return None
 
-    def parse_signatures(self, raw_signature_data):
+
+class PDFSignatureParser(PDFProcessor):
+    """Responsável por extrair e interpretar assinaturas digitais."""
+
+    def parse_signatures(self, raw_signature_data: bytes) -> List[SignerInfo]:
+        """Extrai dados da assinatura digital usando ASN.1 CMS."""
         if not raw_signature_data:
             return []
 
@@ -80,7 +120,6 @@ class PDFUploadProcessorView(grok.View):
             info = cms.ContentInfo.load(raw_signature_data)
             signed_data = info['content']
             certificates = signed_data['certificates']
-            signer_infos = signed_data['signer_infos'][0]
 
             signers = []
             for cert in certificates:
@@ -90,237 +129,244 @@ class PDFUploadProcessorView(grok.View):
                     issuer = cert_data.get('issuer', {})
 
                     common_name = subject.get('common_name', '')
-                    name_parts = common_name.split(':', 1) if common_name else ['', '']
+                    nome, cpf = (common_name.split(':', 1) + [''])[:2]
 
                     signers.append({
                         'type': subject.get('organization_name', ''),
-                        'signer': name_parts[0],
-                        'cpf': self._format_cpf(name_parts[1] if len(name_parts) > 1 else ''),
+                        'signer': nome.strip(),
+                        'cpf': self.format_cpf(cpf.strip()),
                         'oname': issuer.get('organization_name', '')
                     })
                 except Exception as e:
-                    warnings.warn(f"Erro ao processar certificado individual: {e}", RuntimeWarning)
-                    continue
-
+                    warnings.warn(f"Erro ao processar certificado: {e}", RuntimeWarning)
             return signers
 
-        except (ValueError, KeyError, IndexError) as e:
-            warnings.warn(f"Assinatura malformada ou incompleta: {e}", RuntimeWarning)
-            return []
         except Exception as e:
-            warnings.warn(f"Erro inesperado ao analisar assinatura: {e}", RuntimeWarning)
+            warnings.warn(f"Erro ao interpretar assinatura digital: {e}", RuntimeWarning)
             return []
 
-    def _extrair_cpf_do_contents(self, raw_signature_data, original_filename):
+    def extract_cpf_from_contents(self, raw_signature_data: bytes, filename: str) -> Optional[str]:
+        """Tenta extrair CPF dos dados binários brutos da assinatura."""
         if not raw_signature_data:
             return None
 
         try:
             if not isinstance(raw_signature_data, bytes):
-                if isinstance(raw_signature_data, str):
-                    raw_signature_data = raw_signature_data.encode('ascii')
-                else:
-                    return None
+                raw_signature_data = raw_signature_data.encode('ascii')
 
-            CPF_REGEX = re.compile(rb'L\x01\x03\x01\xa0/\x04-\d{8}(\d{11})\d*\x00*\xa0\x17\x06\x05`L')
-            GENERIC_CPF_REGEX = re.compile(rb'(\d{11})')
+            patterns = [
+                re.compile(rb'L\x01\x03\x01\xa0/\x04-\d{8}(\d{11})'),
+                re.compile(rb'(\d{11})')
+            ]
 
-            for pattern in [CPF_REGEX, GENERIC_CPF_REGEX]:
+            for pattern in patterns:
                 match = pattern.search(raw_signature_data)
                 if match:
-                    try:
-                        cpf = match.group(1).decode('ascii')
-                        return self._format_cpf(cpf)
-                    except (UnicodeDecodeError, AttributeError) as e:
-                        logging.warning(f"CPF encontrado mas formato inválido: {e}")
-                        continue
+                    return self.format_cpf(match.group(1).decode('ascii'))
 
             return None
-
         except Exception as e:
-            logging.warning(f"Erro ao extrair CPF de {original_filename}: {e}")
+            logging.warning("Erro ao extrair CPF do arquivo '%s': %s", filename, e)
             return None
 
-    def get_signatures_from_stream(self, file_stream, original_filename):
+    def get_signatures_from_stream(self, file_stream: BytesIO, filename: str) -> List[SignatureData]:
+        """Processa todas as assinaturas encontradas no PDF."""
         try:
             with self._get_pdf_reader(file_stream) as reader:
                 try:
                     fields = reader.get_fields() or {}
                 except Exception as e:
-                    logging.warning(f"Erro ao obter campos do PDF: {e}")
+                    logging.warning("Erro ao ler campos de formulário do PDF: %s", e)
                     fields = {}
 
-                signature_field_values = []
-                for f in fields.values():
-                    try:
-                        if hasattr(f, 'field_type') and str(f.field_type) == '/Sig' and f.value is not None:
-                            signature_field_values.append(f.value)
-                    except Exception as e:
-                        logging.warning(f"Erro ao processar campo de assinatura: {e}")
-                        continue
-
-                lst_signers = []
-                for v in signature_field_values:
-                    try:
-                        signing_time = None
-                        if '/M' in v:
-                            try:
-                                time_str = v['/M'][2:].strip("'").replace("'", ":")
-                                signing_time = parse(time_str)
-                            except (ParserError, IndexError, AttributeError) as e:
-                                logging.warning(f"Formato de data inválido na assinatura: {e}")
-
-                        name_cpf = v.get('/Name', '').strip()
-                        signer_name, signer_cpf_name = (name_cpf.split(':', 1) + [''])[:2]
-                        signer_cpf_name = self._format_cpf(signer_cpf_name.strip()) if signer_cpf_name.strip() and len(signer_cpf_name.strip()) == 11 else None
-
-                        raw_signature_data = v.get('/Contents')
-                        cpf_contents = self._extrair_cpf_do_contents(raw_signature_data, original_filename)
-                        signer_display_name = (v.get('/Name', '') or '').strip().split(':')[0] or '<desconhecido>'
-                        if not isinstance(raw_signature_data, bytes):
-                           warnings.warn(
-                              f"Assinatura em formato inesperado (não-bytes) no arquivo '{original_filename}' (assinante: {signer_display_name})",
-                              RuntimeWarning
-                           )
-                           parsed_signatures = []
-                        else:
-                           parsed_signatures = self.parse_signatures(raw_signature_data)
-
-                        cpf_certificado = parsed_signatures[0].get('cpf') if parsed_signatures else None
-
-                        signer_cpf_final = cpf_certificado or signer_cpf_name or cpf_contents
-
-                        for attrdict in parsed_signatures:
-                            lst_signers.append({
-                                'signer_name': signer_name or attrdict.get('signer', ''),
-                                'signer_cpf': signer_cpf_final or attrdict.get('cpf', ''),
-                                'signing_time': signing_time,
-                                'signer_certificate': attrdict.get('oname', ''),
-                            })
-
-                    except Exception as e:
-                        logging.warning(f"Erro ao processar assinatura: {e}")
-                        continue
-
-                seen = set()
-                unique_signers = [
-                    d for d in lst_signers 
-                    if not (tuple(d.items()) in seen or seen.add(tuple(d.items())))
+                signatures = [
+                    f.value for f in fields.values()
+                    if getattr(f, 'field_type', None) == '/Sig' and f.value
                 ]
-                unique_signers.sort(key=lambda x: x.get('signing_time') or '')
 
-                return unique_signers
+                signers = []
+                for sig in signatures:
+                    try:
+                        signers.extend(self._process_signature(sig, filename))
+                    except Exception as e:
+                        logging.warning("Erro ao processar assinatura: %s", e)
 
+                return self._deduplicate_signers(signers)
         except Exception as e:
-            logging.warning(f"Erro geral ao extrair assinaturas: {e}", exc_info=True)
+            logging.warning("Erro geral ao extrair assinaturas: %s", e, exc_info=True)
             return []
 
-    def _repair_pdf_with_pikepdf(self, pdf_bytes):
+    def _process_signature(self, signature: Dict[str, Any], filename: str) -> List[SignatureData]:
+        """Processa uma assinatura específica extraindo nome, CPF, data e certificado."""
+        signing_time = self._extract_signing_time(signature)
+        name_field = signature.get('/Name', '')
+        name, cpf_name = (name_field.split(':', 1) + [''])[:2]
+        cpf_name = self.format_cpf(cpf_name.strip()) if cpf_name.strip() else None
+
+        raw_data = signature.get('/Contents')
+        cpf_raw = self.extract_cpf_from_contents(raw_data, filename)
+        parsed = self.parse_signatures(raw_data) if isinstance(raw_data, bytes) else []
+
+        cpf_final = (parsed[0]['cpf'] if parsed else None) or cpf_name or cpf_raw
+
+        return [{
+            'signer_name': name.strip(),
+            'signer_cpf': cpf_final,
+            'signing_time': signing_time,
+            'signer_certificate': signer.get('oname', '') if signer else ''
+        } for signer in parsed]
+
+    def _extract_signing_time(self, signature: Dict[str, Any]) -> Optional[str]:
+        """Extrai a data/hora da assinatura (campo /M)."""
+        if '/M' not in signature:
+            return None
         try:
-            repaired_stream = BytesIO()
-            with pikepdf.open(BytesIO(pdf_bytes)) as pdf:
-                pdf.save(repaired_stream)
-            repaired_stream.seek(0)
-            logging.info("PDF recuperado com sucesso via pikepdf")
-            return repaired_stream.getvalue()
+            time_str = signature['/M'][2:].strip("'").replace("'", ":")
+            return self.format_datetime(parse(time_str))
         except Exception as e:
-            logging.warning(f"Erro ao tentar reparar PDF com pikepdf: {e}", exc_info=True)
+            logging.warning("Erro ao interpretar data de assinatura: %s", e)
             return None
 
-    def _optimize_pdf(self, file_stream, title):
+    @staticmethod
+    def _deduplicate_signers(signers: List[SignatureData]) -> List[SignatureData]:
+        """Remove assinaturas duplicadas e ordena por data."""
+        seen = set()
+        unique = [s for s in signers if not (tuple(s.items()) in seen or seen.add(tuple(s.items())))]
+        return sorted(unique, key=lambda x: x.get('signing_time') or '')
+
+
+class PDFOptimizer(PDFProcessor):
+    """Responsável por otimizar e tentar recuperar arquivos PDF corrompidos."""
+
+    def repair_with_pikepdf(self, pdf_bytes: PDFData) -> Optional[bytes]:
         try:
-            file_stream.seek(0)
-            pdf_data = file_stream.getvalue()
-            if not pdf_data:
-                raise ValueError("O arquivo PDF está vazio")
-
-            try:
-                doc = fitz.open(stream=pdf_data)
-            except (FileDataError, EmptyFileError, RuntimeError) as e:
-                logging.warning(f"Falha inicial ao abrir com fitz: {e}")
-                repaired_data = self._repair_pdf_with_pikepdf(pdf_data)
-                if repaired_data:
-                    try:
-                        doc = fitz.open(stream=repaired_data)
-                        pdf_data = repaired_data
-                    except Exception as e2:
-                        raise ValueError(f"Mesmo após pikepdf, PDF inválido: {e2}") from e2
-                else:
-                    raise ValueError(f"Arquivo PDF inválido e pikepdf falhou: {e}") from e
-
-            if title and isinstance(title, str):
-                try:
-                    doc.set_metadata({'title': title[:200]})
-                except Exception as e:
-                    logging.warning(f"Falha ao definir metadados do título: {e}")
-
-            output_stream = BytesIO()
-            try:
-                doc.save(
-                    output_stream,
-                    garbage=3,
-                    deflate=True,
-                    clean=True,
-                    incremental=False,
-                    encryption=fitz.PDF_ENCRYPT_NONE
-                )
-                logging.info("PDF otimizado com sucesso via fitz.")
-                return output_stream.getvalue()
-
-            except Exception as e:
-                logging.warning(f"Erro ao salvar PDF com fitz: {e} — tentando pikepdf como fallback")
-                repaired = self._repair_pdf_with_pikepdf(pdf_data)
-                if repaired:
-                    logging.info("PDF reparado com sucesso via pikepdf após falha no fitz.")
-                    return repaired
-                else:
-                    logging.warning("Falha também com pikepdf — retornando PDF original.")
-                    return pdf_data
-
+            repaired = BytesIO()
+            with pikepdf.open(BytesIO(pdf_bytes)) as pdf:
+                pdf.save(repaired)
+            repaired.seek(0)
+            logging.info("PDF recuperado com sucesso usando pikepdf")
+            return repaired.getvalue()
         except Exception as e:
-            logging.warning(f"Falha crítica na otimização do PDF: {e}", exc_info=True)
-            raise RuntimeError(f"Falha ao otimizar PDF: {e}") from e
+            logging.warning("Falha ao recuperar PDF com pikepdf: %s", e)
+            return None
 
-    def optimizeFile(self, filename, title):
+    def optimize_pdf(self, file_stream: BytesIO, title: Optional[str] = None) -> bytes:
+        file_stream.seek(0)
+        pdf_data = file_stream.getvalue()
+
+        if not pdf_data:
+            raise ValueError("Arquivo PDF vazio")
+
         try:
-            try:
-                original_data = filename.read()
-                if not original_data:
-                    raise ValueError("Arquivo vazio")
-            except Exception as e:
-                raise ValueError(f"Erro ao ler arquivo: {e}") from e
+            doc = self._open_pdf_with_fallback(pdf_data)
+            self._set_pdf_title(doc, title)
+            return self._save_optimized_pdf(doc, pdf_data)
+        except Exception as e:
+            logging.warning("Erro crítico na otimização: %s", e)
+            raise RuntimeError("Falha na otimização do PDF") from e
 
+    def _open_pdf_with_fallback(self, pdf_data: PDFData) -> fitz.Document:
+        try:
+            return fitz.open(stream=pdf_data)
+        except Exception as e:
+            logging.warning("Falha ao abrir com fitz: %s", e)
+            repaired = self.repair_with_pikepdf(pdf_data)
+            if repaired:
+                return fitz.open(stream=repaired)
+            raise ValueError("PDF inválido e não foi possível recuperar") from e
+
+    def _set_pdf_title(self, doc: fitz.Document, title: Optional[str]) -> None:
+        if title:
+            try:
+                doc.set_metadata({'title': title[:MAX_TITLE_LENGTH]})
+            except Exception as e:
+                logging.warning("Erro ao definir título do PDF: %s", e)
+
+    def _save_optimized_pdf(self, doc: fitz.Document, original_data: PDFData) -> bytes:
+        output = BytesIO()
+        try:
+            doc.save(output, garbage=3, deflate=True, clean=True, incremental=False, encryption=fitz.PDF_ENCRYPT_NONE)
+            return output.getvalue()
+        except Exception as e:
+            logging.warning("Falha ao salvar com fitz: %s", e)
+            repaired = self.repair_with_pikepdf(original_data)
+            return repaired if repaired else original_data
+
+
+class PDFUploadProcessorView(grok.View, PDFSignatureParser, PDFOptimizer):
+    """View Zope para processar uploads de PDF com otimização e extração de assinatura."""
+
+    grok.context(Interface)
+    grok.require('zope2.Public')
+    grok.name('otimizar_arquivo')
+
+    def __init__(self, context, request):
+        # Inicialização padrão do Zope
+        super().__init__(context, request)
+
+        # Inicializa atributos da superclasse PDFProcessor
+        PDFProcessor.__init__(self)
+
+        # Armazena o contexto e a requisição
+        self.context = context
+        self.request = request
+
+    def optimize_file(self, file_obj: BinaryIO, title: Optional[str] = None) -> Union[bytes, Dict[str, Any]]:
+        try:
+            original_data = self._read_file_data(file_obj)
             file_stream = BytesIO(original_data)
 
-            # Verifica se o PDF tem assinatura — não otimizar se tiver
-            try:
-                with self._get_pdf_reader(file_stream) as reader:
-                    signers_data = self.get_signatures_from_stream(file_stream, getattr(filename, 'filename', 'unknown'))
-                    if signers_data:
-                        logging.info(f"Arquivo assinado detectado: {len(signers_data)} assinaturas — não será otimizado")
-                        return original_data
-            except Exception as e:
-                logging.warning(f"Erro ao verificar assinatura: {e}")
+            with self._get_pdf_reader(file_stream) as reader:
+                assinaturas = self.get_signatures_from_stream(file_stream, getattr(file_obj, 'filename', 'desconhecido'))
+                if assinaturas:
+                    logging.info("Assinaturas digitais detectadas (%d)", len(assinaturas))
+                    return {'file_stream': BytesIO(original_data), 'signatures': assinaturas}
 
-            # Tenta otimizar (com fallback via pikepdf)
-            try:
-                optimized_data = self._optimize_pdf(BytesIO(original_data), title)
-                if optimized_data and len(optimized_data) < len(original_data):
-                    logging.info(f"PDF otimizado: redução de {len(original_data)} para {len(optimized_data)} bytes")
-                    return optimized_data
-            except Exception as e:
-                logging.warning(f"Falha na otimização: {e}")
+                if self._has_form_fields(reader):
+                    logging.info("PDF contém campos de formulário")
+                    return original_data
 
+                return self._attempt_optimization(original_data, title)
+
+        except ValueError as e:
+            logging.warning("Arquivo PDF inválido: %s", e)
+            return original_data
+        except Exception as e:
+            logging.warning("Erro inesperado ao processar PDF: %s", e, exc_info=True)
             return original_data
 
-        except Exception as e:
-            logging.critical(f"Falha crítica no processamento: {e}", exc_info=True)
-            raise RuntimeError("Falha ao processar documento") from e
-  
-    def render(self, filename, title):
+    def _read_file_data(self, file_obj: BinaryIO) -> bytes:
         try:
-            return self.optimizeFile(filename, title)
+            data = file_obj.read()
+            if not data:
+                raise ValueError("Arquivo vazio")
+            return data
         except Exception as e:
-            logging.critical(f"Erro no render: {e}", exc_info=True)
+            raise ValueError(f"Erro na leitura do arquivo: {e}") from e
+
+    def _has_form_fields(self, reader: PdfReader) -> bool:
+        try:
+            return bool(reader.get_fields())
+        except Exception as e:
+            logging.warning("Erro ao verificar campos de formulário: %s", e)
+            return False
+
+    def _attempt_optimization(self, original_data: bytes, title: Optional[str]) -> bytes:
+        try:
+            optimized = self.optimize_pdf(BytesIO(original_data), title)
+            if optimized and len(optimized) < len(original_data):
+                logging.info("Otimização bem-sucedida: reduziu de %d para %d bytes",
+                             len(original_data), len(optimized))
+                return optimized
+            return original_data
+        except Exception as e:
+            logging.warning("Falha na tentativa de otimização: %s", e)
+            return original_data
+
+    def render(self, filename: BinaryIO, title: Optional[str] = None) -> Any:
+        try:
+            return self.optimize_file(filename, title)
+        except Exception as e:
+            logging.critical("Erro durante o render(): %s", e, exc_info=True)
             filename.seek(0)
             return filename.read()

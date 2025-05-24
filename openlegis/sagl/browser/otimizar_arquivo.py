@@ -84,7 +84,7 @@ class PDFProcessor:
         yield self._cached_pdf_reader
 
     @staticmethod
-    @lru_cache(maxsize=32)
+    @timed_lru_cache(seconds=3600, maxsize=32)  # 1 hora de cache
     def format_cpf(cpf: Optional[str]) -> str:
         """Formata um CPF com pontuação padrão."""
         if not cpf or not isinstance(cpf, str):

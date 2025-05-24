@@ -96,7 +96,6 @@ class PDFProcessor:
 
     @staticmethod
     @timed_lru_cache(seconds=3600, maxsize=32)  # 1 hora de cache
-    @staticmethod
     def format_datetime(dt: Optional[Any]) -> Optional[str]:
         """Formata data/hora para string padrão."""
         if not dt:

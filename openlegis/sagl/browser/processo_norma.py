@@ -17,6 +17,7 @@ import pikepdf
 
 # Configurar logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
 
 def sanear_pdf(pdf_bytes, title=None, mod_date=None):
     """

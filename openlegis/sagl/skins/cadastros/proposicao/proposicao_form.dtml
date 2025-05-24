@@ -499,7 +499,13 @@
   <div class="row" id="divMat" <dtml-if expr="not _.has_key('cod_proposicao') or ind_mat_ou_doc=='M'">style="display:none;"</dtml-if>>
     <div class="col-12 col-md-6 mb-3">
       <label class="form-label required" for="lst_tip_id_basica">Matéria Vinculada</label>
-          <select class="select2 form-select" id="lst_tip_id_basica" name="lst_tip_id_basica" <dtml-if expr="_.has_key('tem_pdf') or not _.has_key('tip_id_basica_sel') or prop_recebida or prop_devolvida"> disabled </dtml-if> data-minimum-results-for-search="Infinity" style="width: 100%;">
+          <select class="select2 form-select" id="lst_tip_id_basica" name="lst_tip_id_basica" 
+              <dtml-if expr="_.has_key('tem_pdf')"> 
+                 readonly 
+              <dtml-elif expr="not _.has_key('tip_id_basica_sel') or prop_recebida or prop_devolvida"> 
+                 readonly 
+               </dtml-if> 
+               data-minimum-results-for-search="Infinity" style="width: 100%;">
              <option value="">Selecione</option>
              <dtml-in expr="zsql.tipo_materia_legislativa_obter_zsql(tip_natureza='P')">
                 <option
@@ -517,20 +523,26 @@
     <div class="col-4 col-md-2 mb-3">
       <label class="form-label required" for="txt_num_ident_basica">Número</label> 
       <input class="form-control number" type="number" id="txt_num_ident_basica" name="txt_num_ident_basica" value="<dtml-var num_ident_basica_sel missing null="1">" 
-        <dtml-if expr="_.has_key('tem_pdf') or not _.has_key('num_ident_basica_sel') or prop_recebida">
-           disabled 
+        <dtml-if expr="_.has_key('tem_pdf')"> 
+           readonly 
+        <dtml-elif expr="not _.has_key('num_ident_basica_sel') or prop_recebida">
+           readonly 
         </dtml-if>  />    
     </div>
     <div class="col-4 col-md-2 mb-3">
       <label class="form-label required" for="txt_ano_ident_basica">Ano</label>
       <input class="form-control year" type="number" id="txt_ano_ident_basica" name="txt_ano_ident_basica" value="<dtml-var ano_ident_basica_sel missing>" 
-        <dtml-if expr="_.has_key('tem_pdf') or not _.has_key('ano_ident_basica_sel') or prop_recebida"> 
-           disabled
-        </dtml-if> />
+        <dtml-if expr="_.has_key('tem_pdf')"> 
+           readonly 
+        <dtml-elif expr="not _.has_key('num_ident_basica_sel') or prop_recebida">
+           readonly 
+        </dtml-if>  /> 
     </div>
     <div class="col-4 col-md-2 mb-3">
-        <label class="form-label" for="postjq"><span class="text-white">Obter Ementa</span></label>
-        <input id="postjq" type="button" class="btn btn-light w" value="Obter Ementa" />
+        <dtml-if expr="not _.has_key('tem_pdf')">
+           <label class="form-label" for="postjq"><span class="text-white">Obter Ementa</span></label>
+           <input id="postjq" type="button" class="btn btn-light w" value="Obter Ementa" />
+        </dtml-if>
     </div>
   </div>
 
@@ -794,7 +806,7 @@
        </div>
     </div>
     <div class="row mb-2">
-     <dtml-if expr="not _.has_key('tem_pdf') or not prop_recebida">   
+     <dtml-if expr="not _.has_key('tem_pdf') and not prop_recebida">   
        <div class="col-12 col-md-2">
            <small id="link_add_file">
              <a class="btn btn-sm btn-light w-100" onclick="addFileField(); return false;" href="#">Anexar</a>
@@ -810,7 +822,7 @@
                   <a class="btn btn-secondary" target="_blank" href="<dtml-var documento>?<dtml-var expr="ZopeTime().timeTime()">">
                     <i class="fa fa-fw fa-file-pdf"></i><dtml-var expr="'Anexo ' + file_item.split('anexo_')[1]">
                   </a>
-                    <dtml-if expr="not _.has_key('tem_pdf') or not prop_recebida">
+                    <dtml-if expr="not _.has_key('tem_pdf') and not prop_recebida">
                         <a class="btn btn-danger" href="javascript:void(0)" onclick="location.href='anexo_excluir?anexo=<dtml-var file_item>&cod_proposicao=<dtml-var cod_proposicao missing>'"> <i class="far fa-trash-alt"></i></a>
                     </dtml-if>
                 </div>

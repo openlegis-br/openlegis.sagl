@@ -341,7 +341,7 @@
    <dtml-if expr="hasattr(sapl_documentos.proposicao, id_pdf_normal) or hasattr(sapl_documentos.proposicao, id_pdf_assinado)">
      <dtml-call expr="REQUEST.set('tem_pdf', '1')">
    </dtml-if>
-   <dtml-if expr="_.has_key('tem_pdf') and not prop_recebida and not prop_devolvida">
+   <dtml-if expr="_.has_key('tem_pdf') and not prop_recebida">
      <div class="alert alert-dismissible alert-info small mt-2">
        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
        <i class="fas fa-lock"></i> Edição bloqueada: o texto final em PDF já foi gerado.
@@ -499,7 +499,7 @@
   <div class="row" id="divMat" <dtml-if expr="not _.has_key('cod_proposicao') or ind_mat_ou_doc=='M'">style="display:none;"</dtml-if>>
     <div class="col-12 col-md-6 mb-3">
       <label class="form-label required" for="lst_tip_id_basica">Matéria Vinculada</label>
-          <select class="select2 form-select" id="lst_tip_id_basica" name="lst_tip_id_basica" <dtml-if "not _.has_key('tip_id_basica_sel') or prop_recebida or prop_devolvida or _.has_key('tem_pdf')"> readonly </dtml-if> data-minimum-results-for-search="Infinity" style="width: 100%;">
+          <select class="select2 form-select" id="lst_tip_id_basica" name="lst_tip_id_basica" <dtml-if "not _.has_key('tip_id_basica_sel') or prop_recebida or prop_devolvida"> disabled </dtml-if> data-minimum-results-for-search="Infinity" style="width: 100%;">
              <option value="">Selecione</option>
              <dtml-in expr="zsql.tipo_materia_legislativa_obter_zsql(tip_natureza='P')">
                 <option
@@ -517,15 +517,15 @@
     <div class="col-4 col-md-2 mb-3">
       <label class="form-label required" for="txt_num_ident_basica">Número</label> 
       <input class="form-control number" type="number" id="txt_num_ident_basica" name="txt_num_ident_basica" value="<dtml-var num_ident_basica_sel missing null="1">" 
-        <dtml-if "not _.has_key('num_ident_basica_sel') or prop_recebida or _.has_key('tem_pdf')">
-           readonly 
+        <dtml-if "not _.has_key('num_ident_basica_sel') or prop_recebida">
+           disabled 
         </dtml-if>  />    
     </div>
     <div class="col-4 col-md-2 mb-3">
       <label class="form-label required" for="txt_ano_ident_basica">Ano</label>
       <input class="form-control year" type="number" id="txt_ano_ident_basica" name="txt_ano_ident_basica" value="<dtml-var ano_ident_basica_sel missing>" 
-        <dtml-if "not _.has_key('ano_ident_basica_sel') or prop_recebida or _.has_key('tem_pdf')"> 
-           readonly
+        <dtml-if "not _.has_key('ano_ident_basica_sel') or prop_recebida"> 
+           disabled
         </dtml-if> />
     </div>
     <div class="col-4 col-md-2 mb-3">

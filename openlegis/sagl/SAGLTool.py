@@ -43,8 +43,12 @@ import logging
 import tasks
 import qrcode
 import pypdf
+from pypdf.errors import PdfReadError
 from dateutil.parser import parse
 from asn1crypto import cms
+import warnings
+import re # Para format_cpf
+CPF_LENGTH = 11
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -2049,64 +2053,192 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
                     content = existing_pdf.tobytes(deflate=True, garbage=3, use_objstms=1)
                     arq.manage_upload(file=content)
 
-    def get_signatures(self, fileStream):
-        reader = pypdf.PdfReader(fileStream)
-        fields = reader.get_fields().values()
-        signature_field_values = [
-            f.value for f in fields if f.field_type == '/Sig']
+    @staticmethod
+    def format_cpf(cpf: str | None) -> str:
+        """Formata um CPF com pontuação padrão.
+        Args:
+            cpf: String contendo CPF (com ou sem formatação)
+        Returns:
+            String formatada como XXX.XXX.XXX-XX ou string vazia se inválido
+        """
+        if not cpf or not isinstance(cpf, str):
+            return ""
+        cleaned = re.sub(r'[^0-9]', '', cpf)
+        if len(cleaned) != CPF_LENGTH:
+            return cpf  # Retorna original se não tiver 11 dígitos
+        return f"{cleaned[:3]}.{cleaned[3:6]}.{cleaned[6:9]}-{cleaned[9:]}"
+
+    @staticmethod
+    def parse_pdf_timestamp(timestamp_str: str) -> str:
+        """Parse PDF timestamp string in various formats.
+        Handles formats:
+        - D:YYYYMMDDHHMMSSZ
+        - D:YYYYMMDDHHMMSS+HH'MM'
+        - D:YYYYMMDDHHMMSS-HH'MM'
+        Args:
+            timestamp_str: Timestamp string from PDF signature
+        Returns:
+            ISO 8601 formatted string or original string if parsing fails
+        """
+        if not timestamp_str or not isinstance(timestamp_str, str):
+            return ""
+
+        if not timestamp_str.startswith('D:'):
+            return timestamp_str  # return original if not in expected format
+        # Remove 'D:' prefix
+        ts_clean = timestamp_str[2:]
+        try:
+            # Handle timezone offset with apostrophes
+            if "'" in ts_clean:
+                # Replace apostrophes with colons in timezone offset
+                ts_parts = ts_clean.split("'")
+                if len(ts_parts) >= 2:
+                    # Reconstruct with proper timezone separator
+                    ts_clean = ts_parts[0] + ":" + ts_parts[1]
+            # Parse with dateutil
+            dt = parse(ts_clean)
+            return dt.isoformat()
+        except Exception as e:
+            warnings.warn(
+                f"Failed to parse PDF timestamp '{timestamp_str}'. Error: {str(e)}",
+                RuntimeWarning
+            )
+            return timestamp_str  # fallback to original string
+
+    def parse_signatures(self, raw_signature_data: bytes | None) -> list[dict]:
+        """Parse raw CMS signature data to extract signer information.
+        Args:
+            raw_signature_data: Bytes containing CMS signature data
+        Returns:
+            List of dictionaries with signer information
+        """
+        if not raw_signature_data:
+            return []
+
+        signers_data = []
+        try:
+            info = cms.ContentInfo.load(raw_signature_data)
+            signed_data = info['content']
+            try:
+                certificates_field = signed_data['certificates']
+            except KeyError:
+                warnings.warn(
+                    "Campo 'certificates' não encontrado na estrutura SignedData da assinatura digital.",
+                    RuntimeWarning
+                )
+                return []
+            if certificates_field is None:
+                warnings.warn(
+                    "Campo 'certificates' está presente mas é nulo na assinatura digital.",
+                    RuntimeWarning
+                )
+                return []
+            if not certificates_field:
+                warnings.warn(
+                    "Lista de 'certificates' está vazia na assinatura digital.",
+                    RuntimeWarning
+                )
+                return []
+            for cert_obj in certificates_field:
+                try:
+                    cert_native = cert_obj.native['tbs_certificate']
+                    subject = cert_native.get('subject', {})
+                    issuer = cert_native.get('issuer', {})
+                    common_name = subject.get('common_name', '')
+                    parts = common_name.split(':', 1)
+                    signer_name_from_cert = parts[0].strip()
+                    cpf_from_cert = self.format_cpf(parts[1].strip()) if len(parts) > 1 else ''
+                    organization_name_subject = subject.get('organization_name', '')
+                    organization_name_issuer = issuer.get('organization_name', '')
+                    signers_data.append({
+                        'type': organization_name_subject,
+                        'signer': signer_name_from_cert,
+                        'cpf': cpf_from_cert,
+                        'oname': organization_name_issuer
+                    })
+                except Exception as e:
+                    warnings.warn(
+                        f"Erro ao processar certificado individual: {e}. "
+                        f"Certificado (início): {str(cert_obj.contents)[:100]}...",
+                        RuntimeWarning
+                    )
+                    continue
+        except Exception as e:
+            warnings.warn(
+                f"Erro ao interpretar estrutura da assinatura digital: {e}",
+                RuntimeWarning
+            )
+            return []
+        return signers_data
+
+    def get_signatures(self, fileStream: BytesIO) -> list[dict]:
+        """Extrai informações de todas as assinaturas digitais em um PDF.
+        Args:
+            fileStream: BytesIO contendo o conteúdo do PDF
+        Returns:
+            Lista de dicionários com informações das assinaturas, ordenadas por data
+        """
+        fileStream.seek(0)
+        try:
+            reader = pypdf.PdfReader(fileStream)
+        except PdfReadError as e:
+            warnings.warn(
+                f"Erro ao ler o PDF com pypdf: {e}. Tentando reparar ou retornando vazio.",
+                RuntimeWarning
+            )
+            return []
+        pdf_fields = reader.get_fields()
         lst_signers = []
-        for v in signature_field_values:
-            v_type = v['/Type']
-            if '/M' in v:
-               signing_time = parse(v['/M'][2:].strip("'").replace("'", ":"))
-            else:
-               signing_time = None
-            if '/Name' in v:
-               name = v['/Name'].split(':')[0]
-               cpf = v['/Name'].split(':')[1]
-            else:
-               name = None
-               cpf = None
-            raw_signature_data = v['/Contents']
-            for attrdict in self.parse_signatures(raw_signature_data):
-               dic = {
-                      'signer_name':name or attrdict.get('signer'),
-                      'signer_cpf':cpf or attrdict.get('cpf'),
-                      'signing_time':str(signing_time) or attrdict.get('signing_time'),
-                      'signer_certificate': attrdict.get('oname')
-               }
-            lst_signers.append(dic)
-        lst_signers.sort(key=lambda dic: dic['signing_time'], reverse=True)
-        return lst_signers
- 
-    def parse_signatures(self, raw_signature_data):
-        info = cms.ContentInfo.load(raw_signature_data)
-        signed_data = info['content']
-        certificates = signed_data['certificates']
-        signer_infos = signed_data['signer_infos'][0]
-        signed_attrs = signer_infos['signed_attrs']
-        signers = []
-        for signer_info in signer_infos:
-            for cert in certificates:
-                cert = cert.native['tbs_certificate']
-                issuer = cert['issuer']
-                subject = cert['subject']
-                oname = issuer.get('organization_name', '')
-                lista = subject['common_name'].split(':')
-                if len(lista) > 1:
-                   signer = subject['common_name'].split(':')[0]
-                   cpf = subject['common_name'].split(':')[1]
-                else:
-                   signer = subject['common_name'].split(':')[0]
-                   cpf = ''
+        if not pdf_fields:
+            return []
+        signature_field_values = [
+            f.value for f in pdf_fields.values()
+            if f and getattr(f, 'field_type', None) == '/Sig' and f.value
+        ]
+        for sig_dict in signature_field_values:
+            signing_time_str = None
+            if '/M' in sig_dict:
+                original_m_field = sig_dict['/M']
+                signing_time_str = self.parse_pdf_timestamp(original_m_field)
+            name_from_pdf_dict = None
+            cpf_from_pdf_dict = None
+            if '/Name' in sig_dict:
+                name_parts = sig_dict['/Name'].split(':', 1)
+                name_from_pdf_dict = name_parts[0].strip()
+                if len(name_parts) > 1:
+                    cpf_from_pdf_dict = self.format_cpf(name_parts[1].strip())
+            raw_signature_data = sig_dict.get('/Contents')
+            parsed_asn1_signers = self.parse_signatures(raw_signature_data)
+            if parsed_asn1_signers:
+                for asn1_signer_info in parsed_asn1_signers:
+                    final_name = asn1_signer_info.get('signer') or name_from_pdf_dict
+                    final_cpf = asn1_signer_info.get('cpf') or cpf_from_pdf_dict
+                    final_cpf_formatted = self.format_cpf(final_cpf) if final_cpf else None
+                    dic = {
+                        'signer_name': final_name,
+                        'signer_cpf': final_cpf_formatted,
+                        'signing_time': signing_time_str,
+                        'signer_certificate': asn1_signer_info.get('oname')
+                    }
+                    lst_signers.append(dic)
+            elif name_from_pdf_dict:
                 dic = {
-                   'type': subject.get('organization_name', ''),
-                   'signer': signer,
-                   'cpf':  cpf,
-                   'oname': oname
+                    'signer_name': name_from_pdf_dict,
+                    'signer_cpf': cpf_from_pdf_dict,
+                    'signing_time': signing_time_str,
+                    'signer_certificate': ''
                 }
-        signers.append(dic)
-        return signers
+                lst_signers.append(dic)
+        def get_sort_key(item):
+            st_str = item.get('signing_time')
+            if st_str:
+                try:
+                    return parse(st_str)
+                except:
+                    return datetime.min
+            return datetime.min
+        lst_signers.sort(key=get_sort_key, reverse=True)
+        return lst_signers
 
     def proposicao_autuar(self,cod_proposicao):
         nom_pdf_proposicao = str(cod_proposicao) + "_signed.pdf"

@@ -116,7 +116,8 @@ class PDFProcessorView(grok.View):
                     dic = {
                         'signer_name': signer_name or signer_info.get('signer'),
                         'signer_cpf': signer_cpf_final or signer_info.get('cpf'),
-                        'signing_time': timestamp.isoformat() if timestamp else None,
+                        'signing_time': timestamp.strftime('%Y-%m-%d %H:%M:%S') if timestamp else None,
+                        'signing_timezone': timestamp.strftime('GMT%z') if timestamp else None,
                         'signer_certificate': signer_info.get('oname', '') if parsed_signers else ''
                     }
                     lst_signers.append(dic)

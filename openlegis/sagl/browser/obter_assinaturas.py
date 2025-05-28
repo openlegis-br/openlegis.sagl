@@ -1,170 +1,150 @@
 # -*- coding: utf-8 -*-
-# Standard library imports
 from io import BytesIO
 import logging
-import re  # Importe a biblioteca re
-
-# Third-party library imports
-from pypdf import PdfReader
-import pymupdf
+import re
+from datetime import datetime
 from dateutil.parser import parse
+from pypdf import PdfReader
 from asn1crypto import cms
-
-# Zope imports
 from five import grok
 from zope.interface import Interface
 
-
-# Configure logging (replace with your preferred logging setup)
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-
-class PDFProcessorView(grok.View):  # Renamed class for clarity
+class PDFProcessorView(grok.View):
     grok.context(Interface)
     grok.require('zope2.Public')
     grok.name('obter_assinaturas')
 
     def _format_cpf(self, cpf):
-        """Formata o CPF no padrão 000.000.000-00."""
-        if cpf and len(cpf) == 11 and cpf.isdigit():
-            return f"{cpf[:3]}.{cpf[3:6]}.{cpf[6:9]}-{cpf[9:]}"
-        return cpf
+        if not cpf or not isinstance(cpf, str):
+            return ""
+        cleaned = re.sub(r'\D', '', cpf)
+        return f"{cleaned[:3]}.{cleaned[3:6]}.{cleaned[6:9]}-{cleaned[9:]}" if len(cleaned) == 11 else ""
 
-    def _format_datetime(self, dt):
-        """Formata o objeto datetime no padrão YYYY-MM-DD HH:MM:SS."""
-        if dt:
-            return dt.strftime('%Y-%m-%d %H:%M:%S')
+    def _parse_pdf_timestamp(self, timestamp_str):
+        if not timestamp_str or not isinstance(timestamp_str, str) or not timestamp_str.startswith("D:"):
+            return None
+        ts_clean = timestamp_str[2:]
+        try:
+            ts_clean = re.sub(r"([+-]\d{2})'(\d{2})'", r"\1:\2", ts_clean)
+            dt = parse(ts_clean)
+            return dt
+        except Exception as e:
+            logging.warning(f"Falha ao parsear timestamp: {timestamp_str}. Erro: {e}")
+            return None
+
+    def _extrair_cpf_do_contents(self, raw_signature_data, filename):
+        if not raw_signature_data:
+            return None
+        try:
+            match = re.search(rb'\d{8}(\d{11})\d*', raw_signature_data)
+            if not match:
+                match = re.search(rb'(\d{11})', raw_signature_data)
+            if match:
+                return self._format_cpf(match.group(1).decode('ascii'))
+        except Exception as e:
+            logging.warning(f"Erro ao extrair CPF de '/Contents' ({filename}): {e}")
         return None
 
     def parse_signatures(self, raw_signature_data):
-        """Parses the raw signature data to extract signer information."""
+        if not raw_signature_data:
+            return []
         try:
             info = cms.ContentInfo.load(raw_signature_data)
             signed_data = info['content']
-            certificates = signed_data['certificates']
-            signer_infos = signed_data['signer_infos'][0]
+            if 'certificates' not in signed_data or not signed_data['certificates']:
+                return []
+            certs = signed_data['certificates']
             signers = []
-            for signer_info in signer_infos:
-                for cert in certificates:
-                    cert = cert.native['tbs_certificate']
-                    issuer = cert['issuer']
-                    subject = cert['subject']
-                    oname = issuer.get('organization_name', '')
-                    common_name = subject.get('common_name', '')  # Corrigido para evitar KeyError
-                    lista = common_name.split(':') if common_name else []  # Corrigido para evitar AttributeError
-                    signer = lista[0] if lista else ''
-                    cpf_certificado_raw = lista[1] if len(lista) > 1 else ''
-                    cpf_certificado = self._format_cpf(cpf_certificado_raw)
-                    dic = {
+            for cert_obj in certs:
+                try:
+                    cert = cert_obj.native['tbs_certificate']
+                    subject = cert.get('subject', {})
+                    issuer = cert.get('issuer', {})
+                    common_name = subject.get('common_name', '')
+                    parts = common_name.split(':', 1)
+                    signer = parts[0].strip() if parts else ''
+                    cpf = self._format_cpf(parts[1].strip()) if len(parts) > 1 else ''
+                    signers.append({
                         'type': subject.get('organization_name', ''),
                         'signer': signer,
-                        'cpf': cpf_certificado,
-                        'oname': oname
-                    }
-                    signers.append(dic)
+                        'cpf': cpf,
+                        'oname': issuer.get('organization_name', '')
+                    })
+                except Exception as e:
+                    logging.warning(f"Erro ao processar certificado: {e}")
+                    continue
             return signers
         except Exception as e:
-            logging.error(f"Erro ao analisar assinatura: {e}")
-            return []  # Retorna uma lista vazia em caso de erro
-
-    def _extrair_cpf_do_contents(self, raw_signature_data, filename):
-        """Tenta extrair o CPF de dentro dos dados brutos de '/Contents', considerando o formato específico."""
-        cpf_contents_formatado = None
-        cpf_contents_raw = None
-        if raw_signature_data:
-            try:
-                conteudo_decodificado = raw_signature_data  # Mantém como bytes
-
-                # Expressão regular ajustada para ignorar 8 dígitos (data?) e capturar 11 (CPF)
-                correspondencia_cpf = re.search(rb'L\x01\x03\x01\xa0/\x04-\d{8}(\d{11})\d*\x00*\xa0\x17\x06\x05`L', conteudo_decodificado)
-                if correspondencia_cpf:
-                    cpf_contents_raw = correspondencia_cpf.group(1).decode('ascii')
-                    cpf_contents_formatado = self._format_cpf(cpf_contents_raw)
-                else:
-                    # Se o padrão específico não for encontrado, tenta a busca genérica por 11 dígitos (backup)
-                    correspondencia_generica = re.search(rb'(\d{11})', conteudo_decodificado)
-                    if correspondencia_generica:
-                        cpf_contents_raw = correspondencia_generica.group(1).decode('ascii')
-                        cpf_contents_formatado = self._format_cpf(cpf_contents_raw)
-
-            except Exception as e:
-                logging.warning(f"Erro ao buscar CPF em '/Contents' (arquivo: {filename}): {e}")
-        return cpf_contents_formatado
+            logging.warning(f"Erro ao interpretar ASN.1 da assinatura: {e}")
+            return []
 
     def get_signatures_from_stream(self, fileStream, filename):
-        """Extracts signature information from a PDF file stream."""
         try:
             reader = PdfReader(fileStream)
-            fields = reader.get_fields().values()
-            signature_field_values = []
-            for f in fields:
-                if hasattr(f, 'field_type') and str(f.field_type) == '/Sig':
-                    signature_field_values.append(f.value)
+            fields = reader.get_fields()
+            if not fields:
+                return []
+
             lst_signers = []
-            for v in signature_field_values:
-                if v is not None:
-                    signing_time_raw = v.get('/M')
-                    signing_time = parse(signing_time_raw[2:].strip("'").replace("'", ":")) if signing_time_raw else None
-                    signing_time_formatted = self._format_datetime(signing_time)
-                    signer_name = None
-                    signer_cpf_name_formatado = None
-                    signer_cpf_name_raw = None
-                    if '/Name' in v:
-                        try:
-                            name_cpf_str = v['/Name'].strip()
-                            if name_cpf_str:
-                                signer_name, _, signer_cpf_name_raw = name_cpf_str.partition(':')
-                                signer_name = signer_name.strip()
-                                signer_cpf_name_raw = signer_cpf_name_raw.strip()
-                                if not signer_cpf_name_raw or len(signer_cpf_name_raw) != 11 or not signer_cpf_name_raw.isdigit():
-                                    signer_cpf_name_formatado = None
-                                else:
-                                    signer_cpf_name_formatado = self._format_cpf(signer_cpf_name_raw)
-                        except Exception as e:
-                            logging.warning(f"Erro ao extrair nome/CPF de '/Name' (arquivo: {filename}): {e}")
-                            signer_name = v.get('/Name', '').strip()
-                            signer_cpf_name_formatado = None
+            for field in fields.values():
+                if field is None or str(getattr(field, 'field_type', '')) != '/Sig' or not field.value:
+                    continue
 
-                    raw_signature_data = v.get('/Contents')
-                    cpf_contents_formatado = self._extrair_cpf_do_contents(raw_signature_data, filename)
+                sig_data = field.value
+                timestamp = self._parse_pdf_timestamp(sig_data.get('/M'))
+                name_raw = sig_data.get('/Name', '')
+                signer_name, signer_cpf_raw = None, None
+                if ':' in name_raw:
+                    name_parts = name_raw.split(':', 1)
+                    signer_name = name_parts[0].strip()
+                    signer_cpf_raw = self._format_cpf(name_parts[1].strip())
+                else:
+                    signer_name = name_raw.strip()
 
-                    parsed_signatures = self.parse_signatures(raw_signature_data)
-                    cpf_certificado_formatado = None
-                    if parsed_signatures:
-                        cpf_certificado_formatado = parsed_signatures[0].get('cpf') # Assume que o CPF do certificado está no primeiro signatário
+                raw_contents = sig_data.get('/Contents')
+                cpf_contents = self._extrair_cpf_do_contents(raw_contents, filename)
+                parsed_signers = self.parse_signatures(raw_contents)
+                signer_cpf_final = (
+                    (parsed_signers[0].get('cpf') if parsed_signers else None)
+                    or signer_cpf_raw
+                    or cpf_contents
+                )
 
-                    # Prioriza o CPF do certificado, depois o do '/Name', e por último o do '/Contents'
-                    signer_cpf_final = cpf_certificado_formatado or signer_cpf_name_formatado or cpf_contents_formatado
+                for signer_info in parsed_signers or [{}]:
+                    dic = {
+                        'signer_name': signer_name or signer_info.get('signer'),
+                        'signer_cpf': signer_cpf_final or signer_info.get('cpf'),
+                        'signing_time': timestamp.isoformat() if timestamp else None,
+                        'signer_certificate': signer_info.get('oname', '') if parsed_signers else ''
+                    }
+                    lst_signers.append(dic)
 
-                    for attrdict in parsed_signatures:
-                        dic = {
-                            'signer_name': signer_name or attrdict.get('signer'),
-                            'signer_cpf': signer_cpf_final or attrdict.get('cpf'), # Garante que o CPF do certificado seja usado se parseado
-                            'signing_time': signing_time,
-                            'signer_certificate': attrdict.get('oname')
-                        }
-                        lst_signers.append(dic)
-
-            # Remove duplicatas e ordena
+            # Deduplicação
             seen = set()
-            unique_signers = [d for d in lst_signers if tuple(d.items()) not in seen and not seen.add(tuple(d.items()))]
-            unique_signers.sort(key=lambda dic: dic['signing_time'], reverse=False)
+            unique_signers = []
+            for signer in lst_signers:
+                key = tuple(sorted(signer.items()))
+                if key not in seen:
+                    seen.add(key)
+                    unique_signers.append(signer)
+
+            # Ordenar por data
+            unique_signers.sort(key=lambda s: parse(s['signing_time']) if s['signing_time'] else datetime.min)
             return unique_signers
         except Exception as e:
-            return []  # Retorna uma lista vazia em caso de erro
-
+            logging.error(f"Erro ao processar o PDF '{filename}': {e}")
+            return []
 
     def render(self, file_stream, filename):
         try:
-            signers_data = self.get_signatures_from_stream(file_stream, filename)  # Extract signatures
-
-            if signers_data:  # Check if there are signatures
-                logging.info(f"Assinaturas do documento {filename}: {signers_data}")
-                return signers_data
+            signers_data = self.get_signatures_from_stream(file_stream, filename)
+            if signers_data:
+                logging.info(f"Assinaturas encontradas em '{filename}': {signers_data}")
             else:
-                logging.info(f"Não há assinatura no documento {filename}")
-                return []
+                logging.info(f"Nenhuma assinatura encontrada em '{filename}'")
+            return signers_data
         except Exception as e:
-            logging.error(f"Erro ao processar o arquivo '{filename}': {e}")
+            logging.error(f"Erro na renderização de '{filename}': {e}")
             return []
-

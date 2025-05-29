@@ -19,6 +19,8 @@ from PIL import Image
 from appy.pod.renderer import Renderer
 import pymupdf
 pymupdf.TOOLS.set_aa_level(0)
+import pikepdf
+import fitz
 from barcode import generate
 from barcode.writer import ImageWriter
 #imports para assinatura digital
@@ -1592,19 +1594,22 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
             print(f"Erro geral em get_file_tosign: {e}")
             return None, None, None
 
-    def pades_signature(self, codigo, anexo, tipo_doc, cod_usuario, qtde_assinaturas):
+    def pades_signature(self, codigo, anexo, tipo_doc, cod_usuario, qtde_assinaturas, page_number=None, coords=None):
         """
-        Inicia o processo de assinatura PAdES para um arquivo PDF.
+        Inicia o processo de assinatura PAdES para um arquivo PDF,
+        com suporte a posicionamento visual personalizado via coordenadas.
         """
         try:
-            # Obter o arquivo PDF a ser assinado e validar
+            # Obter o arquivo PDF a ser assinado
             pdf_tosign, storage_path, crc_arquivo = self.get_file_tosign(codigo, anexo, tipo_doc)
             if not pdf_tosign:
                 raise ValueError("Arquivo PDF para assinatura não encontrado.")
+
             arq = getattr(storage_path, pdf_tosign)
             with BytesIO(bytes(arq.data)) as arq1:
                 pdf_stream = base64.b64encode(arq1.getvalue()).decode('utf8')
-            # Obter a imagem do selo PDF
+
+            # Obter selo/brasão
             try:
                 id_logo = self.sapl_documentos.props_sagl.id_logo
                 arq = getattr(self.sapl_documentos.props_sagl, id_logo)
@@ -1616,17 +1621,18 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
                     raise EnvironmentError("Variável de ambiente INSTALL_HOME não configurada.")
                 dirpath = os.path.join(install_home, 'src/openlegis.sagl/openlegis/sagl/skins/imagens/brasao.gif')
                 if not os.path.exists(dirpath):
-                    raise FileNotFoundError(f"Arquivo de imagem não encontrado em: {dirpath}")
+                    raise FileNotFoundError(f"Arquivo de imagem não encontrado: {dirpath}")
                 with open(dirpath, "rb") as arq1:
                     pdf_stamp = base64.b64encode(arq1.read()).decode('utf8')
-            # Iniciar a assinatura PAdES
+
+            # Iniciar assinatura
             signature_starter = PadesSignatureStarter(self.restpki_client())
             signature_starter.set_pdf_stream(pdf_stream)
             signature_starter.signature_policy_id = StandardSignaturePolicies.PADES_BASIC
             signature_starter.security_context_id = StandardSecurityContexts.PKI_BRAZIL
-            # Definir representação visual
-            position = 2 if int(qtde_assinaturas) <= 3 else 4
-            signature_starter.visual_representation = ({
+
+            # Montar representação visual
+            visual_representation = {
                 'text': {
                     'text': 'Assinado digitalmente por {{signerName}}',
                     'includeSigningTime': True,
@@ -1635,22 +1641,49 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
                 'image': {
                     'resource': {
                         'content': pdf_stamp,
-                        'mimeType': 'image/png'  # Verifique se o tipo MIME corresponde ao tipo de arquivo
+                        'mimeType': 'image/png'
                     },
                     'opacity': 40,
                     'horizontalAlign': 'Right'
-                },
-                'position': self.get_visual_representation_position(position)
-            })
-            # Iniciar assinatura com Web PKI
+                }
+            }
+
+            # Se usuário clicou no PDF para indicar posição
+            if page_number and coords:
+                try:
+                    x, y = map(int, coords.split(','))
+                    visual_representation['position'] = {
+                        'pageNumber': int(page_number),
+                        'measurementUnits': 'Pixels',
+                        'manual': {
+                            'left': x,
+                            'top': y,
+                            'width': 200,  # pixels
+                            'height': 50
+                        }
+                    }
+                except Exception as e:
+                    logging.warning(f"Erro ao interpretar coordenadas: {e}")
+                    sample_number = 2 if int(qtde_assinaturas) <= 3 else 4
+                    visual_representation['position'] = self.get_visual_representation_position(sample_number)
+            else:
+                # Posição automática
+                sample_number = 2 if int(qtde_assinaturas) <= 3 else 4
+                visual_representation['position'] = self.get_visual_representation_position(sample_number)
+
+            signature_starter.visual_representation = visual_representation
+ 
+            # Iniciar com Web PKI
             token = signature_starter.start_with_webpki()
             tokenjs = json.dumps(token)
+
             return token, '', crc_arquivo, codigo, anexo, tipo_doc, cod_usuario, tokenjs
+
         except (ValueError, AttributeError, OSError, EnvironmentError) as e:
-            print(f"Erro em pades_signature: {e}")
+            logging.error(f"Erro em pades_signature: {e}")
             return None, None, None, codigo, anexo, tipo_doc, cod_usuario, None
         except Exception as e:
-            print(f"Erro inesperado em pades_signature: {e}")
+            logging.error(f"Erro inesperado em pades_signature: {e}")
             return None, None, None, codigo, anexo, tipo_doc, cod_usuario, None
 
     def pades_signature_action(self, token, codigo, anexo, tipo_doc, cod_usuario, crc_arquivo_original):
@@ -2244,6 +2277,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         nom_pdf_proposicao = str(cod_proposicao) + "_signed.pdf"
         arq = getattr(self.sapl_documentos.proposicao, nom_pdf_proposicao)
         fileStream = BytesIO(bytes(arq.data))
+        fileStream = self.reparar_pdf_stream(fileStream)
         reader = pypdf.PdfReader(fileStream)
         fields = reader.get_fields()
         signers = []
@@ -2367,9 +2401,35 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
            pdf=storage_path[nom_pdf_saida]
         pdf.manage_permission('View', roles=['Manager','Anonymous'], acquire=1)
 
+    def reparar_pdf_stream(self, file_stream: BytesIO) -> BytesIO:
+        file_stream.seek(0)
+        original = file_stream.read()
+        try:
+            buffer = BytesIO()
+            with pikepdf.open(BytesIO(original)) as pdf:
+                pdf.remove_unreferenced_resources()
+                pdf.save(buffer, linearize=True)
+            reparado = buffer.getvalue()
+            fitz.open(stream=reparado, filetype="pdf")  # valida
+            return BytesIO(reparado)
+        except Exception:
+            # fallback: rasteriza com fitz
+            doc = fitz.open(stream=original, filetype="pdf")
+            novo = fitz.open()
+            for page in doc:
+                pix = page.get_pixmap(dpi=150)
+                img = pix.tobytes("jpeg", 90)
+                rect = fitz.Rect(0, 0, pix.width, pix.height)
+                nova = novo.new_page(width=pix.width, height=pix.height)
+                nova.insert_image(rect, stream=img)
+            out = BytesIO()
+            novo.save(out, garbage=4, deflate=True)
+            return out
+
     def margem_inferior(self, codigo, anexo, tipo_doc, cod_assinatura_doc, cod_usuario, filename):
         arq = getattr(self.sapl_documentos.documentos_assinados, filename)
         fileStream = BytesIO(bytes(arq.data))
+        fileStream = self.reparar_pdf_stream(fileStream)
         reader = pypdf.PdfReader(fileStream)
         fields = reader.get_fields()
         signers = []

@@ -6,7 +6,8 @@ import io
 from DateTime import DateTime
 import logging
 
-logger = logging.getLogger('openlegis')
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
 
 def obter_valor_simples(valor):
     # Se valor for lista ou tupla, extrai o primeiro elemento recursivamente

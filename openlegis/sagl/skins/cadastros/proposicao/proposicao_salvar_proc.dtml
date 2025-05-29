@@ -109,38 +109,6 @@
       <dtml-call expr="sapl_documentos.proposicao.manage_addFile(id=id_documento,file=pysc.upload_file(file=file_nom_arquivo, title='Proposicao', tipo_doc='proposicao', codigo=cod_proposicao))">
     </dtml-if>
 
-    <dtml-if file_nom_image1>
-      <dtml-call expr="REQUEST.set('id_image1', str(cod_proposicao)+'_image_1.jpg')">
-        <dtml-try>
-            <dtml-call expr="sapl_documentos.proposicao.manage_addImage(id_image1,file=file_nom_image1)">
-        <dtml-except> 
-        </dtml-try>
-    </dtml-if>
-
-    <dtml-if file_nom_image2>
-      <dtml-call expr="REQUEST.set('id_image2', str(cod_proposicao)+'_image_2.jpg')">
-        <dtml-try>
-            <dtml-call expr="sapl_documentos.proposicao.manage_addImage(id_image2,file=file_nom_image2)">
-        <dtml-except>
-        </dtml-try>
-    </dtml-if>
-
-    <dtml-if file_nom_image3>
-      <dtml-call expr="REQUEST.set('id_image3', str(cod_proposicao)+'_image_3.jpg')">
-        <dtml-try>
-            <dtml-call expr="sapl_documentos.proposicao.manage_addImage(id_image3,file=file_nom_image3)">
-        <dtml-except>
-        </dtml-try>
-    </dtml-if>
-
-    <dtml-if file_nom_image4>
-      <dtml-call expr="REQUEST.set('id_image4', str(cod_proposicao)+'_image_4.jpg')">
-        <dtml-try>
-            <dtml-call expr="sapl_documentos.proposicao.manage_addImage(id_image4,file=file_nom_image4)">
-        <dtml-except>
-        </dtml-try>
-    </dtml-if>
-
     <dtml-if file_nom_anexo>
         <dtml-in file_nom_anexo prefix="file">
            <dtml-call expr="REQUEST.set('nom_arquivo', pysc.anexo_proposicao_pysc(cod_proposicao,nomear=True))">

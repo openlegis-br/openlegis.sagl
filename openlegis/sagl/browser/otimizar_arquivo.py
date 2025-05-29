@@ -61,15 +61,22 @@ class PDFProcessor:
         if (self._cached_pdf_reader is None or self._cached_pdf_stream != current_stream):
             self._cached_pdf_stream = current_stream
             try:
-                self._cached_pdf_reader = PdfReader(BytesIO(self._cached_pdf_stream))
-            except PdfReadError as e:
-                logging.warning("Erro ao ler o PDF (tentando recuperar): %s", e)
+                reader = PdfReader(BytesIO(self._cached_pdf_stream))
+                # Força leitura de um objeto para validar a xref
+                _ = reader.pages[0]
+                self._cached_pdf_reader = reader
+            except Exception as e:
+                logging.warning("Erro ao ler o PDF com PyPDF (tentando recuperar): %s", e)
                 repaired = self.repair_with_pikepdf(current_stream)
-                if repaired:
+                try:
                     self._cached_pdf_reader = PdfReader(BytesIO(repaired))
-                else:
-                    raise ValueError("PDF corrompido e irrecuperável") from e
+                    # Força leitura novamente
+                    _ = self._cached_pdf_reader.pages[0]
+                except Exception as inner_e:
+                    logging.error("PDF corrompido e irrecuperável após tentativa de reparo: %s", inner_e)
+                    raise ValueError("PDF corrompido e irrecuperável") from inner_e
         yield self._cached_pdf_reader
+
 
     @staticmethod
     @timed_lru_cache(seconds=3600, maxsize=32)

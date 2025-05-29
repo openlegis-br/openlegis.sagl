@@ -578,88 +578,46 @@
         </div>
     </div>
 </dtml-comment>   
-   <div class="row">
-        <div class="col-12 col-md-6 mb-3">
-           <label class="form-label d-block">Fotografia 1</label>
-                 <dtml-call expr="REQUEST.set('id_foto1', str(cod_proposicao)+'_image_1.jpg')">
-                 <dtml-if "hasattr(sapl_documentos.proposicao,id_foto1)">
-                   <div align="center">
-                      <img align="absmiddle" class="img-fluid img-thumbnail mb-2" src="&dtml-portal_url;/sapl_documentos/proposicao/<dtml-var id_foto1>?<dtml-var expr="ZopeTime().timeTime()">" style="max-height: 400px">
-                   </div>
-                  <dtml-if expr="not _.has_key('tem_pdf') and not prop_enviada">
-                     <div class="text-center">
-                        <input type="button" name="delFoto1" class="btn btn-sm btn-danger" value="Excluir" onClick="javascript:fotografia1_excluir()" />
-                     </div>
-                  </dtml-if>
-                 <dtml-else>
-                  <dtml-if expr="not _.has_key('tem_pdf') and not prop_enviada">
-                    <div class="custom-file">
-                      <input type="file" class="form-control" id="file_nom_image1" name="file_nom_image1" accept="image/jpeg" />
-                    </div>
-                  </dtml-if>
-                 </dtml-if>
-        </div>
-        <div class="col-12 col-md-6 mb-3">
-           <label class="form-label d-block">Fotografia 2</label>
-                 <dtml-call expr="REQUEST.set('id_foto2', str(cod_proposicao)+'_image_2.jpg')">
-                 <dtml-if "hasattr(sapl_documentos.proposicao,id_foto2)">
-                   <div align="center">
-                      <img align="absmiddle" class="img-fluid img-thumbnail mb-2" src="&dtml-portal_url;/sapl_documentos/proposicao/<dtml-var id_foto2>?<dtml-var expr="ZopeTime().timeTime()">" style="max-height: 400px">
-                   </div>
-                   <dtml-if expr="not _.has_key('tem_pdf') and not prop_enviada">
-                      <div class="text-center">
-                        <input type="button" name="delFoto2" class="btn btn-sm btn-danger" value="Excluir" onClick="javascript:fotografia2_excluir()" />
-                      </div>
-                   </dtml-if>
-                 <dtml-else>
-                   <dtml-if expr="not _.has_key('tem_pdf') and not prop_enviada">
-                    <div class="custom-file">
-                      <input type="file" class="form-control" id="file_nom_image2" name="file_nom_image2" accept="image/jpeg" />
-                    </div>
-                   </dtml-if>
-                 </dtml-if>
-        </div>
-        <div class="col-12 col-md-6 mb-3">
-           <label class="form-label d-block">Fotografia 3</label>
-                 <dtml-call expr="REQUEST.set('id_foto3', str(cod_proposicao)+'_image_3.jpg')">
-                 <dtml-if "hasattr(sapl_documentos.proposicao,id_foto3)">
-                   <div align="center">
-                      <img align="absmiddle" class="img-fluid img-thumbnail mb-2" src="&dtml-portal_url;/sapl_documentos/proposicao/<dtml-var id_foto3>?<dtml-var expr="ZopeTime().timeTime()">" style="max-height: 400px">
-                   </div>
-                    <dtml-if expr="not _.has_key('tem_pdf') and not prop_enviada">
-                      <div class="text-center">
-                        <input type="button" name="delFoto3" class="btn btn-sm btn-danger" value="Excluir" onClick="javascript:fotografia3_excluir()" />
-                      </div>
-                    </dtml-if>
-                 <dtml-else>
-                    <dtml-if expr="not _.has_key('tem_pdf') and not prop_enviada">
-                       <div class="custom-file">
-                         <input type="file" class="form-control" id="file_nom_image3" name="file_nom_image3" accept="image/jpeg" />
-                       </div>
-                    </dtml-if>
-                  </dtml-if>
-        </div>
-        <div class="col-12 col-md-6 mb-3">
-           <label class="form-label d-block">Fotografia 4</label>
-                 <dtml-call expr="REQUEST.set('id_foto4', str(cod_proposicao)+'_image_4.jpg')">
-                 <dtml-if "hasattr(sapl_documentos.proposicao,id_foto4)">
-                   <div align="center">
-                      <img align="absmiddle" class="img-fluid img-thumbnail mb-2" src="&dtml-portal_url;/sapl_documentos/proposicao/<dtml-var id_foto4>?<dtml-var expr="ZopeTime().timeTime()">" style="max-height: 400px">
-                   </div>
-                     <dtml-if expr="not _.has_key('tem_pdf') and not prop_enviada">
-                       <div class="text-center">
-                         <input type="button" name="delFoto4" class="btn btn-sm btn-danger" value="Excluir" onClick="javascript:fotografia4_excluir()" />
-                       </div>
-                     </dtml-if>
-                 <dtml-else>
-                  <dtml-if expr="not _.has_key('tem_pdf') and not prop_enviada">
-                    <div class="custom-file">
-                      <input type="file" class="form-control" id="file_nom_image4" name="file_nom_image4" accept="image/jpeg" />
-                    </div>
-                  </dtml-if>
-                 </dtml-if>
-        </div>
-   </div>
+
+<div class="row" id="form-container">
+  <dtml-in expr="_.range(1, 5)" prefix="i">
+    <dtml-call expr="REQUEST.set('idx', i_index + 1)">
+    <dtml-call expr="REQUEST.set('id_foto', str(cod_proposicao)+'_image_'+_.str(idx)+'.jpg')">
+
+    <div class="col-12 col-md-6 mb-3" id="foto-container-<dtml-var idx>">
+      <label class="form-label">Fotografia <dtml-var idx></label>
+      <div id="foto<dtml-var idx>-preview" class="mt-2">
+        <dtml-if "hasattr(sapl_documentos.proposicao, id_foto)">
+          <div class="text-center">
+            <img class="img-fluid img-thumbnail mb-2"
+                 src="<dtml-var portal_url>/sapl_documentos/proposicao/<dtml-var id_foto>?<dtml-var expr='DateTime().timeTime()'>"
+                 style="max-height: 600px">
+            <dtml-if expr="not _.has_key('tem_pdf')">
+            <div class="text-center">
+              <button type="button"
+                      class="btn btn-sm btn-danger"
+                      onclick="excluirImagem(<dtml-var idx>, '<dtml-var cod_proposicao>')">
+                Excluir
+              </button>
+            </div>
+            </dtml-if>
+          </div>
+        <dtml-else>
+          <dtml-if expr="not _.has_key('tem_pdf')">
+             <form id="uploadForm<dtml-var idx>" enctype="multipart/form-data">
+               <input type="hidden" name="cod_proposicao" value="<dtml-var cod_proposicao>">
+               <input type="hidden" name="indice" value="<dtml-var idx>">
+               <input type="file" name="file_nom_image<dtml-var idx>" class="form-control"
+                      accept="image/*" onchange="enviarImagem(this.form, <dtml-var idx>)">
+             </form>
+          <dtml-else>
+             <div class="alert alert-light mb-2">Não enviada.</div>
+          </dtml-if>
+        </dtml-if>
+      </div>
+    </div>
+  </dtml-in>
+</div>
         </div>
       </div>
     </div>
@@ -1337,4 +1295,99 @@ function myFunction() {
         });
     });
 </script>
+
+<dtml-if cod_proposicao>
+<script>
+// Função auxiliar para obter o código da proposição dentro de um form
+function getCodProposicaoDoForm(form) {
+  const inputCod = form.querySelector("[name='cod_proposicao']");
+  return inputCod ? inputCod.value : null;
+}
+
+// Função para limpar o campo input file
+function limparInputImagem(idx) {
+  const input = document.getElementById(`file_nom_image${idx}`);
+  if (input) input.value = '';
+}
+
+// Envio assíncrono da imagem via fetch API
+async function enviarImagem(form, idx) {
+  const formData = new FormData(form);
+
+  try {
+    const response = await fetch('salvar-imagem-proposicao', {
+      method: 'POST',
+      body: formData
+    });
+    const html = await response.text();
+
+    const previewDiv = document.getElementById("foto" + idx + "-preview");
+    if (previewDiv) {
+      previewDiv.innerHTML = html;
+    } else {
+      alert("Erro inesperado: área da foto não encontrada.");
+    }
+  } catch (err) {
+    alert("Erro ao enviar imagem: " + err);
+
+    const previewDiv = document.getElementById("foto" + idx + "-preview");
+    if (previewDiv) {
+      // Obter dados atuais para reapresentar o formulário corretamente
+      const inputIndice = previewDiv.querySelector("[name='indice']");
+      const inputCod = previewDiv.querySelector("[name='cod_proposicao']");
+      const indiceAtual = inputIndice ? inputIndice.value : idx;
+      const codProposicaoAtual = inputCod ? inputCod.value : '';
+
+      previewDiv.innerHTML = `
+        <div class="alert alert-danger mb-2">Parâmetros ausentes ou arquivo inválido.</div>
+        <form id="uploadForm${indiceAtual}" enctype="multipart/form-data">
+          <input type="hidden" name="cod_proposicao" value="${codProposicaoAtual}">
+          <input type="hidden" name="indice" value="${indiceAtual}">
+          <input type="file" id="file_nom_image${indiceAtual}" name="file_nom_image${indiceAtual}" class="form-control" accept="image/*" onchange="enviarImagem(this.form, ${indiceAtual})" />
+          <button type="button" class="btn btn-sm btn-secondary mt-2" onclick="limparInputImagem(${indiceAtual})">Limpar</button>
+        </form>
+      `;
+
+      // Reatribuir evento onchange para o novo input
+      const inputFile = document.getElementById(`file_nom_image${indiceAtual}`);
+      if (inputFile) {
+        inputFile.onchange = function() {
+          enviarImagem(this.form, indiceAtual);
+        };
+      }
+    }
+  }
+}
+
+// Exclusão da imagem
+function excluirImagem(idx, codProposicao) {
+  if (!codProposicao) {
+    alert("Código da proposição não informado.");
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append('cod_proposicao', codProposicao);
+  formData.append('indice', idx);
+
+  fetch('excluir-imagem-proposicao', {
+    method: 'POST',
+    body: formData
+  })
+  .then(response => response.text())
+  .then(html => {
+    const previewDiv = document.getElementById("foto" + idx + "-preview");
+    if (previewDiv) {
+      previewDiv.innerHTML = html;
+    } else {
+      alert("Erro inesperado: área da foto não encontrada.");
+    }
+  })
+  .catch(err => {
+    alert("Erro ao excluir imagem: " + err);
+  });
+}
+</script>
+</dtml-if>
+
 <dtml-var footer_html>

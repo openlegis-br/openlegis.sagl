@@ -147,9 +147,11 @@ class PDFSignatureParser(PDFProcessor):
         if not raw:
             return None
         try:
+            if isinstance(raw, str):
+                raw = raw.encode('utf-8')  # Garante que seja bytes
             match = re.search(rb'\d{8}(\d{11})\d*', raw) or re.search(rb'(\d{11})', raw)
             if match:
-                return self.format_cpf(match.group(1).decode('ascii'))
+                return self.format_cpf(match.group(1).decode('ascii', errors='ignore'))
         except Exception as e:
             logging.warning(f"Erro ao extrair CPF de '/Contents': {e}")
         return None
@@ -233,24 +235,6 @@ class PDFOptimizer(PDFProcessor):
             logging.warning("Falha ao recuperar PDF com pikepdf: %s", e)
             return pdf_bytes
 
-    def recreate_pdf_with_jpeg_compression(self, input_stream: BytesIO, qualidade: int = 75, dpi: int = 150) -> bytes:
-        try:
-            input_stream.seek(0)
-            original = fitz.open(stream=input_stream.read(), filetype="pdf")
-            novo_pdf = fitz.open()
-            for page in original:
-                pix = page.get_pixmap(dpi=dpi)
-                img_bytes = pix.tobytes("jpeg", qualidade)
-                rect = fitz.Rect(0, 0, pix.width, pix.height)
-                nova_pagina = novo_pdf.new_page(width=pix.width, height=pix.height)
-                nova_pagina.insert_image(rect, stream=img_bytes)
-            output = BytesIO()
-            novo_pdf.save(output, garbage=4, deflate=True, clean=True)
-            return output.getvalue()
-        except Exception as e:
-            logging.warning("Erro ao recriar PDF com imagens recomprimidas: %s", e)
-            raise
-
     def optimize_pdf(self, file_stream: BytesIO, title: Optional[str] = None) -> bytes:
         file_stream.seek(0)
         pdf_data = file_stream.getvalue()
@@ -305,90 +289,81 @@ class PDFUploadProcessorView(grok.View, PDFSignatureParser, PDFOptimizer):
 
                 if self._has_form_fields(reader):
                     logging.warning("PDF contém campos de formulário")
-                    return original_data
+                    return self.repair_with_pikepdf(original_data)
 
             original_size = len(original_data)
             doc = fitz.open(stream=original_data, filetype="pdf")
             novo_pdf = fitz.open()
-            compressao_aplicada = False
 
-            MARGEM_REDUZIDA = 15  # pontos
-            A4_WIDTH, A4_HEIGHT = 595, 842
+            A4_RETRATO = (595, 842)
+            A4_PAISAGEM = (842, 595)
+            LIMIT_BYTES = 300_000
+            MARGEM = 15
+            ZOOM = 2.0
+            recompression_applied = False
 
-            for page_number, page in enumerate(doc):
+            for i, page in enumerate(doc):
                 try:
                     width, height = page.rect.width, page.rect.height
-                    is_landscape = width > height
-                    is_a4_retrato = abs(width - A4_WIDTH) < 2 and abs(height - A4_HEIGHT) < 2
+                    is_paisagem = width > height
+
+                    is_a4_retrato = abs(width - A4_RETRATO[0]) < 2 and abs(height - A4_RETRATO[1]) < 2
+                    is_a4_paisagem = abs(width - A4_PAISAGEM[0]) < 2 and abs(height - A4_PAISAGEM[1]) < 2
 
                     pix_preview = page.get_pixmap(dpi=72)
                     try:
                         estimated_size = len(pix_preview.tobytes("png"))
-                    except ValueError:
-                        estimated_size = len(pix_preview.tobytes("jpeg"))
+                    except Exception:
+                        estimated_size = 0
 
-                    if is_a4_retrato and not is_landscape and estimated_size <= 500_000:
-                        novo_pdf.insert_pdf(doc, from_page=page_number, to_page=page_number)
-                        logging.warning(f"Página {page_number + 1} - A4 retrato leve, copiada diretamente")
+                    if (is_a4_retrato or is_a4_paisagem) and estimated_size <= LIMIT_BYTES:
+                        novo_pdf.insert_pdf(doc, from_page=i, to_page=i)
+                        logging.debug(f"Página {i+1}: mantida original (A4 {'paisagem' if is_paisagem else 'retrato'} e leve)")
                         continue
 
-                    pix = page.get_pixmap(dpi=150)
-                    try:
-                        img_bytes = pix.tobytes("jpeg", 80)
-                    except ValueError:
-                        img_bytes = pix.tobytes("png")
+                    matrix = fitz.Matrix(ZOOM, ZOOM)
+                    pix = page.get_pixmap(matrix=matrix, alpha=False)
+                    img_bytes = pix.tobytes("jpeg", 80)
 
-                    if is_landscape:
-                        scale = min((A4_HEIGHT - 2 * MARGEM_REDUZIDA) / pix.width,
-                                    (A4_WIDTH - 2 * MARGEM_REDUZIDA) / pix.height, 1.0)
-                        new_width = pix.width * scale
-                        new_height = pix.height * scale
-                        offset_x = (A4_WIDTH - new_height) / 2
-                        offset_y = (A4_HEIGHT - new_width) / 2
-                        rect = fitz.Rect(offset_x, offset_y, offset_x + new_height, offset_y + new_width)
-                        new_page = novo_pdf.new_page(width=A4_WIDTH, height=A4_HEIGHT)
-                        new_page.insert_image(rect, stream=img_bytes, rotate=90)
-                        logging.warning(f"Página {page_number + 1} - Paisagem redimensionada e rotacionada com margem")
-                    else:
-                        scale = min((A4_WIDTH - 2 * MARGEM_REDUZIDA) / pix.width,
-                                    (A4_HEIGHT - 2 * MARGEM_REDUZIDA) / pix.height, 1.0)
-                        new_width = pix.width * scale
-                        new_height = pix.height * scale
-                        offset_x = (A4_WIDTH - new_width) / 2
-                        offset_y = (A4_HEIGHT - new_height) / 2
-                        rect = fitz.Rect(offset_x, offset_y, offset_x + new_width, offset_y + new_height)
-                        new_page = novo_pdf.new_page(width=A4_WIDTH, height=A4_HEIGHT)
-                        new_page.insert_image(rect, stream=img_bytes)
-                        logging.warning(f"Página {page_number + 1} - Retrato redimensionada com margem")
+                    new_width, new_height = A4_PAISAGEM if is_paisagem else A4_RETRATO
+                    new_page = novo_pdf.new_page(width=new_width, height=new_height)
 
-                    compressao_aplicada = True
+                    scale = min((new_width - MARGEM) / pix.width, (new_height - MARGEM) / pix.height, 1.0)
+                    img_w = pix.width * scale
+                    img_h = pix.height * scale
+                    offset_x = (new_width - img_w) / 2
+                    offset_y = (new_height - img_h) / 2
+                    rect = fitz.Rect(offset_x, offset_y, offset_x + img_w, offset_y + img_h)
+
+                    new_page.insert_image(rect, stream=img_bytes)
+                    logging.info(f"Página {i+1}: recriada como A4 {'paisagem' if is_paisagem else 'retrato'} com Matrix")
+                    recompression_applied = True
 
                 except Exception as e:
-                    logging.warning(f"Erro ao processar página {page_number + 1}: {e}")
+                    logging.warning(f"Erro ao processar página {i+1}: {e}")
                     try:
-                        novo_pdf.insert_pdf(doc, from_page=page_number, to_page=page_number)
-                        logging.warning(f"Página {page_number + 1} - Inserida original como fallback")
+                        novo_pdf.insert_pdf(doc, from_page=i, to_page=i)
                     except Exception as fallback_error:
-                        logging.error(f"Fallback falhou: {fallback_error}")
+                        logging.error(f"Fallback falhou na página {i+1}: {fallback_error}")
 
-            if compressao_aplicada or len(novo_pdf) > 0:
+            if not recompression_applied:
+                logging.info("Nenhuma página recriada. Validando PDF original com pikepdf.")
+                return self.repair_with_pikepdf(original_data)
+
+            try:
                 output = BytesIO()
                 novo_pdf.save(output, garbage=4, deflate=True, clean=True)
-                compressed_data = output.getvalue()
-                compressed_size = len(compressed_data)
-                reducao = 100 * (original_size - compressed_size) / original_size if original_size > 0 else 0
-                logging.warning(f"PDF otimizado: {original_size} → {compressed_size} bytes (redução {reducao:.2f}%)")
-                return compressed_data
-            else:
-                logging.warning("Nenhuma modificação aplicada - retornando original")
-                return original_data
+                optimized_data = output.getvalue()
+                logging.info(f"PDF otimizado: {original_size} → {len(optimized_data)} bytes")
+                return self.repair_with_pikepdf(optimized_data)
 
-        except ValueError as e:
-            logging.warning(f"Arquivo PDF inválido: {e}")
-            return original_data
+            except Exception as e:
+                logging.warning(f"Erro ao salvar PDF otimizado, tentando reparar com pikepdf: {e}")
+                return self.repair_with_pikepdf(original_data)
+
         except Exception as e:
-            logging.warning(f"Erro inesperado ao processar PDF: {e}", exc_info=True)
-            return original_data
+            logging.error(f"Erro inesperado ao processar PDF: {e}", exc_info=True)
+            return file_obj.read()
 
     def _read_file_data(self, file_obj: BinaryIO) -> bytes:
         try:

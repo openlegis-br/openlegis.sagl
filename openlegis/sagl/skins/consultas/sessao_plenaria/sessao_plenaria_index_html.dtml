@@ -234,11 +234,13 @@ inicio_sessao=<dtml-var dat_inicio_sessao missing>&num_legislatura=<dtml-var num
                  <dtml-if expr="AUTHENTICATED_USER.has_role(['Authenticated'])">
                    <dtml-in expr="zsql.expediente_materia_obter_zsql(cod_sessao_plen = cod_sessao_plen, ind_excluido=0)">
                      <dtml-if sequence-start>
-                        <dtml-in expr="zsql.materia_obter_zsql(cod_materia=cod_materia, ind_excluido=0)">
-                           <dtml-if expr="materia.des_tipo_materia == 'Indicação'">
-                              <a class="btn btn-sm btn-secondary" target="_blank" href="arquivos_indicacao?cod_sessao_plen=<dtml-var cod_sessao_plen>"><i class="fa fa-download"></i> Indicações</a>
-                           </dtml-if>
-                        </dtml-in>
+                        <dtml-if cod_materia>
+                           <dtml-in expr="zsql.materia_obter_zsql(cod_materia=cod_materia, ind_excluido=0)">
+                              <dtml-if expr="materia.des_tipo_materia == 'Indicação'">
+                                 <a class="btn btn-sm btn-secondary" target="_blank" href="arquivos_indicacao?cod_sessao_plen=<dtml-var cod_sessao_plen>"><i class="fa fa-download"></i> Indicações</a>
+                              </dtml-if>
+                           </dtml-in>
+                        </dtml-if>
                     </dtml-if>
                    </dtml-in>
                </dtml-if>

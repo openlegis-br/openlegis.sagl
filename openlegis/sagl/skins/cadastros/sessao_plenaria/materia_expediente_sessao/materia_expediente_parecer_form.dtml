@@ -37,6 +37,12 @@
          return false;
       }
 
+     if (form.lst_tip_turno.selectedIndex==0){
+         alert("O turno deve ser informado!");
+         form.lst_tip_turno.focus();
+         return false;
+      }
+
      if (form.lst_tip_quorum.selectedIndex==0){
          alert("O quórum de votação deve ser informado");
          form.lst_tip_quorum.focus();
@@ -185,7 +191,16 @@
        <tr>
           <td colspan="3">
            <div class="row">
-              <div class="col-8">
+              <div class="col-4">
+                <label class="form-label required" for="lst_tip_turno">Turno</label>
+                <select class="form-select" id="lst_turno" name="lst_tip_turno">
+                  <option value="0"></option>
+                  <dtml-in expr="zsql.turno_discussao_obter_zsql()">
+                    <option <dtml-if expr="_.has_key('tip_turno') and _.int(cod_turno)==_.int(materia_expediente_form.tip_turno)"> selected<dtml-elif expr="not _.has_key('tip_turno') and (des_turno == 'Turno Único' or des_turno=='Único' or des_turno=='Discussão Única')">selected</dtml-if> value="<dtml-var cod_turno>"><dtml-var des_turno></option>
+                  </dtml-in>
+                </select>
+              </div>  
+              <div class="col-4">
                 <label  class="form-label required" for="lst_tip_quorum">Quórum de Votação</label>
                 <select class="form-select" id="lst_tip_quorum" name="lst_tip_quorum" required>
                   <option value="0"></option>

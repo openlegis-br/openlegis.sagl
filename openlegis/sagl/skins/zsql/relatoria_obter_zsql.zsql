@@ -36,16 +36,16 @@ FROM
 </dtml-sqlgroup>
 
 <dtml-if expr="dat_parecer and dat_parecer2">
-  AND relatoria.dat_destit_relator >= <dtml-sqlvar "pysc.port_to_iso_pysc(dat_parecer)"  type="nb"> 
-  AND relatoria.dat_destit_relator <= <dtml-sqlvar "pysc.port_to_iso_pysc(dat_parecer2)" type="nb">
+  AND DATE(relatoria.dat_destit_relator) >= <dtml-sqlvar "pysc.port_to_iso_pysc(dat_parecer)"  type="nb"> 
+  AND DATE(relatoria.dat_destit_relator) <= <dtml-sqlvar "pysc.port_to_iso_pysc(dat_parecer2)" type="nb">
 </dtml-if>
 
 <dtml-if expr="dat_parecer and (not dat_parecer2)">
-  AND relatoria.dat_destit_relator = <dtml-sqlvar "pysc.port_to_iso_pysc(dat_parecer)" type="nb">
+  AND DATE(relatoria.dat_destit_relator) = <dtml-sqlvar "pysc.port_to_iso_pysc(dat_parecer)" type="nb">
 </dtml-if>
 
 <dtml-if expr="dat_parecer2 and (not dat_parecer)">
-  AND relatoria.dat_destit_relator = <dtml-sqlvar "pysc.port_to_iso_pysc(dat_parecer2)" type="nb">
+  AND DATE(relatoria.dat_destit_relator) = <dtml-sqlvar "pysc.port_to_iso_pysc(dat_parecer2)" type="nb">
 </dtml-if>
 
 <dtml-if pesquisa>

@@ -4,29 +4,6 @@
 
         <form id="signForm" method="post">
 
-<dtml-comment>
-           <dtml-in expr="zsql.usuario_obter_zsql(col_username=AUTHENTICATED_USER.getUserName())">
-             <dtml-call expr="REQUEST.set('nom_completo', str(nom_completo))">
-             <dtml-call expr="REQUEST.set('num_cpf', str(num_cpf))">
-           </dtml-in>
-
-            <div class="row">
-              <div class="col-12 mb-3">
-                 <div class="alert alert-light alert-dismissible fade show mb-0" role="alert">
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    <div class="row">
-                      <div class="col-6">
-                         <strong>Usuário Autenticado: </strong> <dtml-var nom_completo>
-                      </div>
-                      <div class="col-6">
-                         <strong>CPF:</strong> <dtml-var num_cpf>
-                      </div>
-                    </div> 
-                 </div>
-              </div>     
-            </div>
-</dtml-comment>
-
             <div class="row mb-3">
                 <div class="col-md-12">
                     <label class="form-label required" for="certificateSelect">Escolha um certificado ICP-Brasil</label>
@@ -76,10 +53,7 @@
                                                 <input name="codigo" type="hidden" value="<dtml-var codigo>" />
                                                 <input name="tipo_doc" type="hidden" value="<dtml-var tipo_doc>" />
                                                 <input name="anexo" type="hidden" value="<dtml-var anexo missing null>" />
-                                                <dtml-with expr="_.namespace(assinaturas=zsql.assinatura_documento_obter_zsql(codigo=codigo, anexo=anexo, tipo_doc=tipo_doc, ind_assinado=0))">
-                                                   <dtml-call expr="REQUEST.set('txt_qtde_assinaturas', len(assinaturas))">
-                                                </dtml-with>
-                                                <input name="qtde_assinaturas" type="hidden" value="<dtml-var txt_qtde_assinaturas>" />
+                                                <input name="visual_page_option" type="hidden" value="<dtml-var visual_page_option missing>" />
                                                 <input name="cod_usuario" type="hidden" value="<dtml-var cod_usuario_corrente>" />
                                             </div>
                                         </td>

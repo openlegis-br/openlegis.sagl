@@ -10,8 +10,60 @@
         <link href="<dtml-var portal_url>/assets/css/bootstrap.min.css" id="bootstrap-style" rel="stylesheet" type="text/css" />
         <link href="<dtml-var portal_url>/assets/css/icons.min.css" rel="stylesheet" type="text/css" />
         <link href="<dtml-var portal_url>/assets/css/app.css" id="app-style" rel="stylesheet" type="text/css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+        <style>
+            .card-radio-label {
+                cursor: pointer;
+                margin-bottom: 0;
+            }
+            .card-radio-input {
+                position: absolute;
+                opacity: 0;
+            }
+            .card-radio {
+                border: 2px solid transparent;
+                transition: all 0.3s ease;
+            }
+            .card-radio-input:checked + .card-radio {
+                border-color: #0d6efd;
+                background-color: rgba(13, 110, 253, 0.05);
+                box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.25);
+            }
+            .card-radio:hover {
+                border-color: #86b7fe;
+            }
+            .card-radio-invalid {
+                border-color: #dc3545 !important;
+                box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.25);
+            }
+            .btn-primary {
+                transition: all 0.3s ease;
+                border: none;
+                letter-spacing: 0.5px;
+            }
+            .btn-primary:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 6px 12px rgba(13, 110, 253, 0.25);
+            }
+            .btn-primary:active {
+                transform: translateY(0);
+            }
+            .card-radio {
+                border-radius: 0.75rem;
+            }
+            .card-radio-label:focus-within .card-radio {
+                box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.35);
+            }
+            .signature-option-img {
+                max-height: 120px;
+                transition: transform 0.3s ease;
+            }
+            .card-radio:hover .signature-option-img {
+                transform: scale(1.03);
+            }
+        </style>
     </head>
-    <body data-topbar="dark" data-layout="horizontal" <dtml-if expr="REQUEST.get('modal', '')">style="background:#fff;"</dtml-if> >
+    <body data-topbar="dark" data-layout="horizontal" <dtml-if expr="REQUEST.get('modal', '')">style="background:#fff;"</dtml-if>>
        <dtml-if expr="not portal_membership.isAnonymousUser()">
             <dtml-in expr="zsql.usuario_obter_zsql(col_username=AUTHENTICATED_USER.getUserName())">
                <dtml-if cod_usuario>
@@ -29,105 +81,274 @@
                       <div class="container-fluid">
                 </dtml-if>
                 <div class="card-body">
-                <!-- End Header -->
+                
+                <dtml-unless expr="_.has_key('anexo')">
+                   <dtml-call expr="REQUEST.set('anexo', '')">
+                </dtml-unless>
 
-<dtml-unless expr="_.has_key('anexo')">
-   <dtml-call expr="REQUEST.set('anexo', '')">
-</dtml-unless>
+                <dtml-in expr="zsql.usuario_obter_zsql(col_username=AUTHENTICATED_USER.getUserName())">
+                   <dtml-call expr="REQUEST.set('nom_completo', str(nom_completo))">
+                   <dtml-call expr="REQUEST.set('num_cpf', str(num_cpf))">
+                   <dtml-call expr="REQUEST.set('cod_usuario', int(cod_usuario))">
+                </dtml-in>
 
-<dtml-in expr="zsql.usuario_obter_zsql(col_username=AUTHENTICATED_USER.getUserName())">
-   <dtml-call expr="REQUEST.set('nom_completo', str(nom_completo))">
-   <dtml-call expr="REQUEST.set('num_cpf', str(num_cpf))">
-   <dtml-call expr="REQUEST.set('cod_usuario', int(cod_usuario))">
-</dtml-in>
+                <dtml-in expr="zsql.assinatura_documento_obter_zsql(codigo=codigo, anexo=anexo, tipo_doc=tipo_doc, cod_usuario=cod_usuario, ind_assinado=1)">
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-exclamation-circle me-2 fs-4"></i>
+                            <div>
+                                <h5 class="alert-heading mb-1">Aviso importante!</h5>
+                                <p class="mb-0">O documento já foi assinado pelo usuário autenticado.</p>
+                            </div>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div> 
+                </dtml-in>
 
-<dtml-in expr="zsql.assinatura_documento_obter_zsql(codigo=codigo, anexo=anexo, tipo_doc=tipo_doc, cod_usuario=cod_usuario, ind_assinado=1)">
-    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-        <h5>Aviso importante!</h5>
-        <p class="mb-0">O documento já foi assinado pelo usuário autenticado.</p>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div> 
-</dtml-in>
+                <dtml-in expr="zsql.assinatura_documento_obter_zsql(codigo=codigo, anexo=anexo, tipo_doc=tipo_doc, ind_prim_assinatura=1)">
+                   <dtml-if sequence-start>
+                      <dtml-call expr="REQUEST.set('visual_page_option', str(visual_page_option))">
+                   </dtml-if>
+                </dtml-in>
 
-<dtml-if expr="zsql.assinatura_documento_obter_zsql(codigo=codigo, anexo=anexo, tipo_doc=tipo_doc, ind_assinado=1)">
-  <dtml-with expr="_.namespace(assinaturas=zsql.assinatura_documento_obter_zsql(codigo=codigo, anexo=anexo, tipo_doc=tipo_doc, ind_assinado=1))">
-    <dtml-call expr="REQUEST.set('txt_qtde_assinaturas', len(assinaturas))">
-  </dtml-with>
-<dtml-elif expr="zsql.assinatura_documento_obter_zsql(codigo=codigo, anexo=anexo, tipo_doc=tipo_doc, ind_assinado=0)">
-  <dtml-with expr="_.namespace(assinaturas=zsql.assinatura_documento_obter_zsql(codigo=codigo, anexo=anexo, tipo_doc=tipo_doc, ind_assinado=0))">
-    <dtml-call expr="REQUEST.set('txt_qtde_assinaturas', len(assinaturas))">
-  </dtml-with>
-<dtml-else>
-  <dtml-unless expr="_.has_key('txt_qtde_assinaturas')">
-  <form class="d-print-none" method="post" id="qtde_assinaturas" name="qtde_assinaturas" action="pades-signature_html">  
-    <div class="row">
-     <div class="col-12 col-sm-4 mb-3">
-       <label class="form-label required" for="txt_qtde_assinaturas">Quantidade de Signatários</label>
-       <input class="form-control number" type="number" id="txt_qtde_assinaturas" name="txt_qtde_assinaturas" value="1" min="1" required data-bs-toggle="popover" data-bs-trigger="focus" data-bs-placement="right" title="Informação importante" data-bs-content="Informando até 3 (três) signatários, as assinaturas digitais serão exibidas na última página do documento, limitando a visualização de apenas três assinaturas. Informando 4 (quatro) signatários ou mais, uma nova página em branco será adicionada ao final do documento para visibilidade de todas as assinaturas."/>
-     </div>
-     <div class="col-12 col-sm-8 mt-3">
-       <small class="form-text text-muted mt-4">Esse número define a página do documento na qual as assinaturas serão exibidas. Até 3 signatários, as assinaturas serão exibidas no rodapé da última página original do documento; a partir de 4 signatários, serão exibidas no topo de uma página adicionada no final do documento.</small>
-     </div>
-    </div>
-    <input class="btn btn-primary" type="submit" name="button" value="Prosseguir" />
-    <input type="hidden" id="codigo" name="codigo" value="<dtml-var codigo>">
-    <input type="hidden" id="anexo" name="anexo" value="<dtml-var anexo missing null>">
-    <input type="hidden" id="tipo_doc" name="tipo_doc" value="<dtml-var tipo_doc>">
-    <input type="hidden" id="modal" name="modal" value="1">    
-  </form>
-  </dtml-unless>
-</dtml-if>
+                <dtml-if expr="not _.has_key('visual_page_option')">
+                  <form method="post" action="pades-signature_html" id="visual_page_option_form">
+                    <fieldset class="mb-4">
+                      <legend class="fw-semibold mb-3">Escolha onde as assinaturas serão exibidas</legend>
+                      <div class="alert alert-warning alert-dismissible fade show mb-4 py-2">
+                        <div class="d-flex align-items-center">
+                          <i class="fas fa-exclamation-triangle me-2 fs-5"></i>
+                          <div>
+                            <strong>Atenção:</strong> A posição não poderá ser alterada após a efetivação da primeira assinatura.
+                          </div>
+                        </div>
+                        <button type="button" class="btn-close btn-sm" data-bs-dismiss="alert" aria-label="Close"></button>
+                      </div>
+                      
+                      <div class="row g-4">
+                        <div class="col-md-6">
+                          <label class="card-radio-label w-100 h-100">
+                            <input type="radio" name="visual_page_option" value="ultima" class="card-radio-input" required>
+                            <div class="card card-radio h-100">
+                              <div class="card-body text-center py-4">
+                                <div class="mb-3">
+                                  <img src="<dtml-var portal_url>/imagens/assinatura_visual_ultima_pagina.png" class="img-fluid signature-option-img" alt="Última página">
+                                </div>
+                                <h5 class="mb-2">Última página</h5>
+                                <p class="text-danger fw-medium mb-3">(Mostra até 3 assinaturas)</p>
+                                <div class="mt-auto">
+                                  <span class="badge bg-primary bg-opacity-10 text-primary">Recomendado para poucas assinaturas</span>
+                                </div>
+                              </div>
+                            </div>
+                          </label>
+                        </div>
+                        
+                        <div class="col-md-6">
+                          <label class="card-radio-label w-100 h-100">
+                            <input type="radio" name="visual_page_option" value="nova" class="card-radio-input">
+                            <div class="card card-radio h-100">
+                              <div class="card-body text-center py-4">
+                                <div class="mb-3">
+                                  <img src="<dtml-var portal_url>/imagens/assinatura_visual_pagina_nova.png" class="img-fluid signature-option-img" alt="Nova página">
+                                </div>
+                                <h5 class="mb-2">Nova página</h5>
+                                <p class="text-danger fw-medium mb-3">(Mostra todas as assinaturas)</p>
+                                <div class="mt-auto">
+                                  <span class="badge bg-primary bg-opacity-10 text-primary">Recomendado para múltiplas assinaturas</span>
+                                </div>
+                              </div>
+                            </div>
+                          </label>
+                        </div>
+                      </div>
+                      
+                      <div class="invalid-feedback d-flex align-items-center mt-2">
+                        <i class="fas fa-exclamation-circle me-2"></i>
+                        Selecione onde as assinaturas serão exibidas no documento
+                      </div>
+                    </fieldset>
+                    
+                    <div class="d-grid mt-5">
+                      <button type="submit" class="btn btn-primary btn-lg rounded-pill py-3 fw-bold shadow-lg-hover">
+                        <span class="d-flex align-items-center justify-content-center">
+                          <span class="me-3">Prosseguir para Assinatura</span>
+                          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-arrow-right-short" viewBox="0 0 16 16">
+                            <path fill-rule="evenodd" d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"/>
+                          </svg>
+                        </span>
+                      </button>
+                    </div>
+                    
+                    <input type="hidden" name="codigo" value="<dtml-var codigo>">
+                    <input type="hidden" name="anexo" value="<dtml-var anexo missing null>">
+                    <input type="hidden" name="tipo_doc" value="<dtml-var tipo_doc>">
+                    <input type="hidden" name="modal" value="1">
+                  </form>
+                </dtml-if>
 
-<dtml-if expr="_.has_key('txt_qtde_assinaturas')">
-  <dtml-call "REQUEST.set('campos', pades_signature_pdf(codigo=codigo, anexo=anexo, tipo_doc=tipo_doc, cod_usuario=cod_usuario, qtde_assinaturas=txt_qtde_assinaturas))">
-  <dtml-call "REQUEST.set('token', campos[0])">
-  <dtml-call "REQUEST.set('crc_arquivo', campos[2])">
+                <dtml-if expr="_.has_key('visual_page_option')">
+                  <dtml-call expr="REQUEST.set('campos', pades_signature_pdf(codigo=codigo, anexo=anexo, tipo_doc=tipo_doc, cod_usuario=cod_usuario, visual_page_option=visual_page_option))">
+                  <dtml-call expr="REQUEST.set('token', campos[0])">
+                  <dtml-call expr="REQUEST.set('crc_arquivo', campos[2])">
 
-  <form id="signForm" action="pades-signature-action_html" method="post">
-    <input type="hidden" id="token" name="token" value="<dtml-var token>" />
-    <input type="hidden" id="crc_arquivo_original" name="crc_arquivo_original" value="<dtml-var crc_arquivo>" />  
-    <input type="hidden" id="codigo" name="codigo" value="<dtml-var codigo>">
-    <input type="hidden" id="anexo" name="anexo" value="<dtml-var anexo missing null>">
-    <input type="hidden" id="cod_usuario" name="cod_usuario" value="<dtml-var cod_usuario>">  
-    <input type="hidden" id="tipo_doc" name="tipo_doc" value="<dtml-var tipo_doc>">
-    <input type="hidden" id="modal" name="modal" value="1" />
-    <input type="hidden" id="txt_qtde_assinaturas" name="txt_qtde_assinaturas" value="<dtml-var txt_qtde_assinaturas>"> 
-    <div class="row">
-       <div class="col-12 mb-3">
-          <div class="alert alert-light alert-dismissible fade show mb-0" role="alert">
-             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-             <div class="row">
-               <div class="col-6">
-                  <strong>Usuário Autenticado: </strong> <dtml-var nom_completo>
-               </div>
-               <div class="col-6">
-                  <strong>CPF:</strong> <dtml-var num_cpf>
-               </div>
-             </div> 
-          </div>
-       </div>     
-    </div>
-    <div class="row">
-       <div class="col-12 mb-3">
-         <label class="form-label required" for="certificateSelect">Escolha um Certificado ICP-Brasil</label>
-         <select class="form-select"  id="certificateSelect" class="form-control"></select>
-       </div>
-    </div>
-    <div class="row">
-       <div class="col-10 mb-3">
-         <button id="signButton" type="button" class="btn btn-primary"><i class="mdi mdi-certificate"></i> Assinar Documento</button>
-         <button id="refreshButton" type="button" class="btn btn-light"><i class="mdi mdi-reload"></i> Atualizar Certificados</button>
-       </div>
-    </div>
-  </form>
-  <div style="card font-family: monospace;" id="logPanel"></div>
-</dtml-if>
+                  <form id="signForm" action="pades-signature-action_html" method="post">
+                    <input type="hidden" name="token" id="token" value="<dtml-var token>">
+                    <input type="hidden" name="crc_arquivo_original" value="<dtml-var crc_arquivo>">
+                    <input type="hidden" name="codigo" value="<dtml-var codigo>">
+                    <input type="hidden" name="anexo" value="<dtml-var anexo missing null>">
+                    <input type="hidden" name="cod_usuario" value="<dtml-var cod_usuario>">
+                    <input type="hidden" name="tipo_doc" value="<dtml-var tipo_doc>">
+                    <input type="hidden" name="modal" value="1">
 
-  <script src="<dtml-var portal_url>/assets/libs/jquery/jquery.min.js"></script>
-  <script src="<dtml-var portal_url>/assets/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
-  <script src="static/js/jquery.blockUI.js"></script>
-  <script src="static/js/lacuna-web-pki-2.12.0.min.js"></script>
-  <script src="static/js/lacuna-web-pki-client.js"></script>
+                    <div class="row">
+                      <div class="col-12 mb-4">
+                        <div class="alert alert-light alert-dismissible fade show mb-0 border">
+                          <div class="d-flex align-items-center justify-content-between">
+                            <div class="row w-100">
+                              <div class="col-md-6 mb-2 mb-md-0"><strong><i class="fas fa-user me-2"></i>Usuário:</strong> <dtml-var nom_completo></div>
+                              <div class="col-md-6"><strong><i class="fas fa-id-card me-2"></i>CPF:</strong> <dtml-var num_cpf></div>
+                            </div>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
 
+                      <input type="hidden" name="visual_page_option" value="<dtml-var visual_page_option missing>">
+                      <div class="mb-4">
+                        <label class="form-label fw-semibold">Local definido para representação visual das assinaturas:</label>
+                        <div class="form-control-plaintext border rounded p-3 bg-light">
+                          <dtml-if expr="visual_page_option == 'ultima'">
+                            <div class="d-flex align-items-center">
+                              <div class="me-3">
+                                <img src="<dtml-var portal_url>/imagens/assinatura_visual_ultima_pagina.png" alt="Ilustração de assinaturas na última página" style="max-width: 80px;" class="img-thumbnail">
+                              </div>
+                              <div>
+                                <h5 class="mb-1">Última página do documento</h5>
+                                <p class="text-muted mb-0">Até 3 assinaturas serão adicionadas no rodapé da última página</p>
+                              </div>
+                            </div>
+                          <dtml-else>
+                            <div class="d-flex align-items-center">
+                              <div class="me-3">
+                                <img src="<dtml-var portal_url>/imagens/assinatura_visual_pagina_nova.png" alt="Ilustração de assinaturas em página nova" style="max-width: 80px;" class="img-thumbnail">
+                              </div>
+                              <div>
+                                <h5 class="mb-1">Nova página em branco</h5>
+                                <p class="text-muted mb-0">Todas as assinaturas serão adicionadas em uma nova página dedicada</p>
+                              </div>
+                            </div>
+                          </dtml-if>
+                        </div>
+                      </div>
+
+                    <div class="row">
+                      <div class="col-12 mb-4">
+                        <label class="form-label fw-semibold required" for="certificateSelect">Escolha um Certificado ICP-Brasil</label>
+                        <select class="form-select form-select-lg" id="certificateSelect"></select>
+                        <div class="form-text mt-1">
+                          <i class="fas fa-info-circle me-1"></i> Conecte seu certificado digital ou token para prosseguir
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="row">
+                      <div class="col-12">
+                        <button id="signButton" type="button" class="btn btn-primary">
+                          <i class="mdi mdi-certificate me-1"></i> Assinar Documento
+                        </button>
+                        <button id="refreshButton" type="button" class="btn btn-light">
+                          <i class="mdi mdi-reload me-1"></i> Atualizar Certificados
+                        </button>
+                      </div>
+                    </div>
+                  </form>
+                </dtml-if>
+
+                </div>
+            </div>
+        </div>
+
+        <script src="<dtml-var portal_url>/assets/libs/jquery/jquery.min.js"></script>
+        <script src="<dtml-var portal_url>/assets/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
+        <script src="static/js/jquery.blockUI.js"></script>
+        <script src="static/js/lacuna-web-pki-2.12.0.min.js"></script>
+        <script src="static/js/lacuna-web-pki-client.js"></script>
+
+        <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Validação do formulário de opções visuais
+            const visualForm = document.getElementById("visual_page_option_form");
+            if (visualForm) {
+                const radios = visualForm.querySelectorAll('input[name="visual_page_option"]');
+                const submitBtn = visualForm.querySelector('button[type="submit"]');
+                const errorFeedback = visualForm.querySelector('.invalid-feedback');
+                const cards = visualForm.querySelectorAll('.card-radio');
+
+                function validateSelection() {
+                    const selected = visualForm.querySelector('input[name="visual_page_option"]:checked');
+                    const isValid = !!selected;
+                    
+                    if (isValid) {
+                        errorFeedback.style.display = 'none';
+                        cards.forEach(card => card.classList.remove('card-radio-invalid'));
+                    } else {
+                        errorFeedback.style.display = 'flex';
+                        cards.forEach(card => card.classList.add('card-radio-invalid'));
+                    }
+                    
+                    return isValid;
+                }
+
+                radios.forEach(radio => {
+                    radio.addEventListener('change', function() {
+                        cards.forEach(card => card.classList.remove('border-primary'));
+                        if (this.checked) {
+                            this.closest('.card-radio').classList.add('border-primary');
+                        }
+                        validateSelection();
+                    });
+                });
+
+                visualForm.addEventListener('submit', function(e) {
+                    if (!validateSelection()) {
+                        e.preventDefault();
+                        cards.forEach(card => {
+                            card.classList.add('animate__animated', 'animate__headShake');
+                            card.addEventListener('animationend', () => {
+                                card.classList.remove('animate__animated', 'animate__headShake');
+                            });
+                        });
+                    }
+                });
+
+                cards.forEach(card => {
+                    card.addEventListener('mouseenter', function() {
+                        if (!this.querySelector('input').checked) {
+                            this.classList.add('border-primary', 'shadow-sm');
+                        }
+                    });
+                    
+                    card.addEventListener('mouseleave', function() {
+                        if (!this.querySelector('input').checked) {
+                            this.classList.remove('border-primary', 'shadow-sm');
+                        }
+                    });
+                });
+            }
+
+            // Configuração dos botões de assinatura
+            const signButton = document.getElementById("signButton");
+            if (signButton) {
+                signButton.addEventListener('mouseenter', function() {
+                    this.querySelector('i').classList.add('fa-beat');
+                });
+                
+                signButton.addEventListener('mouseleave', function() {
+                    this.querySelector('i').classList.remove('fa-beat');
+                });
+            }
+        });
+        </script>
 <dtml-var footer_html>
-

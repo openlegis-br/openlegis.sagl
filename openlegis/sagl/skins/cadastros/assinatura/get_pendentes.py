@@ -258,6 +258,7 @@ for item in context.zsql.assinatura_documento_pendente_obter_zsql(codigo=codigo,
        for usuario in context.zsql.usuario_obter_zsql(cod_usuario=item.cod_solicitante):
            dic_documento['nome_solicitante_documento'] = usuario.nom_completo
     dic_documento['anexo'] = item['anexo']
+    dic_documento['visual_page_option'] = item.visual_page_option
     dados = get_info(codigo=item['codigo'], tipo_doc=item['tipo_doc'], anexo=item['anexo'])
     dic_documento['id_documento'] = dados[0]
     dic_documento['link_registro'] = dados[1]

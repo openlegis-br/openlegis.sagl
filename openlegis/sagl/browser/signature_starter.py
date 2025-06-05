@@ -22,8 +22,6 @@ logger = logging.getLogger(__name__)
 # --- Configurações ---
 RESTPKI_URL = 'https://restpkiol.azurewebsites.net/'
 VISUAL_REPRESENTATION_TEXT = 'Assinado digitalmente por {{signerName}}'
-VISUAL_REPRESENTATION_FOOTNOTE_HEIGHT = 4.94
-VISUAL_REPRESENTATION_FOOTNOTE_WIDTH = 8.0
 
 def get_restpki_access_token(context):
     """Obtém o token de acesso do Rest PKI das propriedades do portal."""
@@ -83,29 +81,27 @@ async def _build_base_visual_representation(image_content: bytes) -> dict:
         }
     }
 
-async def build_visual_representation(context, qtde_assinaturas=None) -> dict:
+async def build_visual_representation(context, visual_page_option=None) -> dict:
     """Constrói a representação visual da assinatura."""
     image_content = await get_image_content(context)
     base_representation = await _build_base_visual_representation(image_content)
     restpki_client = await create_restpki_client(context)
 
-    if qtde_assinaturas and int(qtde_assinaturas) <= 3:
+    if visual_page_option and str(visual_page_option) == 'ultima':
         visual_positioning = PadesVisualPositioningPresets.get_footnote(restpki_client)
         visual_positioning['auto']['container'].update({'left': 3, 'bottom': 2, 'right': 3})
         base_representation['position'] = visual_positioning
         base_representation['image']['opacity'] = 40
-    elif qtde_assinaturas and int(qtde_assinaturas) > 3:
+    elif visual_page_option and str(visual_page_option) == 'nova':
         visual_positioning = PadesVisualPositioningPresets.get_new_page(restpki_client)
         visual_positioning['auto']['container'].update({'left': 3, 'top': 2, 'bottom': 2, 'right': 3})
         base_representation['position'] = visual_positioning
         base_representation['image']['opacity'] = 40
     else:
         visual_positioning = PadesVisualPositioningPresets.get_footnote(restpki_client)
-        visual_positioning['auto']['container']['height'] = VISUAL_REPRESENTATION_FOOTNOTE_HEIGHT
-        visual_positioning['auto']['signatureRectangleSize']['width'] = VISUAL_REPRESENTATION_FOOTNOTE_WIDTH
-        visual_positioning['auto']['signatureRectangleSize']['height'] = VISUAL_REPRESENTATION_FOOTNOTE_HEIGHT
+        visual_positioning['auto']['container'].update({'left': 3, 'bottom': 2, 'right': 3})
         base_representation['position'] = visual_positioning
-        base_representation['image'].pop('opacity', None)
+        base_representation['image']['opacity'] = 40
 
     return base_representation
 
@@ -145,9 +141,9 @@ class StartPadesSignature(grok.View):
                 raise ValueError("Objeto não possui atributo 'data'.")
 
             post_data = self.request.form
-            qtde_assinaturas = post_data.get('qtde_assinaturas')
+            visual_page_option = post_data.get('visual_page_option')
 
-            logger.info(f"Dados do POST: qtde_assinaturas={qtde_assinaturas}")
+            logger.info(f"Dados do POST: visual_page_option={visual_page_option}")
 
             restpki_client = await create_restpki_client(self.context)
             signature_starter = PadesSignatureStarter(restpki_client)
@@ -156,7 +152,7 @@ class StartPadesSignature(grok.View):
             signature_starter.set_pdf_stream(pdf_stream)
             signature_starter.signature_policy_id = StandardSignaturePolicies.PADES_BASIC
             signature_starter.security_context_id = StandardSecurityContexts.PKI_BRAZIL
-            signature_starter.visual_representation = await build_visual_representation(self.context, qtde_assinaturas)
+            signature_starter.visual_representation = await build_visual_representation(self.context, visual_page_option)
             result = await asyncio.to_thread(signature_starter.start_with_webpki)
             self.request.response.setStatus(HTTPStatus.OK)
             self.request.response.setHeader('Content-Type', 'application/json')

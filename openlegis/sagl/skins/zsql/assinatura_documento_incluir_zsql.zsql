@@ -1,6 +1,6 @@
 <dtml-comment>
 connection_id : dbcon_sagl
-arguments : cod_assinatura_doc codigo anexo tipo_doc cod_solicitante cod_usuario ind_prim_assinatura
+arguments : cod_assinatura_doc codigo anexo tipo_doc cod_solicitante cod_usuario ind_prim_assinatura visual_page_option
 max_rows : 1
 max_cache : 100
 </dtml-comment>
@@ -13,7 +13,8 @@ INSERT INTO assinatura_documento
          dat_solicitacao,
          cod_solicitante,
          cod_usuario,
-         ind_prim_assinatura)
+         ind_prim_assinatura,
+         visual_page_option)
  
 VALUES
 
@@ -24,4 +25,6 @@ VALUES
     NOW(),
     <dtml-sqlvar      cod_solicitante      type="int">,
     <dtml-sqlvar      cod_usuario          type="int">,
-    <dtml-sqlvar      ind_prim_assinatura  type="int">)
+    <dtml-sqlvar      ind_prim_assinatura  type="int">,
+    <dtml-sqlvar      visual_page_option   type="string" optional>
+    )

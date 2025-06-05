@@ -44,16 +44,16 @@ FROM
  </dtml-if>
 
  <dtml-if expr="dat_apresentacao and dat_apresentacao2">
-   AND e.dat_apresentacao >= <dtml-sqlvar "pysc.port_to_iso_pysc(dat_apresentacao)"  type="nb"> 
-   AND e.dat_apresentacao <= <dtml-sqlvar "pysc.port_to_iso_pysc(dat_apresentacao2)" type="nb">
+   AND DATE(e.dat_apresentacao) >= <dtml-sqlvar "pysc.port_to_iso_pysc(dat_apresentacao)"  type="nb"> 
+   AND DATE(e.dat_apresentacao) <= <dtml-sqlvar "pysc.port_to_iso_pysc(dat_apresentacao2)" type="nb">
  </dtml-if>
 
  <dtml-if expr="dat_apresentacao and (not dat_apresentacao2)">
-   AND e.dat_apresentacao = <dtml-sqlvar "pysc.port_to_iso_pysc(dat_apresentacao)" type="nb">
+   AND DATE(e.dat_apresentacao) = <dtml-sqlvar "pysc.port_to_iso_pysc(dat_apresentacao)" type="nb">
  </dtml-if>
 
  <dtml-if expr="dat_apresentacao2 and (not dat_apresentacao)">
-   AND e.dat_apresentacao = <dtml-sqlvar "pysc.port_to_iso_pysc(dat_apresentacao2)" type="nb">
+   AND DATE(e.dat_apresentacao) = <dtml-sqlvar "pysc.port_to_iso_pysc(dat_apresentacao2)" type="nb">
  </dtml-if>
 
  <dtml-if expr="ano_apresentacao">

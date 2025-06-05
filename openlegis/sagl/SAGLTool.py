@@ -1594,7 +1594,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
             print(f"Erro geral em get_file_tosign: {e}")
             return None, None, None
 
-    def pades_signature(self, codigo, anexo, tipo_doc, cod_usuario, qtde_assinaturas, page_number=None, coords=None):
+    def pades_signature(self, codigo, anexo, tipo_doc, cod_usuario, visual_page_option, page_number=None, coords=None):
         """
         Inicia o processo de assinatura PAdES para um arquivo PDF,
         com suporte a posicionamento visual personalizado via coordenadas.
@@ -1664,11 +1664,11 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
                     }
                 except Exception as e:
                     logging.warning(f"Erro ao interpretar coordenadas: {e}")
-                    sample_number = 2 if int(qtde_assinaturas) <= 3 else 4
+                    sample_number = 2 if str(visual_page_option) == 'ultima' else 4
                     visual_representation['position'] = self.get_visual_representation_position(sample_number)
             else:
                 # Posição automática
-                sample_number = 2 if int(qtde_assinaturas) <= 3 else 4
+                sample_number = 2 if str(visual_page_option) == 'ultima' else 4
                 visual_representation['position'] = self.get_visual_representation_position(sample_number)
 
             signature_starter.visual_representation = visual_representation
@@ -1686,7 +1686,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
             logging.error(f"Erro inesperado em pades_signature: {e}")
             return None, None, None, codigo, anexo, tipo_doc, cod_usuario, None
 
-    def pades_signature_action(self, token, codigo, anexo, tipo_doc, cod_usuario, crc_arquivo_original):
+    def pades_signature_action(self, token, codigo, anexo, tipo_doc, cod_usuario, crc_arquivo_original, visual_page_option):
         """
         Finaliza o processo de assinatura PAdES e armazena o PDF assinado.
         """
@@ -1718,6 +1718,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
                     cod_solicitante=cod_usuario,
                     cod_usuario=cod_usuario,
                     ind_prim_assinatura=1,
+                    visual_page_option=visual_page_option
                 )
                 self.zsql.assinatura_documento_registrar_zsql(cod_assinatura_doc=cod_assinatura_doc, cod_usuario=cod_usuario)
             # Determina storage_path e filename

@@ -59,26 +59,26 @@ max_cache : 100
 
    <dtml-if dat_norma>
      <dtml-if dat_norma2>
-        and ( norma_juridica.dat_norma >= <dtml-sqlvar "pysc.port_to_iso_pysc(dat_norma)" type="string"> 
-             and norma_juridica.dat_norma <= <dtml-sqlvar "pysc.port_to_iso_pysc(dat_norma2)" type="string">) 
+        and (DATE(norma_juridica.dat_norma) >= <dtml-sqlvar "pysc.port_to_iso_pysc(dat_norma)" type="string"> 
+             and DATE(norma_juridica.dat_norma) <= <dtml-sqlvar "pysc.port_to_iso_pysc(dat_norma2)" type="string">) 
      <dtml-else>
-        and ( norma_juridica.dat_norma >= <dtml-sqlvar "pysc.port_to_iso_pysc(dat_norma)" type="string">)
+        and (DATE(norma_juridica.dat_norma) >= <dtml-sqlvar "pysc.port_to_iso_pysc(dat_norma)" type="string">)
      </dtml-if>
    <dtml-else>
      <dtml-if dat_norma2>
-        and (norma_juridica.dat_norma <= <dtml-sqlvar "pysc.port_to_iso_pysc(dat_norma2)" type="string">)
+        and (DATE(norma_juridica.dat_norma) <= <dtml-sqlvar "pysc.port_to_iso_pysc(dat_norma2)" type="string">)
      </dtml-if>
    </dtml-if>
    <dtml-if dat_publicacao>
      <dtml-if dat_publicacao2>
-       and ( norma_juridica.dat_publicacao >= <dtml-sqlvar "pysc.port_to_iso_pysc(dat_publicacao)" type="string"> 
-             and norma_juridica.dat_publicacao <= <dtml-sqlvar "pysc.port_to_iso_pysc(dat_publicacao2)" type="string">) 
+       and (DATE(norma_juridica.dat_publicacao) >= <dtml-sqlvar "pysc.port_to_iso_pysc(dat_publicacao)" type="string"> 
+             and DATE(norma_juridica.dat_publicacao) <= <dtml-sqlvar "pysc.port_to_iso_pysc(dat_publicacao2)" type="string">) 
      <dtml-else>
-       and ( norma_juridica.dat_publicacao >= <dtml-sqlvar "pysc.port_to_iso_pysc(dat_publicacao)" type="string">)
+       and (DATE(norma_juridica.dat_publicacao) >= <dtml-sqlvar "pysc.port_to_iso_pysc(dat_publicacao)" type="string">)
      </dtml-if>
    <dtml-else>
       <dtml-if dat_publicacao2>
-        and (norma_juridica.dat_publicacao <= <dtml-sqlvar "pysc.port_to_iso_pysc(dat_norma2)" type="string">)
+        and (DATE(norma_juridica.dat_publicacao) <= <dtml-sqlvar "pysc.port_to_iso_pysc(dat_norma2)" type="string">)
       </dtml-if>
    </dtml-if>
 

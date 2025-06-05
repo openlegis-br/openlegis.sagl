@@ -1,23 +1,87 @@
 <dtml-var header_html>
 
-<dtml-call "REQUEST.set('campos', pades_signature_action_pdf(token=token, codigo=codigo, anexo=anexo, tipo_doc=tipo_doc, cod_usuario=cod_usuario, crc_arquivo_original=crc_arquivo_original))">
+<dtml-call "REQUEST.set('campos', pades_signature_action_pdf(token=token, codigo=codigo, anexo=anexo, tipo_doc=tipo_doc, cod_usuario=cod_usuario, crc_arquivo_original=crc_arquivo_original, visual_page_option=visual_page_option))">
 <dtml-call "REQUEST.set('email', campos[2])">
 <dtml-call "REQUEST.set('tipo', campos[3])">
 <dtml-call "REQUEST.set('cpf', campos[4])">
 
-<h4>Documento assinado com sucesso!</h4>
-   	   Informações do signatário:
-	   <ul>
-	      <li>Email: <dtml-var email missing></li>
-	      <li>
-	  	Dados ICP-Brasil
-		  <ul>
-		      <li>Tipo de certificado: <dtml-var tipo missing> </li>
-		     <li>CPF:  <dtml-var cpf missing></li>
-		  </ul>
-	      </li>
-	   </ul>
-        <input class="btn btn-primary" type="button" id="closeBtn" onclick="var modal1 = $('#close', window.parent.document); modal1.click();" value="Fechar" />	
-  </div>
+<div class="container mt-2"">
+    <div class="card shadow-sm border-success">
+        <div class="card-header bg-success text-white d-flex align-items-center">
+            <i class="fas fa-check-circle fa-lg me-2"></i>
+            <h4 class="mb-0">Documento assinado com sucesso!</h4>
+        </div>
+        
+        <div class="card-body">
+            <div class="alert alert-success d-flex align-items-center">
+                <i class="fas fa-info-circle fa-lg me-3"></i>
+                <div>O documento foi assinado digitalmente e é válido conforme a legislação brasileira.</div>
+            </div>
+            
+            <h5 class="mb-3 text-secondary d-flex align-items-center">
+                <i class="fas fa-user-shield me-2"></i>Informações do signatário
+            </h5>
+            
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="card h-100 border-light">
+                        <div class="card-header bg-light py-2">
+                            <h6 class="mb-0">Dados básicos</h6>
+                        </div>
+                        <div class="card-body py-3">
+                            <dl class="row mb-0">
+                                <dt class="col-sm-4 text-muted">E-mail:</dt>
+                                <dd class="col-sm-8 text-truncate"><dtml-var email missing></dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="card h-100 border-light">
+                        <div class="card-header bg-light py-2">
+                            <h6 class="mb-0">Certificação ICP-Brasil</h6>
+                        </div>
+                        <div class="card-body py-3">
+                            <dl class="row mb-0">
+                                <dt class="col-sm-4 text-muted">Tipo:</dt>
+                                <dd class="col-sm-8"><dtml-var tipo missing></dd>
+                                
+                                <dt class="col-sm-4 text-muted">CPF:</dt>
+                                <dd class="col-sm-8"><dtml-var cpf missing></dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="d-grid gap-2 mt-4 pt-2">
+                <button class="btn btn-light px-4" id="closeBtn" onclick="var modal1 = $('#close', window.parent.document); modal1.click();">
+                    <i class="fas fa-times me-2"></i>Fechar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        border-radius: 0.5rem;
+    }
+    .card-header {
+        border-radius: 0.5rem 0.5rem 0 0 !important;
+    }
+    dt {
+        font-weight: 500;
+        font-size: 0.9rem;
+    }
+    dd {
+        font-weight: 400;
+    }
+    .alert {
+        border-radius: 0.5rem;
+    }
+</style>
+
 <dtml-var js_slot>
 <dtml-var footer_html>

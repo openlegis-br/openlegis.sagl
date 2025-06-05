@@ -1,56 +1,103 @@
 <dtml-call expr="REQUEST.set('metodo', zsql.assinatura_documento_incluir_zsql)">
+<dtml-call expr="REQUEST.set('sucessos', 0)">
+<dtml-call expr="REQUEST.set('duplicados', 0)">
+<dtml-call expr="REQUEST.set('erro_limite', 0)">
+<dtml-call expr="REQUEST.set('visual_page_option', REQUEST.get('visual_page_option', ''))">
 
+<!-- Obtém usuário solicitante -->
 <dtml-in expr="zsql.usuario_obter_zsql(col_username=AUTHENTICATED_USER.getUserName())">
   <dtml-call expr="REQUEST.set('codigo_solicitante', int(cod_usuario))">
 </dtml-in>
 
-<dtml-in lst_cod_usuario>
-  <dtml-call expr="REQUEST.set('codigo_usuario', int(_['sequence-item']))">   
-  <dtml-if expr="zsql.assinatura_documento_obter_zsql(cod_assinatura_doc=hdn_cod_assinatura_doc)">
-    <dtml-call expr="REQUEST.set('ind_prim_assinatura', '0')">
-  <dtml-else>
-    <dtml-call expr="REQUEST.set('ind_prim_assinatura', '1')">
-  </dtml-if>
-  <dtml-unless expr="zsql.assinatura_documento_obter_zsql(cod_assinatura_doc=hdn_cod_assinatura_doc, cod_usuario=codigo_usuario)">
-    <dtml-try>
-      <dtml-if expr="hdn_tipo_doc == 'anexo_sessao' or hdn_tipo_doc == 'anexo_peticao'">
-         <dtml-call expr="metodo(cod_assinatura_doc  = hdn_cod_assinatura_doc,
-                              codigo              = hdn_codigo,
-                              anexo               = hdn_anexo,
-                              tipo_doc            = hdn_tipo_doc,
-                              cod_solicitante     = codigo_solicitante,
-                              cod_usuario         = codigo_usuario,
-                              ind_prim_assinatura = ind_prim_assinatura)">
-      <dtml-else>                        
-         <dtml-call expr="metodo(cod_assinatura_doc  = hdn_cod_assinatura_doc,
-                              codigo              = hdn_codigo,
-                              tipo_doc            = hdn_tipo_doc,
-                              cod_solicitante     = codigo_solicitante,
-                              cod_usuario         = codigo_usuario,
-                              ind_prim_assinatura = ind_prim_assinatura)">
-      </dtml-if>
-    </dtml-try>
-  </dtml-unless>
-</dtml-in>
-
-<dtml-if expr="hdn_tipo_doc == 'anexo_sessao' or hdn_tipo_doc == 'anexo_peticao'">
-   <dtml-if erro>
-        <dtml-let mensagem="'Já existe solicitação de assinatura para esse usuário.'" tipo_mensagem="'warning'" codigo=hdn_codigo anexo=hdn_anexo tipo_doc=hdn_tipo_doc>
-           <dtml-var assinatura_solicitar_form>
-        </dtml-let>
-   <dtml-else>
-        <dtml-let mensagem="'A lista de solicitações foi atualizada.'" sucesso="'1'" codigo=hdn_codigo anexo=hdn_anexo tipo_doc=hdn_tipo_doc url="'assinatura_solicitar_form?codigo='+hdn_codigo + '&anexo=' + hdn_anexo + '&tipo_doc=' + hdn_tipo_doc">
-           <dtml-var assinatura_solicitar_form>
-        </dtml-let> 
-   </dtml-if>
-<dtml-else>
-   <dtml-if erro>
-        <dtml-let mensagem="'Já existe solicitação de assinatura para esse usuário.'" tipo_mensagem="'warning'" codigo=hdn_codigo tipo_doc=hdn_tipo_doc>
-           <dtml-var assinatura_solicitar_form>
-        </dtml-let>
-   <dtml-else>
-        <dtml-let mensagem="'A lista de solicitações foi atualizada.'" sucesso="'1'" codigo=hdn_codigo tipo_doc=hdn_tipo_doc url="'assinatura_solicitar_form?codigo='+hdn_codigo + '&tipo_doc=' + hdn_tipo_doc">
-           <dtml-var assinatura_solicitar_form>
-        </dtml-let> 
-   </dtml-if>
+<!-- Verifica limite para assinaturas na última página -->
+<dtml-if expr="visual_page_option == 'ultima'">
+  <dtml-call expr="REQUEST.set('assinaturas_existentes', zsql.assinatura_documento_obter_zsql(cod_assinatura_doc=hdn_cod_assinatura_doc, ind_excluido=0))">
+  <dtml-call expr="REQUEST.set('qtde_existente', _.len(assinaturas_existentes))">
+  <dtml-call expr="REQUEST.set('limite_atingido', qtde_existente >= 3)">
 </dtml-if>
+
+<!-- Processa cada usuário selecionado, respeitando o limite -->
+<dtml-if expr="_.has_key('lst_cod_usuario') and lst_cod_usuario">
+  <dtml-in lst_cod_usuario>
+    <dtml-call expr="REQUEST.set('codigo_usuario', int(_['sequence-item']))">
+    
+    <!-- Verifica se já existe assinatura para este usuário -->
+    <dtml-if expr="not zsql.assinatura_documento_obter_zsql(cod_assinatura_doc=hdn_cod_assinatura_doc, cod_usuario=codigo_usuario)">
+      <!-- Se for última página e ainda houver espaço (menos de 3 assinaturas) -->
+      <dtml-if expr="visual_page_option != 'ultima' or (visual_page_option == 'ultima' and qtde_existente + sucessos < 3)">
+        <!-- Define se é o primeiro signatário -->
+        <dtml-if expr="not zsql.assinatura_documento_obter_zsql(cod_assinatura_doc=hdn_cod_assinatura_doc)">
+          <dtml-call expr="REQUEST.set('ind_prim_assinatura', '1')">
+        <dtml-else>
+          <dtml-call expr="REQUEST.set('ind_prim_assinatura', '0')">
+        </dtml-if>
+
+        <!-- Efetua a inclusão -->
+        <dtml-try>
+          <dtml-if expr="hdn_tipo_doc == 'anexo_sessao' or hdn_tipo_doc == 'anexo_peticao'">
+            <dtml-call expr="metodo(
+              cod_assinatura_doc=hdn_cod_assinatura_doc,
+              codigo=hdn_codigo,
+              anexo=hdn_anexo,
+              tipo_doc=hdn_tipo_doc,
+              cod_solicitante=codigo_solicitante,
+              cod_usuario=codigo_usuario,
+              ind_prim_assinatura=ind_prim_assinatura,
+              visual_page_option=visual_page_option
+            )">
+          <dtml-else>
+            <dtml-call expr="metodo(
+              cod_assinatura_doc=hdn_cod_assinatura_doc,
+              codigo=hdn_codigo,
+              tipo_doc=hdn_tipo_doc,
+              cod_solicitante=codigo_solicitante,
+              cod_usuario=codigo_usuario,
+              ind_prim_assinatura=ind_prim_assinatura,
+              visual_page_option=visual_page_option
+            )">
+          </dtml-if>
+          <dtml-call expr="REQUEST.set('sucessos', sucessos + 1)">
+        <dtml-except>
+          <dtml-call expr="REQUEST.set('duplicados', duplicados + 1)">
+        </dtml-try>
+      <dtml-else>
+        <dtml-call expr="REQUEST.set('erro_limite', 1)">
+      </dtml-if>
+    <dtml-else>
+      <dtml-call expr="REQUEST.set('duplicados', duplicados + 1)">
+    </dtml-if>
+  </dtml-in>
+</dtml-if>
+
+<!-- Prepara parâmetros para redirecionamento -->
+<dtml-call expr="REQUEST.set('tipo_doc', hdn_tipo_doc)">
+<dtml-call expr="REQUEST.set('codigo', hdn_codigo)">
+<dtml-if expr="hdn_tipo_doc == 'anexo_sessao' or hdn_tipo_doc == 'anexo_peticao'">
+  <dtml-call expr="REQUEST.set('anexo', hdn_anexo)">
+</dtml-if>
+
+<!-- Mensagem de feedback -->
+<dtml-if expr="erro_limite and visual_page_option == 'ultima'">
+  <dtml-call expr="REQUEST.set('mensagem', 'Limite de 3 solicitações na última página atingido. Apenas ' + str(sucessos) + ' solicitação(ões) adicionada(s).')">
+  <dtml-call expr="REQUEST.set('tipo_mensagem', 'warning')">
+<dtml-elif expr="not lst_cod_usuario">
+  <dtml-call expr="REQUEST.set('mensagem', 'Nenhum usuário selecionado')">
+  <dtml-call expr="REQUEST.set('tipo_mensagem', 'danger')">
+<dtml-elif expr="sucessos">
+  <dtml-if expr="duplicados">
+    <dtml-call expr="REQUEST.set('mensagem', str(sucessos) + ' solicitação(ões) de assinatura adicionada(s), ' + str(duplicados) + ' já existia(m)')">
+    <dtml-call expr="REQUEST.set('tipo_mensagem', 'warning')">
+  <dtml-else>
+    <dtml-call expr="REQUEST.set('mensagem', 'Todas as solicitações de assinatura foram adicionadas com sucesso')">
+    <dtml-call expr="REQUEST.set('tipo_mensagem', 'success')">
+  </dtml-if>
+<dtml-elif expr="duplicados">
+  <dtml-call expr="REQUEST.set('mensagem', 'Nenhuma nova solicitação de assinatura (todas já existiam)')">
+  <dtml-call expr="REQUEST.set('tipo_mensagem', 'warning')">
+<dtml-else>
+  <dtml-call expr="REQUEST.set('mensagem', 'Erro ao processar as solicitações de assinatura')">
+  <dtml-call expr="REQUEST.set('tipo_mensagem', 'danger')">
+</dtml-if>
+
+<dtml-call expr="REQUEST.set('sucesso', str(int(sucessos > 0)))">
+<dtml-var assinatura_solicitar_form>

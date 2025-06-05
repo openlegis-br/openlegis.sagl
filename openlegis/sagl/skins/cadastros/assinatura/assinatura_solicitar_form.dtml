@@ -44,6 +44,11 @@
     .card-radio-invalid {
       border-color: #dc3545 !important;
       box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.25);
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .fade-out-error {
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
     }
 
     .alert-warning {
@@ -218,7 +223,7 @@
          <div class="col-12 mb-3">
          <label class="form-label required d-none" for="lst_cod_usuario">Selecione o usuário</label>
          <small id="contador-usuarios" class="form-text text-muted ms-1">
-          0 selecionados (máximo 3 no modo "Última página")
+          0 selecionados
          </small>
            <div class="input-group w-100">
             <select class="select2 users form-select bg-light" name="lst_cod_usuario:list:int" id="lst_cod_usuario" multiple="multiple" required style="width:90%">
@@ -463,44 +468,36 @@ document.addEventListener('DOMContentLoaded', function () {
   const qtdeAssinaturasExistentes = parseInt('<dtml-var qtde_signatarios missing>') || 0;
   const visualPageOptionDefinido = !!document.querySelector('input[name="visual_page_option"][type="hidden"]');
 
-    const el = document.getElementById('toast-mensagem');
-    if (el) {
-      const toast = new bootstrap.Toast(el, {
-        delay: 5000,
-        autohide: true
-      });
-      toast.show();
-      el.addEventListener('hidden.bs.toast', () => el.remove());
-    }
+  const el = document.getElementById('toast-mensagem');
+  if (el) {
+    const toast = new bootstrap.Toast(el, { delay: 5000, autohide: true });
+    toast.show();
+    el.addEventListener('hidden.bs.toast', () => el.remove());
+  }
 
-function mostrarToast(mensagem, tipo = 'warning') {
-  const id = 'toast-' + Date.now();
-  const cor = {
-    warning: 'bg-warning text-dark',
-    success: 'bg-success text-white',
-    danger:  'bg-danger text-white',
-    info:    'bg-info text-white'
-  }[tipo] || 'bg-secondary text-white';
+  function mostrarToast(mensagem, tipo = 'warning') {
+    const id = 'toast-' + Date.now();
+    const cor = {
+      warning: 'bg-warning text-dark',
+      success: 'bg-success text-white',
+      danger:  'bg-danger text-white',
+      info:    'bg-info text-white'
+    }[tipo] || 'bg-secondary text-white';
 
-  const toastHTML = `
-    <div id="${id}" class="toast fade align-items-center ${cor} border-0 mb-2" role="alert" aria-live="assertive" aria-atomic="true">
-      <div class="d-flex">
-        <div class="toast-body">${mensagem}</div>
-        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Fechar"></button>
-      </div>
-    </div>`;
+    const toastHTML = `
+      <div id="${id}" class="toast fade align-items-center ${cor} border-0 mb-2" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+          <div class="toast-body">${mensagem}</div>
+          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Fechar"></button>
+        </div>
+      </div>`;
 
-  $('#toastArea').append(toastHTML);
-
-  const toastEl = document.getElementById(id);
-  const toast = new bootstrap.Toast(toastEl, {
-    delay: 5000,
-    autohide: true
-  });
-  toast.show();
-
-  toastEl.addEventListener('hidden.bs.toast', () => toastEl.remove());
-}
+    $('#toastArea').append(toastHTML);
+    const toastEl = document.getElementById(id);
+    const toast = new bootstrap.Toast(toastEl, { delay: 5000, autohide: true });
+    toast.show();
+    toastEl.addEventListener('hidden.bs.toast', () => toastEl.remove());
+  }
 
   function isUltimaPaginaSelecionada() {
     return !visualPageOptionDefinido &&
@@ -611,11 +608,18 @@ function mostrarToast(mensagem, tipo = 'warning') {
   $selectUsuarios.on('change', function () {
     atualizarContadorUsuarios();
     aplicarBloqueioSelect2();
+    $('#lst_cod_usuario').removeClass('is-invalid');
   });
 
   $('input[name="visual_page_option"]').on('change', function () {
     atualizarContadorUsuarios();
     aplicarBloqueioSelect2();
+
+    // Remover animação de erro suavemente
+    $('.card-radio.card-radio-invalid').addClass('fade-out-error');
+    setTimeout(() => {
+      $('.card-radio').removeClass('card-radio-invalid fade-out-error');
+    }, 300);
   });
 
   $('#assinatura_solicitar').on('submit', function (e) {
@@ -637,10 +641,17 @@ function mostrarToast(mensagem, tipo = 'warning') {
       return false;
     }
 
+    if (!usuariosSelecionados || usuariosSelecionados.length === 0) {
+      e.preventDefault();
+      mostrarToast('Selecione ao menos um usuário para solicitar assinatura.', 'danger');
+      $('#lst_cod_usuario').addClass('is-invalid');
+      return false;
+    }
+
     $('.card-radio').removeClass('card-radio-invalid');
+    $('#lst_cod_usuario').removeClass('is-invalid');
     return true;
   });
-
 });
 </script>
 

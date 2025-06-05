@@ -175,7 +175,7 @@ var batchSignatureRestPkiForm = (function () {
                 step.codigo = row.find('input[name="codigo"]').val();
                 step.tipo_doc = row.find('input[name="tipo_doc"]').val();
                 step.anexo = row.find('input[name="anexo"]').val();
-                step.qtde_assinaturas = row.find('input[name="qtde_assinaturas"]').val();
+                step.visual_page_option = row.find('input[name="visual_page_option"]').val();
                 step.cod_usuario = row.find('input[name="cod_usuario"]').val();
             } else {
                 console.error('Linha da tabela não encontrada para o docId:', step.docId);
@@ -184,13 +184,14 @@ var batchSignatureRestPkiForm = (function () {
                 return;
             }
 	    console.log('Iniciando assinatura para:', 'Documento:', step.docId);
+	    console.log('Representação visual:', 'Pagina:', step.visual_page_option);
             $.ajax({
                 url: step.docId + '/start/',
                 method: 'POST',
                 dataType: 'json',
                 // Se você precisar enviar os valores para o backend na conclusão:
                 data: {
-                      qtde_assinaturas: step.qtde_assinaturas,
+                      visual_page_option: step.visual_page_option,
                       crc_arquivo: step.crc_arquivo,
                 },
                 success: function (token) {

@@ -127,6 +127,10 @@
     <div class="col-12 mb-3">
       <b>Processo Derivado: </b>    
       	<dtml-if expr="tip_processo==0">
+    	      <dtml-call expr="REQUEST.set('nom_unidade_destino', 'Protocolo')">
+              <dtml-in expr="zsql.unidade_tramitacao_obter_zsql(nom_orgao=nom_unidade_destino)">
+                 <dtml-call expr="REQUEST.set('cod_unid_tram_local', int(cod_unid_tramitacao))">
+              </dtml-in>
               <dtml-in expr="zsql.documento_administrativo_pesquisar_zsql(tip_documento=tip_documento, num_protocolo=num_protocolo, ano_documento=ano_protocolo)">
                  <dtml-if sequence-start>
                     <dtml-if expr="ind_anulado==0 and AUTHENTICATED_USER.has_role(['Operador', 'Operador Modulo Administrativo'])">              
@@ -140,26 +144,38 @@
              <dtml-else> 
               <dtml-call expr="REQUEST.set('id_documento', str(cod_protocolo)+'_protocolo.pdf')">
                 <dtml-if "hasattr(sapl_documentos.protocolo,id_documento)">             
-                 <button id="btnCriar" type="button" class="btn btn-sm btn-light" data-bs-toggle="popover" title="Unidade de Destino"><i class="fas fa-plus-circle"></i> Criar Processo</button>
-                 <section class="body-content">
-                   <div hidden>  
-                 <div data-name="PopoverContent" id="PopoverContent">
-                   <form id="myform" class="form-inline" role="form" method="post" action="criar_documento_pysc" onSubmit="return confirm('Confirma a criação do processo administrativo?');" class="was-validated">
-                    <input type="hidden" name="cod_protocolo" value="<dtml-var cod_protocolo>" />                   
-                    <div class="input-group">
-                     <select class="form-select form-select-sm" name="lst_cod_unid_tram_dest" id="lst_cod_unid_tram_dest" required>
-                       <option></option>
-                       <dtml-in expr="zsql.unidade_tramitacao_obter_zsql(ind_adm=1)">
-                         <option value="<dtml-var cod_unid_tramitacao>"><dtml-var nom_unidade_join></option>
-                       </dtml-in>             
-                     </select>                    
-                     <div class="input-group-append" id="button-addon1">
-                        <button class="btn btn-sm btn-primary" type="submit" data-bs-toggle="popover" data-placement="bottom" data-html="true" data-title="OK">OK</button>                     
-                     </div>
-                    </div>     
-                   </form>
-                  </div>
-                  </section>
+		<button id="btnCriar" type="button" class="btn btn-sm btn-primary" data-bs-toggle="popover" title="Criar Processo Administrativo">
+		  <i class="fas fa-plus-circle me-1"></i> Criar Processo
+		</button>
+
+		<div hidden>
+		  <div data-name="PopoverContent" id="PopoverContent">
+		    <form id="myform" method="post" action="criar_documento_pysc" class="needs-validation" novalidate>
+		      <input type="hidden" name="cod_protocolo" value="<dtml-var cod_protocolo>" />      
+		      <div class="mb-3">
+			<label for="lst_cod_status" class="form-label small fw-bold">Status:</label>
+			<select class="form-select form-select-sm" name="lst_cod_status" id="lst_cod_status" required>
+			  <option value="" selected disabled>Selecione o status...</option>
+			</select>
+			<div class="invalid-feedback">Por favor, selecione um status.</div>
+		      </div>
+		      
+		      <div class="mb-3">
+			<label for="lst_cod_unid_tram_dest" class="form-label small fw-bold">Unidade de Destino:</label>
+			<select class="form-select form-select-sm" name="lst_cod_unid_tram_dest" id="lst_cod_unid_tram_dest" required>
+			  <option value="" selected disabled>Selecione a unidade...</option>
+			</select>
+			<div class="invalid-feedback">Por favor, selecione uma unidade.</div>
+		      </div>
+		      
+		      <div class="d-grid gap-2">
+			<button type="submit" class="btn btn-sm btn-success">
+			  <i class="fas fa-check me-1"></i> Confirmar
+			</button>
+		      </div>
+		    </form>
+		  </div>
+		</div>
                 <dtml-else>
                    <span class="text-danger"> <i class="fas fa-exclamation-triangle"></i> Carregue o documento digitalizado para habilitar a criação do processo.</span>
                 </dtml-if>                  
@@ -338,25 +354,136 @@
 </dtml-if>
 
 <dtml-var js_slot>
+
 <script>
-  function campos_criticar(form){
+  // Função para validação do upload de arquivo
+  function campos_criticar(form) {
     if (document.getElementById("file_nom_arquivo").value == "") {
-       bootstrap.showModal({title: "Mensagem do Sistema", body: "É necessário selecionar um arquivo!"});    
-       form.file_nom_arquivo.focus();
-       return false;
+      bootstrap.showModal({
+        title: "Mensagem do Sistema", 
+        body: "É necessário selecionar um arquivo!"
+      });    
+      form.file_nom_arquivo.focus();
+      return false;
     }
-      form.submit();
+    form.submit();
   }
 
-  $(document).ready(function() {    
-    var options = {
+  // Configuração geral quando o DOM estiver pronto
+  document.addEventListener('DOMContentLoaded', function() {
+    // Configuração do popover de criação de processo
+    const form = document.getElementById('myform');
+    const btnCriar = document.getElementById('btnCriar');
+    
+    // Cria o modal de confirmação dinamicamente com configurações acessíveis
+    const confirmationModal = `
+      <div class="modal fade" id="confirmationModal" tabindex="-1" aria-labelledby="confirmationModalLabel" aria-modal="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="confirmationModalLabel">Confirmação</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body">
+              Confirma a criação do processo administrativo?
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+              <button type="button" class="btn btn-primary" id="confirmSubmit" data-bs-dismiss="modal">Confirmar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+    
+    // Adiciona o modal ao body
+    document.body.insertAdjacentHTML('beforeend', confirmationModal);
+    const modal = new bootstrap.Modal(document.getElementById('confirmationModal'));
+
+    if (btnCriar && form) {
+      const popover = new bootstrap.Popover(btnCriar, {
         html: true,
-        title: "Unidade de Destino",
-        content: $('[data-name="PopoverContent"]')       
+        title: "Tramitação Inicial",
+        content: document.querySelector('[data-name="PopoverContent"]'),
+        container: 'body'
+      });
+
+      // Variável para controlar a submissão
+      let shouldSubmit = false;
+
+      // Manipulador de submit personalizado para o formulário de criação
+      form.addEventListener('submit', function(event) {
+        if (!shouldSubmit) {
+          event.preventDefault();
+          event.stopPropagation();
+
+          // Valida o formulário
+          form.classList.add('was-validated');
+          
+          if (!form.checkValidity()) {
+            return false;
+          }
+
+          // Mostra o modal de confirmação
+          modal.show();
+        }
+      });
+
+      // Configura o botão de confirmação do modal
+      document.getElementById('confirmSubmit').addEventListener('click', function() {
+        shouldSubmit = true;
+        form.requestSubmit(); // Método moderno para submissão programática
+        shouldSubmit = false;
+      });
+
+      // Fechar popover ao clicar fora
+      document.addEventListener('click', function(e) {
+        if (e.target !== btnCriar && !e.target.closest('.popover') && 
+            !e.target.closest('#PopoverContent')) {
+          popover.hide();
+        }
+      });
     }
-    var exampleEl = document.getElementById('btnCriar')
-    var popover = new bootstrap.Popover(exampleEl, options)
-  })
+  });
+
+<dtml-if expr="tip_processo==0">
+$(document).ready(function(){
+        var unid_origem = <dtml-var cod_unid_tram_local missing>;
+        $.ajax({
+            url: '<dtml-var portal_url>/cadastros/tramitacao_documento/unidades_carregar_pysc',
+            type: 'post',
+            data: {svalue:unid_origem},
+            dataType: 'json',
+            success:function(response){
+                var len = response.length;
+                $("#lst_cod_unid_tram_dest").empty();
+                $("#lst_cod_usuario_dest").empty();                                
+                for( var i = 0; i<len; i++){
+                    var id = response[i]['id'];
+                    var name = response[i]['name'];
+                    $("#lst_cod_unid_tram_dest").append("<option value='"+id+"'>"+name+"</option>");
+                }
+            }
+        });
+        $.ajax({
+            url: '<dtml-var portal_url>/cadastros/tramitacao_documento/status_carregar_pysc',
+            type: 'post',
+            data: {svalue:unid_origem},
+            dataType: 'json',
+            success:function(response){
+                var len = response.length;
+                $("#lst_cod_status").empty();
+                for( var i = 0; i<len; i++){
+                    var id = response[i]['id'];
+                    var name = response[i]['name'];
+                    $("#lst_cod_status").append("<option value='"+id+"'>"+name+"</option>");
+                }
+            }
+        }); 
+  
+});
+</dtml-if>
 
 </script>
+
 <dtml-var footer_html>

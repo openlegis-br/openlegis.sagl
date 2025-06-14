@@ -4,7 +4,7 @@
 ##bind namespace=
 ##bind script=script
 ##bind subpath=traverse_subpath
-##parameters=cod_protocolo, lst_cod_unid_tram_dest
+##parameters=cod_protocolo, lst_cod_status, lst_cod_unid_tram_dest
 ##title=
 ##
 
@@ -59,8 +59,7 @@ def criar_documento(tip_documento, num_documento, ano_documento, dat_documento, 
 def tramitar_documento(cod_documento, num_protocolo, ano_documento):
     cod_unid_tram_local = int(context.sapl_documentos.props_sagl.origem)
     cod_unid_tram_dest = int(lst_cod_unid_tram_dest)
-    for status in context.zsql.status_tramitacao_administrativo_obter_zsql(sgl_status='PRT'):
-        cod_status = status.cod_status
+    cod_status = int(lst_cod_status)
     for usuario in context.zsql.usuario_obter_zsql(col_username=REQUEST['AUTHENTICATED_USER'].getUserName()):
         if usuario.cod_usuario:
            cod_usuario_corrente = int(usuario.cod_usuario)

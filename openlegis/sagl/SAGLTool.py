@@ -1219,16 +1219,14 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
                         with pymupdf.open(stream=arquivo) as pdf_doc:
                             pdf_doc.bake()
                             merger.insert_pdf(pdf_doc)
-                        self.sapl_documentos.administrativo.tramitacao.manage_delObjects(filename)
                     except Exception as e:
                         print(f"Erro ao processar arquivo {filename}: {e}")
             outputStream = BytesIO()
             merger.save(outputStream, linear=True)
             outputStream.seek(0)
             content = outputStream.getvalue()
-            self.sapl_documentos.administrativo.tramitacao.manage_addFile(
-                id=f"{cod_tramitacao}_tram.pdf", file=content, title="Tramitação de Processo Administrativo"
-            )
+            pdf = getattr(self.sapl_documentos.administrativo.tramitacao, f"{cod_tramitacao}_tram.pdf")
+            pdf.update_data(content)
             for tram in self.zsql.tramitacao_administrativo_obter_zsql(cod_tramitacao=cod_tramitacao, ind_excluido=0):
                 if self.zsql.documento_administrativo_pesquisar_publico_zsql(cod_documento=tram.cod_documento, ind_excluido=0):
                    pdf = getattr(self.sapl_documentos.administrativo.tramitacao, f"{cod_tramitacao}_tram.pdf")
@@ -1260,16 +1258,14 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
                         with pymupdf.open(stream=arquivo) as pdf_doc:
                             pdf_doc.bake()
                             merger.insert_pdf(pdf_doc)
-                        self.sapl_documentos.materia.tramitacao.manage_delObjects(filename)
                     except Exception as e:
                         print(f"Erro ao processar arquivo {filename}: {e}")
             outputStream = BytesIO()
             merger.save(outputStream, linear=True)
             outputStream.seek(0)
             content = outputStream.getvalue()
-            self.sapl_documentos.materia.tramitacao.manage_addFile(
-                id=f"{cod_tramitacao}_tram.pdf", file=content, title="Tramitação de Matéria Legislativa"
-            )
+            pdf = getattr(self.sapl_documentos.materia.tramitacao, f"{cod_tramitacao}_tram.pdf")
+            pdf.update_data(content)
         except Exception as e:
             print(f"Erro ao juntar arquivos PDF: {e}")
         finally:

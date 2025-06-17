@@ -1204,11 +1204,9 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
             cod_tramitacao: O código de tramitação do processo administrativo.
         """
         merger = pymupdf.open()
-        base_filename = str(cod_tramitacao) + "_tram"
-        filenames = [
-            f"{base_filename}.pdf",
-            f"{base_filename}_anexo1.pdf",
-        ]  # Lista de nomes de arquivos a serem processados
+        base_filename = f"{cod_tramitacao}_tram"
+        anexo_filename = f"{base_filename}_anexo1.pdf"
+        filenames = [f"{base_filename}.pdf", anexo_filename]
         try:
             for filename in filenames:
                 if hasattr(self.sapl_documentos.administrativo.tramitacao, filename):
@@ -1234,7 +1232,14 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         except Exception as e:
             print(f"Erro ao juntar arquivos PDF: {e}")
         finally:
+            if hasattr(self.sapl_documentos.administrativo.tramitacao, anexo_filename):
+                try:
+                    self.sapl_documentos.administrativo.tramitacao.manage_delObjects([anexo_filename])
+                    logger.info(f"Arquivo '{anexo_filename}' removido após junção.")
+                except Exception as e:
+                    logger.warning(f"Erro ao tentar remover '{anexo_filename}': {e}")
             merger.close()
+            logger.info(f"[Fim] Junção de PDFs da tramitação {cod_tramitacao} concluída com sucesso.")
 
     def tramitacao_materia_juntar(self, cod_tramitacao):
         """
@@ -1243,11 +1248,9 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
             cod_tramitacao: O código de tramitação da matéria legislativa.
         """
         merger = pymupdf.open()
-        base_filename = str(cod_tramitacao) + "_tram"
-        filenames = [
-            f"{base_filename}.pdf",
-            f"{base_filename}_anexo1.pdf",
-        ]  # Lista de nomes de arquivos a serem processados
+        base_filename = f"{cod_tramitacao}_tram"
+        anexo_filename = f"{base_filename}_anexo1.pdf"
+        filenames = [f"{base_filename}.pdf", anexo_filename]
         try:
             for filename in filenames:
                 if hasattr(self.sapl_documentos.materia.tramitacao, filename):
@@ -1269,7 +1272,14 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         except Exception as e:
             print(f"Erro ao juntar arquivos PDF: {e}")
         finally:
+            if hasattr(self.sapl_documentos.materia.tramitacao, anexo_filename):
+                try:
+                    self.sapl_documentos.materia.tramitacao.manage_delObjects([anexo_filename])
+                    logger.info(f"Arquivo '{anexo_filename}' removido após junção.")
+                except Exception as e:
+                    logger.warning(f"Erro ao tentar remover '{anexo_filename}': {e}")
             merger.close()
+            logger.info(f"[Fim] Junção de PDFs da tramitação {cod_tramitacao} concluída com sucesso.")
 
     def materias_expediente_gerar_ods(self, relatorio_dic, total_assuntos, parlamentares, nom_arquivo):
         try:

@@ -4,13 +4,13 @@ import re
 import logging
 import warnings
 import tempfile
+import os
 from io import BytesIO
 from PIL import Image
-from typing import Any,List, Optional, Dict, Union, BinaryIO, Generator, Tuple, Iterator
+from typing import Any, List, Optional, Dict, Union, BinaryIO, Iterator, Generator, Tuple
 from functools import lru_cache, wraps
 from contextlib import contextmanager
 from datetime import datetime, timedelta
-from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor, as_completed
 
 import fitz  # PyMuPDF
 import pikepdf
@@ -36,7 +36,6 @@ PNG_COMPRESSION_LEVEL = 6
 A4_PORTRAIT = (595, 842)
 A4_LANDSCAPE = (842, 595)
 DEFAULT_DPI = 300
-MAX_OCR_THREADS = 4
 
 PDFData = Union[bytes, bytearray]
 SignatureData = Dict[str, Any]
@@ -52,12 +51,6 @@ logging.basicConfig(
     ]
 )
 warnings.simplefilter("once", RuntimeWarning)
-
-# Set spawn method for multiprocessing
-from concurrent.futures import ThreadPoolExecutor
-import multiprocessing
-if multiprocessing.get_start_method(allow_none=True) is None:
-    multiprocessing.set_start_method("spawn")
 
 # ******************************************
 # EXCEPTIONS
@@ -475,39 +468,36 @@ class PDFUploadProcessorView(grok.View, PDFSignatureParser):
         temp_files = []
 
         try:
-            with ThreadPoolExecutor(max_workers=MAX_OCR_THREADS) as executor:
-                futures = []
-                for i, page in enumerate(doc):
-                    try:
-                        # Verifica se a página já tem texto legível
-                        texto_pagina = page.get_text()
-                        if texto_pagina.strip():  # Se contém texto, copia sem OCR
-                            novo_pdf.insert_pdf(doc, from_page=i, to_page=i)
-                            continue
-
-                        # Se NÃO contém texto, rasteriza e aplica OCR
-                        pix = page.get_pixmap(dpi=DEFAULT_DPI)
-                        temp_img = tempfile.NamedTemporaryFile(suffix='.png', delete=False)
-                        pix.save(temp_img.name)
-                        temp_files.append((temp_img.name, page.rect))
-                        futures.append(executor.submit(gerar_ocr_pdf, temp_img.name))
-
-                    except Exception as e:
-                        logging.warning(f"Página {i+1} falhou: {str(e)}")
+            for i, page in enumerate(doc):
+                try:
+                    # Verifica se a página já tem texto legível
+                    texto_pagina = page.get_text()
+                    if texto_pagina.strip():  # Se contém texto, copia sem OCR
                         novo_pdf.insert_pdf(doc, from_page=i, to_page=i)
+                        continue
 
-                # Processa OCR apenas para páginas sem texto
-                for (img_path, rect), future in zip(temp_files, as_completed(futures)):
+                    # Se NÃO contém texto, rasteriza e aplica OCR
+                    pix = page.get_pixmap(dpi=DEFAULT_DPI)
+                    temp_img = tempfile.NamedTemporaryFile(suffix='.png', delete=False)
+                    pix.save(temp_img.name)
+                    temp_files.append((temp_img.name, page.rect))
+
+                    # Processa OCR para a página atual
                     try:
-                        ocr_pdf = future.result()
-                        new_page = novo_pdf.new_page(width=rect.width, height=rect.height)
-                        new_page.insert_image(rect, filename=img_path)
+                        ocr_pdf = gerar_ocr_pdf(temp_img.name)
+                        new_page = novo_pdf.new_page(width=page.rect.width, height=page.rect.height)
+                        new_page.insert_image(page.rect, filename=temp_img.name)
                         
                         if ocr_pdf:
                             with fitz.open(stream=ocr_pdf, filetype="pdf") as ocr_doc:
-                                new_page.show_pdf_page(rect, ocr_doc, 0, overlay=True)
+                                new_page.show_pdf_page(page.rect, ocr_doc, 0, overlay=True)
                     except Exception as e:
-                        logging.warning(f"OCR falhou: {str(e)}")
+                        logging.warning(f"OCR falhou para página {i+1}: {str(e)}")
+                        novo_pdf.insert_pdf(doc, from_page=i, to_page=i)
+
+                except Exception as e:
+                    logging.warning(f"Página {i+1} falhou: {str(e)}")
+                    novo_pdf.insert_pdf(doc, from_page=i, to_page=i)
 
             output = BytesIO()
             novo_pdf.save(output, garbage=4, deflate=True, clean=True)

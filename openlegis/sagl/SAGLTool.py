@@ -1203,38 +1203,65 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         anexo_filename = f"{base_filename}_anexo1.pdf"
         filenames = [f"{base_filename}.pdf", anexo_filename]
         try:
+            logger.info(f"[Início] Processo de junção de PDFs para tramitação {cod_tramitacao}")
             for filename in filenames:
-                if hasattr(self.sapl_documentos.administrativo.tramitacao, filename):
+                try:
+                    # Verifica se o arquivo existe no sistema
+                    if not hasattr(self.sapl_documentos.administrativo.tramitacao, filename):
+                        logger.warning(f"Arquivo {filename} não encontrado no sistema")
+                        continue
+                    logger.info(f"Tentando acessar o arquivo {filename}")
+                    arq = getattr(self.sapl_documentos.administrativo.tramitacao, filename)
+                    # Verifica se conseguiu acessar o conteúdo do arquivo
+                    if not hasattr(arq, 'data'):
+                        logger.error(f"Arquivo {filename} não possui atributo 'data'")
+                        continue
+                    logger.info(f"Arquivo {filename} acessado com sucesso, tamanho: {len(arq.data)} bytes")
+                    arquivo = BytesIO(bytes(arq.data))
+                    arquivo.seek(0)
+                    # Tenta abrir o PDF com pymupdf
                     try:
-                        arq = getattr(self.sapl_documentos.administrativo.tramitacao, filename)
-                        arquivo = BytesIO(bytes(arq.data))
-                        arquivo.seek(0)
+                        logger.info(f"Tentando abrir {filename} com PyMuPDF")
                         with pymupdf.open(stream=arquivo) as pdf_doc:
+                            logger.info(f"Arquivo {filename} aberto com sucesso - Páginas: {pdf_doc.page_count}")
                             pdf_doc.bake()
                             merger.insert_pdf(pdf_doc)
+                            logger.info(f"Arquivo {filename} inserido no merger com sucesso")
                     except Exception as e:
-                        print(f"Erro ao processar arquivo {filename}: {e}")
+                        logger.error(f"Falha ao processar arquivo {filename} com PyMuPDF: {str(e)}")
+                        continue
+                except Exception as e:
+                    logger.error(f"Erro inesperado ao processar arquivo {filename}: {str(e)}")
+                    continue
+            # Processamento do PDF mesclado
+            logger.info("Salvando PDF mesclado...")
             outputStream = BytesIO()
-            merger.save(outputStream, linear=True)
+            merger.save(outputStream)
             outputStream.seek(0)
             content = outputStream.getvalue()
+            logger.info(f"Tamanho do PDF mesclado: {len(content)} bytes")
+            # Atualiza o arquivo principal
             pdf = getattr(self.sapl_documentos.administrativo.tramitacao, f"{cod_tramitacao}_tram.pdf")
             pdf.update_data(content)
+            logger.info("PDF mesclado atualizado no sistema")
+            # Configura permissões se for documento público
             for tram in self.zsql.tramitacao_administrativo_obter_zsql(cod_tramitacao=cod_tramitacao, ind_excluido=0):
                 if self.zsql.documento_administrativo_pesquisar_publico_zsql(cod_documento=tram.cod_documento, ind_excluido=0):
-                   pdf = getattr(self.sapl_documentos.administrativo.tramitacao, f"{cod_tramitacao}_tram.pdf")
-                   pdf.manage_permission('View', roles=['Manager','Authenticated','Anonymous'], acquire=1)
+                    pdf = getattr(self.sapl_documentos.administrativo.tramitacao, f"{cod_tramitacao}_tram.pdf")
+                    pdf.manage_permission('View', roles=['Manager','Authenticated','Anonymous'], acquire=1)
+                    logger.info("Permissões atualizadas para documento público")
         except Exception as e:
-            print(f"Erro ao juntar arquivos PDF: {e}")
+            logger.error(f"Erro crítico durante o processo de junção: {str(e)}", exc_info=True)
+            raise
         finally:
-            if hasattr(self.sapl_documentos.administrativo.tramitacao, anexo_filename):
-                try:
+            try:
+                if hasattr(self.sapl_documentos.administrativo.tramitacao, anexo_filename):
                     self.sapl_documentos.administrativo.tramitacao.manage_delObjects([anexo_filename])
-                    logger.info(f"Arquivo '{anexo_filename}' removido após junção.")
-                except Exception as e:
-                    logger.warning(f"Erro ao tentar remover '{anexo_filename}': {e}")
+                    logger.info(f"Arquivo anexo {anexo_filename} removido com sucesso")
+            except Exception as e:
+                logger.error(f"Falha ao remover arquivo anexo: {str(e)}")
             merger.close()
-            logger.info(f"[Fim] Junção de PDFs da tramitação {cod_tramitacao} concluída com sucesso.")
+            logger.info(f"[Fim] Processo de junção concluído para tramitação {cod_tramitacao}")
 
     def tramitacao_materia_juntar(self, cod_tramitacao):
         merger = pymupdf.open()
@@ -1242,34 +1269,59 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         anexo_filename = f"{base_filename}_anexo1.pdf"
         filenames = [f"{base_filename}.pdf", anexo_filename]
         try:
+            logger.info(f"[Início] Processo de junção de PDFs para tramitação de matéria {cod_tramitacao}")
             for filename in filenames:
-                if hasattr(self.sapl_documentos.materia.tramitacao, filename):
+                try:
+                    # Verifica se o arquivo existe no sistema
+                    if not hasattr(self.sapl_documentos.materia.tramitacao, filename):
+                        logger.warning(f"Arquivo {filename} não encontrado no sistema de matérias")
+                        continue
+                    logger.info(f"Tentando acessar o arquivo {filename} no repositório de matérias")
+                    arq = getattr(self.sapl_documentos.materia.tramitacao, filename)
+                    # Verifica se conseguiu acessar o conteúdo do arquivo
+                    if not hasattr(arq, 'data'):
+                        logger.error(f"Arquivo {filename} não possui atributo 'data'")
+                        continue
+                    logger.info(f"Arquivo {filename} acessado com sucesso, tamanho: {len(arq.data)} bytes")
+                    arquivo = BytesIO(bytes(arq.data))
+                    arquivo.seek(0)
+                    # Tenta abrir o PDF com pymupdf
                     try:
-                        arq = getattr(self.sapl_documentos.materia.tramitacao, filename)
-                        arquivo = BytesIO(bytes(arq.data))
-                        arquivo.seek(0)
+                        logger.info(f"Tentando abrir {filename} com PyMuPDF")
                         with pymupdf.open(stream=arquivo) as pdf_doc:
+                            logger.info(f"Arquivo {filename} aberto com sucesso - Páginas: {pdf_doc.page_count}")
                             pdf_doc.bake()
                             merger.insert_pdf(pdf_doc)
+                            logger.info(f"Arquivo {filename} inserido no merger com sucesso")
                     except Exception as e:
-                        print(f"Erro ao processar arquivo {filename}: {e}")
+                        logger.error(f"Falha ao processar arquivo {filename} com PyMuPDF: {str(e)}")
+                        continue
+                except Exception as e:
+                    logger.error(f"Erro inesperado ao processar arquivo {filename}: {str(e)}")
+                    continue
+            # Processamento do PDF mesclado
+            logger.info("Salvando PDF mesclado...")
             outputStream = BytesIO()
-            merger.save(outputStream, linear=True)
+            merger.save(outputStream)
             outputStream.seek(0)
             content = outputStream.getvalue()
+            logger.info(f"Tamanho do PDF mesclado: {len(content)} bytes")
+            # Atualiza o arquivo principal
             pdf = getattr(self.sapl_documentos.materia.tramitacao, f"{cod_tramitacao}_tram.pdf")
             pdf.update_data(content)
+            logger.info("PDF mesclado atualizado no sistema de matérias")
         except Exception as e:
-            print(f"Erro ao juntar arquivos PDF: {e}")
+            logger.error(f"Erro crítico durante o processo de junção de matérias: {str(e)}", exc_info=True)
+            raise
         finally:
-            if hasattr(self.sapl_documentos.materia.tramitacao, anexo_filename):
-                try:
+            try:
+                if hasattr(self.sapl_documentos.materia.tramitacao, anexo_filename):
                     self.sapl_documentos.materia.tramitacao.manage_delObjects([anexo_filename])
-                    logger.info(f"Arquivo '{anexo_filename}' removido após junção.")
-                except Exception as e:
-                    logger.warning(f"Erro ao tentar remover '{anexo_filename}': {e}")
+                    logger.info(f"Arquivo anexo {anexo_filename} removido com sucesso do repositório de matérias")
+            except Exception as e:
+                logger.error(f"Falha ao remover arquivo anexo de matérias: {str(e)}")
             merger.close()
-            logger.info(f"[Fim] Junção de PDFs da tramitação {cod_tramitacao} concluída com sucesso.")
+            logger.info(f"[Fim] Processo de junção concluído para tramitação de matéria {cod_tramitacao}")
 
     def materias_expediente_gerar_ods(self, relatorio_dic, total_assuntos, parlamentares, nom_arquivo):
         try:

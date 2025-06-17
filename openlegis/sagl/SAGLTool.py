@@ -1198,11 +1198,6 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         doc.manage_permission('View', roles=['Manager','Authenticated'], acquire=0)
 
     def tramitacao_documento_juntar(self, cod_tramitacao):
-        """
-        Junta os arquivos PDF de tramitação de processo administrativo (principal e anexos) em um único arquivo.
-        Args:
-            cod_tramitacao: O código de tramitação do processo administrativo.
-        """
         merger = pymupdf.open()
         base_filename = f"{cod_tramitacao}_tram"
         anexo_filename = f"{base_filename}_anexo1.pdf"
@@ -1242,11 +1237,6 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
             logger.info(f"[Fim] Junção de PDFs da tramitação {cod_tramitacao} concluída com sucesso.")
 
     def tramitacao_materia_juntar(self, cod_tramitacao):
-        """
-        Junta os arquivos PDF de tramitação de matéria (principal e anexos) em um único arquivo.
-        Args:
-            cod_tramitacao: O código de tramitação da matéria legislativa.
-        """
         merger = pymupdf.open()
         base_filename = f"{cod_tramitacao}_tram"
         anexo_filename = f"{base_filename}_anexo1.pdf"

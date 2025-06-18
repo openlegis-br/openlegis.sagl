@@ -361,8 +361,8 @@ class PDFUploadProcessorView(grok.View, PDFSignatureParser):
             # 2. Verificação de assinaturas
             assinaturas = self._verificar_assinaturas(original_data)
             if assinaturas:
-                logging.info("PDF assinado - mantendo original")
-                result_data = original_data
+                logging.warning("Assinaturas digitais detectadas (%d)", len(assinaturas))
+                return {'file_stream': BytesIO(original_data), 'signatures': assinaturas}
             else:
                 # 3. Otimização principal
                 result_data = self._otimizar_pdf(original_data)

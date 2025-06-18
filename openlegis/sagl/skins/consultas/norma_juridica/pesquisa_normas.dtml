@@ -1,0 +1,1070 @@
+<dtml-var header_html>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.bootstrap5.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/shepherd.js@10.0.1/dist/css/shepherd.css">
+
+<style>
+.filter-toggle-icon {
+    transition: transform 0.35s ease-in-out;
+    display: inline-block;
+}
+.filter-toggle-icon.expanded {
+    transform: rotate(90deg);
+}
+.ts-dropdown .optgroup-header {
+    font-weight: bold;
+    font-size: 0.9em;
+    padding-top: 8px;
+    padding-bottom: 2px;
+    background-color: #f8f9fa;
+}
+.skeleton-loading {
+    animation: skeleton-loading 1.5s infinite ease-in-out;
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+}
+@keyframes skeleton-loading {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+.skeleton-row {
+    height: 38px;
+    margin-bottom: 8px;
+    border-radius: 4px;
+}
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+}
+[aria-busy="true"] {
+    opacity: 0.7;
+    cursor: progress;
+}
+.filter-badge {
+    display: inline-flex;
+    align-items: center;
+    margin-right: 8px;
+    margin-bottom: 8px;
+    padding: .35em .65em;
+    font-size: .875em;
+    font-weight: 500;
+    line-height: 1;
+    color: #333;
+    background-color: #e2e6ea;
+    border-radius: .25rem;
+}
+.filter-badge .btn-close {
+    font-size: .65em;
+    margin-left: .5em;
+    opacity: .75;
+}
+.filter-badge .btn-close:hover {
+    opacity: 1;
+}
+.sortable-header {
+    cursor: pointer;
+    position: relative;
+    padding-right: 20px;
+    white-space: nowrap;
+}
+.sortable-header:hover {
+    color: #44a2d2;
+}
+.sortable-header::after {
+    content: '';
+    position: absolute;
+    right: 5px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    opacity: 0.4;
+}
+.sortable-header.asc::after {
+    border-bottom: 5px solid black;
+    opacity: 1;
+}
+.sortable-header.desc::after {
+    border-top: 5px solid black;
+    opacity: 1;
+}
+.toast-container {
+    right: 1rem;
+    z-index: 1;
+}
+.card-view-container {
+    display: grid;
+    gap: 15px;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    margin-top: 15px;
+}
+.card-norma {
+    border: 1px solid #e0e0e0;
+    border-radius: 0.25rem;
+    padding: 15px;
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+}
+.card-norma .card-header-custom {
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+    font-size: 1.1em;
+    color: #44a2d2;
+    transition: color 0.2s ease-in-out;
+    line-height: 1.3;
+}
+.card-norma a.card-header-custom:hover {
+    color: #2a7da2;
+    text-decoration: underline;
+}
+.card-norma .card-author {
+    font-size: 0.9em;
+    font-weight: 500;
+    padding: 5px 0;
+    margin-bottom: 5px;
+    border-bottom: 1px solid #f0f0f0;
+    display: flex;
+    align-items: center;
+}
+.card-norma .card-body-custom {
+    font-size: 0.9em;
+    margin-bottom: 10px;
+    flex-grow: 1;
+}
+.card-norma .card-meta-custom {
+    font-size: 0.85em;
+    color: #6c757d;
+    margin-bottom: 5px;
+    display: flex;
+    align-items: center;
+}
+.card-norma .card-actions-custom {
+    margin-top: auto;
+    text-align: right;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    justify-content: flex-end;
+}
+mark {
+    background-color: #FFEB3B;
+    padding: 0.1em 0.2em;
+    border-radius: 3px;
+}
+.timeline {
+    position: relative;
+    padding-left: 30px;
+    border-left: 2px solid #e0e0e0;
+}
+.timeline-item {
+    position: relative;
+    margin-bottom: 25px;
+}
+.timeline-dot {
+    position: absolute;
+    left: -40px;
+    top: 5px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background-color: #ccc;
+    border: 3px solid #fff;
+    box-shadow: 0 0 0 2px #ccc;
+}
+.timeline-item.concluido .timeline-dot {
+    background-color: #28a745;
+    box-shadow: 0 0 0 2px #28a745;
+}
+.timeline-item.atual .timeline-dot {
+    background-color: #0d6efd;
+    box-shadow: 0 0 0 2px #0d6efd;
+    transform: scale(1.2);
+}
+.timeline-content {
+    position: relative;
+    top: -5px;
+}
+.timeline-date {
+    font-size: 0.85em;
+    color: #6c757d;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+.timeline-title {
+    font-size: 1.1em;
+    margin-bottom: 8px;
+}
+.timeline-item.atual .timeline-title {
+    color: #0d6efd;
+}
+.timeline-text {
+    font-size: 0.9em;
+    color: #343a40;
+    margin-bottom: 0;
+}
+#form-pesquisa .card-body {
+    padding: 1.5rem;
+}
+#form-pesquisa .card-body h5 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #dee2e6;
+}
+#resultados table .celula-titulo-norma {
+    font-weight: 600;
+    color: #343a40;
+    font-size: 0.95em;
+    vertical-align: middle;
+}
+/* Shepherd Tour Styles */
+.shepherd-theme-custom .shepherd-header {
+    background-color: #44a2d2;
+    color: white;
+    padding: 0.8rem;
+    border-radius: 5px 5px 0 0;
+}
+.shepherd-theme-custom .shepherd-text {
+    color: #333;
+    padding: 1rem;
+    font-size: 0.95rem;
+}
+.shepherd-theme-custom .shepherd-footer {
+    padding: 0 1rem 1rem;
+}
+.shepherd-theme-custom .shepherd-button {
+    background: #44a2d2;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    margin: 0 0.5rem;
+    border-radius: 3px;
+    transition: background 0.3s;
+}
+.shepherd-theme-custom .shepherd-button:hover {
+    background: #2a7da2;
+}
+.shepherd-theme-custom .shepherd-button.shepherd-button-secondary {
+    background: #f8f9fa;
+    color: #333;
+}
+.shepherd-theme-custom .shepherd-cancel-icon {
+    color: white;
+}
+/* Help Button */
+#btn-ajuda-tour {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+</style>
+
+<div class="toast-container position-fixed top-0 end-0 p-3">
+    <div class="toast" id="filter-cleared-toast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header">
+            <i class="fa fa-info-circle text-info me-2"></i>
+            <strong class="me-auto">Informação</strong>
+            <small>Agora</small>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Fechar"></button>
+        </div>
+        <div class="toast-body">
+            Filtros limpos com sucesso!
+        </div>
+    </div>
+</div>
+
+<h1 class="firstHeading font-size-18">Pesquisa de Normas Jurídicas</h1>
+<div class="d-grid gap-2 mb-3">
+    <button class="btn btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#filtro-container" aria-expanded="false" id="btn-toggle-filtros" style="display: none;">
+        <i class="fa fa-filter me-2"></i> Mostrar / Editar Filtros
+    </button>
+</div>
+
+<form method="get" action="<dtml-var portal_url>/normas_table_json" id="form-pesquisa" autocomplete="off">
+  <input type="hidden" name="formato" value="" id="formato">
+  <input type="hidden" name="pagina" value="1" id="pagina">
+  <input type="hidden" name="ordem_campo" value="" id="ordem_campo">
+  <input type="hidden" name="ordem_direcao" value="" id="ordem_direcao">
+  <div class="collapse show" id="filtro-container">
+    <div class="card card-body bg-light mb-3">
+      <h5>Filtros Básicos</h5>
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label for="lst_tip_norma" class="form-label form-label-sm mb-1">Tipo de Norma:</label>
+          <select name="lst_tip_norma" id="lst_tip_norma" class="form-control form-control-sm" multiple placeholder="Selecione..."></select>
+        </div>
+        <div class="col-md-3">
+          <label for="txt_numero" class="form-label form-label-sm mb-1">Número:</label>
+          <input type="text" name="txt_numero" id="txt_numero" class="form-control form-control-sm" placeholder="Ex: 123">
+        </div>
+        <div class="col-md-3">
+          <label for="txt_ano" class="form-label form-label-sm mb-1">Ano:</label>
+          <input type="text" name="txt_ano" id="txt_ano" class="form-control form-control-sm" placeholder="Ex: 2024">
+        </div>
+      </div>
+      <div class="row g-3 mt-3">
+        <div class="col-md-4">
+          <label for="lst_tip_situacao_norma" class="form-label form-label-sm mb-1">Situação:</label>
+          <select name="lst_tip_situacao_norma" id="lst_tip_situacao_norma" class="form-control form-control-sm" placeholder="Situação..."></select>
+        </div>
+        <div class="col-md-8">
+          <label for="txt_assunto" class="form-label form-label-sm mb-1">Assunto ou Ementa:</label>
+          <input type="text" name="txt_assunto" id="txt_assunto" class="form-control form-control-sm" placeholder="Digite palavras-chave para buscar...">
+          <div class="form-check form-switch mt-1">
+            <input type="checkbox" class="form-check-input" name="chk_textual" id="chk_textual" value="on">
+            <label class="form-check-label" for="chk_textual">Pesquisar nos Textos Integrais</label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <button type="button" class="btn btn-link py-0" data-bs-toggle="collapse" data-bs-target="#advancedSearch" aria-expanded="false" aria-controls="advancedSearch">
+                <i class="fas fa-chevron-right filter-toggle-icon me-2"></i>Filtros Avançados
+                <span id="badge-filtros" class="badge bg-secondary ms-1"
+                      data-bs-toggle="tooltip" data-bs-placement="top" title="Nenhum filtro ativo">
+                    0
+                </span>
+            </button>
+        </div>
+    </div>
+
+    <div id="advancedSearch" class="collapse">
+      <div class="card card-body bg-light mt-3">
+        <h5>Filtros Detalhados</h5>
+        <div class="row g-3">
+          <div class="col-md-4">
+            <label for="lst_assunto_norma" class="form-label form-label-sm mb-1">Assunto / Classificação:</label>
+            <select name="lst_assunto_norma" id="lst_assunto_norma" class="form-control form-control-sm" multiple placeholder="Selecione..."></select>
+          </div>
+          <div class="col-md-2">
+            <label for="dt_norma" class="form-label form-label-sm mb-1">Data Inicial da Norma:</label>
+            <input type="text" name="dt_norma" id="dt_norma" class="form-control form-control-sm flatpickr" placeholder="dd/mm/aaaa">
+          </div>
+          <div class="col-md-2">
+            <label for="dt_norma2" class="form-label form-label-sm mb-1">Data Final da Norma:</label>
+            <input type="text" name="dt_norma2" id="dt_norma2" class="form-control form-control-sm flatpickr" placeholder="dd/mm/aaaa">
+          </div>
+          <div class="col-md-2">
+            <label for="dt_public" class="form-label form-label-sm mb-1">Publicação Inicial:</label>
+            <input type="text" name="dt_public" id="dt_public" class="form-control form-control-sm flatpickr" placeholder="dd/mm/aaaa">
+          </div>
+          <div class="col-md-2">
+            <label for="dt_public2" class="form-label form-label-sm mb-1">Publicação Final:</label>
+            <input type="text" name="dt_public2" id="dt_public2" class="form-control form-control-sm flatpickr" placeholder="dd/mm/aaaa">
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <label class="mb-1">Ordenação Padrão:</label><br>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="rd_ordem" id="rd_ordem_1" value="1" checked>
+                <label class="form-check-label" for="rd_ordem_1">Mais Recentes Primeiro</label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="rd_ordem" id="rd_ordem_0" value="0">
+                <label class="form-check-label" for="rd_ordem_0">Mais Antigos Primeiro</label>
+            </div>
+        </div>
+        <div class="col-md-6 text-center text-md-end mt-3 mt-md-0">
+            <button type="submit" class="btn btn-primary" id="btn-pesquisar">
+                <i class="fa fa-search"></i> Pesquisar
+            </button>
+            <button type="button" class="btn btn-outline-primary ms-2" id="btn-limpar" style="display: none;">
+                <i class="fa fa-times"></i> Limpar
+            </button>
+        </div>
+    </div>
+</div>
+</form>
+
+<div id="resumo-filtros" class="mt-3"></div>
+<div id="container-principal-resultados" class="mt-4" style="display: none;">
+    <ul class="nav nav-tabs" id="resultado-tabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="lista-tab" data-bs-toggle="tab" data-bs-target="#resultados-pane" type="button" role="tab" aria-controls="resultados-pane" aria-selected="true">
+                <i class="fa fa-list me-2"></i>Resultados
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="grafico-tab" data-bs-toggle="tab" data-bs-target="#grafico-pane" type="button" role="tab" aria-controls="grafico-pane" aria-selected="false">
+                <i class="fa fa-chart-bar me-2"></i>Resumo Gráfico
+            </button>
+        </li>
+    </ul>
+    <div class="tab-content" id="resultado-tabs-content">
+        <div class="tab-pane fade show active" id="resultados-pane" role="tabpanel" aria-labelledby="lista-tab">
+            <div id="resultados" class="pt-3" aria-live="polite"></div>
+        </div>
+        <div class="tab-pane fade" id="grafico-pane" role="tabpanel" aria-labelledby="grafico-tab">
+            <div id="resumo-estatistico" class="p-3">
+                <div style="max-width: 800px; margin: auto;">
+                    <canvas id="stats-chart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="painel-sem-resultados" class="mt-4"></div>
+
+<!-- Botão de Ajuda Flutuante -->
+<button id="btn-ajuda-tour" class="btn btn-info" title="Ajuda / Tutorial">
+    <i class="fa fa-question"></i>
+</button>
+
+<dtml-var js_slot>
+
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/pt.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/shepherd.js@10.0.1/dist/js/shepherd.min.js"></script>
+
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', function () {
+    const form = document.getElementById('form-pesquisa');
+    const pesquisarBtn = document.getElementById('btn-pesquisar');
+    const limparBtn = document.getElementById('btn-limpar');
+    const resumoFiltrosDiv = document.getElementById('resumo-filtros');
+    const advancedSearchDiv = document.getElementById('advancedSearch');
+    const filtroContainer = document.getElementById('filtro-container');
+    const btnToggleFiltros = document.getElementById('btn-toggle-filtros');
+    const badgeFiltros = document.getElementById('badge-filtros');
+    const filterClearedToastEl = document.getElementById('filter-cleared-toast');
+    let filterClearedToast = null;
+    let advancedFiltersLoaded = false;
+    let itensPorPaginaSelect = null;
+    let statsChartInstance = null;
+    let currentViewMode = localStorage.getItem('normaViewMode') || 'cards';
+    let searchStarted = false;
+
+    // Carregar selects com TomSelect
+    const selectsTomSelect = ['lst_tip_norma', 'lst_tip_situacao_norma', 'lst_assunto_norma'];
+    let tomselectsProntos = 0;
+    
+    function aguardarTomSelectsProntos(callback) {
+        let aguardando = selectsTomSelect.length;
+        selectsTomSelect.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.addEventListener('tomselect:load', function handler() {
+                    aguardando--;
+                    el.removeEventListener('tomselect:load', handler);
+                    if (aguardando === 0) callback();
+                });
+            } else {
+                aguardando--;
+                if (aguardando === 0) callback();
+            }
+        });
+    }
+
+    function carregarSelect(endpoint, selector, placeholder) {
+        const el = document.querySelector(selector);
+        if (!el) return;
+        const tom = new TomSelect(el, {
+            valueField: 'id', labelField: 'descricao', searchField: 'descricao',
+            placeholder, plugins: ['clear_button', 'remove_button'], maxOptions: null,
+        });
+        tom.disable();
+        fetch(endpoint).then(r => r.json()).then(data => {
+            tom.clear(); tom.clearOptions(); tom.addOptions(data); tom.enable();
+            tom.settings.placeholder = placeholder; tom.sync();
+            el.dispatchEvent(new CustomEvent('tomselect:load', { bubbles: true }));
+        }).catch(() => { tom.settings.placeholder = 'Erro ao carregar!'; tom.sync(); });
+    }
+    carregarSelect('tipos_norma_json', '#lst_tip_norma', 'Selecione um ou mais tipos...');
+    carregarSelect('situacoes_norma_json', '#lst_tip_situacao_norma', 'Selecione a situação...');
+    carregarSelect('assuntos_norma_json', '#lst_assunto_norma', 'Selecione os assuntos...');
+
+    // Inicializar datepickers
+    flatpickr('.flatpickr', { locale: 'pt', dateFormat: "d/m/Y" });
+
+    // Configurar collapse dos filtros
+    let bsCollapseFiltros = filtroContainer ? new bootstrap.Collapse(filtroContainer, {toggle: false}) : null;
+    if (filtroContainer && btnToggleFiltros) {
+        filtroContainer.addEventListener('hide.bs.collapse', e => { if (e.target === filtroContainer) btnToggleFiltros.style.display = 'block'; });
+        filtroContainer.addEventListener('show.bs.collapse', e => { if (e.target === filtroContainer) btnToggleFiltros.style.display = 'none'; });
+    }
+
+    // Funções auxiliares
+    function sanitizeHTML(str) {
+        if (!str) return '';
+        const temp = document.createElement('div');
+        temp.textContent = str;
+        return temp.innerHTML;
+    }
+
+    function highlightText(text, query) {
+        if (!query || !text) return text;
+        const escapeRegExp = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const terms = query.split(/\s+/).filter(Boolean).map(escapeRegExp);
+        if (!terms.length) return text;
+        const regex = new RegExp(`(${terms.join('|')})`, 'gi');
+        return text.replace(regex, '<mark>$1</mark>');
+    }
+
+    function showSkeletonLoading() {
+        const div = document.getElementById('resultados');
+        div.innerHTML = `<div class="skeleton-loading" style="height: 20px; width: 200px; margin-bottom: 15px;"></div>
+        <div class="table-responsive"><table class="table"><thead><tr><th></th><th></th><th></th><th></th><th></th></tr></thead>
+        <tbody>${Array(5).fill('<tr>'+Array(5).fill('<td><div class="skeleton-loading skeleton-row"></div></td>').join('')+'</tr>').join('')}</tbody></table></div>`;
+        div.setAttribute('aria-busy', 'true');
+    }
+
+    function renderStatsChart(statsData) {
+        const tabButton = document.querySelector('#grafico-tab');
+        if (!tabButton) return;
+        if (!statsData || Object.keys(statsData).length === 0) {
+            tabButton.parentElement.style.display = 'none';
+            if (statsChartInstance) statsChartInstance.destroy();
+            return;
+        }
+        tabButton.parentElement.style.display = 'block';
+        if (statsChartInstance) statsChartInstance.destroy();
+        const labels = Object.keys(statsData);
+        const dataValues = Object.values(statsData);
+        const ctx = document.getElementById('stats-chart').getContext('2d');
+        statsChartInstance = new Chart(ctx, {
+            type: 'bar',
+            data: { labels, datasets: [{ label: 'Quantidade', data: dataValues, backgroundColor: 'rgba(68, 162, 210, 0.6)', borderColor: 'rgba(68, 162, 210, 1)', borderWidth: 1 }] },
+            options: { indexAxis: 'y', responsive: true, maintainAspectRatio: true,
+                plugins: { legend: { display: false }, title: { display: false } }, scales: { x: { beginAtZero: true } } }
+        });
+    }
+
+    function contarFiltrosAtivos() {
+        const formData = new FormData(form); let count = 0, tooltipContent = [];
+        const labels = {'lst_tip_norma':'Tipo','txt_numero':'Número','txt_ano':'Ano','txt_assunto':'Palavra-chave','lst_tip_situacao_norma':'Situação','lst_assunto_norma':'Assunto','dt_norma':'Data Inicial','dt_norma2':'Data Final','dt_public':'Publicação Ini.','dt_public2':'Publicação Fim.','chk_textual':'Texto integral'};
+        for (let [k,v] of formData.entries()) {
+            if (!v || ['formato','pagina','ordem_campo','ordem_direcao'].includes(k)) continue;
+            const el = form.elements[k];
+            if (el && el.tomselect && el.tomselect.items.length === 0) continue;
+            if (el && el.type === 'checkbox' && !el.checked) continue;
+            if (el && el.tagName === 'SELECT' && el.type === 'select-one' && el.value === '') continue;
+            count++; if (labels[k]) tooltipContent.push(labels[k]);
+        }
+        badgeFiltros.textContent = count;
+        badgeFiltros.setAttribute('title', tooltipContent.length ? "Filtros: "+tooltipContent.join(', ') : "Nenhum filtro ativo");
+    }
+
+    function mostrarResumoFiltros(formData) {
+        let filtrosAtivosBadges = [];
+        const labels = {'lst_tip_norma':'Tipo','txt_numero':'Número','txt_ano':'Ano','txt_assunto':'Palavra-chave','lst_tip_situacao_norma':'Situação','lst_assunto_norma':'Assunto','dt_norma':'Data Inicial','dt_norma2':'Data Final','dt_public':'Publicação Ini.','dt_public2':'Publicação Fim.','chk_textual':'Texto integral'};
+        const activeParams = new URLSearchParams(formData);
+        Object.keys(labels).forEach(key => {
+            let valorExibido = '', originalValue = '';
+            if (['dt_norma','dt_norma2','dt_public','dt_public2'].includes(key)) {
+                valorExibido = activeParams.get(key)||''; originalValue = valorExibido;
+            } else {
+                const el = form.elements[key];
+                if (el) {
+                    if (el.tomselect && el.tomselect.items.length > 0) {
+                        valorExibido = el.tomselect.items.map(item => el.tomselect.options[item].descricao).join(', ');
+                        originalValue = el.tomselect.getValue();
+                    } else if (el.type === 'checkbox' && el.checked) {
+                        valorExibido = 'Sim'; originalValue = '1';
+                    } else if (el.tagName === 'SELECT' && el.value !== '' && el.options[el.selectedIndex]) {
+                        valorExibido = el.options[el.selectedIndex].text; originalValue = el.value;
+                    } else if ((el.type === 'text' || el.type === 'number') && el.value.trim() !== '') {
+                        valorExibido = el.value.trim(); originalValue = el.value.trim();
+                    }
+                }
+            }
+            if (valorExibido) {
+                filtrosAtivosBadges.push(
+                    `<span class="filter-badge" data-filter-key="${key}" data-filter-value="${Array.isArray(originalValue)?originalValue.join(','):originalValue}">
+                        ${labels[key]}: <strong>${sanitizeHTML(valorExibido)}</strong>
+                        <button type="button" class="btn-close" aria-label="Remover filtro ${labels[key]}"></button>
+                    </span>`
+                );
+            }
+        });
+        if (filtrosAtivosBadges.length) {
+            resumoFiltrosDiv.innerHTML =
+                `<div class="alert alert-info py-2" role="status"><strong>Filtros Ativos:</strong> ${filtrosAtivosBadges.join('')}</div>`;
+        } else {
+            resumoFiltrosDiv.innerHTML =
+                `<div class="alert alert-secondary py-2" role="status"><em>Nenhum filtro foi aplicado. Todos os registros estão sendo exibidos.</em></div>`;
+        }
+        resumoFiltrosDiv.querySelectorAll('.filter-badge .btn-close').forEach(btn => btn.addEventListener('click', handleRemoveFilter));
+    }
+
+    function handleRemoveFilter(event) {
+        const badge = event.target.closest('.filter-badge');
+        if (!badge) return;
+        const keyToRemove = badge.dataset.filterKey;
+        const valueToRemove = badge.dataset.filterValue;
+        const element = form.elements[keyToRemove];
+        if (element) {
+            if (element.tomselect) element.tomselect.clear();
+            else if (element.type === 'text' || element.type === 'number') element.value = '';
+            else if (element.type === 'checkbox') element.checked = false;
+            else if (element.tagName === 'SELECT') element.value = '';
+        }
+        realizarBusca(1);
+    }
+
+    function actualizarURL(params) {
+        const queryString = params.toString();
+        const newUrl = queryString ? `${window.location.pathname}?${queryString}` : window.location.pathname;
+        window.history.pushState({ path: newUrl }, '', newUrl);
+    }
+
+    function renderizarErro(msg) {
+        const painelSemResultados = document.getElementById('painel-sem-resultados');
+        painelSemResultados.innerHTML = `<div class="alert alert-danger text-center" role="alert"><i class="fa fa-exclamation-triangle"></i> ${sanitizeHTML(msg)}</div>`;
+        painelSemResultados.style.display = 'block';
+    }
+
+    function renderizarResultados(data) {
+        const painelSemResultados = document.getElementById('painel-sem-resultados');
+        const containerPrincipal = document.getElementById('container-principal-resultados');
+        painelSemResultados.innerHTML = '';
+        painelSemResultados.style.display = 'none';
+        containerPrincipal.style.display = 'none';
+        if (!data || data.total === 0) {
+            painelSemResultados.innerHTML = `<div class="text-center p-4 p-md-5 bg-light rounded border">
+                <div class="mb-3"><i class="fa fa-search-minus fa-3x text-warning"></i></div>
+                <h4 class="fw-bold">Nenhum Registro Encontrado</h4>
+                <p class="text-muted mb-4">Não encontramos normas que correspondam aos filtros aplicados.</p>
+                <div class="mt-4">
+                    <button class="btn btn-primary btn-lg" id="btn-limpar-filtros-no-results">
+                        <i class="fa fa-times me-2"></i>Limpar Filtros e Tentar Novamente
+                    </button>
+                </div>
+            </div>`;
+            const btnLimparNoResults = document.getElementById('btn-limpar-filtros-no-results');
+            if (btnLimparNoResults && limparBtn) btnLimparNoResults.addEventListener('click', () => limparBtn.click());
+            painelSemResultados.style.display = 'block';
+            renderStatsChart(null);
+            return;
+        }
+        containerPrincipal.style.display = 'block';
+        renderStatsChart(data.stats);
+        const resultadosDiv = document.getElementById('resultados');
+        const { page, per_page, total } = data;
+        const inicioFaixa = (page - 1) * per_page + 1;
+        const fimFaixa = Math.min(page * per_page, total);
+        const termosBusca = document.getElementById('txt_assunto').value;
+        let html = `<div class="d-flex flex-column flex-md-row align-items-center mb-3">
+            <div class="form-group mb-2 mb-md-0 me-md-3">
+                <label for="itens_por_pagina" class="me-2">Itens por página:</label>
+                <select class="form-select form-select-sm d-inline-block w-auto" id="itens_por_pagina">
+                    <option value="10" ${per_page == 10 ? 'selected' : ''}>10</option>
+                    <option value="25" ${per_page == 25 ? 'selected' : ''}>25</option>
+                    <option value="50" ${per_page == 50 ? 'selected' : ''}>50</option>
+                    <option value="100" ${per_page == 100 ? 'selected' : ''}>100</option>
+                </select>
+            </div>
+            <div class="btn-group btn-group-sm mb-2 mb-md-0">
+                <button type="button" class="btn btn-outline-secondary ${currentViewMode === 'table' ? 'active' : ''}" id="btn-view-table" title="Tabela"><i class="fa fa-table"></i></button>
+                <button type="button" class="btn btn-outline-secondary ${currentViewMode === 'cards' ? 'active' : ''}" id="btn-view-cards" title="Cards"><i class="fa fa-th-large"></i></button>
+            </div>
+            <div class="btn-group btn-group-sm mb-2 mb-md-0 ms-md-3">
+                <button type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fa fa-download"></i> Exportar
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li><a class="dropdown-item btn-export" href="#" data-format="csv" data-paginar-exportacao="1"><i class="fa fa-file-csv text-muted"></i> CSV (página atual)</a></li>
+                    <li><a class="dropdown-item btn-export" href="#" data-format="excel" data-paginar-exportacao="1"><i class="fa fa-file-excel text-muted"></i> Excel (página atual)</a></li>
+                    <li><a class="dropdown-item btn-export" href="#" data-format="pdf" data-paginar-exportacao="1"><i class="fa fa-file-pdf text-muted"></i> PDF (página atual)</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item btn-export" href="#" data-format="csv" data-paginar-exportacao="0"><i class="fa fa-file-csv text-muted"></i> CSV (todas as páginas)</a></li>
+                    <li><a class="dropdown-item btn-export" href="#" data-format="excel" data-paginar-exportacao="0"><i class="fa fa-file-excel text-muted"></i> Excel (todas as páginas)</a></li>
+                    <li><a class="dropdown-item btn-export" href="#" data-format="pdf" data-paginar-exportacao="0"><i class="fa fa-file-pdf text-muted"></i> PDF (todas as páginas)</a></li>
+                </ul>
+            </div>
+            <p role="status" class="text-center text-md-end mb-0 ms-md-auto">Exibindo ${inicioFaixa}-${fimFaixa} de <strong>${total}</strong> registros.</p>
+        </div>`;
+        if (currentViewMode === 'table') {
+            html += `<div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th scope="col" class="sortable-header" data-sort-field="des_tipo_norma">Tipo</th>
+                            <th scope="col" class="sortable-header" data-sort-field="num_norma">Número</th>
+                            <th scope="col" class="sortable-header" data-sort-field="ano_norma">Ano</th>
+                            <th scope="col" class="sortable-header" data-sort-field="dat_norma">Data Norma</th>
+                            <th scope="col" class="sortable-header" data-sort-field="txt_ementa">Ementa</th>
+                            <th scope="col">Situação</th>
+                            <th scope="col">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>`;
+            data.data.forEach(norma => {
+                html += `<tr>
+                    <td>${sanitizeHTML(norma.des_tipo_norma||'')}</td>
+                    <td>${sanitizeHTML(norma.num_norma||'')}</td>
+                    <td>${sanitizeHTML(norma.ano_norma||'')}</td>
+                    <td>${sanitizeHTML(norma.dat_norma||'')}</td>
+                    <td>${highlightText(sanitizeHTML(norma.txt_ementa||''), termosBusca)}</td>
+                    <td>${sanitizeHTML(norma.situacao||'')}</td>
+                    <td>
+                        <a href="${norma.detail_url||'#'}" class="btn btn-sm btn-outline-primary" title="Detalhes"><i class="fa fa-eye"></i></a>
+                        ${norma.url_texto_integral?`<a href="${norma.url_texto_integral}" class="btn btn-sm btn-outline-primary" target="_blank" title="Texto Integral"><i class="far fa-file-pdf"></i></a>`:''}
+                    </td>
+                </tr>`;
+            });
+            html += '</tbody></table></div>';
+        } else {
+            html += `<div class="card-view-container mb-3">`;
+            data.data.forEach(norma => {
+html += `<div class="card-norma">
+    <a href="${norma.detail_url||'#'}" class="card-header-custom text-decoration-none">
+        ${sanitizeHTML(norma.des_tipo_norma||'')} ${sanitizeHTML(norma.num_norma||'')}/${sanitizeHTML(norma.ano_norma||'')}
+    </a>
+    <div class="card-meta-custom">
+        <i class="fa fa-calendar-alt fa-fw me-2 text-muted"></i>
+        <span>${sanitizeHTML(norma.dat_norma||'')}</span>
+        <span class="ms-2"><i class="fa fa-bullhorn fa-fw me-2 text-muted"></i>${sanitizeHTML(norma.situacao||'')}</span>
+    </div>
+    <div class="card-body-custom"><strong>Ementa:</strong> ${highlightText(sanitizeHTML(norma.txt_ementa||''), termosBusca)}</div>
+    ${norma.assunto ? `<div class="card-meta-custom"><i class="fa fa-tag fa-fw me-2 text-muted"></i>${sanitizeHTML(norma.assunto)}</div>` : ""}
+    <div class="card-actions-custom">
+        ${norma.url_texto_integral?`<a href="${norma.url_texto_integral}" class="btn btn-sm btn-outline-primary" target="_blank" title="Texto Integral"><i class="far fa-file-pdf"></i></a>`:''}
+    </div>
+</div>`;
+            });
+            html += `</div>`;
+        }
+        html += renderizarPaginacao(data);
+        resultadosDiv.innerHTML = html;
+        document.getElementById('btn-view-table').addEventListener('click', () => { currentViewMode='table'; localStorage.setItem('normaViewMode','table'); realizarBusca(page, itensPorPaginaSelect ? itensPorPaginaSelect.value : '10'); });
+        document.getElementById('btn-view-cards').addEventListener('click', () => { currentViewMode='cards'; localStorage.setItem('normaViewMode','cards'); realizarBusca(page, itensPorPaginaSelect ? itensPorPaginaSelect.value : '10'); });
+        itensPorPaginaSelect = document.getElementById('itens_por_pagina');
+        if(itensPorPaginaSelect) itensPorPaginaSelect.addEventListener('change', (e) => realizarBusca(1, e.target.value));
+        document.querySelectorAll('.sortable-header').forEach(h => h.addEventListener('click', handleColumnSort));
+        const navPaginacao = document.getElementById('nav-paginacao');
+        if (navPaginacao) navPaginacao.addEventListener('click', e => {
+            const pageLink = e.target.closest('a.page-link');
+            if (pageLink && pageLink.dataset.page && !pageLink.closest('.page-item.disabled')) {
+                e.preventDefault(); realizarBusca(parseInt(pageLink.dataset.page), itensPorPaginaSelect ? itensPorPaginaSelect.value : '10');
+            }
+        });
+        attachExportListeners();
+        const triggerEl = document.querySelector('#lista-tab');
+        bootstrap.Tab.getInstance(triggerEl)?.show() || new bootstrap.Tab(triggerEl).show();
+    }
+
+    function renderizarPaginacao(data) {
+        if (data.total_pages <= 1) return '';
+        let html = '<nav id="nav-paginacao" aria-label="Navegação de páginas"><ul class="pagination justify-content-center flex-wrap">';
+        html += `<li class="page-item ${!data.has_previous?'disabled':''}"><a class="page-link" href="#" data-page="${data.page-1}">&laquo;</a></li>`;
+        const maxPagesToShow = 5;
+        let startPage = Math.max(1, data.page - Math.floor(maxPagesToShow/2));
+        let endPage = Math.min(data.total_pages, startPage+maxPagesToShow-1);
+        if (endPage - startPage + 1 < maxPagesToShow) startPage = Math.max(1, endPage-maxPagesToShow+1);
+        if (startPage > 1) {
+            html += `<li class="page-item"><a class="page-link" href="#" data-page="1">1</a></li>`;
+            if (startPage > 2) html += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+        }
+        for (let i = startPage; i <= endPage; i++) {
+            html += `<li class="page-item ${i===data.page?'active':''}"><a class="page-link" href="#" data-page="${i}">${i}</a></li>`;
+        }
+        if (endPage < data.total_pages) {
+            if (endPage < data.total_pages-1) html += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+            html += `<li class="page-item"><a class="page-link" href="#" data-page="${data.total_pages}">${data.total_pages}</a></li>`;
+        }
+        html += `<li class="page-item ${!data.has_next?'disabled':''}"><a class="page-link" href="#" data-page="${data.page+1}">&raquo;</a></li></ul></nav>`;
+        return html;
+    }
+
+    function attachExportListeners() {
+        document.querySelectorAll('.btn-export').forEach(btn => {
+            btn.addEventListener('click', async function(e) {
+                e.preventDefault();
+                const params = new URLSearchParams(new FormData(form));
+                params.set('formato', this.dataset.format);
+                params.set('paginar_exportacao', this.dataset.paginarExportacao || '0');
+                if (this.dataset.paginarExportacao === '1') {
+                    params.set('pagina', document.getElementById('pagina').value || '1');
+                    params.set('itens_por_pagina', itensPorPaginaSelect ? itensPorPaginaSelect.value : '10');
+                } else {
+                    params.delete('pagina'); params.delete('itens_por_pagina');
+                }
+                window.open(`${form.getAttribute('action')}?${params.toString()}`, '_blank');
+            });
+        });
+    }
+
+    function handleColumnSort(event) {
+        const field = event.currentTarget.dataset.sortField;
+        if (!field) return;
+        let ordemCampoInput = document.getElementById('ordem_campo');
+        let ordemDirecaoInput = document.getElementById('ordem_direcao');
+        let direction = 'asc';
+        if (ordemCampoInput.value === field && ordemDirecaoInput.value === 'asc') direction = 'desc';
+        ordemCampoInput.value = field;
+        ordemDirecaoInput.value = direction;
+        realizarBusca(1);
+    }
+
+    // Configurar eventos do formulário
+    form.addEventListener('submit', e => { e.preventDefault(); realizarBusca(1); });
+    limparBtn.addEventListener('click', () => {
+        window.history.pushState({}, '', window.location.pathname);
+        form.reset();
+        document.querySelectorAll('select.form-control, select.form-select').forEach(el => { if (el.tomselect) el.tomselect.clear(); });
+        document.getElementById('ordem_campo').value = '';
+        document.getElementById('ordem_direcao').value = '';
+        if (itensPorPaginaSelect) itensPorPaginaSelect.value = '10';
+        document.getElementById('rd_ordem_1').checked = true;
+        document.getElementById('container-principal-resultados').style.display = 'none';
+        document.getElementById('painel-sem-resultados').innerHTML = '';
+        resumoFiltrosDiv.innerHTML = '';
+        limparBtn.style.display = 'none';
+        contarFiltrosAtivos();
+        if (filterClearedToast) filterClearedToast.show();
+        if (bsCollapseFiltros) bsCollapseFiltros.show();
+        btnToggleFiltros.style.display = 'none';
+        const initialMessageDiv = document.getElementById('painel-sem-resultados');
+        if(initialMessageDiv) initialMessageDiv.innerHTML = `<div class="alert alert-info text-center" role="status"><i class="fa fa-search fa-2x mb-2"></i><br>Utilize os filtros acima para encontrar normas.</div>`;
+        searchStarted = false;
+    });
+
+    // Inicializar toast
+    if (filterClearedToastEl) filterClearedToast = new bootstrap.Toast(filterClearedToastEl, { delay: 3000 });
+    [...document.querySelectorAll('[data-bs-toggle="tooltip"]')].map(el => new bootstrap.Tooltip(el));
+
+    // Eventos para filtros avançados
+    advancedSearchDiv.addEventListener('show.bs.collapse', function(){ if (!advancedFiltersLoaded) advancedFiltersLoaded = true; });
+
+    const toggleIcon = document.querySelector('.filter-toggle-icon');
+    if (advancedSearchDiv && toggleIcon) {
+        advancedSearchDiv.addEventListener('show.bs.collapse', function () { toggleIcon.classList.add('expanded'); });
+        advancedSearchDiv.addEventListener('hide.bs.collapse', function () { toggleIcon.classList.remove('expanded'); });
+    }
+
+    // Popular formulário a partir da URL
+    function popularFormPelaURL() {
+        const params = new URLSearchParams(window.location.search);
+        if (!params.toString()) return;
+        const uniqueKeys = [...new Set(params.keys())];
+        uniqueKeys.forEach(key => {
+            const el = form.elements[key];
+            if (el) {
+                if (el.tomselect) {
+                    let valueList = params.getAll(key);
+                    if (valueList.length === 0) {
+                        const raw = params.get(key);
+                        if (raw && raw.includes(',')) valueList = raw.split(',');
+                        else if (raw) valueList = [raw];
+                    }
+                    if (el.tomselect.options && Object.keys(el.tomselect.options).length > 0) {
+                        el.tomselect.setValue(valueList, true);
+                    } else {
+                        el.addEventListener('tomselect:load', function onceLoaded() {
+                            el.tomselect.setValue(valueList, true);
+                            el.removeEventListener('tomselect:load', onceLoaded);
+                        });
+                    }
+                }
+                else if (el.type === 'radio') {
+                    const radioWithValue = document.querySelector(`input[name="${key}"][value="${params.get(key)}"]`);
+                    if (radioWithValue) radioWithValue.checked = true;
+                }
+                else if (el.type === 'checkbox') {
+                    el.checked = (params.get(key) === 'on' || params.get(key) === '1');
+                }
+                else el.value = params.get(key);
+            }
+        });
+        document.getElementById('ordem_campo').value = params.get('ordem_campo') || '';
+        document.getElementById('ordem_direcao').value = params.get('ordem_direcao') || '';
+        contarFiltrosAtivos();
+        realizarBusca(parseInt(params.get('pagina') || '1', 10));
+    }
+
+    // Função principal de busca
+    async function realizarBusca(page=1, itensPorPaginaParam=null) {
+        if (!searchStarted) searchStarted = true;
+        if (bsCollapseFiltros) bsCollapseFiltros.hide();
+        const itensPorPaginaAtual = itensPorPaginaParam || (itensPorPaginaSelect ? itensPorPaginaSelect.value : '10');
+        document.getElementById('pagina').value = page;
+        pesquisarBtn.disabled = true;
+        pesquisarBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Buscando...';
+        pesquisarBtn.setAttribute('aria-busy', 'true');
+        showSkeletonLoading();
+        const params = new URLSearchParams(new FormData(form));
+        params.set('pagina', page);
+        params.set('itens_por_pagina', itensPorPaginaAtual);
+        actualizarURL(params);
+        mostrarResumoFiltros(new FormData(form));
+        try {
+            const response = await fetch(`normas_table_json?${params.toString()}`);
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.details || 'Falha na resposta do servidor.');
+            }
+            const data = await response.json();
+            renderizarResultados(data);
+            limparBtn.style.display = 'inline-block';
+        } catch (error) {
+            renderizarErro(error.message);
+        } finally {
+            pesquisarBtn.disabled = false;
+            pesquisarBtn.innerHTML = '<i class="fa fa-search"></i> Pesquisar';
+            pesquisarBtn.removeAttribute('aria-busy');
+            const resultadosDiv = document.getElementById('resultados');
+            if (resultadosDiv) resultadosDiv.removeAttribute('aria-busy');
+        }
+    }
+
+    // Inicialização da página
+    if (!window.location.search) {
+        document.getElementById('painel-sem-resultados').innerHTML = `<div class="alert alert-info text-center" role="status"><i class="fa fa-search fa-2x mb-2"></i><br>Utilize os filtros acima para encontrar normas.</div>`;
+    }
+
+    // ==================== TOUR GUIADO ====================
+    function iniciarTour() {
+        const tour = new Shepherd.Tour({
+            defaultStepOptions: {
+                cancelIcon: { enabled: true },
+                scrollTo: { behavior: 'smooth', block: 'center' },
+                classes: 'shepherd-theme-custom',
+                arrow: true
+            },
+            useModalOverlay: true,
+            tourName: 'PesquisaNormasTour'
+        });
+
+        // Passo 1: Introdução
+        tour.addStep({
+            title: 'Bem-vindo à Pesquisa de Normas Jurídicas!',
+            text: 'Este guia rápido vai te ajudar a usar os filtros e recursos da pesquisa.',
+            buttons: [
+                { text: 'Sair', action: tour.cancel },
+                { text: 'Próximo', action: tour.next }
+            ],
+            attachTo: {
+                element: '#form-pesquisa',
+                on: 'bottom'
+            }
+        });
+
+        // Passo 2: Filtros Básicos
+        tour.addStep({
+            title: 'Filtros Básicos',
+            text: 'Comece selecionando o tipo de norma, número, ano ou palavras-chave para encontrar o que precisa.',
+            buttons: [
+                { text: 'Voltar', action: tour.back },
+                { text: 'Próximo', action: tour.next }
+            ],
+            attachTo: {
+                element: '#form-pesquisa .card-body h5',
+                on: 'bottom'
+            }
+        });
+
+        // Passo 3: Filtros Avançados
+        tour.addStep({
+            title: 'Filtros Avançados',
+            text: 'Refine sua busca com datas específicas, assuntos detalhados ou período de publicação.',
+            buttons: [
+                { text: 'Voltar', action: tour.back },
+                { text: 'Próximo', action: tour.next }
+            ],
+            attachTo: {
+                element: '#advancedSearch',
+                on: 'bottom'
+            },
+            beforeShowPromise: function() {
+                return new Promise(function(resolve) {
+                    const advancedSearch = document.querySelector('#advancedSearch');
+                    if (advancedSearch.classList.contains('collapse')) {
+                        const bsCollapse = new bootstrap.Collapse(advancedSearch, { toggle: true });
+                        bsCollapse.show();
+                    }
+                    resolve();
+                });
+            }
+        });
+
+        // Passo 4: Resultados
+        tour.addStep({
+            title: 'Visualização de Resultados',
+            text: 'Altere entre tabela e cards, ordene colunas ou exporte os dados conforme sua necessidade.',
+            buttons: [
+                { text: 'Voltar', action: tour.back },
+                { text: 'Próximo', action: tour.next }
+            ],
+            attachTo: {
+                element: '#resultado-tabs',
+                on: 'bottom'
+            },
+            when: {
+                show: function() {
+                    document.querySelector('#container-principal-resultados').style.display = 'block';
+                }
+            }
+        });
+
+        // Passo 5: Finalização
+        tour.addStep({
+            title: 'Pronto para começar!',
+            text: 'Agora você pode explorar todas as normas jurídicas. <br><small>Dica: Os filtros ativos aparecem no topo da página.</small>',
+            buttons: [
+                { text: 'Fechar', action: tour.complete }
+            ],
+            attachTo: {
+                element: '#btn-pesquisar',
+                on: 'top'
+            }
+        });
+
+        // Inicia o tour se for a primeira visita
+        if (!localStorage.getItem('tourNormasFinalizado')) {
+            tour.start();
+            localStorage.setItem('tourNormasFinalizado', 'true');
+        }
+        
+        return tour;
+    }
+
+    // Botão de ajuda para reiniciar o tour
+    document.getElementById('btn-ajuda-tour').addEventListener('click', function() {
+        iniciarTour().start();
+    });
+
+    // Inicia o tour automaticamente na primeira visita
+    if (!localStorage.getItem('tourNormasFinalizado')) {
+        setTimeout(() => {
+            iniciarTour().start();
+        }, 1000);
+    }
+
+    // Carregar dados da URL se existirem
+    if (window.location.search) {
+        aguardarTomSelectsProntos(popularFormPelaURL);
+    } else {
+        contarFiltrosAtivos();
+    }
+});
+</script>
+
+<dtml-var footer_html>

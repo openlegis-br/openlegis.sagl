@@ -1,0 +1,1386 @@
+<dtml-var header_html>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.bootstrap5.css" rel="stylesheet">
+
+<style>
+    .filter-toggle-icon {
+        transition: transform 0.35s ease-in-out;
+        display: inline-block;
+    }
+    .filter-toggle-icon.expanded {
+        transform: rotate(90deg);
+    }
+    .ts-dropdown .optgroup-header {
+        font-size: 0.9em;
+        padding-top: 8px;
+        padding-bottom: 2px;
+        background-color: #f8f9fa;
+    }
+    /* Skeleton Loading */
+    .skeleton-loading {
+        animation: skeleton-loading 1.5s infinite ease-in-out;
+        background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+        background-size: 200% 100%;
+    }
+    @keyframes skeleton-loading {
+        0% { background-position: 200% 0; }
+        100% { background-position: -200% 0; }
+    }
+    .skeleton-row {
+        height: 38px;
+        margin-bottom: 8px;
+        border-radius: 4px;
+    }
+    .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border-width: 0;
+    }
+    [aria-busy="true"] {
+        opacity: 0.7;
+        cursor: progress;
+    }
+    /* Badges de Filtro */
+    .filter-badge {
+        display: inline-flex;
+        align-items: center;
+        margin-right: 8px;
+        margin-bottom: 8px;
+        padding: .35em .65em;
+        font-size: .875em;
+        font-weight: 500;
+        line-height: 1;
+        color: #333;
+        background-color: #e2e6ea;
+        border-radius: .25rem;
+    }
+    .filter-badge .btn-close {
+        font-size: .65em;
+        margin-left: .5em;
+        opacity: .75;
+    }
+    .filter-badge .btn-close:hover {
+        opacity: 1;
+    }
+    /* Ordenação por Colunas */
+    .sortable-header {
+        cursor: pointer;
+        position: relative;
+        padding-right: 20px;
+        white-space: nowrap;
+    }
+    .sortable-header:hover {
+        color: #44a2d2;
+    }
+    .sortable-header::after {
+        content: '';
+        position: absolute;
+        right: 5px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 0;
+        height: 0;
+        border-left: 5px solid transparent;
+        border-right: 5px solid transparent;
+        opacity: 0.4;
+    }
+    .sortable-header.asc::after {
+        border-bottom: 5px solid black;
+        opacity: 1;
+    }
+    .sortable-header.desc::after {
+        border-top: 5px solid black;
+        opacity: 1;
+    }
+    /* Estilo para o contêiner do toast */
+    .toast-container {
+        right: 1rem;
+        z-index: 1;
+    }
+    /* Estilos para a visualização em Cards */
+    .card-view-container {
+        display: grid;
+        gap: 15px;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        margin-top: 15px;
+    }
+    .card-materia {
+        border: 1px solid #e0e0e0;
+        border-radius: 0.25rem;
+        padding: 15px;
+        background-color: #fff;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        display: flex;
+        flex-direction: column;
+    }
+    .card-materia .card-header-custom {
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+        font-size: 1.1em;
+        color: #44a2d2;
+        transition: color 0.2s ease-in-out;
+        line-height: 1.3;
+    }
+    .card-materia a.card-header-custom:hover {
+        color: #2a7da2;
+        text-decoration: underline;
+    }
+    .card-materia .card-author {
+        font-size: 0.9em;
+        font-weight: 500;
+        padding: 5px 0;
+        margin-bottom: 5px;
+        border-bottom: 1px solid #f0f0f0;
+        display: flex;
+        align-items: center;
+    }
+    .card-materia .card-body-custom {
+        font-size: 0.9em;
+        margin-bottom: 10px;
+        flex-grow: 1;
+    }
+    .card-materia .card-meta-custom {
+        font-size: 0.85em;
+        color: #6c757d;
+        margin-bottom: 5px;
+        display: flex;
+        align-items: center;
+    }
+    .card-materia .card-actions-custom {
+        margin-top: auto;
+        text-align: right;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+        justify-content: flex-end;
+    }
+    mark {
+        background-color: #FFEB3B;
+        padding: 0.1em 0.2em;
+        border-radius: 3px;
+    }
+    /* Estilos para a Timeline de Tramitação */
+    .timeline {
+        position: relative;
+        padding-left: 30px;
+        border-left: 2px solid #e0e0e0;
+    }
+    .timeline-item {
+        position: relative;
+        margin-bottom: 25px;
+    }
+    .timeline-dot {
+        position: absolute;
+        left: -40px;
+        top: 5px;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background-color: #ccc;
+        border: 3px solid #fff;
+        box-shadow: 0 0 0 2px #ccc;
+    }
+    .timeline-item.concluido .timeline-dot {
+        background-color: #28a745; /* Verde para concluído */
+        box-shadow: 0 0 0 2px #28a745;
+    }
+    .timeline-item.atual .timeline-dot {
+        background-color: #0d6efd; /* Azul para atual */
+        box-shadow: 0 0 0 2px #0d6efd;
+        transform: scale(1.2);
+    }
+    .timeline-content {
+        position: relative;
+        top: -5px;
+    }
+    .timeline-date {
+        font-size: 0.85em;
+        color: #6c757d;
+        margin-bottom: 5px;
+        font-weight: bold;
+    }
+    .timeline-title {
+        font-size: 1.1em;
+        margin-bottom: 8px;
+    }
+    .timeline-item.atual .timeline-title {
+        color: #0d6efd;
+    }
+    .timeline-text {
+        font-size: 0.9em;
+        color: #343a40;
+        margin-bottom: 0;
+    }
+    /* Melhorias de Hierarquia Visual e Espaçamento */
+    #form-pesquisa .card-body {
+        padding: 1.5rem;
+    }
+    #form-pesquisa .card-body h5 {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid #dee2e6;
+    }
+    #resultados table .celula-titulo-materia {
+        font-weight: 600;
+        color: #343a40;
+        font-size: 0.95em;
+        vertical-align: middle;
+    }
+</style>
+
+<div class="toast-container">
+    <div class="toast" id="filter-cleared-toast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header">
+            <i class="fa fa-info-circle text-info me-2"></i>
+            <strong class="me-auto">Informação</strong>
+            <small>Agora</small>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Fechar"></button>
+        </div>
+        <div class="toast-body">
+            Filtros limpos com sucesso!
+        </div>
+    </div>
+</div>
+
+<h1 class="firstHeading font-size-18">Pesquisa de Matérias Legislativas</h1>
+
+<div class="d-grid gap-2 mb-3">
+    <button class="btn btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#filtro-container" aria-expanded="false" id="btn-toggle-filtros" style="display: none;">
+        <i class="fa fa-filter me-2"></i> Mostrar / Editar Filtros
+    </button>
+</div>
+
+<form method="get" action="&dtml-URL0;/materias_legislativas_json" id="form-pesquisa">
+    <input type="hidden" name="formato" value="" id="formato">
+    <input type="hidden" name="pagina" value="1" id="pagina">
+    <input type="hidden" name="ordem_campo" value="" id="ordem_campo">
+    <input type="hidden" name="ordem_direcao" value="" id="ordem_direcao">
+
+    <div class="collapse show" id="filtro-container">
+        <div class="card card-body bg-light mb-3">
+            <h5>Filtros Básicos</h5>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label for="tip_id_basica" class="form-label form-label-sm mb-1">Tipo de Matéria:</label>
+                    <select name="tip_id_basica" id="tip_id_basica" class="form-control form-control-sm" multiple placeholder="Selecione um ou mais tipos..."></select>
+                </div>
+                <div class="col-md-3">
+                    <label for="num_ident_basica" class="form-label form-label-sm mb-1">Número:</label>
+                    <input type="text" name="num_ident_basica" id="num_ident_basica" class="form-control form-control-sm" placeholder="Ex: 123">
+                    <div class="invalid-feedback" id="num_ident_basica_feedback">
+                        Por favor, insira apenas números.
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <label for="ano_ident_basica" class="form-label form-label-sm mb-1">Ano:</label>
+                    <input type="text" name="ano_ident_basica" id="ano_ident_basica" class="form-control form-control-sm" placeholder="Ex: 2025">
+                    <div class="invalid-feedback" id="ano_ident_basica_feedback">
+                        Por favor, insira um ano válido com 4 dígitos.
+                    </div>
+                </div>
+            </div>
+            <div class="row g-3 mt-3">
+                <div class="col-md-4">
+                    <label for="cod_autor" class="form-label form-label-sm mb-1">Autoria:</label>
+                    <select name="cod_autor" id="cod_autor" class="form-control form-control-sm" placeholder="Selecione um autor..."></select>
+                </div>
+                <div class="col-md-8">
+                    <label for="des_assunto" class="form-label form-label-sm mb-1">Assunto ou Ementa:</label>
+                    <input type="text" name="des_assunto" id="des_assunto" class="form-control form-control-sm" placeholder="Digite palavras-chave para buscar...">
+                    <small id="des_assunto_feedback" class="form-text text-muted" style="display: none;">
+                        <i class="fa fa-spinner fa-spin me-1"></i> Buscando...
+                    </small>
+                    <div class="form-check form-switch mt-1">
+                        <input type="checkbox" class="form-check-input" name="chk_textual" id="chk_textual" value="1">
+                        <label class="form-check-label" for="chk_textual">Pesquisar nos Textos Integrais</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                <button type="button" class="btn btn-link py-0" data-bs-toggle="collapse" data-bs-target="#advancedSearch" aria-expanded="false" aria-controls="advancedSearch">
+                    <i class="fas fa-chevron-right filter-toggle-icon me-2"></i>Filtros Avançados
+                    <span id="badge-filtros" class="badge bg-secondary ms-1"
+                          data-bs-toggle="tooltip" data-bs-placement="top" title="Nenhum filtro ativo">
+                        0
+                    </span>
+                </button>
+            </div>
+        </div>
+
+        <div id="advancedSearch" class="collapse">
+            <div class="card card-body bg-light mt-3">
+                <h5>Filtros Detalhados</h5>
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label for="num_protocolo" class="form-label form-label-sm mb-1">Número do Protocolo:</label>
+                        <input type="text" name="num_protocolo" id="num_protocolo" class="form-control form-control-sm">
+                    </div>
+                    <div class="col-md-4">
+                        <label for="num_processo" class="form-label form-label-sm mb-1">Número do Processo:</label>
+                        <input type="text" name="num_processo" id="num_processo" class="form-control form-control-sm">
+                    </div>
+                    <div class="col-md-4">
+                        <label for="cod_status" class="form-label form-label-sm mb-1">Situação Atual:</label>
+                        <select name="cod_status" id="cod_status" class="form-control form-control-sm" placeholder="Selecione um status..."></select>
+                    </div>
+                </div>
+                <div class="row g-3 mt-3">
+                    <div class="col-md-4">
+                        <label for="cod_unid_tramitacao" class="form-label form-label-sm mb-1">Localização Atual:</label>
+                        <select name="cod_unid_tramitacao" id="cod_unid_tramitacao" class="form-control form-control-sm" placeholder="Selecione uma unidade..."></select>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="cod_unid_tramitacao2" class="form-label form-label-sm mb-1">Tramitou Em:</label>
+                        <select name="cod_unid_tramitacao2" id="cod_unid_tramitacao2" class="form-control form-control-sm" placeholder="Selecione uma unidade..."></select>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="daterange_input" class="form-label form-label-sm mb-1">Data de Apresentação:</label>
+                        <div class="input-group input-group-sm">
+                            <input type="text" id="daterange_input" class="form-control" placeholder="Selecione um período..." style="background-color: #fff !important">
+                        </div>
+                        <div class="btn-group btn-group-sm w-100 mt-1" role="group" id="date-presets">
+                            <button type="button" class="btn btn-outline-secondary" data-preset="hoje">Hoje</button>
+                            <button type="button" class="btn btn-outline-secondary" data-preset="semana">7 dias</button>
+                            <button type="button" class="btn btn-outline-secondary" data-preset="mes_atual">Este Mês</button>
+                            <button type="button" class="btn btn-outline-secondary" data-preset="mes_passado">Mês Passado</button>
+                        </div>
+                        <input type="hidden" name="dat_apresentacao" id="dat_apresentacao_hidden">
+                        <input type="hidden" name="dat_apresentacao2" id="dat_apresentacao2_hidden">
+                    </div>
+                </div>
+                <div class="row g-3 mt-3">
+                    <div class="col-md-3">
+                        <label for="ind_tramitacao" class="form-label form-label-sm mb-1">Em Tramitação?</label>
+                        <select name="ind_tramitacao" id="ind_tramitacao" class="form-select form-select-sm">
+                            <option value="" selected>Tanto faz</option>
+                            <option value="1">Sim</option>
+                            <option value="0">Não</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <label class="mb-1">Ordenação Padrão:</label><br>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="rd_ordem" id="rd_ordem_1" value="1" checked>
+                    <label class="form-check-label" for="rd_ordem_1">Mais Recentes Primeiro</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="rd_ordem" id="rd_ordem_0" value="0">
+                    <label class="form-check-label" for="rd_ordem_0">Mais Antigos Primeiro</label>
+                </div>
+            </div>
+            <div class="col-md-6 text-center text-md-end mt-3 mt-md-0">
+                <button type="submit" class="btn btn-primary" id="btn-pesquisar">
+                    <i class="fa fa-search"></i> Pesquisar
+                </button>
+                <button type="button" class="btn btn-outline-primary ms-2" id="btn-limpar" style="display: none;">
+                    <i class="fa fa-times"></i> Limpar
+                </button>
+            </div>
+        </div>
+    </div>
+</form>
+
+<div id="resumo-filtros" class="mt-3"></div>
+
+<div id="container-principal-resultados" class="mt-4" style="display: none;">
+    <ul class="nav nav-tabs" id="resultado-tabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="lista-tab" data-bs-toggle="tab" data-bs-target="#resultados-pane" type="button" role="tab" aria-controls="resultados-pane" aria-selected="true">
+                <i class="fa fa-list me-2"></i>Resultados
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="grafico-tab" data-bs-toggle="tab" data-bs-target="#grafico-pane" type="button" role="tab" aria-controls="grafico-pane" aria-selected="false">
+                <i class="fa fa-chart-bar me-2"></i>Resumo Gráfico
+            </button>
+        </li>
+    </ul>
+    <div class="tab-content" id="resultado-tabs-content">
+        <div class="tab-pane fade show active" id="resultados-pane" role="tabpanel" aria-labelledby="lista-tab">
+            <div id="resultados" class="pt-3" aria-live="polite"></div>
+        </div>
+        <div class="tab-pane fade" id="grafico-pane" role="tabpanel" aria-labelledby="grafico-tab">
+            <div id="resumo-estatistico" class="p-3">
+                 <div style="max-width: 800px; margin: auto;">
+                    <canvas id="stats-chart"></canvas>
+                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="painel-sem-resultados" class="mt-4"></div>
+
+
+<div class="modal fade" id="modalTramitacao" tabindex="-1" aria-labelledby="modalTramitacaoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTramitacaoLabel">Histórico de Tramitação</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body" id="modalTramitacaoBody">
+                </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<dtml-var js_slot>
+
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/pt.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', function () {
+    const HEADER_HEIGHT = 80;
+    const form = document.getElementById('form-pesquisa');
+    const pesquisarBtn = document.getElementById('btn-pesquisar');
+    const limparBtn = document.getElementById('btn-limpar');
+    const resumoFiltrosDiv = document.getElementById('resumo-filtros');
+    const advancedSearchDiv = document.getElementById('advancedSearch');
+    let advancedFiltersLoaded = false;
+    const ordemCampoInput = document.getElementById('ordem_campo');
+    const ordemDirecaoInput = document.getElementById('ordem_direcao');
+    const desAssuntoInput = document.getElementById('des_assunto');
+    const desAssuntoFeedback = document.getElementById('des_assunto_feedback');
+    const badgeFiltros = document.getElementById('badge-filtros');
+    const filterClearedToastEl = document.getElementById('filter-cleared-toast');
+    let filterClearedToast = null;
+    const numIdentBasicaInput = document.getElementById('num_ident_basica');
+    const anoIdentBasicaInput = document.getElementById('ano_ident_basica');
+    const numIdentBasicaFeedback = document.getElementById('num_ident_basica_feedback');
+    const anoIdentBasicaFeedback = document.getElementById('ano_ident_basica_feedback');
+    let itensPorPaginaSelect = null;
+    let currentViewMode = localStorage.getItem('materiaViewMode') || 'cards';
+    let statsChartInstance = null;
+
+    const filtroContainer = document.getElementById('filtro-container');
+    const btnToggleFiltros = document.getElementById('btn-toggle-filtros');
+    let bsCollapseFiltros = null;
+    if (filtroContainer) {
+        bsCollapseFiltros = new bootstrap.Collapse(filtroContainer, {
+            toggle: false
+        });
+    }
+
+    if (filtroContainer && btnToggleFiltros) {
+        filtroContainer.addEventListener('hide.bs.collapse', function (event) {
+            if (event.target === filtroContainer) {
+                btnToggleFiltros.style.display = 'block';
+            }
+        });
+        filtroContainer.addEventListener('show.bs.collapse', function (event) {
+            if (event.target === filtroContainer) {
+                btnToggleFiltros.style.display = 'none';
+            }
+        });
+    }
+
+    pesquisarBtn.setAttribute('aria-label', 'Pesquisar matérias legislativas');
+    limparBtn.setAttribute('aria-label', 'Limpar filtros de pesquisa');
+
+    const daterangePicker = flatpickr('#daterange_input', {
+        mode: 'range',
+        dateFormat: "d/m/Y",
+        locale: 'pt',
+        onClose: function(selectedDates, dateStr, instance) {
+            const dataInicioHidden = document.getElementById('dat_apresentacao_hidden');
+            const dataFimHidden = document.getElementById('dat_apresentacao2_hidden');
+            if (selectedDates.length === 2) {
+                dataInicioHidden.value = flatpickr.formatDate(selectedDates[0], "d/m/Y");
+                dataFimHidden.value = flatpickr.formatDate(selectedDates[1], "d/m/Y");
+            } else {
+                dataInicioHidden.value = '';
+                dataFimHidden.value = '';
+            }
+            dataInicioHidden.dispatchEvent(new Event('change'));
+        }
+    });
+
+    const datePresetsContainer = document.getElementById('date-presets');
+    if (datePresetsContainer) {
+        datePresetsContainer.addEventListener('click', function(event) {
+            const target = event.target;
+            if (target.tagName !== 'BUTTON') return;
+
+            const preset = target.dataset.preset;
+            if (!preset) return;
+
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            let startDate, endDate;
+
+            switch (preset) {
+                case 'hoje':
+                    startDate = today;
+                    endDate = today;
+                    break;
+                case 'semana':
+                    endDate = new Date(today);
+                    startDate = new Date(today);
+                    startDate.setDate(today.getDate() - 6);
+                    break;
+                case 'mes_atual':
+                    startDate = new Date(today.getFullYear(), today.getMonth(), 1);
+                    endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+                    break;
+                case 'mes_passado':
+                    const prevMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+                    startDate = new Date(prevMonth.getFullYear(), prevMonth.getMonth(), 1);
+                    endDate = new Date(prevMonth.getFullYear(), prevMonth.getMonth() + 1, 0);
+                    break;
+            }
+
+            if (startDate && endDate) {
+                daterangePicker.setDate([startDate, endDate], true);
+                const onCloseCallback = daterangePicker.config.onClose[0];
+                if (onCloseCallback) {
+                     onCloseCallback(daterangePicker.selectedDates, '', daterangePicker);
+                }
+            }
+        });
+    }
+
+    let desAssuntoTimeout;
+    function debounce(func, delay = 1000) {
+        return function() {
+            const context = this;
+            const args = arguments;
+            clearTimeout(desAssuntoTimeout);
+            if (desAssuntoInput.value.trim().length > 0) {
+                if (desAssuntoFeedback) {
+                    desAssuntoFeedback.innerHTML = '<i class="fa fa-spinner fa-spin me-1"></i> Digitando...';
+                    desAssuntoFeedback.style.display = 'block';
+                }
+            } else {
+                if (desAssuntoFeedback) {
+                    desAssuntoFeedback.style.display = 'none';
+                }
+            }
+            desAssuntoTimeout = setTimeout(() => {
+                if (desAssuntoInput.value.trim().length > 0 && desAssuntoFeedback) {
+                    desAssuntoFeedback.innerHTML = '<i class="fa fa-spinner fa-spin me-1"></i> Buscando...';
+                }
+                func.apply(context, args);
+            }, delay);
+        };
+    }
+
+    function sanitizeHTML(str) {
+        if (!str) return '';
+        const temp = document.createElement('div');
+        temp.textContent = str;
+        return temp.innerHTML;
+    }
+
+    const debouncedSearch = debounce(function() {
+        ordemCampoInput.value = '';
+        ordemDirecaoInput.value = '';
+        realizarBusca(1);
+    }, 500);
+
+    if (desAssuntoInput) {
+       //desAssuntoInput.addEventListener('input', debouncedSearch);
+    }
+
+    function renderStatsChart(statsData) {
+        const tabButton = document.querySelector('#grafico-tab');
+        if (!tabButton) return;
+    
+        if (!statsData || Object.keys(statsData).length === 0) {
+            tabButton.parentElement.style.display = 'none';
+            if (statsChartInstance) {
+                statsChartInstance.destroy();
+            }
+            return;
+        }
+    
+        tabButton.parentElement.style.display = 'block';
+
+        if (statsChartInstance) {
+            statsChartInstance.destroy();
+        }
+
+        const labels = Object.keys(statsData);
+        const dataValues = Object.values(statsData);
+        const ctx = document.getElementById('stats-chart').getContext('2d');
+
+        statsChartInstance = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Quantidade',
+                    data: dataValues,
+                    backgroundColor: 'rgba(68, 162, 210, 0.6)',
+                    borderColor: 'rgba(68, 162, 210, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    title: {
+                        display: false // Título do gráfico pode ser redundante com o título da seção
+                    }
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                    }
+                }
+            }
+        });
+    }
+
+    function highlightText(text, query) {
+        if (!query || !text) {
+            return text;
+        }
+        const escapeRegExp = (string) => {
+            return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        };
+        const terms = query.split(/\s+/).filter(Boolean).map(escapeRegExp);
+        if (terms.length === 0) {
+            return text;
+        }
+        const regex = new RegExp(`(${terms.join('|')})`, 'gi');
+        return text.replace(regex, '<mark>$1</mark>');
+    }
+
+    function validarFormulario() {
+        let isValid = true;
+        numIdentBasicaInput.classList.remove('is-invalid');
+        anoIdentBasicaInput.classList.remove('is-invalid');
+        if (numIdentBasicaFeedback) numIdentBasicaFeedback.style.display = 'none';
+        if (anoIdentBasicaFeedback) anoIdentBasicaFeedback.style.display = 'none';
+
+        if (anoIdentBasicaInput.value && !/^\d{4}$/.test(anoIdentBasicaInput.value)) {
+            anoIdentBasicaInput.classList.add('is-invalid');
+            if (anoIdentBasicaFeedback) {
+                anoIdentBasicaFeedback.style.display = 'block';
+                anoIdentBasicaFeedback.textContent = 'Por favor, insira um ano válido com 4 dígitos.';
+            }
+            isValid = false;
+        }
+        if (numIdentBasicaInput.value && !/^\d+$/.test(numIdentBasicaInput.value)) {
+            numIdentBasicaInput.classList.add('is-invalid');
+            if (numIdentBasicaFeedback) {
+                numIdentBasicaFeedback.style.display = 'block';
+                numIdentBasicaFeedback.textContent = 'Por favor, insira apenas números.';
+            }
+            isValid = false;
+        }
+        return isValid;
+    }
+
+    function showSkeletonLoading() {
+        const resultadosDiv = document.getElementById('resultados');
+        resultadosDiv.innerHTML = `
+            <div class="skeleton-loading" style="height: 20px; width: 200px; margin-bottom: 15px;"></div>
+            <div class="table-responsive">
+                <table class="table">
+                    <thead><tr><th style="width: 15%"></th><th style="width: 10%"></th><th style="width: 20%"></th><th style="width: 35%"></th><th style="width: 10%"></th><th style="width: 10%"></th></tr></thead>
+                    <tbody>
+                        ${Array(5).fill('<tr>'+Array(6).fill('<td><div class="skeleton-loading skeleton-row"></div></td>').join('')+'</tr>').join('')}
+                    </tbody>
+                </table>
+            </div>`;
+        resultadosDiv.setAttribute('aria-busy', 'true');
+    }
+
+    async function carregarTiposMateria() {
+        const selectElement = document.getElementById('tip_id_basica');
+        if (!selectElement) return;
+        const tomselect = new TomSelect(selectElement, {
+            plugins: ['remove_button'],
+            placeholder: 'Carregando tipos de matéria...',
+            maxItems: null,
+            maxOptions: null,
+        });
+        tomselect.disable();
+        try {
+            const response = await fetch('tipos_materia_json');
+            if (!response.ok) throw new Error('Erro na resposta do servidor');
+            const data = await response.json();
+            tomselect.clear();
+            tomselect.clearOptions();
+            if (data.principais && data.principais.length) {
+                tomselect.addOptionGroup('principais', { label: 'Matérias Principais' });
+                data.principais.forEach(item => tomselect.addOption({ value: item.id, text: item.text, optgroup: 'principais' }));
+            }
+            if (data.acessorias && data.acessorias.length) {
+                tomselect.addOptionGroup('acessorias', { label: 'Matérias Acessórias' });
+                data.acessorias.forEach(item => tomselect.addOption({ value: item.id, text: item.text, optgroup: 'acessorias' }));
+            }
+            tomselect.enable();
+            tomselect.settings.placeholder = 'Selecione um ou mais tipos...';
+            tomselect.sync();
+        } catch (error) {
+            console.error("Falha ao carregar Tipos de Matéria:", error);
+            tomselect.settings.placeholder = 'Erro ao carregar tipos!';
+            tomselect.sync();
+        }
+    }
+
+    async function carregarSelectSimples(endpoint, selector, placeholder) {
+        const selectElement = document.querySelector(selector);
+        if (!selectElement) return;
+        const tomselect = new TomSelect(selectElement, {
+            valueField: 'id',
+            labelField: 'text',
+            searchField: 'text',
+            placeholder: 'Carregando...',
+            plugins: ['clear_button'],
+            maxOptions: null,
+        });
+        tomselect.disable();
+        try {
+            const response = await fetch(endpoint);
+            if (!response.ok) throw new Error(`Erro na resposta do servidor para ${endpoint}`);
+            const data = await response.json();
+            tomselect.clear();
+            tomselect.clearOptions();
+            tomselect.addOptions(data);
+            tomselect.enable();
+            tomselect.settings.placeholder = placeholder;
+            tomselect.sync();
+        } catch (error) {
+            console.error(`Falha ao carregar dados de ${endpoint}:`, error);
+            tomselect.settings.placeholder = 'Erro ao carregar!';
+            tomselect.sync();
+        }
+    }
+
+    function carregarFiltrosAvancados() {
+        if (advancedFiltersLoaded) return;
+        carregarSelectSimples('status_tramitacao_json', '#cod_status', 'Selecione uma situação...');
+        carregarSelectSimples('unidades_tramitacao_json', '#cod_unid_tramitacao', 'Selecione a localização atual...');
+        carregarSelectSimples('unidades_tramitacao_json', '#cod_unid_tramitacao2', 'Selecione onde tramitou...');
+        advancedFiltersLoaded = true;
+    }
+
+    function contarFiltrosAtivos() {
+        const formData = new FormData(form);
+        let count = 0;
+        const camposIgnorados = ['formato', 'rd_ordem', 'pagina', 'ordem_campo', 'ordem_direcao', 'itens_por_pagina'];
+        let tooltipContent = [];
+        const labels = {
+            'tip_id_basica': 'Tipo', 'num_ident_basica': 'Número', 'ano_ident_basica': 'Ano',
+            'des_assunto': 'Assunto/Ementa', 'num_protocolo': 'Protocolo', 'num_processo': 'Processo', 'cod_autor': 'Autoria',
+            'cod_status': 'Situação', 'cod_unid_tramitacao': 'Localização', 'cod_unid_tramitacao2': 'Tramitou Em',
+            'dat_apresentacao': 'Data Apres.',
+            'ind_tramitacao': 'Em Tramitação', 'chk_textual': 'Pesquisa Textual'
+        };
+        for (let [key, value] of formData.entries()) {
+            if (!value || camposIgnorados.includes(key) || key.endsWith('_hidden')) continue;
+            const el = form.elements[key];
+            if (el && el.tomselect && el.tomselect.items.length === 0) continue;
+            if (el && el.type === 'checkbox' && !el.checked) continue;
+            if (el && el.tagName === 'SELECT' && el.type === 'select-one' && el.value === '') continue;
+            count++;
+            if (labels[key]) tooltipContent.push(labels[key]);
+        }
+        badgeFiltros.textContent = count;
+        let newTitle = tooltipContent.length > 0 ? "Filtros: " + tooltipContent.join(', ') : "Nenhum filtro ativo";
+        if (bootstrap.Tooltip.getInstance(badgeFiltros)) {
+            bootstrap.Tooltip.getInstance(badgeFiltros).setContent({ '.tooltip-inner': newTitle });
+            badgeFiltros.setAttribute('data-bs-original-title', newTitle);
+        } else {
+            badgeFiltros.setAttribute('title', newTitle);
+        }
+    }
+
+    function mostrarResumoFiltros(formData) {
+        let filtrosAtivosBadges = [];
+        const labels = {
+            'tip_id_basica': 'Tipo', 'num_ident_basica': 'Número', 'ano_ident_basica': 'Ano',
+            'des_assunto': 'Assunto/Ementa', 'num_protocolo': 'Protocolo', 'num_processo': 'Processo', 'cod_autor': 'Autoria',
+            'cod_status': 'Situação', 'cod_unid_tramitacao': 'Localização', 'cod_unid_tramitacao2': 'Tramitou Em',
+            'dat_apresentacao': 'Data Apres.',
+            'ind_tramitacao': 'Em Tramitação', 'chk_textual': 'Pesquisa Textual'
+        };
+        const activeParams = new URLSearchParams(formData);
+        Object.keys(labels).forEach(key => {
+            let valorExibido = '', originalValue = '';
+            if (key === 'dat_apresentacao') {
+                const startDate = activeParams.get('dat_apresentacao');
+                const endDate = activeParams.get('dat_apresentacao2');
+                if (startDate && endDate) {
+                    valorExibido = `${startDate} a ${endDate}`;
+                    originalValue = `${startDate},${endDate}`;
+                }
+            } else if (key !== 'dat_apresentacao2') {
+                const el = form.elements[key];
+                if (el) {
+                    if (el.tomselect && el.tomselect.items.length > 0) {
+                        valorExibido = el.tomselect.items.map(item => el.tomselect.options[item].text).join(', ');
+                        originalValue = el.tomselect.getValue();
+                    } else if (el.type === 'checkbox' && el.checked) {
+                        valorExibido = 'Sim';
+                        originalValue = '1';
+                    } else if (el.tagName === 'SELECT' && el.value !== '' && el.options[el.selectedIndex]) {
+                        valorExibido = el.options[el.selectedIndex].text;
+                        originalValue = el.value;
+                    } else if ((el.type === 'text' || el.type === 'number') && el.value.trim() !== '') {
+                        valorExibido = el.value.trim();
+                        originalValue = el.value.trim();
+                    }
+                }
+            }
+            if (valorExibido) {
+                filtrosAtivosBadges.push(
+                    `<span class="filter-badge" data-filter-key="${key}" data-filter-value="${Array.isArray(originalValue) ? originalValue.join(',') : originalValue}">
+                        ${labels[key]}: <strong>${sanitizeHTML(valorExibido)}</strong>
+                        <button type="button" class="btn-close" aria-label="Remover filtro ${labels[key]}"></button>
+                    </span>`
+                );
+            }
+        });
+        if (filtrosAtivosBadges.length > 0) {
+            resumoFiltrosDiv.innerHTML = `<div class="alert alert-info py-2" role="status"><strong>Filtros Ativos:</strong> ${filtrosAtivosBadges.join('')}</div>`;
+            resumoFiltrosDiv.querySelectorAll('.filter-badge .btn-close').forEach(button => button.addEventListener('click', handleRemoveFilter));
+        } else {
+            resumoFiltrosDiv.innerHTML = `<div class="alert alert-secondary py-2" role="status"><em>Nenhum filtro foi aplicado. Todos os registros estão sendo exibidos.</em></div>`;
+        }
+    }
+
+    function handleRemoveFilter(event) {
+        const badge = event.target.closest('.filter-badge');
+        if (!badge) return;
+        const keyToRemove = badge.dataset.filterKey;
+        const valueToRemove = badge.dataset.filterValue;
+        const element = form.elements[keyToRemove];
+        if (element) {
+            if (element.tomselect) {
+                if (element.tomselect.isMultiple) {
+                    const valuesToKeep = element.tomselect.getValue().filter(val => !valueToRemove.split(',').includes(val.toString()));
+                    element.tomselect.setValue(valuesToKeep.length > 0 ? valuesToKeep : '');
+                } else {
+                    element.tomselect.clear();
+                }
+            } else if (element.type === 'text' || element.type === 'number') {
+                element.value = '';
+            } else if (element.type === 'checkbox') {
+                element.checked = false;
+            } else if (element.tagName === 'SELECT') {
+                element.value = '';
+            }
+        }
+        if (keyToRemove === 'dat_apresentacao') {
+            daterangePicker.clear();
+            document.getElementById('dat_apresentacao_hidden').value = '';
+            document.getElementById('dat_apresentacao2_hidden').value = '';
+        }
+        ordemCampoInput.value = '';
+        ordemDirecaoInput.value = '';
+        if (keyToRemove === 'des_assunto' && desAssuntoFeedback) {
+            desAssuntoFeedback.style.display = 'none';
+        }
+        realizarBusca(1);
+    }
+
+    function actualizarURL(params) {
+        const queryString = params.toString();
+        const newUrl = queryString ? `${window.location.pathname}?${queryString}` : window.location.pathname;
+        window.history.pushState({ path: newUrl }, '', newUrl);
+    }
+
+    async function realizarBusca(page = 1, itensPorPaginaParam = null) {
+        const advancedSearchCollapseInstance = bootstrap.Collapse.getInstance(advancedSearchDiv);
+        if (advancedSearchCollapseInstance && advancedSearchDiv.classList.contains('show')) {
+            advancedSearchCollapseInstance.hide();
+        }
+        if (!validarFormulario()) return;
+        if (desAssuntoFeedback) desAssuntoFeedback.style.display = 'none';
+        const itensPorPaginaAtual = itensPorPaginaParam || (itensPorPaginaSelect ? itensPorPaginaSelect.value : '10');
+        document.getElementById('pagina').value = page;
+        pesquisarBtn.disabled = true;
+        pesquisarBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Buscando...';
+        pesquisarBtn.setAttribute('aria-busy', 'true');
+        showSkeletonLoading();
+        const params = new URLSearchParams(new FormData(form));
+        params.delete('daterange_input');
+        params.set('pagina', page);
+        params.set('itens_por_pagina', itensPorPaginaAtual);
+        actualizarURL(params);
+        mostrarResumoFiltros(new FormData(form));
+        try {
+            const response = await fetch(`materias_legislativas_json?${params.toString()}`);
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.details || 'Falha na resposta do servidor.');
+            }
+            const data = await response.json();
+            renderizarResultados(data);
+
+            limparBtn.style.display = 'inline-block';
+
+            if (bsCollapseFiltros) {
+                bsCollapseFiltros.hide();
+            }
+
+        } catch (error) {
+            console.error('Erro na busca AJAX:', error);
+            renderizarErro(error.message);
+        } finally {
+            pesquisarBtn.disabled = false;
+            pesquisarBtn.innerHTML = '<i class="fa fa-search"></i> Pesquisar';
+            pesquisarBtn.removeAttribute('aria-busy');
+            const resultadosDiv = document.getElementById('resultados');
+            if (resultadosDiv) {
+                resultadosDiv.removeAttribute('aria-busy');
+            }
+            aplicarClassesOrdenacao();
+        }
+    }
+
+    function applyViewMode(mode) {
+        currentViewMode = mode;
+        localStorage.setItem('materiaViewMode', mode);
+        if (!document.querySelector('#painel-sem-resultados div') && document.querySelector('#resultados div')) {
+             realizarBusca(parseInt(document.getElementById('pagina').value) || 1, itensPorPaginaSelect ? itensPorPaginaSelect.value : '10');
+        }
+    }
+
+    function attachExportListeners() {
+        document.querySelectorAll('.btn-export').forEach(btn => {
+            btn.addEventListener('click', async function(e) {
+                e.preventDefault();
+                const params = new URLSearchParams(new FormData(form));
+                params.set('formato', this.dataset.format);
+                params.set('paginar_exportacao', this.dataset.paginarExportacao || '0');
+                if (this.dataset.paginarExportacao === '1') {
+                    params.set('pagina', document.getElementById('pagina').value || '1');
+                    params.set('itens_por_pagina', itensPorPaginaSelect ? itensPorPaginaSelect.value : '10');
+                } else {
+                    params.delete('pagina');
+                    params.delete('itens_por_pagina');
+                }
+                const exportUrl = `${form.getAttribute('action')}?${params.toString()}`;
+                window.open(exportUrl, '_blank');
+            });
+        });
+    }
+
+    function renderizarResultados(data) {
+        const containerPrincipal = document.getElementById('container-principal-resultados');
+        const painelSemResultados = document.getElementById('painel-sem-resultados');
+
+        painelSemResultados.innerHTML = '';
+        painelSemResultados.style.display = 'none';
+        containerPrincipal.style.display = 'none';
+
+        if (!data || data.total === 0) {
+            painelSemResultados.innerHTML = `
+                <div class="text-center p-4 p-md-5 bg-light rounded border">
+                    <div class="mb-3"><i class="fa fa-search-minus fa-3x text-warning"></i></div>
+                    <h4 class="fw-bold">Nenhum Registro Encontrado</h4>
+                    <p class="text-muted mb-4">Não encontramos matérias que correspondam aos filtros aplicados.</p>
+                    <div class="mt-4">
+                        <button class="btn btn-primary btn-lg" id="btn-limpar-filtros-no-results">
+                            <i class="fa fa-times me-2"></i>Limpar Filtros e Tentar Novamente
+                        </button>
+                    </div>
+                </div>`;
+            const btnLimparNoResults = document.getElementById('btn-limpar-filtros-no-results');
+            if (btnLimparNoResults && limparBtn) {
+                btnLimparNoResults.addEventListener('click', () => limparBtn.click());
+            }
+            painelSemResultados.style.display = 'block';
+            renderStatsChart(null);
+            return;
+        }
+        
+        containerPrincipal.style.display = 'block';
+        
+        renderStatsChart(data.stats);
+
+        const resultadosDiv = document.getElementById('resultados');
+        const { page: paginaAtual, per_page: itensPorPagina, total } = data;
+        const inicioFaixa = (paginaAtual - 1) * itensPorPagina + 1;
+        const fimFaixa = Math.min(paginaAtual * itensPorPagina, total);
+        const termosBusca = desAssuntoInput.value;
+        let html = `
+            <div class="d-flex flex-column flex-md-row align-items-center mb-3">
+                <div class="form-group mb-2 mb-md-0 me-md-3">
+                    <label for="itens_por_pagina" class="me-2">Itens por página:</label>
+                    <select class="form-select form-select-sm d-inline-block w-auto" id="itens_por_pagina">
+                        <option value="10" ${itensPorPagina == 10 ? 'selected' : ''}>10</option>
+                        <option value="25" ${itensPorPagina == 25 ? 'selected' : ''}>25</option>
+                        <option value="50" ${itensPorPagina == 50 ? 'selected' : ''}>50</option>
+                        <option value="100" ${itensPorPagina == 100 ? 'selected' : ''}>100</option>
+                    </select>
+                </div>
+                <div class="btn-group btn-group-sm mb-2 mb-md-0">
+                    <button type="button" class="btn btn-outline-secondary ${currentViewMode === 'table' ? 'active' : ''}" id="btn-view-table" title="Tabela"><i class="fa fa-table"></i></button>
+                    <button type="button" class="btn btn-outline-secondary ${currentViewMode === 'cards' ? 'active' : ''}" id="btn-view-cards" title="Cards"><i class="fa fa-th-large"></i></button>
+                </div>
+                <div class="btn-group btn-group-sm mb-2 mb-md-0 ms-md-3">
+                    <button type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fa fa-download"></i> Exportar
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item btn-export" href="#" data-format="csv" data-paginar-exportacao="1"><i class="fa fa-file-csv text-muted"></i> CSV (página atual)</a></li>
+                        <li><a class="dropdown-item btn-export" href="#" data-format="excel" data-paginar-exportacao="1"><i class="fa fa-file-excel text-muted"></i> Excel (página atual)</a></li>
+                        <li><a class="dropdown-item btn-export" href="#" data-format="pdf" data-paginar-exportacao="1"><i class="fa fa-file-pdf text-muted"></i> PDF (página atual)</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item btn-export" href="#" data-format="csv" data-paginar-exportacao="0"><i class="fa fa-file-csv text-muted"></i> CSV (todas as páginas)</a></li>
+                        <li><a class="dropdown-item btn-export" href="#" data-format="excel" data-paginar-exportacao="0"><i class="fa fa-file-excel text-muted"></i> Excel (todas as páginas)</a></li>
+                        <li><a class="dropdown-item btn-export" href="#" data-format="pdf" data-paginar-exportacao="0"><i class="fa fa-file-pdf text-muted"></i> PDF (todas as páginas)</a></li>
+                    </ul>
+                </div>
+                <p role="status" class="text-center text-md-end mb-0 ms-md-auto">Exibindo ${inicioFaixa}-${fimFaixa} de <strong>${total}</strong> registros.</p>
+            </div>`;
+        if (currentViewMode === 'table') {
+            html += `
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th scope="col" class="sortable-header" data-sort-field="des_tipo_materia">Tipo</th>
+                                <th scope="col" class="sortable-header" data-sort-field="num_ident_basica">Número/Ano</th>
+                                <th scope="col">Autoria</th>
+                                <th scope="col" class="sortable-header" data-sort-field="txt_ementa">Ementa</th>
+                                <th scope="col" class="sortable-header" data-sort-field="dat_apresentacao">Apresentação</th>
+                                <th scope="col">Ações</th>
+                            </tr>
+                        </thead><tbody>`;
+            data.data.forEach(materia => {
+                const ementaDestacada = highlightText(sanitizeHTML(materia.txt_ementa || ''), termosBusca);
+                let botoesDocumentos = '';
+                if (materia.url_texto_integral) botoesDocumentos += `<a href="${materia.url_texto_integral}" class="btn btn-sm btn-outline-primary" target="_blank" title="Texto Integral"><i class="far fa-file-pdf"></i></a>`;
+                if (materia.url_redacao_final) botoesDocumentos += `<a href="${materia.url_redacao_final}" class="btn btn-sm btn-outline-success" target="_blank" title="Redação Final"><i class="fas fa-file-pdf"></i></a>`;
+                html += `<tr>
+                            <td class="celula-titulo-materia">${sanitizeHTML(materia.des_tipo_materia || '')}</td>
+                            <td class="celula-titulo-materia">${sanitizeHTML(materia.num_ident_basica)}/${sanitizeHTML(materia.ano_ident_basica)}</td>
+                            <td>${materia.autores ? sanitizeHTML(materia.autores) : '<i>Não informada</i>'}</td>
+                            <td>${ementaDestacada}</td>
+                            <td>${sanitizeHTML(materia.dat_apresentacao || '')}</td>
+                            <td class="text-nowrap">
+                                ${botoesDocumentos}
+                                <button type="button" class="btn btn-sm btn-outline-primary btn-ver-tramitacao" data-materia-id="${materia.cod_materia}" title="Ver Tramitação Resumida">
+                                    <i class="fa fa-sitemap"></i>
+                                </button>
+                                <a href="${materia.detail_url}" class="btn btn-sm btn-outline-primary" title="Ver Detalhes"><i class="fa fa-eye"></i></a>
+                            </td>
+                        </tr>`;
+            });
+            html += '</tbody></table></div>';
+        } else {
+            html += `<div class="card-view-container mb-3">`;
+            data.data.forEach(materia => {
+                const ementaDestacada = highlightText(sanitizeHTML(materia.txt_ementa || ''), termosBusca);
+                let botoesDocumentos = '';
+                if (materia.url_texto_integral) botoesDocumentos += `<a href="${materia.url_texto_integral}" class="btn btn-sm btn-outline-primary" target="_blank" title="Texto Integral"><i class="far fa-file-pdf"></i></a>`;
+                if (materia.url_redacao_final) botoesDocumentos += `<a href="${materia.url_redacao_final}" class="btn btn-sm btn-outline-success" target="_blank" title="Redação Final"><i class="fas fa-file-pdf"></i></a>`;
+                html += `<div class="card-materia">
+                            <a href="${materia.detail_url}" class="card-header-custom text-decoration-none">
+                                ${sanitizeHTML(materia.des_tipo_materia || '')} ${sanitizeHTML(materia.num_ident_basica)}/${sanitizeHTML(materia.ano_ident_basica)}
+                            </a>
+                            <div class="card-author">
+                                <i class="fa fa-user-edit fa-fw me-2 text-muted"></i>
+                                ${materia.autores ? sanitizeHTML(materia.autores) : '<i>Autoria não informada</i>'}
+                            </div>
+                            <div class="card-meta-custom">
+                                <i class="fa fa-calendar-alt fa-fw me-2 text-muted"></i>
+                                <span>Apresentação em ${sanitizeHTML(materia.dat_apresentacao || '')}</span>
+                            </div>
+                            <div class="card-body-custom"><strong>Ementa:</strong> ${ementaDestacada}</div>
+                            <div class="card-actions-custom">
+                                ${botoesDocumentos}
+                                <button type="button" class="btn btn-sm btn-outline-primary btn-ver-tramitacao" data-materia-id="${materia.cod_materia}" title="Ver Tramitação Resumida">
+                                    <i class="fa fa-sitemap"></i>
+                                </button>
+                            </div>
+                        </div>`;
+            });
+            html += `</div>`;
+        }
+        html += renderizarPaginacao(data);
+        resultadosDiv.innerHTML = html;
+
+        document.getElementById('btn-view-table').addEventListener('click', () => applyViewMode('table'));
+        document.getElementById('btn-view-cards').addEventListener('click', () => applyViewMode('cards'));
+        itensPorPaginaSelect = document.getElementById('itens_por_pagina');
+        if(itensPorPaginaSelect) {
+            itensPorPaginaSelect.addEventListener('change', (e) => realizarBusca(1, e.target.value));
+        }
+        document.querySelectorAll('.sortable-header').forEach(h => h.addEventListener('click', handleColumnSort));
+        const navPaginacao = document.getElementById('nav-paginacao');
+        if (navPaginacao) {
+            navPaginacao.addEventListener('click', e => {
+                const pageLink = e.target.closest('a.page-link');
+                if (pageLink && pageLink.dataset.page && !pageLink.closest('.page-item.disabled')) {
+                    e.preventDefault();
+                    realizarBusca(parseInt(pageLink.dataset.page), itensPorPaginaSelect ? itensPorPaginaSelect.value : '10');
+                }
+            });
+        }
+        attachExportListeners();
+        
+        const triggerEl = document.querySelector('#lista-tab');
+        bootstrap.Tab.getInstance(triggerEl)?.show() || new bootstrap.Tab(triggerEl).show();
+    }
+
+    function renderizarPaginacao(data) {
+        if (data.total_pages <= 1) return '';
+        let html = '<nav id="nav-paginacao" aria-label="Navegação de páginas"><ul class="pagination justify-content-center flex-wrap">';
+        html += `<li class="page-item ${!data.has_previous ? 'disabled' : ''}"><a class="page-link" href="#" data-page="${data.page - 1}">&laquo;</a></li>`;
+        const maxPagesToShow = 5;
+        let startPage = Math.max(1, data.page - Math.floor(maxPagesToShow / 2));
+        let endPage = Math.min(data.total_pages, startPage + maxPagesToShow - 1);
+        if (endPage - startPage + 1 < maxPagesToShow) startPage = Math.max(1, endPage - maxPagesToShow + 1);
+        if (startPage > 1) {
+            html += `<li class="page-item"><a class="page-link" href="#" data-page="1">1</a></li>`;
+            if (startPage > 2) html += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+        }
+        for (let i = startPage; i <= endPage; i++) {
+            html += `<li class="page-item ${i === data.page ? 'active' : ''}"><a class="page-link" href="#" data-page="${i}">${i}</a></li>`;
+        }
+        if (endPage < data.total_pages) {
+            if (endPage < data.total_pages - 1) html += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+            html += `<li class="page-item"><a class="page-link" href="#" data-page="${data.total_pages}">${data.total_pages}</a></li>`;
+        }
+        html += `<li class="page-item ${!data.has_next ? 'disabled' : ''}"><a class="page-link" href="#" data-page="${data.page + 1}">&raquo;</a></li>`;
+        html += '</ul></nav>';
+        return html;
+    }
+
+    function renderizarErro(mensagem) {
+        const painelSemResultados = document.getElementById('painel-sem-resultados');
+        painelSemResultados.innerHTML = `<div class="alert alert-danger text-center" role="alert"><i class="fa fa-exclamation-triangle"></i> ${sanitizeHTML(mensagem)}</div>`;
+        painelSemResultados.style.display = 'block';
+    }
+
+    function popularFormPelaURL() {
+        const params = new URLSearchParams(window.location.search);
+        if (!params.toString()) return;
+
+        const uniqueKeys = [...new Set(params.keys())];
+
+        uniqueKeys.forEach(key => {
+            const el = form.elements[key];
+            if (el) {
+                if (el.tomselect) {
+                    const allValues = params.getAll(key);
+                    el.tomselect.setValue(allValues, true);
+                }
+                else if (el.type === 'radio') {
+                    const radioWithValue = document.querySelector(`input[name="${key}"][value="${params.get(key)}"]`);
+                    if (radioWithValue) radioWithValue.checked = true;
+                }
+                else if (el.type === 'checkbox') {
+                    el.checked = (params.get(key) === '1');
+                }
+                else {
+                    el.value = params.get(key);
+                }
+            }
+        });
+        
+        const startDateParam = params.get('dat_apresentacao');
+        const endDateParam = params.get('dat_apresentacao2');
+        if (startDateParam || endDateParam) {
+            daterangePicker.setDate([startDateParam, endDateParam], false);
+            document.getElementById('dat_apresentacao_hidden').value = startDateParam || '';
+            document.getElementById('dat_apresentacao2_hidden').value = endDateParam || '';
+        }
+        ordemCampoInput.value = params.get('ordem_campo') || '';
+        ordemDirecaoInput.value = params.get('ordem_direcao') || '';
+        aplicarClassesOrdenacao();
+
+        const hasAdvancedFilterInURL = ['num_protocolo', 'num_processo', 'cod_status', 'cod_unid_tramitacao', 'cod_unid_tramitacao2', 'ind_tramitacao', 'chk_textual'].some(field => params.has(field)) || startDateParam || endDateParam;
+        if (hasAdvancedFilterInURL) {
+            carregarFiltrosAvancados();
+            if (advancedSearchDiv && !advancedSearchDiv.classList.contains('show')) {
+                new bootstrap.Collapse(advancedSearchDiv).show();
+            }
+        }
+
+        contarFiltrosAtivos();
+        realizarBusca(parseInt(params.get('pagina') || '1', 10), params.get('itens_por_pagina') || '10');
+    }
+
+    function handleColumnSort(event) {
+        const field = event.currentTarget.dataset.sortField;
+        if (!field) return;
+        let direction = 'asc';
+        if (ordemCampoInput.value === field && ordemDirecaoInput.value === 'asc') {
+            direction = 'desc';
+        }
+        ordemCampoInput.value = field;
+        ordemDirecaoInput.value = direction;
+        const rdOrdem = document.querySelector('input[name="rd_ordem"]:checked');
+        if (rdOrdem) rdOrdem.checked = false;
+        realizarBusca(1);
+    }
+    
+    function aplicarClassesOrdenacao() {
+        document.querySelectorAll('.sortable-header').forEach(header => {
+            header.classList.remove('asc', 'desc');
+            if (header.dataset.sortField === ordemCampoInput.value) {
+                header.classList.add(ordemDirecaoInput.value);
+            }
+        });
+    }
+    
+    form.addEventListener('submit', e => { e.preventDefault(); realizarBusca(1); });
+    
+    limparBtn.addEventListener('click', () => {
+        window.history.pushState({}, '', window.location.pathname);
+        form.reset();
+        document.querySelectorAll('select.form-control, select.form-select').forEach(el => {
+            if (el.tomselect) el.tomselect.clear();
+        });
+        if (daterangePicker) daterangePicker.clear();
+        document.getElementById('dat_apresentacao_hidden').value = '';
+        document.getElementById('dat_apresentacao2_hidden').value = '';
+        ordemCampoInput.value = '';
+        ordemDirecaoInput.value = '';
+        aplicarClassesOrdenacao();
+        if (itensPorPaginaSelect) itensPorPaginaSelect.value = '10';
+        document.getElementById('rd_ordem_1').checked = true;
+        document.getElementById('container-principal-resultados').style.display = 'none';
+        document.getElementById('painel-sem-resultados').innerHTML = '';
+        resumoFiltrosDiv.innerHTML = '';
+        limparBtn.style.display = 'none';
+        if (desAssuntoFeedback) desAssuntoFeedback.style.display = 'none';
+        contarFiltrosAtivos();
+        if (filterClearedToast) filterClearedToast.show();
+        if (bsCollapseFiltros) {
+            bsCollapseFiltros.show();
+        }
+        btnToggleFiltros.style.display = 'none';
+        const initialMessageDiv = document.getElementById('painel-sem-resultados');
+        if(initialMessageDiv) initialMessageDiv.innerHTML = `<div class="alert alert-info text-center" role="status"><i class="fa fa-search fa-2x mb-2"></i><br>Utilize os filtros acima para encontrar as matérias legislativas.</div>`;
+
+    });
+
+    if (filterClearedToastEl) filterClearedToast = new bootstrap.Toast(filterClearedToastEl, { delay: 3000 });
+    [...document.querySelectorAll('[data-bs-toggle="tooltip"]')].map(el => new bootstrap.Tooltip(el));
+
+    advancedSearchDiv.addEventListener('show.bs.collapse', carregarFiltrosAvancados, { once: true });
+
+    const toggleIcon = document.querySelector('.filter-toggle-icon');
+    if (advancedSearchDiv && toggleIcon) {
+        advancedSearchDiv.addEventListener('show.bs.collapse', function () {
+            toggleIcon.classList.add('expanded');
+        });
+        advancedSearchDiv.addEventListener('hide.bs.collapse', function () {
+            toggleIcon.classList.remove('expanded');
+        });
+    }
+
+    const modalTramitacaoEl = document.getElementById('modalTramitacao');
+    if (modalTramitacaoEl) {
+        const modalTramitacao = new bootstrap.Modal(modalTramitacaoEl);
+        const modalBody = document.getElementById('modalTramitacaoBody');
+        const modalTitle = document.getElementById('modalTramitacaoLabel');
+
+        document.body.addEventListener('click', async function (event) {
+            const target = event.target.closest('.btn-ver-tramitacao');
+            if (!target) return;
+
+            const materiaId = target.dataset.materiaId;
+            const card = target.closest('.card-materia');
+            const tableRow = target.closest('tr');
+            let materiaIdentificacao = '';
+
+            if (card) {
+                 materiaIdentificacao = card.querySelector('.card-header-custom').textContent.trim();
+            } else if (tableRow) {
+                const tipo = tableRow.cells[0].textContent.trim();
+                const numAno = tableRow.cells[1].textContent.trim();
+                materiaIdentificacao = `${tipo} ${numAno}`;
+            }
+
+            modalTitle.textContent = `Tramitação: ${materiaIdentificacao}`;
+            modalBody.innerHTML = '<div class="text-center p-5"><i class="fa fa-spinner fa-spin fa-2x"></i><p class="mt-2">Carregando histórico...</p></div>';
+            modalTramitacao.show();
+
+            try {
+                const response = await fetch(`tramitacao_materia_json?cod_materia=${materiaId}`);
+                if (!response.ok) {
+                    throw new Error('Não foi possível carregar os dados da tramitação.');
+                }
+                const tramitacao = await response.json();
+
+                if (tramitacao.length === 0) {
+                    modalBody.innerHTML = '<p class="text-center">Nenhum histórico de tramitação encontrado para esta matéria.</p>';
+                    return;
+                }
+
+                let timelineHtml = '<div class="timeline">';
+                tramitacao.forEach(passo => {
+                    timelineHtml += `
+                        <div class="timeline-item ${passo.passo_atual ? 'atual' : 'concluido'}">
+                            <div class="timeline-dot"></div>
+                            <div class="timeline-content">
+                                <p class="timeline-date">${passo.data}</p>
+                                <h6 class="timeline-title">${sanitizeHTML(passo.status_tramitacao)}</h6>
+                                <p class="timeline-text">
+                                    De: <strong>${sanitizeHTML(passo.unidade_origem)}</strong><br>
+                                    Para: <strong>${sanitizeHTML(passo.unidade_destino)}</strong>
+                                </p>
+                            </div>
+                        </div>
+                    `;
+                });
+                timelineHtml += '</div>';
+                modalBody.innerHTML = timelineHtml;
+
+            } catch (error) {
+                console.error('Erro ao buscar tramitação:', error);
+                modalBody.innerHTML = `<div class="alert alert-danger">${sanitizeHTML(error.message)}</div>`;
+            }
+        });
+    }
+
+    const promessaTipos = carregarTiposMateria();
+    const promessaAutores = carregarSelectSimples('autores_json', '#cod_autor', 'Selecione um autor...');
+
+    Promise.all([promessaTipos, promessaAutores]).then(() => {
+        console.log("Dados iniciais carregados, processando URL...");
+        if (window.location.search) {
+            popularFormPelaURL();
+        } else {
+            contarFiltrosAtivos();
+            const initialMessageDiv = document.getElementById('painel-sem-resultados');
+            if(initialMessageDiv) initialMessageDiv.innerHTML = `<div class="alert alert-info text-center" role="status"><i class="fa fa-search fa-2x mb-2"></i><br>Utilize os filtros acima para encontrar as matérias legislativas.</div>`;
+        }
+    }).catch(error => {
+        console.error("Erro fatal ao carregar dados iniciais dos filtros:", error);
+        renderizarErro("Não foi possível carregar os filtros necessários para a busca. Por favor, recarregue a página.");
+    });
+});
+</script>
+
+<dtml-var footer_html>

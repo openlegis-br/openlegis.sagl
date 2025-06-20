@@ -5,17 +5,20 @@ import logging
 import warnings
 import tempfile
 import os
+import shutil
+import time
+import traceback
 from io import BytesIO
-from PIL import Image
+from PIL import Image, ImageFilter
 from typing import Any, List, Optional, Dict, Union, BinaryIO, Iterator, Generator, Tuple
 from functools import lru_cache, wraps
 from contextlib import contextmanager
 from datetime import datetime, timedelta
 
-import fitz  # PyMuPDF
+import fitz
 import pikepdf
-import pytesseract
-from pypdf import PdfReader
+import ocrmypdf
+from pypdf import PdfReader, PdfWriter
 from pypdf.errors import PdfReadError
 from asn1crypto import cms
 from dateutil.parser import parse
@@ -28,14 +31,18 @@ from zope.interface import Interface
 # CONSTANTS AND CONFIGURATION
 # ******************************************
 CPF_LENGTH = 11
-MAX_TITLE_LENGTH = 200
 DATE_FORMAT = '%Y-%m-%d %H:%M:%S'
 MAX_PDF_SIZE = 100 * 1024 * 1024  # 100MB
-MAX_PAGES = 500
-PNG_COMPRESSION_LEVEL = 6
+MAX_PAGES = 200
+PNG_COMPRESSION_LEVEL = 9  # Máxima compressão PNG
 A4_PORTRAIT = (595, 842)
 A4_LANDSCAPE = (842, 595)
-DEFAULT_DPI = 300
+A4_TOLERANCE = 0.02  # 2% tolerance for page size
+TEXT_DPI = 250      # Para páginas com texto
+IMAGE_DPI = 250     # Para páginas sem texto
+MAX_IMAGE_SIZE = 2048  # Aumentado tamanho máximo para redimensionamento
+JPEG_QUALITY = 90   # Qualidade máxima para JPEG
+FALLBACK_JPEG_QUALITY = 80  # Qualidade para segunda tentativa
 
 PDFData = Union[bytes, bytearray]
 SignatureData = Dict[str, Any]
@@ -44,7 +51,7 @@ SignerInfo = Dict[str, Optional[str]]
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s',
+    format='%(asctime)s - %(levelname)s - %(name)s - %(message)s',
     handlers=[
         logging.FileHandler('pdf_processor.log'),
         logging.StreamHandler()
@@ -56,22 +63,18 @@ warnings.simplefilter("once", RuntimeWarning)
 # EXCEPTIONS
 # ******************************************
 class PDFIrrecuperavelError(Exception):
-    """Exceção para PDFs corrompidos e irrecuperáveis"""
     pass
 
 class PDFSizeExceededError(Exception):
-    """Exceção para PDFs que excedem o tamanho máximo"""
     pass
 
 class PDFPageLimitExceededError(Exception):
-    """Exceção para PDFs com muitas páginas"""
     pass
 
 # ******************************************
 # CORE UTILITIES
 # ******************************************
-def timed_lru_cache(seconds: int = 300, maxsize: int = 128):
-    """Decorator for time-limited caching"""
+def timed_lru_cache(seconds: int = 600, maxsize: int = 32):
     def wrapper_cache(func):
         func = lru_cache(maxsize=maxsize)(func)
         func.lifetime = timedelta(seconds=seconds)
@@ -87,16 +90,14 @@ def timed_lru_cache(seconds: int = 300, maxsize: int = 128):
     return wrapper_cache
 
 def format_cpf(cpf: Optional[str]) -> str:
-    """Formata CPF com pontos e traço"""
     if not cpf or not isinstance(cpf, str):
         return ""
     cleaned = re.sub(r'[^0-9]', '', cpf)
     if len(cleaned) != CPF_LENGTH:
-        return cpf
+        return ""
     return f"{cleaned[:3]}.{cleaned[3:6]}.{cleaned[6:9]}-{cleaned[9:]}"
 
 def format_datetime(dt: Optional[Any]) -> Optional[str]:
-    """Formata datetime para string padrão"""
     if not dt:
         return None
     try:
@@ -105,28 +106,192 @@ def format_datetime(dt: Optional[Any]) -> Optional[str]:
         return None
 
 def validate_pdf_size(pdf_data: bytes) -> None:
-    """Valida se o PDF não excede o tamanho máximo"""
     if len(pdf_data) > MAX_PDF_SIZE:
         raise PDFSizeExceededError(
             f"O arquivo PDF excede o tamanho máximo de {MAX_PDF_SIZE/1024/1024}MB"
         )
 
+def calculate_compression_rate(original_size: int, compressed_size: int) -> float:
+    """Calcula a taxa de compressão em porcentagem"""
+    if original_size == 0:
+        return 0.0
+    return ((original_size - compressed_size) / original_size) * 100
+
 # ******************************************
 # PDF PROCESSOR CORE
 # ******************************************
 class PDFProcessor:
-    """Classe base para processamento de PDF"""
-
     def __init__(self):
         self._cached_pdf_reader = None
         self._cached_pdf_stream = None
-        self._memory_threshold = 50 * 1024 * 1024  # 50MB
+        self._memory_threshold = 100 * 1024 * 1024  # 100MB
+        self.text_dpi = TEXT_DPI
+        self.image_dpi = IMAGE_DPI
+        self.max_image_size = MAX_IMAGE_SIZE
+        self.jpeg_quality = JPEG_QUALITY
+        self.fallback_jpeg_quality = FALLBACK_JPEG_QUALITY
+        self.png_compression = PNG_COMPRESSION_LEVEL
+
+    def _log_page_processing(self, page_num: int, action: str, processing_time: float = None, 
+                           original_size: int = None, compressed_size: int = None, details: str = ""):
+        log_data = {
+            'page': page_num + 1,
+            'action': action,
+            'details': details,
+        }
+        if processing_time is not None:
+            log_data['processing_time_ms'] = round(processing_time * 1000, 2)
+        if original_size is not None:
+            log_data['original_size_kb'] = round(original_size / 1024, 2)
+            if compressed_size is not None:
+                log_data['compressed_size_kb'] = round(compressed_size / 1024, 2)
+                log_data['compression_rate'] = round(
+                    calculate_compression_rate(original_size, compressed_size), 2
+                )
+        logging.info(
+            "Processamento de página - %s",
+            ", ".join(f"{k}: {v}" for k, v in log_data.items()),
+            extra={'log_data': log_data}
+        )
+
+    def _pagina_contem_texto_legivel(self, page) -> bool:
+        return bool(page.get_text().strip())
+
+    def _is_a4_size(self, width: float, height: float) -> bool:
+        def is_close(a, b):
+            return abs(a - b) <= max(a, b) * A4_TOLERANCE
+        return (is_close(width, A4_PORTRAIT[0]) and is_close(height, A4_PORTRAIT[1])) or \
+               (is_close(width, A4_LANDSCAPE[0]) and is_close(height, A4_LANDSCAPE[1]))
+
+    def _resize_to_a4(self, page: fitz.Page) -> bytes:
+        """Redimensiona UMA página para A4 e retorna bytes de PDF standalone"""
+        original_width = page.rect.width
+        original_height = page.rect.height
+        is_landscape = original_width > original_height
+
+        def is_a4_size(w, h):
+            target = A4_LANDSCAPE if is_landscape else A4_PORTRAIT
+            return (abs(w - target[0]) <= target[0] * 0.05 and
+                    abs(h - target[1]) <= target[1] * 0.05)
+
+        buf = BytesIO()
+        with fitz.open() as tmp_doc:
+            # Caso já esteja em A4, só copia a página como está:
+            if is_a4_size(original_width, original_height):
+                tmp_doc.insert_pdf(page.parent, from_page=page.number, to_page=page.number)
+            else:
+                target_width, target_height = A4_LANDSCAPE if is_landscape else A4_PORTRAIT
+                scale = min(target_width / original_width, target_height / original_height)
+                new_width = original_width * scale
+                new_height = original_height * scale
+                x_offset = (target_width - new_width) / 2
+                y_offset = (target_height - new_height) / 2
+                new_page = tmp_doc.new_page(width=target_width, height=target_height)
+                new_page.show_pdf_page(
+                    fitz.Rect(x_offset, y_offset, x_offset + new_width, y_offset + new_height),
+                    page.parent,
+                    page.number
+                )
+            tmp_doc.save(buf)
+        return buf.getvalue()
+
+    def _resize_document_to_a4(self, pdf_data: bytes) -> bytes:
+        with fitz.open(stream=pdf_data, filetype="pdf") as doc:
+            orig_metadata = dict(doc.metadata or {})
+            with fitz.open() as new_doc:
+                for i, page in enumerate(doc):
+                    page_pdf_bytes = self._resize_to_a4(page)
+                    with fitz.open("pdf", page_pdf_bytes) as page_doc:
+                        new_doc.insert_pdf(page_doc, from_page=0, to_page=0)
+                new_doc.set_metadata(orig_metadata)
+                output = BytesIO()
+                new_doc.save(output)
+            return output.getvalue()
+
+    def _calcular_dpi_ideal(self, page) -> int:
+        return self.text_dpi
+
+    def _imagem_tem_detalhes(self, img: Image.Image) -> bool:
+        return True
+
+    def _determinar_parametros_compressao(self, img: Image.Image) -> tuple:
+        return "JPEG", self.jpeg_quality, {'optimize': True, 'subsampling': 0}
+
+    def _processar_imagem(self, img: Image.Image) -> bytes:
+        try:
+            buffer = BytesIO()
+            if img.mode != 'RGB':
+                img = img.convert('RGB')
+            img.save(buffer, format="JPEG", quality=self.jpeg_quality,
+                    subsampling=0, optimize=True)
+            return buffer.getvalue()
+        except Exception as e:
+            logging.error(f"Falha crítica no processamento de imagem: {str(e)}")
+            raise PDFIrrecuperavelError("Falha ao processar imagem com qualidade máxima")
+
+    def _get_page_content_size(self, page: fitz.Page) -> int:
+        try:
+            return len(page.read_contents() or b'')
+        except:
+            return 0
+
+    def _otimizacao_inteligente(self, doc: fitz.Document) -> Optional[bytes]:
+        with fitz.open() as novo_pdf:
+            orig_metadata = dict(doc.metadata or {})
+            for i, page in enumerate(doc):
+                start_time = time.time()
+                original_size = self._get_page_content_size(page)
+                try:
+                    if self._pagina_contem_texto_legivel(page):
+                        page_pdf_bytes = self._resize_to_a4(page)
+                        with fitz.open("pdf", page_pdf_bytes) as page_doc:
+                            novo_pdf.insert_pdf(page_doc, from_page=0, to_page=0)
+                        self._log_page_processing(
+                            i, "pagina_vetorial", time.time() - start_time,
+                            original_size, original_size,
+                            "Página vetorial mantida/redimensionada"
+                        )
+                        continue
+                    # Página sem texto: converte para imagem JPEG em A4
+                    processed_page_bytes = self._resize_to_a4(page)
+                    with fitz.open("pdf", processed_page_bytes) as processed_doc:
+                        processed_page = processed_doc[0]
+                        width, height = processed_page.rect.width, processed_page.rect.height
+                        is_paisagem = width > height
+                        target_size = A4_LANDSCAPE if is_paisagem else A4_PORTRAIT
+                        dpi = self._calcular_dpi_ideal(processed_page)
+                        pix = processed_page.get_pixmap(dpi=dpi)
+                        img = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
+                        if max(img.size) > self.max_image_size:
+                            ratio = self.max_image_size / max(img.size)
+                            new_size = (int(img.size[0] * ratio), int(img.size[1] * ratio))
+                            img = img.resize(new_size, Image.LANCZOS)
+                        img_bytes = self._processar_imagem(img)
+                        compressed_size = len(img_bytes)
+                        new_page = novo_pdf.new_page(
+                            width=target_size[0],
+                            height=target_size[1]
+                        )
+                        new_page.insert_image(fitz.Rect(0, 0, target_size[0], target_size[1]), stream=img_bytes)
+                        self._log_page_processing(
+                            i, "pagina_imagem", time.time() - start_time,
+                            original_size, compressed_size,
+                            f"Qualidade máxima: {self.jpeg_quality}, DPI: {dpi}, Tamanho: {target_size}"
+                        )
+                except Exception as e:
+                    logging.warning(f"Erro processando página {i}: {str(e)}")
+                    # Em caso de erro, insere a página original:
+                    page_pdf_bytes = self._resize_to_a4(page)
+                    with fitz.open("pdf", page_pdf_bytes) as page_doc:
+                        novo_pdf.insert_pdf(page_doc, from_page=0, to_page=0)
+            novo_pdf.set_metadata(orig_metadata)
+            output = BytesIO()
+            novo_pdf.save(output, garbage=4, deflate=True, clean=True)
+            return output.getvalue()
 
     @contextmanager
     def _get_pdf_reader(self, file_stream: BytesIO) -> Iterator[PdfReader]:
-        """Context manager para leitura segura de PDFs"""
         current_stream = file_stream.getvalue()
-        
         if len(current_stream) > self._memory_threshold:
             with tempfile.NamedTemporaryFile() as tmp:
                 tmp.write(current_stream)
@@ -134,14 +299,13 @@ class PDFProcessor:
                 try:
                     with open(tmp.name, 'rb') as f:
                         reader = PdfReader(f)
-                        _ = reader.pages[0]  # Test access
+                        _ = reader.pages[0]
                         yield reader
                 except Exception as e:
                     raise PDFIrrecuperavelError(f"Falha ao ler PDF: {str(e)}")
                 finally:
                     gc.collect()
                 return
-
         try:
             if self._cached_pdf_reader is None or self._cached_pdf_stream != current_stream:
                 self._cached_pdf_stream = current_stream
@@ -160,17 +324,15 @@ class PDFProcessor:
                 raise PDFIrrecuperavelError("PDF irrecuperável") from inner_e
 
     def _repair_with_pikepdf(self, pdf_bytes: bytes) -> bytes:
-        """Tenta reparar PDF corrompido"""
         try:
             with pikepdf.open(BytesIO(pdf_bytes)) as pdf:
                 output = BytesIO()
                 pdf.save(output, linearize=True, compress_streams=True)
                 return output.getvalue()
         except Exception:
-            return pdf_bytes  # Fallback para o original
+            return pdf_bytes
 
     def _read_file_chunked(self, file_obj: BinaryIO) -> bytes:
-        """Leitura eficiente em chunks"""
         file_obj.seek(0)
         buffer = BytesIO()
         for chunk in iter(lambda: file_obj.read(8192), b''):
@@ -178,9 +340,7 @@ class PDFProcessor:
         return buffer.getvalue()
 
     def _validate_pdf(self, pdf_data: bytes) -> None:
-        """Validações básicas do PDF"""
         validate_pdf_size(pdf_data)
-        
         try:
             with fitz.open(stream=pdf_data, filetype="pdf") as doc:
                 if doc.page_count > MAX_PAGES:
@@ -190,33 +350,94 @@ class PDFProcessor:
         except Exception as e:
             raise PDFIrrecuperavelError(f"PDF inválido: {str(e)}")
 
+    def _verificar_assinaturas(self, pdf_data: bytes) -> Union[bool, Optional[List[SignatureData]]]:
+        try:
+            with BytesIO(pdf_data) as stream:
+                signatures = self.get_signatures_from_stream(stream, "temp.pdf")
+                return signatures if hasattr(self, 'get_signatures_from_stream') else bool(signatures)
+        except Exception as e:
+            logging.warning(f"Verificação de assinaturas falhou: {str(e)}")
+            return False if not hasattr(self, 'get_signatures_from_stream') else None
+
+    def _otimizacao_padrao(self, pdf_data: bytes) -> bytes:
+        try:
+            input_stream = BytesIO(pdf_data)
+            output_stream = BytesIO()
+            # skip_text=True: o ocrmypdf só faz OCR em páginas sem texto pesquisável!
+            ocrmypdf.ocr(
+                input_stream,
+                output_stream,
+                language='por+eng',
+                output_type='pdf',
+                optimize=1,
+                jpeg_quality=65,
+                pdf_renderer='auto',
+                skip_text=True,
+                force_ocr=False,
+                progress_bar=False
+            )
+            return output_stream.getvalue()
+        except Exception as e:
+            logging.error(f"Falha no OCR otimizado: {str(e)}", exc_info=True)
+            return pdf_data
+
+    def _compress_pdf_final(self, pdf_data: bytes) -> bytes:
+        try:
+            with pikepdf.open(BytesIO(pdf_data)) as pdf:
+                output = BytesIO()
+                pdf.save(
+                    output,
+                    linearize=True,
+                    compress_streams=True,
+                )
+                return output.getvalue()
+        except Exception as e:
+            logging.warning(f"Compressão final falhou: {str(e)}")
+            return pdf_data
+
+    def processar_pdf(self, pdf_data: bytes) -> bytes:
+        try:
+            if self._verificar_assinaturas(pdf_data):
+                logging.warning("PDF mantido original devido à presença de assinatura digital.")
+                return pdf_data
+            start_time = time.time()
+            pdf_data = self._resize_document_to_a4(pdf_data)
+            logging.info(f"Redimensionamento para A4 concluído em {(time.time()-start_time)*1000:.2f} ms")
+            logging.info(f"Tamanho após redimensionamento: {len(pdf_data)/1024:.2f} KB")
+            original_size = len(pdf_data)
+            with fitz.open(stream=pdf_data) as doc:
+                try:
+                    pdf_otimizado = self._otimizacao_inteligente(doc)
+                    if len(pdf_otimizado) > original_size * 1.05:
+                        raise ValueError("Otimização aumentou o tamanho do PDF")
+                    return pdf_otimizado
+                except Exception as intel_error:
+                    logging.warning(f"Falha na otimização inteligente: {str(intel_error)}")
+                    return self._otimizacao_padrao(pdf_data)
+        except Exception as e:
+            logging.error(f"Erro geral no processamento: {str(e)}")
+            return pdf_data
+
+
 # ******************************************
 # SIGNATURE HANDLING
 # ******************************************
 class PDFSignatureParser(PDFProcessor):
-    """Processamento de assinaturas digitais em PDFs"""
-
     def parse_signatures(self, raw_signature_data: bytes) -> Generator[SignerInfo, None, None]:
-        """Extrai informações de assinaturas digitais"""
         if not raw_signature_data:
             return
-
         try:
             info = cms.ContentInfo.load(raw_signature_data)
             signed_data = info['content']
-            
             if 'certificates' not in signed_data:
                 return
-
             for cert in signed_data['certificates']:
                 try:
                     cert_data = cert.native['tbs_certificate']
                     subject = cert_data.get('subject', {})
                     issuer = cert_data.get('issuer', {})
-                    
                     common_name = subject.get('common_name', '')
                     nome, cpf = (common_name.split(':', 1) + [''])[:2]
-                    
                     yield {
                         'type': subject.get('organization_name', ''),
                         'signer': nome.strip() or None,
@@ -231,7 +452,6 @@ class PDFSignatureParser(PDFProcessor):
             return
 
     def get_signatures_from_stream(self, file_stream: BytesIO, filename: str) -> List[SignatureData]:
-        """Obtém assinaturas de um stream PDF"""
         try:
             all_signers = []
             with self._get_pdf_reader(file_stream) as reader:
@@ -239,35 +459,29 @@ class PDFSignatureParser(PDFProcessor):
                     fields = reader.get_fields() or {}
                 except Exception:
                     fields = {}
-
                 signatures = [
                     f.value for f in fields.values()
                     if getattr(f, 'field_type', None) == '/Sig' and f.value
                 ]
-
                 for sig in signatures:
                     try:
                         all_signers.extend(list(self._process_signature(sig, filename)))
                     except Exception as e:
                         logging.warning(f"Erro na assinatura: {str(e)}")
-
             return all_signers
         except Exception as e:
             logging.error(f"Erro geral: {str(e)}", exc_info=True)
             return []
 
     def _process_signature(self, signature: Dict[str, Any], filename: str) -> Generator[SignatureData, None, None]:
-        """Processa dados individuais de assinatura"""
         name_field = signature.get('/Name', '')
         name, cpf_name = (name_field.split(':', 1) + [''])[:2]
         name = name.strip() or None
         cpf_name = format_cpf(cpf_name.strip()) if cpf_name.strip() else None
-
         raw_data = signature.get('/Contents')
         cpf_contents = self._extract_cpf_from_contents(raw_data)
         parsed = list(self.parse_signatures(raw_data)) if isinstance(raw_data, bytes) else []
         signing_time = self._extract_signing_time(signature)
-
         if parsed:
             for signer in parsed:
                 yield {
@@ -285,10 +499,8 @@ class PDFSignatureParser(PDFProcessor):
             }
 
     def _extract_signing_time(self, signature: Dict[str, Any]) -> Optional[str]:
-        """Extrai timestamp de assinatura"""
         if '/M' not in signature:
             return None
-            
         try:
             time_raw = signature['/M']
             ts_clean = time_raw[2:] if time_raw.startswith('D:') else time_raw
@@ -300,10 +512,8 @@ class PDFSignatureParser(PDFProcessor):
             return None
 
     def _extract_cpf_from_contents(self, raw: Optional[bytes]) -> Optional[str]:
-        """Tenta extrair CPF dos dados brutos"""
         if not raw:
             return None
-            
         try:
             if isinstance(raw, str):
                 raw = raw.encode('utf-8')
@@ -315,29 +525,9 @@ class PDFSignatureParser(PDFProcessor):
         return None
 
 # ******************************************
-# OCR PROCESSING
-# ******************************************
-def gerar_ocr_pdf(img_path: str) -> bytes:
-    """Gera PDF com OCR a partir de imagem"""
-    try:
-        with Image.open(img_path) as img:
-            ocr_pdf = pytesseract.image_to_pdf_or_hocr(
-                img,
-                lang='por+eng',
-                extension='pdf',
-                nice=10  # Prioridade mais baixa
-            )
-            return ocr_pdf
-    except Exception as e:
-        logging.error(f"OCR falhou: {str(e)}")
-        raise RuntimeError(f"Falha no OCR: {str(e)}")
-
-# ******************************************
 # MAIN PROCESSOR
 # ******************************************
 class PDFUploadProcessorView(grok.View, PDFSignatureParser):
-    """Visualização principal para processamento de PDFs"""
-
     grok.context(Interface)
     grok.require('zope2.Public')
     grok.name('otimizar_arquivo')
@@ -345,6 +535,8 @@ class PDFUploadProcessorView(grok.View, PDFSignatureParser):
     def __init__(self, context, request):
         super().__init__(context, request)
         PDFProcessor.__init__(self)
+        self.png_compression = PNG_COMPRESSION_LEVEL
+        self.fallback_jpeg_quality = FALLBACK_JPEG_QUALITY
 
     def render(
         self,
@@ -353,20 +545,30 @@ class PDFUploadProcessorView(grok.View, PDFSignatureParser):
         **kwargs
     ) -> Any:
         try:
-            # 1. Leitura e validação
+            start_time = time.time()
             file_obj = filename
             original_data = self._read_file_chunked(file_obj)
+            original_size = len(original_data)
+            logging.info('[READ_COMPLETE] Arquivo lido com sucesso size=%.2f KB', original_size / 1024)
             self._validate_pdf(original_data)
+            logging.info('[VALIDATE_COMPLETE] Validação concluída')
 
-            # 2. Verificação de assinaturas
             assinaturas = self._verificar_assinaturas(original_data)
             if assinaturas:
-                logging.warning("Assinaturas digitais detectadas (%d)", len(assinaturas))
+                logging.warning("Assinaturas digitais detectadas (%d). PDF mantido original.", len(assinaturas))
                 return {'file_stream': BytesIO(original_data), 'signatures': assinaturas}
             else:
-                # 3. Otimização principal
-                result_data = self._otimizar_pdf(original_data)
-
+                result_data = self.processar_pdf(original_data)
+                optimized_size = len(result_data)
+                total_time = time.time() - start_time
+                logging.info(
+                    '[SIZE_REDUCTION] Tamanho original: %.2f KB, otimizado: %.2f KB, redução: %.2f KB (%.2f%%) - Tempo total: %.2fs',
+                    original_size / 1024,
+                    optimized_size / 1024,
+                    (original_size - optimized_size) / 1024,
+                    calculate_compression_rate(original_size, optimized_size),
+                    total_time
+                )
             return result_data
 
         except (PDFSizeExceededError, PDFPageLimitExceededError) as e:
@@ -378,134 +580,4 @@ class PDFUploadProcessorView(grok.View, PDFSignatureParser):
             logging.error(f"Erro inesperado: {str(e)}", exc_info=True)
             raise ValueError(f"Falha no processamento: {str(e)}")
 
-    def _verificar_assinaturas(self, pdf_data: bytes) -> Optional[List[SignatureData]]:
-        """Verifica se o PDF contém assinaturas válidas"""
-        try:
-            with BytesIO(pdf_data) as stream:
-                signatures = self.get_signatures_from_stream(stream, "upload.pdf")
-                return signatures if signatures else None
-        except Exception as e:
-            logging.warning(f"Verificação de assinaturas falhou: {str(e)}")
-            return None
 
-    def _otimizar_pdf(self, pdf_data: bytes) -> bytes:
-        """Executa a otimização do PDF com OCR apenas em páginas sem texto"""
-        try:
-            with fitz.open(stream=pdf_data, filetype="pdf") as doc:
-                if doc.page_count > MAX_PAGES:
-                    raise PDFPageLimitExceededError(
-                        f"PDF muito grande ({doc.page_count} páginas)"
-                    )
-
-                # Tenta otimização inteligente primeiro
-                optimized = self._otimizacao_inteligente(doc)
-                if optimized:
-                    return optimized
-
-                # Fallback para rasterização + OCR
-                return self._otimizacao_padrao(doc)
-        except Exception as e:
-            raise PDFIrrecuperavelError(f"Falha na otimização: {str(e)}")
-
-    def _otimizacao_inteligente(self, doc: fitz.Document) -> Optional[bytes]:
-        """Tenta otimização mantendo vetores quando possível"""
-        novo_pdf = fitz.open()
-        recompression_applied = False
-
-        try:
-            for i, page in enumerate(doc):
-                try:
-                    # Verifica se a página contém texto
-                    texto_pagina = page.get_text()
-                    if texto_pagina.strip():  # Se contém texto, mantém como vetor
-                        novo_pdf.insert_pdf(doc, from_page=i, to_page=i)
-                        continue
-
-                    # Se não contém texto, processa como imagem
-                    width, height = page.rect.width, page.rect.height
-                    is_paisagem = width > height
-                    target_size = A4_LANDSCAPE if is_paisagem else A4_PORTRAIT
-
-                    matrix = fitz.Matrix(2, 2)
-                    pix = page.get_pixmap(matrix=matrix, alpha=False)
-                    
-                    # Usando Pillow para controle de qualidade JPEG
-                    img = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
-                    buffer = BytesIO()
-                    img.save(buffer, format="JPEG", quality=90)
-                    img_bytes = buffer.getvalue()
-
-                    new_page = novo_pdf.new_page(width=target_size[0], height=target_size[1])
-                    scale = min(
-                        (target_size[0] - 20) / pix.width,
-                        (target_size[1] - 20) / pix.height
-                    )
-                    rect = fitz.Rect(
-                        (target_size[0] - pix.width * scale) / 2,
-                        (target_size[1] - pix.height * scale) / 2,
-                        (target_size[0] + pix.width * scale) / 2,
-                        (target_size[1] + pix.height * scale) / 2
-                    )
-                    new_page.insert_image(rect, stream=img_bytes)
-                    recompression_applied = True
-
-                except Exception as e:
-                    logging.warning(f"Página {i+1} falhou: {str(e)}")
-                    novo_pdf.insert_pdf(doc, from_page=i, to_page=i)
-
-            if not recompression_applied:
-                return None
-
-            output = BytesIO()
-            novo_pdf.save(output, garbage=4, deflate=True, clean=True)
-            return output.getvalue()
-        finally:
-            novo_pdf.close()
-
-    def _otimizacao_padrao(self, doc: fitz.Document) -> bytes:
-        """Otimização padrão com rasterização + OCR apenas para páginas sem texto"""
-        novo_pdf = fitz.open()
-        temp_files = []
-
-        try:
-            for i, page in enumerate(doc):
-                try:
-                    # Verifica se a página já tem texto legível
-                    texto_pagina = page.get_text()
-                    if texto_pagina.strip():  # Se contém texto, copia sem OCR
-                        novo_pdf.insert_pdf(doc, from_page=i, to_page=i)
-                        continue
-
-                    # Se NÃO contém texto, rasteriza e aplica OCR
-                    pix = page.get_pixmap(dpi=DEFAULT_DPI)
-                    temp_img = tempfile.NamedTemporaryFile(suffix='.png', delete=False)
-                    pix.save(temp_img.name)
-                    temp_files.append((temp_img.name, page.rect))
-
-                    # Processa OCR para a página atual
-                    try:
-                        ocr_pdf = gerar_ocr_pdf(temp_img.name)
-                        new_page = novo_pdf.new_page(width=page.rect.width, height=page.rect.height)
-                        new_page.insert_image(page.rect, filename=temp_img.name)
-                        
-                        if ocr_pdf:
-                            with fitz.open(stream=ocr_pdf, filetype="pdf") as ocr_doc:
-                                new_page.show_pdf_page(page.rect, ocr_doc, 0, overlay=True)
-                    except Exception as e:
-                        logging.warning(f"OCR falhou para página {i+1}: {str(e)}")
-                        novo_pdf.insert_pdf(doc, from_page=i, to_page=i)
-
-                except Exception as e:
-                    logging.warning(f"Página {i+1} falhou: {str(e)}")
-                    novo_pdf.insert_pdf(doc, from_page=i, to_page=i)
-
-            output = BytesIO()
-            novo_pdf.save(output, garbage=4, deflate=True, clean=True)
-            return output.getvalue()
-        finally:
-            novo_pdf.close()
-            for img_path, _ in temp_files:
-                try:
-                    os.unlink(img_path)
-                except Exception:
-                    pass

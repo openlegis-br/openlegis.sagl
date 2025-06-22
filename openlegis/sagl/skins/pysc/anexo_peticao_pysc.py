@@ -4,33 +4,38 @@
 ##bind namespace=
 ##bind script=script
 ##bind subpath=traverse_subpath
-##parameters=cod_peticao='', listar=None, nomear=None
+##parameters=cod_peticao='', listar=None, nomear=None, ordem='asc'
 ##title=
 ##
 if listar:
+    # Lista os anexos ordenados pelo número sequencial
     documentos = context.sapl_documentos.peticao.objectIds()
-    existentes = [documento for documento in documentos if documento.startswith(cod_peticao) and len(documento) == len(cod_peticao) or documento.startswith(str(cod_peticao) + '_anexo_')]
+    existentes = [
+        doc for doc in documentos 
+        if doc.startswith(f"{cod_peticao}_anexo_") and doc.endswith('.pdf')
+    ]
+    
+    # Extrai o número de sequência e ordena
     ordenados = []
-    for item in existentes:
-        dic = {}
-        i =  item.split('.')[0]
-        dic['seq'] = int(i.split('_')[-1])
-        dic['file'] = item
-        ordenados.append(dic)
-    ordenados.sort(key=lambda dic: dic['seq'], reverse=False)
-    lista = []
-    for item in ordenados:
-        lista.append(item['file'])
-    return lista
+    for doc in existentes:
+        try:
+            seq = int(doc.split('_')[-1].split('.')[0])
+            ordenados.append((seq, doc))
+        except ValueError:
+            continue
+    
+    # Define a ordem de classificação
+    reverse_sort = False if ordem.lower() == 'asc' else True
+    ordenados.sort(key=lambda x: x[0], reverse=reverse_sort)
+    
+    return [doc for seq, doc in ordenados]
 
 if nomear:
+    # Gera o próximo nome sequencial disponível
     documentos = context.sapl_documentos.peticao.objectIds()
-    existentes = [documento for documento in documentos if documento.startswith(cod_peticao) and len(documento) == len(cod_peticao) or documento.startswith(str(cod_peticao) + '_anexo_')]
     count = 1
     while True:
-        nome = str(cod_peticao) + '_anexo_' + str(count)+ '.pdf'
-        if nome not in existentes:
+        nome = f"{cod_peticao}_anexo_{count}.pdf"
+        if nome not in documentos:
             return nome
-            break
-        else:
-            count+=1
+        count += 1

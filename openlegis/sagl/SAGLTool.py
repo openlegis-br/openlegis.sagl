@@ -1543,100 +1543,103 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         Recupera o arquivo PDF a ser assinado, seu caminho de armazenamento e seu checksum CRC32.
         """
         try:
-            storage_info = self.zsql.assinatura_storage_obter_zsql(tip_documento=tipo_doc)
-            storage = None
-            for s in storage_info:
-                storage = s
-                break 
-            if storage is None:
+            storage_info = list(self.zsql.assinatura_storage_obter_zsql(tip_documento=tipo_doc))
+            if not storage_info:
                 print(f"Erro: Nenhuma informação de armazenamento encontrada para tipo_doc: {tipo_doc}")
                 return None, None, None
-            tipo_doc = storage.tip_documento
+            storage = storage_info[0]
+            # Ajusta caminhos e nomes de arquivos para cada tipo_doc
+            storage_path = None
+            pdf_location = storage.pdf_location
+            nom_arquivo = nom_arquivo_assinado = pdf_file = pdf_signed = None
+            # Casos especiais (documento já assinado)
+            item_assinado = None
+            assinados = self.zsql.assinatura_documento_obter_zsql(
+                codigo=codigo, anexo=anexo, tipo_doc=tipo_doc, ind_assinado=1)
+            for i in assinados:
+                item_assinado = i
+                break
             if tipo_doc == 'proposicao':
                 storage_path = self.sapl_documentos.proposicao
-                pdf_location = storage.pdf_location
                 pdf_signed = f"{pdf_location}{codigo}{storage.pdf_signed}"
                 nom_arquivo_assinado = f"{codigo}{storage.pdf_signed}"
                 pdf_file = f"{pdf_location}{codigo}{storage.pdf_file}"
                 nom_arquivo = f"{codigo}{storage.pdf_file}"
-            else:
-                item = None
-                document_info = self.zsql.assinatura_documento_obter_zsql(codigo=codigo, anexo=anexo, tipo_doc=tipo_doc, ind_assinado=1)
-                for i in document_info:
-                    item = i
-                    break # Assuming you only need the first item
-                if item:
-                    storage_path = self.sapl_documentos.documentos_assinados
-                    pdf_location = 'sapl_documentos/documentos_assinados/'
-                    pdf_signed = f"{pdf_location}{item.cod_assinatura_doc}.pdf"
-                    nom_arquivo_assinado = f"{item.cod_assinatura_doc}.pdf"
-                    pdf_file = f"{pdf_location}{item.cod_assinatura_doc}.pdf"
-                    nom_arquivo = f"{item.cod_assinatura_doc}.pdf"
-                else:
-                    # local de armazenamento
-                    pdf_location = storage.pdf_location
-                    pdf_signed = f"{pdf_location}{codigo}{storage.pdf_signed}"
-                    nom_arquivo_assinado = f"{codigo}{storage.pdf_signed}"
-                    pdf_file = f"{pdf_location}{codigo}{storage.pdf_file}"
-                    nom_arquivo = f"{codigo}{storage.pdf_file}"
-                    storage_path = None  # Initialize storage_path
-                    if tipo_doc in ('materia', 'doc_acessorio', 'redacao_final'):
-                        storage_path = self.sapl_documentos.materia
-                    elif tipo_doc == 'emenda':
-                        storage_path = self.sapl_documentos.emenda
-                    elif tipo_doc == 'substitutivo':
-                        storage_path = self.sapl_documentos.substitutivo
-                    elif tipo_doc == 'tramitacao':
-                        storage_path = self.sapl_documentos.materia.tramitacao
-                    elif tipo_doc == 'parecer_comissao':
-                        storage_path = self.sapl_documentos.parecer_comissao
-                    elif tipo_doc in ('pauta', 'resumo_sessao'):
-                        storage_path = self.sapl_documentos.pauta_sessao
-                    elif tipo_doc == 'ata':
-                        storage_path = self.sapl_documentos.ata_sessao
-                    elif tipo_doc == 'norma':
-                        storage_path = self.sapl_documentos.norma_juridica
-                    elif tipo_doc in ('documento', 'doc_acessorio_adm'):
-                        storage_path = self.sapl_documentos.administrativo
-                    elif tipo_doc == 'tramitacao_adm':
-                        storage_path = self.sapl_documentos.administrativo.tramitacao
-                    elif tipo_doc == 'protocolo':
-                        storage_path = self.sapl_documentos.protocolo
-                    elif tipo_doc == 'peticao':
-                        storage_path = self.sapl_documentos.peticao
-                    elif tipo_doc == 'pauta_comissao':
-                        storage_path = self.sapl_documentos.reuniao_comissao
-                    elif tipo_doc == 'ata_comissao':
-                        storage_path = self.sapl_documentos.reuniao_comissao
-                    elif tipo_doc == 'documento_comissao':
-                        storage_path = self.sapl_documentos.documento_comissao
-                    elif tipo_doc == 'anexo_peticao':
-                        storage_path = self.sapl_documentos.peticao
-                        pdf_file = f"{pdf_location}{codigo}_anexo_{anexo}{storage.pdf_file}"
-                        nom_arquivo = f"{codigo}_anexo_{anexo}{storage.pdf_file}"
-                    elif tipo_doc == 'anexo_sessao':
-                        storage_path = self.sapl_documentos.anexo_sessao
-                        pdf_file = f"{pdf_location}{codigo}_anexo_{anexo}{storage.pdf_file}"
-                        nom_arquivo = f"{codigo}_anexo_{anexo}{storage.pdf_file}"
+            elif tipo_doc in ('materia', 'doc_acessorio', 'redacao_final'):
+                storage_path = self.sapl_documentos.materia
+            elif tipo_doc == 'emenda':
+                storage_path = self.sapl_documentos.emenda
+            elif tipo_doc == 'substitutivo':
+                storage_path = self.sapl_documentos.substitutivo
+            elif tipo_doc == 'tramitacao':
+                storage_path = self.sapl_documentos.materia.tramitacao
+            elif tipo_doc == 'parecer_comissao':
+                storage_path = self.sapl_documentos.parecer_comissao
+            elif tipo_doc in ('pauta', 'resumo_sessao'):
+                storage_path = self.sapl_documentos.pauta_sessao
+            elif tipo_doc == 'ata':
+                storage_path = self.sapl_documentos.ata_sessao
+            elif tipo_doc == 'norma':
+                storage_path = self.sapl_documentos.norma_juridica
+            elif tipo_doc in ('documento', 'doc_acessorio_adm'):
+                storage_path = self.sapl_documentos.administrativo
+            elif tipo_doc == 'tramitacao_adm':
+                storage_path = self.sapl_documentos.administrativo.tramitacao
+            elif tipo_doc == 'protocolo':
+                storage_path = self.sapl_documentos.protocolo
+            elif tipo_doc == 'peticao':
+                storage_path = self.sapl_documentos.peticao
+            elif tipo_doc == 'pauta_comissao':
+                storage_path = self.sapl_documentos.reuniao_comissao
+            elif tipo_doc == 'ata_comissao':
+                storage_path = self.sapl_documentos.reuniao_comissao
+            elif tipo_doc == 'documento_comissao':
+                storage_path = self.sapl_documentos.documento_comissao
+            elif tipo_doc == 'anexo_peticao':
+                storage_path = self.sapl_documentos.peticao
+                pdf_file = f"{pdf_location}{codigo}_anexo_{anexo}{storage.pdf_file}"
+                nom_arquivo = f"{codigo}_anexo_{anexo}{storage.pdf_file}"
+                pdf_signed = f"{pdf_location}{codigo}_anexo_{anexo}{storage.pdf_signed}"
+                nom_arquivo_assinado = f"{codigo}_anexo_{anexo}{storage.pdf_signed}"
+            elif tipo_doc == 'anexo_sessao':
+                storage_path = self.sapl_documentos.anexo_sessao
+                pdf_file = f"{pdf_location}{codigo}_anexo_{anexo}{storage.pdf_file}"
+                nom_arquivo = f"{codigo}_anexo_{anexo}{storage.pdf_file}"
+                pdf_signed = f"{pdf_location}{codigo}_anexo_{anexo}{storage.pdf_signed}"
+                nom_arquivo_assinado = f"{codigo}_anexo_{anexo}{storage.pdf_signed}"
+            # Caso documento já assinado (armazena sempre em 'documentos_assinados')
+            if item_assinado:
+                storage_path = self.sapl_documentos.documentos_assinados
+                pdf_signed = f"sapl_documentos/documentos_assinados/{item_assinado.cod_assinatura_doc}.pdf"
+                nom_arquivo_assinado = f"{item_assinado.cod_assinatura_doc}.pdf"
+                pdf_file = pdf_signed
+                nom_arquivo = nom_arquivo_assinado
+            # Fallbacks
+            if not pdf_file:
+                pdf_file = f"{pdf_location}{codigo}{storage.pdf_file}"
+                nom_arquivo = f"{codigo}{storage.pdf_file}"
+            if not pdf_signed:
+                pdf_signed = f"{pdf_location}{codigo}{storage.pdf_signed}"
+                nom_arquivo_assinado = f"{codigo}{storage.pdf_signed}"
+            # Busca o arquivo - tenta assinado, se não existir pega o "to sign"
             try:
                 arquivo = self.restrictedTraverse(pdf_signed)
                 pdf_tosign = nom_arquivo_assinado
-            except:
+            except Exception:
                 try:
                     arquivo = self.restrictedTraverse(pdf_file)
                     pdf_tosign = nom_arquivo
                 except Exception as e:
                     print(f"Erro ao acessar o arquivo: {e}")
                     return None, None, None
+            # Calcula CRC32 (de forma compatível com File ou OFS.File.File)
             try:
-                x = crc32(bytes(arquivo))
-                if x >= 0:
-                    crc_arquivo = str(x)
-                else:
-                    crc_arquivo = str(-1 * x)
+                data = arquivo.data if hasattr(arquivo, 'data') else bytes(arquivo)
+                x = crc32(data if isinstance(data, bytes) else data.encode('utf-8'))
+                crc_arquivo = str(x if x >= 0 else -x)
             except Exception as e:
                 print(f"Erro ao calcular o CRC32: {e}")
-                return None, None, None
+                return pdf_tosign, storage_path, None
             return pdf_tosign, storage_path, crc_arquivo
         except Exception as e:
             print(f"Erro geral em get_file_tosign: {e}")

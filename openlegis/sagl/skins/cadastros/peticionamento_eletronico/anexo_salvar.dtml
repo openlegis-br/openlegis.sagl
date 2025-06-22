@@ -1,15 +1,51 @@
 <dtml-try>
-    <dtml-call expr="REQUEST.set('nom_arquivo', pysc.anexo_peticao_pysc(hdn_cod_peticao,nomear=True))">
-    <dtml-call expr="sapl_documentos.peticao.manage_addFile(id=nom_arquivo,file=pysc.upload_file(file=file_nom_anexo, title=txt_descricao_anexo), title=txt_descricao_anexo)">
-    <dtml-let anexo="getattr(sapl_documentos.peticao,nom_arquivo)">
-       <dtml-call expr="anexo.manage_addProperty('tip_documento', lst_tip_documento, 'string')">
-    </dtml-let>
+  <dtml-let
+    arquivos="REQUEST.get('file_nom_anexo', [])"
+    tipos="REQUEST.get('lst_tip_documento', [])"
+    descricoes="REQUEST.get('txt_descricao_anexo', [])"
+    arquivos_lista="arquivos if hasattr(arquivos, '__iter__') and not isinstance(arquivos, str) else [arquivos]"
+    tipos_lista="tipos if hasattr(tipos, '__iter__') and not isinstance(tipos, str) else [tipos]"
+    descricoes_lista="descricoes if hasattr(descricoes, '__iter__') and not isinstance(descricoes, str) else [descricoes]">
+
+    <dtml-if "len(arquivos_lista)==1">
+      <!-- Modo único -->
+      <dtml-let
+        arquivo="arquivos_lista[0]"
+        tipo="tipos_lista[0]"
+        descricao="descricoes_lista[0]">
+        <dtml-if "hasattr(arquivo, 'filename') and tipo and descricao">
+          <dtml-call expr="REQUEST.set('nom_arquivo', pysc.anexo_peticao_pysc(hdn_cod_peticao, nomear=True))">
+          <dtml-call expr="sapl_documentos.peticao.manage_addFile(id=nom_arquivo, file=pysc.upload_file(file=arquivo, title=descricao), title=descricao)">
+          <dtml-let anexo="getattr(sapl_documentos.peticao, nom_arquivo)">
+            <dtml-call expr="anexo.manage_addProperty('tip_documento', tipo, 'string')">
+          </dtml-let>
+        </dtml-if>
+      </dtml-let>
+    <dtml-else>
+      <!-- Modo múltiplo -->
+      <dtml-in arquivos_lista>
+        <dtml-let
+          arquivo="sequence_item"
+          tipo="tipos_lista[_.int(sequence-index)]"
+          descricao="descricoes_lista[_.int(sequence-index)]">
+          <dtml-if "hasattr(arquivo, 'filename') and tipo and descricao">
+            <dtml-call expr="REQUEST.set('nom_arquivo', pysc.anexo_peticao_pysc(hdn_cod_peticao, nomear=True))">
+            <dtml-call expr="sapl_documentos.peticao.manage_addFile(id=nom_arquivo, file=pysc.upload_file(file=arquivo, title=descricao), title=descricao)">
+            <dtml-let anexo="getattr(sapl_documentos.peticao, nom_arquivo)">
+              <dtml-call expr="anexo.manage_addProperty('tip_documento', tipo, 'string')">
+            </dtml-let>
+          </dtml-if>
+        </dtml-let>
+      </dtml-in>
+    </dtml-if>
+  </dtml-let>
+
 <dtml-except>
-  <dtml-let mensagem="'Houve um erro ao salvar o documento acessório!'" mensagem_obs="'Tente novamente.'" tipo_mensagem="'danger'" modal="'1'">
+  <dtml-let mensagem="'Erro ao salvar anexo(s)!'" mensagem_obs="'Tente novamente.'" tipo_mensagem="'danger'" modal="'1'">
     <dtml-var mensagem_emitir>
-  </dtml-let>  
+  </dtml-let>
 <dtml-else>
-  <dtml-let mensagem="'Documento acessório incluído com sucesso!'" url="'peticao_mostrar_proc?cod_peticao='+hdn_cod_peticao+'&modal=1#docs'" modal="'1'">
+  <dtml-let mensagem="'Anexo(s) salvos com sucesso!'" url="'peticao_mostrar_proc?cod_peticao='+hdn_cod_peticao+'&modal=1#docs'" modal="'1'">
     <dtml-var mensagem_emitir>
   </dtml-let>
 </dtml-try>
@@ -17,10 +53,10 @@
 <dtml-comment>LOG DE AUDITORIA</dtml-comment>
 <dtml-if dbcon_logs>
   <dtml-call expr="zsql.logs_registrar_zsql(
-            usuario      = REQUEST['AUTHENTICATED_USER'].getUserName(), 
-            data         = DateTime(datefmt='international').strftime('%Y-%m-%d %H:%M:%S'),
-            modulo       = str(_['REQUEST']['URL1']).split('/')[-1],
-            metodo       = 'anexo_peticao_adicionar',
-            IP           = pysc.get_ip(),
-            cod_registro = hdn_cod_peticao)"> 
+    usuario = REQUEST['AUTHENTICATED_USER'].getUserName(), 
+    data = DateTime().strftime('%Y-%m-%d %H:%M:%S'),
+    modulo = 'anexo_salvar',
+    metodo = 'upload_anexos',
+    IP = pysc.get_ip(),
+    cod_registro = hdn_cod_peticao)">
 </dtml-if>

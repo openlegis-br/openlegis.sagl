@@ -25,11 +25,11 @@ def set_file():
         else:
            filename = str(codigo) + str(storage.pdf_file)
            pdf_signed = str(storage.pdf_location) + str(codigo) + str(storage.pdf_file)
-        if hasattr(storage.pdf_location, pdf_signed):
-           arq = context.restrictedTraverse(pdf_signed)
-           file_stream = BytesIO(bytes(arq.data))
-           result = get_signatures(file_stream, filename)
-           return result
+        arq = context.restrictedTraverse(pdf_signed)
+        file_stream = BytesIO(bytes(arq.data))
+
+    result = get_signatures(file_stream, filename)
+    return result
 
 def get_signatures(file_stream, filename):
     request.set('file_stream', file_stream)

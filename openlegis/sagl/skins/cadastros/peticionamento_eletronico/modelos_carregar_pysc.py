@@ -9,7 +9,8 @@
 ##
 import json
 
-context.REQUEST.RESPONSE.setHeader("Access-Control-Allow-Origin", "*")
+context.REQUEST.RESPONSE.setHeader('Access-Control-Allow-Origin', '*')
+context.REQUEST.RESPONSE.setHeader('Access-Control-Allow-Credentials', 'true')
 
 tipo_materia = None
 if svalue != '0' and svalue != '':

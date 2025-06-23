@@ -1,32 +1,30 @@
 <dtml-try>
-   <dtml-call "sapl_documentos.peticao.manage_delObjects(anexo)">
+  <dtml-call "sapl_documentos.peticao.manage_delObjects(anexo)">
 <dtml-except>
-  <dtml-let mensagem="'Houve um erro!'" mensagem_obs="'Documento acessório não excluído.'" tipo_mensagem="'danger'" modal="'1'">
-    <dtml-var mensagem_emitir>
-  </dtml-let>  
+  <dtml-call expr="RESPONSE.redirect('peticao_mostrar_proc?cod_peticao='+str(cod_peticao)+'&modal=1#docs')">
 <dtml-else>
   <dtml-in expr="zsql.assinatura_documento_obter_zsql(codigo=cod_peticao, anexo=hdn_cod_anexo, tipo_doc='anexo_peticao')">
-   <dtml-try>
-     <dtml-call expr="zsql.assinatura_documento_excluir_zsql(
-                           cod_assinatura_doc  = cod_assinatura_doc,
-                           codigo              = codigo,
-                           tipo_doc            = tipo_doc)">
-   <dtml-except>
+    <dtml-try>
+      <dtml-call expr="zsql.assinatura_documento_excluir_zsql(
+        cod_assinatura_doc=cod_assinatura_doc,
+        codigo=codigo,
+        tipo_doc=tipo_doc
+      )">
+    <dtml-except>
       <dtml-call expr="REQUEST.set('erro', 1)">
-   </dtml-try>
+    </dtml-try>
   </dtml-in>
-  <dtml-let mensagem="'Documento acessório excluído com sucesso!'" url="'peticao_mostrar_proc?cod_peticao='+cod_peticao+'&modal=1#docs'" modal="'1'">
-    <dtml-var mensagem_emitir>
-  </dtml-let>
+  <dtml-call expr="RESPONSE.redirect('peticao_mostrar_proc?cod_peticao='+str(cod_peticao)+'&modal=1#docs')">
 </dtml-try>
 
 <dtml-comment>LOG DE AUDITORIA</dtml-comment>
 <dtml-if dbcon_logs>
   <dtml-call expr="zsql.logs_registrar_zsql(
-            usuario      = REQUEST['AUTHENTICATED_USER'].getUserName(), 
-            data         = DateTime(datefmt='international').strftime('%Y-%m-%d %H:%M:%S'),
-            modulo       = str(_['REQUEST']['URL1']).split('/')[-1],
-            metodo       = 'anexo_peticao_excluir',
-            IP           = pysc.get_ip(),
-            cod_registro = cod_peticao)"> 
+    usuario=REQUEST['AUTHENTICATED_USER'].getUserName(),
+    data=DateTime(datefmt='international').strftime('%Y-%m-%d %H:%M:%S'),
+    modulo=str(REQUEST['URL1']).split('/')[-1],
+    metodo='anexo_peticao_excluir',
+    IP=pysc.get_ip(),
+    cod_registro=cod_peticao
+  )">
 </dtml-if>

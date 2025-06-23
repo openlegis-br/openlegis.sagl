@@ -86,7 +86,7 @@ def criar_documento(numero,ano,data,tip_documento,hdn_num_protocolo,txt_interess
        odt = getattr(context.sapl_documentos.administrativo, id_odt)
        odt.manage_permission('View', roles=['Manager','Authenticated'], acquire=1)
 
-    anexos = context.pysc.anexo_peticao_pysc(str(cod_peticao),listar=True)
+    anexos = context.pysc.anexo_peticao_pysc(str(cod_peticao), listar=True)
     i = 0
     for item in anexos:
         i = i +1
@@ -115,7 +115,7 @@ def criar_documento(numero,ano,data,tip_documento,hdn_num_protocolo,txt_interess
 
 def tramitar_documento(cod_documento, i):
     cod_unid_tram_local = int(context.sapl_documentos.props_sagl.origem)
-    cod_unid_tram_dest = int(lst_unidade)            
+    cod_unid_tram_dest = int(lst_unidade)
     for status in context.zsql.status_tramitacao_administrativo_obter_zsql(sgl_status='PRT'):
         cod_status = status.cod_status
     cod_usuario_corrente = cod_usuario
@@ -164,4 +164,3 @@ elif ind_doc_materia == '1':
    mensagem_obs = '' 
    redirect_url=context.portal_url()+'/mensagem_emitir?modal=1&tipo_mensagem=success&mensagem=' + mensagem + '&mensagem_obs=' + mensagem_obs
    RESPONSE.redirect(redirect_url)
-

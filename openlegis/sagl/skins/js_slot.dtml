@@ -266,18 +266,82 @@ $('body').on('hidden.bs.modal', '.modal', function () {
      $.fn.datepicker.defaults.format = "dd/mm/yyyy";
      $.fn.datepicker.defaults.language = 'pt-BR';
 });
-$(document).ready(function() {
-	$('a[data-confirm]').click(function(ev) {
-		var href = $(this).attr('href');
-		if (!$('#dataConfirmModal').length) {
-			$('body').append('<div class="modal fade" id="dataConfirmModal" tabindex="-1" role="dialog" aria-labelledby="dataConfirmLabel" data-bs-backdrop="static" data-bs-keyboard="false" aria-hidden="true"><div class="modal-dialog modal-dialog-centered modal-md" role="document"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="exampleModalLabel">Mensagem do sistema</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div><div class="modal-body"></div><div class="modal-footer"><a class="btn btn-primary" id="dataConfirmOK">Confirmar</a><button class="btn btn-light" data-bs-dismiss="modal" aria-hidden="true">Cancelar</button></div></div></div></div>');
-		} 
-		$('#dataConfirmModal').find('.modal-body').text($(this).attr('data-confirm'));
-		$('#dataConfirmOK').attr('href', href);
-		$('#dataConfirmModal').modal('show');
-		return false;
-	});
+// ========== MODAL DE CONFIRMAÇÃO PADRÃO ==========
+function initConfirmModal() {
+    if (!document.getElementById('dataConfirmModal')) {
+        const modalHTML = `
+            <div class="modal fade" id="dataConfirmModal" tabindex="-1" role="dialog" 
+                 aria-labelledby="dataConfirmLabel" data-bs-backdrop="static" 
+                 data-bs-keyboard="false" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered modal-md" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header bg-light">
+                            <h5 class="modal-title" id="dataConfirmLabel">Confirmação</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" 
+                                    aria-label="Fechar"></button>
+                        </div>
+                        <div class="modal-body"></div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-light" data-bs-dismiss="modal">
+                                Cancelar
+                            </button>
+                            <a class="btn btn-primary" id="dataConfirmOK">Confirmar</a>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+        document.body.insertAdjacentHTML('beforeend', modalHTML);
+        window.confirmModal = new bootstrap.Modal(document.getElementById('dataConfirmModal'));
+        // Limpeza de event listeners ao fechar
+        document.getElementById('dataConfirmModal').addEventListener('hidden.bs.modal', function() {
+            $('#dataConfirmOK').off('click');
+        });
+    }
+}
+
+$(document).on('click', 'a[data-confirm], button[data-confirm]', function(ev) {
+    ev.preventDefault();
+
+    const $element = $(this);
+    const href = $element.attr('href') || '#';
+    const confirmText = $element.attr('data-confirm');
+    const title = $element.attr('data-title') || 'Confirmação';
+    const action = $element.attr('data-action');
+
+    // Inicializa o modal se necessário
+    if (!window.confirmModal) {
+        initConfirmModal();
+    }
+
+    // Configura o modal
+    $('#dataConfirmLabel').text(title);
+    $('#dataConfirmModal .modal-body').html(confirmText);
+
+    // Configura o comportamento do botão Confirmar
+    $('#dataConfirmOK').off('click').on('click', function(e) {
+        let resultado = true;
+        if (action) {
+            // Se tem uma ação JS definida (como nos botões de gerar ODT/PDF)
+            resultado = eval(action);
+            // Só exibe overlay se ação não retornar false
+            if (resultado !== false) {
+                if (typeof exibirMensagemProcessamento === "function") exibirMensagemProcessamento();
+            }
+        } else if ($element.is('a')) {
+            // Para links: redireciona
+            window.location.href = href;
+        } else if ($element.is('button[type="submit"], input[type="submit"]')) {
+            // Para botões de submit: submete o formulário explicitamente
+            if (typeof exibirMensagemProcessamento === "function") exibirMensagemProcessamento();
+            $element.closest('form').submit();
+        }
+        window.confirmModal.hide();
+    });
+
+    // Exibe o modal
+    window.confirmModal.show();
 });
+
 $(document).ready(function(){
      $('.datepicker').datepicker();
      setTimeout(function() {

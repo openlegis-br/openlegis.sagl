@@ -1561,6 +1561,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
                 break
             if tipo_doc == 'proposicao':
                 storage_path = self.sapl_documentos.proposicao
+                pdf_location = storage.pdf_location
                 pdf_signed = f"{pdf_location}{codigo}{storage.pdf_signed}"
                 nom_arquivo_assinado = f"{codigo}{storage.pdf_signed}"
                 pdf_file = f"{pdf_location}{codigo}{storage.pdf_file}"
@@ -1614,6 +1615,13 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
                 nom_arquivo_assinado = f"{item_assinado.cod_assinatura_doc}.pdf"
                 pdf_file = pdf_signed
                 nom_arquivo = nom_arquivo_assinado
+                if tipo_doc =='proposicao':
+                   storage_path = self.sapl_documentos.proposicao
+                   pdf_location = storage.pdf_location
+                   pdf_signed = f"{pdf_location}{codigo}{storage.pdf_signed}"
+                   nom_arquivo_assinado = f"{codigo}{storage.pdf_signed}"
+                   pdf_file = f"{pdf_location}{codigo}{storage.pdf_file}"
+                   nom_arquivo = f"{codigo}{storage.pdf_file}"
             # Fallbacks
             if not pdf_file:
                 pdf_file = f"{pdf_location}{codigo}{storage.pdf_file}"

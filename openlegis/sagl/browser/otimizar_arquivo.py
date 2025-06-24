@@ -38,11 +38,11 @@ PNG_COMPRESSION_LEVEL = 9  # Máxima compressão PNG
 A4_PORTRAIT = (595, 842)
 A4_LANDSCAPE = (842, 595)
 A4_TOLERANCE = 0.02  # 2% tolerance for page size
-TEXT_DPI = 250      # Para páginas com texto
-IMAGE_DPI = 250     # Para páginas sem texto
+TEXT_DPI = 150      # Para páginas com texto
+IMAGE_DPI = 150     # Para páginas sem texto
 MAX_IMAGE_SIZE = 2048  # Aumentado tamanho máximo para redimensionamento
-JPEG_QUALITY = 90   # Qualidade máxima para JPEG
-FALLBACK_JPEG_QUALITY = 80  # Qualidade para segunda tentativa
+JPEG_QUALITY = 80   # Qualidade máxima para JPEG
+FALLBACK_JPEG_QUALITY = 90  # Qualidade para segunda tentativa
 
 PDFData = Union[bytes, bytearray]
 SignatureData = Dict[str, Any]
@@ -365,19 +365,20 @@ class PDFProcessor:
             output_stream = BytesIO()
             # skip_text=True: o ocrmypdf só faz OCR em páginas sem texto pesquisável!
             ocrmypdf.ocr(
-                input_stream,              # Pode ser path, file-like ou BytesIO
-                output_stream,             # Pode ser path ou BytesIO
-                language='por+eng',               # Idiomas, ex: 'por+eng'
+                input_stream,                # Pode ser path, file-like ou BytesIO
+                output_stream,               # Pode ser path ou BytesIO
+                language='por',              # Idiomas, ex: 'por'
                 output_type='pdf',           # Sempre 'pdf'
-                optimize=1,                  # Otimiza imagens internas
-                jpeg_quality=70,   # Qualidade JPEG (ajuste conforme sua necessidade)
+                optimize=2,                  # Otimiza imagens internas
+                jpeg_quality=40,             # Qualidade JPEG (ajuste conforme sua necessidade)
                 pdf_renderer='sandwich',     # <--- Este é o segredo!
                 skip_text=True,              # Só aplica OCR em páginas sem texto pesquisável
                 force_ocr=False,             # Não faz OCR em páginas já com texto
-                deskew=True,                 # Corrige páginas tortas (scanner desalinhado)
+                deskew=False,                 # Corrige páginas tortas (scanner desalinhado)
                 progress_bar=False,          # Útil para scripts/batch
-                rotate_pages=True,           # Tenta corrigir rotação de páginas
-                clean=True,                  # Remove ruído/despeckle em scans ruins
+                rotate_pages=False,           # Tenta corrigir rotação de páginas
+                clean=False,                  # Remove ruído/despeckle em scans ruins
+                jobs = 4
             )
             return output_stream.getvalue()
         except Exception as e:
@@ -411,7 +412,7 @@ class PDFProcessor:
             with fitz.open(stream=pdf_data) as doc:
                 try:
                     pdf_otimizado = self._otimizacao_inteligente(doc)
-                    if len(pdf_otimizado) > original_size * 1.05:
+                    if len(pdf_otimizado) > original_size * 1.10:
                         raise ValueError("Otimização aumentou o tamanho do PDF")
                     return pdf_otimizado
                 except Exception as intel_error:

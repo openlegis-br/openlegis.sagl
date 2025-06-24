@@ -365,16 +365,19 @@ class PDFProcessor:
             output_stream = BytesIO()
             # skip_text=True: o ocrmypdf só faz OCR em páginas sem texto pesquisável!
             ocrmypdf.ocr(
-                input_stream,
-                output_stream,
-                language='por+eng',
-                output_type='pdf',
-                optimize=1,
-                jpeg_quality=65,
-                pdf_renderer='auto',
-                skip_text=True,
-                force_ocr=False,
-                progress_bar=False
+                input_stream,              # Pode ser path, file-like ou BytesIO
+                output_stream,             # Pode ser path ou BytesIO
+                language='por+eng',               # Idiomas, ex: 'por+eng'
+                output_type='pdf',           # Sempre 'pdf'
+                optimize=1,                  # Otimiza imagens internas
+                jpeg_quality=70,   # Qualidade JPEG (ajuste conforme sua necessidade)
+                pdf_renderer='sandwich',     # <--- Este é o segredo!
+                skip_text=True,              # Só aplica OCR em páginas sem texto pesquisável
+                force_ocr=False,             # Não faz OCR em páginas já com texto
+                deskew=True,                 # Corrige páginas tortas (scanner desalinhado)
+                progress_bar=False,          # Útil para scripts/batch
+                rotate_pages=True,           # Tenta corrigir rotação de páginas
+                clean=True,                  # Remove ruído/despeckle em scans ruins
             )
             return output_stream.getvalue()
         except Exception as e:
@@ -579,5 +582,3 @@ class PDFUploadProcessorView(grok.View, PDFSignatureParser):
         except Exception as e:
             logging.error(f"Erro inesperado: {str(e)}", exc_info=True)
             raise ValueError(f"Falha no processamento: {str(e)}")
-
-

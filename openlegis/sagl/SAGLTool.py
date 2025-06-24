@@ -1640,14 +1640,15 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
                 except Exception as e:
                     print(f"Erro ao acessar o arquivo: {e}")
                     return None, None, None
-            # Calcula CRC32 (de forma compatível com File ou OFS.File.File)
             try:
-                data = arquivo.data if hasattr(arquivo, 'data') else bytes(arquivo)
-                x = crc32(data if isinstance(data, bytes) else data.encode('utf-8'))
-                crc_arquivo = str(x if x >= 0 else -x)
+                x = crc32(bytes(arquivo))
+                if x >= 0:
+                    crc_arquivo = str(x)
+                else:
+                    crc_arquivo = str(-1 * x)
             except Exception as e:
                 print(f"Erro ao calcular o CRC32: {e}")
-                return pdf_tosign, storage_path, None
+                return None, None, None
             return pdf_tosign, storage_path, crc_arquivo
         except Exception as e:
             print(f"Erro geral em get_file_tosign: {e}")

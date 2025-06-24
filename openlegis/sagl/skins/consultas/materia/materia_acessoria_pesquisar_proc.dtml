@@ -1,177 +1,303 @@
 <dtml-var header_html>
 
-<script src="<dtml-var portal_url>/javascript/data_validar.js"></script>
-
-<dtml-let isAnon="portal_membership.isAnonymousUser()">
-  <dtml-if expr="isAnon and sapl_documentos.props_sagl.recaptcha_key">
-     <script src='https://www.google.com/recaptcha/api.js?hl=pt-BR' async defer></script>
-  </dtml-if>
-</dtml-let>
-
- <div class="row mb-2">
-      <div class="col-12 col-md-8 align-self-center">
-        <h1 class="firstHeading font-size-18">Pesquisa de Matérias Acessórias</h1>
-      </div>
-      <div class="col-12 col-md-4 text-start text-md-end">
-         <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia'])">      
-             <a class="btn btn-primary d-print-none" href="<dtml-var portal_url>/cadastros/materia/materia_form_resumido"><i class="fa fa-fw fa-plus"></i> Incluir Matéria</a>
-         </dtml-if>
-      </div>
+ <div class="row mb-3">
+  <div class="col-12 col-md-6 d-flex align-items-center">
+    <h1 class="firstHeading font-size-18">Pesquisa de Matérias Acessórias</h1>
+  </div>
+  <div class="col-12 col-md-6 text-start text-sm-end">
+    <div class="btn-group" role="group">
+     <a class="btn btn-primary" href="<dtml-var portal_url>/consultas/materia/materia_acessoria_pesquisar_form" ><i class="fa fa-fw fa-search"></i> Pesquisa</a>
+     <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia'])">         
+        <a class="btn btn-primary" href="<dtml-var portal_url>/cadastros/materia/materia_form_resumido" ><i class="fa fa-fw fa-plus"></i> Incluir Matéria</a>
+     </dtml-if>   
+    </div>
+  </div>
  </div>
 
-<dtml-var materia_menu>
+<dtml-call "REQUEST.set('existe_seq_anterior', 0)">
+<dtml-call "REQUEST.set('existe_seq_posterior', 0)">
+<dtml-if page>
+  <dtml-call "REQUEST.set('page', _.int(page))">
+<dtml-else>
+  <dtml-call "REQUEST.set('page', 1)">
+</dtml-if>
+<dtml-if step>
+  <dtml-call "REQUEST.set('step', _.int(step))">
+<dtml-else>
+  <dtml-call "REQUEST.set('step', 10)">
+</dtml-if>
+<dtml-call "REQUEST.set('start',(page-1) * step + 1)">
 
-<div class="tab-content" style="margin-top: -1px">
-  <div class="tab-pane p-3 border fade show active">
+<dtml-if expr="lst_tip_materia_ac != ''">
+    <dtml-in expr="zsql.materia_obter_zsql(tip_id_basica=lst_tip_materia_ac, num_ident_basica=txt_numero_ac, ano_ident_basica=txt_ano_ac)">
+        <dtml-call expr="REQUEST.set('cod_materia', cod_materia)">
+        <dtml-else>
+          <dtml-call expr="REQUEST.set('cod_materia', 0)">
+    </dtml-in>
+    <dtml-else>
+      <dtml-call expr="REQUEST.set('cod_materia', '')">
+</dtml-if>
 
-<form novalidate name="pesq_acessoria_form" action="materia_acessoria_pesquisar_proc">
-  <div class="row">
-    <div class="col-12 col-md-6 mb-3">
-      <label class="form-label required" for="lst_tip_materia_acessoria">Tipo de Matéria Acessória</label>
-      <select class="select2 form-select" id="lst_tip_materia_acessoria" name="lst_tip_materia_acessoria" data-minimum-results-for-search="Infinity" style="width: 100%;" required>
-          <option value="">Selecione</option>
-          <dtml-in expr="zsql.tipo_materia_legislativa_obter_zsql(tip_natureza='A', ind_excluido=0)">
-                <option value="<dtml-var des_tipo_materia>"><dtml-var des_tipo_materia></option>
-          </dtml-in>
-      </select>
-      <div class="invalid-feedback">
-        Este campo é obrigatório!
+<dtml-if expr="REQUEST.get('g-recaptcha-response')!=''">
+
+<dtml-if expr="lst_tip_materia_acessoria == 'Emenda'">
+  <dtml-in expr="zsql.emenda_obter_zsql(num_emenda=txt_numero_acessoria, cod_materia=cod_materia, cod_autor=hdn_cod_autor_ac, des_assunto = txt_assunto_ac, ano_apresentacao = txt_ano_apresentacao, dat_apresentacao=dt_apres_ac, dat_apresentacao2=dt_apres2_ac, rd_ordem=rd_ordenacao_ac)" size="step" start="start" orphan=0>
+    <dtml-if sequence-start>
+       <dtml-if previous-sequence>
+         <dtml-call "REQUEST.set('existe_seq_anterior', 1)">
+       </dtml-if previous-sequence>
+       <div class="card mb-3">
+        <div class="card-header">
+         <div class="row">
+          <div class="col-8 col-sm-9 align-self-center">
+            <i class="far fa-list-alt"></i> Resultado: <dtml-var sequence-length> emenda<dtml-if expr="_['sequence-length'] > 1">s</dtml-if>
+          </div>
+      <div class="col-4 col-sm-3 text-end align-self-center">
+         <div class="btn-group">
+           <button class="btn btn-light" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+             <i class="fas fa-file-export"></i> Exportar
+           </button>
+           <div class="dropdown-menu dropdown-menu-right">
+              <dtml-let isAnon="portal_membership.isAnonymousUser()">
+                 <dtml-if expr="not isAnon">
+                     <a class="dropdown-item" href="<dtml-var portal_url>/relatorios/pdf_materia_acessoria_preparar_pysc?<dtml-var "REQUEST.get('QUERY_STRING','')">&tipo_materia=<dtml-var "REQUEST.form.get('lst_tip_materia_acessoria')">" target="_blank"><i class="far fa-file-pdf"></i> PDF</a>
+                 </dtml-if>
+              </dtml-let>
+           </div>
+         </div>
       </div>
     </div>
-    <div class="col-6 col-md-3 mb-3">
-      <label class="form-label" for="txt_numero_acessoria">Número</label>
-      <input name="txt_numero_acessoria" id="txt_numero_acessoria" type="number" class="form-control number" autocomplete="off">
-    </div>
-    <div class="col-6 col-md-3 mb-3 controls">
-      <label class="form-label" for="txt_ano_apresentacao">Ano</label>
-      <input name="txt_ano_apresentacao" id="txt_ano_apresentacao" type="number" min="1900" maxlength="4" class="form-control year" autocomplete="off">
-    </div>
-  </div>
-  <div class="row">
-    <div class="col-12 col-md-6 mb-3">
-      <label class="form-label" for="hdn_cod_autor_ac">Autoria</label>
-        <select class="select2 form-select" id="hdn_cod_autor_ac" name="hdn_cod_autor_ac" data-size="6" data-live-search="true" title="Todas" data-header="Pesquisar Autor" style="width: 100%;">
-              <option value="">Todas</option>
-              <dtml-in expr="zsql.autor_obter_zsql(ind_excluido=0)">
-                <option value="<dtml-var cod_autor>"><dtml-var nom_autor_join></option>
-              </dtml-in>
-       </select>
-    </div>
-    <div class="col-6 col-md-3 mb-3">
-      <label class="form-label" for="dt_apres_ac">Data Inicial</label>
-        <div class="input-group">
-           <input type="text" class="form-control datepicker" placeholder="dd/mm/aaaa" name="dt_apres_ac" id="dt_apres_ac" data-provide="datepicker" data-date-autoclose="true" autocomplete="off">
-           <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
+   </div>
+        <ul class="list-group list-group-flush">
+    </dtml-if sequence-start>
+    <li class="list-group-item">
+      <div class="row">
+        <div class="col-12">    
+           <dtml-in expr="zsql.materia_obter_zsql(cod_materia = cod_materia)">
+              <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia'])">
+                 <a href="<dtml-var portal_url>/cadastros/materia/materia/materia_mostrar_proc?cod_materia=<dtml-var cod_materia>#emenda">
+              <dtml-else>
+                 <a href="<dtml-var portal_url>/consultas/materia/materia_mostrar_proc?cod_materia=<dtml-var expr="pysc.b64encode_pysc(codigo=cod_materia)">" >
+              </dtml-if>
+                  <p class="h6 font-size-14 font-weight-bold text-uppercase mb-1">EMENDA <dtml-var des_tipo_emenda> Nº <dtml-var num_emenda> - <dtml-var sgl_tipo_materia> <dtml-var num_ident_basica>/<dtml-var ano_ident_basica></p></a>
+           </dtml-in>
         </div>
-    </div>
-   <div class="col-6 col-md-3 mb-3">
-      <label class="form-label" for="dt_apres2_ac">Data Final</label>
-        <div class="input-group">
-           <input type="text" class="form-control datepicker" placeholder="dd/mm/aaaa" name="dt_apres2_ac" id="dt_apres2_ac" data-provide="datepicker" data-date-autoclose="true" autocomplete="off">
-           <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
+      </div>
+      <div class="row">
+        <div class="col-12"> 
+          <b>Ementa:</b> <dtml-var txt_ementa>
         </div>
-    </div>
+      </div>
+      <div class="row">
+        <div class="col-12"> 
+            <b>Autoria: </b>
+            <dtml-in expr="zsql.autoria_emenda_obter_zsql(cod_emenda=cod_emenda)">
+               <dtml-var nom_autor_join><dtml-unless sequence-end>,</dtml-unless>
+            </dtml-in>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-12">
+           <b>Data de Apresentação:</b> <dtml-var dat_apresentacao>
+        <div>
+      </div>
+    <dtml-if num_protocolo>
+       <div class="row">
+         <div class="col-12">
+             <b>Protocolo:</b> <dtml-var num_protocolo>/<dtml-var ano_emenda>
+         <div>
+       </div>
+    </dtml-if>
+      <div class="row">
+        <div class="col-12">
+           <b>Resultado:</b>
+             <dtml-in expr="zsql.votacao_ordem_dia_obter_zsql(cod_materia=cod_materia,cod_emenda=cod_emenda, ind_excluido=0)">
+                <dtml-if tip_resultado_votacao>
+                  <dtml-in expr="zsql.tipo_resultado_votacao_obter_zsql(tip_resultado_votacao=tip_resultado_votacao,  ind_excluido=0)">
+                    <dtml-if expr="tip_votacao == 2 ">
+                       <a href="#" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Votação Nominal" data-src="<dtml-var portal_url>/consultas/sessao_plenaria/sessao_plenaria_mostrar_painel_proc?cod_sessao_plen=<dtml-var cod_sessao_plen>&cod_ordem=<dtml-var cod_ordem>&cod_materia=<dtml-var cod_materia>&cod_emenda=<dtml-var cod_emenda>&tipo_materia=acessoria&modal=1">
+                          <dtml-var nom_resultado>
+                       </a>
+                    <dtml-else>
+                        <dtml-var nom_resultado>
+                    </dtml-if>
+                  </dtml-in>
+                <dtml-else>Matéria não votada
+                </dtml-if>
+             <dtml-else>Matéria não votada
+             </dtml-in>
+        <div>
+      </div>
+  <dtml-let id_emenda="str(cod_emenda)+'_emenda.pdf'">
+    <dtml-if "hasattr(sapl_documentos.emenda,id_emenda)">
+      <div class="row d-print-none">
+        <div class="col-12 text-start">
+          <dtml-let emenda="getattr(sapl_documentos.emenda,id_emenda).absolute_url">
+            <div class="btn-group btn-group-sm mt-1">
+              <a class="btn btn-primary" href="<dtml-var emenda>" target="_blank"><i class="far fa-fw fa-file-pdf"></i>Texto Integral</a>
+            </div>
+          </dtml-let>
+        <div>
+      </div>
+    </dtml-if>
+  </dtml-let>
+  </li>
+  <dtml-if sequence-end>
+    </ul>
   </div>
-  <div class="row">
-    <div class="col-12 col-md-6 mb-3">
-      <label class="form-label" for="lst_tip_materia_ac">Matéria Principal</label>
-      <select class="select2 form-select" id="lst_tip_materia_ac" name="lst_tip_materia_ac" data-minimum-results-for-search="Infinity" style="width: 100%;">
-          <option value=""></option>
-          <dtml-in expr="zsql.tipo_materia_legislativa_obter_zsql(tip_natureza='P', ind_excluido=0)">
-                <option value="<dtml-var tip_materia>"><dtml-var des_tipo_materia></option>
-          </dtml-in>
-      </select>
+   <dtml-if next-sequence>
+     <dtml-call "REQUEST.set('existe_seq_posterior', 1)">
+   </dtml-if next-sequence>
+   <dtml-if expr="existe_seq_anterior or existe_seq_posterior">
+     <nav aria-label="Paginação">
+       <ul class="pagination justify-content-center">
+         <dtml-var "pysc.PageListOutput_pysc('materia_acessoria_pesquisar_proc', page, step, _['sequence-length'], lst_tip_materia_acessoria = lst_tip_materia_acessoria, txt_numero_acessoria = txt_numero_acessoria, lst_tip_materia_ac = lst_tip_materia_ac, txt_numero_ac = txt_numero_ac, txt_ano_ac = txt_ano_ac, txt_assunto_ac = txt_assunto_ac, cod_materia = cod_materia, dt_apres_ac = dt_apres_ac, dt_apres2_ac = dt_apres2_ac, txt_ano_apresentacao = txt_ano_apresentacao, hdn_cod_autor_ac = hdn_cod_autor_ac, rd_ordenacao_ac = rd_ordenacao_ac)">
+      </ul>
+     </nav>
+   </dtml-if>
+  </dtml-if sequence-end>
+<dtml-else>
+   <div class="row">
+    <div class="col-12">
+      Nenhuma ocorrência encontrada.
     </div>
-    <div class="col-6 col-md-3 mb-3">
-      <label class="form-label" for="txt_numero_ac">Número</label>
-      <input name="txt_numero_ac" id="txt_numero_ac" type="number" min="1" maxlength="6" class="form-control number"  autocomplete="off">
-    </div>
-    <div class="col-6 col-md-3 mb-3">
-      <label class="form-label" for="txt_ano_ac">Ano</label>
-      <input name="txt_ano_ac" id="txt_ano_ac" type="number" min="1900" maxlength="4" class="form-control year" autocomplete="off">
-    </div>
-  </div>
-  <div class="row">
-    <div class="col-12 col-md-9 mb-3">
-      <label class="form-label" for="txt_assunto_ac">Termos da Pesquisa</label>
-      <input type="text" class="form-control" name="txt_assunto_ac" id="txt_assunto_ac" autocomplete="off" data-bs-toggle="popover" data-bs-trigger="focus" title="Dicas de Preenchimento" data-bs-content="A frase colocada entre aspas duplas pesquisa por registros com a frase exata. Um asterisco (*) é um operador de truncamento que pode ser inserido ao fim de uma palavra. Um sinal de mais (+) precedente indica que a palavra deve estar presente no texto. Um sinal de menos (-) precedente indica que a palavra não deve estar presente em qualquer parte do texto.">
-    </div>
-    <div class="col-12 col-md-3 mb-3">
-      <label class="form-label" for="rd_ordenacao_ac" class="d-block">Ordenação</label>
-        <select class="form-select" id="rd_ordenacao_ac" name="rd_ordenacao_ac" style="width: 100%;">
-         <dtml-in expr="[('Data', '1'), ('Matéria Principal', '2')]">      
-            <option value="<dtml-var expr="_['sequence-item']">" <dtml-if expr="_['sequence-item']==''">selected</dtml-if>><dtml-var expr="_['sequence-key']"></option>
-         </dtml-in>
-        </select>
-    </div>
-  </div>
-  <div class="row">
-       <div class="col-12 col-md-12 mt-2 text-center text-md-start"> 
-        <dtml-let isAnon="portal_membership.isAnonymousUser()">
-            <dtml-if expr="isAnon and sapl_documentos.props_sagl.recaptcha_key">
-                <div class="g-recaptcha mb-3" data-sitekey="<dtml-var "sapl_documentos.props_sagl.recaptcha_key">"></div>
-            </dtml-if>
-         </dtml-let>
-          <button type="button" id="search-btn2" class="btn btn-primary" onClick="return pesquisa_criticar()"><i class="fa fa-fw fa-search"></i> Pesquisar</button>
-          <input class="btn btn-light" type="reset" name="btn_materia_limpar" value="Limpar" />
-     </div>
-  </div>
-  <div class="row">
-    <div class="col-md-12 mt-2">
-       <p class="text-muted small font-size-12 mb-0"><i class="fas fa-asterisk text-danger"></i> Campo obrigatório</p>
-    </div>
-  </div>
-</form>
+ </div>
+</dtml-in>
 
-</div>
-</div>
+<dtml-elif expr="lst_tip_materia_acessoria == 'Substitutivo'">
+<dtml-in expr="zsql.substitutivo_obter_zsql(num_substitutivo = txt_numero_acessoria, cod_materia = cod_materia, cod_autor = hdn_cod_autor_ac, des_assunto = txt_assunto_ac, ano_apresentacao = txt_ano_apresentacao, dat_apresentacao=dt_apres_ac, dat_apresentacao2=dt_apres2_ac,rd_rdem=rd_ordenacao_ac)" size="step" start="start" orphan=0>
+    <dtml-if sequence-start>
+       <dtml-if previous-sequence>
+         <dtml-call "REQUEST.set('existe_seq_anterior', 1)">
+       </dtml-if previous-sequence>
+       <div class="card mb-3">
+        <div class="card-header">
+         <div class="row">
+          <div class="col-8 col-sm-9 align-self-center">
+            <i class="far fa-list-alt"></i> Resultado: <dtml-var sequence-length> substitutivo<dtml-if expr="_['sequence-length'] > 1">s</dtml-if>
+          </div>
+      <div class="col-4 col-sm-3 text-end align-self-center">
+         <div class="btn-group">
+           <button class="btn btn-light" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+             <i class="fas fa-file-export"></i> Exportar
+           </button>
+           <div class="dropdown-menu dropdown-menu-right">
+              <dtml-let isAnon="portal_membership.isAnonymousUser()">
+                 <dtml-if expr="not isAnon">
+                     <a class="dropdown-item" href="<dtml-var portal_url>/relatorios/pdf_materia_acessoria_preparar_pysc?<dtml-var "REQUEST.get('QUERY_STRING','')">&tipo_materia=<dtml-var "REQUEST.form.get('lst_tip_materia_acessoria')">" target="_blank"><i class="far fa-file-pdf"></i> PDF</a>
+                 </dtml-if>
+              </dtml-let>
+           </div>
+         </div>
+      </div>
+    </div>
+   </div>
+        <ul class="list-group list-group-flush">
+    </dtml-if sequence-start>
+    <li class="list-group-item">
+      <div class="row">
+        <div class="col-12">    
+           <dtml-in expr="zsql.materia_obter_zsql(cod_materia = cod_materia)">
+              <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia'])">
+                 <a href="<dtml-var portal_url>/cadastros/materia/materia_mostrar_proc?cod_materia=<dtml-var cod_materia>#substitutivo">
+              <dtml-else>
+                 <a href="<dtml-var portal_url>/consultas/materia/materia_mostrar_proc?cod_materia=<dtml-var expr="pysc.b64encode_pysc(codigo=cod_materia)">" >
+              </dtml-if>
+                  <p class="h6 font-size-14 font-weight-bold text-uppercase mb-1">SUBSTITUTIVO Nº <dtml-var num_substitutivo> - <dtml-var sgl_tipo_materia> <dtml-var num_ident_basica>/<dtml-var ano_ident_basica></p></a>
+           </dtml-in>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-12"> 
+          <b>Ementa:</b> <dtml-var txt_ementa>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-12"> 
+            <b>Autoria: </b>
+            <dtml-in expr="zsql.autoria_substitutivo_obter_zsql(cod_substitutivo=cod_substitutivo)">
+               <dtml-var nom_autor_join><dtml-unless sequence-end>,</dtml-unless>
+            </dtml-in>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-12">
+           <b>Data de Apresentação:</b> <dtml-var dat_apresentacao>
+        <div>
+      </div>
+    <dtml-if num_protocolo>
+       <div class="row">
+         <div class="col-12">
+             <b>Protocolo:</b> <dtml-var num_protocolo>/<dtml-var ano_substitutivo>
+         <div>
+       </div>
+    </dtml-if>
+      <div class="row">
+        <div class="col-12">
+           <b>Resultado:</b>
+             <dtml-in expr="zsql.votacao_ordem_dia_obter_zsql(cod_materia=cod_materia, cod_substitutivo=cod_substitutivo, ind_excluido=0)">
+                <dtml-if tip_resultado_votacao>
+                <dtml-in expr="zsql.tipo_resultado_votacao_obter_zsql(tip_resultado_votacao=tip_resultado_votacao,  ind_excluido=0)">
+                    <dtml-if expr="tip_votacao == 2">
+                       <a href="#" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Votação Nominal" data-src="consultas/sessao_plenaria/sessao_plenaria_mostrar_painel_proc?cod_sessao_plen=<dtml-var cod_sessao_plen>&cod_ordem=<dtml-var cod_ordem>&cod_materia=<dtml-var cod_materia>&cod_substitutivo=<dtml-var cod_substitutivo>&tipo_materia=acessoria&modal=1">
+                          <dtml-var nom_resultado>
+                       </a>
+                    <dtml-else>
+                        <dtml-var nom_resultado>
+                    </dtml-if>
+                </dtml-in>
+                <dtml-else>Matéria não votada
+                </dtml-if>
+                <dtml-else>Matéria não votada
+             </dtml-in>
+        <div>
+      </div>
+  <dtml-let id_substitutivo="str(cod_substitutivo)+'_substitutivo.pdf'">
+    <dtml-if "hasattr(sapl_documentos.substitutivo,id_substitutivo)">
+      <div class="row d-print-none">
+        <div class="col-12 text-start">
+          <dtml-let substitutivo="getattr(sapl_documentos.substitutivo,id_substitutivo).absolute_url">
+            <div class="btn-group btn-group-sm mt-1">
+              <a class="btn btn-primary" href="<dtml-var substitutivo>" target="_blank"><i class="far fas-fw fa-file-pdf"></i>Texto Integral</a>
+            </div>
+          </dtml-let>
+        <div>
+      </div>
+    </dtml-if>
+  </dtml-let>
+  </li>    
+  <dtml-if sequence-end>
+   </ul>
+  </div>
+     <dtml-if next-sequence>
+        <dtml-call "REQUEST.set('existe_seq_posterior', 1)">
+     </dtml-if next-sequence>
+     <dtml-if expr="existe_seq_anterior or existe_seq_posterior">
+        <nav aria-label="Paginação">
+          <ul class="pagination justify-content-center">
+          <dtml-var "pysc.PageListOutput_pysc('materia_acessoria_pesquisar_proc', page, step, _['sequence-length'], lst_tip_materia_acessoria = lst_tip_materia_acessoria, txt_numero_acessoria = txt_numero_acessoria, lst_tip_materia_ac = lst_tip_materia_ac, txt_numero_ac = txt_numero_ac, txt_ano_ac = txt_ano_ac, txt_assunto_ac = txt_assunto_ac, cod_materia = cod_materia, dt_apres_ac = dt_apres_ac, dt_apres2_ac = dt_apres2_ac, txt_ano_apresentacao = txt_ano_apresentacao, hdn_cod_autor_ac = hdn_cod_autor_ac, rd_ordenacao_ac = rd_ordenacao_ac)">
+         </ul>
+        </nav>
+    </dtml-if>
+ </dtml-if sequence-end>
+  <dtml-else>
+     <div class="row">
+       <div class="col-12">
+         <p>Nenhuma ocorrência encontrada.</p>
+       </div>
+     </div>
+  </dtml-in>
+</dtml-if>
+
+<dtml-else>
+  <div class="alert alert-danger alert-dismissible fade show" role="alert">
+    <h5 class="alert-heading">Confirme que você não é um robô.</h5>
+    <button type="button" class="close" data-bs-dismiss="alert" aria-label="Fechar">
+       <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <a class="btn btn-danger" href="javascript:void(0)" onClick="window.history.go(-1); return false;"><i class="fa fa-fw fa-undo"></i> Voltar</a>
+</dtml-if>
 
 <dtml-var js_slot>
-
-<script>
-(function ($) {
-  $(function () {
-    document.onkeypress = function (event) {
-      var form = pesq_acessoria_form;
-      if (event.keyCode === 13) {
-        form.submit();
-      }
-    };
-  });
-}(jQuery));
-
-function pesquisa_criticar(form){  
-
-  var form = document.pesq_acessoria_form;
-
-  if (form.lst_tip_materia_acessoria.value == "") {
-     $('#lst_tip_materia_acessoria').removeClass('is-valid');
-     $('#lst_tip_materia_acessoria').addClass('is-invalid');
-     form.lst_tip_materia_acessoria.focus();
-     return false;
-  }
-
-  if (form.dt_apres_ac.value != "" && !IsValidDate(form.dt_apres_ac.value)) {
-    bootstrap.showModal({title: "Mensagem do Sistema", body: "Digite uma data inicial válida!"});
-    return false;
-  } 
-
-  if (form.dt_apres2_ac.value != "" && !IsValidDate(form.dt_apres2_ac.value)) {
-    bootstrap.showModal({title: "Mensagem do Sistema", body: "Digite uma data final válida!"});
-    return false;
-  } 
-
-  var materia_principal = form.lst_tip_materia_ac[form.lst_tip_materia_ac.selectedIndex].value;
-
-  if (materia_principal!=''){
-     if ((form.lst_tip_materia_ac[form.lst_tip_materia_ac.selectedIndex].value == "") ||
-        (form.txt_numero_ac.value == "") || (form.txt_ano_ac.value == ""))  {
-         bootstrap.showModal({title: "Mensagem do Sistema", body: "informe tipo, número e ano da matéria principal!"});
-         form.txt_numero_ac.focus(); 
-         return false;
-     }
-  }
-  form.submit();
-}
-</script>
 <dtml-var footer_html>

@@ -307,7 +307,10 @@ for sessao in metodo:
       materia = context.zsql.materia_obter_zsql(cod_materia=ordem.cod_materia)[0]
       dic["cod_materia"] = ordem.cod_materia
       dic["cod_parecer"] = ''
-      dic["id_materia"] = '<link href="' + context.sapl_documentos.absolute_url() + '/materia/' + str(materia.cod_materia) + '_texto_integral.pdf' + '">'+materia.des_tipo_materia +' nº '+ str(materia.num_ident_basica)+'/'+str(materia.ano_ident_basica)+'</link>'
+      if hasattr(context.sapl_documentos.materia, str(materia.cod_materia) + '_redacao_final.pdf'):
+         dic["id_materia"] = '<link href="' + context.sapl_documentos.absolute_url() + '/materia/' + str(materia.cod_materia) + '_redacao_final.pdf' + '">'+materia.des_tipo_materia +' nº '+ str(materia.num_ident_basica)+'/'+str(materia.ano_ident_basica)+'</link>'
+      else:
+         dic["id_materia"] = '<link href="' + context.sapl_documentos.absolute_url() + '/materia/' + str(materia.cod_materia) + '_texto_integral.pdf' + '">'+materia.des_tipo_materia +' nº '+ str(materia.num_ident_basica)+'/'+str(materia.ano_ident_basica)+'</link>'
       dic["txt_ementa"] = context.pysc.convert_unicode_pysc(texto=str(ordem.txt_observacao))
       dic["des_turno"]=""
       for turno in context.zsql.turno_discussao_obter_zsql(cod_turno=ordem.tip_turno):

@@ -158,7 +158,10 @@ for sessao in metodo:
                    nome_autor = autor['nom_autor_join']
                lista_autor.append(nome_autor)
            dic["nom_autor"] = ', '.join(['%s' % (value) for (value) in lista_autor])
-           dic["link_materia"] = '<b>ITEM Nº ' + str(item.num_ordem) + '</b> - ' + dic["des_turno"].upper() + ' - <a href="'+context.sapl_documentos.absolute_url()+'/materia/'+ str(materia.cod_materia) + '_texto_integral.pdf' +'">'+materia.des_tipo_materia.upper()+' Nº '+str(materia.num_ident_basica)+'/'+str(materia.ano_ident_basica)+'</a> - ' + dic["nom_autor"].upper() + ' - ' + materia.txt_ementa
+           if hasattr(context.sapl_documentos.materia, str(materia.cod_materia) + '_redacao_final.pdf'):
+              dic["link_materia"] = '<b>ITEM Nº ' + str(item.num_ordem) + '</b> - ' + dic["des_turno"].upper() + ' - <a href="'+context.sapl_documentos.absolute_url()+'/materia/'+ str(materia.cod_materia) + '_redacao_final.pdf' +'">'+materia.des_tipo_materia.upper()+' Nº '+str(materia.num_ident_basica)+'/'+str(materia.ano_ident_basica)+'</a> - ' + dic["nom_autor"].upper() + ' - ' + materia.txt_ementa
+           else:
+              dic["link_materia"] = '<b>ITEM Nº ' + str(item.num_ordem) + '</b> - ' + dic["des_turno"].upper() + ' - <a href="'+context.sapl_documentos.absolute_url()+'/materia/'+ str(materia.cod_materia) + '_texto_integral.pdf' +'">'+materia.des_tipo_materia.upper()+' Nº '+str(materia.num_ident_basica)+'/'+str(materia.ano_ident_basica)+'</a> - ' + dic["nom_autor"].upper() + ' - ' + materia.txt_ementa
            dic["emenda"] = ''
            lst_qtde_emendas=[]
            lst_emendas=[]

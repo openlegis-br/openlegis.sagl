@@ -1,423 +1,570 @@
 <dtml-var header_html>
 
-<dtml-if expr="_.has_key('QUERY_STRING') and QUERY_STRING == 'retry=1'">
-  <div class="alert alert-success alert-dismissible fade show align-items-center" id="alertLogin" role="alert">
-     <i class="mdi mdi-check-circle me-1"></i>
-     O usuário <strong>&dtml-AUTHENTICATED_USER;</strong> foi autenticado com sucesso.
-     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-  </div>
-</dtml-if>
+<style>
+  .hover-effect {
+    transition: all 0.3s ease;
+    transform: translateY(0);
+  }
 
-<dtml-let isAnon="portal_membership.isAnonymousUser()">
-  <dtml-if expr="not isAnon">
-    <h5 class="firstHeading mb-3">Painel do Usuário</h5>
-  <dtml-else>
-    <h5 class="firstHeading mb-3" style="display: none;">Página Inicial</h5>
+  .hover-effect:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+  }
+
+  .card {
+    border-radius: 0.5rem;
+    overflow: hidden;
+    border: 1px solid rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+  }
+
+  .card-header {
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+    padding: 1rem 1.25rem;
+  }
+
+  .card-body {
+    padding: 1.25rem;
+  }
+
+  .toast {
+    border-radius: 0.5rem;
+    border: none;
+  }
+
+  .list-group-item {
+    padding: 1rem 1.25rem;
+    border-left: none;
+    border-right: none;
+  }
+
+  .list-group-item-action:hover {
+    background-color: #f8f9fa;
+  }
+
+  .btn-outline-primary {
+    transition: all 0.3s ease;
+    padding: 0.5rem 1rem;
+  }
+
+  .btn-outline-primary:hover {
+    background-color: #0d6efd;
+    color: white !important;
+  }
+
+  .card-icon-container {
+    height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+  }
+
+  .card-icon {
+    font-size: 3rem;
+    color: #0d6efd;
+  }
+
+  .notification-icon {
+    font-size: 1.5rem;
+    width: 40px;
+    text-align: center;
+  }
+
+  .badge-access bg-primary {
+    padding: 0.35em 0.65em;
+    font-weight: 500;
+    font-size: 0.85em;
+  }
+
+  .alert-dismissible .btn-close {
+    padding: 1rem;
+  }
+</style>
+
+<!-- Main Container -->
+<div class="container-fluid1">
+
+  <!-- Login Success Toast -->
+  <dtml-if expr="_.has_key('QUERY_STRING') and QUERY_STRING == 'retry=1'">
+    <div class="toast-container position-fixed top-0 end-0 p-2" style="z-index: 1100">
+      <div id="successToast" class="toast show" role="alert" aria-live="assertive" aria-atomic="true" data-bs-autohide="true" data-bs-delay="5000">
+        <div class="toast-header bg-success text-white">
+          <i class="mdi mdi-check-circle me-2"></i>
+          <strong class="me-auto">Autenticação bem-sucedida</strong>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Fechar"></button>
+        </div>
+        <div class="toast-body">
+          O usuário <strong><dtml-var AUTHENTICATED_USER></strong> foi autenticado com sucesso.
+        </div>
+      </div>
+    </div>
   </dtml-if>
-</dtml-let>
 
-<dtml-if expr="(str(REQUEST['AUTHENTICATED_USER']).strip()=='Anonymous User')">
-   <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-     <div class="col">
-        <div class="card h-100 bg-primary">
-          <a href="<dtml-var portal_url>/consultas/parlamentar">      
-             <img class="card-img-top img-fluid bg-light" src="<dtml-var portal_url>/imagens/Vereadores.png" alt="Vereadores">
-             <div class="card-body p-3 text-white">
-               <blockquote class="card-bodyquote">
-                 <h4 class="card-title font-size-15">Vereadores</h4>
-                 <p class="card-text text-white font-size-13">
-                   O Poder Legislativo Municipal tem nos vereadores a sua expressão máxima. Possuem funções legisladora, administrativa, julgadora e de fiscalização sobre os atos do Executivo.
-                 </p>
-               </blockquote>
-             </div>
-          </a>
-        </div>
-      </div>
-     <!-- end card-->
-     <div class="col">
-        <div class="card h-100 bg-primary">
-          <a href="<dtml-var portal_url>/consultas/mesa_diretora">
-             <img class="card-img-top img-fluid bg-light" src="<dtml-var portal_url>/imagens/Mesa-Diretora.png" alt="<dtml-var expr="sapl_documentos.props_sagl.nome_mesa"><">
-             <div class="card-body p-3 text-white">
-               <blockquote class="card-bodyquote">
-                 <h4 class="card-title font-size-15"><dtml-var expr="sapl_documentos.props_sagl.nome_mesa"></h4>
-                 <p class="card-text text-white font-size-13">
-                     Órgão colegiado a quem cabe a direção dos trabalhos legislativos. Os integrantes da <dtml-var expr="sapl_documentos.props_sagl.nome_mesa"> são eleitos por seus pares na primeira reunião de instalação do período legislativo, para um mandato de um a dois anos.
-                 </p>
-               </blockquote>
-             </div>
-          </a>
-        </div>
-      </div>
-     <!-- end card-->
-     <div class="col">
-        <div class="card h-100 bg-primary">
-          <a href="<dtml-var portal_url>/consultas/comissao">
-             <img class="card-img-top img-fluid bg-light" src="<dtml-var portal_url>/imagens/Comissoes.png" alt="Comissões">
-             <div class="card-body p-3 text-white">
-               <blockquote class="card-bodyquote">
-                 <h4 class="card-title font-size-15">Comissões</h4>
-                 <p class="card-text text-white font-size-13">
-                     Órgãos que têm por objetivo prestar esclarecimentos aos vereadores para a tomada de decisões. As comissões elaboram estudos, pareceres a respeito de projetos e investigação de irregularidades sobre fato determinado.
-                 </p>
-               </blockquote>
-             </div>
-          </a>
-        </div>
-      </div>
-     <!-- end card-->
-     <div class="col">
-        <div class="card h-100 bg-primary">
-          <a href="<dtml-var portal_url>/consultas/bancada">
-             <img class="card-img-top img-fluid bg-light" src="<dtml-var portal_url>/imagens/Bancadas.png" alt="Bancadas">
-             <div class="card-body p-3 text-white">
-               <blockquote class="card-bodyquote">
-                 <h4 class="card-title font-size-15">Bancadas</h4>
-                 <p class="card-text text-white font-size-13">
-                     Contêm informações sobre as bancadas partidárias e frentes parlamentares, suas lideranças e composições, por legislatura e período de composição.
-                 </p>
-               </blockquote>
-             </div>
-          </a>
-        </div>
-      </div>
-     <!-- end card-->
-     <div class="col">
-        <div class="card h-100 bg-primary">
-          <a href="<dtml-var portal_url>/consultas/pauta_sessao">
-             <img class="card-img-top img-fluid bg-light" src="<dtml-var portal_url>/imagens/Pautas.png" alt="Pautas">
-             <div class="card-body p-3 text-white">
-               <blockquote class="card-bodyquote">
-                 <h4 class="card-title font-size-15">Pautas das <dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao_plural"></h4>
-                 <p class="card-text text-white font-size-13">
-                     Utilizadas para se determinar quais matérias serão discutidas e votadas. A responsabilidade pela elaboração das Pautas é definida no Regimento Interno que, em geral, dá poderes ao Presidente da Casa Legislativa para a sua elaboração.
-                 </p>
-               </blockquote>
-             </div>
-          </a>
-        </div>
-      </div>
-     <!-- end card-->
-     <div class="col">
-        <div class="card h-100 bg-primary">
-          <a href="<dtml-var portal_url>/consultas/sessao_plenaria">
-             <img class="card-img-top img-fluid bg-light" src="<dtml-var portal_url>/imagens/Sessoes.png" alt="<dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao_plural"> Plenárias">
-             <div class="card-body p-3 text-white">
-               <blockquote class="card-bodyquote">
-                 <h4 class="card-title font-size-15"><dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao_plural"> Plenárias</h4>
-                 <p class="card-text text-white font-size-13">
-                     Foro apropriado para a tomada de decisões sobre os projetos de lei e outras matérias legislativas, aprovadas ou rejeitadas em votação pelos vereadores. É dirigida pela <dtml-var expr="sapl_documentos.props_sagl.nome_mesa"> de acordo com o Regimento Interno da Casa. As decisões votadas em Plenário são soberanas.
-                 </p>
-               </blockquote>
-             </div>
-          </a>
-        </div>
-      </div>
-     <!-- end card-->
-     <div class="col">
-        <div class="card h-100 bg-primary">
-          <a href="<dtml-var portal_url>/consultas/materia">
-             <img class="card-img-top img-fluid bg-light" src="<dtml-var portal_url>/imagens/Materias.png" alt="Matérias Legislativas">
-             <div class="card-body p-3 text-white">
-               <blockquote class="card-bodyquote">
-                 <h4 class="card-title font-size-15">Matérias Legislativas</h4>
-                 <p class="card-text text-white font-size-13">
-                     Têm início com o processo de criação de leis e a apresentação de projetos no Poder Legislativo.
-                 </p>
-               </blockquote>
-             </div>
-          </a>
-        </div>
-      </div>
-     <!-- end card-->
-     <div class="col">
-        <div class="card h-100 bg-primary">
-          <a href="<dtml-var portal_url>/consultas/norma_juridica">
-             <img class="card-img-top img-fluid bg-light" src="<dtml-var portal_url>/imagens/Legislacao.png" alt="Legislação">
-             <div class="card-body p-3 text-white">
-               <blockquote class="card-bodyquote">
-                 <h4 class="card-title font-size-15">Legislação</h4>
-                 <p class="card-text text-white font-size-13">
-                     Nos Municípios, referem-se às emendas à Lei Orgânica, às leis complementares, às leis ordinárias, aos decretos legislativos e às resoluções.
-                 </p>
-               </blockquote>
-             </div>
-          </a>
-        </div>
-      </div>
-     <!-- end card-->
-     <div class="col">
-        <div class="card h-100 bg-primary">
-          <a href="<dtml-var portal_url>/consultas/relatorios_administrativos">
-             <img class="card-img-top img-fluid bg-light" src="<dtml-var portal_url>/imagens/Relatorios.png" alt="Relatórios Estatísticos">
-             <div class="card-body p-3 text-white">
-               <blockquote class="card-bodyquote">
-                 <h4 class="card-title font-size-15">Relatórios</h4>
-                 <p class="card-text text-white font-size-13">
-                     Contêm informações estatísticas sobre a produção legislativa dos vereadores e da Casa, dispostas e agrupadas de diferentes formas de acordo com parâmetros fornecidos.
-                 </p>
-               </blockquote>
-             </div>
-          </a>
-        </div>
-      </div>
-     <!-- end card-->
-  </div>
-  <!-- end row-->
+  <!-- Page Header -->
+  <dtml-let isAnon="portal_membership.isAnonymousUser()">
+    <header class="mb-4">
+      <dtml-if expr="not isAnon">
+        <h2 class="firstHeading display-7 font-size-20 text-default mb-4 pb-2 border-bottom d-flex align-items-center">
+          <i class="fas fa-user-shield text-primary me-2"></i>Painel do Usuário
+        </h2>
+      <dtml-else>
+        <h2 class="firstHeading display-7 font-size-20 text-default mb-4 pb-2 border-bottom d-flex align-items-center">
+          <i class="fas fa-landmark text-primary me-2"></i>Portal Legislativo
+        </h2>
+      </dtml-if>
+    </header>
+  </dtml-let>
 
-<dtml-comment>
-<div class="row mt-2">
- <div class="col-12">
-   <div class="card mb-3">
-     <h6 class="card-header"><i class="fas fa-calendar-alt"></i> Próximas <dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao_plural"></h6>   
-      <ul class="list-group list-group-flush">     
-        <dtml-in expr="zsql.sessao_plenaria_proximas_zsql()">
-           <dtml-in expr="zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=cod_sessao_plen)">
-              <dtml-in expr="zsql.tipo_sessao_plenaria_obter_zsql(tip_sessao=tip_sessao)">           
-                  <li class="list-group-item"><span class="badge badge-secondary"><dtml-var dat_inicio_sessao> <dtml-var expr="pysc.hora_formatar_pysc(hora=hr_inicio_sessao)"> </span> <dtml-var num_sessao_plen>ª <dtml-if expr="nom_sessao!='Audiência Pública'"><dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao"></dtml-if> <dtml-var nom_sessao> (<dtml-var num_sessao_leg>ª Sessão Legislativa)
-                  <dtml-if expr="zsql.materia_apresentada_sessao_obter_zsql(cod_sessao_plen = cod_sessao_plen, ind_excluido=0) or zsql.expediente_materia_obter_zsql(cod_sessao_plen = cod_sessao_plen, ind_excluido=0)">
-                     <a class="btn btn-link" href="<dtml-var portal_url>/relatorios/pdf_expediente_preparar_pysc?data=<dtml-var dat_inicio_sessao>&cod_sessao_plen=<dtml-var cod_sessao_plen>" target="_blank"><i class="fas fa-file-pdf"></i> <span class="">Expediente</span></a>
+  <!-- Content for Anonymous Users -->
+  <dtml-if expr="(str(REQUEST['AUTHENTICATED_USER']).strip()=='Anonymous User')">
+    <!-- Public Services Section -->
+    <section class="mb-3">
+      
+      <div class="row g-4">
+        <!-- Councilors Card -->
+        <article class="col-12 col-md-6 col-lg-4 col-xl-3">
+          <div class="card h-100 shadow-sm hover-effect">
+            <a href="<dtml-var portal_url>/consultas/parlamentar" class="text-decoration-none text-reset">
+              <div class="card-icon-container bg-light">
+                <i class="fas fa-user-tie card-icon text-primary"></i>
+              </div>
+              <div class="card-body">
+                <h3 class="h5 card-title text-primary mb-3">Vereadores</h3>
+                <p class="card-text text-muted mb-4">
+                  Conheça os representantes do Poder Legislativo Municipal e suas funções legisladoras, administrativas e fiscalizatórias.
+                </p>
+                <span class="badge badge-access bg-primary">Acessar <i class="fas fa-chevron-right ms-1"></i></span>
+              </div>
+            </a>
+          </div>
+        </article>
+
+        <!-- Board of Directors Card -->
+        <article class="col-12 col-md-6 col-lg-4 col-xl-3">
+          <div class="card h-100 shadow-sm hover-effect">
+            <a href="<dtml-var portal_url>/consultas/mesa_diretora" class="text-decoration-none text-reset">
+              <div class="card-icon-container bg-light">
+                <i class="fas fa-users card-icon text-primary"></i>
+              </div>
+              <div class="card-body">
+                <h3 class="h5 card-title text-primary mb-3"><dtml-var expr="sapl_documentos.props_sagl.nome_mesa"></h3>
+                <p class="card-text text-muted mb-4">
+                  Órgão responsável pela direção dos trabalhos legislativos eleito por seus pares para mandato de um a dois anos.
+                </p>
+                <span class="badge badge-access bg-primary">Acessar <i class="fas fa-chevron-right ms-1"></i></span>
+              </div>
+            </a>
+          </div>
+        </article>
+
+        <!-- Committees Card -->
+        <article class="col-12 col-md-6 col-lg-4 col-xl-3">
+          <div class="card h-100 shadow-sm hover-effect">
+            <a href="<dtml-var portal_url>/consultas/comissao" class="text-decoration-none text-reset">
+              <div class="card-icon-container bg-light">
+                <i class="fas fa-clipboard-list card-icon text-primary"></i>
+              </div>
+              <div class="card-body">
+                <h3 class="h5 card-title text-primary mb-3">Comissões</h3>
+                <p class="card-text text-muted mb-4">
+                  Órgãos temáticos especializados que elaboram estudos e pareceres sobre projetos ou que investigam irregularidades.
+                </p>
+                <span class="badge badge-access bg-primary">Acessar <i class="fas fa-chevron-right ms-1"></i></span>
+              </div>
+            </a>
+          </div>
+        </article>
+
+        <!-- Session Agendas Card -->
+        <article class="col-12 col-md-6 col-lg-4 col-xl-3">
+          <div class="card h-100 shadow-sm hover-effect">
+            <a href="<dtml-var portal_url>/consultas/pauta_sessao" class="text-decoration-none text-reset">
+              <div class="card-icon-container bg-light">
+                <i class="fas fa-list-ol card-icon text-primary"></i>
+              </div>
+              <div class="card-body">
+                <h3 class="h5 card-title text-primary mb-3">Pautas das <dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao_plural"></h3>
+                <p class="card-text text-muted mb-4">
+                  Matérias que serão discutidas e votadas nas <dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao_plural"> Plenárias.
+                </p>
+                <span class="badge badge-access bg-primary">Acessar <i class="fas fa-chevron-right ms-1"></i></span>
+              </div>
+            </a>
+          </div>
+        </article>
+
+        <!-- Plenary Sessions Card -->
+        <article class="col-12 col-md-6 col-lg-4 col-xl-3">
+          <div class="card h-100 shadow-sm hover-effect">
+            <a href="<dtml-var portal_url>/consultas/sessao_plenaria" class="text-decoration-none text-reset">
+              <div class="card-icon-container bg-light">
+                <i class="fas fa-gavel card-icon text-primary"></i>
+              </div>
+              <div class="card-body">
+                <h3 class="h5 card-title text-primary mb-3"><dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao_plural"> Plenárias</h3>
+                <p class="card-text text-muted mb-4">
+                  Foro apropriado para a tomada de decisões sobre projetos de lei e outras matérias legislativas.
+                </p>
+                <span class="badge badge-access bg-primary">Acessar <i class="fas fa-chevron-right ms-1"></i></span>
+              </div>
+            </a>
+          </div>
+        </article>
+
+        <!-- Legislative Matters Card -->
+        <article class="col-12 col-md-6 col-lg-4 col-xl-3">
+          <div class="card h-100 shadow-sm hover-effect">
+            <a href="<dtml-var portal_url>/consultas/materia" class="text-decoration-none text-reset">
+              <div class="card-icon-container bg-light">
+                <i class="fas fa-file-alt card-icon text-primary"></i>
+              </div>
+              <div class="card-body">
+                <h3 class="h5 card-title text-primary mb-3">Matérias Legislativas</h3>
+                <p class="card-text text-muted mb-4">
+                  Processo de criação de leis e apresentação de projetos no Poder Legislativo.
+                </p>
+                <span class="badge badge-access bg-primary">Acessar <i class="fas fa-chevron-right ms-1"></i></span>
+              </div>
+            </a>
+          </div>
+        </article>
+
+        <!-- Legislation Card -->
+        <article class="col-12 col-md-6 col-lg-4 col-xl-3">
+          <div class="card h-100 shadow-sm hover-effect">
+            <a href="<dtml-var portal_url>/consultas/norma_juridica" class="text-decoration-none text-reset">
+              <div class="card-icon-container bg-light">
+                <i class="fas fa-balance-scale card-icon text-primary"></i>
+              </div>
+              <div class="card-body">
+                <h3 class="h5 card-title text-primary mb-3">Legislação</h3>
+                <p class="card-text text-muted mb-4">
+                  Emendas à Lei Orgânica, leis complementares, leis ordinárias, decretos legislativos e resoluções.
+                </p>
+                <span class="badge badge-access bg-primary">Acessar <i class="fas fa-chevron-right ms-1"></i></span>
+              </div>
+            </a>
+          </div>
+        </article>
+
+        <!-- Relatorios Card -->
+        <article class="col-12 col-md-6 col-lg-4 col-xl-3">
+          <div class="card h-100 shadow-sm hover-effect">
+            <a href="<dtml-var portal_url>/relatorios_administrativos/relatorios_administrativos_index_html" class="text-decoration-none text-reset">
+              <div class="card-icon-container bg-light">
+                <i class="fas fa-chart-pie card-icon text-primary"></i>
+              </div>
+              <div class="card-body">
+                <h3 class="h5 card-title text-primary mb-3">Relatórios Estatísticos</h3>
+                <p class="card-text text-muted mb-4">
+                  Acesse dados e métricas legislativas, desempenho e análises sobre a atividade parlamentar.
+                </p>
+                <span class="badge badge-access bg-primary">Acessar <i class="fas fa-chevron-right ms-1"></i></span>
+              </div>
+            </a>
+          </div>
+        </article> 
+       
+      </div>
+    </section>
+
+
+
+  <!-- Content for Authenticated Users -->
+  <dtml-else>
+    <!-- User Dashboard -->
+    <div class="row">
+      <!-- Side Column -->
+      <div class="col-lg-4">
+        <!-- Quick Links Card -->
+        <div class="card shadow-sm mb-4">
+          <div class="card-header bg-primary text-white py-3">
+            <h2 class="h5 mb-0 d-flex align-items-center">
+              <i class="fas fa-bolt me-2"></i>Atalhos Rápidos
+            </h2>
+          </div>
+          <div class="card-body">
+            <div class="d-grid gap-2">
+              <dtml-if expr="AUTHENTICATED_USER.has_role(['Autor', 'Assessor Parlamentar'])">
+                <a href="<dtml-var portal_url>/cadastros/proposicao/proposicao_index_html?ind_enviado=0" 
+                   class="btn btn-outline-primary text-start py-2">
+                  <i class="fas fa-edit me-2"></i> Elaboração de Proposições
+                </a>
+              </dtml-if>
+      
+              <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador','Operador Materia'])">
+                <a href="<dtml-var portal_url>/cadastros/recebimento_proposicao/recebimento_proposicao_index_html#protocolo" 
+                   class="btn btn-outline-primary text-start py-2">
+                  <i class="fas fa-inbox me-2"></i> Recebimento de Proposições
+                </a>
+              <dtml-elif expr="AUTHENTICATED_USER.has_role(['Revisor Proposicao', 'Chefia Revisao'])">
+                <a href="<dtml-var portal_url>/cadastros/recebimento_proposicao/recebimento_proposicao_index_html#pendente" 
+                   class="btn btn-outline-primary text-start py-2">
+                  <i class="fas fa-inbox me-2"></i> Recebimento de Proposições
+                </a>
+              </dtml-if>
+      
+              <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador','Operador Norma'])">
+                <a href="<dtml-var portal_url>/cadastros/norma_juridica/recebimento_normas" 
+                   class="btn btn-outline-primary text-start py-2">
+                  <i class="fas fa-gavel me-2"></i> Recebimento de Normas
+                </a>
+              </dtml-if>
+      
+              <a href="<dtml-var portal_url>/cadastros/peticionamento_eletronico/peticionamento_eletronico_index_html" 
+                 class="btn btn-outline-primary text-start py-2">
+                 <i class="fas fa-file-signature me-2"></i> Peticionamento Digital
+              </a>
+
+              <a href="<dtml-var portal_url>/cadastros/tramitacao_materia/tramitacao_lote_form" 
+                 class="btn btn-outline-primary text-start py-2">
+                <i class="fas fa-exchange-alt me-2"></i> Tramitação de Processos
+              </a>
+
+              <a href="<dtml-var portal_url>/cadastros/assinatura/assinador" 
+                 class="btn btn-outline-primary text-start py-2">
+                <i class="fas fa-signature me-2"></i> Assinador Digital
+              </a>   
+
+            </div>
+          </div>
+        </div>     
+          <!-- User Profile Card -->
+          <div class="card shadow-sm mb-4">
+            <div class="card-header bg-primary text-white py-3">
+              <h2 class="h5 mb-0 d-flex align-items-center">
+                <i class="fas fa-user-circle me-2"></i>Meu Perfil
+              </h2>
+            </div>
+            <div class="card-body">
+              <div class="d-flex align-items-center mb-3">
+                <div class="rounded-circle bg-light p-3 me-3">
+                  <i class="fas fa-user text-primary" style="font-size: 2rem;"></i>
+                </div>
+                <div>
+                  <h3 class="h6 mb-0"><dtml-var AUTHENTICATED_USER></h3>
+                  <small class="text-muted">
+                    <dtml-in expr="AUTHENTICATED_USER.getRoles()">
+                      <dtml-if expr="_['sequence-item'] != 'Authenticated'"> 
+                      <dtml-if sequence-start></dtml-if>
+                      <span class="badge bg-light"><dtml-var sequence-item></span><dtml-if sequence-end><dtml-else> </dtml-if>
+                      </dtml-if>
+                    </dtml-in>
+                  </small>
+                </div>
+              </div>
+              <div class="d-grid gap-2">
+                <!-- Botão de Editar Perfil -->
+                <a href="<dtml-var portal_url>/cadastros/usuario/usuario_mostrar_proc" 
+                   class="btn btn-outline-primary">
+                  <i class="fas fa-user-edit me-2"></i> Editar Perfil
+                </a>
+                <!-- Botão de Sair -->
+                <a href="<dtml-var portal_url>/generico/log_out_proc" class="btn btn-outline-danger">
+                  <i class="fas fa-sign-out-alt me-2"></i> Sair do Sistema
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      <!-- Main Column -->
+      <div class="col-lg-8">
+        <!-- Notifications Card -->
+        <div class="card shadow-sm mb-4">
+          <div class="card-header bg-primary text-white py-3">
+            <h2 class="h5 mb-0 d-flex align-items-center">
+              <i class="fas fa-bell me-2"></i>Notificações e Alertas
+            </h2>
+          </div>
+          <div class="card-body p-0">
+            <div class="list-group list-group-flush">
+              
+              <!-- Alerts for Operators -->
+              <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador','Operador Materia'])">
+                <!-- Matters with expired deliberation period -->
+                <dtml-with expr="_.namespace(materias=zsql.materia_prazo_deliberacao_vencido_zsql())">
+                  <dtml-if expr="_.len(materias) > 0">
+                    <a href="<dtml-var portal_url>/generico/materia_listar_prazo_deliberacao" 
+                       class="list-group-item list-group-item-action list-group-item-danger py-3">
+                      <div class="d-flex align-items-center">
+                        <i class="fas fa-exclamation-triangle notification-icon text-danger"></i>
+                        <div class="ms-3 flex-grow-1">
+                          <h3 class="h6 mb-1">Prazos de deliberação vencidos</h3>
+                          <p class="mb-0 small text-muted">
+                            <dtml-var expr="_.len(materias)"> matéria<dtml-if expr="_.len(materias) > 1">s</dtml-if> com prazo de deliberação vencido
+                          </p>
+                        </div>
+                        <i class="fas fa-chevron-right text-muted ms-3"></i>
+                      </div>
+                    </a>
                   </dtml-if>
-                 <dtml-let id_pauta="str(cod_sessao_plen)+'_pauta_sessao.pdf'">                  
-                 <dtml-if "hasattr(sapl_documentos.pauta_sessao,id_pauta)">
-                    <dtml-let pauta="getattr(sapl_documentos.pauta_sessao,id_pauta).absolute_url">
-                      <a class="btn btn-link" href="<dtml-var pauta>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fas fa-file-pdf"></i> <span class="">Ordem do Dia</span></a>
-                   </dtml-let>
-                 </dtml-if>
-                 </dtml-let> 
-               </li>                       
-              </dtml-in>
-           </dtml-in>
-           <dtml-if sequence-end>
-             </ul>           
-           </dtml-if>
-        <dtml-else>
-           <div class="card-body">Não há nenhuma sessão agendada.</div>
-        </dtml-in>
-            <div class="card-footer text-end">
-             <a class="btn btn-link" href="<dtml-var portal_url>/consultas/sessao_plenaria"><i class="fa fa-link"></i> Calendário das <dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao_plural"></a>
-            </div>        
-   </div>
-</div>
-</div>
+                </dtml-with>
 
-<div class="row mt-2">
- <div class="col-12 col-lg-6">
-   <div class="card mb-3">
-     <h6 class="card-header"><i class="fas fa-comments"></i> Matérias Recentes</h6>      
-      <ul class="list-group list-group-flush">     
-        <dtml-in expr="zsql.materias_recentes_zsql()">
-           <dtml-in expr="zsql.materia_obter_zsql(cod_materia=cod_materia)">
-             <li class="list-group-item"><span class="badge badge-secondary"><dtml-var dat_apresentacao> </span> <a href="<dtml-var portal_url>/consultas/materia/materia_mostrar_proc?cod_materia=<dtml-var expr="pysc.b64encode_pysc(codigo=cod_materia)">" ><dtml-var des_tipo_materia> nº <dtml-var num_ident_basica>/<dtml-var ano_ident_basica></a> - 
-               <dtml-in expr="zsql.autoria_obter_zsql(cod_materia=cod_materia)">
-                 <dtml-var nom_autor_join><dtml-unless sequence-end>,</dtml-unless>
-               </dtml-in>
-              - <dtml-var txt_ementa></li>
-           </dtml-in>
-           <dtml-if sequence-end>
-             </ul>           
-           </dtml-if>
-        <dtml-else>
-           <div class="card-body">Nenhum registro encontrado.</div>
-        </dtml-in>
-            <div class="card-footer text-end">
-             <a class="btn btn-link" href="<dtml-var portal_url>/consultas/materia"><i class="fa fa-link"></i> Pesquisa de Matérias</a>
-            </div>        
-   </div>
- </div>
- <div class="col-12 col-lg-6">
-   <div class="card mb-3">
-     <h6 class="card-header"><i class="fas fa-balance-scale"></i> Normas Recentes</h6>         
-      <ul class="list-group list-group-flush">     
-        <dtml-in expr="zsql.normas_recentes_zsql()">
-           <dtml-in expr="zsql.norma_juridica_obter_zsql(cod_norma=cod_norma)">
-             <li class="list-group-item"><span class="badge badge-secondary"><dtml-var dat_norma> </span> <a href="<dtml-var portal_url>/consultas/norma_juridica/norma_juridica_mostrar_proc?cod_norma=<dtml-var cod_norma missing>"><dtml-var des_tipo_norma> nº <dtml-var num_norma>/<dtml-var ano_norma></a>
-              - <dtml-var txt_ementa></li>
-           </dtml-in>
-           <dtml-if sequence-end>
-             </ul>           
-           </dtml-if>
-        <dtml-else>
-           <div class="card-body">Nenhum registro encontrado.</div>
-        </dtml-in>
-            <div class="card-footer text-end">
-             <a class="btn btn-link" href="<dtml-var portal_url>/consultas/norma_juridica"><i class="fa fa-link"></i> Pesquisa de Legislação</a>
-            </div>        
-   </div>     
- </div>
-</div>
-</dtml-comment>
-<dtml-else>
+                <!-- Matters with expired processing period -->
+                <dtml-with expr="_.namespace(materias=zsql.tramitacao_prazo_vencido_obter_zsql())">
+                  <dtml-if expr="_.len(materias) > 0">
+                    <a href="<dtml-var portal_url>/generico/materia_listar_prazo_vencido" 
+                       class="list-group-item list-group-item-action list-group-item-danger py-3">
+                      <div class="d-flex align-items-center">
+                        <i class="fas fa-hourglass-end notification-icon text-danger"></i>
+                        <div class="ms-3 flex-grow-1">
+                          <h3 class="h6 mb-1">Prazos de tramitação vencidos</h3>
+                          <p class="mb-0 small text-muted">
+                            <dtml-var expr="_.len(materias)"> matéria<dtml-if expr="_.len(materias) > 1">s</dtml-if> com prazo de tramitação vencido
+                          </p>
+                        </div>
+                        <i class="fas fa-chevron-right text-muted ms-3"></i>
+                      </div>
+                    </a>
+                  </dtml-if>
+                </dtml-with>
 
-<div class="row">
-   <div class="col-lg-6 col-xl-6">
-      <div class="card">
-         <div class="card-body">
-            <h5 class="card-title mb-3">Notificações</h5>
-<dtml-if expr="AUTHENTICATED_USER.has_role(['Operador','Operador Materia'])">
- <dtml-with expr="_.namespace(materias=zsql.materia_prazo_deliberacao_vencido_zsql())">
-  <dtml-if expr="_.len(materias) > 0">
-   <div class="row">
-   <div class="col-12">
-     <div class="bs-component">
-       <div class="alert alert-dismissible alert-danger">
-         Há <a href="<dtml-var portal_url>/generico/materia_listar_prazo_de
-liberacao" class="alert-link text-decoration-underline"> <dtml-var expr="_.len(materias)"> matéria<dtml-if expr="_.len(materias) > 1">s</dtml-if> legislativa<dtml-if expr="_.len(materias) > 1">s</dtml-if></a> com prazo de deliberação vencido.
-         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-       </div>
-     </div>
-    </div>
-    </div>
-  </dtml-if>
- </dtml-with>
+                <!-- Matters expiring today -->
+                <dtml-with expr="_.namespace(materias=zsql.tramitacao_prazo_vincendo_obter_zsql())">
+                  <dtml-if expr="_.len(materias) > 0">
+                    <a href="<dtml-var portal_url>/generico/materia_listar_prazo" 
+                       class="list-group-item list-group-item-action list-group-item-warning py-3">
+                      <div class="d-flex align-items-center">
+                        <i class="fas fa-hourglass-half notification-icon text-warning"></i>
+                        <div class="ms-3 flex-grow-1">
+                          <h3 class="h6 mb-1">Prazos vencendo hoje</h3>
+                          <p class="mb-0 small text-muted">
+                            <dtml-var expr="_.len(materias)"> matéria<dtml-if expr="_.len(materias) > 1">s</dtml-if> com prazo<dtml-if expr="_.len(materias) > 1">s</dtml-if> de tramitação vencendo hoje
+                          </p>
+                        </div>
+                        <i class="fas fa-chevron-right text-muted ms-3"></i>
+                      </div>
+                    </a>
+                  </dtml-if>
+                </dtml-with>
+              </dtml-if>
 
- <dtml-with expr="_.namespace(materias=zsql.tramitacao_prazo_vencido_obter_zsql())">
-  <dtml-if expr="_.len(materias) > 0">
-   <div class="row">  
-   <div class="col-12">
-     <div class="bs-component">
-       <div class="alert alert-dismissible alert-danger">
-         Há <a href="<dtml-var portal_url>/generico/materia_listar_prazo_vencido" class="alert-link text-decoration-underline"> <dtml-var expr="_.len(materias)"> matéria<dtml-if expr="_.len(materias) > 1">s</dtml-if> legislativa<dtml-if expr="_.len(materias) > 1">s</dtml-if></a> com prazo de tramitação vencido.
-         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-       </div>
-     </div>
-    </div>
-    </div>
-  </dtml-if>
- </dtml-with>
+              <!-- Pending Signatures -->
+              <dtml-if cod_usuario_corrente>
+                <dtml-with expr="_.namespace(assinaturas=zsql.assinatura_documento_obter_zsql(cod_usuario=cod_usuario_corrente, ind_assinado=0, ind_recusado=0))">
+                  <dtml-if expr="_.len(assinaturas) > 0">
+                    <a href="<dtml-var portal_url>/cadastros/assinatura/assinador" 
+                       class="list-group-item list-group-item-action list-group-item-primary py-3">
+                      <div class="d-flex align-items-center">
+                        <i class="fas fa-signature notification-icon text-primary"></i>
+                        <div class="ms-3 flex-grow-1">
+                          <h3 class="h6 mb-1">Assinaturas pendentes</h3>
+                          <p class="mb-0 small text-muted">
+                            <dtml-var expr="_.len(assinaturas)"> documento<dtml-if expr="_.len(assinaturas) > 1">s</dtml-if> aguardando sua assinatura digital
+                          </p>
+                        </div>
+                        <i class="fas fa-chevron-right text-muted ms-3"></i>
+                      </div>
+                    </a>
+                  </dtml-if>
+                </dtml-with>
 
- <dtml-with expr="_.namespace(materias=zsql.tramitacao_prazo_vincendo_obter_zsql())">
-  <dtml-if expr="_.len(materias) > 0">
-   <div class="row">    
-   <div class="col-12">
-     <div class="bs-component">
-       <div class="alert alert-dismissible alert-info me-2">
-         Há <a href="<dtml-var portal_url>/generico/materia_listar_prazo" class="alert-link text-decoration-underline"> <dtml-var expr="_.len(materias)"> matéria<dtml-if expr="_.len(materias) > 1">s</dtml-if> legislativa<dtml-if expr="_.len(materias) > 1">s</dtml-if></a> com prazo<dtml-if expr="_.len(materias) > 1">s</dtml-if> de tramitação vencendo hoje
-         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-       </div>
-     </div>
-    </div>
-    </div>
-  </dtml-if>
- </dtml-with>
-</dtml-if>
+                <!-- Processes for Acknowledgment -->
+                <dtml-with expr="_.namespace(cientificacoes=zsql.cientificacao_documento_obter_zsql(cod_cientificado=cod_usuario_corrente, ind_pendente=1))">
+                  <dtml-if expr="_.len(cientificacoes) > 0">
+                    <a href="<dtml-var portal_url>/consultas/documento_administrativo/visualizar_processos" 
+                       class="list-group-item list-group-item-action list-group-item-info py-3">
+                      <div class="d-flex align-items-center">
+                        <i class="fas fa-envelope notification-icon text-info"></i>
+                        <div class="ms-3 flex-grow-1">
+                          <h3 class="h6 mb-1">Processos para conhecimento</h3>
+                          <p class="mb-0 small text-muted">
+                            <dtml-var expr="_.len(cientificacoes)"> novo<dtml-if expr="_.len(cientificacoes) > 1">s</dtml-if> processo<dtml-if expr="_.len(cientificacoes) > 1">s</dtml-if> administrativo<dtml-if expr="_.len(cientificacoes) > 1">s</dtml-if>
+                          </p>
+                        </div>
+                        <i class="fas fa-chevron-right text-muted ms-3"></i>
+                      </div>
+                    </a>
+                  </dtml-if>
+                </dtml-with>
 
-<dtml-if cod_usuario_corrente>
+                <!-- Inbox -->
+                <dtml-if expr="zsql.usuario_unid_tram_obter_zsql(cod_usuario=cod_usuario_corrente)">
+                  <dtml-if expr="pysc.caixa_entrada_contar_pysc(cod_usuario=cod_usuario_corrente)>0">
+                    <a href="<dtml-var portal_url>/cadastros/tramitacao_materia/tramitacao_lote_form" 
+                       class="list-group-item list-group-item-action list-group-item-success py-3">
+                      <div class="d-flex align-items-center">
+                        <i class="fas fa-inbox notification-icon text-success"></i>
+                        <div class="ms-3 flex-grow-1">
+                          <h3 class="h6 mb-1">Caixa de entrada</h3>
+                          <p class="mb-0 small text-muted">
+                            <dtml-var expr="pysc.caixa_entrada_contar_pysc(cod_usuario=cod_usuario_corrente)"> matéria<dtml-if expr="pysc.caixa_entrada_contar_pysc(cod_usuario=cod_usuario_corrente)>1">s</dtml-if> legislativa<dtml-if expr="pysc.caixa_entrada_contar_pysc(cod_usuario=cod_usuario_corrente)>1">s</dtml-if>
+                          </p>
+                        </div>
+                        <i class="fas fa-chevron-right text-muted ms-3"></i>
+                      </div>
+                    </a>
+                  </dtml-if>
 
-  <dtml-with expr="_.namespace(assinaturas=zsql.assinatura_documento_obter_zsql(cod_usuario=cod_usuario_corrente, ind_assinado=0, ind_recusado=0))">
-    <dtml-if expr="_.len(assinaturas) > 0">
-   <div class="row">    
-   <div class="col-12">
-     <div class="bs-component">
-       <div class="alert alert-dismissible alert-warning">
-         Há <a href="<dtml-var portal_url>/cadastros/assinatura/assinador" class="alert-link text-decoration-underline"><dtml-var expr="_.len(assinaturas)"> <dtml-if expr="_.len(assinaturas) > 1">solicitações<dtml-else>solicitação</dtml-if> de assinatura digital</a> pendente<dtml-if expr="_.len(assinaturas) > 1">s</dtml-if>.
-         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-       </div>
-     </div>
-    </div>
-    </div>    
-    </dtml-if>
-  </dtml-with>
+                  <dtml-if expr="pysc.caixa_entrada_administrativo_contar_pysc(cod_usuario=cod_usuario_corrente)>0">
+                    <a href="<dtml-var portal_url>/cadastros/tramitacao_documento/tramitacao_lote_form" 
+                       class="list-group-item list-group-item-action list-group-item-success py-3">
+                      <div class="d-flex align-items-center">
+                        <i class="fas fa-inbox notification-icon text-success"></i>
+                        <div class="ms-3 flex-grow-1">
+                          <h3 class="h6 mb-1">Caixa de entrada (Administrativo)</h3>
+                          <p class="mb-0 small text-muted">
+                            <dtml-var expr="pysc.caixa_entrada_administrativo_contar_pysc(cod_usuario=cod_usuario_corrente)"> processo<dtml-if expr="pysc.caixa_entrada_administrativo_contar_pysc(cod_usuario=cod_usuario_corrente)>1">s</dtml-if> administrativo<dtml-if expr="pysc.caixa_entrada_administrativo_contar_pysc(cod_usuario=cod_usuario_corrente)>1">s</dtml-if>
+                          </p>
+                        </div>
+                        <i class="fas fa-chevron-right text-muted ms-3"></i>
+                      </div>
+                    </a>
+                  </dtml-if>
+                </dtml-if>
+              </dtml-if>
 
-  <dtml-with expr="_.namespace(cientificacoes=zsql.cientificacao_documento_obter_zsql(cod_cientificado=cod_usuario_corrente, ind_pendente=1))">
-    <dtml-if expr="_.len(cientificacoes) > 0">
-   <div class="row">    
-   <div class="col-12">
-     <div class="bs-component">
-       <div class="alert alert-dismissible alert-primary">
-         Há <a href="<dtml-var portal_url>/consultas/documento_administrativo/visualizar_processos" class="alert-link text-decoration-underline"><dtml-var expr="_.len(cientificacoes)"> novo<dtml-if expr="_.len(cientificacoes) > 1">s</dtml-if> processo<dtml-if expr="_.len(cientificacoes) > 1">s</dtml-if> administrativo<dtml-if expr="_.len(cientificacoes) > 1">s</dtml-if></a> enviado<dtml-if expr="_.len(cientificacoes) > 1">s</dtml-if> para conhecimento ou providências.
-         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-       </div>
-     </div>
-    </div>
-    </div>    
-    </dtml-if>
-  </dtml-with>
-
-  <dtml-if expr="zsql.usuario_unid_tram_obter_zsql(cod_usuario=cod_usuario_corrente)">
-    <dtml-if expr="pysc.caixa_entrada_contar_pysc(cod_usuario=cod_usuario_corrente)>0">
-       <div class="row">      
-       <div class="col-12">
-         <div class="bs-component">
-           <div class="alert alert-dismissible alert-primary">
-            Há <a href="<dtml-var portal_url>/cadastros/tramitacao_materia/tramitacao_lote_form" class="alert-link text-decoration-underline"> <dtml-var expr="pysc.caixa_entrada_contar_pysc(cod_usuario=cod_usuario_corrente)"> matéria<dtml-if expr="pysc.caixa_entrada_contar_pysc(cod_usuario=cod_usuario_corrente)>1">s</dtml-if> legislativa<dtml-if expr="pysc.caixa_entrada_contar_pysc(cod_usuario=cod_usuario_corrente)>1">s</dtml-if></a> em sua caixa de entrada.
-             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-           </div>
-         </div>
+              <!-- Returned Proposals -->
+              <dtml-if expr="AUTHENTICATED_USER.has_role(['Autor', 'Assessor Parlamentar'])">
+                <dtml-if expr="AUTHENTICATED_USER.has_role(['Assessor Parlamentar'])">
+                  <dtml-in expr="zsql.assessor_parlamentar_obter_zsql(col_username=AUTHENTICATED_USER.getUserName())">
+                    <dtml-in expr="zsql.autor_obter_zsql(cod_parlamentar=cod_parlamentar)">
+                      <dtml-call expr="REQUEST.set('col_username', col_username)">
+                    </dtml-in>
+                  </dtml-in>
+                <dtml-else>
+                  <dtml-call expr="REQUEST.set('col_username',AUTHENTICATED_USER.getUserName())">
+                </dtml-if>
+                <dtml-with expr="_.namespace(devolvidas=zsql.proposicao_obter_zsql(ind_excluido=0, ind_devolvido='1', col_username=col_username))">
+                  <dtml-if expr="_.len(devolvidas) > 0">
+                    <a href="<dtml-var portal_url>/cadastros/proposicao?ind_devolvido=1" 
+                       class="list-group-item list-group-item-action list-group-item-warning py-3">
+                      <div class="d-flex align-items-center">
+                        <i class="fas fa-undo notification-icon text-warning"></i>
+                        <div class="ms-3 flex-grow-1">
+                          <h3 class="h6 mb-1">Proposições devolvidas</h3>
+                          <p class="mb-0 small text-muted">
+                            <dtml-var expr="_.len(devolvidas)"> proposição<dtml-if expr="_.len(devolvidas) > 1">es</dtml-if> digital<dtml-if expr="_.len(devolvidas) > 1">ais</dtml-if> de sua autoria
+                          </p>
+                        </div>
+                        <i class="fas fa-chevron-right text-muted ms-3"></i>
+                      </div>
+                    </a>
+                  </dtml-if>
+                </dtml-with>
+              </dtml-if>
+            </div>
+          </div>
         </div>
-        </div>
+      </div>
     </dtml-if>
-
-    <dtml-if expr="pysc.caixa_entrada_administrativo_contar_pysc(cod_usuario=cod_usuario_corrente)>0">
-       <div class="row">      
-       <div class="col-12">
-         <div class="bs-component">
-           <div class="alert alert-dismissible alert-primary">
-             Há <a href="<dtml-var portal_url>/cadastros/tramitacao_documento/tramitacao_lote_form" class="alert-link text-decoration-underline"> <dtml-var expr="pysc.caixa_entrada_administrativo_contar_pysc(cod_usuario=cod_usuario_corrente)"> processo<dtml-if expr="pysc.caixa_entrada_administrativo_contar_pysc(cod_usuario=cod_usuario_corrente)>1">s</dtml-if> administrativo<dtml-if expr="pysc.caixa_entrada_administrativo_contar_pysc(cod_usuario=cod_usuario_corrente)>1">s</dtml-if></a> em sua caixa de entrada.
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-           </div>
-         </div>
-        </div>
-        </div>
-    </dtml-if>
-
-</dtml-if>
-
-<dtml-if expr="AUTHENTICATED_USER.has_role(['Autor', 'Assessor Parlamentar'])">
-  <dtml-if expr="AUTHENTICATED_USER.has_role(['Assessor Parlamentar'])">
-    <dtml-in expr="zsql.assessor_parlamentar_obter_zsql(col_username=AUTHENTICATED_USER.getUserName())">
-      <dtml-in expr="zsql.autor_obter_zsql(cod_parlamentar=cod_parlamentar)">
-          <dtml-call expr="REQUEST.set('col_username', col_username)">
-      </dtml-in>
-    </dtml-in>
-  <dtml-else>
-    <dtml-call expr="REQUEST.set('col_username',AUTHENTICATED_USER.getUserName())">
-  </dtml-if>
-  <dtml-with expr="_.namespace(devolvidas=zsql.proposicao_obter_zsql(ind_excluido=0, ind_devolvido='1', col_username=col_username))">
-    <dtml-if expr="_.len(devolvidas) > 0">
-   <div class="row">    
-   <div class="col-12">
-     <div class="bs-component">
-       <div class="alert alert-dismissible alert-warning mb-0 p-3">
-         <h4 class="alert-heading font-size-18"><i class="fas fa-exclamation-triangle me-2"></i>Proposição Devolvida</h4>
-         <p class="mb-0"><a href="<dtml-var portal_url>/cadastros/proposicao?ind_devolvido=1" class="alert-link text-decoration-underline"><dtml-var expr="_.len(devolvidas)"> <dtml-if expr="_.len(devolvidas) > 1">Proposições Digitais<dtml-else>Proposição Digital</dtml-if></a> de sua autoria <dtml-if expr="_.len(devolvidas) > 1">foram devolvidas<dtml-else>foi devolvida</dtml-if> pelo setor competente. Para eventual reaproveitamento, providencie a regularização, conforme orientações fornecidas na justificativa da devolução, ou proceda a sua exclusão.</p>
-         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-       </div>
-     </div>
-    </div>
-    </div>    
-    </dtml-if>
-  </dtml-with>
-</dtml-if>
-
-</dtml-if>
-
-<dtml-comment>
-<div class="row">
-<dtml-if expr="AUTHENTICATED_USER.has_role(['Operador','Operador Materia','Operador Modulo Administrativo', 'Leitor Relatorios'])">
-  <div class="col-12">
-   <div class="card">
-   <h6 class="card-header"><i class="far fa-calendar-times"></i> Vencimentos Futuros</h6>   
-     <ul class="list-group list-group-flush">
-      <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador','Operador Materia','Leitor Relatorios'])">     
-        <li class="list-group-item"><i class="fas fa-caret-right"></i> <a href="<dtml-var portal_url>/relatorios_administrativos/materiaVencimento/materiaVencimento">Prazos de deliberação de matérias</a></li>       
-      </dtml-if>
-      <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador','Operador Modulo Administrativo','Leitor Relatorios'])">      
-        <li class="list-group-item"><i class="fas fa-caret-right"></i> <a href="<dtml-var portal_url>/relatorios_administrativos/documentoVencimento/documentoVencimento_index_html">Prazos de conclusão de processos administrativos</a></li>                 
-      </dtml-if>
-     </ul>
-   </div>
   </div>
-</dtml-if>
 </div>
-</dtml-comment>
-</div>
-</div>
-</div>
-<div class="col-md-6">
 
-</div>
-</div>
-</dtml-if>
 <dtml-var js_slot>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Inicializa o toast com opções de auto-hide
+  var toastEl = document.getElementById('successToast');
+  if(toastEl) {
+    var toast = new bootstrap.Toast(toastEl, {
+      autohide: true,    // Fecha automaticamente
+      delay: 3000        // 3 segundos
+    });
+    toast.show();
+  }
+});
+</script>
 <dtml-var footer_html>

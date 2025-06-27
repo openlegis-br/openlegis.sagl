@@ -33,7 +33,7 @@ from zope.interface import Interface
 CPF_LENGTH = 11
 DATE_FORMAT = '%Y-%m-%d %H:%M:%S'
 MAX_PDF_SIZE = 100 * 1024 * 1024  # 100MB
-MAX_PAGES = 200
+MAX_PAGES = 500
 PNG_COMPRESSION_LEVEL = 9  # Máxima compressão PNG
 A4_PORTRAIT = (595, 842)
 A4_LANDSCAPE = (842, 595)

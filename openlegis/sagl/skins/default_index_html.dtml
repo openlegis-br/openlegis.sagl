@@ -293,7 +293,7 @@
                    class="btn btn-outline-primary text-start py-2">
                   <i class="fas fa-inbox me-2"></i> Recebimento de Proposições
                 </a>
-              <dtml-elif expr="AUTHENTICATED_USER.has_role(['Revisor Proposicao', 'Chefia Revisao'])">
+              <dtml-elif expr="AUTHENTICATED_USER.has_role(['Revisor Proposicao', 'Chefia Revisão'])">
                 <a href="<dtml-var portal_url>/cadastros/recebimento_proposicao/recebimento_proposicao_index_html#pendente" 
                    class="btn btn-outline-primary text-start py-2">
                   <i class="fas fa-inbox me-2"></i> Recebimento de Proposições
@@ -343,7 +343,7 @@
                     <dtml-in expr="AUTHENTICATED_USER.getRoles()">
                       <dtml-if expr="_['sequence-item'] != 'Authenticated'"> 
                       <dtml-if sequence-start></dtml-if>
-                      <span class="badge bg-light"><dtml-var sequence-item></span><dtml-if sequence-end><dtml-else> </dtml-if>
+                      <span class="badge bg-secondary"><dtml-var sequence-item></span><dtml-if sequence-end><dtml-else> </dtml-if>
                       </dtml-if>
                     </dtml-in>
                   </small>

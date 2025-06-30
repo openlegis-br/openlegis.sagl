@@ -215,6 +215,7 @@
                 <div class="btn-group">
                   <dtml-let documento="getattr(sapl_documentos.peticao,id_documento).absolute_url">
                     <dtml-call expr="REQUEST.set('nome_arquivo',str(cod_peticao)+'.odt')">
+                      <a class="btn btn-light" href="<dtml-var portal_url>/webeditor/editorPeticao?<dtml-var documento>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fa fa-fw fa-edit"></i>Editar</a> 
                       <button type="button" class="btn btn-light"
                         onclick="javascript:location.href='&dtml-URL1;/sapl_documentos/peticao/externalEdit_/<dtml-var nome_arquivo>.zem'"
                         data-bs-toggle="tooltip" data-placement="bottom" title="Editar no LibreOffice"><i

@@ -3,25 +3,42 @@ from io import BytesIO
 import os
 import pypdf
 import pymupdf
-from datetime import datetime
+import pikepdf
 from DateTime import DateTime
 import logging
-import pikepdf
 
 @zope_task()
 def proposicao_autuar_task(portal, cod_proposicao, portal_url):
     skins = portal.portal_skins.sk_sagl
     nom_pdf_proposicao = str(cod_proposicao) + "_signed.pdf"
     arq = getattr(portal.sapl_documentos.proposicao, nom_pdf_proposicao)
-    fileStream = BytesIO(bytes(arq.data))
-    reader = pypdf.PdfReader(fileStream)
+    
+    # Trabalhe sempre com BytesIO
+    original_stream = BytesIO(bytes(arq.data))
+    
+    # Reparo antecipado com pikepdf (garante PDF íntegro para manipulação)
+    try:
+        original_stream.seek(0)
+        repaired_stream = BytesIO()
+        with pikepdf.open(original_stream) as pdf:
+            pdf.save(repaired_stream)
+        logging.info("[PDF] PDF reparado antecipadamente com pikepdf.")
+        stream = repaired_stream
+    except Exception as e:
+        logging.warning(f"[PDF] PDF não pôde ser reparado antecipadamente com pikepdf: {e}")
+        original_stream.seek(0)
+        stream = original_stream
+
+    # Sempre .seek(0) antes de reutilizar o fluxo
+    stream.seek(0)
+    reader = pypdf.PdfReader(stream)
     fields = reader.get_fields()
     signers = []
     nom_autor = None
     if fields is not None:
         signature_field_values = [f.value for f in fields.values() if f.field_type == '/Sig']
         if signature_field_values is not None:
-            signers = get_signatures(fileStream)
+            signers = get_signatures(stream)
     qtde_assinaturas = len(signers)
     for signer in signers:
         nom_autor = signer['signer_name']
@@ -81,15 +98,18 @@ def proposicao_autuar_task(portal, cod_proposicao, portal_url):
 
     mensagem1 = 'Esta é uma cópia do original assinado digitalmente por ' + nom_autor + outros
     mensagem2 = 'Para validar visite ' + portal_url + '/conferir_assinatura' + ' e informe o código ' + cod_validacao_doc
-    existing_pdf = pymupdf.open(stream=fileStream)
+
+    stream.seek(0)
+    existing_pdf = pymupdf.open(stream=stream)
     numPages = existing_pdf.page_count
-    doc = pymupdf.open()
+
     install_home = os.environ.get('INSTALL_HOME')
     dirpath = os.path.join(install_home, 'src/openlegis.sagl/openlegis/sagl/skins/imagens/logo-icp2.png')
     with open(dirpath, "rb") as arq:
         image = arq.read()
+
     for validacao in skins.zsql.assinatura_documento_obter_zsql(codigo=cod_proposicao, tipo_doc='proposicao', ind_assinado=1):
-        stream = make_qrcode(text=portal_url + '/conferir_assinatura_proc?txt_codigo_verificacao=' + str(validacao.cod_assinatura_doc))
+        stream_qr = make_qrcode(text=portal_url + '/conferir_assinatura_proc?txt_codigo_verificacao=' + str(validacao.cod_assinatura_doc))
         for page_index, i in enumerate(range(len(existing_pdf))):
             w = existing_pdf[page_index].rect.width
             h = existing_pdf[page_index].rect.height
@@ -98,21 +118,16 @@ def proposicao_autuar_task(portal, cod_proposicao, portal_url):
             bottom = h - 50 - margin
             bottom2 = h - 38
             right = w - 53
-            black = pymupdf.pdfcolor["black"]
-            # qrcode
             rect = pymupdf.Rect(left, bottom, left + 50, bottom + 50)
-            existing_pdf[page_index].insert_image(rect, stream=stream)
+            existing_pdf[page_index].insert_image(rect, stream=stream_qr)
             text2 = mensagem2
-            # margem direita
             numero = "Pág. %s/%s" % (i + 1, numPages)
             text3 = numero + ' - ' + texto + info_protocolo + ' ' + mensagem1
             x = w - 8 - margin
             y = h - 30 - margin
             existing_pdf[page_index].insert_text((x, y), text3, fontsize=8, rotate=90)
-            # logo icp
             rect_icp = pymupdf.Rect(right, bottom2, right + 45, bottom2 + 45)
             existing_pdf[page_index].insert_image(rect_icp, stream=image)
-            # margem inferior
             p1 = pymupdf.Point(w - 40 - margin, h - 12)
             p2 = pymupdf.Point(60, h - 12)
             shape = existing_pdf[page_index].new_shape()
@@ -129,60 +144,13 @@ def proposicao_autuar_task(portal, cod_proposicao, portal_url):
     metadata = {"title": texto, "author": nom_autor}
     existing_pdf.set_metadata(metadata)
 
-    # --------- Bloco de salvamento seguro + reparo com pikepdf ----------
-    content = None
-    save_error = None
-
+    # Salvamento único e direto
     try:
-        # Tenta salvar com máxima otimização
         content = existing_pdf.tobytes(deflate=True, garbage=3, use_objstms=1)
     except Exception as e:
-        logging.warning(f"[PDF] Erro ao salvar com garbage=3: {e} - Tentando garbage=1...")
-        try:
-            content = existing_pdf.tobytes(deflate=True, garbage=1, use_objstms=1)
-        except Exception as e2:
-            logging.warning(f"[PDF] Erro ao salvar com garbage=1: {e2} - Tentando só deflate...")
-            try:
-                content = existing_pdf.tobytes(deflate=True)
-            except Exception as e3:
-                logging.warning(f"[PDF] Erro ao salvar só com deflate: {e3} - Tentando sem parâmetros extras...")
-                try:
-                    content = existing_pdf.tobytes()
-                except Exception as e4:
-                    logging.warning(f"[PDF] Erro ao salvar PDF mesmo sem parâmetros extras: {e4} - Tentando reparo com pikepdf.")
-                    save_error = e4
+        logging.error(f"[PDF] Erro inesperado ao salvar PDF já reparado: {e}")
+        raise e
 
-    if content is None:
-        # Repara o PDF usando pikepdf e tenta salvar novamente
-        try:
-            repaired_stream = BytesIO()
-            fileStream.seek(0)
-            with pikepdf.open(fileStream) as pdf:
-                pdf.save(repaired_stream)
-            repaired_stream.seek(0)
-            repaired_pdf = pymupdf.open(stream=repaired_stream)
-            try:
-                content = repaired_pdf.tobytes(deflate=True, garbage=3, use_objstms=1)
-            except Exception as e:
-                logging.warning(f"[PDF] Reparo OK, mas erro ao salvar garbage=3: {e} - Tentando garbage=1...")
-                try:
-                    content = repaired_pdf.tobytes(deflate=True, garbage=1, use_objstms=1)
-                except Exception as e2:
-                    logging.warning(f"[PDF] Reparo OK, mas erro ao salvar garbage=1: {e2} - Tentando só deflate...")
-                    try:
-                        content = repaired_pdf.tobytes(deflate=True)
-                    except Exception as e3:
-                        logging.warning(f"[PDF] Reparo OK, mas erro ao salvar só deflate: {e3} - Tentando sem parâmetros extras...")
-                        try:
-                            content = repaired_pdf.tobytes()
-                        except Exception as e4:
-                            logging.error(f"[PDF] Mesmo com reparo pikepdf, erro ao salvar PDF: {e4}")
-                            raise e4
-        except Exception as repair_fail:
-            logging.error(f"[PDF] Falha no reparo do PDF com pikepdf: {repair_fail}")
-            raise save_error or repair_fail
-
-    # --------- Salvamento ZODB normal -----------
     if nom_pdf_saida in storage_path:
         pdf = storage_path[nom_pdf_saida]
         pdf.update_data(content)
@@ -191,5 +159,4 @@ def proposicao_autuar_task(portal, cod_proposicao, portal_url):
         pdf = storage_path[nom_pdf_saida]
 
     pdf.manage_permission('View', roles=['Manager', 'Anonymous'], acquire=1)
-
     return nom_pdf_saida

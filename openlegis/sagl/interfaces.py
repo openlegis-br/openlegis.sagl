@@ -6,6 +6,11 @@ class IFileSAGL(Interface):
     """
 
 
+class ISAPLDocumentManager(Interface):
+    def existe_documento(tipo, nome):
+        """Retorna True se o documento 'nome' do tipo 'tipo' existe no repositório."""
+
+
 class ILogradouroTableViewExporter(Interface):
     """Interface for Logradouro table view exporters."""
 
@@ -35,6 +40,7 @@ class IWebSocketServerUtility(Interface):
     rooms = Attribute("Dicionário de salas disponíveis")
     max_connections = Attribute("Número máximo de conexões permitidas")
 
+
 class IWebSocketServerService(Interface):
     """Interface para o serviço do servidor WebSocket"""
     
@@ -50,6 +56,7 @@ class IWebSocketServerService(Interface):
     version = Attribute("Versão do servidor WebSocket")
     protocol_version = Attribute("Versão do protocolo suportado")
     server_start_time = Attribute("Data/hora de inicialização do servidor")
+
 
 class ISessionStateManager(Interface):
     """Interface para o gerenciador de estado das sessões"""
@@ -68,6 +75,7 @@ class ISessionStateManager(Interface):
     
     def format_item_info(item):
         """Formata as informações do item para envio"""
+
 
 class IWebSocketMessage(Interface):
     """Interface para mensagens WebSocket"""

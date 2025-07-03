@@ -1,83 +1,954 @@
 <dtml-var header_html>
 
-<div class="row">
-  <div class="col-12">
-      <h1 class="firstHeading font-size-18 mb-0">Recebimento de Proposições
-        <img id="indicator" class="htmx-indicator" src="<dtml-var portal_url>/imagens/bars.svg"/>
-      </h1> 
+<script>
+  var USER_ROLES = [
+    <dtml-in expr="AUTHENTICATED_USER.getRoles()">
+      "<dtml-var sequence-item>"<dtml-unless sequence-end>,</dtml-unless>
+    </dtml-in>
+  ];
+</script>
+
+<style>
+:root {
+  --loading-spinner-size: 2.5rem;
+  --table-min-height: 300px;
+  --blur-intensity: 3px;
+  --primary-color: #0d6efd;
+  --secondary-color: #6c757d;
+}
+
+.filter-card {
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  margin-bottom: 1.5rem;
+  border: 1px solid #e9ecef;
+}
+.filter-card .card-body { padding: 1.25rem; }
+.filter-card .form-label {
+  font-size: 0.85rem;
+  color: #495057;
+  margin-bottom: 0.35rem;
+  font-weight: 500;
+}
+.filter-card .form-control,
+.filter-card .form-select {
+  border-radius: 0.35rem;
+  font-size: 0.9rem;
+  padding: 0.4rem 0.75rem;
+  border: 1px solid #dee2e6;
+  transition: border-color 0.15s ease-in-out;
+}
+.filter-card .form-control:focus,
+.filter-card .form-select:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.1);
+}
+.filter-card .input-group-text {
+  font-size: 0.8rem;
+  padding: 0 0.5rem;
+  background-color: #f8f9fa;
+  color: #495057;
+}
+.filter-card .btn {
+  font-size: 0.85rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 0.35rem;
+}
+.filter-card .btn-sm { padding: 0.25rem 0.5rem; font-size: 0.8rem; }
+@media (max-width: 991.98px) {
+  .filter-card .col-md-3, 
+  .filter-card .col-md-6 { margin-bottom: 1rem; }
+  .filter-card .d-flex { justify-content: flex-start !important; }
+}
+@media (max-width: 767.98px) {
+  .filter-card .col-6 { width: 100% !important; }
+  .filter-card .input-group { width: 100% !important; }
+}
+
+.skeleton-loader { min-height: 120px; margin-bottom: 1rem; }
+.skeleton-line { background: #e9ecef; height: 18px; margin: 7px 0; border-radius: 2px; }
+.skeleton-line.short { width: 40%; }
+.skeleton-line.medium { width: 70%; }
+.table-blur { filter: blur(var(--blur-intensity)); pointer-events: none; }
+#proposicoes-table th[data-column] {
+  cursor: pointer; position: relative; user-select: none;
+}
+#proposicoes-table th[data-column]:hover { background-color: #f8f9fa; }
+#proposicoes-table th i {
+  opacity: 0.3; transition: opacity 0.2s;
+}
+#proposicoes-table th:hover i { opacity: 0.8; }
+#proposicoes-table th.i.fa-sort-up,
+#proposicoes-table th.i.fa-sort-down {
+  opacity: 1;
+  color: var(--primary-color);
+}
+.global-search-container { margin-bottom: 1rem; }
+.proposicao-card {
+  border: 1px solid #e9ecef;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  transition: transform 0.2s, box-shadow 0.2s;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+}
+.proposicao-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+.proposicao-card.prioritaria { border-left: 4px solid #ffc107; }
+
+.card-header {
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #e9ecef;
+  padding: 0.75rem 1rem;
+  border-top-left-radius: 0.5rem !important;
+  border-top-right-radius: 0.5rem !important;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  min-height: 44px;
+  flex-wrap: wrap;
+  word-break: break-word;
+}
+.card-header .badge {
+  max-width: 95%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.85rem;
+  flex-shrink: 1;
+}
+.card-header small {
+  min-width: 95%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: left;
+  font-size: 0.8rem;
+  flex-shrink: 0;
+}
+@media (max-width: 768px) {
+  .card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.2rem;
+    padding: 0.7rem 0.7rem;
+    min-height: unset;
+  }
+  .card-header .badge,
+  .card-header small {
+    max-width: 100%;
+    white-space: normal;
+    text-align: left;
+  }
+}
+
+.card-title {
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  word-break: break-word;
+}
+.card-text {
+  font-size: 0.875rem;
+  color: #495057;
+  margin-bottom: 0.5rem;
+  word-break: break-word;
+}
+.card-meta {
+  font-size: 0.75rem;
+  color: #6c757d;
+  margin-bottom: 0.25rem;
+  word-break: break-word;
+}
+.card-footer.card-actions {
+  background: transparent;
+  border-top: 0;
+  padding-top: 0.5rem;
+  text-align: right;
+}
+.card-body {
+  flex: 1 1 auto;
+  min-height: 100px;
+}
+.view-toggle-container { margin-bottom: 1rem; }
+</style>
+
+<div class="">
+  <div class="row align-items-center mb-3 g-3">
+    <div class="col-md-8 col-12">
+      <h1 class="firstHeading mb-0 d-flex align-items-center font-size-18 gap-2">
+        <i class="fas fa-inbox text-primary fs-4" aria-hidden="true"></i>
+        Recebimento de Proposições
+      </h1>
+      <p class="text-muted small mb-0 mt-1">
+        Gerenciamento de proposições digitais recebidas
+      </p>
+    </div>
+    <div class="col-md-4 col-12 text-md-end" role="region" aria-live="polite" aria-atomic="true">
+      <div id="alert-area"></div>
+    </div>
   </div>
 </div>
 
-<ul class="nav nav-tabs proposicao border-0 mt-4" id="nav_proposicao" role="tablist" hx-target="#tab-pane">
- <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia', 'Revisor Proposicao', 'Chefia Revisão'])">
-    <li class="nav-item">
-        <a class="nav-link" id="pendente-tab" data-bs-toggle="tab" href="#pendente" role="tab" aria-controls="pendente" data-target="#pendente" aria-selected="true" hx-get="<dtml-var portal_url>/cadastros/recebimento_proposicao/proposicao_listar_form?envrec=E" hx-indicator="#indicator" hx-trigger="click">Revisão <dtml-in expr="proposicoes_contar_pysc(caixa='revisao')" mapping><dtml-if sequence-start>[<dtml-var sequence-length>]</dtml-if></dtml-in></a>
+<ul class="nav nav-tabs proposicao mb-3" id="nav_proposicao" role="tablist">
+  <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia', 'Revisor Proposicao', 'Chefia Revisão'])">
+    <li class="nav-item" role="presentation">
+      <a class="nav-link" id="tab-revisao" href="#" data-caixa="revisao" role="tab" aria-controls="revisao" aria-selected="true" tabindex="0">
+        <i class="fas fa-edit me-1" aria-hidden="true"></i> Revisão 
+        <span id="badge-revisao" class="badge bg-primary ms-1" aria-live="polite" aria-atomic="true">0</span>
+      </a>
     </li>
-  <dtml-if "sapl_documentos.props_sagl.restpki_access_token!=''">                                            
-    <li class="nav-item">
-        <a class="nav-link" id="assinatura-tab" data-bs-toggle="tab" href="#assinatura" role="tab" aria-controls="assinatura" data-target="#assinatura" aria-selected="true" hx-get="<dtml-var portal_url>/cadastros/recebimento_proposicao/proposicao_listar_form?envrec=P" hx-indicator="#indicator" hx-trigger="click">Assinatura <dtml-in expr="proposicoes_contar_pysc(caixa='assinatura')" mapping><dtml-if sequence-start>[<dtml-var sequence-length>]</dtml-if></dtml-in></a>
-    </li>     
+    <dtml-if "hasattr(sapl_documentos.props_sagl, 'restpki_access_token') and sapl_documentos.props_sagl.restpki_access_token">
+      <li class="nav-item" role="presentation">
+        <a class="nav-link" id="tab-assinatura" href="#" data-caixa="assinatura" role="tab" aria-controls="assinatura" aria-selected="false" tabindex="-1">
+          <i class="fas fa-signature me-1" aria-hidden="true"></i> Assinatura 
+          <span id="badge-assinatura" class="badge bg-secondary ms-1" aria-live="polite" aria-atomic="true">0</span>
+        </a>
+      </li>
+    </dtml-if>
   </dtml-if>
- </dtml-if>
- <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia'])">
-    <li class="nav-item">
-        <a class="nav-link" id="protocolo-tab" data-bs-toggle="tab" href="#protocolo" role="tab" aria-controls="protocolo" data-target="#protocolo" aria-selected="true" hx-get="<dtml-var portal_url>/cadastros/recebimento_proposicao/proposicao_listar_form?envrec=A" hx-indicator="#indicator" hx-trigger="click">Protocolo <dtml-in expr="proposicoes_contar_pysc(caixa='protocolo')" mapping><dtml-if sequence-start>[<dtml-var sequence-length>]</dtml-if></dtml-in></a>
-    </li>    
- </dtml-if>
- <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia', 'Revisor Proposicao', 'Chefia Revisão'])">
-    <li class="nav-item">
-       <a class="nav-link" id="incorporada-tab" data-bs-toggle="tab" href="#incorporada" role="tab" aria-controls="incorporada" data-target="#incorporada" aria-selected="true" hx-get="<dtml-var portal_url>/cadastros/recebimento_proposicao/proposicao_listar_form?envrec=I" hx-indicator="#indicator" hx-trigger="click">Incorporadas </a>
+  <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia'])">
+    <li class="nav-item" role="presentation">
+      <a class="nav-link" id="tab-protocolo" href="#" data-caixa="protocolo" role="tab" aria-controls="protocolo" aria-selected="false" tabindex="-1">
+        <i class="fas fa-stamp me-1" aria-hidden="true"></i> Protocolo 
+        <span id="badge-protocolo" class="badge bg-secondary ms-1" aria-live="polite" aria-atomic="true">0</span>
+      </a>
     </li>
-    <li class="nav-item">
-        <a class="nav-link" id="protocolo-tab" data-bs-toggle="tab" href="#pedido_devolucao" role="tab" aria-controls="pedido_devolucao" data-target="#pedido_devolucao" aria-selected="true" hx-get="<dtml-var portal_url>/cadastros/recebimento_proposicao/proposicao_listar_form?envrec=S" hx-indicator="#indicator" hx-trigger="click">Pedidos de Devolução <dtml-in expr="proposicoes_contar_pysc(caixa='pedido_devolucao')" mapping><dtml-if sequence-start>[<dtml-var sequence-length>]</dtml-if></dtml-in></a>
-    </li> 
-    <li class="nav-item">
-       <a class="nav-link" id="devolvida-tab" data-bs-toggle="tab" href="#devolvida" role="tab" aria-controls="devolvida" data-target="#devolvida" aria-selected="true" hx-get="<dtml-var portal_url>/cadastros/recebimento_proposicao/proposicao_listar_form?envrec=R" hx-indicator="#indicator" hx-trigger="click">Devolvidas <dtml-in expr="proposicoes_contar_pysc(caixa='devolvido')" mapping><dtml-if sequence-start>[<dtml-var sequence-length>]</dtml-if></dtml-in></a>
+  </dtml-if>
+  <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia', 'Revisor Proposicao', 'Chefia Revisão'])">
+    <li class="nav-item" role="presentation">
+      <a class="nav-link" id="tab-incorporado" href="#" data-caixa="incorporado" role="tab" aria-controls="incorporado" aria-selected="false" tabindex="-1">
+        <i class="fas fa-check-double me-1" aria-hidden="true"></i> Incorporadas 
+        <span id="badge-incorporado" class="badge bg-secondary ms-1" aria-live="polite" aria-atomic="true">0</span>
+      </a>
     </li>
- </dtml-if>
+    <li class="nav-item" role="presentation">
+      <a class="nav-link" id="tab-pedido_devolucao" href="#" data-caixa="pedido_devolucao" role="tab" aria-controls="pedido_devolucao" aria-selected="false" tabindex="-1">
+        <i class="fas fa-undo me-1" aria-hidden="true"></i> Pedidos de Devolução 
+        <span id="badge-pedido_devolucao" class="badge bg-secondary ms-1" aria-live="polite" aria-atomic="true">0</span>
+      </a>
+    </li>
+    <li class="nav-item" role="presentation">
+      <a class="nav-link" id="tab-devolvido" href="#" data-caixa="devolvido" role="tab" aria-controls="devolvido" aria-selected="false" tabindex="-1">
+        <i class="fas fa-times-circle me-1" aria-hidden="true"></i> Devolvidas 
+        <span id="badge-devolvido" class="badge bg-secondary ms-1" aria-live="polite" aria-atomic="true">0</span>
+      </a>
+    </li>
+  </dtml-if>
 </ul>
 
-<div class="tab-content">
-   <dtml-if expr="AUTHENTICATED_USER.has_role(['Revisor Proposicao', 'Chefia Revisão'])">
-      <div id="tab-pane" class="tab-pane p-3 border fade show active" hx-get="<dtml-var portal_url>/cadastros/recebimento_proposicao/proposicao_listar_form?envrec=E" hx-trigger="load" hx-indicator="#indicator"></div>
-   <dtml-elif expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia'])">
-      <div id="tab-pane" class="tab-pane p-3 border fade show active" hx-get="<dtml-var portal_url>/cadastros/recebimento_proposicao/proposicao_listar_form?envrec=A" hx-trigger="load" hx-indicator="#indicator"></div>
-   </dtml-if>
+<div class="card filter-card">
+  <div class="card-body">
+    <div class="row g-3 mb-3 align-items-end">
+      <div class="col-md-3 col-6">
+        <label for="filter-tipo" class="form-label">Tipo</label>
+        <input type="text" id="filter-tipo" name="filter-tipo" class="form-control" placeholder="Veto, Requerimento, etc..." aria-label="Tipo da Proposição" autocomplete="off">
+      </div>
+      <div class="col-md-3 col-6">
+        <label for="filter-autor" class="form-label">Autoria</label>
+        <input type="text" id="filter-autor" name="filter-autor" class="form-control" placeholder="Nome do autor" aria-label="Autoria" autocomplete="off">
+      </div>
+      <div class="col-md-6">
+        <label for="filter-assunto" class="form-label">Ementa</label>
+        <div class="input-group">
+          <input type="text" id="filter-assunto" name="filter-assunto" class="form-control" placeholder="Palavra-chave ou expressão" aria-label="Conteúdo" autocomplete="off">
+          <button class="btn btn-outline-secondary" type="button" id="btn-global-search" title="Buscar">
+            <i class="fas fa-search"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="row g-3 align-items-end">
+      <div class="col-md-3 col-6">
+        <label for="select-por-pagina" class="form-label">Registros por página</label>
+        <select id="select-por-pagina" class="form-select">
+          <option value="10" selected>10</option>
+          <option value="25">25</option>
+          <option value="50">50</option>
+          <option value="100">100</option>
+          <option value="250">250</option>
+        </select>
+      </div>
+      <div class="col-md-6 col-12">
+        <label class="form-label">Data de Envio</label>
+        <div class="input-group">
+          <input type="date" id="filter-dt-inicio" name="filter-dt-inicio" class="form-control" placeholder="De" aria-label="Data inicial">
+          <span class="input-group-text">a</span>
+          <input type="date" id="filter-dt-fim" name="filter-dt-fim" class="form-control" placeholder="Até" aria-label="Data final">
+        </div>
+      </div>
+      <div class="col-md-3 col-6">
+        <div class="d-flex gap-2 justify-content-end">
+          <button id="reset-filters" class="btn btn-outline-danger" type="button" title="Limpar todos os filtros">
+            <i class="fas fa-eraser me-1"></i> Limpar Filtros
+          </button>
+          <button id="export-csv" class="btn btn-success" type="button" title="Exportar para CSV">
+            <i class="fas fa-file-csv me-1"></i> Exportar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="view-toggle-container">
+  <div class="row justify-content-between align-items-center mb-3 g-3">
+    <div class="col-md-6">
+      <h2 class="h5 mb-0">Proposições Digitais</h2>
+    </div>
+    <div class="col-md-6 text-end">
+      <div class="btn-group btn-group-sm" role="group" aria-label="Visualização">
+        <button type="button" id="btn-view-table" class="btn btn-outline-primary active">
+          <i class="fas fa-table"></i> Tabela
+        </button>
+        <button type="button" id="btn-view-cards" class="btn btn-outline-primary">
+          <i class="fas fa-th-large"></i> Cards
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="tab-content mt-2">
+  <div class="tab-pane active" id="tab-content" role="tabpanel">
+    <!-- Grid 5 colunas, margens iguais -->
+    <div id="cards-container" class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xxl-5 g-3"></div>
+    <div class="table-loading" id="table-container" aria-live="polite" aria-busy="false" tabindex="0">
+      <div id="skeleton-loader" class="skeleton-loader" aria-hidden="true" style="display:none">
+        <div class="skeleton-line"></div>
+        <div class="skeleton-line short"></div>
+        <div class="skeleton-line medium"></div>
+        <div class="skeleton-line"></div>
+        <div class="skeleton-line short"></div>
+        <div class="skeleton-line medium"></div>
+      </div>
+      <span id="indicator-overlay" aria-hidden="true" style="display:none">
+        <span class="spinner-border spinner-border-sm text-primary" style="width:var(--loading-spinner-size);height:var(--loading-spinner-size);" role="status" aria-hidden="true"></span>
+      </span>
+      <div class="table-responsive">
+        <table id="proposicoes-table" class="table table-striped table-bordered" style="width:100%">
+          <thead>
+            <tr id="table-header-row">
+              <th width="12%" data-column="envio">Envio <i class="fas fa-sort float-end" aria-hidden="true"></i></th>
+              <th width="15%" data-column="tipo">Tipo <i class="fas fa-sort float-end" aria-hidden="true"></i></th>
+              <th width="35%" data-column="descricao">Ementa <i class="fas fa-sort float-end" aria-hidden="true"></i></th>
+              <th width="15%" data-column="autor">Autoria <i class="fas fa-sort float-end" aria-hidden="true"></i></th>
+              <th class="col-vinculo" width="10%">Vínculo</th>
+              <th class="col-solicitacao_devolucao" width="10%">Data do Pedido</th>
+              <th class="col-devolucao" width="10%">Data Devolução</th>
+              <th width="13%">Ações</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="row mt-3 align-items-center">
+      <div class="col-md-6 col-12 mb-2 mb-md-0">
+        <div class="dataTables_info" id="table-info" role="status" aria-live="polite">Mostrando 0 de 0 registros</div>
+      </div>
+      <div class="col-md-6 col-12">
+        <nav aria-label="Navegação de páginas">
+          <ul class="pagination justify-content-end flex-wrap mb-0" id="pagination"></ul>
+        </nav>
+      </div>
+    </div>
+  </div>
 </div>
 
 <dtml-var js_slot>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.21/lodash.min.js"></script>
 <script>
+const APP_CONFIG = {
+  API_URL: '<dtml-var portal_url>/proposicoes-api',
+  PORTAL_URL: '<dtml-var portal_url>'
+};
 
-window.onload = function(){  
-    var url = document.location.toString();
-    if (url.match('#')) {
-        $('.nav-tabs a[href="#' + url.split('#')[1] + '"]').tab('show');
+window.appState = window.appState || {
+  currentCaixa: 'revisao',
+  currentPage: 1,
+  currentView: 'table',
+  sortColumn: 'envio',
+  sortDirection: 'desc',
+  table: null,
+  isLoading: false,
+  lastUpdate: null,
+  cache: {},
+  filtros: {},
+  porPagina: 10
+};
+
+// Funções auxiliares
+function lerFiltrosForm() {
+  return {
+    tipo: $('#filter-tipo').val(),
+    autor: $('#filter-autor').val(),
+    assunto: $('#filter-assunto').val(),
+    dt_inicio: $('#filter-dt-inicio').val(),
+    dt_fim: $('#filter-dt-fim').val()
+  };
+}
+
+function resetSortIfNoFilters() {
+  const filtros = lerFiltrosForm();
+  const temFiltro = filtros.tipo || filtros.autor || filtros.assunto ||
+                    filtros.dt_inicio || filtros.dt_fim;
+  if (!temFiltro) {
+    window.appState.sortColumn = 'envio';
+    window.appState.sortDirection = 'desc';
+  }
+}
+
+function saveFiltersToLocalStorage() {
+  const filters = {
+    ...lerFiltrosForm(),
+    caixa: window.appState.currentCaixa,
+    sortColumn: window.appState.sortColumn,
+    sortDirection: window.appState.sortDirection,
+    porPagina: window.appState.porPagina,
+    currentView: window.appState.currentView
+  };
+  localStorage.setItem('proposicoes_filters', JSON.stringify(filters));
+}
+
+function loadFiltersFromLocalStorage() {
+  const saved = localStorage.getItem('proposicoes_filters');
+  if (saved) {
+    try {
+      const filters = JSON.parse(saved);
+      $('#filter-tipo').val(filters.tipo || '');
+      $('#filter-autor').val(filters.autor || '');
+      $('#filter-assunto').val(filters.assunto || '');
+      $('#filter-dt-inicio').val(filters.dt_inicio || '');
+      $('#filter-dt-fim').val(filters.dt_fim || '');
+      $('#select-por-pagina').val(filters.porPagina || '10');
+      
+      if (filters.caixa && $(`[data-caixa="${filters.caixa}"]`).length) {
+        window.appState.currentCaixa = filters.caixa;
+      }
+      if (filters.sortColumn) {
+        window.appState.sortColumn = filters.sortColumn;
+        window.appState.sortDirection = filters.sortDirection || 'desc';
+      }
+      if (filters.porPagina) {
+        window.appState.porPagina = parseInt(filters.porPagina, 10);
+      }
+      if (filters.currentView) {
+        window.appState.currentView = filters.currentView;
+        $(`#btn-view-${filters.currentView}`).addClass('active').siblings().removeClass('active');
+      }
+    } catch (e) {
+      console.error('Erro ao carregar filtros salvos:', e);
     }
-    //Change hash for page-reload
-    $('.nav-tabs a[href="#' + url.split('#')[1] + '"]').on('shown', function (e) {
-        window.location.hash = e.target.hash;
-    }); 
-} 
+  }
+}
 
-$(document).ready(() => {
-  let url = location.href.replace(/\/$/, "");
-   if (location.hash) {
-    const hash = url.split("#");
-    $('#nav_proposicao a[href="#'+hash[1]+'"]').tab("show");
-    url = location.href.replace(/\/#/, "#");
-    history.replaceState(null, null, url);
-  } 
+function showLoadingSkeleton(show = true) {
+  if (show) {
+    $('#skeleton-loader').show();
+    $('#proposicoes-table').hide();
+    $('#cards-container').hide();
+    $('#table-container').attr('aria-busy', 'true');
+  } else {
+    $('#skeleton-loader').hide();
+    updateTable(window.appState.table?.data().toArray() || []);
+    $('#table-container').attr('aria-busy', 'false');
+  }
+}
 
-  $('a[data-bs-toggle="tab"]').on("click", function() {
-    let newUrl;
-    const hash = $(this).attr("href");
-    if(hash == "#home") {
-      newUrl = url.split("#")[0];
+function showSpinner(show = true) {
+  if (show) {
+    $('#indicator-overlay').show();
+    $('#proposicoes-table').addClass('table-blur');
+    $('#cards-container').addClass('table-blur');
+  } else {
+    $('#indicator-overlay').hide();
+    $('#proposicoes-table').removeClass('table-blur');
+    $('#cards-container').removeClass('table-blur');
+  }
+}
+
+function showToast(message, type = 'success') {
+  const toastId = 'toast-' + Date.now();
+  const icon = type === 'success' ? 'fa-check-circle' : 
+               type === 'danger' ? 'fa-exclamation-triangle' : 'fa-info-circle';
+  const toastHtml = `
+    <div id="${toastId}" class="alert alert-${type} alert-dismissible fade show mb-0" role="alert">
+      <div class="d-flex align-items-center">
+        <i class="fas ${icon} me-2"></i>
+        <div>${message}</div>
+      </div>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
+    </div>
+  `;
+  $('#alert-area').html(toastHtml);
+  setTimeout(() => { $(`#${toastId}`).alert('close'); }, 5000);
+}
+
+// Funções de manipulação de dados
+async function loadData(caixa, page = 1, forceRefresh = false) {
+  if (window.appState.isLoading) return;
+  
+  window.appState.isLoading = true;
+  window.appState.currentCaixa = caixa;
+  window.appState.currentPage = page;
+  
+  try {
+    const response = await $.ajax({
+      url: APP_CONFIG.API_URL,
+      data: Object.assign(
+        { 
+          caixa, 
+          pagina: page, 
+          por_pagina: window.appState.porPagina,
+          ordenar_por: window.appState.sortColumn,
+          ordenar_direcao: window.appState.sortDirection
+        },
+        window.appState.filtros
+      ),
+      dataType: 'json'
+    });
+    
+    // Atualizar a tabela internamente (mesmo no modo cards)
+    if (window.appState.table) {
+      window.appState.table.clear();
+      if (response.dados && response.dados.length > 0) {
+        window.appState.table.rows.add(response.dados).draw();
+      }
+    }
+    
+    // Atualizar a visualização atual
+    updateTable(response.dados || []);
+    updatePagination(response.paginacao);
+    updateBadge(caixa, response.paginacao.total);
+    
+    document.title = `Recebimento de Proposições - ${$(`[data-caixa="${caixa}"]`).text().trim()} | SAGL`;
+    
+  } catch (error) {
+    showToast(
+      error.responseJSON?.erro || `Erro ao carregar dados: ${error.status}`,
+      'danger'
+    );
+    updateTable([]);
+    updatePagination({ total: 0, pagina: 1, por_pagina: window.appState.porPagina, total_paginas: 1 });
+    
+  } finally {
+    window.appState.isLoading = false;
+    showLoadingSkeleton(false);
+    showSpinner(false);
+    saveFiltersToLocalStorage();
+  }
+}
+
+function updateTable(data) {
+  if (window.appState.currentView === 'table') {
+    $('#cards-container').hide();
+    $('#proposicoes-table').show();
+    
+    if (window.appState.table) {
+      if (data && data.length > 0) {
+        // Garantir que as colunas corretas estão visíveis
+        toggleHeaderColumns(window.appState.currentCaixa);
+      } else {
+        const colspan = window.appState.table.columns().visible().reduce((a, b) => a + (b ? 1 : 0), 0);
+        $('#proposicoes-table tbody').html(`
+          <tr>
+            <td colspan="${colspan}" class="empty-table-message text-center" tabindex="0">
+              <i class="fas fa-file-alt" aria-hidden="true"></i>
+              <div>Nenhuma proposição encontrada</div>
+            </td>
+          </tr>
+        `);
+      }
+    }
+  } else {
+    $('#proposicoes-table').hide();
+    $('#cards-container').show();
+    renderCards(data || []);
+  }
+}
+
+function renderCards(data) {
+  const $container = $('#cards-container').empty();
+  if (data.length === 0) {
+    $container.html(`
+      <div class="col-12 text-center w-100 py-5">
+        <i class="fas fa-file-alt fa-3x mb-3 text-muted"></i>
+        <p class="text-muted">Nenhuma proposição encontrada</p>
+      </div>
+    `);
+    return;
+  }
+  data.forEach(item => {
+    let envio = item.envio || '';
+    if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(envio)) {
+      const dt = new Date(envio);
+      const dia = String(dt.getDate()).padStart(2, '0');
+      const mes = String(dt.getMonth() + 1).padStart(2, '0');
+      const ano = dt.getFullYear();
+      const hora = String(dt.getHours()).padStart(2, '0');
+      const min = String(dt.getMinutes()).padStart(2, '0');
+      const seg = String(dt.getSeconds()).padStart(2, '0');
+      envio = `${dia}/${mes}/${ano} ${hora}:${min}:${seg}`;
+    }
+    const cardHtml = `
+      <div class="col d-flex">
+        <div class="proposicao-card ${item.prioritaria ? 'prioritaria' : ''} h-100 d-flex flex-column w-100">
+          <div class="card-header">
+            <span class="badge bg-secondary">${item.tipo || ''}</span>
+            <small class="text-muted">${envio}</small>
+          </div>
+          <div class="card-body flex-grow-1">
+            <h5 class="card-title">${item.descricao || 'Sem descrição'}</h5>
+            <p class="card-text"><strong>Autoria:</strong> ${item.autor || 'Não informado'}</p>
+            ${item.vinculo ? `<p class="card-text"><strong>Vinculado a:</strong> ${item.vinculo.tipo === 'matéria' ? `${item.vinculo.sigla} ${item.vinculo.numero}/${item.vinculo.ano}` : `Documento ${item.vinculo.id}`}</p>` : ''}
+            ${item.solicitacao_devolucao ? `<p class="card-meta"><strong>Pedido devolução:</strong> ${item.solicitacao_devolucao}</p>` : ''}
+            ${item.devolucao ? `<p class="card-meta"><strong>Devolvido em:</strong> ${item.devolucao}</p>` : ''}
+          </div>
+          <div class="card-footer card-actions bg-transparent border-0 pt-0 mt-auto text-end">
+            <a href="${APP_CONFIG.PORTAL_URL}/cadastros/proposicao/proposicao_mostrar_proc?cod_proposicao=${item.id}"
+              class="btn btn-sm btn-primary btn-card-action" title="Visualizar">
+              <i class="fas fa-eye"></i> Detalhes
+            </a>
+          </div>
+        </div>
+      </div>
+    `;
+    $container.append(cardHtml);
+  });
+}
+
+function updatePagination(pagination) {
+  let html = '';
+  let total = pagination.total || 0;
+  let pagina = pagination.pagina || 1;
+  let por_pagina = pagination.por_pagina || window.appState.porPagina;
+  let total_paginas = pagination.total_paginas || 1;
+  let inicio = total > 0 ? ((pagina - 1) * por_pagina + 1) : 0;
+  let fim = Math.min(inicio + por_pagina - 1, total);
+  
+  $('#table-info').text(`Mostrando ${inicio} a ${fim} de ${total} registros`);
+  
+  if (total_paginas > 1) {
+    if (pagina > 1) {
+      html += `<li class="page-item"><a class="page-link" href="#" data-pag="1" aria-label="Primeira página">&laquo;</a></li>`;
+      html += `<li class="page-item"><a class="page-link" href="#" data-pag="${pagina-1}" aria-label="Página anterior">&lsaquo;</a></li>`;
     } else {
-      newUrl = url.split("#")[0] + hash;
+      html += `<li class="page-item disabled"><span class="page-link" aria-hidden="true">&laquo;</span></li>`;
+      html += `<li class="page-item disabled"><span class="page-link" aria-hidden="true">&lsaquo;</span></li>`;
     }
-    newUrl += "";
-    history.replaceState(null, null, newUrl);
+
+    let start = Math.max(1, pagina - 2);
+    let end = Math.min(total_paginas, pagina + 2);
+    
+    if (start > 1) {
+      html += `<li class="page-item"><a class="page-link" href="#" data-pag="1">1</a></li>`;
+      if (start > 2) html += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+    }
+    
+    for (let i = start; i <= end; i++) {
+      if (i === pagina) {
+        html += `<li class="page-item active"><span class="page-link" aria-current="page">${i}</span></li>`;
+      } else {
+        html += `<li class="page-item"><a class="page-link" href="#" data-pag="${i}">${i}</a></li>`;
+      }
+    }
+    
+    if (end < total_paginas) {
+      if (end < total_paginas - 1) html += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+      html += `<li class="page-item"><a class="page-link" href="#" data-pag="${total_paginas}">${total_paginas}</a></li>`;
+    }
+    
+    if (pagina < total_paginas) {
+      html += `<li class="page-item"><a class="page-link" href="#" data-pag="${pagina+1}" aria-label="Próxima página">&rsaquo;</a></li>`;
+      html += `<li class="page-item"><a class="page-link" href="#" data-pag="${total_paginas}" aria-label="Última página">&raquo;</a></li>`;
+    } else {
+      html += `<li class="page-item disabled"><span class="page-link" aria-hidden="true">&rsaquo;</span></li>`;
+      html += `<li class="page-item disabled"><span class="page-link" aria-hidden="true">&raquo;</span></li>`;
+    }
+  }
+  
+  $('#pagination').html(html);
+}
+
+function updateBadge(caixa, count) {
+  const $badge = $(`#badge-${caixa}`);
+  $badge.text(count || 0)
+    .toggleClass('bg-primary', count > 0)
+    .toggleClass('bg-secondary', count === 0);
+}
+
+function updateActiveTab(caixa) {
+  $('.nav-link').removeClass('active').attr('aria-selected', 'false').attr('tabindex', '-1');
+  $(`[data-caixa="${caixa}"]`).addClass('active').attr('aria-selected', 'true').attr('tabindex', '0');
+}
+
+function loadCounts() {
+  const caixas = ['revisao', 'assinatura', 'protocolo', 'incorporado', 'pedido_devolucao', 'devolvido'];
+  const filtros = lerFiltrosForm();
+  
+  caixas.forEach(caixa => {
+    if ($(`[data-caixa="${caixa}"]`).length) {
+      const params = Object.assign(
+        {
+          caixa: caixa,
+          contar: 1
+        },
+        filtros
+      );
+      
+      $.get(APP_CONFIG.API_URL, params)
+        .done(resp => {
+          updateBadge(caixa, resp.paginacao.total);
+        })
+        .fail(() => {
+          updateBadge(caixa, 0);
+        });
+    }
+  });
+}
+
+// Funções de inicialização
+function initTable() {
+  if (window.appState.table && $.fn.DataTable.isDataTable('#proposicoes-table')) {
+    window.appState.table.destroy();
+  }
+  
+  window.appState.table = $('#proposicoes-table').DataTable({
+    searching: false, 
+    info: false, 
+    paging: false, 
+    ordering: false,
+    columns: [
+      { data: 'envio', render: d => d || '', className: 'text-center' },
+      { data: 'tipo', className: 'text-center' },
+      { data: 'descricao', render: (d, t, row) => (d || 'Sem descrição') + ` <span class="text-muted small">[${row.npe||''}]</span>` },
+      { data: 'autor', className: 'text-center' },
+      { data: 'vinculo', className: 'col-vinculo text-center', render: data => data ? data.tipo === 'matéria' ? `${data.sigla} ${data.numero}/${data.ano}` : `Documento ${data.id}` : '<span class="text-muted">Não incorporada</span>' },
+      { data: 'solicitacao_devolucao', className: 'col-solicitacao_devolucao text-center', render: d => d || '' },
+      { data: 'devolucao', className: 'col-devolucao text-center', render: d => d || '' },
+      { data: null, orderable: false, className: 'text-center', render: (data, type, row) => {
+        return `<a href="${APP_CONFIG.PORTAL_URL}/cadastros/proposicao/proposicao_mostrar_proc?cod_proposicao=${row.id}"
+                class="btn btn-sm btn-outline-primary btn-acao" title="Visualizar Proposição" aria-label="Visualizar Proposição ${row.id}">
+                <i class="fas fa-eye" aria-hidden="true"></i></a>`;
+      }}
+    ],
+    createdRow: function(row, data) { 
+      if (data.prioritaria) $(row).addClass('table-warning'); 
+    }
+  });
+  
+  toggleHeaderColumns(window.appState.currentCaixa);
+  initSorting();
+}
+
+function toggleHeaderColumns(caixa) {
+  const columnsByCaixa = {
+    revisao:          [true, true, true, true, false, false, false],
+    assinatura:       [true, true, true, true, false, false, false],
+    protocolo:        [true, true, true, true, false, false, false],
+    incorporado:      [true, true, true, true, true, false, false],
+    pedido_devolucao: [true, true, true, true, false, true, false],
+    devolvido:        [true, true, true, true, false, false, true]
+  };
+  
+  const colVisibility = columnsByCaixa[caixa] || [true, true, true, true, false, false, false];
+  
+  if (window.appState.table) {
+    colVisibility.forEach((visible, idx) => {
+      window.appState.table.column(idx).visible(visible);
+    });
+    
+    setTimeout(() => { 
+      if (window.appState.table) {
+        window.appState.table.responsive?.recalc?.();
+        const $header = $(`#proposicoes-table th[data-column="${window.appState.sortColumn}"]`);
+        if ($header.length) {
+          const iconClass = window.appState.sortDirection === 'asc' ? 'fa-sort-up' : 'fa-sort-down';
+          $header.find('i').removeClass('fa-sort').addClass(iconClass);
+        }
+      }
+    }, 100);
+  }
+}
+
+function initSorting() {
+  $('#proposicoes-table th[data-column]').on('click', function() {
+    const column = $(this).data('column');
+    const $icon = $(this).find('i');
+    const isCurrent = window.appState.sortColumn === column;
+    
+    $('#proposicoes-table th i').removeClass('fa-sort-up fa-sort-down').addClass('fa-sort');
+    
+    let direction = 'asc';
+    if (isCurrent) {
+      direction = window.appState.sortDirection === 'asc' ? 'desc' : 'asc';
+    }
+    
+    $icon.removeClass('fa-sort')
+         .addClass(direction === 'asc' ? 'fa-sort-up' : 'fa-sort-down');
+    
+    window.appState.sortColumn = column;
+    window.appState.sortDirection = direction;
+    loadData(window.appState.currentCaixa, 1, true);
+    loadCounts();
+  });
+}
+
+function initFilters() {
+  $('#filter-assunto').on('keydown', function(e) {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      window.appState.currentPage = 1;
+      window.appState.filtros = lerFiltrosForm();
+      resetSortIfNoFilters();
+      loadData(window.appState.currentCaixa, 1, true);
+      loadCounts();
+    }
+  });
+
+  $('#btn-global-search').on('click', function() {
+    window.appState.currentPage = 1;
+    window.appState.filtros = lerFiltrosForm();
+    resetSortIfNoFilters();
+    loadData(window.appState.currentCaixa, 1, true);
+    loadCounts();
+  });
+
+  $('#filter-tipo, #filter-autor, #filter-assunto, #filter-dt-inicio, #filter-dt-fim').on('input change', _.debounce(function() {
+    window.appState.currentPage = 1;
+    window.appState.filtros = lerFiltrosForm();
+    resetSortIfNoFilters();
+    loadData(window.appState.currentCaixa, 1, true);
+    loadCounts();
+  }, 500));
+
+  $('#reset-filters').on('click', function(e) {
+    e.preventDefault();
+    $('#filter-tipo').val('');
+    $('#filter-autor').val('');
+    $('#filter-assunto').val('');
+    $('#filter-dt-inicio').val('');
+    $('#filter-dt-fim').val('');
+    window.appState.currentPage = 1;
+    window.appState.filtros = {};
+    resetSortIfNoFilters();
+    loadData(window.appState.currentCaixa, 1, true);
+    loadCounts();
+  });
+
+  $('#export-csv').on('click', function(e) {
+    e.preventDefault();
+    const filtros = lerFiltrosForm();
+    const params = Object.assign(
+      { 
+        caixa: window.appState.currentCaixa,
+        por_pagina: window.appState.porPagina,
+        ordenar_por: window.appState.sortColumn,
+        ordenar_direcao: window.appState.sortDirection
+      }, 
+      filtros
+    );
+    const query = $.param(params);
+    window.open(`${APP_CONFIG.PORTAL_URL}/proposicoes-csv?${query}`, '_blank');
+  });
+
+  $('#select-por-pagina').on('change', function() {
+    window.appState.porPagina = parseInt($(this).val(), 10);
+    window.appState.currentPage = 1;
+    loadData(window.appState.currentCaixa, 1, true);
+    loadCounts();
+  });
+}
+
+function initViewToggle() {
+  $('#btn-view-table').on('click', function() {
+    if (window.appState.currentView !== 'table') {
+      window.appState.currentView = 'table';
+      $(this).addClass('active').siblings().removeClass('active');
+      updateTable(window.appState.table?.data().toArray() || []);
+      saveFiltersToLocalStorage();
+    }
+  });
+
+  $('#btn-view-cards').on('click', function() {
+    if (window.appState.currentView !== 'cards') {
+      window.appState.currentView = 'cards';
+      $(this).addClass('active').siblings().removeClass('active');
+      updateTable(window.appState.table?.data().toArray() || []);
+      saveFiltersToLocalStorage();
+    }
+  });
+}
+
+function handleTabChange(e) {
+  e.preventDefault();
+  const $tab = $(this);
+  const caixa = $tab.data('caixa');
+  if (window.appState.currentCaixa === caixa) return;
+
+  updateActiveTab(caixa); // <--- LINHA CRUCIAL!
+
+  $tab.attr('tabindex', '0').focus();
+  window.appState.currentCaixa = caixa;
+  window.appState.currentPage = 1;
+  showLoadingSkeleton(true);
+  showSpinner(true);
+  loadData(caixa, 1, true);
+  loadCounts();
+  updateTable(window.appState.table?.data().toArray() || []);
+  showToast(`Aba "${$tab.text().trim()}" carregada.`, 'info');
+}
+
+// Inicialização principal
+$(document).ready(function() {
+  loadFiltersFromLocalStorage();
+  window.appState.filtros = lerFiltrosForm();
+  resetSortIfNoFilters();
+  initTable();
+  initFilters();
+  initViewToggle();
+
+  if (USER_ROLES.includes('Operador') || USER_ROLES.includes('Operador Materia')) {
+    window.appState.currentCaixa = 'protocolo';
+  } else if (USER_ROLES.includes('Revisor Proposicao') || USER_ROLES.includes('Chefia Revisão')) {
+    window.appState.currentCaixa = 'revisao';
+  } else {
+    window.appState.currentCaixa = 'revisao';
+  }
+
+  updateActiveTab(window.appState.currentCaixa); // <-- ADICIONE ESTA LINHA AQUI
+
+  loadData(window.appState.currentCaixa, 1, true);
+  loadCounts();
+  $(document)
+    .on('click', '[data-caixa]', function(e) { handleTabChange.call(this, e); })
+    .on('click', '#pagination a.page-link', function(e) {
+      e.preventDefault();
+      const pag = parseInt($(this).data('pag'));
+      if (pag && pag !== window.appState.currentPage) {
+        loadData(window.appState.currentCaixa, pag, true);
+        loadCounts();
+      }
+    })
+    .on('click', '.btn-quick-review', function() {
+      const id = $(this).data('id');
+      showToast(`Revisão rápida iniciada para proposição ${id}`, 'info');
+    });
+
+  let resizeTimer;
+  $(window).on('resize', function() {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+      if (window.appState.table) {
+        window.appState.table.columns.adjust().responsive?.recalc?.();
+      }
+    }, 250);
   });
 });
 </script>

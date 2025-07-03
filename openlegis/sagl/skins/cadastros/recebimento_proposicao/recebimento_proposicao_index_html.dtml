@@ -176,6 +176,28 @@
   min-height: 100px;
 }
 .view-toggle-container { margin-bottom: 1rem; }
+
+/* Chips de filtros ativos */
+.filtro-chip {
+  display: inline-flex;
+  align-items: center;
+  background: #e9ecef;
+  border-radius: 2rem;
+  padding: 0.25em 0.9em 0.25em 0.8em;
+  margin-right: 0.5em;
+  margin-bottom: 0.25em;
+  font-size: 0.95em;
+  color: #495057;
+  border: 1px solid #dee2e6;
+  gap: 0.4em;
+}
+.filtro-chip .chip-remove {
+  cursor: pointer;
+  margin-left: 0.2em;
+  color: #6c757d;
+  font-size: 1em;
+}
+.filtro-chip .chip-remove:hover { color: #dc3545; }
 </style>
 
 <div class="">
@@ -296,6 +318,9 @@
   </div>
 </div>
 
+<!-- RESUMO DOS FILTROS ATIVOS -->
+<div id="filtros-ativos-resumo" class="mb-3" aria-live="polite" aria-atomic="true"></div>
+
 <div class="view-toggle-container">
   <div class="row justify-content-between align-items-center mb-3 g-3">
     <div class="col-md-6">
@@ -394,6 +419,35 @@ function lerFiltrosForm() {
   };
 }
 
+// NOVA FUNÇÃO: Resumo visual dos filtros ativos
+function renderResumoFiltros() {
+  const filtros = lerFiltrosForm();
+  const filtroNomes = {
+    tipo: 'Tipo',
+    autor: 'Autoria',
+    assunto: 'Ementa',
+    dt_inicio: 'Data Inicial',
+    dt_fim: 'Data Final'
+  };
+  let chips = '';
+  let qtdAtivos = 0;
+  Object.entries(filtros).forEach(([k, v]) => {
+    if (v) {
+      qtdAtivos++;
+      chips += `<span class="filtro-chip" data-filtro="${k}">
+        <strong>${filtroNomes[k] || k}:</strong> ${_.escape(v)}
+        <span class="chip-remove" tabindex="0" title="Remover filtro" aria-label="Remover filtro ${filtroNomes[k] || k}" data-remove-filtro="${k}">&times;</span>
+      </span>`;
+    }
+  });
+  const container = $('#filtros-ativos-resumo');
+  if (qtdAtivos > 0) {
+    container.html(`<div class="mb-1 fw-medium">Filtros ativos: </div>${chips}`);
+  } else {
+    container.html(`<span class="text-muted">Nenhum filtro aplicado.</span>`);
+  }
+}
+
 function resetSortIfNoFilters() {
   const filtros = lerFiltrosForm();
   const temFiltro = filtros.tipo || filtros.autor || filtros.assunto ||
@@ -446,6 +500,7 @@ function loadFiltersFromLocalStorage() {
       console.error('Erro ao carregar filtros salvos:', e);
     }
   }
+  renderResumoFiltros(); // <-- EXIBE RESUMO AO CARREGAR
 }
 
 function showLoadingSkeleton(show = true) {
@@ -552,7 +607,6 @@ function updateTable(data) {
     
     if (window.appState.table) {
       if (data && data.length > 0) {
-        // Garantir que as colunas corretas estão visíveis
         toggleHeaderColumns(window.appState.currentCaixa);
       } else {
         const colspan = window.appState.table.columns().visible().reduce((a, b) => a + (b ? 1 : 0), 0);
@@ -807,6 +861,7 @@ function initFilters() {
       window.appState.currentPage = 1;
       window.appState.filtros = lerFiltrosForm();
       resetSortIfNoFilters();
+      renderResumoFiltros(); // Atualiza chips ao filtrar
       loadData(window.appState.currentCaixa, 1, true);
       loadCounts();
     }
@@ -816,6 +871,7 @@ function initFilters() {
     window.appState.currentPage = 1;
     window.appState.filtros = lerFiltrosForm();
     resetSortIfNoFilters();
+    renderResumoFiltros(); // Atualiza chips ao filtrar
     loadData(window.appState.currentCaixa, 1, true);
     loadCounts();
   });
@@ -824,6 +880,7 @@ function initFilters() {
     window.appState.currentPage = 1;
     window.appState.filtros = lerFiltrosForm();
     resetSortIfNoFilters();
+    renderResumoFiltros(); // Atualiza chips ao filtrar
     loadData(window.appState.currentCaixa, 1, true);
     loadCounts();
   }, 500));
@@ -838,6 +895,7 @@ function initFilters() {
     window.appState.currentPage = 1;
     window.appState.filtros = {};
     resetSortIfNoFilters();
+    renderResumoFiltros(); // Atualiza chips ao resetar
     loadData(window.appState.currentCaixa, 1, true);
     loadCounts();
   });
@@ -863,6 +921,21 @@ function initFilters() {
     window.appState.currentPage = 1;
     loadData(window.appState.currentCaixa, 1, true);
     loadCounts();
+  });
+
+  // --- CHIPS: Remoção individual de filtros ---
+  $(document).on('click keydown', '.chip-remove', function(e) {
+    if (e.type === 'click' || e.key === 'Enter' || e.key === ' ') {
+      const filtro = $(this).data('remove-filtro');
+      if (filtro) {
+        $(`#filter-${filtro.replace('_', '-')}`).val('');
+        renderResumoFiltros();
+        window.appState.filtros = lerFiltrosForm();
+        resetSortIfNoFilters();
+        loadData(window.appState.currentCaixa, 1, true);
+        loadCounts();
+      }
+    }
   });
 }
 
@@ -892,7 +965,7 @@ function handleTabChange(e) {
   const caixa = $tab.data('caixa');
   if (window.appState.currentCaixa === caixa) return;
 
-  updateActiveTab(caixa); // <--- LINHA CRUCIAL!
+  updateActiveTab(caixa);
 
   $tab.attr('tabindex', '0').focus();
   window.appState.currentCaixa = caixa;
@@ -910,6 +983,7 @@ $(document).ready(function() {
   loadFiltersFromLocalStorage();
   window.appState.filtros = lerFiltrosForm();
   resetSortIfNoFilters();
+  renderResumoFiltros(); // Inicial
   initTable();
   initFilters();
   initViewToggle();
@@ -922,7 +996,7 @@ $(document).ready(function() {
     window.appState.currentCaixa = 'revisao';
   }
 
-  updateActiveTab(window.appState.currentCaixa); // <-- ADICIONE ESTA LINHA AQUI
+  updateActiveTab(window.appState.currentCaixa);
 
   loadData(window.appState.currentCaixa, 1, true);
   loadCounts();

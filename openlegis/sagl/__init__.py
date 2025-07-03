@@ -17,6 +17,7 @@ from Products.CMFCore.utils import ToolInit
 from Products.PythonScripts.Utility import allow_module
 from zope.component import provideUtility
 from App.config import getConfiguration
+from zope.component import queryUtility
 
 
 # Importações do projeto
@@ -25,9 +26,11 @@ from openlegis.sagl.config import PROJECTNAME
 from openlegis.sagl.lexml import SAGLOAIServer
 from openlegis.sagl.interfaces import (
     IWebSocketServerUtility, 
-    IWebSocketServerService
+    IWebSocketServerService,
+    ISAPLDocumentManager,  # <--- adicione aqui
 )
 from openlegis.sagl.browser.websocket_server import WebSocketServerService
+from openlegis.sagl.document_manager import SAPLDocumentManager  # <--- adicione aqui
 
 # Logger
 logger = logging.getLogger(__name__)
@@ -61,7 +64,7 @@ def configure_module_security():
         allow_module(module)
 
 ###############################################################################
-# VERIFICAÇÃO DE INNSTANCIA E PORTA
+# VERIFICAÇÃO DE INSTÂNCIA E PORTA
 ###############################################################################
 
 def is_instance():
@@ -163,3 +166,13 @@ def initialize(context):
             logger.warning("Porta 8765 já está em uso. WebSocket não será iniciado.")
         else:
             initialize_websocket_service()
+
+    # 4. REGISTRA A UTILITY DE GERENCIAMENTO DE DOCUMENTOS NA ZODB
+    try:
+        # Tenta usar o context como raiz, normalmente funciona em SAPL puro.
+        provideUtility(SAPLDocumentManager(context), ISAPLDocumentManager)
+        m = queryUtility(ISAPLDocumentManager)
+        logger.info("Testando queryUtility após registro: %s", m)
+        logger.info("ISAGLDocumentManager registrado com sucesso.")
+    except Exception as e:
+        logger.exception("Erro ao registrar ISAGLDocumentManager: %s", e)

@@ -14,7 +14,7 @@ import logging
 from z3c.saconfig import named_scoped_session
 from openlegis.sagl.models.models import (
     Proposicao, Autor, TipoProposicao, MateriaLegislativa,
-    DocumentoAcessorio, Parlamentar, Comissao, AssuntoProposicao
+    DocumentoAcessorio, Parlamentar, Comissao, AssuntoProposicao, Usuario
 )
 from openlegis.sagl.interfaces import ISAPLDocumentManager
 
@@ -26,7 +26,7 @@ class ProposicoesAPIBase:
     def _verificar_permissao_caixa(self, caixa):
         roles = self._get_user_roles()
         if caixa in ['revisao', 'assinatura', 'incorporado', 'devolvido', 'pedido_devolucao']:
-            return any(r in roles for r in ['Revisor Proposicao', 'Chefia Revisão', 'Operador', 'Operador Materia'])
+            return any(r in roles for r in ['Revisor Proposicao', 'Chefia Revisão', 'Operador', 'Operador Materia', 'Operador Revisao'])
         elif caixa == 'protocolo':
             return any(r in roles for r in ['Operador', 'Operador Materia'])
         return False
@@ -40,8 +40,44 @@ class ProposicoesAPIBase:
         except Exception:
             return set()
 
+    def _get_cod_usuario(self):
+        """Busca o cod_usuario a partir do login do usuário autenticado."""
+        try:
+            col_username = self.request.AUTHENTICATED_USER.getUserName()
+            session = Session()
+            usuario = session.query(Usuario).filter(
+                Usuario.col_username == col_username,
+                Usuario.ind_excluido == 0,
+                Usuario.ind_ativo == 1
+            ).first()
+            session.close()
+            return usuario.cod_usuario if usuario else None
+        except Exception as e:
+            logger.warning('[proposicoes] Não foi possível obter cod_usuario: %s', e)
+            return None
+
     def _aplicar_filtros_caixa(self, query, caixa):
-        if caixa in ['revisao', 'assinatura', 'protocolo']:
+        if caixa == 'revisao':
+            roles = self._get_user_roles()
+            if 'Revisor Proposicao' in roles:
+                cod_revisor = self._get_cod_usuario()
+                if cod_revisor:
+                    query = query.filter(
+                        Proposicao.dat_envio.isnot(None),
+                        Proposicao.dat_recebimento.is_(None),
+                        Proposicao.dat_solicitacao_devolucao.is_(None),
+                        Proposicao.dat_devolucao.is_(None),
+                        Proposicao.cod_revisor == cod_revisor
+                    )
+                    return query
+            # Demais perfis (Chefia Revisão, Operador, etc.):
+            return query.filter(
+                Proposicao.dat_envio.isnot(None),
+                Proposicao.dat_recebimento.is_(None),
+                Proposicao.dat_solicitacao_devolucao.is_(None),
+                Proposicao.dat_devolucao.is_(None)
+            )
+        elif caixa in ['assinatura', 'protocolo']:
             return query.filter(
                 Proposicao.dat_envio.isnot(None),
                 Proposicao.dat_recebimento.is_(None),
@@ -119,10 +155,6 @@ class ProposicoesAPIBase:
         return query
 
     def _verificar_documentos_fisicos(self, proposicoes, caixa):
-        """
-        Aplica a filtragem correta dos arquivos (em lote, mas com fallback para individual).
-        A lógica é idêntica para ambos os caminhos.
-        """
         doc_manager = queryUtility(ISAPLDocumentManager)
         if not doc_manager or not proposicoes:
             return []
@@ -151,7 +183,6 @@ class ProposicoesAPIBase:
                 logger.warning('[proposicoes] Batch check falhou (%s), usando verificação individual!', e)
                 batch_supported = False
 
-        # Fallback: verificação individual com mesma lógica!
         if not batch_supported:
             for prop in proposicoes:
                 id_base = str(prop.cod_proposicao)
@@ -447,8 +478,6 @@ class ProposicoesAPI(grok.View, ProposicoesAPIBase):
             return self._responder_erro('Erro interno: ' + str(e), 500)
         finally:
             session.close()
-
-    # ... [demais métodos iguais ao seu último arquivo: handle_post_actions, acao, acao_lote, etc.]
 
 class ExportarCSV(grok.View, ProposicoesAPIBase):
     grok.context(Interface)

@@ -226,6 +226,8 @@ class ProposicoesAPIBase:
         dados = {
             'id': proposicao.cod_proposicao,
             'tipo': getattr(proposicao.tipo_proposicao, 'des_tipo_proposicao', ''),
+            'tip_mat_ou_doc': getattr(proposicao.tipo_proposicao, 'ind_mat_ou_doc', None),
+            'cod_mat_ou_doc': getattr(proposicao, 'cod_mat_ou_doc', None),
             'descricao': proposicao.txt_descricao,
             'autor': self._formatar_autor(proposicao.autor),
             'envio': self._formatar_data_hora(proposicao.dat_envio),
@@ -268,47 +270,75 @@ class ProposicoesAPIBase:
         return autor.nom_autor
 
     def _formatar_vinculo(self, proposicao):
-        if hasattr(proposicao, 'ind_mat_ou_doc'):
-            if proposicao.ind_mat_ou_doc == 'D' and not any([
-                proposicao.cod_emenda,
-                proposicao.cod_substitutivo,
-                proposicao.cod_parecer
-            ]):
-                return self._obter_vinculo_documento(proposicao.cod_mat_ou_doc)
-        return self._obter_vinculo_materia(proposicao.cod_mat_ou_doc)
+        tipo = getattr(proposicao.tipo_proposicao, 'ind_mat_ou_doc', None)
+        cod_mat_ou_doc = getattr(proposicao, 'cod_mat_ou_doc', None)
+        # Campos de emenda, substitutivo, parecer:
+        tem_emenda = getattr(proposicao, 'cod_emenda', None)
+        tem_subst = getattr(proposicao, 'cod_substitutivo', None)
+        tem_parecer = getattr(proposicao, 'cod_parecer', None)
+        if tipo == 'D':
+            # Caso documento acessório simples (sem emenda, subst, parecer)
+            if not tem_emenda and not tem_subst and not tem_parecer:
+                return self._obter_vinculo_documento(cod_mat_ou_doc)
+            # Caso emenda/substitutivo/parecer: exibe matéria principal como vínculo
+            elif cod_mat_ou_doc:
+                return self._obter_vinculo_materia(cod_mat_ou_doc)
+            else:
+                return None
+        elif tipo == 'M':
+            return self._obter_vinculo_materia(cod_mat_ou_doc)
+        return None
 
     def _obter_vinculo_materia(self, cod_materia):
+        """
+        Retorna um dicionário com informações detalhadas da matéria legislativa.
+        """
         if not cod_materia:
             return None
         session = Session()
         try:
-            materia = session.get(MateriaLegislativa, cod_materia)
+            materia = (
+                session.query(MateriaLegislativa)
+                .options(joinedload(MateriaLegislativa.tipo_materia_legislativa))
+                .get(cod_materia)
+            )
             if materia:
-                tipo = getattr(materia.tipo_materia_legislativa, 'des_tipo_materia', None)
-                sigla = getattr(materia.tipo_materia_legislativa, 'sgl_tipo_materia', None)
                 return {
                     'tipo': 'matéria',
-                    'id': materia.cod_materia,
-                    'sigla': sigla or '',
-                    'tipo_descricao': tipo or '',
-                    'numero': materia.num_ident_basica,
-                    'ano': materia.ano_ident_basica
+                    'materia_id': materia.cod_materia,
+                    'sigla': getattr(materia.tipo_materia_legislativa, 'sgl_tipo_materia', ''),
+                    'numero': getattr(materia, 'num_ident_basica', ''),
+                    'ano': getattr(materia, 'ano_ident_basica', '')
                 }
             return None
         finally:
             session.close()
 
     def _obter_vinculo_documento(self, cod_documento):
+        """
+        Retorna um dicionário com informações do documento acessório e sua matéria vinculada.
+        """
         if not cod_documento:
             return None
         session = Session()
         try:
-            documento = session.get(DocumentoAcessorio, cod_documento)
+            documento = (
+                session.query(DocumentoAcessorio)
+                .options(
+                    joinedload(DocumentoAcessorio.materia_legislativa)
+                    .joinedload(MateriaLegislativa.tipo_materia_legislativa)
+                )
+                .get(cod_documento)
+            )
             if documento:
+                materia = documento.materia_legislativa
                 return {
                     'tipo': 'documento',
                     'id': documento.cod_documento,
-                    'materia_id': documento.cod_materia
+                    'materia_id': documento.cod_materia,
+                    'sigla': getattr(materia.tipo_materia_legislativa, 'sgl_tipo_materia', '') if materia else '',
+                    'numero': getattr(materia, 'num_ident_basica', '') if materia else '',
+                    'ano': getattr(materia, 'ano_ident_basica', '') if materia else ''
                 }
             return None
         finally:
@@ -478,6 +508,74 @@ class ProposicoesAPI(grok.View, ProposicoesAPIBase):
             return self._responder_erro('Erro interno: ' + str(e), 500)
         finally:
             session.close()
+
+
+class IncorporarLoteProtocolo(grok.View, ProposicoesAPIBase):
+    grok.context(Interface)
+    grok.name('proposicoes-incorporar-lote')
+    grok.require('zope2.View')
+
+    def render(self):
+        # Aceita apenas POST!
+        if self.request.method != 'POST':
+            self.request.response.setStatus(405)
+            return json.dumps({'sucesso': False, 'erro': 'Método não permitido.'})
+        session = Session()
+        try:
+            if not self._verificar_permissao_caixa('protocolo'):
+                self.request.response.setStatus(403)
+                return json.dumps({'sucesso': False, 'erro': 'Acesso não autorizado.'})
+
+            # IDs recebidos do frontend: lista de cod_proposicao (ex: [12, 13, 15])
+            proposicoes_ids = self.request.form.get('proposicoes_ids')
+            if not proposicoes_ids:
+                return json.dumps({'sucesso': False, 'erro': 'Nenhuma proposição informada.'})
+
+            # Garante lista de ints:
+            if isinstance(proposicoes_ids, str):
+                import json as _json
+                proposicoes_ids = _json.loads(proposicoes_ids)
+            proposicoes_ids = [int(x) for x in proposicoes_ids]
+
+            # Consulta só proposições válidas para incorporação em lote:
+            props = (
+                session.query(Proposicao)
+                .join(Proposicao.tipo_proposicao)
+                .filter(
+                    Proposicao.cod_proposicao.in_(proposicoes_ids),
+                    Proposicao.ind_excluido == 0,
+                    Proposicao.cod_mat_ou_doc == None,  # ainda não incorporada
+                    TipoProposicao.ind_mat_ou_doc == 'M',   # agora correto!
+                    Proposicao.dat_solicitacao_devolucao == None,
+                    Proposicao.dat_devolucao == None
+                ).all()
+            )
+
+            if not props:
+                return json.dumps({'sucesso': False, 'erro': 'Nenhuma proposição válida para incorporação.'})
+
+            # Agora, para cada proposição, chama o script criar_materia_pysc via restrictedTraverse
+            portal = self.request.PARENTS[0]
+            context = portal
+            resultados = []
+            for prop in props:
+                try:
+                    # Executa o script (adaptando para contexto Zope)
+                    result = context.restrictedTraverse('cadastros/recebimento_proposicao/criar_materia_pysc')(cod_proposicao=prop.cod_proposicao)
+                    resultados.append({'cod_proposicao': prop.cod_proposicao, 'resultado': 'ok'})
+                except Exception as e:
+                    logger.warning('Falha ao incorporar proposição %s: %s', prop.cod_proposicao, e)
+                    resultados.append({'cod_proposicao': prop.cod_proposicao, 'resultado': 'erro', 'erro': str(e)})
+
+            return json.dumps({'sucesso': True, 'resultados': resultados})
+
+        except Exception as e:
+            logger.exception("Erro na incorporação em lote")
+            self.request.response.setStatus(500)
+            return json.dumps({'sucesso': False, 'erro': str(e)})
+        finally:
+            session.close()
+
 
 class ExportarCSV(grok.View, ProposicoesAPIBase):
     grok.context(Interface)

@@ -63,6 +63,26 @@
   .filter-card .col-6 { width: 100% !important; }
   .filter-card .input-group { width: 100% !important; }
 }
+.filtro-chip {
+  display: inline-flex;
+  align-items: center;
+  background: #e9ecef;
+  border-radius: 2rem;
+  padding: 0.25em 0.9em 0.25em 0.8em;
+  margin-right: 0.5em;
+  margin-bottom: 0.25em;
+  font-size: 0.95em;
+  color: #495057;
+  border: 1px solid #dee2e6;
+  gap: 0.4em;
+}
+.filtro-chip .chip-remove {
+  cursor: pointer;
+  margin-left: 0.2em;
+  color: #6c757d;
+  font-size: 1em;
+}
+.filtro-chip .chip-remove:hover { color: #dc3545; }
 .skeleton-loader { min-height: 120px; margin-bottom: 1rem; }
 .skeleton-line { background: #e9ecef; height: 18px; margin: 7px 0; border-radius: 2px; }
 .skeleton-line.short { width: 40%; }
@@ -292,6 +312,8 @@
   </div>
 </div>
 
+<div id="filtros-ativos-resumo" class="mb-3" aria-live="polite" aria-atomic="true"></div>
+
 <div class="view-toggle-container">
   <div class="row justify-content-between align-items-center mb-3 g-3">
     <div class="col-md-8 d-flex align-items-center gap-3">
@@ -484,6 +506,33 @@ function lerFiltrosForm() {
     dt_inicio: $('#filter-dt-inicio').val(),
     dt_fim: $('#filter-dt-fim').val()
   };
+}
+function renderResumoFiltros() {
+  const filtros = lerFiltrosForm();
+  const filtroNomes = {
+    tipo: 'Tipo',
+    autor: 'Autoria',
+    assunto: 'Ementa',
+    dt_inicio: 'Data Inicial',
+    dt_fim: 'Data Final'
+  };
+  let chips = '';
+  let qtdAtivos = 0;
+  Object.entries(filtros).forEach(([k, v]) => {
+    if (v) {
+      qtdAtivos++;
+      chips += `<span class="filtro-chip" data-filtro="${k}">
+        <strong>${filtroNomes[k] || k}:</strong> ${_.escape(v)}
+        <span class="chip-remove" tabindex="0" role="button" title="Remover filtro" aria-label="Remover filtro ${filtroNomes[k] || k}" data-remove-filtro="${k}">&times;</span>
+      </span>`;
+    }
+  });
+  const container = $('#filtros-ativos-resumo');
+  if (qtdAtivos > 0) {
+    container.html(`<div class="mb-1 fw-medium">Filtros ativos: </div>${chips}`);
+  } else {
+    container.html(`<span class="text-muted">Nenhum filtro aplicado.</span>`);
+  }
 }
 function resetSortIfNoFilters() {
   const filtros = lerFiltrosForm();
@@ -943,6 +992,7 @@ function initFilters() {
       window.appState.currentPage = 1;
       window.appState.filtros = lerFiltrosForm();
       resetSortIfNoFilters();
+      renderResumoFiltros();
       loadData(window.appState.currentCaixa, 1, true);
       loadCounts();
     }
@@ -951,6 +1001,7 @@ function initFilters() {
     window.appState.currentPage = 1;
     window.appState.filtros = lerFiltrosForm();
     resetSortIfNoFilters();
+    renderResumoFiltros();
     loadData(window.appState.currentCaixa, 1, true);
     loadCounts();
   });
@@ -958,6 +1009,7 @@ function initFilters() {
     window.appState.currentPage = 1;
     window.appState.filtros = lerFiltrosForm();
     resetSortIfNoFilters();
+    renderResumoFiltros();
     loadData(window.appState.currentCaixa, 1, true);
     loadCounts();
   }, 500));
@@ -971,6 +1023,7 @@ function initFilters() {
     window.appState.currentPage = 1;
     window.appState.filtros = {};
     resetSortIfNoFilters();
+    renderResumoFiltros();
     loadData(window.appState.currentCaixa, 1, true);
     loadCounts();
   });
@@ -1066,9 +1119,25 @@ $('#btn-incorporar-lote').on('click', async function() {
   }
 });
 
+// --- CHIPS DE FILTROS ATIVOS (REMOVER FILTRO) ---
+$(document).on('click keydown', '.chip-remove', function(e) {
+  if (e.type === 'click' || e.key === 'Enter' || e.key === ' ') {
+    const filtro = $(this).data('remove-filtro');
+    if (filtro) {
+      $(`#filter-${filtro.replace('_', '-')}`).val('');
+      renderResumoFiltros();
+      window.appState.filtros = lerFiltrosForm();
+      resetSortIfNoFilters();
+      loadData(window.appState.currentCaixa, 1, true);
+      loadCounts();
+    }
+  }
+});
+
 // --- INICIALIZAÇÃO PRINCIPAL ---
 $(document).ready(function() {
   loadFiltersFromLocalStorage();
+  renderResumoFiltros();
   window.appState.filtros = lerFiltrosForm();
   resetSortIfNoFilters();
   initTable();
@@ -1109,6 +1178,7 @@ $(document).ready(function() {
     }, 250);
   });
 });
+
 </script>
 
 <dtml-var footer_html>

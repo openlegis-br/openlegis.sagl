@@ -362,17 +362,18 @@
       <div class="table-responsive">
         <table id="proposicoes-table" class="table table-striped table-bordered" style="width:100%">
           <thead>
-            <tr id="table-header-row">
-              <th width="5%" class="col-select" style="display:none;"><!-- Seleção --></th>
-              <th width="12%" data-column="envio">Envio <i class="fas fa-sort float-end" aria-hidden="true"></i></th>
-              <th width="15%" data-column="tipo">Tipo <i class="fas fa-sort float-end" aria-hidden="true"></i></th>
-              <th width="30%" data-column="descricao">Ementa <i class="fas fa-sort float-end" aria-hidden="true"></i></th>
-              <th width="15%" data-column="autor">Autoria <i class="fas fa-sort float-end" aria-hidden="true"></i></th>
-              <th class="col-vinculo" width="15%">Vínculo</th>
-              <th class="col-solicitacao_devolucao" width="10%">Data do Pedido</th>
-              <th class="col-devolucao" width="10%">Data Devolução</th>
-              <th width="5%%">Ações</th>
-            </tr>
+           <tr id="table-header-row">
+             <th width="5%" class="col-select" style="display:none;"></th>
+             <th width="12%" data-column="envio">Envio</th>
+             <th width="15%" data-column="tipo">Tipo</th>
+             <th width="35%" data-column="descricao">Ementa</th>
+             <th width="15%" data-column="autor">Autoria</th>
+             <th class="col-recebimento" width="12%">Incorporação</th>
+             <th class="col-vinculo" width="10%">Vínculo</th>
+             <th class="col-solicitacao_devolucao" width="10%">Data do Pedido</th>
+             <th class="col-devolucao" width="10%">Data Devolução</th>
+             <th width="8%">Ações</th>
+           </tr>
           </thead>
           <tbody></tbody>
         </table>
@@ -787,11 +788,19 @@ function renderCards(data) {
           <div class="card-body flex-grow-1">
             <h5 class="card-title">${item.descricao || 'Sem descrição'}</h5>
             <p class="card-text"><strong>Autoria:</strong> ${item.autor || 'Não informado'}</p>
+            ${(window.appState.currentCaixa === 'incorporado' && item.recebimento) 
+              ? `<p class="card-meta"><strong>Incorporada em:</strong> ${item.recebimento}</p>` 
+              : ''}
             ${vinculoHtml}
             ${item.solicitacao_devolucao ? `<p class="card-meta"><strong>Pedido devolução:</strong> ${item.solicitacao_devolucao}</p>` : ''}
-            ${item.devolucao ? `<p class="card-meta"><strong>Devolvido em:</strong> ${item.devolucao}</p>` : ''}
+            ${item.devolucao ? `<p class="card-meta"><strong>Devolvida em:</strong> ${item.devolucao}</p>` : ''}
           </div>
           <div class="card-footer card-actions bg-transparent border-0 pt-0 mt-auto text-end">
+            ${window.appState.currentCaixa === 'protocolo' && item.pdf_assinado_url ? `
+              <a href="${item.pdf_assinado_url}" class="btn btn-sm btn-outline-success me-1" title="Baixar PDF assinado" target="_blank" rel="noopener">
+                <i class="fas fa-file-pdf"></i> PDF
+              </a>
+            ` : ''}
             <a href="${APP_CONFIG.PORTAL_URL}/cadastros/proposicao/proposicao_mostrar_proc?cod_proposicao=${item.id}"
               class="btn btn-sm btn-primary btn-card-action" title="Visualizar">
               <i class="fas fa-eye"></i> Detalhes
@@ -814,7 +823,7 @@ function initTable() {
     searching: false, 
     info: false, 
     paging: false, 
-    ordering: false,
+    ordering: true,
     columns: [
       { // Coluna seleção (checkbox)
         data: null,
@@ -831,14 +840,29 @@ function initTable() {
       { data: 'tipo', className: 'text-center' },
       { data: 'descricao', render: (d, t, row) => (d || 'Sem descrição') + ` <span class="text-muted small">[${row.npe||''}]</span>` },
       { data: 'autor', className: 'text-center' },
+      { data: 'recebimento', className: 'text-center', render: d => d || '' },
       { data: 'vinculo', className: 'col-vinculo text-center', render: formatarVinculoTabela },
       { data: 'solicitacao_devolucao', className: 'col-solicitacao_devolucao text-center', render: d => d || '' },
       { data: 'devolucao', className: 'col-devolucao text-center', render: d => d || '' },
-      { data: null, orderable: false, className: 'text-center', render: (data, type, row) => {
-        return `<a href="${APP_CONFIG.PORTAL_URL}/cadastros/proposicao/proposicao_mostrar_proc?cod_proposicao=${row.id}"
-                class="btn btn-sm btn-outline-primary btn-acao" title="Visualizar Proposição" aria-label="Visualizar Proposição ${row.id}">
-                <i class="fas fa-eye" aria-hidden="true"></i></a>`;
-      }}
+      {
+        data: null,
+        orderable: false,
+        className: 'text-center',
+        render: (data, type, row) => {
+          let btns = '';
+          // Só mostra se está na caixa protocolo e tem PDF assinado:
+          if (window.appState.currentCaixa === 'protocolo' && row.pdf_assinado_url) {
+            btns += `<a href="${row.pdf_assinado_url}" class="btn btn-sm btn-outline-success me-1" title="Baixar PDF assinado" target="_blank" rel="noopener">
+                      <i class="fas fa-file-pdf"></i>
+                    </a>`;
+          }
+          btns += `<a href="${APP_CONFIG.PORTAL_URL}/cadastros/proposicao/proposicao_mostrar_proc?cod_proposicao=${row.id}"
+                      class="btn btn-sm btn-outline-primary btn-acao" title="Visualizar Proposição" aria-label="Visualizar Proposição ${row.id}">
+                      <i class="fas fa-eye" aria-hidden="true"></i>
+                   </a>`;
+          return btns;
+        }
+      }
     ],
     createdRow: function(row, data) { 
       if (data.prioritaria) $(row).addClass('table-warning'); 
@@ -850,34 +874,48 @@ function initTable() {
   window.appState.table.column(0).visible(window.appState.currentCaixa === 'protocolo');
 }
 
-function toggleHeaderColumns(caixa) {
-  const columnsByCaixa = {
-    revisao:          [false, true, true, true, true, false, false, false],
-    assinatura:       [false, true, true, true, true, false, false, false],
-    protocolo:        [true,  true, true, true, true, false, false, false],
-    incorporado:      [false, true, true, true, true, true, false, false],
-    pedido_devolucao: [false, true, true, true, true, false, true, false],
-    devolvido:        [false, true, true, true, true, false, false, true]
-  };
-  const colVisibility = columnsByCaixa[caixa] || [false, true, true, true, true, false, false, false];
-  if (window.appState.table) {
-    colVisibility.forEach((visible, idx) => {
-      window.appState.table.column(idx).visible(visible);
-    });
-    setTimeout(() => { 
-      if (window.appState.table) {
-        window.appState.table.responsive?.recalc?.();
-        const $header = $(`#proposicoes-table th[data-column="${window.appState.sortColumn}"]`);
-        if ($header.length) {
-          const iconClass = window.appState.sortDirection === 'asc' ? 'fa-sort-up' : 'fa-sort-down';
-          $header.find('i').removeClass('fa-sort').addClass(iconClass);
+  function toggleHeaderColumns(caixa) {
+    // Índices das colunas:
+    // 0: seleção (checkbox)
+    // 1: envio
+    // 2: tipo
+    // 3: descricao
+    // 4: autor
+    // 5: recebimento (só incorporado)
+    // 6: vinculo
+    // 7: solicitacao_devolucao
+    // 8: devolucao
+    // 9: ações <-- sempre visível!
+
+    const columnsByCaixa = {
+      revisao:          [false, true, true, true, true, false, false, false, false, true],
+      assinatura:       [false, true, true, true, true, false, false, false, false, true],
+      protocolo:        [true,  true, true, true, true, false, false, false, false, true],
+      incorporado:      [false, true, true, true, true, true,  true,  false, false, true],
+      pedido_devolucao: [false, true, true, true, true, false, false, true,  false, true],
+      devolvido:        [false, true, true, true, true, false, false, false, true,  true]
+    };
+    // fallback padrão caso "caixa" não seja reconhecida:
+    const colVisibility = columnsByCaixa[caixa] || [false, true, true, true, true, false, false, false, false, true];
+
+    if (window.appState.table) {
+      colVisibility.forEach((visible, idx) => {
+        window.appState.table.column(idx).visible(visible);
+      });
+      setTimeout(() => { 
+        if (window.appState.table) {
+          window.appState.table.responsive?.recalc?.();
+          const $header = $(`#proposicoes-table th[data-column="${window.appState.sortColumn}"]`);
+          if ($header.length) {
+            const iconClass = window.appState.sortDirection === 'asc' ? 'fa-sort-up' : 'fa-sort-down';
+            $header.find('i').removeClass('fa-sort').addClass(iconClass);
+          }
         }
-      }
-    }, 100);
-    $('.col-select').toggle(window.appState.currentCaixa === 'protocolo');
-    window.appState.table.column(0).visible(window.appState.currentCaixa === 'protocolo');
+      }, 100);
+      $('.col-select').toggle(window.appState.currentCaixa === 'protocolo');
+      window.appState.table.column(0).visible(window.appState.currentCaixa === 'protocolo');
+    }
   }
-}
 
 function initSorting() {
   $('#proposicoes-table th[data-column]').on('click', function() {

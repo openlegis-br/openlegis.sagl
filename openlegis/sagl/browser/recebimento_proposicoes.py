@@ -223,6 +223,9 @@ class ProposicoesAPIBase:
     def _formatar_proposicao_completo(self, proposicao, caixa):
         id_base = str(proposicao.cod_proposicao)
         doc_manager = queryUtility(ISAPLDocumentManager)
+        pdf_assinado_url = None
+        if doc_manager and doc_manager.existe_documento('proposicao', id_base + '_signed.pdf'):
+           pdf_assinado_url = f"{doc_manager.sapl_documentos_url}/proposicao/{id_base}_signed.pdf"
         dados = {
             'id': proposicao.cod_proposicao,
             'tipo': getattr(proposicao.tipo_proposicao, 'des_tipo_proposicao', ''),
@@ -241,6 +244,7 @@ class ProposicoesAPIBase:
             'tem_odt': doc_manager and doc_manager.existe_documento('proposicao', id_base + '.odt'),
             'tem_pdf': doc_manager and doc_manager.existe_documento('proposicao', id_base + '.pdf'),
             'tem_pdf_assinado': doc_manager and doc_manager.existe_documento('proposicao', id_base + '_signed.pdf'),
+            'pdf_assinado_url': pdf_assinado_url,
             'prioritaria': getattr(proposicao, 'ind_prioritaria', 0) == 1
         }
         if caixa == 'pedido_devolucao':

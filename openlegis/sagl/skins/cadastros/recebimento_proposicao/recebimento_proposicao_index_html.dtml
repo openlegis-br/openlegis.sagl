@@ -685,7 +685,7 @@ function formatarVinculoTabela(data) {
     const txt = `${sigla} ${numero}/${ano}`.trim();
     return `<a href="${APP_CONFIG.PORTAL_URL}/cadastros/materia/materia_mostrar_proc?cod_materia=${mid}" 
               target="_blank" rel="noopener" title="Abrir matéria ${txt}">
-              <i class="fas fa-external-link-alt"></i> ${txt}</a>`;
+              ${txt}</a>`;
   } else if (data && data.tipo === 'matéria') {
     return `${data.sigla || ''} ${data.numero || ''}/${data.ano || ''}`;
   } else if (data && data.tipo === 'documento') {
@@ -762,7 +762,6 @@ function renderCards(data) {
           <strong>Vínculo:</strong>
           <a href="${APP_CONFIG.PORTAL_URL}/cadastros/materia/materia_mostrar_proc?cod_materia=${mid}"
             target="_blank" rel="noopener" class="ms-1">
-            <i class="fas fa-external-link-alt"></i>
             ${txt}
           </a>
         </p>

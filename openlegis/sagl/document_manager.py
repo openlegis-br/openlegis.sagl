@@ -100,3 +100,10 @@ class SAPLDocumentManager:
             if app and hasattr(app, '_p_jar'):
                 app._p_jar.close()
             return []
+
+    @property
+    def sapl_documentos_url(self):
+        """
+        Retorna a URL base pública dos arquivos sapl_documentos.
+        """
+        return '/sagl/sapl_documentos'

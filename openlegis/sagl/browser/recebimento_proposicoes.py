@@ -132,7 +132,14 @@ class ProposicoesAPIBase:
 
         assunto = self.request.form.get('assunto', '').strip()
         if assunto:
-            query = query.filter(Proposicao.txt_descricao.ilike(f'%{assunto}%'))
+            import re
+            assunto_limpo = assunto.upper().replace(" ", "")
+            m = re.match(r"^(NPE)?(\d+)$", assunto_limpo)
+            if m:
+                npe_num = int(m.group(2))
+                query = query.filter(Proposicao.cod_proposicao == npe_num)
+            else:
+                query = query.filter(Proposicao.txt_descricao.ilike(f'%{assunto}%'))
 
         campo_data = self.request.form.get('campo_data', 'dat_envio')
         dt_inicio = self.request.form.get('dt_inicio')
@@ -379,7 +386,7 @@ class ProposicoesAPIBase:
         return 'rascunho'
 
     def _formatar_data_hora(self, dt):
-        return dt.strftime('%d/%m/%Y %H:%M') if dt else None
+        return dt.strftime('%d/%m/%Y %H:%M:%S') if dt else None
 
     def _responder_sucesso(self, dados, paginacao):
         return json.dumps({

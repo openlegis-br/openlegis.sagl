@@ -75,13 +75,21 @@
     <dtml-try>
       <dtml-call expr="zsql.trans_begin_zsql()">    
       <dtml-call expr="metodo(
-         cod_proposicao     = hdn_cod_proposicao,
-         cod_autor          = int(cod_autor),
-         tip_proposicao     = hdn_tip_proposicao,
-         cod_materia        = cod_materia,
-         cod_assunto        = lst_assunto,
-         cod_assessor       = lst_assessor,
-         txt_descricao      = pysc.convert_unicode_pysc(texto=str(txt_descricao)))">
+         cod_proposicao        = hdn_cod_proposicao,
+         cod_autor             = int(cod_autor),
+         tip_proposicao        = hdn_tip_proposicao,
+         cod_materia           = cod_materia,
+         cod_assunto           = lst_assunto,
+         cod_assessor          = lst_assessor,
+         txt_descricao         = pysc.convert_unicode_pysc(texto=str(txt_descricao)),
+         txt_justificativa     = pysc.convert_unicode_pysc(texto=str(txa_txt_justificativa)),
+         num_cep               = txt_num_cep,
+         nom_logradouro        = txt_nom_logradouro,
+         nom_bairro            = txt_nom_bairro,
+         nom_cidade            = txt_nom_cidade,
+         sgl_uf                = txt_sgl_uf,
+         complemento_endereco  = txt_complemento_endereco
+      )">
       <dtml-call expr="zsql.trans_commit_zsql()">         
     <dtml-except>
       <dtml-call expr="zsql.trans_rollback_zsql()">    
@@ -129,24 +137,8 @@
     <dtmll-var REQUEST>
 </dtml-if>
 
-<dtml-unless hdn_id>
-<dtml-if lat>
-  <dtml-call expr="REQUEST.set('metodog', zsql.proposicao_geocode_incluir_zsql)">
-</dtml-if>
-</dtml-unless>
-
-<dtml-if hdn_id>
-<dtml-if lat>
-  <dtml-call expr="REQUEST.set('metodog', zsql.proposicao_geocode_atualizar_zsql)">
-</dtml-if>
-</dtml-if>
-
- <dtml-if lat>
-    <dtml-call expr="metodog(cod_proposicao=cod_proposicao, endereco='', lat=lat, lng=lng)">
- </dtml-if>
-
 <dtml-comment>LOG DE AUDITORIA</dtml-comment>
-<dtml-if dbcon_logs>
+<dtml-if expr="cod_proposicao and dbcon_logs">
   <dtml-call expr="zsql.logs_registrar_zsql(
             usuario      = REQUEST['AUTHENTICATED_USER'].getUserName(), 
             data         = DateTime(datefmt='international').strftime('%Y-%m-%d %H:%M:%S'),

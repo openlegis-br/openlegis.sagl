@@ -7,6 +7,7 @@
 ##parameters=cod_proposicao, modelo_proposicao, modelo_path
 ##title=
 ##
+import json
 from Products.CMFCore.utils import getToolByName
 st = getToolByName(context, 'portal_sagl')
 
@@ -45,6 +46,7 @@ for proposicao in context.zsql.proposicao_obter_zsql(cod_proposicao=cod_proposic
     ano_ident_basica = DateTime(datefmt='international').strftime("%Y")
     txt_ementa = proposicao.txt_descricao
     dat_apresentacao = context.pysc.data_converter_por_extenso_pysc(data=DateTime(datefmt='international').strftime("%d/%m/%Y"))
+    inf_basicas_dic['txt_justificativa'] = ''
 
     inf_basicas_dic['des_assunto'] = ''
     inf_basicas_dic['orgao_responsavel'] = ''
@@ -124,6 +126,40 @@ for proposicao in context.zsql.proposicao_obter_zsql(cod_proposicao=cod_proposic
             autor_dic['cod_autor'] = int(autor['cod_autor'])
         nom_autor.append(autor_dic)
 
+    if proposicao.des_tipo_proposicao == 'Indicação':
+        assunto = inf_basicas_dic.get('des_assunto', '')
+        orgao = inf_basicas_dic.get('orgao_responsavel', '').upper()
+        logradouro = getattr(proposicao, 'nom_logradouro', '') or context.REQUEST.get('txt_nom_logradouro', '')
+        complemento = getattr(proposicao, 'complemento_endereco', '') or context.REQUEST.get('txt_complemento_endereco', '')
+        bairro = getattr(proposicao, 'nom_bairro', '') or context.REQUEST.get('txt_nom_bairro', '')
+        cidade = inf_basicas_dic.get('nom_localidade', '')
+        uf = inf_basicas_dic.get('sgl_uf', '')
+
+        def preposicao_ao_ou_a(orgao_nome):
+            orgaos_femininos = ['Secretaria', 'Diretoria', 'Procuradoria', 'Comissão', 'Ouvidoria']
+            for palavra in orgaos_femininos:
+                if palavra.lower() in orgao_nome.lower():
+                    return 'à'
+            return 'ao'
+
+        ementa_odt = ""
+        if orgao:
+            prep = preposicao_ao_ou_a(orgao)
+            ementa_odt += f"{prep} {orgao} providências para que, após análise técnica dos profissionais da área, seja realizado o serviço de "
+        else:
+            ementa_odt += "providências para que, após análise técnica dos profissionais da área, seja realizado o serviço de "
+        if assunto:
+            ementa_odt += assunto.lower().strip() + " "
+        if logradouro:
+            ementa_odt += "na " + logradouro
+            if complemento:
+                ementa_odt += ", " + complemento
+            if bairro:
+                ementa_odt += ", " + bairro + "."
+        else:
+            ementa_odt += "."
+        txt_ementa = ementa_odt
+
 data_atual = DateTime(datefmt='international').strftime("%d/%m/%Y")
 subscritores = []
 outros_autores = context.zsql.autores_obter_zsql(txt_dat_apresentacao=data_atual)
@@ -183,4 +219,16 @@ inf_basicas_dic['lst_prefeito'] = 'Não Cadastrado'
 for prefeito in context.zsql.prefeito_atual_obter_zsql(data_composicao = data):
    inf_basicas_dic['lst_prefeito'] = prefeito.nom_completo
 
-return st.proposicao_gerar_odt(inf_basicas_dic, num_proposicao, nom_arquivo, des_tipo_materia, num_ident_basica, ano_ident_basica, txt_ementa, materia_vinculada, dat_apresentacao, nom_autor, apelido_autor, subscritores, modelo_proposicao, modelo_path)
+try:
+    st.proposicao_gerar_odt(
+        inf_basicas_dic, num_proposicao, nom_arquivo, des_tipo_materia, 
+        num_ident_basica, ano_ident_basica, txt_ementa, materia_vinculada, 
+        dat_apresentacao, nom_autor, apelido_autor, subscritores, 
+        modelo_proposicao, modelo_path
+    )
+    RESPONSE.setHeader('Content-Type', 'application/json; charset=utf-8')
+    return json.dumps({"success": True, "message": "ODT gerado com sucesso!"})
+except Exception as e:
+    RESPONSE.setStatus(500)
+    RESPONSE.setHeader('Content-Type', 'application/json; charset=utf-8')
+    return json.dumps({"success": False, "message": f"Erro ao gerar ODT: {e}"})

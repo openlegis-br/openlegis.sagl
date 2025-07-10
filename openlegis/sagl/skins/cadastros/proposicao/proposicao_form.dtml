@@ -1410,9 +1410,8 @@ body {
 	      </div>
 	    </div>
 	  </div>
-
 	<dtml-else>
-	  <input type="hidden" name="lst_assessor" value="&dtml-cod_assessor_sel missing='';">
+	  <input type="hidden" name="lst_assessor" value="<dtml-var cod_assessor missing>">
 	</dtml-if>
       </form>
 
@@ -1454,7 +1453,7 @@ body {
                         <button class="btn btn-success btn-action" type="button" onClick="proposicao_enviar()">
                             <i class="fas fa-share-square me-1"></i> Enviar para Protocolo
                         </button>
-                    <dtml-elif expr="hasattr(sapl_documentos.proposicao,id_documento) and not hasattr(sapl_documentos.proposicao,id_pdf) and AUTHENTICATED_USER.has_role(['Autor', 'Assessor Parlamentar']) and (des_tipo_autor == 'Parlamentar' or des_tipo_autor == 'Mesa Diretora' or des_tipo_autor == 'Comissao')">
+                    <dtml-elif expr="des_tipo_proposicao!='Indicação' and hasattr(sapl_documentos.proposicao,id_documento) and not hasattr(sapl_documentos.proposicao,id_pdf) and AUTHENTICATED_USER.has_role(['Autor', 'Assessor Parlamentar']) and (des_tipo_autor == 'Parlamentar' or des_tipo_autor == 'Mesa Diretora' or des_tipo_autor == 'Comissao')">
                         <button type="button" class="btn btn-success btn-action" data-bs-toggle="modal" data-bs-target="#revisaoModal">
                             <i class="fas fa-share-square me-1"></i> Enviar para Revisão
                         </button>
@@ -2348,7 +2347,6 @@ function carregarAssuntos(tipoProposicaoId) {
         }
     });
 }
-
 
 function liberarEmentaPorCepZerado() {
     $("#txt_nom_logradouro").prop('readonly', false).removeClass('bg-light');

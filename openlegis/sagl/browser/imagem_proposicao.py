@@ -81,7 +81,7 @@ class SalvarImagemProposicaoView(grok.View):
             <div class="text-center">
               <img class="img-fluid img-thumbnail mb-2" src="{context.portal_url()}/sapl_documentos/proposicao/{id_imagem}?{DateTime().timeTime()}" style="max-height: 500px;">
               <div class="text-center">
-                <button type="button" class="btn btn-sm btn-danger" onclick="excluirImagem({indice}, '{cod_proposicao}')">Excluir</button>
+                <button type="button" class="btn btn-sm btn-danger text-white" onclick="excluirImagem({indice}, '{cod_proposicao}')"><i class="far fa-trash-alt me-1"></i> Excluir</button>
               </div>
             </div>
             """

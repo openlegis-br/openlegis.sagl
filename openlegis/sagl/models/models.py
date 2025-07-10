@@ -2433,6 +2433,15 @@ class Proposicao(Base):
     cod_assessor = mapped_column(Integer)
     cod_assunto = mapped_column(Integer)
     cod_revisor = mapped_column(Integer)
+    # novos campos
+    txt_justificativa = mapped_column(TEXT)
+    num_cep = mapped_column(VARCHAR(9), nullable=True)
+    nom_logradouro = mapped_column(VARCHAR(200), nullable=True)
+    nom_bairro = mapped_column(VARCHAR(100), nullable=True)
+    nom_cidade = mapped_column(VARCHAR(100), nullable=True)
+    sgl_uf = mapped_column(VARCHAR(2), nullable=True)
+    complemento_endereco = mapped_column(VARCHAR(100), nullable=True)  # se quiser complementar
+    dat_criacao = mapped_column(TIMESTAMP, nullable=False, server_default=text('CURRENT_TIMESTAMP'))
 
     assessor_parlamentar: Mapped[Optional['AssessorParlamentar']] = relationship('AssessorParlamentar', back_populates='proposicao')
     assunto_proposicao: Mapped[Optional['AssuntoProposicao']] = relationship('AssuntoProposicao', back_populates='proposicao')

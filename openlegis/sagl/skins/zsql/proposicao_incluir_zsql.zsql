@@ -1,27 +1,42 @@
 <dtml-comment>
 connection_id : dbcon_sagl
-arguments : cod_autor tip_proposicao cod_materia cod_assunto cod_assessor txt_descricao dat_envio dat_recebimento ind_excluido=0
+arguments : cod_autor tip_proposicao cod_materia cod_assunto cod_assessor txt_descricao dat_envio dat_recebimento txt_justificativa num_cep nom_logradouro nom_bairro nom_cidade sgl_uf complemento_endereco ind_excluido=0
 max_rows : 1
 max_cache : 100
 </dtml-comment>
 INSERT INTO proposicao (
-               cod_autor,
-               tip_proposicao,
-               cod_materia,
-	       cod_assunto,
-	       cod_assessor,
-               txt_descricao,
-               dat_envio,
-               dat_recebimento,
-               ind_excluido)
-
-VALUES
- (<dtml-sqlvar cod_autor               type="int">,
-  <dtml-sqlvar tip_proposicao          type="int">,
-  <dtml-sqlvar cod_materia             type="int" optional>,
-  <dtml-sqlvar cod_assunto             type="int" optional>,
-  <dtml-sqlvar cod_assessor            type="int" optional>, 
-  <dtml-sqlvar txt_descricao           type="string">,
-  <dtml-sqlvar dat_envio               type="nb" optional>,
-  <dtml-sqlvar dat_recebimento         type="nb" optional>,
-  <dtml-sqlvar ind_excluido            type="int" optional>)
+    cod_autor,
+    tip_proposicao,
+    cod_materia,
+    cod_assunto,
+    cod_assessor,
+    txt_descricao,
+    dat_envio,
+    dat_recebimento,
+    ind_excluido,
+    txt_justificativa,
+    num_cep,
+    nom_logradouro,
+    nom_bairro,
+    nom_cidade,
+    sgl_uf,
+    complemento_endereco
+)
+VALUES (
+    <dtml-sqlvar cod_autor             type="int">,
+    <dtml-sqlvar tip_proposicao        type="int">,
+    <dtml-sqlvar cod_materia           type="int" optional>,
+    <dtml-sqlvar cod_assunto           type="int" optional>,
+    <dtml-sqlvar cod_assessor          type="int" optional>,
+    <dtml-sqlvar txt_descricao         type="string">,
+    <dtml-sqlvar dat_envio             type="nb" optional>,
+    <dtml-sqlvar dat_recebimento       type="nb" optional>,
+    <dtml-sqlvar ind_excluido          type="int" optional>,
+    <dtml-sqlvar txt_justificativa     type="string" optional>,
+    <dtml-sqlvar num_cep               type="string" optional>,
+    <dtml-sqlvar nom_logradouro        type="string" optional>,
+    <dtml-sqlvar nom_bairro            type="string" optional>,
+    <dtml-sqlvar nom_cidade            type="string" optional>,
+    <dtml-sqlvar sgl_uf                type="string" optional>,
+    <dtml-sqlvar complemento_endereco  type="string" optional>
+)

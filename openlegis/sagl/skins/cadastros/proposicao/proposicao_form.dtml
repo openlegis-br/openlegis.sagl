@@ -1290,6 +1290,11 @@ body {
 						<button type="button" class="btn btn-outline-danger" onclick="excluir_arquivo('pdf')" data-bs-toggle="tooltip" title="Remover o arquivo PDF">
 						    <i class="far fa-trash-alt me-1"></i> Excluir PDF
 						</button>
+					      <dtml-elif expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia', 'Revisor Proposicao', 'Chefia Revisão']) and not prop_recebida and not prop_devolvida">
+					        <button type="button" class="btn btn-outline-danger" onclick="excluir_arquivo('pdf')"
+						    data-bs-toggle="tooltip" title="Remover o PDF assinado digitalmente">
+						<i class="far fa-trash-alt me-1"></i> Excluir PDF
+					        </button>
 					    </dtml-if>
 					</dtml-let>
 				    <dtml-else>
@@ -1445,6 +1450,9 @@ body {
                                 <button class="btn btn-success btn-action" type="button" onClick="proposicao_retomar()">
                                     <i class="fas fa-redo me-1"></i> Reaproveitar Proposição
                                 </button>
+                               <button type="button" class="btn btn-danger btn-action" onClick="proposicao_excluir()">
+                                  <i class="far fa-trash-alt me-1"></i> Excluir Proposição
+                               </button>
                             <dtml-else>
                                 <dtml-unless dat_solicitacao_devolucao>
                                     <button class="btn btn-danger btn-action" type="button" onClick="proposicao_solicitar_devolucao()">

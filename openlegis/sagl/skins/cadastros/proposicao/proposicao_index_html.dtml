@@ -38,7 +38,7 @@
         <a class="btn <dtml-if "_.has_key('ind_enviado') and ind_enviado=='0'">btn-primary disabled<dtml-else>btn-outline-primary</dtml-if> mb-2"
            href="<dtml-var portal_url>/cadastros/proposicao/proposicao_index_html?ind_enviado=0">
           Em elaboração
-          <span class="badge bg-secondary ms-1">
+          <span class="ms-1">
             <dtml-in expr="zsql.proposicao_obter_zsql(ind_excluido=0, ind_enviado='0', ind_devolvido='0', col_username=col_username)">
               <dtml-if sequence-start>[<dtml-var sequence-length>]</dtml-if>
             </dtml-in>
@@ -48,7 +48,7 @@
         <a class="btn <dtml-if "_.has_key('ind_enviado') and ind_enviado=='1'">btn-primary disabled<dtml-else>btn-outline-primary</dtml-if> mb-2"
            href="<dtml-var portal_url>/cadastros/proposicao/proposicao_index_html?ind_enviado=1">
           Enviadas
-          <span class="badge bg-secondary ms-1">
+          <span class="ms-1">
             <dtml-in expr="zsql.proposicao_obter_zsql(ind_excluido=0, ind_enviado='1', ind_devolvido='0', col_username=col_username)">
               <dtml-if sequence-start>[<dtml-var sequence-length>]</dtml-if>
             </dtml-in>
@@ -58,7 +58,7 @@
         <a class="btn <dtml-if "_.has_key('ind_devolvido') and ind_devolvido=='1'">btn-danger disabled<dtml-else>btn-outline-danger</dtml-if> mb-2"
            href="<dtml-var portal_url>/cadastros/proposicao/proposicao_index_html?ind_devolvido=1">
           Devolvidas
-          <span class="badge bg-secondary ms-1">
+          <span class="ms-1">
             <dtml-in expr="zsql.proposicao_obter_zsql(ind_excluido=0, ind_devolvido='1', col_username=col_username)">
               <dtml-if sequence-start>[<dtml-var sequence-length>]</dtml-if>
             </dtml-in>

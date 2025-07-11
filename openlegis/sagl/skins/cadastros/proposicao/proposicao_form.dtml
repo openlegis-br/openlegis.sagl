@@ -843,7 +843,7 @@ body {
 			  value="<dtml-var sgl_uf missing null>"
 			  style="text-transform:uppercase;"
 			  oninput="this.value = this.value.toUpperCase();"
-			  <dtml-if "_.has_key('tem_pdf') or _.has_key('tem_odt') or prop_recebida or prop_devolvida">readonly</dtml-if>
+			  <dtml-if "_.has_key('tem_odt') or prop_recebida or prop_devolvida">readonly</dtml-if>
 			>
 		    </div>
 		    </div>
@@ -1000,14 +1000,14 @@ body {
                                         <div id="foto<dtml-var idx>-preview" class="mt-2 image-preview-container">
                                             <dtml-if "hasattr(sapl_documentos.proposicao, id_foto)">
                                                 <div class="text-center">
-                                                    <img class="img-fluid image-preview animate-fade-in mb-2"
+                                                    <img class="img-fluid img-thumbnail mb-2"
                                                         src="<dtml-var portal_url>/sapl_documentos/proposicao/<dtml-var id_foto>?<dtml-var expr='DateTime().timeTime()'>"
-                                                        alt="Fotografia <dtml-var idx>">
+                                                        alt="Fotografia <dtml-var idx>" style="max-height: 500px;">
                                                     <dtml-if expr="not _.has_key('tem_pdf') and not _.has_key('tem_odt')">
                                                     <div class="image-actions">
                                                         <button type="button"
                                                                 class="btn btn-danger btn-sm text-white"
-                                                                onclick="excluirImagem(<dtml-var idx>, '<dtml-var cod_proposicao missing>')">
+                                                                onclick="ProposicaoManager.excluirImagem(<dtml-var idx>, '<dtml-var cod_proposicao missing>')">
                                                                 <i class="far fa-trash-alt me-1"></i> Excluir
                                                         </button>
                                                     </div>
@@ -1018,7 +1018,7 @@ body {
                                                     <div id="uploadForm<dtml-var idx>" enctype="multipart/form-data">
                                                         <input type="hidden" name="indice" value="<dtml-var idx>">
                                                         <input type="file" name="file_nom_image<dtml-var idx>" class="form-control"
-                                                                accept="image/*" onchange="enviarImagem(this.form, <dtml-var idx>)">
+                                                                accept="image/*" onchange="ProposicaoManager.enviarImagem(this.form, <dtml-var idx>)">
                                                         <div class="help-text mt-2">Formatos suportados: JPG, PNG, GIF. Tamanho máximo: 5MB.</div>
                                                     </div>
                                                 <dtml-else>
@@ -1070,9 +1070,9 @@ body {
 				  <dtml-if expr="not _.has_key('tem_pdf') and not prop_recebida">
 				    <div class="file-preview-actions">
 				      <button type="button" class="btn btn-sm btn-outline-danger"
-				        onclick="showConfirmModal('Excluir Anexo', 'Deseja realmente excluir este anexo?', function() { excluirAnexoAjax('<dtml-var file_item>', '<dtml-var cod_proposicao missing>'); });">
-				        <i class="far fa-trash-alt"></i> Excluir
-				      </button>
+        onclick="ProposicaoManager.excluirAnexo('<dtml-var file_item>', '<dtml-var cod_proposicao missing>')">
+    <i class="far fa-trash-alt"></i> Excluir
+</button>
 				    </div>
 				  </dtml-if>
 				</div>
@@ -1129,9 +1129,7 @@ body {
 						        <button type="button" class="btn btn-outline-info" onclick="javascript:location.href='<dtml-var portal_url>/sapl_documentos/proposicao/externalEdit_/<dtml-var nome_arquivo>.zem'" data-bs-toggle="tooltip" title="Editar usando LibreOffice (requer instalação)">
 						            <i class="fas fa-fw fa-external-link-alt me-1"></i>LibreOffice
 						        </button>
-						        <button type="button" class="btn btn-outline-danger" onclick="excluir_arquivo('odt')">
-						            <i class="far fa-trash-alt me-1"></i> Excluir ODT
-						        </button>
+
 						    <dtml-else>
 						        <!-- Somente visualizar para o autor ou quem não é revisor -->
 						        <a class="btn btn-outline-primary" href="<dtml-var portal_url>/generico/viewerJS/#<dtml-var documento>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank" data-bs-toggle="tooltip" title="Visualizar ODT">
@@ -1242,7 +1240,7 @@ body {
 						        <dtml-if expr="(des_tipo_proposicao=='Requerimento' or des_tipo_proposicao=='Indicação' or des_tipo_proposicao=='Moção' or des_tipo_proposicao=='Pedido de Informação')">
 						            <dtml-if expr="int(sapl_documentos.props_sagl.assinatura_simples)==1">
 						                <button type="button" class="btn btn-outline-secondary"
-						                        onclick="showConfirmModal('Assinatura Simples', 'Confirma a assinatura simples da proposição?', function() { location.href='<dtml-var portal_url>/cadastros/proposicao/assinar_pdf?cod_proposicao=<dtml-var cod_proposicao missing>'; });"
+						                        onclick="ProposicaoManager.showConfirmModal('Assinatura Simples', 'Confirma a assinatura simples da proposição?', function() { location.href='<dtml-var portal_url>/cadastros/proposicao/assinar_pdf?cod_proposicao=<dtml-var cod_proposicao missing>'; });"
 						                        data-bs-toggle="tooltip" title="Adicionar uma assinatura simples">
 						                    <i class="fas fa-file-signature me-1"></i> Assinatura Simples
 						                </button>
@@ -1260,7 +1258,7 @@ body {
 						    <dtml-if expr="AUTHENTICATED_USER.has_role(['Autor']) and (des_tipo_autor == 'Externo' or des_tipo_autor == 'Poder Executivo')">
 						        <dtml-if expr="int(sapl_documentos.props_sagl.assinatura_simples)==1">
 						            <button type="button" class="btn btn-outline-secondary"
-						                    onclick="showConfirmModal('Assinatura Simples', 'Confirma a assinatura simples da proposição?', function() { location.href='<dtml-var portal_url>/cadastros/proposicao/assinar_pdf?cod_proposicao=<dtml-var cod_proposicao missing>'; });"
+						                    onclick="ProposicaoManager.showConfirmModal('Assinatura Simples', 'Confirma a assinatura simples da proposição?', function() { location.href='<dtml-var portal_url>/cadastros/proposicao/assinar_pdf?cod_proposicao=<dtml-var cod_proposicao missing>'; });"
 						                    data-bs-toggle="tooltip" title="Adicionar uma assinatura simples">
 						                <i class="fas fa-file-signature me-1"></i> Assinatura Simples
 						            </button>
@@ -1623,611 +1621,1279 @@ body {
 <dtml-var js_slot>
 
 <script>
-// Inicialização do TinyMCE para o campo de observação
-tinymce.init({
-    selector: '#txa_txt_observacao',
-    language: 'pt_BR',
-    browser_spellcheck: true,
-    contextmenu: false,
-    height: 250,
-    paste_as_text: true,
-    plugins: [
-        'advlist autolink link image lists charmap print preview hr anchor pagebreak',
-        'searchreplace wordcount visualblocks visualchars code fullscreen insertdatetime media nonbreaking',
-        'table emoticons template paste help'
-    ],
-    toolbar: 'undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | ' +
-        ' link image | print preview media fullpage | ',
-    menubar: 'edit view insert format tools help',
-    content_style: 'body {font-size:14px }'
-});
+// ========== MODULE PATTERN IMPLEMENTATION ==========
+var ProposicaoManager = (function() {
+    // ========== PRIVATE VARIABLES ==========
+    const _portalUrl = '<dtml-var portal_url>';
+    const _codProposicao = '<dtml-var cod_proposicao missing>';
+    const _emRevisao = <dtml-if expr="(('Operador' in AUTHENTICATED_USER.getRoles()) or ('Operador Materia' in AUTHENTICATED_USER.getRoles()) or ('Revisor Proposicao' in AUTHENTICATED_USER.getRoles()) or ('Chefia Revisão' in AUTHENTICATED_USER.getRoles())) and dat_envio and _.has_key('tem_odt') and not _.has_key('tem_pdf') and not dat_recebimento">true<dtml-else>false</dtml-if>;
+    const _tem_pdf = <dtml-if expr="_.has_key('tem_pdf')">true<dtml-else>false</dtml-if>;
+    const _ehAutor = <dtml-if expr="AUTHENTICATED_USER.has_role(['Autor'])">true<dtml-else>false</dtml-if>;
+    const _campoAssuntoBloqueado = <dtml-if expr="_.has_key('tem_pdf') or _.has_key('tem_odt') or prop_recebida or prop_devolvida">true<dtml-else>false</dtml-if>;
+    
+    // Cached DOM elements
+    const _domCache = {
+        form: document.proposicao_form,
+        txtDescricao: $('#txt_descricao'),
+        txaJustificativa: $('#txa_txt_justificativa'),
+        lstAssunto: $('#lst_assunto'),
+        btnGerarPdf: $('#btn-gerar-pdf'),
+        // Add other frequently used elements here
+    };
 
-// --------- VARIÁVEIS DE CONTROLE DE PERFIL E ESTADO ---------
-var emRevisao = <dtml-if expr="(('Operador' in AUTHENTICATED_USER.getRoles()) or ('Operador Materia' in AUTHENTICATED_USER.getRoles()) or ('Revisor Proposicao' in AUTHENTICATED_USER.getRoles()) or ('Chefia Revisão' in AUTHENTICATED_USER.getRoles())) and dat_envio and _.has_key('tem_odt') and not _.has_key('tem_pdf') and not dat_recebimento">true<dtml-else>false</dtml-if>;
-var tem_pdf = <dtml-if expr="_.has_key('tem_pdf')">true<dtml-else>false</dtml-if>;
-var ehAutor = <dtml-if expr="AUTHENTICATED_USER.has_role(['Autor'])">true<dtml-else>false</dtml-if>;
-var campoAssuntoBloqueado = <dtml-if expr="_.has_key('tem_pdf') or _.has_key('tem_odt') or prop_recebida or prop_devolvida">true<dtml-else>false</dtml-if>;
-
-// ------------ CONTROLE DO BOTÃO GERAR PDF ---------------
-function controlarBotaoGerarPdf() {
-    if (emRevisao && ehAutor) {
-        $('#btn-gerar-pdf').prop('disabled', true)
-            .addClass('disabled')
-            .attr('title', 'A conversão para PDF é permitida apenas pela revisão ou operador.');
-    } else {
-        $('#btn-gerar-pdf').prop('disabled', false)
-            .removeClass('disabled')
-            .attr('title', 'Converter ODT em PDF');
-    }
-}
-
-// --------- CONTROLE DE CAMPOS EMENTA, ASSUNTO, ENDEREÇO ---------
-function tipo_proposicao_mudou() {
-    const form = document.proposicao_form;
-    if (!form || !form.lst_tip_proposicao) return;
-    form.hdn_alterou.value = 1;
-    const tipoProposicaoValue = form.lst_tip_proposicao.value;
-    const desTipoProposicao = form.lst_tip_proposicao.options[form.lst_tip_proposicao.selectedIndex].text;
-    const indMatOuDoc = tipoProposicaoValue.split("&");
-    controlarBotaoGerarPdf();
-
-    // Oculta todos os campos variáveis antes de decidir mostrar
-    $("#divIndicaEndereco, #divJustificativa, #cardAssunto, #accordionMaps").slideUp(300);
-    $('a[href*="/webeditor/editorProposicao"], button[onclick*="externalEdit_"]').show();
-    $("#btn-gerar-pdf").val("Converter ODT").prop('onclick', null).off('click').on('click', texto_pdf_gerar);
-
-    // Sempre desbloqueia os campos por padrão (serão re-bloqueados depois se necessário)
-    $("#txt_descricao").prop('readonly', false).removeClass('bg-light');
-    $("#txa_txt_justificativa").prop('readonly', true).addClass('bg-light');
-    $("#txt_nom_logradouro, #txt_nom_bairro, #txt_nom_cidade, #txt_sgl_uf, #txt_complemento_endereco, #txt_num_cep")
-        .prop('readonly', false)
-        .removeClass('bg-light')
-        .removeClass('border-warning');
-
-    // Matéria vinculada
-    if (indMatOuDoc[1] === 'D') {
-        $("#divMat").slideDown(300);
-        form.lst_tip_id_basica.disabled = false;
-        form.txt_num_ident_basica.disabled = false;
-        form.txt_ano_ident_basica.disabled = false;
-    } else {
-        $("#divMat").slideUp(300);
-        form.lst_tip_id_basica.disabled = true;
-        form.txt_num_ident_basica.disabled = true;
-        form.txt_ano_ident_basica.disabled = true;
-    }
-
-    // ---- BLOQUEIO DE EMENTA/ASSUNTO ----
-    if (desTipoProposicao === 'Indicação') {
-        $("#divIndicaEndereco, #divJustificativa, #cardAssunto, #accordionMaps").slideDown(300);
-        $('a[href*="/webeditor/editorProposicao"], button[onclick*="externalEdit_"]').hide();
-        $("#btn-gerar-pdf").val("Gerar PDF Final").prop('onclick', null).off('click').on('click', texto_pdf_gerar);
-
-        // Ementa sempre readonly
-        $("#txt_descricao").prop('readonly', true).addClass('bg-light');
-        if (campoAssuntoBloqueado) {
-            $("#txa_txt_justificativa").prop('readonly', true).addClass('bg-light');
+    // ========== PRIVATE FUNCTIONS ==========
+    function _aplicarReadonlySelect2(selector, enableReadonly) {
+        const $select = $(selector);
+        if (enableReadonly) {
+            $select.addClass('readonly');
+            setTimeout(() => {
+                $select.next('.select2-container').find('.select2-selection').addClass('readonly');
+            }, 10);
         } else {
-            $("#txa_txt_justificativa").prop('readonly', false).removeClass('bg-light');
-        }
-        // Endereço: se bloqueado, trava todos
-        if (campoAssuntoBloqueado) {
-            $("#txt_nom_logradouro, #txt_nom_bairro, #txt_nom_cidade, #txt_sgl_uf, #txt_complemento_endereco, #txt_num_cep")
-                .prop('readonly', true)
-                .addClass('bg-light')
-                .removeClass('border-warning');
-        }
-    } else {
-        // Outros tipos
-        if (emRevisao && !tem_pdf) {
-            $("#txt_descricao").prop('readonly', false).removeClass('bg-light');
-            aplicarReadonlySelect2('#lst_assunto', false);
-        } else {
-            if (tem_pdf || campoAssuntoBloqueado) {
-                $("#txt_descricao").prop('readonly', true).addClass('bg-light');
-                aplicarReadonlySelect2('#lst_assunto', true);
-            } else {
-                $("#txt_descricao").prop('readonly', false).removeClass('bg-light');
-                aplicarReadonlySelect2('#lst_assunto', false);
-            }
-        }
-        $("#txa_txt_justificativa").prop('readonly', true).addClass('bg-light');
-        if (campoAssuntoBloqueado) {
-            $("#txt_nom_logradouro, #txt_nom_bairro, #txt_nom_cidade, #txt_sgl_uf, #txt_complemento_endereco, #txt_num_cep")
-                .prop('readonly', true)
-                .addClass('bg-light')
-                .removeClass('border-warning');
+            $select.removeClass('readonly');
+            setTimeout(() => {
+                $select.next('.select2-container').find('.select2-selection').removeClass('readonly');
+            }, 10);
         }
     }
 
-    // BLOQUEIO select de assunto (readonly visual)
-    if (['Indicação', 'Requerimento', 'Moção'].includes(desTipoProposicao)) {
-        $("#cardAssunto").slideDown(300);
-    } else {
-        aplicarReadonlySelect2('#lst_assunto', true);
-        $("#lst_assunto").val('').trigger('change');
-    }
-
-    // Ajuste do botão
-    controlarBotaoGerarPdf();
-
-    // Inicializa e carrega assuntos
-    $('#lst_assunto').select2({minimumResultsForSearch: Infinity});
-    $("#lst_assunto").html('<option value="">Carregando...</option>');
-    carregarAssuntos(indMatOuDoc[0]);
-}
-
-// Aplica/Remove visual de readonly ao select2
-function aplicarReadonlySelect2(selector, enableReadonly) {
-    const $select = $(selector);
-    if (enableReadonly) {
-        $select.addClass('readonly');
-        setTimeout(function() {
-            $select.next('.select2-container').find('.select2-selection').addClass('readonly');
-        }, 10);
-    } else {
-        $select.removeClass('readonly');
-        setTimeout(function() {
-            $select.next('.select2-container').find('.select2-selection').removeClass('readonly');
-        }, 10);
-    }
-}
-$(document).on('mousedown mousewheel focus', '#lst_assunto', function(e) {
-    if ($(this).hasClass('readonly')) {
-        e.preventDefault(); this.blur(); return false;
-    }
-});
-$(document).on('select2:opening select2:selecting', '#lst_assunto', function(e) {
-    if ($(this).hasClass('readonly')) {
-        e.preventDefault(); return false;
-    }
-});
-
-// AJAX de assuntos (readonly ao finalizar)
-function carregarAssuntos(tipoProposicaoId) {
-    $.ajax({
-        url: 'assuntos_carregar_pysc',
-        type: 'post',
-        data: { svalue: tipoProposicaoId },
-        dataType: 'json',
-        beforeSend: function() {
-            $("#lst_assunto").addClass('readonly').html('<option value="">Carregando...</option>');
-        },
-        success: function(response) {
-            let options = '<option value="">Selecione</option>';
-            response.forEach(function(item) {
-                options += `<option value="${item.cod_assunto}">${item.des_assunto} (${item.nom_orgao})</option>`;
-            });
-            $("#lst_assunto").html(options);
-
-            // Controle de readonly visual após carregar
-            if (emRevisao && !tem_pdf) {
-                aplicarReadonlySelect2('#lst_assunto', false);
-            } else if (tem_pdf || campoAssuntoBloqueado) {
-                aplicarReadonlySelect2('#lst_assunto', true);
-            } else {
-                aplicarReadonlySelect2('#lst_assunto', false);
-            }
-
-            <dtml-if "_.has_key('cod_assunto_sel')">
-            if ($("#lst_assunto option[value='<dtml-var cod_assunto_sel>']").length) {
-                $("#lst_assunto").val('<dtml-var cod_assunto_sel>').trigger('change');
-            }
-            </dtml-if>
-            $('#lst_assunto').select2({minimumResultsForSearch: Infinity});
-        },
-        error: function() {
-            $("#lst_assunto").html('<option value="">Erro ao carregar assuntos</option>');
-        }
-    });
-}
-
-// Função padrão para confirmação modal (reutilizável)
-// Função reutilizável para modal de confirmação Bootstrap 5
-function showConfirmModal(title, body, confirmAction, cancelAction, confirmBtnClass = 'btn-primary', confirmText = 'Confirmar') {
-    const modalId = 'confirmationModal-' + Math.random().toString(36).substring(2, 9);
-    const modalHtml = `
-        <div class="modal fade" id="${modalId}" tabindex="-1" aria-labelledby="${modalId}Label" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="${modalId}Label">${title}</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
-                    </div>
-                    <div class="modal-body">
-                        ${body}
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="button" class="btn ${confirmBtnClass}" id="${modalId}-confirm-btn" autofocus>${confirmText}</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    `;
-    $(`#${modalId}`).remove(); // Evita duplicidade
-    $('body').append(modalHtml);
-    const $modal = $(`#${modalId}`);
-    const modal = new bootstrap.Modal($modal[0]);
-    modal.show();
-
-    // Foco automático no botão confirmar (acessibilidade)
-    $modal.on('shown.bs.modal', function() {
-        $(`#${modalId}-confirm-btn`).trigger('focus');
-    });
-
-    // Clique em Confirmar
-    $(`#${modalId}-confirm-btn`).one('click', function() {
-        if (typeof confirmAction === 'function') confirmAction();
-        modal.hide();
-    });
-
-    // Ao fechar, executa o cancelAction e remove do DOM
-    $modal.on('hidden.bs.modal', function() {
-        if (typeof cancelAction === 'function') cancelAction();
-        $modal.remove();
-    });
-}
-
-// Toast amigável
-function mostrarToast(tipo, mensagem) {
-    let bg = 'bg-info';  // Cor padrão (informação)
-    if (tipo === 'sucesso') bg = 'bg-success';  // Verde para sucesso
-    else if (tipo === 'erro') bg = 'bg-danger'; // Vermelho para erro
-
-    const toastHtml = `
-       <div class="container-fluid">
-        <div class="toast show align-items-center text-white ${bg} border-0" 
-             role="alert" aria-live="assertive" aria-atomic="true" 
-             style="position: fixed; bottom: 80px; right: 20px; z-index: 1100;">
-            <div class="d-flex">
-                <div class="toast-body">
-                    ${mensagem}
-                </div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" 
-                        data-bs-dismiss="toast" aria-label="Fechar"></button>
-            </div>
-        </div>
-      </div>
-    `;
-    $('.toast').remove();
-    $('body').append(toastHtml);
-    setTimeout(() => $('.toast').fadeOut(500, function() { $(this).remove(); }), 3500);
-}
-
-// Validação dos campos obrigatórios do formulário
-function campos_criticar(form) {
-    if ($(form).data('submitting')) return false;
-    $(form).data('submitting', true);
-    $(form).find('.is-invalid').removeClass('is-invalid');
-    $(form).find('.invalid-feedback').remove();
-    $(form).find('button[type=submit], .btn-action').prop('disabled', true);
-
-    let isValid = true;
-    let firstInvalidField = null;
-
-    const tipoProposicaoSelect = form.lst_tip_proposicao;
-    if (tipoProposicaoSelect.selectedIndex === -1 || tipoProposicaoSelect.value === "") {
-        $(tipoProposicaoSelect).addClass('is-invalid');
-        $(tipoProposicaoSelect).closest('.form-group').append('<div class="invalid-feedback">Selecione um tipo de proposição</div>');
-        if (!firstInvalidField) firstInvalidField = tipoProposicaoSelect;
-        isValid = false;
-    }
-    const tipoProposicaoValue = tipoProposicaoSelect[tipoProposicaoSelect.selectedIndex].value;
-    const desTipoProposicao = tipoProposicaoSelect.options[tipoProposicaoSelect.selectedIndex].text;
-
-    if ((desTipoProposicao === 'Requerimento') || (desTipoProposicao === 'Indicação') || (desTipoProposicao === 'Moção')) {
-        if (form.lst_assunto.selectedIndex === -1 || form.lst_assunto.value === '') {
-            $(form.lst_assunto).addClass('is-invalid');
-            $(form.lst_assunto).closest('.form-group').append('<div class="invalid-feedback">O assunto é obrigatório para este tipo de proposição</div>');
-            if (!firstInvalidField) firstInvalidField = form.lst_assunto;
-            isValid = false;
-        }
-    }
-    if (desTipoProposicao === 'Indicação') {
-        if (form.txt_num_cep.value === "") {
-            $(form.txt_num_cep).addClass('is-invalid');
-            $(form.txt_num_cep).closest('.form-group').append('<div class="invalid-feedback">O CEP é obrigatório para indicações</div>');
-            if (!firstInvalidField) firstInvalidField = form.txt_num_cep;
-            isValid = false;
-        }
-        const justificativa = form.txa_txt_justificativa.value;
-        if (justificativa === "" || justificativa.trim() === "<p></p>") {
-            $(form.txa_txt_justificativa).addClass('is-invalid');
-            $(form.txa_txt_justificativa).closest('.form-group').append('<div class="invalid-feedback">A justificativa da indicação deve ser preenchida</div>');
-            if (!firstInvalidField) firstInvalidField = form.txa_txt_justificativa;
-            isValid = false;
-        }
-    } else {
-        const ementa = form.txt_descricao.value;
-        if (ementa === "" || ementa.trim() === "<p></p>") {
-            $(form.txt_descricao).addClass('is-invalid');
-            $(form.txt_descricao).closest('.form-group').append('<div class="invalid-feedback">A ementa da proposição deve ser preenchida</div>');
-            if (!firstInvalidField) firstInvalidField = form.txt_descricao;
-            isValid = false;
-        }
-        const indMatOuDoc = tipoProposicaoValue.split("&");
-        if (indMatOuDoc[1] === 'D') {
-            if (form.lst_tip_id_basica.selectedIndex === -1 || form.lst_tip_id_basica.value === "" ||
-                form.txt_num_ident_basica.value === "" || form.txt_ano_ident_basica.value === "") {
-                $(form.lst_tip_id_basica).addClass('is-invalid');
-                $(form.txt_num_ident_basica).addClass('is-invalid');
-                $(form.txt_ano_ident_basica).addClass('is-invalid');
-                $('#divMatBody').append('<div class="invalid-feedback d-block">Informe tipo, número e ano da matéria vinculada</div>');
-                if (!firstInvalidField) firstInvalidField = form.lst_tip_id_basica;
-                isValid = false;
-            }
-        }
-    }
-
-    if (!isValid) {
-        $(form).find('button[type=submit], .btn-action').prop('disabled', false);
-        $(form).data('submitting', false);
-        if (firstInvalidField) {
-            const offset = getTotalTopOffset();
-            $('html, body').animate({ scrollTop: $(firstInvalidField).offset().top - offset - 10 }, 500);
-            $(firstInvalidField).focus().addClass('animate-fade-in');
-            setTimeout(() => { $(firstInvalidField).removeClass('animate-fade-in'); }, 1000);
-        }
-        mostrarToast && mostrarToast('erro', 'Corrija os campos destacados em vermelho.');
-        return false;
-    }
-
-    form.hdn_tip_proposicao.value = tipoProposicaoValue.split("&")[0];
-    $(form).find('button[type=submit], .btn-action').prop('disabled', true);
-    form.submit();
-}
-
-function getTotalTopOffset() {
-    let total = 0;
-    const header = document.getElementById('page-topbar');
-    if (header) {
-        const style = window.getComputedStyle(header);
-        if (['fixed', 'sticky'].includes(style.position)) {
+    function _getTotalTopOffset() {
+        let total = 0;
+        const header = document.getElementById('page-topbar');
+        if (header && ['fixed', 'sticky'].includes(window.getComputedStyle(header).position)) {
             total += header.offsetHeight;
         }
-    }
-    const topnav = document.querySelector('.topnav');
-    if (topnav) {
-        const style = window.getComputedStyle(topnav);
-        if (['fixed', 'sticky'].includes(style.position)) {
+        const topnav = document.querySelector('.topnav');
+        if (topnav && ['fixed', 'sticky'].includes(window.getComputedStyle(topnav).position)) {
             total += topnav.offsetHeight;
         }
+        return total;
     }
-    return total;
-}
 
-// Geração e manipulação dos arquivos ODT e PDF
-async function texto_odt_gerar() {
-    const lstModelo = document.getElementById("lst_modelo");
-    if (!lstModelo || lstModelo.selectedIndex === 0) {
-        showConfirmModal(
-            "Modelo não selecionado",
-            "Para gerar o documento é necessário selecionar um modelo.",
-            null,
-            null
-        );
-        return false;
+    function _artigoParaOrgao(nome) {
+        if (!nome) return '';
+        const minusculo = nome.trim().toLowerCase();
+        if (minusculo.startsWith('secretaria')) return 'à ';
+        if (minusculo.startsWith('coordenadoria')) return 'à ';
+        if (minusculo.startsWith('diretoria')) return 'à ';
+        if (minusculo.startsWith('departamento')) return 'ao ';
+        if (minusculo.startsWith('setor')) return 'ao ';
+        if (minusculo.startsWith('gabinete')) return 'ao ';
+        if (minusculo.startsWith('divisão')) return 'à ';
+        if (minusculo.startsWith('comissão')) return 'à ';
+        return 'ao ';
     }
-    const value = lstModelo.value;
-    const selected = lstModelo.options[lstModelo.selectedIndex];
-    const path = selected.getAttribute('data-path');
-    const portalUrl = '<dtml-var portal_url>';
-    const codProposicao = '<dtml-var cod_proposicao missing>';
 
-    showConfirmModal(
-        "Confirmação",
-        "Confirma a geração do arquivo ODT? Esta ação substituirá qualquer documento existente.",
-        async function() {
-            mostrarToast('info', `<span class="spinner-border spinner-border-sm me-2"></span>Gerando arquivo ODT...`);
-            try {
-                const response = await fetch(`${portalUrl}/modelo_proposicao/proposicao?cod_proposicao=${codProposicao}&modelo_proposicao=${value}&modelo_path=${path}`, {
-                    method: 'POST',
-                    headers: { 'Accept': 'application/json' }
-                });
-                const data = await response.json();
-                $('.toast').remove();
-                if (data.success) {
-                    mostrarToast('sucesso', `<i class="fas fa-check-circle me-2"></i> ${data.message}`);
-                    setTimeout(() => location.reload(), 2000);
-                } else {
-                    mostrarToast('erro', `<i class="fas fa-exclamation-triangle me-2"></i> ${data.message}`);
-                }
-            } catch (err) {
-                $('.toast').remove();
-                mostrarToast('erro', `<i class="fas fa-exclamation-triangle me-2"></i> Erro ao gerar ODT: ${err.message}`);
+    // ========== PUBLIC API ==========
+    return {
+        // ========== INITIALIZATION ==========
+        init: function() {
+            this.initTinyMCE();
+            this.initEventHandlers();
+            this.initSelect2();
+            this.initDragAndDrop();
+            this.initTooltips();
+            this.tipoProposicaoMudou();
+            this.atualizarStatusProposicao();
+            
+            // Initialize CEP handling
+            const cepAtual = $('#txt_num_cep').val()?.replace(/\D/g, '') || '';
+            if (cepAtual === '00000000') {
+                this.liberarEmentaPorCepZerado();
+            } else if (cepAtual && cepAtual.length === 8) {
+                this.bloquearCamposEnderecoReadonly();
             }
-        }
-    );
-}
 
-async function texto_pdf_gerar() {
-    const portalUrl = '<dtml-var portal_url>';
-    const codProposicao = '<dtml-var cod_proposicao missing>';
-    showConfirmModal(
-        "Confirmação",
-        "Confirma a geração do arquivo PDF? Esta ação substituirá qualquer PDF existente.",
-        async function() {
-            mostrarToast('info', `<span class="spinner-border spinner-border-sm me-2"></span>Gerando arquivo PDF...`);
-            try {
-                const response = await fetch(`${portalUrl}/modelo_proposicao/proposicao_gerar_pdf?cod_proposicao=${codProposicao}`, {
-                    method: 'POST',
-                    headers: { 'Accept': 'application/json' }
-                });
-                const data = await response.json();
-                $('.toast').remove();
-                if (data.success) {
-                    mostrarToast('sucesso', `<i class="fas fa-check-circle me-2"></i> ${data.message}`);
-                    setTimeout(() => location.reload(), 2000);
-                } else {
-                    mostrarToast('erro', `<i class="fas fa-exclamation-triangle me-2"></i> ${data.message}`);
+            // Load models if cod_proposicao exists
+            <dtml-if "_.has_key('cod_proposicao')">
+                const tipoProposicaoInicial = $("#lst_tip_proposicao").val();
+                const tipoPropoIdInicial = tipoProposicaoInicial?.split("&")[0] || '';
+                if (tipoPropoIdInicial) {
+                    $.ajax({
+                        url: 'modelos_carregar_pysc',
+                        type: 'post',
+                        data: { svalue: tipoPropoIdInicial },
+                        dataType: 'json',
+                        success: function(response) {
+                            response.forEach(function(item) {
+                                $("#lst_modelo").append(`<option data-path="${item.path_arquivo}" value="${item.id_arquivo}">${item.titulo_arquivo}</option>`);
+                            });
+                            <dtml-if "_.has_key('nom_modelo')">
+                                $(`#lst_modelo option[data-path*="<dtml-var nom_modelo>"]`).prop('selected', true);
+                            </dtml-if>
+                        }
+                    });
                 }
-            } catch (err) {
-                $('.toast').remove();
-                mostrarToast('erro', `<i class="fas fa-exclamation-triangle me-2"></i> Erro ao gerar PDF: ${err.message}`);
-            }
-        }
-    );
-}
+            </dtml-if>
+        },
 
-function excluir_arquivo(tipo) {
-    const portalUrl = '<dtml-var portal_url>';
-    const codProposicao = '<dtml-var cod_proposicao missing>';
-    let url = '';
-    let msg = '';
-    if (tipo === 'odt') {
-        url = `${portalUrl}/cadastros/proposicao/texto_proposicao_excluir_proc?cod_proposicao=${codProposicao}`;
-        msg = "Deseja realmente excluir o arquivo ODT da Proposição?";
-    }
-    if (tipo === 'pdf') {
-        url = `${portalUrl}/cadastros/proposicao/texto_pdf_excluir_proc?cod_proposicao=${codProposicao}`;
-        msg = "Deseja realmente excluir o texto PDF da proposição?";
-    }
-    if (tipo === 'assinado') {
-        url = `${portalUrl}/cadastros/proposicao/texto_pdf_assinado_excluir_proc?cod_proposicao=${codProposicao}`;
-        msg = "Deseja realmente excluir o texto PDF assinado da proposição?";
-    }
-    showConfirmModal('Excluir Arquivo', msg, function() {
-        mostrarToast('info', `<span class="spinner-border spinner-border-sm me-2"></span>Excluindo arquivo...`);
-        fetch(url, { method: 'POST' })
-            .then(resp => resp.json())
-            .then(data => {
-                $('.toast').remove();
-                if (data.success) {
-                    mostrarToast('sucesso', `<i class="fas fa-check-circle me-2"></i> ${data.message}`);
-                    setTimeout(() => location.reload(), 2000);
-                } else {
-                    mostrarToast('erro', `<i class="fas fa-exclamation-triangle me-2"></i> ${data.message}`);
+        // ========== CORE FUNCTIONS ==========
+        initTinyMCE: function() {
+            tinymce.init({
+                selector: '#txa_txt_observacao',
+                language: 'pt_BR',
+                browser_spellcheck: true,
+                contextmenu: false,
+                height: 250,
+                paste_as_text: true,
+                plugins: [
+                    'advlist autolink link image lists charmap print preview hr anchor pagebreak',
+                    'searchreplace wordcount visualblocks visualchars code fullscreen insertdatetime media nonbreaking',
+                    'table emoticons template paste help'
+                ],
+                toolbar: 'undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | ' +
+                    ' link image | print preview media fullpage | ',
+                menubar: 'edit view insert format tools help',
+                content_style: 'body {font-size:14px }',
+                setup: function(editor) {
+                    editor.on('change', function() {
+                        editor.save();
+                    });
                 }
-            })
-            .catch(err => {
-                $('.toast').remove();
-                mostrarToast('erro', `<i class="fas fa-exclamation-triangle me-2"></i> Erro ao excluir arquivo: ${err.message}`);
             });
-    });
-}
-
-function excluirAnexoAjax(anexo, cod_proposicao) {
-  fetch(
-    `anexo_excluir?anexo=${encodeURIComponent(anexo)}&cod_proposicao=${encodeURIComponent(cod_proposicao)}`,
-    { method: 'POST' }
-  )
-    .then(r => r.json())
-    .then(data => {
-      if (data.success) {
-        mostrarToast('success', data.message || 'Anexo excluído com sucesso!');
-        // Remove do DOM
-        var el = document.getElementById('preview-' + anexo);
-        if (el) el.remove();
-      } else {
-        mostrarToast('danger', data.message || 'Erro ao excluir anexo.');
-      }
-    })
-    .catch(() => {
-      mostrarToast('danger', 'Erro de comunicação com o servidor.');
-    });
-}
-
-function proposicao_excluir() {
-    const codProposicao = '<dtml-var cod_proposicao missing>';
-    if (!codProposicao || codProposicao === "missing") {
-        showConfirmModal(
-            "Erro",
-            "Não foi possível identificar a proposição para exclusão.",
-            null,
-            null
-        );
-        return;
-    }
-    showConfirmModal(
-        "Excluir Proposição",
-        "Deseja realmente excluir esta proposição? Esta ação não poderá ser desfeita.",
-        function() {
-            location.href = `proposicao_excluir_proc?cod_proposicao=${codProposicao}`;
         },
-        null,
-        'btn-danger',
-        'Sim, excluir'
-    );
-}
 
-function proposicao_enviar() {
-    const codProposicao = '<dtml-var cod_proposicao missing>';
-    if (!codProposicao || codProposicao === "missing") {
-        showConfirmModal(
-            "Erro",
-            "Não foi possível identificar a proposição para envio.",
-            null,
-            null
-        );
-        return;
-    }
-    showConfirmModal(
-        "Confirmação de Envio",
-        "Ao enviar esta proposição, ela será encaminhada para análise e não poderá ser editada. Confirma o envio?",
-        function() {
-            location.href = `proposicao_enviar_proc?hdn_cod_proposicao=${codProposicao}`;
-        },
-        null,
-        'btn-success',
-        'Sim, enviar'
-    );
-}
+        initEventHandlers: function() {
+            // CEP handling
+            $('#txt_num_cep').inputmask('99999-999');
+            $("#txt_num_cep").on('blur', () => this.buscarCEP());
 
-function proposicao_solicitar_devolucao() {
-    const codProposicao = '<dtml-var cod_proposicao missing>';
-    if (!codProposicao || codProposicao === "missing") {
-        showConfirmModal(
-            "Erro",
-            "Não foi possível identificar a proposição para solicitar devolução.",
-            null,
-            null
-        );
-        return;
-    }
-    showConfirmModal(
-        "Solicitar Devolução",
-        "Deseja solicitar a devolução desta proposição para edição? Esta solicitação precisará ser aprovada.",
-        function() {
-            location.href = `proposicao_solicitar_devolucao_proc?cod_proposicao=${codProposicao}`;
-        },
-        null,
-        'btn-danger',
-        'Solicitar Devolução'
-    );
-}
+            // Ementa generation
+            $("#lst_assunto, #txt_complemento_endereco").on('change', () => {
+                if ($("#lst_tip_proposicao option:selected").text() === "Indicação") {
+                    this.gerarEmentaAutomatica(true);
+                }
+            });
 
-function proposicao_retomar() {
-    const codProposicao = '<dtml-var cod_proposicao missing>';
-    if (!codProposicao || codProposicao === "missing") {
-        showConfirmModal(
-            "Erro",
-            "Não foi possível identificar a proposição para reaproveitamento.",
-            null,
-            null
-        );
-        return;
-    }
-    showConfirmModal(
-        "Reaproveitar Proposição",
-        "Deseja reaproveitar esta proposição devolvida? Todas as informações serão mantidas.",
-        function() {
-            location.href = `proposicao_retomar_proc?cod_proposicao=${codProposicao}`;
+            $("#txt_nom_logradouro, #txt_complemento_endereco, #txt_nom_bairro, #txt_nom_cidade, #txt_sgl_uf").on('input change', () => {
+                if ($("#lst_tip_proposicao option:selected").text() === "Indicação") {
+                    this.gerarEmentaAutomatica(true);
+                }
+            });
+
+            // Form submissions
+            $('#revisaoform').on('submit', (e) => {
+                e.preventDefault();
+                this.showConfirmModal(
+                    "Confirmação de Envio",
+                    "Confirma o envio da proposição para revisão?",
+                    () => e.target.submit(),
+                    null
+                );
+            });
+
+            $('#myform').on('submit', (e) => {
+                if (!e.target.checkValidity()) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    $(e.target).addClass('was-validated');
+                    return;
+                }
+                e.preventDefault();
+                this.showConfirmModal(
+                    "Confirmação de Devolução",
+                    "<p>Confirma a devolução da proposição ao Autor?</p>",
+                    () => e.target.submit(),
+                    null,
+                    'btn-danger',
+                    'Sim, devolver'
+                );
+            });
+
+            // Other event handlers...
         },
-        null,
-        'btn-success',
-        'Reaproveitar Proposição'
-    );
-}
+
+        initSelect2: function() {
+            $('.select2').select2({
+                width: '100%',
+                dropdownParent: $(this).closest('.modal').length ? $(this).closest('.modal') : $('body')
+            });
+
+            $(window).on('resize', () => {
+                $('#lst_assunto').select2('close');
+                $('#lst_assunto').select2({ width: '100%' });
+            });
+
+            // Block select2 interaction when readonly
+            $(document)
+                .on('mousedown mousewheel focus', '#lst_assunto', (e) => {
+                    if ($(e.target).hasClass('readonly')) {
+                        e.preventDefault();
+                        e.target.blur();
+                        return false;
+                    }
+                })
+                .on('select2:opening select2:selecting', '#lst_assunto', (e) => {
+                    if ($(e.target).hasClass('readonly')) {
+                        e.preventDefault();
+                        return false;
+                    }
+                });
+        },
+
+        initDragAndDrop: function() {
+            const dropArea = $('#pdf-drop-area');
+            const fileInput = $('#file_nom_anexo_input');
+            const browseLink = $('#pdf-browse-link');
+            const previewDiv = $('#pdf-upload-preview');
+            let uploadedFiles = [];
+
+            const preventDefaults = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+            };
+
+            const highlight = () => dropArea.addClass('highlight');
+            const unhighlight = () => dropArea.removeClass('highlight');
+
+            const handleDrop = (e) => {
+                const dt = e.originalEvent.dataTransfer;
+                const files = dt.files;
+                handleFiles({ target: { files } });
+            };
+
+            const handleFiles = (event) => {
+                const files = event.target.files;
+                previewDiv.empty();
+                if (files.length > 0) {
+                    uploadedFiles = [...uploadedFiles, ...Array.from(files)];
+                    renderFileList();
+                }
+            };
+
+            const renderFileList = () => {
+                previewDiv.empty();
+                if (uploadedFiles.length > 0) {
+                    const fileList = $('<ul class="list-group mb-3"></ul>');
+                    uploadedFiles.forEach((file, index) => {
+                        if (file.type !== 'application/pdf') {
+                            previewDiv.append(`
+                                <div class="alert alert-warning alert-dismissible fade show small mb-2" role="alert">
+                                    <i class="fas fa-exclamation-triangle me-2"></i>
+                                    O arquivo "${file.name}" não é um PDF válido e será ignorado.
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                </div>
+                            `);
+                            return;
+                        }
+                        const listItem = $(`
+                            <li class="list-group-item d-flex justify-content-between align-items-center" data-index="${index}">
+                                <div>
+                                    <i class="fas fa-file-pdf text-danger me-2"></i>
+                                    ${file.name} (${(file.size / 1024).toFixed(2)} KB)
+                                </div>
+                                <button type="button" class="btn btn-sm btn-outline-danger remove-file">
+                                    <i class="far fa-trash-alt"></i>
+                                </button>
+                            </li>
+                        `);
+                        fileList.append(listItem);
+                    });
+                    previewDiv.append(fileList);
+                    updateFileInput();
+                    $('.remove-file').on('click', function() {
+                        const index = $(this).closest('li').data('index');
+                        removeFile(index);
+                    });
+                }
+            };
+
+            const removeFile = (index) => {
+                uploadedFiles.splice(index, 1);
+                renderFileList();
+            };
+
+            const updateFileInput = () => {
+                const dataTransfer = new DataTransfer();
+                uploadedFiles.forEach(file => {
+                    if (file.type === 'application/pdf') {
+                        dataTransfer.items.add(file);
+                    }
+                });
+                fileInput[0].files = dataTransfer.files;
+            };
+
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                dropArea.on(eventName, preventDefaults);
+            });
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropArea.on(eventName, highlight);
+            });
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropArea.on(eventName, unhighlight);
+            });
+            dropArea.on('drop', handleDrop);
+            browseLink.on('click', (e) => {
+                e.preventDefault();
+                fileInput.click();
+            });
+            fileInput.on('change', handleFiles);
+        },
+
+	excluirAnexo: function(anexo, cod_proposicao) {
+	    this.showConfirmModal(
+		"Excluir Anexo",
+		"Deseja realmente excluir este anexo? Esta ação não pode ser desfeita.",
+		() => {
+		    // Show loading indicator
+		    const el = document.getElementById('preview-' + anexo);
+		    if (el) {
+		        el.innerHTML = `
+		            <div class="d-flex justify-content-center align-items-center" style="height: 100px;">
+		                <div class="spinner-border text-primary" role="status">
+		                    <span class="visually-hidden">Carregando...</span>
+		                </div>
+		            </div>
+		        `;
+		    }
+
+		    fetch(
+		        `anexo_excluir?anexo=${encodeURIComponent(anexo)}&cod_proposicao=${encodeURIComponent(cod_proposicao)}`,
+		        { 
+		            method: 'POST',
+		            headers: {
+		                'Accept': 'application/json',
+		                'X-Requested-With': 'XMLHttpRequest'
+		            }
+		        }
+		    )
+		    .then(r => {
+		        if (!r.ok) {
+		            throw new Error(`HTTP error! status: ${r.status}`);
+		        }
+		        return r.json();
+		    })
+		    .then(data => {
+		        if (data.success) {
+		            this.mostrarToast('sucesso', data.message || 'Anexo excluído com sucesso!');
+		            // Remove from DOM with animation
+		            if (el) {
+		                $(el).fadeOut(300, () => el.remove());
+		            }
+		        } else {
+		            throw new Error(data.message || 'Erro ao excluir anexo.');
+		        }
+		    })
+		    .catch((error) => {
+		        // Restore element if it exists
+		        if (el) {
+		            el.innerHTML = `
+		                <div class="alert alert-danger">
+		                    <i class="fas fa-exclamation-triangle me-2"></i>
+		                    ${error.message || 'Erro ao excluir anexo.'}
+		                    <button class="btn btn-sm btn-secondary mt-2" onclick="ProposicaoManager.excluirAnexo('${anexo}', '${cod_proposicao}')">
+		                        <i class="fas fa-sync-alt me-1"></i> Tentar novamente
+		                    </button>
+		                </div>
+		            `;
+		        }
+		        this.mostrarToast('erro', error.message || 'Erro ao excluir anexo.');
+		    });
+		},
+		null, // No cancel action
+		'btn-danger', // Red confirm button
+		'Sim, excluir' // Confirm button text
+	    );
+	},
+
+        initTooltips: function() {
+            $('[data-bs-toggle="tooltip"]').tooltip();
+        },
+
+        // ========== BUSINESS LOGIC ==========
+        tipoProposicaoMudou: function() {
+            if (!_domCache.form || !_domCache.form.lst_tip_proposicao) return;
+            
+            _domCache.form.hdn_alterou.value = 1;
+            const tipoProposicaoValue = _domCache.form.lst_tip_proposicao.value;
+            const desTipoProposicao = _domCache.form.lst_tip_proposicao.options[_domCache.form.lst_tip_proposicao.selectedIndex].text;
+            const indMatOuDoc = tipoProposicaoValue.split("&");
+            
+            this.controlarBotaoGerarPdf();
+
+            // Hide all variable fields first
+            $("#divIndicaEndereco, #divJustificativa, #cardAssunto, #accordionMaps").slideUp(300);
+            $('a[href*="/webeditor/editorProposicao"], button[onclick*="externalEdit_"]').show();
+            $("#btn-gerar-pdf").val("Converter ODT").prop('onclick', null).off('click').on('click', () => this.textoPdfGerar());
+
+            // Unlock fields by default (will be re-locked if needed)
+            _domCache.txtDescricao.prop('readonly', false).removeClass('bg-light');
+            _domCache.txaJustificativa.prop('readonly', true).addClass('bg-light');
+            $("#txt_nom_logradouro, #txt_nom_bairro, #txt_nom_cidade, #txt_sgl_uf, #txt_complemento_endereco, #txt_num_cep")
+                .prop('readonly', false)
+                .removeClass('bg-light')
+                .removeClass('border-warning');
+
+            // Matéria vinculada
+            if (indMatOuDoc[1] === 'D') {
+                $("#divMat").slideDown(300);
+                _domCache.form.lst_tip_id_basica.disabled = false;
+                _domCache.form.txt_num_ident_basica.disabled = false;
+                _domCache.form.txt_ano_ident_basica.disabled = false;
+            } else {
+                $("#divMat").slideUp(300);
+                _domCache.form.lst_tip_id_basica.disabled = true;
+                _domCache.form.txt_num_ident_basica.disabled = true;
+                _domCache.form.txt_ano_ident_basica.disabled = true;
+            }
+
+            // ---- BLOQUEIO DE EMENTA/ASSUNTO ----
+            if (desTipoProposicao === 'Indicação') {
+                $("#divIndicaEndereco, #divJustificativa, #cardAssunto, #accordionMaps").slideDown(300);
+                $('a[href*="/webeditor/editorProposicao"], button[onclick*="externalEdit_"]').hide();
+                $("#btn-gerar-pdf").val("Gerar PDF Final").prop('onclick', null).off('click').on('click', () => this.textoPdfGerar());
+
+                // Ementa sempre readonly
+                _domCache.txtDescricao.prop('readonly', true).addClass('bg-light');
+                
+                // Justificativa: só desbloqueia se não houver bloqueio geral
+                if (_campoAssuntoBloqueado) {
+                    _domCache.txaJustificativa.prop('readonly', true).addClass('bg-light');
+                } else {
+                    _domCache.txaJustificativa.prop('readonly', false).removeClass('bg-light');
+                }
+                
+                // Endereço: se bloqueado, trava todos
+                if (_campoAssuntoBloqueado) {
+                    $("#txt_nom_logradouro, #txt_nom_bairro, #txt_nom_cidade, #txt_sgl_uf, #txt_complemento_endereco, #txt_num_cep")
+                        .prop('readonly', true)
+                        .addClass('bg-light')
+                        .removeClass('border-warning');
+                }
+            } else if (desTipoProposicao === 'Requerimento') {
+              $("#accordionMaps").slideDown(300);
+              // regras específicas de Requerimento (se houver)
+            } else {
+                // Outros tipos
+                if (_emRevisao && !_tem_pdf) {
+                    _domCache.txtDescricao.prop('readonly', false).removeClass('bg-light');
+                    _aplicarReadonlySelect2('#lst_assunto', false);
+                } else {
+                    if (_tem_pdf || _campoAssuntoBloqueado) {
+                        _domCache.txtDescricao.prop('readonly', true).addClass('bg-light');
+                        _aplicarReadonlySelect2('#lst_assunto', true);
+                    } else {
+                        _domCache.txtDescricao.prop('readonly', false).removeClass('bg-light');
+                        _aplicarReadonlySelect2('#lst_assunto', false);
+                    }
+                }
+                _domCache.txaJustificativa.prop('readonly', true).addClass('bg-light');
+                
+                if (_campoAssuntoBloqueado) {
+                    $("#txt_nom_logradouro, #txt_nom_bairro, #txt_nom_cidade, #txt_sgl_uf, #txt_complemento_endereco, #txt_num_cep")
+                        .prop('readonly', true)
+                        .addClass('bg-light')
+                        .removeClass('border-warning');
+                }
+            }
+
+            // BLOQUEIO select de assunto (readonly visual)
+            if (['Indicação', 'Requerimento', 'Moção'].includes(desTipoProposicao)) {
+                $("#cardAssunto").slideDown(300);
+            } else {
+                _aplicarReadonlySelect2('#lst_assunto', true);
+                _domCache.lstAssunto.val('').trigger('change');
+            }
+
+            // Load subjects
+            _domCache.lstAssunto.select2({minimumResultsForSearch: Infinity});
+            _domCache.lstAssunto.html('<option value="">Carregando...</option>');
+            this.carregarAssuntos(indMatOuDoc[0]);
+        },
+
+        carregarAssuntos: function(tipoProposicaoId) {
+            $.ajax({
+                url: 'assuntos_carregar_pysc',
+                type: 'post',
+                data: { svalue: tipoProposicaoId },
+                dataType: 'json',
+                beforeSend: () => {
+                    _domCache.lstAssunto.addClass('readonly').html('<option value="">Carregando...</option>');
+                },
+                success: (response) => {
+                    let options = '<option value="">Selecione</option>';
+                    response.forEach((item) => {
+                        options += `<option value="${item.cod_assunto}">${item.des_assunto} (${item.nom_orgao})</option>`;
+                    });
+                    _domCache.lstAssunto.html(options);
+
+                    // Apply readonly based on state
+                    if (_emRevisao && !_tem_pdf) {
+                        _aplicarReadonlySelect2('#lst_assunto', false);
+                    } else if (_tem_pdf || _campoAssuntoBloqueado) {
+                        _aplicarReadonlySelect2('#lst_assunto', true);
+                    } else {
+                        _aplicarReadonlySelect2('#lst_assunto', false);
+                    }
+
+                    <dtml-if "_.has_key('cod_assunto_sel')">
+                    if ($("#lst_assunto option[value='<dtml-var cod_assunto_sel>']").length) {
+                        _domCache.lstAssunto.val('<dtml-var cod_assunto_sel>').trigger('change');
+                    }
+                    </dtml-if>
+                    _domCache.lstAssunto.select2({minimumResultsForSearch: Infinity});
+                },
+                error: () => {
+                    _domCache.lstAssunto.html('<option value="">Erro ao carregar assuntos</option>');
+                }
+            });
+        },
+
+        controlarBotaoGerarPdf: function() {
+            if (_emRevisao && _ehAutor) {
+                _domCache.btnGerarPdf.prop('disabled', true)
+                    .addClass('disabled')
+                    .attr('title', 'A conversão para PDF é permitida apenas pela revisão ou operador.');
+            } else {
+                _domCache.btnGerarPdf.prop('disabled', false)
+                    .removeClass('disabled')
+                    .attr('title', 'Converter ODT em PDF');
+            }
+        },
+
+        // ========== CEP AND ADDRESS FUNCTIONS ==========
+        bloquearCamposEnderecoReadonly: function() {
+            $("#txt_nom_logradouro, #txt_nom_bairro, #txt_nom_cidade, #txt_sgl_uf")
+                .prop('readonly', true)
+                .addClass('bg-light')
+                .removeClass('border-warning');
+        },
+
+        liberarCamposEnderecoEdicao: function() {
+            $("#txt_nom_logradouro, #txt_nom_bairro, #txt_nom_cidade, #txt_sgl_uf")
+                .prop('readonly', false)
+                .removeClass('bg-light')
+                .addClass('border-warning');
+        },
+
+        liberarEmentaPorCepZerado: function() {
+            $("#txt_nom_logradouro").prop('readonly', false).removeClass('bg-light');
+            $("#txt_nom_cidade").prop('readonly', false).removeClass('bg-light');
+            $("#txt_sgl_uf").prop('readonly', false).removeClass('bg-light');
+            $("#txt_nom_bairro").prop('readonly', false).removeClass('bg-light');
+            _domCache.txtDescricao.prop('readonly', true).addClass('bg-light');
+            $("#badgeEmentaAuto").show();
+            $("#helpEmentaAuto").show();
+            $("#avisoEmentaManual").show();
+            $("#txt_nom_logradouro, #txt_nom_bairro, #txt_nom_cidade, #txt_sgl_uf").addClass('border-warning');
+        },
+
+        bloquearEmentaAutomatica: function() {
+            $("#txt_nom_logradouro").prop('readonly', true).addClass('bg-light').removeClass('border-warning');
+            $("#txt_nom_cidade").prop('readonly', true).addClass('bg-light').removeClass('border-warning');
+            $("#txt_sgl_uf").prop('readonly', true).removeClass('border-warning');
+            $("#txt_nom_bairro").prop('readonly', true).addClass('bg-light').removeClass('border-warning');
+            _domCache.txtDescricao.prop('readonly', true).addClass('bg-light');
+            $("#badgeEmentaAuto").show();
+            $("#helpEmentaAuto").show();
+            $("#avisoEmentaManual").hide();
+        },
+
+        // ========== EMENTA GENERATION ==========
+        gerarEmentaAutomatica: function(forcar = false) {
+            const desTipoProposicao = $("#lst_tip_proposicao option:selected").text();
+            if (desTipoProposicao !== 'Indicação') return;
+            
+            const campo = _domCache.txtDescricao;
+            const ementaExistente = campo.val().trim();
+            
+            if (!forcar && ementaExistente !== "") {
+                return;
+            }
+
+            const textoAssuntoCompleto = _domCache.lstAssunto.find("option:selected").text().trim();
+            const assuntoTexto = textoAssuntoCompleto.split(' (')[0];
+            const orgaoTexto = textoAssuntoCompleto.match(/\(([^)]+)\)/)?.[1] || "";
+            const logradouroTexto = $("#txt_nom_logradouro").val();
+            const complementoTexto = $("#txt_complemento_endereco").val();
+            const bairroTexto = $("#txt_nom_bairro").val();
+            const cidadeTexto = $("#txt_nom_cidade").val();
+            const estadoTexto = $("#txt_sgl_uf").val();
+
+            let ementaFinal = "Solicitando ";
+            if (orgaoTexto) {
+                ementaFinal += _artigoParaOrgao(orgaoTexto) + orgaoTexto + " ";
+            }
+            if (assuntoTexto && assuntoTexto !== 'Selecione') {
+                ementaFinal += `a realização de ${assuntoTexto.toLowerCase().trim()} `;
+            }
+            if (logradouroTexto) {
+                ementaFinal += `na ${logradouroTexto}`;
+                if (complementoTexto) ementaFinal += `, ${complementoTexto}`;
+                if (bairroTexto) ementaFinal += `, ${bairroTexto}`;
+                if (cidadeTexto && estadoTexto) {
+                    ementaFinal += `, neste município de ${cidadeTexto}/${estadoTexto}.`;
+                } else if (cidadeTexto) {
+                    ementaFinal += `, neste município de ${cidadeTexto}.`;
+                } else {
+                    ementaFinal += ".";
+                }
+            } else {
+                ementaFinal += ".";
+            }
+            campo.val(ementaFinal);
+        },
+
+        // ========== CEP LOOKUP ==========
+        async buscarCEP() {
+            const cepRaw = $("#txt_num_cep").val();
+            const cep = cepRaw.replace(/\D/g, '');
+            const desTipoProposicao = $("#lst_tip_proposicao option:selected").text();
+            const cepInput = $("#txt_num_cep");
+            const cepDisplay = $("#loadingCEP");
+            
+            const limparCampos = () => {
+                $("#txt_nom_logradouro").val('');
+                $("#txt_nom_bairro").val('');
+                $("#txt_nom_cidade").val('');
+                $("#txt_sgl_uf").val('');
+            };
+
+            if (desTipoProposicao !== 'Indicação') return;
+
+            if (cep === '00000000') {
+                this.liberarCamposEnderecoEdicao();
+                cepDisplay.html('');
+                limparCampos();
+                return;
+            }
+            
+            if (cep.length !== 8) {
+                this.bloquearCamposEnderecoReadonly();
+                cepDisplay.html('');
+                limparCampos();
+                return;
+            }
+
+            this.bloquearCamposEnderecoReadonly();
+            cepInput.prop('disabled', true);
+            cepDisplay.html(`
+                <div class="d-flex align-items-center text-muted">
+                    <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                    Buscando endereço...
+                </div>
+            `);
+            limparCampos();
+
+            try {
+                // Try ViaCEP first
+                const viaCEPResponse = await this._buscarCEPViaCEP(cep);
+                if (viaCEPResponse && !viaCEPResponse.erro) {
+                    this._preencherEndereco(
+                        viaCEPResponse.logradouro || '',
+                        viaCEPResponse.bairro || '',
+                        viaCEPResponse.localidade || '',
+                        viaCEPResponse.uf || ''
+                    );
+                    this.gerarEmentaAutomatica(true);
+                    cepDisplay.html('');
+                    return;
+                }
+
+                // Fallback to BrasilAPI
+                const brasilAPIResponse = await this._buscarCEPBrasilAPI(cep);
+                if (brasilAPIResponse && !brasilAPIResponse.errors && !brasilAPIResponse.message) {
+                    this._preencherEndereco(
+                        brasilAPIResponse.street || '',
+                        brasilAPIResponse.neighborhood || '',
+                        brasilAPIResponse.city || '',
+                        brasilAPIResponse.state || ''
+                    );
+                    this.gerarEmentaAutomatica(true);
+                    cepDisplay.html('');
+                    return;
+                }
+
+                throw new Error("CEP não encontrado.");
+            } catch (error) {
+                limparCampos();
+                cepDisplay.html(`
+                    <div class="text-danger">
+                        <i class="fas fa-exclamation-circle me-1"></i>
+                        ${error.message.includes("não encontrado") ? "CEP não encontrado" : "Erro ao consultar CEP"}
+                    </div>
+                `);
+                this.showConfirmModal(
+                    "CEP não encontrado",
+                    "Não foi possível encontrar o endereço para o CEP informado. Verifique o número digitado."
+                );
+            } finally {
+                cepInput.prop('disabled', false);
+            }
+        },
+
+        async _buscarCEPViaCEP(cep, retries = 2) {
+            try {
+                const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+                if (!response.ok) throw new Error("ViaCEP não respondeu");
+                return await response.json();
+            } catch (error) {
+                if (retries > 0) {
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    return this._buscarCEPViaCEP(cep, retries - 1);
+                }
+                throw error;
+            }
+        },
+
+        async _buscarCEPBrasilAPI(cep, retries = 2) {
+            try {
+                const response = await fetch(`https://brasilapi.com.br/api/cep/v2/${cep}`);
+                if (!response.ok) throw new Error("BrasilAPI não respondeu");
+                return await response.json();
+            } catch (error) {
+                if (retries > 0) {
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    return this._buscarCEPBrasilAPI(cep, retries - 1);
+                }
+                throw error;
+            }
+        },
+
+        _preencherEndereco: function(logradouro, bairro, cidade, uf) {
+            $("#txt_nom_logradouro").val(logradouro);
+            $("#txt_nom_bairro").val(bairro);
+            $("#txt_nom_cidade").val(cidade);
+            $("#txt_sgl_uf").val(uf);
+        },
+
+        // ========== FILE OPERATIONS ==========
+        async textoOdtGerar() {
+            const lstModelo = document.getElementById("lst_modelo");
+            if (!lstModelo || lstModelo.selectedIndex === 0) {
+                this.showConfirmModal(
+                    "Modelo não selecionado",
+                    "Para gerar o documento é necessário selecionar um modelo.",
+                    null,
+                    null
+                );
+                return false;
+            }
+            
+            const value = lstModelo.value;
+            const selected = lstModelo.options[lstModelo.selectedIndex];
+            const path = selected.getAttribute('data-path');
+
+            this.showConfirmModal(
+                "Confirmação",
+                "Confirma a geração do arquivo ODT? Esta ação substituirá qualquer documento existente.",
+                async () => {
+                    this.mostrarToast('info', `<span class="spinner-border spinner-border-sm me-2"></span>Gerando arquivo ODT...`);
+                    try {
+                        const response = await fetch(`${_portalUrl}/modelo_proposicao/proposicao?cod_proposicao=${_codProposicao}&modelo_proposicao=${value}&modelo_path=${path}`, {
+                            method: 'POST',
+                            headers: { 'Accept': 'application/json' }
+                        });
+                        const data = await response.json();
+                        $('.toast').remove();
+                        
+                        if (data.success) {
+                            this.mostrarToast('sucesso', `<i class="fas fa-check-circle me-2"></i> ${data.message}`);
+                            setTimeout(() => location.reload(), 1000);
+                        } else {
+                            this.mostrarToast('erro', `<i class="fas fa-exclamation-triangle me-2"></i> ${data.message}`);
+                        }
+                    } catch (err) {
+                        $('.toast').remove();
+                        this.mostrarToast('erro', `<i class="fas fa-exclamation-triangle me-2"></i> Erro ao gerar ODT: ${err.message}`);
+                    }
+                }
+            );
+        },
+
+        async textoPdfGerar() {
+            this.showConfirmModal(
+                "Confirmação",
+                "Confirma a geração do arquivo PDF? Esta ação substituirá qualquer PDF existente.",
+                async () => {
+                    this.mostrarToast('info', `<span class="spinner-border spinner-border-sm me-2"></span>Gerando arquivo PDF...`);
+                    try {
+                        const response = await fetch(`${_portalUrl}/modelo_proposicao/proposicao_gerar_pdf?cod_proposicao=${_codProposicao}`, {
+                            method: 'POST',
+                            headers: { 'Accept': 'application/json' }
+                        });
+                        const data = await response.json();
+                        $('.toast').remove();
+                        
+                        if (data.success) {
+                            this.mostrarToast('sucesso', `<i class="fas fa-check-circle me-2"></i> ${data.message}`);
+                            setTimeout(() => location.reload(), 1000);
+                        } else {
+                            this.mostrarToast('erro', `<i class="fas fa-exclamation-triangle me-2"></i> ${data.message}`);
+                        }
+                    } catch (err) {
+                        $('.toast').remove();
+                        this.mostrarToast('erro', `<i class="fas fa-exclamation-triangle me-2"></i> Erro ao gerar PDF: ${err.message}`);
+                    }
+                }
+            );
+        },
+
+        excluirArquivo: function(tipo) {
+            let url = '';
+            let msg = '';
+            
+            if (tipo === 'odt') {
+                url = `${_portalUrl}/cadastros/proposicao/texto_proposicao_excluir_proc?cod_proposicao=${_codProposicao}`;
+                msg = "Deseja realmente excluir o arquivo ODT da Proposição?";
+            } else if (tipo === 'pdf') {
+                url = `${_portalUrl}/cadastros/proposicao/texto_pdf_excluir_proc?cod_proposicao=${_codProposicao}`;
+                msg = "Deseja realmente excluir o texto PDF da proposição?";
+            } else if (tipo === 'assinado') {
+                url = `${_portalUrl}/cadastros/proposicao/texto_pdf_assinado_excluir_proc?cod_proposicao=${_codProposicao}`;
+                msg = "Deseja realmente excluir o texto PDF assinado da proposição?";
+            }
+
+            this.showConfirmModal('Excluir Arquivo', msg, () => {
+                this.mostrarToast('info', `<span class="spinner-border spinner-border-sm me-2"></span>Excluindo arquivo...`);
+                fetch(url, { method: 'POST' })
+                    .then(resp => resp.json())
+                    .then(data => {
+                        $('.toast').remove();
+                        if (data.success) {
+                            this.mostrarToast('sucesso', `<i class="fas fa-check-circle me-2"></i> ${data.message}`);
+                            setTimeout(() => location.reload(), 1000);
+                        } else {
+                            this.mostrarToast('erro', `<i class="fas fa-exclamation-triangle me-2"></i> ${data.message}`);
+                        }
+                    })
+                    .catch(err => {
+                        $('.toast').remove();
+                        this.mostrarToast('erro', `<i class="fas fa-exclamation-triangle me-2"></i> Erro ao excluir arquivo: ${err.message}`);
+                    });
+            });
+        },
+
+        // ========== PROPOSITION OPERATIONS ==========
+        proposicaoExcluir: function() {
+            if (!_codProposicao || _codProposicao === "missing") {
+                this.showConfirmModal(
+                    "Erro",
+                    "Não foi possível identificar a proposição para exclusão.",
+                    null,
+                    null
+                );
+                return;
+            }
+            
+            this.showConfirmModal(
+                "Excluir Proposição",
+                "Deseja realmente excluir esta proposição? Esta ação não poderá ser desfeita.",
+                () => {
+                    location.href = `proposicao_excluir_proc?cod_proposicao=${_codProposicao}`;
+                },
+                null,
+                'btn-danger',
+                'Sim, excluir'
+            );
+        },
+
+        proposicaoEnviar: function() {
+            if (!_codProposicao || _codProposicao === "missing") {
+                this.showConfirmModal(
+                    "Erro",
+                    "Não foi possível identificar a proposição para envio.",
+                    null,
+                    null
+                );
+                return;
+            }
+            
+            this.showConfirmModal(
+                "Confirmação de Envio",
+                "Ao enviar esta proposição, ela será encaminhada para análise e não poderá ser editada. Confirma o envio?",
+                () => {
+                    location.href = `proposicao_enviar_proc?hdn_cod_proposicao=${_codProposicao}`;
+                },
+                null,
+                'btn-success',
+                'Sim, enviar'
+            );
+        },
+
+        proposicaoSolicitarDevolucao: function() {
+            if (!_codProposicao || _codProposicao === "missing") {
+                this.showConfirmModal(
+                    "Erro",
+                    "Não foi possível identificar a proposição para solicitar devolução.",
+                    null,
+                    null
+                );
+                return;
+            }
+            
+            this.showConfirmModal(
+                "Solicitar Devolução",
+                "Deseja solicitar a devolução da proposição ao Autor? Esta solicitação precisará ser aprovada.",
+                () => {
+                    location.href = `proposicao_solicitar_devolucao_proc?cod_proposicao=${_codProposicao}`;
+                },
+                null,
+                'btn-danger',
+                'Solicitar Devolução'
+            );
+        },
+
+        proposicaoRetomar: function() {
+            if (!_codProposicao || _codProposicao === "missing") {
+                this.showConfirmModal(
+                    "Erro",
+                    "Não foi possível identificar a proposição para reaproveitamento.",
+                    null,
+                    null
+                );
+                return;
+            }
+            
+            this.showConfirmModal(
+                "Reaproveitar Proposição",
+                "Deseja reaproveitar esta proposição devolvida? Todas as informações serão mantidas.",
+                () => {
+                    location.href = `proposicao_retomar_proc?cod_proposicao=${_codProposicao}`;
+                },
+                null,
+                'btn-success',
+                'Reaproveitar Proposição'
+            );
+        },
+
+        // ========== UI COMPONENTS ==========
+        showConfirmModal: function(title, body, confirmAction, cancelAction, confirmBtnClass = 'btn-primary', confirmText = 'Confirmar') {
+            const modalId = 'confirmationModal-' + Math.random().toString(36).substring(2, 9);
+            const modalHtml = `
+                <div class="modal fade" id="${modalId}" tabindex="-1" aria-labelledby="${modalId}Label" aria-hidden="true" role="dialog">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h2 class="modal-title" id="${modalId}Label">${title}</h2>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                            </div>
+                            <div class="modal-body">
+                                ${body}
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                <button type="button" class="btn ${confirmBtnClass}" id="${modalId}-confirm-btn" autofocus>${confirmText}</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            $(`#${modalId}`).remove();
+            $('body').append(modalHtml);
+            const $modal = $(`#${modalId}`);
+            const modal = new bootstrap.Modal($modal[0]);
+            modal.show();
+
+            $modal.on('shown.bs.modal', () => {
+                $(`#${modalId}-confirm-btn`).trigger('focus');
+            });
+
+            $(`#${modalId}-confirm-btn`).one('click', () => {
+                if (typeof confirmAction === 'function') confirmAction();
+                modal.hide();
+            });
+
+            $modal.on('hidden.bs.modal', () => {
+                if (typeof cancelAction === 'function') cancelAction();
+                $modal.remove();
+            });
+        },
+
+        mostrarToast: function(tipo, mensagem) {
+            let bg = 'bg-info';
+            if (tipo === 'sucesso') bg = 'bg-success';
+            else if (tipo === 'erro') bg = 'bg-danger';
+
+            const toastHtml = `
+               <div class="container-fluid">
+                <div class="toast show align-items-center text-white ${bg} border-0" 
+                     role="alert" aria-live="assertive" aria-atomic="true" 
+                     style="position: fixed; bottom: 80px; right: 20px; z-index: 1100;">
+                    <div class="d-flex">
+                        <div class="toast-body">
+                            ${mensagem}
+                        </div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" 
+                                data-bs-dismiss="toast" aria-label="Fechar"></button>
+                    </div>
+                </div>
+              </div>
+            `;
+            $('.toast').remove();
+            $('body').append(toastHtml);
+            setTimeout(() => $('.toast').fadeOut(500, () => $(this).remove()), 3500);
+        },
+
+        atualizarStatusProposicao: function() {
+            const steps = {
+                draft: { icon: 'fa-edit', label: 'Em elaboração', class: 'draft' },
+                submitted: { icon: 'fa-paper-plane', label: 'Enviada', class: 'submitted' },
+                received: { icon: 'fa-check-circle', label: 'Incorporada', class: 'received' },
+                returned: { icon: 'fa-times-circle', label: 'Devolvida', class: 'returned' }
+            };
+            
+            $('.step').removeClass('active completed');
+            
+            <dtml-if dat_recebimento>
+                $('.step-draft, .step-submitted').addClass('completed');
+                $('.step-received').addClass('active');
+            <dtml-elif expr="dat_envio and not dat_devolucao">
+                $('.step-draft').addClass('completed');
+                $('.step-submitted').addClass('active');
+            <dtml-elif expr="dat_devolucao">
+                $('.step-draft, .step-submitted').addClass('completed');
+                $('.step-returned').addClass('active');
+            <dtml-else>
+                $('.step-draft').addClass('active');
+            </dtml-if>
+        },
+
+        // ========== FORM VALIDATION ==========
+        camposCriticar: function(form) {
+            if ($(form).data('submitting')) return false;
+            $(form).data('submitting', true);
+            $(form).find('.is-invalid').removeClass('is-invalid');
+            $(form).find('.invalid-feedback').remove();
+            $(form).find('button[type=submit], .btn-action').prop('disabled', true);
+
+            let isValid = true;
+            let firstInvalidField = null;
+
+            const tipoProposicaoSelect = form.lst_tip_proposicao;
+            if (tipoProposicaoSelect.selectedIndex === -1 || tipoProposicaoSelect.value === "") {
+                $(tipoProposicaoSelect).addClass('is-invalid');
+                $(tipoProposicaoSelect).closest('.form-group').append('<div class="invalid-feedback">Selecione um tipo de proposição</div>');
+                if (!firstInvalidField) firstInvalidField = tipoProposicaoSelect;
+                isValid = false;
+            }
+            
+            const tipoProposicaoValue = tipoProposicaoSelect[tipoProposicaoSelect.selectedIndex].value;
+            const desTipoProposicao = tipoProposicaoSelect.options[tipoProposicaoSelect.selectedIndex].text;
+
+            if (['Requerimento', 'Indicação', 'Moção'].includes(desTipoProposicao)) {
+                if (form.lst_assunto.selectedIndex === -1 || form.lst_assunto.value === '') {
+                    $(form.lst_assunto).addClass('is-invalid');
+                    $(form.lst_assunto).closest('.form-group').append('<div class="invalid-feedback">O assunto é obrigatório para este tipo de proposição</div>');
+                    if (!firstInvalidField) firstInvalidField = form.lst_assunto;
+                    isValid = false;
+                }
+            }
+            
+            if (desTipoProposicao === 'Indicação') {
+                if (form.txt_num_cep.value === "") {
+                    $(form.txt_num_cep).addClass('is-invalid');
+                    $(form.txt_num_cep).closest('.form-group').append('<div class="invalid-feedback">O CEP é obrigatório para indicações</div>');
+                    if (!firstInvalidField) firstInvalidField = form.txt_num_cep;
+                    isValid = false;
+                }
+                
+                const justificativa = form.txa_txt_justificativa.value;
+                if (justificativa === "" || justificativa.trim() === "<p></p>") {
+                    $(form.txa_txt_justificativa).addClass('is-invalid');
+                    $(form.txa_txt_justificativa).closest('.form-group').append('<div class="invalid-feedback">A justificativa da indicação deve ser preenchida</div>');
+                    if (!firstInvalidField) firstInvalidField = form.txa_txt_justificativa;
+                    isValid = false;
+                }
+            } else {
+                const ementa = form.txt_descricao.value;
+                if (ementa === "" || ementa.trim() === "<p></p>") {
+                    $(form.txt_descricao).addClass('is-invalid');
+                    $(form.txt_descricao).closest('.form-group').append('<div class="invalid-feedback">A ementa da proposição deve ser preenchida</div>');
+                    if (!firstInvalidField) firstInvalidField = form.txt_descricao;
+                    isValid = false;
+                }
+                
+                const indMatOuDoc = tipoProposicaoValue.split("&");
+                if (indMatOuDoc[1] === 'D') {
+                    if (form.lst_tip_id_basica.selectedIndex === -1 || form.lst_tip_id_basica.value === "" ||
+                        form.txt_num_ident_basica.value === "" || form.txt_ano_ident_basica.value === "") {
+                        $(form.lst_tip_id_basica).addClass('is-invalid');
+                        $(form.txt_num_ident_basica).addClass('is-invalid');
+                        $(form.txt_ano_ident_basica).addClass('is-invalid');
+                        $('#divMatBody').append('<div class="invalid-feedback d-block">Informe tipo, número e ano da matéria vinculada</div>');
+                        if (!firstInvalidField) firstInvalidField = form.lst_tip_id_basica;
+                        isValid = false;
+                    }
+                }
+            }
+
+            if (!isValid) {
+                $(form).find('button[type=submit], .btn-action').prop('disabled', false);
+                $(form).data('submitting', false);
+                
+                if (firstInvalidField) {
+                    const offset = _getTotalTopOffset();
+                    $('html, body').animate({ scrollTop: $(firstInvalidField).offset().top - offset - 10 }, 500);
+                    $(firstInvalidField).focus().addClass('animate-fade-in');
+                    setTimeout(() => { $(firstInvalidField).removeClass('animate-fade-in'); }, 1000);
+                }
+                
+                this.mostrarToast('erro', 'Corrija os campos destacados em vermelho.');
+                return false;
+            }
+
+            form.hdn_tip_proposicao.value = tipoProposicaoValue.split("&")[0];
+            $(form).find('button[type=submit], .btn-action').prop('disabled', true);
+            form.submit();
+        },
+
+        // ========== IMAGE HANDLING ==========
+        async enviarImagem(containerDiv, idx) {
+            const fileInput = containerDiv.querySelector(`[name="file_nom_image${idx}"]`);
+            const previewDiv = document.getElementById(`foto${idx}-preview`);
+            const file = fileInput.files[0];
+            if (!file) return;
+
+            // Preview
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                previewDiv.innerHTML = `
+                    <div class="text-center position-relative">
+                        <img class="img-fluid img-thumbnail mb-2" src="${e.target.result}" style="max-height: 300px;">
+                        <div class="position-absolute top-0 start-50 translate-middle-x mt-2">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Carregando...</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            };
+            reader.readAsDataURL(file);
+
+            const formData = new FormData();
+            formData.append('cod_proposicao', _codProposicao);
+            formData.append('indice', idx);
+            formData.append(fileInput.name, file);
+
+            try {
+                const response = await fetch('salvar-imagem-proposicao', { method: 'POST', body: formData });
+                if (!response.ok) throw new Error('Erro no servidor');
+                const html = await response.text();
+                previewDiv.innerHTML = html;
+
+                this.mostrarToast('sucesso', '<i class="fas fa-check-circle me-2"></i> Fotografia salva com sucesso!');
+            } catch (err) {
+                previewDiv.innerHTML = `
+                    <div class="alert alert-danger mb-2">
+                        <i class="fas fa-exclamation-triangle me-2"></i> Erro ao enviar imagem: ${err.message}
+                    </div>
+                    <button class="btn btn-sm btn-secondary" onclick="location.reload()">
+                        <i class="fas fa-sync-alt me-1"></i> Tentar novamente
+                    </button>
+                `;
+            }
+        },
+
+        excluirImagem: function(idx) {
+            this.showConfirmModal(
+                "Excluir Imagem",
+                "Deseja realmente excluir esta imagem? Esta ação não pode ser desfeita.",
+                async () => {
+                    const previewDiv = document.getElementById(`foto${idx}-preview`);
+                    previewDiv.innerHTML = `
+                        <div class="text-center p-3">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Carregando...</span>
+                            </div>
+                        </div>
+                    `;
+                    
+                    try {
+                        const response = await fetch('excluir-imagem-proposicao', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                            body: `cod_proposicao=${encodeURIComponent(_codProposicao)}&indice=${encodeURIComponent(idx)}`
+                        });
+                        
+                        if (!response.ok) throw new Error('Erro no servidor');
+                        
+                        previewDiv.innerHTML = `
+                            <div id="uploadForm${idx}" enctype="multipart/form-data">
+                                <input type="hidden" name="indice" value="${idx}">
+                                <input type="file" name="file_nom_image${idx}" class="form-control" accept="image/*" onchange="ProposicaoManager.enviarImagem(this.parentElement, ${idx})">
+                                <div class="help-text mt-2">Formatos suportados: JPG, PNG, GIF. Tamanho máximo: 5MB.</div>
+                            </div>
+                        `;
+                        
+                        this.mostrarToast('sucesso', '<i class="fas fa-check-circle me-2"></i> Fotografia excluída com sucesso!');
+                    } catch (err) {
+                        previewDiv.innerHTML = `
+                            <div class="alert alert-danger">
+                                <i class="fas fa-exclamation-triangle me-2"></i> Erro ao excluir imagem: ${err.message}
+                            </div>
+                            <button class="btn btn-sm btn-secondary" onclick="location.reload()">
+                                <i class="fas fa-sync-alt me-1"></i> Tentar novamente
+                            </button>
+                        `;
+                    }
+                }
+            );
+        },
+
+        // ========== OBSERVATION HANDLING ==========
+        observacaoSalvar: function(formObservacao) {
+            const editor = tinymce.get('txa_txt_observacao');
+            let content = '';
+            
+            if (!editor) {
+                content = formObservacao.txa_txt_observacao.value.trim();
+            } else {
+                content = editor.getContent()
+                    .replace(/<p>&nbsp;<\/p>/g, '')
+                    .replace(/<p><br><\/p>/g, '')
+                    .replace(/<p><\/p>/g, '')
+                    .replace(/<div><br><\/div>/g, '')
+                    .trim();
+            }
+            
+            if (content === "") {
+                const target = editor ? $(editor.editorContainer) : $(formObservacao.txa_txt_observacao);
+                target.addClass('is-invalid');
+                target.closest('.form-group').append('<div class="invalid-feedback">A observação não pode estar vazia</div>');
+                
+                if (editor) {
+                    editor.focus();
+                } else {
+                    formObservacao.txa_txt_observacao.focus();
+                }
+                
+                return false;
+            }
+            
+            if (editor) {
+                editor.save();
+            }
+            
+            formObservacao.submit();
+        }
+    };
+})();
+
+// Initialize on document ready
+$(document).ready(function() {
+    ProposicaoManager.init();
+});
+
+// Make some functions globally available
+function tipo_proposicao_mudou() { ProposicaoManager.tipoProposicaoMudou(); }
+function texto_pdf_gerar() { ProposicaoManager.textoPdfGerar(); }
+function texto_odt_gerar() { ProposicaoManager.textoOdtGerar(); }
+function excluir_arquivo(tipo) { ProposicaoManager.excluirArquivo(tipo); }
+function proposicao_excluir() { ProposicaoManager.proposicaoExcluir(); }
+function proposicao_enviar() { ProposicaoManager.proposicaoEnviar(); }
+function proposicao_solicitar_devolucao() { ProposicaoManager.proposicaoSolicitarDevolucao(); }
+function proposicao_retomar() { ProposicaoManager.proposicaoRetomar(); }
+function campos_criticar(form) { return ProposicaoManager.camposCriticar(form); }
+function observacao_salvar(formObservacao) { return ProposicaoManager.observacaoSalvar(formObservacao); }
 
 // Incorporar (caso cod_proposicao)
 <dtml-if cod_proposicao>
   <dtml-let cod_doc="pysc.proposicao_calcular_checksum_pysc(cod_proposicao)">
     function proposicao_incorporar() {
-        const portalUrl = '<dtml-var portal_url>';
         const codDoc = '<dtml-var cod_doc missing>';
         if (!codDoc || codDoc === "missing") {
-            showConfirmModal(
+            ProposicaoManager.showConfirmModal(
                 "Erro",
                 "Não foi possível identificar a proposição para incorporação.",
                 null,
@@ -2235,855 +2901,15 @@ function proposicao_retomar() {
             );
             return;
         }
-        showConfirmModal(
+        ProposicaoManager.showConfirmModal(
             "Incorporar Proposição",
             "Confirma a incorporação desta proposição ao sistema? Esta ação não poderá ser desfeita.",
             function() {
-                location.href = `${portalUrl}/cadastros/recebimento_proposicao/proposicao_buscar_proc?txtCodDoc=${codDoc}`;
+                location.href = `${ProposicaoManager._portalUrl}/cadastros/recebimento_proposicao/proposicao_buscar_proc?txtCodDoc=${codDoc}`;
             }
         );
     }
   </dtml-let>
 </dtml-if>
-
-// Troca de tipo de proposição e assuntos relacionados
-var emRevisao = <dtml-if expr="('Operador' in AUTHENTICATED_USER.getRoles()) or ('Operador Materia' in AUTHENTICATED_USER.getRoles()) or ('Revisor Proposicao' in AUTHENTICATED_USER.getRoles()) or ('Chefia Revisão' in AUTHENTICATED_USER.getRoles()) and dat_envio and _.has_key('tem_odt') and not _.has_key('tem_pdf') and not dat_recebimento">true<dtml-else>false</dtml-if>;
-var tem_pdf = <dtml-if expr="_.has_key('tem_pdf')">true<dtml-else>false</dtml-if>;
-var ehAutor = <dtml-if expr="AUTHENTICATED_USER.has_role(['Autor'])">true<dtml-else>false</dtml-if>;
-var campoAssuntoBloqueado = <dtml-if expr="_.has_key('tem_pdf') or _.has_key('tem_odt') or prop_recebida or prop_devolvida">true<dtml-else>false</dtml-if>;
-
-// Função que sempre ajusta o estado do botão "Converter ODT"
-function controlarBotaoGerarPdf() {
-    if (typeof emRevisao !== 'undefined' && emRevisao && typeof ehAutor !== 'undefined' && ehAutor) {
-        $('#btn-gerar-pdf').prop('disabled', true)
-            .addClass('disabled')
-            .attr('title', 'A conversão para PDF é permitida apenas por revisão ou operador.');
-    } else {
-        $('#btn-gerar-pdf').prop('disabled', false)
-            .removeClass('disabled')
-            .attr('title', 'Converter ODT em PDF');
-    }
-}
-
-function tipo_proposicao_mudou() {
-    const form = document.proposicao_form;
-    if (!form || !form.lst_tip_proposicao) return;
-    form.hdn_alterou.value = 1;
-    const tipoProposicaoValue = form.lst_tip_proposicao.value;
-    const desTipoProposicao = form.lst_tip_proposicao.options[form.lst_tip_proposicao.selectedIndex].text;
-    const indMatOuDoc = tipoProposicaoValue.split("&");
-
-    // Oculta todos os campos variáveis antes de decidir mostrar
-    $("#divIndicaEndereco, #divJustificativa, #cardAssunto, #accordionMaps").slideUp(300);
-    $('a[href*="/webeditor/editorProposicao"], button[onclick*="externalEdit_"]').show();
-    $("#btn-gerar-pdf").val("Converter ODT").prop('onclick', null).off('click').on('click', texto_pdf_gerar);
-
-    // Sempre desbloqueia os campos por padrão (serão re-bloqueados depois se necessário)
-    $("#txt_descricao").prop('readonly', false).removeClass('bg-light');
-    $("#txa_txt_justificativa").prop('readonly', true).addClass('bg-light');
-    $("#txt_nom_logradouro, #txt_nom_bairro, #txt_nom_cidade, #txt_sgl_uf, #txt_complemento_endereco, #txt_num_cep")
-        .prop('readonly', false)
-        .removeClass('bg-light')
-        .removeClass('border-warning');
-
-    // Matéria vinculada
-    if (indMatOuDoc[1] === 'D') {
-        $("#divMat").slideDown(300);
-        form.lst_tip_id_basica.disabled = false;
-        form.txt_num_ident_basica.disabled = false;
-        form.txt_ano_ident_basica.disabled = false;
-    } else {
-        $("#divMat").slideUp(300);
-        form.lst_tip_id_basica.disabled = true;
-        form.txt_num_ident_basica.disabled = true;
-        form.txt_ano_ident_basica.disabled = true;
-    }
-
-    // ---- BLOQUEIO DE EMENTA/ASSUNTO ----
-    if (desTipoProposicao === 'Indicação') {
-        $("#divIndicaEndereco, #divJustificativa, #cardAssunto, #accordionMaps").slideDown(300);
-        $('a[href*="/webeditor/editorProposicao"], button[onclick*="externalEdit_"]').hide();
-        $("#btn-gerar-pdf").val("Gerar PDF Final").prop('onclick', null).off('click').on('click', texto_pdf_gerar);
-
-        // Indicação: ementa SEMPRE readonly
-        $("#txt_descricao").prop('readonly', true).addClass('bg-light');
-
-        // Justificativa: só desbloqueia se não houver bloqueio geral
-        if (campoAssuntoBloqueado) {
-            $("#txa_txt_justificativa").prop('readonly', true).addClass('bg-light');
-        } else {
-            $("#txa_txt_justificativa").prop('readonly', false).removeClass('bg-light');
-        }
-        // Endereço: se bloqueado, trava todos
-        if (campoAssuntoBloqueado) {
-            $("#txt_nom_logradouro, #txt_nom_bairro, #txt_nom_cidade, #txt_sgl_uf, #txt_complemento_endereco, #txt_num_cep")
-                .prop('readonly', true)
-                .addClass('bg-light')
-                .removeClass('border-warning');
-        }
-    } else {
-        // Outros tipos
-        if (emRevisao && !tem_pdf) {
-            // Se está em revisão e NÃO tem PDF, deixa editar ementa e assunto
-            $("#txt_descricao").prop('readonly', false).removeClass('bg-light');
-            aplicarReadonlySelect2('#lst_assunto', false);
-        } else {
-            // Se tem PDF ou está bloqueado, deixa readonly
-            if (tem_pdf || campoAssuntoBloqueado) {
-                $("#txt_descricao").prop('readonly', true).addClass('bg-light');
-                aplicarReadonlySelect2('#lst_assunto', true);
-            } else {
-                $("#txt_descricao").prop('readonly', false).removeClass('bg-light');
-                aplicarReadonlySelect2('#lst_assunto', false);
-            }
-        }
-        // Justificativa sempre oculta/readonly
-        $("#txa_txt_justificativa").prop('readonly', true).addClass('bg-light');
-
-        // Bloqueia campos de endereço se bloqueio geral (só precaução)
-        if (campoAssuntoBloqueado) {
-            $("#txt_nom_logradouro, #txt_nom_bairro, #txt_nom_cidade, #txt_sgl_uf, #txt_complemento_endereco, #txt_num_cep")
-                .prop('readonly', true)
-                .addClass('bg-light')
-                .removeClass('border-warning');
-        }
-    }
-
-    // BLOQUEIO select de assunto (readonly visual)
-    if (['Indicação', 'Requerimento', 'Moção'].includes(desTipoProposicao)) {
-        $("#cardAssunto").slideDown(300);
-        // Assunto: já tratado acima na revisão ou bloqueio!
-        //aplicarReadonlySelect2('#lst_assunto', campoAssuntoBloqueado || tem_pdf);
-    } else {
-        aplicarReadonlySelect2('#lst_assunto', true);
-        $("#lst_assunto").val('').trigger('change');
-    }
-
-    // Inicializa e carrega assuntos
-    $('#lst_assunto').select2({minimumResultsForSearch: Infinity});
-    $("#lst_assunto").html('<option value="">Carregando...</option>');
-    carregarAssuntos(indMatOuDoc[0]);
-}
-
-// Função para aplicar ou remover "readonly visual" ao select2
-function aplicarReadonlySelect2(selector, enableReadonly) {
-    const $select = $(selector);
-    if (enableReadonly) {
-        $select.addClass('readonly');
-        setTimeout(function() {
-            $select.next('.select2-container').find('.select2-selection').addClass('readonly');
-        }, 10);
-    } else {
-        $select.removeClass('readonly');
-        setTimeout(function() {
-            $select.next('.select2-container').find('.select2-selection').removeClass('readonly');
-        }, 10);
-    }
-}
-
-// Bloqueio real da interação do Select2 e do <select>
-$(document).on('mousedown mousewheel focus', '#lst_assunto', function(e) {
-    if ($(this).hasClass('readonly')) {
-        e.preventDefault(); this.blur(); return false;
-    }
-});
-$(document).on('select2:opening select2:selecting', '#lst_assunto', function(e) {
-    if ($(this).hasClass('readonly')) {
-        e.preventDefault(); return false;
-    }
-});
-
-// Função AJAX para carregar assuntos e controlar bloqueio visual após carregamento
-function carregarAssuntos(tipoProposicaoId) {
-    $.ajax({
-        url: 'assuntos_carregar_pysc',
-        type: 'post',
-        data: { svalue: tipoProposicaoId },
-        dataType: 'json',
-        beforeSend: function() {
-            $("#lst_assunto").addClass('readonly').html('<option value="">Carregando...</option>');
-        },
-        success: function(response) {
-            let options = '<option value="">Selecione</option>';
-            response.forEach(function(item) {
-                options += `<option value="${item.cod_assunto}">${item.des_assunto} (${item.nom_orgao})</option>`;
-            });
-            $("#lst_assunto").html(options);
-
-            // --------- BLOQUEIO VISUAL (revisão e PDF) ---------
-            // emRevisao e não tem PDF: liberar edição; caso contrário, bloquear
-            if ((typeof emRevisao !== 'undefined' && emRevisao) && !(typeof tem_pdf !== 'undefined' && tem_pdf)) {
-                aplicarReadonlySelect2('#lst_assunto', false);
-            } else if ((typeof tem_pdf !== 'undefined' && tem_pdf) || campoAssuntoBloqueado) {
-                aplicarReadonlySelect2('#lst_assunto', true);
-            } else {
-                aplicarReadonlySelect2('#lst_assunto', false);
-            }
-
-            <dtml-if "_.has_key('cod_assunto_sel')">
-            if ($("#lst_assunto option[value='<dtml-var cod_assunto_sel>']").length) {
-                $("#lst_assunto").val('<dtml-var cod_assunto_sel>').trigger('change');
-            }
-            </dtml-if>
-            $('#lst_assunto').select2({minimumResultsForSearch: Infinity});
-        },
-        error: function() {
-            $("#lst_assunto").html('<option value="">Erro ao carregar assuntos</option>');
-        }
-    });
-}
-
-function liberarEmentaPorCepZerado() {
-    $("#txt_nom_logradouro").prop('readonly', false).removeClass('bg-light');
-    $("#txt_nom_cidade").prop('readonly', false).removeClass('bg-light');
-    $("#txt_sgl_uf").prop('readonly', false).removeClass('bg-light');
-    $("#txt_nom_bairro").prop('readonly', false).removeClass('bg-light');
-    $("#txt_descricao").prop('readonly', true).addClass('bg-light');
-    $("#badgeEmentaAuto").show();
-    $("#helpEmentaAuto").show();
-    $("#avisoEmentaManual").show();
-    $("#txt_nom_logradouro, #txt_nom_bairro, #txt_nom_cidade, #txt_sgl_uf").addClass('border-warning');
-}
-
-function bloquearEmentaAutomatica() {
-    $("#txt_nom_logradouro").prop('readonly', true).addClass('bg-light').removeClass('border-warning');
-    $("#txt_nom_cidade").prop('readonly', true).addClass('bg-light').removeClass('border-warning');
-    $("#txt_sgl_uf").prop('readonly', true).removeClass('border-warning');
-    $("#txt_nom_bairro").prop('readonly', true).addClass('bg-light').removeClass('border-warning');
-    $("#txt_descricao").prop('readonly', true).addClass('bg-light');
-    $("#badgeEmentaAuto").show();
-    $("#helpEmentaAuto").show();
-    $("#avisoEmentaManual").hide();
-}
-
-// Ementa automática para Indicação
-function artigoParaOrgao(nome) {
-    if (!nome) return '';
-    const minusculo = nome.trim().toLowerCase();
-    if (minusculo.startsWith('secretaria')) return 'à ';
-    if (minusculo.startsWith('coordenadoria')) return 'à ';
-    if (minusculo.startsWith('diretoria')) return 'à ';
-    if (minusculo.startsWith('departamento')) return 'ao ';
-    if (minusculo.startsWith('setor')) return 'ao ';
-    if (minusculo.startsWith('gabinete')) return 'ao ';
-    if (minusculo.startsWith('divisão')) return 'à ';
-    if (minusculo.startsWith('comissão')) return 'à ';
-    return 'ao ';
-}
-
-let ementaEditadaAutomaticamente = false;
-function gerarEmentaAutomatica(forcar = false) {
-    const desTipoProposicao = $("#lst_tip_proposicao option:selected").text();
-    if (desTipoProposicao !== 'Indicação') return;
-    
-    const campo = $("#txt_descricao");
-    const ementaExistente = campo.val().trim();
-    
-    // Não sobrescreve se já houver texto, a menos que force
-    if (!forcar && ementaExistente !== "") {
-        return;
-    }
-
-    const textoAssuntoCompleto = $("#lst_assunto option:selected").text().trim();
-    const assuntoTexto = textoAssuntoCompleto.split(' (')[0];
-    const orgaoTexto = textoAssuntoCompleto.match(/\(([^)]+)\)/)?.[1] || "";
-    const logradouroTexto = $("#txt_nom_logradouro").val();
-    const complementoTexto = $("#txt_complemento_endereco").val();
-    const bairroTexto = $("#txt_nom_bairro").val();
-    const cidadeTexto = $("#txt_nom_cidade").val();
-    const estadoTexto = $("#txt_sgl_uf").val();
-
-    let ementaFinal = "Solicitando ";
-    if (orgaoTexto) {
-        ementaFinal += artigoParaOrgao(orgaoTexto) + orgaoTexto + " ";
-    }
-    if (assuntoTexto && assuntoTexto !== 'Selecione') {
-        ementaFinal += `a realização de ${assuntoTexto.toLowerCase().trim()} `;
-    }
-    if (logradouroTexto) {
-        ementaFinal += `na ${logradouroTexto}`;
-        if (complementoTexto) ementaFinal += `, ${complementoTexto}`;
-        if (bairroTexto) ementaFinal += `, ${bairroTexto}`;
-        if (cidadeTexto && estadoTexto) {
-            ementaFinal += `, neste município de ${cidadeTexto}/${estadoTexto}.`;
-        } else if (cidadeTexto) {
-            ementaFinal += `, neste município de ${cidadeTexto}.`;
-        } else {
-            ementaFinal += ".";
-        }
-    } else {
-        ementaFinal += ".";
-    }
-    campo.val(ementaFinal);
-}
-
-// CEP via APIs externas (ViaCEP + fallback BrasilAPI)
-function bloquearCamposEnderecoReadonly() {
-    $("#txt_nom_logradouro, #txt_nom_bairro, #txt_nom_cidade, #txt_sgl_uf")
-        .prop('readonly', true)
-        .addClass('bg-light')
-        .removeClass('border-warning');
-}
-
-function liberarCamposEnderecoEdicao() {
-    $("#txt_nom_logradouro, #txt_nom_bairro, #txt_nom_cidade, #txt_sgl_uf")
-        .prop('readonly', false)
-        .removeClass('bg-light')
-        .addClass('border-warning');
-}
-
-// Função chamada ao buscar CEP
-function buscarCEP() {
-    const cepRaw = $("#txt_num_cep").val();
-    const cep = cepRaw.replace(/\D/g, '');
-    const desTipoProposicao = $("#lst_tip_proposicao option:selected").text();
-    const cepInput = $("#txt_num_cep");
-    const cepDisplay = $("#loadingCEP");
-    const limparCampos = () => {
-        $("#txt_nom_logradouro").val('');
-        $("#txt_nom_bairro").val('');
-        $("#txt_nom_cidade").val('');
-        $("#txt_sgl_uf").val('');
-    };
-
-    if (desTipoProposicao !== 'Indicação') return;
-
-    if (cep === '00000000') {
-        liberarCamposEnderecoEdicao();
-        cepDisplay.html('');
-        limparCampos();
-        return;
-    }
-    if (cep.length !== 8) {
-        bloquearCamposEnderecoReadonly();
-        cepDisplay.html('');
-        limparCampos();
-        return;
-    }
-
-    bloquearCamposEnderecoReadonly();
-    cepInput.prop('disabled', true);
-    cepDisplay.html(`
-        <div class="d-flex align-items-center text-muted">
-            <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-            Buscando endereço...
-        </div>
-    `);
-    limparCampos();
-
-    // Consulta no ViaCEP
-    fetch(`https://viacep.com.br/ws/${cep}/json/`)
-        .then(resp => resp.json())
-        .then(data => {
-            if (!data.erro) {
-                $("#txt_nom_logradouro").val(data.logradouro || '');
-                $("#txt_nom_bairro").val(data.bairro || '');
-                $("#txt_nom_cidade").val(data.localidade || '');
-                $("#txt_sgl_uf").val(data.uf || '');
-                gerarEmentaAutomatica(true);
-                cepDisplay.html('');
-            } else {
-                // Tenta BrasilAPI
-                fetch(`https://brasilapi.com.br/api/cep/v2/${cep}`)
-                    .then(resp2 => resp2.json())
-                    .then(data2 => {
-                        if (!data2.errors && !data2.message) {
-                            $("#txt_nom_logradouro").val(data2.street || '');
-                            $("#txt_nom_bairro").val(data2.neighborhood || '');
-                            $("#txt_nom_cidade").val(data2.city || '');
-                            $("#txt_sgl_uf").val(data2.state || '');
-                            gerarEmentaAutomatica(true);
-                            cepDisplay.html('');
-                        } else {
-                            throw new Error("CEP não encontrado.");
-                        }
-                    })
-                    .catch(() => {
-                        limparCampos();
-                        cepDisplay.html(`
-                            <div class="text-danger">
-                                <i class="fas fa-exclamation-circle me-1"></i>
-                                CEP não encontrado
-                            </div>
-                        `);
-                        showConfirmModal(
-                            "CEP não encontrado",
-                            "Não foi possível encontrar o endereço para o CEP informado. Verifique o número digitado."
-                        );
-                    });
-            }
-        })
-        .catch(() => {
-            limparCampos();
-            cepDisplay.html(`
-                <div class="text-danger">
-                    <i class="fas fa-exclamation-circle me-1"></i>
-                    Erro ao consultar CEP
-                </div>
-            `);
-            showConfirmModal(
-                "Erro na consulta",
-                "Ocorreu um erro ao consultar o CEP. Tente novamente."
-            );
-        })
-        .finally(() => {
-            cepInput.prop('disabled', false);
-        });
-}
-
-function buscarEmentaMateria() {
-    const tipoMateria = $("#lst_tip_id_basica").val();
-    const numero = $("#txt_num_ident_basica").val();
-    const ano = $("#txt_ano_ident_basica").val();
-    const $botao = $("#postjq");
-    const $descricao = $("#txt_descricao");
-
-    if (!tipoMateria || !numero || !ano) return;
-
-    $.ajax({
-        url: 'ementa_buscar_pysc',
-        type: 'POST',
-        data: {
-            lst_tip_proposicao: $("#lst_tip_proposicao option:selected").text(),
-            lst_tip_id_basica: tipoMateria,
-            txt_num_ident_basica: numero,
-            txt_ano_ident_basica: ano
-        },
-        dataType: 'json',
-        beforeSend: function() {
-            $botao.prop('disabled', true)
-                  .html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Carregando...');
-        },
-        success: function(response) {
-            if (Array.isArray(response) && response.length > 0 && response[0].ementa) {
-                $descricao.val(response[0].ementa).trigger('input').focus();
-            } else {
-                showConfirmModal(
-                    "Ementa não encontrada",
-                    "Não foi possível localizar a ementa da matéria informada. Verifique os dados e tente novamente."
-                );
-            }
-        },
-        error: function() {
-            showConfirmModal(
-                "Erro na consulta",
-                "Ocorreu um erro ao tentar buscar a ementa da matéria. Tente novamente mais tarde."
-            );
-        },
-        complete: function() {
-            $botao.prop('disabled', false).html('<i class="fas fa-search"></i> Obter Ementa');
-        }
-    });
-}
-
-function observacao_salvar(formObservacao) {
-    const editor = tinymce.get('txa_txt_observacao');
-    if (!editor) {
-        const textarea = formObservacao.txa_txt_observacao;
-        if (textarea.value.trim() === "" || textarea.value.trim() === "<p></p>") {
-            $(textarea).addClass('is-invalid');
-            $(textarea).closest('.form-group').append('<div class="invalid-feedback">A observação não pode estar vazia</div>');
-            return false;
-        }
-    } else {
-        let content = editor.getContent();
-        content = content.replace(/<p>&nbsp;<\/p>/g, '');
-        content = content.replace(/<p><br><\/p>/g, '');
-        content = content.replace(/<p><\/p>/g, '');
-        content = content.replace(/<div><br><\/div>/g, '');
-        content = content.trim();
-        if (content === "") {
-            const editorContainer = $(editor.editorContainer);
-            editorContainer.addClass('is-invalid');
-            editorContainer.closest('.form-group').append('<div class="invalid-feedback">A observação não pode estar vazia</div>');
-            editor.focus(); 
-            return false;
-        }
-        editor.save();
-    }
-    formObservacao.submit();
-}
-
-// STATUS visual
-function atualizarStatusProposicao(status) {
-    const steps = {
-        draft: { icon: 'fa-edit', label: 'Em elaboração', class: 'draft' },
-        submitted: { icon: 'fa-paper-plane', label: 'Enviada', class: 'submitted' },
-        received: { icon: 'fa-check-circle', label: 'Incorporada', class: 'received' },
-        returned: { icon: 'fa-times-circle', label: 'Devolvida', class: 'returned' }
-    };
-    $('.step').removeClass('active completed');
-    if (status === 'draft') { $('.step-draft').addClass('active'); }
-    else if (status === 'submitted') { $('.step-draft').addClass('completed'); $('.step-submitted').addClass('active'); }
-    else if (status === 'received') { $('.step-draft, .step-submitted').addClass('completed'); $('.step-received').addClass('active'); }
-    else if (status === 'returned') { $('.step-draft').addClass('completed'); $('.step-submitted').addClass('completed'); $('.step-returned').addClass('active'); }
-}
-
-// Drag & Drop e lista de PDFs anexos
-$(document).ready(function() {
-    var ehAutor = <dtml-if expr="AUTHENTICATED_USER.has_role(['Autor'])">true<dtml-else>false</dtml-if>;
-
-    // Máscara para o campo CEP
-    $('#txt_num_cep').inputmask('99999-999');
-    // Busca endereço e pode atualizar a ementa (se for Indicação)
-    $("#txt_num_cep").on('blur', buscarCEP);
-
-    const cepAtual = $('#txt_num_cep').val() ? $('#txt_num_cep').val().replace(/\D/g, '') : '';
-    if (cepAtual && cepAtual.length === 8 && cepAtual !== '00000000') {
-        bloquearCamposEnderecoReadonly();
-    } else if (cepAtual === '00000000') {
-        liberarCamposEnderecoEdicao();
-    } else {
-        bloquearCamposEnderecoReadonly();
-    }
-
-    // Ajuste: se campo txt_descricao veio preenchido do banco, NÃO sobrescreve!
-    // Só gera a ementa automática na abertura se o campo estiver vazio
-    if ($("#lst_tip_proposicao option:selected").text() === "Indicação") {
-        const ementaSalva = $("#txt_descricao").val().trim();
-        
-        // Só gera automaticamente se não houver texto salvo
-        if (!ementaSalva) {
-            gerarEmentaAutomatica();
-        } else {
-            // Mantém o texto do banco e ajusta a interface
-            $("#txt_descricao").prop('readonly', true).addClass('bg-light');
-            $("#badgeEmentaAuto").hide();
-            $("#helpEmentaAuto").hide();
-            $("#avisoEmentaManual").hide();
-        }
-    }
-
-    // Libera edição de endereço se CEP zerado (só exibe interface, não mexe na ementa)
-    let cepInicial = $('#txt_num_cep').val() ? $('#txt_num_cep').val().replace(/\D/g, '') : '';
-    if (cepInicial === '00000000') {
-        liberarEmentaPorCepZerado();
-    } else {
-        bloquearEmentaAutomatica();
-    }
-
-    // Atualiza ementa apenas quando assunto, complemento, logradouro ou bairro mudam (e só para Indicação)
-    $("#lst_assunto, #txt_complemento_endereco").on('change', function() {
-        if ($("#lst_tip_proposicao option:selected").text() === "Indicação") {
-            gerarEmentaAutomatica(true);
-        }
-    });
-   $("#txt_nom_logradouro, #txt_complemento_endereco, #txt_nom_bairro, #txt_nom_cidade, #txt_sgl_uf").on('input change', function() {
-       if ($("#lst_tip_proposicao option:selected").text() === "Indicação") {
-        gerarEmentaAutomatica(true);
-       }
-   });
-
-    // Quando CEP perde o foco, pode liberar endereço manual OU atualizar ementa se não for zerado
-    $("#txt_num_cep").on('blur', function() {
-        let cep = $(this).val().replace(/\D/g, '');
-        if (cep === "00000000") {
-            liberarEmentaPorCepZerado();
-        } else {
-            bloquearEmentaAutomatica();
-            if ($("#lst_tip_proposicao option:selected").text() === "Indicação") {
-                gerarEmentaAutomatica(true);
-            }
-        }
-    });
-
-    // Buscar ementa da matéria vinculada
-    $("#postjq").on('click', buscarEmentaMateria);
-
-    // Inicialização do select2 para selects estilizados
-    $('.select2').select2({
-        width: '100%',
-        dropdownParent: $(this).closest('.modal').length ? $(this).closest('.modal') : $('body')
-    });
-
-    // Reajusta select2 no resize
-    $(window).on('resize', function() {
-       $('#lst_assunto').select2('close');
-       $('#lst_assunto').select2({ width: '100%' });
-    });
-
-
-    // Tooltips bootstrap
-    $('[data-bs-toggle="tooltip"]').tooltip();
-
-    // Ajuste de textareas auto-resize
-    $('.auto-resize').each(function() {
-        this.style.height = 'auto';
-        this.style.height = (this.scrollHeight) + 'px';
-    }).on('input', function() {
-        this.style.height = 'auto';
-        this.style.height = (this.scrollHeight) + 'px';
-    });
-
-    // Só chama a função se existir o formulário e o select
-    if (document.proposicao_form && document.proposicao_form.lst_tip_proposicao) {
-        tipo_proposicao_mudou();
-    }
-
-    // Carregar modelos de proposição já existentes, se houver cod_proposicao
-    <dtml-if "_.has_key('cod_proposicao')">
-        const tipoProposicaoInicial = $("#lst_tip_proposicao").val();
-        const tipoPropoIdInicial = tipoProposicaoInicial ? tipoProposicaoInicial.split("&")[0] : '';
-        if (tipoPropoIdInicial) {
-            $.ajax({
-                url: 'modelos_carregar_pysc',
-                type: 'post',
-                data: { svalue: tipoPropoIdInicial },
-                dataType: 'json',
-                success: function(response) {
-                    response.forEach(function(item) {
-                        $("#lst_modelo").append(`<option data-path="${item.path_arquivo}" value="${item.id_arquivo}">${item.titulo_arquivo}</option>`);
-                    });
-                    <dtml-if "_.has_key('nom_modelo')">
-                        $(`#lst_modelo option[data-path*="<dtml-var nom_modelo>"]`).prop('selected', true);
-                    </dtml-if>
-                }
-            });
-        }
-    </dtml-if>
-
-    // Drag & drop de anexos PDF (mantido conforme original)
-    let uploadedFiles = [];
-    const dropArea = $('#pdf-drop-area');
-    const fileInput = $('#file_nom_anexo_input');
-    const browseLink = $('#pdf-browse-link');
-    const previewDiv = $('#pdf-upload-preview');
-    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => { dropArea.on(eventName, preventDefaults); });
-    ['dragenter', 'dragover'].forEach(eventName => { dropArea.on(eventName, highlight); });
-    ['dragleave', 'drop'].forEach(eventName => { dropArea.on(eventName, unhighlight); });
-    dropArea.on('drop', handleDrop);
-    browseLink.on('click', (e) => { e.preventDefault(); fileInput.click(); });
-    fileInput.on('change', handleFiles);
-
-    function preventDefaults(e) { e.preventDefault(); e.stopPropagation(); }
-    function highlight() { dropArea.addClass('highlight'); }
-    function unhighlight() { dropArea.removeClass('highlight'); }
-    function handleDrop(e) {
-        const dt = e.originalEvent.dataTransfer;
-        const files = dt.files;
-        handleFiles({ target: { files } });
-    }
-    function handleFiles(event) {
-        const files = event.target.files;
-        previewDiv.empty();
-        if (files.length > 0) {
-            uploadedFiles = [...uploadedFiles, ...Array.from(files)];
-            renderFileList();
-        }
-    }
-    function renderFileList() {
-        previewDiv.empty();
-        if (uploadedFiles.length > 0) {
-            const fileList = $('<ul class="list-group mb-3"></ul>');
-            uploadedFiles.forEach((file, index) => {
-                if (file.type !== 'application/pdf') {
-                    previewDiv.append(`
-                        <div class="alert alert-warning alert-dismissible fade show small mb-2" role="alert">
-                            <i class="fas fa-exclamation-triangle me-2"></i>
-                            O arquivo "${file.name}" não é um PDF válido e será ignorado.
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </div>
-                    `);
-                    return;
-                }
-                const listItem = $(`
-                    <li class="list-group-item d-flex justify-content-between align-items-center" data-index="${index}">
-                        <div>
-                            <i class="fas fa-file-pdf text-danger me-2"></i>
-                            ${file.name} (${(file.size / 1024).toFixed(2)} KB)
-                        </div>
-                        <button type="button" class="btn btn-sm btn-outline-danger remove-file">
-                            <i class="far fa-trash-alt"></i>
-                        </button>
-                    </li>
-                `);
-                fileList.append(listItem);
-            });
-            previewDiv.append(fileList);
-            updateFileInput();
-            $('.remove-file').on('click', function() {
-                const index = $(this).closest('li').data('index');
-                removeFile(index);
-            });
-        }
-    }
-    function removeFile(index) {
-        uploadedFiles.splice(index, 1);
-        renderFileList();
-    }
-    function updateFileInput() {
-        const dataTransfer = new DataTransfer();
-        uploadedFiles.forEach(file => {
-            if (file.type === 'application/pdf') {
-                dataTransfer.items.add(file);
-            }
-        });
-        fileInput[0].files = dataTransfer.files;
-    }
-
-    // Status da proposição (etapas)
-    <dtml-if dat_recebimento>
-        atualizarStatusProposicao('received');
-    <dtml-elif expr="dat_envio and not dat_devolucao">
-        atualizarStatusProposicao('submitted');
-    <dtml-elif expr="dat_devolucao">
-        atualizarStatusProposicao('returned');
-    <dtml-else>
-        atualizarStatusProposicao('draft');
-    </dtml-if>
-
-    // Atualiza form de acordo com tipo de proposição inicial
-    tipo_proposicao_mudou();
-
-    $('#revisaoform').on('submit', function(e) {
-        e.preventDefault();
-        showConfirmModal(
-            "Confirmação de Envio",
-            "Confirma o envio da proposição para revisão?",
-            () => this.submit(),
-            null
-        );
-    });
-	$('#myform').on('submit', function(e) {
-	    // Se quiser validar Bootstrap 5 antes:
-	    if (!this.checkValidity()) {
-		e.preventDefault();
-		e.stopPropagation();
-		$(this).addClass('was-validated');
-		return;
-	    }
-	    e.preventDefault();
-	    showConfirmModal(
-		"Confirmação de Devolução",
-		"<p>Confirma a devolução da proposição ao Autor?</p>",
-		() => this.submit(), // confirma
-		null, // cancelar
-		'btn-danger', // cor do botão confirmar
-		'Sim, devolver' // texto do botão confirmar
-	    );
-	});
-});
-
-
-// Imagem: upload e exclusão AJAX
-// Função para upload AJAX de imagens (proposição)
-async function enviarImagem(containerDiv, idx) {
-    const fileInput = containerDiv.querySelector(`[name="file_nom_image${idx}"]`);
-    const previewDiv = document.getElementById(`foto${idx}-preview`);
-    const file = fileInput.files[0];
-    if (!file) return;
-
-    // Pré-visualização imediata da imagem
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        previewDiv.innerHTML = `
-            <div class="text-center position-relative">
-                <img class="img-fluid img-thumbnail mb-2" src="${e.target.result}" style="max-height: 300px;">
-                <div class="position-absolute top-0 start-50 translate-middle-x mt-2">
-                    <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">Carregando...</span>
-                    </div>
-                </div>
-            </div>
-        `;
-    };
-    reader.readAsDataURL(file);
-
-    // Sempre pega cod_proposicao do formulário principal!
-    const codProposicao = document.querySelector('input[name="cod_proposicao"]').value;
-    const indice = containerDiv.querySelector('input[name="indice"]').value;
-
-    const formData = new FormData();
-    formData.append('cod_proposicao', codProposicao);
-    formData.append('indice', indice);
-    formData.append(fileInput.name, file);
-
-    try {
-        const response = await fetch('salvar-imagem-proposicao', { method: 'POST', body: formData });
-        if (!response.ok) throw new Error('Erro no servidor');
-        const html = await response.text();
-        previewDiv.innerHTML = html;
-
-        const toastHtml = `
-            <div class="toast show align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true" style="position: fixed; bottom: 80px; right: 20px; z-index: 1100;">
-                <div class="d-flex">
-                    <div class="toast-body">
-                        <i class="fas fa-check-circle me-2"></i> Fotografia salva com sucesso!
-                    </div>
-                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-                </div>
-            </div>
-        `;
-        $('body').append(toastHtml);
-        setTimeout(() => $('.toast').remove(), 3000);
-    } catch (err) {
-        previewDiv.innerHTML = `
-            <div class="alert alert-danger mb-2">
-                <i class="fas fa-exclamation-triangle me-2"></i> Erro ao enviar imagem: ${err.message}
-            </div>
-            <button class="btn btn-sm btn-secondary" onclick="location.reload()">
-                <i class="fas fa-sync-alt me-1"></i> Tentar novamente
-            </button>
-        `;
-    }
-}
-
-// Função AJAX para exclusão de imagem (com confirmação)
-function excluirImagem(idx) {
-    // Busca o cod_proposicao do formulário principal
-    const codProposicao = document.querySelector('input[name="cod_proposicao"]').value;
-    showConfirmModal(
-        "Excluir Imagem",
-        "Deseja realmente excluir esta imagem? Esta ação não pode ser desfeita.",
-        async function() {
-            const previewDiv = document.getElementById(`foto${idx}-preview`);
-            previewDiv.innerHTML = `
-                <div class="text-center p-3">
-                    <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">Carregando...</span>
-                    </div>
-                </div>
-            `;
-            try {
-                const response = await fetch('excluir-imagem-proposicao', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: `cod_proposicao=${encodeURIComponent(codProposicao)}&indice=${encodeURIComponent(idx)}`
-                });
-                if (!response.ok) throw new Error('Erro no servidor');
-                // Renderiza novamente o bloco de upload vazio
-                previewDiv.innerHTML = `
-                    <div id="uploadForm${idx}" enctype="multipart/form-data">
-                        <input type="hidden" name="indice" value="${idx}">
-                        <input type="file" name="file_nom_image${idx}" class="form-control" accept="image/*" onchange="enviarImagem(this.parentElement, ${idx})">
-                        <div class="help-text mt-2">Formatos suportados: JPG, PNG, GIF. Tamanho máximo: 5MB.</div>
-                    </div>
-                `;
-                const toastHtml = `
-                    <div class="toast show align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true" style="position: fixed; bottom: 80px; right: 20px; z-index: 1100;">
-                        <div class="d-flex">
-                            <div class="toast-body">
-                                <i class="fas fa-check-circle me-2"></i> Fotografia excluída com sucesso!
-                            </div>
-                            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-                        </div>
-                    </div>
-                `;
-                $('body').append(toastHtml);
-                setTimeout(() => $('.toast').remove(), 3000);
-            } catch (err) {
-                previewDiv.innerHTML = `
-                    <div class="alert alert-danger">
-                        <i class="fas fa-exclamation-triangle me-2"></i> Erro ao excluir imagem: ${err.message}
-                    </div>
-                    <button class="btn btn-sm btn-secondary" onclick="location.reload()">
-                        <i class="fas fa-sync-alt me-1"></i> Tentar novamente
-                    </button>
-                `;
-            }
-        }
-    );
-}
 </script>
-
 <dtml-var footer_html>

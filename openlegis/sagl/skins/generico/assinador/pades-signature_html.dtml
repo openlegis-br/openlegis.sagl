@@ -276,79 +276,87 @@
         <script src="<dtml-var portal_url>/generico/assinador/static/js/lacuna-web-pki-2.12.0.min.js"></script>
         <script src="<dtml-var portal_url>/generico/assinador/static/js/lacuna-web-pki-client.js"></script>
 
-        <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            // Validação do formulário de opções visuais
-            const visualForm = document.getElementById("visual_page_option_form");
-            if (visualForm) {
-                const radios = visualForm.querySelectorAll('input[name="visual_page_option"]');
-                const submitBtn = visualForm.querySelector('button[type="submit"]');
-                const errorFeedback = visualForm.querySelector('.invalid-feedback');
-                const cards = visualForm.querySelectorAll('.card-radio');
+	<script>
+	document.addEventListener("DOMContentLoaded", function() {
+	    // Validação do formulário de opções visuais
+	    const visualForm = document.getElementById("visual_page_option_form");
+	    if (visualForm) {
+		const radios = visualForm.querySelectorAll('input[name="visual_page_option"]');
+		const submitBtn = visualForm.querySelector('button[type="submit"]');
+		const errorFeedback = visualForm.querySelector('.invalid-feedback');
+		const cards = visualForm.querySelectorAll('.card-radio');
 
-                function validateSelection() {
-                    const selected = visualForm.querySelector('input[name="visual_page_option"]:checked');
-                    const isValid = !!selected;
-                    
-                    if (isValid) {
-                        errorFeedback.style.display = 'none';
-                        cards.forEach(card => card.classList.remove('card-radio-invalid'));
-                    } else {
-                        errorFeedback.style.display = 'flex';
-                        cards.forEach(card => card.classList.add('card-radio-invalid'));
-                    }
-                    
-                    return isValid;
-                }
+		function validateSelection() {
+		    const selected = visualForm.querySelector('input[name="visual_page_option"]:checked');
+		    const isValid = !!selected;
 
-                radios.forEach(radio => {
-                    radio.addEventListener('change', function() {
-                        cards.forEach(card => card.classList.remove('border-primary'));
-                        if (this.checked) {
-                            this.closest('.card-radio').classList.add('border-primary');
-                        }
-                        validateSelection();
-                    });
-                });
+		    if (isValid) {
+		        if (errorFeedback) errorFeedback.style.display = 'none';
+		        cards.forEach(card => card.classList.remove('card-radio-invalid'));
+		    } else {
+		        if (errorFeedback) errorFeedback.style.display = 'flex';
+		        cards.forEach(card => card.classList.add('card-radio-invalid'));
+		    }
 
-                visualForm.addEventListener('submit', function(e) {
-                    if (!validateSelection()) {
-                        e.preventDefault();
-                        cards.forEach(card => {
-                            card.classList.add('animate__animated', 'animate__headShake');
-                            card.addEventListener('animationend', () => {
-                                card.classList.remove('animate__animated', 'animate__headShake');
-                            });
-                        });
-                    }
-                });
+		    return isValid;
+		}
 
-                cards.forEach(card => {
-                    card.addEventListener('mouseenter', function() {
-                        if (!this.querySelector('input').checked) {
-                            this.classList.add('border-primary', 'shadow-sm');
-                        }
-                    });
-                    
-                    card.addEventListener('mouseleave', function() {
-                        if (!this.querySelector('input').checked) {
-                            this.classList.remove('border-primary', 'shadow-sm');
-                        }
-                    });
-                });
-            }
+		radios.forEach(radio => {
+		    radio.addEventListener('change', function() {
+		        cards.forEach(card => card.classList.remove('border-primary'));
+		        if (this.checked) {
+		            // Proteção: só adiciona classe se encontrar o .card-radio
+		            let cardEl = this.closest('.card-radio');
+		            if (cardEl) cardEl.classList.add('border-primary');
+		        }
+		        validateSelection();
+		    });
+		});
 
-            // Configuração dos botões de assinatura
-            const signButton = document.getElementById("signButton");
-            if (signButton) {
-                signButton.addEventListener('mouseenter', function() {
-                    this.querySelector('i').classList.add('fa-beat');
-                });
-                
-                signButton.addEventListener('mouseleave', function() {
-                    this.querySelector('i').classList.remove('fa-beat');
-                });
-            }
-        });
-        </script>
+		visualForm.addEventListener('submit', function(e) {
+		    if (!validateSelection()) {
+		        e.preventDefault();
+		        cards.forEach(card => {
+		            card.classList.add('animate__animated', 'animate__headShake');
+		            card.addEventListener('animationend', () => {
+		                card.classList.remove('animate__animated', 'animate__headShake');
+		            }, { once: true });
+		        });
+		    }
+		});
+
+		// Hover seguro nas cards
+		cards.forEach(card => {
+		    card.addEventListener('mouseenter', function() {
+		        // Protege: só mexe se input existir!
+		        const input = this.querySelector('input');
+		        if (input && !input.checked) {
+		            this.classList.add('border-primary', 'shadow-sm');
+		        }
+		    });
+		    card.addEventListener('mouseleave', function() {
+		        const input = this.querySelector('input');
+		        if (input && !input.checked) {
+		            this.classList.remove('border-primary', 'shadow-sm');
+		        }
+		    });
+		});
+	    }
+
+	    // Configuração dos botões de assinatura
+	    const signButton = document.getElementById("signButton");
+	    if (signButton) {
+		signButton.addEventListener('mouseenter', function() {
+		    const icon = this.querySelector('i');
+		    if (icon) icon.classList.add('fa-beat');
+		});
+
+		signButton.addEventListener('mouseleave', function() {
+		    const icon = this.querySelector('i');
+		    if (icon) icon.classList.remove('fa-beat');
+		});
+	    }
+	});
+	</script>
+
 <dtml-var footer_html>

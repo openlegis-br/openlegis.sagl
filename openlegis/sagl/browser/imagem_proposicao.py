@@ -15,6 +15,19 @@ def obter_valor_simples(valor):
         valor = valor[0]
     return valor
 
+def resize_image(imagem, largura_max=600):
+    """Redimensiona imagem para largura máxima especificada, mantendo proporção."""
+    if imagem.width > largura_max:
+        proporcao = largura_max / float(imagem.width)
+        nova_altura = int(imagem.height * proporcao)
+        # Compatibilidade com Pillow antigo/novo
+        try:
+            resample = Image.Resampling.LANCZOS
+        except AttributeError:
+            resample = Image.LANCZOS
+        return imagem.resize((largura_max, nova_altura), resample)
+    return imagem
+
 class SalvarImagemProposicaoView(grok.View):
     grok.context(Interface)
     grok.name('salvar-imagem-proposicao')
@@ -28,7 +41,6 @@ class SalvarImagemProposicaoView(grok.View):
         indice = obter_valor_simples(request.get('indice'))
 
         arquivo = None
-        # Procura pelo arquivo enviado com prefixo 'file_nom_image'
         for key in request.form.keys():
             if key.startswith('file_nom_image'):
                 arquivo = request.form.get(key)
@@ -37,7 +49,6 @@ class SalvarImagemProposicaoView(grok.View):
                 break
 
         if not cod_proposicao or not indice or not arquivo:
-            # Retorna o form para reenvio com mensagem de erro
             return f"""
             <div class="alert alert-danger mb-2">Parâmetros ausentes ou arquivo inválido.</div>
             <form id="uploadForm{indice or ''}" enctype="multipart/form-data">
@@ -49,20 +60,21 @@ class SalvarImagemProposicaoView(grok.View):
 
         try:
             id_imagem = f"{cod_proposicao}_image_{indice}.jpg"
+            # Certifica-se que está lendo o arquivo corretamente
+            if hasattr(arquivo, 'read'):
+                arquivo.seek(0)
+                imagem = Image.open(arquivo)
+            else:
+                raise ValueError("Arquivo de imagem não encontrado")
 
-            imagem = Image.open(arquivo)
-            # Converte para RGB caso tenha canal alfa para evitar erro ao salvar JPEG
+            # Remove canal alfa se necessário
             if imagem.mode in ("RGBA", "LA"):
                 imagem = imagem.convert("RGB")
 
-            # Redimensiona largura para 600px mantendo proporção
-            if imagem.width > 600:
-                proporcao = 600 / float(imagem.width)
-                nova_altura = int(imagem.height * proporcao)
-                imagem = imagem.resize((600, nova_altura), Image.Resampling.LANCZOS)
+            imagem = resize_image(imagem, 600)
 
             buffer = io.BytesIO()
-            imagem.save(buffer, format='JPEG')
+            imagem.save(buffer, format='JPEG', quality=90)
             buffer.seek(0)
 
             sapl = getToolByName(context, 'sapl_documentos')
@@ -76,23 +88,21 @@ class SalvarImagemProposicaoView(grok.View):
 
             logger.info(f"Imagem salva: {id_imagem}")
 
-            # Retorna preview da imagem com botão para exclusão
+            # Retorna preview da imagem
             return f"""
             <div class="text-center">
-              <img class="img-fluid img-thumbnail mb-2" src="{context.portal_url()}/sapl_documentos/proposicao/{id_imagem}?{DateTime().timeTime()}" style="max-height: 500px;">
+              <img class="img-fluid img-thumbnail mb-2" src="{context.portal_url()}/sapl_documentos/proposicao/{id_imagem}?{int(DateTime().timeTime())}" style="max-height: 500px;">
               <div class="text-center">
-                <button type="button" class="btn btn-sm btn-danger text-white" onclick="excluirImagem({indice}, '{cod_proposicao}')"><i class="far fa-trash-alt me-1"></i> Excluir</button>
+                <button type="button" class="btn btn-sm btn-danger text-white" onclick="ProposicaoManager.excluirImagem({indice}, '{cod_proposicao}')"><i class="far fa-trash-alt me-1"></i> Excluir</button>
               </div>
             </div>
             """
         except Exception as e:
             logger.error(f"Erro ao processar imagem: {e}")
-            # Forçar transformar índice para string segura
             indice_str = str(indice) if indice else ''
             cod_prop_str = str(cod_proposicao) if cod_proposicao else ''
-
             return f"""
-            <div class="alert alert-danger mb-2">Parâmetros ausentes ou arquivo inválido.</div>
+            <div class="alert alert-danger mb-2">Erro ao processar imagem: {e}</div>
             <form id="uploadForm{indice_str}" enctype="multipart/form-data">
               <input type="hidden" name="cod_proposicao" value="{cod_prop_str}">
               <input type="hidden" name="indice" value="{indice_str}">
@@ -125,7 +135,6 @@ class ExcluirImagemProposicaoView(grok.View):
                 pasta.manage_delObjects([id_imagem])
                 logger.info(f"[Proposição {cod_proposicao}] Imagem {id_imagem} excluída.")
 
-            # Retorna form para novo upload após exclusão
             return f"""
               <form id="uploadForm{indice}" enctype="multipart/form-data">
                 <input type="hidden" name="cod_proposicao" value="{cod_proposicao}">

@@ -442,9 +442,6 @@ body {
                 </dtml-if>
                 
                 <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia', 'Revisor Proposicao', 'Chefia Revisão']) and not prop_recebida and not prop_devolvida">
-                    <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#devolucaoModal">
-                        <i class="fas fa-angle-double-left me-1"></i> Devolver
-                    </button>
                     <div class="modal fade" id="devolucaoModal" tabindex="-1" aria-labelledby="devolucaoModalLabel" aria-hidden="true">
                       <div class="modal-dialog">
                         <div class="modal-content text-start">
@@ -453,11 +450,14 @@ body {
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                           </div>
                           <div class="modal-body">
-                           <form id="myform" role="form" method="post" action="proposicao_salvar_devolucao_proc">
+                           <form id="myform" class="needs-validation" method="post" action="proposicao_salvar_devolucao_proc" novalidate>
                                <div class="row">
                                    <div class="col-12 mb-3">
-                                   <label class="form-label required" for="txt_justif_devolucao">Justificativa</label>
+                                   <label class="form-label required" for="txt_justif_devolucao">Motivo da Devolução</label>
                                    <textarea class="form-control" name="txt_justif_devolucao" rows="2" required></textarea>
+                                   <div class="invalid-feedback">
+                                     O motivo da devolução é obrigatório.
+                                   </div>
                                    <input type="hidden" name="cod_proposicao" value="<dtml-var cod_proposicao missing>" />
                                    </div>
                                </div>
@@ -680,7 +680,7 @@ body {
                                      <input class="form-control" type="text" value="Em Revisão" readonly>
                                 <dtml-elif dat_devolucao>
                                      <input class="form-control" type="text" value="Devolvida" readonly>
-                                <dtml-elif expr="(dat_envio and not dat_recebimento) and tem_pdf_assinado">
+                                <dtml-elif expr="(dat_envio and not dat_recebimento) and _.has_key('tem_pdf_assinado')">
                                      <input class="form-control" type="text" value="Em análise" readonly>
                                 <dtml-else>
                                     <input class="form-control" type="text" value="Em elaboração" readonly>
@@ -696,7 +696,7 @@ body {
             <div class="card card-proposicao mb-4 border-danger">
                 <div class="card-header bg-danger bg-opacity-10">
                     <h5 class="card-title mb-0 text-danger">
-                        <i class="fas fa-exclamation-triangle me-2"></i> Justificativa de Devolução
+                        <i class="fas fa-exclamation-triangle me-2"></i> Motivo de Devolução
                     </h5>
                 </div>
                 <div class="card-body">
@@ -1201,8 +1201,12 @@ body {
 						</button>
 					    </dtml-if>
 					</dtml-if>
-					<dtml-if expr="not prop_recebida and not prop_devolvida">
-					
+					<dtml-if expr="AUTHENTICATED_USER.has_role(['Autor', 'Assessor Parlamentar'])  and not prop_enviada and not prop_devolvida">
+					    <button type="button" class="btn btn-outline-danger" onclick="excluir_arquivo('assinado')"
+						    data-bs-toggle="tooltip" title="Remover o PDF assinado digitalmente">
+						<i class="far fa-trash-alt me-1"></i> Excluir PDF
+					    </button>
+					<dtml-elif expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia', 'Revisor Proposicao', 'Chefia Revisão']) and not prop_recebida and not prop_devolvida">
 					    <button type="button" class="btn btn-outline-danger" onclick="excluir_arquivo('assinado')"
 						    data-bs-toggle="tooltip" title="Remover o PDF assinado digitalmente">
 						<i class="far fa-trash-alt me-1"></i> Excluir PDF
@@ -1282,7 +1286,7 @@ body {
 						    </dtml-if>
 						</dtml-if>
 					    </dtml-if>
-					    <dtml-if expr="not prop_recebida and not prop_devolvida">
+					      <dtml-if expr="AUTHENTICATED_USER.has_role(['Autor', 'Assessor Parlamentar']) and not prop_enviada and not prop_devolvida">
 						<button type="button" class="btn btn-outline-danger" onclick="excluir_arquivo('pdf')" data-bs-toggle="tooltip" title="Remover o arquivo PDF">
 						    <i class="far fa-trash-alt me-1"></i> Excluir PDF
 						</button>
@@ -1417,15 +1421,20 @@ body {
 
     <div class="sticky-footer-actions bg-light p-3 border-top">
       <div class="container-fluid d-flex justify-content-end gap-2">
-        <dtml-if expr="AUTHENTICATED_USER.has_role(['Autor', 'Assessor Parlamentar']) and not prop_enviada and not prop_devolvida">
+        <dtml-if expr="AUTHENTICATED_USER.has_role(['Autor', 'Assessor Parlamentar']) and not prop_enviada and not prop_devolvida and not _.has_key('tem_pdf_assinado')">
             <button class="btn btn-primary btn-action" type="button" onClick="campos_criticar(document.proposicao_form)">
                 <i class="fas fa-save me-1"></i> Salvar Proposição
             </button>
-        <dtml-elif expr="(AUTHENTICATED_USER.has_role(['Operador','Operador Materia', 'Revisor Proposicao', 'Chefia Revisão']) and not prop_recebida and not prop_devolvida)">
+        <dtml-elif expr="(AUTHENTICATED_USER.has_role(['Operador','Operador Materia', 'Revisor Proposicao', 'Chefia Revisão']) and not prop_recebida and not prop_devolvida) and not _.has_key('tem_pdf_assinado')">
             <button class="btn btn-primary btn-action" type="button" onClick="campos_criticar(document.proposicao_form)">
                 <i class="fas fa-save me-1"></i> Salvar Proposição
             </button>
         </dtml-if>
+       <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia', 'Revisor Proposicao', 'Chefia Revisão']) and not prop_recebida and not prop_devolvida">
+           <button type="button" class="btn btn-danger btn-action" data-bs-toggle="modal" data-bs-target="#devolucaoModal">
+               <i class="fas fa-angle-double-left me-1"></i> Devolver ao Autor
+           </button>
+       </dtml-if>
 
         <dtml-if expr="usr_eh_autor and AUTHENTICATED_USER.has_role(['Autor', 'Assessor Parlamentar'])">
             <dtml-if expr="_.has_key('cod_proposicao')">
@@ -1806,7 +1815,8 @@ function carregarAssuntos(tipoProposicaoId) {
 }
 
 // Função padrão para confirmação modal (reutilizável)
-function showConfirmModal(title, body, confirmAction, cancelAction) {
+// Função reutilizável para modal de confirmação Bootstrap 5
+function showConfirmModal(title, body, confirmAction, cancelAction, confirmBtnClass = 'btn-primary', confirmText = 'Confirmar') {
     const modalId = 'confirmationModal-' + Math.random().toString(36).substring(2, 9);
     const modalHtml = `
         <div class="modal fade" id="${modalId}" tabindex="-1" aria-labelledby="${modalId}Label" aria-hidden="true">
@@ -1817,27 +1827,37 @@ function showConfirmModal(title, body, confirmAction, cancelAction) {
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
                     </div>
                     <div class="modal-body">
-                        <p>${body}</p>
+                        ${body}
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="button" class="btn btn-primary" id="confirmActionButton">Confirmar</button>
+                        <button type="button" class="btn ${confirmBtnClass}" id="${modalId}-confirm-btn" autofocus>${confirmText}</button>
                     </div>
                 </div>
             </div>
         </div>
     `;
-    $(`#${modalId}`).remove();
+    $(`#${modalId}`).remove(); // Evita duplicidade
     $('body').append(modalHtml);
-    const modal = new bootstrap.Modal(document.getElementById(modalId));
+    const $modal = $(`#${modalId}`);
+    const modal = new bootstrap.Modal($modal[0]);
     modal.show();
-    $(`#${modalId} #confirmActionButton`).one('click', function() {
+
+    // Foco automático no botão confirmar (acessibilidade)
+    $modal.on('shown.bs.modal', function() {
+        $(`#${modalId}-confirm-btn`).trigger('focus');
+    });
+
+    // Clique em Confirmar
+    $(`#${modalId}-confirm-btn`).one('click', function() {
         if (typeof confirmAction === 'function') confirmAction();
         modal.hide();
     });
-    $(`#${modalId}`).on('hidden.bs.modal', function() {
+
+    // Ao fechar, executa o cancelAction e remove do DOM
+    $modal.on('hidden.bs.modal', function() {
         if (typeof cancelAction === 'function') cancelAction();
-        $(this).remove();
+        $modal.remove();
     });
 }
 
@@ -2102,54 +2122,111 @@ function excluirAnexoAjax(anexo, cod_proposicao) {
 
 function proposicao_excluir() {
     const codProposicao = '<dtml-var cod_proposicao missing>';
+    if (!codProposicao || codProposicao === "missing") {
+        showConfirmModal(
+            "Erro",
+            "Não foi possível identificar a proposição para exclusão.",
+            null,
+            null
+        );
+        return;
+    }
     showConfirmModal(
         "Excluir Proposição",
         "Deseja realmente excluir esta proposição? Esta ação não poderá ser desfeita.",
         function() {
             location.href = `proposicao_excluir_proc?cod_proposicao=${codProposicao}`;
-        }
+        },
+        null,
+        'btn-danger',
+        'Sim, excluir'
     );
 }
 
 function proposicao_enviar() {
     const codProposicao = '<dtml-var cod_proposicao missing>';
+    if (!codProposicao || codProposicao === "missing") {
+        showConfirmModal(
+            "Erro",
+            "Não foi possível identificar a proposição para envio.",
+            null,
+            null
+        );
+        return;
+    }
     showConfirmModal(
         "Confirmação de Envio",
         "Ao enviar esta proposição, ela será encaminhada para análise e não poderá ser editada. Confirma o envio?",
         function() {
             location.href = `proposicao_enviar_proc?hdn_cod_proposicao=${codProposicao}`;
-        }
+        },
+        null,
+        'btn-success',
+        'Sim, enviar'
     );
 }
 
 function proposicao_solicitar_devolucao() {
     const codProposicao = '<dtml-var cod_proposicao missing>';
+    if (!codProposicao || codProposicao === "missing") {
+        showConfirmModal(
+            "Erro",
+            "Não foi possível identificar a proposição para solicitar devolução.",
+            null,
+            null
+        );
+        return;
+    }
     showConfirmModal(
         "Solicitar Devolução",
         "Deseja solicitar a devolução desta proposição para edição? Esta solicitação precisará ser aprovada.",
         function() {
             location.href = `proposicao_solicitar_devolucao_proc?cod_proposicao=${codProposicao}`;
-        }
+        },
+        null,
+        'btn-danger',
+        'Solicitar Devolução'
     );
 }
 
 function proposicao_retomar() {
     const codProposicao = '<dtml-var cod_proposicao missing>';
+    if (!codProposicao || codProposicao === "missing") {
+        showConfirmModal(
+            "Erro",
+            "Não foi possível identificar a proposição para reaproveitamento.",
+            null,
+            null
+        );
+        return;
+    }
     showConfirmModal(
         "Reaproveitar Proposição",
         "Deseja reaproveitar esta proposição devolvida? Todas as informações serão mantidas.",
         function() {
             location.href = `proposicao_retomar_proc?cod_proposicao=${codProposicao}`;
-        }
+        },
+        null,
+        'btn-success',
+        'Reaproveitar Proposição'
     );
 }
 
 // Incorporar (caso cod_proposicao)
 <dtml-if cod_proposicao>
-    <dtml-let cod_doc="pysc.proposicao_calcular_checksum_pysc(cod_proposicao)">
+  <dtml-let cod_doc="pysc.proposicao_calcular_checksum_pysc(cod_proposicao)">
     function proposicao_incorporar() {
         const portalUrl = '<dtml-var portal_url>';
         const codDoc = '<dtml-var cod_doc missing>';
+        if (!codDoc || codDoc === "missing") {
+            showConfirmModal(
+                "Erro",
+                "Não foi possível identificar a proposição para incorporação.",
+                null,
+                null
+            );
+            return;
+        }
         showConfirmModal(
             "Incorporar Proposição",
             "Confirma a incorporação desta proposição ao sistema? Esta ação não poderá ser desfeita.",
@@ -2158,7 +2235,7 @@ function proposicao_retomar() {
             }
         );
     }
-    </dtml-let>
+  </dtml-let>
 </dtml-if>
 
 // Troca de tipo de proposição e assuntos relacionados
@@ -2452,22 +2529,31 @@ function buscarCEP() {
     const cepRaw = $("#txt_num_cep").val();
     const cep = cepRaw.replace(/\D/g, '');
     const desTipoProposicao = $("#lst_tip_proposicao option:selected").text();
+    const cepInput = $("#txt_num_cep");
+    const cepDisplay = $("#loadingCEP");
+    const limparCampos = () => {
+        $("#txt_nom_logradouro").val('');
+        $("#txt_nom_bairro").val('');
+        $("#txt_nom_cidade").val('');
+        $("#txt_sgl_uf").val('');
+    };
 
     if (desTipoProposicao !== 'Indicação') return;
 
     if (cep === '00000000') {
         liberarCamposEnderecoEdicao();
+        cepDisplay.html('');
+        limparCampos();
         return;
     }
     if (cep.length !== 8) {
         bloquearCamposEnderecoReadonly();
+        cepDisplay.html('');
+        limparCampos();
         return;
     }
-    // Sempre bloqueia ao tentar buscar!
-    bloquearCamposEnderecoReadonly();
 
-    const cepInput = $("#txt_num_cep");
-    const cepDisplay = $("#loadingCEP");
+    bloquearCamposEnderecoReadonly();
     cepInput.prop('disabled', true);
     cepDisplay.html(`
         <div class="d-flex align-items-center text-muted">
@@ -2475,75 +2561,77 @@ function buscarCEP() {
             Buscando endereço...
         </div>
     `);
-    $("#txt_nom_logradouro").val('');
-    $("#txt_nom_bairro").val('');
-    $("#txt_nom_cidade").val('');
-    $("#txt_sgl_uf").val('');
+    limparCampos();
+
+    // Consulta no ViaCEP
     fetch(`https://viacep.com.br/ws/${cep}/json/`)
-      .then(resp => resp.json())
-      .then(data => {
-        if (!data.erro) {
-            $("#txt_nom_logradouro").val(data.logradouro || '');
-            $("#txt_nom_bairro").val(data.bairro || '');
-            $("#txt_nom_cidade").val(data.localidade || '');
-            $("#txt_sgl_uf").val(data.uf || '');
-            cepDisplay.text('');
-            gerarEmentaAutomatica(true);
-        } else {
-            fetch(`https://brasilapi.com.br/api/cep/v2/${cep}`)
-                .then(resp2 => resp2.json())
-                .then(data2 => {
-                    if (!data2.errors && !data2.message) {
-                        $("#txt_nom_logradouro").val(data2.street || '');
-                        $("#txt_nom_bairro").val(data2.neighborhood || '');
-                        $("#txt_nom_cidade").val(data2.city || '');
-                        $("#txt_sgl_uf").val(data2.state || '');
-                        cepDisplay.text('');
-                        gerarEmentaAutomatica(true);
-                    } else {
-                        throw new Error("CEP não encontrado.");
-                    }
-                })
-                .catch(() => {
-                    cepDisplay.html(`
-                        <div class="text-danger">
-                            <i class="fas fa-exclamation-circle me-1"></i>
-                            CEP não encontrado
-                        </div>
-                    `);
-                    showConfirmModal(
-                        "CEP não encontrado",
-                        "Não foi possível encontrar o endereço para o CEP informado. Verifique o número digitado.",
-                        null,
-                        null
-                    );
-                });
-        }
-      })
-      .catch(() => {
-        cepDisplay.html(`
-            <div class="text-danger">
-                <i class="fas fa-exclamation-circle me-1"></i>
-                Erro ao consultar CEP
-            </div>
-        `);
-        showConfirmModal(
-            "Erro na consulta",
-            "Ocorreu um erro ao consultar o CEP. Tente novamente.",
-            null,
-            null
-        );
-      })
-      .finally(() => {
-        cepInput.prop('disabled', false);
-      });
+        .then(resp => resp.json())
+        .then(data => {
+            if (!data.erro) {
+                $("#txt_nom_logradouro").val(data.logradouro || '');
+                $("#txt_nom_bairro").val(data.bairro || '');
+                $("#txt_nom_cidade").val(data.localidade || '');
+                $("#txt_sgl_uf").val(data.uf || '');
+                gerarEmentaAutomatica(true);
+                cepDisplay.html('');
+            } else {
+                // Tenta BrasilAPI
+                fetch(`https://brasilapi.com.br/api/cep/v2/${cep}`)
+                    .then(resp2 => resp2.json())
+                    .then(data2 => {
+                        if (!data2.errors && !data2.message) {
+                            $("#txt_nom_logradouro").val(data2.street || '');
+                            $("#txt_nom_bairro").val(data2.neighborhood || '');
+                            $("#txt_nom_cidade").val(data2.city || '');
+                            $("#txt_sgl_uf").val(data2.state || '');
+                            gerarEmentaAutomatica(true);
+                            cepDisplay.html('');
+                        } else {
+                            throw new Error("CEP não encontrado.");
+                        }
+                    })
+                    .catch(() => {
+                        limparCampos();
+                        cepDisplay.html(`
+                            <div class="text-danger">
+                                <i class="fas fa-exclamation-circle me-1"></i>
+                                CEP não encontrado
+                            </div>
+                        `);
+                        showConfirmModal(
+                            "CEP não encontrado",
+                            "Não foi possível encontrar o endereço para o CEP informado. Verifique o número digitado."
+                        );
+                    });
+            }
+        })
+        .catch(() => {
+            limparCampos();
+            cepDisplay.html(`
+                <div class="text-danger">
+                    <i class="fas fa-exclamation-circle me-1"></i>
+                    Erro ao consultar CEP
+                </div>
+            `);
+            showConfirmModal(
+                "Erro na consulta",
+                "Ocorreu um erro ao consultar o CEP. Tente novamente."
+            );
+        })
+        .finally(() => {
+            cepInput.prop('disabled', false);
+        });
 }
 
 function buscarEmentaMateria() {
     const tipoMateria = $("#lst_tip_id_basica").val();
     const numero = $("#txt_num_ident_basica").val();
     const ano = $("#txt_ano_ident_basica").val();
+    const $botao = $("#postjq");
+    const $descricao = $("#txt_descricao");
+
     if (!tipoMateria || !numero || !ano) return;
+
     $.ajax({
         url: 'ementa_buscar_pysc',
         type: 'POST',
@@ -2555,30 +2643,27 @@ function buscarEmentaMateria() {
         },
         dataType: 'json',
         beforeSend: function() {
-            $("#postjq").prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Carregando...');
+            $botao.prop('disabled', true)
+                  .html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Carregando...');
         },
         success: function(response) {
-            if (response.length > 0 && response[0].ementa) {
-                $("#txt_descricao").val(response[0].ementa);
+            if (Array.isArray(response) && response.length > 0 && response[0].ementa) {
+                $descricao.val(response[0].ementa).trigger('input').focus();
             } else {
                 showConfirmModal(
                     "Ementa não encontrada",
-                    "Não foi possível localizar a ementa da matéria informada. Verifique os dados e tente novamente.",
-                    null,
-                    null
+                    "Não foi possível localizar a ementa da matéria informada. Verifique os dados e tente novamente."
                 );
             }
         },
         error: function() {
             showConfirmModal(
                 "Erro na consulta",
-                "Ocorreu um erro ao tentar buscar a ementa da matéria. Tente novamente mais tarde.",
-                null,
-                null
+                "Ocorreu um erro ao tentar buscar a ementa da matéria. Tente novamente mais tarde."
             );
         },
         complete: function() {
-            $("#postjq").prop('disabled', false).text('Obter Ementa');
+            $botao.prop('disabled', false).html('<i class="fas fa-search"></i> Obter Ementa');
         }
     });
 }
@@ -2851,15 +2936,24 @@ $(document).ready(function() {
             null
         );
     });
-    $('#myform').on('submit', function(e) {
-        e.preventDefault();
-        showConfirmModal(
-            "Confirmação de Devolução",
-            "Confirma a devolução da proposição ao Autor?",
-            () => this.submit(),
-            null
-        );
-    });
+	$('#myform').on('submit', function(e) {
+	    // Se quiser validar Bootstrap 5 antes:
+	    if (!this.checkValidity()) {
+		e.preventDefault();
+		e.stopPropagation();
+		$(this).addClass('was-validated');
+		return;
+	    }
+	    e.preventDefault();
+	    showConfirmModal(
+		"Confirmação de Devolução",
+		"<p>Confirma a devolução da proposição ao Autor?</p>",
+		() => this.submit(), // confirma
+		null, // cancelar
+		'btn-danger', // cor do botão confirmar
+		'Sim, devolver' // texto do botão confirmar
+	    );
+	});
 });
 
 

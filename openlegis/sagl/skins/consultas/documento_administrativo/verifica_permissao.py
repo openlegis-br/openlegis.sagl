@@ -28,6 +28,8 @@ elif REQUEST['AUTHENTICATED_USER'].has_role(['Authenticated']):
       for documento in context.zsql.documento_administrativo_obter_zsql(cod_documento=cod_documento, ind_excluido=0):
           if context.zsql.usuario_tipo_documento_obter_zsql(tip_documento=documento.tip_documento, cod_usuario=cod_usuario, ind_excluido=0):
              can_view = True 
+          elif context.zsql.usuario_consulta_tipo_documento_obter_zsql(tip_documento=documento.tip_documento, cod_usuario=cod_usuario, ind_excluido=0):
+             can_view = True 
       # pedido de assinatura
       if context.zsql.assinatura_documento_obter_zsql(codigo=cod_documento, tipo_doc='documento', cod_usuario=cod_usuario, ind_excluido=0):
          can_view = True
@@ -51,4 +53,3 @@ elif REQUEST['AUTHENTICATED_USER'].has_role(['Authenticated']):
              can_view = True
 
 return can_view
-

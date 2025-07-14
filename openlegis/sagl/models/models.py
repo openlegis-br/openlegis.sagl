@@ -578,6 +578,7 @@ class TipoDocumentoAdministrativo(Base):
     documento_administrativo: Mapped[List['DocumentoAdministrativo']] = relationship('DocumentoAdministrativo', uselist=True, back_populates='tipo_documento_administrativo')
     documento_acessorio_administrativo: Mapped[List['DocumentoAcessorioAdministrativo']] = relationship('DocumentoAcessorioAdministrativo', uselist=True, back_populates='tipo_documento_administrativo')
     usuario_tipo_documento: Mapped[List['UsuarioTipoDocumento']] = relationship('UsuarioTipoDocumento', uselist=True, back_populates='tipo_documento_administrativo')
+    usuario_consulta_documento: Mapped[List['UsuarioConsultaDocumento']] = relationship('UsuarioConsultaDocumento', back_populates='tipo_documento_administrativo')
 
 
 class TipoEmenda(Base):
@@ -1317,6 +1318,7 @@ class Usuario(Base):
     funcionario: Mapped[List['Funcionario']] = relationship('Funcionario', uselist=True, back_populates='usuario')
     usuario_peticionamento: Mapped[List['UsuarioPeticionamento']] = relationship('UsuarioPeticionamento', uselist=True, back_populates='usuario')
     usuario_tipo_documento: Mapped[List['UsuarioTipoDocumento']] = relationship('UsuarioTipoDocumento', uselist=True, back_populates='usuario')
+    usuario_consulta_documento: Mapped[List['UsuarioConsultaDocumento']] = relationship('UsuarioConsultaDocumento', back_populates='usuario')
     peticao: Mapped[List['Peticao']] = relationship('Peticao', uselist=True, back_populates='usuario')
     proposicao: Mapped[List['Proposicao']] = relationship('Proposicao', uselist=True, back_populates='usuario')
     tramitacao: Mapped[List['Tramitacao']] = relationship('Tramitacao', uselist=True, foreign_keys='[Tramitacao.cod_usuario_dest]', back_populates='usuario')
@@ -2105,6 +2107,27 @@ class UsuarioTipoDocumento(Base):
     usuario: Mapped['Usuario'] = relationship('Usuario', back_populates='usuario_tipo_documento')
     tipo_documento_administrativo: Mapped['TipoDocumentoAdministrativo'] = relationship('TipoDocumentoAdministrativo', back_populates='usuario_tipo_documento')
 
+
+class UsuarioConsultaDocumento(Base):
+    __tablename__ = 'usuario_consulta_documento'
+    __table_args__ = (
+        ForeignKeyConstraint(['cod_usuario'], ['usuario.cod_usuario'], ondelete='RESTRICT', onupdate='RESTRICT', name='usuario_consulta_documento_ibfk_1'),
+        ForeignKeyConstraint(['tip_documento'], ['tipo_documento_administrativo.tip_documento'], ondelete='RESTRICT', onupdate='RESTRICT', name='usuario_consulta_documento_ibfk_2'),
+        Index('idx_usuario', 'cod_usuario'),
+        Index('idx_tip_documento', 'tip_documento'),
+        {'mysql_charset': 'utf8mb4', 'mysql_collate': 'utf8mb4_unicode_ci'}
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    cod_usuario: Mapped[int] = mapped_column(Integer, nullable=False)
+    tip_documento: Mapped[int] = mapped_column(Integer, nullable=False)
+    ind_excluido: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("'0'")
+    )
+
+    # Relationships - CHANGED 'tipo_documento' to 'tipo_documento_administrativo'
+    usuario: Mapped['Usuario'] = relationship('Usuario', back_populates='usuario_consulta_documento')
+    tipo_documento_administrativo: Mapped['TipoDocumentoAdministrativo'] = relationship('TipoDocumentoAdministrativo', back_populates='usuario_consulta_documento'
+    )
 
 class Afastamento(Base):
     __tablename__ = 'afastamento'

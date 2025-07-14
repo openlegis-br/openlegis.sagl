@@ -1,0 +1,9 @@
+ALTER TABLE proposicao
+ADD COLUMN txt_justificativa TEXT,
+ADD COLUMN num_cep VARCHAR(9),
+ADD COLUMN nom_logradouro VARCHAR(200),
+ADD COLUMN nom_bairro VARCHAR(100),
+ADD COLUMN nom_cidade VARCHAR(100),
+ADD COLUMN sgl_uf VARCHAR(2),
+ADD COLUMN complemento_endereco VARCHAR(100),
+ADD COLUMN dat_criacao TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP;

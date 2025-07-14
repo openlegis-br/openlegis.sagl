@@ -1,54 +1,81 @@
 <dtml-var header_html>
- 
- <div class="row mb-2">
-      <div class="col-12 col-md-8 align-self-center">
-        <h1 class="firstHeading font-size-18">Tipos de Documento Administrativo</h1>
-      </div>
-      <div class="col-12 col-md-4 text-start text-md-end">
-         <div class="btn-group d-print-none ">
-          <a class="btn btn-primary d-print-none mb-3" href="tipo_documento_administrativo_form"><i class="fa fa-fw fa-plus"></i> Incluir Tipo</a>
-         </div>
-      </div>
- </div>
 
-<dtml-in expr="zsql.tipo_documento_administrativo_obter_zsql(ind_excluido=0)">
-    <dtml-if sequence-start>
-       <table class="table">
-         <thead class="table-light">
-          <tr> 
-            <th width="15%">Sigla</th>
-            <th>Tipo de Documento</th>
-            <th width="15%">Natureza</th>
-            <th width="20%">Acesso Público</th>
-          </tr>
-         </thead>
-    </dtml-if sequence-start>
-          <tr>
-            <td>
-              <a href="tipo_documento_administrativo_mostrar_proc?tip_documento=<dtml-var tip_documento>">
-               <dtml-var sgl_tipo_documento></a></td>
-            <td><dtml-var des_tipo_documento></td>
-            <td>
-             <dtml-if expr="tip_natureza=='A'">
-                Acessório
-             <dtml-elif expr="tip_natureza=='P'">
-                Principal
-             </dtml-if>
-           </td>
-            <td>
-            <dtml-if expr="ind_publico == 1">
-              Sim
-            <dtml-elif expr="ind_publico == 0">
-              Não
-            </dtml-if>
-            </td>
-          </tr>
-    <dtml-if sequence-end>
-        </table>
-    </dtml-if sequence-end>
-<dtml-else>
-   <p>Nenhum tipo de documento cadastrado.</p>
-</dtml-in>
+<div class="">
+  <!-- Cabeçalho e Botão de Inclusão -->
+  <div class="row mb-4 align-items-center">
+    <div class="col-12 col-md-8">
+      <h1 class="firstHeading font-size-18 h3 mb-0 text-gray-800">
+        <i class="fas fa-file-alt me-2"></i>Tipos de Documento Administrativo
+      </h1>
+    </div>
+    <div class="col-12 col-md-4 text-end">
+      <a href="tipo_documento_administrativo_form" class="btn btn-primary">
+        <i class="fas fa-plus me-2"></i>Incluir Tipo
+      </a>
+    </div>
+  </div>
+
+  <!-- Tabela de Documentos -->
+  <div class="card shadow mb-4">
+    <div class="card-body">
+      <dtml-in expr="zsql.tipo_documento_administrativo_obter_zsql(ind_excluido=0)">
+        <dtml-if sequence-start>
+          <div class="table-responsive">
+            <table class="table table-hover">
+              <thead class="table-light">
+                <tr>
+                  <th width="15%" class="align-middle">Sigla</th>
+                  <th class="align-middle">Tipo de Documento</th>
+                  <th width="15%" class="align-middle">Natureza</th>
+                  <th width="15%" class="align-middle">Acesso Público</th>
+                  <th width="10%" class="text-center align-middle">Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+        </dtml-if sequence-start>
+        
+                <tr>
+                  <td class="align-middle">
+                    <a href="tipo_documento_administrativo_mostrar_proc?tip_documento=<dtml-var tip_documento>" 
+                       class="text-primary text-decoration-none">
+                      <dtml-var sgl_tipo_documento>
+                    </a>
+                  </td>
+                  <td class="align-middle"><dtml-var des_tipo_documento></td>
+                  <td class="align-middle">
+                    <span class="badge bg-<dtml-if expr="tip_natureza=='P'">primary<dtml-else>secondary</dtml-if>">
+                      <dtml-if expr="tip_natureza=='A'">Acessório</dtml-if>
+                      <dtml-if expr="tip_natureza=='P'">Principal</dtml-if>
+                    </span>
+                  </td>
+                  <td class="align-middle">
+                    <span class="badge bg-<dtml-if expr="ind_publico==1">success<dtml-else>danger</dtml-if>">
+                      <dtml-if expr="ind_publico==1">Sim</dtml-if>
+                      <dtml-if expr="ind_publico==0">Não</dtml-if>
+                    </span>
+                  </td>
+                  <td class="text-center align-middle">
+                    <a href="tipo_documento_administrativo_mostrar_proc?tip_documento=<dtml-var tip_documento>" 
+                       class="btn btn-sm btn-outline-primary" title="Editar">
+                      <i class="fas fa-edit"></i>
+                    </a>
+                  </td>
+                </tr>
+        
+        <dtml-if sequence-end>
+              </tbody>
+            </table>
+          </div>
+        </dtml-if sequence-end>
+        
+        <dtml-else>
+          <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i>Nenhum tipo de documento cadastrado.
+          </div>
+      </dtml-in>
+    </div>
+  </div>
+</div>
 
 <dtml-var js_slot>
 <dtml-var footer_html>

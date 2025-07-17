@@ -5,7 +5,10 @@ from z3c.saconfig import named_scoped_session
 from openlegis.sagl.models.models import (
     MateriaLegislativa, TipoMateriaLegislativa, Tramitacao,
     Autoria, Relatoria, Parlamentar, UnidadeTramitacao, StatusTramitacao,
-    Comissao, Orgao, Autor, TipoAutor, Bancada, Legislatura
+    Comissao, Orgao, Autor, TipoAutor, Bancada, Legislatura, TipoFimRelatoria,
+    DocumentoAcessorio, TipoDocumento, Substitutivo, Emenda, TipoEmenda, Parecer,
+    RegimeTramitacao, QuorumVotacao, TipoNormaJuridica, TipoSituacaoNorma,
+    NormaJuridica
 )
 from sqlalchemy.orm import joinedload, aliased
 from sqlalchemy import case, func, and_, or_, cast, String, select, text, asc, desc
@@ -298,9 +301,11 @@ class MateriaLegislativaView(grok.View):
 
         return query
 
-    def _apply_ordering(self, query):
+    def _apply_ordering(self, query, session):
         ordem_campo = self.request.get('ordem_campo')
         ordem_direcao = self.request.get('ordem_direcao', 'asc')
+
+        # Ordenação por Número (default: ano desc, depois número)
         if ordem_campo == 'num_ident_basica':
             order_logic = [
                 MateriaLegislativa.ano_ident_basica,
@@ -310,6 +315,45 @@ class MateriaLegislativaView(grok.View):
                 query = query.order_by(desc(order_logic[0]), desc(order_logic[1]))
             else:
                 query = query.order_by(asc(order_logic[0]), asc(order_logic[1]))
+
+        # Ordenação apenas pelo Ano (ano e número)
+        elif ordem_campo == 'ano_ident_basica':
+            order_by_ano = asc(MateriaLegislativa.ano_ident_basica) if ordem_direcao == 'asc' else desc(MateriaLegislativa.ano_ident_basica)
+            order_by_num = asc(func.lpad(cast(MateriaLegislativa.num_ident_basica, String), 6, '0')) if ordem_direcao == 'asc' else desc(func.lpad(cast(MateriaLegislativa.num_ident_basica, String), 6, '0'))
+            query = query.order_by(order_by_ano, order_by_num)
+
+        # Ordenação por Autoria (primeiro autor alfabético)
+        elif ordem_campo == 'autores':
+            nome_autor_expr = _build_autor_name_expression()
+            from sqlalchemy.orm import aliased
+            sub_autor = (
+                session.query(
+                    Autoria.cod_materia,
+                    nome_autor_expr.label('nom_autor')
+                )
+                .join(Autor, Autoria.cod_autor == Autor.cod_autor)
+                .join(TipoAutor, Autor.tip_autor == TipoAutor.tip_autor)
+                .outerjoin(Parlamentar, Autor.cod_parlamentar == Parlamentar.cod_parlamentar)
+                .outerjoin(Comissao, Autor.cod_comissao == Comissao.cod_comissao)
+                .outerjoin(Bancada, Autor.cod_bancada == Bancada.cod_bancada)
+                .outerjoin(Legislatura, Bancada.num_legislatura == Legislatura.num_legislatura)
+                .filter(Autoria.ind_excluido == 0, Autor.ind_excluido == 0)
+                .order_by(
+                    Autoria.cod_materia,
+                    Autoria.ind_primeiro_autor.desc(),
+                    nome_autor_expr
+                )
+            ).subquery('primeiro_autor')
+            query = query.outerjoin(
+                sub_autor, MateriaLegislativa.cod_materia == sub_autor.c.cod_materia
+            )
+            order_col = sub_autor.c.nom_autor
+            if ordem_direcao == 'desc':
+                query = query.order_by(desc(order_col))
+            else:
+                query = query.order_by(asc(order_col))
+
+        # Ordenação por outros campos textuais
         elif ordem_campo in ['des_tipo_materia', 'txt_ementa', 'dat_apresentacao']:
             coluna_ordenacao = {
                 'des_tipo_materia': TipoMateriaLegislativa.des_tipo_materia,
@@ -317,6 +361,8 @@ class MateriaLegislativaView(grok.View):
                 'dat_apresentacao': MateriaLegislativa.dat_apresentacao
             }[ordem_campo]
             query = query.order_by(desc(coluna_ordenacao) if ordem_direcao == 'desc' else asc(coluna_ordenacao))
+
+        # Ordenação padrão
         else:
             ordem = self.request.get('rd_ordem', '1')
             order_logic = [
@@ -327,6 +373,7 @@ class MateriaLegislativaView(grok.View):
                 query = query.order_by(asc(order_logic[0]), asc(order_logic[1]))
             else:
                 query = query.order_by(desc(order_logic[0]), desc(order_logic[1]))
+
         return query
 
     def _format_results(self, results_raw):
@@ -613,7 +660,7 @@ class MateriaLegislativaView(grok.View):
             stats = {tipo: contagem for tipo, contagem in stats_results}
 
             # Aplicar ordenação para a consulta final paginada/exportada
-            ordered_query = self._apply_ordering(query)
+            ordered_query = self._apply_ordering(query, session)
             formato = self.request.get('formato', '').lower()
             if formato in ('csv', 'excel', 'pdf'):
                 is_anonymous = getToolByName(self.context, 'portal_membership').isAnonymousUser()
@@ -694,8 +741,12 @@ class TramitacaoMateriaView(grok.View):
             Parlamentar_Destino = aliased(Parlamentar, name='par_destino')
 
             # Expressões CASE para nomes de origem e destino
-            nome_origem_expr = self._get_nome_unidade_expr(UT_Origem, Comissao_Origem, Orgao_Origem, Parlamentar_Origem).label('nome_origem')
-            nome_destino_expr = self._get_nome_unidade_expr(UT_Destino, Comissao_Destino, Orgao_Destino, Parlamentar_Destino).label('nome_destino')
+            nome_origem_expr = self._get_nome_unidade_expr(
+                UT_Origem, Comissao_Origem, Orgao_Origem, Parlamentar_Origem
+            ).label('nome_origem')
+            nome_destino_expr = self._get_nome_unidade_expr(
+                UT_Destino, Comissao_Destino, Orgao_Destino, Parlamentar_Destino
+            ).label('nome_destino')
 
             # Construção da Query
             query = session.query(
@@ -717,8 +768,8 @@ class TramitacaoMateriaView(grok.View):
                 Tramitacao.cod_materia == cod_materia,
                 Tramitacao.ind_excluido == 0
              ).order_by(
-                asc(Tramitacao.dat_tramitacao),
-                asc(Tramitacao.cod_tramitacao)
+                desc(Tramitacao.dat_tramitacao),
+                desc(Tramitacao.cod_tramitacao)
              )
 
             results = query.all()
@@ -809,3 +860,286 @@ class StatusTramitacaoView(grok.View):
             logger.error(f"Erro em StatusTramitacaoView: {str(e)}", exc_info=True)
             self.request.response.setStatus(500)
             return json.dumps({'error': 'Erro ao buscar status de tramitação', 'details': str(e)})
+
+
+class MateriaDetalheView(grok.View):
+    """Endpoint detalhado para uma matéria legislativa."""
+    grok.context(Interface)
+    grok.name('materia_detalhe_json')
+    grok.require('zope2.View')
+
+    def render(self):
+        session = Session()
+        try:
+            cod_materia = self.request.get('cod_materia')
+            if not cod_materia or not str(cod_materia).isdigit():
+                self.request.response.setStatus(400)
+                return json.dumps({'error': 'Parâmetro `cod_materia` inválido ou ausente.'})
+
+            cod_materia = int(cod_materia)
+
+            # ALIASES EXCLUSIVOS (SEM REPETIÇÃO)
+            Materia = aliased(MateriaLegislativa, name='materia')
+            TipoMat = aliased(TipoMateriaLegislativa, name='tipo_materia')
+            Tram = aliased(Tramitacao, name='tram')
+            StatTram = aliased(StatusTramitacao, name='stat_tram')
+            UT_Dest = aliased(UnidadeTramitacao, name='ut_dest')
+            Org_Dest = aliased(Orgao, name='org_dest')
+            Com_Dest = aliased(Comissao, name='com_dest')
+            Parl_Dest = aliased(Parlamentar, name='parl_dest')
+            RegTram = aliased(RegimeTramitacao, name='reg_tram')
+            QuorumVot = aliased(QuorumVotacao, name='quorum_vot')
+
+            # 1. DADOS PRINCIPAIS + ÚLTIMA TRAMITAÇÃO + regime/quórum
+            materia = session.query(
+                Materia, TipoMat, Tram, StatTram, RegTram, QuorumVot
+            ).\
+                join(TipoMat, Materia.tip_id_basica == TipoMat.tip_materia).\
+                outerjoin(
+                    Tram, and_(
+                        Materia.cod_materia == Tram.cod_materia,
+                        Tram.ind_excluido == 0,
+                        Tram.ind_ult_tramitacao == 1
+                    )
+                ).\
+                outerjoin(StatTram, Tram.cod_status == StatTram.cod_status).\
+                outerjoin(RegTram, Materia.cod_regime_tramitacao == RegTram.cod_regime_tramitacao).\
+                outerjoin(QuorumVot, Materia.tip_quorum == QuorumVot.cod_quorum).\
+                filter(Materia.cod_materia == cod_materia).\
+                first()
+            if not materia:
+                self.request.response.setStatus(404)
+                return json.dumps({'error': 'Matéria não encontrada.'})
+
+            materia_obj, tipo_obj, tram_obj, stat_tram_obj, regime_obj, quorum_obj = materia
+
+            # 2. AUTORES
+            Autoria_aut = aliased(Autoria, name='autoria_aut')
+            Autor_aut = aliased(Autor, name='autor_aut')
+            TipoAutor_aut = aliased(TipoAutor, name='tipo_autor_aut')
+            Parlamentar_aut_lj = aliased(Parlamentar, name='parlamentar_aut_lj')
+            Comissao_aut_lj = aliased(Comissao, name='comissao_aut_lj')
+            Bancada_aut_lj = aliased(Bancada, name='bancada_aut_lj')
+            Legislatura_aut_lj = aliased(Legislatura, name='legislatura_aut_lj')
+
+            autor_nome_expr = case(
+                (TipoAutor_aut.des_tipo_autor == 'Parlamentar', Parlamentar_aut_lj.nom_parlamentar),
+                (TipoAutor_aut.des_tipo_autor == 'Bancada',
+                    func.concat(
+                        Bancada_aut_lj.nom_bancada, " (",
+                        func.date_format(Legislatura_aut_lj.dat_inicio, '%Y'), "-",
+                        func.date_format(Legislatura_aut_lj.dat_fim, '%Y'), ")"
+                    )
+                ),
+                (TipoAutor_aut.des_tipo_autor == 'Comissao', Comissao_aut_lj.nom_comissao),
+                (True, Autor_aut.nom_autor)
+            ).label('nome')
+
+            autores = session.query(autor_nome_expr).\
+                select_from(Autoria_aut).\
+                join(Autor_aut, Autoria_aut.cod_autor == Autor_aut.cod_autor).\
+                join(TipoAutor_aut, Autor_aut.tip_autor == TipoAutor_aut.tip_autor).\
+                outerjoin(Parlamentar_aut_lj, Autor_aut.cod_parlamentar == Parlamentar_aut_lj.cod_parlamentar).\
+                outerjoin(Comissao_aut_lj, Autor_aut.cod_comissao == Comissao_aut_lj.cod_comissao).\
+                outerjoin(Bancada_aut_lj, Autor_aut.cod_bancada == Bancada_aut_lj.cod_bancada).\
+                outerjoin(Legislatura_aut_lj, Bancada_aut_lj.num_legislatura == Legislatura_aut_lj.num_legislatura).\
+                filter(
+                    Autoria_aut.cod_materia == cod_materia,
+                    Autoria_aut.ind_excluido == 0,
+                    Autor_aut.ind_excluido == 0
+                ).\
+                order_by(Autoria_aut.ind_primeiro_autor.desc(), autor_nome_expr).\
+                all()
+            autores = [a.nome for a in autores]
+
+            # 3. TODAS RELATORIAS
+            Relatoria_rel = aliased(Relatoria, name='relatoria_rel')
+            Parlamentar_rel = aliased(Parlamentar, name='parlamentar_rel')
+            Comissao_rel = aliased(Comissao, name='comissao_rel')
+            relatorias_q = session.query(
+                Relatoria_rel, Parlamentar_rel, Comissao_rel
+            ).outerjoin(
+                Parlamentar_rel, Relatoria_rel.cod_parlamentar == Parlamentar_rel.cod_parlamentar
+            ).outerjoin(
+                Comissao_rel, Relatoria_rel.cod_comissao == Comissao_rel.cod_comissao
+            ).filter(
+                Relatoria_rel.cod_materia == cod_materia,
+                Relatoria_rel.ind_excluido == 0
+            ).order_by(
+                Relatoria_rel.num_ordem
+            ).all()
+            relatorias_data = [
+                {
+                    'cod_relatoria': r.cod_relatoria,
+                    'relator': parl.nom_parlamentar if parl else None,
+                    'comissao': com.nom_comissao if com else None,
+                    'dat_desig_relator': r.dat_desig_relator.strftime('%d/%m/%Y') if r.dat_desig_relator else None
+                }
+                for r, parl, com in relatorias_q
+            ]
+            # para retrocompatibilidade, manter também o atual:
+            relatoria_obj, parlamentar_rel, comissao_rel = relatorias_q[0] if relatorias_q else (None, None, None)
+            nome_relator = parlamentar_rel.nom_parlamentar if parlamentar_rel else None
+            nome_comissao_rel = comissao_rel.nom_comissao if comissao_rel else None
+
+            # 4. SUBSTITUTIVOS
+            substitutivos = session.query(Substitutivo).filter(
+                Substitutivo.cod_materia == cod_materia,
+                Substitutivo.ind_excluido == 0
+            ).order_by(Substitutivo.cod_substitutivo).all()
+            substitutivos_data = [
+                {
+                    'cod_substitutivo': s.cod_substitutivo,
+                    'des_tipo_substitutivo': s.des_tipo_substitutivo,
+                    'dat_apresentacao': s.dat_apresentacao.strftime('%d/%m/%Y') if s.dat_apresentacao else None
+                }
+                for s in substitutivos
+            ]
+
+            # 5. EMENDAS (INCLUINDO TIPO)
+            Emenda_e = aliased(Emenda, name='emenda_e')
+            TipoEmenda_te = aliased(TipoEmenda, name='tipo_emenda_te')
+            emendas = session.query(Emenda_e, TipoEmenda_te).\
+                join(TipoEmenda_te, Emenda_e.tip_emenda == TipoEmenda_te.tip_emenda).\
+                filter(
+                    Emenda_e.cod_materia == cod_materia,
+                    Emenda_e.ind_excluido == 0
+                ).order_by(Emenda_e.cod_emenda).all()
+            emendas_data = [
+                {
+                    'cod_emenda': e.cod_emenda,
+                    'tip_emenda': e.tip_emenda,
+                    'des_tipo_emenda': te.des_tipo_emenda if te else None,
+                    'dat_apresentacao': e.dat_apresentacao.strftime('%d/%m/%Y') if e.dat_apresentacao else None
+                }
+                for e, te in emendas
+            ]
+
+            # 6. DOCUMENTOS ACESSÓRIOS + tipo
+            DocumentoAcessorio_doc = aliased(DocumentoAcessorio, name='documento_acessorio_doc')
+            TipoDocumento_doc = aliased(TipoDocumento, name='tipo_documento_doc')
+            docs = session.query(DocumentoAcessorio_doc, TipoDocumento_doc).\
+                join(TipoDocumento_doc, DocumentoAcessorio_doc.tip_documento == TipoDocumento_doc.tip_documento).\
+                filter(
+                    DocumentoAcessorio_doc.cod_materia == cod_materia,
+                    DocumentoAcessorio_doc.ind_excluido == 0
+                ).order_by(DocumentoAcessorio_doc.cod_documento).all()
+            docs_data = [
+                {
+                    'cod_documento': d.cod_documento,
+                    'tip_documento': d.tip_documento,
+                    'des_tipo_documento': td.des_tipo_documento,
+                    'nom_documento': d.nom_documento,
+                    'dat_documento': d.dat_documento.strftime('%d/%m/%Y') if d.dat_documento else None,
+                    'txt_ementa': d.txt_ementa
+                }
+                for d, td in docs
+            ]
+
+            # 7. ÚLTIMA TRAMITAÇÃO - DESTINO
+            unid_dest_nome = None
+            if tram_obj:
+                if tram_obj.cod_unid_tram_dest:
+                    ut = session.query(UT_Dest, Org_Dest, Com_Dest, Parl_Dest).\
+                        outerjoin(Org_Dest, UT_Dest.cod_orgao == Org_Dest.cod_orgao).\
+                        outerjoin(Com_Dest, UT_Dest.cod_comissao == Com_Dest.cod_comissao).\
+                        outerjoin(Parl_Dest, UT_Dest.cod_parlamentar == Parl_Dest.cod_parlamentar).\
+                        filter(UT_Dest.cod_unid_tramitacao == tram_obj.cod_unid_tram_dest).\
+                        first()
+                    if ut:
+                        ut_obj, org_obj, com_obj, parl_obj = ut
+                        if com_obj and com_obj.nom_comissao:
+                            unid_dest_nome = com_obj.nom_comissao
+                        elif org_obj and org_obj.nom_orgao:
+                            unid_dest_nome = org_obj.nom_orgao
+                        elif parl_obj and parl_obj.nom_parlamentar:
+                            unid_dest_nome = parl_obj.nom_parlamentar
+
+            # 8. PARECERES
+            Parecer_p = aliased(Parecer, name='parecer_p')
+            Relatoria_p = aliased(Relatoria, name='relatoria_p')
+            Parlamentar_p = aliased(Parlamentar, name='parlamentar_p')
+            Comissao_p = aliased(Comissao, name='comissao_p')
+            pareceres_q = session.query(Parecer_p, Relatoria_p, Parlamentar_p, Comissao_p).\
+                outerjoin(Relatoria_p, Parecer_p.cod_relatoria == Relatoria_p.cod_relatoria).\
+                outerjoin(Parlamentar_p, Relatoria_p.cod_parlamentar == Parlamentar_p.cod_parlamentar).\
+                outerjoin(Comissao_p, Relatoria_p.cod_comissao == Comissao_p.cod_comissao).\
+                filter(Parecer_p.cod_materia == cod_materia, Parecer_p.ind_excluido == 0).\
+                order_by(Parecer_p.cod_relatoria).all()
+            pareceres_data = [
+                {
+                    'num_parecer': p.num_parecer,
+                    'ano_parecer': p.ano_parecer,
+                    'txt_parecer': p.txt_parecer,
+                    'relator': parl.nom_parlamentar if parl else None,
+                    'comissao': com.nom_comissao if com else None
+                }
+                for p, r, parl, com in pareceres_q
+            ]
+
+            # 9. NORMAS JURÍDICAS
+            NormaJuridica_n = aliased(NormaJuridica, name='norma_n')
+            TipoNormaJuridica_tn = aliased(TipoNormaJuridica, name='tipo_norma_n')
+            normas = session.query(NormaJuridica_n, TipoNormaJuridica_tn).\
+                join(TipoNormaJuridica_tn, NormaJuridica_n.tip_norma == TipoNormaJuridica_tn.tip_norma).\
+                filter(
+                    NormaJuridica_n.cod_materia == cod_materia,
+                    NormaJuridica_n.ind_excluido == 0
+                ).all()
+            normas_data = [
+                {
+                    'cod_norma': n.cod_norma,
+                    'tip_norma': n.tip_norma,
+                    'des_tipo_norma': tn.des_tipo_norma if tn else None,
+                    'num_norma': n.num_norma,
+                    'ano_norma': n.ano_norma,
+                    'dat_norma': n.dat_norma.strftime('%d/%m/%Y') if n.dat_norma else None,
+                    'dat_publicacao': n.dat_publicacao.strftime('%d/%m/%Y') if n.dat_publicacao else None,
+                    'txt_ementa': n.txt_ementa
+                }
+                for n, tn in normas
+            ]
+
+            resp = {
+                'cod_materia': materia_obj.cod_materia,
+                'tipo_materia': tipo_obj.des_tipo_materia,
+                'numero': materia_obj.num_ident_basica,
+                'ano': materia_obj.ano_ident_basica,
+                'ementa': materia_obj.txt_ementa,
+                'apresentacao': materia_obj.dat_apresentacao.strftime('%d/%m/%Y') if materia_obj.dat_apresentacao else None,
+                'autores': autores,
+                'relator': nome_relator,
+                'comissao_relator': nome_comissao_rel,
+                'relatorias': relatorias_data,
+                'regime_tramitacao': {
+                    'cod_regime_tramitacao': regime_obj.cod_regime_tramitacao if regime_obj else None,
+                    'des_regime_tramitacao': regime_obj.des_regime_tramitacao if regime_obj else None
+                } if regime_obj else None,
+                'quorum': {
+                    'cod_quorum': quorum_obj.cod_quorum if quorum_obj else None,
+                    'des_quorum': quorum_obj.des_quorum if quorum_obj else None,
+                    'txt_formula': quorum_obj.txt_formula if quorum_obj else None
+                } if quorum_obj else None,
+                'dat_fim_prazo': materia_obj.dat_fim_prazo.strftime('%d/%m/%Y') if hasattr(materia_obj, 'dat_fim_prazo') and materia_obj.dat_fim_prazo else None,
+                'substitutivos': substitutivos_data,
+                'emendas': emendas_data,
+                'documentos_acessorios': docs_data,
+                'pareceres': pareceres_data,
+                'normas_juridicas': normas_data,
+                'ultima_tramitacao': {
+                    'data': tram_obj.dat_tramitacao.strftime('%d/%m/%Y') if tram_obj and tram_obj.dat_tramitacao else None,
+                    'unidade_destino': unid_dest_nome,
+                    'status': stat_tram_obj.des_status if stat_tram_obj else None,
+                    'prazo_fim': tram_obj.dat_fim_prazo.strftime('%d/%m/%Y') if tram_obj and hasattr(tram_obj, 'dat_fim_prazo') and tram_obj.dat_fim_prazo else None
+                } if tram_obj else None
+            }
+
+            self.request.response.setHeader('Content-Type', 'application/json')
+            return json.dumps(resp, ensure_ascii=False)
+
+        except Exception as e:
+            logger.error(f"Erro ao obter detalhes da matéria: {str(e)}", exc_info=True)
+            self.request.response.setStatus(500)
+            return json.dumps({'error': 'Erro ao obter detalhes da matéria', 'details': str(e)})
+        finally:
+            session.close()

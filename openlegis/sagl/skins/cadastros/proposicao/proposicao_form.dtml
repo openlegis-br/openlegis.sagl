@@ -2145,7 +2145,13 @@ var ProposicaoManager = (function() {
                         _domCache.lstAssunto.val('<dtml-var cod_assunto_sel>').trigger('change');
                     }
                     </dtml-if>
-                    _domCache.lstAssunto.select2({minimumResultsForSearch: Infinity});
+                    if (_domCache.lstAssunto.hasClass('select2-hidden-accessible')) {
+                      _domCache.lstAssunto.select2('destroy');
+                    }
+                    _domCache.lstAssunto.select2({
+                      minimumResultsForSearch: 0,
+                      width: '100%'
+                    });
                 },
                 error: () => {
                     _domCache.lstAssunto.html('<option value="">Erro ao carregar assuntos</option>');

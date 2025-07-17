@@ -416,6 +416,25 @@ window.appState = window.appState || {
   selecaoLote: new Set()
 };
 
+// === ORDENACAO PADRAO POR CAIXA (P/ USAR AO TROCAR DE ABA) ===
+const CAIXA_ORDER_DEFAULT = {
+  revisao:      { sortColumn: 'envio',    sortDirection: 'asc'  },
+  assinatura:   { sortColumn: 'envio',    sortDirection: 'asc'  },
+  protocolo:    { sortColumn: 'envio',    sortDirection: 'asc'  },
+  incorporado:  { sortColumn: 'recebimento', sortDirection: 'desc' },
+  devolvido:    { sortColumn: 'devolucao', sortDirection: 'desc' },
+  pedido_devolucao: { sortColumn: 'solicitacao_devolucao', sortDirection: 'asc' }
+};
+function aplicarOrdenacaoPadraoCaixa(caixa) {
+  const def = CAIXA_ORDER_DEFAULT[caixa];
+  if (def) {
+    window.appState.sortColumn = def.sortColumn;
+    window.appState.sortDirection = def.sortDirection;
+  } else {
+    window.appState.sortColumn = 'envio';
+    window.appState.sortDirection = 'desc';
+  }
+}
 // --- SELEÇÃO EM LOTE ---
 function isElegivelIncorporacao(row) {
   return (
@@ -1111,6 +1130,7 @@ function handleTabChange(e) {
   const $tab = $(this);
   const caixa = $tab.data('caixa');
   if (window.appState.currentCaixa === caixa) return;
+  aplicarOrdenacaoPadraoCaixa(caixa); // <-- Reset ordenação ao trocar de aba
   updateActiveTab(caixa);
   $tab.attr('tabindex', '0').focus();
   window.appState.currentCaixa = caixa;
@@ -1180,6 +1200,8 @@ $(document).ready(function() {
   initTable();
   initFilters();
   initViewToggle();
+
+  // Seleciona aba inicial conforme papel, mas garante ordenação padrão!
   if (USER_ROLES.includes('Operador') || USER_ROLES.includes('Operador Materia')) {
     window.appState.currentCaixa = 'protocolo';
   } else if (USER_ROLES.includes('Revisor Proposicao') || USER_ROLES.includes('Chefia Revisão')) {
@@ -1187,6 +1209,8 @@ $(document).ready(function() {
   } else {
     window.appState.currentCaixa = 'revisao';
   }
+  aplicarOrdenacaoPadraoCaixa(window.appState.currentCaixa); // <-- Garante ordem ao iniciar
+
   updateActiveTab(window.appState.currentCaixa);
   updateLoteActionsVisibility();
   loadData(window.appState.currentCaixa, 1, true);

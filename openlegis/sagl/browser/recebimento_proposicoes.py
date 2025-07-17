@@ -41,7 +41,6 @@ class ProposicoesAPIBase:
             return set()
 
     def _get_cod_usuario(self):
-        """Busca o cod_usuario a partir do login do usuário autenticado."""
         try:
             col_username = self.request.AUTHENTICATED_USER.getUserName()
             session = Session()
@@ -70,7 +69,6 @@ class ProposicoesAPIBase:
                         Proposicao.cod_revisor == cod_revisor
                     )
                     return query
-            # Demais perfis (Chefia Revisão, Operador, etc.):
             return query.filter(
                 Proposicao.dat_envio.isnot(None),
                 Proposicao.dat_recebimento.is_(None),
@@ -86,6 +84,7 @@ class ProposicoesAPIBase:
             )
         elif caixa == 'incorporado':
             return query.filter(
+                Proposicao.ind_excluido == 0,
                 Proposicao.dat_recebimento.isnot(None),
                 Proposicao.cod_mat_ou_doc.isnot(None)
             )
@@ -301,9 +300,6 @@ class ProposicoesAPIBase:
         return None
 
     def _obter_vinculo_materia(self, cod_materia):
-        """
-        Retorna um dicionário com informações detalhadas da matéria legislativa.
-        """
         if not cod_materia:
             return None
         session = Session()
@@ -311,7 +307,8 @@ class ProposicoesAPIBase:
             materia = (
                 session.query(MateriaLegislativa)
                 .options(joinedload(MateriaLegislativa.tipo_materia_legislativa))
-                .get(cod_materia)
+                .filter(MateriaLegislativa.cod_materia == cod_materia)
+                .first()
             )
             if materia:
                 return {
@@ -326,9 +323,6 @@ class ProposicoesAPIBase:
             session.close()
 
     def _obter_vinculo_documento(self, cod_documento):
-        """
-        Retorna um dicionário com informações do documento acessório e sua matéria vinculada.
-        """
         if not cod_documento:
             return None
         session = Session()
@@ -339,7 +333,8 @@ class ProposicoesAPIBase:
                     joinedload(DocumentoAcessorio.materia_legislativa)
                     .joinedload(MateriaLegislativa.tipo_materia_legislativa)
                 )
-                .get(cod_documento)
+                .filter(DocumentoAcessorio.cod_documento == cod_documento)
+                .first()
             )
             if documento:
                 materia = documento.materia_legislativa
@@ -423,6 +418,7 @@ class ProposicoesAPIBase:
             return obj.strftime('%d/%m/%Y %H:%M')
         raise TypeError(f"Tipo {type(obj)} não serializável")
 
+
 class ProposicoesAPI(grok.View, ProposicoesAPIBase):
     grok.context(Interface)
     grok.name('proposicoes-api')
@@ -445,14 +441,16 @@ class ProposicoesAPI(grok.View, ProposicoesAPIBase):
             if not self._verificar_permissao_caixa(caixa):
                 return self._responder_erro('Acesso não autorizado para esta caixa', 403)
 
-            query = session.query(Proposicao).join(Proposicao.tipo_proposicao)
-            query = query.filter(Proposicao.ind_excluido == 0)
-            query = query.join(Proposicao.autor)
-            query = query.outerjoin(Autor.parlamentar)
-            query = query.outerjoin(Autor.comissao)
-            query = self._aplicar_filtros_caixa(query, caixa)
-            query = self._aplicar_filtros_adicionais(query)
+            # Total de registros
+            base_query = session.query(Proposicao.cod_proposicao).join(Proposicao.tipo_proposicao)
+            base_query = base_query.filter(Proposicao.ind_excluido == 0)
+            base_query = base_query.join(Proposicao.autor)
+            base_query = base_query.outerjoin(Autor.parlamentar)
+            base_query = base_query.outerjoin(Autor.comissao)
+            base_query = self._aplicar_filtros_caixa(base_query, caixa)
+            base_query = self._aplicar_filtros_adicionais(base_query)
 
+            # Ordenação padrão
             ORDER_MAP = {
                 'envio': Proposicao.dat_envio,
                 'tipo': TipoProposicao.des_tipo_proposicao,
@@ -465,53 +463,115 @@ class ProposicoesAPI(grok.View, ProposicoesAPIBase):
 
             ordenar_por = self.request.form.get('ordenar_por')
             ordenar_direcao = self.request.form.get('ordenar_direcao')
-            filtros_aplicados = any([
-                self.request.form.get('q', '').strip(),
-                self.request.form.get('tipo', '').strip(),
-                self.request.form.get('autor', '').strip(),
-                self.request.form.get('assunto', '').strip(),
-                self.request.form.get('campo_data'),
-                self.request.form.get('dt_inicio'),
-                self.request.form.get('dt_fim')
-            ])
 
-            if ordenar_por:
-                order_field = ORDER_MAP.get(ordenar_por, Proposicao.dat_envio)
-                order_method = order_field.asc() if (ordenar_direcao == 'asc') else order_field.desc()
-                query = query.order_by(order_method)
-            elif not filtros_aplicados:
-                query = query.order_by(Proposicao.dat_envio.desc())
+            # ----------- AJUSTE PARA "incorporado" -----------
+            if caixa == 'incorporado':
+                # Só aceita ordenação por 'recebimento'
+                if ordenar_por != 'recebimento':
+                    ordenar_por = None  # Ignora valores inválidos, força padrão
+                total = base_query.with_entities(func.count(Proposicao.cod_proposicao)).order_by(None).scalar()
+                id_query = base_query
+                if ordenar_por == 'recebimento':
+                    if ordenar_direcao == 'asc':
+                        id_query = id_query.order_by(Proposicao.dat_recebimento.asc(), Proposicao.cod_proposicao.asc())
+                    else:
+                        id_query = id_query.order_by(Proposicao.dat_recebimento.desc(), Proposicao.cod_proposicao.desc())
+                else:
+                    id_query = id_query.order_by(Proposicao.dat_recebimento.desc(), Proposicao.cod_proposicao.desc())
 
-            query = query.options(
-                joinedload(Proposicao.tipo_proposicao),
-                joinedload(Proposicao.autor).joinedload(Autor.parlamentar),
-                joinedload(Proposicao.autor).joinedload(Autor.comissao),
-                joinedload(Proposicao.materia_legislativa),
-                joinedload(Proposicao.assunto_proposicao)
-            )
+                pag_ids = [row[0] for row in id_query.limit(por_pagina).offset((pagina - 1) * por_pagina).all()]
 
-            if caixa in ['revisao', 'assinatura', 'protocolo']:
-                todas = query.all()
-                filtradas = self._verificar_documentos_fisicos(todas, caixa)
-                total = len(filtradas)
-                paginados = filtradas[(pagina - 1) * por_pagina : pagina * por_pagina]
+                if not pag_ids:
+                    paginados = []
+                else:
+                    query = (
+                        session.query(Proposicao)
+                        .join(Proposicao.tipo_proposicao)
+                        .join(Proposicao.autor)
+                        .outerjoin(Autor.parlamentar)
+                        .outerjoin(Autor.comissao)
+                        .filter(Proposicao.cod_proposicao.in_(pag_ids))
+                        .options(
+                            joinedload(Proposicao.tipo_proposicao),
+                            joinedload(Proposicao.autor).joinedload(Autor.parlamentar),
+                            joinedload(Proposicao.autor).joinedload(Autor.comissao),
+                            joinedload(Proposicao.materia_legislativa),
+                            joinedload(Proposicao.assunto_proposicao)
+                        )
+                    )
+                    proposicoes_dict = {p.cod_proposicao: p for p in query.all()}
+                    paginados = [proposicoes_dict[pid] for pid in pag_ids if pid in proposicoes_dict]
+
+                if apenas_contar:
+                    return self._responder_contagem(total)
+
+                dados = [self._formatar_proposicao_completo(p, caixa) for p in paginados]
+                return self._responder_sucesso(
+                    dados=dados,
+                    paginacao={
+                        'total': total,
+                        'pagina': pagina,
+                        'por_pagina': por_pagina,
+                        'total_paginas': (total + por_pagina - 1) // por_pagina
+                    }
+                )
+            # ----------- DEMAIS CAIXAS -----------
             else:
-                total = query.with_entities(func.count(Proposicao.cod_proposicao)).order_by(None).scalar()
-                paginados = query.limit(por_pagina).offset((pagina - 1) * por_pagina).all()
+                query = session.query(Proposicao).join(Proposicao.tipo_proposicao)
+                query = query.filter(Proposicao.ind_excluido == 0)
+                query = query.join(Proposicao.autor)
+                query = query.outerjoin(Autor.parlamentar)
+                query = query.outerjoin(Autor.comissao)
+                query = self._aplicar_filtros_caixa(query, caixa)
+                query = self._aplicar_filtros_adicionais(query)
 
-            if apenas_contar:
-                return self._responder_contagem(total)
+                if ordenar_por:
+                    order_field = ORDER_MAP.get(ordenar_por, Proposicao.dat_envio)
+                    order_method = order_field.asc() if (ordenar_direcao == 'asc') else order_field.desc()
+                    query = query.order_by(order_method)
+                elif caixa == 'revisao':
+                    query = query.order_by(Proposicao.dat_envio.asc())
+                elif caixa == 'assinatura':
+                    query = query.order_by(Proposicao.dat_envio.asc())
+                elif caixa == 'protocolo':
+                    query = query.order_by(Proposicao.dat_envio.asc())
+                elif caixa == 'devolvido':
+                    query = query.order_by(Proposicao.dat_devolucao.desc())
+                elif caixa == 'pedido_devolucao':
+                    query = query.order_by(Proposicao.dat_solicitacao_devolucao.asc())
+                else:
+                    query = query.order_by(Proposicao.dat_envio.desc())
 
-            dados = [self._formatar_proposicao_completo(p, caixa) for p in paginados]
-            return self._responder_sucesso(
-                dados=dados,
-                paginacao={
-                    'total': total,
-                    'pagina': pagina,
-                    'por_pagina': por_pagina,
-                    'total_paginas': (total + por_pagina - 1) // por_pagina
-                }
-            )
+                query = query.options(
+                    joinedload(Proposicao.tipo_proposicao),
+                    joinedload(Proposicao.autor).joinedload(Autor.parlamentar),
+                    joinedload(Proposicao.autor).joinedload(Autor.comissao),
+                    joinedload(Proposicao.materia_legislativa),
+                    joinedload(Proposicao.assunto_proposicao)
+                )
+
+                if caixa in ['revisao', 'assinatura', 'protocolo']:
+                    todas = query.all()
+                    filtradas = self._verificar_documentos_fisicos(todas, caixa)
+                    total = len(filtradas)
+                    paginados = filtradas[(pagina - 1) * por_pagina : pagina * por_pagina]
+                else:
+                    total = query.with_entities(func.count(Proposicao.cod_proposicao)).order_by(None).scalar()
+                    paginados = query.limit(por_pagina).offset((pagina - 1) * por_pagina).all()
+
+                if apenas_contar:
+                    return self._responder_contagem(total)
+
+                dados = [self._formatar_proposicao_completo(p, caixa) for p in paginados]
+                return self._responder_sucesso(
+                    dados=dados,
+                    paginacao={
+                        'total': total,
+                        'pagina': pagina,
+                        'por_pagina': por_pagina,
+                        'total_paginas': (total + por_pagina - 1) // por_pagina
+                    }
+                )
         except ValueError as e:
             return self._responder_erro(f'Parâmetros inválidos: {e}', 400)
         except Exception as e:
@@ -519,74 +579,6 @@ class ProposicoesAPI(grok.View, ProposicoesAPIBase):
             return self._responder_erro('Erro interno: ' + str(e), 500)
         finally:
             session.close()
-
-
-class IncorporarLoteProtocolo(grok.View, ProposicoesAPIBase):
-    grok.context(Interface)
-    grok.name('proposicoes-incorporar-lote')
-    grok.require('zope2.View')
-
-    def render(self):
-        # Aceita apenas POST!
-        if self.request.method != 'POST':
-            self.request.response.setStatus(405)
-            return json.dumps({'sucesso': False, 'erro': 'Método não permitido.'})
-        session = Session()
-        try:
-            if not self._verificar_permissao_caixa('protocolo'):
-                self.request.response.setStatus(403)
-                return json.dumps({'sucesso': False, 'erro': 'Acesso não autorizado.'})
-
-            # IDs recebidos do frontend: lista de cod_proposicao (ex: [12, 13, 15])
-            proposicoes_ids = self.request.form.get('proposicoes_ids')
-            if not proposicoes_ids:
-                return json.dumps({'sucesso': False, 'erro': 'Nenhuma proposição informada.'})
-
-            # Garante lista de ints:
-            if isinstance(proposicoes_ids, str):
-                import json as _json
-                proposicoes_ids = _json.loads(proposicoes_ids)
-            proposicoes_ids = [int(x) for x in proposicoes_ids]
-
-            # Consulta só proposições válidas para incorporação em lote:
-            props = (
-                session.query(Proposicao)
-                .join(Proposicao.tipo_proposicao)
-                .filter(
-                    Proposicao.cod_proposicao.in_(proposicoes_ids),
-                    Proposicao.ind_excluido == 0,
-                    Proposicao.cod_mat_ou_doc == None,  # ainda não incorporada
-                    TipoProposicao.ind_mat_ou_doc == 'M',   # agora correto!
-                    Proposicao.dat_solicitacao_devolucao == None,
-                    Proposicao.dat_devolucao == None
-                ).all()
-            )
-
-            if not props:
-                return json.dumps({'sucesso': False, 'erro': 'Nenhuma proposição válida para incorporação.'})
-
-            # Agora, para cada proposição, chama o script criar_materia_pysc via restrictedTraverse
-            portal = self.request.PARENTS[0]
-            context = portal
-            resultados = []
-            for prop in props:
-                try:
-                    # Executa o script (adaptando para contexto Zope)
-                    result = context.restrictedTraverse('cadastros/recebimento_proposicao/criar_materia_pysc')(cod_proposicao=prop.cod_proposicao)
-                    resultados.append({'cod_proposicao': prop.cod_proposicao, 'resultado': 'ok'})
-                except Exception as e:
-                    logger.warning('Falha ao incorporar proposição %s: %s', prop.cod_proposicao, e)
-                    resultados.append({'cod_proposicao': prop.cod_proposicao, 'resultado': 'erro', 'erro': str(e)})
-
-            return json.dumps({'sucesso': True, 'resultados': resultados})
-
-        except Exception as e:
-            logger.exception("Erro na incorporação em lote")
-            self.request.response.setStatus(500)
-            return json.dumps({'sucesso': False, 'erro': str(e)})
-        finally:
-            session.close()
-
 
 class ExportarCSV(grok.View, ProposicoesAPIBase):
     grok.context(Interface)
@@ -597,6 +589,8 @@ class ExportarCSV(grok.View, ProposicoesAPIBase):
         session = Session()
         try:
             caixa = self.request.form.get('caixa', 'revisao')
+            pagina = int(self.request.form.get('pagina', 1))
+            por_pagina = int(self.request.form.get('por_pagina', 10))
             if not self._verificar_permissao_caixa(caixa):
                 self.request.response.setStatus(403)
                 return json.dumps({
@@ -618,25 +612,6 @@ class ExportarCSV(grok.View, ProposicoesAPIBase):
                 'Data Devolução', 'Documentos'
             ])
 
-            query = session.query(Proposicao).join(Proposicao.tipo_proposicao)
-            query = query.filter(Proposicao.ind_excluido == 0)
-            query = query.join(Proposicao.autor)
-            query = query.outerjoin(Autor.parlamentar)
-            query = query.outerjoin(Autor.comissao)
-            query = self._aplicar_filtros_caixa(query, caixa)
-            query = self._aplicar_filtros_adicionais(query)
-
-            ordenar_por = self.request.form.get('ordenar_por')
-            ordenar_direcao = self.request.form.get('ordenar_direcao')
-            filtros_aplicados = any([
-                self.request.form.get('q', '').strip(),
-                self.request.form.get('tipo', '').strip(),
-                self.request.form.get('autor', '').strip(),
-                self.request.form.get('assunto', '').strip(),
-                self.request.form.get('campo_data'),
-                self.request.form.get('dt_inicio'),
-                self.request.form.get('dt_fim')
-            ])
             ORDER_MAP = {
                 'envio': Proposicao.dat_envio,
                 'tipo': TipoProposicao.des_tipo_proposicao,
@@ -646,24 +621,53 @@ class ExportarCSV(grok.View, ProposicoesAPIBase):
                 'devolucao': Proposicao.dat_devolucao,
                 'solicitacao_devolucao': Proposicao.dat_solicitacao_devolucao
             }
-            if ordenar_por:
-                order_field = ORDER_MAP.get(ordenar_por, Proposicao.dat_envio)
-                order_method = order_field.asc() if (ordenar_direcao == 'asc') else order_field.desc()
-                query = query.order_by(order_method)
-            elif not filtros_aplicados:
-                query = query.order_by(Proposicao.dat_envio.desc())
+            ordenar_por = self.request.form.get('ordenar_por')
+            ordenar_direcao = self.request.form.get('ordenar_direcao')
 
-            query = query.options(
-                joinedload(Proposicao.tipo_proposicao),
-                joinedload(Proposicao.autor).joinedload(Autor.parlamentar),
-                joinedload(Proposicao.autor).joinedload(Autor.comissao)
-            )
+            # ---- AJUSTE PARA "incorporado" ----
+            if caixa == 'incorporado':
+                if ordenar_por != 'recebimento':
+                    ordenar_por = None  # só aceita ordenação por data de recebimento
+                if ordenar_por == 'recebimento':
+                    if ordenar_direcao == 'asc':
+                        base_query = base_query.order_by(Proposicao.dat_recebimento.asc(), Proposicao.cod_proposicao.asc())
+                    else:
+                        base_query = base_query.order_by(Proposicao.dat_recebimento.desc(), Proposicao.cod_proposicao.desc())
+                else:
+                    base_query = base_query.order_by(Proposicao.dat_recebimento.desc(), Proposicao.cod_proposicao.desc())
+            else:
+                if ordenar_por:
+                    order_field = ORDER_MAP.get(ordenar_por, Proposicao.dat_envio)
+                    order_method = order_field.asc() if (ordenar_direcao == 'asc') else order_field.desc()
+                    base_query = base_query.order_by(order_method)
+                else:
+                    base_query = base_query.order_by(Proposicao.dat_envio.desc())
+
+            # Paginação por IDs
+            all_ids = [row[0] for row in base_query.all()]
+            pag_ids = all_ids[(pagina - 1) * por_pagina : pagina * por_pagina]
+
+            if not pag_ids:
+                proposicoes = []
+            else:
+                query = (
+                    session.query(Proposicao)
+                    .join(Proposicao.tipo_proposicao)
+                    .join(Proposicao.autor)
+                    .outerjoin(Autor.parlamentar)
+                    .outerjoin(Autor.comissao)
+                    .filter(Proposicao.cod_proposicao.in_(pag_ids))
+                    .options(
+                        joinedload(Proposicao.tipo_proposicao),
+                        joinedload(Proposicao.autor).joinedload(Autor.parlamentar),
+                        joinedload(Proposicao.autor).joinedload(Autor.comissao)
+                    )
+                )
+                proposicoes_dict = {p.cod_proposicao: p for p in query.all()}
+                proposicoes = [proposicoes_dict[pid] for pid in pag_ids if pid in proposicoes_dict]
 
             if caixa in ['revisao', 'assinatura', 'protocolo']:
-                todas = query.all()
-                proposicoes = self._verificar_documentos_fisicos(todas, caixa)
-            else:
-                proposicoes = query.all()
+                proposicoes = self._verificar_documentos_fisicos(proposicoes, caixa)
 
             for prop in proposicoes:
                 writer.writerow([

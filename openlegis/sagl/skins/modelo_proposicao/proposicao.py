@@ -46,7 +46,7 @@ for proposicao in context.zsql.proposicao_obter_zsql(cod_proposicao=cod_proposic
     ano_ident_basica = DateTime(datefmt='international').strftime("%Y")
     txt_ementa = proposicao.txt_descricao
     dat_apresentacao = context.pysc.data_converter_por_extenso_pysc(data=DateTime(datefmt='international').strftime("%d/%m/%Y"))
-    inf_basicas_dic['txt_justificativa'] = ''
+    inf_basicas_dic['txt_justificativa'] = proposicao.txt_justificativa
 
     inf_basicas_dic['des_assunto'] = ''
     inf_basicas_dic['orgao_responsavel'] = ''
@@ -127,16 +127,17 @@ for proposicao in context.zsql.proposicao_obter_zsql(cod_proposicao=cod_proposic
         nom_autor.append(autor_dic)
 
     if proposicao.des_tipo_proposicao == 'Indicação':
-        assunto = inf_basicas_dic.get('des_assunto', '')
+        assunto = inf_basicas_dic.get('des_assunto', '').upper()
         orgao = inf_basicas_dic.get('orgao_responsavel', '').upper()
         logradouro = getattr(proposicao, 'nom_logradouro', '') or context.REQUEST.get('txt_nom_logradouro', '')
         complemento = getattr(proposicao, 'complemento_endereco', '') or context.REQUEST.get('txt_complemento_endereco', '')
         bairro = getattr(proposicao, 'nom_bairro', '') or context.REQUEST.get('txt_nom_bairro', '')
+        cep = getattr(proposicao, 'num_cep', '') or context.REQUEST.get('txt_num_cep', '')
         cidade = inf_basicas_dic.get('nom_localidade', '')
         uf = inf_basicas_dic.get('sgl_uf', '')
 
         def preposicao_ao_ou_a(orgao_nome):
-            orgaos_femininos = ['Secretaria', 'Diretoria', 'Procuradoria', 'Comissão', 'Ouvidoria']
+            orgaos_femininos = ['Secretaria', 'Diretoria', 'Procuradoria', 'Comissão', 'Ouvidoria', 'Futel']
             for palavra in orgaos_femininos:
                 if palavra.lower() in orgao_nome.lower():
                     return 'à'
@@ -145,17 +146,20 @@ for proposicao in context.zsql.proposicao_obter_zsql(cod_proposicao=cod_proposic
         ementa_odt = ""
         if orgao:
             prep = preposicao_ao_ou_a(orgao)
-            ementa_odt += f"{prep} {orgao} providências para que, após análise técnica dos profissionais da área, seja realizado o serviço de "
+            ementa_odt += f"{prep} {orgao} para "
         else:
-            ementa_odt += "providências para que, após análise técnica dos profissionais da área, seja realizado o serviço de "
+            ementa_odt += " para "
         if assunto:
-            ementa_odt += assunto.lower().strip() + " "
+            ementa_odt += assunto.strip() + " "
         if logradouro:
             ementa_odt += "na " + logradouro
             if complemento:
                 ementa_odt += ", " + complemento
             if bairro:
-                ementa_odt += ", " + bairro + "."
+                ementa_odt += ", " + bairro 
+            if cep:
+                ementa_odt += ", CEP " + cep 
+            ementa_odt += "."
         else:
             ementa_odt += "."
         txt_ementa = ementa_odt

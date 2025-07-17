@@ -54,16 +54,20 @@
         margin-bottom: 8px;
         padding: .35em .65em;
         font-size: .875em;
-        font-weight: 500;
         line-height: 1;
         color: #333;
         background-color: #e2e6ea;
-        border-radius: .25rem;
+        border-radius: 1rem;
+        transition: all 0.2s ease;
+    }
+    .filter-badge:hover {
+        background-color: #d6d8db;
     }
     .filter-badge .btn-close {
         font-size: .65em;
         margin-left: .5em;
         opacity: .75;
+        transition: opacity 0.2s ease;
     }
     .filter-badge .btn-close:hover {
         opacity: 1;
@@ -81,7 +85,7 @@
     .sortable-header::after {
         content: '';
         position: absolute;
-        right: 5px;
+        right: 0;
         top: 50%;
         transform: translateY(-50%);
         width: 0;
@@ -187,11 +191,11 @@
         box-shadow: 0 0 0 2px #ccc;
     }
     .timeline-item.concluido .timeline-dot {
-        background-color: #28a745; /* Verde para concluído */
+        background-color: #28a745;
         box-shadow: 0 0 0 2px #28a745;
     }
     .timeline-item.atual .timeline-dot {
-        background-color: #0d6efd; /* Azul para atual */
+        background-color: #0d6efd;
         box-shadow: 0 0 0 2px #0d6efd;
         transform: scale(1.2);
     }
@@ -229,11 +233,63 @@
         padding-bottom: 0.5rem;
         border-bottom: 1px solid #dee2e6;
     }
-    #resultados table .celula-titulo-materia {
-        font-weight: 600;
-        color: #343a40;
-        font-size: 0.95em;
-        vertical-align: middle;
+    #btn-toggle-filtros {
+        transition: all 0.3s ease;
+    }
+    .ts-wrapper.single .ts-control > input,
+    .ts-wrapper.multi .ts-control > div {
+        color: #495057;
+    }
+    .ts-control .item::placeholder {
+        color: #6c757d;
+        opacity: 1;
+    }
+    #btn-toggle-filtros {
+        transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+    #btn-toggle-filtros[style*="display: none"] {
+        opacity: 0;
+        transform: translateY(-10px);
+        pointer-events: none;
+    }
+    .ts-wrapper .ts-control {
+        position: relative;
+        padding-right: 2.2em;
+    }
+    .input-group-sm > .ts-wrapper.has-items .ts-control, .ts-wrapper.form-select-sm.has-items .ts-control, .ts-wrapper.form-control-sm.has-items .ts-control {
+        padding-top: 0;
+        padding-bottom: 0;
+    }
+    .ts-wrapper .ts-control:after {
+        content: "";
+        position: absolute;
+        right: 1em;
+        top: 50%;
+        width: 0; height: 0;
+        pointer-events: none;
+        border-left: 5px solid transparent;
+        border-right: 5px solid transparent;
+        border-top: 6px solid #666;
+        transform: translateY(-50%);
+        opacity: 0.65;
+    }
+    .ts-wrapper.focus .ts-control:after {
+        border-top-color: #0056b3;
+        opacity: 1;
+    }
+    .fade-in {
+      animation: fadeIn 0.5s;
+    }
+    .fade-out {
+      animation: fadeOut 0.35s forwards;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+    @keyframes fadeOut {
+      from { opacity: 1; }
+      to   { opacity: 0; }
     }
 </style>
 
@@ -254,7 +310,7 @@
 <h1 class="firstHeading font-size-18">Pesquisa de Matérias Legislativas</h1>
 
 <div class="d-grid gap-2 mb-3">
-    <button class="btn btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#filtro-container" aria-expanded="false" id="btn-toggle-filtros" style="display: none;">
+    <button class="btn btn-outline-primary" type="button" id="btn-toggle-filtros" data-bs-toggle="collapse" data-bs-target="#filtro-container" aria-expanded="false">
         <i class="fa fa-filter me-2"></i> Mostrar / Editar Filtros
     </button>
 </div>
@@ -271,7 +327,9 @@
             <div class="row g-3">
                 <div class="col-md-6">
                     <label for="tip_id_basica" class="form-label form-label-sm mb-1">Tipo de Matéria:</label>
-                    <select name="tip_id_basica" id="tip_id_basica" class="form-control form-control-sm" multiple placeholder="Selecione um ou mais tipos..."></select>
+                    <select name="tip_id_basica" id="tip_id_basica" class="form-control form-control-sm" multiple 
+                       placeholder="Selecione um ou mais tipos..." data-tomselect>
+                    </select>
                 </div>
                 <div class="col-md-3">
                     <label for="num_ident_basica" class="form-label form-label-sm mb-1">Número:</label>
@@ -428,7 +486,6 @@
 
 <div id="painel-sem-resultados" class="mt-4"></div>
 
-
 <div class="modal fade" id="modalTramitacao" tabindex="-1" aria-labelledby="modalTramitacaoLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -437,7 +494,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
             </div>
             <div class="modal-body" id="modalTramitacaoBody">
-                </div>
+            </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
             </div>
@@ -451,60 +508,58 @@
 <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/pt.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script type="text/javascript">
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
+
+<script>
 document.addEventListener('DOMContentLoaded', function () {
-    const HEADER_HEIGHT = 80;
+    // Elementos principais
     const form = document.getElementById('form-pesquisa');
     const pesquisarBtn = document.getElementById('btn-pesquisar');
     const limparBtn = document.getElementById('btn-limpar');
     const resumoFiltrosDiv = document.getElementById('resumo-filtros');
     const advancedSearchDiv = document.getElementById('advancedSearch');
-    let advancedFiltersLoaded = false;
     const ordemCampoInput = document.getElementById('ordem_campo');
     const ordemDirecaoInput = document.getElementById('ordem_direcao');
     const desAssuntoInput = document.getElementById('des_assunto');
-    const desAssuntoFeedback = document.getElementById('des_assunto_feedback');
     const badgeFiltros = document.getElementById('badge-filtros');
     const filterClearedToastEl = document.getElementById('filter-cleared-toast');
-    let filterClearedToast = null;
     const numIdentBasicaInput = document.getElementById('num_ident_basica');
     const anoIdentBasicaInput = document.getElementById('ano_ident_basica');
-    const numIdentBasicaFeedback = document.getElementById('num_ident_basica_feedback');
-    const anoIdentBasicaFeedback = document.getElementById('ano_ident_basica_feedback');
+    const resultadosDiv = document.getElementById('resultados');
+    const painelSemResultados = document.getElementById('painel-sem-resultados');
+    const containerPrincipal = document.getElementById('container-principal-resultados');
+
+    // Variáveis de estado
+    let advancedFiltersLoaded = false;
     let itensPorPaginaSelect = null;
     let currentViewMode = localStorage.getItem('materiaViewMode') || 'cards';
     let statsChartInstance = null;
-
-    const filtroContainer = document.getElementById('filtro-container');
-    const btnToggleFiltros = document.getElementById('btn-toggle-filtros');
     let bsCollapseFiltros = null;
-    if (filtroContainer) {
-        bsCollapseFiltros = new bootstrap.Collapse(filtroContainer, {
-            toggle: false
-        });
+    let filterClearedToast = null;
+    const apiCache = new Map();
+    let ultimoResultadoMaterias = null;
+
+    let bsCollapseAdvancedSearch = null;
+    if (document.getElementById('filtro-container')) {
+        bsCollapseFiltros = new bootstrap.Collapse(document.getElementById('filtro-container'), { toggle: false });
+    }
+    if (advancedSearchDiv) {
+        bsCollapseAdvancedSearch = new bootstrap.Collapse(advancedSearchDiv, { toggle: false });
     }
 
-    if (filtroContainer && btnToggleFiltros) {
-        filtroContainer.addEventListener('hide.bs.collapse', function (event) {
-            if (event.target === filtroContainer) {
-                btnToggleFiltros.style.display = 'block';
-            }
-        });
-        filtroContainer.addEventListener('show.bs.collapse', function (event) {
-            if (event.target === filtroContainer) {
-                btnToggleFiltros.style.display = 'none';
-            }
-        });
+    // Inicializações
+    if (document.getElementById('filtro-container')) {
+        bsCollapseFiltros = new bootstrap.Collapse(document.getElementById('filtro-container'), { toggle: false });
     }
-
     pesquisarBtn.setAttribute('aria-label', 'Pesquisar matérias legislativas');
     limparBtn.setAttribute('aria-label', 'Limpar filtros de pesquisa');
 
+    // Date Range Picker
     const daterangePicker = flatpickr('#daterange_input', {
         mode: 'range',
         dateFormat: "d/m/Y",
         locale: 'pt',
-        onClose: function(selectedDates, dateStr, instance) {
+        onClose: function(selectedDates) {
             const dataInicioHidden = document.getElementById('dat_apresentacao_hidden');
             const dataFimHidden = document.getElementById('dat_apresentacao2_hidden');
             if (selectedDates.length === 2) {
@@ -518,114 +573,374 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    const datePresetsContainer = document.getElementById('date-presets');
-    if (datePresetsContainer) {
-        datePresetsContainer.addEventListener('click', function(event) {
-            const target = event.target;
-            if (target.tagName !== 'BUTTON') return;
+    // Event Listeners usando delegação
+    document.body.addEventListener('click', function(e) {
+        if (e.target.closest('#btn-view-table')) applyViewMode('table');
+        if (e.target.closest('#btn-view-cards')) applyViewMode('cards');
+        if (e.target.closest('.btn-export')) {
+            e.preventDefault();
+            handleExportClick(e.target.closest('.btn-export'));
+        }
+        if (e.target.closest('.btn-ver-tramitacao')) handleTramitacaoClick(e.target.closest('.btn-ver-tramitacao'));
+        if (e.target === limparBtn) handleLimparClick();
+        if (e.target.closest('.filter-badge .btn-close')) handleRemoveFilter(e);
+        if (e.target.closest('[data-preset]')) handleDatePreset(e.target.closest('[data-preset]'));
+        if (e.target.closest('#btn-limpar-filtros-no-results')) handleLimparClick();
+    });
 
-            const preset = target.dataset.preset;
-            if (!preset) return;
-
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-
-            let startDate, endDate;
-
-            switch (preset) {
-                case 'hoje':
-                    startDate = today;
-                    endDate = today;
-                    break;
-                case 'semana':
-                    endDate = new Date(today);
-                    startDate = new Date(today);
-                    startDate.setDate(today.getDate() - 6);
-                    break;
-                case 'mes_atual':
-                    startDate = new Date(today.getFullYear(), today.getMonth(), 1);
-                    endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-                    break;
-                case 'mes_passado':
-                    const prevMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1);
-                    startDate = new Date(prevMonth.getFullYear(), prevMonth.getMonth(), 1);
-                    endDate = new Date(prevMonth.getFullYear(), prevMonth.getMonth() + 1, 0);
-                    break;
-            }
-
-            if (startDate && endDate) {
-                daterangePicker.setDate([startDate, endDate], true);
-                const onCloseCallback = daterangePicker.config.onClose[0];
-                if (onCloseCallback) {
-                     onCloseCallback(daterangePicker.selectedDates, '', daterangePicker);
-                }
-            }
-        });
-    }
-
-    let desAssuntoTimeout;
-    function debounce(func, delay = 1000) {
-        return function() {
-            const context = this;
-            const args = arguments;
-            clearTimeout(desAssuntoTimeout);
-            if (desAssuntoInput.value.trim().length > 0) {
-                if (desAssuntoFeedback) {
-                    desAssuntoFeedback.innerHTML = '<i class="fa fa-spinner fa-spin me-1"></i> Digitando...';
-                    desAssuntoFeedback.style.display = 'block';
-                }
-            } else {
-                if (desAssuntoFeedback) {
-                    desAssuntoFeedback.style.display = 'none';
-                }
-            }
-            desAssuntoTimeout = setTimeout(() => {
-                if (desAssuntoInput.value.trim().length > 0 && desAssuntoFeedback) {
-                    desAssuntoFeedback.innerHTML = '<i class="fa fa-spinner fa-spin me-1"></i> Buscando...';
-                }
-                func.apply(context, args);
-            }, delay);
-        };
-    }
-
-    function sanitizeHTML(str) {
-        if (!str) return '';
-        const temp = document.createElement('div');
-        temp.textContent = str;
-        return temp.innerHTML;
-    }
-
-    const debouncedSearch = debounce(function() {
-        ordemCampoInput.value = '';
-        ordemDirecaoInput.value = '';
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
         realizarBusca(1);
-    }, 500);
+    });
 
-    if (desAssuntoInput) {
-       //desAssuntoInput.addEventListener('input', debouncedSearch);
+    if (filterClearedToastEl) {
+        filterClearedToast = new bootstrap.Toast(filterClearedToastEl, { delay: 3000 });
+    }
+
+    async function fetchWithCache(url) {
+        if (apiCache.has(url)) return apiCache.get(url);
+        try {
+            const response = await fetch(url);
+            if (!response.ok) throw new Error('Erro na resposta do servidor');
+            const data = await response.json();
+            apiCache.set(url, data);
+            return data;
+        } catch (error) {
+            console.error('Erro na requisição:', error);
+            throw error;
+        }
+    }
+
+    function validarFormulario() {
+        let isValid = true;
+        numIdentBasicaInput.classList.remove('is-invalid');
+        anoIdentBasicaInput.classList.remove('is-invalid');
+        if (anoIdentBasicaInput.value && !/^\d{4}$/.test(anoIdentBasicaInput.value)) {
+            anoIdentBasicaInput.classList.add('is-invalid');
+            isValid = false;
+        }
+        if (numIdentBasicaInput.value && !/^\d+$/.test(numIdentBasicaInput.value)) {
+            numIdentBasicaInput.classList.add('is-invalid');
+            isValid = false;
+        }
+        return isValid;
+    }
+
+    function haFiltrosAtivos() {
+        const formData = new FormData(form);
+        const ignorar = ['formato', 'rd_ordem', 'pagina', 'ordem_campo', 'ordem_direcao', 'itens_por_pagina'];
+        for (let [k, v] of formData.entries()) {
+            if (ignorar.includes(k)) continue;
+            if (v && v !== '' && !(k === 'chk_textual' && v === '0')) return true;
+        }
+        return false;
+    }
+    if (!haFiltrosAtivos()) {
+        document.getElementById('btn-toggle-filtros').style.display = 'none';
+    }
+
+    function showSkeletonLoading() {
+        resultadosDiv.innerHTML = `
+            <div class="skeleton-loading" style="height: 20px; width: 200px; margin-bottom: 15px;"></div>
+            <div class="table-responsive">
+                <table class="table">
+                    <thead><tr><th style="width: 15%"></th><th style="width: 10%"></th><th style="width: 20%"></th><th style="width: 35%"></th><th style="width: 10%"></th><th style="width: 10%"></th></tr></thead>
+                    <tbody>
+                        ${Array(5).fill('<tr>'+Array(6).fill('<td><div class="skeleton-loading skeleton-row"></div></td>').join('')+'</tr>').join('')}
+                    </tbody>
+                </table>
+            </div>`;
+        resultadosDiv.setAttribute('aria-busy', 'true');
+    }
+
+    function showInitialMessage() {
+        const btnToggleFiltros = document.getElementById('btn-toggle-filtros');
+        if (btnToggleFiltros) btnToggleFiltros.style.display = 'none';
+        painelSemResultados.innerHTML = `
+            <div class="alert alert-info text-center" role="status">
+                <i class="fa fa-search fa-2x mb-2"></i><br>
+                Utilize os filtros acima para encontrar as matérias legislativas.
+            </div>`;
+        painelSemResultados.style.display = 'block';
+    }
+
+    function showNoResults() {
+        containerPrincipal.style.display = 'none';
+        painelSemResultados.innerHTML = `
+            <div class="text-center p-4 p-md-5 bg-light rounded border">
+                <div class="mb-3"><i class="fa fa-search-minus fa-3x text-warning"></i></div>
+                <h4 class="fw-bold">Nenhum Registro Encontrado</h4>
+                <p class="text-muted mb-4">Não encontramos matérias que correspondam aos filtros aplicados.</p>
+                <div class="mt-4">
+                    <button class="btn btn-primary btn-lg" id="btn-limpar-filtros-no-results">
+                        <i class="fa fa-times me-2"></i>Limpar Filtros e Tentar Novamente
+                    </button>
+                </div>
+            </div>`;
+        painelSemResultados.style.display = 'block';
+        renderStatsChart(null);
+    }
+
+    function renderizarErro(mensagem) {
+        painelSemResultados.innerHTML = `
+            <div class="alert alert-danger text-center" role="alert">
+                <i class="fa fa-exclamation-triangle"></i> ${sanitizeHTML(mensagem)}
+            </div>`;
+        painelSemResultados.style.display = 'block';
+    }
+
+    async function realizarBusca(page = 1, itensPorPaginaParam = null) {
+        if (!validarFormulario()) return;
+        const itensPorPaginaAtual = itensPorPaginaParam || (itensPorPaginaSelect ? itensPorPaginaSelect.value : '10');
+        document.getElementById('pagina').value = page;
+        pesquisarBtn.disabled = true;
+        pesquisarBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Buscando...';
+        pesquisarBtn.setAttribute('aria-busy', 'true');
+        showSkeletonLoading();
+        try {
+            const params = new URLSearchParams(new FormData(form));
+            params.delete('daterange_input');
+            params.set('pagina', page);
+            params.set('itens_por_pagina', itensPorPaginaAtual);
+            actualizarURL(params);
+            mostrarResumoFiltros(new FormData(form));
+            const response = await fetchWithCache(`materias_legislativas_json?${params.toString()}`);
+            ultimoResultadoMaterias = response;
+            renderizarResultados(response);
+            limparBtn.style.display = 'inline-block';
+            if (bsCollapseFiltros) bsCollapseFiltros.hide();
+        } catch (error) {
+            console.error('Erro na busca:', error);
+            renderizarErro(error.message || 'Ocorreu um erro ao buscar os dados.');
+        } finally {
+            pesquisarBtn.disabled = false;
+            pesquisarBtn.innerHTML = '<i class="fa fa-search"></i> Pesquisar';
+            pesquisarBtn.removeAttribute('aria-busy');
+            resultadosDiv.removeAttribute('aria-busy');
+        }
+    }
+
+    function renderizarResultados(data) {
+        if (!data || data.total === 0) {
+            showNoResults();
+            return;
+        }
+        containerPrincipal.style.display = 'block';
+        painelSemResultados.style.display = 'none';
+        renderStatsChart(data.stats);
+        document.getElementById('btn-toggle-filtros').style.display = 'block';
+        const { page: paginaAtual, per_page: itensPorPagina, total } = data;
+        const inicioFaixa = (paginaAtual - 1) * itensPorPagina + 1;
+        const fimFaixa = Math.min(paginaAtual * itensPorPagina, total);
+        const termosBusca = desAssuntoInput.value;
+        let html = `
+            <div class="d-flex flex-column flex-md-row align-items-center mb-3">
+                <div class="form-group mb-2 mb-md-0 me-md-3">
+                    <label for="itens_por_pagina" class="me-2">Itens por página:</label>
+                    <select class="form-select form-select-sm d-inline-block w-auto" id="itens_por_pagina">
+                        <option value="10" ${itensPorPagina == 10 ? 'selected' : ''}>10</option>
+                        <option value="25" ${itensPorPagina == 25 ? 'selected' : ''}>25</option>
+                        <option value="50" ${itensPorPagina == 50 ? 'selected' : ''}>50</option>
+                        <option value="100" ${itensPorPagina == 100 ? 'selected' : ''}>100</option>
+                    </select>
+                </div>
+                <div class="btn-group btn-group-sm mb-2 mb-md-0">
+                    <button type="button" class="btn btn-outline-primary" id="btn-view-table" title="Tabela">
+                        <i class="fa fa-table"></i> Tabela
+                    </button>
+                    <button type="button" class="btn btn-outline-primary" id="btn-view-cards" title="Cards">
+                        <i class="fa fa-th-large"></i> Cards
+                    </button>
+                </div>
+                <div class="btn-group btn-group-sm mb-2 mb-md-0 ms-md-3">
+                    <button type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fa fa-download"></i> Exportar
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item btn-export" href="#" data-format="csv" data-paginar-exportacao="1">
+                            <i class="fa fa-file-csv text-muted"></i> CSV (página atual)
+                        </a></li>
+                        <li><a class="dropdown-item btn-export" href="#" data-format="excel" data-paginar-exportacao="1">
+                            <i class="fa fa-file-excel text-muted"></i> Excel (página atual)
+                        </a></li>
+                        <li><a class="dropdown-item btn-export" href="#" data-format="pdf" data-paginar-exportacao="1">
+                            <i class="fa fa-file-pdf text-muted"></i> PDF (página atual)
+                        </a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item btn-export" href="#" data-format="csv" data-paginar-exportacao="0">
+                            <i class="fa fa-file-csv text-muted"></i> CSV (todas as páginas)
+                        </a></li>
+                        <li><a class="dropdown-item btn-export" href="#" data-format="excel" data-paginar-exportacao="0">
+                            <i class="fa fa-file-excel text-muted"></i> Excel (todas as páginas)
+                        </a></li>
+                        <li><a class="dropdown-item btn-export" href="#" data-format="pdf" data-paginar-exportacao="0">
+                            <i class="fa fa-file-pdf text-muted"></i> PDF (todas as páginas)
+                        </a></li>
+                    </ul>
+                </div>
+                <p role="status" class="text-center text-md-end mb-0 ms-md-auto">
+                    Exibindo ${inicioFaixa}-${fimFaixa} de <strong>${total}</strong> registros.
+                </p>
+            </div>`;
+        if (currentViewMode === 'table') html += renderTableView(data, termosBusca);
+        else html += renderCardsView(data, termosBusca);
+        html += renderizarPaginacao(data);
+        resultadosDiv.innerHTML = html;
+        document.getElementById('btn-view-table').classList.toggle('active', currentViewMode === 'table');
+        document.getElementById('btn-view-cards').classList.toggle('active', currentViewMode === 'cards');
+        itensPorPaginaSelect = document.getElementById('itens_por_pagina');
+        if (itensPorPaginaSelect) {
+            itensPorPaginaSelect.addEventListener('change', (e) => {
+                realizarBusca(1, e.target.value);
+            });
+        }
+        const triggerEl = document.querySelector('#lista-tab');
+        bootstrap.Tab.getInstance(triggerEl)?.show() || new bootstrap.Tab(triggerEl).show();
+        if (bsCollapseFiltros && document.getElementById('filtro-container').classList.contains('show')) {
+            bsCollapseFiltros.hide();
+            document.getElementById('filtro-container').addEventListener('hidden.bs.collapse', function handler() {
+                scrollParaResultados();
+                this.removeEventListener('hidden.bs.collapse', handler);
+            });
+        } else {
+            scrollParaResultados();
+        }
+    }
+
+    function renderTableView(data, termosBusca) {
+        let html = `
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th width="15%" scope="col" class="sortable-header${ordemCampoInput.value === 'des_tipo_materia' ? ' ' + ordemDirecaoInput.value : ''}" data-sort-field="des_tipo_materia">Tipo</th>
+                            <th scope="col" class="sortable-header${ordemCampoInput.value === 'num_ident_basica' ? ' ' + ordemDirecaoInput.value : ''}" data-sort-field="num_ident_basica">Número</th>
+                            <th scope="col" class="sortable-header${ordemCampoInput.value === 'ano_ident_basica' ? ' ' + ordemDirecaoInput.value : ''}" data-sort-field="ano_ident_basica">Ano</th>
+                            <th scope="col" class="sortable-header${ordemCampoInput.value === 'txt_ementa' ? ' ' + ordemDirecaoInput.value : ''}" data-sort-field="txt_ementa">Ementa</th>
+                            <th width="15%" scope="col" class="sortable-header${ordemCampoInput.value === 'autores' ? ' ' + ordemDirecaoInput.value : ''}" data-sort-field="autores">Autoria</th>
+                            <th scope="col" class="sortable-header${ordemCampoInput.value === 'dat_apresentacao' ? ' ' + ordemDirecaoInput.value : ''}" data-sort-field="dat_apresentacao">Apresentação</th>
+                            <th width="10%" scope="col">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>`;
+        data.data.forEach(materia => {
+            const ementaDestacada = highlightText(sanitizeHTML(materia.txt_ementa || ''), termosBusca);
+            let botoesDocumentos = '';
+            if (materia.url_texto_integral) {
+                botoesDocumentos += `<a href="${materia.url_texto_integral}" class="btn btn-sm btn-outline-primary" target="_blank" title="Texto Integral"><i class="far fa-file-pdf"></i></a>`;
+            }
+            if (materia.url_redacao_final) {
+                botoesDocumentos += `<a href="${materia.url_redacao_final}" class="btn btn-sm btn-outline-success ms-1" target="_blank" title="Redação Final"><i class="fas fa-file-pdf"></i></a>`;
+            }
+            html += `
+                <tr>
+                    <td class="celula-titulo-materia">${sanitizeHTML(materia.des_tipo_materia || '')}</td>
+                    <td class="celula-titulo-materia">${sanitizeHTML(materia.num_ident_basica)}</td>
+                    <td class="celula-titulo-materia">${sanitizeHTML(materia.ano_ident_basica)}</td>
+                    <td>${ementaDestacada}</td>
+                    <td>${materia.autores ? sanitizeHTML(materia.autores) : '<i>Não informada</i>'}</td>
+                    <td>${sanitizeHTML(materia.dat_apresentacao || '')}</td>
+                    <td class="text-nowrap">
+                        ${botoesDocumentos}
+                        <button type="button" class="btn btn-sm btn-outline-primary btn-ver-tramitacao" data-materia-id="${materia.cod_materia}" title="Ver Tramitação Resumida">
+                            <i class="fa fa-sitemap"></i>
+                        </button>
+                        <a href="${materia.detail_url}" class="btn btn-sm btn-outline-primary" title="Ver Detalhes"><i class="fa fa-eye"></i></a>
+                    </td>
+                </tr>`;
+        });
+        html += '</tbody></table></div>';
+        return html;
+    }
+
+    function renderCardsView(data, termosBusca) {
+        let html = '<div class="card-view-container mb-3">';
+        data.data.forEach(materia => {
+            const ementaDestacada = highlightText(sanitizeHTML(materia.txt_ementa || ''), termosBusca);
+            let botoesDocumentos = '';
+            if (materia.url_texto_integral) {
+                botoesDocumentos += `<a href="${materia.url_texto_integral}" class="btn btn-sm btn-outline-primary" target="_blank" title="Texto Integral"><i class="far fa-file-pdf"></i></a>`;
+            }
+            if (materia.url_redacao_final) {
+                botoesDocumentos += `<a href="${materia.url_redacao_final}" class="btn btn-sm btn-outline-success" target="_blank" title="Redação Final"><i class="fas fa-file-pdf"></i></a>`;
+            }
+            html += `
+                <div class="card-materia">
+                    <a href="${materia.detail_url}" class="card-header-custom text-decoration-none">
+                        ${sanitizeHTML(materia.des_tipo_materia || '')} ${sanitizeHTML(materia.num_ident_basica)}/${sanitizeHTML(materia.ano_ident_basica)}
+                    </a>
+                    <div class="card-author">
+                        <i class="fa fa-user-edit fa-fw me-2 text-muted"></i>
+                        ${materia.autores ? sanitizeHTML(materia.autores) : '<i>Autoria não informada</i>'}
+                    </div>
+                    <div class="card-meta-custom">
+                        <i class="fa fa-calendar-alt fa-fw me-2 text-muted"></i>
+                        <span>Apresentação em ${sanitizeHTML(materia.dat_apresentacao || '')}</span>
+                    </div>
+                    <div class="card-body-custom"><strong>Ementa:</strong> ${ementaDestacada}</div>
+                    <div class="card-actions-custom">
+                        ${botoesDocumentos}
+                        <button type="button" class="btn btn-sm btn-outline-primary btn-ver-tramitacao" data-materia-id="${materia.cod_materia}" title="Ver Tramitação Resumida">
+                            <i class="fa fa-sitemap"></i>
+                        </button>
+                    </div>
+                </div>`;
+        });
+        html += '</div>';
+        return html;
+    }
+
+    function renderizarPaginacao(data) {
+        if (data.total_pages <= 1) return '';
+        let html = '<nav id="nav-paginacao" aria-label="Navegação de páginas"><ul class="pagination justify-content-center flex-wrap">';
+        html += `<li class="page-item ${data.page === 1 ? 'disabled' : ''}">
+                <a class="page-link" href="#" data-page="1" title="Primeira página">&laquo;</a>
+            </li>`;
+        html += `<li class="page-item ${!data.has_previous ? 'disabled' : ''}">
+                <a class="page-link" href="#" data-page="${data.page - 1}">&lsaquo;</a>
+            </li>`;
+        const maxPagesToShow = 3;
+        let startPage = Math.max(1, data.page - Math.floor(maxPagesToShow / 2));
+        let endPage = Math.min(data.total_pages, startPage + maxPagesToShow - 1);
+        if (endPage - startPage + 1 < maxPagesToShow) {
+            startPage = Math.max(1, endPage - maxPagesToShow + 1);
+        }
+        if (startPage > 1) {
+            html += `<li class="page-item"><a class="page-link" href="#" data-page="1">1</a></li>`;
+            if (startPage > 2) html += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+        }
+        for (let i = startPage; i <= endPage; i++) {
+            html += `<li class="page-item ${i === data.page ? 'active' : ''}">
+                    <a class="page-link" href="#" data-page="${i}">${i}</a>
+                </li>`;
+        }
+        if (endPage < data.total_pages) {
+            if (endPage < data.total_pages - 1) html += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+            html += `<li class="page-item"><a class="page-link" href="#" data-page="${data.total_pages}">${data.total_pages}</a></li>`;
+        }
+        html += `<li class="page-item ${!data.has_next ? 'disabled' : ''}">
+                <a class="page-link" href="#" data-page="${data.page + 1}">&rsaquo;</a>
+            </li>`;
+        html += `<li class="page-item ${data.page === data.total_pages ? 'disabled' : ''}">
+                <a class="page-link" href="#" data-page="${data.total_pages}" title="Última página">&raquo;</a>
+            </li>`;
+        html += '</ul></nav>';
+        return html;
     }
 
     function renderStatsChart(statsData) {
         const tabButton = document.querySelector('#grafico-tab');
         if (!tabButton) return;
-    
         if (!statsData || Object.keys(statsData).length === 0) {
             tabButton.parentElement.style.display = 'none';
-            if (statsChartInstance) {
-                statsChartInstance.destroy();
-            }
+            if (statsChartInstance) statsChartInstance.destroy();
             return;
         }
-    
         tabButton.parentElement.style.display = 'block';
-
-        if (statsChartInstance) {
-            statsChartInstance.destroy();
-        }
-
+        if (statsChartInstance) statsChartInstance.destroy();
+        const ctx = document.getElementById('stats-chart').getContext('2d');
         const labels = Object.keys(statsData);
         const dataValues = Object.values(statsData);
-        const ctx = document.getElementById('stats-chart').getContext('2d');
 
         statsChartInstance = new Chart(ctx, {
             type: 'bar',
@@ -642,193 +957,295 @@ document.addEventListener('DOMContentLoaded', function () {
             options: {
                 indexAxis: 'y',
                 responsive: true,
-                maintainAspectRatio: true,
                 plugins: {
-                    legend: {
-                        display: false
-                    },
-                    title: {
-                        display: false // Título do gráfico pode ser redundante com o título da seção
+                    legend: { display: false },
+                    tooltip: { enabled: true },
+                    datalabels: {
+                        anchor: 'end',
+                        align: 'end',
+                        color: '#444',
+                        font: { weight: 'bold', size: 12 },
+                        formatter: function(value) { return value; }
                     }
                 },
-                scales: {
-                    x: {
-                        beginAtZero: true,
-                    }
+                scales: { x: { beginAtZero: true } }
+            },
+            plugins: [ChartDataLabels]
+        });
+    }
+
+    function scrollParaResultados() {
+        // Considera header fixo (#page-topbar, 80px) e .topnav (54.75px) se visível
+        const header = document.getElementById('page-topbar');
+        const topnav = document.querySelector('.topnav');
+        let offset = 0;
+        if (header) offset += header.offsetHeight || 80;
+        if (topnav && window.getComputedStyle(topnav).display !== 'none') offset += topnav.offsetHeight || 54.75;
+        const res = resultadosDiv.getBoundingClientRect().top + window.scrollY - offset - 15;
+        window.scrollTo({ top: res, behavior: 'smooth' });
+    }
+
+    function applyViewMode(mode) {
+        if (!ultimoResultadoMaterias) return;
+        currentViewMode = mode;
+        localStorage.setItem('materiaViewMode', mode);
+        renderizarResultados(ultimoResultadoMaterias);
+        setTimeout(scrollParaResultados, 150);
+    }
+
+    function handleExportClick(btn) {
+        const params = new URLSearchParams(new FormData(form));
+        params.set('formato', btn.dataset.format);
+        params.set('paginar_exportacao', btn.dataset.paginarExportacao || '0');
+        if (btn.dataset.paginarExportacao === '1') {
+            params.set('pagina', document.getElementById('pagina').value || '1');
+            params.set('itens_por_pagina', itensPorPaginaSelect ? itensPorPaginaSelect.value : '10');
+        } else {
+            params.delete('pagina');
+            params.delete('itens_por_pagina');
+        }
+        const exportUrl = `${form.getAttribute('action')}?${params.toString()}`;
+        window.open(exportUrl, '_blank');
+    }
+
+    async function handleTramitacaoClick(btn) {
+        const materiaId = btn.dataset.materiaId;
+        const modalTramitacao = new bootstrap.Modal(document.getElementById('modalTramitacao'));
+        const modalBody = document.getElementById('modalTramitacaoBody');
+        const modalTitle = document.getElementById('modalTramitacaoLabel');
+        let materiaIdentificacao = '';
+        const card = btn.closest('.card-materia');
+        const tableRow = btn.closest('tr');
+        if (card) {
+            materiaIdentificacao = card.querySelector('.card-header-custom').textContent.trim();
+        } else if (tableRow) {
+            const tipo = tableRow.cells[0].textContent.trim();
+            const numAno = tableRow.cells[1].textContent.trim();
+            materiaIdentificacao = `${tipo} ${numAno}`;
+        }
+        modalTitle.textContent = `Tramitação: ${materiaIdentificacao}`;
+        modalBody.innerHTML = '<div class="text-center p-5"><i class="fa fa-spinner fa-spin fa-2x"></i><p class="mt-2">Carregando histórico...</p></div>';
+        modalTramitacao.show();
+        try {
+            const response = await fetchWithCache(`tramitacao_materia_json?cod_materia=${materiaId}`);
+            if (response.length === 0) {
+                modalBody.innerHTML = '<p class="text-center">Nenhum histórico de tramitação encontrado para esta matéria.</p>';
+                return;
+            }
+            let timelineHtml = '<div class="timeline">';
+            response.forEach(passo => {
+                timelineHtml += `
+                    <div class="timeline-item ${passo.passo_atual ? 'atual' : 'concluido'}">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <p class="timeline-date">${passo.data}</p>
+                            <h6 class="timeline-title">${sanitizeHTML(passo.status_tramitacao)}</h6>
+                            <p class="timeline-text">
+                                De: <strong>${sanitizeHTML(passo.unidade_origem)}</strong><br>
+                                Para: <strong>${sanitizeHTML(passo.unidade_destino)}</strong>
+                            </p>
+                        </div>
+                    </div>`;
+            });
+            timelineHtml += '</div>';
+            modalBody.innerHTML = timelineHtml;
+        } catch (error) {
+            console.error('Erro ao buscar tramitação:', error);
+            modalBody.innerHTML = `<div class="alert alert-danger">${sanitizeHTML(error.message)}</div>`;
+        }
+    }
+
+    function handleLimparClick() {
+        form.reset();
+        document.querySelectorAll('select').forEach(el => {
+            if (el.tomselect) {
+                el.tomselect.clear();
+                el.tomselect.sync();
+            } else {
+                el.value = '';
+            }
+        });
+        if (daterangePicker) daterangePicker.clear();
+        document.getElementById('dat_apresentacao_hidden').value = '';
+        document.getElementById('dat_apresentacao2_hidden').value = '';
+        ordemCampoInput.value = '';
+        ordemDirecaoInput.value = '';
+        document.getElementById('pagina').value = '1';
+        containerPrincipal.style.display = 'none';
+        resumoFiltrosDiv.style.display = 'none';
+        limparBtn.style.display = 'none';
+        const btnToggleFiltros = document.getElementById('btn-toggle-filtros');
+        if (btnToggleFiltros) btnToggleFiltros.style.display = 'none';
+        showInitialMessage();
+        if (filterClearedToast) filterClearedToast.show();
+        if (bsCollapseFiltros && !document.getElementById('filtro-container').classList.contains('show')) {
+            bsCollapseFiltros.show();
+        }
+        if (bsCollapseAdvancedSearch && advancedSearchDiv.classList.contains('show')) {
+            bsCollapseAdvancedSearch.hide();
+        }
+        contarFiltrosAtivos();
+        mostrarResumoFiltros(new FormData(form));
+        window.history.replaceState({}, document.title, window.location.pathname);
+    }
+
+    function handleRemoveFilter(event) {
+        event.stopPropagation();
+        const badge = event.target.closest('.filter-badge');
+        if (!badge) return;
+        const keyToRemove = badge.dataset.filterKey;
+        const valueToRemove = badge.dataset.filterValue;
+        const element = form.elements[keyToRemove];
+
+        if (keyToRemove === 'tip_id_basica' && element && element.tomselect) {
+            let atual = element.tomselect.getValue();
+            if (Array.isArray(atual)) {
+                atual = atual.filter(v => v != valueToRemove);
+            } else {
+                atual = atual == valueToRemove ? [] : [atual];
+            }
+            element.tomselect.setValue(atual);
+
+            setTimeout(() => {
+                contarFiltrosAtivos();
+                mostrarResumoFiltros(new FormData(form));
+                if (!haFiltrosAtivos()) {
+                    handleLimparClick();
+                } else {
+                    realizarBusca(1);
                 }
+            }, 10);
+            return;
+        }
+
+        if (element) {
+            if (element.tomselect) {
+                if (element.tomselect.isMultiple) {
+                    const valuesToKeep = element.tomselect.getValue().filter(val => !valueToRemove.split(',').includes(val.toString()));
+                    element.tomselect.setValue(valuesToKeep);
+                } else {
+                    element.tomselect.clear();
+                }
+            } else if (element.type === 'checkbox') {
+                element.checked = false;
+            } else if (element.tagName === 'SELECT') {
+                element.value = '';
+            } else if (element.type === 'text' || element.type === 'number') {
+                element.value = '';
             }
-        });
-    }
-
-    function highlightText(text, query) {
-        if (!query || !text) {
-            return text;
         }
-        const escapeRegExp = (string) => {
-            return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        };
-        const terms = query.split(/\s+/).filter(Boolean).map(escapeRegExp);
-        if (terms.length === 0) {
-            return text;
-        }
-        const regex = new RegExp(`(${terms.join('|')})`, 'gi');
-        return text.replace(regex, '<mark>$1</mark>');
-    }
-
-    function validarFormulario() {
-        let isValid = true;
-        numIdentBasicaInput.classList.remove('is-invalid');
-        anoIdentBasicaInput.classList.remove('is-invalid');
-        if (numIdentBasicaFeedback) numIdentBasicaFeedback.style.display = 'none';
-        if (anoIdentBasicaFeedback) anoIdentBasicaFeedback.style.display = 'none';
-
-        if (anoIdentBasicaInput.value && !/^\d{4}$/.test(anoIdentBasicaInput.value)) {
-            anoIdentBasicaInput.classList.add('is-invalid');
-            if (anoIdentBasicaFeedback) {
-                anoIdentBasicaFeedback.style.display = 'block';
-                anoIdentBasicaFeedback.textContent = 'Por favor, insira um ano válido com 4 dígitos.';
+        if (keyToRemove === 'dat_apresentacao') {
+            if (typeof daterangePicker !== 'undefined' && daterangePicker) {
+                daterangePicker.clear();
             }
-            isValid = false;
+            document.getElementById('dat_apresentacao_hidden').value = '';
+            document.getElementById('dat_apresentacao2_hidden').value = '';
         }
-        if (numIdentBasicaInput.value && !/^\d+$/.test(numIdentBasicaInput.value)) {
-            numIdentBasicaInput.classList.add('is-invalid');
-            if (numIdentBasicaFeedback) {
-                numIdentBasicaFeedback.style.display = 'block';
-                numIdentBasicaFeedback.textContent = 'Por favor, insira apenas números.';
+
+        setTimeout(() => {
+            contarFiltrosAtivos();
+            mostrarResumoFiltros(new FormData(form));
+            if (!haFiltrosAtivos()) {
+                handleLimparClick();
+            } else {
+                realizarBusca(1);
             }
-            isValid = false;
+        }, 10);
+    }
+
+    function handleDatePreset(btn) {
+        const preset = btn.dataset.preset;
+        if (!preset) return;
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        let startDate, endDate;
+        switch (preset) {
+            case 'hoje':
+                startDate = today;
+                endDate = today;
+                break;
+            case 'semana':
+                endDate = new Date(today);
+                startDate = new Date(today);
+                startDate.setDate(today.getDate() - 6);
+                break;
+            case 'mes_atual':
+                startDate = new Date(today.getFullYear(), today.getMonth(), 1);
+                endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+                break;
+            case 'mes_passado':
+                const prevMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+                startDate = new Date(prevMonth.getFullYear(), prevMonth.getMonth(), 1);
+                endDate = new Date(prevMonth.getFullYear(), prevMonth.getMonth() + 1, 0);
+                break;
         }
-        return isValid;
-    }
-
-    function showSkeletonLoading() {
-        const resultadosDiv = document.getElementById('resultados');
-        resultadosDiv.innerHTML = `
-            <div class="skeleton-loading" style="height: 20px; width: 200px; margin-bottom: 15px;"></div>
-            <div class="table-responsive">
-                <table class="table">
-                    <thead><tr><th style="width: 15%"></th><th style="width: 10%"></th><th style="width: 20%"></th><th style="width: 35%"></th><th style="width: 10%"></th><th style="width: 10%"></th></tr></thead>
-                    <tbody>
-                        ${Array(5).fill('<tr>'+Array(6).fill('<td><div class="skeleton-loading skeleton-row"></div></td>').join('')+'</tr>').join('')}
-                    </tbody>
-                </table>
-            </div>`;
-        resultadosDiv.setAttribute('aria-busy', 'true');
-    }
-
-    async function carregarTiposMateria() {
-        const selectElement = document.getElementById('tip_id_basica');
-        if (!selectElement) return;
-        const tomselect = new TomSelect(selectElement, {
-            plugins: ['remove_button'],
-            placeholder: 'Carregando tipos de matéria...',
-            maxItems: null,
-            maxOptions: null,
-        });
-        tomselect.disable();
-        try {
-            const response = await fetch('tipos_materia_json');
-            if (!response.ok) throw new Error('Erro na resposta do servidor');
-            const data = await response.json();
-            tomselect.clear();
-            tomselect.clearOptions();
-            if (data.principais && data.principais.length) {
-                tomselect.addOptionGroup('principais', { label: 'Matérias Principais' });
-                data.principais.forEach(item => tomselect.addOption({ value: item.id, text: item.text, optgroup: 'principais' }));
+        if (startDate && endDate) {
+            daterangePicker.setDate([startDate, endDate], true);
+            const onCloseCallback = daterangePicker.config.onClose[0];
+            if (onCloseCallback) {
+                onCloseCallback(daterangePicker.selectedDates, '', daterangePicker);
             }
-            if (data.acessorias && data.acessorias.length) {
-                tomselect.addOptionGroup('acessorias', { label: 'Matérias Acessórias' });
-                data.acessorias.forEach(item => tomselect.addOption({ value: item.id, text: item.text, optgroup: 'acessorias' }));
-            }
-            tomselect.enable();
-            tomselect.settings.placeholder = 'Selecione um ou mais tipos...';
-            tomselect.sync();
-        } catch (error) {
-            console.error("Falha ao carregar Tipos de Matéria:", error);
-            tomselect.settings.placeholder = 'Erro ao carregar tipos!';
-            tomselect.sync();
         }
     }
 
-    async function carregarSelectSimples(endpoint, selector, placeholder) {
-        const selectElement = document.querySelector(selector);
-        if (!selectElement) return;
-        const tomselect = new TomSelect(selectElement, {
-            valueField: 'id',
-            labelField: 'text',
-            searchField: 'text',
-            placeholder: 'Carregando...',
-            plugins: ['clear_button'],
-            maxOptions: null,
-        });
-        tomselect.disable();
-        try {
-            const response = await fetch(endpoint);
-            if (!response.ok) throw new Error(`Erro na resposta do servidor para ${endpoint}`);
-            const data = await response.json();
-            tomselect.clear();
-            tomselect.clearOptions();
-            tomselect.addOptions(data);
-            tomselect.enable();
-            tomselect.settings.placeholder = placeholder;
-            tomselect.sync();
-        } catch (error) {
-            console.error(`Falha ao carregar dados de ${endpoint}:`, error);
-            tomselect.settings.placeholder = 'Erro ao carregar!';
-            tomselect.sync();
-        }
-    }
-
-    function carregarFiltrosAvancados() {
-        if (advancedFiltersLoaded) return;
-        carregarSelectSimples('status_tramitacao_json', '#cod_status', 'Selecione uma situação...');
-        carregarSelectSimples('unidades_tramitacao_json', '#cod_unid_tramitacao', 'Selecione a localização atual...');
-        carregarSelectSimples('unidades_tramitacao_json', '#cod_unid_tramitacao2', 'Selecione onde tramitou...');
-        advancedFiltersLoaded = true;
+    function actualizarURL(params) {
+        const queryString = params.toString();
+        const newUrl = queryString ? `${window.location.pathname}?${queryString}` : window.location.pathname;
+        window.history.pushState({ path: newUrl }, '', newUrl);
     }
 
     function contarFiltrosAtivos() {
-        const formData = new FormData(form);
         let count = 0;
         const camposIgnorados = ['formato', 'rd_ordem', 'pagina', 'ordem_campo', 'ordem_direcao', 'itens_por_pagina'];
-        let tooltipContent = [];
-        const labels = {
-            'tip_id_basica': 'Tipo', 'num_ident_basica': 'Número', 'ano_ident_basica': 'Ano',
-            'des_assunto': 'Assunto/Ementa', 'num_protocolo': 'Protocolo', 'num_processo': 'Processo', 'cod_autor': 'Autoria',
-            'cod_status': 'Situação', 'cod_unid_tramitacao': 'Localização', 'cod_unid_tramitacao2': 'Tramitou Em',
-            'dat_apresentacao': 'Data Apres.',
-            'ind_tramitacao': 'Em Tramitação', 'chk_textual': 'Pesquisa Textual'
-        };
-        for (let [key, value] of formData.entries()) {
-            if (!value || camposIgnorados.includes(key) || key.endsWith('_hidden')) continue;
-            const el = form.elements[key];
-            if (el && el.tomselect && el.tomselect.items.length === 0) continue;
-            if (el && el.type === 'checkbox' && !el.checked) continue;
-            if (el && el.tagName === 'SELECT' && el.type === 'select-one' && el.value === '') continue;
-            count++;
-            if (labels[key]) tooltipContent.push(labels[key]);
+        for (let el of form.elements) {
+            if (!el.name || camposIgnorados.includes(el.name)) continue;
+            if (el.tomselect && el.tomselect.getValue && el.tomselect.getValue().length > 0) { count++; continue; }
+            if (el.type === 'checkbox' && el.checked) { count++; continue; }
+            if (el.tagName === 'SELECT' && el.value !== '') { count++; continue; }
+            if ((el.type === 'text' || el.type === 'number') && el.value.trim() !== '') { count++; continue; }
         }
+        const dataApres1 = document.getElementById('dat_apresentacao_hidden')?.value;
+        const dataApres2 = document.getElementById('dat_apresentacao2_hidden')?.value;
+        if (dataApres1 && dataApres2) count++;
         badgeFiltros.textContent = count;
-        let newTitle = tooltipContent.length > 0 ? "Filtros: " + tooltipContent.join(', ') : "Nenhum filtro ativo";
-        if (bootstrap.Tooltip.getInstance(badgeFiltros)) {
-            bootstrap.Tooltip.getInstance(badgeFiltros).setContent({ '.tooltip-inner': newTitle });
-            badgeFiltros.setAttribute('data-bs-original-title', newTitle);
+        let newTitle = count > 0 ? `${count} filtro(s) ativo(s)` : "Nenhum filtro ativo";
+        const tooltipInstance = bootstrap.Tooltip.getInstance(badgeFiltros);
+        if (tooltipInstance) {
+            tooltipInstance.setContent({ '.tooltip-inner': newTitle });
         } else {
-            badgeFiltros.setAttribute('title', newTitle);
+            new bootstrap.Tooltip(badgeFiltros, { title: newTitle });
         }
     }
 
     function mostrarResumoFiltros(formData) {
         let filtrosAtivosBadges = [];
         const labels = {
-            'tip_id_basica': 'Tipo', 'num_ident_basica': 'Número', 'ano_ident_basica': 'Ano',
-            'des_assunto': 'Assunto/Ementa', 'num_protocolo': 'Protocolo', 'num_processo': 'Processo', 'cod_autor': 'Autoria',
-            'cod_status': 'Situação', 'cod_unid_tramitacao': 'Localização', 'cod_unid_tramitacao2': 'Tramitou Em',
-            'dat_apresentacao': 'Data Apres.',
+            'tip_id_basica': 'Tipo', // ...
+            'num_ident_basica': 'Número', 'ano_ident_basica': 'Ano',
+            'des_assunto': 'Assunto/Ementa', 'num_protocolo': 'Protocolo', 'num_processo': 'Processo',
+            'cod_autor': 'Autoria', 'cod_status': 'Situação', 'cod_unid_tramitacao': 'Localização',
+            'cod_unid_tramitacao2': 'Tramitou Em', 'dat_apresentacao': 'Data Apres.',
             'ind_tramitacao': 'Em Tramitação', 'chk_textual': 'Pesquisa Textual'
         };
         const activeParams = new URLSearchParams(formData);
+
+        // BADGES INDIVIDUAIS PARA TIPO DE MATÉRIA
+        const tiposSelect = form.elements['tip_id_basica'];
+        if (tiposSelect && tiposSelect.tomselect && tiposSelect.tomselect.items.length > 0) {
+            tiposSelect.tomselect.items.forEach(val => {
+                let label = tiposSelect.tomselect.options[val]?.text || val;
+                filtrosAtivosBadges.push(
+                    `<span class="filter-badge" data-filter-key="tip_id_basica" data-filter-value="${val}">
+                        <strong>${labels['tip_id_basica']}</strong>: ${sanitizeHTML(label)}
+                        <button type="button" class="btn-close" aria-label="Remover filtro Tipo"></button>
+                    </span>`
+                );
+            });
+        }
+
+        // Outros campos (exceto tip_id_basica)
         Object.keys(labels).forEach(key => {
+            if (key === 'tip_id_basica') return;
             let valorExibido = '', originalValue = '';
             if (key === 'dat_apresentacao') {
                 const startDate = activeParams.get('dat_apresentacao');
@@ -858,334 +1275,29 @@ document.addEventListener('DOMContentLoaded', function () {
             if (valorExibido) {
                 filtrosAtivosBadges.push(
                     `<span class="filter-badge" data-filter-key="${key}" data-filter-value="${Array.isArray(originalValue) ? originalValue.join(',') : originalValue}">
-                        ${labels[key]}: <strong>${sanitizeHTML(valorExibido)}</strong>
+                        <strong>${labels[key]}</strong>: ${sanitizeHTML(valorExibido)}
                         <button type="button" class="btn-close" aria-label="Remover filtro ${labels[key]}"></button>
                     </span>`
                 );
             }
         });
+
         if (filtrosAtivosBadges.length > 0) {
-            resumoFiltrosDiv.innerHTML = `<div class="alert alert-info py-2" role="status"><strong>Filtros Ativos:</strong> ${filtrosAtivosBadges.join('')}</div>`;
-            resumoFiltrosDiv.querySelectorAll('.filter-badge .btn-close').forEach(button => button.addEventListener('click', handleRemoveFilter));
-        } else {
-            resumoFiltrosDiv.innerHTML = `<div class="alert alert-secondary py-2" role="status"><em>Nenhum filtro foi aplicado. Todos os registros estão sendo exibidos.</em></div>`;
-        }
-    }
-
-    function handleRemoveFilter(event) {
-        const badge = event.target.closest('.filter-badge');
-        if (!badge) return;
-        const keyToRemove = badge.dataset.filterKey;
-        const valueToRemove = badge.dataset.filterValue;
-        const element = form.elements[keyToRemove];
-        if (element) {
-            if (element.tomselect) {
-                if (element.tomselect.isMultiple) {
-                    const valuesToKeep = element.tomselect.getValue().filter(val => !valueToRemove.split(',').includes(val.toString()));
-                    element.tomselect.setValue(valuesToKeep.length > 0 ? valuesToKeep : '');
-                } else {
-                    element.tomselect.clear();
-                }
-            } else if (element.type === 'text' || element.type === 'number') {
-                element.value = '';
-            } else if (element.type === 'checkbox') {
-                element.checked = false;
-            } else if (element.tagName === 'SELECT') {
-                element.value = '';
-            }
-        }
-        if (keyToRemove === 'dat_apresentacao') {
-            daterangePicker.clear();
-            document.getElementById('dat_apresentacao_hidden').value = '';
-            document.getElementById('dat_apresentacao2_hidden').value = '';
-        }
-        ordemCampoInput.value = '';
-        ordemDirecaoInput.value = '';
-        if (keyToRemove === 'des_assunto' && desAssuntoFeedback) {
-            desAssuntoFeedback.style.display = 'none';
-        }
-        realizarBusca(1);
-    }
-
-    function actualizarURL(params) {
-        const queryString = params.toString();
-        const newUrl = queryString ? `${window.location.pathname}?${queryString}` : window.location.pathname;
-        window.history.pushState({ path: newUrl }, '', newUrl);
-    }
-
-    async function realizarBusca(page = 1, itensPorPaginaParam = null) {
-        const advancedSearchCollapseInstance = bootstrap.Collapse.getInstance(advancedSearchDiv);
-        if (advancedSearchCollapseInstance && advancedSearchDiv.classList.contains('show')) {
-            advancedSearchCollapseInstance.hide();
-        }
-        if (!validarFormulario()) return;
-        if (desAssuntoFeedback) desAssuntoFeedback.style.display = 'none';
-        const itensPorPaginaAtual = itensPorPaginaParam || (itensPorPaginaSelect ? itensPorPaginaSelect.value : '10');
-        document.getElementById('pagina').value = page;
-        pesquisarBtn.disabled = true;
-        pesquisarBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Buscando...';
-        pesquisarBtn.setAttribute('aria-busy', 'true');
-        showSkeletonLoading();
-        const params = new URLSearchParams(new FormData(form));
-        params.delete('daterange_input');
-        params.set('pagina', page);
-        params.set('itens_por_pagina', itensPorPaginaAtual);
-        actualizarURL(params);
-        mostrarResumoFiltros(new FormData(form));
-        try {
-            const response = await fetch(`materias_legislativas_json?${params.toString()}`);
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
-                throw new Error(errorData.details || 'Falha na resposta do servidor.');
-            }
-            const data = await response.json();
-            renderizarResultados(data);
-
-            limparBtn.style.display = 'inline-block';
-
-            if (bsCollapseFiltros) {
-                bsCollapseFiltros.hide();
-            }
-
-        } catch (error) {
-            console.error('Erro na busca AJAX:', error);
-            renderizarErro(error.message);
-        } finally {
-            pesquisarBtn.disabled = false;
-            pesquisarBtn.innerHTML = '<i class="fa fa-search"></i> Pesquisar';
-            pesquisarBtn.removeAttribute('aria-busy');
-            const resultadosDiv = document.getElementById('resultados');
-            if (resultadosDiv) {
-                resultadosDiv.removeAttribute('aria-busy');
-            }
-            aplicarClassesOrdenacao();
-        }
-    }
-
-    function applyViewMode(mode) {
-        currentViewMode = mode;
-        localStorage.setItem('materiaViewMode', mode);
-        if (!document.querySelector('#painel-sem-resultados div') && document.querySelector('#resultados div')) {
-             realizarBusca(parseInt(document.getElementById('pagina').value) || 1, itensPorPaginaSelect ? itensPorPaginaSelect.value : '10');
-        }
-    }
-
-    function attachExportListeners() {
-        document.querySelectorAll('.btn-export').forEach(btn => {
-            btn.addEventListener('click', async function(e) {
-                e.preventDefault();
-                const params = new URLSearchParams(new FormData(form));
-                params.set('formato', this.dataset.format);
-                params.set('paginar_exportacao', this.dataset.paginarExportacao || '0');
-                if (this.dataset.paginarExportacao === '1') {
-                    params.set('pagina', document.getElementById('pagina').value || '1');
-                    params.set('itens_por_pagina', itensPorPaginaSelect ? itensPorPaginaSelect.value : '10');
-                } else {
-                    params.delete('pagina');
-                    params.delete('itens_por_pagina');
-                }
-                const exportUrl = `${form.getAttribute('action')}?${params.toString()}`;
-                window.open(exportUrl, '_blank');
-            });
-        });
-    }
-
-    function renderizarResultados(data) {
-        const containerPrincipal = document.getElementById('container-principal-resultados');
-        const painelSemResultados = document.getElementById('painel-sem-resultados');
-
-        painelSemResultados.innerHTML = '';
-        painelSemResultados.style.display = 'none';
-        containerPrincipal.style.display = 'none';
-
-        if (!data || data.total === 0) {
-            painelSemResultados.innerHTML = `
-                <div class="text-center p-4 p-md-5 bg-light rounded border">
-                    <div class="mb-3"><i class="fa fa-search-minus fa-3x text-warning"></i></div>
-                    <h4 class="fw-bold">Nenhum Registro Encontrado</h4>
-                    <p class="text-muted mb-4">Não encontramos matérias que correspondam aos filtros aplicados.</p>
-                    <div class="mt-4">
-                        <button class="btn btn-primary btn-lg" id="btn-limpar-filtros-no-results">
-                            <i class="fa fa-times me-2"></i>Limpar Filtros e Tentar Novamente
-                        </button>
-                    </div>
+            resumoFiltrosDiv.style.display = 'block';
+            resumoFiltrosDiv.innerHTML = `
+                <div class="alert alert-info py-2" role="status">
+                    <strong>Filtros Ativos:</strong> ${filtrosAtivosBadges.join('')}
                 </div>`;
-            const btnLimparNoResults = document.getElementById('btn-limpar-filtros-no-results');
-            if (btnLimparNoResults && limparBtn) {
-                btnLimparNoResults.addEventListener('click', () => limparBtn.click());
-            }
-            painelSemResultados.style.display = 'block';
-            renderStatsChart(null);
-            return;
-        }
-        
-        containerPrincipal.style.display = 'block';
-        
-        renderStatsChart(data.stats);
-
-        const resultadosDiv = document.getElementById('resultados');
-        const { page: paginaAtual, per_page: itensPorPagina, total } = data;
-        const inicioFaixa = (paginaAtual - 1) * itensPorPagina + 1;
-        const fimFaixa = Math.min(paginaAtual * itensPorPagina, total);
-        const termosBusca = desAssuntoInput.value;
-        let html = `
-            <div class="d-flex flex-column flex-md-row align-items-center mb-3">
-                <div class="form-group mb-2 mb-md-0 me-md-3">
-                    <label for="itens_por_pagina" class="me-2">Itens por página:</label>
-                    <select class="form-select form-select-sm d-inline-block w-auto" id="itens_por_pagina">
-                        <option value="10" ${itensPorPagina == 10 ? 'selected' : ''}>10</option>
-                        <option value="25" ${itensPorPagina == 25 ? 'selected' : ''}>25</option>
-                        <option value="50" ${itensPorPagina == 50 ? 'selected' : ''}>50</option>
-                        <option value="100" ${itensPorPagina == 100 ? 'selected' : ''}>100</option>
-                    </select>
-                </div>
-                <div class="btn-group btn-group-sm mb-2 mb-md-0">
-                    <button type="button" class="btn btn-outline-primary ${currentViewMode === 'table' ? 'active' : ''}" id="btn-view-table" title="Tabela"><i class="fa fa-table"></i> Tabela</button>
-                    <button type="button" class="btn btn-outline-primary ${currentViewMode === 'cards' ? 'active' : ''}" id="btn-view-cards" title="Cards"><i class="fa fa-th-large"></i> Cards</button>
-                </div>
-                <div class="btn-group btn-group-sm mb-2 mb-md-0 ms-md-3">
-                    <button type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="fa fa-download"></i> Exportar
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-end">
-                        <li><a class="dropdown-item btn-export" href="#" data-format="csv" data-paginar-exportacao="1"><i class="fa fa-file-csv text-muted"></i> CSV (página atual)</a></li>
-                        <li><a class="dropdown-item btn-export" href="#" data-format="excel" data-paginar-exportacao="1"><i class="fa fa-file-excel text-muted"></i> Excel (página atual)</a></li>
-                        <li><a class="dropdown-item btn-export" href="#" data-format="pdf" data-paginar-exportacao="1"><i class="fa fa-file-pdf text-muted"></i> PDF (página atual)</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item btn-export" href="#" data-format="csv" data-paginar-exportacao="0"><i class="fa fa-file-csv text-muted"></i> CSV (todas as páginas)</a></li>
-                        <li><a class="dropdown-item btn-export" href="#" data-format="excel" data-paginar-exportacao="0"><i class="fa fa-file-excel text-muted"></i> Excel (todas as páginas)</a></li>
-                        <li><a class="dropdown-item btn-export" href="#" data-format="pdf" data-paginar-exportacao="0"><i class="fa fa-file-pdf text-muted"></i> PDF (todas as páginas)</a></li>
-                    </ul>
-                </div>
-                <p role="status" class="text-center text-md-end mb-0 ms-md-auto">Exibindo ${inicioFaixa}-${fimFaixa} de <strong>${total}</strong> registros.</p>
-            </div>`;
-        if (currentViewMode === 'table') {
-            html += `
-                <div class="table-responsive">
-                    <table class="table table-striped table-hover">
-                        <thead class="table-light">
-                            <tr>
-                                <th width="15%" scope="col" class="sortable-header" data-sort-field="des_tipo_materia">Tipo</th>
-                                <th scope="col" class="sortable-header" data-sort-field="num_ident_basica">Número/Ano</th>
-                                <th scope="col">Autoria</th>
-                                <th scope="col" class="sortable-header" data-sort-field="txt_ementa">Ementa</th>
-                                <th scope="col" class="sortable-header" data-sort-field="dat_apresentacao">Apresentação</th>
-                                <th width="10%" scope="col">Ações</th>
-                            </tr>
-                        </thead><tbody>`;
-            data.data.forEach(materia => {
-                const ementaDestacada = highlightText(sanitizeHTML(materia.txt_ementa || ''), termosBusca);
-                let botoesDocumentos = '';
-                if (materia.url_texto_integral) botoesDocumentos += `<a href="${materia.url_texto_integral}" class="btn btn-sm btn-outline-primary" target="_blank" title="Texto Integral"><i class="far fa-file-pdf"></i></a>`;
-                if (materia.url_redacao_final) botoesDocumentos += `<a href="${materia.url_redacao_final}" class="btn btn-sm btn-outline-success" target="_blank" title="Redação Final"><i class="fas fa-file-pdf"></i></a>`;
-                html += `<tr>
-                            <td class="celula-titulo-materia">${sanitizeHTML(materia.des_tipo_materia || '')}</td>
-                            <td class="celula-titulo-materia">${sanitizeHTML(materia.num_ident_basica)}/${sanitizeHTML(materia.ano_ident_basica)}</td>
-                            <td>${materia.autores ? sanitizeHTML(materia.autores) : '<i>Não informada</i>'}</td>
-                            <td>${ementaDestacada}</td>
-                            <td>${sanitizeHTML(materia.dat_apresentacao || '')}</td>
-                            <td class="text-nowrap">
-                                ${botoesDocumentos}
-                                <button type="button" class="btn btn-sm btn-outline-primary btn-ver-tramitacao" data-materia-id="${materia.cod_materia}" title="Ver Tramitação Resumida">
-                                    <i class="fa fa-sitemap"></i>
-                                </button>
-                                <a href="${materia.detail_url}" class="btn btn-sm btn-outline-primary" title="Ver Detalhes"><i class="fa fa-eye"></i></a>
-                            </td>
-                        </tr>`;
-            });
-            html += '</tbody></table></div>';
         } else {
-            html += `<div class="card-view-container mb-3">`;
-            data.data.forEach(materia => {
-                const ementaDestacada = highlightText(sanitizeHTML(materia.txt_ementa || ''), termosBusca);
-                let botoesDocumentos = '';
-                if (materia.url_texto_integral) botoesDocumentos += `<a href="${materia.url_texto_integral}" class="btn btn-sm btn-outline-primary" target="_blank" title="Texto Integral"><i class="far fa-file-pdf"></i></a>`;
-                if (materia.url_redacao_final) botoesDocumentos += `<a href="${materia.url_redacao_final}" class="btn btn-sm btn-outline-success" target="_blank" title="Redação Final"><i class="fas fa-file-pdf"></i></a>`;
-                html += `<div class="card-materia">
-                            <a href="${materia.detail_url}" class="card-header-custom text-decoration-none">
-                                ${sanitizeHTML(materia.des_tipo_materia || '')} ${sanitizeHTML(materia.num_ident_basica)}/${sanitizeHTML(materia.ano_ident_basica)}
-                            </a>
-                            <div class="card-author">
-                                <i class="fa fa-user-edit fa-fw me-2 text-muted"></i>
-                                ${materia.autores ? sanitizeHTML(materia.autores) : '<i>Autoria não informada</i>'}
-                            </div>
-                            <div class="card-meta-custom">
-                                <i class="fa fa-calendar-alt fa-fw me-2 text-muted"></i>
-                                <span>Apresentação em ${sanitizeHTML(materia.dat_apresentacao || '')}</span>
-                            </div>
-                            <div class="card-body-custom"><strong>Ementa:</strong> ${ementaDestacada}</div>
-                            <div class="card-actions-custom">
-                                ${botoesDocumentos}
-                                <button type="button" class="btn btn-sm btn-outline-primary btn-ver-tramitacao" data-materia-id="${materia.cod_materia}" title="Ver Tramitação Resumida">
-                                    <i class="fa fa-sitemap"></i>
-                                </button>
-                            </div>
-                        </div>`;
-            });
-            html += `</div>`;
+            resumoFiltrosDiv.style.display = 'none';
+            resumoFiltrosDiv.innerHTML = '';
         }
-        html += renderizarPaginacao(data);
-        resultadosDiv.innerHTML = html;
-
-        document.getElementById('btn-view-table').addEventListener('click', () => applyViewMode('table'));
-        document.getElementById('btn-view-cards').addEventListener('click', () => applyViewMode('cards'));
-        itensPorPaginaSelect = document.getElementById('itens_por_pagina');
-        if(itensPorPaginaSelect) {
-            itensPorPaginaSelect.addEventListener('change', (e) => realizarBusca(1, e.target.value));
-        }
-        document.querySelectorAll('.sortable-header').forEach(h => h.addEventListener('click', handleColumnSort));
-        const navPaginacao = document.getElementById('nav-paginacao');
-        if (navPaginacao) {
-            navPaginacao.addEventListener('click', e => {
-                const pageLink = e.target.closest('a.page-link');
-                if (pageLink && pageLink.dataset.page && !pageLink.closest('.page-item.disabled')) {
-                    e.preventDefault();
-                    realizarBusca(parseInt(pageLink.dataset.page), itensPorPaginaSelect ? itensPorPaginaSelect.value : '10');
-                }
-            });
-        }
-        attachExportListeners();
-        
-        const triggerEl = document.querySelector('#lista-tab');
-        bootstrap.Tab.getInstance(triggerEl)?.show() || new bootstrap.Tab(triggerEl).show();
-    }
-
-    function renderizarPaginacao(data) {
-        if (data.total_pages <= 1) return '';
-        let html = '<nav id="nav-paginacao" aria-label="Navegação de páginas"><ul class="pagination justify-content-center flex-wrap">';
-        html += `<li class="page-item ${!data.has_previous ? 'disabled' : ''}"><a class="page-link" href="#" data-page="${data.page - 1}">&laquo;</a></li>`;
-        const maxPagesToShow = 5;
-        let startPage = Math.max(1, data.page - Math.floor(maxPagesToShow / 2));
-        let endPage = Math.min(data.total_pages, startPage + maxPagesToShow - 1);
-        if (endPage - startPage + 1 < maxPagesToShow) startPage = Math.max(1, endPage - maxPagesToShow + 1);
-        if (startPage > 1) {
-            html += `<li class="page-item"><a class="page-link" href="#" data-page="1">1</a></li>`;
-            if (startPage > 2) html += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
-        }
-        for (let i = startPage; i <= endPage; i++) {
-            html += `<li class="page-item ${i === data.page ? 'active' : ''}"><a class="page-link" href="#" data-page="${i}">${i}</a></li>`;
-        }
-        if (endPage < data.total_pages) {
-            if (endPage < data.total_pages - 1) html += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
-            html += `<li class="page-item"><a class="page-link" href="#" data-page="${data.total_pages}">${data.total_pages}</a></li>`;
-        }
-        html += `<li class="page-item ${!data.has_next ? 'disabled' : ''}"><a class="page-link" href="#" data-page="${data.page + 1}">&raquo;</a></li>`;
-        html += '</ul></nav>';
-        return html;
-    }
-
-    function renderizarErro(mensagem) {
-        const painelSemResultados = document.getElementById('painel-sem-resultados');
-        painelSemResultados.innerHTML = `<div class="alert alert-danger text-center" role="alert"><i class="fa fa-exclamation-triangle"></i> ${sanitizeHTML(mensagem)}</div>`;
-        painelSemResultados.style.display = 'block';
     }
 
     function popularFormPelaURL() {
         const params = new URLSearchParams(window.location.search);
         if (!params.toString()) return;
-
         const uniqueKeys = [...new Set(params.keys())];
-
         uniqueKeys.forEach(key => {
             const el = form.elements[key];
             if (el) {
@@ -1205,7 +1317,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             }
         });
-        
         const startDateParam = params.get('dat_apresentacao');
         const endDateParam = params.get('dat_apresentacao2');
         if (startDateParam || endDateParam) {
@@ -1215,170 +1326,154 @@ document.addEventListener('DOMContentLoaded', function () {
         }
         ordemCampoInput.value = params.get('ordem_campo') || '';
         ordemDirecaoInput.value = params.get('ordem_direcao') || '';
-        aplicarClassesOrdenacao();
-
-        const hasAdvancedFilterInURL = ['num_protocolo', 'num_processo', 'cod_status', 'cod_unid_tramitacao', 'cod_unid_tramitacao2', 'ind_tramitacao', 'chk_textual'].some(field => params.has(field)) || startDateParam || endDateParam;
+        const hasAdvancedFilterInURL = ['num_protocolo', 'num_processo', 'cod_status', 'cod_unid_tramitacao', 
+                                      'cod_unid_tramitacao2', 'ind_tramitacao', 'chk_textual'].some(field => params.has(field)) || 
+                                      startDateParam || endDateParam;
         if (hasAdvancedFilterInURL) {
             carregarFiltrosAvancados();
-            if (advancedSearchDiv && !advancedSearchDiv.classList.contains('show')) {
-                new bootstrap.Collapse(advancedSearchDiv).show();
-            }
         }
-
         contarFiltrosAtivos();
-        realizarBusca(parseInt(params.get('pagina') || '1', 10), params.get('itens_por_pagina') || '10');
+        realizarBusca(
+           parseInt(params.get('pagina') || '1'),  
+           params.get('itens_por_pagina') || '10'
+        );
     }
-
-    function handleColumnSort(event) {
-        const field = event.currentTarget.dataset.sortField;
-        if (!field) return;
-        let direction = 'asc';
-        if (ordemCampoInput.value === field && ordemDirecaoInput.value === 'asc') {
-            direction = 'desc';
-        }
-        ordemCampoInput.value = field;
-        ordemDirecaoInput.value = direction;
-        const rdOrdem = document.querySelector('input[name="rd_ordem"]:checked');
-        if (rdOrdem) rdOrdem.checked = false;
-        realizarBusca(1);
-    }
-    
-    function aplicarClassesOrdenacao() {
-        document.querySelectorAll('.sortable-header').forEach(header => {
-            header.classList.remove('asc', 'desc');
-            if (header.dataset.sortField === ordemCampoInput.value) {
-                header.classList.add(ordemDirecaoInput.value);
-            }
-        });
-    }
-    
-    form.addEventListener('submit', e => { e.preventDefault(); realizarBusca(1); });
-    
-    limparBtn.addEventListener('click', () => {
-        window.history.pushState({}, '', window.location.pathname);
-        form.reset();
-        document.querySelectorAll('select.form-control, select.form-select').forEach(el => {
-            if (el.tomselect) el.tomselect.clear();
-        });
-        if (daterangePicker) daterangePicker.clear();
-        document.getElementById('dat_apresentacao_hidden').value = '';
-        document.getElementById('dat_apresentacao2_hidden').value = '';
-        ordemCampoInput.value = '';
-        ordemDirecaoInput.value = '';
-        aplicarClassesOrdenacao();
-        if (itensPorPaginaSelect) itensPorPaginaSelect.value = '10';
-        document.getElementById('rd_ordem_1').checked = true;
-        document.getElementById('container-principal-resultados').style.display = 'none';
-        document.getElementById('painel-sem-resultados').innerHTML = '';
-        resumoFiltrosDiv.innerHTML = '';
-        limparBtn.style.display = 'none';
-        if (desAssuntoFeedback) desAssuntoFeedback.style.display = 'none';
-        contarFiltrosAtivos();
-        if (filterClearedToast) filterClearedToast.show();
-        if (bsCollapseFiltros) {
-            bsCollapseFiltros.show();
-        }
-        btnToggleFiltros.style.display = 'none';
-        const initialMessageDiv = document.getElementById('painel-sem-resultados');
-        if(initialMessageDiv) initialMessageDiv.innerHTML = `<div class="alert alert-info text-center" role="status"><i class="fa fa-search fa-2x mb-2"></i><br>Utilize os filtros acima para encontrar as matérias legislativas.</div>`;
-
-    });
-
-    if (filterClearedToastEl) filterClearedToast = new bootstrap.Toast(filterClearedToastEl, { delay: 3000 });
-    [...document.querySelectorAll('[data-bs-toggle="tooltip"]')].map(el => new bootstrap.Tooltip(el));
 
     advancedSearchDiv.addEventListener('show.bs.collapse', carregarFiltrosAvancados, { once: true });
 
-    const toggleIcon = document.querySelector('.filter-toggle-icon');
-    if (advancedSearchDiv && toggleIcon) {
-        advancedSearchDiv.addEventListener('show.bs.collapse', function () {
-            toggleIcon.classList.add('expanded');
+    async function carregarTiposMateria() {
+        const selectElement = document.getElementById('tip_id_basica');
+        if (!selectElement) return;
+        selectElement.dataset.tomselect = true;
+        const tomselect = new TomSelect(selectElement, {
+            plugins: ['remove_button'],
+            placeholder: 'Carregando tipos de matéria...',
+            maxItems: null,
+            maxOptions: null,
+            onInitialize: function() { this.wrapper.dataset.tomselectInitialized = true; }
         });
-        advancedSearchDiv.addEventListener('hide.bs.collapse', function () {
-            toggleIcon.classList.remove('expanded');
-        });
+        tomselect.disable();
+        try {
+            const data = await fetchWithCache('tipos_materia_json');
+            tomselect.clear();
+            tomselect.clearOptions();
+            if (data.principais && data.principais.length) {
+                tomselect.addOptionGroup('principais', { label: 'Matérias Principais' });
+                data.principais.forEach(item => tomselect.addOption({ 
+                    value: item.id, 
+                    text: item.text, 
+                    optgroup: 'principais' 
+                }));
+            }
+            if (data.acessorias && data.acessorias.length) {
+                tomselect.addOptionGroup('acessorias', { label: 'Matérias Acessórias' });
+                data.acessorias.forEach(item => tomselect.addOption({ 
+                    value: item.id, 
+                    text: item.text, 
+                    optgroup: 'acessorias' 
+                }));
+            }
+            tomselect.enable();
+            tomselect.settings.placeholder = 'Selecione um ou mais tipos...';
+            tomselect.sync();
+        } catch (error) {
+            console.error("Falha ao carregar Tipos de Matéria:", error);
+            tomselect.settings.placeholder = 'Erro ao carregar tipos!';
+            tomselect.sync();
+        }
     }
 
-    const modalTramitacaoEl = document.getElementById('modalTramitacao');
-    if (modalTramitacaoEl) {
-        const modalTramitacao = new bootstrap.Modal(modalTramitacaoEl);
-        const modalBody = document.getElementById('modalTramitacaoBody');
-        const modalTitle = document.getElementById('modalTramitacaoLabel');
-
-        document.body.addEventListener('click', async function (event) {
-            const target = event.target.closest('.btn-ver-tramitacao');
-            if (!target) return;
-
-            const materiaId = target.dataset.materiaId;
-            const card = target.closest('.card-materia');
-            const tableRow = target.closest('tr');
-            let materiaIdentificacao = '';
-
-            if (card) {
-                 materiaIdentificacao = card.querySelector('.card-header-custom').textContent.trim();
-            } else if (tableRow) {
-                const tipo = tableRow.cells[0].textContent.trim();
-                const numAno = tableRow.cells[1].textContent.trim();
-                materiaIdentificacao = `${tipo} ${numAno}`;
-            }
-
-            modalTitle.textContent = `Tramitação: ${materiaIdentificacao}`;
-            modalBody.innerHTML = '<div class="text-center p-5"><i class="fa fa-spinner fa-spin fa-2x"></i><p class="mt-2">Carregando histórico...</p></div>';
-            modalTramitacao.show();
-
-            try {
-                const response = await fetch(`tramitacao_materia_json?cod_materia=${materiaId}`);
-                if (!response.ok) {
-                    throw new Error('Não foi possível carregar os dados da tramitação.');
-                }
-                const tramitacao = await response.json();
-
-                if (tramitacao.length === 0) {
-                    modalBody.innerHTML = '<p class="text-center">Nenhum histórico de tramitação encontrado para esta matéria.</p>';
-                    return;
-                }
-
-                let timelineHtml = '<div class="timeline">';
-                tramitacao.forEach(passo => {
-                    timelineHtml += `
-                        <div class="timeline-item ${passo.passo_atual ? 'atual' : 'concluido'}">
-                            <div class="timeline-dot"></div>
-                            <div class="timeline-content">
-                                <p class="timeline-date">${passo.data}</p>
-                                <h6 class="timeline-title">${sanitizeHTML(passo.status_tramitacao)}</h6>
-                                <p class="timeline-text">
-                                    De: <strong>${sanitizeHTML(passo.unidade_origem)}</strong><br>
-                                    Para: <strong>${sanitizeHTML(passo.unidade_destino)}</strong>
-                                </p>
-                            </div>
-                        </div>
-                    `;
-                });
-                timelineHtml += '</div>';
-                modalBody.innerHTML = timelineHtml;
-
-            } catch (error) {
-                console.error('Erro ao buscar tramitação:', error);
-                modalBody.innerHTML = `<div class="alert alert-danger">${sanitizeHTML(error.message)}</div>`;
-            }
+    async function carregarSelectSimples(endpoint, selector, placeholder) {
+        const selectElement = document.querySelector(selector);
+        if (!selectElement) return;
+        const tomselect = new TomSelect(selectElement, {
+            valueField: 'id',
+            labelField: 'text',
+            searchField: 'text',
+            placeholder: 'Carregando...',
+            plugins: ['clear_button'],
+            maxOptions: null,
         });
+        tomselect.disable();
+        try {
+            const data = await fetchWithCache(endpoint);
+            tomselect.clear();
+            tomselect.clearOptions();
+            tomselect.addOptions(data);
+            tomselect.enable();
+            tomselect.settings.placeholder = placeholder;
+            tomselect.sync();
+        } catch (error) {
+            console.error(`Falha ao carregar dados de ${endpoint}:`, error);
+            tomselect.settings.placeholder = 'Erro ao carregar!';
+            tomselect.sync();
+        }
     }
 
-    const promessaTipos = carregarTiposMateria();
-    const promessaAutores = carregarSelectSimples('autores_json', '#cod_autor', 'Selecione um autor...');
+    function carregarFiltrosAvancados() {
+        if (advancedFiltersLoaded) return;
+        carregarSelectSimples('status_tramitacao_json', '#cod_status', 'Selecione uma situação...');
+        carregarSelectSimples('unidades_tramitacao_json', '#cod_unid_tramitacao', 'Selecione a localização atual...');
+        carregarSelectSimples('unidades_tramitacao_json', '#cod_unid_tramitacao2', 'Selecione onde tramitou...');
+        advancedFiltersLoaded = true;
+    }
 
-    Promise.all([promessaTipos, promessaAutores]).then(() => {
-        console.log("Dados iniciais carregados, processando URL...");
+    function highlightText(text, query) {
+        if (!query || !text) return text;
+        const escapeRegExp = (string) => string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const terms = query.split(/\s+/).filter(Boolean).map(escapeRegExp);
+        if (terms.length === 0) return text;
+        const regex = new RegExp(`(${terms.join('|')})`, 'gi');
+        return text.replace(regex, '<mark>$1</mark>');
+    }
+
+    function sanitizeHTML(str) {
+        if (!str) return '';
+        const temp = document.createElement('div');
+        temp.textContent = str;
+        return temp.innerHTML;
+    }
+
+    Promise.all([
+        carregarTiposMateria(),
+        carregarSelectSimples('autores_json', '#cod_autor', 'Selecione um autor...')
+    ]).then(() => {
         if (window.location.search) {
             popularFormPelaURL();
         } else {
             contarFiltrosAtivos();
-            const initialMessageDiv = document.getElementById('painel-sem-resultados');
-            if(initialMessageDiv) initialMessageDiv.innerHTML = `<div class="alert alert-info text-center" role="status"><i class="fa fa-search fa-2x mb-2"></i><br>Utilize os filtros acima para encontrar as matérias legislativas.</div>`;
+            showInitialMessage();
         }
     }).catch(error => {
-        console.error("Erro fatal ao carregar dados iniciais dos filtros:", error);
-        renderizarErro("Não foi possível carregar os filtros necessários para a busca. Por favor, recarregue a página.");
+        console.error("Erro ao carregar dados iniciais:", error);
+        renderizarErro("Não foi possível carregar os filtros. Recarregue a página.");
+    });
+
+    advancedSearchDiv.addEventListener('show.bs.collapse', carregarFiltrosAvancados, { once: true });
+
+    resultadosDiv.addEventListener('click', function(e) {
+        const pageLink = e.target.closest('.page-link');
+        if (pageLink && pageLink.hasAttribute('data-page')) {
+            e.preventDefault();
+            const page = parseInt(pageLink.getAttribute('data-page'), 10);
+            if (!isNaN(page)) {
+                realizarBusca(page, itensPorPaginaSelect ? itensPorPaginaSelect.value : '10');
+            }
+        }
+    });
+
+    resultadosDiv.addEventListener('click', function(event) {
+        const th = event.target.closest('.sortable-header');
+        if (!th) return;
+        const campo = th.dataset.sortField;
+        if (!campo) return;
+        let direcao = 'asc';
+        if (ordemCampoInput.value === campo) {
+            direcao = ordemDirecaoInput.value === 'asc' ? 'desc' : 'asc';
+        }
+        ordemCampoInput.value = campo;
+        ordemDirecaoInput.value = direcao;
+        realizarBusca(1);
     });
 });
 </script>

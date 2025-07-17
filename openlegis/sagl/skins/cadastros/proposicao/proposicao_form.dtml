@@ -392,8 +392,10 @@ body {
   <dtml-if expr="AUTHENTICATED_USER.has_role(['Assessor Parlamentar'])">
     <dtml-in expr="zsql.assessor_parlamentar_obter_zsql(col_username=AUTHENTICATED_USER.getUserName())">
       <dtml-in expr="zsql.autor_obter_zsql(cod_parlamentar=cod_parlamentar)">
+         <dtml-in expr="zsql.tipo_autor_obter_zsql(tip_autor=tip_autor)">
             <dtml-call expr="REQUEST.set('tip_proposicao_perm',tip_proposicao_sel)">
             <dtml-call expr="REQUEST.set('des_tipo_autor',des_tipo_autor)">
+         </dtml-in>
       </dtml-in>
     </dtml-in>
 

@@ -890,7 +890,7 @@ body {
 				</div>
 			    <dtml-else>
 				<label class="form-label required-field" for="txt_descricao">Ementa</label>
-				<textarea class="form-control auto-resize" id="txt_descricao" name="txt_descricao" rows="3"><dtml-var txt_descricao missing></textarea>
+				<textarea class="form-control auto-resize" id="txt_descricao" name="txt_descricao" rows="3" ><dtml-var txt_descricao missing></textarea>
 				<div class="help-text">Preencha a ementa de acordo com o tipo de proposição</div>
 			    </dtml-if>
 			</div>
@@ -2062,6 +2062,18 @@ var ProposicaoManager = (function() {
                 }
             } else if (desTipoProposicao === 'Requerimento') {
               $("#accordionMaps").slideDown(300);
+                if (_emRevisao && !_tem_pdf) {
+                    _domCache.txtDescricao.prop('readonly', false).removeClass('bg-light');
+                    _aplicarReadonlySelect2('#lst_assunto', false);
+                } else {
+                    if (_tem_pdf || _campoAssuntoBloqueado) {
+                        _domCache.txtDescricao.prop('readonly', true).addClass('bg-light');
+                        _aplicarReadonlySelect2('#lst_assunto', true);
+                    } else {
+                        _domCache.txtDescricao.prop('readonly', false).removeClass('bg-light');
+                        _aplicarReadonlySelect2('#lst_assunto', false);
+                    }
+                }
               // regras específicas de Requerimento (se houver)
             } else {
                 // Outros tipos

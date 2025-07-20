@@ -392,6 +392,29 @@
   </div>
 </div>
 
+<!-- Modal de confirmação da data de apresentação -->
+<div class="modal fade" id="modal-data-apresentacao" tabindex="-1" aria-labelledby="modalDataApresentacaoLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalDataApresentacaoLabel"><i class="fas fa-calendar-plus me-2"></i> Incorporar Proposições</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+      </div>
+      <div class="modal-body">
+        <label for="input-data-apresentacao" class="form-label">Informe a data de apresentação das matérias:</label>
+        <input type="date" class="form-control" id="input-data-apresentacao" name="data_apresentacao" required>
+        <div class="form-text">Essa data será registrada como data de apresentação nas matérias geradas.</div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-primary" id="btn-confirmar-incorporacao">
+          <i class="fas fa-check-circle me-1"></i> Confirmar Incorporação
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <dtml-var js_slot>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.21/lodash.min.js"></script>
@@ -1145,34 +1168,53 @@ function handleTabChange(e) {
 }
 
 // --- INCORPORAR LOTE ---
-$('#btn-incorporar-lote').on('click', async function() {
+$('#btn-incorporar-lote').on('click', function() {
+  const hoje = new Date().toISOString().split('T')[0];
+  $('#input-data-apresentacao').val(hoje);
+  const modal = new bootstrap.Modal(document.getElementById('modal-data-apresentacao'));
+  modal.show();
+});
+
+$('#btn-confirmar-incorporacao').on('click', async function () {
+  const dataApresentacao = $('#input-data-apresentacao').val();
   const ids = getSelecionadosParaLote();
-  if (!ids.length) return;
-  $(this).prop('disabled', true);
+  if (!dataApresentacao || !ids.length) {
+    showToast('Informe uma data válida e selecione pelo menos uma proposição.', 'danger');
+    return;
+  }
+
+  $('#btn-confirmar-incorporacao').prop('disabled', true);
   showSpinner(true);
+
   try {
     const resp = await $.ajax({
       method: 'POST',
       url: APP_CONFIG.PORTAL_URL + '/proposicoes-incorporar-lote',
-      data: { proposicoes_ids: JSON.stringify(ids) }
+      data: {
+        proposicoes_ids: JSON.stringify(ids),
+        data_apresentacao: dataApresentacao
+      }
     });
-    let msg = 'Incorporação em lote solicitada com sucesso!';
-    if (resp && resp.resultados && resp.resultados.length > 0) {
+
+    let msg = 'Incorporação em lote realizada com sucesso!';
+    if (resp && resp.resultados?.length > 0) {
       const ok = resp.resultados.filter(r => r.resultado === 'ok').length;
       const erro = resp.resultados.length - ok;
-      msg = `✅ ${ok} proposição(ões) incorporada(s)` +
-            (erro ? `, ${erro} falhou(aram)` : '') + '.';
+      msg = `✅ ${ok} incorporada(s)` + (erro ? `, ❌ ${erro} com erro(s)` : '') + '.';
     }
+
     showToast(msg, 'success');
+    $('#modal-data-apresentacao').modal('hide');
     window.appState.selecaoLote = new Set();
     updateBotaoLote();
     loadData(window.appState.currentCaixa, window.appState.currentPage, true);
     loadCounts();
+
   } catch (e) {
-    showToast('Falha ao incorporar em lote', 'danger');
+    showToast('Erro ao incorporar proposições.', 'danger');
   } finally {
+    $('#btn-confirmar-incorporacao').prop('disabled', false);
     showSpinner(false);
-    $(this).prop('disabled', false);
   }
 });
 

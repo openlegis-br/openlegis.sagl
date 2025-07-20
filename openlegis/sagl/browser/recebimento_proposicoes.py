@@ -587,36 +587,43 @@ class IncorporarLoteProtocolo(grok.View, ProposicoesAPIBase):
     grok.require('zope2.View')
 
     def render(self):
-        # Aceita apenas POST!
         if self.request.method != 'POST':
             self.request.response.setStatus(405)
             return json.dumps({'sucesso': False, 'erro': 'Método não permitido.'})
+
         session = Session()
         try:
             if not self._verificar_permissao_caixa('protocolo'):
                 self.request.response.setStatus(403)
                 return json.dumps({'sucesso': False, 'erro': 'Acesso não autorizado.'})
 
-            # IDs recebidos do frontend: lista de cod_proposicao (ex: [12, 13, 15])
             proposicoes_ids = self.request.form.get('proposicoes_ids')
             if not proposicoes_ids:
                 return json.dumps({'sucesso': False, 'erro': 'Nenhuma proposição informada.'})
 
-            # Garante lista de ints:
             if isinstance(proposicoes_ids, str):
                 import json as _json
                 proposicoes_ids = _json.loads(proposicoes_ids)
             proposicoes_ids = [int(x) for x in proposicoes_ids]
 
-            # Consulta só proposições válidas para incorporação em lote:
+            # Captura e valida a data de apresentação
+            data_apresentacao_str = self.request.form.get('data_apresentacao')
+            if not data_apresentacao_str:
+                return json.dumps({'sucesso': False, 'erro': 'Data de apresentação não informada.'})
+
+            try:
+                data_apresentacao = datetime.strptime(data_apresentacao_str, '%Y-%m-%d').date()
+            except Exception:
+                return json.dumps({'sucesso': False, 'erro': 'Data de apresentação inválida.'})
+
             props = (
                 session.query(Proposicao)
                 .join(Proposicao.tipo_proposicao)
                 .filter(
                     Proposicao.cod_proposicao.in_(proposicoes_ids),
                     Proposicao.ind_excluido == 0,
-                    Proposicao.cod_mat_ou_doc == None,  # ainda não incorporada
-                    TipoProposicao.ind_mat_ou_doc == 'M',   # agora correto!
+                    Proposicao.cod_mat_ou_doc == None,
+                    TipoProposicao.ind_mat_ou_doc == 'M',
                     Proposicao.dat_solicitacao_devolucao == None,
                     Proposicao.dat_devolucao == None
                 ).all()
@@ -625,18 +632,27 @@ class IncorporarLoteProtocolo(grok.View, ProposicoesAPIBase):
             if not props:
                 return json.dumps({'sucesso': False, 'erro': 'Nenhuma proposição válida para incorporação.'})
 
-            # Agora, para cada proposição, chama o script criar_materia_pysc via restrictedTraverse
             portal = self.request.PARENTS[0]
             context = portal
             resultados = []
+
             for prop in props:
                 try:
-                    # Executa o script (adaptando para contexto Zope)
-                    result = context.restrictedTraverse('cadastros/recebimento_proposicao/criar_materia_pysc')(cod_proposicao=prop.cod_proposicao)
+                    criar_materia = context.restrictedTraverse(
+                        'cadastros/recebimento_proposicao/criar_materia_pysc'
+                    )
+                    criar_materia(
+                        cod_proposicao=prop.cod_proposicao,
+                        data_apresentacao=data_apresentacao
+                    )
                     resultados.append({'cod_proposicao': prop.cod_proposicao, 'resultado': 'ok'})
                 except Exception as e:
                     logger.warning('Falha ao incorporar proposição %s: %s', prop.cod_proposicao, e)
-                    resultados.append({'cod_proposicao': prop.cod_proposicao, 'resultado': 'erro', 'erro': str(e)})
+                    resultados.append({
+                        'cod_proposicao': prop.cod_proposicao,
+                        'resultado': 'erro',
+                        'erro': str(e)
+                    })
 
             return json.dumps({'sucesso': True, 'resultados': resultados})
 
@@ -644,9 +660,10 @@ class IncorporarLoteProtocolo(grok.View, ProposicoesAPIBase):
             logger.exception("Erro na incorporação em lote")
             self.request.response.setStatus(500)
             return json.dumps({'sucesso': False, 'erro': str(e)})
+
         finally:
             session.close()
-
+            
 
 class ExportarCSV(grok.View, ProposicoesAPIBase):
     grok.context(Interface)
@@ -692,7 +709,6 @@ class ExportarCSV(grok.View, ProposicoesAPIBase):
             ordenar_por = self.request.form.get('ordenar_por')
             ordenar_direcao = self.request.form.get('ordenar_direcao')
 
-            # ---- AJUSTE PARA "incorporado" ----
             if caixa == 'incorporado':
                 if ordenar_por != 'recebimento':
                     ordenar_por = None  # só aceita ordenação por data de recebimento

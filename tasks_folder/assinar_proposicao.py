@@ -71,14 +71,14 @@ def _salvar_pdf_modificado(caminho_armazenamento, pdf_assinado, conteudo, item):
         raise
 
 def processar_proposicao(portal, portal_url, item):
-    """Função auxiliar para processar uma única proposição (usando threads)."""
     caminho_armazenamento = portal.sapl_documentos.proposicao
     try:
-        for proposicao in portal.portal_skins.sk_sagl.zsql.proposicao_obter_zsql(cod_proposicao=int(item)):
+        proposicao_obter = portal.unrestrictedTraverse('portal_skins/sk_sagl/zsql/proposicao_obter_zsql')
+        checksum_func = portal.unrestrictedTraverse('portal_skins/sk_sagl/pysc/proposicao_calcular_checksum_pysc')
+
+        for proposicao in proposicao_obter(cod_proposicao=int(item)):
             try:
-                string = portal.portal_skins.sk_sagl.pysc.proposicao_calcular_checksum_pysc(
-                    proposicao.cod_proposicao, senha=1
-                )
+                string = checksum_func(proposicao.cod_proposicao, senha=1)
                 nome_autor = proposicao.nom_autor
                 pdf_proposicao = str(proposicao.cod_proposicao) + ".pdf"
                 pdf_assinado = str(proposicao.cod_proposicao) + "_signed.pdf"
@@ -88,10 +88,7 @@ def processar_proposicao(portal, portal_url, item):
                 pdf_existente = pymupdf.open(stream=arquivo)
                 numPaginas = pdf_existente.page_count
                 stream = make_qrcode(
-                    text=portal_url
-                    + "/sapl_documentos/proposicao/"
-                    + proposicao.cod_proposicao
-                    + "_signed.pdf"
+                    text=portal_url + f"/sapl_documentos/proposicao/{proposicao.cod_proposicao}_signed.pdf"
                 )
 
                 for indice_pagina, pagina in enumerate(pdf_existente):
@@ -104,15 +101,12 @@ def processar_proposicao(portal, portal_url, item):
                         total_paginas=numPaginas,
                     )
 
-                conteudo = pdf_existente.tobytes(
-                    deflate=True, garbage=3, use_objstms=1
-                )
+                conteudo = pdf_existente.tobytes(deflate=True, garbage=3, use_objstms=1)
                 _salvar_pdf_modificado(caminho_armazenamento, pdf_assinado, conteudo, item)
 
             except Exception as e:
-                logging.error(
-                    f"Erro ao processar proposição {item}: {e}\n{traceback.format_exc()}"
-                )
+                logging.error(f"Erro ao processar proposição {item}: {e}\n{traceback.format_exc()}")
+
     except Exception as e:
         logging.error(f"Erro no loop principal para o item {item}: {e}\n{traceback.format_exc()}")
 

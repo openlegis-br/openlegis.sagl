@@ -123,7 +123,7 @@ def proposicao_autuar_task(portal, cod_proposicao, portal_url):
             texto_rodape = f"Pág. {i+1}/{numPages} - {texto} {info_protocolo} {mensagem1}"
             page.insert_text((w - 13, h - 30), texto_rodape, fontsize=8, rotate=90)
 
-            rect_icp = pymupdf.Rect(w - 53, h - 50, w - 8, h - 5)
+            rect_icp = pymupdf.Rect(w - 53, h - 35, w - 8, h + 5)
             page.insert_image(rect_icp, stream=image)
 
             shape = page.new_shape()

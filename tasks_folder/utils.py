@@ -27,47 +27,46 @@ class AfterCommitTask(Task):
         transaction.get().addAfterCommitHook(hook)
 
 def zope_task(**task_kw):
-    """Decorador de tarefas celery que executa em contexto Zope."""
+    """Decorador de tarefas Celery que executa em contexto Zope."""
     def wrap(func):
-        def new_func(*args, **kw):
-            site_path = kw.get('site_path', 'sagl')
-            site_path = site_path.strip().strip('/')
-            # configuração Zope utilizando zc.buildout:
+        @celery.task(bind=True, base=AfterCommitTask, **task_kw)
+        def task_wrapper(self, *args, **kw):
+            site_path = kw.get('site_path', 'sagl').strip().strip('/')
             try:
-                buildout_dir = os.environ.get('BUILDOUT_DIR', '../') # pega a pasta de buildout
+                buildout_dir = os.environ.get('BUILDOUT_DIR', '../')
                 os.chdir(buildout_dir)
                 os.environ['ZOPE_CONFIG'] = os.path.join('parts', 'instance', 'etc', 'zope.conf')
                 app = makerequest(Zope2.app())
             except Exception as configure_error:
                 logging.error(f'Falha na configuração do Zope: {configure_error}')
                 raise
+
             transaction.begin()
             try:
-                try:
-                    site = app.unrestrictedTraverse(site_path)
-                    notify(BeforeTraverseEvent(site, site.REQUEST))
-                    user = app.acl_users.getUserById('admin')
-                    newSecurityManager(None, user)
-                    result = func(site, *args, **kw)
-                    transaction.commit()
-                except ConflictError as e:
-                    transaction.abort()
-                    logging.warning("Conflito no ZODB, tentando novamente.")
-                    raise new_func.retry(exc=e)
-                except Exception as e:
-                    transaction.abort()
-                    logging.error(f"Erro durante execução da tarefa Zope: {e}")
-                    raise
-                finally:
-                    noSecurityManager()
-                    setSite(None)
-                    app._p_jar.close()
+                site = app.unrestrictedTraverse(site_path)
+                notify(BeforeTraverseEvent(site, site.REQUEST))
+                user = app.acl_users.getUserById('admin')
+                newSecurityManager(None, user)
+
+                result = func(site, *args, **kw)
+                transaction.commit()
                 return result
+
+            except ConflictError as e:
+                transaction.abort()
+                logging.warning("Conflito no ZODB, tentando novamente.")
+                raise self.retry(exc=e, countdown=2, max_retries=5)
+
             except Exception as e:
-                logging.critical(f"Erro Inesperado em zope_task: {e}")
+                transaction.abort()
+                logging.error(f"Erro durante execução da tarefa Zope: {e}")
                 raise
-        new_func.__name__ = func.__name__
-        return celery.task(base=AfterCommitTask, **task_kw)(new_func)
+
+            finally:
+                noSecurityManager()
+                setSite(None)
+                app._p_jar.close()
+        return task_wrapper
     return wrap
 
 def make_qrcode(text):
@@ -152,4 +151,3 @@ def parse_signatures(raw_signature_data):
     except Exception as e:
         logging.error(f"Erro ao analisar assinaturas: {e}")
         return None
-

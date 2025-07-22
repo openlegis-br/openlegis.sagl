@@ -2,7 +2,7 @@ from .utils import zope_task, make_qrcode, get_signatures, parse_signatures
 from io import BytesIO
 import os
 import pypdf
-import pymupdf
+import fitz as pymupdf
 import pikepdf
 from DateTime import DateTime
 import logging
@@ -45,8 +45,10 @@ def reparar_pdf_stream(file_stream: BytesIO) -> BytesIO:
         file_stream.seek(0)
         return file_stream
 
+
 @zope_task()
 def peticao_autuar_task(portal, cod_peticao, portal_url):
+    logger.info(f"[peticao_autuar_task] Iniciando task para petição {cod_peticao}")
     skins = portal.portal_skins.sk_sagl
 
     for peticao in skins.zsql.peticao_obter_zsql(cod_peticao=cod_peticao):
@@ -57,9 +59,13 @@ def peticao_autuar_task(portal, cod_peticao, portal_url):
 
         for validacao in skins.zsql.assinatura_documento_obter_zsql(tipo_doc='peticao', codigo=peticao.cod_peticao, ind_assinado=1):
             nom_pdf_peticao = f"{validacao.cod_assinatura_doc}.pdf"
-            pdf_peticao_url = f"{portal.sapl_documentos.documentos_assinados.absolute_url()}/{nom_pdf_peticao}"
             cod_validacao_doc = str(skins.cadastros.assinatura.format_verification_code(code=validacao.cod_assinatura_doc))
-            arq_data = getattr(portal.sapl_documentos.documentos_assinados, nom_pdf_peticao).data
+
+            if hasattr(portal.sapl_documentos.documentos_assinados, nom_pdf_peticao):
+                arq_data = getattr(portal.sapl_documentos.documentos_assinados, nom_pdf_peticao).data
+            else:
+                raise FileNotFoundError(f"Arquivo assinado {nom_pdf_peticao} não encontrado em documentos_assinados.")
+
             repaired_pypdf_stream = reparar_pdf_stream(BytesIO(bytes(arq_data)))
 
             try:
@@ -83,13 +89,15 @@ def peticao_autuar_task(portal, cod_peticao, portal_url):
             break
         else:
             nom_pdf_peticao = f"{cod_peticao}.pdf"
-            pdf_peticao_url = f"{portal.sapl_documentos.peticao.absolute_url()}/{nom_pdf_peticao}"
+            if hasattr(portal.sapl_documentos.peticao, nom_pdf_peticao):
+                arq_data = getattr(portal.sapl_documentos.peticao, nom_pdf_peticao).data
+            else:
+                raise FileNotFoundError(f"Arquivo da petição {nom_pdf_peticao} não encontrado.")
             for usuario in skins.zsql.usuario_obter_zsql(cod_usuario=peticao.cod_usuario):
                 nom_autor = usuario.nom_completo
-            arq_data = getattr(portal.sapl_documentos.peticao, nom_pdf_peticao).data
 
         if not arq_data:
-            raise ValueError("Arquivo da petição não encontrado ou vazio.")
+            raise ValueError("Arquivo da petição está vazio.")
 
         info_protocolo = f"- Recebido em {peticao.dat_recebimento}."
         texto = ''
@@ -100,7 +108,7 @@ def peticao_autuar_task(portal, cod_peticao, portal_url):
         if peticao.ind_doc_adm == "1":
             for documento in skins.zsql.documento_administrativo_obter_zsql(cod_documento=peticao.cod_documento):
                 for protocolo in skins.zsql.protocolo_obter_zsql(num_protocolo=documento.num_protocolo, ano_protocolo=documento.ano_documento):
-                    info_protocolo = f" - Prot. nº {protocolo.num_protocolo}/{protocolo.ano_protocolo} {DateTime(protocolo.dat_protocolo, datefmt='international').strftime('%d/%m/%Y')} {protocolo.hor_protocolo}."
+                    info_protocolo = f" - Prot. nº {protocolo.num_protocolo}/{protocolo.ano_protocolo} {DateTime(protocolo.dat_protocolo).strftime('%d/%m/%Y')} {protocolo.hor_protocolo}."
                 texto = f"{documento.des_tipo_documento} nº {documento.num_documento}/{documento.ano_documento}"
                 storage_path = portal.sapl_documentos.administrativo
                 nom_pdf_saida = f"{documento.cod_documento}_texto_integral.pdf"
@@ -122,8 +130,7 @@ def peticao_autuar_task(portal, cod_peticao, portal_url):
                 nom_pdf_saida = f"{norma.cod_norma}_texto_integral.pdf"
                 caminho = '/sapl_documentos/norma_juridica/'
 
-        initial_pdf_bytes = bytes(arq_data)
-        repaired_stream = reparar_pdf_stream(BytesIO(initial_pdf_bytes))
+        repaired_stream = reparar_pdf_stream(BytesIO(bytes(arq_data)))
 
         try:
             existing_pdf = pymupdf.open(stream=repaired_stream)
@@ -143,11 +150,10 @@ def peticao_autuar_task(portal, cod_peticao, portal_url):
         install_home = os.environ.get('INSTALL_HOME')
         if not install_home:
             raise EnvironmentError("Variável INSTALL_HOME não definida.")
-        dirpath = os.path.join(install_home, 'src/openlegis.sagl/openlegis/sagl/skins/imagens/logo-icp2.png')
-        if not os.path.isfile(dirpath):
-            raise FileNotFoundError(f"Logo ICP não encontrado: {dirpath}")
-
-        with open(dirpath, "rb") as arq:
+        logo_path = os.path.join(install_home, 'src/openlegis.sagl/openlegis/sagl/skins/imagens/logo-icp2.png')
+        if not os.path.isfile(logo_path):
+            raise FileNotFoundError(f"Logo ICP não encontrado: {logo_path}")
+        with open(logo_path, "rb") as arq:
             image = arq.read()
 
         for i, page in enumerate(existing_pdf.pages()):
@@ -181,14 +187,13 @@ def peticao_autuar_task(portal, cod_peticao, portal_url):
             logger.error(f"Erro ao salvar PDF com PyMuPDF: {e!r}")
             raise
 
-        if nom_pdf_saida in storage_path:
+        if nom_pdf_saida in storage_path.objectIds():
             arquivo_peticao = storage_path[nom_pdf_saida]
             arquivo_peticao.update_data(content)
         else:
             storage_path.manage_addFile(id=nom_pdf_saida, file=content, title=texto)
             arquivo_peticao = storage_path[nom_pdf_saida]
 
-        # Permissões
         arquivo_peticao.manage_permission('View', roles=['Manager', 'Authenticated'], acquire=0)
         if peticao.ind_norma == "1":
             arquivo_peticao.manage_permission('View', roles=['Manager', 'Anonymous'], acquire=1)

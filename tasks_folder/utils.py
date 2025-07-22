@@ -14,6 +14,7 @@ from dateutil.parser import parse
 from asn1crypto import cms
 import qrcode
 from io import BytesIO
+from functools import wraps
 
 celery = Celery('tasks', config_source='celeryconfig')
 
@@ -27,51 +28,50 @@ class AfterCommitTask(Task):
         transaction.get().addAfterCommitHook(hook)
 
 def zope_task(**task_kw):
-    """Decorador de tarefas Celery que executa em contexto Zope com retry e commit."""
+    """Decorador de tarefas celery que executa em contexto Zope com retry e ZODB."""
     def wrap(func):
         @celery.task(bind=True, base=AfterCommitTask, **task_kw)
-        def task_wrapper(self, *args, **kw):
-            site_path = kw.pop('site_path', 'sagl').strip().strip('/')
+        @wraps(func)
+        def task_instance(self, *args, **kw):
+            site_path = kw.get('site_path', 'sagl')
+            site_path = site_path.strip().strip('/')
             try:
                 buildout_dir = os.environ.get('BUILDOUT_DIR', '../')
                 os.chdir(buildout_dir)
                 os.environ['ZOPE_CONFIG'] = os.path.join('parts', 'instance', 'etc', 'zope.conf')
                 app = makerequest(Zope2.app())
             except Exception as configure_error:
-                logging.error(f'Falha na configuração do Zope: {configure_error}', exc_info=True)
+                logging.error(f'[zope_task] Erro ao configurar Zope: {configure_error}')
                 raise
 
             transaction.begin()
             try:
                 site = app.unrestrictedTraverse(site_path)
-                from Products.CMFCore.utils import getToolByName
-                user_folder = getToolByName(site, 'acl_users')
-                user = user_folder.getUserById('admin') or user_folder.getUserById('manager')
-                if user is not None:
-                    newSecurityManager(None, user.__of__(user_folder))
-
+                notify(BeforeTraverseEvent(site, site.REQUEST))
+                user = app.acl_users.getUserById('admin')
+                newSecurityManager(None, user)
                 result = func(site, *args, **kw)
                 transaction.commit()
                 return result
 
             except ConflictError as e:
                 transaction.abort()
-                logging.warning("ConflictError (ZODB): tentativa de retry", exc_info=True)
-                raise self.retry(exc=e, countdown=2, max_retries=5)
+                logging.warning(f"[zope_task] Conflito de transação: {e}")
+                raise self.retry(exc=e, countdown=5, max_retries=3)
 
             except Exception as e:
                 transaction.abort()
-                logging.error(f"Erro durante execução da tarefa Zope: {e}", exc_info=True)
+                logging.error(f"[zope_task] Erro durante execução da tarefa: {e}", exc_info=True)
                 raise
 
             finally:
-                noSecurityManager()
-                setSite(None)
-                if hasattr(app, '_p_jar') and app._p_jar is not None:
-                    app._p_jar.sync()
+                try:
+                    noSecurityManager()
+                    setSite(None)
                     app._p_jar.close()
-
-        return task_wrapper
+                except Exception as fe:
+                    logging.warning(f"[zope_task] Falha ao fechar site/app: {fe}")
+        return task_instance
     return wrap
 
 def make_qrcode(text):

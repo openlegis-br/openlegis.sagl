@@ -27,7 +27,7 @@ class AfterCommitTask(Task):
         transaction.get().addAfterCommitHook(hook)
 
 def zope_task(**task_kw):
-    """Decorador de tarefas Celery que executa em contexto Zope."""
+    """Decorador de tarefas Celery que executa em contexto Zope com retry e commit."""
     def wrap(func):
         @celery.task(bind=True, base=AfterCommitTask, **task_kw)
         def task_wrapper(self, *args, **kw):
@@ -38,25 +38,25 @@ def zope_task(**task_kw):
                 os.environ['ZOPE_CONFIG'] = os.path.join('parts', 'instance', 'etc', 'zope.conf')
                 app = makerequest(Zope2.app())
             except Exception as configure_error:
-                logging.error(f'Falha na configuração do Zope: {configure_error}')
+                logging.error(f'Falha na configuração do Zope: {configure_error}', exc_info=True)
                 raise
 
             transaction.begin()
             try:
                 site = app.unrestrictedTraverse(site_path)
-                notify(BeforeTraverseEvent(site, site.REQUEST))
-                user = app.acl_users.getUserById('admin')
+                from Products.CMFCore.utils import getToolByName
+                user_folder = getToolByName(site, 'acl_users')
+                user = user_folder.getUserById('admin') or user_folder.getUserById('manager')
                 if user is not None:
-                    newSecurityManager(None, user)
+                    newSecurityManager(None, user.__of__(user_folder))
 
-                # Passa o portal/site como primeiro argumento da função
                 result = func(site, *args, **kw)
                 transaction.commit()
                 return result
 
             except ConflictError as e:
                 transaction.abort()
-                logging.warning("Conflito no ZODB, tentando novamente.")
+                logging.warning("ConflictError (ZODB): tentativa de retry", exc_info=True)
                 raise self.retry(exc=e, countdown=2, max_retries=5)
 
             except Exception as e:
@@ -67,7 +67,9 @@ def zope_task(**task_kw):
             finally:
                 noSecurityManager()
                 setSite(None)
-                app._p_jar.close()
+                if hasattr(app, '_p_jar') and app._p_jar is not None:
+                    app._p_jar.sync()
+                    app._p_jar.close()
 
         return task_wrapper
     return wrap

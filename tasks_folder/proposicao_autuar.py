@@ -117,9 +117,7 @@ def proposicao_autuar_task(portal, cod_proposicao, portal_url):
             page = existing_pdf[i]
             w, h = page.rect.width, page.rect.height
             is_landscape = w > h
-
             texto_rodape = f"Pág. {i+1}/{numPages} - {texto} {info_protocolo} {mensagem1}"
-
             if is_landscape:
                 # Texto na margem inferior centralizado
                 page.insert_textbox(
@@ -129,7 +127,6 @@ def proposicao_autuar_task(portal, cod_proposicao, portal_url):
                     fontname="helv",
                     align=pymupdf.TEXT_ALIGN_CENTER
                 )
-
                 # QR e logo na margem direita
                 rect_qr = pymupdf.Rect(5, h - 55, 55, h - 5)
                 rect_icp = pymupdf.Rect(w - 53, h - 35, w - 8, h + 5)
@@ -146,7 +143,6 @@ def proposicao_autuar_task(portal, cod_proposicao, portal_url):
                   rotate=90
                 )
                 shape.commit()
-
             else:
                 # Texto na margem direita (rotacionado)
                 page.insert_text((w - 13, h - 30), texto_rodape, fontsize=8, rotate=90)

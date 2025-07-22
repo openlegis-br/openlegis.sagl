@@ -31,7 +31,7 @@ def zope_task(**task_kw):
     def wrap(func):
         @celery.task(bind=True, base=AfterCommitTask, **task_kw)
         def task_wrapper(self, *args, **kw):
-            site_path = kw.get('site_path', 'sagl').strip().strip('/')
+            site_path = kw.pop('site_path', 'sagl').strip().strip('/')
             try:
                 buildout_dir = os.environ.get('BUILDOUT_DIR', '../')
                 os.chdir(buildout_dir)
@@ -46,8 +46,10 @@ def zope_task(**task_kw):
                 site = app.unrestrictedTraverse(site_path)
                 notify(BeforeTraverseEvent(site, site.REQUEST))
                 user = app.acl_users.getUserById('admin')
-                newSecurityManager(None, user)
+                if user is not None:
+                    newSecurityManager(None, user)
 
+                # Passa o portal/site como primeiro argumento da função
                 result = func(site, *args, **kw)
                 transaction.commit()
                 return result
@@ -59,13 +61,14 @@ def zope_task(**task_kw):
 
             except Exception as e:
                 transaction.abort()
-                logging.error(f"Erro durante execução da tarefa Zope: {e}")
+                logging.error(f"Erro durante execução da tarefa Zope: {e}", exc_info=True)
                 raise
 
             finally:
                 noSecurityManager()
                 setSite(None)
                 app._p_jar.close()
+
         return task_wrapper
     return wrap
 

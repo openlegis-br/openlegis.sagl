@@ -23,8 +23,10 @@ task_acks_on_failure_or_timeout = True      # re-encaminha a tarefa se falhar
 task_default_retry_delay = 5                # segundos entre reintentos
 task_default_max_retries = 5                # número máximo de tentativas
 
+task_create_missing_queues = True
+
 # Rotas específicas por fila
 task_routes = {
-    'tasks_folder.protocolo_prefeitura.protocolo_prefeitura_task': {'queue': 'prefeitura'}
+    #'tasks_folder.protocolo_prefeitura.protocolo_prefeitura_task': {'queue': 'prefeitura'}
     #'tasks_folder.utils.proposicao_autuar_task': {'queue': 'assinaturas'},  # opcional, se quiser separar
 }

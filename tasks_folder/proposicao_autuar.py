@@ -7,11 +7,16 @@ import pikepdf
 from DateTime import DateTime
 import logging
 
-@zope_task()
-def proposicao_autuar_task(portal, cod_proposicao, portal_url):
-    skins = portal.portal_skins.sk_sagl
+
+@zope_task(bind=True, max_retries=5, default_retry_delay=5)
+def proposicao_autuar_task(self, site, cod_proposicao, portal_url):
+    queue_name = self.request.delivery_info.get('routing_key', 'desconhecida')  
+    if self.request.retries > 0:
+        logging.info(f"[proposicao_autuar_task] Tentativa de retry #{self.request.retries} | cod_proposicao={cod_proposicao}")
+    logging.info(f"[proposicao_autuar_task] Executando na fila: {queue_name} | cod_proposicao={cod_proposicao}")
+    skins = site.portal_skins.sk_sagl
     nom_pdf_proposicao = str(cod_proposicao) + "_signed.pdf"
-    arq = getattr(portal.sapl_documentos.proposicao, nom_pdf_proposicao)
+    arq = getattr(site.sapl_documentos.proposicao, nom_pdf_proposicao)
     original_stream = BytesIO(bytes(arq.data))
 
     try:
@@ -19,10 +24,10 @@ def proposicao_autuar_task(portal, cod_proposicao, portal_url):
         repaired_stream = BytesIO()
         with pikepdf.open(original_stream) as pdf:
             pdf.save(repaired_stream)
-        logging.info("[PDF] PDF reparado antecipadamente com pikepdf.")
+        logging.info("[proposicao_autuar_task] PDF reparado antecipadamente com pikepdf.")
         stream = repaired_stream
     except Exception as e:
-        logging.warning(f"[PDF] PDF não pôde ser reparado antecipadamente com pikepdf: {e}")
+        logging.warning(f"[proposicao_autuar_task] PDF não pôde ser reparado antecipadamente com pikepdf: {e}")
         original_stream.seek(0)
         stream = original_stream
 
@@ -61,7 +66,7 @@ def proposicao_autuar_task(portal, cod_proposicao, portal_url):
                     for protocolo in skins.zsql.protocolo_obter_zsql(num_protocolo=materia.num_protocolo, ano_protocolo=materia.ano_ident_basica):
                         info_protocolo = ' - Prot. ' + str(protocolo.num_protocolo) + '/' + str(protocolo.ano_protocolo) + ' ' + str(DateTime(protocolo.dat_protocolo, datefmt='international').strftime('%d/%m/%Y')) + ' ' + protocolo.hor_protocolo + '.'
                 texto = str(materia.des_tipo_materia) + ' nº ' + str(materia.num_ident_basica) + '/' + str(materia.ano_ident_basica)
-                storage_path = portal.sapl_documentos.materia
+                storage_path = site.sapl_documentos.materia
                 nom_pdf_saida = str(materia.cod_materia) + "_texto_integral.pdf"
 
         elif proposicao.ind_mat_ou_doc == 'D' and tipo_proposicao not in ['Emenda', 'Mensagem Aditiva', 'Substitutivo', 'Parecer', 'Parecer de Comissão']:
@@ -69,7 +74,7 @@ def proposicao_autuar_task(portal, cod_proposicao, portal_url):
                 for materia in skins.zsql.materia_obter_zsql(cod_materia=documento.cod_materia):
                     materia = str(materia.sgl_tipo_materia) + ' nº ' + str(materia.num_ident_basica) + '/' + str(materia.ano_ident_basica)
                 texto = str(documento.des_tipo_documento) + ' - ' + str(materia)
-                storage_path = portal.sapl_documentos.materia
+                storage_path = site.sapl_documentos.materia
                 nom_pdf_saida = str(documento.cod_documento) + ".pdf"
 
         elif proposicao.ind_mat_ou_doc == 'D' and tipo_proposicao in ['Emenda', 'Mensagem Aditiva']:
@@ -78,7 +83,7 @@ def proposicao_autuar_task(portal, cod_proposicao, portal_url):
                     materia = str(materia.sgl_tipo_materia) + ' nº ' + str(materia.num_ident_basica) + '/' + str(materia.ano_ident_basica)
                 info_protocolo = '- Recebida em ' + proposicao.dat_recebimento + '.'
                 texto = 'Emenda ' + str(emenda.des_tipo_emenda) + ' nº ' + str(emenda.num_emenda) + ' ao ' + str(materia)
-                storage_path = portal.sapl_documentos.emenda
+                storage_path = site.sapl_documentos.emenda
                 nom_pdf_saida = str(emenda.cod_emenda) + "_emenda.pdf"
 
         elif proposicao.ind_mat_ou_doc == 'D' and tipo_proposicao == 'Substitutivo':
@@ -86,7 +91,7 @@ def proposicao_autuar_task(portal, cod_proposicao, portal_url):
                 for materia in skins.zsql.materia_obter_zsql(cod_materia=substitutivo.cod_materia):
                     materia = str(materia.sgl_tipo_materia) + ' nº ' + str(materia.num_ident_basica) + '/' + str(materia.ano_ident_basica)
                 texto = 'Substitutivo nº ' + str(substitutivo.num_substitutivo) + ' ao ' + str(materia)
-                storage_path = portal.sapl_documentos.substitutivo
+                storage_path = site.sapl_documentos.substitutivo
                 nom_pdf_saida = str(substitutivo.cod_substitutivo) + "_substitutivo.pdf"
 
         elif proposicao.ind_mat_ou_doc == 'D' and tipo_proposicao in ['Parecer', 'Parecer de Comissão']:
@@ -96,7 +101,7 @@ def proposicao_autuar_task(portal, cod_proposicao, portal_url):
                 for materia in skins.zsql.materia_obter_zsql(cod_materia=relatoria.cod_materia):
                     materia = str(materia.sgl_tipo_materia) + ' nº ' + str(materia.num_ident_basica) + '/' + str(materia.ano_ident_basica)
                 texto = 'Parecer ' + sgl_comissao + ' nº ' + str(relatoria.num_parecer) + '/' + str(relatoria.ano_parecer) + ' ao ' + str(materia)
-                storage_path = portal.sapl_documentos.parecer_comissao
+                storage_path = site.sapl_documentos.parecer_comissao
                 nom_pdf_saida = str(relatoria.cod_relatoria) + "_parecer.pdf"
 
     mensagem1 = 'Esta é uma cópia do original assinado digitalmente por ' + nom_autor + outros
@@ -121,15 +126,15 @@ def proposicao_autuar_task(portal, cod_proposicao, portal_url):
             if is_landscape:
                 # Texto na margem inferior centralizado
                 page.insert_textbox(
-                    pymupdf.Rect(60, h - 25, w - 60, h - 5),
+                    pymupdf.Rect(65, h - 22, w - 65, h - 5),
                     texto_rodape,
                     fontsize=8,
                     fontname="helv",
-                    align=pymupdf.TEXT_ALIGN_CENTER
+                    align=pymupdf.TEXT_ALIGN_LEFT
                 )
                 # QR e logo na margem direita
-                rect_qr = pymupdf.Rect(5, h - 55, 55, h - 5)
-                rect_icp = pymupdf.Rect(w - 53, h - 35, w - 8, h + 5)
+                rect_qr = pymupdf.Rect(10, h - 55, 60, h - 5)
+                rect_icp = pymupdf.Rect(w - 53, h - 38, w - 8, h + 7)
                 page.insert_image(rect_qr, stream=stream_qr)
                 page.insert_image(rect_icp, stream=image)
 
@@ -148,8 +153,8 @@ def proposicao_autuar_task(portal, cod_proposicao, portal_url):
                 page.insert_text((w - 13, h - 30), texto_rodape, fontsize=8, rotate=90)
 
                 # QR code e logo na margem inferior esquerda
-                rect_qr = pymupdf.Rect(5, h - 55, 55, h - 5)
-                rect_icp = pymupdf.Rect(w - 53, h - 35, w - 8, h + 5)
+                rect_qr = pymupdf.Rect(10, h - 55, 60, h - 5)
+                rect_icp = pymupdf.Rect(w - 53, h - 38, w - 8, h + 7)
                 page.insert_image(rect_qr, stream=stream_qr)
                 page.insert_image(rect_icp, stream=image)
 
@@ -174,4 +179,7 @@ def proposicao_autuar_task(portal, cod_proposicao, portal_url):
         pdf = storage_path[nom_pdf_saida]
 
     pdf.manage_permission('View', roles=['Manager', 'Anonymous'], acquire=1)
+
+    logging.info(f"[proposicao_autuar_task] Finalizado com sucesso | cod_proposicao={cod_proposicao} | gerou arquivo para ID: {nom_pdf_saida.split('_')[0]} | Arquivo: {nom_pdf_saida}")
+
     return nom_pdf_saida

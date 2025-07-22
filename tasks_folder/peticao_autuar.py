@@ -46,7 +46,7 @@ def reparar_pdf_stream(file_stream: BytesIO) -> BytesIO:
         return file_stream
 
 
-@zope_task()
+@zope_task(bind=True)
 def peticao_autuar_task(portal, cod_peticao, portal_url):
     logger.info(f"[peticao_autuar_task] Iniciando task para petição {cod_peticao}")
     skins = portal.portal_skins.sk_sagl
@@ -139,11 +139,11 @@ def peticao_autuar_task(portal, cod_peticao, portal_url):
             raise
 
         if cod_validacao_doc:
-            stream = make_qrcode(f"{portal_url}/conferir_assinatura_proc?txt_codigo_verificacao={cod_validacao_doc}")
+            stream_qr = make_qrcode(f"{portal_url}/conferir_assinatura_proc?txt_codigo_verificacao={cod_validacao_doc}")
             mensagem1 = f"Esta é uma cópia do original assinado digitalmente por {nom_autor}{outros}"
             mensagem2 = f"Para validar visite {portal_url}/conferir_assinatura e informe o código {cod_validacao_doc}."
         else:
-            stream = make_qrcode(f"{portal_url}{caminho}{nom_pdf_saida}")
+            stream_qr = make_qrcode(f"{portal_url}{caminho}{nom_pdf_saida}")
             mensagem1 = f"Documento assinado digitalmente com usuário e senha por {nom_autor}"
             mensagem2 = "Para verificar a autenticidade do documento leia o QR code."
 
@@ -158,21 +158,48 @@ def peticao_autuar_task(portal, cod_peticao, portal_url):
 
         for i, page in enumerate(existing_pdf.pages()):
             w, h = page.rect.width, page.rect.height
-            margin = 5
-            left, bottom = 10 - margin, h - 50 - margin
-            bottom2 = h - 38
-            right = w - 53
-            page.insert_image(pymupdf.Rect(left, bottom, left + 50, bottom + 50), stream=stream)
-            if cod_validacao_doc:
-                page.insert_image(pymupdf.Rect(right, bottom2, right + 45, bottom2 + 45), stream=image)
-            numero = f"Pág. {i+1}/{existing_pdf.page_count}"
-            text3 = f"{numero} - {texto} {info_protocolo} {mensagem1}"
-            page.insert_text((w - 8 - margin, h - 50 - margin), text3, fontsize=8, rotate=90)
-            shape = page.new_shape()
-            shape.draw_circle(pymupdf.Point(w - 40 - margin, h - 12), 1)
-            shape.draw_circle(pymupdf.Point(60, h - 12), 1)
-            shape.insert_text(pymupdf.Point(60, h - 12), mensagem2, fontname="helv", fontsize=8)
-            shape.commit()
+            is_landscape = w > h
+            texto_rodape = f"Pág. {i+1}/{existing_pdf.page_count} - {texto} {info_protocolo} {mensagem1}"
+            if is_landscape:
+                # Texto na margem inferior centralizado
+                page.insert_textbox(
+                    pymupdf.Rect(60, h - 25, w - 60, h - 5),
+                    texto_rodape,
+                    fontsize=8,
+                    fontname="helv",
+                    align=pymupdf.TEXT_ALIGN_CENTER
+                )
+                # QR e logo na margem direita
+                rect_qr = pymupdf.Rect(5, h - 55, 55, h - 5)
+                rect_icp = pymupdf.Rect(w - 53, h - 35, w - 8, h + 5)
+                page.insert_image(rect_qr, stream=stream_qr)
+                page.insert_image(rect_icp, stream=image)
+
+                # Código de verificação na vertical
+                shape = page.new_shape()
+                shape.insert_text(
+                  pymupdf.Point(w - 13, h - 45),  # Começa logo acima do logo ICP (ajustável)
+                  mensagem2,
+                  fontname="helv",
+                  fontsize=8,
+                  rotate=90
+                )
+                shape.commit()
+            else:
+                # Texto na margem direita (rotacionado)
+                page.insert_text((w - 13, h - 30), texto_rodape, fontsize=8, rotate=90)
+
+                # QR code e logo na margem inferior esquerda
+                rect_qr = pymupdf.Rect(5, h - 55, 55, h - 5)
+                rect_icp = pymupdf.Rect(w - 53, h - 35, w - 8, h + 5)
+                page.insert_image(rect_qr, stream=stream_qr)
+                page.insert_image(rect_icp, stream=image)
+
+                # Código de verificação na mesma linha
+                shape = page.new_shape()
+                shape.draw_circle(pymupdf.Point(60, h - 12), 1)
+                shape.insert_text(pymupdf.Point(60, h - 12), mensagem2, fontname="helv", fontsize=8)
+                shape.commit()
 
         if peticao.ind_doc_adm == "1":
             rect = pymupdf.Rect(40, 120, w - 20, 170)

@@ -29,19 +29,30 @@ class AfterCommitTask(Task):
 
 def zope_task(**task_kw):
     """Decorador de tarefas celery que executa em contexto Zope com retry e ZODB."""
+    task_kw.setdefault("bind", True)
+
     def wrap(func):
-        @celery.task(bind=True, base=AfterCommitTask, **task_kw)
+        @celery.task(base=AfterCommitTask, **task_kw)
         @wraps(func)
         def task_instance(self, *args, **kw):
-            site_path = kw.get('site_path', 'sagl')
-            site_path = site_path.strip().strip('/')
+            site_path = kw.pop('site_path', 'sagl').strip().strip('/')
+
+            cod_proposicao = kw.get('cod_proposicao', None)
+            cod_info = f" | cod_proposicao={cod_proposicao}" if cod_proposicao else ""
+
+            if self.request.retries > 0:
+                logging.warning(f"[zope_task] Retry #{self.request.retries}{cod_info} para tarefa {func.__name__}")
+                exc = self.request._excinfo[1] if self.request._excinfo else None
+                if exc:
+                    logging.warning(f"[zope_task] Erro anterior{cod_info}: {exc}")
+
             try:
                 buildout_dir = os.environ.get('BUILDOUT_DIR', '../')
                 os.chdir(buildout_dir)
                 os.environ['ZOPE_CONFIG'] = os.path.join('parts', 'instance', 'etc', 'zope.conf')
                 app = makerequest(Zope2.app())
             except Exception as configure_error:
-                logging.error(f'[zope_task] Erro ao configurar Zope: {configure_error}')
+                logging.error(f'[zope_task] Erro ao configurar Zope{cod_info}: {configure_error}', exc_info=True)
                 raise
 
             transaction.begin()
@@ -50,18 +61,19 @@ def zope_task(**task_kw):
                 notify(BeforeTraverseEvent(site, site.REQUEST))
                 user = app.acl_users.getUserById('admin')
                 newSecurityManager(None, user)
-                result = func(site, *args, **kw)
+
+                result = func(self, site, *args, **kw)
                 transaction.commit()
                 return result
 
             except ConflictError as e:
                 transaction.abort()
-                logging.warning(f"[zope_task] Conflito de transação: {e}")
-                raise self.retry(exc=e, countdown=5, max_retries=3)
+                logging.warning(f"[zope_task] Conflito de transação{cod_info}: {e}", exc_info=True)
+                raise self.retry(exc=e)
 
             except Exception as e:
                 transaction.abort()
-                logging.error(f"[zope_task] Erro durante execução da tarefa: {e}", exc_info=True)
+                logging.error(f"[zope_task] Erro durante execução da tarefa{cod_info}: {e}", exc_info=True)
                 raise
 
             finally:
@@ -70,7 +82,8 @@ def zope_task(**task_kw):
                     setSite(None)
                     app._p_jar.close()
                 except Exception as fe:
-                    logging.warning(f"[zope_task] Falha ao fechar site/app: {fe}")
+                    logging.warning(f"[zope_task] Falha ao fechar site/app{cod_info}: {fe}", exc_info=True)
+
         return task_instance
     return wrap
 

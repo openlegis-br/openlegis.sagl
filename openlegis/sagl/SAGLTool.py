@@ -50,6 +50,7 @@ from dateutil.parser import parse
 from asn1crypto import cms
 import warnings
 import re # Para format_cpf
+import random
 CPF_LENGTH = 11
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -2656,35 +2657,42 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         with open(dirpath, "rb") as arq:
              image = arq.read()
         for page_index, i in enumerate(range(len(existing_pdf))):
-            w = existing_pdf[page_index].rect.width
-            h = existing_pdf[page_index].rect.height
+            page = existing_pdf[page_index]
+            w = page.rect.width
+            h = page.rect.height
+            is_landscape = w > h
             margin = 5
-            left = 10 - margin
-            bottom = h - 50 - margin
-            bottom2 = h - 38
-            right = w - 53
             black = pymupdf.pdfcolor["black"]
-            # qrcode
-            rect = pymupdf.Rect(left, bottom, left + 50, bottom + 50)  # qrcode bottom left square
-            existing_pdf[page_index].insert_image(rect, stream=stream)
+            numero = "Pág. %s/%s" % (i + 1, numPages)
             text2 = mensagem2
-            # logo icp
-            rect_icp = pymupdf.Rect(right, bottom2, right + 45, bottom2 + 45)
-            existing_pdf[page_index].insert_image(rect_icp, stream=image)
-            # margem direita
-            numero = "Pág. %s/%s" % (i+1, numPages)
             text3 = numero + ' - ' + texto + ' - ' + mensagem1
-            x = w - 8 - margin #largura
-            y = h - 50 - margin # altura
-            existing_pdf[page_index].insert_text((x, y), text3, fontsize=8, rotate=90)
-            # margem inferior
-            p1 = pymupdf.Point(w - 40 - margin, h - 12) # numero de pagina documento
-            p2 = pymupdf.Point(60, h - 12) # margem inferior
-            shape = existing_pdf[page_index].new_shape()
-            shape.draw_circle(p1,1)
-            shape.draw_circle(p2,1)
-            #shape.insert_text(p1, numero, fontname = "helv", fontsize = 8)
-            shape.insert_text(p2, text2, fontname = "helv", fontsize = 8, rotate=0)
+            shape = page.new_shape()
+            if is_landscape:
+                qr_rect = pymupdf.Rect(10, h - 55, 60, h - 5)
+                page.insert_image(qr_rect, stream=stream)
+                icp_rect = pymupdf.Rect(w - 53, h - 38, w - 8, h + 7)
+                page.insert_image(icp_rect, stream=image)
+                page.insert_textbox(
+                    pymupdf.Rect(65, h - 22, w - 65, h - 5),
+                    text3,
+                    fontsize=8,
+                    fontname="helv",
+                    align=pymupdf.TEXT_ALIGN_LEFT
+                )
+                shape.insert_text(
+                    pymupdf.Point(w - 13, h - 45),  # margem direita, logo acima da logo
+                    text2,
+                    fontname="helv",
+                    fontsize=8,
+                    rotate=90
+                )
+            else:
+                qr_rect = pymupdf.Rect(10, h - 55, 60, h - 5)
+                page.insert_image(qr_rect, stream=stream)
+                icp_rect = pymupdf.Rect(w - 53, h - 38, w - 8, h + 7)
+                page.insert_image(icp_rect, stream=image)
+                page.insert_text((w - 13, h - 50), text3, fontsize=8, rotate=90)
+                shape.insert_text(pymupdf.Point(60, h - 12), text2, fontname="helv", fontsize=8, rotate=0)
             shape.commit()
         content = existing_pdf.tobytes(deflate=True, garbage=3, use_objstms=1)
         if hasattr(storage_path, nom_pdf_documento):
@@ -2727,6 +2735,21 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
 
     # Tarefas assincronas
 
+    def proposicao_autuar_async(self, cod_proposicao):
+        portal_url = str(self.url())
+        async_result = tasks.proposicao_autuar_task.apply_async(
+            kwargs={'cod_proposicao': cod_proposicao, 'portal_url': portal_url},
+            countdown=random.randint(1, 3)
+        )
+        return async_result
+
+    def peticao_autuar(self, cod_peticao):
+        portal_url = str(self.url())
+        async_result = tasks.peticao_autuar_task.apply_async(
+            kwargs={'cod_peticao': cod_peticao, 'portal_url': portal_url}
+        )
+        return async_result
+
     def index_file(self, url):
         try:
             arquivo = self.unrestrictedTraverse(url)
@@ -2737,24 +2760,5 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         except Exception as e:
             print(f"Erro ao processar o arquivo PDF: {e}")
             return []
-
-    def margem_inferior_async(self, codigo, anexo, tipo_doc, cod_assinatura_doc, cod_usuario, filename):
-        portal_url = str(self.url())
-        async_result = tasks.margem_inferior_task.delay(codigo, anexo, tipo_doc, cod_assinatura_doc, cod_usuario, filename, portal_url)
-        return async_result
-
-    def peticao_autuar(self, cod_peticao):
-        portal_url = str(self.url())
-        async_result = tasks.peticao_autuar_task.delay(cod_peticao, portal_url)
-        return async_result
-
-    def proposicao_autuar_async(self, cod_proposicao):
-        portal_url = str(self.url())
-        async_result = tasks.proposicao_autuar_task.delay(cod_proposicao, portal_url)
-        return async_result
-
-    def adicionar_carimbo_async(self, cod_sessao_plen, nom_resultado, cod_materia):
-        async_result = tasks.adicionar_carimbo_task.delay(cod_sessao_plen, nom_resultado, cod_materia)
-        return async_result
 
 InitializeClass(SAGLTool)

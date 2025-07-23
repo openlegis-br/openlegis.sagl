@@ -30,11 +30,11 @@ class AfterCommitTask(Task):
                     self._run_after_commit,
                     args=[args, kwargs, options]
                 )
-                return None  # importante: não retorna AsyncResult aqui
+                return None
         except Exception as e:
             logging.warning(f"[AfterCommitTask] Falha ao registrar hook: {e}", exc_info=True)
 
-        # fallback: executa imediatamente (necessário para retry funcionar)
+        # fallback imediato
         return super().apply_async(args=args, kwargs=kwargs, **options)
 
     def _run_after_commit(self, success, args, kwargs, options):
@@ -46,24 +46,25 @@ class AfterCommitTask(Task):
         else:
             logging.warning("[AfterCommitTask] Transação abortada. Tarefa não foi enfileirada.")
 
-
 def zope_task(**task_kw):
-    """Decorador de tarefas celery que executa em contexto Zope com retry e ZODB."""
     task_kw.setdefault("bind", True)
 
     def wrap(func):
         @wraps(func)
         def task_instance(self, *args, **kw):
             site_path = kw.pop('site_path', 'sagl').strip().strip('/')
-
             cod_proposicao = kw.get('cod_proposicao', None)
             cod_info = f" | cod_proposicao={cod_proposicao}" if cod_proposicao else ""
 
-            if self.request.retries > 0:
-                logging.warning(f"[zope_task] Retry #{self.request.retries}{cod_info} para tarefa {func.__name__}")
+            retry_count = getattr(self.request, 'retries', 0)
+            if retry_count > 0:
+                logging.warning(f"[zope_task] Retry #{retry_count}{cod_info} para tarefa {func.__name__}")
+                logging.info(f"[zope_task] {func.__name__} | Tentativa #{retry_count} com task_id={self.request.id}")
                 exc = self.request._excinfo[1] if self.request._excinfo else None
                 if exc:
-                    logging.warning(f"[zope_task] Erro anterior{cod_info}: {exc}")
+                    logging.warning(f"[zope_task] Erro anterior: {exc}")
+            else:
+                logging.info(f"[zope_task] Primeira execução de {func.__name__}{cod_info}")
 
             try:
                 buildout_dir = os.environ.get('BUILDOUT_DIR', '../')
@@ -88,7 +89,27 @@ def zope_task(**task_kw):
             except ConflictError as e:
                 transaction.abort()
                 logging.warning(f"[zope_task] Conflito de transação{cod_info}: {e}", exc_info=True)
-                raise self.retry(exc=e)
+
+                if retry_count < 3:
+                    countdown = 5 + (retry_count * 5)
+                    logging.info(f"[zope_task] Reenfileirando manualmente retry #{retry_count + 1} em {countdown}s...{cod_info}")
+                    self.app.send_task(
+                        self.name,
+                        args=args,
+                        kwargs=kw,
+                        countdown=countdown,
+                        retry=True,
+                        retry_policy={
+                            'max_retries': 3,
+                            'interval_start': 10,
+                            'interval_step': 10,
+                            'interval_max': 60,
+                        }
+                    )
+                    return None
+                else:
+                    logging.error(f"[zope_task] Número máximo de retries atingido para {self.name}{cod_info}")
+                    raise
 
             except Exception as e:
                 transaction.abort()
@@ -107,7 +128,6 @@ def zope_task(**task_kw):
 
     return wrap
 
-
 def make_qrcode(text):
     qr = qrcode.QRCode(
         version=1,
@@ -121,38 +141,35 @@ def make_qrcode(text):
     fp = BytesIO()
     img.save(fp, "PNG")
     return fp
-        
+
 def get_signatures(fileStream):
     try:
         reader = pypdf.PdfReader(fileStream)
         fields = reader.get_fields()
-        signature_field_values = [
-            f.value for f in fields.values() if f.field_type == '/Sig']
+        signature_field_values = [f.value for f in fields.values() if f.field_type == '/Sig']
         lst_signers = []
         for v in signature_field_values:
             try:
                 if '/M' in v:
-                   signing_time = parse(v['/M'][2:].strip("'").replace("'", ":"))
+                    signing_time = parse(v['/M'][2:].strip("'").replace("'", ":"))
                 else:
                     signing_time = None
                 if '/Name' in v:
-                   name = v['/Name'].split(':')[0]
-                   cpf = v['/Name'].split(':')[1]
+                    name, cpf = v['/Name'].split(':')[0:2]
                 else:
-                   name = None
-                   cpf = None
+                    name, cpf = None, None
                 raw_signature_data = v['/Contents']
                 for attrdict in parse_signatures(raw_signature_data):
                     dic = {
-                      'signer_name':name or attrdict.get('signer'),
-                      'signer_cpf':cpf or attrdict.get('cpf'),
-                      'signing_time':str(signing_time) or attrdict.get('signing_time'),
-                      'signer_certificate': attrdict.get('oname')
+                        'signer_name': name or attrdict.get('signer'),
+                        'signer_cpf': cpf or attrdict.get('cpf'),
+                        'signing_time': str(signing_time) or attrdict.get('signing_time'),
+                        'signer_certificate': attrdict.get('oname')
                     }
                     lst_signers.append(dic)
-            except (KeyError, ValueError, TypeError) as e:
+            except Exception as e:
                 logging.error(f"Erro ao processar assinatura: {e}")
-                continue  # Pula para a próxima assinatura em caso de erro
+                continue
         lst_signers.sort(key=lambda dic: dic['signing_time'], reverse=True)
         return lst_signers
     except Exception as e:
@@ -173,17 +190,13 @@ def parse_signatures(raw_signature_data):
                 subject = cert['subject']
                 oname = issuer.get('organization_name', '')
                 lista = subject['common_name'].split(':')
-                if len(lista) > 1:
-                   signer = subject['common_name'].split(':')[0]
-                   cpf = subject['common_name'].split(':')[1]
-                else:
-                   signer = subject['common_name'].split(':')[0]
-                   cpf = ''
+                signer = lista[0]
+                cpf = lista[1] if len(lista) > 1 else ''
                 dic = {
-                   'type': subject.get('organization_name', ''),
-                   'signer': signer,
-                   'cpf':  cpf,
-                   'oname': oname
+                    'type': subject.get('organization_name', ''),
+                    'signer': signer,
+                    'cpf': cpf,
+                    'oname': oname
                 }
         signers.append(dic)
         return signers

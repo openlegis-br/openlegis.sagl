@@ -2518,14 +2518,15 @@ var ProposicaoManager = (function() {
                 );
                 return;
             }
-            
+        
             this.showConfirmModal(
                 "Confirmação de Envio",
-                "Ao enviar esta proposição, ela será encaminhada para análise e não poderá ser editada. Confirma o envio?",
+                "Ao enviar esta proposição, ela será encaminhada para análise e não poderá ser editada. " +
+                "Além disso, qualquer solicitação de assinatura pendente será removida. Confirma o envio?",
                 () => {
-                    location.href = `proposicao_enviar_proc?hdn_cod_proposicao=${_codProposicao}`;
-                },
-                null,
+                     location.href = `proposicao_enviar_proc?hdn_cod_proposicao=${_codProposicao}`;
+                 },
+                 null,
                 'btn-success',
                 'Sim, enviar'
             );

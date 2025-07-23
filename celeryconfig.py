@@ -14,16 +14,21 @@ accept_content = ['json']
 timezone = 'America/Sao_Paulo'
 enable_utc = False
 
-# Permitir reexecução de tarefas em caso de falha (ZODB ConflictError, etc)
-task_acks_late = True                       # só marca como "ACK" após completar com sucesso
-task_reject_on_worker_lost = True           # rejeita se o worker morre no meio
-task_acks_on_failure_or_timeout = True      # re-encaminha a tarefa se falhar
+# Otimizações para ZODB
+worker_prefetch_multiplier = 1
+task_acks_late = True
+task_reject_on_worker_lost = True
+task_track_started = True
 
 # Reintento padrão (usado se não especificar em @task)
-task_default_retry_delay = 5                # segundos entre reintentos
-task_default_max_retries = 5                # número máximo de tentativas
+task_default_retry_delay = 10               # segundos entre reintentos
+task_default_max_retries = 3                # número máximo de tentativas
 
-task_create_missing_queues = True
+# Timeouts
+broker_transport_options = {
+    'visibility_timeout': 600,  # 10 minutos
+    'max_retries': 3
+}
 
 # Rotas específicas por fila
 task_routes = {

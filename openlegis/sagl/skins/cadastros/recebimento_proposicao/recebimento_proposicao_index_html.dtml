@@ -855,25 +855,162 @@ function renderCards(data) {
   updateBtnMarcarTodos();
 }
 
+function renderCards(data) {
+  const $container = $('#cards-container').empty();
+
+  if (data.length === 0) {
+    $container.html(`
+      <div class="col-12 text-center w-100 py-5">
+        <i class="fas fa-file-alt fa-3x mb-3 text-muted"></i>
+        <p class="text-muted">Nenhuma proposição encontrada</p>
+      </div>
+    `);
+    return;
+  }
+
+  data.forEach(item => {
+    let envio = item.envio || '';
+    if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(envio)) {
+      const dt = new Date(envio);
+      const dia = String(dt.getDate()).padStart(2, '0');
+      const mes = String(dt.getMonth() + 1).padStart(2, '0');
+      const ano = dt.getFullYear();
+      const hora = String(dt.getHours()).padStart(2, '0');
+      const min = String(dt.getMinutes()).padStart(2, '0');
+      const seg = String(dt.getSeconds()).padStart(2, '0');
+      envio = `${dia}/${mes}/${ano} ${hora}:${min}:${seg}`;
+    }
+
+    const selecionavel = isElegivelIncorporacao(item) && window.appState.currentCaixa === 'protocolo';
+    const checked = window.appState.selecaoLote.has(String(item.id)) ? 'checked' : '';
+
+    let vinculoHtml = '';
+    if (item.vinculo && (item.vinculo.materia_id || (item.vinculo.tipo === 'matéria' && item.vinculo.id))) {
+      const mid = item.vinculo.materia_id || item.vinculo.id;
+      const sigla = item.vinculo.sigla || '';
+      const numero = item.vinculo.numero || '';
+      const ano = item.vinculo.ano || '';
+      const txt = `${sigla} ${numero}/${ano}`.trim();
+      vinculoHtml = `
+        <p class="card-text">
+          <strong>Vínculo:</strong>
+          <a href="${APP_CONFIG.PORTAL_URL}/cadastros/materia/materia_mostrar_proc?cod_materia=${mid}"
+            target="_blank" rel="noopener" class="ms-1">
+            ${txt}
+          </a>
+        </p>
+      `;
+    } else if (item.vinculo && item.vinculo.tipo === 'documento') {
+      vinculoHtml = `
+        <p class="card-text">
+          <strong>Vínculo:</strong> Documento ${item.vinculo.id}
+        </p>
+      `;
+    }
+
+    // Bloco de botões
+    let acoesHtml = '';
+
+    // 🔹 Botão de status de assinaturas (somente na aba assinatura)
+    if (window.appState.currentCaixa === 'assinatura') {
+      const a = item.assinaturas;
+      let statusIcon = 'fa-ban';
+      let btnClass = 'btn-outline-secondary';
+      let title = 'Sem pedidos de assinatura';
+
+      if (a && a.total > 0) {
+        const assinadas = a.assinadas?.length || 0;
+        const pendentes = a.pendentes?.length || 0;
+
+        if (pendentes === 0) {
+          statusIcon = 'fa-check-circle';
+          btnClass = 'btn-outline-success';
+          title = `Assinada por: ${a.assinadas.join(', ')}`;
+        } else if (assinadas > 0) {
+          statusIcon = 'fa-hourglass-half';
+          btnClass = 'btn-outline-warning';
+          title = `Assinaturas: ${a.assinadas.join(', ')}\nPendentes: ${a.pendentes.join(', ')}`;
+        } else {
+          statusIcon = 'fa-hourglass-start';
+          btnClass = 'btn-outline-warning';
+          title = `Pendentes: ${a.pendentes.join(', ')}`;
+        }
+      }
+
+      acoesHtml += `<button type="button" class="btn btn-sm ${btnClass} me-1" title="${_.escape(title)}">
+        <i class="fas ${statusIcon}"></i>
+      </button>`;
+    }
+
+    // 🔹 Botão PDF (somente protocolo)
+    if (window.appState.currentCaixa === 'protocolo' && item.pdf_assinado_url) {
+      acoesHtml += `<a href="${item.pdf_assinado_url}" class="btn btn-sm btn-outline-success me-1" title="Baixar PDF assinado" target="_blank" rel="noopener">
+        <i class="fas fa-file-pdf"></i> PDF
+      </a>`;
+    }
+
+    // 🔹 Botão visualizar
+    acoesHtml += `<a href="${APP_CONFIG.PORTAL_URL}/cadastros/proposicao/proposicao_mostrar_proc?cod_proposicao=${item.id}"
+      class="btn btn-sm btn-primary btn-card-action" title="Visualizar">
+      <i class="fas fa-eye"></i> Detalhes
+    </a>`;
+
+    // Monta HTML do card
+    const cardHtml = `
+      <div class="col d-flex">
+        <div class="proposicao-card ${item.prioritaria ? 'prioritaria' : ''} h-100 d-flex flex-column w-100">
+          <div class="card-header d-flex align-items-left justify-content-between">
+            <span class="badge bg-secondary">${item.tipo || ''}</span>
+            ${selecionavel
+              ? `<input type="checkbox" class="incorporar-checkbox-card ms-2" value="${item.id}" aria-label="Selecionar proposição para incorporar" ${checked}>`
+              : ''
+            }
+            <small class="text-muted">${envio}</small>
+          </div>
+          <div class="card-body flex-grow-1">
+            <h5 class="card-title">${item.descricao || 'Sem descrição'}</h5>
+            <p class="card-text"><strong>Autoria:</strong> ${item.autor || 'Não informado'}</p>
+            ${(window.appState.currentCaixa === 'incorporado' && item.recebimento) 
+              ? `<p class="card-meta"><strong>Incorporada em:</strong> ${item.recebimento}</p>` 
+              : ''}
+            ${vinculoHtml}
+            ${item.solicitacao_devolucao ? `<p class="card-meta"><strong>Pedido devolução:</strong> ${item.solicitacao_devolucao}</p>` : ''}
+            ${item.devolucao ? `<p class="card-meta"><strong>Devolvida em:</strong> ${item.devolucao}</p>` : ''}
+          </div>
+          <div class="card-footer card-actions bg-transparent border-0 pt-0 mt-auto text-end">
+            ${acoesHtml}
+          </div>
+        </div>
+      </div>
+    `;
+
+    $container.append(cardHtml);
+  });
+
+  updateBtnMarcarTodos();
+}
+
 // --- DATATABLES ---
 function initTable() {
   if (window.appState.table && $.fn.DataTable.isDataTable('#proposicoes-table')) {
     window.appState.table.destroy();
   }
+
   window.appState.table = $('#proposicoes-table').DataTable({
-    searching: false, 
-    info: false, 
-    paging: false, 
+    searching: false,
+    info: false,
+    paging: false,
     ordering: true,
     columns: [
-      { // Coluna seleção (checkbox)
+      { // 0: checkbox de seleção (somente para protocolo)
         data: null,
         orderable: false,
         className: 'text-center col-select',
         visible: false,
         render: function(data, type, row) {
-          if (isElegivelIncorporacao(row) && window.appState.currentCaixa === 'protocolo')
-            return `<input type="checkbox" class="incorporar-checkbox" value="${row.id}" aria-label="Selecionar proposição para incorporar">`;
+          if (isElegivelIncorporacao(row) && window.appState.currentCaixa === 'protocolo') {
+            return `<input type="checkbox" class="incorporar-checkbox" value="${row.id}" aria-label="Selecionar proposição">`;
+          }
           return '';
         }
       },
@@ -885,35 +1022,75 @@ function initTable() {
       { data: 'vinculo', className: 'col-vinculo text-center', render: formatarVinculoTabela },
       { data: 'solicitacao_devolucao', className: 'col-solicitacao_devolucao text-center', render: d => d || '' },
       { data: 'devolucao', className: 'col-devolucao text-center', render: d => d || '' },
-      {
+      { // 9: Coluna de ações
         data: null,
         orderable: false,
-        className: 'text-center',
+        className: 'text-start',
         render: (data, type, row) => {
-          let btns = '';
-          // Só mostra se está na caixa protocolo e tem PDF assinado:
-          if (window.appState.currentCaixa === 'protocolo' && row.pdf_assinado_url) {
-            btns += `<a href="${row.pdf_assinado_url}" class="btn btn-sm btn-outline-success me-1" title="Baixar PDF assinado" target="_blank" rel="noopener">
-                      <i class="fas fa-file-pdf"></i>
-                    </a>`;
+          let html = '';
+
+          // Botão de status de assinatura (somente na aba assinatura)
+          if (window.appState.currentCaixa === 'assinatura') {
+            const a = row.assinaturas;
+            let statusIcon = 'fa-ban';
+            let btnClass = 'btn-outline-secondary';
+            let title = 'Sem pedidos de assinatura';
+
+            if (a && a.total > 0) {
+              const assinadas = a.assinadas?.length || 0;
+              const pendentes = a.pendentes?.length || 0;
+
+              if (pendentes === 0) {
+                statusIcon = 'fa-check-circle';
+                btnClass = 'btn-outline-success';
+                title = `Assinada por: ${a.assinadas.join(', ')}`;
+              } else if (assinadas > 0) {
+                statusIcon = 'fa-hourglass-half';
+                btnClass = 'btn-outline-warning';
+                title = `Assinaturas: ${a.assinadas.join(', ')}\nPendentes: ${a.pendentes.join(', ')}`;
+              } else {
+                statusIcon = 'fa-hourglass-start';
+                btnClass = 'btn-outline-warning';
+                title = `Pendentes: ${a.pendentes.join(', ')}`;
+              }
+            }
+
+            html += `<button type="button" class="btn btn-sm ${btnClass} me-1" title="${_.escape(title)}">
+              <i class="fas ${statusIcon}"></i>
+            </button>`;
           }
-          btns += `<a href="${APP_CONFIG.PORTAL_URL}/cadastros/proposicao/proposicao_mostrar_proc?cod_proposicao=${row.id}"
-                      class="btn btn-sm btn-outline-primary btn-acao" title="Visualizar Proposição" aria-label="Visualizar Proposição ${row.id}">
-                      <i class="fas fa-eye" aria-hidden="true"></i>
-                   </a>`;
-          return btns;
+
+          // Botão PDF (somente na aba protocolo)
+          if (window.appState.currentCaixa === 'protocolo' && row.pdf_assinado_url) {
+            html += `<a href="${row.pdf_assinado_url}" class="btn btn-sm btn-outline-success me-1" title="Visualizar PDF assinado" target="_blank" rel="noopener">
+              <i class="fas fa-file-pdf"></i>
+            </a>`;
+          }
+
+          // Botão visualizar
+          html += `<a href="${APP_CONFIG.PORTAL_URL}/cadastros/proposicao/proposicao_mostrar_proc?cod_proposicao=${row.id}"
+                    class="btn btn-sm btn-outline-primary" title="Visualizar Proposição ${row.id}">
+                    <i class="fas fa-eye"></i>
+                  </a>`;
+
+          return html;
         }
       }
     ],
-    createdRow: function(row, data) { 
-      if (data.prioritaria) $(row).addClass('table-warning'); 
+    createdRow: function(row, data) {
+      if (data.prioritaria) {
+        $(row).addClass('table-warning');
+      }
     }
   });
+
   toggleHeaderColumns(window.appState.currentCaixa);
   initSorting();
+
   $('.col-select').toggle(window.appState.currentCaixa === 'protocolo');
   window.appState.table.column(0).visible(window.appState.currentCaixa === 'protocolo');
 }
+
 
   function toggleHeaderColumns(caixa) {
     // Índices das colunas:

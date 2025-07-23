@@ -334,6 +334,8 @@ class ProposicoesAPIBase:
             'pdf_assinado_url': pdf_assinado_url,
             'prioritaria': getattr(proposicao, 'ind_prioritaria', 0) == 1
         }
+        if caixa == 'assinatura':
+            dados['assinaturas'] = self._obter_status_assinaturas(proposicao.cod_proposicao)
         if caixa == 'pedido_devolucao':
             dados['solicitacao_devolucao'] = self._formatar_data_hora(proposicao.dat_solicitacao_devolucao)
         if caixa == 'devolvido':
@@ -498,6 +500,40 @@ class ProposicoesAPIBase:
         if isinstance(obj, datetime):
             return obj.strftime('%d/%m/%Y %H:%M')
         raise TypeError(f"Tipo {type(obj)} não serializável")
+
+    def _obter_status_assinaturas(self, cod_proposicao):
+        session = Session()
+        try:
+            assinaturas = (
+                session.query(
+                    AssinaturaDocumento,
+                    Usuario.nom_completo
+                )
+                .join(Usuario, Usuario.cod_usuario == AssinaturaDocumento.cod_usuario)
+                .filter(
+                    AssinaturaDocumento.codigo == cod_proposicao,
+                    AssinaturaDocumento.tipo_doc == 'proposicao',
+                    AssinaturaDocumento.ind_excluido == 0
+                )
+                .all()
+            )
+
+            pendentes = []
+            assinadas = []
+
+            for assinatura, nome in assinaturas:
+                if assinatura.ind_assinado:
+                    assinadas.append(nome)
+                elif not assinatura.ind_recusado:
+                    pendentes.append(nome)
+
+            return {
+                'total': len(assinaturas),
+                'assinadas': assinadas,
+                'pendentes': pendentes
+            }
+        finally:
+            session.close()
 
 
 class ProposicoesAPI(grok.View, ProposicoesAPIBase):

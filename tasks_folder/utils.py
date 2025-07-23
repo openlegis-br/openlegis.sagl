@@ -19,20 +19,39 @@ from functools import wraps
 celery = Celery('tasks', config_source='celeryconfig')
 
 class AfterCommitTask(Task):
-    """Base para tarefas que se enfileiram após o commit."""
+    """Tarefa que só será enfileirada após o commit da transação ZODB."""
     abstract = True
-    def apply_async(self, *args, **kw):
-        def hook(success):
-            if success:
-                super(AfterCommitTask, self).apply_async(*args, **kw)
-        transaction.get().addAfterCommitHook(hook)
+
+    def apply_async(self, args=None, kwargs=None, **options):
+        try:
+            txn = transaction.get()
+            if not txn.isDoomed():
+                txn.addAfterCommitHook(
+                    self._run_after_commit,
+                    args=[args, kwargs, options]
+                )
+                return None  # importante: não retorna AsyncResult aqui
+        except Exception as e:
+            logging.warning(f"[AfterCommitTask] Falha ao registrar hook: {e}", exc_info=True)
+
+        # fallback: executa imediatamente (necessário para retry funcionar)
+        return super().apply_async(args=args, kwargs=kwargs, **options)
+
+    def _run_after_commit(self, success, args, kwargs, options):
+        if success:
+            try:
+                super().apply_async(args=args, kwargs=kwargs, **options)
+            except Exception as e:
+                logging.error(f"[AfterCommitTask] Erro ao executar tarefa pós-commit: {e}", exc_info=True)
+        else:
+            logging.warning("[AfterCommitTask] Transação abortada. Tarefa não foi enfileirada.")
+
 
 def zope_task(**task_kw):
     """Decorador de tarefas celery que executa em contexto Zope com retry e ZODB."""
     task_kw.setdefault("bind", True)
 
     def wrap(func):
-        @celery.task(base=AfterCommitTask, **task_kw)
         @wraps(func)
         def task_instance(self, *args, **kw):
             site_path = kw.pop('site_path', 'sagl').strip().strip('/')
@@ -84,8 +103,10 @@ def zope_task(**task_kw):
                 except Exception as fe:
                     logging.warning(f"[zope_task] Falha ao fechar site/app{cod_info}: {fe}", exc_info=True)
 
-        return task_instance
+        return celery.task(base=AfterCommitTask, **task_kw)(task_instance)
+
     return wrap
+
 
 def make_qrcode(text):
     qr = qrcode.QRCode(

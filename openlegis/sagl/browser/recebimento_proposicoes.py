@@ -3,7 +3,7 @@ from five import grok
 from zope.interface import Interface
 from zope.component import queryUtility
 from sqlalchemy.orm import joinedload
-from sqlalchemy import func, or_, desc, asc
+from sqlalchemy import func, or_, desc, asc, select
 from datetime import datetime
 import json
 import csv
@@ -14,7 +14,8 @@ import logging
 from z3c.saconfig import named_scoped_session
 from openlegis.sagl.models.models import (
     Proposicao, Autor, TipoProposicao, MateriaLegislativa,
-    DocumentoAcessorio, Parlamentar, Comissao, AssuntoProposicao, Usuario
+    DocumentoAcessorio, Parlamentar, Comissao, AssuntoProposicao, Usuario,
+    AssinaturaDocumento
 )
 from openlegis.sagl.interfaces import ISAPLDocumentManager
 
@@ -56,6 +57,7 @@ class ProposicoesAPIBase:
             return None
 
     def _aplicar_filtros_caixa(self, query, caixa):
+        session = Session()
         if caixa == 'revisao':
             roles = self._get_user_roles()
             if 'Revisor Proposicao' in roles:
@@ -68,33 +70,97 @@ class ProposicoesAPIBase:
                         Proposicao.dat_devolucao.is_(None),
                         Proposicao.cod_revisor == cod_revisor
                     )
+                    session.close()
                     return query
-            return query.filter(
+            query = query.filter(
                 Proposicao.dat_envio.isnot(None),
                 Proposicao.dat_recebimento.is_(None),
                 Proposicao.dat_solicitacao_devolucao.is_(None),
                 Proposicao.dat_devolucao.is_(None)
             )
-        elif caixa in ['assinatura', 'protocolo']:
-            return query.filter(
+            session.close()
+            return query
+
+        elif caixa == 'assinatura':
+            # Subquery: proposições com pelo menos um pedido de assinatura pendente
+            pendentes_subq = (
+                session.query(AssinaturaDocumento.codigo)
+                .filter(
+                    AssinaturaDocumento.tipo_doc == 'proposicao',
+                    AssinaturaDocumento.ind_excluido == 0,
+                    AssinaturaDocumento.ind_assinado == 0
+                )
+                .distinct()
+                .subquery()
+            )
+            # Aplica filtro de datas e limita para:
+            # - com pedidos pendentes
+            # - ou outras que serão filtradas depois por .pdf/.signed
+            query = query.filter(
                 Proposicao.dat_envio.isnot(None),
                 Proposicao.dat_recebimento.is_(None),
                 Proposicao.dat_solicitacao_devolucao.is_(None),
                 Proposicao.dat_devolucao.is_(None)
+            ).filter(
+                or_(
+                    Proposicao.cod_proposicao.in_(select(pendentes_subq)),
+                    True  # permite que _verificar_documentos_fisicos trate casos com .pdf e sem _signed.pdf
+                )
             )
+            session.close()
+            return query
+
+        elif caixa == 'protocolo':
+            from sqlalchemy.sql import case
+            total_assinaturas = func.count(AssinaturaDocumento.id)
+            assinadas = func.sum(case((AssinaturaDocumento.ind_assinado == 1, 1), else_=0))
+            todas_assinadas_subq = (
+                session.query(AssinaturaDocumento.codigo)
+                .filter(
+                    AssinaturaDocumento.ind_excluido == 0,
+                    AssinaturaDocumento.tipo_doc == 'proposicao'
+                )
+                .group_by(AssinaturaDocumento.codigo)
+                .having(total_assinaturas == assinadas)
+                .subquery()
+            )
+            query = query.filter(
+                Proposicao.dat_envio.isnot(None),
+                Proposicao.dat_recebimento.is_(None),
+                Proposicao.dat_solicitacao_devolucao.is_(None),
+                Proposicao.dat_devolucao.is_(None)
+            ).filter(
+                or_(
+                    ~Proposicao.cod_proposicao.in_(
+                        session.query(AssinaturaDocumento.codigo)
+                        .filter(
+                            AssinaturaDocumento.ind_excluido == 0,
+                            AssinaturaDocumento.tipo_doc == 'proposicao'
+                        )
+                    ),
+                    Proposicao.cod_proposicao.in_(select(todas_assinadas_subq))
+                )
+            )
+            session.close()
+            return query
+
         elif caixa == 'incorporado':
-            return query.filter(
+            query = query.filter(
                 Proposicao.ind_excluido == 0,
                 Proposicao.dat_recebimento.isnot(None),
                 Proposicao.cod_mat_ou_doc.isnot(None)
             )
+
         elif caixa == 'devolvido':
-            return query.filter(Proposicao.dat_devolucao.isnot(None))
+            query = query.filter(Proposicao.dat_devolucao.isnot(None))
+
         elif caixa == 'pedido_devolucao':
-            return query.filter(
+            query = query.filter(
                 Proposicao.dat_solicitacao_devolucao.isnot(None),
                 Proposicao.dat_devolucao.is_(None)
             )
+
+        session.close()
         return query
 
     def _aplicar_filtros_adicionais(self, query):
@@ -164,19 +230,19 @@ class ProposicoesAPIBase:
         doc_manager = queryUtility(ISAPLDocumentManager)
         if not doc_manager or not proposicoes:
             return []
-
+        resultados = []
         arquivos_necessarios = []
+        codigos_proposicao = [str(p.cod_proposicao) for p in proposicoes]
+        # Determinar arquivos esperados por proposição
         for prop in proposicoes:
             id_base = str(prop.cod_proposicao)
-            arquivos = []
             if caixa == 'revisao':
-                arquivos.append((id_base + '.odt', 'odt'))
+                arquivos_necessarios.append((id_base, id_base + '.odt', 'odt'))
             elif caixa == 'assinatura':
-                arquivos.append((id_base + '.pdf', 'pdf'))
+                arquivos_necessarios.append((id_base, id_base + '.pdf', 'pdf'))
+                arquivos_necessarios.append((id_base, id_base + '_signed.pdf', 'pdf_assinado'))
             elif caixa == 'protocolo':
-                arquivos.append((id_base + '_signed.pdf', 'pdf_assinado'))
-            arquivos_necessarios.extend([(id_base, nome, tipo) for (nome, tipo) in arquivos])
-
+                arquivos_necessarios.append((id_base, id_base + '_signed.pdf', 'pdf_assinado'))
         arquivos_encontrados = {}
         batch_supported = hasattr(doc_manager, 'batch_check_documents')
         if batch_supported:
@@ -188,29 +254,44 @@ class ProposicoesAPIBase:
             except Exception as e:
                 logger.warning('[proposicoes] Batch check falhou (%s), usando verificação individual!', e)
                 batch_supported = False
-
         if not batch_supported:
             for prop in proposicoes:
                 id_base = str(prop.cod_proposicao)
                 arquivos_encontrados[(id_base, 'odt')] = doc_manager.existe_documento('proposicao', id_base + '.odt')
                 arquivos_encontrados[(id_base, 'pdf')] = doc_manager.existe_documento('proposicao', id_base + '.pdf')
                 arquivos_encontrados[(id_base, 'pdf_assinado')] = doc_manager.existe_documento('proposicao', id_base + '_signed.pdf')
-
-        resultados = []
-        for prop in proposicoes:
-            id_base = str(prop.cod_proposicao)
-            tem_odt = arquivos_encontrados.get((id_base, 'odt'), False)
-            tem_pdf = arquivos_encontrados.get((id_base, 'pdf'), False)
-            tem_pdf_assinado = arquivos_encontrados.get((id_base, 'pdf_assinado'), False)
-            if caixa == 'revisao':
-                if tem_odt and not tem_pdf and not tem_pdf_assinado:
-                    resultados.append(prop)
-            elif caixa == 'assinatura':
-                if tem_pdf and not tem_pdf_assinado:
-                    resultados.append(prop)
-            elif caixa == 'protocolo':
-                if tem_pdf_assinado:
-                    resultados.append(prop)
+        session = Session()
+        try:
+            if caixa == 'assinatura':
+                # Carrega todos os pedidos pendentes de assinatura em um só SELECT
+                pendentes = set([
+                    row[0] for row in session.query(AssinaturaDocumento.codigo)
+                    .filter(
+                        AssinaturaDocumento.tipo_doc == 'proposicao',
+                        AssinaturaDocumento.ind_excluido == 0,
+                        AssinaturaDocumento.ind_assinado == 0,
+                        AssinaturaDocumento.codigo.in_([p.cod_proposicao for p in proposicoes])
+                    ).distinct()
+                ])
+            for prop in proposicoes:
+                id_base = str(prop.cod_proposicao)
+                tem_odt = arquivos_encontrados.get((id_base, 'odt'), False)
+                tem_pdf = arquivos_encontrados.get((id_base, 'pdf'), False)
+                tem_pdf_assinado = arquivos_encontrados.get((id_base, 'pdf_assinado'), False)
+                if caixa == 'revisao':
+                    if tem_odt and not tem_pdf and not tem_pdf_assinado:
+                        resultados.append(prop)
+                elif caixa == 'assinatura':
+                    # Entra se:
+                    # - tem .pdf e não tem _signed.pdf
+                    # - ou está entre os com pedidos pendentes
+                    if (tem_pdf and not tem_pdf_assinado) or prop.cod_proposicao in pendentes:
+                        resultados.append(prop)
+                elif caixa == 'protocolo':
+                    if tem_pdf_assinado:
+                        resultados.append(prop)
+        finally:
+            session.close()
         return resultados
 
     def _determinar_caixa_proposicao(self, proposicao):
@@ -676,12 +757,14 @@ class ExportarCSV(grok.View, ProposicoesAPIBase):
             caixa = self.request.form.get('caixa', 'revisao')
             pagina = int(self.request.form.get('pagina', 1))
             por_pagina = int(self.request.form.get('por_pagina', 10))
+
             if not self._verificar_permissao_caixa(caixa):
                 self.request.response.setStatus(403)
                 return json.dumps({
                     'sucesso': False,
                     'erro': 'Acesso não autorizado para esta caixa'
                 })
+
             filename = f"proposicoes_{caixa}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
             self.request.response.setHeader('Content-Type', 'text/csv; charset=utf-8')
             self.request.response.setHeader(
@@ -689,13 +772,8 @@ class ExportarCSV(grok.View, ProposicoesAPIBase):
                 f'attachment; filename="{filename}"'
             )
 
-            output = io.StringIO()
-            writer = csv.writer(output, delimiter=';', quoting=csv.QUOTE_MINIMAL)
-            writer.writerow([
-                'NPE', 'Tipo', 'Descrição', 'Autor',
-                'Status', 'Data Envio', 'Data Recebimento',
-                'Data Devolução', 'Documentos'
-            ])
+            base_query = session.query(Proposicao)
+            base_query = self._aplicar_filtros_caixa(base_query, caixa)
 
             ORDER_MAP = {
                 'envio': Proposicao.dat_envio,
@@ -727,8 +805,7 @@ class ExportarCSV(grok.View, ProposicoesAPIBase):
                 else:
                     base_query = base_query.order_by(Proposicao.dat_envio.desc())
 
-            # Paginação por IDs
-            all_ids = [row[0] for row in base_query.all()]
+            all_ids = [row[0] for row in base_query.with_entities(Proposicao.cod_proposicao).all()]
             pag_ids = all_ids[(pagina - 1) * por_pagina : pagina * por_pagina]
 
             if not pag_ids:
@@ -753,6 +830,14 @@ class ExportarCSV(grok.View, ProposicoesAPIBase):
             if caixa in ['revisao', 'assinatura', 'protocolo']:
                 proposicoes = self._verificar_documentos_fisicos(proposicoes, caixa)
 
+            output = io.StringIO()
+            writer = csv.writer(output, delimiter=';', quoting=csv.QUOTE_MINIMAL)
+            writer.writerow([
+                'NPE', 'Tipo', 'Descrição', 'Autor',
+                'Status', 'Data Envio', 'Data Recebimento',
+                'Data Devolução', 'Documentos'
+            ])
+
             for prop in proposicoes:
                 writer.writerow([
                     f"NPE{prop.cod_proposicao}",
@@ -770,6 +855,7 @@ class ExportarCSV(grok.View, ProposicoesAPIBase):
                     self.request.response.write(chunk.encode('utf-8'))
                 output.seek(0)
                 output.truncate(0)
+
             return ''
         except Exception as e:
             traceback.print_exc()

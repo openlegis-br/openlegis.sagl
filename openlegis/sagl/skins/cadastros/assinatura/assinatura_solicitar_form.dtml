@@ -227,7 +227,24 @@
          </small>
            <div class="input-group w-100">
             <select class="select2 users form-select bg-light" name="lst_cod_usuario:list:int" id="lst_cod_usuario" multiple="multiple" required style="width:90%">
-               <dtml-if expr="tipo_doc in ['proposicao', 'pauta_comissao', 'ata_comissao', 'parecer_comissao']">
+               <dtml-if expr="tipo_doc == 'parecer_comissao'">
+                 <dtml-in expr="zsql.relatoria_obter_zsql(cod_relatoria=codigo, ind_excluido=0)">
+                    <dtml-call expr="REQUEST.set('cod_comissao_relatora', cod_comissao)">
+                 </dtml-in>
+                 <dtml-in expr="zsql.periodo_comp_comissao_obter_zsql(ind_excluido=0)">
+                    <dtml-if expr="(DateTime(datefmt='international') >= DateTime(dat_inicio, datefmt='international')) and (DateTime(datefmt='international') <= DateTime(dat_fim, datefmt='international'))">
+                      <dtml-in expr="zsql.composicao_comissao_obter_zsql(cod_comissao=cod_comissao_relatora, cod_periodo_comp=cod_periodo_comp)">
+                        <dtml-in expr="zsql.parlamentar_obter_zsql(cod_parlamentar=cod_parlamentar)">
+                         <dtml-in expr="zsql.autor_obter_zsql(cod_parlamentar=cod_parlamentar)">
+                          <dtml-in expr="zsql.usuario_obter_zsql(col_username=col_username, ind_ativo=1)">
+                             <option value="<dtml-var cod_usuario>"><dtml-var nom_completo><dtml-if expr="nom_cargo != ''"> (<dtml-var nom_cargo>)</dtml-if></option>
+                          </dtml-in>
+                         </dtml-in>
+                        </dtml-in>
+                      </dtml-in>
+                    </dtml-if>
+                 </dtml-in>
+               <dtml-elif expr="tipo_doc in ['proposicao', 'pauta_comissao', 'ata_comissao']">
                  <dtml-call expr="REQUEST.set('data_atual', DateTime(datefmt='international').strftime('%d/%m/%Y'))">
                  <dtml-if expr="AUTHENTICATED_USER.has_role(['Autor'])">
                     <dtml-in expr="zsql.usuario_obter_zsql(col_username=AUTHENTICATED_USER.getUserName(), ind_ativo=1)">
@@ -542,48 +559,74 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   }
 
-  $.fn.select2.amd.define('select2/selectAllAdapter', [
-    'select2/utils', 'select2/dropdown', 'select2/dropdown/attachBody'
-  ], function (Utils, Dropdown, AttachBody) {
-    function SelectAll() {}
-    SelectAll.prototype.render = function (decorated) {
-      const $rendered = decorated.call(this);
-      const $btns = $(`
-        <div class="d-flex gap-2 px-2 py-1 border-bottom">
-          <button type="button" class="btn btn-sm btn-outline-primary">Selecionar Todos</button>
-          <button type="button" class="btn btn-sm btn-outline-secondary">Desmarcar Todos</button>
-        </div>`);
+$.fn.select2.amd.define('select2/selectAllAdapter', [
+  'select2/utils', 'select2/dropdown', 'select2/dropdown/attachBody'
+], function (Utils, Dropdown, AttachBody) {
+  function SelectAll() {}
 
-      if (!this.$element.prop("multiple")) return $rendered;
-      $rendered.find('.select2-dropdown').prepend($btns);
+  SelectAll.prototype.render = function (decorated) {
+    const $rendered = decorated.call(this);
 
-      $btns.eq(0).find('button').on('click', () => {
-        const $select = $rendered.closest('.select2-container').prev();
-        const selecionados = $select.val() || [];
-        const novos = [];
+    if (!this.$element.prop("multiple")) return $rendered;
 
-        $rendered.find('.select2-results__option[aria-selected=false]').each(function () {
-          const val = $(this).attr('id')?.split('-').pop();
-          if (val && !selecionados.includes(val)) novos.push(val);
-        });
+    const $btns = $(`
+      <div class="d-flex gap-2 px-2 py-1 border-bottom">
+        <button type="button" class="btn btn-sm btn-outline-primary">Selecionar Todos</button>
+        <button type="button" class="btn btn-sm btn-outline-secondary">Desmarcar Todos</button>
+      </div>`);
 
-        const totalPrevisto = obterTotalPrevisto(novos.length);
-        if (isUltimaPaginaSelecionada() && totalPrevisto > 3) {
-          mostrarToast(`Máximo de 3 assinaturas permitido na última página (já existem ${qtdeAssinaturasExistentes}).`, 'danger');
-          return;
-        }
+    $rendered.find('.select2-dropdown').prepend($btns);
 
-        $rendered.find('.select2-results__option[aria-selected=false]').trigger('mouseup');
+    // Referência ao elemento Select original
+    const $select = this.$element;
+
+    // Botão "Selecionar Todos"
+    $btns.find('button').eq(0).on('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      
+      const selecionados = $select.val() || [];
+      const novos = [];
+      
+      // Obter todas as opções disponíveis
+      $select.find('option:not(:disabled)').each(function() {
+        const val = $(this).val();
+        if (val && !selecionados.includes(val)) novos.push(val);
       });
 
-      $btns.eq(1).find('button').on('click', () => {
-        $rendered.find('.select2-results__option[aria-selected=true]').trigger('mouseup');
-      });
+      const totalPrevisto = obterTotalPrevisto(novos.length);
+      if (isUltimaPaginaSelecionada() && totalPrevisto > 3) {
+        mostrarToast(`Máximo de 3 assinaturas permitido na última página (já existem ${qtdeAssinaturasExistentes}).`, 'danger');
+        return;
+      }
 
-      return $rendered;
-    };
-    return Utils.Decorate(Utils.Decorate(Dropdown, AttachBody), SelectAll);
-  });
+      // Selecionar todas as opções válidas
+      $select.val(novos).trigger('change');
+      
+      // Fechar o dropdown de forma alternativa
+      $select.select2('close');
+    });
+
+    // Botão "Desmarcar Todos"
+    $btns.find('button').eq(1).on('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      
+      // Limpar todas as seleções
+      $select.val(null).trigger('change');
+      
+      // Fechar o dropdown de forma alternativa
+      $select.select2('close');
+      
+      // Atualizar contador
+      atualizarContadorUsuarios();
+    });
+
+    return $rendered;
+  };
+
+  return Utils.Decorate(Utils.Decorate(Dropdown, AttachBody), SelectAll);
+});
 
   $selectUsuarios.select2({
     placeholder: 'Clique para selecionar o usuário',

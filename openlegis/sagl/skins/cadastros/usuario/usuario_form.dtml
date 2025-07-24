@@ -4,7 +4,7 @@
 
 <dtml-unless expr="AUTHENTICATED_USER.has_role(['Administrador'])">
 <style>
-select#perfis, select#lst_unidade, select#lst_peticionamento {
+select#perfis, select#lst_unidade, select#lst_peticionamento,  select#lst_gerenciamento_doc, select#lst_consulta_doc{
   background: #EEE; 
   pointer-events: none;
   touch-action: none;
@@ -260,6 +260,36 @@ select#perfis, select#lst_unidade, select#lst_peticionamento {
     <p class="h5 font-size-16">Processo Digital</p>
     <div class="row">
        <div class="col-12 col-md-6 mb-3">
+          <label class="form-label" for="lst_gerenciamento_doc">Tipos de Documento com Permissão de Gerenciamento</label>
+          <select class="select2 form-select" id="lst_gerenciamento_doc" name="lst_gerenciamento_doc:list" size="5" multiple <dtml-unless expr="AUTHENTICATED_USER.has_role(['Administrador'])">readonly</dtml-unless> style="width:100%" data-placeholder="Nenhum">
+             <dtml-in expr="zsql.tipo_documento_administrativo_obter_zsql(tip_natureza='P',ind_excluido=0)">
+               <option value="<dtml-var tip_documento>"
+                <dtml-if cod_usuario>
+                  <dtml-if expr="zsql.usuario_tipo_documento_obter_zsql(cod_usuario=cod_usuario,tip_documento=tip_documento)">
+                     selected
+                  </dtml-if></dtml-if>>
+                 <dtml-var des_tipo_documento>
+               </option>
+             </dtml-in>
+         </select>
+       </div>
+       <div class="col-12 col-md-6 mb-3">
+          <label class="form-label" for="lst_consulta_doc">Tipos de Documento com Permissão de Consulta</label>
+          <select class="select2 form-select" id="lst_consulta_doc" name="lst_consulta_doc:list" size="5" multiple <dtml-unless expr="AUTHENTICATED_USER.has_role(['Administrador'])">readonly</dtml-unless> style="width:100%" data-placeholder="Nenhum">
+             <dtml-in expr="zsql.tipo_documento_administrativo_obter_zsql(tip_natureza='P',ind_excluido=0)">
+               <option value="<dtml-var tip_documento>"
+                <dtml-if cod_usuario>
+                  <dtml-if expr="zsql.usuario_consulta_tipo_documento_obter_zsql(cod_usuario=cod_usuario,tip_documento=tip_documento)">
+                     selected
+                  </dtml-if></dtml-if>>
+                 <dtml-var des_tipo_documento>
+               </option>
+             </dtml-in>
+         </select>
+       </div>
+    </div>
+    <div class="row">
+       <div class="col-12 col-md-6 mb-3">
           <label class="form-label" for="lst_unidade">Unidades de Tramitação Vinculadas</label>
           <select class="select2 form-select" id="lst_unidade" name="lst_cod_unid_tramitacao:list" size="5" multiple <dtml-unless expr="AUTHENTICATED_USER.has_role(['Administrador'])">readonly</dtml-unless> style="width:100%" data-placeholder="Nenhuma">
              <dtml-in expr="zsql.unidade_tramitacao_obter_zsql()">
@@ -300,7 +330,7 @@ select#perfis, select#lst_unidade, select#lst_peticionamento {
              </dtml-in>
          </select>
        </div>
-    </div>   
+    </div>
 </form>
 
     <div class="btn-group text-start">
@@ -446,4 +476,3 @@ $(document).ready(function() {
 </script>
 
 <dtml-var footer_html>
-

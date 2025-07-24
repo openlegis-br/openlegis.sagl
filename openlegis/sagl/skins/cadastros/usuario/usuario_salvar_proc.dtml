@@ -10,7 +10,6 @@
   </dtml-in>
 </dtml-if>
 
-
 <dtml-if chk_ind_ativo>
    <dtml-call expr="REQUEST.set('chk_ind_ativo', 1)">
 <dtml-else>
@@ -91,6 +90,20 @@
       <dtml-call expr="tipo_peticionamento_permitir_pysc(cod_usuario=hdn_cod_usuario, tip_peticionamento=lst_peticionamento)">
    </dtml-if>
 
+   <dtml-unless lst_gerenciamento_doc>
+      <dtml-call expr="REQUEST.set('lst_gerenciamento_doc', '')">
+   </dtml-unless>
+   <dtml-if expr="(lst_gerenciamento_doc != ['0'] or lst_gerenciamento_doc != 0 or lst_gerenciamento_doc != '')">
+      <dtml-call expr="tipo_documento_permitir_pysc(cod_usuario=hdn_cod_usuario, tip_documento=lst_gerenciamento_doc)">
+   </dtml-if>
+
+   <dtml-unless lst_consulta_doc>
+      <dtml-call expr="REQUEST.set('lst_consulta_doc', '')">
+   </dtml-unless>
+   <dtml-if expr="(lst_consulta_doc != ['0'] or lst_consulta_doc != 0 or lst_consulta_doc != '')">
+      <dtml-call expr="tipo_documento_consulta_permitir_pysc(cod_usuario=hdn_cod_usuario, tip_documento=lst_consulta_doc)">
+   </dtml-if>
+
    <dtml-if expr="AUTHENTICATED_USER.has_role(['Administrador'])">
      <dtml-call expr="REQUEST.set('url', portal_url() + '/cadastros/usuario/usuario_mostrar_proc?cod_usuario='+hdn_cod_usuario)">
    <dtml-else>
@@ -122,4 +135,3 @@
    </dtml-if>
 </dtml-try>
 </dtml-unless>
-

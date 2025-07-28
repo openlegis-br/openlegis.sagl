@@ -124,16 +124,25 @@ try:
 
     # Redirecionamento final com sucesso
     url = (
-        f"{context.portal_url()}/cadastros/sessao_plenaria/materia_expediente_sessao/"
-        f"materia_expediente_sessao_index_html?cod_sessao_plen={cod_sessao_plen}"
-        f"&cod_sessao_leg={cod_sessao_leg}&num_legislatura={num_legislatura}"
-        f"&dat_sessao={dat_sessao}&tip_sessao={tip_sessao}"
+        context.portal_url() +
+        "/cadastros/sessao_plenaria/materia_expediente_sessao/materia_expediente_sessao_index_html"
+        "?cod_sessao_plen=" + str(cod_sessao_plen) +
+        "&cod_sessao_leg=" + str(cod_sessao_leg) +
+        "&num_legislatura=" + str(num_legislatura) +
+        "&dat_sessao=" + str(dat_sessao) +
+        "&tip_sessao=" + str(tip_sessao)
     )
+
     mensagem = "Aprovações registradas com sucesso!"
+    mensagem_obs = ''
     redirect_url = (
-        f"{context.portal_url()}/mensagem_emitir?"
-        f"tipo_mensagem=success&mensagem={mensagem}&mensagem_obs=&url={url}"
+        context.portal_url() + "/mensagem_emitir?"
+        "tipo_mensagem=success"
+        "&mensagem=" + mensagem +
+        "&mensagem_obs=" + mensagem_obs +
+        "&url=" + url
     )
+
     RESPONSE.redirect(redirect_url)
 
 except Exception as e:

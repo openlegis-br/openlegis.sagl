@@ -1,100 +1,143 @@
-<dtml-in expr="zsql.tipo_resultado_votacao_obter_zsql(ind_excluido=0)">
-  <dtml-if expr="nom_resultado in ('Aprovado', 'Aprovada', 'Aprovado(a)')">
-    <dtml-call expr="REQUEST.set('lst_tip_resultado', tip_resultado_votacao)">
-    <dtml-call expr="REQUEST.set('nom_resultado', nom_resultado)">
-  </dtml-if>
-</dtml-in>
+## Script (Python) "aprovacao_lote_pysc"
+##bind container=container
+##bind context=context
+##bind namespace=
+##bind script=script
+##bind subpath=traverse_subpath
+##parameters=cod_sessao_plen, cod_sessao_leg, num_legislatura, dat_sessao, tip_sessao
+##
 
-<dtml-in expr="zsql.expediente_materia_obter_zsql(cod_sessao_plen=cod_sessao_plen, ind_excluido=0)">
-  <dtml-if cod_materia>
-    <dtml-in expr="zsql.materia_obter_zsql(cod_materia=cod_materia)">
-      <dtml-if expr="des_tipo_materia != 'Indicação'">
+import logging
 
-        <!-- Inicialização de variáveis padrão -->
-        <dtml-call expr="REQUEST.set('txt_votos_nao',        '0')">
-        <dtml-call expr="REQUEST.set('txt_votos_abstencao',  '0')">
-        <dtml-call expr="REQUEST.set('txt_ausentes',         '0')">
-        <dtml-call expr="REQUEST.set('txa_txt_observacao',   '')">
-        <dtml-call expr="REQUEST.set('hdn_cod_ordem',        cod_ordem)">
-        <dtml-call expr="REQUEST.set('hdn_cod_materia',      cod_materia)">
-        <dtml-call expr="REQUEST.set('hdn_cod_emenda',       '')">
-        <dtml-call expr="REQUEST.set('hdn_cod_subemenda',    '')">
-        <dtml-call expr="REQUEST.set('hdn_cod_substitutivo', '')">
+REQUEST = context.REQUEST
+RESPONSE = REQUEST.RESPONSE
 
-        <!-- Verificar se a matéria já foi votada -->
-        <dtml-call expr="REQUEST.set('temVotacao', '')">
-        <dtml-in expr="zsql.votacao_expediente_materia_obter_zsql(cod_sessao_plen=cod_sessao_plen, cod_ordem=cod_ordem, cod_materia=cod_materia)">
-          <dtml-if expr="tip_resultado_votacao">
-            <dtml-call expr="REQUEST.set('temVotacao', cod_votacao)">
-          </dtml-if>
-        </dtml-in>
-        <dtml-in expr="zsql.votacao_obter_zsql(cod_materia=cod_materia)">
-          <dtml-if expr="tip_resultado_votacao">
-            <dtml-call expr="REQUEST.set('temVotacaoAnterior', cod_votacao)">
-          </dtml-if>
-        </dtml-in>
+try:
+    # Obter tipo de resultado aprovado
+    resultado_aprovado = None
+    nom_resultado = None
+    for r in context.zsql.tipo_resultado_votacao_obter_zsql(ind_excluido=0):
+        if r.nom_resultado in ('Aprovado', 'Aprovada', 'Aprovado(a)'):
+            resultado_aprovado = r.tip_resultado_votacao
+            nom_resultado = r.nom_resultado
+            break
 
-        <!-- Se já tiver votação -->
-        <dtml-if expr="REQUEST.get('temVotacao', '') or REQUEST.get('temVotacaoAnterior', '')">
+    if not resultado_aprovado:
+        raise ValueError("Tipo de resultado 'Aprovado' não encontrado.")
 
-          <!-- Verificar PDF assinado da proposição -->
-          <dtml-in expr="zsql.proposicao_obter_zsql(ind_mat_ou_doc='M', cod_mat_ou_doc=cod_materia)">
-            <dtml-if sequence-start>
-              <dtml-if expr="hasattr(sapl_documentos.proposicao, str(cod_proposicao) + '_signed.pdf')">
-                <dtml-call expr="modelo_proposicao.proposicao_autuar(cod_proposicao=cod_proposicao)">
-              </dtml-if>
-            </dtml-if>
-          </dtml-in>
+    # Percorrer matérias da sessão plenária
+    for expediente in context.zsql.expediente_materia_obter_zsql(cod_sessao_plen=cod_sessao_plen, ind_excluido=0):
+        cod_materia = expediente.cod_materia
+        cod_ordem = expediente.cod_ordem
+        if not cod_materia:
+            continue
 
-          <!-- Verificar PDF assinado da matéria -->
-          <dtml-in expr="zsql.assinatura_documento_obter_zsql(codigo=cod_materia, tipo_doc='materia', ind_assinado=1)">
-            <dtml-if sequence-start>
-              <dtml-call expr="REQUEST.set('filename', str(cod_assinatura_doc) + '.pdf')">
-              <dtml-if expr="hasattr(sapl_documentos.documentos_assinados, filename)">
-                <dtml-call expr="modelo_proposicao.margem_inferior(codigo=codigo, anexo=anexo, tipo_doc=tipo_doc, cod_assinatura_doc=cod_assinatura_doc, cod_usuario=cod_usuario, filename=filename)">
-              </dtml-if>
-            </dtml-if>
-          </dtml-in>
+        materia = context.zsql.materia_obter_zsql(cod_materia=cod_materia)[0]
 
-          <!-- Verificar PDF de redação final -->
-          <dtml-in expr="zsql.assinatura_documento_obter_zsql(codigo=cod_materia, tipo_doc='redacao_final', ind_assinado=1)">
-            <dtml-if sequence-start>
-              <dtml-call expr="REQUEST.set('filename', str(cod_assinatura_doc) + '.pdf')">
-              <dtml-if expr="hasattr(sapl_documentos.documentos_assinados, filename)">
-                <dtml-call expr="modelo_proposicao.margem_inferior(codigo=codigo, anexo=anexo, tipo_doc=tipo_doc, cod_assinatura_doc=cod_assinatura_doc, cod_usuario=cod_usuario, filename=filename)">
-              </dtml-if>
-            </dtml-if>
-          </dtml-in>
+        votacoes = context.zsql.votacao_expediente_materia_obter_zsql(
+            cod_sessao_plen=cod_sessao_plen,
+            cod_ordem=cod_ordem,
+            cod_materia=cod_materia
+        )
 
-          <!-- Registrar como aprovado -->
-          <dtml-call expr="modelo_proposicao.requerimento_aprovar(cod_sessao_plen=cod_sessao_plen, nom_resultado=nom_resultado, cod_materia=cod_materia)">
-        </dtml-if>
+        votacao_existente = votacoes[0] if votacoes else None
+        cod_votacao = votacao_existente.cod_votacao if votacao_existente else None
+        tip_resultado = votacao_existente.tip_resultado_votacao if votacao_existente else None
 
-        <!-- Se ainda não tiver votação, incluir -->
-        <dtml-unless expr="REQUEST.get('temVotacao', '')">
-          <dtml-call expr="REQUEST.set('metodo', zsql.votacao_incluir_zsql)">
-          <dtml-call expr="metodo(
-            num_votos_sim=pysc.quantidade_presentes_sessao_plenaria_contar_pysc(cod_sessao_plen=cod_sessao_plen),
-            num_votos_nao=txt_votos_nao,
-            num_abstencao=txt_votos_abstencao,
-            num_ausentes=txt_ausentes,
-            txt_observacao=txa_txt_observacao,
-            cod_ordem=hdn_cod_ordem,
-            cod_materia=hdn_cod_materia,
-            cod_emenda=hdn_cod_emenda,
-            cod_subemenda=hdn_cod_subemenda,
-            cod_substitutivo=hdn_cod_substitutivo,
-            tip_resultado_votacao=lst_tip_resultado)">
-          <dtml-call expr="modelo_proposicao.requerimento_aprovar(cod_sessao_plen=cod_sessao_plen, nom_resultado=nom_resultado, cod_materia=cod_materia)">
-        </dtml-unless>
+        if cod_votacao and tip_resultado not in (None, 0):
+            logging.info(f"[AUTOVOTO] Matéria {cod_materia} já possui cod_votacao={cod_votacao} com tip_resultado_votacao={tip_resultado}. Votação manual detectada. Nenhuma ação executada.")
+            continue
 
-      </dtml-if>
-    </dtml-in>
-  </dtml-if>
-</dtml-in>
+        # Obter número de votos SIM (presentes)
+        num_votos_sim = context.pysc.quantidade_presentes_sessao_plenaria_contar_pysc(cod_sessao_plen=cod_sessao_plen)
 
-<!-- Mensagem final -->
-<dtml-let mensagem="'Aprovações registradas com sucesso!'"
-          url="'index_html?cod_sessao_plen='+_.str(cod_sessao_plen)+'&cod_sessao_leg='+_.str(cod_sessao_leg)+'&num_legislatura='+_.str(num_legislatura)+'&dat_sessao='+_.str(dat_sessao)+'&tip_sessao='+_.str(tip_sessao)">
-  <dtml-var mensagem_emitir>
-</dtml-let>
+        if cod_votacao and tip_resultado in (None, 0):
+            # Atualizar votação incompleta
+            context.zsql.votacao_atualizar_zsql(
+                cod_votacao=cod_votacao,
+                num_votos_sim=num_votos_sim,
+                num_votos_nao=0,
+                num_abstencao=0,
+                num_ausentes=0,
+                txt_observacao='',
+                cod_ordem=cod_ordem,
+                cod_materia=cod_materia,
+                cod_parecer=None,
+                cod_emenda=None,
+                cod_subemenda=None,
+                cod_substitutivo=None,
+                tip_resultado_votacao=resultado_aprovado,
+                ind_excluido=0
+            )
+            logging.info(f"[AUTOVOTO] Votação incompleta atualizada para matéria {cod_materia} (cod_votacao={cod_votacao}).")
+        else:
+            # Nova votação
+            context.zsql.votacao_incluir_zsql(
+                num_votos_sim=num_votos_sim,
+                num_votos_nao=0,
+                num_abstencao=0,
+                num_ausentes=0,
+                txt_observacao='',
+                cod_ordem=cod_ordem,
+                cod_materia=cod_materia,
+                cod_parecer=None,
+                cod_emenda=None,
+                cod_subemenda=None,
+                cod_substitutivo=None,
+                tip_resultado_votacao=resultado_aprovado,
+                ind_excluido=0
+            )
+            logging.info(f"[AUTOVOTO] Votação registrada para matéria {cod_materia}.")
+
+        # Verificar proposição assinada
+        for prop in context.zsql.proposicao_obter_zsql(ind_mat_ou_doc='M', cod_mat_ou_doc=cod_materia):
+            cod_proposicao = prop.cod_proposicao
+            nome_arquivo = f"{cod_proposicao}_signed.pdf"
+            if hasattr(context.sapl_documentos.proposicao, nome_arquivo):
+                context.modelo_proposicao.proposicao_autuar(cod_proposicao=cod_proposicao)
+                logging.info(f"[AUTOVOTO] Proposição {cod_proposicao} autuada.")
+                break
+
+        # Aplicar margem inferior se documento assinado existir
+        for tipo_doc in ('materia', 'redacao_final'):
+            for assinatura in context.zsql.assinatura_documento_obter_zsql(codigo=cod_materia, tipo_doc=tipo_doc, ind_assinado=1):
+                filename = f"{assinatura.cod_assinatura_doc}.pdf"
+                if hasattr(context.sapl_documentos.documentos_assinados, filename):
+                    context.modelo_proposicao.margem_inferior(
+                        codigo=assinatura.codigo,
+                        anexo=assinatura.anexo,
+                        tipo_doc=assinatura.tipo_doc,
+                        cod_assinatura_doc=assinatura.cod_assinatura_doc,
+                        cod_usuario=assinatura.cod_usuario,
+                        filename=filename
+                    )
+                    logging.info(f"[AUTOVOTO] Margem aplicada ({tipo_doc}) para matéria {cod_materia}.")
+                    break
+
+        # Registrar aprovação da matéria
+        context.modelo_proposicao.requerimento_aprovar(
+            cod_sessao_plen=cod_sessao_plen,
+            nom_resultado=nom_resultado,
+            cod_materia=cod_materia
+        )
+        logging.info(f"[AUTOVOTO] Matéria {cod_materia} carimbada como aprovada.")
+
+    # Redirecionamento final com sucesso
+    url = f"{context.portal_url()}/cadastros/sessao_plenaria/materia_expediente_sessao/materia_expediente_sessao_index_html?cod_sessao_plen={cod_sessao_plen}&cod_sessao_leg={cod_sessao_leg}&num_legislatura={num_legislatura}&dat_sessao={dat_sessao}&tip_sessao={tip_sessao}"
+
+    mensagem = "Aprovações registradas com sucesso!"
+    mensagem_obs = ''
+    redirect_url = (
+        f"{context.portal_url()}/mensagem_emitir?"
+        f"tipo_mensagem=success&mensagem={mensagem}&mensagem_obs={mensagem_obs}&"
+        f"url={url}"
+    )
+    RESPONSE.redirect(redirect_url)
+
+except Exception as e:
+    error_msg = f"Erro fatal no script: {str(e)}"
+    logging.info(error_msg)
+    RESPONSE.redirect(
+        f"{context.portal_url()}/mensagem_emitir?"
+        f"tipo_mensagem=error&mensagem={error_msg}"
+    )

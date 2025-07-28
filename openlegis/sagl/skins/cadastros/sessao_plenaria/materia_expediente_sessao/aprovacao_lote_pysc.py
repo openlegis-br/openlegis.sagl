@@ -123,14 +123,32 @@ try:
         logging.info(f"[AUTOVOTO] Matéria {cod_materia} carimbada como aprovada.")
 
     # Redirecionamento final com sucesso
-    url = context.portal_url() + '/cadastros/sessao_plenaria/materia_expediente_sessao/materia_expediente_sessao_index_html?cod_sessao_plen={cod_sessao_plen}&cod_sessao_leg={cod_sessao_leg}&num_legislatura={num_legislatura}&dat_sessao={dat_sessao}&tip_sessao={tip_sessao}'
-    mensagem = "Aprovações registradas com sucesso!"
+    def escape_url_param(value):
+        if value is None:
+            return ''
+        return str(value).replace(' ', '%20').replace('&', '%26').replace('?', '%3F').replace('=', '%3D')
+
+    mensagem = escape_url_param("Aprovações registradas com sucesso!")
     mensagem_obs = ''
-    redirect_url = (
-        f"{context.portal_url()}/mensagem_emitir?"
-        f"tipo_mensagem=success&mensagem={mensagem}&mensagem_obs={mensagem_obs}&"
-        f"url={url}"
+    url_interna = (
+        context.portal_url() +
+        "/cadastros/sessao_plenaria/materia_expediente_sessao/materia_expediente_sessao_index_html" +
+        "?cod_sessao_plen=" + str(cod_sessao_plen) +
+        "&cod_sessao_leg=" + str(cod_sessao_leg) +
+        "&num_legislatura=" + str(num_legislatura) +
+        "&dat_sessao=" + escape_url_param(dat_sessao) +
+        "&tip_sessao=" + str(tip_sessao)
     )
+    url_interna_escaped = escape_url_param(url_interna)
+
+    redirect_url = (
+        context.portal_url() + "/mensagem_emitir?"
+        "tipo_mensagem=success"
+        "&mensagem=" + mensagem +
+        "&mensagem_obs=" + mensagem_obs +
+        "&url=" + url_interna_escaped
+    )
+
     RESPONSE.redirect(redirect_url)
 
 except Exception as e:
@@ -138,5 +156,5 @@ except Exception as e:
     logging.info(error_msg)
     RESPONSE.redirect(
         f"{context.portal_url()}/mensagem_emitir?"
-        f"tipo_mensagem=error&mensagem={error_msg}"
+        f"tipo_mensagem=error&mensagem={escape_url_param(error_msg)}"
     )

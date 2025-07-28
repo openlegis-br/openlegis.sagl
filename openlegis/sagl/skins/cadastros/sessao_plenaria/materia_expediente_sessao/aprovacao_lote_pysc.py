@@ -123,14 +123,13 @@ try:
         logging.info(f"[AUTOVOTO] Matéria {cod_materia} carimbada como aprovada.")
 
     # Redirecionamento final com sucesso
+    url = f"index_html?cod_sessao_plen={cod_sessao_plen}&cod_sessao_leg={cod_sessao_leg}&num_legislatura={num_legislatura}&dat_sessao={dat_sessao}&tip_sessao={tip_sessao}"
     mensagem = "Aprovações registradas com sucesso!"
+    mensagem_obs = ''
     redirect_url = (
         f"{context.portal_url()}/mensagem_emitir?"
-        f"tipo_mensagem=success&mensagem={mensagem}&"
-        f"url=index_html?cod_sessao_plen={cod_sessao_plen}"
-        f"&cod_sessao_leg={cod_sessao_leg}"
-        f"&num_legislatura={num_legislatura}"
-        f"&dat_sessao={dat_sessao}&tip_sessao={tip_sessao}"
+        f"tipo_mensagem=success&mensagem={mensagem}&mensagem_obs={mensagem_obs}&"
+        f"url={url}"
     )
     RESPONSE.redirect(redirect_url)
 

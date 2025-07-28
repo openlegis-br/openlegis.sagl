@@ -56,7 +56,7 @@ def configure_module_security():
         'xml.sax', 'xml.sax.saxutils', 'email.message', 'email.encoders',
         'email.utils', 'email.mime.application', 'email.mime.multipart',
         'email.mime.text', 'AccessControl.PermissionRole',
-        'collections.Counter', 'reportlab', 'reportlab.lib',
+        'collections.Counter', 'reportlab', 'reportlab.lib', 'logging',
         'reportlab.lib.utils', 'operator', 'locale', 'zlib.crc32'
     ]
 

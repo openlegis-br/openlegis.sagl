@@ -391,7 +391,7 @@ class Comissoes(grok.View):
                        arquivo = str(parecer.cod_relatoria) + "_parecer.pdf"
                        if hasattr(self.context.sapl_documentos.parecer_comissao, arquivo):
                           dic_arquivo['content-type'] = 'application/pdf'
-                          dic_arquivo['download'] = self.portal_url + '/sapl_documentos/materia/' + arquivo
+                          dic_arquivo['download'] = self.portal_url + '/sapl_documentos/parecer_comissao/' + arquivo
                           dic_arquivo['filename'] = arquivo
                           dic_arquivo['size'] = ''
                           lst_arquivo.append(dic_arquivo)

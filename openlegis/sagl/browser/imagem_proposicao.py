@@ -1,7 +1,7 @@
 from five import grok
 from zope.interface import Interface
 from Products.CMFCore.utils import getToolByName
-from PIL import Image
+from PIL import Image, ImageOps, ImageColor
 import io
 from DateTime import DateTime
 import logging
@@ -9,24 +9,53 @@ import logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
+BORDAS_COR_PADRAO = ('black')  # branco
+
 def obter_valor_simples(valor):
-    # Se valor for lista ou tupla, extrai o primeiro elemento recursivamente
+    """Normaliza valores enviados no request (lista, tupla ou valor único)."""
     while isinstance(valor, (list, tuple)) and len(valor) > 0:
         valor = valor[0]
     return valor
 
-def resize_image(imagem, largura_max=600):
-    """Redimensiona imagem para largura máxima especificada, mantendo proporção."""
-    if imagem.width > largura_max:
-        proporcao = largura_max / float(imagem.width)
-        nova_altura = int(imagem.height * proporcao)
-        # Compatibilidade com Pillow antigo/novo
-        try:
-            resample = Image.Resampling.LANCZOS
-        except AttributeError:
-            resample = Image.LANCZOS
-        return imagem.resize((largura_max, nova_altura), resample)
-    return imagem
+def _parse_cor(cor_str, fallback=BORDAS_COR_PADRAO):
+    """Aceita #RRGGBB, nomes ('white'), rgb(255,255,255)."""
+    if not cor_str:
+        return fallback
+    try:
+        return ImageColor.getrgb(str(cor_str).strip())
+    except Exception:
+        return fallback
+
+def encaixar_16x9_borda(imagem, largura_final=600, cor=(255, 255, 255)):
+    """Padroniza imagem no formato 16:9 com bordas (sem cortes)."""
+    proporcao_alvo = 16 / 9
+
+    # Redimensiona proporcionalmente para caber no quadro 16:9
+    w, h = imagem.size
+    proporcao_original = w / h
+
+    if proporcao_original > proporcao_alvo:
+        # imagem mais larga → encaixa pela largura
+        nova_largura = largura_final
+        nova_altura = int(nova_largura / proporcao_original)
+    else:
+        # imagem mais alta (retrato) → encaixa pela altura do quadro 16:9
+        nova_altura = int(largura_final / proporcao_alvo)
+        nova_largura = int(nova_altura * proporcao_original)
+
+    try:
+        resample = Image.Resampling.LANCZOS
+    except AttributeError:
+        resample = Image.LANCZOS
+
+    img_red = imagem.resize((nova_largura, nova_altura), resample)
+
+    # Cria tela 16:9 e centraliza
+    tela = Image.new("RGB", (largura_final, int(largura_final / proporcao_alvo)), cor)
+    x = (tela.width - img_red.width) // 2
+    y = (tela.height - img_red.height) // 2
+    tela.paste(img_red, (x, y))
+    return tela
 
 class SalvarImagemProposicaoView(grok.View):
     grok.context(Interface)
@@ -40,6 +69,11 @@ class SalvarImagemProposicaoView(grok.View):
         cod_proposicao = obter_valor_simples(request.get('cod_proposicao'))
         indice = obter_valor_simples(request.get('indice'))
 
+        # Cor da borda opcional (ex.: '#FFFFFF', 'black', 'rgb(0,0,0)')
+        cor_str = obter_valor_simples(request.get('borda_cor')) or ''
+        cor_borda = _parse_cor(cor_str, BORDAS_COR_PADRAO)
+
+        # Busca o arquivo enviado
         arquivo = None
         for key in request.form.keys():
             if key.startswith('file_nom_image'):
@@ -48,6 +82,7 @@ class SalvarImagemProposicaoView(grok.View):
                     arquivo = arquivo[0]
                 break
 
+        # Se não houver parâmetros, retorna formulário de upload
         if not cod_proposicao or not indice or not arquivo:
             return f"""
             <div class="alert alert-danger mb-2">Parâmetros ausentes ou arquivo inválido.</div>
@@ -60,35 +95,46 @@ class SalvarImagemProposicaoView(grok.View):
 
         try:
             id_imagem = f"{cod_proposicao}_image_{indice}.jpg"
-            # Certifica-se que está lendo o arquivo corretamente
+
+            # Abre a imagem
             if hasattr(arquivo, 'read'):
                 arquivo.seek(0)
                 imagem = Image.open(arquivo)
             else:
                 raise ValueError("Arquivo de imagem não encontrado")
 
-            # Remove canal alfa se necessário
+            # 1) Corrige orientação conforme EXIF (fotos de celular)
+            try:
+                imagem = ImageOps.exif_transpose(imagem)
+            except Exception:
+                pass  # se não tiver EXIF, segue o fluxo
+
+            # 2) Remove canal alfa se presente (salvar em JPEG)
             if imagem.mode in ("RGBA", "LA"):
                 imagem = imagem.convert("RGB")
+            elif imagem.mode not in ("RGB", "L"):
+                imagem = imagem.convert("RGB")
 
-            imagem = resize_image(imagem, 600)
+            # 3) Padroniza para 16:9 com bordas (brancas por padrão)
+            imagem = encaixar_16x9_borda(imagem, largura_final=600, cor=cor_borda)
 
+            # 4) Salva em buffer
             buffer = io.BytesIO()
-            imagem.save(buffer, format='JPEG', quality=90)
+            imagem.save(buffer, format='JPEG', quality=90, optimize=True)
             buffer.seek(0)
 
+            # 5) Salva no Zope
             sapl = getToolByName(context, 'sapl_documentos')
             pasta_proposicao = sapl.proposicao
 
-            # Remove imagem antiga, se existir
             if hasattr(pasta_proposicao, id_imagem):
                 pasta_proposicao.manage_delObjects([id_imagem])
 
             pasta_proposicao.manage_addImage(id_imagem, file=buffer)
 
-            logger.info(f"Imagem salva: {id_imagem}")
+            logger.info(f"Imagem salva com sucesso: {id_imagem} (borda_cor={cor_borda})")
 
-            # Retorna preview da imagem
+            # Retorna HTML com preview
             return f"""
             <div class="text-center">
               <img class="img-fluid img-thumbnail mb-2" src="{context.portal_url()}/sapl_documentos/proposicao/{id_imagem}?{int(DateTime().timeTime())}" style="max-height: 500px;">

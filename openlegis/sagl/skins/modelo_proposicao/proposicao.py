@@ -157,7 +157,7 @@ for proposicao in context.zsql.proposicao_obter_zsql(cod_proposicao=cod_proposic
                 ementa_odt += ", " + complemento
             if bairro:
                 ementa_odt += ", " + bairro 
-            if cep:
+            if cep and cep != '00000-000':
                 ementa_odt += ", CEP " + cep 
             ementa_odt += "."
         else:

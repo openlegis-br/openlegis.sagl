@@ -1,5 +1,5 @@
 <dtml-var header_html>
-<style>.display {font-size:90%}"></style>
+<style>.display {font-size:90%;}</style>
 <h1 class="firstHeading font-size-18 mb-3">Tramitação de Processos Digitais</h1>
 <div class="row">
     <div class="col-12">
@@ -74,6 +74,11 @@
                 <div class="my-3">
                     <dtml-in expr="caixa_entrada_pysc(cod_usuario=cod_usuario_corrente)">
                         <dtml-if sequence-start>
+                        <div class="d-flex justify-content-end mb-2">
+  <button type="button" id="btnSelecionar500" class="btn btn-outline-primary btn-sm">
+    Selecionar até 500 processos
+  </button>
+</div>
                             <div class="table-responsive">
                                 <table class="table table-hover table-border display w-100" id="tramitacao">
                                     <thead class="table-light">
@@ -92,8 +97,7 @@
                         </dtml-if sequence-start>
                         <dtml-in expr="zsql.tramitacao_obter_zsql(cod_tramitacao=_['sequence-item'], ind_excluido=0)">
                             <tr>
-                                <td>
-                                    </td>
+                                <td><input type="checkbox" class="form-check-input" /></td>
                                 <td>
                                     <div class="date"><dtml-var dat_tramitacao></div>
                                 </td>
@@ -110,7 +114,7 @@
                                                    target="_blank">
                                             </dtml-if>
                                             <dtml-var des_tipo_materia upper>
-                                            Nº <dtml-var num_ident_basica>/<dtml-var ano_ident_basica></a>&nbsp;–&nbsp;</a>
+                                            Nº <dtml-var num_ident_basica>/<dtml-var ano_ident_basica></a>&nbsp;–&nbsp;
                                             <dtml-in expr="zsql.autoria_obter_zsql(cod_materia=cod_materia)">
                                                 <span class="title"><dtml-var nom_autor_join><dtml-unless sequence-end>,</dtml-unless></span>
                                             </dtml-in>
@@ -328,7 +332,7 @@
                             </div>
                         </dtml-if>
                         <dtml-else>
-                            <p>Não há processos legislativas na caixa de entrada.</p>
+                            <p class="alert alert-info">Não há processos legislativos disponíveis para tramitação.</p>
                         </dtml-in>
                 </div> </div> </form>
 
@@ -416,56 +420,87 @@
         const processingContainer = document.getElementById('processing-indicator-container');
         const form = document.getElementById('tramitacao_form');
 
-        // Evento de clique no botão "Tramitar Processos"
-        $('#btnTramitar').on('click', function (event) {
-            event.preventDefault(); // Impede o envio padrão do formulário
+	    // Botão personalizado para selecionar até 500 processos
+    $('#btnSelecionar500').on('click', function () {
+        var rows = table.rows({ search: 'applied' }).nodes();
+        var count = 0;
 
-            // Verifica a validade do formulário antes de prosseguir
-            if (!form.checkValidity()) {
-                form.classList.add('was-validated'); // Adiciona a classe para ativar os estilos de validação do Bootstrap
-                return; // Interrompe a execução se o formulário for inválido
-            }
+        table.rows().deselect();
 
-            var data = table
-                .rows(function (idx, data, node) {
-                    // Obtém todos os checkboxes da linha
-                    var cells = $(node).find('input[type="checkbox"]');
-                    // Mantém apenas as linhas com checkboxes marcados
-                    return checkedTargets(cells).length;
-                }).data().toArray();
-
-            if (data.length) {
-                // Adiciona inputs hidden para cada processo selecionado
-                for (var i = 0; i < data.length; i++) {
-                    $(form).append(
-                        $('<input>')
-                            .attr('type', 'hidden')
-                            .attr('name', 'check_tram')
-                            .attr('required', 'required')
-                            .val(data[i][7]) // Pega o cod_materia
-                    );
-                }
+        $(rows).each(function () {
+            if (count < 500) {
+                const checkbox = $(this).find('input[type="checkbox"]');
+                checkbox.prop('checked', true);
+                table.row(this).select();
+                count++;
             } else {
-                // Exibe uma mensagem de erro se nenhum processo for selecionado
-                bootstrap.showModal({
-                    title: "Mensagem do Sistema",
-                    body: "Nenhum processo foi selecionado para tramitação em lote. Marque os processos que deseja tramitar e tente novamente."
-                });
                 return false;
             }
-
-            // Substitui o botão pelo indicador de processamento
-            btnTramitar.style.display = 'none'; // Esconde o botão
-            processingContainer.style.display = 'block'; // Exibe o indicador
-
-            form.submit(); // Envia o formulário programaticamente
-
-            // Simula um tempo de processamento (pode ser removido ou ajustado)
-            setTimeout(function () {
-                // Você pode adicionar código aqui para fazer algo após o processamento
-                // Por enquanto, vou deixá-lo vazio, pois a página provavelmente será recarregada
-            }, 10000);
         });
+
+        if (count === 0) {
+            bootstrap.showModal({
+                title: "Nenhum processo selecionado",
+                body: "Não há processos visíveis na lista para selecionar."
+            });
+        } else if (count < 500) {
+            bootstrap.showModal({
+                title: "Seleção parcial",
+                body: "Foram selecionados " + count + " processos disponíveis na visualização atual."
+            });
+        } else {
+            bootstrap.showModal({
+                title: "Limite de seleção",
+                body: "Foram selecionados os 500 primeiros processos visíveis."
+            });
+        }
+    });
+
+        // Evento de clique no botão "Tramitar Processos"
+	    $('#btnTramitar').on('click', function (event) {
+		event.preventDefault();
+
+		if (!form.checkValidity()) {
+		    form.classList.add('was-validated');
+		    return;
+		}
+
+		$('input[name="check_tram"]').remove();
+
+		const data = table.rows().nodes().to$().filter(function () {
+		    return $(this).find('input[type="checkbox"]').prop('checked');
+		});
+
+		if (data.length === 0) {
+		    bootstrap.showModal({
+		        title: "Mensagem do Sistema",
+		        body: "Nenhum processo foi selecionado para tramitação em lote. Marque os processos que deseja tramitar e tente novamente."
+		    });
+		    return;
+		}
+
+		if (data.length > 500) {
+		    bootstrap.showModal({
+		        title: "Limite Excedido",
+		        body: "Você selecionou mais de 500 processos. Por favor, selecione no máximo 500 processos por vez."
+		    });
+		    return;
+		}
+
+		data.each(function () {
+		    const codMateria = table.row(this).data()[7];
+		    $('<input>')
+		        .attr('type', 'hidden')
+		        .attr('name', 'check_tram')
+		        .val(codMateria)
+		        .appendTo(form);
+		});
+
+		btnTramitar.style.display = 'none';
+		processingContainer.style.display = 'block';
+
+		form.submit();
+	    });
 
         // Inicializa o TinyMCE (editor de texto)
         tinymce.init({

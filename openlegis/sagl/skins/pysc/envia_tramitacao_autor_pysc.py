@@ -6,89 +6,89 @@
 ##bind subpath=traverse_subpath
 ##parameters=cod_materia
 ##title=
-from xml.sax.saxutils import escape
-from Products.PythonScripts.standard import url_unquote
-from email.mime.text import MIMEText
-request=context.REQUEST
-response=request.RESPONSE
 
+from xml.sax.saxutils import escape
+from email.mime.text import MIMEText
+from DateTime import DateTime
+
+request = context.REQUEST
 mailhost = context.MailHost
 
-data_registro=DateTime(datefmt='international').strftime('%d/%m/%Y às %H:%M')
+# Dados da casa legislativa
+props = dict(context.sapl_documentos.props_sagl.propertyItems())
+email_casa = props.get('end_email_casa', '').strip()
+casa_legislativa = props.get('nom_casa', 'Câmara Municipal')
 
-casa={}
-aux=context.sapl_documentos.props_sagl.propertyItems()
-for item in aux:
-  casa[item[0]] = item[1]
-email_casa = casa['end_email_casa']
-casa_legislativa = casa['nom_casa']
+if not email_casa or '@' not in email_casa:
+    # Opcional: logar erro ou pular envio se remetente for inválido
+    return
+
+data_registro = DateTime(datefmt='international').strftime('%d/%m/%Y às %H:%M')
 
 for materia in context.zsql.materia_obter_zsql(cod_materia=cod_materia):
- ementa = materia.txt_ementa
- projeto = str(materia.des_tipo_materia)+" "+str(materia.num_ident_basica)+"/"+str(materia.ano_ident_basica)
+    ementa = escape(materia.txt_ementa or '')
+    projeto = f"{materia.des_tipo_materia} {materia.num_ident_basica}/{materia.ano_ident_basica}"
 
- nom_autor = ""
- autorias = context.zsql.autoria_obter_zsql(cod_materia=materia.cod_materia)
- fields = list(autorias.data_dictionary().keys())
- lista_autor = []
- lista_codigo = []
- for autor in autorias:
-   for field in fields:
-     cod_autor = int(autor['cod_autor'])
-     nome_autor = autor['nom_autor_join']
-   lista_codigo.append(cod_autor)
-   lista_autor.append(nome_autor)
- nom_autor = ', '.join(['%s' % (value) for (value) in lista_autor])
+    # Coleta autores únicos
+    lista_autor = []
+    lista_codigo = set()
+    for autor in context.zsql.autoria_obter_zsql(cod_materia=materia.cod_materia):
+        cod_autor = int(autor.cod_autor)
+        nome_autor = autor.nom_autor_join
+        if cod_autor not in lista_codigo:
+            lista_codigo.add(cod_autor)
+            lista_autor.append(nome_autor)
 
- data = ''
- status = ''
- texto_acao = ''
- for tramitacao in context.zsql.tramitacao_obter_zsql(cod_materia=cod_materia, ind_ult_tramitacao=1):
-   data = tramitacao.dat_tramitacao
-   status = tramitacao.des_status
-   if tramitacao.txt_tramitacao != None:
-     texto_acao = escape(tramitacao.txt_tramitacao)
-   else:
-     texto_acao = " "
+    nom_autor = ', '.join(lista_autor)
 
-remetente = email_casa
+    # Informações da última tramitação
+    data = ''
+    status = ''
+    texto_acao = ''
+    for tramitacao in context.zsql.tramitacao_obter_zsql(cod_materia=cod_materia, ind_ult_tramitacao=1):
+        data = tramitacao.dat_tramitacao.strftime('%d/%m/%Y')
+        status = tramitacao.des_status or ''
+        texto_acao = escape(tramitacao.txt_tramitacao or '')
 
-linkMat = request.SERVER_URL+"/consultas/materia/materia_mostrar_proc?cod_materia=" + str(cod_materia)
+    # Link da matéria
+    linkMat = f"{request.SERVER_URL}/consultas/materia/materia_mostrar_proc?cod_materia={cod_materia}"
 
-destinatarios=[]
-for item in lista_codigo:
- for destinatario in context.zsql.autor_obter_zsql(cod_autor=item):
-  dic={}
-  dic['end_email']=destinatario.end_email
-  if dic['end_email'] != None:
-   destinatarios.append(dic)
+    # Coleta e-mails dos autores
+    destinatarios = set()
+    for cod_autor in lista_codigo:
+        for dest in context.zsql.autor_obter_zsql(cod_autor=cod_autor):
+            if dest.end_email and '@' in dest.end_email:
+                destinatarios.add(dest.end_email.strip())
 
-for dic in destinatarios:
-   html = """\
-   <html>
-     <head></head>
-     <body>
-       <p>A seguinte matéria de sua autoria sofreu tramitação registrada em {data_registro}:</p>
-       <p><a href="{linkMat}" target="blank">{projeto}</a><br>
-          {ementa}<br>
-          Autoria: {nom_autor}<br>    
-          Data da Ação: {data}<br>
-          Status: {status}
-       </p>
-       <p>
-          <strong>{casa_legislativa}</strong><br>
-          Processo Digital
-       </p>
-     </body>
-   </html>
-   """.format(data_registro=data_registro, projeto=projeto, linkMat=linkMat, ementa=ementa, nom_autor=nom_autor, data=data, status=status, casa_legislativa=casa_legislativa)
+    # Monta e envia os e-mails
+    for email_dest in destinatarios:
+        assunto = f"{projeto} - Aviso de tramitação em {data_registro}"
+        html = f"""\
+        <html>
+          <head></head>
+          <body>
+            <p>A seguinte matéria de sua autoria sofreu tramitação registrada em {data_registro}:</p>
+            <p>
+              <a href="{linkMat}" target="_blank">{projeto}</a><br>
+              {ementa}<br>
+              Autoria: {nom_autor}<br>
+              Data da Ação: {data}<br>
+              Status: {status}
+            </p>
+            <p>
+              <strong>{casa_legislativa}</strong><br>
+              Processo Digital
+            </p>
+          </body>
+        </html>
+        """
 
-   mMsg = MIMEText(html, 'html', "utf-8")
-
-   mFrom = remetente
-   
-   mTo = dic['end_email']
-
-   mSubj = projeto +" - Aviso de tramitação em " + data_registro
-
-   mailhost.send(mMsg, mTo, mFrom, subject=mSubj)
+        try:
+            # Garante que todos os campos obrigatórios estejam válidos
+            if email_dest and email_casa and assunto and html:
+                mensagem = MIMEText(html, 'html', 'utf-8')
+                mailhost.send(mensagem, mTo=email_dest, mFrom=email_casa, subject=assunto)
+        except Exception as e:
+            logger = context.plone_log if hasattr(context, 'plone_log') else None
+            if logger:
+                logger(f"[ERRO ENVIO EMAIL - TRAMITAÇÃO] {email_dest}: {str(e)}")

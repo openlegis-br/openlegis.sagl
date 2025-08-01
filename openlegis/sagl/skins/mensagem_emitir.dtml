@@ -1,44 +1,45 @@
 <dtml-var header_html>
 
+<dtml-call expr="REQUEST.set('mensagem', REQUEST.SESSION.get('mensagem', REQUEST.get('mensagem', '')))">
+<dtml-call expr="REQUEST.set('mensagem_obs', REQUEST.SESSION.get('mensagem_obs', REQUEST.get('mensagem_obs', '')))">
+<dtml-call expr="REQUEST.set('tipo_mensagem', REQUEST.SESSION.get('tipo_mensagem', REQUEST.get('tipo_mensagem', 'success')))">
+<dtml-call expr="REQUEST.set('url', REQUEST.SESSION.get('url_redirect', REQUEST.get('url', '')))">
+
 <h1 class="firstHeading mb-3" style="display:none;"><dtml-var mensagem></h1>
 
-<dtml-unless tipo_mensagem>
-  <dtml-call expr="REQUEST.set('tipo_mensagem', 'success')">
-</dtml-unless>
-
-<dtml-if expr="_.has_key('tipo_mensagem') or _.has_key('sucesso')">
-    <div class="alert alert-<dtml-var tipo_mensagem missing=success html_quote> alert-dismissible fade show" role="alert">
+<dtml-if tipo_mensagem>
+    <div class="alert alert-<dtml-var tipo_mensagem html_quote> alert-dismissible fade show" role="alert">
         <h6 class="fw-bolder font-size-14 mt-2 mb-1"><dtml-var mensagem></h6>
         <dtml-if mensagem_obs>
           <p class="mb-0 font-size-13"><dtml-var mensagem_obs newline_to_br html_quote></p>
         </dtml-if>
          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
+
     <div class="text-center">
     <dtml-if expr="tipo_mensagem=='success'">
-         <dtml-if expr="_.has_key('url')">
-             <dtml-if expr="_.has_key('modal') or REQUEST.get('modal', '')">
-                <dtml-if expr="_.has_key('url')">
-                  <a class="btn btn-primary" href="<dtml-var url>">Continuar</a>
-                </dtml-if>
+         <dtml-if url>
+             <dtml-if expr="REQUEST.get('modal', '')">
+                <a class="btn btn-primary" href="<dtml-var url>">Continuar</a>
                 <input class="btn btn-light" type="button" id="closeBtn" onclick="var modal1 = $('#close', window.parent.document); modal1.click();" value="Fechar" />
              <dtml-else>
                 <a class="btn btn-primary" href="<dtml-var url>">Continuar</a>
              </dtml-if>
          <dtml-else>
-             <dtml-if expr="_.has_key('modal') or REQUEST.get('modal', '')">
+             <dtml-if expr="REQUEST.get('modal', '')">
                 <input class="btn btn-light" type="button" id="closeBtn" onclick="var modal1 = $('#close', window.parent.document); modal1.click();" value="Fechar" />
              <dtml-else>
                 <a class="btn btn-primary" href="index_html">Continuar</a>
              </dtml-if>
          </dtml-if>
     <dtml-else>
-         <dtml-if expr="_.has_key('url')">
+         <dtml-if url>
              <a class="btn btn-danger" href="<dtml-var url>"><i class="fa fa-fw fa-undo"></i> Voltar</a>
          <dtml-else> 
              <a class="btn btn-danger" href="javascript:void(0)" onClick="window.history.go(-1); return false;"><i class="fa fa-fw fa-undo"></i> Voltar</a>
          </dtml-if>
     </dtml-if>
+
     <dtml-if expr="_.has_key('cod_doc_prop')">
        <a class="btn btn-light d-print-none" target="_blank" href="<dtml-var portal_url>/cadastros/proposicao/proposicao_recibo_imprimir?cod_documento=<dtml-var cod_doc_prop>">Imprimir Recibo</a>  
     </dtml-if>    

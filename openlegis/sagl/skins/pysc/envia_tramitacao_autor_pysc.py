@@ -10,6 +10,7 @@
 from xml.sax.saxutils import escape
 from email.mime.text import MIMEText
 from DateTime import DateTime
+import logging
 
 request = context.REQUEST
 mailhost = context.MailHost
@@ -20,7 +21,7 @@ email_casa = props.get('end_email_casa', '').strip()
 casa_legislativa = props.get('nom_casa', 'Câmara Municipal')
 
 if not email_casa or '@' not in email_casa:
-    # Opcional: logar erro ou pular envio se remetente for inválido
+    logging.warning('Email da casa legislativa (remetente) não configurado corretamente.')
     return
 
 data_registro = DateTime(datefmt='international').strftime('%d/%m/%Y às %H:%M')
@@ -53,7 +54,7 @@ for materia in context.zsql.materia_obter_zsql(cod_materia=cod_materia):
     # Link da matéria
     linkMat = f"{request.SERVER_URL}/consultas/materia/materia_mostrar_proc?cod_materia={cod_materia}"
 
-    # Coleta e-mails dos autores
+    # Coleta e-mails válidos dos autores
     destinatarios = set()
     for cod_autor in lista_codigo:
         for dest in context.zsql.autor_obter_zsql(cod_autor=cod_autor):
@@ -84,11 +85,9 @@ for materia in context.zsql.materia_obter_zsql(cod_materia=cod_materia):
         """
 
         try:
-            # Garante que todos os campos obrigatórios estejam válidos
+            # Verificação final antes do envio
             if email_dest and email_casa and assunto and html:
                 mensagem = MIMEText(html, 'html', 'utf-8')
                 mailhost.send(mensagem, mTo=email_dest, mFrom=email_casa, subject=assunto)
         except Exception as e:
-            logger = context.plone_log if hasattr(context, 'plone_log') else None
-            if logger:
-                logger(f"[ERRO ENVIO EMAIL - TRAMITAÇÃO] {email_dest}: {str(e)}")
+            logging.error(f"Erro ao enviar e-mail para {email_dest}: {e}")

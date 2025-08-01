@@ -12,6 +12,7 @@ st = getToolByName(context, 'portal_sagl')
 
 REQUEST = context.REQUEST
 RESPONSE = REQUEST.RESPONSE
+SESSION = REQUEST.SESSION
 
 v=str(check_tram)
 if v.isdigit():
@@ -91,8 +92,10 @@ for dic in lst_novas:
        if hasattr(context.sapl_documentos.materia.tramitacao,arquivoPdf):
           context.cadastros.tramitacao_materia.tramitacao_juntar_pdf(cod_tramitacao=dic['cod_tramitacao'])
 
-mensagem = 'Processos legislativos tramitados com sucesso!'
-mensagem_obs = ''
-url = context.portal_url() + '/cadastros/tramitacao_materia/itens_enviados_html'
-redirect_url=context.portal_url()+'/mensagem_emitir?tipo_mensagem=success&mensagem=' + mensagem + '&mensagem_obs=' + mensagem_obs + '&url=' + url
-REQUEST.RESPONSE.redirect(redirect_url)
+# Mensagem via sessão para evitar excesso na URL
+SESSION['tipo_mensagem'] = 'success'
+SESSION['mensagem'] = 'Processos legislativos tramitados com sucesso!'
+SESSION['mensagem_obs'] = ''
+SESSION['url_redirect'] = context.portal_url() + '/cadastros/tramitacao_materia/itens_enviados_html'
+
+RESPONSE.redirect(context.portal_url() + '/mensagem_emitir')

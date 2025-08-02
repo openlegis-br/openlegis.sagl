@@ -141,8 +141,8 @@
                             </div>
                         </div>
                     </div>
-                    <dtml-call expr="REQUEST.set('pasta', consultas.materia.pasta_digital.pastadigital(cod_materia=cod_materia,action='pasta'))">
-                    <dtml-in pasta mapping>
+                    <dtml-call expr="REQUEST.set('pasta', consultas.materia.pasta_digital.pastadigital(cod_materia=cod_materia, action='pasta'))">
+                    <dtml-in expr="REQUEST.get('pasta')['documentos']" mapping>
                        <dtml-if sequence-start>
                          <div id="navbar" class="navbar-collapse collapse">
                            <ol>
@@ -232,7 +232,7 @@
    </div>
 
   <main>
-    <dtml-in pasta mapping>
+    <dtml-in expr="REQUEST.get('pasta')['documentos']" mapping>
        <dtml-if sequence-start>     
          <iframe onload="load(this)" id="iframeViewer" name="iframeViewer" src="<dtml-var portal_url>/js/pdfjs/web/viewer?file=<dtml-var url>" allowfullscreen=""></iframe>
        </dtml-if>

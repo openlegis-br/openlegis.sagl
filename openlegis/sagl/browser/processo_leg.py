@@ -450,7 +450,7 @@ def sanear_pdf(pdf_bytes, titulo=None, data_modificacao=None):
                 if titulo or data_modificacao:
                     metadados = doc.metadata or {}
                     if titulo:
-                        metadados["title"] = str(titulo)[:100]  # Limita tamanho do título
+                        metadados["title"] = str(titulo)[:100]
                     if data_modificacao:
                         metadados["modDate"] = str(data_modificacao)
                     doc.set_metadata(metadados)
@@ -954,16 +954,17 @@ class ProcessoLegView(grok.View):
         try:
             pdf_mesclado = fitz.open()
             total_size = 0
+            documentos_com_paginas = []
+
+            current_page = 1
 
             for i, documento in enumerate(documentos, 1):
                 try:
                     if documento.get('filesystem'):
-                        # Documentos do sistema de arquivos (como fichas de votação)
                         caminho_arquivo = secure_path_join(documento['path'], documento['file'])
                         with open(caminho_arquivo, 'rb') as f:
                             pdf_bytes = f.read()
                     else:
-                        # Documentos do Zope
                         arquivo_obj = getattr(documento['path'], documento['file'])
                         pdf_bytes = bytes(arquivo_obj.data)
                     
@@ -982,78 +983,88 @@ class ProcessoLegView(grok.View):
                     if not pdf:
                         raise PDFGenerationError(f"Documento corrompido: {documento['title']}")
 
+                    start_page = len(pdf_mesclado) + 1
                     pdf_mesclado.insert_pdf(pdf)
+                    end_page = len(pdf_mesclado)
+                    num_pages = end_page - start_page + 1
 
-                    # Salvar cópia individual
+                    documento['start_page'] = start_page
+                    documento['end_page'] = end_page
+                    documento['num_pages'] = num_pages
+                    documentos_com_paginas.append(documento)
+
                     caminho_individual = secure_path_join(dir_base, f"{i:04d}.pdf")
                     with open(caminho_individual, 'wb') as f:
-                        f.write(pdf.tobytes(**PDF_OPTIONS))
+                        pdf.save(f, **PDF_OPTIONS)
 
                 except Exception as e:
-                    logger.error(
-                        f"Erro ao processar {documento['file']} ({documento['title']}): {str(e)}", 
-                        exc_info=True
-                    )
+                    logger.error(f"Erro ao processar {documento['file']}: {str(e)}", exc_info=True)
                     raise PDFGenerationError(f"Erro ao processar documento: {documento['title']}")
 
-            # Verificação final do tamanho
             if len(pdf_mesclado) > MAX_PAGES:
                 raise PDFGenerationError(f"Número de páginas excede o limite de {MAX_PAGES}")
 
-            # Adicionar numeração de páginas
-            total_paginas = len(pdf_mesclado)
-            for num_pagina in range(total_paginas):
-                pagina = pdf_mesclado[num_pagina]
-                largura = pagina.rect.width
+            self._adicionar_rodape_e_metadados(pdf_mesclado, id_processo)
 
-                texto_rodape = f"Pág. {num_pagina + 1}/{total_paginas}"
-                posicao = fitz.Point(largura - 70, 20)
-
-                forma = pagina.new_shape()
-                forma.insert_text(
-                    posicao, 
-                    f"{id_processo}\n{texto_rodape}", 
-                    fontname="helv", 
-                    fontsize=8
-                )
-                forma.commit()
-
-            # Metadados
-            pdf_mesclado.set_metadata({
-                "title": id_processo,
-                "modDate": documentos[-1]["data"] if documentos else DateTime().strftime('%Y-%m-%d %H:%M:%S'),
-                "creator": "Sistema de Processo Legislativo",
-                "producer": "ReportLab + PyMuPDF"
-            })
-
-            return pdf_mesclado
+            return pdf_mesclado, documentos_com_paginas
             
         except Exception as e:
             logger.error(f"Erro na mesclagem de documentos: {str(e)}", exc_info=True)
             raise PDFGenerationError(f"Falha na mesclagem de documentos: {str(e)}")
 
     def salvar_paginas_individuais(self, pdf_final, dir_paginas, id_processo):
-        """Salva páginas individuais com tratamento de erros"""
+        """Salva páginas individuais com numeração consistente"""
         try:
-            data_modificacao = DateTime().strftime('%Y-%m-%d %H:%M:%S')
-            if hasattr(pdf_final, 'metadata') and 'modDate' in pdf_final.metadata:
-                data_modificacao = pdf_final.metadata['modDate']
+            if not os.path.exists(dir_paginas):
+                os.makedirs(dir_paginas, mode=0o700)
 
-            for i in range(len(pdf_final)):
-                nome_arquivo = f"pg_{i + 1:04d}.pdf"
+            for page_num in range(len(pdf_final)):
+                nome_arquivo = f"pg_{page_num + 1:04d}.pdf"
                 caminho_arquivo = secure_path_join(dir_paginas, nome_arquivo)
 
                 with fitz.open() as pagina_pdf:
-                    pagina_pdf.insert_pdf(pdf_final, from_page=i, to_page=i)
+                    pagina_pdf.insert_pdf(pdf_final, from_page=page_num, to_page=page_num)
+                    
                     pagina_pdf.set_metadata({
-                        "title": nome_arquivo,
-                        "modDate": data_modificacao
+                        "title": f"{id_processo} - Página {page_num + 1}",
+                        "creator": "Sistema de Processo Legislativo"
                     })
+                    
                     pagina_pdf.save(caminho_arquivo, **PDF_OPTIONS)
                     
         except Exception as e:
             logger.error(f"Erro ao salvar páginas individuais: {str(e)}", exc_info=True)
             raise PDFGenerationError(f"Falha ao salvar páginas individuais: {str(e)}")
+
+    def _adicionar_rodape_e_metadados(self, pdf, id_processo):
+        """Adiciona rodapé e metadados consistentes ao PDF"""
+        total_paginas = len(pdf)
+    
+        for num_pagina in range(total_paginas):
+            pagina = pdf[num_pagina]
+            largura = pagina.rect.width
+        
+            # Texto do rodapé
+            texto_rodape = f"{id_processo} | Pág. {num_pagina + 1}/{total_paginas}"
+            posicao = fitz.Point(largura - 100, 20)
+        
+            forma = pagina.new_shape()
+            forma.insert_text(
+                posicao, 
+                texto_rodape, 
+                fontname="helv", 
+                fontsize=8,
+                color=fitz.utils.getColor("gray")
+            )
+            forma.commit()
+
+        # Metadados consistentes
+        pdf.set_metadata({
+            "title": id_processo,
+            "creator": "Sistema de Processo Legislativo",
+            "producer": "PyMuPDF",
+            "creationDate": DateTime().strftime('%Y-%m-%d %H:%M:%S')
+        })
 
     def render(self, cod_materia, action='json'):
         """
@@ -1065,45 +1076,53 @@ class ProcessoLegView(grok.View):
             dir_base, dir_paginas = self.preparar_diretorios(cod_materia)
             dados_materia = self.obter_dados_materia(cod_materia)
             documentos_raw = self.coletar_documentos(dados_materia, dir_base)
-            pdf_final = self.mesclar_documentos(documentos_raw, dir_base, dados_materia['id_exibicao'])
-            total_paginas = pdf_final.page_count
+            
+            # 2. Mesclar documentos obtendo também o mapeamento de páginas
+            pdf_final, documentos_com_paginas = self.mesclar_documentos(
+                documentos_raw, dir_base, dados_materia['id_exibicao']
+            )
+            total_paginas = len(pdf_final)
 
-            # ** NOVO: salva cada página em dir_paginas/pg_0001.pdf, pg_0002.pdf … **
+            # 3. Salvar páginas individuais
             self.salvar_paginas_individuais(pdf_final, dir_paginas, dados_materia['id_exibicao'])
 
-            # 2. Reconstruir a lista de documentos com intervalos de páginas
-            current_page = 1
-            documentos = []
-            for doc in documentos_raw:
-                # determina quantas páginas este doc ocupa
-                num_pag = doc.get('num_paginas')
-                if not num_pag:
-                    # abre o PDF para contar
-                    caminho = os.path.join(doc['path'], doc['file']) if doc.get('filesystem') else None
-                    if caminho and os.path.exists(caminho):
-                        with fitz.open(caminho) as p: num_pag = p.page_count
-                    else:
-                        num_pag = 1
-                paginas = list(range(current_page, current_page + num_pag))
-                documentos.append({
-                    'titulo':     doc['title'],
-                    'paginas':    paginas,
-                    'data':       doc['data'],
-                    'num_paginas': num_pag
-                })
-                current_page += num_pag
-
+            # 4. Formatando a resposta
             result = {
-                'documentos':     documentos,
-                'total_paginas': total_paginas
+                'documentos': [],
+                'total_paginas': total_paginas,
+                'id_processo': dados_materia['id_exibicao']
             }
 
-            # 3. Saída JSON formatada
+            base_url = f"{self.context.absolute_url()}/@@pagina_processo_leg_integral"
+            
+            for i, doc in enumerate(documentos_com_paginas, 1):
+                doc_id = f"{i:04d}.pdf"
+                first_page = doc['start_page']
+                first_id = f"pg_{first_page:04d}.pdf"
+                
+                paginas = []
+                for page_num in range(doc['start_page'], doc['end_page'] + 1):
+                    pg_id = f"pg_{page_num:04d}.pdf"
+                    paginas.append({
+                        'num_pagina': str(page_num),
+                        'id_pagina': pg_id,
+                        'url': f"{base_url}?cod_materia={cod_materia}%26pagina={pg_id}"
+                    })
+                
+                result['documentos'].append({
+                    'id': doc_id,
+                    'title': doc['title'],
+                    'data': doc['data'],
+                    'url': f"{base_url}?cod_materia={cod_materia}%26pagina={first_id}",
+                    'paginas_geral': total_paginas,
+                    'paginas': paginas,
+                    'id_paginas': [p['id_pagina'] for p in paginas],
+                    'paginas_doc': doc['num_pages']
+                })
+
+            # 5. Retornar conforme o action
             if action == 'json':
-                base_url = f"{self.context.absolute_url()}/@@pagina_processo_leg_integral"
-                return formatar_documentos(result, cod_materia, base_url)
-  
-            # 4. Download PDF legado
+                return result
             if action == 'download':
                 nome_final = f"{dados_materia['id']}.pdf"
                 caminho_final = os.path.join(dir_base, nome_final)
@@ -1117,15 +1136,12 @@ class ProcessoLegView(grok.View):
                 )
                 return conteudo
 
-            # fallback
-            return formatar_documentos(result, cod_materia,
-                                       f"{self.context.absolute_url()}/@@pagina_processo_leg_integral")
-    
+            return result
+        
         except Exception as e:
-            logger.error(f"Erro no render JSON: {e}", exc_info=True)
+            logger.error(f"Erro no render: {e}", exc_info=True)
             self.request.RESPONSE.setStatus(500)
-            return []
-
+            return {'error': str(e)}
 
 class PaginaProcessoLeg(grok.View):
     """Exibe página individual usando secure_path_join."""
@@ -1140,9 +1156,8 @@ class PaginaProcessoLeg(grok.View):
         return secure_path_join(install_home, 'var/tmp')
 
     def render(self, cod_materia, pagina):
-        # validação similar...
-        dir_hash  = hashlib.md5(str(cod_materia).encode()).hexdigest()
-        dir_base  = secure_path_join(self.temp_base, f'{self.TEMP_DIR_PREFIX}{dir_hash}')
+        dir_hash = hashlib.md5(str(cod_materia).encode()).hexdigest()
+        dir_base = secure_path_join(self.temp_base, f'{self.TEMP_DIR_PREFIX}{dir_hash}')
         dir_pages = secure_path_join(dir_base, 'pages')
         file_path = secure_path_join(dir_pages, pagina)
 
@@ -1160,7 +1175,6 @@ class PaginaProcessoLeg(grok.View):
             self.request.response.setStatus(403)
             return "Acesso não permitido"
 
-
 class LimparProcessoLegView(grok.View):
     """Visualização para limpeza de diretórios temporários."""
     grok.context(Interface)
@@ -1169,22 +1183,17 @@ class LimparProcessoLegView(grok.View):
     
     @property
     def temp_base(self):
-        """Diretório base temporário seguro"""
         install_home = os.environ.get('INSTALL_HOME', tempfile.gettempdir())
         return os.path.abspath(os.path.join(install_home, 'var/tmp'))
 
     def render(self, cod_materia):
-        """Remove os arquivos temporários do processo com segurança."""
         try:
-            # Validação do código da matéria
             if not cod_materia or not str(cod_materia).isdigit():
                 raise ValueError("Código da matéria inválido")
             
-            # Cria hash segura para nome do diretório
             dir_hash = hashlib.md5(str(cod_materia).encode()).hexdigest()
             dir_base = os.path.join(self.temp_base, f'processo_leg_integral_{dir_hash}')
             
-            # Verificação de segurança do caminho
             if not os.path.abspath(dir_base).startswith(self.temp_base):
                 raise SecurityError("Tentativa de acesso a caminho não permitido")
             

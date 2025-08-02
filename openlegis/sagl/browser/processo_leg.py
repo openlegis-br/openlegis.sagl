@@ -1045,8 +1045,8 @@ class ProcessoLegView(grok.View):
             largura = pagina.rect.width
         
             # Texto do rodapé
-            texto_rodape = f"{id_processo} | Pág. {num_pagina + 1}/{total_paginas}"
-            posicao = fitz.Point(largura - 100, 20)
+            texto_rodape = f"{id_processo} | Fls. {num_pagina + 1}/{total_paginas}"
+            posicao = fitz.Point(largura - 120, 30)
         
             forma = pagina.new_shape()
             forma.insert_text(

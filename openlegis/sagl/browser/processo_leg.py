@@ -665,7 +665,7 @@ class ProcessoLegView(grok.View):
                 cod_mat_ou_doc=dados_materia['cod_materia'], 
                 ind_mat_ou_doc='M'
             ):
-                data_texto = DateTime(proposta.dat_recebimento, datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
+                data_texto = DateTime(proposta.dat_recebimento, datefmt='international').strftime('%Y-%m-%d 00:00:02')
             
             adicionar_documento({
                 "data": data_texto,

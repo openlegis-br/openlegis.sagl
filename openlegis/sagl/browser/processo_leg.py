@@ -591,34 +591,54 @@ class ProcessoLegView(grok.View):
     
     @property
     def temp_base(self) -> str:
-        """Diretório base temporário seguro"""
+        """
+        Diretório base temporário seguro. 
+        Garante que INSTALL_HOME/var/tmp exista, ou usa system temp.
+        """
+        # 1) pick your install-home or fallback
         install_home = os.environ.get('INSTALL_HOME', tempfile.gettempdir())
-        return secure_path_join(install_home, 'var/tmp')
+
+        # 2) build the var/tmp path under it
+        base = os.path.abspath(os.path.join(install_home, 'var', 'tmp'))
+
+        # 3) ensure it exists (mode 700 for safety)
+        try:
+            os.makedirs(base, mode=0o700, exist_ok=True)
+        except Exception as e:
+            logger.error(f"Não foi possível criar base temp '{base}': {e}")
+            raise PDFGenerationError(f"Falha na preparação dos diretórios: {e}")
+
+        # 4) return it (secure_path_join will let sub-dirs through)
+        return base
 
     def preparar_diretorios(self, cod_materia: str) -> Tuple[str, str]:
         """Cria diretórios temporários de trabalho com segurança"""
         try:
+            # 1) Validar código da matéria
             if not cod_materia or not str(cod_materia).isdigit():
                 raise ValueError("Código da matéria inválido")
-            
+
+            # 2) Gerar hash único para este processamento
             dir_hash = hashlib.md5(str(cod_materia).encode()).hexdigest()
-            dir_base = secure_path_join(
-                self.temp_base, 
-                f"{self.TEMP_DIR_PREFIX}{dir_hash}"
-            )
-            dir_paginas = secure_path_join(dir_base, 'pages')
-            
+            prefix = f"{self.TEMP_DIR_PREFIX}{dir_hash}"
+
+            # 3) Secure‐join para o diretório base (parent já existe via temp_base)
+            dir_base = secure_path_join(self.temp_base, prefix)
+
+            # 4) (Re)criar dir_base com permissão restrita
             if os.path.exists(dir_base):
                 shutil.rmtree(dir_base, ignore_errors=True)
-            
             os.makedirs(dir_base, mode=0o700, exist_ok=True)
+
+            # 5) Secure‐join para o subdiretório de páginas (já que dir_base existe)
+            dir_paginas = secure_path_join(dir_base, 'pages')
             os.makedirs(dir_paginas, mode=0o700, exist_ok=True)
-            
+
             return dir_base, dir_paginas
-            
+
         except Exception as e:
-            logger.error(f"Erro ao preparar diretórios: {str(e)}", exc_info=True)
-            raise PDFGenerationError(f"Falha na preparação dos diretórios: {str(e)}")
+            logger.error(f"Erro ao preparar diretórios: {e}", exc_info=True)
+            raise PDFGenerationError(f"Falha na preparação dos diretórios: {e}")
 
     def obter_dados_materia(self, cod_materia):
         """Obtém informações básicas da matéria legislativa com validação"""

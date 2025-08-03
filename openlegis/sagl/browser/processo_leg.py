@@ -303,8 +303,10 @@ def gerar_ficha_votacao_pdf(dados_votacao, caminho_saida, nome_camara, nome_sess
             ]]
             vote_colors = {
                 'Sim': colors.HexColor(theme['success']),
-                'Não': colors.HexColor(theme['danger']),
-                'Abstenção': colors.HexColor(theme['warning'])
+                'Nao': colors.HexColor(theme['danger']),
+                'Abstencao': colors.HexColor(theme['warning']),
+                'Ausente': colors.HexColor(theme['light_gray']),
+                'Na Presid.': colors.HexColor(theme['secondary'])       
             }
             for v in dados_votacao.get('votos_nominais', []):
                 vote = v.get('voto','').strip()

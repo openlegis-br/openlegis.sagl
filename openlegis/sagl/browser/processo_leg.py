@@ -3,7 +3,13 @@ import os
 import shutil
 import tempfile
 import hashlib
+import gc
+import sys
 from io import BytesIO
+from concurrent.futures import ThreadPoolExecutor
+from functools import lru_cache, wraps
+import time
+from typing import List, Dict, Any, Tuple, Optional
 from DateTime import DateTime
 from Acquisition import aq_inner
 from five import grok
@@ -12,22 +18,42 @@ import fitz
 import logging
 import pikepdf
 from reportlab.lib import colors
-from reportlab.lib.pagesizes import A4
+from reportlab.lib.pagesizes import A4, letter
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.utils import ImageReader
-from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_JUSTIFY
+from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_JUSTIFY, TA_RIGHT
 from reportlab.platypus import (
-    SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Image
+    SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Image, PageBreak
 )
+from reportlab.pdfgen import canvas
 from reportlab.rl_config import defaultPageSize
-from reportlab.lib.units import mm
+from reportlab.lib.units import mm, inch
+from PIL import Image as PILImage
 
-# Configuração de logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler('pdf_generation.log'),
+        logging.StreamHandler()
+    ]
+)
 logger = logging.getLogger(__name__)
 
+# Configuração de logging de performance
+perf_logger = logging.getLogger('performance')
+perf_logger.setLevel(logging.DEBUG)
+perf_handler = logging.FileHandler('performance_metrics.log')
+perf_handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
+perf_logger.addHandler(perf_handler)
+
+# Configurações globais de performance
+sys.setrecursionlimit(10000)
+gc.disable()
+
 # Constantes para otimização de PDF
-PDF_OPTIONS = {
+PDF_OPTIMIZATION_SETTINGS = {
     'garbage': 3,
     'deflate': True,
     'clean': True,
@@ -39,6 +65,20 @@ MAX_PDF_SIZE = 50 * 1024 * 1024  # 50MB
 MAX_TOTAL_SIZE = 500 * 1024 * 1024  # 500MB
 MAX_PAGES = 1000
 MAX_DOCUMENTS = 100
+MAX_WORKERS = 4
+
+# Cache de temas e estilos
+_style_cache = {}
+_theme = {
+    'primary': '#003366',
+    'secondary': '#E1F5FE',
+    'success': '#4CAF50',
+    'danger': '#F44336',
+    'warning': '#FFC107',
+    'light_gray': '#F5F5F5',
+    'text': '#212121',
+    'muted': '#757575'
+}
 
 class PDFGenerationError(Exception):
     """Exceção personalizada para erros na geração de PDF"""
@@ -48,498 +88,493 @@ class SecurityError(Exception):
     """Exceção para problemas de segurança"""
     pass
 
-def validate_pdf_content(pdf_bytes):
-    if len(pdf_bytes) > MAX_PDF_SIZE:
-        raise PDFGenerationError(f"Tamanho do PDF excede {MAX_PDF_SIZE//(1024*1024)}MB")
-    if not pdf_bytes.startswith(b'%PDF-'):
-        raise PDFGenerationError("O arquivo não é um PDF válido")
-    return True
+def timeit(func):
+    """Decorator para medição de tempo de execução"""
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        gc.enable()
+        start_time = time.perf_counter()
+        try:
+            result = func(*args, **kwargs)
+        finally:
+            elapsed = time.perf_counter() - start_time
+            perf_logger.debug(f"{func.__name__} executed in {elapsed:.4f} seconds")
+            gc.disable()
+        return result
+    return wrapper
 
-def secure_path_join(base_path, *paths):
-    full = os.path.abspath(os.path.join(base_path, *paths))
-    if not full.startswith(os.path.abspath(base_path)):
-        raise SecurityError("Tentativa de acesso não permitido")
-    return full
+@lru_cache(maxsize=32)
+def get_cached_styles():
+    """Retorna estilos com cache para melhor performance"""
+    if not _style_cache:
+        # 1) Load the standard sample stylesheet and copy only the named styles
+        base_styles = getSampleStyleSheet()
+        for name, style in base_styles.byName.items():
+            _style_cache[name] = style
 
-def gerar_ficha_votacao_pdf(dados_votacao, caminho_saida, nome_camara, nome_sessao, logo_bytes=None):
-    """Gera um PDF da ficha de votação com design profissional aprimorado"""
-    try:
-        # Configuração do documento com margens para impressão
-        margin_left = margin_right = 15 * mm
-        doc = SimpleDocTemplate(
-            caminho_saida,
-            pagesize=A4,
-            rightMargin=margin_right,
-            leftMargin=margin_left,
-            topMargin=5 * mm,
-            bottomMargin=20 * mm
-        )
+        # 2) Define your custom styles, including the missing Totalizador* ones
+        custom_styles = {
+            'Header1': ParagraphStyle(
+                name='Header1',
+                parent=_style_cache['Heading1'],
+                fontSize=14, leading=18,
+                alignment=TA_CENTER,
+                textColor=colors.HexColor(_theme['primary'])
+            ),
+            'Header2': ParagraphStyle(
+                name='Header2',
+                parent=_style_cache['Heading2'],
+                fontSize=11, leading=13,
+                alignment=TA_LEFT,
+                textColor=colors.HexColor(_theme['primary'])
+            ),
+            'Label': ParagraphStyle(
+                name='Label',
+                parent=_style_cache['Normal'],
+                fontSize=9, leading=11,
+                alignment=TA_LEFT,
+                textColor=colors.HexColor(_theme['muted'])
+            ),
+            'Value': ParagraphStyle(
+                name='Value',
+                parent=_style_cache['Normal'],
+                fontSize=9, leading=11,
+                alignment=TA_LEFT,
+                textColor=colors.HexColor(_theme['text'])
+            ),
+            'VoteResult': ParagraphStyle(
+                name='VoteResult',
+                parent=_style_cache['Normal'],
+                fontSize=12, leading=15,
+                alignment=TA_CENTER,
+                textColor=colors.white,
+                backColor=colors.HexColor(_theme['primary'])
+            ),
 
-        # --- ESTILOS AVANÇADOS ---
-        styles = getSampleStyleSheet()
-        theme = {
-            'primary': '#003366',
-            'secondary': '#E1F5FE',
-            'success': '#4CAF50',
-            'danger': '#F44336',
-            'warning': '#FFC107',
-            'light_gray': '#F5F5F5',
-            'text': '#212121',
-            'muted': '#757575'
+            # ——— The missing Totalizador styles ———
+            'TotalizadorCabecalho': ParagraphStyle(
+                name='TotalizadorCabecalho',
+                parent=_style_cache['Heading4'],
+                fontSize=9, leading=11,
+                alignment=TA_CENTER,
+                textColor=colors.white
+            ),
+            'TotalizadorConteudo': ParagraphStyle(
+                name='TotalizadorConteudo',
+                parent=_style_cache['Normal'],
+                fontSize=9, leading=11,
+                alignment=TA_CENTER,
+                textColor=colors.HexColor(_theme['text'])
+            ),
+            'TotalizadorDestaque': ParagraphStyle(
+                name='TotalizadorDestaque',
+                parent=_style_cache['Heading4'],
+                fontSize=9, leading=11,
+                alignment=TA_CENTER,
+                textColor=colors.HexColor(_theme['primary'])
+            ),
         }
 
-        styles.add(ParagraphStyle(
-            name='Header1',
-            fontSize=14,
-            leading=18,
-            alignment=TA_CENTER,
-            textColor=colors.HexColor(theme['primary']),
-            fontName='Helvetica-Bold',
-            spaceAfter=12
-        ))
-        styles.add(ParagraphStyle(
-            name='Header2',
-            fontSize=11,
-            leading=13,
-            alignment=TA_LEFT,
-            textColor=colors.HexColor(theme['primary']),
-            fontName='Helvetica-Bold',
-            spaceAfter=8,
-            borderLeft=2,
-            borderColor=colors.HexColor(theme['primary']),
-            leftPadding=6
-        ))
-        styles.add(ParagraphStyle(
-            name='Label',
-            fontSize=9,
-            leading=11,
-            alignment=TA_LEFT,
-            textColor=colors.HexColor(theme['muted']),
-            fontName='Helvetica-Bold',
-            spaceAfter=2
-        ))
-        styles.add(ParagraphStyle(
-            name='Value',
-            fontSize=9,
-            leading=11,
-            alignment=TA_LEFT,
-            textColor=colors.HexColor(theme['text']),
-            fontName='Helvetica',
-            spaceAfter=8
-        ))
-        styles.add(ParagraphStyle(
-            name='VoteResult',
-            fontSize=12,
-            leading=15,
-            alignment=TA_CENTER,
-            textColor=colors.white,
-            backColor=colors.HexColor(theme['primary']),
-            fontName='Helvetica-Bold',
-            spaceBefore=10,
-            spaceAfter=15,
-            padding=6
-        ))
-        styles.add(ParagraphStyle(
-            name='TotalizadorCabecalho',
-            fontSize=9,
-            leading=11,
-            alignment=TA_LEFT,
-            textColor=colors.white,
-            backColor=colors.HexColor(theme['primary']),
-            fontName='Helvetica-Bold'
-        ))
-        styles.add(ParagraphStyle(
-            name='TotalizadorConteudo',
-            fontSize=9,
-            leading=11,
-            alignment=TA_LEFT,
-            textColor=colors.HexColor(theme['text']),
-            fontName='Helvetica'
-        ))
-        styles.add(ParagraphStyle(
-            name='TotalizadorDestaque',
-            fontSize=9,
-            leading=11,
-            alignment=TA_LEFT,
-            textColor=colors.HexColor(theme['text']),
-            fontName='Helvetica-Bold'
-        ))
+        _style_cache.update(custom_styles)
+
+    return _style_cache
 
 
+def validate_pdf_content(pdf_bytes: bytes) -> bool:
+    """Valida se o conteúdo é um PDF válido e dentro dos limites de tamanho"""
+    if len(pdf_bytes) > MAX_PDF_SIZE:
+        raise PDFGenerationError(f"PDF size exceeds {MAX_PDF_SIZE//(1024*1024)}MB limit")
+    if not pdf_bytes.startswith(b'%PDF-'):
+        raise PDFGenerationError("Invalid PDF file signature")
+    return True
 
-        elements = []
+def secure_path_join(base_path: str, *paths: str) -> str:
+    """Junção segura de caminhos com verificações de segurança"""
+    base = os.path.abspath(base_path)
+    full_path = os.path.abspath(os.path.join(base, *paths))
+    
+    # Verificações de segurança
+    if not os.path.exists(base):
+        raise SecurityError(f"Base path does not exist: {base}")
+    if not os.path.isdir(base):
+        raise SecurityError(f"Base path is not a directory: {base}")
+    if not full_path.startswith(base + os.sep):
+        raise SecurityError(f"Path traversal attempt detected: {full_path}")
+    if os.path.islink(full_path):
+        raise SecurityError(f"Symbolic links not allowed: {full_path}")
+    
+    return full_path
 
-        # 1. CABEÇALHO INSTITUCIONAL
-        if logo_bytes:
-            logo_stream = BytesIO(logo_bytes)
-            logo_img = Image(
-                logo_stream,
-                width=50, height=50
-            )
-        else:
-            # fallback para arquivo estático ou nada
-            logo_img = Image('logo_camara.png', width=60, height=60) \
-                       if os.path.exists('logo_camara.png') else ''
-
-        nome_camara_para_header = Paragraph(
-            nome_camara + '<br/>' + dados_votacao.get('sessao',''),
-            ParagraphStyle(
-              'CamaraNameHeader',
-              fontSize=13,
-              leading=15,
-              alignment=TA_LEFT,
-              textColor=colors.HexColor(theme['primary']),
-              fontName='Helvetica-Bold',
-              spaceAfter=14
-            )
-        )
-
-        # (c) Parágrafo com título da sessão e ID fica na segunda linha
-        title_para_header = Paragraph('REGISTRO DE VOTAÇÃO', style=styles['Header1'])
-        
-        id_para_header = Paragraph(
-            f"ID: {hashlib.md5(str(dados_votacao).encode()).hexdigest()[:8]}",
-            styles['Label']
-        )
-
-        header_data = [
-            # Linha 1: Nome da Câmara, centralizado sobre as 3 colunas
-            [ logo_img, nome_camara_para_header, '' ],
-            [ '', title_para_header, id_para_header ]
-        ]
-
-        header_table = Table(header_data, colWidths=[60, '*', 80])
-        header_table.setStyle(TableStyle([
-            # Linha 1: alinhar verticalmente o logo e o nome
-            ('VALIGN',        (0,0), (1,0),   'MIDDLE'),
-            ('ALIGN',         (0,0), (0,0),   'CENTER'),
-            ('ALIGN',         (1,0), (1,0),   'LEFT'),
-            ('BOTTOMPADDING', (0,0), (-1,0),  6),
-
-            # Linha 2: mesma formatação que antes
-            ('VALIGN',        (0,1), (-1,1),  'MIDDLE'),
-            ('ALIGN',         (0,1), (0,1),   'CENTER'),
-            ('ALIGN',         (2,1), (2,1),   'RIGHT'),
-            ('LINEBELOW',     (1,1), (1,1),   1, colors.HexColor(theme['primary'])),
-            ('BOTTOMPADDING', (0,1), (-1,1),  10),
-        ]))
-        elements.append(header_table)
-
-        # 2. INFORMAÇÕES DA SESSÃO (Grid 2 colunas)
-        session_data = [
-            [
-                Paragraph(f"<b>{nome_sessao}:</b>", styles['Label']),
-                Paragraph(dados_votacao.get('sessao',''), styles['Value']),
-                Paragraph('<b>Data/Hora:</b>', styles['Label']),
-                Paragraph(f"{dados_votacao.get('data_sessao','')} {dados_votacao.get('hora_sessao','')}", styles['Value'])
-            ],
-            [
-                Paragraph('<b>Legislatura:</b>', styles['Label']),
-                Paragraph(dados_votacao.get('legislatura',''), styles['Value']),
-                Paragraph('<b>Fase:</b>', styles['Label']),
-                Paragraph(dados_votacao.get('fase',''), styles['Value']),
-            ],
-            [
-                Paragraph('<b>Tipo de Votação:</b>', styles['Label']),
-                Paragraph(dados_votacao.get('txt_tipo_votacao',''), styles['Value']),
-                Paragraph('<b>Turno de Discussão:</b>', styles['Label']),
-                Paragraph(dados_votacao.get('txt_turno','—'), styles['Value'])
-            ],
-            [
-                Paragraph('<b>Quórum:</b>', styles['Label']),
-                Paragraph(dados_votacao.get('txt_quorum',''), styles['Value']),
-                # Se não precisar de quarta coluna neste row, deixe vazia:
-                Paragraph('', styles['Label']),
-                Paragraph('', styles['Value'])
-            ]
-        ]
-
-        session_table = Table(session_data, colWidths=['20%','30%','20%','30%'], hAlign='LEFT')
-        session_table.setStyle(TableStyle([
-            ('VALIGN',       (0,0), (-1,-1), 'TOP'),
-            ('ALIGN',        (0,0), (-1,-1), 'LEFT'),
-            ('GRID',         (0,0), (-1,-1), 0.5, colors.HexColor('#EEEEEE')),
-            ('BACKGROUND',   (0,0), (-1,-1), colors.white),
-            ('LEFTPADDING',  (0,0), (-1,-1), 4),
-            ('RIGHTPADDING', (0,0), (-1,-1), 4),
-            ('BOTTOMPADDING',(0,0), (-1,-1), 6),
-        ]))
-        elements.extend([session_table, Spacer(1, 15)])
-
-        # 3. INFORMAÇÕES DA MATÉRIA
-        elements.append(Paragraph(
-            f"{dados_votacao.get('tipo_materia','')} nº {dados_votacao.get('num_materia','')}/{dados_votacao.get('ano_materia','')}",
-            styles['Header2']
-        ))
-        elements.append(Paragraph(
-            f"<b>Autoria:</b> {dados_votacao.get('autoria_materia','')}",
-            styles['Value']
-        ))
-        elements.append(Spacer(1, 5))
-        ementa_style = ParagraphStyle(
-            'EmentaStyle', parent=styles['Value'],
-            alignment=TA_JUSTIFY,
-            backColor=colors.HexColor(theme['light_gray']),
-            borderPadding=5,
-            spaceAfter=15
-        )
-        elements.append(Paragraph(
-            f"<b>Ementa:</b> {dados_votacao.get('ementa_materia','')}",
-            ementa_style
-        ))
-
-        # 4. RESULTADO COM DESTAQUE
-        result_text = f"RESULTADO: {dados_votacao.get('txt_resultado','').upper()}"
-        elements.append(Paragraph(result_text, styles['VoteResult']))
-
-        # 5. DETALHAMENTO NOMINAL (se aplicável)
-        votos = []
-        if dados_votacao.get('txt_tipo_votacao') == 'Nominal':
-            elements.append(Paragraph('DETALHAMENTO DA VOTAÇÃO', styles['Header2']))
-            table_data = [[
-                Paragraph('Vereador', styles['TotalizadorCabecalho']),
-                Paragraph('Partido', styles['TotalizadorCabecalho']),
-                Paragraph('Voto', styles['TotalizadorCabecalho'])
-            ]]
-            vote_colors = {
-                'Sim': colors.HexColor(theme['success']),
-                'Nao': colors.HexColor(theme['danger']),
-                'Abstencao': colors.HexColor(theme['warning']),
-                'Ausente': colors.HexColor(theme['light_gray']),
-                'Na Presid.': colors.HexColor(theme['secondary'])       
-            }
-            for v in dados_votacao.get('votos_nominais', []):
-                vote = v.get('voto','').strip()
-                votos.append(vote)
-                table_data.append([
-                    Paragraph(v.get('nom_completo',''), styles['Value']),
-                    Paragraph(v.get('partido',''), styles['Value']),
-                    Paragraph(vote, styles['Value'])
-                ])
-            vote_table = Table(table_data, colWidths=['50%', '30%', '20%'], repeatRows=1)
-            vote_table.setStyle(TableStyle([
-                ('BACKGROUND', (0,0), (-1,0), colors.HexColor(theme['primary'])),
-                ('TEXTCOLOR',  (0,0), (-1,0), colors.white),
-                ('ALIGN',      (0,0), (-1,-1), 'LEFT'),
-                ('FONTNAME',   (0,0), (-1,0), 'Helvetica-Bold'),
-                ('FONTSIZE',   (0,0), (-1,0), 9),
-                ('BOTTOMPADDING', (0,0), (-1,0), 6),
-                ('GRID',       (0,0), (-1,-1), 0.5, colors.HexColor('#EEEEEE')),
-                ('ROWBACKGROUNDS', (0,1), (-1,-1), [colors.white, colors.HexColor('#FAFAFA')])
-            ]))
-            for i, row in enumerate(table_data[1:], start=1):
-                vote = row[2].text
-                if vote in vote_colors:
-                    vote_table.setStyle(TableStyle([
-                        ('BACKGROUND', (2,i), (2,i), vote_colors[vote])
-                    ]))
-            elements.extend([vote_table, Spacer(1, 15)])
-
-        # 6. TOTALIZADORES COMPLETOS
-        tot_sim = int(dados_votacao.get('num_votos_sim') or 0)
-        tot_nao = int(dados_votacao.get('num_votos_nao') or 0)
-        tot_abst = int(dados_votacao.get('num_abstencao') or 0)
-        tot_aus = int(dados_votacao.get('num_ausentes') or 0)
-        tot_pres = votos.count('Na Presid.') if dados_votacao.get('txt_tipo_votacao') == 'Nominal' else 0
-        tot_geral = tot_sim + tot_nao + tot_abst + tot_aus + tot_pres
-
-        total_data = [
-            [
-                Paragraph('Tipo de Voto', styles['TotalizadorCabecalho']),
-                Paragraph('Quantidade', styles['TotalizadorCabecalho']),
-                Paragraph('Percentual', styles['TotalizadorCabecalho'])
-            ],
-            [
-                Paragraph('Votos "Sim"', styles['TotalizadorConteudo']),
-                Paragraph(str(tot_sim), styles['TotalizadorConteudo']),
-                Paragraph(f'{(tot_sim/tot_geral*100):.1f}%' if tot_geral > 0 else '0%', styles['TotalizadorConteudo'])
-            ],
-            [
-                Paragraph('Votos "Não"', styles['TotalizadorConteudo']),
-                Paragraph(str(tot_nao), styles['TotalizadorConteudo']),
-                Paragraph(f'{(tot_nao/tot_geral*100):.1f}%' if tot_geral > 0 else '0%', styles['TotalizadorConteudo'])
-            ],
-            [
-                Paragraph('Abstenções', styles['TotalizadorConteudo']),
-                Paragraph(str(tot_abst), styles['TotalizadorConteudo']),
-                Paragraph(f'{(tot_abst/tot_geral*100):.1f}%' if tot_geral > 0 else '0%', styles['TotalizadorConteudo'])
-            ],
-            [
-                Paragraph('Na Presidência', styles['TotalizadorConteudo']),
-                Paragraph(str(tot_pres), styles['TotalizadorConteudo']),
-                Paragraph(f'{(tot_pres/tot_geral*100):.1f}%' if tot_geral > 0 else '0%', styles['TotalizadorConteudo'])
-            ],
-            [
-                Paragraph('Ausentes', styles['TotalizadorConteudo']),
-                Paragraph(str(tot_aus), styles['TotalizadorConteudo']),
-                Paragraph(f'{(tot_aus/tot_geral*100):.1f}%' if tot_geral > 0 else '0%', styles['TotalizadorConteudo'])
-            ],
-            [
-                Paragraph('TOTAL GERAL', styles['TotalizadorDestaque']),
-                Paragraph(str(tot_geral), styles['TotalizadorDestaque']),
-                Paragraph('100%', styles['TotalizadorDestaque'])
-            ]
-        ]
-
-        total_table = Table(total_data, colWidths=['50%', '25%', '25%'])
-        total_table.setStyle(TableStyle([
-            ('BACKGROUND', (0,0), (-1,0), colors.HexColor(theme['primary'])),
-            ('TEXTCOLOR',  (0,0), (-1,0), colors.white),
-            ('ALIGN',      (1,1), (-1,-1), 'CENTER'),
-            ('FONTNAME',   (0,-1), (-1,-1), 'Helvetica-Bold'),
-            ('BACKGROUND', (0,-1), (-1,-1), colors.HexColor(theme['light_gray']),
-            ),
-            ('BOX',        (0,0), (-1,-1), 0.5, colors.HexColor('#E0E0E0')),
-            ('LINEABOVE',  (0,-1), (-1,-1), 1, colors.HexColor(theme['primary'])),
-            ('BACKGROUND', (0,1), (0,1), colors.HexColor('#E8F5E9')),
-            ('BACKGROUND', (0,2), (0,2), colors.HexColor('#FFEBEE')),
-            ('BACKGROUND', (0,3), (0,3), colors.HexColor('#FFF8E1')),
-        ]))
-        elements.append(Paragraph('TOTALIZAÇÃO DE VOTOS', styles['Header2']))
-        elements.append(total_table)
-
-        # 7. RODAPÉ PROFISSIONAL
-        def footer(canvas, doc):
-            canvas.saveState()
-            canvas.setStrokeColor(colors.HexColor(theme['primary']))
-            canvas.setLineWidth(0.5)
-            canvas.line(margin_left, 40, doc.width + margin_left, 40)
-            canvas.setFont('Helvetica', 7)
-            canvas.setFillColor(colors.HexColor(theme['muted']))
-            canvas.drawString(margin_left, 30, f"Documento gerado eletronicamente - {nome_camara}")
-            footer_text = f"{DateTime().strftime('%d/%m/%Y %H:%M')} | Página {canvas.getPageNumber()}"
-            canvas.drawRightString(doc.width + margin_left, 30, footer_text)
-            canvas.restoreState()
-
-        # Constrói o documento
-        doc.build(elements, onFirstPage=footer, onLaterPages=footer)
-        logger.info(f"PDF gerado com sucesso em: {caminho_saida}")
-
-    except Exception as e:
-        logger.error(f"Erro na geração do PDF: {str(e)}", exc_info=True)
-        raise PDFGenerationError(f"Falha na geração do PDF: {str(e)}")
-
-def check_pdf_security(pdf_bytes):
+def check_pdf_security(pdf_bytes: bytes) -> bool:
     """Verifica se o PDF contém elementos potencialmente maliciosos"""
     try:
-        # Verifica JavaScript com pikepdf
+        # Verificação com pikepdf
         with pikepdf.open(BytesIO(pdf_bytes)) as pdf:
             for page in pdf.pages:
                 if '/JS' in page or '/JavaScript' in page:
-                    raise SecurityError("PDF contém JavaScript potencialmente malicioso")
+                    raise SecurityError("PDF contains JavaScript")
         
         # Verificação adicional com fitz
         with fitz.open(stream=pdf_bytes, filetype="pdf") as doc:
             for page in doc:
                 if page.get_links() or page.get_xobjects():
-                    # Verificação simplificada de elementos ativos
-                    logger.warning("PDF contém elementos interativos/ativos")
+                    logger.warning("PDF contains interactive elements")
         
         return True
     except Exception as e:
-        logger.error(f"Falha na verificação de segurança do PDF: {e}")
-        raise SecurityError(f"Falha na verificação de segurança do PDF: {e}")
+        logger.error(f"PDF security check failed: {e}")
+        raise SecurityError(f"PDF security check failed: {e}")
 
-def sanear_pdf(pdf_bytes, titulo=None, data_modificacao=None):
-    """Sanear e reparar um PDF utilizando PyMuPDF (fitz) com fallback para pikepdf"""
-    def tentar_fitz(stream):
-        try:
-            with fitz.open(stream=stream, filetype="pdf") as doc:
-                if len(doc) > MAX_PAGES:
-                    raise PDFGenerationError(f"PDF excede o limite de {MAX_PAGES} páginas")
-                
-                # Atualizar metadados se fornecido
-                if titulo or data_modificacao:
-                    metadados = doc.metadata or {}
-                    if titulo:
-                        metadados["title"] = str(titulo)[:100]
-                    if data_modificacao:
-                        metadados["modDate"] = str(data_modificacao)
-                    doc.set_metadata(metadados)
-                
-                # Otimizar PDF
-                saida = BytesIO()
-                doc.save(saida, **PDF_OPTIONS)
-                saida.seek(0)
-                
-                validate_pdf_content(saida.getvalue())
-                check_pdf_security(saida.getvalue())
-                
-                return fitz.open(stream=saida, filetype="pdf")
-            
-        except Exception as e:
-            logger.warning(f"[sanear_pdf] Falha no Fitz: {e}")
-            return None
-
+def optimize_pdf_content(pdf_bytes: bytes, title: str = None, 
+                        modification_date: str = None) -> bytes:
+    """Otimiza e limpa o conteúdo do PDF"""
     try:
-        validate_pdf_content(pdf_bytes)
-        check_pdf_security(pdf_bytes)
-        
-        # Tentar primeiro com Fitz
-        resultado = tentar_fitz(BytesIO(pdf_bytes))
-        
-        if resultado:
-            return resultado
-
-        # Fallback com pikepdf
-        logger.info("[sanear_pdf] Tentando reparar com pikepdf")
-        with pikepdf.open(BytesIO(pdf_bytes)) as pdf:
-            # Remover elementos potencialmente perigosos
-            for page in pdf.pages:
-                if '/Annots' in page:
-                    del page.Annots
-                if '/AA' in page:
-                    del page.AA
+        # Primeira passagem com fitz para otimização básica
+        with fitz.open(stream=pdf_bytes, filetype="pdf") as doc:
+            if len(doc) > MAX_PAGES:
+                raise PDFGenerationError(f"PDF exceeds {MAX_PAGES} pages limit")
             
-            saida = BytesIO()
-            pdf.save(saida)
-            saida.seek(0)
+            # Atualiza metadados se fornecidos
+            if title or modification_date:
+                metadata = doc.metadata or {}
+                if title:
+                    metadata["title"] = str(title)[:100]
+                if modification_date:
+                    metadata["modDate"] = str(modification_date)
+                doc.set_metadata(metadata)
             
-            validate_pdf_content(saida.getvalue())
-            resultado = tentar_fitz(saida)
-            
-            if resultado:
-                logger.info("[sanear_pdf] PDF reparado com pikepdf")
-                return resultado
-            
-            logger.error("[sanear_pdf] pikepdf salvou, mas o fitz ainda falhou")
-            raise PDFGenerationError("Não foi possível reparar o PDF")
-            
+            # Salva em buffer com otimizações
+            output_buffer = BytesIO()
+            doc.save(output_buffer, **PDF_OPTIMIZATION_SETTINGS)
+            optimized_bytes = output_buffer.getvalue()
+    
     except Exception as e:
-        logger.error(f"[sanear_pdf] Erro ao processar PDF: {e}")
-        raise PDFGenerationError(f"Falha ao processar PDF: {str(e)}")
+        logger.warning(f"Primary PDF optimization failed, trying fallback: {e}")
+        # Fallback com pikepdf
+        try:
+            with pikepdf.open(BytesIO(pdf_bytes)) as pdf:
+                # Remove elementos potencialmente perigosos
+                for page in pdf.pages:
+                    if '/Annots' in page:
+                        del page.Annots
+                    if '/AA' in page:
+                        del page.AA
+                
+                output_buffer = BytesIO()
+                pdf.save(output_buffer)
+                optimized_bytes = output_buffer.getvalue()
+        except Exception as e:
+            logger.error(f"Fallback PDF optimization failed: {e}")
+            raise PDFGenerationError(f"Failed to optimize PDF: {e}")
+    
+    # Validações finais
+    validate_pdf_content(optimized_bytes)
+    check_pdf_security(optimized_bytes)
+    
+    return optimized_bytes
 
-def formatar_documentos(result, cod_materia, base_url):
-    """
-    Transforma o resultado de render() em lista de dicts conforme especificação.
-    """
-    documentos = result.get('documentos', [])
-    total_paginas = result.get('total_paginas', 0)
-    out = []
-    for idx, doc in enumerate(documentos, start=1):
-        doc_id = f"{idx:04d}.pdf"
-        first_num = doc['paginas'][0]
-        first_id = f"pg_{int(first_num):04d}.pdf"
-        url_geral = f"{base_url}?cod_materia={cod_materia}%26pagina={first_id}"
-        paginas = []
-        for num in doc['paginas']:
-            pg_id = f"pg_{int(num):04d}.pdf"
-            paginas.append({
-                'num_pagina': str(num),
-                'id_pagina': pg_id,
-                'url': f"{base_url}?cod_materia={cod_materia}%26pagina={pg_id}"
-            })
-        out.append({
-            'id': doc_id,
-            'title': doc['titulo'],
-            'data': doc['data'],
-            'url': url_geral,
-            'paginas_geral': total_paginas,
-            'paginas': paginas,
-            'id_paginas': [],
-            'paginas_doc': doc.get('num_paginas', len(paginas))
-        })
-    return out
+def build_header_content(dados_votacao: Dict, nome_camara: str, 
+                        styles: Dict, logo_bytes: bytes = None) -> Tuple[Table, List[Any]]:
+    """Constrói o cabeçalho do documento"""
+    elements = []
+    
+    # Logo handling
+    logo_img = None
+    if logo_bytes:
+        try:
+            logo_img = Image(BytesIO(logo_bytes), width=50, height=50)
+        except Exception as e:
+            logger.warning(f"Failed to process logo: {e}")
+
+    # Header content
+    title_text = f"<b>{nome_camara}</b><br/>{dados_votacao.get('sessao', '')}"
+    title_para = Paragraph(title_text, styles['Header1'])
+    doc_id = hashlib.md5(str(dados_votacao).encode()).hexdigest()[:8]
+    id_para = Paragraph(f"ID: {doc_id}", styles['Label'])
+
+    header_data = [
+        [logo_img if logo_img else '', title_para, ''],
+        ['', Paragraph("REGISTRO DE VOTAÇÃO", styles['Header1']), id_para]
+    ]
+
+    header_table = Table(header_data, colWidths=[60, '*', 80])
+    header_table.setStyle(TableStyle([
+        ('VALIGN', (0,0), (-1,0), 'MIDDLE'),
+        ('ALIGN', (0,0), (0,0), 'CENTER'),
+        ('ALIGN', (1,0), (1,0), 'LEFT'),
+        ('BOTTOMPADDING', (0,0), (-1,0), 6),
+        ('VALIGN', (0,1), (-1,1), 'MIDDLE'),
+        ('ALIGN', (0,1), (0,1), 'CENTER'),
+        ('ALIGN', (2,1), (2,1), 'RIGHT'),
+        ('LINEBELOW', (1,1), (1,1), 1, colors.HexColor(_theme['primary'])),
+        ('BOTTOMPADDING', (0,1), (-1,1), 10),
+    ]))
+    
+    elements.append(header_table)
+    return header_table, elements
+
+def build_session_table(dados_votacao: Dict, styles: Dict) -> Table:
+    """Constrói a tabela de informações da sessão"""
+    session_data = [
+        [
+            Paragraph("<b>Sessão:</b>", styles['Label']),
+            Paragraph(dados_votacao.get('sessao',''), styles['Value']),
+            Paragraph('<b>Data/Hora:</b>', styles['Label']),
+            Paragraph(f"{dados_votacao.get('data_sessao','')} {dados_votacao.get('hora_sessao','')}", styles['Value'])
+        ],
+        [
+            Paragraph('<b>Legislatura:</b>', styles['Label']),
+            Paragraph(dados_votacao.get('legislatura',''), styles['Value']),
+            Paragraph('<b>Fase:</b>', styles['Label']),
+            Paragraph(dados_votacao.get('fase',''), styles['Value']),
+        ],
+        [
+            Paragraph('<b>Tipo de Votação:</b>', styles['Label']),
+            Paragraph(dados_votacao.get('txt_tipo_votacao',''), styles['Value']),
+            Paragraph('<b>Turno de Discussão:</b>', styles['Label']),
+            Paragraph(dados_votacao.get('txt_turno','—'), styles['Value'])
+        ],
+        [
+            Paragraph('<b>Quórum:</b>', styles['Label']),
+            Paragraph(dados_votacao.get('txt_quorum',''), styles['Value']),
+            Paragraph('', styles['Label']),
+            Paragraph('', styles['Value'])
+        ]
+    ]
+
+    session_table = Table(session_data, colWidths=['20%','30%','20%','30%'], hAlign='LEFT')
+    session_table.setStyle(TableStyle([
+        ('VALIGN', (0,0), (-1,-1), 'TOP'),
+        ('ALIGN', (0,0), (-1,-1), 'LEFT'),
+        ('GRID', (0,0), (-1,-1), 0.5, colors.HexColor('#EEEEEE')),
+        ('BACKGROUND', (0,0), (-1,-1), colors.white),
+        ('LEFTPADDING', (0,0), (-1,-1), 4),
+        ('RIGHTPADDING', (0,0), (-1,-1), 4),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 6),
+    ]))
+    
+    return session_table
+
+def build_materia_section(dados_votacao: Dict, styles: Dict, elements: List[Any]) -> None:
+    """Constrói a seção de informações da matéria"""
+    materia_title = f"{dados_votacao.get('tipo_materia','')} nº {dados_votacao.get('num_materia','')}/{dados_votacao.get('ano_materia','')}"
+    elements.append(Paragraph(materia_title, styles['Header2']))
+    
+    autoria_text = f"<b>Autoria:</b> {dados_votacao.get('autoria_materia','')}"
+    elements.append(Paragraph(autoria_text, styles['Value']))
+    elements.append(Spacer(1, 5))
+    
+    ementa_style = ParagraphStyle(
+        'EmentaStyle', parent=styles['Value'],
+        alignment=TA_JUSTIFY,
+        backColor=colors.HexColor(_theme['light_gray']),
+        borderPadding=5,
+        spaceAfter=15
+    )
+    ementa_text = f"<b>Ementa:</b> {dados_votacao.get('ementa_materia','')}"
+    elements.append(Paragraph(ementa_text, ementa_style))
+
+def build_voting_results(dados_votacao: Dict, styles: Dict, elements: List[Any]) -> None:
+    """Constrói a seção de resultados da votação"""
+    result_text = f"RESULTADO: {dados_votacao.get('txt_resultado','').upper()}"
+    elements.append(Paragraph(result_text, styles['VoteResult']))
+
+def build_voting_details(dados_votacao: Dict, styles: Dict, elements: List[Any]) -> None:
+    """Constrói a tabela de detalhes da votação nominal"""
+    if dados_votacao.get('txt_tipo_votacao') != 'Nominal':
+        return
+    
+    elements.append(Paragraph('DETALHAMENTO DA VOTAÇÃO', styles['Header2']))
+    
+    table_data = [[
+        Paragraph('Vereador', styles['TotalizadorCabecalho']),
+        Paragraph('Partido', styles['TotalizadorCabecalho']),
+        Paragraph('Voto', styles['TotalizadorCabecalho'])
+    ]]
+    
+    vote_colors = {
+        'Sim': colors.HexColor(_theme['success']),
+        'Nao': colors.HexColor(_theme['danger']),
+        'Abstencao': colors.HexColor(_theme['warning']),
+        'Ausente': colors.HexColor(_theme['light_gray']),
+        'Na Presid.': colors.HexColor(_theme['secondary'])       
+    }
+    
+    for v in dados_votacao.get('votos_nominais', []):
+        vote = v.get('voto','').strip()
+        table_data.append([
+            Paragraph(v.get('nom_completo',''), styles['Value']),
+            Paragraph(v.get('partido',''), styles['Value']),
+            Paragraph(vote, styles['Value'])
+        ])
+    
+    vote_table = Table(table_data, colWidths=['50%', '30%', '20%'], repeatRows=1)
+    vote_table.setStyle(TableStyle([
+        ('BACKGROUND', (0,0), (-1,0), colors.HexColor(_theme['primary'])),
+        ('TEXTCOLOR', (0,0), (-1,0), colors.white),
+        ('ALIGN', (0,0), (-1,-1), 'LEFT'),
+        ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0,0), (-1,0), 9),
+        ('BOTTOMPADDING', (0,0), (-1,0), 6),
+        ('GRID', (0,0), (-1,-1), 0.5, colors.HexColor('#EEEEEE')),
+        ('ROWBACKGROUNDS', (0,1), (-1,-1), [colors.white, colors.HexColor('#FAFAFA')])
+    ]))
+    
+    for i, row in enumerate(table_data[1:], start=1):
+        vote = row[2].text
+        if vote in vote_colors:
+            vote_table.setStyle(TableStyle([
+                ('BACKGROUND', (2,i), (2,i), vote_colors[vote])
+            ]))
+    
+    elements.extend([vote_table, Spacer(1, 15)])
+
+def build_totals_table(dados_votacao: Dict, styles: Dict, elements: List[Any]) -> None:
+    """Constrói a tabela de totalização de votos"""
+    tot_sim = int(dados_votacao.get('num_votos_sim') or 0)
+    tot_nao = int(dados_votacao.get('num_votos_nao') or 0)
+    tot_abst = int(dados_votacao.get('num_abstencao') or 0)
+    tot_aus = int(dados_votacao.get('num_ausentes') or 0)
+    tot_pres = sum(1 for v in dados_votacao.get('votos_nominais', []) 
+                  if v.get('voto','').strip() == 'Na Presid.') if dados_votacao.get('txt_tipo_votacao') == 'Nominal' else 0
+    tot_geral = tot_sim + tot_nao + tot_abst + tot_aus + tot_pres
+
+    total_data = [
+        [
+            Paragraph('Tipo de Voto', styles['TotalizadorCabecalho']),
+            Paragraph('Quantidade', styles['TotalizadorCabecalho']),
+            Paragraph('Percentual', styles['TotalizadorCabecalho'])
+        ],
+        [
+            Paragraph('Votos "Sim"', styles['TotalizadorConteudo']),
+            Paragraph(str(tot_sim), styles['TotalizadorConteudo']),
+            Paragraph(f'{(tot_sim/tot_geral*100):.1f}%' if tot_geral > 0 else '0%', styles['TotalizadorConteudo'])
+        ],
+        [
+            Paragraph('Votos "Não"', styles['TotalizadorConteudo']),
+            Paragraph(str(tot_nao), styles['TotalizadorConteudo']),
+            Paragraph(f'{(tot_nao/tot_geral*100):.1f}%' if tot_geral > 0 else '0%', styles['TotalizadorConteudo'])
+        ],
+        [
+            Paragraph('Abstenções', styles['TotalizadorConteudo']),
+            Paragraph(str(tot_abst), styles['TotalizadorConteudo']),
+            Paragraph(f'{(tot_abst/tot_geral*100):.1f}%' if tot_geral > 0 else '0%', styles['TotalizadorConteudo'])
+        ],
+        [
+            Paragraph('Na Presidência', styles['TotalizadorConteudo']),
+            Paragraph(str(tot_pres), styles['TotalizadorConteudo']),
+            Paragraph(f'{(tot_pres/tot_geral*100):.1f}%' if tot_geral > 0 else '0%', styles['TotalizadorConteudo'])
+        ],
+        [
+            Paragraph('Ausentes', styles['TotalizadorConteudo']),
+            Paragraph(str(tot_aus), styles['TotalizadorConteudo']),
+            Paragraph(f'{(tot_aus/tot_geral*100):.1f}%' if tot_geral > 0 else '0%', styles['TotalizadorConteudo'])
+        ],
+        [
+            Paragraph('TOTAL GERAL', styles['TotalizadorDestaque']),
+            Paragraph(str(tot_geral), styles['TotalizadorDestaque']),
+            Paragraph('100%', styles['TotalizadorDestaque'])
+        ]
+    ]
+
+    total_table = Table(total_data, colWidths=['50%', '25%', '25%'])
+    total_table.setStyle(TableStyle([
+        ('BACKGROUND', (0,0), (-1,0), colors.HexColor(_theme['primary'])),
+        ('TEXTCOLOR', (0,0), (-1,0), colors.white),
+        ('ALIGN', (1,1), (-1,-1), 'CENTER'),
+        ('FONTNAME', (0,-1), (-1,-1), 'Helvetica-Bold'),
+        ('BACKGROUND', (0,-1), (-1,-1), colors.HexColor(_theme['light_gray'])),
+        ('BOX', (0,0), (-1,-1), 0.5, colors.HexColor('#E0E0E0')),
+        ('LINEABOVE', (0,-1), (-1,-1), 1, colors.HexColor(_theme['primary'])),
+        ('BACKGROUND', (0,1), (0,1), colors.HexColor('#E8F5E9')),
+        ('BACKGROUND', (0,2), (0,2), colors.HexColor('#FFEBEE')),
+        ('BACKGROUND', (0,3), (0,3), colors.HexColor('#FFF8E1')),
+    ]))
+    
+    elements.append(Paragraph('TOTALIZAÇÃO DE VOTOS', styles['Header2']))
+    elements.append(total_table)
+
+def add_footer(canvas, doc):
+    """Adiciona rodapé às páginas do PDF"""
+    canvas.saveState()
+    margin_left = 15 * mm
+    canvas.setStrokeColor(colors.HexColor(_theme['primary']))
+    canvas.setLineWidth(0.5)
+    canvas.line(margin_left, 40, doc.width + margin_left, 40)
+    canvas.setFont('Helvetica', 7)
+    canvas.setFillColor(colors.HexColor(_theme['muted']))
+    canvas.drawString(margin_left, 30, f"Documento gerado eletronicamente")
+    footer_text = f"{DateTime().strftime('%d/%m/%Y %H:%M')} | Página {canvas.getPageNumber()}"
+    canvas.drawRightString(doc.width + margin_left, 30, footer_text)
+    canvas.restoreState()
+
+@timeit
+def gerar_ficha_votacao_pdf(dados_votacao: Dict, caminho_saida: str, 
+                           nome_camara: str, nome_sessao: str, 
+                           logo_bytes: bytes = None) -> None:
+    """Gera o PDF da ficha de votação com otimizações de performance"""
+    try:
+        # Configuração do documento
+        buffer = BytesIO()
+        styles = get_cached_styles()
+        
+        doc = SimpleDocTemplate(
+            buffer,
+            pagesize=A4,
+            rightMargin=15*mm,
+            leftMargin=15*mm,
+            topMargin=5*mm,
+            bottomMargin=20*mm
+        )
+        
+        # Construção do conteúdo
+        elements = []
+        
+        # 1. Cabeçalho
+        header_table, header_elements = build_header_content(dados_votacao, nome_camara, styles, logo_bytes)
+        elements.extend(header_elements)
+        
+        # 2. Informações da sessão
+        session_table = build_session_table(dados_votacao, styles)
+        elements.extend([session_table, Spacer(1, 15)])
+        
+        # 3. Informações da matéria
+        build_materia_section(dados_votacao, styles, elements)
+        
+        # 4. Resultado da votação
+        build_voting_results(dados_votacao, styles, elements)
+        
+        # 5. Detalhamento nominal (se aplicável)
+        build_voting_details(dados_votacao, styles, elements)
+        
+        # 6. Totalizadores
+        build_totals_table(dados_votacao, styles, elements)
+        
+        # Construção do documento com rodapé
+        doc.build(elements, onFirstPage=add_footer, onLaterPages=add_footer)
+        
+        # Otimização e salvamento em paralelo
+        with ThreadPoolExecutor(max_workers=1) as executor:
+            executor.submit(optimize_and_save_pdf, buffer, caminho_saida)
+            
+        logger.info(f"PDF gerado com sucesso em: {caminho_saida}")
+        
+    except Exception as e:
+        logger.error(f"Erro na geração do PDF: {str(e)}", exc_info=True)
+        raise PDFGenerationError(f"Falha na geração do PDF: {str(e)}")
+    finally:
+        gc.enable()
+
+def optimize_and_save_pdf(buffer: BytesIO, output_path: str) -> None:
+    """Otimiza e salva o PDF em paralelo"""
+    try:
+        buffer.seek(0)
+        with fitz.open(stream=buffer.read(), filetype="pdf") as doc:
+            doc.save(output_path, **PDF_OPTIMIZATION_SETTINGS)
+        logger.debug(f"PDF otimizado salvo em: {output_path}")
+    except Exception as e:
+        logger.error(f"Falha na otimização do PDF: {str(e)}", exc_info=True)
+        raise
 
 class ProcessoLegView(grok.View):
     """Visualização principal para geração do processo legislativo em PDF"""
@@ -547,23 +582,25 @@ class ProcessoLegView(grok.View):
     grok.require('zope2.View')
     grok.name('processo_leg_integral')
     
-    # Configurações
     TEMP_DIR_PREFIX = 'processo_leg_integral_'
+
+    def update(self):
+        """Extrai parâmetros da requisição antes do render"""
+        self.cod_materia = self.request.form.get('cod_materia')
+        self.action = self.request.form.get('action', 'json')
     
     @property
-    def temp_base(self):
+    def temp_base(self) -> str:
         """Diretório base temporário seguro"""
         install_home = os.environ.get('INSTALL_HOME', tempfile.gettempdir())
         return secure_path_join(install_home, 'var/tmp')
 
-    def preparar_diretorios(self, cod_materia):
+    def preparar_diretorios(self, cod_materia: str) -> Tuple[str, str]:
         """Cria diretórios temporários de trabalho com segurança"""
         try:
-            # Validação do código da matéria
             if not cod_materia or not str(cod_materia).isdigit():
                 raise ValueError("Código da matéria inválido")
             
-            # Cria hash segura para nome do diretório
             dir_hash = hashlib.md5(str(cod_materia).encode()).hexdigest()
             dir_base = secure_path_join(
                 self.temp_base, 
@@ -571,11 +608,9 @@ class ProcessoLegView(grok.View):
             )
             dir_paginas = secure_path_join(dir_base, 'pages')
             
-            # Limpeza segura de diretórios existentes
             if os.path.exists(dir_base):
                 shutil.rmtree(dir_base, ignore_errors=True)
             
-            # Criação dos diretórios
             os.makedirs(dir_base, mode=0o700, exist_ok=True)
             os.makedirs(dir_paginas, mode=0o700, exist_ok=True)
             
@@ -611,8 +646,8 @@ class ProcessoLegView(grok.View):
             logger.error(f"Erro ao obter dados da matéria: {str(e)}", exc_info=True)
             raise PDFGenerationError(f"Falha ao obter dados da matéria: {str(e)}")
 
-    def coletar_documentos(self, dados_materia, dir_base):
-        """Coleta documentos relacionados à matéria com validação"""
+    def coletar_documentos(self, dados_materia: Dict, dir_base: str) -> List[Dict]:
+        """Coleta documentos relacionados à matéria"""
         nome_camara = self.context.sapl_documentos.props_sagl.getProperty(
             'nom_casa', '(não definido)'
         )
@@ -624,27 +659,12 @@ class ProcessoLegView(grok.View):
         logo_bytes = None
         if id_logo and hasattr(props, id_logo):
             logo_obj = getattr(props, id_logo)
-            logo_bytes = bytes(logo_obj.data)  # blob da imagem
+            logo_bytes = bytes(logo_obj.data)
+        
         documentos = []
         total_size = 0
         
         try:
-            # Função auxiliar para adicionar documentos com verificação de tamanho
-            def adicionar_documento(doc_info):
-                nonlocal total_size
-                if len(documentos) >= MAX_DOCUMENTS:
-                    raise PDFGenerationError(f"Número máximo de documentos ({MAX_DOCUMENTS}) excedido")
-                
-                if hasattr(doc_info['path'], doc_info['file']):
-                    arquivo_obj = getattr(doc_info['path'], doc_info['file'])
-                    file_size = len(bytes(arquivo_obj.data))
-                    
-                    if total_size + file_size > MAX_TOTAL_SIZE:
-                        raise PDFGenerationError(f"Tamanho total dos documentos excede {MAX_TOTAL_SIZE//(1024*1024)}MB")
-                    
-                    total_size += file_size
-                    documentos.append(doc_info)
-
             # Capa do processo
             arquivo_capa = f"capa_{dados_materia['tipo']}-{dados_materia['numero']}-{dados_materia['ano']}.pdf"
             self.context.modelo_proposicao.capa_processo(
@@ -652,7 +672,7 @@ class ProcessoLegView(grok.View):
                 action='gerar'
             )
             
-            adicionar_documento({
+            documentos.append({
                 "data": DateTime(dados_materia['data_apresentacao'], datefmt='international').strftime('%Y-%m-%d 00:00:01'),
                 "path": self.context.temp_folder,
                 "file": arquivo_capa,
@@ -668,15 +688,16 @@ class ProcessoLegView(grok.View):
                 ind_mat_ou_doc='M'
             ):
                 data_texto = DateTime(proposta.dat_recebimento, datefmt='international').strftime('%Y-%m-%d 00:00:02')
-            
-            adicionar_documento({
-                "data": data_texto,
-                "path": self.context.sapl_documentos.materia,
-                "file": arquivo_texto,
-                "title": f"{dados_materia['descricao']} nº {dados_materia['numero']}/{dados_materia['ano']}"
-            })
 
-            # Redação Final (adicionando o novo código)
+            if hasattr(self.context.sapl_documentos.materia, arquivo_texto):    
+                documentos.append({
+                    "data": data_texto,
+                    "path": self.context.sapl_documentos.materia,
+                    "file": arquivo_texto,
+                    "title": f"{dados_materia['descricao']} nº {dados_materia['numero']}/{dados_materia['ano']}"
+                })
+
+            # Redação Final
             nom_redacao = f"{dados_materia['cod_materia']}_redacao_final.pdf"
             if hasattr(self.context.sapl_documentos.materia, nom_redacao):
                 doc_redacao = {
@@ -686,30 +707,28 @@ class ProcessoLegView(grok.View):
                     "title": "Redação Final"
                 }
             
-                # Atualiza data se houver proposta associada
                 for proposicao in self.context.zsql.proposicao_obter_zsql(
                     cod_mat_ou_doc=dados_materia['cod_materia'],
                     ind_mat_ou_doc='M'
                 ):
                     doc_redacao["data"] = DateTime(proposicao.dat_recebimento, datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
             
-                adicionar_documento(doc_redacao)
+                documentos.append(doc_redacao)
 
             # Fichas de votação
             votacoes = self.context.pysc.votacao_obter_pysc(cod_materia=dados_materia['cod_materia'])
             for i, votacao in enumerate(votacoes):
                 fase = votacao.get('fase', '')
                 if fase == "Expediente - Leitura de Matérias":
-                   logger.info(f"[coletar_documentos] Pulando regisro de votação na fase: {fase}")
-                   continue  # não gera nem registra essa ficha
+                   logger.info(f"Ignorando votação na fase: {fase}")
+                   continue
 
                 nome_arquivo = f'ficha_votacao_{i + 1}.pdf'
                 caminho_arquivo = secure_path_join(dir_base, nome_arquivo)
 
-                # Gera o PDF da ficha
-                gerar_ficha_votacao_pdf(votacao, caminho_arquivo, nome_camara, nome_sessao, logo_bytes=logo_bytes)
+                gerar_ficha_votacao_pdf(
+                    votacao, caminho_arquivo, nome_camara, nome_sessao, logo_bytes=logo_bytes)
 
-                # Lê bytes e valida
                 with open(caminho_arquivo, 'rb') as f:
                     pdf_bytes = f.read()
                 validate_pdf_content(pdf_bytes)
@@ -722,20 +741,14 @@ class ProcessoLegView(grok.View):
                     date_str = str(raw_date)[:10]
                 hora_str = votacao.get('hora_sessao', '00:00:00')
                 data_votacao = f"{date_str} {hora_str}"
-                pdf = sanear_pdf(
-                    pdf_bytes,
-                    titulo="Registro de Votação",
-                    data_modificacao=data_votacao
-                )
-
-                if pdf:
-                    documentos.append({
-                        "data": data_votacao,
-                        "file": nome_arquivo,
-                        "title": "Registro de Votação",
-                        "path": dir_base,
-                        "filesystem": True
-                    })
+                
+                documentos.append({
+                    "data": data_votacao,
+                    "file": nome_arquivo,
+                    "title": "Registro de Votação",
+                    "path": dir_base,
+                    "filesystem": True
+                })
 
             # Emendas
             for emenda in self.context.zsql.emenda_obter_zsql(
@@ -748,7 +761,7 @@ class ProcessoLegView(grok.View):
                 for proposta in self.context.zsql.proposicao_obter_zsql(cod_emenda=emenda.cod_emenda):
                     data_emenda = DateTime(proposta.dat_recebimento, datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
 
-                adicionar_documento({
+                documentos.append({
                     "data": data_emenda,
                     "path": self.context.sapl_documentos.emenda,
                     "file": arquivo_emenda,
@@ -769,13 +782,12 @@ class ProcessoLegView(grok.View):
                         "title": f"Substitutivo nº {substitutivo.num_substitutivo}"
                     }
                 
-                    # Atualiza data se houver proposta associada
                     for proposta in self.context.zsql.proposicao_obter_zsql(
                         cod_substitutivo=substitutivo.cod_substitutivo
                     ):
                         doc_substitutivo["data"] = DateTime(proposta.dat_recebimento, datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
                 
-                    adicionar_documento(doc_substitutivo)
+                    documentos.append(doc_substitutivo)
 
             # Relatorias/Pareceres
             for relat in self.context.zsql.relatoria_obter_zsql(
@@ -790,13 +802,11 @@ class ProcessoLegView(grok.View):
                         "file": arquivo_parecer
                     }
                 
-                    # Atualiza data se houver proposta associada
                     for proposta in self.context.zsql.proposicao_obter_zsql(
                         cod_parecer=relat.cod_relatoria
                     ):
                         doc_parecer["data"] = DateTime(proposta.dat_recebimento, datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
                 
-                    # Obtém informações da comissão
                     comissao = self.context.zsql.comissao_obter_zsql(
                         cod_comissao=relat.cod_comissao,
                         ind_excluido=0
@@ -806,7 +816,7 @@ class ProcessoLegView(grok.View):
                         f"{relat.num_parecer}/{relat.ano_parecer}"
                     )
                 
-                    adicionar_documento(doc_parecer)
+                    documentos.append(doc_parecer)
 
             # Matérias Anexadas
             for anexada in self.context.zsql.anexada_obter_zsql(
@@ -825,7 +835,7 @@ class ProcessoLegView(grok.View):
                             "(anexada)"
                         )
                     }
-                    adicionar_documento(doc_anexada)
+                    documentos.append(doc_anexada)
                 
                     # Documentos acessórios das matérias anexadas
                     for documento in self.context.zsql.documento_acessorio_obter_zsql(
@@ -841,14 +851,13 @@ class ProcessoLegView(grok.View):
                                 "title": f"{documento.nom_documento} (acess. de anexada)"
                             }
                         
-                            # Atualiza data se houver proposta associada
                             for proposta in self.context.zsql.proposicao_obter_zsql(
                                 cod_mat_ou_doc=documento.cod_documento,
                                 ind_mat_ou_doc='D'
                             ):
                                 doc_acessorio["data"] = DateTime(proposta.dat_recebimento, datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
                         
-                            adicionar_documento(doc_acessorio)
+                            documentos.append(doc_acessorio)
 
             # Matérias Anexadoras
             for anexadora in self.context.zsql.anexada_obter_zsql(
@@ -867,7 +876,7 @@ class ProcessoLegView(grok.View):
                             "(anexadora)"
                         )
                     }
-                    adicionar_documento(doc_anexadora)
+                    documentos.append(doc_anexadora)
                 
                     # Documentos acessórios das matérias anexadoras
                     for documento in self.context.zsql.documento_acessorio_obter_zsql(
@@ -883,14 +892,13 @@ class ProcessoLegView(grok.View):
                                 "title": f"{documento.nom_documento} (acess. de anexadora)"
                             }
                         
-                            # Atualiza data se houver proposta associada
                             for proposta in self.context.zsql.proposicao_obter_zsql(
                                 cod_mat_ou_doc=documento.cod_documento,
                                 ind_mat_ou_doc='D'
                             ):
                                 doc_acessorio["data"] = DateTime(proposta.dat_recebimento, datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
                         
-                            adicionar_documento(doc_acessorio)
+                            documentos.append(doc_acessorio)
 
             # Documentos Acessórios da Matéria Principal
             for documento in self.context.zsql.documento_acessorio_obter_zsql(
@@ -906,14 +914,13 @@ class ProcessoLegView(grok.View):
                         "title": documento.nom_documento
                     }
                 
-                    # Atualiza data se houver proposta associada
                     for proposta in self.context.zsql.proposicao_obter_zsql(
                         cod_mat_ou_doc=documento.cod_documento,
                         ind_mat_ou_doc='D'
                     ):
                         doc_acessorio["data"] = DateTime(proposta.dat_recebimento, datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
                 
-                    adicionar_documento(doc_acessorio)
+                    documentos.append(doc_acessorio)
 
             # Tramitações
             for tram in self.context.zsql.tramitacao_obter_zsql(
@@ -923,7 +930,7 @@ class ProcessoLegView(grok.View):
             ):
                 arquivo_tram = f"{tram.cod_tramitacao}_tram.pdf"
                 if hasattr(self.context.sapl_documentos.materia.tramitacao, arquivo_tram):
-                    adicionar_documento({
+                    documentos.append({
                         "data": DateTime(tram.dat_tramitacao, datefmt='international').strftime('%Y-%m-%d %H:%M:%S'),
                         "path": self.context.sapl_documentos.materia.tramitacao,
                         "file": arquivo_tram,
@@ -936,7 +943,7 @@ class ProcessoLegView(grok.View):
             ):
                 arquivo_norma = f"{norma.cod_norma}_texto_integral.pdf"
                 if hasattr(self.context.sapl_documentos.norma_juridica, arquivo_norma):
-                    adicionar_documento({
+                    documentos.append({
                         "data": DateTime(norma.dat_norma, datefmt='international').strftime('%Y-%m-%d 23:59:00'),
                         "path": self.context.sapl_documentos.norma_juridica,
                         "file": arquivo_norma,
@@ -951,116 +958,116 @@ class ProcessoLegView(grok.View):
             logger.error(f"Erro ao coletar documentos: {str(e)}", exc_info=True)
             raise PDFGenerationError(f"Falha na coleta de documentos: {str(e)}")
 
-    def mesclar_documentos(self, documentos, dir_base, id_processo):
-        """Mescla documentos em um único PDF com tratamento de erros"""
+    def process_single_document(self, doc: Dict, dir_base: str) -> Tuple[bytes, Dict]:
+        """Processa um documento individual para mesclagem"""
         try:
-            pdf_mesclado = fitz.open()
-            total_size = 0
-            documentos_com_paginas = []
+            if doc.get('filesystem'):
+                # Filesystem-stored PDF
+                pdf_path = secure_path_join(doc['path'], doc['file'])
+                with open(pdf_path, 'rb') as f:
+                    pdf_bytes = f.read()
+            else:
+                # Zope container-stored PDF
+                container = doc['path']
+                filename = doc['file']
+                arquivo_obj = None
 
-            current_page = 1
+                # 1) Try attribute access
+                if hasattr(container, filename):
+                    arquivo_obj = getattr(container, filename)
+                else:
+                    # 2) Try dict-style access
+                    try:
+                        arquivo_obj = container[filename]
+                    except (KeyError, TypeError):
+                        arquivo_obj = None
 
-            for i, documento in enumerate(documentos, 1):
-                try:
-                    if documento.get('filesystem'):
-                        caminho_arquivo = secure_path_join(documento['path'], documento['file'])
-                        with open(caminho_arquivo, 'rb') as f:
-                            pdf_bytes = f.read()
+                # 3) Try stripping ".pdf" if still not found
+                if arquivo_obj is None and filename.lower().endswith('.pdf'):
+                    base = filename[:-4]
+                    if hasattr(container, base):
+                        arquivo_obj = getattr(container, base)
                     else:
-                        arquivo_obj = getattr(documento['path'], documento['file'])
-                        pdf_bytes = bytes(arquivo_obj.data)
-                    
-                    validate_pdf_content(pdf_bytes)
-                    total_size += len(pdf_bytes)
-                    
-                    if total_size > MAX_TOTAL_SIZE:
-                        raise PDFGenerationError(f"Tamanho total excede {MAX_TOTAL_SIZE//(1024*1024)}MB")
+                        try:
+                            arquivo_obj = container[base]
+                        except Exception:
+                            arquivo_obj = None
 
-                    pdf = sanear_pdf(
-                        pdf_bytes, 
-                        titulo=documento["title"], 
-                        data_modificacao=documento["data"]
-                    )
-                    
-                    if not pdf:
-                        raise PDFGenerationError(f"Documento corrompido: {documento['title']}")
+                if not arquivo_obj:
+                    raise AttributeError(f"Could not locate PDF '{filename}' in container")
 
-                    start_page = len(pdf_mesclado) + 1
-                    pdf_mesclado.insert_pdf(pdf)
-                    end_page = len(pdf_mesclado)
-                    num_pages = end_page - start_page + 1
+                # Extract bytes
+                pdf_bytes = bytes(arquivo_obj.data)
 
-                    documento['start_page'] = start_page
-                    documento['end_page'] = end_page
-                    documento['num_pages'] = num_pages
-                    documentos_com_paginas.append(documento)
+            # Validate before returning
+            validate_pdf_content(pdf_bytes)
+            return pdf_bytes, doc
 
-                    caminho_individual = secure_path_join(dir_base, f"{i:04d}.pdf")
-                    with open(caminho_individual, 'wb') as f:
-                        pdf.save(f, **PDF_OPTIONS)
+        except Exception as e:
+            logger.warning(f"Erro ao processar documento '{doc.get('title','?')}': {e}")
+            # Let the caller skip this doc
+            raise
 
-                except Exception as e:
-                    logger.error(f"Erro ao processar {documento['file']}: {str(e)}", exc_info=True)
-                    raise PDFGenerationError(f"Erro ao processar documento: {documento['title']}")
-
+    @timeit
+    def mesclar_documentos(self, documentos: List[Dict], dir_base: str, 
+                          id_processo: str) -> Tuple[fitz.Document, List[Dict]]:
+        """Mescla documentos em um único PDF com tratamento de erros"""
+        pdf_mesclado = fitz.open()
+        documentos_com_paginas = []
+        
+        try:
+            with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
+                futures = []
+                for doc in documentos:
+                    futures.append(executor.submit(
+                        self.process_single_document, doc, dir_base))
+                
+                for future in futures:
+                    try:
+                        pdf_bytes, doc_info = future.result()
+                        
+                        with fitz.open(stream=pdf_bytes, filetype="pdf") as pdf:
+                            start_page = len(pdf_mesclado)
+                            pdf_mesclado.insert_pdf(pdf)
+                            doc_info.update({
+                                'start_page': start_page + 1,
+                                'end_page': len(pdf_mesclado),
+                                'num_pages': len(pdf_mesclado) - start_page
+                            })
+                            documentos_com_paginas.append(doc_info)
+                            
+                            # Limpeza periódica de memória
+                            if len(pdf_mesclado) % 10 == 0:
+                                gc.collect()
+                                
+                    except Exception as e:
+                        logger.warning(f"Ignorando documento devido ao erro: {str(e)}")
+                        continue
+            
             if len(pdf_mesclado) > MAX_PAGES:
                 raise PDFGenerationError(f"Número de páginas excede o limite de {MAX_PAGES}")
 
             self._adicionar_rodape_e_metadados(pdf_mesclado, id_processo)
-
+            
             return pdf_mesclado, documentos_com_paginas
             
         except Exception as e:
             logger.error(f"Erro na mesclagem de documentos: {str(e)}", exc_info=True)
             raise PDFGenerationError(f"Falha na mesclagem de documentos: {str(e)}")
+        finally:
+            gc.enable()
 
-    def salvar_paginas_individuais(self, pdf_final, dir_paginas, id_processo):
-        """Salva páginas individuais com numeração consistente"""
-        try:
-            if not os.path.exists(dir_paginas):
-                os.makedirs(dir_paginas, mode=0o700)
-
-            for page_num in range(len(pdf_final)):
-                nome_arquivo = f"pg_{page_num + 1:04d}.pdf"
-                caminho_arquivo = secure_path_join(dir_paginas, nome_arquivo)
-
-                with fitz.open() as pagina_pdf:
-                    pagina_pdf.insert_pdf(pdf_final, from_page=page_num, to_page=page_num)
-                    
-                    pagina_pdf.set_metadata({
-                        "title": f"{id_processo} - Página {page_num + 1}",
-                        "creator": "Sistema de Processo Legislativo"
-                    })
-                    
-                    pagina_pdf.save(caminho_arquivo, **PDF_OPTIONS)
-                    
-        except Exception as e:
-            logger.error(f"Erro ao salvar páginas individuais: {str(e)}", exc_info=True)
-            raise PDFGenerationError(f"Falha ao salvar páginas individuais: {str(e)}")
-
-    def _adicionar_rodape_e_metadados(self, pdf, id_processo):
-        """Adiciona rodapé e metadados consistentes ao PDF"""
-        total_paginas = len(pdf)
-    
-        for num_pagina in range(total_paginas):
-            pagina = pdf[num_pagina]
-            largura = pagina.rect.width
-        
-            # Texto do rodapé
-            texto_rodape = f"{id_processo} | Fls. {num_pagina + 1}/{total_paginas}"
-            posicao = fitz.Point(largura - 120, 30)
-        
-            forma = pagina.new_shape()
-            forma.insert_text(
-                posicao, 
-                texto_rodape, 
-                fontname="helv", 
+    def _adicionar_rodape_e_metadados(self, pdf: fitz.Document, id_processo: str) -> None:
+        """Adiciona rodapé e metadados ao PDF mesclado"""
+        for page_num in range(len(pdf)):
+            page = pdf[page_num]
+            page.insert_text(
+                fitz.Point(page.rect.width - 120, 30),
+                f"{id_processo} | Fls. {page_num + 1}/{len(pdf)}",
                 fontsize=8,
                 color=fitz.utils.getColor("gray")
             )
-            forma.commit()
-
-        # Metadados consistentes
+        
         pdf.set_metadata({
             "title": id_processo,
             "creator": "Sistema de Processo Legislativo",
@@ -1068,123 +1075,190 @@ class ProcessoLegView(grok.View):
             "creationDate": DateTime().strftime('%Y-%m-%d %H:%M:%S')
         })
 
-    def render(self, cod_materia, action='json'):
-        """
-        Se action=='download', retorna o PDF;
-        se action=='json', retorna somente a lista formatada.
-        """
+    @timeit
+    def salvar_paginas_individuais(self, pdf_final: fitz.Document, 
+                                 dir_paginas: str, id_processo: str) -> None:
+        """Salva páginas individuais com paralelismo"""
         try:
-            # 1. Preparação
-            dir_base, dir_paginas = self.preparar_diretorios(cod_materia)
-            dados_materia = self.obter_dados_materia(cod_materia)
-            documentos_raw = self.coletar_documentos(dados_materia, dir_base)
-            
-            # 2. Mesclar documentos obtendo também o mapeamento de páginas
-            pdf_final, documentos_com_paginas = self.mesclar_documentos(
-                documentos_raw, dir_base, dados_materia['id_exibicao']
-            )
-            total_paginas = len(pdf_final)
+            os.makedirs(dir_paginas, mode=0o700, exist_ok=True)
 
-            # 3. Salvar páginas individuais
-            self.salvar_paginas_individuais(pdf_final, dir_paginas, dados_materia['id_exibicao'])
+            with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
+                for page_num in range(len(pdf_final)):
+                    executor.submit(
+                        self._save_single_page,
+                        pdf_final,
+                        page_num,
+                        dir_paginas,
+                        id_processo
+                    )
+        except Exception as e:
+            logger.error(f"Erro ao salvar páginas individuais: {str(e)}", exc_info=True)
+            raise PDFGenerationError(f"Falha ao salvar páginas individuais: {str(e)}")
 
-            # 4. Formatando a resposta
-            result = {
-                'documentos': [],
-                'total_paginas': total_paginas,
-                'id_processo': dados_materia['id_exibicao']
-            }
-
-            base_url = f"{self.context.absolute_url()}/@@pagina_processo_leg_integral"
-            
-            for i, doc in enumerate(documentos_com_paginas, 1):
-                doc_id = f"{i:04d}.pdf"
-                first_page = doc['start_page']
-                first_id = f"pg_{first_page:04d}.pdf"
-                
-                paginas = []
-                for page_num in range(doc['start_page'], doc['end_page'] + 1):
-                    pg_id = f"pg_{page_num:04d}.pdf"
-                    paginas.append({
-                        'num_pagina': str(page_num),
-                        'id_pagina': pg_id,
-                        'url': f"{base_url}?cod_materia={cod_materia}%26pagina={pg_id}"
-                    })
-                
-                result['documentos'].append({
-                    'id': doc_id,
-                    'title': doc['title'],
-                    'data': doc['data'],
-                    'url': f"{base_url}?cod_materia={cod_materia}%26pagina={first_id}",
-                    'paginas_geral': total_paginas,
-                    'paginas': paginas,
-                    'id_paginas': [p['id_pagina'] for p in paginas],
-                    'paginas_doc': doc['num_pages']
-                })
-
-            # 5. Retornar conforme o action
-            if action == 'json':
-                return result
-            if action == 'download':
-                nome_final = f"{dados_materia['id']}.pdf"
-                caminho_final = os.path.join(dir_base, nome_final)
-                pdf_final.save(caminho_final, **PDF_OPTIONS)
-                with open(caminho_final, 'rb') as f:
-                    conteudo = f.read()
-                self.request.RESPONSE.setHeader('Content-Type', 'application/pdf')
-                self.request.RESPONSE.setHeader(
-                    'Content-Disposition',
-                    f'inline; filename="{nome_final}"'
-                )
-                return conteudo
-
-            return result
+    def _save_single_page(self, pdf_final: fitz.Document, page_num: int,
+                         dir_paginas: str, id_processo: str) -> None:
+        """Salva uma única página do PDF"""
+        nome_arquivo = f"pg_{page_num + 1:04d}.pdf"
+        caminho_arquivo = secure_path_join(dir_paginas, nome_arquivo)
         
+        try:
+            with fitz.open() as pagina_pdf:
+                pagina_pdf.insert_pdf(pdf_final, from_page=page_num, to_page=page_num)
+                pagina_pdf.set_metadata({
+                    "title": f"{id_processo} - Página {page_num + 1}",
+                    "creator": "Sistema de Processo Legislativo"
+                })
+                pagina_pdf.save(caminho_arquivo, **PDF_OPTIMIZATION_SETTINGS)
+        except Exception as e:
+            logger.error(f"Erro ao salvar página {page_num + 1}: {str(e)}")
+            raise
+
+    def _formatar_resultado(self, documentos: List[Dict], pdf_final: fitz.Document,
+                          cod_materia: str, dados_materia: Dict) -> Dict:
+        """Formata o resultado final para resposta JSON"""
+        result = {
+            'documentos': [],
+            'total_paginas': len(pdf_final),
+            'id_processo': dados_materia['id_exibicao']
+        }
+
+        base_url = f"{self.context.absolute_url()}/@@pagina_processo_leg_integral"
+        
+        for i, doc in enumerate(documentos, 1):
+            doc_id = f"{i:04d}.pdf"
+            first_page = doc.get('start_page', 1)
+            first_id = f"pg_{first_page:04d}.pdf"
+            
+            paginas = []
+            for page_num in range(doc.get('start_page', 1), doc.get('end_page', 1) + 1):
+                pg_id = f"pg_{page_num:04d}.pdf"
+                paginas.append({
+                    'num_pagina': str(page_num),
+                    'id_pagina': pg_id,
+                    'url': f"{base_url}?cod_materia={cod_materia}%26pagina={pg_id}"
+                })
+            
+            result['documentos'].append({
+                'id': doc_id,
+                'title': doc['title'],
+                'data': doc['data'],
+                'url': f"{base_url}?cod_materia={cod_materia}%26pagina={first_id}",
+                'paginas_geral': len(pdf_final),
+                'paginas': paginas,
+                'id_paginas': [p['id_pagina'] for p in paginas],
+                'paginas_doc': doc.get('num_pages', len(paginas))
+            })
+
+        return result
+
+    def _handle_download(self, pdf_final: fitz.Document, dir_base: str,
+                        doc_id: str) -> bytes:
+        """Prepara o PDF final para download"""
+        nome_final = f"{doc_id}.pdf"
+        caminho_final = os.path.join(dir_base, nome_final)
+        
+        pdf_final.save(caminho_final, **PDF_OPTIMIZATION_SETTINGS)
+        
+        with open(caminho_final, 'rb') as f:
+            conteudo = f.read()
+            
+        self.request.RESPONSE.setHeader('Content-Type', 'application/pdf')
+        self.request.RESPONSE.setHeader(
+            'Content-Disposition',
+            f'inline; filename="{nome_final}"'
+        )
+        return conteudo
+
+    @timeit
+    def render(self):
+        """Método principal para geração do processo legislativo"""
+        try:
+            if not self.cod_materia:
+                raise ValueError("O parâmetro cod_materia é obrigatório")
+            
+            gc.disable()
+            
+            # Processamento paralelo inicial
+            with ThreadPoolExecutor(max_workers=2) as executor:
+                future_dados = self.obter_dados_materia(self.cod_materia)
+                future_dirs = executor.submit(self.preparar_diretorios, self.cod_materia)
+                
+                dados_materia = future_dados
+                dir_base, dir_paginas = future_dirs.result()
+            
+            # Resto da implementação original...
+            documentos = self.coletar_documentos(dados_materia, dir_base)
+            pdf_final, documentos_com_paginas = self.mesclar_documentos(
+                documentos, dir_base, dados_materia['id_exibicao'])
+            
+            self.salvar_paginas_individuais(
+                pdf_final, dir_paginas, dados_materia['id_exibicao'])
+            
+            result = self._formatar_resultado(
+                documentos_com_paginas, pdf_final, self.cod_materia, dados_materia)
+            
+            if self.action == 'download':
+                return self._handle_download(pdf_final, dir_base, dados_materia['id'])
+                
+            return result
+            
+        except ValueError as ve:
+            logger.error(f"Erro de validação: {str(ve)}")
+            self.request.RESPONSE.setStatus(400)
+            return {'error': str(ve)}
         except Exception as e:
             logger.error(f"Erro no render: {e}", exc_info=True)
             self.request.RESPONSE.setStatus(500)
             return {'error': str(e)}
+        finally:
+            gc.enable()
 
 class PaginaProcessoLeg(grok.View):
-    """Exibe página individual usando secure_path_join."""
+    """Visualização para páginas individuais do processo"""
     grok.context(Interface)
     grok.require('zope2.View')
     grok.name('pagina_processo_leg_integral')
+    
     TEMP_DIR_PREFIX = 'processo_leg_integral_'
 
     @property
-    def temp_base(self):
+    def temp_base(self) -> str:
         install_home = os.environ.get('INSTALL_HOME', tempfile.gettempdir())
         return secure_path_join(install_home, 'var/tmp')
 
     def render(self, cod_materia, pagina):
         dir_hash = hashlib.md5(str(cod_materia).encode()).hexdigest()
-        dir_base = secure_path_join(self.temp_base, f'{self.TEMP_DIR_PREFIX}{dir_hash}')
+        dir_base = secure_path_join(
+            self.temp_base, 
+            f'{self.TEMP_DIR_PREFIX}{dir_hash}'
+        )
         dir_pages = secure_path_join(dir_base, 'pages')
         file_path = secure_path_join(dir_pages, pagina)
 
         try:
             with open(file_path, 'rb') as f:
                 data = f.read()
-            resp = self.context.REQUEST.response
-            resp.setHeader('Content-Type', 'application/pdf')
-            resp.setHeader('Content-Disposition', f'inline; filename="{pagina}"')
+            self.request.RESPONSE.setHeader('Content-Type', 'application/pdf')
+            self.request.RESPONSE.setHeader(
+                'Content-Disposition', 
+                f'inline; filename="{pagina}"'
+            )
             return data
         except FileNotFoundError:
-            self.request.response.setStatus(404)
+            self.request.RESPONSE.setStatus(404)
             return "Página não encontrada"
         except SecurityError:
-            self.request.response.setStatus(403)
+            self.request.RESPONSE.setStatus(403)
             return "Acesso não permitido"
 
 class LimparProcessoLegView(grok.View):
-    """Visualização para limpeza de diretórios temporários."""
+    """Visualização para limpeza de diretórios temporários"""
     grok.context(Interface)
     grok.require('zope2.View')
     grok.name('processo_leg_integral_limpar')
     
     @property
-    def temp_base(self):
+    def temp_base(self) -> str:
         install_home = os.environ.get('INSTALL_HOME', tempfile.gettempdir())
         return os.path.abspath(os.path.join(install_home, 'var/tmp'))
 

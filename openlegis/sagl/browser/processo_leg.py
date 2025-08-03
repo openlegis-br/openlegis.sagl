@@ -1082,7 +1082,7 @@ class ProcessoLegView(grok.View):
         for page_num in range(len(pdf)):
             page = pdf[page_num]
             page.insert_text(
-                fitz.Point(page.rect.width - 120, 30),
+                fitz.Point(page.rect.width - 110, 20),
                 f"{id_processo} | Fls. {page_num + 1}/{len(pdf)}",
                 fontsize=8,
                 color=fitz.utils.getColor("gray")

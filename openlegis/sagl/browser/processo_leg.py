@@ -570,7 +570,8 @@ def optimize_and_save_pdf(buffer: BytesIO, output_path: str) -> None:
     try:
         buffer.seek(0)
         with fitz.open(stream=buffer.read(), filetype="pdf") as doc:
-            doc.save(output_path, **PDF_OPTIMIZATION_SETTINGS, incremental=True)
+            doc.bake()
+            doc.save(output_path, **PDF_OPTIMIZATION_SETTINGS)
         logger.debug(f"PDF otimizado salvo em: {output_path}")
     except Exception as e:
         logger.error(f"Falha na otimização do PDF: {str(e)}", exc_info=True)

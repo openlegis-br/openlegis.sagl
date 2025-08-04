@@ -1049,7 +1049,7 @@ class ProcessoLegView(grok.View):
 
                         with fitz.open(stream=pdf_bytes, filetype="pdf") as pdf:
                             start_page = len(pdf_mesclado)
-                            pdf_mesclado.insert_pdf(pdf)
+                            pdf_mesclado.insert_pdf(pdf, annots=True)
                             doc_info.update({
                                 'start_page': start_page + 1,
                                 'end_page': len(pdf_mesclado),
@@ -1125,7 +1125,7 @@ class ProcessoLegView(grok.View):
 
         try:
             with fitz.open() as pagina_pdf:
-                pagina_pdf.insert_pdf(pdf_final, from_page=page_num, to_page=page_num)
+                pagina_pdf.insert_pdf(pdf_final, from_page=page_num, to_page=page_num, annots=True)
                 pagina_pdf.set_metadata({
                     "title": f"{id_processo} - Página {page_num + 1}",
                     "creator": "Sistema de Processo Legislativo"

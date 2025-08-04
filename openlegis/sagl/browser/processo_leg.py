@@ -744,6 +744,8 @@ class ProcessoLegView(grok.View):
                    logger.info(f"Ignorando votação na fase: {fase}")
                    continue
 
+                turno = votacao.get('txt_turno', '')
+
                 nome_arquivo = f'ficha_votacao_{i + 1}.pdf'
                 caminho_arquivo = secure_path_join(dir_base, nome_arquivo)
 
@@ -766,7 +768,7 @@ class ProcessoLegView(grok.View):
                 documentos.append({
                     "data": data_votacao,
                     "file": nome_arquivo,
-                    "title": "Registro de Votação",
+                    "title": f"Registro de Votação ({turno})",
                     "path": dir_base,
                     "filesystem": True
                 })

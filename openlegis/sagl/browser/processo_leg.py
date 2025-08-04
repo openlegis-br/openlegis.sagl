@@ -57,7 +57,7 @@ PDF_OPTIMIZATION_SETTINGS = {
     'garbage': 3,
     'deflate': True,
     'clean': True,
-    'use_objstms': True
+    #'use_objstms': True
 }
 
 # Limites de segurança
@@ -255,11 +255,11 @@ def optimize_pdf_content(pdf_bytes: bytes, title: str = None,
         try:
             with pikepdf.open(BytesIO(pdf_bytes)) as pdf:
                 # Remove elementos potencialmente perigosos
-                for page in pdf.pages:
-                    if '/Annots' in page:
-                        del page.Annots
-                    if '/AA' in page:
-                        del page.AA
+                #for page in pdf.pages:
+                #    if '/Annots' in page:
+                #        del page.Annots
+                #    if '/AA' in page:
+                #        del page.AA
                 pdf.bake()
                 output_buffer = BytesIO()
                 pdf.save(output_buffer)
@@ -570,8 +570,7 @@ def optimize_and_save_pdf(buffer: BytesIO, output_path: str) -> None:
     try:
         buffer.seek(0)
         with fitz.open(stream=buffer.read(), filetype="pdf") as doc:
-            doc.bake()
-            doc.save(output_path, **PDF_OPTIMIZATION_SETTINGS)
+            doc.save(output_path, **PDF_OPTIMIZATION_SETTINGS, incremental=True)
         logger.debug(f"PDF otimizado salvo em: {output_path}")
     except Exception as e:
         logger.error(f"Falha na otimização do PDF: {str(e)}", exc_info=True)

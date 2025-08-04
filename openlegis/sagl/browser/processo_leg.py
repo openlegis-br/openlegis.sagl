@@ -56,8 +56,8 @@ gc.disable()
 PDF_OPTIMIZATION_SETTINGS = {
     'garbage': 3,
     'deflate': True,
-    'clean': True,
-    #'use_objstms': True
+    #'clean': True,
+    'use_objstms': True
 }
 
 # Limites de segurança

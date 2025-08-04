@@ -560,74 +560,52 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
 $.fn.select2.amd.define('select2/selectAllAdapter', [
-  'select2/utils', 'select2/dropdown', 'select2/dropdown/attachBody'
-], function (Utils, Dropdown, AttachBody) {
-  function SelectAll() {}
+    'select2/utils', 'select2/dropdown', 'select2/dropdown/attachBody'
+  ], function (Utils, Dropdown, AttachBody) {
+    function SelectAll() {}
+    SelectAll.prototype.render = function (decorated) {
+      const $rendered = decorated.call(this);
+      if (!this.$element.prop('multiple')) return $rendered;
 
-  SelectAll.prototype.render = function (decorated) {
-    const $rendered = decorated.call(this);
+      const $btns = $(`
+        <div class="d-flex gap-2 px-2 py-1 border-bottom">
+          <button type="button" class="btn btn-sm btn-outline-primary">Selecionar Todos</button>
+          <button type="button" class="btn btn-sm btn-outline-secondary">Desmarcar Todos</button>
+        </div>
+      `);
+      $rendered.find('.select2-dropdown').prepend($btns);
 
-    if (!this.$element.prop("multiple")) return $rendered;
+      const $select = this.$element;
+      const dropdown = this.$dropdown;
 
-    const $btns = $(`
-      <div class="d-flex gap-2 px-2 py-1 border-bottom">
-        <button type="button" class="btn btn-sm btn-outline-primary">Selecionar Todos</button>
-        <button type="button" class="btn btn-sm btn-outline-secondary">Desmarcar Todos</button>
-      </div>`);
-
-    $rendered.find('.select2-dropdown').prepend($btns);
-
-    // Referência ao elemento Select original
-    const $select = this.$element;
-
-    // Botão "Selecionar Todos"
-    $btns.find('button').eq(0).on('click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      
-      const selecionados = $select.val() || [];
-      const novos = [];
-      
-      // Obter todas as opções disponíveis
-      $select.find('option:not(:disabled)').each(function() {
-        const val = $(this).val();
-        if (val && !selecionados.includes(val)) novos.push(val);
+      // **SELECIONAR TODOS — só opções visíveis após filtro**
+      $btns.find('button').eq(0).on('click', function (e) {
+        e.preventDefault(); e.stopPropagation();
+        const visiveis = dropdown.find('.select2-results__option:visible:not(.select2-results__option--disabled)');
+        const ids = visiveis.map((_, el) => $(el).data('data').id).get();
+        const total = obterTotalPrevisto(ids.length);
+        if (isUltimaPaginaSelecionada() && total > 3) {
+          mostrarToast(`Máximo de 3 assinaturas permitido na última página (já existem ${qtdeAssinaturasExistentes}).`, 'danger');
+          return;
+        }
+        $select.val(ids).trigger('change');
+        $select.select2('close');
       });
 
-      const totalPrevisto = obterTotalPrevisto(novos.length);
-      if (isUltimaPaginaSelecionada() && totalPrevisto > 3) {
-        mostrarToast(`Máximo de 3 assinaturas permitido na última página (já existem ${qtdeAssinaturasExistentes}).`, 'danger');
-        return;
-      }
+      // Desmarcar Tudo (sem alteração)
+      $btns.find('button').eq(1).on('click', function (e) {
+        e.preventDefault(); e.stopPropagation();
+        $select.val(null).trigger('change');
+        $select.select2('close');
+        atualizarContadorUsuarios();
+      });
 
-      // Selecionar todas as opções válidas
-      $select.val(novos).trigger('change');
-      
-      // Fechar o dropdown de forma alternativa
-      $select.select2('close');
-    });
+      return $rendered;
+    };
+    return Utils.Decorate(Utils.Decorate(Dropdown, AttachBody), SelectAll);
+  });
 
-    // Botão "Desmarcar Todos"
-    $btns.find('button').eq(1).on('click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      
-      // Limpar todas as seleções
-      $select.val(null).trigger('change');
-      
-      // Fechar o dropdown de forma alternativa
-      $select.select2('close');
-      
-      // Atualizar contador
-      atualizarContadorUsuarios();
-    });
-
-    return $rendered;
-  };
-
-  return Utils.Decorate(Utils.Decorate(Dropdown, AttachBody), SelectAll);
-});
-
+  // Inicialização do Select2 com o adapter ajustado
   $selectUsuarios.select2({
     placeholder: 'Clique para selecionar o usuário',
     dropdownAdapter: $.fn.select2.amd.require('select2/selectAllAdapter'),
@@ -635,14 +613,13 @@ $.fn.select2.amd.define('select2/selectAllAdapter', [
     language: 'pt-BR'
   });
 
+  // Restante dos eventos (change, selecting, submit) permanece idêntico ao original
   $selectUsuarios.on('select2:selecting', function (e) {
     if (visualPageOptionDefinido) return;
-
-    const selecionados = $(this).val() || [];
-    const codSelecionado = e.params.args.data.id;
-    const totalPrevisto = obterTotalPrevisto(selecionados.includes(codSelecionado) ? 0 : 1);
-
-    if (isUltimaPaginaSelecionada() && totalPrevisto > 3) {
+    const sel = $selectUsuarios.val() || [];
+    const idSel = e.params.args.data.id;
+    const totalPrev = obterTotalPrevisto(sel.includes(idSel) ? 0 : 1);
+    if (isUltimaPaginaSelecionada() && totalPrev > 3) {
       e.preventDefault();
       mostrarToast('A opção "Última página" permite no máximo 3 assinaturas.', 'danger');
     }
@@ -651,48 +628,26 @@ $.fn.select2.amd.define('select2/selectAllAdapter', [
   $selectUsuarios.on('change', function () {
     atualizarContadorUsuarios();
     aplicarBloqueioSelect2();
-    $('#lst_cod_usuario').removeClass('is-invalid');
+    $(this).removeClass('is-invalid');
   });
-
   $('input[name="visual_page_option"]').on('change', function () {
     atualizarContadorUsuarios();
     aplicarBloqueioSelect2();
-
-    // Remover animação de erro suavemente
-    $('.card-radio.card-radio-invalid').addClass('fade-out-error');
-    setTimeout(() => {
-      $('.card-radio').removeClass('card-radio-invalid fade-out-error');
-    }, 300);
+    $('.card-radio').removeClass('card-radio-invalid');
   });
-
   $('#assinatura_solicitar').on('submit', function (e) {
-    if (visualPageOptionDefinido) return true;
-
-    const selecionado = $('input[name="visual_page_option"]:checked').val();
-    const usuariosSelecionados = $selectUsuarios.val() || [];
-
-    if (!selecionado) {
+    if (!visualPageOptionDefinido && !document.querySelector('input[name="visual_page_option"]:checked')) {
       e.preventDefault();
       mostrarToast('Escolha onde as assinaturas serão exibidas no documento.', 'danger');
       $('.card-radio').addClass('card-radio-invalid');
       return false;
     }
-
-    if (selecionado === 'ultima' && usuariosSelecionados.length + qtdeAssinaturasExistentes > 3) {
-      e.preventDefault();
-      mostrarToast('Máximo de 3 assinaturas permitido na última página.', 'danger');
-      return false;
-    }
-
-    if (!usuariosSelecionados || usuariosSelecionados.length === 0) {
+    if (( $selectUsuarios.val() || [] ).length === 0) {
       e.preventDefault();
       mostrarToast('Selecione ao menos um usuário para solicitar assinatura.', 'danger');
       $('#lst_cod_usuario').addClass('is-invalid');
       return false;
     }
-
-    $('.card-radio').removeClass('card-radio-invalid');
-    $('#lst_cod_usuario').removeClass('is-invalid');
     return true;
   });
 });

@@ -260,7 +260,7 @@ def optimize_pdf_content(pdf_bytes: bytes, title: str = None,
                         del page.Annots
                     if '/AA' in page:
                         del page.AA
-
+                pdf.bake()
                 output_buffer = BytesIO()
                 pdf.save(output_buffer)
                 optimized_bytes = output_buffer.getvalue()
@@ -570,6 +570,7 @@ def optimize_and_save_pdf(buffer: BytesIO, output_path: str) -> None:
     try:
         buffer.seek(0)
         with fitz.open(stream=buffer.read(), filetype="pdf") as doc:
+            doc.bake()
             doc.save(output_path, **PDF_OPTIMIZATION_SETTINGS)
         logger.debug(f"PDF otimizado salvo em: {output_path}")
     except Exception as e:
@@ -1179,6 +1180,7 @@ class ProcessoLegView(grok.View):
         nome_final = f"{doc_id}.pdf"
         caminho_final = os.path.join(dir_base, nome_final)
 
+        pdf_final.bake()
         pdf_final.save(caminho_final, **PDF_OPTIMIZATION_SETTINGS)
 
         with open(caminho_final, 'rb') as f:

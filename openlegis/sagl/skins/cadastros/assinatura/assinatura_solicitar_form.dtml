@@ -234,17 +234,38 @@
                  <dtml-in expr="zsql.periodo_comp_comissao_obter_zsql(ind_excluido=0)">
                     <dtml-if expr="(DateTime(datefmt='international') >= DateTime(dat_inicio, datefmt='international')) and (DateTime(datefmt='international') <= DateTime(dat_fim, datefmt='international'))">
                       <dtml-in expr="zsql.composicao_comissao_obter_zsql(cod_comissao=cod_comissao_relatora, cod_periodo_comp=cod_periodo_comp)">
-                        <dtml-in expr="zsql.parlamentar_obter_zsql(cod_parlamentar=cod_parlamentar)">
-                         <dtml-in expr="zsql.autor_obter_zsql(cod_parlamentar=cod_parlamentar)">
-                          <dtml-in expr="zsql.usuario_obter_zsql(col_username=col_username, ind_ativo=1)">
-                             <option value="<dtml-var cod_usuario>"><dtml-var nom_completo><dtml-if expr="nom_cargo != ''"> (<dtml-var nom_cargo>)</dtml-if></option>
-                          </dtml-in>
-                         </dtml-in>
-                        </dtml-in>
+                        <dtml-if expr="(not dat_desligamento) or (DateTime(datefmt='international') < DateTime(dat_desligamento, datefmt='international'))">
+                           <dtml-in expr="zsql.parlamentar_obter_zsql(cod_parlamentar=cod_parlamentar)">
+                             <dtml-in expr="zsql.autor_obter_zsql(cod_parlamentar=cod_parlamentar)">
+                               <dtml-in expr="zsql.usuario_obter_zsql(col_username=col_username, ind_ativo=1)">
+                                  <option value="<dtml-var cod_usuario>"><dtml-var nom_completo><dtml-if expr="nom_cargo != ''"> (<dtml-var des_cargo>)</dtml-if></option>
+                               </dtml-in>
+                             </dtml-in>
+                           </dtml-in>
+                        </dtml-if>
                       </dtml-in>
                     </dtml-if>
                  </dtml-in>
-               <dtml-elif expr="tipo_doc in ['proposicao', 'pauta_comissao', 'ata_comissao']">
+               <dtml-elif expr="tipo_doc in ['pauta_comissao', 'ata_comissao']">
+                 <dtml-in expr="zsql.reuniao_comissao_obter_zsql(cod_reuniao=codigo, ind_excluido=0)">
+                    <dtml-call expr="REQUEST.set('cod_comissao', cod_comissao)">
+                 </dtml-in>
+                 <dtml-in expr="zsql.periodo_comp_comissao_obter_zsql(ind_excluido=0)">
+                    <dtml-if expr="(DateTime(datefmt='international') >= DateTime(dat_inicio, datefmt='international')) and (DateTime(datefmt='international') <= DateTime(dat_fim, datefmt='international'))">
+                      <dtml-in expr="zsql.composicao_comissao_obter_zsql(cod_comissao=cod_comissao, cod_periodo_comp=cod_periodo_comp)">
+                        <dtml-if expr="(not dat_desligamento) or (DateTime(datefmt='international') < DateTime(dat_desligamento, datefmt='international'))">
+                           <dtml-in expr="zsql.parlamentar_obter_zsql(cod_parlamentar=cod_parlamentar)">
+                             <dtml-in expr="zsql.autor_obter_zsql(cod_parlamentar=cod_parlamentar)">
+                               <dtml-in expr="zsql.usuario_obter_zsql(col_username=col_username, ind_ativo=1)">
+                                  <option value="<dtml-var cod_usuario>"><dtml-var nom_completo><dtml-if expr="nom_cargo != ''"> (<dtml-var des_cargo>)</dtml-if></option>
+                               </dtml-in>
+                             </dtml-in>
+                           </dtml-in>
+                        </dtml-if>
+                      </dtml-in>
+                    </dtml-if>
+                 </dtml-in>
+               <dtml-elif expr="tipo_doc in ['proposicao']">
                  <dtml-call expr="REQUEST.set('data_atual', DateTime(datefmt='international').strftime('%d/%m/%Y'))">
                  <dtml-if expr="AUTHENTICATED_USER.has_role(['Autor'])">
                     <dtml-in expr="zsql.usuario_obter_zsql(col_username=AUTHENTICATED_USER.getUserName(), ind_ativo=1)">

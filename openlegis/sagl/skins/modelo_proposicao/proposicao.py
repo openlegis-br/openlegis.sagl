@@ -46,7 +46,13 @@ for proposicao in context.zsql.proposicao_obter_zsql(cod_proposicao=cod_proposic
     ano_ident_basica = DateTime(datefmt='international').strftime("%Y")
     txt_ementa = proposicao.txt_descricao
     dat_apresentacao = context.pysc.data_converter_por_extenso_pysc(data=DateTime(datefmt='international').strftime("%d/%m/%Y"))
-    inf_basicas_dic['txt_justificativa'] = proposicao.txt_justificativa
+    #inf_basicas_dic['txt_justificativa'] = proposicao.txt_justificativa
+    orig = getattr(proposicao, 'txt_justificativa', None)
+    if orig and orig.strip():
+        just = " ".join(orig.split())
+    else:
+        just = orig or ''
+    inf_basicas_dic['txt_justificativa'] = just
 
     inf_basicas_dic['des_assunto'] = ''
     inf_basicas_dic['orgao_responsavel'] = ''

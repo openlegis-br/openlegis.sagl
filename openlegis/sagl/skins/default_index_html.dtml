@@ -469,6 +469,28 @@
                 </dtml-with>
               </dtml-if>
 
+              <!-- Alerts for Operators -->
+              <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador','Operador Norma'])">
+                <!-- Normas pendentes de recebimento -->
+                <dtml-with expr="_.namespace(normas=zsql.peticao_obter_zsql(ind_norma=1, ind_enviado='1', ind_recebido='0', ind_excluido=0))">
+                  <dtml-if expr="_.len(normas) > 0">
+                    <a href="<dtml-var portal_url>/cadastros/norma_juridica/recebimento_normas" 
+                       class="list-group-item list-group-item-action list-group-item-info py-3">
+                      <div class="d-flex align-items-center">
+                        <i class="fas fa-balance-scale notification-icon text-info"></i>
+                        <div class="ms-3 flex-grow-1">
+                          <h3 class="h6 mb-1">Recebimento de Normas</h3>
+                          <p class="mb-0 small text-muted">
+                            <dtml-var expr="_.len(normas)"> norma<dtml-if expr="_.len(normas) > 1">s</dtml-if> pendente<dtml-if expr="_.len(normas) > 1">s</dtml-if> de recebimento
+                          </p>
+                        </div>
+                        <i class="fas fa-chevron-right text-muted ms-3"></i>
+                      </div>
+                    </a>
+                  </dtml-if>
+                </dtml-with>
+              </dtml-if>
+
               <!-- Pending Signatures -->
               <dtml-if cod_usuario_corrente>
                 <dtml-with expr="_.namespace(assinaturas=zsql.assinatura_documento_obter_zsql(cod_usuario=cod_usuario_corrente, ind_assinado=0, ind_recusado=0))">

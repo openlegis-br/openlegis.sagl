@@ -2932,5 +2932,30 @@ function observacao_salvar(formObservacao) { return ProposicaoManager.observacao
     }
   </dtml-let>
 </dtml-if>
+    $(function () {
+        $("#postjq").click(function (event)
+        {
+            event.preventDefault();
+            var $post = {};
+            $post.lst_tip_proposicao = $("#lst_tip_proposicao option:selected").text();
+            $post.lst_tip_id_basica = $('#lst_tip_id_basica').val();
+            $post.txt_num_ident_basica = $('#txt_num_ident_basica').val();
+            $post.txt_ano_ident_basica = $('#txt_ano_ident_basica').val();
+            $.ajax({
+                url: 'ementa_buscar_pysc',
+                type: 'POST',
+                data: $post,
+                dataType: 'json',
+                success:function(response){
+                    var len = response.length;
+                    $("#txt_descricao").empty();
+                    for( var i = 0; i<len; i++){
+                        var ementa = response[i]['ementa'];
+                        $("#txt_descricao").val(ementa);
+                    }
+                }
+            });
+        });
+    });
 </script>
 <dtml-var footer_html>

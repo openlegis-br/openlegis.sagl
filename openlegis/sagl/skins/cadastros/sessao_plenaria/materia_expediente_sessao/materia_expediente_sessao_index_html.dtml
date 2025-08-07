@@ -171,33 +171,43 @@ $(document).ready(function() {
       "responsive": true,
       "rowReorder": true,
       "language": {
-          "url": '<dtml-var portal_url>/assets/libs/datatables.net/plugins/i18n/pt-BR.json',
-          },
-        "bStateSave": true,
-        "fnStateSave": function (oSettings, oData) {
-            localStorage.setItem('expDataTable', JSON.stringify(oData));
-        },
-        "fnStateLoad": function (oSettings) {
-            return JSON.parse(localStorage.getItem('expDataTable'));
-        },
+          "url": '<dtml-var portal_url>/assets/libs/datatables.net/plugins/i18n/pt-BR.json'
+      },
+      "bStateSave": true,
+      "fnStateSave": function (oSettings, oData) {
+          localStorage.setItem('expDataTable', JSON.stringify(oData));
+      },
+      "fnStateLoad": function (oSettings) {
+          return JSON.parse(localStorage.getItem('expDataTable'));
+      },
+      // personaliza o seletor de quantidade de itens por página
+      "pageLength": 10,
+      "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "Todos"]]
   });
-  var table = $('#expediente').DataTable()
-    table.on('row-reorder.dt', function (dragEvent, data, nodes) {
-        for (var i = 0, ien = data.length ; i < ien ; i++) {
-            var rowData = table.row(data[i].node).data();
-            var codigo = table.row(data[i].node).id();
-            $.ajax({
-                type: "GET",
-                cache: false,
-                contentType: "application/json; charset=utf-8",
-                url: 'materia_expediente_atualizar_proc',
-                data: {cod_sessao_plen: <dtml-var cod_sessao_plen>,  Id: codigo, fromPosition: data[i].oldData, toPosition: data[i].newData },
-                dataType: "json"
-            });
-            }
-    });
+
+  var table = $('#expediente').DataTable();
+  table.on('row-reorder.dt', function (dragEvent, data, nodes) {
+      for (var i = 0, ien = data.length; i < ien; i++) {
+          var rowData = table.row(data[i].node).data();
+          var codigo = table.row(data[i].node).id();
+          $.ajax({
+              type: "GET",
+              cache: false,
+              contentType: "application/json; charset=utf-8",
+              url: 'materia_expediente_atualizar_proc',
+              data: {
+                cod_sessao_plen: <dtml-var cod_sessao_plen>,
+                Id: codigo,
+                fromPosition: data[i].oldData,
+                toPosition: data[i].newData
+              },
+              dataType: "json"
+          });
+      }
+  });
 });
 </script>
+
 
 <script>
     function exibirMensagemProcessamento(mensagem) {
@@ -235,7 +245,7 @@ $(document).ready(function() {
     function aprovacao_lote(){
         if (confirm("Confirma a aprovação em lote dos Requerimentos e das Moções?")) {
             exibirMensagemProcessamento('Aprovando Requerimentos em Lote...');
-            location.href="aprovacao_lote_proc?<dtml-var expr="REQUEST.get('QUERY_STRING','')">";
+            location.href="aprovacao_lote_pysc?<dtml-var expr="REQUEST.get('QUERY_STRING','')">";
         }
         return;
     }

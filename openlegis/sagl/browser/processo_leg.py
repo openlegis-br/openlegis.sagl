@@ -254,12 +254,6 @@ def optimize_pdf_content(pdf_bytes: bytes, title: str = None,
         # Fallback com pikepdf
         try:
             with pikepdf.open(BytesIO(pdf_bytes)) as pdf:
-                # Remove elementos potencialmente perigosos
-                #for page in pdf.pages:
-                #    if '/Annots' in page:
-                #        del page.Annots
-                #    if '/AA' in page:
-                #        del page.AA
                 pdf.bake()
                 output_buffer = BytesIO()
                 pdf.save(output_buffer)
@@ -688,13 +682,20 @@ class ProcessoLegView(grok.View):
         try:
             # Capa do processo
             arquivo_capa = f"capa_{dados_materia['tipo']}-{dados_materia['numero']}-{dados_materia['ano']}.pdf"
+            data_capa = DateTime(dados_materia['data_apresentacao'], datefmt='international').strftime('%Y-%m-%d 00:00:01')
             self.context.modelo_proposicao.capa_processo(
                 cod_materia=dados_materia['cod_materia'],
                 action='gerar'
             )
 
+            for proposta in self.context.zsql.proposicao_obter_zsql(
+                cod_mat_ou_doc=dados_materia['cod_materia'],
+                ind_mat_ou_doc='M'
+            ):
+                data_capa = DateTime(proposta.dat_recebimento, datefmt='international').strftime('%Y-%m-%d 00:00:01')
+
             documentos.append({
-                "data": DateTime(dados_materia['data_apresentacao'], datefmt='international').strftime('%Y-%m-%d 00:00:01'),
+                "data": data_capa,
                 "path": self.context.temp_folder,
                 "file": arquivo_capa,
                 "title": "Capa do Processo"

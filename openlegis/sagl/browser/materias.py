@@ -13,9 +13,6 @@ import re
 from z3c.saconfig import named_scoped_session
 from sqlalchemy import text
 
-# ATENÇÃO: z3c.saconfig retorna um scoped_session. Em apps Zope/Plone,
-# normalmente NÃO se usa "with Session() as s". Use Session() e deixe o
-# transaction manager cuidar da vida útil (apenas leitura aqui).
 Session = named_scoped_session('minha_sessao')
 
 

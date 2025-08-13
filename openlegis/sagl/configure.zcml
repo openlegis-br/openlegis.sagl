@@ -7,12 +7,21 @@
     xmlns:browser="http://namespaces.zope.org/browser"
     i18n_domain="OpenLegis">
 
+  <!-- Ativa o Grok -->
+  <include package="grokcore.component" file="meta.zcml" />
+  <include package="grokcore.view" file="meta.zcml" />
+  <include package="grokcore.security" file="meta.zcml" />
+
+  <!-- Registro do pacote -->
   <five:registerPackage package="." initialize=".initialize" />
 
+  <!-- (Opcional) five.grok, caso outras views/utilities dependam -->
   <include package="five.grok" />
 
-  <grok:grok package="." />
+  <!-- Varrer e registrar views automaticamente -->
+  <grok:grok package=".browser" />
 
+  <!-- GenericSetup -->
   <genericsetup:registerProfile
       name="default"
       title="SAGL"
@@ -20,19 +29,16 @@
       for="Products.CMFCore.interfaces.ISiteRoot"
       />
 
-  <!-- registro a pasta de skins -->
-
+  <!-- Skins -->
   <cmf:registerDirectory name="skins" directory="skins" recursive="True" />
 
-  <!-- views para assinatura digital -->
-
+  <!-- Views para assinatura digital -->
   <browser:page
       name="start"
       for="*"
       class=".browser.signature_starter.StartPadesSignature"
       permission="zope2.WebDAVAccess"
       />
-
   <browser:page
       name="complete"
       for="*"

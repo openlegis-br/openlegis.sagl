@@ -1,24 +1,34 @@
-from five import grok
+# -*- coding: utf-8 -*-
+from grokcore.component import context
+from grokcore.view import View as GrokView, name
+from grokcore.security import require
 from zope.interface import Interface
-from Products.CMFCore.utils import getToolByName
+from zope.publisher.interfaces import IPublishTraverse
+
 from PIL import Image, ImageOps, ImageColor
-import io
 from DateTime import DateTime
+import io
 import logging
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
+# --------------------------------------------------------------------
+# logging (não sobrescreve configuração global do Zope)
+# --------------------------------------------------------------------
 logger = logging.getLogger(__name__)
 
-BORDAS_COR_PADRAO = ('black')  # branco
 
+# --------------------------------------------------------------------
+# utilitários
+# --------------------------------------------------------------------
 def obter_valor_simples(valor):
     """Normaliza valores enviados no request (lista, tupla ou valor único)."""
-    while isinstance(valor, (list, tuple)) and len(valor) > 0:
+    while isinstance(valor, (list, tuple)) and valor:
         valor = valor[0]
     return valor
 
-def _parse_cor(cor_str, fallback=BORDAS_COR_PADRAO):
-    """Aceita #RRGGBB, nomes ('white'), rgb(255,255,255)."""
+
+def _parse_cor(cor_str, fallback=(0, 0, 0)):
+    """Aceita #RRGGBB, nomes ('white'), rgb(255,255,255). Retorna tupla RGB."""
     if not cor_str:
         return fallback
     try:
@@ -26,41 +36,42 @@ def _parse_cor(cor_str, fallback=BORDAS_COR_PADRAO):
     except Exception:
         return fallback
 
-def encaixar_16x9_borda(imagem, largura_final=600, cor=(255, 255, 255)):
-    """Padroniza imagem no formato 16:9 com bordas (sem cortes)."""
-    proporcao_alvo = 16 / 9
 
-    # Redimensiona proporcionalmente para caber no quadro 16:9
+def encaixar_16x9_borda(imagem, largura_final=600, cor=(255, 255, 255)):
+    """Padroniza imagem em quadro 16:9 com bordas (sem cortes)."""
+    proporcao_alvo = 16 / 9
     w, h = imagem.size
     proporcao_original = w / h
 
     if proporcao_original > proporcao_alvo:
-        # imagem mais larga → encaixa pela largura
         nova_largura = largura_final
         nova_altura = int(nova_largura / proporcao_original)
     else:
-        # imagem mais alta (retrato) → encaixa pela altura do quadro 16:9
         nova_altura = int(largura_final / proporcao_alvo)
         nova_largura = int(nova_altura * proporcao_original)
 
     try:
         resample = Image.Resampling.LANCZOS
-    except AttributeError:
+    except AttributeError:  # Pillow < 9
         resample = Image.LANCZOS
 
     img_red = imagem.resize((nova_largura, nova_altura), resample)
 
-    # Cria tela 16:9 e centraliza
-    tela = Image.new("RGB", (largura_final, int(largura_final / proporcao_alvo)), cor)
+    altura_final = int(largura_final / proporcao_alvo)
+    tela = Image.new("RGB", (largura_final, altura_final), cor)
     x = (tela.width - img_red.width) // 2
     y = (tela.height - img_red.height) // 2
     tela.paste(img_red, (x, y))
     return tela
 
-class SalvarImagemProposicaoView(grok.View):
-    grok.context(Interface)
-    grok.name('salvar-imagem-proposicao')
-    grok.require('zope2.View')
+
+# --------------------------------------------------------------------
+# SalvarImagemProposicao
+# --------------------------------------------------------------------
+class SalvarImagemProposicaoView(GrokView):
+    context(Interface)
+    name('salvar-imagem-proposicao')
+    require('zope2.View')
 
     def render(self):
         request = self.request
@@ -71,9 +82,10 @@ class SalvarImagemProposicaoView(grok.View):
 
         # Cor da borda opcional (ex.: '#FFFFFF', 'black', 'rgb(0,0,0)')
         cor_str = obter_valor_simples(request.get('borda_cor')) or ''
-        cor_borda = _parse_cor(cor_str, BORDAS_COR_PADRAO)
+        # fallback = borda preta
+        cor_borda = _parse_cor(cor_str, fallback=(0, 0, 0))
 
-        # Busca o arquivo enviado
+        # Busca o arquivo enviado (campo dinâmico file_nom_image{indice})
         arquivo = None
         for key in request.form.keys():
             if key.startswith('file_nom_image'):
@@ -82,14 +94,16 @@ class SalvarImagemProposicaoView(grok.View):
                     arquivo = arquivo[0]
                 break
 
-        # Se não houver parâmetros, retorna formulário de upload
+        # Sem parâmetros → exibe formulário de upload (snippet)
         if not cod_proposicao or not indice or not arquivo:
+            idx = indice or ''
+            cod = cod_proposicao or ''
             return f"""
             <div class="alert alert-danger mb-2">Parâmetros ausentes ou arquivo inválido.</div>
-            <form id="uploadForm{indice or ''}" enctype="multipart/form-data">
-              <input type="hidden" name="cod_proposicao" value="{cod_proposicao or ''}">
-              <input type="hidden" name="indice" value="{indice or ''}">
-              <input type="file" name="file_nom_image{indice or ''}" class="form-control" accept="image/*" onchange="enviarImagem(this.form, {indice or ''})" />
+            <form id="uploadForm{idx}" enctype="multipart/form-data" method="post">
+              <input type="hidden" name="cod_proposicao" value="{cod}">
+              <input type="hidden" name="indice" value="{idx}">
+              <input type="file" name="file_nom_image{idx}" class="form-control" accept="image/*" onchange="enviarImagem(this.form, {idx or 0})" />
             </form>
             """
 
@@ -97,25 +111,25 @@ class SalvarImagemProposicaoView(grok.View):
             id_imagem = f"{cod_proposicao}_image_{indice}.jpg"
 
             # Abre a imagem
-            if hasattr(arquivo, 'read'):
-                arquivo.seek(0)
-                imagem = Image.open(arquivo)
-            else:
+            if not hasattr(arquivo, 'read'):
                 raise ValueError("Arquivo de imagem não encontrado")
+
+            arquivo.seek(0)
+            imagem = Image.open(arquivo)
 
             # 1) Corrige orientação conforme EXIF (fotos de celular)
             try:
                 imagem = ImageOps.exif_transpose(imagem)
             except Exception:
-                pass  # se não tiver EXIF, segue o fluxo
+                pass
 
-            # 2) Remove canal alfa se presente (salvar em JPEG)
-            if imagem.mode in ("RGBA", "LA"):
+            # 2) Converte para RGB (JPEG)
+            if imagem.mode not in ("RGB", "L"):
                 imagem = imagem.convert("RGB")
-            elif imagem.mode not in ("RGB", "L"):
+            elif imagem.mode == "L":
                 imagem = imagem.convert("RGB")
 
-            # 3) Padroniza para 16:9 com bordas (brancas por padrão)
+            # 3) Padroniza para 16:9 com bordas (preto por padrão)
             imagem = encaixar_16x9_borda(imagem, largura_final=600, cor=cor_borda)
 
             # 4) Salva em buffer
@@ -123,43 +137,56 @@ class SalvarImagemProposicaoView(grok.View):
             imagem.save(buffer, format='JPEG', quality=90, optimize=True)
             buffer.seek(0)
 
-            # 5) Salva no Zope
-            sapl = getToolByName(context, 'sapl_documentos')
+            # 5) Persiste no Zope
+            sapl = getattr(context, 'sapl_documentos', None)
+            if not sapl or not hasattr(sapl, 'proposicao'):
+                raise RuntimeError("Pasta sapl_documentos/proposicao não encontrada.")
+
             pasta_proposicao = sapl.proposicao
 
             if hasattr(pasta_proposicao, id_imagem):
                 pasta_proposicao.manage_delObjects([id_imagem])
 
+            # manage_addImage(id, file) — o Zope detecta content_type automaticamente
             pasta_proposicao.manage_addImage(id_imagem, file=buffer)
 
-            logger.info(f"Imagem salva com sucesso: {id_imagem} (borda_cor={cor_borda})")
+            logger.info("Imagem salva: %s (borda=%s)", id_imagem, cor_borda)
 
-            # Retorna HTML com preview
+            bust = int(DateTime().timeTime())
             return f"""
             <div class="text-center">
-              <img class="img-fluid img-thumbnail mb-2" src="{context.portal_url()}/sapl_documentos/proposicao/{id_imagem}?{int(DateTime().timeTime())}" style="max-height: 500px;">
+              <img class="img-fluid img-thumbnail mb-2"
+                   src="{context.portal_url()}/sapl_documentos/proposicao/{id_imagem}?{bust}"
+                   style="max-height: 500px;">
               <div class="text-center">
-                <button type="button" class="btn btn-sm btn-danger text-white" onclick="ProposicaoManager.excluirImagem({indice}, '{cod_proposicao}')"><i class="far fa-trash-alt me-1"></i> Excluir</button>
+                <button type="button" class="btn btn-sm btn-danger text-white"
+                        onclick="ProposicaoManager.excluirImagem({indice}, '{cod_proposicao}')">
+                  <i class="far fa-trash-alt me-1"></i> Excluir
+                </button>
               </div>
             </div>
             """
         except Exception as e:
-            logger.error(f"Erro ao processar imagem: {e}")
-            indice_str = str(indice) if indice else ''
-            cod_prop_str = str(cod_proposicao) if cod_proposicao else ''
+            logger.exception("Erro ao processar imagem:")
+            idx = str(indice or '')
+            cod = str(cod_proposicao or '')
             return f"""
             <div class="alert alert-danger mb-2">Erro ao processar imagem: {e}</div>
-            <form id="uploadForm{indice_str}" enctype="multipart/form-data">
-              <input type="hidden" name="cod_proposicao" value="{cod_prop_str}">
-              <input type="hidden" name="indice" value="{indice_str}">
-              <input type="file" name="file_nom_image{indice_str}" class="form-control" accept="image/*" onchange="enviarImagem(this.form, {indice_str})" />
+            <form id="uploadForm{idx}" enctype="multipart/form-data" method="post">
+              <input type="hidden" name="cod_proposicao" value="{cod}">
+              <input type="hidden" name="indice" value="{idx}">
+              <input type="file" name="file_nom_image{idx}" class="form-control" accept="image/*" onchange="enviarImagem(this.form, {idx or 0})" />
             </form>
             """
 
-class ExcluirImagemProposicaoView(grok.View):
-    grok.context(Interface)
-    grok.name('excluir-imagem-proposicao')
-    grok.require('zope2.View')
+
+# --------------------------------------------------------------------
+# ExcluirImagemProposicao
+# --------------------------------------------------------------------
+class ExcluirImagemProposicaoView(GrokView):
+    context(Interface)
+    name('excluir-imagem-proposicao')
+    require('zope2.View')
 
     def render(self):
         request = self.request
@@ -173,21 +200,25 @@ class ExcluirImagemProposicaoView(grok.View):
 
         id_imagem = f"{cod_proposicao}_image_{indice}.jpg"
 
-        sapl = getToolByName(context, 'sapl_documentos')
+        sapl = getattr(context, 'sapl_documentos', None)
+        if not sapl or not hasattr(sapl, 'proposicao'):
+            return "<div class='text-danger'>Pasta de proposições não encontrada.</div>"
+
         pasta = sapl.proposicao
 
         try:
             if hasattr(pasta, id_imagem):
                 pasta.manage_delObjects([id_imagem])
-                logger.info(f"[Proposição {cod_proposicao}] Imagem {id_imagem} excluída.")
+                logger.info("[Proposição %s] Imagem %s excluída.", cod_proposicao, id_imagem)
 
             return f"""
-              <form id="uploadForm{indice}" enctype="multipart/form-data">
+              <form id="uploadForm{indice}" enctype="multipart/form-data" method="post">
                 <input type="hidden" name="cod_proposicao" value="{cod_proposicao}">
                 <input type="hidden" name="indice" value="{indice}">
-                <input type="file" name="file_nom_image{indice}" class="form-control" accept="image/*" onchange="enviarImagem(this.form, {indice})" />
+                <input type="file" name="file_nom_image{indice}" class="form-control" accept="image/*"
+                       onchange="enviarImagem(this.form, {indice})" />
               </form>
             """
         except Exception as e:
-            logger.error(f"Erro ao excluir imagem {id_imagem}: {e}")
+            logger.exception("Erro ao excluir imagem:")
             return f"<div class='text-danger'>Erro ao excluir imagem: {e}</div>"

@@ -1,109 +1,220 @@
 # -*- coding: utf-8 -*-
-from five import grok
+from grokcore.component import context
+from grokcore.view import name
+from grokcore.security import require
+from grokcore.view import View as GrokView
 from zope.publisher.interfaces import IPublishTraverse
 from zope.interface import implementer, Interface
 import json
 from DateTime import DateTime
 
-@implementer(IPublishTraverse)
-class Sessoes(grok.View):
-    grok.context(Interface)
-    grok.require('zope2.View')
-    grok.name('sessoes')
 
+@implementer(IPublishTraverse)
+class Sessoes(GrokView):
+    """API de sessões plenárias (lista, detalhe, presença e votação nominal)."""
+
+    # Registro automático via grokcore
+    context(Interface)
+    name('sessoes')          # URL: @@sessoes
+    require('zope2.View')
+
+    # Estado de traversal
+    subpath = None
+    tipo = None
+    ano = None
+    item_id = None
+    votacao = False
+    presenca = False
+
+    # ---------------- Traversal ----------------
     def publishTraverse(self, request, name):
-        if not hasattr(self, 'subpath'):
+        if self.subpath is None:
             self.subpath = []
         self.subpath.append(name)
-        for idx, val in enumerate(self.subpath):
-            if val == 'tipo' and idx+1 < len(self.subpath):
-                self.tipo = self.subpath[idx+1]
-            if val == 'ano' and idx+1 < len(self.subpath):
-                self.ano = self.subpath[idx+1]
-            if val == 'id' and idx+1 < len(self.subpath):
-                self.item_id = self.subpath[idx+1]
-            if val == 'votacao':
-                self.votacao = True
-            if val == 'presenca':
-                self.presenca = True
+
+        # flags
+        self.votacao = self.votacao or (name == 'votacao')
+        self.presenca = self.presenca or (name == 'presenca')
+
+        # coleta params posicionais do caminho
+        if len(self.subpath) >= 2:
+            for i, val in enumerate(self.subpath[:-1]):
+                nxt = self.subpath[i+1]
+                if val == 'tipo':
+                    self.tipo = nxt
+                elif val == 'ano':
+                    self.ano = nxt
+                elif val == 'id':
+                    self.item_id = nxt
         return self
 
+    # ---------------- Utils ----------------
+    def _portal_url(self):
+        try:
+            return self.context.portal_url().rstrip('/')
+        except Exception:
+            portal = self.context.portal_url.getPortalObject()
+            return portal.absolute_url().rstrip('/')
+
+    def _json(self, data):
+        self.request.response.setHeader('Content-Type', 'application/json; charset=utf-8')
+        return json.dumps(data, sort_keys=True, indent=3, ensure_ascii=False)
+
+    @staticmethod
+    def _fmt_date(d):
+        try:
+            return DateTime(d, datefmt='international').strftime('%Y-%m-%d')
+        except Exception:
+            return ''
+
+    @staticmethod
+    def _fmt_date_br(d):
+        try:
+            return DateTime(d, datefmt='international').strftime('%d/%m/%Y')
+        except Exception:
+            return ''
+
+    @staticmethod
+    def _fmt_time(t):
+        if not t:
+            return ''
+        try:
+            return DateTime(t, datefmt='international').strftime('%H:%M')
+        except Exception:
+            return str(t)
+
+    @staticmethod
+    def _get_qs(form, key, default=None):
+        """Pega um valor da querystring; aceita listas e retorna a 1ª ocorrência."""
+        if key not in form:
+            return default
+        val = form.get(key)
+        if isinstance(val, (list, tuple)):
+            return val[0] if val else default
+        return val
+
+    @staticmethod
+    def _get_qs_bool(form, key, default=False):
+        """Interpreta '1/true/yes/on' como True; '0/false/no/off' como False."""
+        val = Sessoes._get_qs(form, key, None)
+        if val is None:
+            return default
+        s = str(val).strip().lower()
+        if s in ('1', 'true', 'yes', 'y', 'on'):
+            return True
+        if s in ('0', 'false', 'no', 'n', 'off'):
+            return False
+        return default
+
+    # ---------------- Inicialização por request ----------------
     def update_context(self):
-        self.portal = self.context.portal_url.getPortalObject()
-        self.portal_url = self.portal.absolute_url()
+        self.portal_url = self._portal_url()
         self.service_url = f"{self.portal_url}/@@sessoes"
         self.hoje = DateTime()
-        self.tipo = getattr(self, 'tipo', None)
-        self.ano = getattr(self, 'ano', None)
-        self.item_id = getattr(self, 'item_id', None)
-        self.votacao = getattr(self, 'votacao', False)
-        self.presenca = getattr(self, 'presenca', False)
 
+        # mantém o que veio via traversal...
+        tipo = getattr(self, 'tipo', None)
+        ano = getattr(self, 'ano', None)
+        item_id = getattr(self, 'item_id', None)
+        votacao = bool(getattr(self, 'votacao', False))
+        presenca = bool(getattr(self, 'presenca', False))
+
+        # ...mas a querystring tem precedência
+        form = getattr(self.request, 'form', {}) or {}
+        tipo_qs = self._get_qs(form, 'tipo', None)
+        ano_qs = self._get_qs(form, 'ano', None)
+        id_qs = self._get_qs(form, 'id', None)
+        vot_qs = self._get_qs_bool(form, 'votacao', None)   # None = não sobrescreve
+        pre_qs = self._get_qs_bool(form, 'presenca', None)
+
+        self.tipo = tipo_qs if tipo_qs is not None else tipo
+        self.ano = ano_qs if ano_qs is not None else ano
+        self.item_id = id_qs if id_qs is not None else item_id
+        self.votacao = vot_qs if vot_qs is not None else votacao
+        self.presenca = pre_qs if pre_qs is not None else presenca
+
+    # ---------------- Helpers de arquivos ----------------
+    def _get_pauta(self, item_id):
+        fn = f"{item_id}_pauta_sessao.pdf"
+        try:
+            pasta = self.context.sapl_documentos.pauta_sessao
+        except Exception:
+            pasta = None
+        if pasta and hasattr(pasta, fn):
+            return [{
+                'content-type': 'application/pdf',
+                'download': f"{self.portal_url}/sapl_documentos/pauta_sessao/{fn}",
+                'filename': fn, 'size': ''
+            }]
+        return []
+
+    def _get_ata(self, item_id):
+        fn = f"{item_id}_ata_sessao.pdf"
+        try:
+            pasta = self.context.sapl_documentos.ata_sessao
+        except Exception:
+            pasta = None
+        if pasta and hasattr(pasta, fn):
+            return [{
+                'content-type': 'application/pdf',
+                'download': f"{self.portal_url}/sapl_documentos/ata_sessao/{fn}",
+                'filename': fn, 'size': ''
+            }]
+        return []
+
+    # ---------------- Blocos de dados ----------------
     def help(self):
         anos = [{'title': a.ano_sessao, 'id': a.ano_sessao}
                 for a in self.context.zsql.ano_sessao_plenaria_obter_zsql()]
         tipos = [{'title': t.nom_sessao, 'id': t.tip_sessao}
                  for t in self.context.zsql.tipo_sessao_plenaria_obter_zsql(ind_excluido=0)]
         return {
-            'exemplo': {'urlExemplo': f"{self.service_url}/tipo/1/ano/2025"},
+            'exemplo': {'urlExemplo': f"{self.service_url}/tipo/{tipos[0]['id']}/ano/{anos[0]['id']}"} if (tipos and anos) else {},
             'filtros': {'ano': anos, 'tipo': tipos}
         }
 
-    def _get_pauta(self, item_id):
-        lst = []
-        fn = f"{item_id}_pauta_sessao.pdf"
-        if hasattr(self.context.sapl_documentos.pauta_sessao, fn):
-            lst.append({
-                'content-type': 'application/pdf',
-                'download': f"{self.portal_url}/sapl_documentos/pauta_sessao/{fn}",
-                'filename': fn, 'size': ''
-            })
-        return lst
-
-    def _get_ata(self, item_id):
-        lst = []
-        fn = f"{item_id}_ata_sessao.pdf"
-        if hasattr(self.context.sapl_documentos.ata_sessao, fn):
-            lst.append({
-                'content-type': 'application/pdf',
-                'download': f"{self.portal_url}/sapl_documentos/ata_sessao/{fn}",
-                'filename': fn, 'size': ''
-            })
-        return lst
-
     def _get_parlamentar(self, cod_parlamentar):
-        for p in self.context.zsql.parlamentar_obter_zsql(cod_parlamentar=cod_parlamentar, ind_excluido=0):
-            partidos = []
-            for f in self.context.zsql.filiacao_obter_zsql(ind_excluido=0, cod_parlamentar=cod_parlamentar):
-                if not f.dat_desfiliacao:
-                    for pt in self.context.zsql.partido_obter_zsql(ind_excluido=0, cod_partido=f.cod_partido):
-                        partidos.append({'token': pt.sgl_partido, 'title': pt.nom_partido})
-            return {
-                '@type': 'Vereador',
-                '@id': f"{self.portal_url}/@@vereadores/{p.cod_parlamentar}",
-                'id': p.cod_parlamentar,
-                'title': p.nom_parlamentar,
-                'description': p.nom_completo,
-                'partido': partidos
-            }
-        return {}
+        recs = list(self.context.zsql.parlamentar_obter_zsql(
+            cod_parlamentar=cod_parlamentar, ind_excluido=0))
+        if not recs:
+            return {}
+        p = recs[0]
+        partidos = []
+        for f in self.context.zsql.filiacao_obter_zsql(ind_excluido=0, cod_parlamentar=cod_parlamentar):
+            if not getattr(f, 'dat_desfiliacao', None):
+                pts = list(self.context.zsql.partido_obter_zsql(ind_excluido=0, cod_partido=f.cod_partido))
+                if pts:
+                    partidos.append({'token': pts[0].sgl_partido, 'title': pts[0].nom_partido})
+        return {
+            '@type': 'Vereador',
+            '@id': f"{self.portal_url}/@@vereadores/{p.cod_parlamentar}",
+            'id': str(p.cod_parlamentar),
+            'title': p.nom_parlamentar,
+            'description': p.nom_completo,
+            'partido': partidos
+        }
 
     def lista_sessoes(self, tipo, ano):
         items = []
         for s in self.context.zsql.sessao_plenaria_obter_zsql(tip_sessao=tipo, ano_sessao=ano, ind_excluido=0):
-            t = self.context.zsql.tipo_sessao_plenaria_obter_zsql(tip_sessao=s.tip_sessao, ind_excluido=0)[0]
+            ts = list(self.context.zsql.tipo_sessao_plenaria_obter_zsql(tip_sessao=s.tip_sessao, ind_excluido=0))
+            t = ts[0] if ts else None
             sid = str(s.cod_sessao_plen)
+            data = self._fmt_date(getattr(s, 'dat_inicio_sessao', None))
+            hr_ini = self._fmt_time(getattr(s, 'hr_inicio_sessao', None))
+            titulo = f"{getattr(s, 'num_sessao_plen', '')}ª Reunião {getattr(t, 'nom_sessao', '')}" if t else f"{getattr(s, 'num_sessao_plen', '')}ª Reunião"
+            desc = f"{self._fmt_date_br(getattr(s, 'dat_inicio_sessao', None))} {hr_ini}" if getattr(s, 'dat_inicio_sessao', None) else titulo
             items.append({
                 '@id': f"{self.service_url}/id/{sid}",
                 '@type': 'SessaoPlenaria',
                 'id': sid,
-                'title': f"{s.num_sessao_plen}ª Reunião {t.nom_sessao}",
-                'description': f"{DateTime(s.dat_inicio_sessao,datefmt='international').strftime('%d/%m/%Y')} {DateTime(s.hr_inicio_sessao,datefmt='international').strftime('%H:%M')}",
-                'date': DateTime(s.dat_inicio_sessao,datefmt='international').strftime('%Y-%m-%d'),
-                'type': t.nom_sessao,
-                'type_id': s.tip_sessao,
-                'startTime': DateTime(s.hr_inicio_sessao,datefmt='international').strftime('%H:%M'),
-                'endTime': s.hr_fim_sessao,
+                'title': titulo,
+                'description': desc,
+                'date': data,
+                'type': getattr(t, 'nom_sessao', ''),
+                'type_id': getattr(s, 'tip_sessao', ''),
+                'startTime': hr_ini,
+                'endTime': self._fmt_time(getattr(s, 'hr_fim_sessao', None)),
                 '@id_votacao': f"{self.service_url}/id/{sid}/votacao",
                 '@id_presenca': f"{self.service_url}/id/{sid}/presenca",
                 'pauta': self._get_pauta(sid),
@@ -113,26 +224,28 @@ class Sessoes(grok.View):
         return {'description': 'Lista de reuniões plenárias', 'items': items}
 
     def get_sessao(self, item_id):
-        sess = self.context.zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=item_id, ind_excluido=0)
+        sess = list(self.context.zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=item_id, ind_excluido=0))
         if not sess:
             return {}
         s = sess[0]
-        t = self.context.zsql.tipo_sessao_plenaria_obter_zsql(tip_sessao=s.tip_sessao, ind_excluido=0)[0]
+        ts = list(self.context.zsql.tipo_sessao_plenaria_obter_zsql(tip_sessao=s.tip_sessao, ind_excluido=0))
+        t = ts[0] if ts else None
         sid = str(s.cod_sessao_plen)
-        desc = f"{s.num_sessao_plen}ª Reunião {t.nom_sessao} - {DateTime(s.dat_inicio_sessao,datefmt='international').strftime('%d/%m/%Y')}"
+        data = self._fmt_date(getattr(s, 'dat_inicio_sessao', None))
+        desc = f"{getattr(s, 'num_sessao_plen', '')}ª Reunião {getattr(t, 'nom_sessao', '')} - {self._fmt_date_br(getattr(s, 'dat_inicio_sessao', None))}" if getattr(s, 'dat_inicio_sessao', None) else ''
         return {
             '@type': 'SessaoPlenaria',
             '@id': f"{self.service_url}/id/{sid}",
             '@id_votacao': f"{self.service_url}/id/{sid}/votacao",
             '@id_presenca': f"{self.service_url}/id/{sid}/presenca",
             'id': sid,
-            'date': DateTime(s.dat_inicio_sessao,datefmt='international').strftime('%Y-%m-%d'),
+            'date': data,
             'description': desc,
-            'type': t.nom_sessao,
-            'type_id': s.tip_sessao,
-            'startTime': DateTime(s.hr_inicio_sessao,datefmt='international').strftime('%H:%M'),
-            'endTime': s.hr_fim_sessao,
-            'title': f"{s.num_sessao_plen}ª Reunião {t.nom_sessao}",
+            'type': getattr(t, 'nom_sessao', ''),
+            'type_id': getattr(s, 'tip_sessao', ''),
+            'startTime': self._fmt_time(getattr(s, 'hr_inicio_sessao', None)),
+            'endTime': self._fmt_time(getattr(s, 'hr_fim_sessao', None)),
+            'title': f"{getattr(s, 'num_sessao_plen', '')}ª Reunião {getattr(t, 'nom_sessao', '')}",
             'pauta': self._get_pauta(sid),
             'ata': self._get_ata(sid),
         }
@@ -141,11 +254,11 @@ class Sessoes(grok.View):
         presentes, ausentes, just = [], [], []
         for p in self.context.zsql.presenca_sessao_obter_zsql(cod_sessao_plen=item_id, ind_excluido=0):
             dic = self._get_parlamentar(p.cod_parlamentar)
-            if p.tip_frequencia == 'P':
+            if getattr(p, 'tip_frequencia', '') == 'P':
                 presentes.append(dic)
-            elif p.tip_frequencia == 'F':
+            elif getattr(p, 'tip_frequencia', '') == 'F':
                 ausentes.append(dic)
-            elif p.tip_frequencia == 'A':
+            elif getattr(p, 'tip_frequencia', '') == 'A':
                 just.append(dic)
         return [{
             'presentes': presentes,
@@ -157,12 +270,17 @@ class Sessoes(grok.View):
         }]
 
     def _get_presenca_ordem_dia(self, item_id):
+        # Se houver regra diferente, ajustar aqui; por ora, replica a chamada regimental
         return self._get_presenca_abertura(item_id)
 
     def _get_presenca(self, item_id):
-        sess = self.context.zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=item_id, ind_excluido=0)[0]
-        t = self.context.zsql.tipo_sessao_plenaria_obter_zsql(tip_sessao=sess.tip_sessao, ind_excluido=0)[0]
-        desc = f"{sess.num_sessao_plen}ª Reunião {t.nom_sessao} - {DateTime(sess.dat_inicio_sessao,datefmt='international').strftime('%d/%m/%Y')}"
+        sess = list(self.context.zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=item_id, ind_excluido=0))
+        if not sess:
+            return {}
+        s = sess[0]
+        ts = list(self.context.zsql.tipo_sessao_plenaria_obter_zsql(tip_sessao=s.tip_sessao, ind_excluido=0))
+        t = ts[0] if ts else None
+        desc = f"{getattr(s, 'num_sessao_plen', '')}ª Reunião {getattr(t, 'nom_sessao', '')} - {self._fmt_date_br(getattr(s, 'dat_inicio_sessao', None))}" if getattr(s, 'dat_inicio_sessao', None) else ''
         return {
             '@id': f"{self.service_url}/id/{item_id}/presenca",
             '@type': 'presencaSessao',
@@ -174,101 +292,123 @@ class Sessoes(grok.View):
 
     def _get_votacao(self, item_id):
         lst_materias = []
+        # Votações da ordem do dia desta sessão
         for ordem in self.context.zsql.votacao_ordem_dia_obter_zsql(cod_sessao_plen=int(item_id), ind_excluido=0):
-            pauta = self.context.zsql.ordem_dia_obter_zsql(cod_ordem=ordem.cod_ordem, ind_excluido=0)[0]
-            dic_item = {}
+            # Pauta (turno/quorum/tipo de votação)
+            pautas = list(self.context.zsql.ordem_dia_obter_zsql(cod_ordem=ordem.cod_ordem, ind_excluido=0))
+            pauta = pautas[0] if pautas else None
 
-            # Monta matéria ou parecer
+            dic_item = {}
             cod_mat = getattr(ordem, 'cod_materia', None)
             cod_par = getattr(ordem, 'cod_parecer', None)
-            tip_vot = getattr(ordem, 'tip_votacao', None)
 
-            if tip_vot == 2 and cod_mat:
-                mat = self.context.zsql.materia_obter_zsql(cod_materia=cod_mat, ind_excluido=0)[0]
-                dic_item.update({
-                    "@id": f"{self.portal_url}/@@materias/{mat.cod_materia}",
-                    "@type": 'Materia',
-                    "title": f"{mat.des_tipo_materia} nº {mat.num_ident_basica}/{mat.ano_ident_basica}",
-                    "id": str(mat.cod_materia),
-                    "description": mat.txt_ementa,
-                    "tipo_votacao": self.context.zsql.tipo_votacao_obter_zsql(tip_votacao=pauta.tip_votacao)[0].des_tipo_votacao,
-                    "turno": self.context.zsql.turno_discussao_obter_zsql(cod_turno=pauta.tip_turno)[0].des_turno,
-                    "quorum": self.context.zsql.quorum_votacao_obter_zsql(cod_quorum=pauta.tip_quorum)[0].des_quorum,
-                })
-                auto = []
-                for a in self.context.zsql.autoria_obter_zsql(cod_materia=cod_mat):
-                    auto.append({
-                        'description': a.des_tipo_autor,
-                        'id': a.cod_autor,
-                        'title': a.nom_autor_join,
-                        'primeiro_autor': bool(a.ind_primeiro_autor)
+            if getattr(ordem, 'tip_votacao', None) == 2 and cod_mat:
+                mats = list(self.context.zsql.materia_obter_zsql(cod_materia=cod_mat, ind_excluido=0))
+                if mats:
+                    mat = mats[0]
+                    dic_item.update({
+                        "@id": f"{self.portal_url}/@@materias/{mat.cod_materia}",
+                        "@type": 'Materia',
+                        "title": f"{mat.des_tipo_materia} nº {mat.num_ident_basica}/{mat.ano_ident_basica}",
+                        "id": str(mat.cod_materia),
+                        "description": getattr(mat, 'txt_ementa', '') or '',
                     })
-                dic_item['autoria'] = auto
+                    # autoria
+                    auto = []
+                    for a in self.context.zsql.autoria_obter_zsql(cod_materia=cod_mat):
+                        auto.append({
+                            'description': a.des_tipo_autor,
+                            'id': str(a.cod_autor),
+                            'title': a.nom_autor_join,
+                            'primeiro_autor': bool(getattr(a, 'ind_primeiro_autor', 0)),
+                        })
+                    dic_item['autoria'] = auto
 
             elif cod_par:
-                par = self.context.zsql.relatoria_obter_zsql(cod_relatoria=cod_par)[0]
-                com = self.context.zsql.comissao_obter_zsql(cod_comissao=par.cod_comissao)[0]
-                rel = self.context.zsql.parlamentar_obter_zsql(cod_parlamentar=par.cod_parlamentar)[0]
-                mat = self.context.zsql.materia_obter_zsql(cod_materia=par.cod_materia)[0]
-                fav = par.tip_conclusao == 'F'
-                desc = (f"Parecer {com.sgl_comissao} nº {par.num_parecer}/{par.ano_parecer}, "
-                        f"com relatoria de {rel.nom_parlamentar}, {'FAVORÁVEL' if fav else 'CONTRÁRIO'} ao "
-                        f"{mat.sgl_tipo_materia} {mat.num_ident_basica}/{mat.ano_ident_basica}")
+                rels = list(self.context.zsql.relatoria_obter_zsql(cod_relatoria=cod_par))
+                if rels:
+                    par = rels[0]
+                    coms = list(self.context.zsql.comissao_obter_zsql(cod_comissao=par.cod_comissao))
+                    relp = list(self.context.zsql.parlamentar_obter_zsql(cod_parlamentar=par.cod_parlamentar))
+                    mats = list(self.context.zsql.materia_obter_zsql(cod_materia=par.cod_materia))
+                    com = coms[0] if coms else None
+                    rel = relp[0] if relp else None
+                    mat = mats[0] if mats else None
+                    fav = getattr(par, 'tip_conclusao', '') == 'F'
+                    desc = (
+                        f"Parecer {getattr(com, 'sgl_comissao', '')} nº {getattr(par, 'num_parecer', '')}/{getattr(par, 'ano_parecer', '')}, "
+                        f"com relatoria de {getattr(rel, 'nom_parlamentar', '')}, "
+                        f"{'FAVORÁVEL' if fav else 'CONTRÁRIO'} ao "
+                        f"{getattr(mat, 'sgl_tipo_materia', '')} {getattr(mat, 'num_ident_basica', '')}/{getattr(mat, 'ano_ident_basica', '')}"
+                    )
+                    dic_item.update({
+                        "@type": 'Parecer',
+                        "id": str(getattr(par, 'cod_relatoria', '')),
+                        "title": f"Parecer {getattr(com, 'sgl_comissao', '')} nº {getattr(par, 'num_parecer', '')}/{getattr(par, 'ano_parecer', '')}",
+                        "description": desc,
+                        "autoria": [{
+                            "@id": f"{self.portal_url}/@@comissoes/{getattr(com, 'cod_comissao', '')}",
+                            "@type": "Comissão",
+                            "description": getattr(com, 'nom_comissao', ''),
+                            "id": str(getattr(com, 'cod_comissao', '')),
+                            "title": getattr(com, 'sgl_comissao', '')
+                        }] if com else [],
+                    })
+
+            # metadados de votação (se houver pauta)
+            if pauta:
+                tv = list(self.context.zsql.tipo_votacao_obter_zsql(tip_votacao=pauta.tip_votacao))
+                trn = list(self.context.zsql.turno_discussao_obter_zsql(cod_turno=pauta.tip_turno))
+                qr = list(self.context.zsql.quorum_votacao_obter_zsql(cod_quorum=pauta.tip_quorum))
                 dic_item.update({
-                    "@type": 'Parecer',
-                    "id": str(par.cod_relatoria),
-                    "title": f"Parecer {com.sgl_comissao} nº {par.num_parecer}/{par.ano_parecer}",
-                    "description": desc,
-                    "tipo_votacao": self.context.zsql.tipo_votacao_obter_zsql(tip_votacao=pauta.tip_votacao)[0].des_tipo_votacao,
-                    "turno": self.context.zsql.turno_discussao_obter_zsql(cod_turno=pauta.tip_turno)[0].des_turno,
-                    "quorum": self.context.zsql.quorum_votacao_obter_zsql(cod_quorum=pauta.tip_quorum)[0].des_quorum,
-                    "autoria": [{
-                        "@id": f"{self.portal_url}/@@comissoes/{com.cod_comissao}",
-                        "@type": "Comissão",
-                        "description": com.nom_comissao,
-                        "id": com.cod_comissao,
-                        "title": com.sgl_comissao
-                    }],
+                    "tipo_votacao": tv[0].des_tipo_votacao if tv else '',
+                    "turno": trn[0].des_turno if trn else '',
+                    "quorum": qr[0].des_quorum if qr else '',
                 })
 
-            # apuração
+            # apuração textual
             res_list = []
             if getattr(ordem, 'tip_resultado_votacao', None):
                 for r in self.context.zsql.tipo_resultado_votacao_obter_zsql(tip_resultado_votacao=ordem.tip_resultado_votacao, ind_excluido=0):
                     res_list.append({'resultado': r.nom_resultado})
             dic_item['apuracao'] = res_list
 
-            # votos nominais (usa sempre ordem.cod_votacao)
-            cod_vot = ordem.cod_votacao
+            # votos nominais
+            cod_vot = getattr(ordem, 'cod_votacao', None)
             lst_sim, lst_nao, lst_abst, lst_pres, lst_aus = [], [], [], [], []
-            for v in self.context.zsql.votacao_parlamentar_obter_zsql(cod_votacao=cod_vot, ind_excluido=0):
-                p = self.context.zsql.parlamentar_obter_zsql(cod_parlamentar=v.cod_parlamentar)[0]
-                partidos = [
-                    {'token': pt.sgl_partido, 'title': pt.nom_partido}
-                    for f in self.context.zsql.filiacao_obter_zsql(ind_excluido=0, cod_parlamentar=p.cod_parlamentar)
-                    for pt in self.context.zsql.partido_obter_zsql(ind_excluido=0, cod_partido=f.cod_partido)
-                    if not f.dat_desfiliacao
-                ]
-                dv = {
-                    '@id': f"{self.portal_url}/@@vereadores/{p.cod_parlamentar}",
-                    '@type': 'Vereador',
-                    'id': str(p.cod_parlamentar),
-                    'title': p.nom_parlamentar,
-                    'description': p.nom_completo,
-                    'votacao_id': str(v.cod_votacao),
-                    'partido': partidos
-                }
-                m = {
-                    'Sim': (lst_sim, 'Sim'),
-                    'Nao': (lst_nao, 'Não'),
-                    'Abstencao': (lst_abst, 'Abstenção'),
-                    'Na Presid.': (lst_pres, 'Na Presidência'),
-                    'Ausente': (lst_aus, 'Ausente'),
-                }
-                if v.vot_parlamentar in m:
-                    tgt, lbl = m[v.vot_parlamentar]
-                    dv['voto'] = lbl
-                    tgt.append(dv)
+            if cod_vot:
+                for v in self.context.zsql.votacao_parlamentar_obter_zsql(cod_votacao=cod_vot, ind_excluido=0):
+                    prs = list(self.context.zsql.parlamentar_obter_zsql(cod_parlamentar=v.cod_parlamentar))
+                    if not prs:
+                        continue
+                    p = prs[0]
+                    partidos = []
+                    for f in self.context.zsql.filiacao_obter_zsql(ind_excluido=0, cod_parlamentar=p.cod_parlamentar):
+                        if not getattr(f, 'dat_desfiliacao', None):
+                            pts = list(self.context.zsql.partido_obter_zsql(ind_excluido=0, cod_partido=f.cod_partido))
+                            if pts:
+                                partidos.append({'token': pts[0].sgl_partido, 'title': pts[0].nom_partido})
+                    dv = {
+                        '@id': f"{self.portal_url}/@@vereadores/{p.cod_parlamentar}",
+                        '@type': 'Vereador',
+                        'id': str(p.cod_parlamentar),
+                        'title': p.nom_parlamentar,
+                        'description': p.nom_completo,
+                        'votacao_id': str(getattr(v, 'cod_votacao', '')),
+                        'partido': partidos
+                    }
+                    mapping = {
+                        'Sim': ('Sim', lst_sim),
+                        'Nao': ('Não', lst_nao),
+                        'Abstencao': ('Abstenção', lst_abst),
+                        'Na Presid.': ('Na Presidência', lst_pres),
+                        'Ausente': ('Ausente', lst_aus),
+                    }
+                    lbl_list = mapping.get(getattr(v, 'vot_parlamentar', ''), None)
+                    if lbl_list:
+                        lbl, target = lbl_list
+                        dv['voto'] = lbl
+                        target.append(dv)
 
             dic_item['votos'] = [{
                 'favoravel': lst_sim,
@@ -287,17 +427,23 @@ class Sessoes(grok.View):
 
             lst_materias.append(dic_item)
 
-        sess = self.context.zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=item_id, ind_excluido=0)[0]
-        t = self.context.zsql.tipo_sessao_plenaria_obter_zsql(tip_sessao=sess.tip_sessao, ind_excluido=0)[0]
-        desc_s = f"{sess.num_sessao_plen}ª Reunião {t.nom_sessao} – {DateTime(sess.dat_inicio_sessao,datefmt='international').strftime('%d/%m/%Y')}"
+        sess = list(self.context.zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=item_id, ind_excluido=0))
+        tdesc = ''
+        if sess:
+            s = sess[0]
+            ts = list(self.context.zsql.tipo_sessao_plenaria_obter_zsql(tip_sessao=s.tip_sessao, ind_excluido=0))
+            t = ts[0] if ts else None
+            tdesc = f"{getattr(s, 'num_sessao_plen', '')}ª Reunião {getattr(t, 'nom_sessao', '')} – {self._fmt_date_br(getattr(s, 'dat_inicio_sessao', None))}" if getattr(s, 'dat_inicio_sessao', None) else ''
+
         return {
             '@id': f"{self.service_url}/id/{item_id}/votacao",
             '@type': 'votacaoNominal',
             'title': 'Lista de votação nominal',
-            'description': desc_s,
+            'description': tdesc,
             'items': lst_materias
         }
 
+    # ---------------- Render ----------------
     def render(self, ano='', tipo=''):
         self.update_context()
         data = {
@@ -315,4 +461,4 @@ class Sessoes(grok.View):
             data.update(self.get_sessao(self.item_id))
         else:
             data.update(self.help())
-        return json.dumps(data, sort_keys=True, indent=3, ensure_ascii=False)
+        return self._json(data)

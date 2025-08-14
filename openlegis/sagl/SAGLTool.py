@@ -1080,7 +1080,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
                         _carregar_e_mesclar_pdf(self.sapl_documentos.materia, anexada.cod_materia_anexada, "{}_texto_integral.pdf")
                     for subst in self.zsql.substitutivo_obter_zsql(cod_materia=cod_materia, ind_excluido=0):
                         _carregar_e_mesclar_pdf(self.sapl_documentos.substitutivo, subst.cod_substitutivo, "{}_substitutivo.pdf")
-                    for eme in self.zsql.emenda_obter_zsql(cod_materia=cod_materia, ind_excluido=0):
+                    for eme in self.zsql.emenda_obter_zsql(cod_materia=cod_materia, exc_pauta=0, ind_excluido=0):
                         _carregar_e_mesclar_pdf(self.sapl_documentos.emenda, eme.cod_emenda, "{}_emenda.pdf")
                     for relat in self.zsql.relatoria_obter_zsql(cod_materia=cod_materia, ind_excluido=0):
                         for tipo in self.zsql.tipo_fim_relatoria_obter_zsql(tip_fim_relatoria=relat.tip_fim_relatoria):

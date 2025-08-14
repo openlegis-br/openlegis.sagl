@@ -361,6 +361,10 @@ body {
     <dtml-call expr="REQUEST.set('dat_recebimento',None)">
 </dtml-unless>
 
+<dtml-unless dat_solicitacao_devolucao>
+    <dtml-call expr="REQUEST.set('dat_solicitacao_devolucao',None)">
+</dtml-unless>
+
 <dtml-unless dat_devolucao>
     <dtml-call expr="REQUEST.set('dat_devolucao',None)">
 </dtml-unless>
@@ -368,6 +372,8 @@ body {
 <dtml-call expr="REQUEST.set('prop_enviada',(dat_envio!=None))">
 
 <dtml-call expr="REQUEST.set('prop_recebida',(dat_recebimento!=None))">
+
+<dtml-call expr="REQUEST.set('prop_solicitada',(dat_solicitacao_devolucao!=None))">
 
 <dtml-call expr="REQUEST.set('prop_devolvida',(dat_devolucao!=None))">
 
@@ -526,7 +532,7 @@ body {
     </div>
   </dtml-if>
 
-    <dtml-if expr="dat_solicitacao_devolucao">
+    <dtml-if prop_solicitada>
         <div class="alert alert-dismissible alert-danger animate-fade-in">
             <div class="d-flex align-items-center">
                 <i class="fas fa-exclamation-circle me-2"></i>
@@ -584,7 +590,7 @@ body {
                                     disabled
                                 <dtml-elif expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia', 'Revisor Proposicao', 'Chefia Revisão']) and (prop_recebida or prop_devolvida)">
                                     disabled
-                                <dtml-elif expr="dat_solicitacao_devolucao">
+                                <dtml-elif prop_solicitada>
                                     disabled
                                 </dtml-if>>
                                 <option value="">Selecione</option>
@@ -890,7 +896,7 @@ body {
                                      disabled
                                   <dtml-elif expr="AUTHENTICATED_USER.has_role(['Autor', 'Assessor Parlamentar']) and prop_enviada">
                                      readonly
-                                  <dtml-elif expr="prop_recebida or prop_devolvida or dat_solicitacao_devolucao">
+                                  <dtml-elif expr="prop_recebida or prop_devolvida or prop_solicitada">
                                      readonly
                                   </dtml-if>
 				><dtml-var txt_descricao missing></textarea>
@@ -1207,7 +1213,7 @@ body {
 						    data-bs-toggle="tooltip" title="Remover o PDF assinado digitalmente">
 						<i class="far fa-trash-alt me-1"></i> Excluir PDF
 					    </button>
-					<dtml-elif expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia', 'Revisor Proposicao', 'Chefia Revisão']) and (not prop_recebida and not prop_devolvida) and not dat_solicitacao_devolucao">
+					<dtml-elif expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia', 'Revisor Proposicao', 'Chefia Revisão']) and (not prop_recebida and not prop_devolvida) and not prop_solicitada">
 					    <button type="button" class="btn btn-outline-danger" onclick="excluir_arquivo('assinado')"
 						    data-bs-toggle="tooltip" title="Remover o PDF assinado digitalmente">
 						<i class="far fa-trash-alt me-1"></i> Excluir PDF
@@ -1291,7 +1297,7 @@ body {
 						<button type="button" class="btn btn-outline-danger" onclick="excluir_arquivo('pdf')" data-bs-toggle="tooltip" title="Remover o arquivo PDF">
 						    <i class="far fa-trash-alt me-1"></i> Excluir PDF
 						</button>
-					      <dtml-elif expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia', 'Revisor Proposicao', 'Chefia Revisão']) and not prop_recebida and not prop_devolvida and not dat_solicitacao_devolucao">
+					      <dtml-elif expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia', 'Revisor Proposicao', 'Chefia Revisão']) and not prop_recebida and not prop_devolvida and not prop_solicitada">
 					        <button type="button" class="btn btn-outline-danger" onclick="excluir_arquivo('pdf')"
 						    data-bs-toggle="tooltip" title="Remover o PDF assinado digitalmente">
 						<i class="far fa-trash-alt me-1"></i> Excluir PDF
@@ -1431,7 +1437,7 @@ body {
             <button class="btn btn-primary btn-action" type="button" onClick="campos_criticar(document.proposicao_form)">
                 <i class="fas fa-save me-1"></i> Salvar Proposição
             </button>
-        <dtml-elif expr="(AUTHENTICATED_USER.has_role(['Operador','Operador Materia', 'Revisor Proposicao', 'Chefia Revisão']) and not prop_recebida and not dat_solicitacao_devolucao and not prop_devolvida)">
+        <dtml-elif expr="(AUTHENTICATED_USER.has_role(['Operador','Operador Materia', 'Revisor Proposicao', 'Chefia Revisão']) and not prop_recebida and not prop_solicitada and not prop_devolvida)">
             <button class="btn btn-primary btn-action" type="button" onClick="campos_criticar(document.proposicao_form)">
                 <i class="fas fa-save me-1"></i> Salvar Proposição
             </button>
@@ -1455,7 +1461,7 @@ body {
                                   <i class="far fa-trash-alt me-1"></i> Excluir Proposição
                                </button>
                             <dtml-else>
-                                <dtml-if expr="not _.has_key('dat_solicitacao_devolucao')">
+                                <dtml-if expr="not prop_solicitada">
                                     <button class="btn btn-danger btn-action" type="button" onClick="proposicao_solicitar_devolucao()">
                                         <i class="fas fa-paper-plane me-1"></i> Solicitar Devolução
                                     </button>
@@ -1535,7 +1541,7 @@ body {
                             </dtml-let>
                         <dtml-else>
                             <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia'])">
-                              <dtml-if expr="not dat_solicitacao_devolucao">
+                              <dtml-if expr="not prop_solicitada">
                                 <button class="btn btn-success btn-action" type="button" onClick="proposicao_incorporar()">
                                     <i class="fas fa-check-circle me-1"></i> Incorporar
                                 </button>

@@ -556,17 +556,6 @@ body {
         <dtml-if expr="hasattr(sapl_documentos.proposicao, id_pdf_assinado)">
             <dtml-call expr="REQUEST.set('tem_pdf_assinado', '1')">
         </dtml-if>
-        <dtml-if expr="_.has_key('tem_pdf') and not prop_recebida">
-            <div class="alert alert-dismissible alert-info animate-fade-in">
-                <div class="d-flex align-items-center">
-                    <i class="fas fa-lock me-2"></i>
-                    <div>
-                        <strong>Edição bloqueada</strong>
-                        <div class="small">O texto final já foi gerado.</div>
-                    </div>
-                </div>
-            </div>
-        </dtml-if>
     </dtml-if>
 
 <dtml-if expr="usr_eh_autor or AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia', 'Revisor Proposicao', 'Chefia Revisão']) and prop_enviada">
@@ -589,8 +578,8 @@ body {
                         <div class="form-group">
                             <label class="form-label required-field" for="lst_tip_proposicao">Tipo de Proposição</label>
                             <select class="select2 form-select" id="lst_tip_proposicao" name="lst_tip_proposicao" data-minimum-results-for-search="Infinity" onChange="javascript:tipo_proposicao_mudou()"
-                                <dtml-if expr="_.has_key('tem_pdf') or _.has_key('tem_odt')">
-                                    disabled
+                                <dtml-if expr="AUTHENTICATED_USER.has_role(['Autor', 'Assessor Parlamentar']) and (_.has_key('tem_odt') or _.has_key('tem_pdf'))">
+                                   disabled
                                 <dtml-elif expr="AUTHENTICATED_USER.has_role(['Autor', 'Assessor Parlamentar']) and prop_enviada">
                                     disabled
                                 <dtml-elif expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia', 'Revisor Proposicao', 'Chefia Revisão']) and prop_recebida">
@@ -881,9 +870,13 @@ body {
 				    >Automática</span>
 				</label>
 				<textarea class="form-control auto-resize" id="txt_descricao" name="txt_descricao" rows="3"
-                                  <dtml-if "des_tipo_proposicao == 'Indicação' and _.has_key('txt_num_cep') and txt_num_cep == '00000-000'"></dtml-if>
-                                  <dtml-if expr="_.has_key('tem_pdf') or _.has_key('tem_odt')">readonly</dtml-if>
+
                                   <dtml-unless "des_tipo_proposicao == 'Indicação' and _.has_key('txt_num_cep') and txt_num_cep == '00000-000'">readonly</dtml-unless>
+                                  <dtml-if expr="AUTHENTICATED_USER.has_role(['Autor', 'Assessor Parlamentar']) and prop_enviada">
+                                     readonly
+                                  <dtml-elif expr="prop_recebida or prop_devolvida">
+                                     readonly
+                                  </dtml-if>
                                 ><dtml-var txt_descricao missing></textarea>
 				<div id="helpEmentaAuto" class="help-text small text-muted"
 				     <dtml-if "_.has_key('txt_num_cep') and txt_num_cep == '00000-000'">style="display:none;"</dtml-if>
@@ -892,7 +885,15 @@ body {
 				</div>
 			    <dtml-else>
 				<label class="form-label required-field" for="txt_descricao">Ementa</label>
-				<textarea class="form-control auto-resize" id="txt_descricao" name="txt_descricao" rows="3" ><dtml-var txt_descricao missing></textarea>
+				<textarea class="form-control auto-resize" id="txt_descricao" name="txt_descricao" rows="3"
+                                  <dtml-if expr="AUTHENTICATED_USER.has_role(['Autor', 'Assessor Parlamentar']) and (_.has_key('tem_odt') or _.has_key('tem_pdf'))">
+                                     disabled
+                                  <dtml-elif expr="AUTHENTICATED_USER.has_role(['Autor', 'Assessor Parlamentar']) and prop_enviada">
+                                     readonly
+                                  <dtml-elif expr="prop_recebida or prop_devolvida">
+                                     readonly
+                                  </dtml-if>
+				><dtml-var txt_descricao missing></textarea>
 				<div class="help-text">Preencha a ementa de acordo com o tipo de proposição</div>
 			    </dtml-if>
 			</div>
@@ -1313,7 +1314,7 @@ body {
 						    <i class="fas fa-file-pdf me-1"></i> Converter ODT
 						</button>
 					    <dtml-else>
-						<button type="button" id="btn-gerar-pdf" class="btn btn-outline-secondary" disabled data-bs-toggle="tooltip" title="Não há ODT para converter">
+						<button type="button" id="btn-gerar-pdf" class="btn btn-outline-secondary" data-bs-toggle="tooltip" title="Não há ODT para converter">
 						    <i class="fas fa-file-pdf me-1"></i> Converter ODT
 						</button>
 					    </dtml-if>
@@ -1430,7 +1431,7 @@ body {
             <button class="btn btn-primary btn-action" type="button" onClick="campos_criticar(document.proposicao_form)">
                 <i class="fas fa-save me-1"></i> Salvar Proposição
             </button>
-        <dtml-elif expr="(AUTHENTICATED_USER.has_role(['Operador','Operador Materia', 'Revisor Proposicao', 'Chefia Revisão']) and not prop_recebida and not prop_devolvida) and not _.has_key('tem_pdf_assinado')">
+        <dtml-elif expr="(AUTHENTICATED_USER.has_role(['Operador','Operador Materia', 'Revisor Proposicao', 'Chefia Revisão']) and not prop_recebida and not prop_devolvida)">
             <button class="btn btn-primary btn-action" type="button" onClick="campos_criticar(document.proposicao_form)">
                 <i class="fas fa-save me-1"></i> Salvar Proposição
             </button>
@@ -2019,7 +2020,7 @@ var ProposicaoManager = (function() {
             $("#btn-gerar-pdf").val("Converter ODT").prop('onclick', null).off('click').on('click', () => this.textoPdfGerar());
 
             // Unlock fields by default (will be re-locked if needed)
-            _domCache.txtDescricao.prop('readonly', false).removeClass('bg-light');
+            //_domCache.txtDescricao.prop('readonly', true).removeClass('bg-light');
             _domCache.txaJustificativa.prop('readonly', true).addClass('bg-light');
             $("#txt_nom_logradouro, #txt_nom_bairro, #txt_nom_cidade, #txt_sgl_uf, #txt_complemento_endereco, #txt_num_cep")
                 .prop('readonly', false)
@@ -2064,41 +2065,8 @@ var ProposicaoManager = (function() {
                 }
             } else if (desTipoProposicao === 'Requerimento') {
               $("#accordionMaps").slideDown(300);
-                if (_emRevisao && !_tem_pdf) {
-                    _domCache.txtDescricao.prop('readonly', false).removeClass('bg-light');
-                    _aplicarReadonlySelect2('#lst_assunto', false);
-                } else {
-                    if (_tem_pdf || _campoAssuntoBloqueado) {
-                        _domCache.txtDescricao.prop('readonly', true).addClass('bg-light');
-                        _aplicarReadonlySelect2('#lst_assunto', true);
-                    } else {
-                        _domCache.txtDescricao.prop('readonly', false).removeClass('bg-light');
-                        _aplicarReadonlySelect2('#lst_assunto', false);
-                    }
-                }
               // regras específicas de Requerimento (se houver)
-            } else {
-                // Outros tipos
-                if (_emRevisao && !_tem_pdf) {
-                    _domCache.txtDescricao.prop('readonly', false).removeClass('bg-light');
-                    _aplicarReadonlySelect2('#lst_assunto', false);
-                } else {
-                    if (_tem_pdf || _campoAssuntoBloqueado) {
-                        _domCache.txtDescricao.prop('readonly', true).addClass('bg-light');
-                        _aplicarReadonlySelect2('#lst_assunto', true);
-                    } else {
-                        _domCache.txtDescricao.prop('readonly', false).removeClass('bg-light');
-                        _aplicarReadonlySelect2('#lst_assunto', false);
-                    }
-                }
-                _domCache.txaJustificativa.prop('readonly', true).addClass('bg-light');
-                
-                if (_campoAssuntoBloqueado) {
-                    $("#txt_nom_logradouro, #txt_nom_bairro, #txt_nom_cidade, #txt_sgl_uf, #txt_complemento_endereco, #txt_num_cep")
-                        .prop('readonly', true)
-                        .addClass('bg-light')
-                        .removeClass('border-warning');
-                }
+
             }
 
             // BLOQUEIO select de assunto (readonly visual)

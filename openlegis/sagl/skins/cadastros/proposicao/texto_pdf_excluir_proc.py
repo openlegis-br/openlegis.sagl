@@ -17,21 +17,6 @@ if hasattr(context.sapl_documentos.proposicao, id_texto):
     except Exception:
         erro = True
 
-# Tenta excluir assinaturas vinculadas ao documento
-try:
-    assinaturas = context.zsql.assinatura_documento_obter_zsql(codigo=cod_proposicao, tipo_doc='proposicao')
-    for assinatura in assinaturas:
-        try:
-            context.zsql.assinatura_documento_excluir_zsql(
-                cod_assinatura_doc=assinatura.cod_assinatura_doc,
-                codigo=assinatura.codigo,
-                tipo_doc=assinatura.tipo_doc
-            )
-        except Exception:
-            erro = True
-except Exception:
-    erro = True
-
 # LOG DE AUDITORIA (opcional, execute se necessário)
 try:
     if getattr(context, "dbcon_logs", False):

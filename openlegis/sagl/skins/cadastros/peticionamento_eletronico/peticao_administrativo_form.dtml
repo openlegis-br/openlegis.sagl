@@ -269,7 +269,7 @@
                 <div class="btn-group">
                   <dtml-call expr="REQUEST.set('temPDF', 1)">
                     <dtml-let filename="getattr(sapl_documentos.peticao,id_documento).absolute_url">
-                      <a class="btn btn-light" href="<dtml-var filename>" target="_blank">
+                      <a class="btn btn-light" href="<dtml-var filename>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank">
                         <i class="fa fa-file-pdf"></i> Visualizar
                       </a>
                     </dtml-let>

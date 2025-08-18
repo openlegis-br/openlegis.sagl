@@ -1707,10 +1707,20 @@ var ProposicaoManager = (function() {
             
             // Initialize CEP handling
             const cepAtual = $('#txt_num_cep').val()?.replace(/\D/g, '') || '';
-            if (cepAtual === '00000000') {
-                this.liberarEmentaPorCepZerado();
-            } else if (cepAtual && cepAtual.length === 8) {
-                this.bloquearCamposEnderecoReadonly();
+            const tipoProposicaoAtual = $("#lst_tip_proposicao option:selected").text();
+            
+            if (tipoProposicaoAtual === "Indicação") {
+                if (cepAtual === '00000000') {
+                    this.liberarEmentaPorCepZerado();
+                } else if (cepAtual && cepAtual.length === 8) {
+                    this.bloquearEmentaAutomatica();
+                } else {
+                    // Se não há CEP válido, bloqueia os campos por padrão
+                    this.bloquearEmentaAutomatica();
+                }
+            } else {
+                // Garantir que o campo ementa esteja liberado para edição se não for Indicação
+                _domCache.txtDescricao.prop('readonly', false).removeClass('bg-light');
             }
 
             // Load models if cod_proposicao exists
@@ -2026,12 +2036,22 @@ var ProposicaoManager = (function() {
             $("#btn-gerar-pdf").val("Converter ODT").prop('onclick', null).off('click').on('click', () => this.textoPdfGerar());
 
             // Unlock fields by default (will be re-locked if needed)
-            //_domCache.txtDescricao.prop('readonly', true).removeClass('bg-light');
+            _domCache.txtDescricao.prop('readonly', false).removeClass('bg-light');
             _domCache.txaJustificativa.prop('readonly', true).addClass('bg-light');
-            $("#txt_nom_logradouro, #txt_nom_bairro, #txt_nom_cidade, #txt_sgl_uf, #txt_complemento_endereco, #txt_num_cep")
-                .prop('readonly', false)
-                .removeClass('bg-light')
-                .removeClass('border-warning');
+            
+            // Para Indicação, os campos de endereço são bloqueados por padrão
+            if (desTipoProposicao === 'Indicação') {
+                $("#txt_nom_logradouro, #txt_nom_bairro, #txt_nom_cidade, #txt_sgl_uf")
+                    .prop('readonly', true)
+                    .addClass('bg-light')
+                    .removeClass('border-warning');
+                $("#txt_complemento_endereco").prop('readonly', false).removeClass('bg-light');
+            } else {
+                $("#txt_nom_logradouro, #txt_nom_bairro, #txt_nom_cidade, #txt_sgl_uf, #txt_complemento_endereco, #txt_num_cep")
+                    .prop('readonly', false)
+                    .removeClass('bg-light')
+                    .removeClass('border-warning');
+            }
 
             // Matéria vinculada
             if (indMatOuDoc[1] === 'D') {
@@ -2062,12 +2082,26 @@ var ProposicaoManager = (function() {
                     _domCache.txaJustificativa.prop('readonly', false).removeClass('bg-light');
                 }
                 
-                // Endereço: se bloqueado, trava todos
+                // Endereço: só libera se não houver bloqueio geral E se CEP for 00000-000
                 if (_campoAssuntoBloqueado) {
                     $("#txt_nom_logradouro, #txt_nom_bairro, #txt_nom_cidade, #txt_sgl_uf, #txt_complemento_endereco, #txt_num_cep")
                         .prop('readonly', true)
                         .addClass('bg-light')
                         .removeClass('border-warning');
+                } else {
+                    // Verifica se CEP é 00000-000 para liberar campos de endereço
+                    const cepAtual = $('#txt_num_cep').val()?.replace(/\D/g, '') || '';
+                    if (cepAtual === '00000000') {
+                        $("#txt_nom_logradouro, #txt_nom_bairro, #txt_nom_cidade, #txt_sgl_uf")
+                            .prop('readonly', false)
+                            .removeClass('bg-light')
+                            .addClass('border-warning');
+                    } else {
+                        $("#txt_nom_logradouro, #txt_nom_bairro, #txt_nom_cidade, #txt_sgl_uf")
+                            .prop('readonly', true)
+                            .addClass('bg-light')
+                            .removeClass('border-warning');
+                    }
                 }
             } else if (desTipoProposicao === 'Requerimento') {
               $("#accordionMaps").slideDown(300);
@@ -2161,26 +2195,32 @@ var ProposicaoManager = (function() {
         },
 
         liberarEmentaPorCepZerado: function() {
-            $("#txt_nom_logradouro").prop('readonly', false).removeClass('bg-light');
-            $("#txt_nom_cidade").prop('readonly', false).removeClass('bg-light');
-            $("#txt_sgl_uf").prop('readonly', false).removeClass('bg-light');
-            $("#txt_nom_bairro").prop('readonly', false).removeClass('bg-light');
-            _domCache.txtDescricao.prop('readonly', true).addClass('bg-light');
-            $("#badgeEmentaAuto").show();
-            $("#helpEmentaAuto").show();
-            $("#avisoEmentaManual").show();
-            $("#txt_nom_logradouro, #txt_nom_bairro, #txt_nom_cidade, #txt_sgl_uf").addClass('border-warning');
+            // Só libera os campos se for Indicação
+            if ($("#lst_tip_proposicao option:selected").text() === "Indicação") {
+                $("#txt_nom_logradouro").prop('readonly', false).removeClass('bg-light');
+                $("#txt_nom_cidade").prop('readonly', false).removeClass('bg-light');
+                $("#txt_sgl_uf").prop('readonly', false).removeClass('bg-light');
+                $("#txt_nom_bairro").prop('readonly', false).removeClass('bg-light');
+                _domCache.txtDescricao.prop('readonly', true).addClass('bg-light');
+                $("#badgeEmentaAuto").show();
+                $("#helpEmentaAuto").show();
+                $("#avisoEmentaManual").show();
+                $("#txt_nom_logradouro, #txt_nom_bairro, #txt_nom_cidade, #txt_sgl_uf").addClass('border-warning');
+            }
         },
 
         bloquearEmentaAutomatica: function() {
-            $("#txt_nom_logradouro").prop('readonly', true).addClass('bg-light').removeClass('border-warning');
-            $("#txt_nom_cidade").prop('readonly', true).addClass('bg-light').removeClass('border-warning');
-            $("#txt_sgl_uf").prop('readonly', true).removeClass('border-warning');
-            $("#txt_nom_bairro").prop('readonly', true).addClass('bg-light').removeClass('border-warning');
-            _domCache.txtDescricao.prop('readonly', true).addClass('bg-light');
-            $("#badgeEmentaAuto").show();
-            $("#helpEmentaAuto").show();
-            $("#avisoEmentaManual").hide();
+            // Só bloqueia os campos se for Indicação
+            if ($("#lst_tip_proposicao option:selected").text() === "Indicação") {
+                $("#txt_nom_logradouro").prop('readonly', true).addClass('bg-light').removeClass('border-warning');
+                $("#txt_nom_cidade").prop('readonly', true).addClass('bg-light').removeClass('border-warning');
+                $("#txt_sgl_uf").prop('readonly', true).removeClass('border-warning');
+                $("#txt_nom_bairro").prop('readonly', true).addClass('bg-light').removeClass('border-warning');
+                _domCache.txtDescricao.prop('readonly', true).addClass('bg-light');
+                $("#badgeEmentaAuto").show();
+                $("#helpEmentaAuto").show();
+                $("#avisoEmentaManual").hide();
+            }
         },
 
         // ========== EMENTA GENERATION ==========
@@ -2246,20 +2286,20 @@ var ProposicaoManager = (function() {
             if (desTipoProposicao !== 'Indicação') return;
 
             if (cep === '00000000') {
-                this.liberarCamposEnderecoEdicao();
+                this.liberarEmentaPorCepZerado();
                 cepDisplay.html('');
                 limparCampos();
                 return;
             }
             
             if (cep.length !== 8) {
-                this.bloquearCamposEnderecoReadonly();
+                this.bloquearEmentaAutomatica();
                 cepDisplay.html('');
                 limparCampos();
                 return;
             }
 
-            this.bloquearCamposEnderecoReadonly();
+            this.bloquearEmentaAutomatica();
             cepInput.prop('disabled', true);
             cepDisplay.html(`
                 <div class="d-flex align-items-center text-muted">

@@ -893,7 +893,7 @@ body {
 				<label class="form-label required-field" for="txt_descricao">Ementa</label>
 				<textarea class="form-control auto-resize" id="txt_descricao" name="txt_descricao" rows="3"
                                   <dtml-if expr="AUTHENTICATED_USER.has_role(['Autor', 'Assessor Parlamentar']) and (_.has_key('tem_odt') or _.has_key('tem_pdf'))">
-                                     disabled
+                                     readonly
                                   <dtml-elif expr="AUTHENTICATED_USER.has_role(['Autor', 'Assessor Parlamentar']) and prop_enviada">
                                      readonly
                                   <dtml-elif expr="prop_recebida or prop_devolvida or prop_solicitada">

@@ -1089,7 +1089,7 @@ class ProcessoLegView(grok.View):
                 fitz.Point(page.rect.width - 110, 20),
                 f"{id_processo} | Fls. {page_num + 1}/{len(pdf)}",
                 fontsize=8,
-                color=fitz.utils.getColor("gray")
+                color=(0, 0, 0)
             )
 
         pdf.set_metadata({

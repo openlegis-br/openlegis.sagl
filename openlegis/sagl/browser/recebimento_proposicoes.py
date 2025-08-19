@@ -50,7 +50,6 @@ class ProposicoesAPIBase:
                     "Chefia Revisão",
                     "Operador",
                     "Operador Materia",
-                    "Operador Revisao",
                 }
             )
         if caixa == "protocolo":

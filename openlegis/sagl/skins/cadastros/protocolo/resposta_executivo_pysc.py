@@ -4,9 +4,10 @@
 ##bind namespace=
 ##bind script=script
 ##bind subpath=traverse_subpath
-##parameters=cod_materia_respondida
+##parameters=cod_materia_respondida, cod_unid_tram_local=None, cod_unid_tram_dest=None, cod_status=None
 ##title=
 ##
+# -*- coding: utf-8 -*-
 import json
 from DateTime import DateTime
 
@@ -16,6 +17,21 @@ session = REQUEST.SESSION
 
 usuario = REQUEST['AUTHENTICATED_USER'].getUserName()
 
+# =============================================================================
+# Utilitários
+# =============================================================================
+
+def _coerce_int(v, default=None):
+    """Converte para int com fallback."""
+    try:
+        if v is None or v == "":
+            return default
+        return int(v)
+    except Exception:
+        return default
+
+def _now(fmt="%d/%m/%Y %H:%M:%S"):
+    return DateTime(datefmt="international").strftime(fmt)
 
 def retornar_erro(msg):
     """Monta e retorna um JSON de erro padronizado."""
@@ -24,11 +40,29 @@ def retornar_erro(msg):
         'mensagem': msg,
         'usuario': usuario,
         'ip_origem': context.pysc.get_ip(),
-        'data': DateTime(datefmt="international").strftime("%d/%m/%Y %H:%M:%S"),
+        'data': _now(),
     }]
     RESPONSE.setHeader('Content-Type', 'application/json; charset=utf-8')
     return json.dumps(payload)
 
+def _parse_num_protocolo(num_protocolo_str):
+    """
+    Recebe algo como '123/2025' ou '123' e retorna o inteiro 123.
+    Se não der para converter, retorna None.
+    """
+    if not num_protocolo_str:
+        return None
+    s = str(num_protocolo_str).strip()
+    if '/' in s:
+        s = s.split('/', 1)[0]
+    try:
+        return int(s)
+    except Exception:
+        return None
+
+# =============================================================================
+# Matéria / Ementa
+# =============================================================================
 
 def obter_materia(cod_materia):
     """
@@ -53,10 +87,18 @@ def obter_materia(cod_materia):
     # não encontrou nenhuma matéria
     return None
 
+# =============================================================================
+# Protocolo
+# =============================================================================
 
 def numero_protocolo():
     """Obtém o número/código de protocolo conforme configuração (anual ou sequencial)."""
-    if context.sapl_documentos.props_sagl.numero_protocolo_anual == 1:
+    try:
+        anual = getattr(context.sapl_documentos.props_sagl, 'numero_protocolo_anual', 0)
+    except Exception:
+        anual = 0
+
+    if anual == 1:
         for numero in context.zsql.protocolo_numero_obter_zsql(
             ano_protocolo=DateTime(datefmt='international').strftime('%Y')
         ):
@@ -66,7 +108,6 @@ def numero_protocolo():
             return int(numero.novo_codigo)
     # fallback (não deveria ocorrer)
     return 1
-
 
 def criar_protocolo(cod_materia, txt_ementa):
     """Cria o protocolo legislativo e delega para criação do documento acessório."""
@@ -85,12 +126,16 @@ def criar_protocolo(cod_materia, txt_ementa):
         nome_autor = getattr(item, 'nom_autor_join', '') or ''
         break
 
-    # Define o tipo de documento: tenta "Ofício / Resposta", senão fallback 9
+    # Define o tipo de documento: tenta "Resposta", senão fallback 9
     tip_doc = 9
-    for tipo_doc in context.zsql.tipo_documento_obter_zsql(ind_excluido=0):
-        if getattr(tipo_doc, 'des_tipo_documento', '') == 'Resposta':
-            tip_doc = int(tipo_doc.tip_documento)
-            break
+    try:
+        for tipo_doc in context.zsql.tipo_documento_obter_zsql(ind_excluido=0):
+            nome_tipo = (getattr(tipo_doc, 'des_tipo_documento', '') or '').strip().lower()
+            if nome_tipo == 'resposta':
+                tip_doc = int(tipo_doc.tip_documento)
+                break
+    except Exception:
+        pass
 
     num_prot_int = numero_protocolo()
 
@@ -113,7 +158,7 @@ def criar_protocolo(cod_materia, txt_ementa):
         cod_protocolo = int(codigo.cod_protocolo)
         break
 
-    # monta num_protocolo "N/AAAA"
+    # monta num_protocolo "N/AAAA" para exibição
     num_protocolo = ''
     if cod_protocolo is not None:
         for protocolo in context.zsql.protocolo_obter_zsql(cod_protocolo=cod_protocolo):
@@ -130,18 +175,29 @@ def criar_protocolo(cod_materia, txt_ementa):
         cod_usuario=cod_usuario
     )
 
+# =============================================================================
+# Documento Acessório
+# =============================================================================
 
 def criar_documento(tip_doc, txt_ementa, nome_autor, cod_materia, cod_protocolo, num_protocolo, cod_usuario):
     """Cria Documento Acessório (anexa PDF) e lança tramitação."""
-    context.zsql.documento_acessorio_incluir_zsql(
+    # Converte num_protocolo para inteiro (o método ZSQL espera int)
+    num_protocolo_int = _parse_num_protocolo(num_protocolo)
+
+    # Monta kwargs para evitar enviar valores inválidos
+    kwargs = dict(
         tip_documento=tip_doc,
         nom_documento=txt_ementa,
         nom_autor_documento=nome_autor,
         cod_materia=cod_materia,
-        num_protocolo=num_protocolo,
-        dat_documento=DateTime(datefmt='international').strftime('%d/%m/%Y %H:%M:%S'),
-        ind_publico=1
+        dat_documento=_now(),
+        ind_publico=1,
     )
+    # Só envia num_protocolo se for inteiro válido
+    if num_protocolo_int is not None:
+        kwargs['num_protocolo'] = num_protocolo_int
+
+    context.zsql.documento_acessorio_incluir_zsql(**kwargs)
 
     cod_documento = None
     for codigo in context.zsql.documento_acessorio_incluido_codigo_obter_zsql():
@@ -151,10 +207,17 @@ def criar_documento(tip_doc, txt_ementa, nome_autor, cod_materia, cod_protocolo,
     if cod_documento is not None:
         id_documento = f"{cod_documento}.pdf"
         # só tenta anexar se veio arquivo
-        if hasattr(REQUEST, 'form') and 'file' in REQUEST.form and REQUEST.form['file']:
-            context.sapl_documentos.materia.manage_addFile(id=id_documento, file=REQUEST.form['file'])
+        file_obj = None
+        try:
+            if hasattr(REQUEST, 'form'):
+                file_obj = REQUEST.form.get('file') or REQUEST.form.get('arquivo')
+        except Exception:
+            file_obj = None
 
-        if context.dbcon_logs:
+        if file_obj:
+            context.sapl_documentos.materia.manage_addFile(id=id_documento, file=file_obj)
+
+        if getattr(context, 'dbcon_logs', False):
             context.zsql.logs_registrar_zsql(
                 usuario=REQUEST['AUTHENTICATED_USER'].getUserName(),
                 data=DateTime(datefmt='international').strftime('%Y-%m-%d %H:%M:%S'),
@@ -168,10 +231,41 @@ def criar_documento(tip_doc, txt_ementa, nome_autor, cod_materia, cod_protocolo,
         cod_documento=cod_documento,
         cod_materia=cod_materia,
         cod_protocolo=cod_protocolo,
-        num_protocolo=num_protocolo,
+        num_protocolo=num_protocolo,  # segue como string "N/AAAA" apenas para exibição
         cod_usuario=cod_usuario
     )
 
+# =============================================================================
+# Tramitação (parametrizável)
+# =============================================================================
+
+def _resolver_parametros_tramitacao():
+    """
+    Resolve os parâmetros de tramitação a partir de:
+    1) parâmetros do script,
+    2) REQUEST (querystring/form),
+    3) defaults do sistema.
+    """
+    # defaults (ajuste aqui se quiser outros padrões)
+    DEFAULT_LOCAL = 37
+    DEFAULT_DEST = 72
+    DEFAULT_STATUS = 43
+
+    # parâmetros do script
+    p_local = _coerce_int(cod_unid_tram_local)
+    p_dest  = _coerce_int(cod_unid_tram_dest)
+    p_stat  = _coerce_int(cod_status)
+
+    # REQUEST (aceita tanto em form quanto querystring)
+    r_local = _coerce_int(REQUEST.get('cod_unid_tram_local'))
+    r_dest  = _coerce_int(REQUEST.get('cod_unid_tram_dest'))
+    r_stat  = _coerce_int(REQUEST.get('cod_status'))
+
+    final_local = p_local if p_local is not None else (r_local if r_local is not None else DEFAULT_LOCAL)
+    final_dest  = p_dest  if p_dest  is not None else (r_dest  if r_dest  is not None else DEFAULT_DEST)
+    final_stat  = p_stat  if p_stat  is not None else (r_stat  if r_stat  is not None else DEFAULT_STATUS)
+
+    return final_local, final_dest, final_stat
 
 def tramitar_materia(cod_documento, cod_materia, cod_protocolo, num_protocolo, cod_usuario):
     """Finaliza a última tramitação, registra recebimento e cria nova tramitação padrão."""
@@ -187,13 +281,17 @@ def tramitar_materia(cod_documento, cod_materia, cod_protocolo, num_protocolo, c
                 cod_tramitacao=tr.cod_tramitacao,
                 cod_usuario_corrente=cod_usuario
             )
-        context.pysc.atualiza_indicador_tramitacao_materia_pysc(
-            cod_materia=tr.cod_materia,
-            cod_status=1056
-        )
+        # Atualiza indicador de "recebido" (se aplicável ao seu fluxo)
+        try:
+            context.pysc.atualiza_indicador_tramitacao_materia_pysc(
+                cod_materia=tr.cod_materia,
+                cod_status=DEFAULT_STATUS
+            )
+        except Exception:
+            pass
         break  # somente a atual/última
 
-    hr_tramitacao = DateTime(datefmt='international').strftime('%d/%m/%Y %H:%M:%S')
+    hr_tramitacao = _now()
     txt_tramitacao = (
         '<p>Resposta eletrônica recebida em '
         + hr_tramitacao
@@ -202,14 +300,16 @@ def tramitar_materia(cod_documento, cod_materia, cod_protocolo, num_protocolo, c
         + '</p>'
     )
 
+    _local, _dest, _stat = _resolver_parametros_tramitacao()
+
     context.zsql.tramitacao_incluir_zsql(
         cod_materia=cod_materia,
         dat_tramitacao=DateTime(datefmt='international').strftime('%Y-%m-%d %H:%M:%S'),
-        cod_unid_tram_local=37,
+        cod_unid_tram_local=_local,
         cod_usuario_local=cod_usuario,
-        cod_unid_tram_dest=72,
+        cod_unid_tram_dest=_dest,
         dat_encaminha=DateTime(datefmt='international').strftime('%Y-%m-%d %H:%M:%S'),
-        cod_status=43,
+        cod_status=_stat,
         ind_urgencia=0,
         txt_tramitacao=txt_tramitacao,
         ind_ult_tramitacao=1
@@ -217,14 +317,25 @@ def tramitar_materia(cod_documento, cod_materia, cod_protocolo, num_protocolo, c
 
     # notifica e gera PDF da tramitação atual
     for tr in context.zsql.tramitacao_obter_zsql(cod_materia=cod_materia, ind_ult_tramitacao=1, ind_excluido=0):
-        context.pysc.envia_tramitacao_autor_pysc(cod_materia=cod_materia)
-        context.pysc.envia_acomp_materia_pysc(cod_materia=cod_materia)
+        try:
+            context.pysc.envia_tramitacao_autor_pysc(cod_materia=cod_materia)
+        except Exception:
+            pass
+        try:
+            context.pysc.envia_acomp_materia_pysc(cod_materia=cod_materia)
+        except Exception:
+            pass
+
         hdn_url = context.portal_url() + ''
-        context.relatorios.pdf_tramitacao_preparar_pysc(
-            hdn_cod_tramitacao=tr.cod_tramitacao,
-            hdn_url=hdn_url
-        )
-        if context.dbcon_logs:
+        try:
+            context.relatorios.pdf_tramitacao_preparar_pysc(
+                hdn_cod_tramitacao=tr.cod_tramitacao,
+                hdn_url=hdn_url
+            )
+        except Exception:
+            pass
+
+        if getattr(context, 'dbcon_logs', False):
             context.zsql.logs_registrar_zsql(
                 usuario=REQUEST['AUTHENTICATED_USER'].getUserName(),
                 data=DateTime(datefmt='international').strftime('%Y-%m-%d %H:%M:%S'),
@@ -237,6 +348,9 @@ def tramitar_materia(cod_documento, cod_materia, cod_protocolo, num_protocolo, c
 
     return criar_resposta(cod_protocolo=cod_protocolo, num_protocolo=num_protocolo)
 
+# =============================================================================
+# Resposta final (JSON)
+# =============================================================================
 
 def criar_resposta(cod_protocolo, num_protocolo):
     """Retorno JSON final para o cliente."""
@@ -245,15 +359,17 @@ def criar_resposta(cod_protocolo, num_protocolo):
         'usuario': usuario,
         'numero_protocolo': str(num_protocolo or ''),
         'codigo': str(cod_protocolo or ''),
-        'data_protocolo': DateTime(datefmt='international').strftime('%d/%m/%Y %H:%M:%S'),
+        'data_protocolo': _now(),
         'ip_origem': context.pysc.get_ip(),
     }]
     retorno = json.dumps(resposta)
     RESPONSE.setHeader('Content-Type', 'application/json; charset=utf-8')
     return retorno
 
+# =============================================================================
+# Entrada principal
+# =============================================================================
 
-# ===== Entrada principal =====
 txt_ementa = obter_materia(cod_materia_respondida)
 if not txt_ementa:
     # encerra com mensagem clara se a matéria não existir

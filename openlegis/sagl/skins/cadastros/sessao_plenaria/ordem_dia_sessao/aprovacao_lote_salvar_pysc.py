@@ -55,7 +55,7 @@ if tipo_aprovado is not None and nome_aprovado is not None:
             for proposicao in context.zsql.proposicao_obter_zsql(ind_mat_ou_doc='M', cod_mat_ou_doc=cod_materia):
                 if hasattr(context.sapl_documentos.proposicao, f'{proposicao.cod_proposicao}_signed.pdf'):
                     context.modelo_proposicao.proposicao_autuar(cod_proposicao=proposicao.cod_proposicao)
-            context.modelo_proposicao.requerimento_aprovar_async(
+            context.modelo_proposicao.requerimento_aprovar(
                 cod_sessao_plen=cod_sessao_plen,
                 nom_resultado=nome_aprovado,
                 cod_materia=cod_materia
@@ -84,7 +84,7 @@ if tipo_aprovado is not None and nome_aprovado is not None:
             for proposicao in context.zsql.proposicao_obter_zsql(ind_mat_ou_doc='M', cod_mat_ou_doc=cod_materia):
                 if hasattr(context.sapl_documentos.proposicao, f'{proposicao.cod_proposicao}_signed.pdf'):
                     context.modelo_proposicao.proposicao_autuar(cod_proposicao=proposicao.cod_proposicao)
-            context.modelo_proposicao.requerimento_aprovar_async(
+            context.modelo_proposicao.requerimento_aprovar(
                 cod_sessao_plen=cod_sessao_plen,
                 nom_resultado=nome_aprovado,
                 cod_materia=cod_materia

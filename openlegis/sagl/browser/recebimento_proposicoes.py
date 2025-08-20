@@ -5,9 +5,11 @@ import json
 import logging
 import traceback
 from datetime import datetime
+import re
 
-from sqlalchemy import func, or_, select
+from sqlalchemy import func, or_, select, and_
 from sqlalchemy.orm import joinedload
+from sqlalchemy.sql import false, true
 from z3c.saconfig import named_scoped_session
 from zope.component import queryUtility
 from zope.interface import Interface
@@ -56,6 +58,87 @@ class ProposicoesAPIBase:
             return any(r in roles for r in {"Operador", "Operador Materia"})
         return False
 
+    def _tem_acesso_caixa(self, caixa: str) -> bool:
+        return self._verificar_permissao_caixa(caixa)
+
+    def _caixas_permitidas(self) -> set[str]:
+        roles = self._get_user_roles()
+        permitidas = set()
+        if any(r in roles for r in {"Revisor Proposicao", "Chefia Revisão", "Operador", "Operador Materia"}):
+            permitidas |= {"revisao", "assinatura", "incorporado", "devolvido", "pedido_devolucao"}
+        if any(r in roles for r in {"Operador", "Operador Materia"}):
+            permitidas.add("protocolo")
+        return permitidas
+
+    def _expr_por_caixa(self, caixa: str, session):
+        """Expressão booleana SQLAlchemy equivalente ao filtro daquela caixa."""
+        from sqlalchemy.sql import case
+
+        if caixa == "revisao":
+            return and_(
+                Proposicao.dat_envio.isnot(None),
+                Proposicao.dat_recebimento.is_(None),
+                Proposicao.dat_solicitacao_devolucao.is_(None),
+                Proposicao.dat_devolucao.is_(None),
+            )
+
+        if caixa == "assinatura":
+            # Base; checagem fina de arquivos/pendências é feita depois
+            return and_(
+                Proposicao.dat_envio.isnot(None),
+                Proposicao.dat_recebimento.is_(None),
+                Proposicao.dat_solicitacao_devolucao.is_(None),
+                Proposicao.dat_devolucao.is_(None),
+            )
+
+        if caixa == "protocolo":
+            total_assinaturas = func.count(AssinaturaDocumento.id)
+            assinadas = func.sum(case((AssinaturaDocumento.ind_assinado == 1, 1), else_=0))
+            todas_assinadas_subq = (
+                session.query(AssinaturaDocumento.codigo)
+                .filter(
+                    AssinaturaDocumento.ind_excluido == 0,
+                    AssinaturaDocumento.tipo_doc == "proposicao",
+                )
+                .group_by(AssinaturaDocumento.codigo)
+                .having(total_assinaturas == assinadas)
+                .subquery()
+            )
+            return and_(
+                Proposicao.dat_envio.isnot(None),
+                Proposicao.dat_recebimento.is_(None),
+                Proposicao.dat_solicitacao_devolucao.is_(None),
+                Proposicao.dat_devolucao.is_(None),
+                or_(
+                    ~Proposicao.cod_proposicao.in_(
+                        session.query(AssinaturaDocumento.codigo).filter(
+                            AssinaturaDocumento.ind_excluido == 0,
+                            AssinaturaDocumento.tipo_doc == "proposicao",
+                        )
+                    ),
+                    Proposicao.cod_proposicao.in_(select(todas_assinadas_subq.c.codigo)),
+                ),
+            )
+
+        if caixa == "incorporado":
+            return and_(
+                Proposicao.ind_excluido == 0,
+                Proposicao.dat_recebimento.isnot(None),
+                Proposicao.cod_mat_ou_doc.isnot(None),
+            )
+
+        if caixa == "devolvido":
+            return Proposicao.dat_devolucao.isnot(None)
+
+        if caixa == "pedido_devolucao":
+            return and_(
+                Proposicao.dat_solicitacao_devolucao.isnot(None),
+                Proposicao.dat_devolucao.is_(None),
+            )
+
+        # Desconhecida => sempre falso
+        return false()
+
     def _get_user_roles(self):
         try:
             portal = self.request.PARENTS[0]
@@ -86,104 +169,112 @@ class ProposicoesAPIBase:
             logger.warning("[proposicoes] Não foi possível obter cod_usuario: %s", e)
             return None
 
-    def _aplicar_filtros_caixa(self, query, caixa):
+    def _aplicar_filtros_caixa(self, query, caixa, session):
+        """
+        Aplica filtros por 'caixa' usando a MESMA sessão do chamador.
+        """
+        if caixa == "revisao":
+            roles = self._get_user_roles()
+            if "Revisor Proposicao" in roles:
+                cod_revisor = self._get_cod_usuario()
+                if cod_revisor:
+                    return query.filter(
+                        Proposicao.dat_envio.isnot(None),
+                        Proposicao.dat_recebimento.is_(None),
+                        Proposicao.dat_solicitacao_devolucao.is_(None),
+                        Proposicao.dat_devolucao.is_(None),
+                        Proposicao.cod_revisor == cod_revisor,
+                    )
+            return query.filter(
+                Proposicao.dat_envio.isnot(None),
+                Proposicao.dat_recebimento.is_(None),
+                Proposicao.dat_solicitacao_devolucao.is_(None),
+                Proposicao.dat_devolucao.is_(None),
+            )
+
+        if caixa == "assinatura":
+            # Base: enviadas, não recebidas, sem devolução
+            return query.filter(
+                Proposicao.dat_envio.isnot(None),
+                Proposicao.dat_recebimento.is_(None),
+                Proposicao.dat_solicitacao_devolucao.is_(None),
+                Proposicao.dat_devolucao.is_(None),
+            )
+
+        if caixa == "protocolo":
+            from sqlalchemy.sql import case
+
+            total_assinaturas = func.count(AssinaturaDocumento.id)
+            assinadas = func.sum(case((AssinaturaDocumento.ind_assinado == 1, 1), else_=0))
+            todas_assinadas_subq = (
+                session.query(AssinaturaDocumento.codigo)
+                .filter(
+                    AssinaturaDocumento.ind_excluido == 0,
+                    AssinaturaDocumento.tipo_doc == "proposicao",
+                )
+                .group_by(AssinaturaDocumento.codigo)
+                .having(total_assinaturas == assinadas)
+                .subquery()
+            )
+            return query.filter(
+                Proposicao.dat_envio.isnot(None),
+                Proposicao.dat_recebimento.is_(None),
+                Proposicao.dat_solicitacao_devolucao.is_(None),
+                Proposicao.dat_devolucao.is_(None),
+            ).filter(
+                or_(
+                    ~Proposicao.cod_proposicao.in_(
+                        session.query(AssinaturaDocumento.codigo).filter(
+                            AssinaturaDocumento.ind_excluido == 0,
+                            AssinaturaDocumento.tipo_doc == "proposicao",
+                        )
+                    ),
+                    Proposicao.cod_proposicao.in_(select(todas_assinadas_subq.c.codigo)),
+                )
+            )
+
+        if caixa == "incorporado":
+            return query.filter(
+                Proposicao.ind_excluido == 0,
+                Proposicao.dat_recebimento.isnot(None),
+                Proposicao.cod_mat_ou_doc.isnot(None),
+            )
+
+        if caixa == "devolvido":
+            return query.filter(Proposicao.dat_devolucao.isnot(None))
+
+        if caixa == "pedido_devolucao":
+            return query.filter(
+                Proposicao.dat_solicitacao_devolucao.isnot(None),
+                Proposicao.dat_devolucao.is_(None),
+            )
+
+        return query
+
+    def _aplicar_filtros_adicionais(self, query):
+        """
+        Aplica q, tipo, autor, assunto/NPE e intervalo de datas.
+        Também restringe às caixas que o usuário tem acesso:
+          - se 'caixa' for 'all'/'todas' => OR de todas as caixas permitidas
+          - se 'caixa' não permitida => resultado vazio
+        Levanta ValueError para datas inválidas (tratado no chamador).
+        """
         session = Session()
         try:
-            if caixa == "revisao":
-                roles = self._get_user_roles()
-                if "Revisor Proposicao" in roles:
-                    cod_revisor = self._get_cod_usuario()
-                    if cod_revisor:
-                        return query.filter(
-                            Proposicao.dat_envio.isnot(None),
-                            Proposicao.dat_recebimento.is_(None),
-                            Proposicao.dat_solicitacao_devolucao.is_(None),
-                            Proposicao.dat_devolucao.is_(None),
-                            Proposicao.cod_revisor == cod_revisor,
-                        )
-                return query.filter(
-                    Proposicao.dat_envio.isnot(None),
-                    Proposicao.dat_recebimento.is_(None),
-                    Proposicao.dat_solicitacao_devolucao.is_(None),
-                    Proposicao.dat_devolucao.is_(None),
-                )
-
-            if caixa == "assinatura":
-                pendentes_subq = (
-                    session.query(AssinaturaDocumento.codigo)
-                    .filter(
-                        AssinaturaDocumento.tipo_doc == "proposicao",
-                        AssinaturaDocumento.ind_excluido == 0,
-                        AssinaturaDocumento.ind_assinado == 0,
-                    )
-                    .distinct()
-                    .subquery()
-                )
-                return query.filter(
-                    Proposicao.dat_envio.isnot(None),
-                    Proposicao.dat_recebimento.is_(None),
-                    Proposicao.dat_solicitacao_devolucao.is_(None),
-                    Proposicao.dat_devolucao.is_(None),
-                ).filter(
-                    or_(
-                        Proposicao.cod_proposicao.in_(select(pendentes_subq)),
-                        True,  # permite pós-filtro por existência de .pdf / _signed.pdf
-                    )
-                )
-
-            if caixa == "protocolo":
-                from sqlalchemy.sql import case
-
-                total_assinaturas = func.count(AssinaturaDocumento.id)
-                assinadas = func.sum(case((AssinaturaDocumento.ind_assinado == 1, 1), else_=0))
-                todas_assinadas_subq = (
-                    session.query(AssinaturaDocumento.codigo)
-                    .filter(
-                        AssinaturaDocumento.ind_excluido == 0,
-                        AssinaturaDocumento.tipo_doc == "proposicao",
-                    )
-                    .group_by(AssinaturaDocumento.codigo)
-                    .having(total_assinaturas == assinadas)
-                    .subquery()
-                )
-                return query.filter(
-                    Proposicao.dat_envio.isnot(None),
-                    Proposicao.dat_recebimento.is_(None),
-                    Proposicao.dat_solicitacao_devolucao.is_(None),
-                    Proposicao.dat_devolucao.is_(None),
-                ).filter(
-                    or_(
-                        ~Proposicao.cod_proposicao.in_(
-                            session.query(AssinaturaDocumento.codigo).filter(
-                                AssinaturaDocumento.ind_excluido == 0,
-                                AssinaturaDocumento.tipo_doc == "proposicao",
-                            )
-                        ),
-                        Proposicao.cod_proposicao.in_(select(todas_assinadas_subq)),
-                    )
-                )
-
-            if caixa == "incorporado":
-                return query.filter(
-                    Proposicao.ind_excluido == 0,
-                    Proposicao.dat_recebimento.isnot(None),
-                    Proposicao.cod_mat_ou_doc.isnot(None),
-                )
-
-            if caixa == "devolvido":
-                return query.filter(Proposicao.dat_devolucao.isnot(None))
-
-            if caixa == "pedido_devolucao":
-                return query.filter(
-                    Proposicao.dat_solicitacao_devolucao.isnot(None),
-                    Proposicao.dat_devolucao.is_(None),
-                )
-
-            return query
+            caixa_req = (self.request.form.get("caixa") or "").strip().lower()
+            if caixa_req in {"all", "todas"}:
+                permitidas = self._caixas_permitidas()
+                if not permitidas:
+                    return query.filter(false())
+                exprs = [self._expr_por_caixa(c, session) for c in sorted(permitidas)]
+                query = query.filter(or_(*exprs))
+            elif caixa_req:
+                if not self._tem_acesso_caixa(caixa_req):
+                    return query.filter(false())
+                # Se tem acesso, não reaplicamos aqui o filtro da caixa para evitar duplicidade.
         finally:
             session.close()
 
-    def _aplicar_filtros_adicionais(self, query):
         # texto livre
         search_term = (self.request.form.get("q") or "").strip()
         if search_term:
@@ -223,7 +314,7 @@ class ProposicoesAPIBase:
         assunto = (self.request.form.get("assunto") or "").strip()
         if assunto:
             assunto_limpo = assunto.upper().replace(" ", "")
-            m = __import__("re").match(r"^(NPE)?(\d+)$", assunto_limpo)
+            m = re.match(r"^(NPE)?(\d+)$", assunto_limpo)
             if m:
                 npe_num = int(m.group(2))
                 query = query.filter(Proposicao.cod_proposicao == npe_num)
@@ -241,7 +332,7 @@ class ProposicoesAPIBase:
                     try:
                         query = query.filter(coluna >= datetime.strptime(dt_inicio, "%Y-%m-%d"))
                     except Exception:
-                        return self._responder_erro("Data inicial inválida", 400)
+                        raise ValueError("Data inicial inválida")
                 if dt_fim:
                     try:
                         query = query.filter(
@@ -249,7 +340,7 @@ class ProposicoesAPIBase:
                             <= datetime.strptime(dt_fim, "%Y-%m-%d").replace(hour=23, minute=59, second=59)
                         )
                     except Exception:
-                        return self._responder_erro("Data final inválida", 400)
+                        raise ValueError("Data final inválida")
         return query
 
     def _verificar_documentos_fisicos(self, proposicoes, caixa):
@@ -294,6 +385,7 @@ class ProposicoesAPIBase:
 
         session = Session()
         try:
+            pendentes = set()
             if caixa == "assinatura":
                 pendentes = set(
                     row[0]
@@ -316,7 +408,8 @@ class ProposicoesAPIBase:
                     if tem_odt and not tem_pdf and not tem_pdf_assinado:
                         resultados.append(prop)
                 elif caixa == "assinatura":
-                    if (tem_pdf and not tem_pdf_assinado) or prop.cod_proposicao in pendentes:
+                    # ou tem PDF sem assinado, ou possui pendência na tabela de assinaturas
+                    if (tem_pdf and not tem_pdf_assinado) or (prop.cod_proposicao in pendentes):
                         resultados.append(prop)
                 elif caixa == "protocolo":
                     if tem_pdf_assinado:
@@ -569,7 +662,8 @@ class ProposicoesAPI(GrokView, ProposicoesAPIBase):
             por_pagina = int(self.request.form.get("por_pagina", 10))
             apenas_contar = self.request.form.get("contar") == "1"
 
-            if not self._verificar_permissao_caixa(caixa):
+            # Permite 'all'/'todas'; caso contrário, exige permissão para a caixa específica
+            if caixa not in {"all", "todas"} and not self._verificar_permissao_caixa(caixa):
                 return self._responder_erro("Acesso não autorizado para esta caixa", 403)
 
             base_query = session.query(Proposicao.cod_proposicao).join(Proposicao.tipo_proposicao)
@@ -577,7 +671,13 @@ class ProposicoesAPI(GrokView, ProposicoesAPIBase):
             base_query = base_query.join(Proposicao.autor)
             base_query = base_query.outerjoin(Autor.parlamentar)
             base_query = base_query.outerjoin(Autor.comissao)
-            base_query = self._aplicar_filtros_caixa(base_query, caixa)
+
+            if caixa in {"all", "todas"}:
+                # Não aplicamos filtro de caixa aqui; ficará por conta de _aplicar_filtros_adicionais
+                pass
+            else:
+                base_query = self._aplicar_filtros_caixa(base_query, caixa, session)
+
             base_query = self._aplicar_filtros_adicionais(base_query)
 
             ORDER_MAP = {
@@ -592,7 +692,7 @@ class ProposicoesAPI(GrokView, ProposicoesAPIBase):
             ordenar_por = self.request.form.get("ordenar_por")
             ordenar_direcao = self.request.form.get("ordenar_direcao")
 
-            # caixa 'incorporado' tem regra própria de ordenação
+            # caixa 'incorporado' tem regra própria de ordenação (quando não é 'all')
             if caixa == "incorporado":
                 if ordenar_por != "recebimento":
                     ordenar_por = None
@@ -645,13 +745,18 @@ class ProposicoesAPI(GrokView, ProposicoesAPIBase):
                     },
                 )
 
-            # demais caixas
+            # demais caixas (inclusive 'all'/'todas')
             query = session.query(Proposicao).join(Proposicao.tipo_proposicao)
             query = query.filter(Proposicao.ind_excluido == 0)
             query = query.join(Proposicao.autor)
             query = query.outerjoin(Autor.parlamentar)
             query = query.outerjoin(Autor.comissao)
-            query = self._aplicar_filtros_caixa(query, caixa)
+
+            if caixa in {"all", "todas"}:
+                pass
+            else:
+                query = self._aplicar_filtros_caixa(query, caixa, session)
+
             query = self._aplicar_filtros_adicionais(query)
 
             if ordenar_por:
@@ -802,7 +907,8 @@ class ExportarCSV(GrokView, ProposicoesAPIBase):
             pagina = int(self.request.form.get("pagina", 1))
             por_pagina = int(self.request.form.get("por_pagina", 10))
 
-            if not self._verificar_permissao_caixa(caixa):
+            # Permite 'all'/'todas' aqui também
+            if caixa not in {"all", "todas"} and not self._verificar_permissao_caixa(caixa):
                 self.request.response.setStatus(403)
                 return json.dumps({"sucesso": False, "erro": "Acesso não autorizado para esta caixa"})
 
@@ -811,7 +917,19 @@ class ExportarCSV(GrokView, ProposicoesAPIBase):
             self.request.response.setHeader("Content-Disposition", f'attachment; filename="{filename}"')
 
             base_query = session.query(Proposicao)
-            base_query = self._aplicar_filtros_caixa(base_query, caixa)
+            base_query = base_query.join(Proposicao.tipo_proposicao)
+            base_query = base_query.filter(Proposicao.ind_excluido == 0)
+            base_query = base_query.join(Proposicao.autor)
+            base_query = base_query.outerjoin(Autor.parlamentar)
+            base_query = base_query.outerjoin(Autor.comissao)
+
+            if caixa in {"all", "todas"}:
+                pass
+            else:
+                base_query = self._aplicar_filtros_caixa(base_query, caixa, session)
+
+            # Mesmos filtros adicionais da listagem (inclui guarda de perfil e 'all')
+            base_query = self._aplicar_filtros_adicionais(base_query)
 
             ORDER_MAP = {
                 "envio": Proposicao.dat_envio,
@@ -881,7 +999,7 @@ class ExportarCSV(GrokView, ProposicoesAPIBase):
                     [
                         f"NPE{prop.cod_proposicao}",
                         getattr(prop.tipo_proposicao, "des_tipo_proposicao", ""),
-                        prop.txt_descricao,
+                        (prop.txt_descricao or "").replace("\r", " ").replace("\n", " ").strip(),
                         self._formatar_autor(prop.autor),
                         self._determinar_status(prop),
                         self._formatar_data_hora(prop.dat_envio) or "",
@@ -898,6 +1016,9 @@ class ExportarCSV(GrokView, ProposicoesAPIBase):
                 output.truncate(0)
 
             return ""
+        except ValueError as e:
+            self.request.response.setStatus(400)
+            return json.dumps({"sucesso": False, "erro": f"Parâmetros inválidos: {str(e)}"})
         except Exception as e:
             traceback.print_exc()
             self.request.response.setStatus(500)

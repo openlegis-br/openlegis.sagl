@@ -46,7 +46,7 @@ class EmailDoc(grok.View):
 
         msg = EmailMessage()
         msg['From'] = '%s <%s>' % (casa_legislativa, email_casa)
-        msg['reply-to'] = '%s <%s>' % (usuario, email_usuario)
+        msg['Reply-To'] = '%s <%s>' % (usuario, email_usuario)
 
         recipients = []
         destinatarios = []
@@ -235,7 +235,7 @@ class EmailDoc(grok.View):
                 <html>
                   <head></head>
                   <body style="margin: 25px">
-                    <div style=min-width::300px; margin:0 auto;">
+                    <div style=min-width:300px; margin:0 auto;">
                         <img style="display: block; margin: 0 auto;" src="{logo_casa}" width="90px" height="90px">
                         <p align="center" style="font-family:Arial, Helvetica, sans-serif; font-size:20px; font-weight: bold; margin-top: 10px; margin-bottom: 5px; text-transform: uppercase">{casa_legislativa}</p>
                         <p align="center" style="font-family:Arial, Helvetica, sans-serif; font-size:14px;margin-top: 5px">Estado de {estado}</p>

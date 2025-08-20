@@ -106,7 +106,6 @@ for materia in context.zsql.materia_obter_zsql(cod_materia=cod_materia):
             for field in fields:
                 nome_autor = str(autor['nom_autor_join'])
             lista_autor.append(nome_autor)
-            break
         inf_basicas_dic['autoria_materia_anexada'] = str('Autoria do Projeto: ') + ', '.join(['%s' % (value) for (value) in lista_autor])
 
 data_atual = DateTime().strftime("%d/%m/%Y")

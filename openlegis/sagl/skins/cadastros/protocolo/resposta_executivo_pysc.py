@@ -6,7 +6,6 @@
 ##bind subpath=traverse_subpath
 ##parameters=cod_materia_respondida, cod_unid_tram_local=None, cod_unid_tram_dest=None, cod_status=None
 ##title=
-##
 # -*- coding: utf-8 -*-
 import json
 from DateTime import DateTime
@@ -18,10 +17,17 @@ session = REQUEST.SESSION
 usuario = REQUEST['AUTHENTICATED_USER'].getUserName()
 
 # =============================================================================
+# Defaults (ajuste conforme seu fluxo)
+# =============================================================================
+DEFAULT_LOCAL = 37
+DEFAULT_DEST  = 72
+DEFAULT_STATUS = 43
+
+# =============================================================================
 # Utilitários
 # =============================================================================
 
-def _coerce_int(v, default=None):
+def coerce_int(v, default=None):
     """Converte para int com fallback."""
     try:
         if v is None or v == "":
@@ -30,8 +36,13 @@ def _coerce_int(v, default=None):
     except Exception:
         return default
 
-def _now(fmt="%d/%m/%Y %H:%M:%S"):
+def now_str(fmt="%d/%m/%Y %H:%M:%S"):
+    """Data/hora formatada para exibição (humana)."""
     return DateTime(datefmt="international").strftime(fmt)
+
+def now_iso():
+    """Data/hora para banco (ISO)."""
+    return DateTime(datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
 
 def retornar_erro(msg):
     """Monta e retorna um JSON de erro padronizado."""
@@ -40,12 +51,12 @@ def retornar_erro(msg):
         'mensagem': msg,
         'usuario': usuario,
         'ip_origem': context.pysc.get_ip(),
-        'data': _now(),
+        'data': now_str(),
     }]
     RESPONSE.setHeader('Content-Type', 'application/json; charset=utf-8')
     return json.dumps(payload)
 
-def _parse_num_protocolo(num_protocolo_str):
+def parse_num_protocolo(num_protocolo_str):
     """
     Recebe algo como '123/2025' ou '123' e retorna o inteiro 123.
     Se não der para converter, retorna None.
@@ -94,7 +105,7 @@ def obter_materia(cod_materia):
 def numero_protocolo():
     """Obtém o número/código de protocolo conforme configuração (anual ou sequencial)."""
     try:
-        anual = getattr(context.sapl_documentos.props_sagl, 'numero_protocolo_anual', 0)
+        anual = int(getattr(context.sapl_documentos.props_sagl, 'numero_protocolo_anual', 0) or 0)
     except Exception:
         anual = 0
 
@@ -182,7 +193,7 @@ def criar_protocolo(cod_materia, txt_ementa):
 def criar_documento(tip_doc, txt_ementa, nome_autor, cod_materia, cod_protocolo, num_protocolo, cod_usuario):
     """Cria Documento Acessório (anexa PDF) e lança tramitação."""
     # Converte num_protocolo para inteiro (o método ZSQL espera int)
-    num_protocolo_int = _parse_num_protocolo(num_protocolo)
+    num_protocolo_int = parse_num_protocolo(num_protocolo)
 
     # Monta kwargs para evitar enviar valores inválidos
     kwargs = dict(
@@ -190,7 +201,7 @@ def criar_documento(tip_doc, txt_ementa, nome_autor, cod_materia, cod_protocolo,
         nom_documento=txt_ementa,
         nom_autor_documento=nome_autor,
         cod_materia=cod_materia,
-        dat_documento=_now(),
+        dat_documento=now_iso(),
         ind_publico=1,
     )
     # Só envia num_protocolo se for inteiro válido
@@ -220,7 +231,7 @@ def criar_documento(tip_doc, txt_ementa, nome_autor, cod_materia, cod_protocolo,
         if getattr(context, 'dbcon_logs', False):
             context.zsql.logs_registrar_zsql(
                 usuario=REQUEST['AUTHENTICATED_USER'].getUserName(),
-                data=DateTime(datefmt='international').strftime('%Y-%m-%d %H:%M:%S'),
+                data=now_iso(),
                 modulo='documento_acessorio_materia',
                 metodo='resposta_executivo_pysc',
                 cod_registro=cod_documento,
@@ -239,27 +250,22 @@ def criar_documento(tip_doc, txt_ementa, nome_autor, cod_materia, cod_protocolo,
 # Tramitação (parametrizável)
 # =============================================================================
 
-def _resolver_parametros_tramitacao():
+def resolver_parametros_tramitacao():
     """
     Resolve os parâmetros de tramitação a partir de:
     1) parâmetros do script,
     2) REQUEST (querystring/form),
     3) defaults do sistema.
     """
-    # defaults (ajuste aqui se quiser outros padrões)
-    DEFAULT_LOCAL = 37
-    DEFAULT_DEST = 72
-    DEFAULT_STATUS = 43
-
     # parâmetros do script
-    p_local = _coerce_int(cod_unid_tram_local)
-    p_dest  = _coerce_int(cod_unid_tram_dest)
-    p_stat  = _coerce_int(cod_status)
+    p_local = coerce_int(cod_unid_tram_local)
+    p_dest  = coerce_int(cod_unid_tram_dest)
+    p_stat  = coerce_int(cod_status)
 
     # REQUEST (aceita tanto em form quanto querystring)
-    r_local = _coerce_int(REQUEST.get('cod_unid_tram_local'))
-    r_dest  = _coerce_int(REQUEST.get('cod_unid_tram_dest'))
-    r_stat  = _coerce_int(REQUEST.get('cod_status'))
+    r_local = coerce_int(REQUEST.get('cod_unid_tram_local'))
+    r_dest  = coerce_int(REQUEST.get('cod_unid_tram_dest'))
+    r_stat  = coerce_int(REQUEST.get('cod_status'))
 
     final_local = p_local if p_local is not None else (r_local if r_local is not None else DEFAULT_LOCAL)
     final_dest  = p_dest  if p_dest  is not None else (r_dest  if r_dest  is not None else DEFAULT_DEST)
@@ -269,6 +275,9 @@ def _resolver_parametros_tramitacao():
 
 def tramitar_materia(cod_documento, cod_materia, cod_protocolo, num_protocolo, cod_usuario):
     """Finaliza a última tramitação, registra recebimento e cria nova tramitação padrão."""
+    # Resolve parâmetros antes de qualquer operação que dependa do status
+    local_id, dest_id, stat_id = resolver_parametros_tramitacao()
+
     # encerra a "última" e registra recebimento
     for tr in context.zsql.tramitacao_obter_zsql(cod_materia=cod_materia, ind_ult_tramitacao=1, ind_excluido=0):
         context.zsql.tramitacao_ind_ultima_atualizar_zsql(
@@ -285,13 +294,13 @@ def tramitar_materia(cod_documento, cod_materia, cod_protocolo, num_protocolo, c
         try:
             context.pysc.atualiza_indicador_tramitacao_materia_pysc(
                 cod_materia=tr.cod_materia,
-                cod_status=DEFAULT_STATUS
+                cod_status=stat_id
             )
         except Exception:
             pass
         break  # somente a atual/última
 
-    hr_tramitacao = _now()
+    hr_tramitacao = now_str()
     txt_tramitacao = (
         '<p>Resposta eletrônica recebida em '
         + hr_tramitacao
@@ -300,16 +309,14 @@ def tramitar_materia(cod_documento, cod_materia, cod_protocolo, num_protocolo, c
         + '</p>'
     )
 
-    _local, _dest, _stat = _resolver_parametros_tramitacao()
-
     context.zsql.tramitacao_incluir_zsql(
         cod_materia=cod_materia,
-        dat_tramitacao=DateTime(datefmt='international').strftime('%Y-%m-%d %H:%M:%S'),
-        cod_unid_tram_local=_local,
+        dat_tramitacao=now_iso(),
+        cod_unid_tram_local=local_id,
         cod_usuario_local=cod_usuario,
-        cod_unid_tram_dest=_dest,
-        dat_encaminha=DateTime(datefmt='international').strftime('%Y-%m-%d %H:%M:%S'),
-        cod_status=_stat,
+        cod_unid_tram_dest=dest_id,
+        dat_encaminha=now_iso(),
+        cod_status=stat_id,
         ind_urgencia=0,
         txt_tramitacao=txt_tramitacao,
         ind_ult_tramitacao=1
@@ -338,7 +345,7 @@ def tramitar_materia(cod_documento, cod_materia, cod_protocolo, num_protocolo, c
         if getattr(context, 'dbcon_logs', False):
             context.zsql.logs_registrar_zsql(
                 usuario=REQUEST['AUTHENTICATED_USER'].getUserName(),
-                data=DateTime(datefmt='international').strftime('%Y-%m-%d %H:%M:%S'),
+                data=now_iso(),
                 modulo='tramitacao_materia',
                 metodo='resposta_executivo_pysc',
                 cod_registro=tr.cod_tramitacao,
@@ -359,7 +366,7 @@ def criar_resposta(cod_protocolo, num_protocolo):
         'usuario': usuario,
         'numero_protocolo': str(num_protocolo or ''),
         'codigo': str(cod_protocolo or ''),
-        'data_protocolo': _now(),
+        'data_protocolo': now_str(),
         'ip_origem': context.pysc.get_ip(),
     }]
     retorno = json.dumps(resposta)

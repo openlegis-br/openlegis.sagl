@@ -664,9 +664,15 @@ body {
                                             <dtml-call expr="REQUEST.set('cod_mat', cod_mat_ou_doc)">
                                         </dtml-if>
                                         <dtml-in expr="zsql.materia_obter_zsql(cod_materia=cod_mat)">
+                                           <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia'])">
+                                            <a class="btn btn-outline-primary w-100 text-start" href="<dtml-var portal_url>/cadastros/materia/materia_mostrar_proc?cod_materia=<dtml-var cod_mat>" target="_blank">
+                                                <i class="fas fa-link me-1"></i> <dtml-var des_tipo_materia> nº <dtml-var num_ident_basica>/<dtml-var ano_ident_basica>
+                                            </a>
+                                           <dtml-else>
                                             <a class="btn btn-outline-primary w-100 text-start" href="<dtml-var portal_url>/consultas/materia/materia_mostrar_proc?cod_materia=<dtml-var cod_mat>" target="_blank">
                                                 <i class="fas fa-link me-1"></i> <dtml-var des_tipo_materia> nº <dtml-var num_ident_basica>/<dtml-var ano_ident_basica>
                                             </a>
+                                           </dtml-if>
                                         </dtml-in>
                                     <dtml-elif dat_devolucao>
                                         <input class="form-control bg-danger bg-opacity-10" type="text" value="Devolvida" readonly>
@@ -893,7 +899,7 @@ body {
 				<label class="form-label required-field" for="txt_descricao">Ementa</label>
 				<textarea class="form-control auto-resize" id="txt_descricao" name="txt_descricao" rows="3"
                                   <dtml-if expr="AUTHENTICATED_USER.has_role(['Autor', 'Assessor Parlamentar']) and (_.has_key('tem_odt') or _.has_key('tem_pdf'))">
-                                     readonly
+                                     disabled
                                   <dtml-elif expr="AUTHENTICATED_USER.has_role(['Autor', 'Assessor Parlamentar']) and prop_enviada">
                                      readonly
                                   <dtml-elif expr="prop_recebida or prop_devolvida or prop_solicitada">
@@ -1307,6 +1313,7 @@ body {
 				    <dtml-else>
 					<div class="input-group">
 					    <dtml-if expr="AUTHENTICATED_USER.has_role(['Autor', 'Assessor Parlamentar']) and (des_tipo_autor == 'Parlamentar')">
+						<input type="file" class="form-control" id="file_nom_arquivo" name="file_nom_arquivo" accept="application/pdf">
 					    <dtml-else>
 						<input type="file" class="form-control" id="file_nom_arquivo" name="file_nom_arquivo" accept="application/pdf">
 					    </dtml-if>
@@ -2224,49 +2231,50 @@ var ProposicaoManager = (function() {
         },
 
         // ========== EMENTA GENERATION ==========
-        gerarEmentaAutomatica: function(forcar = false) {
-            const desTipoProposicao = $("#lst_tip_proposicao option:selected").text();
-            if (desTipoProposicao !== 'Indicação') return;
-            
-            const campo = _domCache.txtDescricao;
-            const ementaExistente = campo.val().trim();
-            
-            if (!forcar && ementaExistente !== "") {
-                return;
-            }
+	gerarEmentaAutomatica: function(forcar = false) {
+	    const desTipoProposicao = $("#lst_tip_proposicao option:selected").text();
+	    if (desTipoProposicao !== 'Indicação') return;
+	    
+	    const campo = _domCache.txtDescricao;
+	    const ementaExistente = campo.val().trim();
+	    if (!forcar && ementaExistente !== "") return;
 
-            const textoAssuntoCompleto = _domCache.lstAssunto.find("option:selected").text().trim();
-            const assuntoTexto = textoAssuntoCompleto.split(' (')[0];
-            const orgaoTexto = textoAssuntoCompleto.match(/\(([^)]+)\)/)?.[1] || "";
-            const logradouroTexto = $("#txt_nom_logradouro").val();
-            const complementoTexto = $("#txt_complemento_endereco").val();
-            const bairroTexto = $("#txt_nom_bairro").val();
-            const cidadeTexto = $("#txt_nom_cidade").val();
-            const estadoTexto = $("#txt_sgl_uf").val();
+	    const textoAssuntoCompleto = _domCache.lstAssunto.find("option:selected").text().trim();
+	    const assuntoTexto = textoAssuntoCompleto.split(' (')[0];
+	    const orgaoTexto = textoAssuntoCompleto.match(/\(([^)]+)\)/)?.[1] || "";
 
-            let ementaFinal = "Solicitando ";
-            if (orgaoTexto) {
-                ementaFinal += _artigoParaOrgao(orgaoTexto) + orgaoTexto + " ";
-            }
-            if (assuntoTexto && assuntoTexto !== 'Selecione') {
-                ementaFinal += `a realização de ${assuntoTexto.toLowerCase().trim()} `;
-            }
-            if (logradouroTexto) {
-                ementaFinal += `na ${logradouroTexto}`;
-                if (complementoTexto) ementaFinal += `, ${complementoTexto}`;
-                if (bairroTexto) ementaFinal += `, ${bairroTexto}`;
-                if (cidadeTexto && estadoTexto) {
-                    ementaFinal += `, neste município de ${cidadeTexto}/${estadoTexto}.`;
-                } else if (cidadeTexto) {
-                    ementaFinal += `, neste município de ${cidadeTexto}.`;
-                } else {
-                    ementaFinal += ".";
-                }
-            } else {
-                ementaFinal += ".";
-            }
-            campo.val(ementaFinal);
-        },
+	    const logradouroTexto  = $("#txt_nom_logradouro").val();
+	    const complementoTexto = $("#txt_complemento_endereco").val();
+	    const bairroTexto      = $("#txt_nom_bairro").val();
+	    const cepTexto         = $("#txt_num_cep").val() || "";
+	    const cepDigits        = (cepTexto || "").replace(/\D/g, "");
+
+	    let ementaFinal = "Solicitando ";
+	    if (orgaoTexto) {
+		ementaFinal += _artigoParaOrgao(orgaoTexto) + orgaoTexto + " ";
+	    }
+	    if (assuntoTexto && assuntoTexto !== 'Selecione') {
+		ementaFinal += `a realização de ${assuntoTexto.toLowerCase().trim()}`;
+	    }
+
+	    if (logradouroTexto) {
+		// Com logradouro: incluir complemento, " no bairro", CEP; sem cidade/UF
+		ementaFinal += ` na ${logradouroTexto}`;
+		if (complementoTexto) ementaFinal += `, ${complementoTexto}`;
+		if (bairroTexto)      ementaFinal += `, no bairro ${bairroTexto}`;
+		if (cepDigits && cepDigits !== '00000000') ementaFinal += `, CEP ${cepTexto}`;
+		ementaFinal += ".";
+	    } else {
+		// Sem logradouro → "no bairro <bairro>", complemento e CEP (se existirem)
+		const partes = [];
+		if (bairroTexto) partes.push(`no bairro ${bairroTexto}`);
+		if (complementoTexto) partes.push(complementoTexto);
+		if (cepDigits && cepDigits !== '00000000') partes.push(`CEP ${cepTexto}`);
+		ementaFinal += partes.length ? (' ' + partes.join(', ') + '.') : '.';
+	    }
+
+	    campo.val(ementaFinal);
+	},
 
         // ========== CEP LOOKUP ==========
         async buscarCEP() {

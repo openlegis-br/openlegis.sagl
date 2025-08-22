@@ -99,7 +99,7 @@ for materia in context.zsql.materia_obter_zsql(cod_materia=cod_materia):
     inf_basicas_dic['autoria_materia_anexada'] = ''
     for anexada in context.zsql.anexada_obter_zsql(cod_materia_principal=cod_materia,ind_excluido=0):
         inf_basicas_dic['materia_anexada'] = str(anexada.tip_materia_anexada) + ' ' + str(anexada.num_materia_anexada) + '/' + str(anexada.ano_materia_anexada)
-        autores = context.zsql.autoria_obter_zsql(cod_materia = anexada.cod_materia_anexada, ind_primeiro_autor=1)
+        autores = context.zsql.autoria_obter_zsql(cod_materia = anexada.cod_materia_anexada)
         fields = autores.data_dictionary().keys()
         lista_autor = []
         for autor in autores:

@@ -235,13 +235,11 @@
                     <dtml-if expr="(DateTime(datefmt='international') >= DateTime(dat_inicio, datefmt='international')) and (DateTime(datefmt='international') <= DateTime(dat_fim, datefmt='international'))">
                       <dtml-in expr="zsql.composicao_comissao_obter_zsql(cod_comissao=cod_comissao_relatora, cod_periodo_comp=cod_periodo_comp)">
                         <dtml-if expr="(not dat_desligamento) or (DateTime(datefmt='international') < DateTime(dat_desligamento, datefmt='international'))">
-                           <dtml-in expr="zsql.parlamentar_obter_zsql(cod_parlamentar=cod_parlamentar)">
                              <dtml-in expr="zsql.autor_obter_zsql(cod_parlamentar=cod_parlamentar)">
                                <dtml-in expr="zsql.usuario_obter_zsql(col_username=col_username, ind_ativo=1)">
                                   <option value="<dtml-var cod_usuario>"><dtml-var nom_completo><dtml-if expr="nom_cargo != ''"> (<dtml-var des_cargo>)</dtml-if></option>
                                </dtml-in>
                              </dtml-in>
-                           </dtml-in>
                         </dtml-if>
                       </dtml-in>
                     </dtml-if>
@@ -254,13 +252,11 @@
                     <dtml-if expr="(DateTime(datefmt='international') >= DateTime(dat_inicio, datefmt='international')) and (DateTime(datefmt='international') <= DateTime(dat_fim, datefmt='international'))">
                       <dtml-in expr="zsql.composicao_comissao_obter_zsql(cod_comissao=cod_comissao, cod_periodo_comp=cod_periodo_comp)">
                         <dtml-if expr="(not dat_desligamento) or (DateTime(datefmt='international') < DateTime(dat_desligamento, datefmt='international'))">
-                           <dtml-in expr="zsql.parlamentar_obter_zsql(cod_parlamentar=cod_parlamentar)">
                              <dtml-in expr="zsql.autor_obter_zsql(cod_parlamentar=cod_parlamentar)">
                                <dtml-in expr="zsql.usuario_obter_zsql(col_username=col_username, ind_ativo=1)">
                                   <option value="<dtml-var cod_usuario>"><dtml-var nom_completo><dtml-if expr="nom_cargo != ''"> (<dtml-var des_cargo>)</dtml-if></option>
                                </dtml-in>
                              </dtml-in>
-                           </dtml-in>
                         </dtml-if>
                       </dtml-in>
                     </dtml-if>

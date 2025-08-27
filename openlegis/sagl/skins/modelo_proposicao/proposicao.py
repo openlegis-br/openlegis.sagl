@@ -11,10 +11,11 @@ import json
 from Products.CMFCore.utils import getToolByName
 from DateTime import DateTime
 
+from Products.CMFCore.utils import getToolByName
 st = getToolByName(context, 'portal_sagl')
 
 REQUEST = context.REQUEST
-RESPONSE = REQUEST.RESPONSE
+RESPONSE =  REQUEST.RESPONSE
 
 # -----------------------------------------------------------------------------
 # Utilidades (sem prefixo "_")
@@ -34,180 +35,177 @@ def safe_int_value(v, default=None):
     except Exception:
         return default
 
-# -----------------------------------------------------------------------------
-# Informações da Casa / Localidade
-# -----------------------------------------------------------------------------
 inf_basicas_dic = {}
-casa = {}
-for k, v in context.sapl_documentos.props_sagl.propertyItems():
-    casa[k] = v
+casa={}
+aux=context.sapl_documentos.props_sagl.propertyItems()
+for item in aux:
+    casa[item[0]]=item[1]
+localidade=context.zsql.localidade_obter_zsql(cod_localidade=casa["cod_localidade"])
+estado = context.zsql.localidade_obter_zsql(tip_localidade="U")
+for uf in estado:
+    if localidade[0].sgl_uf == uf.sgl_uf:
+       nom_estado = uf.nom_localidade
+       break
+inf_basicas_dic['nom_camara']= casa['nom_casa']
+inf_basicas_dic["nom_estado"] = nom_estado
+for local in context.zsql.localidade_obter_zsql(cod_localidade = casa['cod_localidade']):
+    inf_basicas_dic['nom_localidade']= local.nom_localidade
+    inf_basicas_dic['sgl_uf']= local.sgl_uf
 
-loc = first_item(context.zsql.localidade_obter_zsql(cod_localidade=casa.get("cod_localidade")))
-uf_lista = context.zsql.localidade_obter_zsql(tip_localidade="U")
-
-nom_estado = ''
-if loc:
-    for uf in uf_lista:
-        if getattr(loc, 'sgl_uf', '') == getattr(uf, 'sgl_uf', ''):
-            nom_estado = getattr(uf, 'nom_localidade', '')
-            break
-
-inf_basicas_dic['nom_camara'] = casa.get('nom_casa', '')
-inf_basicas_dic['nom_estado'] = nom_estado
-if loc:
-    inf_basicas_dic['nom_localidade'] = getattr(loc, 'nom_localidade', '')
-    inf_basicas_dic['sgl_uf'] = getattr(loc, 'sgl_uf', '')
-else:
-    inf_basicas_dic['nom_localidade'] = ''
-    inf_basicas_dic['sgl_uf'] = ''
-
-# URL de validação
-try:
-    inf_basicas_dic['url_validacao'] = context.generico.absolute_url() + "/conferir_assinatura"
-except Exception:
-    try:
-        inf_basicas_dic['url_validacao'] = context.absolute_url() + "/conferir_assinatura"
-    except Exception:
-        inf_basicas_dic['url_validacao'] = "/conferir_assinatura"
+inf_basicas_dic['url_validacao'] = "" + context.generico.absolute_url()+"/conferir_assinatura"
 
 inf_basicas_dic['id_materia'] = ''
+
 inf_basicas_dic['des_tipo_proposicao'] = ''
 
-# -----------------------------------------------------------------------------
-# Obter Proposição
-# -----------------------------------------------------------------------------
-proposicoes = context.zsql.proposicao_obter_zsql(cod_proposicao=cod_proposicao)
-proposicao = first_item(proposicoes)
+for proposicao in context.zsql.proposicao_obter_zsql(cod_proposicao=cod_proposicao):
+    inf_basicas_dic['des_tipo_proposicao']= proposicao.des_tipo_proposicao
+    num_proposicao = proposicao.cod_proposicao
+    nom_arquivo = str(proposicao.cod_proposicao)+'.odt'
+    des_tipo_materia = proposicao.des_tipo_proposicao.upper()
+    num_ident_basica = ''
+    ano_ident_basica = DateTime(datefmt='international').strftime("%Y")
+    txt_ementa = proposicao.txt_descricao
+    dat_apresentacao = context.pysc.data_converter_por_extenso_pysc(data=DateTime(datefmt='international').strftime("%d/%m/%Y"))
 
-if not proposicao:
-    RESPONSE.setStatus(404)
-    RESPONSE.setHeader('Content-Type', 'application/json; charset=utf-8')
-    return json.dumps(
-        {"success": False, "message": "Proposição não encontrada."},
-        ensure_ascii=False
-    )
+    inf_basicas_dic['des_assunto'] = ''
+    inf_basicas_dic['orgao_responsavel'] = ''
+    if proposicao.cod_assunto != None:
+       for assunto in context.zsql.assunto_proposicao_obter_zsql(cod_assunto = proposicao.cod_assunto):
+           inf_basicas_dic['des_assunto'] = assunto.des_assunto
+           inf_basicas_dic['orgao_responsavel'] = assunto.nom_orgao
 
-inf_basicas_dic['des_tipo_proposicao'] = getattr(proposicao, 'des_tipo_proposicao', '')
+    materia_vinculada = {}
+    if proposicao.cod_materia != None:
+       for materia in context.zsql.materia_obter_zsql(cod_materia = proposicao.cod_materia):
+           materia_vinculada['id_materia'] = materia.des_tipo_materia + ' nº ' + str(materia.num_ident_basica) + '/' + str(materia.ano_ident_basica)
+           materia_vinculada['txt_ementa'] = materia.txt_ementa
+           materia_vinculada['autoria'] = ''
+           autores = context.zsql.autoria_obter_zsql(cod_materia=materia.cod_materia)
+           fields = list(autores.data_dictionary().keys())
+           lista_autor = []
+           for autor in autores:
+               for field in fields:
+                   nome_autor = autor['nom_autor_join']
+               lista_autor.append(nome_autor)
+           inf_basicas_dic['nome_autor'] = autor.nom_autor_join.upper()               
+           materia_vinculada['autoria'] = ', '.join(['%s' % (value) for (value) in lista_autor]) 
+       
+       if proposicao.des_tipo_proposicao == 'Parecer' or proposicao.des_tipo_proposicao == 'Parecer de Comissão':
+          inf_basicas_dic['nom_comissao'] = 'COMISSÃO DE XXXXXXX'
+          inf_basicas_dic['id_materia'] = materia_vinculada['id_materia']
+          inf_basicas_dic['data_parecer'] = context.pysc.data_converter_por_extenso_pysc(data=DateTime(datefmt='international').strftime("%d/%m/%Y"))
+          for relator in context.zsql.autor_obter_zsql(cod_autor = proposicao.cod_autor):
+              inf_basicas_dic['nom_relator'] = relator.nom_autor_join
+          inf_basicas_dic['nom_presidente_comissao'] = 'XXXXXXXX'
 
-num_proposicao = proposicao.cod_proposicao
-nom_arquivo = f"{proposicao.cod_proposicao}.odt"
-des_tipo_materia = to_uppercase(getattr(proposicao, 'des_tipo_proposicao', ''))
-num_ident_basica = ''  # permanece conforme contrato original
-ano_ident_basica = DateTime(datefmt='international').strftime("%Y")
-txt_ementa = getattr(proposicao, 'txt_descricao', '') or ''
-dat_apresentacao = context.pysc.data_converter_por_extenso_pysc(
-    data=DateTime(datefmt='international').strftime("%d/%m/%Y")
-)
-
-# Justificativa (limpa/normalizada)
-orig_just = getattr(proposicao, 'txt_justificativa', None)
-if orig_just and orig_just.strip():
-    inf_basicas_dic['txt_justificativa'] = " ".join(orig_just.split())
-else:
-    inf_basicas_dic['txt_justificativa'] = orig_just or ''
-
-# Assunto / Órgão responsável (se houver)
-inf_basicas_dic['des_assunto'] = ''
-inf_basicas_dic['orgao_responsavel'] = ''
-if getattr(proposicao, 'cod_assunto', None) is not None:
-    for assunto in context.zsql.assunto_proposicao_obter_zsql(cod_assunto=proposicao.cod_assunto):
-        inf_basicas_dic['des_assunto'] = getattr(assunto, 'des_assunto', '')
-        inf_basicas_dic['orgao_responsavel'] = getattr(assunto, 'nom_orgao', '')
-
-# -----------------------------------------------------------------------------
-# Matéria vinculada (se houver)
-# -----------------------------------------------------------------------------
-materia_vinculada = {}
-if getattr(proposicao, 'cod_materia', None) is not None:
-    for materia in context.zsql.materia_obter_zsql(cod_materia=proposicao.cod_materia):
-        materia_vinculada['id_materia'] = f"{materia.des_tipo_materia} nº {materia.num_ident_basica}/{materia.ano_ident_basica}"
-        materia_vinculada['txt_ementa'] = getattr(materia, 'txt_ementa', '')
-        # Autoria da matéria vinculada (lista textual)
-        autores = context.zsql.autoria_obter_zsql(cod_materia=materia.cod_materia)
-        lista_autor = []
-        for a in autores:
-            lista_autor.append(a.get('nom_autor_join', ''))
-        materia_vinculada['autoria'] = ', '.join([str(x) for x in lista_autor if x])
-
-        # Nome do autor (para templates que exigem)
-        if autores:
-            try:
-                inf_basicas_dic['nome_autor'] = to_uppercase(autores[-1].get('nom_autor_join', ''))
-            except Exception:
-                inf_basicas_dic['nome_autor'] = ''
-
-    # Caso Parecer
-    if inf_basicas_dic['des_tipo_proposicao'] in ('Parecer', 'Parecer de Comissão'):
-        inf_basicas_dic['nom_comissao'] = 'COMISSÃO DE XXXXXXX'
-        inf_basicas_dic['id_materia'] = materia_vinculada.get('id_materia', '')
-        inf_basicas_dic['data_parecer'] = context.pysc.data_converter_por_extenso_pysc(
-            data=DateTime(datefmt='international').strftime("%d/%m/%Y")
-        )
-        # Relator
-        for rel in context.zsql.autor_obter_zsql(cod_autor=proposicao.cod_autor):
-            inf_basicas_dic['nom_relator'] = getattr(rel, 'nom_autor_join', '')
-            break
-        # Presidente da Comissão (placeholder)
-        inf_basicas_dic['nom_presidente_comissao'] = 'XXXXXXXX'
-
-# -----------------------------------------------------------------------------
-# Autor principal (nom_autor = lista de dicts exigida pelo gerador)
-# -----------------------------------------------------------------------------
-apelido_autor = ''
-nom_autor = []
-
-autores_principais = context.zsql.autor_obter_zsql(cod_autor=proposicao.cod_autor)
-for autor in autores_principais:
-    autor_dic = {
-        'nome_autor': to_uppercase(getattr(autor, 'nom_autor_join', '')),
-        'apelido_autor': to_uppercase(getattr(autor, 'nom_autor_join', '')),
-        'cod_autor': safe_int_value(autor.get('cod_autor'), None),
-        'cargo': '',
-        'partido': ''
-    }
-
-    if getattr(autor, 'cod_parlamentar', None) is not None:
-        parlamentares = context.zsql.parlamentar_obter_zsql(cod_parlamentar=autor.cod_parlamentar)
-        p = first_item(parlamentares)
-        if p:
-            if getattr(p, 'sex_parlamentar', '') == 'M':
-                nom_cargo = 'Vereador'
-                info_gabinete = 'Gabinete do ' + nom_cargo
-            elif getattr(p, 'sex_parlamentar', '') == 'F':
-                nom_cargo = 'Vereadora'
-                info_gabinete = 'Gabinete da ' + nom_cargo
+    apelido_autor = ''
+    nom_autor = []
+    autores = context.zsql.autor_obter_zsql(cod_autor = proposicao.cod_autor)
+    fields = list(autores.data_dictionary().keys())
+    for autor in autores:
+        autor_dic = {}
+        for field in fields:
+            nom_parlamentar = ''
+            partido_autor = ''
+            nom_cargo = ''                
+            if autor.cod_parlamentar != None:
+               parlamentares = context.zsql.parlamentar_obter_zsql(cod_parlamentar = autor.cod_parlamentar)
+               for parlamentar in parlamentares:
+                   nom_parlamentar = " - " + parlamentar.nom_parlamentar
+                   if parlamentar.sex_parlamentar == 'M':
+                      nom_cargo = 'Vereador'
+                      info_gabinete = 'Gabinete do ' + nom_cargo
+                   elif parlamentar.sex_parlamentar == 'F':
+                      nom_cargo = 'Vereadora'
+                      info_gabinete = 'Gabinete da ' + nom_cargo                 
+                   if parlamentar.sgl_partido !=None:
+                      partido_autor = parlamentar.sgl_partido
+                   else:
+                      partido_autor = ''
+                   autor_dic['nome_autor'] = parlamentar.nom_completo.upper()
+                   autor_dic['apelido_autor'] = parlamentar.nom_parlamentar.upper()
+                   autor_dic['cargo'] = nom_cargo
+                   autor_dic['partido'] = partido_autor
+                   inf_basicas_dic['info_gabinete'] = info_gabinete.upper() + ' ' + autor.nom_autor_join.upper()
+            elif autor.des_cargo == 'Prefeito Municipal' or autor.des_cargo == 'Prefeito Municipal':
+               for usuario in context.zsql.usuario_obter_zsql(col_username=autor.col_username):
+                   autor_dic['nome_autor'] = usuario.nom_completo.upper()
+                   autor_dic['apelido_autor'] = usuario.nom_completo.upper()
+                   autor_dic['cod_autor'] = autor['cod_autor']
+                   autor_dic['cargo'] = autor.des_cargo
+                   autor_dic['partido'] = ''
+                   inf_basicas_dic['info_gabinete'] = ''
             else:
-                nom_cargo = ''
-                info_gabinete = ''
+               autor_dic['nome_autor'] = autor.nom_autor_join.upper()
+               autor_dic['apelido_autor'] = autor.nom_autor_join.upper()
+               autor_dic['cod_autor'] = autor['cod_autor']
+               autor_dic['cargo'] = ''
+               autor_dic['partido'] = ''
+               inf_basicas_dic['info_gabinete'] = ''
+            autor_dic['cod_autor'] = int(autor['cod_autor'])
+        nom_autor.append(autor_dic)
 
-            autor_dic['nome_autor'] = to_uppercase(getattr(p, 'nom_completo', autor_dic['nome_autor']))
-            autor_dic['apelido_autor'] = to_uppercase(getattr(p, 'nom_parlamentar', autor_dic['apelido_autor']))
-            autor_dic['cargo'] = nom_cargo
-            autor_dic['partido'] = getattr(p, 'sgl_partido', '') or ''
-            inf_basicas_dic['info_gabinete'] = to_uppercase(info_gabinete + ' ' + getattr(autor, 'nom_autor_join', ''))
-    elif getattr(autor, 'des_cargo', '') in ('Prefeito Municipal', 'Prefeita Municipal'):
-        usuarios = context.zsql.usuario_obter_zsql(col_username=autor.col_username)
-        u = first_item(usuarios)
-        if u:
-            autor_dic['nome_autor'] = to_uppercase(getattr(u, 'nom_completo', autor_dic['nome_autor']))
-            autor_dic['apelido_autor'] = to_uppercase(getattr(u, 'nom_completo', autor_dic['apelido_autor']))
-        autor_dic['cargo'] = getattr(autor, 'des_cargo', '')
-        autor_dic['partido'] = ''
-        inf_basicas_dic['info_gabinete'] = ''
-    else:
-        # Outros tipos de autor (cidadão, entidade, etc.)
-        inf_basicas_dic['info_gabinete'] = ''
+data_atual = DateTime(datefmt='international').strftime("%d/%m/%Y")
+subscritores = []
+outros_autores = context.zsql.autores_obter_zsql(txt_dat_apresentacao=data_atual)
+fields = list(outros_autores.data_dictionary().keys())
+for autor in outros_autores:
+    outros_dic = {}
+    for field in fields:
+        if autor.cod_parlamentar != None:
+           parlamentares = context.zsql.parlamentar_obter_zsql(cod_parlamentar = autor.cod_parlamentar)
+           for parlamentar in parlamentares:
+               if parlamentar.sgl_partido != None:
+                  partido_autor = parlamentar.sgl_partido
+               else:
+                  partido_autor = "Sem partido"
+               if parlamentar.sex_parlamentar == 'M':
+                  cargo = "Vereador"
+               elif parlamentar.sex_parlamentar == 'F':
+                  cargo = "Vereadora"
+           outros_dic['nome_autor'] = parlamentar.nom_completo
+           outros_dic['apelido_autor'] = parlamentar.nom_parlamentar
+           outros_dic['partido'] = partido_autor
+           outros_dic['cargo'] = cargo
+        outros_dic['cod_autor'] = int(autor['cod_autor'])
+    subscritores.append(outros_dic)
 
-    nom_autor.append(autor_dic)
+outros=[]
+for autor in nom_autor:
+    for subscritor in subscritores:
+        if autor.get('cod_autor',autor) != subscritor.get('cod_autor',subscritor):
+           outros.append(subscritor)
+subscritores = outros
+inf_basicas_dic['subscritores'] = outros
 
-# Se não definimos nome_autor base para templates, usa o principal (fallback)
-if not inf_basicas_dic.get('nome_autor') and nom_autor:
-    inf_basicas_dic['nome_autor'] = nom_autor[0]['nome_autor']
+# Presidente e Secretários
+inf_basicas_dic["lst_presidente"] = ''
+inf_basicas_dic["lst_vpresidente"] = ''
+inf_basicas_dic["lst_1secretario"] = ''
+inf_basicas_dic["lst_2secretario"] = ''
+inf_basicas_dic["lst_3secretario"] = ''
+data = context.pysc.data_converter_pysc(data_atual)
+for legislatura in context.zsql.legislatura_obter_zsql(data=data):
+    for periodo in context.zsql.periodo_comp_mesa_obter_zsql(num_legislatura=legislatura.num_legislatura,data=data):
+        for membro in context.zsql.composicao_mesa_obter_zsql(cod_periodo_comp=periodo.cod_periodo_comp):
+            for parlamentar in context.zsql.parlamentar_obter_zsql(cod_parlamentar=membro.cod_parlamentar):
+                if membro.des_cargo == 'Presidente':
+                   inf_basicas_dic["lst_presidente"] = parlamentar.nom_completo
+                if membro.des_cargo == 'Vice-Presidente':
+                   inf_basicas_dic["lst_vpresidente"] = parlamentar.nom_completo
+                elif membro.des_cargo == '1º Secretário':
+                   inf_basicas_dic["lst_1secretario"] = parlamentar.nom_completo
+                elif membro.des_cargo == '2º Secretário':
+                   inf_basicas_dic["lst_2secretario"] = parlamentar.nom_completo
+                elif membro.des_cargo == '3º Secretário':
+                   inf_basicas_dic["lst_3secretario"] = parlamentar.nom_completo
 
-# -----------------------------------------------------------------------------
-# Tratamento especial para Indicação: montar ementa
-# Regra: se NÃO houver logradouro, incluir bairro, complemento e CEP (se existirem)
-# -----------------------------------------------------------------------------
+# Prefeito
+inf_basicas_dic['lst_prefeito'] = 'Não Cadastrado'
+for prefeito in context.zsql.prefeito_atual_obter_zsql(data_composicao = data):
+   inf_basicas_dic['lst_prefeito'] = prefeito.nom_completo
+
 if inf_basicas_dic['des_tipo_proposicao'] == 'Indicação':
     assunto = to_uppercase(inf_basicas_dic.get('des_assunto', ''))
     orgao = to_uppercase(inf_basicas_dic.get('orgao_responsavel', ''))
@@ -259,81 +257,6 @@ if inf_basicas_dic['des_tipo_proposicao'] == 'Indicação':
             ementa_odt += "."
 
     txt_ementa = ementa_odt
-
-# -----------------------------------------------------------------------------
-# Subscritores (exclui autores principais e evita duplicados)
-# -----------------------------------------------------------------------------
-data_atual = DateTime(datefmt='international').strftime("%d/%m/%Y")
-subscritores = []
-outros_autores = context.zsql.autores_obter_zsql(txt_dat_apresentacao=data_atual)
-
-main_ids = set()
-for a in nom_autor:
-    cid = a.get('cod_autor')
-    if cid is not None:
-        main_ids.add(cid)
-
-seen = set()
-for autor in outros_autores:
-    cod_aut = safe_int_value(autor.get('cod_autor'), None)
-    if cod_aut is None or cod_aut in main_ids or cod_aut in seen:
-        continue
-
-    outros_dic = {'cod_autor': cod_aut}
-    if getattr(autor, 'cod_parlamentar', None) is not None:
-        parlamentares = context.zsql.parlamentar_obter_zsql(cod_parlamentar=autor.cod_parlamentar)
-        p = first_item(parlamentares)
-        if p:
-            partido_autor = getattr(p, 'sgl_partido', None) or "Sem partido"
-            cargo = 'Vereador' if getattr(p, 'sex_parlamentar', '') == 'M' else ('Vereadora' if getattr(p, 'sex_parlamentar', '') == 'F' else '')
-            outros_dic['nome_autor'] = getattr(p, 'nom_completo', '')
-            outros_dic['apelido_autor'] = getattr(p, 'nom_parlamentar', '')
-            outros_dic['partido'] = partido_autor
-            outros_dic['cargo'] = cargo
-    else:
-        # Se não é parlamentar e a fonte não traz campos, mantém mínimos
-        outros_dic.setdefault('nome_autor', autor.get('nom_autor_join', ''))
-        outros_dic.setdefault('apelido_autor', autor.get('nom_autor_join', ''))
-        outros_dic.setdefault('partido', '')
-        outros_dic.setdefault('cargo', '')
-
-    subscritores.append(outros_dic)
-    seen.add(cod_aut)
-
-# -----------------------------------------------------------------------------
-# Mesa Diretora (data vigente)
-# -----------------------------------------------------------------------------
-inf_basicas_dic["lst_presidente"] = ''
-inf_basicas_dic["lst_vpresidente"] = ''
-inf_basicas_dic["lst_1secretario"] = ''
-inf_basicas_dic["lst_2secretario"] = ''
-inf_basicas_dic["lst_3secretario"] = ''
-
-data_conv = context.pysc.data_converter_pysc(data=data_atual)
-for legislatura in context.zsql.legislatura_obter_zsql(data=data_conv):
-    for periodo in context.zsql.periodo_comp_mesa_obter_zsql(num_legislatura=legislatura.num_legislatura, data=data_conv):
-        for membro in context.zsql.composicao_mesa_obter_zsql(cod_periodo_comp=periodo.cod_periodo_comp):
-            parlamentar = first_item(context.zsql.parlamentar_obter_zsql(cod_parlamentar=membro.cod_parlamentar))
-            if not parlamentar:
-                continue
-            if membro.des_cargo == 'Presidente':
-                inf_basicas_dic["lst_presidente"] = parlamentar.nom_completo
-            elif membro.des_cargo == 'Vice-Presidente':
-                inf_basicas_dic["lst_vpresidente"] = parlamentar.nom_completo
-            elif membro.des_cargo == '1º Secretário':
-                inf_basicas_dic["lst_1secretario"] = parlamentar.nom_completo
-            elif membro.des_cargo == '2º Secretário':
-                inf_basicas_dic["lst_2secretario"] = parlamentar.nom_completo
-            elif membro.des_cargo == '3º Secretário':
-                inf_basicas_dic["lst_3secretario"] = parlamentar.nom_completo
-
-# -----------------------------------------------------------------------------
-# Prefeito(a) atual
-# -----------------------------------------------------------------------------
-inf_basicas_dic['lst_prefeito'] = 'Não Cadastrado'
-prefeito = first_item(context.zsql.prefeito_atual_obter_zsql(data_composicao=data_conv))
-if prefeito:
-    inf_basicas_dic['lst_prefeito'] = getattr(prefeito, 'nom_completo', 'Não Cadastrado')
 
 # -----------------------------------------------------------------------------
 # Geração do ODT

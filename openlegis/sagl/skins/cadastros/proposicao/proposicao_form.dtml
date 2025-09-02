@@ -10,7 +10,6 @@
 .card-proposicao {
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
     margin-bottom: 25px;
-    border: 1px solid #e0e0e0;
 }
 
 .card-header {
@@ -1313,7 +1312,6 @@ body {
 				    <dtml-else>
 					<div class="input-group">
 					    <dtml-if expr="AUTHENTICATED_USER.has_role(['Autor', 'Assessor Parlamentar']) and (des_tipo_autor == 'Parlamentar')">
-						<input type="file" class="form-control" id="file_nom_arquivo" name="file_nom_arquivo" accept="application/pdf">
 					    <dtml-else>
 						<input type="file" class="form-control" id="file_nom_arquivo" name="file_nom_arquivo" accept="application/pdf">
 					    </dtml-if>
@@ -1340,7 +1338,6 @@ body {
             </div>
         </div>
        </dtml-if>
-
 	<dtml-if cod_proposicao>
 	  <div class="accordion accordion-flush accordion-plus-icon mb-4" id="accordionEquipe">
 	    <div class="card card-proposicao mb-0 shadow-sm">
@@ -1437,6 +1434,86 @@ body {
 	  <input type="hidden" name="lst_assessor" value="<dtml-var cod_assessor missing>">
 	</dtml-if>
       </form>
+
+	<dtml-if expr="_.has_key('cod_proposicao') and (AUTHENTICATED_USER.has_role(['Autor', 'Assessor Parlamentar']) and des_tipo_autor == 'Parlamentar') or AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia', 'Revisor Proposicao', 'Chefia Revisão'])">
+	      <div class="accordion accordion-flush accordion-plus-icon mb-4" id="accordionDest">
+		 <div class="card card-proposicao mb-0 shadow-sm">
+		     <div class="card-header accordion-header d-flex align-items-center px-0 py-1" id="headingDest" style="background-color: #f8f9fa; border-bottom: 1px solid #e0e0e0; border-radius: 10px 10px 0 0;">
+		       <h5 class="my-0">
+		         <button class="accordion-button collapsed bg-transparent shadow-none d-flex align-items-center w-100" type="button" data-bs-toggle="collapse" data-bs-target="#collapseDest" aria-expanded="false" aria-controls="collapseDest" style="font-size: 15px; font-weight: 600; color: #2c3e50; min-height: 0; box-shadow: none; line-height:1.1;"><i class="fas fa-envelope me-2"></i> Destinatários para Remessa Eletrônica</button>
+		       </h5>
+		     </div>
+		     <div id="collapseDest" class="collapse" aria-labelledby="headingDest" data-bs-parent="#accordionDest">
+		         <div class="card-body">
+			   <div class="table-resposive">
+			    <table class="table table-sm table-borderless mb-0">
+			       <thead>
+				<tr>
+				    <th><label for="txt_nom_destinatario">Nome do Destinatário</label></th>
+				    <th width="50%"><label for="txt_end_email">Endereço de E-mail</label></th>
+				</tr>
+			       </thead>
+				     <dtml-in expr="zsql.destinatario_oficio_obter_zsql(cod_proposicao = cod_proposicao, ind_excluido=0)">
+				<tr>
+				    <td>
+				       <input class="form-control" type="text" id="txt_nom_destinatario" name="txt_nom_destinatario" value="<dtml-var nom_destinatario>" readonly>
+				    </td>
+				    <td>
+		                       <div class="input-group">
+		                          <input type="email" class="form-control" id="txt_end_email" name="txt_end_email" value="<dtml-var end_email>" readonly>
+		                          <dtml-if expr="_.has_key('cod_proposicao') and (AUTHENTICATED_USER.has_role(['Autor', 'Assessor Parlamentar']) and des_tipo_autor == 'Parlamentar') and not prop_recebida">
+		                             <a class="btn btn-danger text-white" href="destinatario_excluir?cod_proposicao=<dtml-var cod_proposicao>&cod_destinatario=<dtml-var cod_destinatario>"><i class="fa fa-fw fa-trash-alt"></i></a>
+		                          </dtml-if>
+		                       </div>
+				    </td>
+				</tr>
+			     <dtml-else>
+			       <div class="row">
+			         <div class="col-12 ms-1 mb-3 text-muted">
+				    Nenhum destinatário cadastrado.
+			         </div>
+			       </div>
+		             </dtml-in>
+			    </table>
+			   </div>
+		      <dtml-if expr="_.has_key('cod_proposicao') and (AUTHENTICATED_USER.has_role(['Autor', 'Assessor Parlamentar']) and des_tipo_autor == 'Parlamentar') and not prop_recebida">
+			<form class="needs-validation" novalidate name="destinatario_form" id="destinatario_incluir_form" action="destinatario_incluir">
+			   <div class="table-resposive">
+			    <table class="table table-borderless" id="master_table">
+			       <thead class="d-none">
+				<tr>
+				    <th><label for="txt_nom_destinatario" class="required">Nome</label></th>
+				    <th><label for="txt_end_email" class="required">E-mail</label></th>
+				</tr>
+			       </thead>
+				<tr>
+				    <td width="50%">
+				       <input class="form-control" type="text" id="txt_nom_destinatario" name="txt_nom_destinatario" required>
+				    </td>
+				    <td>
+		                       <div class="input-group">
+		                           <input type="email" class="form-control" id="txt_end_email" name="txt_end_email" required>
+		                           <a class="btn btn-light add"><i class="fa fa-fw fa-plus"></i></a>
+		                           <a class="btn btn-light removeRow"><i class="fa fa-fw fa-minus"></i></a>
+		                       </div>
+				    </td>
+				</tr>
+			    </table>
+			   </div>
+			   <input type="hidden" name="cod_proposicao" value="<dtml-var cod_proposicao>" />
+			   <input type="hidden" name="hdn_url" value="<dtml-var ACTUAL_URL>?cod_proposicao=<dtml-var cod_proposicao>" />
+			   <div class="row">
+			     <div class="col-12 text-start">
+			       <input class="btn btn-outline-primary ms-1" type="submit" name="button" value="Incluir Destinatários" />
+			     </div>
+			  </div>
+			</form>
+			</dtml-if>
+		       </div>
+		     </div>
+		 </div>
+	      </div>
+	</dtml-if>
 
     <div class="sticky-footer-actions bg-light p-3 border-top">
       <div class="container-fluid d-flex justify-content-end gap-2">
@@ -1604,7 +1681,7 @@ body {
 		    </div>
 
 		    <dtml-if expr="not cod_mat_ou_doc and not prop_devolvida">
-		      <button class="btn btn-outline-primary btn-action-sm" type="button" onclick="observacao_salvar(document.observacao_form)">
+		      <button class="btn btn-outline-primary" type="button" onclick="observacao_salvar(document.observacao_form)">
 		        <i class="fas fa-save me-1"></i> Gravar Observações
 		      </button>
 		    </dtml-if>
@@ -2953,6 +3030,36 @@ function observacao_salvar(formObservacao) { return ProposicaoManager.observacao
         );
     }
   </dtml-let>
+
+$(document).ready(function () {
+    $(document).on('click', '#master_table .add', function () {
+        var row = $(this).closest('tr');
+        var clone = row.clone();
+        var tr = clone.closest('tr');
+        $(this).closest('tr').after(clone);
+        tr.find('input[type=text]').val('');
+        tr.find('input[type=email]').val('');
+        var $span = $("#master_table tr");
+    });
+
+    $(document).on('click', '#master_table .removeRow', function () {
+        if ($('#master_table .add').length > 1) {
+            $(this).closest('tr').remove();
+        }
+
+    });
+
+});
+
+function myFunction() {
+    var form=$("#master_table").closest('form')
+    $(form.prop('elements')).each(function(){
+        var missing= $(this).val()===""
+        $(this).parent().toggleClass('error',missing)
+    })
+    return form.find(".error").length==0
+}
+
 </dtml-if>
     $(function () {
         $("#postjq").click(function (event)

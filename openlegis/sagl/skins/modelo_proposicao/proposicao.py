@@ -207,6 +207,7 @@ for prefeito in context.zsql.prefeito_atual_obter_zsql(data_composicao = data):
    inf_basicas_dic['lst_prefeito'] = prefeito.nom_completo
 
 if inf_basicas_dic['des_tipo_proposicao'] == 'Indicação':
+    inf_basicas_dic['txt_ementa'] = proposicao.txt_descricao
     assunto = to_uppercase(inf_basicas_dic.get('des_assunto', ''))
     orgao = to_uppercase(inf_basicas_dic.get('orgao_responsavel', ''))
 

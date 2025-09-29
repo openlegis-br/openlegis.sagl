@@ -143,6 +143,19 @@ class ProcessoNorma(grok.View):
                             'title': id_norma
                         })
 
+                    for anexo in self.context.zsql.anexo_norma_obter_zsql(cod_norma=norma.cod_norma, ind_excluido=0):
+                        nom_anexo = str(cod_norma) + '_anexo_' + anexo.cod_anexo
+                        if hasattr(self.context.sapl_documentos.norma_juridica, nom_anexo):
+                            dic = {}
+                            dic["data"] = DateTime(norma.dat_norma, datefmt='international').strftime('%Y-%m-%d 00:00:03') + anexo.cod_anexo
+                            dic['path'] = self.context.sapl_documentos.norma_juridica
+                            dic['file'] = nom_anexo
+                            dic['title'] = anexo.txt_descricao
+                            lst_arquivos.append(dic)
+                            logging.debug(f"Anexo encontrado: {nom_anexo}")
+                        else:
+                            logging.warning(f"Anexo não encontrado: {nom_anexo}")
+
                 lst_arquivos.sort(key=lambda dic: dic['data'])
                 lst_arquivos = [(i + 1, j) for i, j in enumerate(lst_arquivos)]
 

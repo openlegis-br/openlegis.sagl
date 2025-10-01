@@ -7,6 +7,7 @@
 ##parameters=check_tram, txt_dat_tramitacao, lst_cod_unid_tram_local, hdn_cod_usuario_local, lst_cod_unid_tram_dest, lst_cod_usuario_dest, lst_cod_status, rad_ind_urgencia, txa_txt_tramitacao, txt_dat_fim_prazo, file_nom_anexo
 ##title=
 ##
+from io import BytesIO
 from Products.CMFCore.utils import getToolByName
 st = getToolByName(context, 'portal_sagl')
 
@@ -59,6 +60,17 @@ for item in cod_materia:
     if context.dbcon_logs and (item != '' and item != None):
        context.zsql.logs_registrar_zsql(usuario = REQUEST['AUTHENTICATED_USER'].getUserName(), data = DateTime(datefmt='international').strftime('%Y-%m-%d %H:%M:%S'), modulo = 'tramitacao_materia', metodo = 'tramitacao_lote_salvar_pysc', cod_registro = item, IP = context.pysc.get_ip())         
 
+anexo_bytes = None
+if file_nom_anexo and hasattr(file_nom_anexo, "read"):
+    try:
+        anexo_bytes = file_nom_anexo.read()
+    except Exception:
+        anexo_bytes = None
+    try:
+        file_nom_anexo.seek(0)
+    except Exception:
+        pass
+        
 lst_novas = []
 for item in cod_materia:
     dic_novas = {}
@@ -70,27 +82,73 @@ for item in cod_materia:
         lst_novas.append(dic_novas)
 
 for dic in lst_novas:
-    #carimbo deferimento
-    #if dic['des_status'] == 'Deferido':
-    #   context.modelo_proposicao.requerimento_aprovar(cod_sessao_plen=0, nom_resultado=dic['des_status'], cod_materia=dic['cod_materia'])
+    # carimbo deferimento (opcional)
+    # if dic['des_status'] == 'Deferido':
+    #     try:
+    #         context.modelo_proposicao.requerimento_aprovar(
+    #             cod_sessao_plen=0,
+    #             nom_resultado=dic['des_status'],
+    #             cod_materia=dic['cod_materia']
+    #         )
+    #     except Exception:
+    #         pass
 
-    # protocolo executivo
-    #for unidade in context.zsql.unidade_tramitacao_obter_zsql(cod_unid_tramitacao=dic['cod_destino'], ind_leg=1, ind_excluido=0):
-    #    if 'Prefeitura' in unidade.nom_unidade_join or 'Executivo' in unidade.nom_unidade_join:
-    #        resultado_protocolo = st.protocolo_prefeitura(dic['cod_materia']) 
-    #        context.zsql.tramitacao_prefeitura_registrar_zsql(cod_tramitacao = dic['cod_tramitacao'], texto_protocolo=resultado_protocolo)           
+    # protocolo executivo (opcional)
+    # try:
+    #     for unidade in context.zsql.unidade_tramitacao_obter_zsql(
+    #         cod_unid_tramitacao=dic['cod_destino'], ind_leg=1, ind_excluido=0
+    #     ):
+    #         if 'Prefeitura' in unidade.nom_unidade_join or 'Executivo' in unidade.nom_unidade_join:
+    #             try:
+    #                 resultado_protocolo = st.protocolo_prefeitura(dic['cod_materia'])
+    #                 context.zsql.tramitacao_prefeitura_registrar_zsql(
+    #                     cod_tramitacao=dic['cod_tramitacao'],
+    #                     texto_protocolo=resultado_protocolo
+    #                 )
+    #             except Exception:
+    #                 pass
+    # except Exception:
+    #     pass
     # fim protocolo executivo
 
-    context.pysc.envia_tramitacao_autor_pysc(cod_materia = dic['cod_materia'])
-    context.pysc.envia_acomp_materia_pysc(cod_materia = dic['cod_materia'])         
-    #hdn_url = '/tramitacao_mostrar_proc?hdn_cod_tramitacao=' + str(dic['cod_tramitacao'])+ '&hdn_cod_materia=' + str(dic['cod_materia'])+'&lote=1'
-    hdn_url = context.portal_url() + '/cadastros/tramitacao_materia/itens_enviados_html'
-    context.relatorios.pdf_tramitacao_preparar_pysc(hdn_cod_tramitacao = dic['cod_tramitacao'], hdn_url = hdn_url)
-    arquivoPdf=str(dic['cod_tramitacao'])+"_tram_anexo1.pdf"
-    if file_nom_anexo != '' and len(file_nom_anexo.read())!=0:
-       context.sapl_documentos.materia.tramitacao.manage_addFile(id=arquivoPdf, content_type='application/pdf', file=file_nom_anexo, title='Anexo de Tramitação')
-       if hasattr(context.sapl_documentos.materia.tramitacao,arquivoPdf):
-          context.cadastros.tramitacao_materia.tramitacao_juntar_pdf(cod_tramitacao=dic['cod_tramitacao'])
+    # notificações
+    try:
+        context.pysc.envia_tramitacao_autor_pysc(cod_materia=dic['cod_materia'])
+    except Exception:
+        pass
+    try:
+        context.pysc.envia_acomp_materia_pysc(cod_materia=dic['cod_materia'])
+    except Exception:
+        pass
+
+    # gera PDF do despacho (tramitação)
+    try:
+        hdn_url = context.portal_url() + '/cadastros/tramitacao_materia/itens_enviados_html'
+        context.relatorios.pdf_tramitacao_preparar_pysc(
+            hdn_cod_tramitacao=dic['cod_tramitacao'],
+            hdn_url=hdn_url
+        )
+    except Exception:
+        pass
+
+    # anexo + merge
+    try:
+        arquivoPdf = f"{dic['cod_tramitacao']}_tram_anexo1.pdf"
+        if anexo_bytes:  # já bufferizado; evita consumir stream da requisição
+            context.sapl_documentos.materia.tramitacao.manage_addFile(
+                id=arquivoPdf,
+                content_type='application/pdf',
+                file=BytesIO(anexo_bytes),  # novo buffer a cada iteração
+                title='Anexo de Tramitação'
+            )
+            if hasattr(context.sapl_documentos.materia.tramitacao, arquivoPdf):
+                # chama seu método de mescla (que já remove o anexo após juntar)
+                context.cadastros.tramitacao_materia.tramitacao_juntar_pdf(
+                    cod_tramitacao=dic['cod_tramitacao']
+                )
+    except Exception:
+        # não quebra o lote se falhar o anexo/merge
+        pass
 
 # Mensagem via sessão para evitar excesso na URL
 SESSION['tipo_mensagem'] = 'success'

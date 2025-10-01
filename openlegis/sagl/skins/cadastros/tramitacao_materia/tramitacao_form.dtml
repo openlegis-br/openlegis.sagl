@@ -125,11 +125,11 @@
     <div class="col-12 col-md-6 mb-3">
       <label class="form-label required" for="lst_cod_unid_tram_dest">Unidade de Destino</label>
        <dtml-if expr="not _.has_key('hdn_cod_tramitacao')">
-          <select class="form-select" name="lst_cod_unid_tram_dest" id="lst_cod_unid_tram_dest" required >
+          <select class="select2 form-select" name="lst_cod_unid_tram_dest" id="lst_cod_unid_tram_dest"  style="width:100%" required >
              <option value=""></option>
           </select>
        <dtml-elif expr="_.has_key('hdn_cod_tramitacao') and zsql.tramitacao_pesquisar_zsql(cod_materia=cod_materia)">
-          <select class="form-select" id="lst_cod_unid_tram_dest" name="lst_cod_unid_tram_dest" required>
+          <select class="select2 form-select" id="lst_cod_unid_tram_dest" name="lst_cod_unid_tram_dest"  style="width:100%" required>
              <option></option>
              <dtml-in expr="zsql.tramitacao_obter_zsql(cod_materia=cod_materia, ind_ult_tramitacao=1)">
                  <dtml-call expr="REQUEST.set('cod_unid_tram', cod_unid_tram_dest)">
@@ -170,7 +170,7 @@
     <div class="col-12 col-md-6 mb-3"> 
       <label class="form-label required" for="lst_cod_status">Status</label>
       <dtml-if expr="not _.has_key('hdn_cod_tramitacao')">      
-         <select class="form-select" id="lst_cod_status" name="lst_cod_status" required >
+         <select class="select2 form-select" id="lst_cod_status" name="lst_cod_status"  style="width:100%" required >
          </select>
       <dtml-else>
          <select class="form-select" id="lst_cod_status" name="lst_cod_status" required >      

@@ -75,6 +75,13 @@ for proposicao in context.zsql.proposicao_obter_zsql(cod_proposicao=cod_proposic
            inf_basicas_dic['des_assunto'] = assunto.des_assunto
            inf_basicas_dic['orgao_responsavel'] = assunto.nom_orgao
 
+    # Justificativa (limpa/normalizada)
+    orig_just = getattr(proposicao, 'txt_justificativa', None)
+    if orig_just and orig_just.strip():
+        inf_basicas_dic['txt_justificativa'] = " ".join(orig_just.split())
+    else:
+        inf_basicas_dic['txt_justificativa'] = orig_just or ''
+
     materia_vinculada = {}
     if proposicao.cod_materia != None:
        for materia in context.zsql.materia_obter_zsql(cod_materia = proposicao.cod_materia):

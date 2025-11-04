@@ -59,6 +59,11 @@ logging.basicConfig(
 )
 warnings.simplefilter("once", RuntimeWarning)
 
+# Silence some noisy loggers
+logging.getLogger('ocrmypdf').setLevel(logging.WARNING)
+logging.getLogger('pikepdf').setLevel(logging.WARNING)
+logging.getLogger('pypdf').setLevel(logging.WARNING)
+
 # ******************************************
 # EXCEPTIONS
 # ******************************************
@@ -155,7 +160,13 @@ class PDFProcessor:
         )
 
     def _pagina_contem_texto_legivel(self, page) -> bool:
-        return bool(page.get_text().strip())
+        """Verifica se a página contém texto legível de forma mais robusta"""
+        try:
+            texto = page.get_text().strip()
+            # Considera como texto legível se tiver pelo menos 10 caracteres significativos
+            return len(texto) >= 10 and any(c.isalnum() for c in texto)
+        except Exception:
+            return False
 
     def _is_a4_size(self, width: float, height: float) -> bool:
         def is_close(a, b):
@@ -236,58 +247,171 @@ class PDFProcessor:
             return 0
 
     def _otimizacao_inteligente(self, doc: fitz.Document) -> Optional[bytes]:
+        """
+        Processamento inteligente com melhor detecção de conteúdo.
+        """
         with fitz.open() as novo_pdf:
             orig_metadata = dict(doc.metadata or {})
+            
             for i, page in enumerate(doc):
                 start_time = time.time()
                 original_size = self._get_page_content_size(page)
+                
                 try:
-                    if self._pagina_contem_texto_legivel(page):
+                    # Verificação mais robusta de texto
+                    texto_pagina = page.get_text().strip()
+                    tem_texto_legivel = len(texto_pagina) > 10  # Mínimo de caracteres
+                    
+                    # Verifica se tem imagens significativas
+                    tem_imagens = len(page.get_images()) > 0
+                    
+                    if tem_texto_legivel and not tem_imagens:
+                        # Página principalmente textual - mantém como vetor
                         page_pdf_bytes = self._resize_to_a4(page)
                         with fitz.open("pdf", page_pdf_bytes) as page_doc:
                             novo_pdf.insert_pdf(page_doc, from_page=0, to_page=0)
                         self._log_page_processing(
                             i, "pagina_vetorial", time.time() - start_time,
                             original_size, original_size,
-                            "Página vetorial mantida/redimensionada"
+                            f"Texto detectado: {len(texto_pagina)} chars"
                         )
-                        continue
-                    # Página sem texto: converte para imagem JPEG em A4
-                    processed_page_bytes = self._resize_to_a4(page)
-                    with fitz.open("pdf", processed_page_bytes) as processed_doc:
-                        processed_page = processed_doc[0]
-                        width, height = processed_page.rect.width, processed_page.rect.height
-                        is_paisagem = width > height
-                        target_size = A4_LANDSCAPE if is_paisagem else A4_PORTRAIT
-                        dpi = self._calcular_dpi_ideal(processed_page)
-                        pix = processed_page.get_pixmap(dpi=dpi)
-                        img = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
-                        if max(img.size) > self.max_image_size:
-                            ratio = self.max_image_size / max(img.size)
-                            new_size = (int(img.size[0] * ratio), int(img.size[1] * ratio))
-                            img = img.resize(new_size, Image.LANCZOS)
-                        img_bytes = self._processar_imagem(img)
-                        compressed_size = len(img_bytes)
-                        new_page = novo_pdf.new_page(
-                            width=target_size[0],
-                            height=target_size[1]
-                        )
-                        new_page.insert_image(fitz.Rect(0, 0, target_size[0], target_size[1]), stream=img_bytes)
-                        self._log_page_processing(
-                            i, "pagina_imagem", time.time() - start_time,
-                            original_size, compressed_size,
-                            f"Qualidade máxima: {self.jpeg_quality}, DPI: {dpi}, Tamanho: {target_size}"
-                        )
+                    else:
+                        # Página com imagens ou pouco texto - processa como imagem
+                        processed_page_bytes = self._resize_to_a4(page)
+                        with fitz.open("pdf", processed_page_bytes) as processed_doc:
+                            processed_page = processed_doc[0]
+                            width, height = processed_page.rect.width, processed_page.rect.height
+                            is_paisagem = width > height
+                            target_size = A4_LANDSCAPE if is_paisagem else A4_PORTRAIT
+                            
+                            # DPI adaptativo baseado no conteúdo
+                            dpi = self.image_dpi if tem_imagens else self.text_dpi
+                            
+                            pix = processed_page.get_pixmap(dpi=dpi)
+                            img = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
+                            
+                            # Redimensionamento inteligente
+                            if max(img.size) > self.max_image_size:
+                                ratio = self.max_image_size / max(img.size)
+                                new_size = (int(img.size[0] * ratio), int(img.size[1] * ratio))
+                                img = img.resize(new_size, Image.LANCZOS)
+                            
+                            # Compressão adaptativa
+                            if tem_imagens:
+                                formato, qualidade, opts = "JPEG", 75, {'optimize': True, 'subsampling': 1}
+                            else:
+                                formato, qualidade, opts = "JPEG", 85, {'optimize': True, 'subsampling': 0}
+                            
+                            buffer = BytesIO()
+                            img.save(buffer, format=formato, quality=qualidade, **opts)
+                            img_bytes = buffer.getvalue()
+                            
+                            compressed_size = len(img_bytes)
+                            new_page = novo_pdf.new_page(width=target_size[0], height=target_size[1])
+                            new_page.insert_image(fitz.Rect(0, 0, target_size[0], target_size[1]), stream=img_bytes)
+                            
+                            self._log_page_processing(
+                                i, "pagina_imagem", time.time() - start_time,
+                                original_size, compressed_size,
+                                f"Formato: {formato}, Qualidade: {qualidade}, DPI: {dpi}"
+                            )
+                            
                 except Exception as e:
                     logging.warning(f"Erro processando página {i}: {str(e)}")
-                    # Em caso de erro, insere a página original:
+                    # Fallback: insere página original redimensionada
                     page_pdf_bytes = self._resize_to_a4(page)
                     with fitz.open("pdf", page_pdf_bytes) as page_doc:
                         novo_pdf.insert_pdf(page_doc, from_page=0, to_page=0)
+            
             novo_pdf.set_metadata(orig_metadata)
             output = BytesIO()
             novo_pdf.save(output, garbage=4, deflate=True, clean=True)
             return output.getvalue()
+
+    def _handle_ocr_errors(self, pdf_data: bytes) -> bytes:
+        """
+        Trata erros específicos do OCR e aplica fallbacks.
+        """
+        try:
+            return self._otimizacao_padrao(pdf_data)
+        except ocrmypdf.exceptions.PriorOcrFoundError:
+            logging.info("PDF já contém OCR, aplicando otimização leve")
+            return self._compress_pdf_final(pdf_data)
+        except ocrmypdf.exceptions.UnsupportedImageFormatError:
+            logging.warning("Formato de imagem não suportado, convertendo...")
+            # Fallback para conversão básica
+            return self._compress_pdf_final(pdf_data)
+        except Exception as e:
+            logging.error(f"OCR falhou: {e}")
+            return pdf_data
+
+    def _otimizacao_padrao(self, pdf_data: bytes) -> bytes:
+        """
+        Processa o PDF com OCRMyPDF de forma otimizada.
+        """
+        try:
+            # Criar arquivos temporários para entrada e saída
+            with tempfile.NamedTemporaryFile(suffix='.pdf', delete=False) as input_temp:
+                input_temp.write(pdf_data)
+                input_temp.flush()
+                input_temp_name = input_temp.name
+            
+            output_temp_name = None
+            try:
+                with tempfile.NamedTemporaryFile(suffix='.pdf', delete=False) as output_temp:
+                    output_temp_name = output_temp.name
+                
+                # Configuração otimizada do OCRMyPDF - versão compatível
+                ocrmypdf.ocr(
+                    input_temp_name,
+                    output_temp_name,
+                    language='por+eng',  # Português + Inglês para melhor reconhecimento
+                    output_type='pdf',
+                    optimize=1,  # Otimização moderada
+                    jpeg_quality=70,  # Qualidade balanceada
+                    pdf_renderer='hocr',  # Mais compatível que 'sandwich'
+                    skip_text=False,  # IMPORTANTE: Processa mesmo páginas com texto
+                    force_ocr=False,  # Não força OCR em texto já existente
+                    deskew=True,  # Corrige inclinação
+                    progress_bar=False,
+                    rotate_pages=True,  # Corrige rotação automática
+                    clean=True,  # Limpa imagem antes do OCR
+                    jobs=2,  # Reduz número de jobs para evitar conflitos
+                    quiet=True  # Reduz log interno
+                )
+                
+                # Ler o resultado
+                with open(output_temp_name, 'rb') as f:
+                    result = f.read()
+                    
+                return result
+                
+            except ocrmypdf.exceptions.PriorOcrFoundError:
+                logging.info("PDF já contém texto pesquisável, aplicando apenas otimização")
+                # Se já tem OCR, aplica apenas otimização
+                return self._compress_pdf_final(pdf_data)
+                
+            except ocrmypdf.exceptions.InputFileError as e:
+                logging.warning(f"Erro no arquivo de entrada: {e}")
+                return pdf_data
+                
+            except Exception as ocr_error:
+                logging.warning(f"OCR falhou, aplicando compressão básica: {ocr_error}")
+                return self._compress_pdf_final(pdf_data)
+                
+            finally:
+                # Limpeza dos arquivos temporários
+                try:
+                    if os.path.exists(input_temp_name):
+                        os.unlink(input_temp_name)
+                    if output_temp_name and os.path.exists(output_temp_name):
+                        os.unlink(output_temp_name)
+                except Exception as cleanup_error:
+                    logging.warning(f"Erro na limpeza: {cleanup_error}")
+                    
+        except Exception as e:
+            logging.error(f"Falha crítica no OCR: {str(e)}", exc_info=True)
+            return self._compress_pdf_final(pdf_data)
 
     @contextmanager
     def _get_pdf_reader(self, file_stream: BytesIO) -> Iterator[PdfReader]:
@@ -359,32 +483,6 @@ class PDFProcessor:
             logging.warning(f"Verificação de assinaturas falhou: {str(e)}")
             return False if not hasattr(self, 'get_signatures_from_stream') else None
 
-    def _otimizacao_padrao(self, pdf_data: bytes) -> bytes:
-        try:
-            input_stream = BytesIO(pdf_data)
-            output_stream = BytesIO()
-            # skip_text=True: o ocrmypdf só faz OCR em páginas sem texto pesquisável!
-            ocrmypdf.ocr(
-                input_stream,                # Pode ser path, file-like ou BytesIO
-                output_stream,               # Pode ser path ou BytesIO
-                language='por',              # Idiomas, ex: 'por'
-                output_type='pdf',           # Sempre 'pdf'
-                optimize=2,                  # Otimiza imagens internas
-                jpeg_quality=40,             # Qualidade JPEG (ajuste conforme sua necessidade)
-                pdf_renderer='sandwich',     # <--- Este é o segredo!
-                skip_text=True,              # Só aplica OCR em páginas sem texto pesquisável
-                force_ocr=False,             # Não faz OCR em páginas já com texto
-                deskew=False,                 # Corrige páginas tortas (scanner desalinhado)
-                progress_bar=False,          # Útil para scripts/batch
-                rotate_pages=False,           # Tenta corrigir rotação de páginas
-                clean=False,                  # Remove ruído/despeckle em scans ruins
-                jobs = 4
-            )
-            return output_stream.getvalue()
-        except Exception as e:
-            logging.error(f"Falha no OCR otimizado: {str(e)}", exc_info=True)
-            return pdf_data
-
     def _compress_pdf_final(self, pdf_data: bytes) -> bytes:
         try:
             with pikepdf.open(BytesIO(pdf_data)) as pdf:
@@ -413,14 +511,15 @@ class PDFProcessor:
                 try:
                     pdf_otimizado = self._otimizacao_inteligente(doc)
                     if len(pdf_otimizado) > original_size * 1.10:
-                        raise ValueError("Otimização aumentou o tamanho do PDF")
+                        logging.warning("Otimização aumentou o tamanho do PDF, aplicando OCR padrão")
+                        return self._otimizacao_padrao(pdf_data)
                     return pdf_otimizado
                 except Exception as intel_error:
                     logging.warning(f"Falha na otimização inteligente: {str(intel_error)}")
                     return self._otimizacao_padrao(pdf_data)
         except Exception as e:
             logging.error(f"Erro geral no processamento: {str(e)}")
-            return pdf_data
+            return self._handle_ocr_errors(pdf_data)
 
 
 # ******************************************

@@ -39,12 +39,14 @@
            </dtml-let>  
         <dtml-elif expr="zsql.assinatura_documento_obter_zsql(codigo=cod_tramitacao,tipo_doc='tramitacao', ind_assinado=1)">
            <dtml-in expr="zsql.assinatura_documento_obter_zsql(codigo=cod_tramitacao, tipo_doc='tramitacao', ind_assinado=1)">
-             <dtml-if "hasattr(sapl_documentos.materia.tramitacao,pdf)">
-                <dtml-let pdf="getattr(sapl_documentos.materia.tramitacao,pdf).absolute_url">
-                   <a href="<dtml-var pdf>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fas fa-certificate"></i><span class="d-none">PDF</span></a>
-                </dtml-let>  
-             <dtml-else>         
-                  <a href="<dtml-var portal_url>/sapl_documentos/documentos_assinados/<dtml-var cod_assinatura_doc>.pdf?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fas fa-fw fa-certificate"></i><span class="d-none">PDF</span>
+             <dtml-if sequence-start>
+                <dtml-if "hasattr(sapl_documentos.materia.tramitacao,pdf)">
+                   <dtml-let pdf="getattr(sapl_documentos.materia.tramitacao,pdf).absolute_url">
+                      <a href="<dtml-var pdf>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fas fa-certificate"></i><span class="d-none">PDF</span></a>
+                   </dtml-let>  
+                <dtml-else>         
+                     <a href="<dtml-var portal_url>/sapl_documentos/documentos_assinados/<dtml-var cod_assinatura_doc>.pdf?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fas fa-fw fa-certificate"></i><span class="d-none">PDF</span>
+                </dtml-if>
              </dtml-if>
            </dtml-in>            
          <dtml-elif "hasattr(sapl_documentos.materia.tramitacao,pdf)">

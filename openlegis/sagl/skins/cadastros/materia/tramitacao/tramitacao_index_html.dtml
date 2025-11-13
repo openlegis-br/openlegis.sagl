@@ -38,7 +38,7 @@
               <a href="<dtml-var pdf_assinado>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fas fa-certificate"></i><span class="d-none">PDF</span>
            </dtml-let>  
         <dtml-elif expr="zsql.assinatura_documento_obter_zsql(codigo=cod_tramitacao,tipo_doc='tramitacao', ind_assinado=1)">
-           <dtml-in expr="zsql.assinatura_documento_obter_zsql(codigo=cod_tramitacao, tipo_doc='tramitacao', ind_assinado=1, ind_prim_assinatura=1)">
+           <dtml-in expr="zsql.assinatura_documento_obter_zsql(codigo=cod_tramitacao, tipo_doc='tramitacao', ind_assinado=1)">
              <dtml-if "hasattr(sapl_documentos.materia.tramitacao,pdf)">
                 <dtml-let pdf="getattr(sapl_documentos.materia.tramitacao,pdf).absolute_url">
                    <a href="<dtml-var pdf>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fas fa-certificate"></i><span class="d-none">PDF</span></a>

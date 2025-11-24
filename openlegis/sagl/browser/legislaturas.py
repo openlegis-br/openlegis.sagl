@@ -147,20 +147,30 @@ class Legislaturas(GrokView):
                 url_foto = f"{portal_url}/imagens/avatar.png"
                 image_info = []
 
-            # Partidos na legislatura (dedup mantendo ordem)
+            # Partidos na legislatura (dedup mantendo ordem) - CORREÇÃO APLICADA
             partidos = []
             vistos = set()
             for fil in self.context.zsql.parlamentar_data_filiacao_obter_zsql(
                 num_legislatura=num_legislatura, cod_parlamentar=mandato.cod_parlamentar
             ):
-                if getattr(fil, 'dat_filiacao', None):
+                dat_filiacao = getattr(fil, 'dat_filiacao', None)
+                
+                # CORREÇÃO: Validar dat_filiacao antes de usar
+                if not dat_filiacao or str(dat_filiacao).strip() in ['', '0', '0000-00-00', '0000-00-00 00:00:00']:
+                    continue
+                    
+                # CORREÇÃO: Tratar erro individual para cada chamada ZSQL
+                try:
                     for pt in self.context.zsql.parlamentar_partido_obter_zsql(
-                        dat_filiacao=fil.dat_filiacao, cod_parlamentar=mandato.cod_parlamentar
+                        dat_filiacao=dat_filiacao, cod_parlamentar=mandato.cod_parlamentar
                     ):
                         key = (pt.sgl_partido, pt.nom_partido)
                         if key not in vistos:
                             partidos.append({'token': pt.sgl_partido, 'title': pt.nom_partido})
                             vistos.add(key)
+                except Exception:
+                    # Ignorar erro para esta filiação específica e continuar com as demais
+                    continue
 
             # Autor (pode não existir)
             autores = list(self.context.zsql.autor_obter_zsql(cod_parlamentar=par.cod_parlamentar)) or []

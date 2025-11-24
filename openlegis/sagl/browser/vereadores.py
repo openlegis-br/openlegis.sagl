@@ -122,21 +122,30 @@ class Vereador(GrokView):
             else:
                 v["url_foto"] = f"{self.portal_url}/imagens/avatar.png"
 
-            # partidos atuais (pelos registros da legislatura vigente)
+            # CORREÇÃO: partidos atuais (pelos registros da legislatura vigente)
             lst_partido = []
             num_leg = self._get_legislatura()
             if num_leg:
                 for fil in self.context.zsql.parlamentar_data_filiacao_obter_zsql(
                     num_legislatura=num_leg, cod_parlamentar=cod_parl
                 ):
-                    if getattr(fil, 'dat_filiacao', None) and fil.dat_filiacao != '0':
+                    # CORREÇÃO: Validar dat_filiacao antes de usar
+                    dat_filiacao = getattr(fil, 'dat_filiacao', None)
+                    if not dat_filiacao or str(dat_filiacao).strip() in ['', '0', '0000-00-00', '0000-00-00 00:00:00']:
+                        continue
+                    
+                    # CORREÇÃO: Tratar erro individual para cada chamada ZSQL
+                    try:
                         for pt in self.context.zsql.parlamentar_partido_obter_zsql(
-                            dat_filiacao=fil.dat_filiacao, cod_parlamentar=cod_parl
+                            dat_filiacao=dat_filiacao, cod_parlamentar=cod_parl
                         ):
                             lst_partido.append({
                                 "token": pt.sgl_partido,
                                 "title": pt.nom_partido
                             })
+                    except Exception:
+                        # Ignorar erro para esta filiação específica e continuar
+                        continue
             v["partido"] = lst_partido
             vereadores.append(v)
 
@@ -152,13 +161,17 @@ class Vereador(GrokView):
     def _get_filiacoes(self, cod_parlamentar):
         lst = []
         for fil in self.context.zsql.filiacao_obter_zsql(ind_excluido=0, cod_parlamentar=cod_parlamentar):
+            # CORREÇÃO: Validar datas antes de converter
+            dat_filiacao = getattr(fil, 'dat_filiacao', None)
+            dat_desfiliacao = getattr(fil, 'dat_desfiliacao', None)
+            
             entry = {
-                "data_filiacao": DateTime(fil.dat_filiacao, datefmt='international').strftime("%Y-%m-%d")
-                                 if getattr(fil, 'dat_filiacao', None) else "",
-                "data_desfiliacao": (
-                    DateTime(fil.dat_desfiliacao, datefmt='international').strftime("%Y-%m-%d")
-                    if getattr(fil, 'dat_desfiliacao', None) else ""
-                ),
+                "data_filiacao": (DateTime(dat_filiacao, datefmt='international').strftime("%Y-%m-%d")
+                                 if dat_filiacao and str(dat_filiacao).strip() not in ['', '0', '0000-00-00'] 
+                                 else ""),
+                "data_desfiliacao": (DateTime(dat_desfiliacao, datefmt='international').strftime("%Y-%m-%d")
+                                    if dat_desfiliacao and str(dat_desfiliacao).strip() not in ['', '0', '0000-00-00']
+                                    else ""),
                 "filiacao_atual": getattr(fil, 'dat_desfiliacao', None) is None
             }
             pts = list(self.context.zsql.partido_obter_zsql(ind_excluido=0, cod_partido=fil.cod_partido))
@@ -171,15 +184,21 @@ class Vereador(GrokView):
     def _get_mandatos(self, cod_parlamentar):
         lst = []
         for m in self.context.zsql.mandato_obter_zsql(cod_parlamentar=cod_parlamentar, ind_excluido=0):
+            # CORREÇÃO: Validar datas antes de converter
+            dat_inicio = getattr(m, 'dat_inicio_mandato', None)
+            dat_fim = getattr(m, 'dat_fim_mandato', None)
+            
             dic = {
                 "@id": f"{self.portal_url}/@@legislaturas/{m.num_legislatura}",
                 "@type": "Mandato",
                 "id": m.num_legislatura,
                 "votos": getattr(m, 'num_votos_recebidos', '') or '',
-                "start": DateTime(m.dat_inicio_mandato, datefmt='international').strftime("%Y-%m-%d")
-                         if getattr(m, 'dat_inicio_mandato', None) else "",
-                "end": DateTime(m.dat_fim_mandato, datefmt='international').strftime("%Y-%m-%d")
-                       if getattr(m, 'dat_fim_mandato', None) else "",
+                "start": (DateTime(dat_inicio, datefmt='international').strftime("%Y-%m-%d")
+                         if dat_inicio and str(dat_inicio).strip() not in ['', '0', '0000-00-00'] 
+                         else ""),
+                "end": (DateTime(dat_fim, datefmt='international').strftime("%Y-%m-%d")
+                       if dat_fim and str(dat_fim).strip() not in ['', '0', '0000-00-00']
+                       else ""),
                 "natureza": "Titular" if getattr(m, 'ind_titular', 0) == 1 else "Suplente",
             }
             lst.append(dic)
@@ -190,8 +209,17 @@ class Vereador(GrokView):
     def _get_mesas(self, cod_parlamentar):
         lst = []
         for comp in self.context.zsql.parlamentar_mesa_obter_zsql(cod_parlamentar=cod_parlamentar, ind_excluido=0):
-            ini = DateTime(comp.sl_dat_inicio, datefmt='international') if getattr(comp, 'sl_dat_inicio', None) else None
-            fim = DateTime(comp.sl_dat_fim, datefmt='international') if getattr(comp, 'sl_dat_fim', None) else None
+            # CORREÇÃO: Validar datas antes de converter
+            dat_inicio = getattr(comp, 'sl_dat_inicio', None)
+            dat_fim = getattr(comp, 'sl_dat_fim', None)
+            
+            ini = (DateTime(dat_inicio, datefmt='international') 
+                   if dat_inicio and str(dat_inicio).strip() not in ['', '0', '0000-00-00'] 
+                   else None)
+            fim = (DateTime(dat_fim, datefmt='international') 
+                   if dat_fim and str(dat_fim).strip() not in ['', '0', '0000-00-00'] 
+                   else None)
+            
             dic = {
                 "@id": f"{self.portal_url}/@@mesas/{comp.cod_periodo_comp}",
                 "@type": "ParticipanteMesa",
@@ -213,11 +241,21 @@ class Vereador(GrokView):
                 cod_periodo_comp=comp.cod_periodo_comp, ind_excluido=0
             ))
             periodo = periods[0] if periods else None
-            # datas
-            start_dt = DateTime(comp.dat_designacao, datefmt='international') if getattr(comp, 'dat_designacao', None) else None
-            end_dt = (DateTime(comp.dat_desligamento, datefmt='international')
-                      if getattr(comp, 'dat_desligamento', None)
-                      else (DateTime(periodo.dat_fim_periodo, datefmt='international') if periodo else None))
+            
+            # CORREÇÃO: Validar datas antes de converter
+            dat_designacao = getattr(comp, 'dat_designacao', None)
+            dat_desligamento = getattr(comp, 'dat_desligamento', None)
+            dat_fim_periodo = getattr(periodo, 'dat_fim_periodo', None) if periodo else None
+            
+            start_dt = (DateTime(dat_designacao, datefmt='international') 
+                       if dat_designacao and str(dat_designacao).strip() not in ['', '0', '0000-00-00'] 
+                       else None)
+            end_dt = (DateTime(dat_desligamento, datefmt='international')
+                      if dat_desligamento and str(dat_desligamento).strip() not in ['', '0', '0000-00-00']
+                      else (DateTime(dat_fim_periodo, datefmt='international') 
+                            if dat_fim_periodo and str(dat_fim_periodo).strip() not in ['', '0', '0000-00-00'] 
+                            else None))
+            
             dic = {
                 "@id": f"{self.portal_url}/@@comissoes/{comp.cod_comissao}",
                 "@type": "ParticipanteComissao",
@@ -245,10 +283,12 @@ class Vereador(GrokView):
             return {}
         item = res[0]
 
+        # CORREÇÃO: Validar data de nascimento antes de converter
+        dat_nascimento = getattr(item, 'dat_nascimento', None)
         birthday = ""
-        if getattr(item, 'dat_nascimento', None):
+        if dat_nascimento and str(dat_nascimento).strip() not in ['', '0', '0000-00-00']:
             try:
-                birthday = DateTime(item.dat_nascimento, datefmt='international').strftime("%Y-%m-%d")
+                birthday = DateTime(dat_nascimento, datefmt='international').strftime("%Y-%m-%d")
             except Exception:
                 birthday = ""
 

@@ -1496,7 +1496,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
             w = existing_pdf[0].rect.width
             h = existing_pdf[0].rect.height
             margin = 10
-            top = margin + 50
+            top = margin + 120
             right = w - 40 - margin
             black = pymupdf.pdfcolor["black"]
             rect = pymupdf.Rect(
@@ -1505,7 +1505,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
             stream = self.create_barcode(numero_a_codificar=string)
             existing_pdf[0].insert_image(rect, stream=stream, rotate=-90)
             text2 = texto + "\n" + data + "\n" + num_materia
-            p2 = pymupdf.Point(w - 8 - margin, margin + 90)
+            p2 = pymupdf.Point(w - 8 - margin, margin + 160)
             shape = existing_pdf[0].new_shape()
             shape.draw_circle(p2, 1)
             shape.insert_text(p2, text2, fontname="helv", fontsize=7, rotate=-90)

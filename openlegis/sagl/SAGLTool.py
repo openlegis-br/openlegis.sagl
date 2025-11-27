@@ -1024,9 +1024,10 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         merger.close()
 
         # Store the final PDF
-        upload_kwargs = {'file': self.pysc.upload_file(file=final_pdf_content, title='Proposição ' + cod_proposicao)}
-        self.sapl_documentos.proposicao.manage_addFile(id=nom_arquivo_pdf, **upload_kwargs)
-
+        #upload_kwargs = {'file': self.pysc.upload_file(file=final_pdf_content, title='Proposição ' + cod_proposicao)}
+        #self.sapl_documentos.proposicao.manage_addFile(id=nom_arquivo_pdf, **upload_kwargs)
+        self.sapl_documentos.proposicao.manage_addFile(id=nom_arquivo_pdf, file=final_pdf_content)
+        
         # Set permissions
         pdf = getattr(self.sapl_documentos.proposicao, nom_arquivo_pdf)
         pdf.manage_permission('View', roles=['Manager', 'Authenticated'], acquire=0)

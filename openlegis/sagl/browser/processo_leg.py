@@ -30,21 +30,38 @@ from reportlab.rl_config import defaultPageSize
 from reportlab.lib.units import mm, inch
 from PIL import Image as PILImage
 
+# CONFIGURAÇÃO DE LOGGING CORRIGIDA - SEM RESOURCE LEAKS
+def setup_logging():
+    """Configura o logging de forma segura sem resource leaks"""
+    logger = logging.getLogger()
+    logger.setLevel(logging.INFO)
+    
+    # Remove handlers existentes para evitar duplicação
+    for handler in logger.handlers[:]:
+        logger.removeHandler(handler)
+    
+    # Formatter comum
+    formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+    
+    # FileHandler com fechamento seguro
+    file_handler = logging.FileHandler('/var/openlegis/SAGL5/pdf_generation.log', mode='a', encoding='utf-8')
+    file_handler.setFormatter(formatter)
+    logger.addHandler(file_handler)
+    
+    # StreamHandler para console
+    console_handler = logging.StreamHandler()
+    console_handler.setFormatter(formatter)
+    logger.addHandler(console_handler)
 
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.FileHandler('pdf_generation.log'),
-        logging.StreamHandler()
-    ]
-)
+# Inicializa o logging
+setup_logging()
+
 logger = logging.getLogger(__name__)
 
 # Configuração de logging de performance
 perf_logger = logging.getLogger('performance')
 perf_logger.setLevel(logging.DEBUG)
-perf_handler = logging.FileHandler('performance_metrics.log')
+perf_handler = logging.FileHandler('/var/openlegis/SAGL5/performance_metrics.log', mode='a', encoding='utf-8')
 perf_handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
 perf_logger.addHandler(perf_handler)
 

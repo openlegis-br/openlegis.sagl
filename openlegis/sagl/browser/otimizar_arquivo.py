@@ -48,16 +48,31 @@ PDFData = Union[bytes, bytearray]
 SignatureData = Dict[str, Any]
 SignerInfo = Dict[str, Optional[str]]
 
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(name)s - %(message)s',
-    handlers=[
-        logging.FileHandler('pdf_processor.log'),
-        logging.StreamHandler()
-    ]
-)
-warnings.simplefilter("once", RuntimeWarning)
+# CONFIGURAÇÃO DE LOGGING CORRIGIDA
+def setup_logging():
+    """Configura o logging de forma segura sem resource leaks"""
+    logger = logging.getLogger()
+    logger.setLevel(logging.INFO)
+    
+    # Remove handlers existentes para evitar duplicação
+    for handler in logger.handlers[:]:
+        logger.removeHandler(handler)
+    
+    # Formatter comum
+    formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(name)s - %(message)s')
+    
+    # FileHandler com fechamento seguro
+    file_handler = logging.FileHandler('/var/openlegis/SAGL5/pdf_processor.log', mode='a', encoding='utf-8')
+    file_handler.setFormatter(formatter)
+    logger.addHandler(file_handler)
+    
+    # StreamHandler para console
+    console_handler = logging.StreamHandler()
+    console_handler.setFormatter(formatter)
+    logger.addHandler(console_handler)
+
+# Inicializa o logging
+setup_logging()
 
 # Silence some noisy loggers
 logging.getLogger('ocrmypdf').setLevel(logging.WARNING)

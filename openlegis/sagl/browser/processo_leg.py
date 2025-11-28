@@ -38,25 +38,32 @@ def setup_logging():
     
     # Remove handlers existentes para evitar duplicação
     for handler in logger.handlers[:]:
-        logger.removeHandler(handler)
+        try:
+            handler.close()  # ✅ FECHA o handler antes de remover
+            logger.removeHandler(handler)
+        except Exception as e:
+            print(f"Erro ao fechar handler: {e}")
     
     # Formatter comum
     formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
     
-    # FileHandler com fechamento seguro
-    file_handler = logging.FileHandler('/var/openlegis/SAGL5/pdf_generation.log', mode='a', encoding='utf-8')
-    file_handler.setFormatter(formatter)
-    logger.addHandler(file_handler)
+    # FileHandler com contexto seguro
+    try:
+        file_handler = logging.FileHandler('/var/openlegis/SAGL5/pdf_generation.log', mode='a', encoding='utf-8')
+        file_handler.setFormatter(formatter)
+        logger.addHandler(file_handler)
+    except Exception as e:
+        print(f"Erro ao criar file handler: {e}")
     
     # StreamHandler para console
     console_handler = logging.StreamHandler()
     console_handler.setFormatter(formatter)
     logger.addHandler(console_handler)
+    
+    return logger  # ✅ Retorna o logger para reutilização
 
-# Inicializa o logging
-setup_logging()
-
-logger = logging.getLogger(__name__)
+# Inicializa o logging UMA ÚNICA VEZ
+logger = setup_logging()
 
 # Configuração de logging de performance
 perf_logger = logging.getLogger('performance')

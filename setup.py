@@ -1,17 +1,13 @@
-from setuptools import setup, find_packages
+from setuptools import setup, find_namespace_packages
 import os
 
 setup(
     name='openlegis.sagl',
-    version='5.1',
+    version='6.0',
     description="Plataforma de Processos Digitais",
     long_description=open("README.txt").read() + "\n" +
                      open(os.path.join("docs", "HISTORY.txt")).read(),
     classifiers=[
-        "Programming Language :: Python :: 3.8",
-        "Programming Language :: Python :: 3.9",
-        "Programming Language :: Python :: 3.10",
-        "Programming Language :: Python :: 3.11",
         "Programming Language :: Python :: 3.12",
         "Programming Language :: Python :: 3.13",
     ],
@@ -22,7 +18,7 @@ setup(
     license='GPL',
     include_package_data=True,
     zip_safe=False,
-    python_requires='>=3.8',
+    python_requires='>=3.12',
     install_requires=[
         'setuptools',
         'Pillow',
@@ -56,5 +52,6 @@ setup(
         'trml2pdf',
     ],
     entry_points={},
-    packages=find_packages(include=['openlegis', 'openlegis.*']), # Find packages under 'openlegis'
+    packages=find_namespace_packages(include=['openlegis', 'openlegis.*']), # Find packages under 'openlegis'
+    namespace_packages=['openlegis'],
 )

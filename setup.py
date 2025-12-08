@@ -53,5 +53,4 @@ setup(
     ],
     entry_points={},
     packages=find_namespace_packages(include=['openlegis', 'openlegis.*']), # Find packages under 'openlegis'
-    namespace_packages=['openlegis'],
 )

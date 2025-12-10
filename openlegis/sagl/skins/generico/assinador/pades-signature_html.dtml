@@ -2,361 +2,1252 @@
 <html lang="pt-br">
     <head>
         <meta charset="utf-8" />
-        <title>Assinatura Digital</title>
+        <title>Assinatura Digital - OpenLegis</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta content="Gestão de Processos Digitais" name="description" />
-        <meta content="OpenLegis" name="author" />
+        <meta name="description" content="Gestão de Processos Digitais - Sistema de Assinatura Digital" />
+        <meta name="author" content="OpenLegis" />
+        <meta name="robots" content="noindex, nofollow">
+        
+        <meta name="csrf-token" content="<dtml-var expr="REQUEST.get('csrf_token', '')">">
+        
         <link rel="shortcut icon" href="<dtml-var portal_url>/imagens/favicon.ico">
+        
+        <link rel="preload" href="<dtml-var portal_url>/assets/css/bootstrap.min.css" as="style">
+        <link rel="preload" href="<dtml-var portal_url>/assets/js/bootstrap.bundle.min.js" as="script">
+        
         <link href="<dtml-var portal_url>/assets/css/bootstrap.min.css" id="bootstrap-style" rel="stylesheet" type="text/css" />
         <link href="<dtml-var portal_url>/assets/css/icons.min.css" rel="stylesheet" type="text/css" />
         <link href="<dtml-var portal_url>/assets/css/app.css" id="app-style" rel="stylesheet" type="text/css" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+        
         <style>
+            /* Base Styles */
+            :root {
+                --primary-color: #0d6efd;
+                --success-color: #198754;
+                --danger-color: #dc3545;
+                --warning-color: #664d03;
+                --info-color: #0dcaf0;
+                --step-active: #0d6efd;
+                --step-inactive: #6c757d;
+            }
+            
+            /* Accessibility - Skip Link */
+            .skip-link {
+                position: absolute;
+                top: -40px;
+                left: 0;
+                background: var(--primary-color);
+                color: white;
+                padding: 8px 16px;
+                z-index: 9999;
+                text-decoration: none;
+                transition: top 0.3s;
+                border-radius: 0 0 4px 0;
+            }
+            
+            .skip-link:focus {
+                top: 0;
+                outline: 3px solid var(--primary-color);
+                outline-offset: 2px;
+            }
+            
+            /* Visually Hidden Utility Class */
+            .visually-hidden {
+                position: absolute;
+                width: 1px;
+                height: 1px;
+                padding: 0;
+                margin: -1px;
+                overflow: hidden;
+                clip: rect(0, 0, 0, 0);
+                white-space: nowrap;
+                border: 0;
+            }
+            
+            .visually-hidden-focusable:not(:focus):not(:focus-within) {
+                position: absolute;
+                width: 1px;
+                height: 1px;
+                padding: 0;
+                margin: -1px;
+                overflow: hidden;
+                clip: rect(0, 0, 0, 0);
+                white-space: nowrap;
+                border: 0;
+            }
+                        
+            /* Radio Card Styles */
             .card-radio-label {
                 cursor: pointer;
                 margin-bottom: 0;
+                display: block;
+                pointer-events: auto;
             }
+            
             .card-radio-input {
                 position: absolute;
                 opacity: 0;
+                width: 0;
+                height: 0;
             }
+            
             .card-radio {
                 border: 2px solid transparent;
                 transition: all 0.3s ease;
+                position: relative;
+                height: 100%;
+                background-color: white;
             }
+            
+            .card-radio-input:focus-visible + .card-radio {
+                outline: 3px solid var(--primary-color);
+                outline-offset: 3px;
+                box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.35);
+            }
+            
             .card-radio-input:checked + .card-radio {
-                border-color: #0d6efd;
+                border-color: var(--primary-color);
                 background-color: rgba(13, 110, 253, 0.05);
-                box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.25);
+                box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.15);
             }
+            
             .card-radio:hover {
                 border-color: #86b7fe;
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
             }
+
+            /* Estilo para opções bloqueadas/definidas */
+            .card-radio-input:disabled:checked + .card-radio {
+                border-color: var(--success-color) !important;
+                background-color: rgba(25, 135, 84, 0.05) !important;
+                box-shadow: 0 0 0 3px rgba(25, 135, 84, 0.15) !important;
+                opacity: 1 !important;
+                cursor: not-allowed;
+            }
+
+            /* Remove todos os efeitos de hover para cartões desabilitados */
+            .card-radio-input:disabled + .card-radio:hover {
+                transform: none !important;
+                box-shadow: none !important;
+                border-color: inherit !important;
+            }
+
+            /* Estilo para texto de opção bloqueada */
+            .card-radio-input:disabled + .card-radio .text-muted {
+                color: #6c757d !important;
+                font-style: italic;
+            }
+            
+            /* Validation States */
             .card-radio-invalid {
-                border-color: #dc3545 !important;
+                border-color: var(--danger-color) !important;
                 box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.25);
             }
+            
+            .is-valid {
+                border-color: var(--success-color) !important;
+            }
+            
+            .is-invalid {
+                border-color: var(--danger-color) !important;
+                animation: shake 0.5s ease-in-out;
+            }
+            
+            @keyframes shake {
+                0%, 100% { transform: translateX(0); }
+                25% { transform: translateX(-5px); }
+                75% { transform: translateX(5px); }
+            }
+            
+            /* Button Styles */
             .btn-primary {
                 transition: all 0.3s ease;
                 border: none;
                 letter-spacing: 0.5px;
+                background-color: var(--primary-color);
+                font-weight: 600;
             }
-            .btn-primary:hover {
+            
+            .btn-primary:hover:not(:disabled) {
                 transform: translateY(-2px);
                 box-shadow: 0 6px 12px rgba(13, 110, 253, 0.25);
             }
-            .btn-primary:active {
+            
+            .btn-primary:active:not(:disabled) {
                 transform: translateY(0);
             }
+            
+            .btn-primary:focus-visible {
+                outline: 3px solid var(--primary-color);
+                outline-offset: 2px;
+                box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.35);
+            }
+            
+            .btn-success {
+                background-color: var(--success-color);
+                border-color: var(--success-color);
+                font-weight: 600;
+            }
+            
+            /* Card Styles */
             .card-radio {
                 border-radius: 0.75rem;
             }
+            
             .card-radio-label:focus-within .card-radio {
                 box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.35);
             }
+            
+            /* Image Styles */
             .signature-option-img {
-                max-height: 120px;
+                max-height: 80px;
                 transition: transform 0.3s ease;
+                width: auto;
             }
+            
             .card-radio:hover .signature-option-img {
-                transform: scale(1.03);
+                transform: scale(1.05);
+            }
+            
+            /* Alert Improvements */
+            .alert-warning {
+                background-color: #fff3cd;
+                border-color: #ffecb5;
+                color: var(--warning-color);
+            }
+            
+            .alert-warning .alert-heading {
+                color: var(--warning-color);
+            }
+            
+            .alert-info {
+                background-color: #d1ecf1;
+                border-color: #bee5eb;
+                color: #0c5460;
+            }
+            
+            /* Required field indicator */
+            .required::after {
+                content: " *";
+                color: var(--danger-color);
+            }
+            
+            /* Loading spinner */
+            .spinner-border {
+                vertical-align: middle;
+            }
+            
+            /* Embed container for iframe */
+            .embed-container {
+                position: relative;
+                overflow: hidden;
+                border-radius: 0.5rem;
+                background-color: #f8f9fa;
+                min-height: 500px;
+            }
+            
+            .iframe-placeholder {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                height: 500px;
+                background-color: #f8f9fa;
+                border-radius: 0.5rem;
+                flex-direction: column;
+            }
+            
+            /* User info panel */
+            .user-info-panel {
+                background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+                border-left: 4px solid var(--primary-color);
+                padding: 0.75rem !important;
+            }
+
+            .user-info-panel .bg-opacity-10.p-2 {
+                padding: 0.5rem !important;
+            }
+
+            .user-info-panel .d-flex .me-3 {
+                margin-right: 0.5rem !important;
+            }
+            
+            /* Responsive adjustments */
+            @media (max-width: 768px) {
+                .signature-option-img {
+                    max-height: 80px;
+                }
+                
+                .card-body.text-center.py-4 {
+                    padding: 1rem 0.75rem !important;
+                }
+                
+                .btn-lg.py-3 {
+                    padding: 0.65rem 1.25rem !important;
+                    font-size: 1rem;
+                }
+                
+                .card-header h5 {
+                    font-size: 1.1rem;
+                }
+                
+                .step-indicator {
+                    flex-direction: column;
+                    gap: 1rem;
+                }
+                
+                .step-indicator::before {
+                    display: none;
+                }
+                
+                .step {
+                    display: flex;
+                    align-items: center;
+                    text-align: left;
+                }
+                
+                .step-icon {
+                    margin: 0 10px 0 0;
+                    flex-shrink: 0;
+                }
+            }
+            
+            @media (prefers-reduced-motion: reduce) {
+                *,
+                *::before,
+                *::after {
+                    animation-duration: 0.01ms !important;
+                    animation-iteration-count: 1 !important;
+                    transition-duration: 0.01ms !important;
+                }
+                
+                .card-radio,
+                .btn-primary,
+                .signature-option-img,
+                .step-icon {
+                    transition: none !important;
+                }
             }
         </style>
     </head>
+    
     <body data-topbar="dark" data-layout="horizontal" <dtml-if expr="REQUEST.get('modal', '')">style="background:#fff;"</dtml-if>>
-       <dtml-if expr="not portal_membership.isAnonymousUser()">
-            <dtml-in expr="zsql.usuario_obter_zsql(col_username=AUTHENTICATED_USER.getUserName())">
-               <dtml-if cod_usuario>
-                  <dtml-call expr="REQUEST.set('cod_usuario_corrente', int(cod_usuario))">
-               </dtml-if>
-           </dtml-in>
+        <a href="#main-content" class="skip-link visually-hidden-focusable">
+            Pular para conteúdo principal
+        </a>
+        
+        <dtml-if expr="not REQUEST.get('codigo', '').isdigit()">
+            <dtml-call expr="RESPONSE.redirect('/error-invalid-document')">
         </dtml-if>
+        
+        <dtml-if expr="not portal_membership.isAnonymousUser()">
+            <dtml-in expr="zsql.usuario_obter_zsql(col_username=AUTHENTICATED_USER.getUserName())">
+                <dtml-if cod_usuario>
+                    <dtml-call expr="REQUEST.set('cod_usuario_corrente', int(cod_usuario))">
+                </dtml-if>
+            </dtml-in>
+        </dtml-if>
+        
         <div id="layout-wrapper">
             <div class="main-content">
                 <dtml-if expr="REQUEST.get('modal', '')">
-                  <div class="content-modal">
-                      <div class="container-xxl">
+                    <div class="content-modal">
+                        <div class="container-xxl">
                 <dtml-else>
-                  <div class="page-content">
-                      <div class="container-fluid">
+                    <div class="page-content">
+                        <div class="container-fluid">
                 </dtml-if>
-                <div class="card-body">
                 
-                <dtml-unless expr="_.has_key('anexo')">
-                   <dtml-call expr="REQUEST.set('anexo', '')">
-                </dtml-unless>
+                <main id="main-content" role="main" class="card-body">
+                    <dtml-unless expr="_.has_key('anexo')">
+                        <dtml-call expr="REQUEST.set('anexo', '')">
+                    </dtml-unless>
+                    
+                    <dtml-in expr="zsql.usuario_obter_zsql(col_username=AUTHENTICATED_USER.getUserName())">
+                        <dtml-call expr="REQUEST.set('nom_completo', str(nom_completo))">
+                        <dtml-call expr="REQUEST.set('num_cpf', str(num_cpf))">
+                        <dtml-call expr="REQUEST.set('cod_usuario', int(cod_usuario))">
+                    </dtml-in>
 
-                <dtml-in expr="zsql.usuario_obter_zsql(col_username=AUTHENTICATED_USER.getUserName())">
-                   <dtml-call expr="REQUEST.set('nom_completo', str(nom_completo))">
-                   <dtml-call expr="REQUEST.set('num_cpf', str(num_cpf))">
-                   <dtml-call expr="REQUEST.set('cod_usuario', int(cod_usuario))">
-                </dtml-in>
-
-                <dtml-in expr="zsql.assinatura_documento_obter_zsql(codigo=codigo, anexo=anexo, tipo_doc=tipo_doc, cod_usuario=cod_usuario, ind_assinado=1)">
-                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                        <div class="d-flex align-items-center">
-                            <i class="fas fa-exclamation-circle me-2 fs-4"></i>
-                            <div>
-                                <h5 class="alert-heading mb-1">Aviso importante!</h5>
-                                <p class="mb-0">O documento já foi assinado pelo usuário autenticado.</p>
-                            </div>
-                        </div>
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div> 
-                </dtml-in>
-
-                <dtml-in expr="zsql.assinatura_documento_obter_zsql(codigo=codigo, anexo=anexo, tipo_doc=tipo_doc, ind_prim_assinatura=1)">
-                   <dtml-if sequence-start>
-                      <dtml-call expr="REQUEST.set('visual_page_option', str(visual_page_option))">
-                   </dtml-if>
-                </dtml-in>
-
-                <dtml-if expr="not _.has_key('visual_page_option')">
-                  <form method="post" action="pades-signature_html" id="visual_page_option_form">
-                    <fieldset class="mb-4">
-                      <legend class="fw-semibold mb-3">Escolha onde as assinaturas serão exibidas</legend>
-                      <div class="alert alert-warning alert-dismissible fade show mb-4 py-2">
-                        <div class="d-flex align-items-center">
-                          <i class="fas fa-exclamation-triangle me-2 fs-5"></i>
-                          <div>
-                            <strong>Atenção:</strong> A posição não poderá ser alterada após a efetivação da primeira assinatura.
-                          </div>
-                        </div>
-                        <button type="button" class="btn-close btn-sm" data-bs-dismiss="alert" aria-label="Close"></button>
-                      </div>
-                      
-                      <div class="row g-4">
-                        <div class="col-md-6">
-                          <label class="card-radio-label w-100 h-100">
-                            <input type="radio" name="visual_page_option" value="ultima" class="card-radio-input" required>
-                            <div class="card card-radio h-100">
-                              <div class="card-body text-center py-4">
-                                <div class="mb-3">
-                                  <img src="<dtml-var portal_url>/imagens/assinatura_visual_ultima_pagina.png" class="img-fluid signature-option-img" alt="Última página">
+                    <!-- SEMPRE BUSCAR A OPÇÃO DO BANCO NO INÍCIO -->
+                    <dtml-in expr="zsql.assinatura_documento_obter_zsql(codigo=codigo, anexo=anexo, tipo_doc=tipo_doc, ind_prim_assinatura=1)">
+                        <dtml-if sequence-start>
+                            <dtml-call expr="REQUEST.set('visual_page_option_db', str(visual_page_option))">
+                        <dtml-else>
+                            <!-- Se não encontrou como primeira assinatura, buscar qualquer registro -->
+                            <dtml-in expr="zsql.assinatura_documento_obter_zsql(codigo=codigo, anexo=anexo, tipo_doc=tipo_doc)">
+                                <dtml-if sequence-start>
+                                    <dtml-call expr="REQUEST.set('visual_page_option_db', str(visual_page_option))">
+                                </dtml-if>
+                            </dtml-in>
+                        </dtml-if>
+                    </dtml-in>
+                    
+                    <!-- Garantir que temos um valor para visual_page_option_db -->
+                    <dtml-unless expr="REQUEST.get('visual_page_option_db')">
+                        <dtml-call expr="REQUEST.set('visual_page_option_db', '')">
+                    </dtml-unless>
+                    
+                    <dtml-in expr="zsql.assinatura_documento_obter_zsql(codigo=codigo, anexo=anexo, tipo_doc=tipo_doc, cod_usuario=cod_usuario, ind_assinado=1)">
+                        <div class="alert alert-danger alert-dismissible fade show mb-3" role="alert">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-exclamation-circle me-2 fs-4" aria-hidden="true"></i>
+                                <div>
+                                    <h2 class="h5 alert-heading mb-1">Aviso importante!</h2>
+                                    <p class="mb-0">O documento já foi assinado pelo usuário autenticado.</p>
                                 </div>
-                                <h5 class="mb-2">Última página</h5>
-                                <p class="text-danger fw-medium mb-3">(Mostra até 3 assinaturas)</p>
-                                <div class="mt-auto">
-                                  <span class="badge bg-primary bg-opacity-10 text-primary">Recomendado para poucas assinaturas</span>
-                                </div>
-                              </div>
                             </div>
-                          </label>
-                        </div>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar alerta"></button>
+                        </div> 
+                    </dtml-in>          
+                    
+                    <dtml-if expr="not REQUEST.get('etapa') or REQUEST.get('etapa') == 'visualizar'">
+                        <dtml-call expr="REQUEST.set('link_pdf_final', cadastros.assinatura.gerar_link_pysc(tip_documento=tipo_doc, codigo=codigo, anexo=anexo))">
                         
-                        <div class="col-md-6">
-                          <label class="card-radio-label w-100 h-100">
-                            <input type="radio" name="visual_page_option" value="nova" class="card-radio-input">
-                            <div class="card card-radio h-100">
-                              <div class="card-body text-center py-4">
-                                <div class="mb-3">
-                                  <img src="<dtml-var portal_url>/imagens/assinatura_visual_pagina_nova.png" class="img-fluid signature-option-img" alt="Nova página">
+                        <article class="card shadow-lg mb-3 animate__animated animate__fadeIn">
+                            <header class="card-header bg-primary text-white fw-bold d-flex justify-content-between align-items-center">
+                                <h2 class="h5 mb-0">
+                                    <i class="fas fa-eye me-2" aria-hidden="true"></i> 
+                                    1. Visualização do Documento
+                                </h2>
+                                <span class="badge bg-light text-primary fs-6">Passo 1 de 3</span>
+                            </header>
+                            
+                            <div class="card-body">
+                                <div class="row mb-3">
+                                    <div class="col-12">
+                                        <div class="alert alert-info alert-dismissible fade show" role="alert">
+                                            <div class="d-flex align-items-center">
+                                                <i class="fas fa-info-circle me-2 fs-5" aria-hidden="true"></i>
+                                                <div>
+                                                    <strong>Importante:</strong> Visualize atentamente o conteúdo do documento antes de prosseguir para a assinatura digital. 
+                                                    Após assinado, o documento não poderá ser alterado.
+                                                </div>
+                                            </div>
+                                            <button type="button" class="btn-close btn-sm" data-bs-dismiss="alert" aria-label="Fechar alerta"></button>
+                                        </div>
+                                    </div>
+                                </div>          
+                                
+                                <div class="embed-container mb-3">
+                                    <iframe 
+                                        src="<dtml-var link_pdf_final>#<dtml-var expr="ZopeTime().timeTime()">&toolbar=0&navpanes=0&scrollbar=1" 
+                                        style="width: 100%; height: 70vh; min-height: 500px; border: none;" 
+                                        allowfullscreen
+                                        title="Documento a ser assinado - Visualização"
+                                        loading="lazy"
+                                        aria-label="Visualização do documento PDF. Use as setas do teclado para navegar."
+                                    ></iframe>
+                                    <div class="iframe-fallback visually-hidden">
+                                        <p>Seu navegador não suporta a visualização de PDF em linha. 
+                                        <a href="<dtml-var link_pdf_final>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank" rel="noopener">Clique aqui para baixar o documento</a></p>
+                                    </div>
                                 </div>
-                                <h5 class="mb-2">Nova página</h5>
-                                <p class="text-danger fw-medium mb-3">(Mostra todas as assinaturas)</p>
-                                <div class="mt-auto">
-                                  <span class="badge bg-primary bg-opacity-10 text-primary">Recomendado para múltiplas assinaturas</span>
+                                
+                                <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-3">
+                                    <a href="pades-signature_html?codigo=<dtml-var expr="str(codigo)">&anexo=<dtml-var expr="str(anexo)" missing="null">&tipo_doc=<dtml-var expr="str(tipo_doc)">&modal=1&etapa=escolher&visual_page_option_db=<dtml-var expr="REQUEST.get('visual_page_option_db', '')">" 
+                                        class="btn btn-success btn-lg rounded-pill px-4 py-2 fw-bold shadow-lg-hover animate__animated animate__pulse animate__infinite" 
+                                        role="button"
+                                        aria-label="Confirmar visualização e prosseguir para escolha da posição da assinatura">
+                                        <span class="d-flex align-items-center justify-content-center">
+                                            <i class="fas fa-check me-2 fs-6" aria-hidden="true"></i> Confirmo o conteúdo e desejo prosseguir
+                                        </span>
+                                    </a>
                                 </div>
-                              </div>
                             </div>
-                          </label>
-                        </div>
-                      </div>
-                      
-                      <div class="invalid-feedback d-flex align-items-center mt-2">
-                        <i class="fas fa-exclamation-circle me-2"></i>
-                        Selecione onde as assinaturas serão exibidas no documento
-                      </div>
-                    </fieldset>
+                        </article>
+                    </dtml-if>
                     
-                    <div class="d-grid mt-5">
-                      <button type="submit" class="btn btn-primary btn-lg rounded-pill py-3 fw-bold shadow-lg-hover">
-                        <span class="d-flex align-items-center justify-content-center">
-                          <span class="me-3">Prosseguir para Assinatura</span>
-                          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-arrow-right-short" viewBox="0 0 16 16">
-                            <path fill-rule="evenodd" d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"/>
-                          </svg>
-                        </span>
-                      </button>
-                    </div>
+                    <dtml-if expr="REQUEST.get('etapa') == 'escolher'">
+                        <!-- DEBUG: Mostrar valores recebidos -->
+                        <!-- <div class="alert alert-info">
+                            DEBUG: visual_page_option_db = <dtml-var expr="REQUEST.get('visual_page_option_db', 'VAZIO')">
+                        </div> -->
+                        
+                        <article class="card shadow-lg mb-3 animate__animated animate__fadeIn">
+                            <header class="card-header bg-primary text-white fw-bold d-flex justify-content-between align-items-center">
+                                <h2 class="h5 mb-0">
+                                    <i class="fas fa-marker me-2" aria-hidden="true"></i> 
+                                    2. Escolha onde as assinaturas serão exibidas
+                                </h2>
+                                <span class="badge bg-light text-primary fs-6">Passo 2 de 3</span>
+                            </header>
+                            
+                            <div class="card-body">
+                                <form method="post" action="pades-signature_html" id="visual_page_option_form" novalidate>
+                                    <input type="hidden" name="csrf_token" value="<dtml-var expr="REQUEST.get('csrf_token', '')">">
+                                    
+                                    <div class="row mb-3">
+                                        <div class="col-12">
+                                            <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                                                <div class="d-flex align-items-center">
+                                                    <i class="fas fa-exclamation-triangle me-2 fs-5" aria-hidden="true"></i>
+                                                    <div>
+                                                        <dtml-if expr="REQUEST.get('visual_page_option_db')">
+                                                            <strong>Aviso:</strong> A posição já foi definida pelo solicitante ou signatário anterior e não pode ser alterada. 
+                                                            A opção marcada será utilizada para todas as assinaturas.
+                                                        <dtml-else>
+                                                            <strong>Atenção:</strong> A posição não poderá ser alterada após a efetivação da primeira assinatura.
+                                                            Esta escolha se aplicará a todas as assinaturas deste documento.
+                                                        </dtml-if>
+                                                    </div>
+                                                </div>
+                                                <button type="button" class="btn-close btn-sm" data-bs-dismiss="alert" aria-label="Fechar alerta"></button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <fieldset class="mb-3">
+                                        <legend class="fw-semibold mb-2 h5">
+                                            Selecione a posição das assinaturas no documento:
+                                        </legend>
+                                        
+                                        <div class="row g-3">
+                                            <div class="col-md-6">
+                                                <label class="card-radio-label w-100 h-100">
+                                                    <input type="radio" 
+                                                           name="visual_page_option"
+                                                           value="ultima" 
+                                                           class="card-radio-input" 
+                                                           <dtml-if expr="not REQUEST.get('visual_page_option_db')">
+                                                               required
+                                                           </dtml-if>
+                                                           aria-describedby="ultimaDesc"
+                                                           id="option-ultima"
+                                                           <dtml-if expr="REQUEST.get('visual_page_option_db') == 'ultima'">
+                                                               checked
+                                                           <dtml-else>
+                                                               <dtml-if expr="REQUEST.get('visual_page_option_db')">
+                                                                   disabled
+                                                               </dtml-if>
+                                                           </dtml-if>>
+                                                    <div class="card card-radio h-100" 
+                                                         role="radio" 
+                                                         aria-checked="<dtml-if expr="REQUEST.get('visual_page_option_db') == 'ultima'">true<dtml-else>false</dtml-if>">
+                                                        <div class="card-body text-center py-4">
+                                                            <div class="mb-2">
+                                                                <img src="<dtml-var portal_url>/imagens/assinatura_visual_ultima_pagina.png" 
+                                                                    loading="lazy"
+                                                                    class="img-fluid signature-option-img" 
+                                                                    alt="Ilustração de assinaturas sendo adicionadas na última página do documento">
+                                                            </div>
+                                                            <h3 class="h5 mb-1">Última página</h3>
+                                                            <p class="text-danger fw-medium mb-2">(Mostra até 3 assinaturas)</p>
+                                                            <p class="text-muted mb-2" id="ultimaDesc">
+                                                                As assinaturas serão adicionadas no rodapé da última página existente do documento.
+                                                                Ideal para documentos com poucos signatários.
+                                                            </p>
+                                                            <div class="mt-auto">
+                                                                <span class="badge bg-primary bg-opacity-10 text-primary">
+                                                                    Recomendado para poucas assinaturas
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </label>
+                                            </div>
+                                            
+                                            <div class="col-md-6">
+                                                <label class="card-radio-label w-100 h-100">
+                                                    <input type="radio" 
+                                                           name="visual_page_option"
+                                                           value="nova" 
+                                                           class="card-radio-input"
+                                                           <dtml-if expr="not REQUEST.get('visual_page_option_db')">
+                                                               required
+                                                           </dtml-if>
+                                                           aria-describedby="novaDesc"
+                                                           id="option-nova"
+                                                           <dtml-if expr="REQUEST.get('visual_page_option_db') == 'nova'">
+                                                               checked
+                                                           <dtml-else>
+                                                               <dtml-if expr="REQUEST.get('visual_page_option_db')">
+                                                                   disabled
+                                                               </dtml-if>
+                                                           </dtml-if>>
+                                                    <div class="card card-radio h-100" 
+                                                         role="radio" 
+                                                         aria-checked="<dtml-if expr="REQUEST.get('visual_page_option_db') == 'nova'">true<dtml-else>false</dtml-if>">
+                                                        <div class="card-body text-center py-4">
+                                                            <div class="mb-2">
+                                                                <img src="<dtml-var portal_url>/imagens/assinatura_visual_pagina_nova.png" 
+                                                                    loading="lazy"
+                                                                    class="img-fluid signature-option-img" 
+                                                                    alt="Ilustração de assinaturas sendo adicionadas em uma nova página em branco">
+                                                            </div>
+                                                            <h3 class="h5 mb-1">Nova página</h3>
+                                                            <p class="text-danger fw-medium mb-2">(Mostra todas as assinaturas)</p>
+                                                            <p class="text-muted mb-2" id="novaDesc">
+                                                                Uma nova página em branco será adicionada ao documento para exibir todas as assinaturas.
+                                                                Ideal para documentos com múltiplos signatários.
+                                                            </p>
+                                                            <div class="mt-auto">
+                                                                <span class="badge bg-primary bg-opacity-10 text-primary">
+                                                                    Recomendado para múltiplas assinaturas
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </label>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="invalid-feedback d-flex align-items-center mt-2 d-none" id="option-error">
+                                            <i class="fas fa-exclamation-circle me-2" aria-hidden="true"></i>
+                                            Selecione onde as assinaturas serão exibidas no documento
+                                        </div>
+                                    </fieldset>
+                                    
+                                    <div class="row mt-3">
+                                        <div class="col-md-6 mb-2 mb-md-0">
+                                            <a href="pades-signature_html?codigo=<dtml-var expr="str(codigo)">&anexo=<dtml-var expr="str(anexo)" missing="null">&tipo_doc=<dtml-var expr="str(tipo_doc)">&modal=1" 
+                                                class="btn btn-outline-secondary btn-lg w-100"
+                                                aria-label="Voltar para visualização do documento">
+                                                <i class="fas fa-arrow-left me-2" aria-hidden="true"></i> 
+                                                Voltar para Visualização
+                                            </a>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <button type="submit" 
+                                                    class="btn btn-primary btn-lg w-100 rounded-pill py-2 fw-bold shadow-lg-hover">
+                                                <span class="d-flex align-items-center justify-content-center">
+                                                    <span class="me-2">Prosseguir para Assinatura</span>
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-arrow-right-short" viewBox="0 0 16 16" aria-hidden="true">
+                                                        <path fill-rule="evenodd" d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"/>
+                                                    </svg>
+                                                </span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    
+                                    <input type="hidden" name="codigo" value="<dtml-var expr="str(codigo)">">
+                                    <input type="hidden" name="anexo" value="<dtml-var expr="str(anexo)" missing="null">">
+                                    <input type="hidden" name="tipo_doc" value="<dtml-var expr="str(tipo_doc)">">
+                                    <input type="hidden" name="modal" value="1">
+                                    <input type="hidden" name="etapa" value="assinar">
+                                    <!-- Passar o valor do banco como hidden -->
+                                    <input type="hidden" name="visual_page_option_db" value="<dtml-var expr="REQUEST.get('visual_page_option_db', '')">">
+                                </form>
+                            </div>
+                        </article>
+                    </dtml-if>
                     
-                    <input type="hidden" name="codigo" value="<dtml-var codigo>">
-                    <input type="hidden" name="anexo" value="<dtml-var anexo missing null>">
-                    <input type="hidden" name="tipo_doc" value="<dtml-var tipo_doc>">
-                    <input type="hidden" name="modal" value="1">
-                  </form>
-                </dtml-if>
+                    <dtml-if expr="REQUEST.get('etapa') == 'assinar'">
+                        <!-- VERIFICAÇÃO: Onde está o problema? -->
+                        <!-- DEBUG: Mostrar valores disponíveis -->
+                        <!-- <div class="alert alert-info mb-3">
+                            <h4 class="h6">DEBUG - Valores disponíveis:</h4>
+                            <ul class="mb-0">
+                                <li>REQUEST.visual_page_option = <dtml-var expr="REQUEST.get('visual_page_option', 'NÃO DEFINIDO')"></li>
+                                <li>REQUEST.visual_page_option_db = <dtml-var expr="REQUEST.get('visual_page_option_db', 'NÃO DEFINIDO')"></li>
+                                <li>Parâmetro POST visual_page_option = <dtml-var expr="REQUEST.form.get('visual_page_option', 'NÃO ENVIADO')"></li>
+                            </ul>
+                        </div> -->
+                        
+                        <!-- DETERMINAR O VALOR CORRETO PARA visual_page_option -->
+                        <dtml-unless expr="REQUEST.get('visual_page_option')">
+                            <!-- PRIMEIRO: Tentar do formulário POST -->
+                            <dtml-if expr="REQUEST.form.get('visual_page_option')">
+                                <dtml-call expr="REQUEST.set('visual_page_option', REQUEST.form.get('visual_page_option'))">
+                            <dtml-else>
+                                <!-- SEGUNDO: Tentar do banco de dados (parâmetro GET) -->
+                                <dtml-if expr="REQUEST.get('visual_page_option_db')">
+                                    <dtml-call expr="REQUEST.set('visual_page_option', REQUEST.get('visual_page_option_db'))">
+                                <dtml-else>
+                                    <!-- TERCEIRO: Buscar diretamente do banco -->
+                                    <dtml-in expr="zsql.assinatura_documento_obter_zsql(codigo=codigo, anexo=anexo, tipo_doc=tipo_doc, ind_prim_assinatura=1)">
+                                        <dtml-if sequence-start>
+                                            <dtml-call expr="REQUEST.set('visual_page_option', str(visual_page_option))">
+                                        <dtml-else>
+                                            <!-- Se não encontrou como primeira, buscar qualquer -->
+                                            <dtml-in expr="zsql.assinatura_documento_obter_zsql(codigo=codigo, anexo=anexo, tipo_doc=tipo_doc)">
+                                                <dtml-if sequence-start>
+                                                    <dtml-call expr="REQUEST.set('visual_page_option', str(visual_page_option))">
+                                                </dtml-if>
+                                            </dtml-in>
+                                        </dtml-if>
+                                    </dtml-in>
+                                    
+                                    <!-- QUARTO: Se ainda não tem, usar padrão -->
+                                    <dtml-unless expr="REQUEST.get('visual_page_option')">
+                                        <dtml-call expr="REQUEST.set('visual_page_option', 'ultima')">
+                                    </dtml-unless>
+                                </dtml-if>
+                            </dtml-if>
+                        </dtml-unless>
+                        
+                        <!-- Garantir que temos um valor válido -->
+                        <dtml-unless expr="REQUEST.get('visual_page_option') in ['ultima', 'nova']">
+                            <dtml-call expr="REQUEST.set('visual_page_option', 'ultima')">
+                        </dtml-unless>
+                        
+                        <!-- DEBUG: Mostrar valor final -->
+                        <!-- <div class="alert alert-success mb-3">
+                            Valor final usado: <strong><dtml-var expr="REQUEST.get('visual_page_option')"></strong>
+                        </div> -->
 
-                <dtml-if expr="_.has_key('visual_page_option')">
-                  <dtml-call expr="REQUEST.set('campos', pades_signature_pdf(codigo=codigo, anexo=anexo, tipo_doc=tipo_doc, cod_usuario=cod_usuario, visual_page_option=visual_page_option))">
-                  <dtml-call expr="REQUEST.set('token', campos[0])">
-                  <dtml-call expr="REQUEST.set('crc_arquivo', campos[2])">
-
-                  <form id="signForm" action="pades-signature-action_html" method="post">
-                    <input type="hidden" name="token" id="token" value="<dtml-var token>">
-                    <input type="hidden" name="crc_arquivo_original" value="<dtml-var crc_arquivo>">
-                    <input type="hidden" name="codigo" value="<dtml-var codigo>">
-                    <input type="hidden" name="anexo" value="<dtml-var anexo missing null>">
-                    <input type="hidden" name="cod_usuario" value="<dtml-var cod_usuario>">
-                    <input type="hidden" name="tipo_doc" value="<dtml-var tipo_doc>">
-                    <input type="hidden" name="modal" value="1">
-
-                    <div class="row">
-                      <div class="col-12 mb-4">
-                        <div class="alert alert-light alert-dismissible fade show mb-0 border">
-                          <div class="d-flex align-items-center justify-content-between">
-                            <div class="row w-100">
-                              <div class="col-md-6 mb-2 mb-md-0"><strong><i class="fas fa-user me-2"></i>Usuário:</strong> <dtml-var nom_completo></div>
-                              <div class="col-md-6"><strong><i class="fas fa-id-card me-2"></i>CPF:</strong> <dtml-var num_cpf></div>
+                        <dtml-call expr="REQUEST.set('campos', pades_signature_pdf(codigo=codigo, anexo=anexo, tipo_doc=tipo_doc, cod_usuario=cod_usuario, visual_page_option=REQUEST.get('visual_page_option')))">
+                        <dtml-call expr="REQUEST.set('token', str(campos[0]))">
+                        <dtml-call expr="REQUEST.set('crc_arquivo', str(campos[2]))">
+                        
+                        <article class="card shadow-lg animate__animated animate__fadeIn">
+                            <header class="card-header bg-primary text-white fw-bold d-flex justify-content-between align-items-center">
+                                <h2 class="h5 mb-0">
+                                    <i class="fas fa-key me-2" aria-hidden="true"></i> 
+                                    3. Assinatura com Certificado Digital
+                                </h2>
+                                <span class="badge bg-light text-primary fs-6">Passo 3 de 3</span>
+                            </header>
+                            
+                            <div class="card-body">
+                                <form id="signForm" action="pades-signature-action_html" method="post" novalidate>
+                                    <input type="hidden" name="csrf_token" value="<dtml-var expr="REQUEST.get('csrf_token', '')">">
+                                    
+                                    <input type="hidden" name="token" id="token" value="<dtml-var token>">
+                                    <input type="hidden" name="crc_arquivo_original" value="<dtml-var crc_arquivo>">
+                                    <input type="hidden" name="codigo" value="<dtml-var expr="str(codigo)">">
+                                    <input type="hidden" name="anexo" value="<dtml-var expr="str(anexo)" missing="null">">
+                                    <input type="hidden" name="cod_usuario" value="<dtml-var expr="str(cod_usuario)">">
+                                    <input type="hidden" name="tipo_doc" value="<dtml-var expr="str(tipo_doc)">">
+                                    <input type="hidden" name="modal" value="1">
+                                    <input type="hidden" name="visual_page_option" value="<dtml-var expr="REQUEST.get('visual_page_option')">">
+                                    
+                                    <div class="row mb-3">
+                                        <div class="col-12">
+                                            <div class="alert alert-light alert-dismissible fade show mb-0 border user-info-panel" role="status">
+                                                <div class="row">
+                                                    <div class="col-md-6 mb-2 mb-md-0">
+                                                        <div class="d-flex align-items-center">
+                                                            <div class="bg-primary bg-opacity-10 p-2 rounded me-2">
+                                                                <i class="fas fa-user text-primary fs-5" aria-hidden="true"></i>
+                                                            </div>
+                                                            <div>
+                                                                <div class="small text-muted">Usuário</div>
+                                                                <div class="fw-semibold" id="current-user"><dtml-var nom_completo></div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="d-flex align-items-center">
+                                                            <div class="bg-primary bg-opacity-10 p-2 rounded me-2">
+                                                                <i class="fas fa-id-card text-primary fs-5" aria-hidden="true"></i>
+                                                            </div>
+                                                            <div>
+                                                                <div class="small text-muted">CPF</div>
+                                                                <div class="fw-semibold" id="current-cpf"><dtml-var num_cpf></div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <h3 class="h6 fw-semibold mb-1">Local definido para representação visual das assinaturas:</h3>
+                                        <div class="form-control-plaintext border rounded p-2 bg-light" aria-live="polite">
+                                            <dtml-if expr="REQUEST.get('visual_page_option') == 'ultima'">
+                                                <div class="d-flex align-items-center">
+                                                    <div class="me-2">
+                                                        <img src="<dtml-var portal_url>/imagens/assinatura_visual_ultima_pagina.png" 
+                                                            alt="Ilustração de assinaturas na última página" 
+                                                            style="max-width: 60px;" class="img-thumbnail"
+                                                            loading="lazy">
+                                                    </div>
+                                                    <div>
+                                                        <h4 class="h6 mb-1">Última página do documento</h4>
+                                                        <p class="text-muted mb-0">Até 3 assinaturas serão adicionadas no rodapé da última página</p>
+                                                    </div>
+                                                </div>
+                                            <dtml-else>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="me-2">
+                                                        <img src="<dtml-var portal_url>/imagens/assinatura_visual_pagina_nova.png" 
+                                                            alt="Ilustração de assinaturas em página nova" 
+                                                            style="max-width: 60px;" class="img-thumbnail"
+                                                            loading="lazy">
+                                                    </div>
+                                                    <div>
+                                                        <h4 class="h6 mb-1">Nova página em branco</h4>
+                                                        <p class="text-muted mb-0">Todas as assinaturas serão adicionadas em uma nova página dedicada</p>
+                                                    </div>
+                                                </div>
+                                            </dtml-if>
+                                        </div>
+                                        
+                                        <!-- Indicador de fonte da informação -->
+                                        <div class="small text-muted mt-2">
+                                            <i class="fas fa-info-circle me-1"></i>
+                                            <dtml-if expr="REQUEST.get('visual_page_option_db')">
+                                                Esta configuração foi definida pelo solicitante ou primeiro signatário e será aplicada a todas as assinaturas
+                                            <dtml-else>
+                                                Esta configuração será aplicada a todas as assinaturas deste documento
+                                            </dtml-if>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="row">
+                                        <div class="col-12 mb-3">
+                                            <label class="form-label fw-semibold required mb-1" for="certificateSelect">
+                                                <i class="fas fa-certificate me-2"></i>
+                                                Escolha um Certificado ICP-Brasil
+                                            </label>
+                                            <select class="form-select form-select-lg" id="certificateSelect" 
+                                                     aria-describedby="certificateHelp"
+                                                     required>
+                                                <option value="" selected disabled>Selecione um certificado...</option>
+                                            </select>
+                                            <div class="form-text mt-1 d-flex align-items-center" id="certificateHelp">
+                                                <i class="fas fa-info-circle me-2 text-info" aria-hidden="true"></i> 
+                                                Conecte seu certificado digital (eToken, cartão ou A3) ao computador para prosseguir
+                                            </div>
+                                            <div class="invalid-feedback d-flex align-items-center mt-1">
+                                                <i class="fas fa-exclamation-circle me-2" aria-hidden="true"></i>
+                                                Selecione um certificado digital para continuar
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="row mt-3">
+                                        <div class="col-12">
+                                            <div class="d-grid gap-2 d-md-flex">
+                                                <button id="signButton" type="button" class="btn btn-primary btn-lg px-4">
+                                                    <i class="fas fa-feather-alt me-2" aria-hidden="true"></i> 
+                                                    <span>Assinar Documento</span>
+                                                </button>
+                                                
+                                                <button id="refreshButton" type="button" class="btn btn-outline-primary btn-lg">
+                                                    <i class="fas fa-redo me-2" aria-hidden="true"></i> 
+                                                    <span>Atualizar Certificados</span>
+                                                </button>
+                                                
+                                                <a href="pades-signature_html?codigo=<dtml-var expr="str(codigo)">&anexo=<dtml-var expr="str(anexo)" missing="null">&tipo_doc=<dtml-var expr="str(tipo_doc)">&modal=1&etapa=escolher&visual_page_option_db=<dtml-var expr="REQUEST.get('visual_page_option_db', '')">" 
+                                                    class="btn btn-outline-secondary btn-lg ms-md-auto"
+                                                    aria-label="Voltar para escolha da posição da assinatura">
+                                                    <i class="fas fa-arrow-left me-2" aria-hidden="true"></i> 
+                                                    Voltar
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
                             </div>
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                      <input type="hidden" name="visual_page_option" value="<dtml-var visual_page_option missing>">
-                      <div class="mb-4">
-                        <label class="form-label fw-semibold">Local definido para representação visual das assinaturas:</label>
-                        <div class="form-control-plaintext border rounded p-3 bg-light">
-                          <dtml-if expr="visual_page_option == 'ultima'">
-                            <div class="d-flex align-items-center">
-                              <div class="me-3">
-                                <img src="<dtml-var portal_url>/imagens/assinatura_visual_ultima_pagina.png" alt="Ilustração de assinaturas na última página" style="max-width: 80px;" class="img-thumbnail">
-                              </div>
-                              <div>
-                                <h5 class="mb-1">Última página do documento</h5>
-                                <p class="text-muted mb-0">Até 3 assinaturas serão adicionadas no rodapé da última página</p>
-                              </div>
-                            </div>
-                          <dtml-else>
-                            <div class="d-flex align-items-center">
-                              <div class="me-3">
-                                <img src="<dtml-var portal_url>/imagens/assinatura_visual_pagina_nova.png" alt="Ilustração de assinaturas em página nova" style="max-width: 80px;" class="img-thumbnail">
-                              </div>
-                              <div>
-                                <h5 class="mb-1">Nova página em branco</h5>
-                                <p class="text-muted mb-0">Todas as assinaturas serão adicionadas em uma nova página dedicada</p>
-                              </div>
-                            </div>
-                          </dtml-if>
-                        </div>
-                      </div>
-
-                    <div class="row">
-                      <div class="col-12 mb-4">
-                        <label class="form-label fw-semibold required" for="certificateSelect">Escolha um Certificado ICP-Brasil</label>
-                        <select class="form-select form-select-lg" id="certificateSelect"></select>
-                        <div class="form-text mt-1">
-                          <i class="fas fa-info-circle me-1"></i> Conecte seu certificado digital ou token para prosseguir
-                        </div>
-                      </div>
-                    </div>
-
-                    <div class="row">
-                      <div class="col-12">
-                        <button id="signButton" type="button" class="btn btn-primary">
-                          <i class="mdi mdi-certificate me-1"></i> Assinar Documento
-                        </button>
-                        <button id="refreshButton" type="button" class="btn btn-light">
-                          <i class="mdi mdi-reload me-1"></i> Atualizar Certificados
-                        </button>
-                      </div>
-                    </div>
-                  </form>
-                </dtml-if>
-
-                </div>
+                        </article>
+                    </dtml-if>
+                </main>
             </div>
         </div>
-
+        
         <script src="<dtml-var portal_url>/assets/libs/jquery/jquery.min.js"></script>
         <script src="<dtml-var portal_url>/assets/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
         <script src="<dtml-var portal_url>/generico/assinador/static/js/jquery.blockUI.js"></script>
         <script src="<dtml-var portal_url>/generico/assinador/static/js/lacuna-web-pki-2.12.0.min.js"></script>
         <script src="<dtml-var portal_url>/generico/assinador/static/js/lacuna-web-pki-client.js"></script>
-
-	<script>
-	document.addEventListener("DOMContentLoaded", function() {
-	    // Validação do formulário de opções visuais
-	    const visualForm = document.getElementById("visual_page_option_form");
-	    if (visualForm) {
-		const radios = visualForm.querySelectorAll('input[name="visual_page_option"]');
-		const submitBtn = visualForm.querySelector('button[type="submit"]');
-		const errorFeedback = visualForm.querySelector('.invalid-feedback');
-		const cards = visualForm.querySelectorAll('.card-radio');
-
-		function validateSelection() {
-		    const selected = visualForm.querySelector('input[name="visual_page_option"]:checked');
-		    const isValid = !!selected;
-
-		    if (isValid) {
-		        if (errorFeedback) errorFeedback.style.display = 'none';
-		        cards.forEach(card => card.classList.remove('card-radio-invalid'));
-		    } else {
-		        if (errorFeedback) errorFeedback.style.display = 'flex';
-		        cards.forEach(card => card.classList.add('card-radio-invalid'));
-		    }
-
-		    return isValid;
-		}
-
-		radios.forEach(radio => {
-		    radio.addEventListener('change', function() {
-		        cards.forEach(card => card.classList.remove('border-primary'));
-		        if (this.checked) {
-		            // Proteção: só adiciona classe se encontrar o .card-radio
-		            let cardEl = this.closest('.card-radio');
-		            if (cardEl) cardEl.classList.add('border-primary');
-		        }
-		        validateSelection();
-		    });
-		});
-
-		visualForm.addEventListener('submit', function(e) {
-		    if (!validateSelection()) {
-		        e.preventDefault();
-		        cards.forEach(card => {
-		            card.classList.add('animate__animated', 'animate__headShake');
-		            card.addEventListener('animationend', () => {
-		                card.classList.remove('animate__animated', 'animate__headShake');
-		            }, { once: true });
-		        });
-		    }
-		});
-
-		// Hover seguro nas cards
-		cards.forEach(card => {
-		    card.addEventListener('mouseenter', function() {
-		        // Protege: só mexe se input existir!
-		        const input = this.querySelector('input');
-		        if (input && !input.checked) {
-		            this.classList.add('border-primary', 'shadow-sm');
-		        }
-		    });
-		    card.addEventListener('mouseleave', function() {
-		        const input = this.querySelector('input');
-		        if (input && !input.checked) {
-		            this.classList.remove('border-primary', 'shadow-sm');
-		        }
-		    });
-		});
-	    }
-
-	    // Configuração dos botões de assinatura
-	    const signButton = document.getElementById("signButton");
-	    if (signButton) {
-		signButton.addEventListener('mouseenter', function() {
-		    const icon = this.querySelector('i');
-		    if (icon) icon.classList.add('fa-beat');
-		});
-
-		signButton.addEventListener('mouseleave', function() {
-		    const icon = this.querySelector('i');
-		    if (icon) icon.classList.remove('fa-beat');
-		});
-	    }
-	});
-	</script>
-
-<dtml-var footer_html>
+        
+        <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Initialize accessibility features
+            initAccessibility();
+            
+            // Setup visual form validation
+            setupVisualFormValidation();
+            
+            // Setup certificate handlers
+            setupCertificateHandlers();
+            
+            // Setup form submissions
+            setupFormSubmissions();
+            
+            // Setup iframe fallback
+            setupIframeFallback();
+        });
+        
+        function initAccessibility() {
+            // Add ARIA live regions for dynamic content
+            const liveRegion = document.createElement('div');
+            liveRegion.setAttribute('aria-live', 'polite');
+            liveRegion.setAttribute('aria-atomic', 'true');
+            liveRegion.className = 'visually-hidden';
+            document.body.appendChild(liveRegion);
+            
+            // Announce page load for screen readers
+            const currentStep = document.querySelector('.card-header h2.h5');
+            if (currentStep) {
+                announceToScreenReader('Página de assinatura digital carregada. ' + currentStep.textContent.trim());
+            } else {
+                announceToScreenReader('Página de assinatura digital carregada');
+            }
+        }
+        
+        function announceToScreenReader(message) {
+            const announcement = document.createElement('div');
+            announcement.setAttribute('aria-live', 'polite');
+            announcement.setAttribute('aria-atomic', 'true');
+            announcement.className = 'visually-hidden';
+            announcement.textContent = message;
+            document.body.appendChild(announcement);
+            
+            // Remove after announcing
+            setTimeout(() => {
+                if (announcement.parentNode) {
+                    announcement.parentNode.removeChild(announcement);
+                }
+            }, 1000);
+        }
+        
+        function setupVisualFormValidation() {
+            const visualForm = document.getElementById("visual_page_option_form");
+            if (!visualForm) return;
+            
+            const radios = visualForm.querySelectorAll('input[name="visual_page_option"]');
+            const submitBtn = visualForm.querySelector('button[type="submit"]');
+            const errorFeedback = document.getElementById("option-error");
+            const cards = visualForm.querySelectorAll('.card-radio');
+            
+            // Verifica se há alguma opção desabilitada (indica seleção bloqueada)
+            const isSelectionLocked = Array.from(radios).some(radio => radio.disabled);
+            
+            // Se a seleção está bloqueada, desativa a validação e o feedback de erro
+            if (isSelectionLocked) {
+                if (errorFeedback) {
+                    errorFeedback.classList.add('d-none');
+                    errorFeedback.classList.remove('d-flex');
+                }
+                
+                // Remove a obrigatoriedade dos inputs (já que um já está selecionado)
+                radios.forEach(radio => {
+                    radio.required = false;
+                });
+            }
+            
+            // Function to update ARIA attributes and visual state
+            function updateCardSelection(selectedRadio) {
+                cards.forEach(card => {
+                    const cardInput = card.previousElementSibling; // O input está antes do card no DOM
+                    if (!cardInput || cardInput.type !== 'radio') return;
+                    
+                    const isChecked = cardInput === selectedRadio;
+                    card.setAttribute('aria-checked', isChecked.toString());
+                    
+                    // Update visual state
+                    if (isChecked) {
+                        card.classList.add('is-valid');
+                        card.classList.remove('border-primary', 'shadow-sm');
+                        
+                        // Aplica estilo especial para opções bloqueadas
+                        if (cardInput.disabled) {
+                            card.classList.add('border-success');
+                            card.style.backgroundColor = 'rgba(25, 135, 84, 0.05)';
+                        } else {
+                            card.classList.add('border-primary');
+                        }
+                    } else {
+                        card.classList.remove('is-valid', 'border-primary', 'border-success', 'shadow-sm');
+                        card.style.backgroundColor = '';
+                    }
+                    
+                    // Remove classes de erro
+                    card.classList.remove('card-radio-invalid', 'is-invalid');
+                });
+            }
+            
+            // Function to validate selection
+            function validateSelection() {
+                // Se a seleção está bloqueada, sempre é válida
+                if (isSelectionLocked) {
+                    return true;
+                }
+                
+                const selected = visualForm.querySelector('input[name="visual_page_option"]:checked');
+                const isValid = !!selected;
+                
+                // Update error display
+                if (errorFeedback) {
+                    errorFeedback.classList.toggle('d-none', isValid);
+                    errorFeedback.classList.toggle('d-flex', !isValid);
+                }
+                
+                // Update card states
+                cards.forEach(card => {
+                    const cardInput = card.previousElementSibling;
+                    if (!cardInput || cardInput.disabled) return;
+                    
+                    card.classList.toggle('card-radio-invalid', !isValid);
+                    card.classList.toggle('is-invalid', !isValid);
+                });
+                
+                return isValid;
+            }
+            
+            // Function to show validation error
+            function showValidationError() {
+                if (isSelectionLocked) return;
+                
+                // Add shake animation to available cards
+                cards.forEach(card => {
+                    const cardInput = card.previousElementSibling;
+                    if (!cardInput || cardInput.disabled) return;
+                    
+                    card.classList.add('animate__animated', 'animate__headShake');
+                    card.addEventListener('animationend', () => {
+                        card.classList.remove('animate__animated', 'animate__headShake');
+                    }, { once: true });
+                });
+                
+                // Focus first available radio for accessibility
+                const firstAvailableRadio = Array.from(radios).find(radio => !radio.disabled);
+                if (firstAvailableRadio) {
+                    firstAvailableRadio.focus();
+                }
+                
+                // Announce error to screen readers
+                announceToScreenReader('Erro: Selecione uma opção para onde as assinaturas serão exibidas');
+            }
+            
+            // Initialize selection state
+            radios.forEach(radio => {
+                if (radio.checked) {
+                    updateCardSelection(radio);
+                }
+                
+                // Only add event listeners to non-disabled radios
+                if (!radio.disabled) {
+                    radio.addEventListener('change', function() {
+                        updateCardSelection(this);
+                        validateSelection();
+                    });
+                    
+                    // Keyboard navigation support
+                    radio.addEventListener('keydown', function(e) {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            this.checked = true;
+                            updateCardSelection(this);
+                            validateSelection();
+                        }
+                    });
+                }
+            });
+            
+            // Hover effects for non-disabled cards only
+            cards.forEach(card => {
+                const input = card.previousElementSibling;
+                if (!input || input.disabled) return;
+                
+                card.addEventListener('mouseenter', function() {
+                    if (!input.checked) {
+                        this.classList.add('border-primary', 'shadow-sm');
+                    }
+                });
+                
+                card.addEventListener('mouseleave', function() {
+                    if (!input.checked) {
+                        this.classList.remove('border-primary', 'shadow-sm');
+                    }
+                });
+                
+                // Click on card selects radio (only if not disabled)
+                card.addEventListener('click', function(e) {
+                    if (e.target.tagName !== 'INPUT' && !input.disabled) {
+                        input.checked = true;
+                        input.dispatchEvent(new Event('change'));
+                        input.focus();
+                    }
+                });
+            });
+            
+            // Form submission handler
+            visualForm.addEventListener('submit', function(e) {
+                // Se a seleção está bloqueada, permite submissão sem validação
+                if (!isSelectionLocked && !validateSelection()) {
+                    e.preventDefault();
+                    showValidationError();
+                    return false;
+                }
+                
+                // Disable submit button to prevent double submission
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = '<span class="d-flex align-items-center justify-content-center">' +
+                        '<span class="spinner-border spinner-border-sm me-3" role="status" aria-hidden="true"></span>' +
+                        'Processando...' +
+                        '</span>';
+                    
+                    // Announce submission to screen readers
+                    announceToScreenReader(isSelectionLocked ? 
+                        'Confirmando posição predefinida de assinatura' : 
+                        'Processando seleção, aguarde');
+                }
+                
+                return true;
+            });
+            
+            // Validate on load
+            validateSelection();
+        }
+        
+        function setupCertificateHandlers() {
+            const signButton = document.getElementById("signButton");
+            const refreshButton = document.getElementById("refreshButton");
+            const certificateSelect = document.getElementById("certificateSelect");
+            
+            if (!signButton || !certificateSelect) return;
+            
+            // Hover effects for sign button
+            signButton.addEventListener('mouseenter', function() {
+                if (!this.disabled) {
+                    this.style.transform = 'translateY(-2px)';
+                }
+            });
+            
+            signButton.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+            });
+            
+            // Certificate selection validation
+            certificateSelect.addEventListener('change', function() {
+                const isValid = this.value && this.value !== '';
+                this.classList.toggle('is-valid', isValid);
+                this.classList.toggle('is-invalid', !isValid);
+                
+                if (isValid) {
+                    announceToScreenReader('Certificado selecionado');
+                }
+            });
+            
+            // Sign button click handler
+            signButton.addEventListener('click', function() {
+                if (!certificateSelect.value || certificateSelect.value === '') {
+                    certificateSelect.classList.add('is-invalid');
+                    certificateSelect.focus();
+                    
+                    // Shake animation for feedback
+                    certificateSelect.classList.add('animate__animated', 'animate__headShake');
+                    certificateSelect.addEventListener('animationend', () => {
+                        certificateSelect.classList.remove('animate__animated', 'animate__headShake');
+                    }, { once: true });
+                    
+                    announceToScreenReader('Erro: Selecione um certificado digital');
+                    return;
+                }
+                
+                // Disable button during signing
+                this.disabled = true;
+                const originalText = this.innerHTML;
+                this.innerHTML = '<span class="d-flex align-items-center">' +
+                    '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>' +
+                    'Assinando...' +
+                    '</span>';
+                
+                announceToScreenReader('Processando assinatura digital, aguarde');
+                
+                // Re-enable button after 10 seconds if something goes wrong
+                setTimeout(() => {
+                    if (signButton.disabled) {
+                        signButton.disabled = false;
+                        signButton.innerHTML = originalText;
+                        announceToScreenReader('Tempo de assinatura excedido, tente novamente');
+                    }
+                }, 10000);
+            });
+            
+            // Refresh button handler
+            if (refreshButton) {
+                refreshButton.addEventListener('click', function() {
+                    const originalText = this.innerHTML;
+                    this.innerHTML = '<span class="d-flex align-items-center">' +
+                        '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>' +
+                        'Atualizando...' +
+                        '</span>';
+                    
+                    announceToScreenReader('Atualizando lista de certificados');
+                    
+                    // Simulate refresh delay
+                    setTimeout(() => {
+                        this.innerHTML = originalText;
+                        announceToScreenReader('Lista de certificados atualizada');
+                    }, 1500);
+                });
+            }
+        }
+        
+        function setupFormSubmissions() {
+            const signForm = document.getElementById("signForm");
+            if (!signForm) return;
+            
+            signForm.addEventListener('submit', function(e) {
+                // Validate certificate selection
+                const certificateSelect = document.getElementById("certificateSelect");
+                if (!certificateSelect || !certificateSelect.value || certificateSelect.value === '') {
+                    e.preventDefault();
+                    certificateSelect.classList.add('is-invalid');
+                    certificateSelect.focus();
+                    announceToScreenReader('Erro: Selecione um certificado digital antes de enviar');
+                    return false;
+                }
+                
+                // Add CSRF token if not present
+                if (!this.querySelector('input[name="csrf_token"]')) {
+                    const csrfToken = document.querySelector('meta[name="csrf-token"]');
+                    if (csrfToken) {
+                        const csrfInput = document.createElement('input');
+                        csrfInput.type = 'hidden';
+                        csrfInput.name = 'csrf_token';
+                        csrfInput.value = csrfToken.content;
+                        this.appendChild(csrfInput);
+                    }
+                }
+                
+                // Disable all buttons to prevent double submission
+                const buttons = this.querySelectorAll('button');
+                buttons.forEach(button => {
+                    button.disabled = true;
+                });
+                
+                announceToScreenReader('Enviando assinatura, aguarde a conclusão');
+                return true;
+            });
+        }
+        
+        function setupIframeFallback() {
+            const iframe = document.querySelector('iframe');
+            if (!iframe) return;
+            
+            // Check if iframe loaded successfully
+            iframe.addEventListener('load', function() {
+                try {
+                    // Try to access iframe content to check if it loaded
+                    const iframeDoc = this.contentDocument || this.contentWindow.document;
+                    if (!iframeDoc) {
+                        showIframeFallback();
+                    }
+                } catch (e) {
+                    // Cross-origin restriction, assume it loaded
+                    console.log('Iframe loaded (cross-origin)');
+                }
+            });
+            
+            iframe.addEventListener('error', function() {
+                showIframeFallback();
+            });
+            
+            function showIframeFallback() {
+                const fallback = document.querySelector('.iframe-fallback');
+                if (fallback) {
+                    fallback.classList.remove('visually-hidden');
+                    fallback.classList.add('p-4', 'text-center', 'bg-light', 'rounded');
+                    iframe.style.display = 'none';
+                    announceToScreenReader('Erro ao carregar visualização do documento. Link de download disponível.');
+                }
+            }
+        }
+        
+        // Error handling for reduced motion preference
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            document.documentElement.style.setProperty('--animation-duration', '0.01ms');
+        }
+        </script>
+    </body>
+</html>

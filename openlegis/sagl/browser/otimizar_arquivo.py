@@ -23,7 +23,6 @@ from pypdf import PdfReader, PdfWriter
 from pypdf.errors import PdfReadError
 from asn1crypto import cms
 from dateutil.parser import parse
-import threading
 
 # Se usar com Zope/Plone:
 from five import grok
@@ -41,14 +40,20 @@ A4_PORTRAIT = (595, 842)
 A4_LANDSCAPE = (842, 595)
 A4_TOLERANCE = 0.02 # 2% tolerance for page size
 
-# AJUSTES DE QUALIDADE (MANTIDOS 200 DPI, mas pode ser ajustado para 300 se a nitidez do vetor for crítica)
+# AJUSTES DE QUALIDADE 
 TEXT_DPI = 200       
-IMAGE_DPI = 200      
+IMAGE_DPI = 150       # REDUZIDO de 200 para 150 para melhor compressão
 
-MAX_IMAGE_SIZE = 2400
-# QUALIDADE JPEG BASE (Usada na otimização inteligente)
-JPEG_QUALITY = 92    
-FALLBACK_JPEG_QUALITY = 95 
+MAX_IMAGE_SIZE = 1600 # REDUZIDO de 2400 para 1600
+# QUALIDADE JPEG BASE 
+JPEG_QUALITY = 85     # REDUZIDO de 92 para 85 para melhor compressão
+FALLBACK_JPEG_QUALITY = 90 # REDUZIDO de 95 para 90
+
+# === CONFIGURAÇÃO DE OCR ===
+ENABLE_OCR = True       # Mude para False para desativar completamente o OCR.
+OCR_FALLBACK_ONLY = True # Alterado para True: só aplica OCR quando otimização falha
+OCR_FORCE_ENABLED = False # Se True, força OCR mesmo que o PDF já tenha texto pesquisável.
+# ===========================
 
 PDFData = Union[bytes, bytearray]
 SignatureData = Dict[str, Any]
@@ -159,6 +164,12 @@ class PDFProcessor:
         self.png_compression = PNG_COMPRESSION_LEVEL
         self._processing_cache = {} # Cache para evitar reprocessamento em retry
 
+        # === NOVAS CONFIGURAÇÕES DE OCR ===
+        self.enable_ocr = ENABLE_OCR
+        self.ocr_fallback_only = OCR_FALLBACK_ONLY
+        self.ocr_force_enabled = OCR_FORCE_ENABLED
+        # ==================================
+
     def _safe_update_progress(self, stage: str, message: str, progress: int = None, details: str = ""):
         """
         Método auxiliar que tenta atualizar progresso se o método estiver disponível.
@@ -169,8 +180,6 @@ class PDFProcessor:
                 self._update_progress(stage, message, progress, details)
             except Exception as e:
                 logging.debug(f"Erro ao chamar _update_progress: {e}")
-        self.png_compression = PNG_COMPRESSION_LEVEL
-        self._processing_cache = {} # Cache para evitar reprocessamento em retry
 
     def _get_file_hash(self, pdf_data: bytes) -> str:
         """Gera hash do arquivo para cache"""
@@ -188,15 +197,12 @@ class PDFProcessor:
         if original_size is not None:
             log_data['original_size_kb'] = round(original_size / 1024, 2)
             if compressed_size is not None:
-                # Para conversões (imagem ou fallback), calcula taxa de compressão
                 log_data['compressed_size_kb'] = round(compressed_size / 1024, 2)
                 if original_size > 0:
                     compression_rate = calculate_compression_rate(original_size, compressed_size)
-                    # Só mostra taxa se for razoável (evita valores absurdos de comparações incorretas)
-                    if abs(compression_rate) < 10000: # Limita a 10000%
+                    if abs(compression_rate) < 10000:
                         log_data['compression_rate'] = round(compression_rate, 2)
                     elif compressed_size > original_size:
-                        # Se aumentou muito, mostra ratio
                         ratio = compressed_size / original_size
                         log_data['size_increase'] = f"{ratio:.2f}x"
         logging.info(
@@ -209,7 +215,6 @@ class PDFProcessor:
         """Verifica se a página contém texto legível de forma mais robusta"""
         try:
             texto = page.get_text().strip()
-            # Considera como texto legível se tiver pelo menos 10 caracteres significativos
             return len(texto) >= 10 and any(c.isalnum() for c in texto)
         except Exception:
             return False
@@ -217,12 +222,8 @@ class PDFProcessor:
     def _documento_tem_texto_pesquisavel(self, doc: fitz.Document) -> bool:
         """
         Verifica se o documento tem texto pesquisável (OCR ou texto vetorial).
-        Retorna True se pelo menos uma página tem texto legível.
-        Otimizado para ser rápido mesmo em documentos grandes.
         """
         try:
-            # Para documentos grandes, verifica apenas algumas páginas
-            # Estratégia: primeira, última, e algumas do meio
             total_pages = doc.page_count
             if total_pages == 0:
                 return False
@@ -231,26 +232,20 @@ class PDFProcessor:
             if total_pages <= 3:
                 pages_to_check = list(range(total_pages))
             else:
-                # Para documentos grandes, verifica: primeira, última, e algumas do meio
-                pages_to_check = [0, total_pages - 1] # Primeira e última
-                # Adiciona algumas páginas do meio
+                # Para documentos grandes, verifica amostra
+                pages_to_check = [0, total_pages - 1]
                 if total_pages > 5:
                     mid = total_pages // 2
                     pages_to_check.extend([mid - 1, mid, mid + 1])
                 else:
                     pages_to_check.extend(range(1, total_pages - 1))
             
-            paginas_com_texto = 0
             for i in pages_to_check:
                 try:
                     page = doc[i]
-                    # Usa get_text com flags otimizadas
-                    texto = page.get_text("text", flags=11).strip() # flags=11 é mais rápido
+                    texto = page.get_text("text", flags=11).strip()
                     if len(texto) >= 10 and any(c.isalnum() for c in texto):
-                        paginas_com_texto += 1
-                        # Se encontrou texto em pelo menos uma página, já pode retornar True
-                        if paginas_com_texto >= 1:
-                            return True
+                        return True
                 except:
                     continue
             
@@ -277,7 +272,6 @@ class PDFProcessor:
 
         buf = BytesIO()
         with fitz.open() as tmp_doc:
-            # Caso já esteja em A4, só copia a página como está:
             if is_a4_size(original_width, original_height):
                 tmp_doc.insert_pdf(page.parent, from_page=page.number, to_page=page.number)
             else:
@@ -293,36 +287,30 @@ class PDFProcessor:
                     page.parent,
                     page.number
                 )
-            # Salva com compressão para evitar aumento de tamanho
             tmp_doc.save(buf, garbage=4, deflate=True, clean=True)
         return buf.getvalue()
 
     def _resize_document_to_a4(self, pdf_data: bytes) -> bytes:
         """
         Redimensiona todas as páginas do documento para A4 de forma otimizada.
-        Processa todas as páginas de uma vez em vez de página por página.
         """
         with fitz.open(stream=pdf_data, filetype="pdf") as doc:
             orig_metadata = dict(doc.metadata or {})
             total_pages = doc.page_count
             
-            # Processa todas as páginas de uma vez
             with fitz.open() as new_doc:
                 for i, page in enumerate(doc):
                     original_width = page.rect.width
                     original_height = page.rect.height
                     is_landscape = original_width > original_height
                     
-                    # Verifica se esta página já está em A4
                     target = A4_LANDSCAPE if is_landscape else A4_PORTRAIT
                     is_a4 = (abs(original_width - target[0]) <= target[0] * 0.05 and
                              abs(original_height - target[1]) <= target[1] * 0.05)
                     
                     if is_a4:
-                        # Já está em A4, apenas copia
                         new_doc.insert_pdf(doc, from_page=i, to_page=i)
                     else:
-                        # Redimensiona para A4
                         target_width, target_height = target
                         scale = min(target_width / original_width, target_height / original_height)
                         new_width = original_width * scale
@@ -339,41 +327,15 @@ class PDFProcessor:
                 
                 new_doc.set_metadata(orig_metadata)
                 output = BytesIO()
-                # Salva com compressão para evitar aumento de tamanho
                 new_doc.save(output, garbage=4, deflate=True, clean=True)
                 return output.getvalue()
-
-    def _calcular_dpi_ideal(self, page) -> int:
-        return self.text_dpi
-
-    def _imagem_tem_detalhes(self, img: Image.Image) -> bool:
-        return True
-
-    def _determinar_parametros_compressao(self, img: Image.Image) -> tuple:
-        return "JPEG", self.jpeg_quality, {'optimize': True, 'subsampling': 0}
-
-    def _processar_imagem(self, img: Image.Image) -> bytes:
-        try:
-            buffer = BytesIO()
-            if img.mode != 'RGB':
-                img = img.convert('RGB')
-            img.save(buffer, format="JPEG", quality=self.jpeg_quality,
-                     subsampling=0, optimize=True)
-            return buffer.getvalue()
-        except Exception as e:
-            logging.error(f"Falha crítica no processamento de imagem: {str(e)}")
-            raise PDFIrrecuperavelError("Falha ao processar imagem com qualidade máxima")
 
     def _get_page_content_size(self, page: fitz.Page) -> int:
         """
         Calcula o tamanho aproximado da página incluindo conteúdo vetorial e imagens embutidas.
-        Retorna o tamanho em bytes.
         """
         try:
-            # Tamanho do conteúdo vetorial (texto, linhas, etc)
             content_size = len(page.read_contents() or b'')
-            
-            # Soma o tamanho das imagens embutidas
             images = page.get_images()
             image_size = 0
             for img_idx in images:
@@ -384,9 +346,6 @@ class PDFProcessor:
                     image_size += len(img_bytes)
                 except:
                     continue
-            
-            # Retorna a soma do conteúdo vetorial e imagens
-            # Se não tem imagens e o conteúdo é muito pequeno, pode ser uma página vetorial simples
             return content_size + image_size
         except:
             return 0
@@ -394,25 +353,18 @@ class PDFProcessor:
     def _is_page_scanned(self, page: fitz.Page) -> bool:
         """Verifica se a página é uma imagem escaneada (não vetorial)"""
         try:
-            # Páginas escaneadas geralmente têm muito poucos objetos vetoriais
-            # e muitas imagens grandes
             images = page.get_images()
             text_blocks = page.get_text("blocks")
             texto = page.get_text().strip()
             
-            # Se tem muitas imagens e pouco texto estruturado, provavelmente é escaneada
             if len(images) > 0:
-                # Verifica se tem pouco texto (menos de 50 caracteres) ou poucos blocos de texto
                 if len(texto) < 50 or len(text_blocks) < 3:
-                    # Verifica tamanho das imagens
-                    page_area = page.rect.width * page.rect.height
                     for img_idx in images:
                         try:
                             xref = img_idx[0]
                             base_image = page.parent.extract_image(xref)
                             img_bytes = base_image.get("image", b"")
-                            # Se as imagens são grandes (mais de 20KB), provavelmente é escaneada
-                            if len(img_bytes) > 20000: # 20KB
+                            if len(img_bytes) > 20000:
                                 return True
                         except:
                             continue
@@ -423,72 +375,57 @@ class PDFProcessor:
     def _otimizacao_inteligente(self, doc: fitz.Document) -> Optional[bytes]:
         """
         Processamento inteligente com melhor detecção de conteúdo.
-        Preserva páginas vetoriais e só converte quando realmente necessário.
-        Otimizado para documentos grandes com muitas páginas.
+        CORREÇÃO: Evita conversão para imagem quando aumenta muito o tamanho.
         """
         total_pages = doc.page_count
         logging.info(f"Iniciando otimização inteligente para {total_pages} páginas")
         
-        # Para documentos grandes (>100 páginas), faz verificação rápida primeiro
-        # para ver se todas as páginas são vetoriais
+        # Para documentos grandes (>100 páginas), faz verificação rápida
         if total_pages > 100:
             logging.info("Documento grande detectado, fazendo verificação rápida...")
             self._safe_update_progress(
                 'optimizing',
                 f'Analisando documento grande ({total_pages} páginas)...',
                 52,
-                f'Verificando amostra de páginas para otimização'
+                f'Verificando amostra de páginas'
             )
-            pages_to_check = min(10, total_pages) # Verifica até 10 páginas
+            pages_to_check = min(10, total_pages)
             all_vectorial = True
-            pages_with_images = 0
             pages_with_large_images = 0
             
             for i in range(pages_to_check):
                 try:
                     page = doc[i]
-                    # Verificação rápida: apenas texto (mais rápido que verificar imagens)
-                    texto = page.get_text("text", flags=11).strip() # flags=11 é mais rápido
+                    texto = page.get_text("text", flags=11).strip()
                     tem_texto = len(texto) > 10
                     
-                    # Se não tem texto legível, precisa processar individualmente
                     if not tem_texto:
                         all_vectorial = False
-                        logging.info(f"Página {i+1} sem texto legível, requer processamento individual")
                         break
                     
-                    # Verifica imagens apenas se necessário (mais lento)
                     tem_imagens = len(page.get_images()) > 0
                     if tem_imagens:
-                        pages_with_images += 1
-                        # Só verifica tamanho se tem imagens
                         original_size = self._get_page_content_size(page)
-                        if original_size > 500000: # > 500KB - imagens muito grandes
+                        if original_size > 500000:
                             pages_with_large_images += 1
                             all_vectorial = False
-                            logging.info(f"Página {i+1} tem imagens muito grandes ({original_size/1024:.1f}KB), requer processamento individual")
                             break
                 except Exception as e:
                     logging.warning(f"Erro ao verificar página {i+1}: {e}")
                     all_vectorial = False
                     break
             
-            logging.info(f"Verificação rápida: all_vectorial={all_vectorial}, pages_with_images={pages_with_images}, pages_with_large_images={pages_with_large_images}")
-            
-            # Se todas as páginas verificadas são vetoriais (têm texto e não são escaneadas),
-            # pode processar em lote mesmo com imagens pequenas
             if all_vectorial:
-                logging.info(f"Todas as páginas são vetoriais, processando em lote (otimização rápida)")
+                logging.info(f"Todas as páginas são vetoriais, processando em lote")
                 self._safe_update_progress(
                     'optimizing',
-                    f'Processando {total_pages} páginas em lote (todas vetoriais)...',
+                    f'Processando {total_pages} páginas em lote...',
                     60,
                     f'Documento grande: processamento otimizado em lote'
                 )
                 batch_start = time.time()
                 with fitz.open() as novo_pdf:
                     orig_metadata = dict(doc.metadata or {})
-                    # Copia todas as páginas de uma vez (muito mais rápido)
                     novo_pdf.insert_pdf(doc, from_page=0, to_page=total_pages - 1)
                     novo_pdf.set_metadata(orig_metadata)
                     output = BytesIO()
@@ -496,27 +433,17 @@ class PDFProcessor:
                     batch_time = time.time() - batch_start
                     logging.info(f"Processamento em lote concluído para {total_pages} páginas em {batch_time:.2f}s")
                     return output.getvalue()
-            else:
-                logging.info(f"Processamento individual necessário (all_vectorial={all_vectorial}, large_images={pages_with_large_images})")
-                self._safe_update_progress(
-                    'optimizing',
-                    f'Processando {total_pages} páginas individualmente...',
-                    55,
-                    f'Páginas mistas detectadas - processamento otimizado'
-                )
         
-        # Processamento individual (para documentos pequenos ou com páginas mistas)
+        # Processamento individual
         with fitz.open() as novo_pdf:
             orig_metadata = dict(doc.metadata or {})
             
-            # Log de progresso a cada 100 páginas para documentos grandes
             log_interval = 100 if total_pages > 100 else total_pages
             
             for i, page in enumerate(doc):
                 start_time = time.time()
                 
-                # Atualiza progresso durante processamento de páginas
-                progress_pct = 50 + int(((i + 1) / total_pages) * 30) # 50-80%
+                progress_pct = 50 + int(((i + 1) / total_pages) * 30)
                 self._safe_update_progress(
                     'optimizing',
                     f'Processando página {i+1} de {total_pages}...',
@@ -524,69 +451,43 @@ class PDFProcessor:
                     f'Página {i+1}/{total_pages}'
                 )
                 
-                # Log de progresso para documentos grandes
                 if total_pages > 100 and (i + 1) % log_interval == 0:
-                    progress_pct = ((i + 1) / total_pages) * 100
-                    logging.info(f"Processando página {i+1}/{total_pages} ({progress_pct:.1f}%)")
+                    progress_pct_actual = ((i + 1) / total_pages) * 100
+                    logging.info(f"Processando página {i+1}/{total_pages} ({progress_pct_actual:.1f}%)")
                 
                 original_size = self._get_page_content_size(page)
                 
                 try:
-                    # Verificação mais robusta de texto
                     texto_pagina = page.get_text().strip()
-                    tem_texto_legivel = len(texto_pagina) > 10 # Mínimo de caracteres
-                    
-                    # Verifica se tem imagens significativas
+                    tem_texto_legivel = len(texto_pagina) > 10
                     tem_imagens = len(page.get_images()) > 0
-                    
-                    # Verifica se a página é escaneada (imagem) ou vetorial
                     is_scanned = self._is_page_scanned(page)
+                    is_very_small = original_size < 5000
+                    is_extremely_large = original_size > 20000000
                     
-                    # Páginas muito pequenas (< 5KB) são quase certamente vetoriais
-                    # e não devem ser convertidas para imagem
-                    is_very_small = original_size < 5000 # < 5KB
-                    
-                    # Páginas extremamente grandes (>20MB) - mantém como está para evitar processamento lento
-                    # que pode causar ConflictError
-                    is_extremely_large = original_size > 20000000 # > 20MB
-                    
-                    # Decisão: manter como vetor ou converter para imagem
-                    is_small_page = original_size < 100000 # < 100KB
+                    # DECISÃO CRÍTICA: Quando converter para imagem?
+                    # Só converte se realmente necessário e se não aumentar muito o tamanho
                     should_keep_vectorial = is_extremely_large or \
                                              is_very_small or \
                                              (tem_texto_legivel and not is_scanned) or \
-                                             (is_small_page and not is_scanned) or \
-                                             (not tem_imagens and original_size < 50000) # < 50KB
+                                             (original_size < 100000 and not is_scanned) or \
+                                             (not tem_imagens and original_size < 50000)
                     
                     if should_keep_vectorial:
-                        # Página principalmente vetorial - mantém como vetor
-                        # Para páginas extremamente grandes, mantém como está (já foi redimensionado antes)
-                        if is_extremely_large:
-                            # Página extremamente grande - mantém como está para evitar processamento lento
+                        # Mantém como vetor
+                        width, height = page.rect.width, page.rect.height
+                        is_landscape = width > height
+                        target = A4_LANDSCAPE if is_landscape else A4_PORTRAIT
+                        is_a4 = (abs(width - target[0]) <= target[0] * 0.05 and
+                                 abs(height - target[1]) <= target[1] * 0.05)
+                        
+                        if is_a4:
                             novo_pdf.insert_pdf(doc, from_page=i, to_page=i)
-                            logging.info(f"Página {i+1} extremamente grande ({original_size/1024:.1f}KB), mantida como está")
-                            self._safe_update_progress(
-                                'optimizing',
-                                f'Processando página {i+1} de {total_pages}...',
-                                progress_pct,
-                                f'Página {i+1}: mantida como está ({original_size/1024:.1f}KB - muito grande)'
-                            )
                         else:
-                            # Para páginas vetoriais normais, pode inserir diretamente se já está em A4
-                            width, height = page.rect.width, page.rect.height
-                            is_landscape = width > height
-                            target = A4_LANDSCAPE if is_landscape else A4_PORTRAIT
-                            is_a4 = (abs(width - target[0]) <= target[0] * 0.05 and
-                                     abs(height - target[1]) <= target[1] * 0.05)
-                            
-                            if is_a4:
-                                # Já está em A4, insere diretamente (mais rápido)
-                                novo_pdf.insert_pdf(doc, from_page=i, to_page=i)
-                            else:
-                                # Precisa redimensionar
-                                page_pdf_bytes = self._resize_to_a4(page)
-                                with fitz.open("pdf", page_pdf_bytes) as page_doc:
-                                    novo_pdf.insert_pdf(page_doc, from_page=0, to_page=0)
+                            page_pdf_bytes = self._resize_to_a4(page)
+                            with fitz.open("pdf", page_pdf_bytes) as page_doc:
+                                novo_pdf.insert_pdf(page_doc, from_page=0, to_page=0)
+                        
                         reason = []
                         if is_very_small:
                             reason.append("muito pequena")
@@ -594,39 +495,31 @@ class PDFProcessor:
                             reason.append(f"texto({len(texto_pagina)} chars)")
                         if not is_scanned:
                             reason.append("não escaneada")
-                        if not tem_imagens:
-                            reason.append("sem imagens")
-                        # Para páginas vetoriais mantidas como vetor, não passa compressed_size
-                        # para evitar cálculos incorretos de taxa de compressão
                         self._log_page_processing(
                             i, "pagina_vetorial", time.time() - start_time,
-                            original_size, None, # Não passa compressed_size para páginas vetoriais
+                            original_size, None,
                             f"Mantida como vetor: {', '.join(reason)}"
                         )
                     else:
-                        # Página escaneada ou com imagens grandes - processa como imagem
+                        # Tenta converter para imagem, mas com verificações rigorosas
                         original_size_kb = original_size / 1024
                         
-                        # Para páginas extremamente grandes (>20MB), mantém como está
-                        # para evitar processamento muito lento que causa ConflictError
-                        if original_size_kb > 20000: # > 20MB
-                            logging.warning(f"Página {i+1} extremamente grande ({original_size_kb:.1f}KB), mantendo como está para evitar ConflictError")
-                            # Mantém como está (já foi redimensionado para A4 antes)
-                            novo_pdf.insert_pdf(doc, from_page=i, to_page=i)
-                            self._safe_update_progress(
-                                'optimizing',
-                                f'Processando página {i+1} de {total_pages}...',
-                                progress_pct,
-                                f'Página {i+1}: mantida como está ({original_size_kb:.1f}KB - muito grande)'
-                            )
+                        # Se a página já é grande (>5MB), evita converter para imagem
+                        # pois JPEG de alta qualidade vai aumentar ainda mais
+                        if original_size_kb > 5000: # > 5MB
+                            logging.info(f"Página {i+1} muito grande ({original_size_kb:.1f}KB), mantendo como vetor")
+                            # Mantém como vetor
+                            page_pdf_bytes = self._resize_to_a4(page)
+                            with fitz.open("pdf", page_pdf_bytes) as page_doc:
+                                novo_pdf.insert_pdf(page_doc, from_page=0, to_page=0)
                             self._log_page_processing(
-                                i, "pagina_mantida", time.time() - start_time,
-                                original_size, original_size,
-                                f"Mantida como está (muito grande: {original_size_kb:.1f}KB)"
+                                i, "pagina_vetorial_fallback", time.time() - start_time,
+                                original_size, len(page_pdf_bytes),
+                                f"Mantida como vetor (muito grande: {original_size_kb:.1f}KB)"
                             )
                             continue
                         
-                        # Processa como imagem com DPI adaptativo
+                        # Processa como imagem com DPI REDUZIDO para compressão
                         processed_page_bytes = self._resize_to_a4(page)
                         with fitz.open("pdf", processed_page_bytes) as processed_doc:
                             processed_page = processed_doc[0]
@@ -634,66 +527,37 @@ class PDFProcessor:
                             is_paisagem = width > height
                             target_size = A4_LANDSCAPE if is_paisagem else A4_PORTRAIT
                             
-                            # DPI adaptativo baseado no conteúdo e tamanho da página
-                            # Para páginas muito grandes, reduz DPI drasticamente para acelerar processamento
-                            if original_size_kb > 10000: # > 10MB - página muito grande
-                                dpi = 100 # DPI muito baixo para acelerar drasticamente
-                                logging.info(f"Página {i+1} muito grande ({original_size_kb:.1f}KB), usando DPI muito reduzido (100)")
-                                self._safe_update_progress(
-                                    'optimizing',
-                                    f'Processando página {i+1} de {total_pages}...',
-                                    progress_pct,
-                                    f'Página {i+1}: convertendo para imagem (DPI 100 - muito grande: {original_size_kb:.1f}KB)'
-                                )
-                            elif original_size_kb > 5000: # > 5MB
-                                dpi = 120 # DPI baixo
-                                self._safe_update_progress(
-                                    'optimizing',
-                                    f'Processando página {i+1} de {total_pages}...',
-                                    progress_pct,
-                                    f'Página {i+1}: convertendo para imagem (DPI 120 - grande: {original_size_kb:.1f}KB)'
-                                )
-                            elif original_size_kb > 2000: # > 2MB
-                                dpi = 150 # DPI médio-baixo
+                            # DPI ADAPTATIVO MAIS BAIXO para melhor compressão
+                            if original_size_kb > 2000:
+                                dpi = 120  # DPI baixo para páginas grandes
+                            elif original_size_kb > 1000:
+                                dpi = 140  # DPI médio-baixo
                             else:
-                                dpi = self.image_dpi if tem_imagens else self.text_dpi
+                                dpi = self.image_dpi
                             
                             pix = processed_page.get_pixmap(dpi=dpi)
                             img = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
                             
-                            # Redimensionamento inteligente - redimensiona mais agressivamente para páginas grandes
+                            # Redimensionamento mais agressivo
                             max_size = self.max_image_size
-                            if original_size_kb > 10000: # Páginas muito grandes
-                                max_size = 1200 # Reduz muito o tamanho máximo
-                            elif original_size_kb > 5000: # Páginas grandes
-                                max_size = 1500 # Reduz tamanho máximo
-                            elif original_size_kb > 2000: # Páginas médias-grandes
-                                max_size = 1800 # Reduz um pouco
-                            
                             if max(img.size) > max_size:
                                 ratio = max_size / max(img.size)
                                 new_size = (int(img.size[0] * ratio), int(img.size[1] * ratio))
                                 img = img.resize(new_size, Image.LANCZOS)
                             
-                            # Compressão com qualidade alta para preservar qualidade
-                            # Usa qualidade 92 (alta) para manter qualidade visual
-                            formato, qualidade, opts = "JPEG", self.jpeg_quality, {
-                                'optimize': True, 
-                                'subsampling': 0 # Sem subsampling para melhor qualidade
-                            }
-                            
+                            # QUALIDADE JPEG MAIS BAIXA para melhor compressão
+                            # Usa subsampling 420 para melhor compressão (sacrifica um pouco de qualidade)
                             buffer = BytesIO()
-                            img.save(buffer, format=formato, quality=qualidade, **opts)
+                            img.save(buffer, format="JPEG", quality=self.jpeg_quality,
+                                     subsampling=2, optimize=True)  # subsampling=2 é 420 (melhor compressão)
                             img_bytes = buffer.getvalue()
                             
                             compressed_size = len(img_bytes)
                             
-                            # Verifica se a conversão não aumentou muito o tamanho
+                            # VERIFICAÇÃO CRÍTICA: Se a conversão aumenta o tamanho, mantém como vetor
                             size_increase_ratio = compressed_size / original_size if original_size > 0 else float('inf')
-                            is_very_small = original_size < 5000 # < 5KB
-                            significant_increase = size_increase_ratio > 1.2
                             
-                            if significant_increase or is_very_small:
+                            if size_increase_ratio > 1.0:  # Se aumentou o tamanho
                                 logging.warning(
                                     f"Página {i+1}: conversão aumentaria tamanho de {original_size/1024:.2f}KB "
                                     f"para {compressed_size/1024:.2f}KB ({size_increase_ratio:.1f}x), mantendo como vetor"
@@ -717,7 +581,7 @@ class PDFProcessor:
                                 self._log_page_processing(
                                     i, "pagina_imagem", time.time() - start_time,
                                     original_size, compressed_size,
-                                    f"Formato: {formato}, Qualidade: {qualidade}, DPI: {dpi}"
+                                    f"Formato: JPEG, Qualidade: {self.jpeg_quality}, DPI: {dpi}, Subsampling: 420"
                                 )
                             
                 except Exception as e:
@@ -729,33 +593,33 @@ class PDFProcessor:
             
             novo_pdf.set_metadata(orig_metadata)
             output = BytesIO()
-            # Melhor compressão final
             novo_pdf.save(output, garbage=4, deflate=True, clean=True)
             return output.getvalue()
 
     def _handle_ocr_errors(self, pdf_data: bytes) -> bytes:
         """
-        Trata erros (que antes levariam ao OCR) aplicando apenas a compressão final.
+        Trata erros aplicando compressão final.
         """
         try:
+            if not self.enable_ocr:
+                logging.info("OCR desativado. Aplicando compressão final após erro.")
+                return self._compress_pdf_final(pdf_data)
+                
             return self._otimizacao_padrao(pdf_data)
-        except ocrmypdf.exceptions.PriorOcrFoundError:
-            logging.info("PDF já contém OCR, aplicando otimização leve")
-            return self._compress_pdf_final(pdf_data)
-        except ocrmypdf.exceptions.UnsupportedImageFormatError:
-            logging.warning("Formato de imagem não suportado, convertendo...")
-            # Fallback para conversão básica
-            return self._compress_pdf_final(pdf_data)
+            
         except Exception as e:
             logging.error(f"OCR falhou: {e}")
-            return pdf_data
+            return self._compress_pdf_final(pdf_data)
 
     def _otimizacao_padrao(self, pdf_data: bytes) -> bytes:
         """
-        Processa o PDF com OCRMyPDF de forma otimizada para VELOCIDADE (baixa qualidade).
+        Processa o PDF com OCRMyPDF com configurações otimizadas para compressão.
         """
+        if not self.enable_ocr:
+            logging.warning("OCR desativado. Retornando compressão final.")
+            return self._compress_pdf_final(pdf_data)
+
         try:
-            # Criar arquivos temporários para entrada e saída
             with tempfile.NamedTemporaryFile(suffix='.pdf', delete=False) as input_temp:
                 input_temp.write(pdf_data)
                 input_temp.flush()
@@ -766,42 +630,39 @@ class PDFProcessor:
                 with tempfile.NamedTemporaryFile(suffix='.pdf', delete=False) as output_temp:
                     output_temp_name = output_temp.name
                 
-                # Atualiza progresso antes de iniciar OCR
                 self._safe_update_progress(
                     'ocr',
-                    'Aplicando OCR RÁPIDO (comprometimento da qualidade)...',
+                    'Aplicando OCR para melhor compressão...',
                     60,
-                    'Iniciando reconhecimento de texto com configurações de alta velocidade'
+                    'Iniciando reconhecimento de texto'
                 )
                 
-                # AJUSTES DE ALTA VELOCIDADE/BAIXA QUALIDADE APLICADOS AQUI:
+                # CONFIGURAÇÕES OTIMIZADAS PARA COMPRESSÃO
                 ocrmypdf.ocr(
                     input_temp_name,
                     output_temp_name,
                     language='por+eng',
                     output_type='pdf',
-                    optimize=0,           # ❌ Desliga otimização pós-OCR (Mais Rápido, mas arquivo maior)
-                    jpeg_quality=60,      # ❌ Qualidade BAIXA (Imagens menores, OCR mais rápido)
-                    pdf_renderer='sandwich',# ✅ Modo mais rápido para renderização
+                    optimize=1,           # ✅ Otimização leve
+                    jpeg_quality=75,      # ✅ Qualidade moderada para melhor compressão
+                    pdf_renderer='hocr',  # ✅ Modo mais eficiente em espaço
                     skip_text=False,
                     force_ocr=False,
-                    deskew=False,         # ❌ Desliga correção de inclinação (Mais Rápido)
+                    deskew=False,
                     progress_bar=False,
-                    rotate_pages=False,   # ❌ Desliga rotação (Mais Rápido)
-                    clean=False,          # ❌ Desliga limpeza (Mais Rápido)
-                    jobs=4,               # ✅ Aumenta paralelismo (Assumindo múltiplos núcleos disponíveis)
+                    rotate_pages=False,
+                    clean=False,
+                    jobs=2,               # ✅ Menos jobs para menos uso de memória
                     quiet=True
                 )
                 
-                # Atualiza progresso após OCR
                 self._safe_update_progress(
                     'optimizing',
-                    'OCR RÁPIDO concluído, finalizando otimização...',
+                    'OCR concluído, finalizando...',
                     90,
-                    'OCRMyPDF concluído (modo rápido)'
+                    'OCRMyPDF concluído'
                 )
                 
-                # Ler o resultado
                 with open(output_temp_name, 'rb') as f:
                     result = f.read()
                     
@@ -809,32 +670,11 @@ class PDFProcessor:
                 
             except ocrmypdf.exceptions.PriorOcrFoundError:
                 logging.info("PDF já contém texto pesquisável, aplicando apenas otimização")
-                # Se já tem OCR, aplica apenas otimização
                 self._safe_update_progress(
                     'optimizing',
                     'Otimizando PDF (já tem OCR)...',
                     80,
-                    'PDF já possui texto pesquisável - apenas otimização'
-                )
-                return self._compress_pdf_final(pdf_data)
-                
-            except ocrmypdf.exceptions.InputFileError as e:
-                error_msg = str(e)
-                if "Tagged PDF" in error_msg or "does not need OCR" in error_msg:
-                    logging.info("PDF Tagged detectado (gerado de documento office), aplicando otimização sem OCR")
-                    self._safe_update_progress(
-                        'optimizing',
-                        'Otimizando PDF Tagged...',
-                        80,
-                        'PDF Tagged detectado - não precisa de OCR'
-                    )
-                    return self._compress_pdf_final(pdf_data)
-                logging.warning(f"Erro no arquivo de entrada: {e}")
-                self._safe_update_progress(
-                    'compressing',
-                    'Aplicando compressão...',
-                    85,
-                    f'Erro no OCR: {str(e)[:50]}'
+                    'PDF já possui texto pesquisável'
                 )
                 return self._compress_pdf_final(pdf_data)
                 
@@ -846,7 +686,7 @@ class PDFProcessor:
                         'optimizing',
                         'Otimizando PDF Tagged...',
                         80,
-                        'PDF Tagged detectado - não precisa de OCR'
+                        'PDF Tagged detectado'
                     )
                     return self._compress_pdf_final(pdf_data)
                 logging.warning(f"OCR falhou, aplicando compressão básica: {ocr_error}")
@@ -859,7 +699,6 @@ class PDFProcessor:
                 return self._compress_pdf_final(pdf_data)
                 
             finally:
-                # Limpeza dos arquivos temporários
                 try:
                     if os.path.exists(input_temp_name):
                         os.unlink(input_temp_name)
@@ -943,19 +782,28 @@ class PDFProcessor:
             return False if not hasattr(self, 'get_signatures_from_stream') else None
 
     def _compress_pdf_final(self, pdf_data: bytes) -> bytes:
+        """
+        Compressão final agressiva usando pikepdf.
+        """
         try:
             with pikepdf.open(BytesIO(pdf_data)) as pdf:
                 output = BytesIO()
+                # Configurações agressivas de compressão
                 pdf.save(
                     output,
-                    linearize=True,
+                    linearize=False,  # Não linearizar para melhor compressão
                     compress_streams=True,
+                    stream_compress_level=9,  # Nível máximo de compressão
                     object_stream_mode=pikepdf.ObjectStreamMode.generate,
-                    preserve_pdfa=True,
+                    preserve_pdfa=False,  # Não preservar PDF/A para melhor compressão
+                    compress_fonts=True,
+                    normalize_content=True,
+                    deduplicate_images=True,  # Deduplicar imagens
+                    force_version='1.5'  # Versão mais compatível
                 )
                 compressed = output.getvalue()
-                # Só retorna se realmente comprimiu (reduziu tamanho)
                 if len(compressed) < len(pdf_data):
+                    logging.info(f"Compressão final: {len(pdf_data)/1024:.2f}KB -> {len(compressed)/1024:.2f}KB (redução: {calculate_compression_rate(len(pdf_data), len(compressed)):.1f}%)")
                     return compressed
                 return pdf_data
         except Exception as e:
@@ -969,7 +817,6 @@ class PDFProcessor:
                 return pdf_data
             start_time = time.time()
             
-            # Atualiza progresso - redimensionamento
             self._safe_update_progress(
                 'resizing',
                 'Redimensionando para A4...',
@@ -980,7 +827,7 @@ class PDFProcessor:
             resize_start = time.time()
             pdf_data = self._resize_document_to_a4(pdf_data)
             resize_time = time.time() - resize_start
-            logging.info(f"Redimensionamento para A4 concluído em {resize_time:.2f}s ({resize_time*1000:.2f} ms)")
+            logging.info(f"Redimensionamento para A4 concluído em {resize_time:.2f}s")
             logging.info(f"Tamanho após redimensionamento: {len(pdf_data)/1024:.2f} KB")
             
             self._safe_update_progress(
@@ -989,10 +836,9 @@ class PDFProcessor:
                 35,
                 f'Redimensionado em {resize_time:.2f}s - {len(pdf_data)/1024:.1f} KB'
             )
-            original_size = len(pdf_data)
+            original_size_after_resize = len(pdf_data)
             
             with fitz.open(stream=pdf_data) as doc:
-                # Atualiza progresso - verificação de texto
                 self._safe_update_progress(
                     'checking_text',
                     'Verificando texto pesquisável...',
@@ -1001,12 +847,10 @@ class PDFProcessor:
                 )
                 
                 step_start = time.time()
-                # Verifica se o documento tem texto pesquisável (OCR)
                 check_start = time.time()
                 tem_texto_pesquisavel = self._documento_tem_texto_pesquisavel(doc)
                 check_time = time.time() - check_start
                 logging.info(f"Verificação de texto pesquisável: {check_time:.2f}s (tem_texto: {tem_texto_pesquisavel}, páginas: {doc.page_count})")
-                logging.info(f"Verificação de texto pesquisável concluída em {time.time() - step_start:.2f}s (tem_texto: {tem_texto_pesquisavel})")
                 
                 self._safe_update_progress(
                     'checking_text',
@@ -1015,12 +859,21 @@ class PDFProcessor:
                     f'Texto pesquisável: {"Sim" if tem_texto_pesquisavel else "Não"} ({doc.page_count} páginas)'
                 )
                 
-                if not tem_texto_pesquisavel:
-                    # PDF sem OCR - aplica OCR RÁPIDO
-                    logging.info("PDF sem texto pesquisável detectado, aplicando OCR RÁPIDO")
+                # LÓGICA DE OCR CONFIGURÁVEL
+                should_run_ocr = (
+                    self.enable_ocr and 
+                    (
+                        (not tem_texto_pesquisavel and not self.ocr_fallback_only) or
+                        (tem_texto_pesquisavel and self.ocr_force_enabled)
+                    )
+                )
+
+                if should_run_ocr:
+                    action_msg = "OCR FORÇADO" if tem_texto_pesquisavel and self.ocr_force_enabled else "OCR para compressão"
+                    logging.info(f"Aplicando {action_msg}")
                     return self._otimizacao_padrao(pdf_data)
                 
-                # PDF com texto pesquisável - aplica otimização inteligente
+                # PDF sem OCR visível - tenta otimização inteligente
                 self._safe_update_progress(
                     'optimizing',
                     'Otimizando PDF...',
@@ -1030,53 +883,66 @@ class PDFProcessor:
                 
                 try:
                     pdf_otimizado = self._otimizacao_inteligente(doc)
+                    tamanho_otimizado = len(pdf_otimizado)
                     
-                    # Atualiza progresso durante otimização
-                    self._safe_update_progress(
-                        'optimizing',
-                        'Finalizando otimização...',
-                        80,
-                        'Aplicando compressão final'
-                    )
-                    
-                    # Verifica se a otimização aumentou o tamanho
-                    if len(pdf_otimizado) > original_size * 1.05: # Tolerância de 5%
+                    # VERIFICAÇÃO CRÍTICA: Se a otimização aumentou o tamanho
+                    if tamanho_otimizado > original_size_after_resize * 1.02:  # Tolerância de 2%
+                        aumento_percentual = (tamanho_otimizado - original_size_after_resize) / original_size_after_resize * 100
                         logging.warning(
-                            f"Otimização aumentou o tamanho do PDF de {original_size/1024:.2f}KB "
-                            f"para {len(pdf_otimizado)/1024:.2f}KB, aplicando compressão final"
+                            f"Otimização aumentou o tamanho do PDF de {original_size_after_resize/1024:.2f}KB "
+                            f"para {tamanho_otimizado/1024:.2f}KB (aumento: {aumento_percentual:.1f}%)"
                         )
-                        self._safe_update_progress(
-                            'compressing',
-                            'Comprimindo PDF...',
-                            85,
-                            f'Tamanho aumentou - aplicando compressão adicional'
-                        )
-                        # Tenta compressão final
-                        compressed = self._compress_pdf_final(pdf_data)
-                        if len(compressed) < len(pdf_otimizado):
-                            return compressed
-                        # Se ainda aumentou muito, tenta OCR padrão (pode melhorar compressão)
-                        if len(compressed) > original_size * 1.10:
-                            logging.warning("Compressão ainda aumentou tamanho, aplicando OCR RÁPIDO (fallback)")
+                        
+                        # SE OCR ESTÁ ATIVADO E É FALLBACK-ONLY, TENTA OCR
+                        if self.enable_ocr and self.ocr_fallback_only:
+                            logging.warning("Otimização aumentou tamanho, aplicando OCR RÁPIDO (fallback)")
                             self._safe_update_progress(
                                 'ocr',
-                                'Aplicando OCR RÁPIDO para melhor compressão (fallback)...',
+                                'Aplicando OCR para melhor compressão (fallback)...',
                                 70,
-                                'Compressão não foi suficiente - tentando OCR RÁPIDO'
+                                'Otimização aumentou tamanho - tentando OCR'
                             )
                             return self._otimizacao_padrao(pdf_data)
-                        return compressed
-                    return pdf_otimizado
+                        else:
+                            # Se OCR não está disponível ou não é fallback, aplica compressão final
+                            self._safe_update_progress(
+                                'compressing',
+                                'Comprimindo PDF (otimização aumentou tamanho)...',
+                                85,
+                                f'Aumento: {aumento_percentual:.1f}% - aplicando compressão agressiva'
+                            )
+                            return self._compress_pdf_final(pdf_otimizado)
+                    
+                    # Se otimização foi boa (não aumentou muito ou reduziu), aplica compressão final leve
+                    self._safe_update_progress(
+                        'compressing',
+                        'Aplicando compressão final...',
+                        85,
+                        f'Otimização bem sucedida ({tamanho_otimizado/1024:.1f}KB)'
+                    )
+                    return self._compress_pdf_final(pdf_otimizado)
                 
                 except Exception as intel_error:
                     logging.warning(f"Falha na otimização inteligente: {str(intel_error)}")
-                    self._safe_update_progress(
-                        'ocr',
-                        'Aplicando OCR RÁPIDO (fallback)...',
-                        60,
-                        f'Falha na otimização inteligente: {str(intel_error)[:50]}'
-                    )
-                    return self._otimizacao_padrao(pdf_data)
+                    
+                    if self.enable_ocr:
+                        self._safe_update_progress(
+                            'ocr',
+                            'Aplicando OCR (fallback por erro)...',
+                            60,
+                            f'Falha na otimização: {str(intel_error)[:50]}'
+                        )
+                        return self._otimizacao_padrao(pdf_data)
+                    else:
+                        logging.warning("OCR desativado. Aplicando compressão final após falha.")
+                        self._safe_update_progress(
+                            'compressing',
+                            'Aplicando compressão final (após erro)...',
+                            85,
+                            f'Falha na otimização: {str(intel_error)[:50]}'
+                        )
+                        return self._compress_pdf_final(pdf_data)
+        
         except Exception as e:
             logging.error(f"Erro geral no processamento: {str(e)}")
             self._safe_update_progress('error', f'Erro no processamento: {str(e)}', 0)
@@ -1189,84 +1055,68 @@ class PDFSignatureParser(PDFProcessor):
         return None
 
 # ******************************************
-# PROGRESS STORAGE (Thread-safe global cache)
+# PROGRESS STORAGE (Simplificado para Zope)
 # ******************************************
-# Cache global thread-safe para armazenar progresso
-# Chave: session_id ou request_id, Valor: dict com progresso
 _progress_cache = {}
-_progress_cache_lock = threading.Lock()
-_progress_cache_cleanup_interval = 300 # Limpa cache a cada 5 minutos
 _last_cleanup = time.time()
 
 def _get_progress_from_cache(session_id: str) -> Dict[str, Any]:
-    """Obtém progresso do cache global"""
+    """Obtém progresso do cache simplificado"""
     global _last_cleanup
-    with _progress_cache_lock:
-        # Limpeza periódica de entradas antigas (>10 minutos)
-        current_time = time.time()
-        if current_time - _last_cleanup > _progress_cache_cleanup_interval:
-            cutoff_time = current_time - 600 # 10 minutos
-            keys_to_remove = [
-                k for k, v in _progress_cache.items()
-                if v.get('timestamp', 0) < cutoff_time
-            ]
-            for k in keys_to_remove:
-                del _progress_cache[k]
-            _last_cleanup = current_time
-        
-        return _progress_cache.get(session_id, {
-            'stage': 'unknown',
-            'message': 'Processando...',
-            'progress': 0,
-            'details': ''
-        })
+    current_time = time.time()
+    
+    if current_time - _last_cleanup > 300:
+        cutoff_time = current_time - 600
+        keys_to_remove = [
+            k for k, v in _progress_cache.items()
+            if v.get('timestamp', 0) < cutoff_time
+        ]
+        for k in keys_to_remove:
+            del _progress_cache[k]
+        _last_cleanup = current_time
+    
+    return _progress_cache.get(session_id, {
+        'stage': 'unknown',
+        'message': 'Processando...',
+        'progress': 0,
+        'details': ''
+    })
 
 def _set_progress_in_cache(session_id: str, progress_data: Dict[str, Any]):
-    """Armazena progresso no cache global"""
-    with _progress_cache_lock:
-        progress_data['timestamp'] = time.time()
-        _progress_cache[session_id] = progress_data
+    """Armazena progresso no cache simplificado"""
+    progress_data['timestamp'] = time.time()
+    _progress_cache[session_id] = progress_data
 
 def _get_session_id(request) -> str:
-    """Obtém um ID único para a sessão/requisição que seja compartilhado entre requisições"""
+    """Obtém um ID único para a sessão/requisição"""
     try:
-        # Primeiro, tenta obter de um cookie de sessão (se disponível) - MELHOR OPÇÃO
         if hasattr(request, 'cookies'):
             session_cookie = request.cookies.get('__ac', None) or request.cookies.get('session_id', None) or request.cookies.get('ZopeSession', None)
             if session_cookie:
-                # Converte para string se for bytes
                 if isinstance(session_cookie, bytes):
                     session_cookie = session_cookie.decode('utf-8', errors='ignore')
                 return f"cookie_{session_cookie}"
         
-        # Tenta obter ID da sessão se disponível
         if hasattr(request, 'SESSION'):
             session_obj = request.SESSION
-            # Tenta obter um identificador único do objeto SESSION
             if hasattr(session_obj, '_p_oid'):
                 oid = session_obj._p_oid
-                # Converte bytes para string hexadecimal
                 if isinstance(oid, bytes):
                     oid = oid.hex()
                 elif oid is None:
-                    # Se _p_oid é None, usa hash do objeto
                     oid = str(hash(session_obj))
                 else:
                     oid = str(oid)
                 return f"session_{oid}"
             
-            # Ou usa o caminho do objeto se disponível
             if hasattr(session_obj, '__parent__'):
                 return f"session_path_{id(session_obj.__parent__)}"
             
-            # Ou usa o ID do objeto diretamente
             return f"session_{id(session_obj)}"
         
-        # Fallback: usa ID do request (não ideal, mas funciona para mesma requisição)
         return f"req_{id(request)}"
     except Exception:
-        # Último fallback: timestamp + thread ID
-        return f"fallback_{threading.current_thread().ident}_{time.time()}"
+        return f"fallback_{time.time()}"
 
 # ******************************************
 # PROGRESS VIEW
@@ -1280,43 +1130,31 @@ class PDFProcessingProgressView(grok.View):
     def render(self):
         """Retorna o progresso atual em JSON"""
         try:
-            # Obtém ID da sessão/requisição
             session_id = _get_session_id(self.request)
-            
-            # Tenta obter do cache global primeiro
             progress_data = _get_progress_from_cache(session_id)
             
-            # Se não encontrou no cache, tenta buscar em todas as chaves do cache
-            # (pode ser que o session_id seja ligeiramente diferente entre requisições)
             if progress_data.get('stage') == 'unknown':
-                with _progress_cache_lock:
-                    # Busca por prefixo (cookie_, session_, etc) ou busca o mais recente
-                    current_time = time.time()
-                    most_recent = None
-                    most_recent_time = 0
-                    
-                    for key, value in _progress_cache.items():
-                        # Verifica se é recente (últimos 5 minutos)
-                        value_time = value.get('timestamp', 0)
-                        if value_time > current_time - 300:
-                            # Prioriza por timestamp (mais recente primeiro)
-                            if value_time > most_recent_time:
-                                most_recent = value
-                                most_recent_time = value_time
-                    
-                    if most_recent:
-                        progress_data = most_recent
+                current_time = time.time()
+                most_recent = None
+                most_recent_time = 0
+                
+                for key, value in _progress_cache.items():
+                    value_time = value.get('timestamp', 0)
+                    if value_time > current_time - 300:
+                        if value_time > most_recent_time:
+                            most_recent = value
+                            most_recent_time = value_time
+                
+                if most_recent:
+                    progress_data = most_recent
             
-            # Fallback: tenta obter do SESSION se disponível
             if progress_data.get('stage') == 'unknown' and hasattr(self.request, 'SESSION'):
                 progress_key = 'pdf_processing_progress'
                 session_data = self.request.SESSION.get(progress_key)
                 if session_data:
                     progress_data = session_data
-                    # Atualiza cache com dados do SESSION
                     _set_progress_in_cache(session_id, progress_data)
             
-            # Retorna como JSON
             self.request.RESPONSE.setHeader('Content-Type', 'application/json')
             import json
             result = json.dumps(progress_data)
@@ -1348,35 +1186,23 @@ class PDFUploadProcessorView(grok.View, PDFSignatureParser):
 
     def _update_progress(self, stage: str, message: str, progress: int = None, details: str = ""):
         """
-        Atualiza o progresso do processamento no request e no cache global.
-        stage: etapa atual (validating, resizing, optimizing, ocr, finalizing)
-        message: mensagem para o usuário
-        progress: porcentagem (0-100), None para auto-calcular
-        details: detalhes adicionais
+        Atualiza o progresso do processamento.
         """
         try:
             if not hasattr(self, 'request'):
                 return
             
-            # Obtém ID da sessão/requisição
             session_id = _get_session_id(self.request)
             
-            # Verifica se há progresso anterior (pode ser retry)
             previous_progress = _get_progress_from_cache(session_id)
             previous_progress_pct = previous_progress.get('progress', 0)
             
-            # Calcula o progresso atual
             current_progress = progress if progress is not None else 0
             
-            # Se for retry e o progresso anterior for maior, mantém o anterior como mínimo
-            # Mas permite avançar se o novo progresso for maior
             if previous_progress.get('stage') not in ('unknown', 'complete', 'error', 'initializing'):
-                # Se a mensagem anterior contém "[Retry]", é um retry em andamento
                 if '[Retry]' in previous_progress.get('message', ''):
-                    # Mantém o progresso anterior como mínimo, mas permite avançar
                     if current_progress < previous_progress_pct:
                         current_progress = previous_progress_pct
-                        # Adiciona indicação de que está mantendo progresso mínimo
                         if '[Retry]' not in message:
                             message = f"[Retry] {message}"
             
@@ -1388,15 +1214,12 @@ class PDFUploadProcessorView(grok.View, PDFSignatureParser):
                 'timestamp': time.time()
             }
             
-            # Armazena no cache global (thread-safe)
             _set_progress_in_cache(session_id, progress_data)
             
-            # Também armazena no SESSION se disponível (para compatibilidade)
             if hasattr(self.request, 'SESSION'):
                 try:
                     progress_key = 'pdf_processing_progress'
                     self.request.SESSION[progress_key] = progress_data
-                    # Força persistência do SESSION
                     try:
                         self.request.SESSION._p_changed = True
                     except:
@@ -1404,11 +1227,9 @@ class PDFUploadProcessorView(grok.View, PDFSignatureParser):
                 except Exception:
                     pass
             
-            # Log apenas para erros ou conclusão
             if stage in ('error', 'complete'):
                 logging.info(f"[PROGRESS] {stage} - {message} ({current_progress}%)")
         except Exception:
-            # Não falha se não conseguir atualizar progresso
             pass
 
     def _get_progress(self):
@@ -1448,11 +1269,9 @@ class PDFUploadProcessorView(grok.View, PDFSignatureParser):
             logging.info('[READ_COMPLETE] Arquivo lido com sucesso size=%.2f KB (%.2fs)', 
                          original_size / 1024, read_time)
             
-            # Detecta possível retry baseado no hash do arquivo
             file_hash = self._get_file_hash(original_data)
             cache_key = f"pdf_process_{file_hash}"
             
-            # Verifica se já está processando (pode ser retry do Zope)
             is_retry = False
             if hasattr(self.request, 'SESSION'):
                 cache_data = self.request.SESSION.get(cache_key)
@@ -1461,15 +1280,11 @@ class PDFUploadProcessorView(grok.View, PDFSignatureParser):
                     is_retry = True
                     logging.info(f'[RETRY_DETECTED] Possível retry detectado (hash: {file_hash[:8]}...), tempo decorrido: {elapsed:.2f}s')
             
-            # Inicializa progresso ANTES de qualquer processamento
-            # Se for retry, mantém o progresso anterior ou mostra mensagem de reprocessamento
             session_id = _get_session_id(self.request)
             if is_retry:
-                # Verifica se há progresso anterior no cache
                 previous_progress = _get_progress_from_cache(session_id)
                 
                 if previous_progress.get('stage') not in ('unknown', 'complete', 'error'):
-                    # Mantém o progresso anterior e adiciona indicação de retry
                     prev_stage = previous_progress.get('stage', 'processing')
                     prev_message = previous_progress.get('message', 'Processando...')
                     prev_progress = previous_progress.get('progress', 0)
@@ -1481,24 +1296,16 @@ class PDFUploadProcessorView(grok.View, PDFSignatureParser):
                         prev_progress,
                         f"Reprocessando após ConflictError - {prev_details}"
                     )
-                    # Não reinicia do zero, continua a partir do progresso anterior
                 else:
-                    # Se não há progresso anterior válido, inicia normalmente mas indica retry
                     self._update_progress('processing', '[Retry] Reprocessando após ConflictError...', 20, 'Zope detectou conflito e está reprocessando')
             else:
-                # Inicializa progresso normalmente
                 self._update_progress('initializing', 'Iniciando processamento...', 0, 'Preparando arquivo para processamento')
-                time.sleep(0.1) # Pequeno delay para garantir que o SESSION seja salvo
-                
-                # Atualiza para leitura
+                time.sleep(0.1)
                 self._update_progress('reading', 'Lendo arquivo...', 5, 'Carregando arquivo PDF')
             
-            # Marca como processando
             if hasattr(self.request, 'SESSION'):
                 self.request.SESSION[cache_key] = {'status': 'processing', 'start_time': start_time}
             
-            # Se for retry e já tem progresso anterior, não atualiza para validação (mantém o progresso anterior)
-            # Caso contrário, atualiza normalmente
             current_progress = _get_progress_from_cache(session_id)
             if not is_retry or current_progress.get('stage') in ('unknown', 'processing', 'initializing'):
                 self._update_progress('validating', f'Validando PDF ({original_size/1024:.1f} KB)...', 10)
@@ -1510,7 +1317,6 @@ class PDFUploadProcessorView(grok.View, PDFSignatureParser):
             if assinaturas:
                 logging.warning("Assinaturas digitais detectadas (%d). PDF mantido original.", len(assinaturas))
                 result = {'file_stream': BytesIO(original_data), 'signatures': assinaturas}
-                # Marca como completo no cache
                 if hasattr(self.request, 'SESSION'):
                     self.request.SESSION[cache_key] = {
                         'status': 'complete',
@@ -1533,7 +1339,6 @@ class PDFUploadProcessorView(grok.View, PDFSignatureParser):
                     reduction,
                     total_time
                 )
-                # Marca como completo no cache
                 if hasattr(self.request, 'SESSION'):
                     self.request.SESSION[cache_key] = {
                         'status': 'complete',
@@ -1542,16 +1347,19 @@ class PDFUploadProcessorView(grok.View, PDFSignatureParser):
                         'reduction': reduction,
                         'optimized_size': optimized_size
                     }
-                # Só marca como completo DEPOIS que tudo terminou
                 self._update_progress('complete', 'Processamento concluído', 100, 
                                      f'Redução: {reduction:.1f}% ({optimized_size/1024:.1f} KB)')
                 return result_data
 
         except (PDFSizeExceededError, PDFPageLimitExceededError) as e:
             logging.error(str(e))
+            self._update_progress('error', f'Erro de Limite: {str(e)}', 0)
             raise
-        except PDFIrrecuperavelError:
+        except PDFIrrecuperavelError as e:
+            logging.error(str(e))
+            self._update_progress('error', f'PDF Irrecuperável: {str(e)}', 0)
             raise
         except Exception as e:
             logging.error(f"Erro inesperado: {str(e)}", exc_info=True)
+            self._update_progress('error', f'Falha no processamento: {str(e)}', 0)
             raise ValueError(f"Falha no processamento: {str(e)}")

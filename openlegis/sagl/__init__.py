@@ -25,10 +25,10 @@ from openlegis.sagl.lexml import SAGLOAIServer
 from openlegis.sagl.interfaces import (
     IWebSocketServerUtility, 
     IWebSocketServerService,
-    ISAPLDocumentManager,  # <--- adicione aqui
+    ISAPLDocumentManager,
 )
 from openlegis.sagl.browser.websocket_server import WebSocketServerService
-from openlegis.sagl.document_manager import SAPLDocumentManager  # <--- adicione aqui
+from openlegis.sagl.document_manager import SAPLDocumentManager
 
 # Logger
 logger = logging.getLogger(__name__)
@@ -36,6 +36,83 @@ logger = logging.getLogger(__name__)
 ###############################################################################
 # CONFIGURAÇÃO DE SEGURANÇA
 ###############################################################################
+
+def patch_celery_for_zope():
+    """Patch Celery's LazyModule to handle __file__ attribute for Zope compatibility"""
+    try:
+        # Import celery.local to ensure it's loaded, then patch it
+        try:
+            import celery.local
+            from celery.local import LazyModule
+            
+            # Check if already patched
+            if hasattr(LazyModule, '_original_getattr_patched'):
+                return
+            
+            # Store original __getattr__
+            original_getattr = LazyModule.__getattr__
+            LazyModule._original_getattr_patched = True
+            
+            def patched_getattr(self, name):
+                # Handle common module attributes that proxy modules might not have
+                # These attributes are accessed by Zope's refcount function and other introspection tools
+                proxy_module_attrs = ('__file__', '__path__', '__loader__', '__spec__', '__package__')
+                
+                # First check: if it's a known proxy module attribute, return None immediately
+                if name in proxy_module_attrs:
+                    return None
+                
+                # For other attributes, try the original behavior
+                try:
+                    return original_getattr(self, name)
+                except AttributeError:
+                    # If ModuleType.__getattribute__ failed, check if it's a proxy module attribute
+                    # This is a safety net in case the attribute list needs to be extended
+                    if name in proxy_module_attrs:
+                        return None
+                    # Re-raise for attributes we don't explicitly handle
+                    raise
+            
+            LazyModule.__getattr__ = patched_getattr
+            logger.debug("Patch do Celery LazyModule aplicado com sucesso")
+        except ImportError:
+            # Celery not available, skip patching
+            pass
+        
+        # Patch Zope's ApplicationManager.refcount to handle modules without __file__
+        try:
+            from App.ApplicationManager import ApplicationManager
+            original_refcount = ApplicationManager.refcount
+            
+            def patched_refcount(self):
+                """Patched refcount that handles modules without __file__ attribute"""
+                import sys
+                result = {}
+                for name, module in sys.modules.items():
+                    try:
+                        if module is None:
+                            continue
+                        # Try to get __file__, but handle AttributeError gracefully
+                        try:
+                            file_path = getattr(module, '__file__', None)
+                        except (AttributeError, TypeError):
+                            file_path = None
+                        # Count references
+                        refcount = sys.getrefcount(module)
+                        if refcount > 3:  # filter out normal references
+                            result[name] = (refcount, file_path)
+                    except (TypeError, AttributeError):
+                        # Skip modules that can't be inspected
+                        continue
+                return result
+            
+            ApplicationManager.refcount = patched_refcount
+        except (ImportError, AttributeError):
+            # ApplicationManager not available, skip
+            pass
+            
+    except Exception as e:
+        logger.warning(f"Erro ao aplicar patch do Celery para Zope: {e}")
 
 def configure_module_security():
     """Configura permissões para módulos Python usados em código restrito"""
@@ -152,6 +229,9 @@ def register_main_components(context):
 def initialize(context):
     """Função principal de inicialização do pacote"""
 
+    # 0. Aplica patch para compatibilidade Celery/Zope (antes de qualquer import do Celery)
+    patch_celery_for_zope()
+
     # 1. Configura segurança
     configure_module_security()
 
@@ -180,7 +260,7 @@ def initialize(context):
     def create_sagl_after_startup():
         """Cria a aplicação SAGL após o Zope estar totalmente inicializado"""
         import time
-        time.sleep(3)  # Aguarda 3 segundos para o Zope estar totalmente pronto e a conexão ZODB estar estável
+        time.sleep(5)  # Aguarda 5 segundos para o Zope estar totalmente pronto e a conexão ZODB estar estável
         
         try:
             # Get the root application directly from Zope2

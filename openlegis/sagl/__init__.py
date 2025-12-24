@@ -180,7 +180,7 @@ def initialize(context):
     def create_sagl_after_startup():
         """Cria a aplicação SAGL após o Zope estar totalmente inicializado"""
         import time
-        time.sleep(5)  # Aguarda 5 segundos para o Zope estar totalmente pronto e a conexão ZODB estar estável
+        time.sleep(3)  # Aguarda 3 segundos para o Zope estar totalmente pronto e a conexão ZODB estar estável
         
         try:
             # Get the root application directly from Zope2
@@ -202,23 +202,18 @@ def initialize(context):
             logger.info("SAGL '%s' não encontrado na raiz, criando aplicação após inicialização...", sagl_id)
             
             try:
-                # Try to import the create function from the recipe
-                try:
-                    from openlegis.recipe.sagl.sagl import create
-                except ImportError:
-                    # If the recipe is not available, define a simple create function
-                    logger.warning("openlegis.recipe.sagl não disponível, usando função create local")
-                    def create(container, sagl_id):
-                        from openlegis.sagl import Portal
-                        from zope.component.hooks import setSite
-                        if sagl_id in container.objectIds():
-                            sagl = getattr(container, sagl_id)
-                            return (sagl, False)
-                        factory = container.manage_addProduct['openlegis.sagl']
-                        factory.manage_addSAGL(sagl_id, title='SAGL', database="MySQL")
+                # Define the create function locally
+                def create(container, sagl_id):
+                    from openlegis.sagl import Portal
+                    from zope.component.hooks import setSite
+                    if sagl_id in container.objectIds():
                         sagl = getattr(container, sagl_id)
-                        setSite(sagl)
-                        return (sagl, True)
+                        return (sagl, False)
+                    factory = container.manage_addProduct['openlegis.sagl']
+                    factory.manage_addSAGL(sagl_id, title='SAGL', database="MySQL")
+                    sagl = getattr(container, sagl_id)
+                    setSite(sagl)
+                    return (sagl, True)
                 
                 from zope.component.hooks import setSite
                 import transaction

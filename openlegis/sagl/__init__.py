@@ -174,3 +174,124 @@ def initialize(context):
         logger.info("ISAGLDocumentManager registrado com sucesso.")
     except Exception as e:
         logger.exception("Erro ao registrar ISAGLDocumentManager: %s", e)
+
+    # 5. VERIFICA E CRIA APLICAÇÃO SAGL NA RAIZ SE NÃO EXISTIR
+    # Usar um timer para executar após o Zope estar totalmente inicializado
+    def create_sagl_after_startup():
+        """Cria a aplicação SAGL após o Zope estar totalmente inicializado"""
+        import time
+        time.sleep(5)  # Aguarda 5 segundos para o Zope estar totalmente pronto e a conexão ZODB estar estável
+        
+        try:
+            # Get the root application directly from Zope2
+            import Zope2
+            app = Zope2.app()
+            
+            if app is None:
+                logger.warning("Não foi possível obter a aplicação Zope para verificar/criar SAGL")
+                return
+            
+            sagl_id = 'sagl'
+            
+            # Check if SAGL already exists in root
+            if hasattr(app, 'objectIds') and sagl_id in app.objectIds():
+                # Aplicação já existe, não precisa fazer nada nem logar
+                return
+            
+            # SAGL doesn't exist, create it
+            logger.info("SAGL '%s' não encontrado na raiz, criando aplicação após inicialização...", sagl_id)
+            
+            try:
+                # Try to import the create function from the recipe
+                try:
+                    from openlegis.recipe.sagl.sagl import create
+                except ImportError:
+                    # If the recipe is not available, define a simple create function
+                    logger.warning("openlegis.recipe.sagl não disponível, usando função create local")
+                    def create(container, sagl_id):
+                        from openlegis.sagl import Portal
+                        from zope.component.hooks import setSite
+                        if sagl_id in container.objectIds():
+                            sagl = getattr(container, sagl_id)
+                            return (sagl, False)
+                        factory = container.manage_addProduct['openlegis.sagl']
+                        factory.manage_addSAGL(sagl_id, title='SAGL', database="MySQL")
+                        sagl = getattr(container, sagl_id)
+                        setSite(sagl)
+                        return (sagl, True)
+                
+                from zope.component.hooks import setSite
+                import transaction
+                from AccessControl.SecurityManagement import newSecurityManager, noSecurityManager
+                
+                # Set up security manager
+                acl_users = app.acl_users
+                admin_user = 'admin'
+                user = acl_users.getUser(admin_user)
+                if user:
+                    user = user.__of__(acl_users)
+                    newSecurityManager(None, user)
+                    logger.info("Usuário admin configurado para criação do SAGL")
+                else:
+                    # Try to create admin user
+                    try:
+                        if hasattr(acl_users, 'userFolderAddUser'):
+                            acl_users.userFolderAddUser(admin_user, 'openlegis', ['Manager'], [])
+                            transaction.commit()
+                            user = acl_users.getUser(admin_user)
+                            if user:
+                                user = user.__of__(acl_users)
+                                newSecurityManager(None, user)
+                                logger.info("Usuário admin criado para criação do SAGL")
+                    except Exception as e:
+                        logger.warning("Não foi possível criar/obter usuário admin: %s", str(e))
+                        return  # Can't proceed without admin user
+                
+                # Create SAGL
+                sagl, created = create(app, sagl_id)
+                
+                if created:
+                    logger.info("SAGL '%s' criado com sucesso durante inicialização do Zope", sagl_id)
+                    
+                    # Run setup profile
+                    try:
+                        setup_tool = getattr(sagl, 'portal_setup')
+                        setup_tool.runAllImportStepsFromProfile('profile-openlegis.sagl:default')
+                        logger.info("Profile openlegis.sagl:default aplicado durante inicialização")
+                    except Exception as e:
+                        logger.warning("Erro ao aplicar profile durante inicialização: %s", str(e))
+                    
+                    # Mark objects as changed to ensure they're saved
+                    if hasattr(app, '_p_changed'):
+                        app._p_changed = 1
+                    if hasattr(sagl, '_p_changed'):
+                        sagl._p_changed = 1
+                    
+                    # Commit transaction to ensure persistence
+                    transaction.commit()
+                    logger.info("SAGL '%s' inicializado e commitado com sucesso durante inicialização do Zope", sagl_id)
+                    
+                    # Verify it was created
+                    if sagl_id in app.objectIds():
+                        logger.info("VERIFICAÇÃO: SAGL '%s' confirmado nos objectIds após commit", sagl_id)
+                    else:
+                        logger.warning("AVISO: SAGL '%s' não encontrado nos objectIds após commit - pode não ter persistido", sagl_id)
+                
+                noSecurityManager()
+                
+            except Exception as e:
+                logger.error("Erro ao criar SAGL após inicialização: %s", str(e))
+                import traceback
+                logger.error(traceback.format_exc())
+                try:
+                    noSecurityManager()
+                except:
+                    pass
+        except Exception as e:
+            logger.warning("Erro ao verificar/criar SAGL após inicialização: %s", str(e))
+            # Não falha a inicialização se houver erro aqui
+    
+    # Inicia o timer em uma thread separada para executar após a inicialização
+    # A thread verifica silenciosamente se a aplicação existe e só loga se precisar criar
+    timer_thread = threading.Thread(target=create_sagl_after_startup, daemon=True, name="SAGLCreationThread")
+    timer_thread.start()

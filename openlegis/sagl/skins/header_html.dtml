@@ -13,6 +13,22 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta content="Gestão de Processos Digitais" name="description" />
         <meta content="OpenLegis" name="author" />
+        <!-- Skip links para acessibilidade -->
+        <style>
+            .skip-link {
+                position: absolute;
+                top: -40px;
+                left: 0;
+                background: #000;
+                color: #fff;
+                padding: 8px;
+                text-decoration: none;
+                z-index: 100;
+            }
+            .skip-link:focus {
+                top: 0;
+            }
+        </style>
         <!-- App favicon -->
         <link rel="shortcut icon" href="<dtml-var portal_url>/imagens/favicon.ico">
         <link rel="manifest" href="<dtml-var portal_url>/manifest.json">
@@ -33,6 +49,9 @@
     </head>
 
     <body data-topbar="dark" data-layout="horizontal" <dtml-if expr="REQUEST.get('modal', '')">style="background:#fff;"</dtml-if> >
+        <!-- Skip links para acessibilidade -->
+        <a href="#main-content" class="skip-link">Pular para o conteúdo principal</a>
+        <a href="#topnav-menu-content" class="skip-link">Pular para o menu de navegação</a>
         <!-- Loader -->
         <div id="preloader">
             <div id="status">
@@ -86,9 +105,9 @@
                    <div class="d-flex">
                       <a class="navbar-brand navbar waves-effect waves-light d-flex ps-2 ps-sm-2 pe-2 pe-sm-5 pt-0 pb-0" href="<dtml-var portal_url>">
                         <dtml-if expr="not existe_logo">
-                           <img class="logo" src="<dtml-var portal_url>/imagens/brasao.gif" alt="" height="75">
+                           <img class="logo" src="<dtml-var portal_url>/imagens/brasao.gif" alt="Brasão da instituição" height="75">
                         <dtml-else>
-                           <img class="logo" src="sapl_documentos/props_sagl/<dtml-var id_logo>" alt="" height="75" style="max-width: 75px" />
+                           <img class="logo" src="sapl_documentos/props_sagl/<dtml-var id_logo>" alt="Logo da instituição" height="75" style="max-width: 75px" />
                         </dtml-if>
                         <div class="d-flex flex-column pt-0 pb-0">
                            <h5 class="siteTitle text-white text-uppercase mb-0"><dtml-var "sapl_documentos.props_sagl.nom_casa"></h5>
@@ -175,11 +194,12 @@
                     <!-- Search input -->
                     <div class="search-wrap" id="search-wrap">
                         <div class="search-bar">
-                         <form action="<dtml-var portal_url>/generico/palavra_chave_buscar_proc" name="search_form" id="search_form">
-                            <input name="txt_palavra_chave" class="search-input form-control" placeholder="Pesquisar" />
+                         <form action="<dtml-var portal_url>/generico/palavra_chave_buscar_proc" name="search_form" id="search_form" role="search">
+                            <label for="txt_palavra_chave" class="visually-hidden">Pesquisar no sistema</label>
+                            <input name="txt_palavra_chave" id="txt_palavra_chave" class="search-input form-control" placeholder="Pesquisar" aria-label="Campo de pesquisa" />
                          </form>
-                            <a href="#" class="close-search toggle-search" data-target="#search-wrap">
-                                <i class="mdi mdi-close-circle"></i>
+                            <a href="#" class="close-search toggle-search" data-target="#search-wrap" aria-label="Fechar busca">
+                                <i class="mdi mdi-close-circle" aria-hidden="true"></i>
                             </a>
                         </div>
                     </div>
@@ -187,38 +207,38 @@
                     <div class="d-flex">
                         <!-- Full screen -->
                         <div class="dropdown d-none d-lg-inline-block">
-                            <button type="button" class="btn header-item noti-icon waves-effect" data-bs-toggle="fullscreen">
-                                <i class="mdi mdi-fullscreen"></i>
+                            <button type="button" class="btn header-item noti-icon waves-effect" data-bs-toggle="fullscreen" aria-label="Tela cheia">
+                                <i class="mdi mdi-fullscreen" aria-hidden="true"></i>
                             </button>
                         </div>
 
                         <div class="dropdown d-none d-lg-inline-block">
-                            <button type="button" class="btn header-item toggle-search noti-icon waves-effect" data-target="#search-wrap">
-                                <i class="mdi mdi-magnify"></i>
+                            <button type="button" class="btn header-item toggle-search noti-icon waves-effect" data-target="#search-wrap" aria-label="Abrir busca">
+                                <i class="mdi mdi-magnify" aria-hidden="true"></i>
                             </button>
                         </div>
 
                         <button type="button" class="btn px-1 font-size-16 d-lg-none header-item waves-effect waves-light"
-                            data-bs-toggle="collapse" data-bs-target="#topnav-menu-content">
-                            <i class="fa fa-fw fa-bars"></i>
+                            data-bs-toggle="collapse" data-bs-target="#topnav-menu-content" aria-label="Abrir menu de navegação" aria-expanded="false" aria-controls="topnav-menu-content">
+                            <i class="fa fa-fw fa-bars" aria-hidden="true"></i>
                         </button>
 
                     <dtml-if expr="AUTHENTICATED_USER.has_role(['Authenticated'])">
                         <div class="dropdown d-inline-block">
-                            <button type="button" class="btn header-item waves-effect" id="page-header-user-dropdown"
-                                data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <button type="button" class="btn header-item waves-effect" id="page-header-user-dropdown"
+                                data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" aria-label="Menu do usuário">
                                 <dtml-if cod_parlamentar_corrente>
                                    <dtml-call expr="REQUEST.set('id_foto', str(cod_parlamentar_corrente)+'_foto_parlamentar')">
                                       <dtml-if expr="hasattr(sapl_documentos.parlamentar.fotos,id_foto)">
-                                         <img class="rounded-circle header-profile-user" src="<dtml-var portal_url>/sapl_documentos/parlamentar/fotos/<dtml-var id_foto>" alt="Header Avatar">
+                                         <img class="rounded-circle header-profile-user" src="<dtml-var portal_url>/sapl_documentos/parlamentar/fotos/<dtml-var id_foto>" alt="Foto do perfil de <dtml-var AUTHENTICATED_USER>">
                                       <dtml-else>
-                                         <img class="rounded-circle header-profile-user" src="<dtml-var portal_url>/assets/images/users/user-icon.jpg" alt="Header Avatar">
+                                         <img class="rounded-circle header-profile-user" src="<dtml-var portal_url>/assets/images/users/user-icon.jpg" alt="Ícone de usuário">
                                       </dtml-if>
                                 <dtml-else>
-                                   <img class="rounded-circle header-profile-user" src="<dtml-var portal_url>/assets/images/users/user-icon.jpg" alt="Header Avatar">
+                                   <img class="rounded-circle header-profile-user" src="<dtml-var portal_url>/assets/images/users/user-icon.jpg" alt="Ícone de usuário">
                                 </dtml-if>
                                 <span class="d-none d-xl-inline-block ms-1"><dtml-var AUTHENTICATED_USER></span>
-                                <i class="mdi mdi-chevron-down d-none d-xl-inline-block"></i>
+                                <i class="mdi mdi-chevron-down d-none d-xl-inline-block" aria-hidden="true"></i>
                             </button>
                             <div class="dropdown-menu dropdown-menu-end">
                                 <!-- item-->
@@ -249,13 +269,13 @@
                             </div>
                         </div>
                     <dtml-else>
-                                <button type="button" class="btn header-item waves-effect noti-icon" data-bs-toggle="modal" data-bs-target="#loginModal">
-                                    <i class="mdi mdi-login"></i>
+                                <button type="button" class="btn header-item waves-effect noti-icon" data-bs-toggle="modal" data-bs-target="#loginModal" aria-label="Fazer login">
+                                    <i class="mdi mdi-login" aria-hidden="true"></i>
                                 </button>
                     </dtml-if>
                         <div class="dropdown d-none d-md-inline-block">
-                            <button type="button" class="btn header-item noti-icon right-bar-toggle waves-effect waves-light">
-                                <i class="mdi mdi-spin mdi-cog"></i>
+                            <button type="button" class="btn header-item noti-icon right-bar-toggle waves-effect waves-light" aria-label="Abrir preferências">
+                                <i class="mdi mdi-spin mdi-cog" aria-hidden="true"></i>
                             </button>
                         </div>
 
@@ -412,7 +432,7 @@
             <!-- ============================================================== -->
             <!-- Start right Content here -->
             <!-- ============================================================== -->
-            <div class="main-content">
+            <main id="main-content" class="main-content" role="main">
                 <dtml-if expr="REQUEST.get('modal', '')">
                   <div class="content-modal">
                       <div class="container-xxl min-vh-100">

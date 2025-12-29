@@ -27,6 +27,7 @@ from dateutil.parser import parse
 # Se usar com Zope/Plone:
 from five import grok
 from zope.interface import Interface
+from openlegis.sagl import get_base_path
 
 # ******************************************
 # CONSTANTS AND CONFIGURATION
@@ -73,9 +74,14 @@ def setup_logging():
     formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(name)s - %(message)s')
     
     # FileHandler com fechamento seguro
-    file_handler = logging.FileHandler('/var/openlegis/SAGL5/pdf_processor.log', mode='a', encoding='utf-8')
-    file_handler.setFormatter(formatter)
-    logger.addHandler(file_handler)
+    try:
+        base_path = get_base_path()
+        log_path = os.path.join(base_path, 'pdf_processor.log')
+        file_handler = logging.FileHandler(log_path, mode='a', encoding='utf-8')
+        file_handler.setFormatter(formatter)
+        logger.addHandler(file_handler)
+    except Exception as e:
+        print(f"Erro ao criar file handler: {e}")
     
     # StreamHandler para console
     console_handler = logging.StreamHandler()

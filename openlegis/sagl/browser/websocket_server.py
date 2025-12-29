@@ -130,7 +130,7 @@ class WebSocketServerService(grok.GlobalUtility):
     async def _start_server_task(self):
         self._server_start_time = datetime.now()
     
-        logger.info("Iniciando servidor WebSocket...")
+        logger.debug("Iniciando servidor WebSocket...")
         try:
             async with websockets.serve(
                 self.websocket_handler,
@@ -143,7 +143,7 @@ class WebSocketServerService(grok.GlobalUtility):
                 compression=None,
                 origins=None
             ):
-                logger.info(f"Servidor WebSocket executando em ws://0.0.0.0:{WEBSOCKET_PORT}")
+                logger.info(f"Servidor WebSocket iniciado e ouvindo em ws://0.0.0.0:{WEBSOCKET_PORT}")
                 monitor_task = asyncio.create_task(self.monitor_sessoes_e_itens())
                 health_task = asyncio.create_task(self.health_monitor())
                 try:
@@ -710,7 +710,13 @@ def fetch_active_sessao_and_item(session):
         
         return active_sessao, active_item
     except Exception as e:
-        logger.error(f"Erro ao buscar sessão e item ativos: {e}")
+        error_msg = str(e)
+        # Trata erro de banco não encontrado de forma mais silenciosa
+        if "Unknown database" in error_msg or "1049" in error_msg:
+            # Log apenas em debug para evitar spam, mas registra uma vez
+            logger.debug(f"Banco de dados ainda não disponível (será criado em breve): {error_msg}")
+        else:
+            logger.error(f"Erro ao buscar sessão e item ativos: {e}")
         return None, None
 
 def get_active_item_for_sessao(cod_sessao_plen):

@@ -29,6 +29,7 @@ from reportlab.pdfgen import canvas
 from reportlab.rl_config import defaultPageSize
 from reportlab.lib.units import mm, inch
 from PIL import Image as PILImage
+from openlegis.sagl import get_base_path
 
 # CONFIGURAÇÃO DE LOGGING CORRIGIDA - SEM RESOURCE LEAKS
 def setup_logging():
@@ -49,7 +50,9 @@ def setup_logging():
     
     # FileHandler com contexto seguro
     try:
-        file_handler = logging.FileHandler('/var/openlegis/SAGL5/pdf_generation.log', mode='a', encoding='utf-8')
+        base_path = get_base_path()
+        log_path = os.path.join(base_path, 'pdf_generation.log')
+        file_handler = logging.FileHandler(log_path, mode='a', encoding='utf-8')
         file_handler.setFormatter(formatter)
         logger.addHandler(file_handler)
     except Exception as e:
@@ -68,9 +71,14 @@ logger = setup_logging()
 # Configuração de logging de performance
 perf_logger = logging.getLogger('performance')
 perf_logger.setLevel(logging.DEBUG)
-perf_handler = logging.FileHandler('/var/openlegis/SAGL5/performance_metrics.log', mode='a', encoding='utf-8')
-perf_handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
-perf_logger.addHandler(perf_handler)
+try:
+    base_path = get_base_path()
+    perf_log_path = os.path.join(base_path, 'performance_metrics.log')
+    perf_handler = logging.FileHandler(perf_log_path, mode='a', encoding='utf-8')
+    perf_handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
+    perf_logger.addHandler(perf_handler)
+except Exception as e:
+    print(f"Erro ao criar perf handler: {e}")
 
 # Configurações globais de performance
 sys.setrecursionlimit(10000)

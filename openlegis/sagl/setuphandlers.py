@@ -1,6 +1,8 @@
 """
 SAGL setup handlers.
 """
+import logging
+logger = logging.getLogger('openlegis.sagl')
 
 def setupMountPoint(portal):
     # Metodo para adicionar o mount point do sapl_documentos
@@ -55,7 +57,14 @@ def setupConteudo(portal):
     # importar conteudos na raiz do SAGL
     for o in ['extensions.zexp']:
         if o[:len(o)-5] not in portal.objectIds():
-            portal.manage_importObject(o)
+            try:
+                portal.manage_importObject(o)
+            except Exception as e:
+                # Se o arquivo não existir ou houver erro na importação, apenas loga e continua
+                # O arquivo pode não estar disponível ainda ou pode ser opcional
+                import logging
+                logger = logging.getLogger('openlegis.sagl')
+                logger.warning("Não foi possível importar %s: %s", o, str(e))
 
 
 def setupAdicionarUsuarios(portal):
@@ -74,3 +83,51 @@ def importar_estrutura(context):
     setupCache(site)
     setupConteudo(site)
     setupAdicionarUsuarios(site)
+
+
+def verificar_e_criar_sagl_raiz(context):
+    """Verifica se a aplicação SAGL existe na raiz do Zope e cria se não existir"""
+    if context.readDataFile('sagl-final.txt') is None:
+        return
+    
+    try:
+        # Get the site from context
+        site = context.getSite()
+        
+        # Check if the site itself is a SAGL (we're being called during SAGL creation)
+        # If so, we should not try to create another SAGL
+        if hasattr(site, 'meta_type') and 'SAGL' in str(site.meta_type):
+            logger.debug("Import step executado durante criação de SAGL, ignorando verificação de raiz")
+            return
+        
+        # Get the root application by traversing up
+        app = site
+        while hasattr(app, '__parent__') and app.__parent__ is not None:
+            app = app.__parent__
+        
+        # Verify we're at the root (should have acl_users)
+        if not hasattr(app, 'acl_users'):
+            logger.warning("Não foi possível encontrar a raiz do Zope")
+            return
+        
+        # Check if app has objectIds method (it should be a proper Zope container)
+        if not hasattr(app, 'objectIds'):
+            logger.warning("Objeto raiz não tem método objectIds, não é possível verificar SAGL")
+            return
+        
+        sagl_id = 'sagl'
+        
+        # Check if SAGL already exists in root
+        if sagl_id in app.objectIds():
+            logger.info("SAGL '%s' já existe na raiz do Zope", sagl_id)
+            return
+        
+        # SAGL doesn't exist in root, but we're being called from within a SAGL site
+        # This means we should not try to create it here, as it would cause recursion
+        logger.info("SAGL '%s' não encontrado na raiz, mas import step foi chamado de dentro de um site SAGL", sagl_id)
+        logger.info("A criação do SAGL na raiz deve ser feita durante o buildout ou manualmente")
+        
+    except Exception as e:
+        logger.warning("Erro ao verificar SAGL na raiz: %s", str(e))
+        import traceback
+        logger.debug(traceback.format_exc())

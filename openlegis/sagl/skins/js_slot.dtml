@@ -15,7 +15,7 @@
                              </div>
                             </div>
                             <div class="col-sm-6 text-sm-end d-none d-sm-block">
-                                <i class="mdi mdi-zigbee"></i> SAGL 5.1
+                                <i class="mdi mdi-zigbee"></i> SAGL 6.0
                             </div>
                         </div>
                     </div>
@@ -131,7 +131,7 @@
     <div class="modal-content">
       <div class="modal-header bg-light">
         <p class="h5 modal-title" id="iFrameModalLabel">New message</p>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"aria-label="Close"></button>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
       </div>
       <div class="modal-body">
         <iframe src="" height="100%" width="100%" frameborder="0"></iframe>
@@ -149,7 +149,7 @@
         <div class="modal-content">
             <div class="modal-header">
               <p class="h5 modal-title">Login</p>
-              <button type="button" class="btn-close" data-bs-dismiss="modal"aria-label="Close"></button>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
             </div>
             <div class="modal-body">
                 <dtml-if expr="_.has_key('QUERY_STRING') and QUERY_STRING == 'retry=0'">
@@ -163,18 +163,21 @@
                                 <div class="mb-3">
                                     <label class="form-label" for="name">Usuário</label>
                                     <div class="input-group">
-                                        <span class="input-group-text" id="basic-addon1"><i class="far fa-user"></i></span>
-                                        <input type="text" class="form-control" id="name" name="__ac_name" autocomplete="false" value="<dtml-var "REQUEST.get('__ac_name', '')">" size="30" placeholder="Digite o usuário" required>
+                                        <span class="input-group-text" id="basic-addon1" aria-hidden="true"><i class="far fa-user"></i></span>
+                                        <input type="text" class="form-control" id="name" name="__ac_name" autocomplete="username" value="<dtml-var "REQUEST.get('__ac_name', '')">" size="30" placeholder="Digite o usuário" required aria-describedby="basic-addon1">
                                     </div>
                                 </div>
 
                                 <div class="mb-3">
                                     <label class="form-label" for="password">Senha</label>
                                     <div class="input-group">
-                                        <span class="input-group-text" id="basic-addon2"><i class="fa fa-key"></i></span>
-                                        <input type="password" class="form-control password" id="password" name="__ac_password" placeholder="Digite a senha" required>
+                                        <span class="input-group-text" id="basic-addon2" aria-hidden="true"><i class="fa fa-key"></i></span>
+                                        <input type="password" class="form-control password" id="password" name="__ac_password" autocomplete="current-password" placeholder="Digite a senha" required aria-describedby="basic-addon2 togglePasswordDesc">
                                         <span class="input-group-text">
-                                          <i class="far fa-eye-slash" id="togglePassword" style="cursor: pointer"></i>
+                                          <button type="button" class="btn btn-link p-0 border-0" id="togglePassword" aria-label="Mostrar senha" aria-describedby="togglePasswordDesc">
+                                            <i class="far fa-eye-slash" aria-hidden="true"></i>
+                                          </button>
+                                          <span id="togglePasswordDesc" class="visually-hidden">Alternar visibilidade da senha</span>
                                         </span>
                                     </div>
                                 </div>
@@ -209,16 +212,16 @@
 <script>
         const togglePassword = document.getElementById("togglePassword");
         const password = document.getElementById("password");
+        const toggleIcon = togglePassword.querySelector('i');
         togglePassword.addEventListener('click', () => {
-            // Toggle the type attribute using
-            // getAttribure() method
-            const type = password
-                .getAttribute('type') === 'password' ?
-                'text' : 'password';
+            // Toggle the type attribute
+            const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
             password.setAttribute('type', type);
-            // Toggle the eye and bi-eye icon
-            togglePassword.classList.toggle('fa-eye');
-            togglePassword.classList.toggle('fa-eye-slash');
+            // Toggle the eye icon
+            toggleIcon.classList.toggle('fa-eye');
+            toggleIcon.classList.toggle('fa-eye-slash');
+            // Update aria-label
+            togglePassword.setAttribute('aria-label', type === 'password' ? 'Mostrar senha' : 'Ocultar senha');
         });
 </script>
 <dtml-else>

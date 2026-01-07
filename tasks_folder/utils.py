@@ -1239,7 +1239,12 @@ def zope_task(**task_kw):
                     pass
                 
                 # Usa ZopeContext como context manager para simplificar setup/cleanup
+                logger.info(f"[zope_task] ===== INICIANDO EXECUÇÃO DA FUNÇÃO {func.__name__} =====")
+                logger.info(f"[zope_task] task_id={task_id}, site_path={site_path}{cod_info}")
+                
                 with ZopeContext(site_path=site_path, task_id=task_id, logger=logger) as ctx:
+                    logger.info(f"[zope_task] ZopeContext criado com sucesso, site obtido: {type(ctx.site)}")
+                    
                     # CRÍTICO: Aborta transação atual e inicia nova limpa
                     # Isso garante que estamos usando uma transação completamente isolada
                     try:
@@ -1251,11 +1256,17 @@ def zope_task(**task_kw):
                         logger.debug(f"[zope_task] Erro ao limpar transação: {e}")
                         transaction.begin()
                     
+                    logger.info(f"[zope_task] Transação limpa, chamando função {func.__name__}...")
+                    
                     # Executa a função com o site
                     result = func(self, ctx.site, *args, **kw)
                     
+                    logger.info(f"[zope_task] Função {func.__name__} executada com sucesso, fazendo commit...")
+                    
                     # Faz commit da transação
                     ctx.commit()
+                    
+                    logger.info(f"[zope_task] ===== FUNÇÃO {func.__name__} CONCLUÍDA COM SUCESSO =====")
                     
                     return result
             

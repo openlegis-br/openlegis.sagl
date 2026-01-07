@@ -1,60 +1,68 @@
-<dtml-in expr="zsql.localidade_obter_zsql(sgl_uf = lst_sgl_uf, tip_localidade='M', nom_localidade_pesq=txt_municipio)">
-  <dtml-call expr="REQUEST.set('cod_localidade', cod_localidade)">
+<dtml-if expr="REQUEST.form">
+  <dtml-in expr="zsql.localidade_obter_zsql(sgl_uf = REQUEST.get('lst_sgl_uf', ''), tip_localidade='M', nom_localidade_pesq=REQUEST.get('txt_municipio', ''))">
+    <dtml-call expr="REQUEST.set('cod_localidade', cod_localidade)">
+  <dtml-else>
+    <dtml-let mensagem="'A localidade especificada não existe!'"> 
+       <dtml-var mensagem_emitir>
+       <dtml-call expr="REQUEST.set('erro', 1)">
+    </dtml-let> 
+  </dtml-in>
+
+  <dtml-call expr="REQUEST.set('erro', 0)">
+  <dtml-unless erro>
+    <dtml-with expr="sapl_documentos.props_sagl">   
+      <dtml-try> 
+        <dtml-call expr="manage_changeProperties
+          (cod_casa=REQUEST.get('txt_cod_casa', ''), 
+          nom_casa=REQUEST.get('txt_nom_casa', ''),
+          sgl_casa=REQUEST.get('txt_sgl_casa', ''),
+          end_casa=REQUEST.get('txt_end_casa', ''),
+          cod_localidade=REQUEST.get('cod_localidade', ''),     
+          num_cep=REQUEST.get('txt_num_cep', ''),
+          num_tel=REQUEST.get('txt_num_tel', ''),
+          num_fax=REQUEST.get('txt_num_fax', ''),
+          txt_senha_inicial=REQUEST.get('txt_txt_senha_inicial', ''),
+          end_email_casa=REQUEST.get('txt_end_email_casa', ''),
+          end_web_casa=REQUEST.get('txt_end_web_casa', ''),
+          txt_informacao_geral=REQUEST.get('txt_informacao_geral', ''),
+          recaptcha_key=REQUEST.get('txt_recaptcha_key', ''),
+          numero_protocolo_anual=REQUEST.get('rad_protocolo', '0'),
+          acompanhamento_materia=REQUEST.get('rad_acompanhamento', '0'),
+          assinatura_simples=REQUEST.get('rad_assinatura', '0'),
+          restpki_access_token=REQUEST.get('txt_restpki_access_token', ''),
+          reuniao_sessao=REQUEST.get('txt_reuniao_sessao', ''),
+          reuniao_sessao_plural=REQUEST.get('txt_reuniao_sessao_plural', ''),
+          nome_mesa=REQUEST.get('txt_nome_mesa', ''),
+          origem=REQUEST.get('lst_origem', ''),
+          destino=REQUEST.get('lst_destino', ''),
+          destino_outros=REQUEST.get('lst_destino_outros', ''),
+          status=REQUEST.get('lst_status', ''),
+          status_doc=REQUEST.get('lst_status_doc', ''),
+          status_eme=REQUEST.get('lst_status_eme', ''),
+          status_par=REQUEST.get('lst_status_par', ''),
+          status_sub=REQUEST.get('lst_status_sub', '')
+          )">
+        <dtml-except>
+          <dtml-call expr="REQUEST.set('erro', 1)">
+      </dtml-try>
+    </dtml-with>
+  </dtml-unless>
 <dtml-else>
-  <dtml-let mensagem="'A localidade especificada não existe!'"> 
+  <dtml-let mensagem="'Erro: Requisição inválida - dados do formulário não disponíveis.'"> 
      <dtml-var mensagem_emitir>
      <dtml-call expr="REQUEST.set('erro', 1)">
-  </dtml-let> 
-</dtml-in>
-
-<dtml-unless erro>
-  <dtml-try> 
-    <dtml-with expr="sapl_documentos.props_sagl">   
-      <dtml-call expr="manage_changeProperties
-        (cod_casa=REQUEST['txt_cod_casa'], 
-        nom_casa=REQUEST['txt_nom_casa'],
-        sgl_casa=REQUEST['txt_sgl_casa'],
-        end_casa=REQUEST['txt_end_casa'],
-        cod_localidade=REQUEST['cod_localidade'],     
-        num_cep=REQUEST['txt_num_cep'],
-        num_tel=REQUEST['txt_num_tel'],
-        num_fax=REQUEST['txt_num_fax'],
-        txt_senha_inicial=REQUEST['txt_txt_senha_inicial'],
-        end_email_casa=REQUEST['txt_end_email_casa'],
-        end_web_casa=REQUEST['txt_end_web_casa'],
-        txt_informacao_geral=REQUEST['txt_informacao_geral'],
-        recaptcha_key=REQUEST['txt_recaptcha_key'],
-        numero_protocolo_anual=REQUEST['rad_protocolo'],
-        acompanhamento_materia=REQUEST['rad_acompanhamento'],
-        assinatura_simples=REQUEST['rad_assinatura'],
-        restpki_access_token=REQUEST['txt_restpki_access_token'],
-        reuniao_sessao=REQUEST['txt_reuniao_sessao'],
-        reuniao_sessao_plural=REQUEST['txt_reuniao_sessao_plural'],
-        nome_mesa=REQUEST['txt_nome_mesa'],
-        origem=REQUEST['lst_origem'],
-        destino=REQUEST['lst_destino'],
-        destino_outros=REQUEST['lst_destino_outros'],
-        status=REQUEST['lst_status'],
-        status_doc=REQUEST['lst_status_doc'],
-        status_eme=REQUEST['lst_status_eme'],
-        status_par=REQUEST['lst_status_par'],
-        status_sub=REQUEST['lst_status_sub']
-        )">
-  </dtml-with>
-</dtml-try>
-</dtml-unless>
-
-<dtml-call expr="REQUEST.set('erro', 0)">   
-<dtml-if expr="radTI=='S'">                
+  </dtml-let>
+</dtml-if>   
+<dtml-if expr="REQUEST.form and REQUEST.get('radTI')=='S'">                
     <dtml-call expr="REQUEST.set('existe_logo', 0)">
-    <dtml-if expr="(_.int(hdn_file)==1)">
+    <dtml-if expr="(_.int(REQUEST.get('hdn_file', 0))==1)">
        <dtml-call expr="REQUEST.set('id_logo', 'logo_casa.gif')">
          <dtml-in expr="sapl_documentos.props_sagl.objectValues()"> 
             <dtml-if expr="id == 'logo_casa.gif'">
                <dtml-let logo="getattr(sapl_documentos.props_sagl,id_logo) ">
                   <dtml-call expr="REQUEST.set('existe_logo', 1)">    
                   <dtml-try>
-                    <dtml-call "logo.manage_upload(file=file_nom_logo)">
+                    <dtml-call "logo.manage_upload(file=REQUEST.get('file_nom_logo'))">
                   <dtml-except>
                      <dtml-call expr="REQUEST.set('erro', 1)">              
                   </dtml-try>
@@ -63,24 +71,26 @@
          </dtml-in>
     </dtml-if>
 
-<dtml-elif expr="radTI=='I'">  
+<dtml-elif expr="REQUEST.form and REQUEST.get('radTI')=='I'">  
     <dtml-call expr="REQUEST.set('existe_logo', 0)">              
-    <dtml-if "(not existe_logo) and (_.int(hdn_file)==1)">
+    <dtml-if "(not existe_logo) and (_.int(REQUEST.get('hdn_file', 0))==1)">
        <dtml-try>    
          <dtml-call expr="REQUEST.set('id_logo', 'logo_casa.gif')">
-          <dtml-call expr="sapl_documentos.props_sagl.manage_addImage(id=id_logo,file=file_nom_logo)">
+          <dtml-call expr="sapl_documentos.props_sagl.manage_addImage(id=REQUEST.get('id_logo'),file=REQUEST.get('file_nom_logo'))">
        <dtml-except> 
          <dtml-call expr="REQUEST.set('erro', 1)">              
        </dtml-try>      
     </dtml-if>
 
-<dtml-elif expr="radTI=='E'">
+<dtml-elif expr="REQUEST.form and REQUEST.get('radTI')=='E'">
    <dtml-call expr="REQUEST.set('id_logo', 'logo_casa.gif')">
-   <dtml-call "sapl_documentos.props_sagl.manage_delObjects(id_logo)">
+   <dtml-call "sapl_documentos.props_sagl.manage_delObjects(REQUEST.get('id_logo'))">
 </dtml-if>
 
-<dtml-let mensagem="'Casa Legislativa salva com sucesso!'" url=hdn_url>
-   <dtml-var mensagem_emitir>
-</dtml-let>
+<dtml-if expr="not erro">
+  <dtml-let mensagem="'Casa Legislativa salva com sucesso!'" url="REQUEST.get('hdn_url', 'casa_legislativa_form')">
+     <dtml-var mensagem_emitir>
+  </dtml-let>
+</dtml-if>
 
 

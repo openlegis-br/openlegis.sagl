@@ -504,12 +504,20 @@ def gerar_processo_norma_integral_task(self, site, cod_norma, portal_url, user_i
     """
     task_id = getattr(self.request, 'id', 'UNKNOWN')
     
+    # CRÍTICO: Log explícito no início para garantir visibilidade
+    logger.info(f"[gerar_processo_norma_integral_task] ===== INICIANDO TASK =====")
+    logger.info(f"[gerar_processo_norma_integral_task] task_id={task_id}, cod_norma={cod_norma}, portal_url={portal_url}")
+    
     try:
         if not cod_norma:
+            logger.error(f"[gerar_processo_norma_integral_task] cod_norma é obrigatório")
             raise ValueError("cod_norma é obrigatório")
         
         if not portal_url:
+            logger.error(f"[gerar_processo_norma_integral_task] portal_url é obrigatório")
             raise ValueError("portal_url é obrigatório")
+        
+        logger.info(f"[gerar_processo_norma_integral_task] Parâmetros válidos, iniciando processamento...")
         
         # Atualiza progresso: Iniciando
         self.update_state(
@@ -521,6 +529,8 @@ def gerar_processo_norma_integral_task(self, site, cod_norma, portal_url, user_i
                 'stage': ProcessStage.INIT
             }
         )
+        
+        logger.info(f"[gerar_processo_norma_integral_task] Estado atualizado para PROGRESS (INIT)")
         
         # Atualiza progresso: Obtendo dados da norma
         self.update_state(
@@ -748,6 +758,9 @@ def gerar_processo_norma_integral_task(self, site, cod_norma, portal_url, user_i
                     }
                 )
                 
+                logger.info(f"[gerar_processo_norma_integral_task] ===== TASK CONCLUÍDA COM SUCESSO =====")
+                logger.info(f"[gerar_processo_norma_integral_task] task_id={task_id}, cod_norma={cod_norma}, total_paginas={total_paginas}")
+                
                 return {
                     'success': True,
                     'cod_norma': cod_norma,
@@ -771,5 +784,10 @@ def gerar_processo_norma_integral_task(self, site, cod_norma, portal_url, user_i
             raise
             
     except Exception as e:
-        logger.error(f"[gerar_processo_norma_integral_task] Erro: {e}", exc_info=True)
+        logger.error(f"[gerar_processo_norma_integral_task] ===== ERRO NA TASK =====")
+        logger.error(f"[gerar_processo_norma_integral_task] task_id={task_id}, cod_norma={cod_norma}")
+        logger.error(f"[gerar_processo_norma_integral_task] Erro: {type(e).__name__}: {e}", exc_info=True)
         raise
+    finally:
+        logger.info(f"[gerar_processo_norma_integral_task] ===== FINALIZANDO TASK =====")
+        logger.info(f"[gerar_processo_norma_integral_task] task_id={task_id}, cod_norma={cod_norma}")

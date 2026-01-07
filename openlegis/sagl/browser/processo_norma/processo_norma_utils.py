@@ -177,3 +177,60 @@ def get_file_info_for_hash(container, filename):
         logger.debug(f"[get_file_info_for_hash] Erro ao obter info de {filename}: {e}")
     
     return file_info
+
+
+def safe_check_files_batch(container, filenames):
+    """
+    Verifica múltiplos arquivos de uma vez usando objectIds (sem cache).
+    Mais eficiente que verificar arquivos individualmente.
+    
+    Args:
+        container: Container Zope (ex: portal.sapl_documentos.norma_juridica)
+        filenames: Lista de nomes de arquivos a verificar
+        
+    Returns:
+        dict: Dicionário com {filename: bool} indicando se cada arquivo existe e tem tamanho > 0
+    """
+    results = {}
+    try:
+        if hasattr(container, 'objectIds'):
+            # OTIMIZAÇÃO: Chama objectIds() uma única vez para todos os arquivos
+            obj_ids = container.objectIds()
+            obj_ids_set = set(obj_ids)  # Converte para set para busca O(1)
+            
+            for filename in filenames:
+                exists = filename in obj_ids_set
+                if not exists and filename.lower().endswith('.pdf'):
+                    base = filename[:-4]
+                    exists = base in obj_ids_set
+                
+                if exists:
+                    # Verifica tamanho apenas se arquivo existe
+                    try:
+                        file_obj = getattr(container, filename, None)
+                        if file_obj is None and filename.lower().endswith('.pdf'):
+                            file_obj = getattr(container, filename[:-4], None)
+                        
+                        if file_obj is not None:
+                            if hasattr(file_obj, 'get_size'):
+                                size = file_obj.get_size()
+                                if size is None or size == 0:
+                                    results[filename] = False
+                                    continue
+                        results[filename] = True
+                    except Exception as e:
+                        logger.debug(f"[safe_check_files_batch] Erro ao verificar {filename}: {e}")
+                        results[filename] = True  # Assume que existe se está em objectIds
+                else:
+                    results[filename] = False
+        else:
+            # Se não tem objectIds, marca todos como não existentes
+            for filename in filenames:
+                results[filename] = False
+    except Exception as e:
+        logger.debug(f"[safe_check_files_batch] Erro ao verificar arquivos: {e}")
+        # Em caso de erro, marca todos como não existentes
+        for filename in filenames:
+            results[filename] = False
+    
+    return results

@@ -44,6 +44,7 @@ from openlegis.sagl.browser.processo_leg.processo_leg_utils import (
     get_processo_dir,
     get_processo_dir_hash,
     safe_check_file,
+    safe_check_files_batch,
     secure_path_join,
     SecurityError,
     TEMP_DIR_PREFIX
@@ -751,20 +752,46 @@ class ProcessoLegView(grok.View):
             data_apresentacao_str = _convert_to_datetime_string(dados_materia['data_apresentacao'])
             data_capa = DateTime(data_apresentacao_str, datefmt='international').strftime('%Y-%m-%d 00:00:01')
             
+            # OTIMIZAÇÃO: Chama _get_proposicao_data() uma vez e reutiliza
+            proposta = self._get_proposicao_data(dados_materia['cod_materia'])
+            
             # Gera a capa usando o método padrão do sistema (gera no temp_folder)
             try:
                 self.context.modelo_proposicao.capa_processo(cod_materia=dados_materia['cod_materia'], action='gerar')
                 
-                # Aguarda um pouco para garantir que o arquivo foi gerado
-                time.sleep(0.5)
-                
-                # Faz download via HTTP
+                # OTIMIZAÇÃO: Polling inteligente ao invés de sleep fixo
+                # Aguarda a geração da capa com polling e timeout
+                max_wait_time = 5.0  # Máximo de 5 segundos
+                poll_interval = 0.1  # Verifica a cada 100ms
                 base_url = self.context.absolute_url()
                 url = f"{base_url}/modelo_proposicao/capa_processo?cod_materia={dados_materia['cod_materia']}&action=download"
                 
                 import urllib.request
                 import urllib.error
                 
+                capa_ready = False
+                elapsed_time = 0.0
+                
+                while elapsed_time < max_wait_time and not capa_ready:
+                    try:
+                        # Tenta fazer HEAD request para verificar se arquivo está pronto
+                        req = urllib.request.Request(url, method='HEAD')
+                        req.add_header('User-Agent', 'SAGL-PDF-Generator/1.0')
+                        with urllib.request.urlopen(req, timeout=5) as response:
+                            if response.status == 200:
+                                capa_ready = True
+                                break
+                    except (urllib.error.HTTPError, urllib.error.URLError):
+                        # Ainda não está pronto, continua aguardando
+                        pass
+                    except Exception:
+                        # Outro erro, continua tentando
+                        pass
+                    
+                    time.sleep(poll_interval)
+                    elapsed_time += poll_interval
+                
+                # Faz download via HTTP
                 req = urllib.request.Request(url)
                 req.add_header('User-Agent', 'SAGL-PDF-Generator/1.0')
                 
@@ -790,8 +817,7 @@ class ProcessoLegView(grok.View):
                 logger.error(f"[coletar_documentos] Erro ao gerar/baixar capa do processo: {str(e)}", exc_info=True)
                 raise PDFGenerationError(f"Falha ao gerar/baixar capa do processo: {str(e)}")
 
-            # Usa cache de proposição para obter data
-            proposta = self._get_proposicao_data(dados_materia['cod_materia'])
+            # Usa proposta já obtida para obter data
             if proposta and proposta.dat_recebimento:
                 data_str = _convert_to_datetime_string(proposta.dat_recebimento)
                 data_capa = DateTime(data_str, datefmt='international').strftime('%Y-%m-%d 00:00:01')
@@ -807,43 +833,41 @@ class ProcessoLegView(grok.View):
                 "filesystem": True
             })
 
+            # OTIMIZAÇÃO: Coleta todos os nomes de arquivos para verificação em batch
+            arquivos_para_verificar = []
+            arquivos_info = {}  # Armazena informações sobre cada arquivo
+
             # Texto integral da matéria
             arquivo_texto = f"{dados_materia['cod_materia']}_texto_integral.pdf"
-            proposta = self._get_proposicao_data(dados_materia['cod_materia'])
             if proposta and proposta.dat_recebimento:
                 data_str = _convert_to_datetime_string(proposta.dat_recebimento)
                 data_texto = DateTime(data_str, datefmt='international').strftime('%Y-%m-%d 00:00:02')
             else:
                 data_str = _convert_to_datetime_string(dados_materia['data_apresentacao'])
                 data_texto = DateTime(data_str, datefmt='international').strftime('%Y-%m-%d 00:00:02')
-
-            if self._safe_has_file(self.context.sapl_documentos.materia, arquivo_texto):
-                documentos.append({
-                    "data": data_texto,
-                    "path": self.context.sapl_documentos.materia,
-                    "file": arquivo_texto,
-                    "title": f"{dados_materia['descricao']} nº {dados_materia['numero']}/{dados_materia['ano']}"
-                })
+            
+            arquivos_para_verificar.append(arquivo_texto)
+            arquivos_info[arquivo_texto] = {
+                "data": data_texto,
+                "path": self.context.sapl_documentos.materia,
+                "title": f"{dados_materia['descricao']} nº {dados_materia['numero']}/{dados_materia['ano']}"
+            }
 
             # Redação Final
             nom_redacao = f"{dados_materia['cod_materia']}_redacao_final.pdf"
-            if self._safe_has_file(self.context.sapl_documentos.materia, nom_redacao):
-                proposta = self._get_proposicao_data(dados_materia['cod_materia'])
-                if proposta and proposta.dat_recebimento:
-                    data_str = _convert_to_datetime_string(proposta.dat_recebimento)
-                    data_redacao = DateTime(data_str, datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
-                else:
-                    data_str = _convert_to_datetime_string(dados_materia['data_apresentacao'])
-                    data_redacao = DateTime(data_str, datefmt='international').strftime('%Y-%m-%d 00:00:03')
-
-                doc_redacao = {
-                    "data": data_redacao,
-                    "path": self.context.sapl_documentos.materia,
-                    "file": nom_redacao,
-                    "title": "Redação Final"
-                }
-
-                documentos.append(doc_redacao)
+            arquivos_para_verificar.append(nom_redacao)
+            if proposta and proposta.dat_recebimento:
+                data_str = _convert_to_datetime_string(proposta.dat_recebimento)
+                data_redacao = DateTime(data_str, datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
+            else:
+                data_str = _convert_to_datetime_string(dados_materia['data_apresentacao'])
+                data_redacao = DateTime(data_str, datefmt='international').strftime('%Y-%m-%d 00:00:03')
+            
+            arquivos_info[nom_redacao] = {
+                "data": data_redacao,
+                "path": self.context.sapl_documentos.materia,
+                "title": "Redação Final"
+            }
 
             # Fichas de votação - geradas no filesystem da pasta digital para uso pelo celery
             votacoes = self.context.pysc.votacao_obter_pysc(cod_materia=dados_materia['cod_materia'])
@@ -907,9 +931,10 @@ class ProcessoLegView(grok.View):
                 
                 logger.debug(f"[coletar_documentos] Ficha de votação gerada no filesystem: {caminho_arquivo} ({len(pdf_bytes)} bytes)")
 
-            # Emendas - SQLAlchemy
+            # OTIMIZAÇÃO: Usar uma única sessão SQLAlchemy para todas as queries
             session = self._get_session()
             try:
+                # Emendas - SQLAlchemy
                 emendas = session.query(Emenda, TipoEmenda, Proposicao)\
                     .join(TipoEmenda, Emenda.tip_emenda == TipoEmenda.tip_emenda)\
                     .outerjoin(Proposicao, Proposicao.cod_emenda == Emenda.cod_emenda)\
@@ -927,18 +952,15 @@ class ProcessoLegView(grok.View):
                         data_str = _convert_to_datetime_string(emenda_obj.dat_apresentacao)
                         data_emenda = DateTime(data_str, datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
 
+                    # Emendas não precisam verificação de arquivo (sempre adiciona)
                     documentos.append({
                         "data": data_emenda,
                         "path": self.context.sapl_documentos.emenda,
                         "file": arquivo_emenda,
                         "title": f"Emenda {tipo_emenda_obj.des_tipo_emenda} nº {emenda_obj.num_emenda}"
                     })
-            finally:
-                session.close()
 
-            # Substitutivos - SQLAlchemy
-            session = self._get_session()
-            try:
+                # Substitutivos - SQLAlchemy
                 substitutivos = session.query(Substitutivo, Proposicao)\
                     .outerjoin(Proposicao, Proposicao.cod_substitutivo == Substitutivo.cod_substitutivo)\
                     .filter(Substitutivo.cod_materia == dados_materia['cod_materia'])\
@@ -947,28 +969,22 @@ class ProcessoLegView(grok.View):
                 
                 for subst_obj, proposta_obj in substitutivos:
                     arquivo_substitutivo = f"{subst_obj.cod_substitutivo}_substitutivo.pdf"
-                    if self._safe_has_file(self.context.sapl_documentos.substitutivo, arquivo_substitutivo):
-                        # Usar data de proposta se existir, senão data de apresentação
-                        if proposta_obj and proposta_obj.dat_recebimento:
-                            data_str = _convert_to_datetime_string(proposta_obj.dat_recebimento)
-                            data_sub = DateTime(data_str, datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
-                        else:
-                            data_str = _convert_to_datetime_string(subst_obj.dat_apresentacao)
-                            data_sub = DateTime(data_str, datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
-                        
-                        doc_substitutivo = {
-                            "data": data_sub,
-                            "path": self.context.sapl_documentos.substitutivo,
-                            "file": arquivo_substitutivo,
-                            "title": f"Substitutivo nº {subst_obj.num_substitutivo}"
-                        }
-                        documentos.append(doc_substitutivo)
-            finally:
-                session.close()
+                    arquivos_para_verificar.append(arquivo_substitutivo)
+                    # Usar data de proposta se existir, senão data de apresentação
+                    if proposta_obj and proposta_obj.dat_recebimento:
+                        data_str = _convert_to_datetime_string(proposta_obj.dat_recebimento)
+                        data_sub = DateTime(data_str, datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
+                    else:
+                        data_str = _convert_to_datetime_string(subst_obj.dat_apresentacao)
+                        data_sub = DateTime(data_str, datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
+                    
+                    arquivos_info[arquivo_substitutivo] = {
+                        "data": data_sub,
+                        "path": self.context.sapl_documentos.substitutivo,
+                        "title": f"Substitutivo nº {subst_obj.num_substitutivo}"
+                    }
 
-            # Relatorias/Pareceres - SQLAlchemy (com JOIN para comissão)
-            session = self._get_session()
-            try:
+                # Relatorias/Pareceres - SQLAlchemy (com JOIN para comissão)
                 relatorias = session.query(Relatoria, Comissao, Proposicao)\
                     .join(Comissao, Relatoria.cod_comissao == Comissao.cod_comissao)\
                     .outerjoin(Proposicao, Proposicao.cod_parecer == Relatoria.cod_relatoria)\
@@ -979,31 +995,25 @@ class ProcessoLegView(grok.View):
                 
                 for relat_obj, comissao_obj, proposta_obj in relatorias:
                     arquivo_parecer = f"{relat_obj.cod_relatoria}_parecer.pdf"
-                    if self._safe_has_file(self.context.sapl_documentos.parecer_comissao, arquivo_parecer):
-                        # Usar data de proposta se existir, senão data de destituição do relator
-                        if proposta_obj and proposta_obj.dat_recebimento:
-                            data_str = _convert_to_datetime_string(proposta_obj.dat_recebimento)
-                            data_parecer = DateTime(data_str, datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
-                        else:
-                            data_str = _convert_to_datetime_string(relat_obj.dat_destit_relator)
-                            data_parecer = DateTime(data_str, datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
-                        
-                        doc_parecer = {
-                            "data": data_parecer,
-                            "path": self.context.sapl_documentos.parecer_comissao,
-                            "file": arquivo_parecer,
-                            "title": (
-                                f"Parecer {comissao_obj.sgl_comissao} nº "
-                                f"{relat_obj.num_parecer}/{relat_obj.ano_parecer}"
-                            )
-                        }
-                        documentos.append(doc_parecer)
-            finally:
-                session.close()
+                    arquivos_para_verificar.append(arquivo_parecer)
+                    # Usar data de proposta se existir, senão data de destituição do relator
+                    if proposta_obj and proposta_obj.dat_recebimento:
+                        data_str = _convert_to_datetime_string(proposta_obj.dat_recebimento)
+                        data_parecer = DateTime(data_str, datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
+                    else:
+                        data_str = _convert_to_datetime_string(relat_obj.dat_destit_relator)
+                        data_parecer = DateTime(data_str, datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
+                    
+                    arquivos_info[arquivo_parecer] = {
+                        "data": data_parecer,
+                        "path": self.context.sapl_documentos.parecer_comissao,
+                        "title": (
+                            f"Parecer {comissao_obj.sgl_comissao} nº "
+                            f"{relat_obj.num_parecer}/{relat_obj.ano_parecer}"
+                        )
+                    }
 
-            # Matérias Anexadas - SQLAlchemy (com JOIN para obter tipo/numero/ano)
-            session = self._get_session()
-            try:
+                # Matérias Anexadas - SQLAlchemy (com JOIN para obter tipo/numero/ano)
                 anexadas = session.query(Anexada, MateriaLegislativa, TipoMateriaLegislativa)\
                     .join(MateriaLegislativa, Anexada.cod_materia_anexada == MateriaLegislativa.cod_materia)\
                     .join(TipoMateriaLegislativa, MateriaLegislativa.tip_id_basica == TipoMateriaLegislativa.tip_materia)\
@@ -1011,55 +1021,61 @@ class ProcessoLegView(grok.View):
                     .filter(Anexada.ind_excluido == 0)\
                     .all()
                 
+                # OTIMIZAÇÃO: Coleta códigos de matérias anexadas para query batch de documentos acessórios
+                cod_materias_anexadas = [anexada_obj.cod_materia_anexada for anexada_obj, _, _ in anexadas]
+                
+                # OTIMIZAÇÃO: Query batch de documentos acessórios das matérias anexadas (antes do loop)
+                docs_anexadas_batch = {}
+                if cod_materias_anexadas:
+                    docs_anexadas_all = session.query(DocumentoAcessorio, Proposicao)\
+                        .outerjoin(Proposicao, Proposicao.cod_mat_ou_doc == DocumentoAcessorio.cod_documento)\
+                        .outerjoin(TipoProposicao, Proposicao.tip_proposicao == TipoProposicao.tip_proposicao)\
+                        .filter(or_(Proposicao.cod_proposicao.is_(None), TipoProposicao.ind_mat_ou_doc == 'D'))\
+                        .filter(DocumentoAcessorio.cod_materia.in_(cod_materias_anexadas))\
+                        .filter(DocumentoAcessorio.ind_excluido == 0)\
+                        .all()
+                    
+                    # Agrupa por cod_materia
+                    for doc_obj, proposta_obj in docs_anexadas_all:
+                        cod_mat = doc_obj.cod_materia
+                        if cod_mat not in docs_anexadas_batch:
+                            docs_anexadas_batch[cod_mat] = []
+                        docs_anexadas_batch[cod_mat].append((doc_obj, proposta_obj))
+                
                 for anexada_obj, materia_obj, tipo_obj in anexadas:
                     arquivo_anexada = f"{anexada_obj.cod_materia_anexada}_texto_integral.pdf"
-                    if self._safe_has_file(self.context.sapl_documentos.materia, arquivo_anexada):
-                        data_anex_str = _convert_to_datetime_string(anexada_obj.dat_anexacao)
-                        doc_anexada = {
-                            "data": DateTime(data_anex_str, datefmt='international').strftime('%Y-%m-%d 23:58:00'),
-                            "path": self.context.sapl_documentos.materia,
-                            "file": arquivo_anexada,
-                            "title": (
-                                f"{tipo_obj.sgl_tipo_materia} "
-                                f"{materia_obj.num_ident_basica}/{materia_obj.ano_ident_basica} "
-                                "(anexada)"
-                            )
-                        }
-                        documentos.append(doc_anexada)
+                    arquivos_para_verificar.append(arquivo_anexada)
+                    data_anex_str = _convert_to_datetime_string(anexada_obj.dat_anexacao)
+                    arquivos_info[arquivo_anexada] = {
+                        "data": DateTime(data_anex_str, datefmt='international').strftime('%Y-%m-%d 23:58:00'),
+                        "path": self.context.sapl_documentos.materia,
+                        "title": (
+                            f"{tipo_obj.sgl_tipo_materia} "
+                            f"{materia_obj.num_ident_basica}/{materia_obj.ano_ident_basica} "
+                            "(anexada)"
+                        )
+                    }
 
-                        # Documentos acessórios das matérias anexadas - SQLAlchemy
-                        docs_anexada = session.query(DocumentoAcessorio, Proposicao)\
-                            .outerjoin(Proposicao, Proposicao.cod_mat_ou_doc == DocumentoAcessorio.cod_documento)\
-                            .outerjoin(TipoProposicao, Proposicao.tip_proposicao == TipoProposicao.tip_proposicao)\
-                            .filter(or_(Proposicao.cod_proposicao.is_(None), TipoProposicao.ind_mat_ou_doc == 'D'))\
-                            .filter(DocumentoAcessorio.cod_materia == anexada_obj.cod_materia_anexada)\
-                            .filter(DocumentoAcessorio.ind_excluido == 0)\
-                            .all()
+                    # Documentos acessórios das matérias anexadas (usando batch)
+                    docs_anexada = docs_anexadas_batch.get(anexada_obj.cod_materia_anexada, [])
+                    for doc_obj, proposta_obj in docs_anexada:
+                        arquivo_acessorio = f"{doc_obj.cod_documento}.pdf"
+                        arquivos_para_verificar.append(arquivo_acessorio)
+                        # Usar data de proposta se existir, senão data do documento
+                        if proposta_obj and proposta_obj.dat_recebimento:
+                            data_str = _convert_to_datetime_string(proposta_obj.dat_recebimento)
+                            data_doc = DateTime(data_str, datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
+                        else:
+                            data_str = _convert_to_datetime_string(doc_obj.dat_documento)
+                            data_doc = DateTime(data_str, datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
                         
-                        for doc_obj, proposta_obj in docs_anexada:
-                            arquivo_acessorio = f"{doc_obj.cod_documento}.pdf"
-                            if self._safe_has_file(self.context.sapl_documentos.materia, arquivo_acessorio):
-                                # Usar data de proposta se existir, senão data do documento
-                                if proposta_obj and proposta_obj.dat_recebimento:
-                                    data_str = _convert_to_datetime_string(proposta_obj.dat_recebimento)
-                                    data_doc = DateTime(data_str, datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
-                                else:
-                                    data_str = _convert_to_datetime_string(doc_obj.dat_documento)
-                                    data_doc = DateTime(data_str, datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
-                                
-                                doc_acessorio = {
-                                    "data": data_doc,
-                                    "path": self.context.sapl_documentos.materia,
-                                    "file": arquivo_acessorio,
-                                    "title": f"{doc_obj.nom_documento} (acess. de anexada)"
-                                }
-                                documentos.append(doc_acessorio)
-            finally:
-                session.close()
+                        arquivos_info[arquivo_acessorio] = {
+                            "data": data_doc,
+                            "path": self.context.sapl_documentos.materia,
+                            "title": f"{doc_obj.nom_documento} (acess. de anexada)"
+                        }
 
-            # Matérias Anexadoras - SQLAlchemy (com JOIN para obter tipo/numero/ano)
-            session = self._get_session()
-            try:
+                # Matérias Anexadoras - SQLAlchemy (com JOIN para obter tipo/numero/ano)
                 anexadoras = session.query(Anexada, MateriaLegislativa, TipoMateriaLegislativa)\
                     .join(MateriaLegislativa, Anexada.cod_materia_principal == MateriaLegislativa.cod_materia)\
                     .join(TipoMateriaLegislativa, MateriaLegislativa.tip_id_basica == TipoMateriaLegislativa.tip_materia)\
@@ -1067,55 +1083,61 @@ class ProcessoLegView(grok.View):
                     .filter(Anexada.ind_excluido == 0)\
                     .all()
                 
+                # OTIMIZAÇÃO: Coleta códigos de matérias anexadoras para query batch
+                cod_materias_anexadoras = [anexada_obj.cod_materia_principal for anexada_obj, _, _ in anexadoras]
+                
+                # OTIMIZAÇÃO: Query batch de documentos acessórios das matérias anexadoras
+                docs_anexadoras_batch = {}
+                if cod_materias_anexadoras:
+                    docs_anexadoras_all = session.query(DocumentoAcessorio, Proposicao)\
+                        .outerjoin(Proposicao, Proposicao.cod_mat_ou_doc == DocumentoAcessorio.cod_documento)\
+                        .outerjoin(TipoProposicao, Proposicao.tip_proposicao == TipoProposicao.tip_proposicao)\
+                        .filter(or_(Proposicao.cod_proposicao.is_(None), TipoProposicao.ind_mat_ou_doc == 'D'))\
+                        .filter(DocumentoAcessorio.cod_materia.in_(cod_materias_anexadoras))\
+                        .filter(DocumentoAcessorio.ind_excluido == 0)\
+                        .all()
+                    
+                    # Agrupa por cod_materia
+                    for doc_obj, proposta_obj in docs_anexadoras_all:
+                        cod_mat = doc_obj.cod_materia
+                        if cod_mat not in docs_anexadoras_batch:
+                            docs_anexadoras_batch[cod_mat] = []
+                        docs_anexadoras_batch[cod_mat].append((doc_obj, proposta_obj))
+                
                 for anexada_obj, materia_obj, tipo_obj in anexadoras:
                     arquivo_anexadora = f"{anexada_obj.cod_materia_principal}_texto_integral.pdf"
-                    if self._safe_has_file(self.context.sapl_documentos.materia, arquivo_anexadora):
-                        data_anex_str = _convert_to_datetime_string(anexada_obj.dat_anexacao)
-                        doc_anexadora = {
-                            "data": DateTime(data_anex_str, datefmt='international').strftime('%Y-%m-%d 23:58:00'),
-                            "path": self.context.sapl_documentos.materia,
-                            "file": arquivo_anexadora,
-                            "title": (
-                                f"{tipo_obj.sgl_tipo_materia} "
-                                f"{materia_obj.num_ident_basica}/{materia_obj.ano_ident_basica} "
-                                "(anexadora)"
-                            )
-                        }
-                        documentos.append(doc_anexadora)
+                    arquivos_para_verificar.append(arquivo_anexadora)
+                    data_anex_str = _convert_to_datetime_string(anexada_obj.dat_anexacao)
+                    arquivos_info[arquivo_anexadora] = {
+                        "data": DateTime(data_anex_str, datefmt='international').strftime('%Y-%m-%d 23:58:00'),
+                        "path": self.context.sapl_documentos.materia,
+                        "title": (
+                            f"{tipo_obj.sgl_tipo_materia} "
+                            f"{materia_obj.num_ident_basica}/{materia_obj.ano_ident_basica} "
+                            "(anexadora)"
+                        )
+                    }
 
-                        # Documentos acessórios das matérias anexadoras - SQLAlchemy
-                        docs_anexadora = session.query(DocumentoAcessorio, Proposicao)\
-                            .outerjoin(Proposicao, Proposicao.cod_mat_ou_doc == DocumentoAcessorio.cod_documento)\
-                            .outerjoin(TipoProposicao, Proposicao.tip_proposicao == TipoProposicao.tip_proposicao)\
-                            .filter(or_(Proposicao.cod_proposicao.is_(None), TipoProposicao.ind_mat_ou_doc == 'D'))\
-                            .filter(DocumentoAcessorio.cod_materia == anexada_obj.cod_materia_principal)\
-                            .filter(DocumentoAcessorio.ind_excluido == 0)\
-                            .all()
+                    # Documentos acessórios das matérias anexadoras (usando batch)
+                    docs_anexadora = docs_anexadoras_batch.get(anexada_obj.cod_materia_principal, [])
+                    for doc_obj, proposta_obj in docs_anexadora:
+                        arquivo_acessorio = f"{doc_obj.cod_documento}.pdf"
+                        arquivos_para_verificar.append(arquivo_acessorio)
+                        # Usar data de proposta se existir, senão data do documento
+                        if proposta_obj and proposta_obj.dat_recebimento:
+                            data_str = _convert_to_datetime_string(proposta_obj.dat_recebimento)
+                            data_doc = DateTime(data_str, datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
+                        else:
+                            data_str = _convert_to_datetime_string(doc_obj.dat_documento)
+                            data_doc = DateTime(data_str, datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
                         
-                        for doc_obj, proposta_obj in docs_anexadora:
-                            arquivo_acessorio = f"{doc_obj.cod_documento}.pdf"
-                            if self._safe_has_file(self.context.sapl_documentos.materia, arquivo_acessorio):
-                                # Usar data de proposta se existir, senão data do documento
-                                if proposta_obj and proposta_obj.dat_recebimento:
-                                    data_str = _convert_to_datetime_string(proposta_obj.dat_recebimento)
-                                    data_doc = DateTime(data_str, datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
-                                else:
-                                    data_str = _convert_to_datetime_string(doc_obj.dat_documento)
-                                    data_doc = DateTime(data_str, datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
-                                
-                                doc_acessorio = {
-                                    "data": data_doc,
-                                    "path": self.context.sapl_documentos.materia,
-                                    "file": arquivo_acessorio,
-                                    "title": f"{doc_obj.nom_documento} (acess. de anexadora)"
-                                }
-                                documentos.append(doc_acessorio)
-            finally:
-                session.close()
+                        arquivos_info[arquivo_acessorio] = {
+                            "data": data_doc,
+                            "path": self.context.sapl_documentos.materia,
+                            "title": f"{doc_obj.nom_documento} (acess. de anexadora)"
+                        }
 
-            # Documentos Acessórios da Matéria Principal - SQLAlchemy
-            session = self._get_session()
-            try:
+                # Documentos Acessórios da Matéria Principal - SQLAlchemy
                 documentos_acessorios = session.query(DocumentoAcessorio, Proposicao)\
                     .outerjoin(Proposicao, Proposicao.cod_mat_ou_doc == DocumentoAcessorio.cod_documento)\
                     .outerjoin(TipoProposicao, Proposicao.tip_proposicao == TipoProposicao.tip_proposicao)\
@@ -1126,28 +1148,22 @@ class ProcessoLegView(grok.View):
                 
                 for doc_obj, proposta_obj in documentos_acessorios:
                     arquivo_acessorio = f"{doc_obj.cod_documento}.pdf"
-                    if hasattr(self.context.sapl_documentos.materia, arquivo_acessorio):
-                        # Usar data de proposta se existir, senão data do documento
-                        if proposta_obj and proposta_obj.dat_recebimento:
-                            data_str = _convert_to_datetime_string(proposta_obj.dat_recebimento)
-                            data_doc = DateTime(data_str, datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
-                        else:
-                            data_str = _convert_to_datetime_string(doc_obj.dat_documento)
-                            data_doc = DateTime(data_str, datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
-                        
-                        doc_acessorio = {
-                            "data": data_doc,
-                            "path": self.context.sapl_documentos.materia,
-                            "file": arquivo_acessorio,
-                            "title": doc_obj.nom_documento
-                        }
-                        documentos.append(doc_acessorio)
-            finally:
-                session.close()
+                    arquivos_para_verificar.append(arquivo_acessorio)
+                    # Usar data de proposta se existir, senão data do documento
+                    if proposta_obj and proposta_obj.dat_recebimento:
+                        data_str = _convert_to_datetime_string(proposta_obj.dat_recebimento)
+                        data_doc = DateTime(data_str, datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
+                    else:
+                        data_str = _convert_to_datetime_string(doc_obj.dat_documento)
+                        data_doc = DateTime(data_str, datefmt='international').strftime('%Y-%m-%d %H:%M:%S')
+                    
+                    arquivos_info[arquivo_acessorio] = {
+                        "data": data_doc,
+                        "path": self.context.sapl_documentos.materia,
+                        "title": doc_obj.nom_documento
+                    }
 
-            # Tramitações - SQLAlchemy (com JOIN para status)
-            session = self._get_session()
-            try:
+                # Tramitações - SQLAlchemy (com JOIN para status)
                 tramitacoes = session.query(Tramitacao, StatusTramitacao)\
                     .join(StatusTramitacao, Tramitacao.cod_status == StatusTramitacao.cod_status)\
                     .filter(Tramitacao.cod_materia == dados_materia['cod_materia'])\
@@ -1157,20 +1173,15 @@ class ProcessoLegView(grok.View):
                 
                 for tram_obj, status_obj in tramitacoes:
                     arquivo_tram = f"{tram_obj.cod_tramitacao}_tram.pdf"
-                    if self._safe_has_file(self.context.sapl_documentos.materia.tramitacao, arquivo_tram):
-                        data_tram_str = _convert_to_datetime_string(tram_obj.dat_tramitacao)
-                        documentos.append({
-                            "data": DateTime(data_tram_str, datefmt='international').strftime('%Y-%m-%d %H:%M:%S'),
-                            "path": self.context.sapl_documentos.materia.tramitacao,
-                            "file": arquivo_tram,
-                            "title": f"Tramitação ({status_obj.des_status})"
-                        })
-            finally:
-                session.close()
+                    arquivos_para_verificar.append(arquivo_tram)
+                    data_tram_str = _convert_to_datetime_string(tram_obj.dat_tramitacao)
+                    arquivos_info[arquivo_tram] = {
+                        "data": DateTime(data_tram_str, datefmt='international').strftime('%Y-%m-%d %H:%M:%S'),
+                        "path": self.context.sapl_documentos.materia.tramitacao,
+                        "title": f"Tramitação ({status_obj.des_status})"
+                    }
 
-            # Normas Jurídicas Relacionadas - SQLAlchemy (com JOIN para tipo)
-            session = self._get_session()
-            try:
+                # Normas Jurídicas Relacionadas - SQLAlchemy (com JOIN para tipo)
                 normas = session.query(NormaJuridica, TipoNormaJuridica)\
                     .join(TipoNormaJuridica, NormaJuridica.tip_norma == TipoNormaJuridica.tip_norma)\
                     .filter(NormaJuridica.cod_materia == dados_materia['cod_materia'])\
@@ -1179,14 +1190,45 @@ class ProcessoLegView(grok.View):
                 
                 for norma_obj, tipo_norma_obj in normas:
                     arquivo_norma = f"{norma_obj.cod_norma}_texto_integral.pdf"
-                    if self._safe_has_file(self.context.sapl_documentos.norma_juridica, arquivo_norma):
-                        data_norma_str = _convert_to_datetime_string(norma_obj.dat_norma)
+                    arquivos_para_verificar.append(arquivo_norma)
+                    data_norma_str = _convert_to_datetime_string(norma_obj.dat_norma)
+                    arquivos_info[arquivo_norma] = {
+                        "data": DateTime(data_norma_str, datefmt='international').strftime('%Y-%m-%d 23:59:00'),
+                        "path": self.context.sapl_documentos.norma_juridica,
+                        "title": f"{tipo_norma_obj.sgl_tipo_norma} nº {norma_obj.num_norma}/{norma_obj.ano_norma}"
+                    }
+                
+                # OTIMIZAÇÃO: Verifica todos os arquivos em batch por container
+                # Agrupa arquivos por container
+                arquivos_por_container = {}
+                for arquivo in arquivos_para_verificar:
+                    info = arquivos_info.get(arquivo, {})
+                    container = info.get('path')
+                    if container:
+                        if container not in arquivos_por_container:
+                            arquivos_por_container[container] = []
+                        arquivos_por_container[container].append(arquivo)
+                
+                # Verifica arquivos em batch por container
+                arquivos_existentes = set()
+                for container, arquivos_list in arquivos_por_container.items():
+                    resultados = safe_check_files_batch(container, arquivos_list)
+                    arquivos_existentes.update(arquivo for arquivo, existe in resultados.items() if existe)
+                
+                # Adiciona documentos que existem
+                for arquivo in arquivos_para_verificar:
+                    if arquivo in arquivos_existentes:
+                        info = arquivos_info[arquivo]
                         documentos.append({
-                            "data": DateTime(data_norma_str, datefmt='international').strftime('%Y-%m-%d 23:59:00'),
-                            "path": self.context.sapl_documentos.norma_juridica,
-                            "file": arquivo_norma,
-                            "title": f"{tipo_norma_obj.sgl_tipo_norma} nº {norma_obj.num_norma}/{norma_obj.ano_norma}"
+                            "data": info["data"],
+                            "path": info["path"],
+                            "file": arquivo,
+                            "title": info["title"],
+                            "filesystem": False  # Precisa ser baixado via HTTP
                         })
+                        
+            except Exception as e:
+                logger.warning(f"Erro ao coletar dados do banco: {str(e)}", exc_info=True)
             finally:
                 session.close()
 

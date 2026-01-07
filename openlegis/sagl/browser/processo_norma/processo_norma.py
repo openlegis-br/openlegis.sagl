@@ -33,6 +33,7 @@ from openlegis.sagl.browser.processo_norma.processo_norma_utils import (
     get_cache_norma_file_path,
     TEMP_DIR_PREFIX_NORMA,
     safe_check_file,
+    safe_check_files_batch,
     secure_path_join
 )
 
@@ -236,6 +237,7 @@ class ProcessoNormaView(grok.View):
             data_capa = DateTime(data_norma_str, datefmt='international').strftime('%Y-%m-%d 00:00:01')
             
             # Gera a capa usando o método padrão do sistema (gera no temp_folder)
+            # OTIMIZAÇÃO: Usa sessão temporária apenas para capa, depois será consolidada
             try:
                 # Tenta usar método específico para normas, se existir
                 if hasattr(self.context, 'modelo_proposicao') and hasattr(self.context.modelo_proposicao, 'capa_norma'):
@@ -243,25 +245,55 @@ class ProcessoNormaView(grok.View):
                     url_path = 'capa_norma'
                 else:
                     # Fallback: usa método de matéria se norma tiver cod_materia
-                    session = self._get_session()
+                    # Usa sessão temporária aqui pois precisa ser antes da sessão principal
+                    session_capa = self._get_session()
                     try:
-                        norma = session.query(NormaJuridica)\
+                        norma_capa = session_capa.query(NormaJuridica)\
                             .filter(NormaJuridica.cod_norma == dados_norma['cod_norma'])\
                             .filter(NormaJuridica.ind_excluido == 0)\
                             .first()
                         
-                        if norma and norma.cod_materia:
-                            self.context.modelo_proposicao.capa_processo(cod_materia=norma.cod_materia, action='gerar')
+                        if norma_capa and norma_capa.cod_materia:
+                            self.context.modelo_proposicao.capa_processo(cod_materia=norma_capa.cod_materia, action='gerar')
                             url_path = 'capa_processo'
                             # Usa cod_materia para download
-                            cod_para_capa = norma.cod_materia
+                            cod_para_capa = norma_capa.cod_materia
                         else:
                             raise PDFGenerationError("Norma não possui matéria relacionada e não há método capa_norma disponível")
                     finally:
-                        session.close()
+                        session_capa.close()
                 
-                # Aguarda um pouco para garantir que o arquivo foi gerado
-                time.sleep(0.5)
+                # OTIMIZAÇÃO: Polling inteligente ao invés de sleep fixo
+                # Aguarda a geração da capa com polling e timeout
+                max_wait_time = 5.0  # Máximo de 5 segundos
+                poll_interval = 0.1  # Verifica a cada 100ms
+                waited = 0.0
+                capa_ready = False
+                
+                while waited < max_wait_time:
+                    try:
+                        # Tenta fazer uma requisição HEAD para verificar se a capa está disponível
+                        test_url = url if 'url' in locals() else None
+                        if test_url:
+                            test_req = urllib.request.Request(test_url)
+                            test_req.add_header('User-Agent', 'SAGL-PDF-Generator/1.0')
+                            test_req.get_method = lambda: 'HEAD'
+                            try:
+                                with urllib.request.urlopen(test_req, timeout=2) as test_response:
+                                    if test_response.status == 200:
+                                        capa_ready = True
+                                        break
+                            except (urllib.error.HTTPError, urllib.error.URLError):
+                                pass  # Ainda não está pronto, continua esperando
+                    except Exception:
+                        pass
+                    
+                    time.sleep(poll_interval)
+                    waited += poll_interval
+                
+                # Se não ficou pronto no tempo esperado, continua mesmo assim
+                if not capa_ready:
+                    logger.debug(f"[coletar_documentos] Capa não verificada como pronta após {waited:.1f}s, continuando...")
                 
                 # Faz download via HTTP
                 base_url = self.context.absolute_url()
@@ -305,43 +337,45 @@ class ProcessoNormaView(grok.View):
                 "filesystem": True
             })
 
-            # Texto integral da norma
-            arquivo_texto = f"{dados_norma['cod_norma']}_texto_integral.pdf"
-            data_norma_str = _convert_to_datetime_string(dados_norma['data_norma'])
-            data_texto = DateTime(data_norma_str, datefmt='international').strftime('%Y-%m-%d 00:00:02')
-
-            if self._safe_has_file(self.context.sapl_documentos.norma_juridica, arquivo_texto):
-                documentos.append({
-                    "data": data_texto,
-                    "path": self.context.sapl_documentos.norma_juridica,
-                    "file": arquivo_texto,
-                    "title": f"{dados_norma['descricao']} nº {dados_norma['numero']}/{dados_norma['ano']}",
-                    "filesystem": False  # Precisa ser baixado via HTTP
-                })
-
-            # Texto compilado da norma
-            arquivo_compilado = f"{dados_norma['cod_norma']}_texto_consolidado.pdf"
-            if self._safe_has_file(self.context.sapl_documentos.norma_juridica, arquivo_compilado):
-                data_compilado = DateTime(data_norma_str, datefmt='international').strftime('%Y-%m-%d 00:00:03')
-                documentos.append({
-                    "data": data_compilado,
-                    "path": self.context.sapl_documentos.norma_juridica,
-                    "file": arquivo_compilado,
-                    "title": "Texto Compilado",
-                    "filesystem": False  # Precisa ser baixado via HTTP
-                })
-
-            # Matéria relacionada (a matéria que originou a norma) - SQLAlchemy
+            # OTIMIZAÇÃO: Usar uma única sessão SQLAlchemy para todas as queries
             session = self._get_session()
             try:
-                # Busca a norma para obter o cod_materia
+                # Busca a norma uma vez para reutilizar
                 norma = session.query(NormaJuridica)\
                     .filter(NormaJuridica.cod_norma == dados_norma['cod_norma'])\
                     .filter(NormaJuridica.ind_excluido == 0)\
                     .first()
                 
-                if norma and norma.cod_materia:
-                    # Busca a matéria que originou a norma
+                if not norma:
+                    raise ValueError("Norma não encontrada")
+                
+                # OTIMIZAÇÃO: Coleta todos os nomes de arquivos para verificação em batch
+                arquivos_para_verificar = []
+                arquivos_info = {}  # Armazena informações sobre cada arquivo
+                
+                # Texto integral da norma
+                arquivo_texto = f"{dados_norma['cod_norma']}_texto_integral.pdf"
+                data_norma_str = _convert_to_datetime_string(dados_norma['data_norma'])
+                data_texto = DateTime(data_norma_str, datefmt='international').strftime('%Y-%m-%d 00:00:02')
+                arquivos_para_verificar.append(arquivo_texto)
+                arquivos_info[arquivo_texto] = {
+                    "data": data_texto,
+                    "path": self.context.sapl_documentos.norma_juridica,
+                    "title": f"{dados_norma['descricao']} nº {dados_norma['numero']}/{dados_norma['ano']}"
+                }
+
+                # Texto compilado da norma
+                arquivo_compilado = f"{dados_norma['cod_norma']}_texto_consolidado.pdf"
+                data_compilado = DateTime(data_norma_str, datefmt='international').strftime('%Y-%m-%d 00:00:03')
+                arquivos_para_verificar.append(arquivo_compilado)
+                arquivos_info[arquivo_compilado] = {
+                    "data": data_compilado,
+                    "path": self.context.sapl_documentos.norma_juridica,
+                    "title": "Texto Compilado"
+                }
+
+                # Matéria relacionada (se houver)
+                if norma.cod_materia:
                     materia_result = session.query(MateriaLegislativa, TipoMateriaLegislativa)\
                         .join(TipoMateriaLegislativa, 
                               MateriaLegislativa.tip_id_basica == TipoMateriaLegislativa.tip_materia)\
@@ -352,21 +386,15 @@ class ProcessoNormaView(grok.View):
                     if materia_result:
                         materia_obj, tipo_obj = materia_result
                         arquivo_materia = f"{materia_obj.cod_materia}_texto_integral.pdf"
-                        if self._safe_has_file(self.context.sapl_documentos.materia, arquivo_materia):
-                            data_materia_str = _convert_to_datetime_string(materia_obj.dat_apresentacao)
-                            documentos.append({
-                                "data": DateTime(data_materia_str, datefmt='international').strftime('%Y-%m-%d 00:00:02'),
-                                "path": self.context.sapl_documentos.materia,
-                                "file": arquivo_materia,
-                                "title": f"{tipo_obj.sgl_tipo_materia} {materia_obj.num_ident_basica}/{materia_obj.ano_ident_basica} (matéria relacionada)",
-                                "filesystem": False  # Precisa ser baixado via HTTP
-                            })
-            finally:
-                session.close()
+                        arquivos_para_verificar.append(arquivo_materia)
+                        data_materia_str = _convert_to_datetime_string(materia_obj.dat_apresentacao)
+                        arquivos_info[arquivo_materia] = {
+                            "data": DateTime(data_materia_str, datefmt='international').strftime('%Y-%m-%d 00:00:02'),
+                            "path": self.context.sapl_documentos.materia,
+                            "title": f"{tipo_obj.sgl_tipo_materia} {materia_obj.num_ident_basica}/{materia_obj.ano_ident_basica} (matéria relacionada)"
+                        }
 
-            # Normas relacionadas (vinculadas) - SQLAlchemy
-            session = self._get_session()
-            try:
+                # OTIMIZAÇÃO: Executa ambas as queries de vínculos na mesma sessão
                 # Busca normas onde cod_norma é referente (normas que esta norma referencia)
                 vinculos_referente = session.query(VinculoNormaJuridica, NormaJuridica, TipoNormaJuridica)\
                     .join(NormaJuridica, VinculoNormaJuridica.cod_norma_referida == NormaJuridica.cod_norma)\
@@ -383,37 +411,18 @@ class ProcessoNormaView(grok.View):
                     .filter(NormaJuridica.ind_excluido == 0)\
                     .all()
                 
-                # Adiciona normas referenciadas por esta norma
-                for vinculo_obj, norma_obj, tipo_obj in vinculos_referente:
+                # Adiciona arquivos de normas relacionadas à lista de verificação
+                for vinculo_obj, norma_obj, tipo_obj in vinculos_referente + vinculos_referida:
                     arquivo_norma = f"{norma_obj.cod_norma}_texto_integral.pdf"
-                    if self._safe_has_file(self.context.sapl_documentos.norma_juridica, arquivo_norma):
-                        data_norma_str = _convert_to_datetime_string(norma_obj.dat_norma)
-                        documentos.append({
-                            "data": DateTime(data_norma_str, datefmt='international').strftime('%Y-%m-%d 00:00:03'),
-                            "path": self.context.sapl_documentos.norma_juridica,
-                            "file": arquivo_norma,
-                            "title": f"{tipo_obj.sgl_tipo_norma} {norma_obj.num_norma}/{norma_obj.ano_norma} (norma relacionada)",
-                            "filesystem": False  # Precisa ser baixado via HTTP
-                        })
-                
-                # Adiciona normas que referenciam esta norma
-                for vinculo_obj, norma_obj, tipo_obj in vinculos_referida:
-                    arquivo_norma = f"{norma_obj.cod_norma}_texto_integral.pdf"
-                    if self._safe_has_file(self.context.sapl_documentos.norma_juridica, arquivo_norma):
-                        data_norma_str = _convert_to_datetime_string(norma_obj.dat_norma)
-                        documentos.append({
-                            "data": DateTime(data_norma_str, datefmt='international').strftime('%Y-%m-%d 00:00:03'),
-                            "path": self.context.sapl_documentos.norma_juridica,
-                            "file": arquivo_norma,
-                            "title": f"{tipo_obj.sgl_tipo_norma} {norma_obj.num_norma}/{norma_obj.ano_norma} (norma relacionada)",
-                            "filesystem": False  # Precisa ser baixado via HTTP
-                        })
-            finally:
-                session.close()
+                    arquivos_para_verificar.append(arquivo_norma)
+                    data_norma_rel_str = _convert_to_datetime_string(norma_obj.dat_norma)
+                    arquivos_info[arquivo_norma] = {
+                        "data": DateTime(data_norma_rel_str, datefmt='international').strftime('%Y-%m-%d 00:00:03'),
+                        "path": self.context.sapl_documentos.norma_juridica,
+                        "title": f"{tipo_obj.sgl_tipo_norma} {norma_obj.num_norma}/{norma_obj.ano_norma} (norma relacionada)"
+                    }
 
-            # Anexos da norma - SQLAlchemy
-            session = self._get_session()
-            try:
+                # Anexos da norma
                 from openlegis.sagl.models.models import AnexoNorma
                 anexos = session.query(AnexoNorma)\
                     .filter(AnexoNorma.cod_norma == dados_norma['cod_norma'])\
@@ -423,18 +432,45 @@ class ProcessoNormaView(grok.View):
                 
                 for anexo in anexos:
                     id_anexo = f"{dados_norma['cod_norma']}_anexo_{anexo.cod_anexo}"
-                    if self._safe_has_file(self.context.sapl_documentos.norma_juridica, id_anexo):
-                        # Usa data da norma com incremento para manter ordem
-                        data_anexo = DateTime(data_norma_str, datefmt='international').strftime('%Y-%m-%d 00:00:04')
+                    arquivos_para_verificar.append(id_anexo)
+                    data_anexo = DateTime(data_norma_str, datefmt='international').strftime('%Y-%m-%d 00:00:04')
+                    arquivos_info[id_anexo] = {
+                        "data": data_anexo,
+                        "path": self.context.sapl_documentos.norma_juridica,
+                        "title": f"Anexo {anexo.cod_anexo} - {anexo.txt_descricao or 'Sem descrição'}"
+                    }
+                
+                # OTIMIZAÇÃO: Verifica todos os arquivos em batch por container
+                # Agrupa arquivos por container
+                arquivos_por_container = {}
+                for arquivo in arquivos_para_verificar:
+                    info = arquivos_info.get(arquivo, {})
+                    container = info.get('path')
+                    if container:
+                        if container not in arquivos_por_container:
+                            arquivos_por_container[container] = []
+                        arquivos_por_container[container].append(arquivo)
+                
+                # Verifica arquivos em batch por container
+                arquivos_existentes = set()
+                for container, arquivos_list in arquivos_por_container.items():
+                    resultados = safe_check_files_batch(container, arquivos_list)
+                    arquivos_existentes.update(arquivo for arquivo, existe in resultados.items() if existe)
+                
+                # Adiciona documentos que existem
+                for arquivo in arquivos_para_verificar:
+                    if arquivo in arquivos_existentes:
+                        info = arquivos_info[arquivo]
                         documentos.append({
-                            "data": data_anexo,
-                            "path": self.context.sapl_documentos.norma_juridica,
-                            "file": id_anexo,
-                            "title": f"Anexo {anexo.cod_anexo} - {anexo.txt_descricao or 'Sem descrição'}",
+                            "data": info["data"],
+                            "path": info["path"],
+                            "file": arquivo,
+                            "title": info["title"],
                             "filesystem": False  # Precisa ser baixado via HTTP
                         })
+                        
             except Exception as e:
-                logger.warning(f"Erro ao coletar anexos da norma: {str(e)}", exc_info=True)
+                logger.warning(f"Erro ao coletar dados do banco: {str(e)}", exc_info=True)
             finally:
                 session.close()
 
@@ -449,6 +485,31 @@ class ProcessoNormaView(grok.View):
     def _safe_has_file(self, container, filename: str) -> bool:
         """Verifica se um arquivo existe no container"""
         return safe_check_file(container, filename)
+    
+    def _get_container_cache(self, container):
+        """Obtém cache de objectIds para um container"""
+        if not hasattr(self, '_container_cache'):
+            self._container_cache = {}
+        container_id = id(container)
+        if container_id not in self._container_cache:
+            try:
+                if hasattr(container, 'objectIds'):
+                    self._container_cache[container_id] = set(container.objectIds())
+                else:
+                    self._container_cache[container_id] = set()
+            except Exception as e:
+                logger.debug(f"[_get_container_cache] Erro ao obter objectIds: {e}")
+                self._container_cache[container_id] = set()
+        return self._container_cache[container_id]
+    
+    def _safe_has_file_cached(self, container, filename: str) -> bool:
+        """Verifica se um arquivo existe no container usando cache"""
+        obj_ids = self._get_container_cache(container)
+        exists = filename in obj_ids
+        if not exists and filename.lower().endswith('.pdf'):
+            base = filename[:-4]
+            exists = base in obj_ids
+        return exists
 
     @timeit
     def render(self):

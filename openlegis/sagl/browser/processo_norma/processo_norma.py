@@ -31,9 +31,7 @@ from openlegis.sagl.browser.processo_norma.processo_norma_utils import (
     get_processo_norma_dir,
     get_processo_norma_dir_hash,
     get_cache_norma_file_path,
-    TEMP_DIR_PREFIX_NORMA
-)
-from openlegis.sagl.browser.processo_leg.processo_leg_utils import (
+    TEMP_DIR_PREFIX_NORMA,
     safe_check_file,
     secure_path_join
 )

@@ -1,139 +1,314 @@
 <dtml-var header_html>
 
- <div class="row mb-2">
-      <div class="col-12 col-md-8 align-self-center">
-        <h1 class="firstHeading font-size-18">Comissões</h1>
-      </div>
-      <div class="col-12 col-md-4 text-start text-md-end">
-         <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Comissao'])">
-            <a class="btn btn-light d-print-none" href="<dtml-var portal_url>/cadastros/comissao/comissao_form"><i class="fa fa-fw fa-plus"></i> Incluir Comissão</a>
-         </dtml-if> 
-      </div>
- </div>
-
- <div class="row">
-    <div class="col-12 col-md-8 mb-3">
-         <label class="form-label" for="lst_tip_comissao" class="col-12 col-sm-4 col-form-label">Tipo de Comissão</label>
-         <select class="form-select" id="lst_tip_comissao" name="lst_tip_comissao">
-              <option value="">Todos</option>
-              <dtml-in expr="zsql.tipo_comissao_obter_zsql()">   
-                 <option 
-                   value="<dtml-var nom_tipo_comissao>"><dtml-var nom_tipo_comissao></option>
-              </dtml-in>
-         </select>
-    </div>
-    <div class="col-12 col-md-4 mb-3 d-flex align-items-center justify-content-center">
-             <div class="form-check form-check-inline">
-              <input class="filter-atividade form-check-input" type="radio" name="filter" id="ativas" value="Ativa" />
-              <label class="form-check-label" for="ativas">
-                Ativas
-              </label>
-             </div>
-             <div class="form-check form-check-inline">
-              <input class="filter-atividade form-check-input" type="radio" name="filter" id="inativas" value="Inativa" />
-              <label class="form-check-label" for="inativas">
-                Inativas
-              </label>
-             </div>
-             <div class="form-check form-check-inline">
-              <input class="filter-atividade form-check-input" type="radio" name="filter" id="todas" value="all"  checked="checked" />
-              <label class="form-check-label" for="todas">
-                Todas
-              </label>
-             </div>
-    </div>
- </div>
-
-<div class="table-responsive">
- <table id="comissoes" class="table w-100">
-     <thead class="table-light">
-         <tr>
-             <th>Nome</th>
-             <th>Tipo</th>
-             <th>Status</th>
-         </tr>
-     </thead>
-     <tbody>
-         <dtml-in expr="zsql.comissao_obter_zsql(ind_excluido=0,)">
-             <tr>
-                 <td>
-                    <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Comissao'])">
-                       <a href="<dtml-var portal_url>/cadastros/comissao/comissao_mostrar_proc?cod_comissao=<dtml-var cod_comissao>"><dtml-var nom_comissao></a>
-                    <dtml-else>
-                       <a href="<dtml-var portal_url>/consultas/comissao/comissao_mostrar_proc?cod_comissao=<dtml-var cod_comissao>"><dtml-var nom_comissao></a>
-                    </dtml-if>
-                 </td>
-                 <td><dtml-var nom_tipo_comissao></td>
-                 <td>
-                     <dtml-if dat_extincao>Inativa<dtml-else>Ativa</dtml-if>
-                 </td>
-             </tr>
-         </dtml-in>
-     </tbody>
- </table>
+<div class="row mb-3">
+  <div class="col-12 col-md-8 align-self-center">
+    <h1 class="firstHeading font-size-18 mb-0">Comissões</h1>
+  </div>
+  <div class="col-12 col-md-4 text-start text-md-end">
+    <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Comissao'])">
+      <a class="btn btn-primary d-print-none" href="<dtml-var portal_url>/cadastros/comissao/comissao_form">
+        <i class="fas fa-plus me-1"></i>Incluir Comissão
+      </a>
+    </dtml-if> 
+  </div>
 </div>
 
- <div id="panelBtn" class="d-print-none">
-   <div class="row">
-      <div class="col-6 mt-2 button"></div>
-      <div class="col-6 small mt-2 d-flex align-items-center justify-content-end"><a href="<dtml-var portal_url>/@@comissoes" target="_blank"> <i class="mdi mdi-database-arrow-down"></i> Dados abertos</a></div>
-   </div>
- </div>
+<div class="card mb-3">
+  <div class="card-body">
+    <div class="row g-3">
+      <div class="col-12 col-md-8">
+        <label class="form-label" for="lst_tip_comissao">
+          <i class="fas fa-filter me-1"></i>Tipo de Comissão
+        </label>
+        <select class="form-select" id="lst_tip_comissao" name="lst_tip_comissao">
+          <option value="">Todos</option>
+          <dtml-in expr="zsql.tipo_comissao_obter_zsql()">   
+            <option value="<dtml-var nom_tipo_comissao>"><dtml-var nom_tipo_comissao></option>
+          </dtml-in>
+        </select>
+      </div>
+      <div class="col-12 col-md-4">
+        <label class="form-label mb-2">
+          <i class="fas fa-info-circle me-1"></i>Status
+        </label>
+        <div class="btn-group w-100" role="group" aria-label="Filtro de status">
+          <input class="btn-check filter-atividade" type="radio" name="filter" id="ativas" value="Ativa" checked="checked" autocomplete="off" />
+          <label class="btn btn-outline-secondary" for="ativas">Ativas</label>
+          <input class="btn-check filter-atividade" type="radio" name="filter" id="inativas" value="Inativa" autocomplete="off" />
+          <label class="btn btn-outline-secondary" for="inativas">Inativas</label>
+          <input class="btn-check filter-atividade" type="radio" name="filter" id="todas" value="all" autocomplete="off" />
+          <label class="btn btn-outline-secondary" for="todas">Todas</label>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card mb-3">
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table id="comissoes" class="table table-hover table-striped align-middle mb-0 w-100">
+        <thead class="table-light">
+          <tr>
+            <th>Nome</th>
+            <th>Tipo</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody class="table-group-divider">
+          <dtml-in expr="zsql.comissao_obter_zsql(ind_excluido=0,)">
+            <dtml-if dat_extincao>
+              <dtml-call expr="REQUEST.set('status_comissao', 'Inativa')">
+            <dtml-else>
+              <dtml-call expr="REQUEST.set('status_comissao', 'Ativa')">
+            </dtml-if>
+            <tr>
+              <td>
+                <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Comissao'])">
+                  <a href="<dtml-var portal_url>/cadastros/comissao/comissao_mostrar_proc?cod_comissao=<dtml-var cod_comissao>" class="text-decoration-none">
+                    <i class="fas fa-users me-1 text-muted"></i><span class="text-primary"><dtml-var nom_comissao></span>
+                  </a>
+                <dtml-else>
+                  <a href="<dtml-var portal_url>/consultas/comissao/comissao_mostrar_proc?cod_comissao=<dtml-var cod_comissao>" class="text-decoration-none">
+                    <i class="fas fa-users me-1 text-muted"></i><span class="text-primary"><dtml-var nom_comissao></span>
+                  </a>
+                </dtml-if>
+              </td>
+              <td>
+                <span class="text-muted"><dtml-var nom_tipo_comissao></span>
+              </td>
+              <td data-status="<dtml-var status_comissao>">
+                <dtml-if dat_extincao>
+                  <span class="badge bg-secondary">
+                    <i class="fas fa-times-circle me-1"></i>Inativa
+                  </span>
+                <dtml-else>
+                  <span class="badge bg-success">
+                    <i class="fas fa-check-circle me-1"></i>Ativa
+                  </span>
+                </dtml-if>
+              </td>
+            </tr>
+          </dtml-in>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div id="panelBtn" class="d-print-none">
+  <div class="row align-items-center">
+    <div class="col-12 col-md-6 mb-2 mb-md-0">
+      <div class="button"></div>
+    </div>
+    <div class="col-12 col-md-6 text-start text-md-end">
+      <a href="<dtml-var portal_url>/@@comissoes" target="_blank" class="text-decoration-none small">
+        <i class="mdi mdi-database-arrow-down me-1"></i>Dados abertos
+      </a>
+    </div>
+  </div>
+</div>
 
 <dtml-var js_slot>
-<script>
+<style>
+/* Ajustar bordas do btn-group para estados corretos seguindo padrão Bootstrap 5 */
+.btn-group .btn-check:checked + .btn-outline-secondary,
+.btn-group .btn-check:active + .btn-outline-secondary,
+.btn-group .btn-outline-secondary.active {
+  border-color: #6c757d !important;
+  background-color: #6c757d !important;
+  color: #ffffff !important;
+  z-index: 1;
+}
 
+/* Garantir legibilidade do texto quando botão está ativo */
+.btn-group .btn-check:checked + .btn-outline-secondary,
+.btn-group .btn-check:active + .btn-outline-secondary,
+.btn-group .btn-outline-secondary.active {
+  --bs-btn-color: #ffffff;
+  --bs-btn-bg: #6c757d;
+  --bs-btn-border-color: #6c757d;
+  --bs-btn-hover-color: #ffffff;
+  --bs-btn-hover-bg: #5c636a;
+  --bs-btn-hover-border-color: #565e64;
+  --bs-btn-focus-shadow-rgb: 108, 117, 125;
+  --bs-btn-active-color: #ffffff;
+  --bs-btn-active-bg: #565e64;
+  --bs-btn-active-border-color: #51585e;
+  --bs-btn-active-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
+  --bs-btn-disabled-color: #6c757d;
+  --bs-btn-disabled-bg: transparent;
+  --bs-btn-disabled-border-color: #6c757d;
+}
+
+.btn-group .btn-outline-secondary:not(.active):hover {
+  border-color: #6c757d;
+  background-color: transparent;
+  color: #6c757d;
+  z-index: 2;
+}
+
+.btn-group .btn-outline-secondary:not(.active):focus,
+.btn-group .btn-check:focus + .btn-outline-secondary {
+  border-color: #6c757d;
+  box-shadow: 0 0 0 0.25rem rgba(108, 117, 125, 0.25);
+  z-index: 3;
+}
+
+/* Remover bordas duplicadas entre botões adjacentes */
+.btn-group > .btn-check + .btn-outline-secondary:not(:first-child) {
+  margin-left: -1px;
+}
+
+/* Garantir bordas arredondadas apenas nas extremidades */
+.btn-group > .btn-check:first-child + .btn-outline-secondary {
+  border-top-left-radius: 0.375rem;
+  border-bottom-left-radius: 0.375rem;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.btn-group > .btn-check:last-child + .btn-outline-secondary {
+  border-top-right-radius: 0.375rem;
+  border-bottom-right-radius: 0.375rem;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+/* Botões do meio sem bordas arredondadas */
+.btn-group > .btn-check:not(:first-child):not(:last-child) + .btn-outline-secondary {
+  border-radius: 0;
+}
+
+/* Garantir que botão ativo tenha borda visível mesmo quando adjacente */
+.btn-group .btn-check:checked + .btn-outline-secondary,
+.btn-group .btn-outline-secondary.active {
+  position: relative;
+}
+</style>
+<script>
 $(document).ready(function() {
     var table = $('#comissoes').DataTable( {
         "responsive": true,
         "order": [[ 2, "asc" ], [ 0, "asc" ]],
+        "dom": '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>rt<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
         "language": {
           search: "Pesquisar Comissão:",
           processing:     "Processando...",
           loadingRecords: "Carregando...",
           lengthMenu:     "Exibir _MENU_ registros por página",
           info:           "Exibindo _START_ a _END_ de _TOTAL_ registros",
-          infoEmpty:      "Exibindo _START_ a _END_ de _TOTAL_ registros",
-          infoFiltered:   "(total de registros:_MAX_)",
+          infoEmpty:      "Exibindo 0 a 0 de 0 registros",
+          infoFiltered:   "(filtrado de _MAX_ registros no total)",
           emptyTable:     "Nenhum registro encontrado",
-          zeroRecords:     "Nenhum registro encontrado",
+          zeroRecords:    "Nenhum registro encontrado",
           paginate: {
             first:      "Primeiro",
             previous:   "Anterior",
             next:       "Próximo",
             last:       "Último"
           },
-         "buttons": {
-           print: "Imprimir",
-           copy: "Copiar",
-           copyTitle: "Cópia bem sucedida",
-           copySuccess: {
-            1: "Uma linha copiada com sucesso",
-            _: "%d linhas copiadas com sucesso"
+          buttons: {
+            print: "Imprimir",
+            copy: "Copiar",
+            copyTitle: "Cópia bem sucedida",
+            copySuccess: {
+              1: "Uma linha copiada com sucesso",
+              _: "%d linhas copiadas com sucesso"
+            }
           }
-        }
+        },
+        "buttons": {
+          "dom": {
+            "button": {
+              "className": "btn btn-sm btn-outline-secondary"
+            },
+            "collection": {
+              "tag": "div",
+              "className": "dropdown-menu"
+            }
+          },
+          "buttons": [
+            {
+              "extend": "copy",
+              "text": "<i class='fas fa-copy me-1'></i>Copiar",
+              "className": "btn btn-sm btn-outline-secondary"
+            },
+            {
+              "extend": "print",
+              "text": "<i class='fas fa-print me-1'></i>Imprimir",
+              "className": "btn btn-sm btn-outline-secondary"
+            }
+          ]
         }
     });
 
     $('#lst_tip_comissao').on('change', function(){
-     table.columns(1).search(this.value).draw();   
+      table.columns(1).search(this.value).draw();   
     });
 
-    $(".filter-atividade").on("change", function(e) {
-      var searchTerms = [];
-      $.each($(".filter-atividade"), function(i, elem) {
-          if ($(elem).prop("checked")) {
-              if($(this).val() != "all"){
-                  searchTerms.push("^" + $(this).val() + "$");
-              }
-          }
+    // Gerenciar estados dos botões do btn-group
+    function updateButtonStates() {
+      $('.filter-atividade').each(function() {
+        var $label = $(this).next('label');
+        if ($(this).prop('checked')) {
+          $label.addClass('active');
+        } else {
+          $label.removeClass('active');
+        }
       });
-      table.column(2).search(searchTerms.join("|"), true, false, true).draw();
+    }
+    
+    // Variável para armazenar a função de filtro atual
+    var statusFilterFunction = null;
+    
+    // Função para aplicar filtro de status
+    function applyStatusFilter(selectedValue) {
+      // Remover filtro anterior se existir
+      if (statusFilterFunction !== null) {
+        var index = $.fn.dataTable.ext.search.indexOf(statusFilterFunction);
+        if (index !== -1) {
+          $.fn.dataTable.ext.search.splice(index, 1);
+        }
+        statusFilterFunction = null;
+      }
+      
+      // Adicionar novo filtro se não for "all"
+      if (selectedValue !== "all") {
+        statusFilterFunction = function(settings, data, dataIndex) {
+          if (settings.nTable.id !== 'comissoes') {
+            return true;
+          }
+          
+          var row = table.row(dataIndex).node();
+          var statusCell = $(row).find('td').eq(2);
+          var cellStatus = statusCell.attr('data-status');
+          
+          return cellStatus === selectedValue;
+        };
+        
+        $.fn.dataTable.ext.search.push(statusFilterFunction);
+      }
+      
+      table.draw();
+    }
+    
+    // Aplicar filtro de "Ativas" por padrão ao carregar a página
+    applyStatusFilter("Ativa");
+    
+    // Inicializar estado ativo
+    updateButtonStates();
+    
+    $(".filter-atividade").on("change", function(e) {
+      // Atualizar estados visuais
+      updateButtonStates();
+      
+      var selectedValue = $(this).val();
+      applyStatusFilter(selectedValue);
     });
 
     table.buttons().container()
-        .appendTo( '#panelBtn .button:eq(0)' );
-
+      .appendTo( '#panelBtn .button' );
 });
 </script>
 <dtml-var footer_html>

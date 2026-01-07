@@ -8,7 +8,7 @@ from openlegis.sagl.models.models import (
     Comissao, Orgao, Autor, TipoAutor, Bancada, Legislatura, TipoFimRelatoria,
     DocumentoAcessorio, TipoDocumento, Substitutivo, Emenda, TipoEmenda, Parecer,
     RegimeTramitacao, QuorumVotacao, TipoNormaJuridica, TipoSituacaoNorma,
-    NormaJuridica, Anexada, Numeracao
+    NormaJuridica, Anexada, Numeracao, AssuntoMateria
 )
 from sqlalchemy.orm import joinedload, aliased
 from sqlalchemy import case, func, and_, or_, cast, String, Integer, select, text, asc, desc, literal, union_all, column
@@ -196,25 +196,12 @@ class MateriaLegislativaView(grok.View):
 
     def _parse_list_param(self, param_name):
         """Retorna lista de valores (strings ou inteiros) do parâmetro."""
+        # Zope/Plone pode retornar lista ou string única
         values = self.request.get(param_name)
         if not values:
             return None
-        if isinstance(values, str):
-            if values.startswith('[') and values.endswith(']'):
-                try:
-                    return json.loads(values)
-                except:
-                    return [values]
-            return [values]
         if isinstance(values, (list, tuple)):
-            return list(values)
-        return [values]
-    
-    def _parse_list_param(self, param_name):
-        """Retorna lista de valores (strings ou inteiros) do parâmetro."""
-        values = self.request.get(param_name)
-        if not values:
-            return None
+            return [str(v) for v in values if v]
         if isinstance(values, str):
             if values.startswith('[') and values.endswith(']'):
                 try:
@@ -223,9 +210,7 @@ class MateriaLegislativaView(grok.View):
                     return [values]
             # Tentar dividir por vírgula
             return [v.strip() for v in values.split(',') if v.strip()]
-        if isinstance(values, (list, tuple)):
-            return list(values)
-        return [values]
+        return [str(values)]
     
     def _parse_int_list_param(self, param_name):
         """Retorna lista de inteiros do parâmetro (filtra valores não numéricos)."""
@@ -360,7 +345,25 @@ class MateriaLegislativaView(grok.View):
 
     def _determine_search_scope(self, session):
         """Determina o escopo da pesquisa baseado nos tipos de matéria selecionados."""
-        tipos_selecionados = self._parse_list_param('tip_id_basica')
+        tipos_selecionados = self._parse_list_param('tip_id_basica') or []
+        
+        # Verificar se há pesquisa por assunto - matérias acessórias não têm assunto
+        tem_filtro_assunto = self._parse_int_param('lst_assunto_materia') is not None
+        if tem_filtro_assunto:
+            # Quando há pesquisa por assunto, excluir matérias acessórias do resultado
+            # pois elas não possuem assunto associado
+            tipos_selecionados = [t for t in tipos_selecionados 
+                                 if t not in ('EMENDA', 'SUBSTITUTIVO')]
+            # Remover tipos acessórios dos tipos selecionados
+            if tipos_selecionados:
+                tipos_materia = session.query(
+                    TipoMateriaLegislativa.tip_materia,
+                    TipoMateriaLegislativa.tip_natureza
+                ).filter(
+                    TipoMateriaLegislativa.tip_materia.in_([int(t) for t in tipos_selecionados if t.isdigit()]),
+                    TipoMateriaLegislativa.ind_excluido == 0
+                ).all()
+                tipos_selecionados = [str(t.tip_materia) for t in tipos_materia if t.tip_natureza == 'P']
         
         # Verificar se há filtros avançados aplicados (exceto data de apresentação)
         # Filtros avançados que não se aplicam a emendas e substitutivos:
@@ -379,13 +382,14 @@ class MateriaLegislativaView(grok.View):
         
         if not tipos_selecionados:
             # Se nenhum tipo selecionado
-            if tem_filtro_avancado:
-                # Se há filtro avançado (exceto data de apresentação), pesquisar apenas matérias principais
+            if tem_filtro_avancado or tem_filtro_assunto:
+                # Se há filtro avançado (exceto data de apresentação) ou filtro por assunto,
+                # pesquisar apenas matérias principais (excluir matérias acessórias)
                 return {
                     'pesquisa_principal': True,
                     'pesquisa_acessoria': False,
-                    'pesquisa_emenda': False,  # Não incluir emendas quando há filtro avançado
-                    'pesquisa_substitutivo': False,  # Não incluir substitutivos quando há filtro avançado
+                    'pesquisa_emenda': False,  # Não incluir emendas quando há filtro avançado ou por assunto
+                    'pesquisa_substitutivo': False,  # Não incluir substitutivos quando há filtro avançado ou por assunto
                     'tipos_principais': None,
                     'tipos_acessorios': None
                 }
@@ -404,9 +408,10 @@ class MateriaLegislativaView(grok.View):
         pesquisa_emenda = 'EMENDA' in tipos_selecionados
         pesquisa_substitutivo = 'SUBSTITUTIVO' in tipos_selecionados
         
-        # Se há filtros avançados e não são apenas EMENDA/SUBSTITUTIVO selecionados, excluir emendas e substitutivos
-        if tem_filtro_avancado and not (pesquisa_emenda or pesquisa_substitutivo):
-            # Se há filtros avançados e não foram selecionados especificamente EMENDA/SUBSTITUTIVO,
+        # Se há filtros avançados ou filtro por assunto, e não são apenas EMENDA/SUBSTITUTIVO selecionados,
+        # excluir emendas e substitutivos (matérias acessórias não têm assunto)
+        if (tem_filtro_avancado or tem_filtro_assunto) and not (pesquisa_emenda or pesquisa_substitutivo):
+            # Se há filtros avançados ou filtro por assunto, e não foram selecionados especificamente EMENDA/SUBSTITUTIVO,
             # pesquisar apenas matérias principais (excluir emendas e substitutivos)
             tipos_normais = [t for t in tipos_selecionados if t not in ('EMENDA', 'SUBSTITUTIVO')]
             if tipos_normais:
@@ -420,15 +425,15 @@ class MateriaLegislativaView(grok.View):
                 ).all()
                 
                 tipos_principais_ids = [t.tip_materia for t in tipos_materia if t.tip_natureza == 'P']
-                tipos_acessorios_ids = [t.tip_materia for t in tipos_materia if t.tip_natureza == 'A']
+                tipos_acessorios_ids = [t.tip_materia for t in tipos_materia if t.tip_natureza == 'A'] if not tem_filtro_assunto else []
                 
                 return {
                     'pesquisa_principal': bool(tipos_principais_ids),
-                    'pesquisa_acessoria': bool(tipos_acessorios_ids),
-                    'pesquisa_emenda': False,  # Excluir emendas quando há filtros avançados
-                    'pesquisa_substitutivo': False,  # Excluir substitutivos quando há filtros avançados
+                    'pesquisa_acessoria': False if tem_filtro_assunto else bool(tipos_acessorios_ids),
+                    'pesquisa_emenda': False,  # Excluir emendas quando há filtros avançados ou por assunto
+                    'pesquisa_substitutivo': False,  # Excluir substitutivos quando há filtros avançados ou por assunto
                     'tipos_principais': tipos_principais_ids if tipos_principais_ids else None,
-                    'tipos_acessorios': tipos_acessorios_ids if tipos_acessorios_ids else None
+                    'tipos_acessorios': tipos_acessorios_ids if tipos_acessorios_ids and not tem_filtro_assunto else None
                 }
             else:
                 # Apenas tipos não numéricos selecionados, pesquisar apenas principais
@@ -475,7 +480,19 @@ class MateriaLegislativaView(grok.View):
         tipos_acessorios_combinados = set()
         
         # Se apenas opções especiais foram selecionadas (Emenda e/ou Substitutivo)
+        # MAS se há filtro por assunto, excluir matérias acessórias (emendas e substitutivos não têm assunto)
         if not tipos_normais:
+            # Se há filtro por assunto, retornar apenas matérias principais (nenhuma acessória)
+            if tem_filtro_assunto:
+                return {
+                    'pesquisa_principal': True,
+                    'pesquisa_acessoria': False,
+                    'pesquisa_emenda': False,
+                    'pesquisa_substitutivo': False,
+                    'tipos_principais': None,
+                    'tipos_acessorios': None
+                }
+            
             # Adicionar tipos acessórios relacionados encontrados em tipo_materia_legislativa
             tipos_acessorios_combinados.update(tipos_acessorios_emenda)
             tipos_acessorios_combinados.update(tipos_acessorios_substitutivo)
@@ -551,7 +568,14 @@ class MateriaLegislativaView(grok.View):
             tipos_acessorios_ids = list(set(tipos_acessorios_ids)) if tipos_acessorios_ids else []
             
             pesquisa_principal = len(tipos_principais_ids) > 0
-            pesquisa_acessoria = len(tipos_acessorios_ids) > 0 or pesquisa_emenda or pesquisa_substitutivo
+            # Se há filtro por assunto, excluir matérias acessórias (elas não têm assunto)
+            if tem_filtro_assunto:
+                pesquisa_acessoria = False
+                pesquisa_emenda = False
+                pesquisa_substitutivo = False
+                tipos_acessorios_ids = []
+            else:
+                pesquisa_acessoria = len(tipos_acessorios_ids) > 0 or pesquisa_emenda or pesquisa_substitutivo
             
             return {
                 'pesquisa_principal': pesquisa_principal,
@@ -563,6 +587,7 @@ class MateriaLegislativaView(grok.View):
             }
         
         # Fallback: comportamento padrão
+        # Se há filtro por assunto, garantir que não inclua matérias acessórias
         return {
             'pesquisa_principal': True,
             'pesquisa_acessoria': False,
@@ -608,6 +633,10 @@ class MateriaLegislativaView(grok.View):
         if (val := self.request.get('ind_tramitacao')) and val.isdigit():
             query = query.filter(MateriaLegislativa.ind_tramitacao == int(val))
         
+        # Filtro por assunto (apenas um assunto por vez)
+        if (cod_assunto := self._parse_int_param('lst_assunto_materia')) is not None:
+            query = query.filter(MateriaLegislativa.cod_assunto == cod_assunto)
+        
         # Filtro por data de apresentação
         dat1 = self._parse_date_param('dat_apresentacao')
         dat2 = self._parse_date_param('dat_apresentacao2')
@@ -618,19 +647,29 @@ class MateriaLegislativaView(grok.View):
         elif dat2:
             query = query.filter(MateriaLegislativa.dat_apresentacao <= dat2)
         
-        # Filtro por texto (ementa)
+        # Filtro por texto (ementa) - usar mesma estratégia da _apply_text_search
         termo = self.request.get('des_assunto')
         if termo:
             termos_limpos = re.sub(r'[^\w\s]', ' ', termo)
             termos_limpos = ' '.join(termos_limpos.split())
             if termos_limpos:
-                # Filtrar palavras monossílabas antes de fazer a busca
+                # Filtrar stop words
                 palavras = termos_limpos.split()
                 palavras_filtradas = self._filter_monosyllabic_words(palavras)
                 if palavras_filtradas:
-                    termos_filtrados = ' '.join(palavras_filtradas)
-                    palavra_term = f"%{termos_filtrados}%"
-                    query = query.filter(MateriaLegislativa.txt_ementa.ilike(palavra_term))
+                    # Buscar frase completa OU maioria das palavras importantes
+                    frase_completa_term = f"%{termos_limpos}%"
+                    condicao_frase = MateriaLegislativa.txt_ementa.ilike(frase_completa_term)
+                    
+                    # Condições para cada palavra
+                    condicoes_palavras = []
+                    for palavra in palavras_filtradas:
+                        palavra_term = f"%{palavra}%"
+                        condicoes_palavras.append(MateriaLegislativa.txt_ementa.ilike(palavra_term))
+                    
+                    # ESTRATÉGIA: Buscar frase completa OU todas as palavras (AND)
+                    # Todas as palavras digitadas devem estar presentes no resultado
+                    query = query.filter(or_(condicao_frase, and_(*condicoes_palavras)))
         
         # Filtro por autoria
         cod_autor = self._parse_int_param('cod_autor')
@@ -660,6 +699,9 @@ class MateriaLegislativaView(grok.View):
             query = query.filter(MateriaLegislativa.tip_id_basica.in_(tipos))
         if (val := self.request.get('ind_tramitacao')) and val.isdigit():
             query = query.filter(MateriaLegislativa.ind_tramitacao == int(val))
+        # Filtro por assunto (apenas um assunto por vez)
+        if (cod_assunto := self._parse_int_param('lst_assunto_materia')) is not None:
+            query = query.filter(MateriaLegislativa.cod_assunto == cod_assunto)
         return query
 
     def _apply_date_filters(self, query):
@@ -684,6 +726,79 @@ class MateriaLegislativaView(grok.View):
             query = query.filter(MateriaLegislativa.dat_publicacao <= dat_pub2)
         
         return query
+
+    def _calculate_stats_by_assunto(self, final_data, session):
+        """Calcula estatísticas por assunto das matérias.
+        
+        IMPORTANTE: Cada matéria é contada apenas uma vez, mesmo que tenha múltiplos assuntos.
+        A matéria é contada no primeiro assunto válido encontrado.
+        Apenas matérias principais são consideradas (matérias acessórias não têm assunto).
+        
+        Args:
+            final_data: Lista de dados formatados das matérias
+            session: Sessão do banco de dados
+            
+        Returns:
+            Dicionário com assuntos como chaves e contagens como valores, ordenado por quantidade (decrescente)
+        """
+        stats_by_assunto = {}
+        materias_sem_assunto = 0
+        
+        # Buscar mapa de assuntos
+        mapa_assunto = {}
+        try:
+            assuntos_info = session.query(
+                AssuntoMateria.cod_assunto,
+                AssuntoMateria.des_assunto
+            ).filter(
+                AssuntoMateria.ind_excluido == 0
+            ).all()
+            mapa_assunto = {str(cod): des for cod, des in assuntos_info}
+        except Exception as e:
+            logger.error(f"Erro ao buscar mapa de assuntos: {e}")
+        
+        # IDs das matérias principais para buscar assuntos
+        materias_principais_ids = []
+        for item in final_data:
+            tipo_item = item.get('tipo_item', '')
+            # Apenas matérias principais têm assunto
+            if tipo_item == 'principal':
+                cod_materia = item.get('cod_materia')
+                if cod_materia:
+                    materias_principais_ids.append(cod_materia)
+        
+        # Buscar assuntos das matérias em batch
+        if materias_principais_ids:
+            try:
+                assuntos_materias = session.query(
+                    MateriaLegislativa.cod_materia,
+                    MateriaLegislativa.cod_assunto
+                ).filter(
+                    MateriaLegislativa.cod_materia.in_(materias_principais_ids)
+                ).all()
+                
+                for cod_materia, cod_assunto in assuntos_materias:
+                    if not cod_assunto:
+                        materias_sem_assunto += 1
+                    else:
+                        # Buscar descrição do assunto
+                        assunto_desc = mapa_assunto.get(str(cod_assunto))
+                        if assunto_desc:
+                            # Contar a matéria apenas no primeiro assunto válido para que o total bata
+                            stats_by_assunto[assunto_desc] = stats_by_assunto.get(assunto_desc, 0) + 1
+                        else:
+                            materias_sem_assunto += 1
+            except Exception as e:
+                logger.error(f"Erro ao buscar assuntos das matérias: {e}")
+        
+        # Adicionar "Não classificada" se houver matérias sem assunto
+        if materias_sem_assunto > 0:
+            stats_by_assunto['Não classificada'] = materias_sem_assunto
+        
+        # Ordenar por quantidade (decrescente)
+        stats_by_assunto = dict(sorted(stats_by_assunto.items(), key=lambda x: x[1], reverse=True))
+        
+        return stats_by_assunto
 
     def _calculate_stats_by_author(self, final_data, autor_filtrado=None, apenas_coautor=False, apenas_primeiro_autor=False):
         """Calcula estatísticas por autor a partir dos dados formatados, incluindo quantidade por tipo de matéria.
@@ -868,6 +983,23 @@ class MateriaLegislativaView(grok.View):
         except Exception:
             return None
     
+    def _normalize_accents(self, text):
+        """Remove acentos de uma string para busca tolerante a acentos."""
+        import unicodedata
+        # Normalizar para NFD (decompor acentos) e remover marcas diacríticas
+        nfd = unicodedata.normalize('NFD', text)
+        return ''.join(c for c in nfd if unicodedata.category(c) != 'Mn')
+    
+    def _create_accent_insensitive_like(self, campo, termo):
+        """Cria condição LIKE que funciona com ou sem acentos.
+        Usa COLLATE utf8mb4_unicode_ci que é insensível a acentos.
+        """
+        # O ilike do SQLAlchemy já usa o collation da coluna (utf8mb4_unicode_ci)
+        # que é insensível a acentos, então apenas usar ilike normal
+        # Mas para garantir, podemos também criar condição que busca normalizado
+        termo_pattern = f"%{termo}%"
+        return campo.ilike(termo_pattern)
+    
     def _filter_monosyllabic_words(self, palavras):
         """Filtra palavras monossílabas (stop words) da lista de palavras."""
         # Lista de palavras monossílabas comuns em português (artigos, preposições, pronomes, etc.)
@@ -947,28 +1079,45 @@ class MateriaLegislativaView(grok.View):
                 return query
             
             palavras = termos_limpos.split()
-            # Filtrar palavras monossílabas (stop words) e palavras muito curtas
-            palavras = self._filter_monosyllabic_words(palavras)
-            if not palavras:
+            # Filtrar stop words e palavras muito curtas
+            palavras_filtradas = self._filter_monosyllabic_words(palavras)
+            if not palavras_filtradas:
                 return query
             
-            # ESTRATÉGIA 1: Tentar FULLTEXT primeiro (mais rápido e ordena por relevância)
-            try:
-                # FULLTEXT em modo BOOLEAN:
-                # - Exige que TODAS as palavras estejam presentes (AND)
-                # - Permite palavras em qualquer ordem
-                # - Usa + antes de cada palavra para exigir presença
-                # - Ordena resultados por relevância
-                palavras_fulltext = ' '.join([f'+{palavra}' for palavra in palavras])
-                fulltext_expr = text(
-                    "MATCH(txt_ementa, txt_indexacao, txt_observacao) "
-                    "AGAINST(:search_term IN BOOLEAN MODE)"
-                ).bindparams(search_term=palavras_fulltext)
-                return query.filter(fulltext_expr)
-            except Exception as e:
-                # ESTRATÉGIA 2: Fallback para LIKE quando FULLTEXT não está disponível
-                logger.warning(f"FULLTEXT não disponível, usando LIKE como fallback: {str(e)}")
-                return self._apply_like_search_fallback(query, termos_limpos, palavras)
+            # ESTRATÉGIA: Exigir que a MAIORIA das palavras esteja presente (mais relevante que OR puro)
+            # Para N palavras, exige pelo menos ceil(N/2) + 1 palavras (maioria)
+            # Isso garante relevância sem ser muito restritivo
+            num_palavras = len(palavras_filtradas)
+            min_palavras_necessarias = (num_palavras // 2) + 1 if num_palavras > 1 else 1
+            
+            # Para cada palavra, criar condição que busca em qualquer campo
+            condicoes_por_palavra = []
+            for palavra in palavras_filtradas:
+                palavra_term = f"%{palavra}%"
+                condicao_palavra = or_(
+                    MateriaLegislativa.txt_ementa.ilike(palavra_term),
+                    MateriaLegislativa.txt_indexacao.ilike(palavra_term),
+                    MateriaLegislativa.txt_observacao.ilike(palavra_term)
+                )
+                condicoes_por_palavra.append(condicao_palavra)
+            
+            # ESTRATÉGIA: Buscar frase completa OU maioria das palavras importantes
+            # - Frase completa: para resultados exatos (prioridade)
+            # - Para 1-2 palavras: exigir todas (AND)
+            # - Para 3+ palavras: exigir as 2 primeiras palavras (AND) para garantir relevância
+            # Isso balanceia entre encontrar resultados e manter relevância
+            frase_completa_term = f"%{termos_limpos}%"
+            condicao_frase_completa = or_(
+                MateriaLegislativa.txt_ementa.ilike(frase_completa_term),
+                MateriaLegislativa.txt_indexacao.ilike(frase_completa_term),
+                MateriaLegislativa.txt_observacao.ilike(frase_completa_term)
+            )
+            
+            # ESTRATÉGIA: Buscar frase completa OU todas as palavras (AND)
+            # - Frase completa: para resultados exatos (prioridade)
+            # - Todas as palavras (AND): garante que todas as palavras digitadas estejam presentes
+            # Isso garante relevância: resultados devem conter todas as palavras importantes
+            return query.filter(or_(condicao_frase_completa, and_(*condicoes_por_palavra)))
     
     def _apply_like_search_fallback(self, query, termos_limpos, palavras):
         """Fallback usando LIKE quando FULLTEXT não está disponível"""
@@ -1143,6 +1292,7 @@ class MateriaLegislativaView(grok.View):
         if (val := self.request.get('ind_tramitacao')) and val.isdigit():
             query = query.filter(MateriaLegislativa.ind_tramitacao == int(val))
         # Filtro por matéria principal (não se aplica a matérias acessórias principais)
+        # NOTA: Filtro por assunto não se aplica a matérias acessórias principais, apenas a matérias principais
         return query
 
     def _apply_filters_to_emenda_query(self, query, session):
@@ -1400,6 +1550,17 @@ class MateriaLegislativaView(grok.View):
         
         if materia_ids:
             try:
+                # Buscar assuntos das matérias em batch
+                assuntos_info = session.query(
+                    MateriaLegislativa.cod_materia,
+                    AssuntoMateria.des_assunto
+                ).outerjoin(
+                    AssuntoMateria, MateriaLegislativa.cod_assunto == AssuntoMateria.cod_assunto
+                ).filter(
+                    MateriaLegislativa.cod_materia.in_(materia_ids)
+                ).all()
+                assunto_dict = {cod_materia: des_assunto for cod_materia, des_assunto in assuntos_info if des_assunto}
+                
                 # Contagem de substitutivos
                 subst_counts = session.query(
                     Substitutivo.cod_materia,
@@ -1750,6 +1911,11 @@ class MateriaLegislativaView(grok.View):
                 if norma_derivada_data:
                     norma_derivada_data['url'] = f"{portal_url}/{'cadastros' if is_operador_norma else 'consultas'}/norma_juridica/norma_juridica_mostrar_proc?cod_norma={norma_derivada_data['cod_norma']}"
                 item['norma_derivada'] = norma_derivada_data
+                # Adicionar assunto apenas para matérias principais
+                if tipo_item == 'principal':
+                    item['assunto'] = assunto_dict.get(cod_item, '')
+                else:
+                    item['assunto'] = ''
             
             # URLs para documentos (se aplicável)
             if tipo_item in ('principal', 'acessoria_principal'):
@@ -1759,7 +1925,7 @@ class MateriaLegislativaView(grok.View):
                     item['url_texto_integral'] = f"{portal_url}/pysc/download_materia_pysc?cod_materia={cod_item}&texto_original=1"
                     # Adicionar link para pasta digital apenas para usuários autenticados e matérias principais
                     if tipo_item == 'principal' and not mtool.isAnonymousUser():
-                        item['url_pasta_digital'] = f"{portal_url}/consultas/materia/pasta_digital/?cod_materia={cod_item}&action=pasta"
+                        item['url_pasta_digital'] = f"{portal_url}/@@pasta_digital?cod_materia={cod_item}&action=pasta"
                 # Para matérias principais, também buscar redação final
                 if tipo_item == 'principal':
                     redacao_final_pdf = f"{cod_item}_redacao_final.pdf"
@@ -2072,6 +2238,17 @@ class MateriaLegislativaView(grok.View):
         session = Session()
         
         try:
+            # Buscar assuntos das matérias em batch
+            assuntos_info = session.query(
+                MateriaLegislativa.cod_materia,
+                AssuntoMateria.des_assunto
+            ).outerjoin(
+                AssuntoMateria, MateriaLegislativa.cod_assunto == AssuntoMateria.cod_assunto
+            ).filter(
+                MateriaLegislativa.cod_materia.in_(materia_ids)
+            ).all()
+            assunto_dict = {cod_materia: des_assunto for cod_materia, des_assunto in assuntos_info if des_assunto}
+            
             # Agregações em batch (evita N+1 queries)
             # Contagem de substitutivos
             subst_counts = session.query(
@@ -2260,6 +2437,7 @@ class MateriaLegislativaView(grok.View):
             regime_dict = {}
             tramitacao_dict = {}
             norma_dict = {}
+            assunto_dict = {}
         finally:
             session.close()
         
@@ -2311,6 +2489,7 @@ class MateriaLegislativaView(grok.View):
                 'qtd_pareceres': parecer_dict.get(materia.cod_materia, 0),
                 'cod_regime_tramitacao': materia.cod_regime_tramitacao,
                 'des_regime_tramitacao': regime_dict.get(materia.cod_regime_tramitacao, {}).get('des', ''),
+                'assunto': assunto_dict.get(materia.cod_materia, ''),
                 # Informações da última tramitação
                 'ult_tramitacao': tramitacao_dict.get(materia.cod_materia, {}),
                 # Norma derivada
@@ -2321,7 +2500,7 @@ class MateriaLegislativaView(grok.View):
                 item['url_texto_integral'] = f"{portal_url}/pysc/download_materia_pysc?cod_materia={materia.cod_materia}&texto_original=1"
                 # Adicionar link para pasta digital apenas para usuários autenticados
                 if not mtool.isAnonymousUser():
-                    item['url_pasta_digital'] = f"{portal_url}/consultas/materia/pasta_digital/?cod_materia={materia.cod_materia}&action=pasta"
+                    item['url_pasta_digital'] = f"{portal_url}/@@pasta_digital?cod_materia={materia.cod_materia}&action=pasta"
             redacao_final_pdf = f"{materia.cod_materia}_redacao_final.pdf"
             if hasattr(docs_folder, redacao_final_pdf):
                 item['url_redacao_final'] = f"{portal_url}/pysc/download_materia_pysc?cod_materia={materia.cod_materia}&redacao_final=1"
@@ -2792,6 +2971,7 @@ class MateriaLegislativaView(grok.View):
                     total_count = 0
                     stats = {}
                     stats_by_author = {}
+                    stats_by_assunto = {}
                     formatted_data = []
                     final_data = []
                 elif len(queries_para_unir) == 1:
@@ -2841,6 +3021,7 @@ class MateriaLegislativaView(grok.View):
                     # Calcular estatísticas apenas se solicitado (carregamento sob demanda)
                     stats = {}
                     stats_by_author = {}
+                    stats_by_assunto = {}
                     if calcular_estatisticas:
                         # Obter parâmetros de filtro de autoria
                         cod_autor = self._parse_int_param('cod_autor')
@@ -2893,6 +3074,8 @@ class MateriaLegislativaView(grok.View):
                         stats = dict(sorted(stats.items(), key=lambda x: (-x[1], x[0])))
                         # Calcular estatísticas por autor
                         stats_by_author = self._calculate_stats_by_author(final_data, autor_filtrado, chk_coautor, chk_primeiro_autor)
+                        # Calcular estatísticas por assunto
+                        stats_by_assunto = self._calculate_stats_by_assunto(final_data, session)
                 else:
                     # Unificar múltiplas queries
                     query_unificada = union_all(*queries_para_unir).alias('materias_unificadas')
@@ -2935,6 +3118,7 @@ class MateriaLegislativaView(grok.View):
                     # Calcular estatísticas apenas se solicitado (carregamento sob demanda)
                     stats = {}
                     stats_by_author = {}
+                    stats_by_assunto = {}
                     if calcular_estatisticas:
                         # Otimização: usar amostragem para grandes volumes (limite de 5k registros)
                         # Isso evita carregar todos os resultados em memória e timeout
@@ -3048,6 +3232,8 @@ class MateriaLegislativaView(grok.View):
                         stats_author_start = time.time()
                         stats_by_author = self._calculate_stats_by_author(final_stats, autor_filtrado, chk_coautor, chk_primeiro_autor)
                         stats_author_elapsed = time.time() - stats_author_start
+                        # Calcular estatísticas por assunto
+                        stats_by_assunto = self._calculate_stats_by_assunto(final_stats, session)
                         if stats_author_elapsed > 1.0:
                             logger.debug(f"Cálculo de estatísticas por autor levou {stats_author_elapsed:.2f}s para {len(final_stats)} resultados")
                     
@@ -3108,6 +3294,7 @@ class MateriaLegislativaView(grok.View):
                 # Calcular estatísticas apenas se solicitado (carregamento sob demanda)
                 stats = {}
                 stats_by_author = {}
+                stats_by_assunto = {}
                 if calcular_estatisticas:
                     stats_results = stats_query.all()
                     stats = {tipo: contagem for tipo, contagem in stats_results}
@@ -3120,6 +3307,8 @@ class MateriaLegislativaView(grok.View):
                     if cod_autor is not None:
                         autor_filtrado = self._get_autor_name_by_cod(cod_autor, session)
                     stats_by_author = self._calculate_stats_by_author(final_data, autor_filtrado, chk_coautor, chk_primeiro_autor)
+                    # Calcular estatísticas por assunto
+                    stats_by_assunto = self._calculate_stats_by_assunto(final_data, session)
             else:
                 # Apenas matérias principais (ou principais + emendas + substitutivos se nenhum tipo selecionado)
                 # Se emendas ou substitutivos devem ser incluídos (quando nenhum tipo selecionado)
@@ -3211,6 +3400,7 @@ class MateriaLegislativaView(grok.View):
                     # Calcular estatísticas apenas se solicitado (carregamento sob demanda)
                     stats = {}
                     stats_by_author = {}
+                    stats_by_assunto = {}
                     if calcular_estatisticas:
                         # Para performance, sempre usar queries agregadas para estatísticas por tipo
                         # e amostra limitada para estatísticas por autor
@@ -3278,6 +3468,8 @@ class MateriaLegislativaView(grok.View):
                         if cod_autor is not None:
                             autor_filtrado = self._get_autor_name_by_cod(cod_autor, session)
                         stats_by_author = self._calculate_stats_by_author(final_stats, autor_filtrado, chk_coautor, chk_primeiro_autor)
+                        # Calcular estatísticas por assunto
+                        stats_by_assunto = self._calculate_stats_by_assunto(final_stats, session)
                         
                         # Ordenar estatísticas por quantidade (decrescente)
                         stats = dict(sorted(stats.items(), key=lambda x: (-x[1], x[0])))
@@ -3337,6 +3529,7 @@ class MateriaLegislativaView(grok.View):
                     # Calcular estatísticas apenas se solicitado (carregamento sob demanda)
                     stats = {}
                     stats_by_author = {}
+                    stats_by_assunto = {}
                     if calcular_estatisticas:
                         stats_results = stats_query.all()
                         stats = {tipo: contagem for tipo, contagem in stats_results}
@@ -3357,6 +3550,8 @@ class MateriaLegislativaView(grok.View):
                         if cod_autor is not None:
                             autor_filtrado = self._get_autor_name_by_cod(cod_autor, session)
                         stats_by_author = self._calculate_stats_by_author(final_stats_autor, autor_filtrado, chk_coautor, chk_primeiro_autor)
+                        # Calcular estatísticas por assunto
+                        stats_by_assunto = self._calculate_stats_by_assunto(final_stats_autor, session)
 
                     # Aplicar ordenação para a consulta final paginada/exportada
                     ordered_query = self._apply_ordering(query, session)
@@ -3464,7 +3659,8 @@ class MateriaLegislativaView(grok.View):
                         'per_page': page_size, 'total_pages': total_pages,
                         'has_previous': page > 1, 'has_next': page < total_pages,
                         'stats': stats,
-                        'stats_by_author': stats_by_author if 'stats_by_author' in locals() else {}
+                        'stats_by_author': stats_by_author if 'stats_by_author' in locals() else {},
+                        'stats_by_assunto': stats_by_assunto if 'stats_by_assunto' in locals() else {}
                     }
                 else:
                     # Paginar resultados já formatados (caso antigo, para compatibilidade)
@@ -3479,7 +3675,8 @@ class MateriaLegislativaView(grok.View):
                         'per_page': page_size, 'total_pages': total_pages,
                         'has_previous': page > 1, 'has_next': page < total_pages,
                         'stats': stats,
-                        'stats_by_author': stats_by_author if 'stats_by_author' in locals() else {}
+                        'stats_by_author': stats_by_author if 'stats_by_author' in locals() else {},
+                        'stats_by_assunto': stats_by_assunto if 'stats_by_assunto' in locals() else {}
                     }
             else:
                 # Apenas matérias principais - usar ordered_query
@@ -3502,7 +3699,8 @@ class MateriaLegislativaView(grok.View):
                         'has_previous': page > 1,
                         'has_next': page < total_pages,
                         'stats': stats,
-                        'stats_by_author': stats_by_author if 'stats_by_author' in locals() else {}
+                        'stats_by_author': stats_by_author if 'stats_by_author' in locals() else {},
+                        'stats_by_assunto': stats_by_assunto if 'stats_by_assunto' in locals() else {}
                     }
                 else:
                     page = self._parse_int_param('pagina', 1)
@@ -3511,6 +3709,7 @@ class MateriaLegislativaView(grok.View):
                     data['stats'] = stats
                     # stats_by_author já foi calculado acima a partir de todos os resultados
                     data['stats_by_author'] = stats_by_author if 'stats_by_author' in locals() else {}
+                    data['stats_by_assunto'] = stats_by_assunto if 'stats_by_assunto' in locals() else {}
             
             self.request.response.setHeader('Content-Type', 'application/json')
             
@@ -4466,5 +4665,28 @@ class MateriaDocumentosView(grok.View):
             logger.error(f"Erro ao buscar documentos da matéria: {str(e)}", exc_info=True)
             self.request.response.setStatus(500)
             return json.dumps({'error': 'Erro ao buscar documentos', 'details': str(e)})
+        finally:
+            session.close()
+
+class AssuntosMateriaJSON(grok.View):
+    grok.context(Interface)
+    grok.name('assuntos_materia_json')
+    grok.require('zope2.View')
+
+    def render(self):
+        session = Session()
+        try:
+            dados = session.query(AssuntoMateria)\
+                          .filter_by(ind_excluido=0)\
+                          .order_by(AssuntoMateria.des_assunto)\
+                          .all()
+            self.request.response.setHeader('Content-Type', 'application/json; charset=utf-8')
+            return json.dumps([
+                {'id': a.cod_assunto, 'descricao': a.des_assunto} for a in dados
+            ], ensure_ascii=False)
+        except Exception as e:
+            logger.error(f"Erro em AssuntosMateriaJSON: {str(e)}", exc_info=True)
+            self.request.response.setStatus(500)
+            return json.dumps({'error': 'Erro ao buscar assuntos de matéria', 'details': str(e)})
         finally:
             session.close()

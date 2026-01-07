@@ -5,6 +5,10 @@
 <style>
     /* ============================================
        CLASSES CUSTOMIZADAS APENAS QUANDO NECESSÁRIO
+       PADRONIZAÇÃO COM TEMA GLOBAL DO SISTEMA
+       Cores principais do tema: --bs-primary (#44a2d2)
+       Fonte padrão: --bs-body-font-size (0.93rem)
+       Fonte botões: --bs-btn-font-size (13px)
        ============================================ */
     
     /* 1. Filter Toggle Icon - animação específica */
@@ -16,12 +20,235 @@
         transform: rotate(90deg);
     }
     
+    /* 1.1. Garantir legibilidade do botão de filtros avançados no hover */
+    button[data-bs-target="#advancedSearch"],
+    button[data-bs-target="#advancedSearch"]:hover,
+    button[data-bs-target="#advancedSearch"]:focus,
+    button[data-bs-target="#advancedSearch"]:active {
+        color: var(--bs-body-color, #212529) !important;
+        background-color: transparent !important;
+    }
+    button[data-bs-target="#advancedSearch"]:hover {
+        color: var(--bs-primary, #44a2d2) !important;
+        background-color: transparent !important;
+    }
+    button[data-bs-target="#advancedSearch"] span.fw-semibold,
+    button[data-bs-target="#advancedSearch"]:hover span.fw-semibold,
+    button[data-bs-target="#advancedSearch"]:focus span.fw-semibold {
+        color: inherit !important;
+    }
+    button[data-bs-target="#advancedSearch"] i,
+    button[data-bs-target="#advancedSearch"]:hover i {
+        color: var(--bs-primary, #44a2d2) !important;
+    }
+    
+    /* 1.2. Garantir legibilidade do card-header dos filtros avançados no hover */
+    #advancedSearch .card-header,
+    #advancedSearch .card-header:hover,
+    #advancedSearch .card-header h5,
+    #advancedSearch .card-header h5:hover {
+        background-color: #fff !important;
+        color: var(--bs-body-color, #212529) !important;
+    }
+    #advancedSearch .card-header i,
+    #advancedSearch .card-header i:hover {
+        color: var(--bs-primary, #44a2d2) !important;
+    }
+    
     /* 2. TomSelect customizações */
+    .ts-dropdown {
+        font-size: var(--bs-body-font-size, 1rem);
+    }
+    
     .ts-dropdown .optgroup-header {
         font-size: 0.9em;
         padding-top: 8px;
         padding-bottom: 2px;
         background-color: var(--bs-gray-100, #f8f9fa);
+    }
+    
+    /* Harmonizar tamanho de fonte das opções no dropdown */
+    .ts-dropdown .option,
+    .ts-dropdown .ts-option {
+        font-size: var(--bs-body-font-size, 1rem);
+        padding: 0.5rem 0.75rem;
+        line-height: 1.5;
+    }
+    
+    /* Garantir que o texto das opções tenha tamanho consistente */
+    .ts-dropdown .option .text,
+    .ts-dropdown .ts-option .text,
+    .ts-dropdown .option,
+    .ts-dropdown .ts-option {
+        font-size: var(--bs-body-font-size, 1rem);
+    }
+    
+    /* Input de busca no dropdown */
+    .ts-dropdown input[type="text"],
+    .ts-dropdown input[type="search"],
+    .ts-dropdown .input-wrap input {
+        font-size: var(--bs-body-font-size, 1rem);
+        padding: 0.5rem 0.75rem;
+    }
+    
+    /* Garantir que o texto de "no results" e outros textos no dropdown tenham tamanho consistente */
+    .ts-dropdown .no-results,
+    .ts-dropdown .create {
+        font-size: var(--bs-body-font-size, 1rem);
+        padding: 0.5rem 0.75rem;
+    }
+    
+    /* 2.1. Padronização visual entre selects múltiplos e simples */
+    /* Garantir que selects simples e múltiplos tenham aparência consistente quando selecionados */
+    
+    /* Estilo padronizado para chips em selects múltiplos - mais discretos */
+    .ts-wrapper.multi .ts-control .item {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.125rem 0.375rem;
+        margin: 0;
+        background-color: var(--bs-tertiary-bg, #f8f9fa);
+        color: var(--bs-body-color, #212529);
+        border: 1px solid var(--bs-border-color-translucent, rgba(0, 0, 0, 0.075));
+        border-radius: 0.25rem;
+        font-size: var(--bs-body-font-size, 1rem);
+        line-height: 1.5;
+        font-weight: 400;
+        height: auto;
+        max-height: calc(1.5em + 0.25rem);
+    }
+    
+    /* Estilo para o item selecionado em selects simples - mais discreto */
+    .ts-wrapper.single .ts-control .item {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.125rem 0.375rem;
+        margin: 0;
+        background-color: var(--bs-tertiary-bg, #f8f9fa);
+        color: var(--bs-body-color, #212529);
+        border: 1px solid var(--bs-border-color-translucent, rgba(0, 0, 0, 0.075));
+        border-radius: 0.25rem;
+        font-size: var(--bs-body-font-size, 1rem);
+        line-height: 1.5;
+        font-weight: 400;
+        height: auto;
+        max-height: calc(1.5em + 0.25rem);
+    }
+    
+    /* Garantir padding e font-size consistente no controle - usar mesma fonte dos inputs */
+    /* Altura fixa para não mudar quando há itens selecionados */
+    .ts-wrapper.single .ts-control,
+    .ts-wrapper.multi .ts-control {
+        padding: 0.375rem 0.75rem;
+        min-height: calc(1.5em + 0.75rem + 2px);
+        height: calc(1.5em + 0.75rem + 2px);
+        font-size: var(--bs-body-font-size, 1rem);
+        line-height: 1.5;
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.25rem;
+        overflow: hidden;
+    }
+    
+    /* Garantir que o controle tenha tamanho de fonte e altura consistente em todos os estados */
+    .ts-wrapper.single .ts-control,
+    .ts-wrapper.multi .ts-control,
+    .ts-wrapper.single:not(.has-items) .ts-control,
+    .ts-wrapper.multi:not(.has-items) .ts-control,
+    .ts-wrapper.single.has-items .ts-control,
+    .ts-wrapper.multi.has-items .ts-control {
+        font-size: var(--bs-body-font-size, 1rem);
+        height: calc(1.5em + 0.75rem + 2px);
+        min-height: calc(1.5em + 0.75rem + 2px);
+    }
+    
+    /* Botão de remoção consistente para selects múltiplos - mais discreto */
+    .ts-wrapper.multi .ts-control .item .remove {
+        border-left: 1px solid var(--bs-border-color-translucent, rgba(0, 0, 0, 0.075));
+        padding-left: 0.375rem;
+        margin-left: 0.375rem;
+        cursor: pointer;
+        opacity: 0.5;
+        color: var(--bs-body-color, #212529);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        align-self: center;
+    }
+    
+    .ts-wrapper.multi .ts-control .item .remove:hover {
+        opacity: 1;
+        background-color: var(--bs-danger-bg-subtle, rgba(220, 53, 69, 0.1));
+        color: var(--bs-danger, #dc3545);
+    }
+    
+    /* Botão clear para selects simples */
+    .ts-wrapper.single .ts-control .clear-button {
+        color: #6c757d;
+        opacity: 0.6;
+    }
+    
+    .ts-wrapper.single .ts-control .clear-button:hover {
+        opacity: 1;
+        color: #212529;
+    }
+    
+    /* Garantir que o input de busca tenha o mesmo estilo em ambos */
+    .ts-wrapper.single .ts-control input,
+    .ts-wrapper.multi .ts-control input {
+        font-size: var(--bs-body-font-size, 1rem);
+        padding: 0;
+        margin: 0;
+        color: inherit;
+        height: auto;
+        line-height: 1.5;
+        border: none;
+        background: transparent;
+        flex: 1;
+        min-width: 50px;
+    }
+    
+    /* Placeholder consistente */
+    .ts-wrapper.single .ts-control .placeholder,
+    .ts-wrapper.multi .ts-control .placeholder {
+        color: #6c757d;
+        font-size: var(--bs-body-font-size, 1rem);
+        padding: 0;
+        line-height: 1.5;
+    }
+    
+    /* Garantir que o placeholder tenha o mesmo tamanho mesmo quando o controle está vazio */
+    .ts-wrapper.single:not(.has-items) .ts-control .placeholder,
+    .ts-wrapper.multi:not(.has-items) .ts-control .placeholder {
+        font-size: var(--bs-body-font-size, 1rem);
+    }
+    
+    /* Garantir altura fixa mesmo quando há itens selecionados */
+    .ts-wrapper.single.has-items .ts-control,
+    .ts-wrapper.multi.has-items .ts-control {
+        min-height: calc(1.5em + 0.75rem + 2px);
+        height: calc(1.5em + 0.75rem + 2px);
+        font-size: var(--bs-body-font-size, 1rem);
+    }
+    
+    /* Harmonizar selects nativos com TomSelect */
+    /* Aplicar apenas a selects que não estão dentro de um wrapper TomSelect */
+    select.form-select:not(.ts-hidden-accessible) {
+        padding: 0.375rem 0.75rem;
+        font-size: var(--bs-body-font-size, 1rem);
+        line-height: 1.5;
+        min-height: calc(1.5em + 0.75rem + 2px);
+    }
+    
+    /* Garantir que selects dentro de wrapper TomSelect não sejam afetados */
+    .ts-wrapper select.form-select {
+        padding: 0;
+        font-size: inherit;
+        line-height: inherit;
+        min-height: auto;
     }
     
     /* 3. Skeleton Loading - funcionalidade específica */
@@ -64,7 +291,7 @@
     }
     .sortable-header:hover {
         color: var(--bs-primary, #44a2d2);
-        background-color: rgba(13, 110, 253, 0.05) !important;
+        background-color: rgba(68, 162, 210, 0.05) !important; /* Opacidade do tema primário */
     }
     .sortable-header::after {
         content: '⇅';
@@ -96,7 +323,7 @@
     }
     .sortable-header.asc,
     .sortable-header.desc {
-        background-color: rgba(13, 110, 253, 0.08) !important;
+        background-color: rgba(68, 162, 210, 0.08) !important; /* Opacidade do tema primário */
         font-weight: 600;
     }
     /* 7. Toast Container - usar position utilities do Bootstrap quando possível */
@@ -184,10 +411,10 @@
     }
     .card-materia:hover::before {
         opacity: 1;
-        border-color: var(--bs-primary, #0d6efd);
+        border-color: var(--bs-primary, #44a2d2); /* Cor primária do tema */
     }
     .card-materia:focus-within {
-        outline: 2px solid var(--bs-primary, #0d6efd);
+        outline: 2px solid var(--bs-primary, #44a2d2); /* Cor primária do tema */
         outline-offset: 2px;
     }
     .card-materia .card-body {
@@ -197,14 +424,32 @@
         padding: 1.5rem;
     }
     
-    /* Seções com background unificado (harmonização com layout global) - melhorado contraste */
+    /* CARD HEADER - Padronização com tema global */
+    .card-materia .card-header {
+        background-color: rgba(68, 162, 210, 0.12) !important; /* Fundo destacado com cor primária do tema - mantém legibilidade */
+        border-bottom: 2px solid rgba(68, 162, 210, 0.2) !important; /* Borda inferior para mais destaque */
+        padding: 1rem 1.25rem !important; /* Espaçamento adequado */
+    }
+    
+    /* Seções com background unificado - usando cores do tema */
     .card-section-detalhes,
     .card-section-status {
-        background-color: rgba(13, 202, 240, 0.15); /* bg-info bg-opacity-15 - melhor contraste */
-        border-left: 3px solid var(--bs-info, #0dcaf0);
-        border-radius: 0.375rem;
+        background-color: rgba(68, 162, 210, 0.08) !important; /* Opacidade da cor primária do tema */
+        border-left: 3px solid var(--bs-primary, #44a2d2); /* Cor primária do tema */
+        border-radius: var(--bs-border-radius, 0.375rem);
         padding: 1.25rem;
         margin-bottom: 1.25rem;
+    }
+    
+    /* Redução da margem inferior da seção de status para aproximar do footer */
+    .card-section-status {
+        margin-bottom: 0.5rem;
+    }
+    
+    /* Texto das informações sem negrito para diferenciar do label */
+    .card-section-detalhes span,
+    .card-section-status span {
+        font-weight: 400 !important; /* Peso normal para valores, labels mantêm negrito */
     }
     
     /* 10. Highlight de texto de busca */
@@ -238,7 +483,7 @@
     .card-body .text-primary.fa,
     .card-body .text-primary.fas,
     .card-body .text-primary.far {
-        color: var(--bs-primary, #0d6efd) !important;
+        color: var(--bs-primary, #44a2d2) !important; /* Cor primária do tema */
     }
     .card-body .text-muted.fa,
     .card-body .text-muted.fas,
@@ -256,6 +501,31 @@
         backface-visibility: hidden;
         transform: translateZ(0); /* Força aceleração de hardware */
     }
+    /* Estado normal - garantir legibilidade do texto em badges com fundo claro */
+    .badge.bg-primary.bg-opacity-10.text-primary.badge-clickable,
+    .badge.bg-primary.bg-opacity-10.text-primary.badge-clickable *,
+    .badge.bg-primary.bg-opacity-10.text-primary.badge-clickable i {
+        color: var(--bs-primary, #44a2d2) !important; /* Cor primária do tema */
+        font-weight: 500;
+    }
+    /* Garantir que links visitados também mantenham cor legível */
+    .badge.bg-primary.bg-opacity-10.text-primary.badge-clickable:link,
+    .badge.bg-primary.bg-opacity-10.text-primary.badge-clickable:visited,
+    .badge.bg-primary.bg-opacity-10.text-primary.badge-clickable:link *,
+    .badge.bg-primary.bg-opacity-10.text-primary.badge-clickable:visited * {
+        color: var(--bs-primary, #44a2d2) !important; /* Cor primária do tema */
+    }
+    /* Estado focus para badges com bg-opacity-10 - mudar para fundo sólido e texto branco */
+    .badge.bg-primary.bg-opacity-10.text-primary.badge-clickable:focus,
+    .badge.bg-primary.bg-opacity-10.text-primary.badge-clickable:focus-visible,
+    .badge.bg-primary.bg-opacity-10.text-primary.badge-clickable:focus *,
+    .badge.bg-primary.bg-opacity-10.text-primary.badge-clickable:focus-visible * {
+        background-color: var(--bs-primary, #44a2d2) !important; /* Cor primária do tema */
+        color: #fff !important;
+        border-color: var(--bs-primary, #44a2d2) !important;
+        outline: 2px solid var(--bs-primary, #44a2d2) !important;
+        outline-offset: 2px !important;
+    }
     .badge-clickable:hover {
         transform: translate3d(0, -2px, 0) scale(1.05); /* Usa translate3d para melhor renderização */
         box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
@@ -263,9 +533,55 @@
     /* Hover para botões de Texto Integral e Redação Final - texto branco */
     .badge.bg-primary.badge-clickable:hover,
     .badge.bg-primary.badge-clickable:hover * {
-        background-color: var(--bs-primary, #0d6efd) !important;
+        background-color: var(--bs-primary, #44a2d2) !important; /* Cor primária do tema */
         color: #fff !important;
-        border-color: var(--bs-primary, #0d6efd) !important;
+        border-color: var(--bs-primary, #44a2d2) !important;
+    }
+    /* Hover específico para badges com bg-opacity-10 - garantir texto branco legível */
+    .badge.bg-primary.bg-opacity-10.text-primary.badge-clickable:hover,
+    .badge.bg-primary.bg-opacity-10.text-primary.badge-clickable:hover *,
+    .badge.bg-primary.bg-opacity-10.text-primary.badge-clickable:hover i,
+    .badge.bg-primary.bg-opacity-10.text-primary.badge-clickable:link:hover,
+    .badge.bg-primary.bg-opacity-10.text-primary.badge-clickable:visited:hover,
+    .badge.bg-primary.bg-opacity-10.text-primary.badge-clickable:link:hover *,
+    .badge.bg-primary.bg-opacity-10.text-primary.badge-clickable:visited:hover * {
+        background-color: var(--bs-primary, #44a2d2) !important; /* Cor primária do tema */
+        color: #fff !important;
+        border-color: var(--bs-primary, #44a2d2) !important;
+    }
+    /* Estados active para botões de Texto Integral quando não está em hover */
+    .badge.bg-primary.badge-clickable:active:not(:hover),
+    .badge.bg-primary.badge-clickable:active:not(:hover) * {
+        background-color: var(--bs-primary, #44a2d2) !important; /* Cor primária do tema */
+        color: #fff !important;
+        border-color: var(--bs-primary, #44a2d2) !important;
+    }
+    /* Estado focus - garantir texto legível (branco sobre fundo azul) */
+    .badge.bg-primary.badge-clickable:focus,
+    .badge.bg-primary.badge-clickable:focus-visible,
+    .badge.bg-primary.badge-clickable:focus *,
+    .badge.bg-primary.badge-clickable:focus-visible * {
+        background-color: var(--bs-primary, #44a2d2) !important; /* Cor primária do tema */
+        color: #fff !important;
+        border-color: var(--bs-primary, #44a2d2) !important;
+        outline: 2px solid var(--bs-primary, #44a2d2) !important;
+        outline-offset: 2px !important;
+    }
+    /* Quando focus e hover juntos, manter texto branco */
+    .badge.bg-primary.badge-clickable:focus:hover,
+    .badge.bg-primary.badge-clickable:focus-visible:hover,
+    .badge.bg-primary.badge-clickable:focus:hover *,
+    .badge.bg-primary.badge-clickable:focus-visible:hover * {
+        background-color: var(--bs-primary, #44a2d2) !important; /* Cor primária do tema */
+        color: #fff !important;
+        border-color: var(--bs-primary, #44a2d2) !important;
+    }
+    /* Visited mantém estado normal (texto azul escuro) a menos que esteja em hover ou focus */
+    .badge.bg-primary.badge-clickable:visited:not(:hover):not(:focus):not(:focus-visible),
+    .badge.bg-primary.badge-clickable:visited:not(:hover):not(:focus):not(:focus-visible) * {
+        background-color: rgba(68, 162, 210, 0.1) !important; /* Opacidade da cor primária do tema */
+        color: var(--bs-primary, #44a2d2) !important; /* Cor primária do tema */
+        border-color: rgba(68, 162, 210, 0.25) !important;
     }
     .badge.bg-success.badge-clickable:hover,
     .badge.bg-success.badge-clickable:hover * {
@@ -273,12 +589,71 @@
         color: #fff !important;
         border-color: var(--bs-success, #28a745) !important;
     }
-    /* Hover para badge de Pasta Digital - texto branco */
+    /* Estados active para botões de Redação Final */
+    .badge.bg-success.badge-clickable:active,
+    .badge.bg-success.badge-clickable:active * {
+        background-color: var(--bs-success, #28a745) !important;
+        color: #fff !important;
+        border-color: var(--bs-success, #28a745) !important;
+    }
+    /* Estado focus para botões de Redação Final - garantir legibilidade */
+    .badge.bg-success.badge-clickable:focus,
+    .badge.bg-success.badge-clickable:focus-visible,
+    .badge.bg-success.badge-clickable:focus *,
+    .badge.bg-success.badge-clickable:focus-visible * {
+        background-color: var(--bs-success, #28a745) !important;
+        color: #fff !important;
+        border-color: var(--bs-success, #28a745) !important;
+        outline: 2px solid var(--bs-success, #28a745) !important;
+        outline-offset: 2px !important;
+    }
+    /* Visited mantém estado normal a menos que esteja em hover ou focus */
+    .badge.bg-success.badge-clickable:visited:not(:hover):not(:focus):not(:focus-visible),
+    .badge.bg-success.badge-clickable:visited:not(:hover):not(:focus):not(:focus-visible) * {
+        background-color: rgba(40, 167, 69, 0.1) !important;
+        color: var(--bs-success, #28a745) !important;
+        border-color: rgba(40, 167, 69, 0.25) !important;
+    }
+    /* Hover para badge de Pasta Digital - texto preto */
     .badge.bg-warning.badge-clickable:hover,
     .badge.bg-warning.badge-clickable:hover * {
         background-color: var(--bs-warning, #ffc107) !important;
         color: #000 !important;
         border-color: var(--bs-warning, #ffc107) !important;
+    }
+    /* Estado focus para badge de Pasta Digital - garantir legibilidade */
+    .badge.bg-warning.badge-clickable:focus,
+    .badge.bg-warning.badge-clickable:focus-visible,
+    .badge.bg-warning.badge-clickable:focus *,
+    .badge.bg-warning.badge-clickable:focus-visible * {
+        background-color: var(--bs-warning, #ffc107) !important;
+        color: #000 !important;
+        border-color: var(--bs-warning, #ffc107) !important;
+        outline: 2px solid var(--bs-warning, #ffc107) !important;
+        outline-offset: 2px !important;
+    }
+    /* Quando focus e hover juntos, manter texto preto */
+    .badge.bg-warning.badge-clickable:focus:hover,
+    .badge.bg-warning.badge-clickable:focus-visible:hover,
+    .badge.bg-warning.badge-clickable:focus:hover *,
+    .badge.bg-warning.badge-clickable:focus-visible:hover * {
+        background-color: var(--bs-warning, #ffc107) !important;
+        color: #000 !important;
+        border-color: var(--bs-warning, #ffc107) !important;
+    }
+    /* Estados active para badge de Pasta Digital */
+    .badge.bg-warning.badge-clickable:active,
+    .badge.bg-warning.badge-clickable:active * {
+        background-color: var(--bs-warning, #ffc107) !important;
+        color: #000 !important;
+        border-color: var(--bs-warning, #ffc107) !important;
+    }
+    /* Visited mantém estado normal a menos que esteja em hover ou focus */
+    .badge.bg-warning.badge-clickable:visited:not(:hover):not(:focus):not(:focus-visible),
+    .badge.bg-warning.badge-clickable:visited:not(:hover):not(:focus):not(:focus-visible) * {
+        background-color: rgba(255, 193, 7, 0.1) !important;
+        color: #856404 !important;
+        border-color: rgba(255, 193, 7, 0.25) !important;
     }
     
     /* 12. Card title link - indicar que é clicável */
@@ -287,10 +662,10 @@
         cursor: pointer;
     }
     .card-title-link:hover {
-        color: var(--bs-primary, #0d6efd) !important;
+        color: var(--bs-primary, #44a2d2) !important; /* Cor primária do tema */
     }
     .card-title-link:focus {
-        outline: 2px solid var(--bs-primary, #0d6efd);
+        outline: 2px solid var(--bs-primary, #44a2d2); /* Cor primária do tema */
         outline-offset: 2px;
         border-radius: 0.25rem;
     }
@@ -357,6 +732,24 @@
         max-width: none !important; /* Remover limitação de largura máxima do canvas */
         width: 100% !important; /* Garantir que use toda a largura disponível */
     }
+    /* Container específico para gráfico por assunto */
+    #resumo-estatistico-assunto .canvas-container {
+        min-height: 400px;
+        height: auto;
+        overflow: visible !important; /* Permitir que os labels saiam do container */
+        max-width: none !important; /* Remover limitação de largura máxima */
+        width: 100% !important; /* Garantir que use toda a largura disponível */
+        padding-right: 80px !important; /* Padding extra maior à direita para os labels de até 4 dígitos */
+    }
+    #resumo-estatistico-assunto {
+        overflow: visible !important; /* Permitir que os labels saiam do container */
+        width: 100% !important; /* Garantir que use toda a largura disponível */
+        padding-right: 0 !important; /* Remover padding padrão que possa limitar */
+    }
+    #resumo-estatistico-assunto canvas {
+        max-width: none !important; /* Remover limitação de largura máxima do canvas */
+        width: 100% !important; /* Garantir que use toda a largura disponível */
+    }
     
     /* 15. Input datepicker - garantir fundo branco */
     .flatpickr-input.bg-white {
@@ -368,7 +761,7 @@
         position: fixed;
         top: -100px;
         left: 0;
-        background: var(--bs-primary, #0d6efd);
+        background: var(--bs-primary, #44a2d2); /* Cor primária do tema */
         color: #fff;
         padding: 12px 20px;
         text-decoration: none;
@@ -386,7 +779,7 @@
     
     /* 17. Focus visible - melhorar navegação por teclado */
     *:focus-visible {
-        outline: 2px solid var(--bs-primary, #0d6efd);
+        outline: 2px solid var(--bs-primary, #44a2d2); /* Cor primária do tema */
         outline-offset: 2px;
     }
     
@@ -422,8 +815,8 @@
         box-shadow: 0 0 0 2px var(--bs-success, #28a745);
     }
     .timeline-item.atual .timeline-dot {
-        background-color: var(--bs-primary, #0d6efd);
-        box-shadow: 0 0 0 2px var(--bs-primary, #0d6efd);
+        background-color: var(--bs-primary, #44a2d2); /* Cor primária do tema */
+        box-shadow: 0 0 0 2px var(--bs-primary, #44a2d2); /* Cor primária do tema */
         transform: scale(1.2);
     }
     /* 12. TomSelect customizações - necessário para integração */
@@ -439,14 +832,7 @@
         position: relative;
         padding-right: 2.2em;
     }
-    .input-group-sm > .ts-wrapper.has-items .ts-control,
-    .ts-wrapper.form-select-sm.has-items .ts-control,
-    .ts-wrapper.form-control-sm.has-items .ts-control {
-        padding-top: 0;
-        padding-bottom: 0;
-    }
     .ts-wrapper .ts-control:after {
-        content: "";
         position: absolute;
         right: 1em;
         top: 50%;
@@ -460,7 +846,7 @@
         opacity: 0.65;
     }
     .ts-wrapper.focus .ts-control:after {
-        border-top-color: var(--bs-primary, #0d6efd);
+        border-top-color: var(--bs-primary, #44a2d2); /* Cor primária do tema */
         opacity: 1;
     }
     
@@ -506,6 +892,34 @@
             padding: 1rem !important;
         }
     }
+    
+    /* 17. Focus visible - melhorar navegação por teclado */
+    *:focus-visible {
+        outline: 2px solid var(--bs-primary, #44a2d2); /* Cor primária do tema */
+        outline-offset: 2px;
+    }
+    
+    /* 18. Skip links - acessibilidade */
+    .skip-link {
+        position: fixed;
+        top: -100px;
+        left: 0;
+        background: var(--bs-primary, #44a2d2); /* Cor primária do tema */
+        color: #fff;
+        padding: 12px 20px;
+        text-decoration: none;
+        z-index: 9999;
+        border-radius: 0 0 4px 4px;
+        font-weight: 600;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        transition: top 0.2s ease-in-out;
+    }
+    .skip-link:focus {
+        top: 0;
+        outline: 3px solid var(--bs-warning, #ffc107);
+        outline-offset: 2px;
+    }
+    
 </style>
 
 <!-- Skip Links para Acessibilidade -->
@@ -526,7 +940,16 @@
     </div>
 </div>
 
-<h1 class="firstHeading font-size-18">Pesquisa de Matérias Legislativas</h1>
+<div class="row mb-2">
+      <div class="col-12 col-md-8 align-self-center">
+        <h1 class="firstHeading font-size-18">Pesquisa de Matérias Legislativas</h1>
+      </div>
+      <div class="col-12 col-md-4 text-start text-md-end">
+         <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia'])">      
+             <a class="btn btn-primary d-print-none" href="<dtml-var portal_url>/cadastros/materia/materia_form_resumido"><i class="fa fa-fw fa-plus"></i> Incluir Matéria</a>
+         </dtml-if>
+      </div>
+ </div>
 
 <div class="d-grid gap-2 mb-3">
     <button class="btn btn-outline-primary" type="button" id="btn-toggle-filtros" data-bs-toggle="collapse" data-bs-target="#filtro-container" aria-expanded="false">
@@ -554,19 +977,16 @@
                     <label for="tip_id_basica" class="form-label form-label-sm mb-1 fw-semibold">
                         <i class="fas fa-file-alt text-muted me-1"></i>Tipo de Matéria:
                     </label>
-                    <select name="tip_id_basica" id="tip_id_basica" class="form-select form-select-sm" multiple 
+                    <select name="tip_id_basica" id="tip_id_basica" class="form-select" multiple 
                        placeholder="Selecione um ou mais tipos..." data-tomselect aria-label="Selecione tipo de matéria">
                     </select>
-                    <small class="form-text text-muted">
-                        <i class="fas fa-info-circle me-1"></i>Selecione tipos de matéria principal ou acessória (inclui Emenda e Substitutivo)
-                    </small>
                 </div>
                 <div class="col-md-3">
                     <label for="num_ident_basica" class="form-label form-label-sm mb-1 fw-semibold">
                         <i class="fas fa-hashtag text-muted me-1"></i>Número:
                     </label>
                     <input type="text" name="num_ident_basica" id="num_ident_basica" 
-                           class="form-control form-control-sm" 
+                           class="form-control" 
                            placeholder="Ex: 123"
                            inputmode="numeric"
                            pattern="[0-9]*"
@@ -580,7 +1000,7 @@
                         <i class="fas fa-calendar text-muted me-1"></i>Ano:
                     </label>
                     <input type="text" name="ano_ident_basica" id="ano_ident_basica" 
-                           class="form-control form-control-sm" 
+                           class="form-control" 
                            placeholder="Ex: 2025"
                            inputmode="numeric"
                            pattern="[0-9]*"
@@ -597,7 +1017,7 @@
                         <i class="fas fa-user-edit text-muted me-1"></i>Autoria:
                     </label>
                     <select name="cod_autor" id="cod_autor" 
-                            class="form-select form-select-sm" 
+                            class="form-select" 
                             placeholder="Selecione um autor..."
                             aria-label="Selecione autor"></select>
                     <div class="d-flex gap-3 mt-2">
@@ -620,7 +1040,7 @@
                         <i class="fas fa-search text-muted me-1"></i>Assunto ou Ementa:
                     </label>
                     <input type="text" name="des_assunto" id="des_assunto" 
-                           class="form-control form-control-sm" 
+                           class="form-control" 
                            placeholder="Digite palavras-chave para buscar..."
                            aria-describedby="des_assunto_feedback">
                     <small id="des_assunto_feedback" class="form-text text-muted d-none" role="status" aria-live="polite">
@@ -681,7 +1101,7 @@
                                 <input type="text" 
                                        name="num_protocolo" 
                                        id="num_protocolo" 
-                                       class="form-control form-control-sm" 
+                                       class="form-control" 
                                        placeholder="Ex: 123"
                                        aria-label="Número do protocolo de entrada da matéria"
                                        aria-describedby="num_protocolo_help">
@@ -696,7 +1116,7 @@
                                 <input type="text" 
                                        name="num_processo" 
                                        id="num_processo" 
-                                       class="form-control form-control-sm" 
+                                       class="form-control" 
                                        placeholder="Ex: 456"
                                        aria-label="Número do processo administrativo da matéria"
                                        aria-describedby="num_processo_help">
@@ -708,7 +1128,7 @@
                                 <label for="ind_tramitacao" class="form-label form-label-sm mb-1 fw-semibold">
                                     <i class="fas fa-exchange-alt text-muted me-1"></i>Em Tramitação?
                                 </label>
-                                <select name="ind_tramitacao" id="ind_tramitacao" class="form-select form-select-sm">
+                                <select name="ind_tramitacao" id="ind_tramitacao" class="form-select">
                                     <option value="" selected>Tanto faz</option>
                                     <option value="1">Sim</option>
                                     <option value="0">Não</option>
@@ -729,7 +1149,7 @@
                                 <label for="daterange_input" class="form-label form-label-sm mb-1 fw-semibold">
                                     <i class="far fa-calendar text-muted me-1"></i>Data de Apresentação
                                 </label>
-                                <div class="input-group input-group-sm">
+                                <div class="input-group">
                                     <span class="input-group-text"><i class="fas fa-calendar"></i></span>
                                     <input type="text" 
                                            id="daterange_input" 
@@ -752,7 +1172,7 @@
                                 <label for="daterange_publicacao" class="form-label form-label-sm mb-1 fw-semibold">
                                     <i class="far fa-newspaper text-muted me-1"></i>Data de Publicação
                                 </label>
-                                <div class="input-group input-group-sm">
+                                <div class="input-group">
                                     <span class="input-group-text"><i class="fas fa-calendar"></i></span>
                                     <input type="text" 
                                            id="daterange_publicacao" 
@@ -787,7 +1207,7 @@
                                     <i class="fas fa-info-circle text-muted me-1"></i>Situação Atual
                                 </label>
                                 <select name="cod_status" id="cod_status" 
-                                        class="form-select form-select-sm" 
+                                        class="form-select" 
                                         placeholder="Selecione uma situação..."
                                         data-bs-toggle="tooltip" 
                                         data-bs-placement="top" 
@@ -799,7 +1219,7 @@
                                     <i class="fas fa-map-marker-alt text-muted me-1"></i>Localização Atual
                                 </label>
                                 <select name="cod_unid_tramitacao" id="cod_unid_tramitacao" 
-                                        class="form-select form-select-sm" 
+                                        class="form-select" 
                                         placeholder="Selecione uma unidade..."
                                         data-bs-toggle="tooltip" 
                                         data-bs-placement="top" 
@@ -811,12 +1231,29 @@
                                     <i class="fas fa-route text-muted me-1"></i>Tramitou Em
                                 </label>
                                 <select name="cod_unid_tramitacao2" id="cod_unid_tramitacao2" 
-                                        class="form-select form-select-sm" 
+                                        class="form-select" 
                                         placeholder="Selecione onde tramitou..."
                                         data-bs-toggle="tooltip" 
                                         data-bs-placement="top" 
                                         title="Filtrar por unidades onde a matéria já tramitou">
                                 </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <hr class="my-4">
+                    
+                    <!-- Seção: Classificação -->
+                    <div class="mb-4">
+                        <h6 class="text-muted text-uppercase small mb-3 fw-semibold border-bottom pb-2">
+                            <i class="fas fa-tags me-2"></i>Classificação
+                        </h6>
+                        <div class="row g-3">
+                            <div class="col-md-12">
+                                <label for="lst_assunto_materia" class="form-label form-label-sm mb-1 fw-semibold">
+                                    <i class="fas fa-tag text-muted me-1"></i>Assunto / Classificação
+                                </label>
+                                <select name="lst_assunto_materia" id="lst_assunto_materia" class="form-select" placeholder="Selecione um assunto..." aria-label="Selecione um assunto"></select>
                             </div>
                         </div>
                     </div>
@@ -833,13 +1270,13 @@
                                 <label for="tip_autor" class="form-label form-label-sm mb-1 fw-semibold">
                                     <i class="fas fa-user-tag text-muted me-1"></i>Tipo de Autor
                                 </label>
-                                <select name="tip_autor" id="tip_autor" class="form-select form-select-sm" placeholder="Selecione um tipo..."></select>
+                                <select name="tip_autor" id="tip_autor" class="form-select" placeholder="Selecione um tipo..."></select>
                             </div>
                             <div class="col-md-4">
                                 <label for="cod_relator" class="form-label form-label-sm mb-1 fw-semibold">
                                     <i class="fas fa-user-check text-muted me-1"></i>Relator
                                 </label>
-                                <select name="cod_relator" id="cod_relator" class="form-select form-select-sm" placeholder="Selecione um relator..."></select>
+                                <select name="cod_relator" id="cod_relator" class="form-select" placeholder="Selecione um relator..."></select>
                             </div>
                         </div>
                     </div>
@@ -899,6 +1336,11 @@
                 <i class="fa fa-users me-2"></i>Resumo por Autor
             </button>
         </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="grafico-assunto-tab" data-bs-toggle="tab" data-bs-target="#grafico-assunto-pane" type="button" role="tab" aria-controls="grafico-assunto-pane" aria-selected="false">
+                <i class="fa fa-tags me-2"></i>Resumo por Assunto
+            </button>
+        </li>
     </ul>
     <div class="tab-content" id="resultado-tabs-content">
         <div class="tab-pane fade show active" id="resultados-pane" role="tabpanel" aria-labelledby="lista-tab">
@@ -925,6 +1367,23 @@
             <div id="resumo-estatistico-autor" class="p-3">
                  <div class="canvas-container">
                     <canvas id="stats-chart-autor" aria-label="Gráfico de resumo estatístico por autor"></canvas>
+                 </div>
+            </div>
+        </div>
+        <div class="tab-pane fade" id="grafico-assunto-pane" role="tabpanel" aria-labelledby="grafico-assunto-tab">
+            <div id="resumo-estatistico-assunto" class="p-3">
+                <div class="d-flex justify-content-end mb-2">
+                    <div class="btn-group" role="group" aria-label="Tipo de gráfico">
+                        <button type="button" class="btn btn-sm btn-outline-primary active" id="btn-grafico-barra-assunto" data-tipo="bar">
+                            <i class="fa fa-chart-bar me-1"></i>Barra
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-primary" id="btn-grafico-pizza-assunto" data-tipo="pie">
+                            <i class="fa fa-chart-pie me-1"></i>Pizza
+                        </button>
+                    </div>
+                </div>
+                 <div class="canvas-container">
+                    <canvas id="stats-chart-assunto" aria-label="Gráfico de resumo estatístico por assunto"></canvas>
                  </div>
             </div>
         </div>
@@ -1003,6 +1462,8 @@ document.addEventListener('DOMContentLoaded', function () {
     // Expor no window para debug
     window.statsChartInstance = null;
     window.statsChartAutorInstance = null;
+    window.statsChartAssuntoInstance = null;
+    let tipoGraficoAssunto = 'bar'; // 'bar' ou 'pie' - tipo de gráfico por assunto
     let graficoEventListenersAdicionados = false; // Flag para evitar adicionar listeners múltiplas vezes
     let carregandoEstatisticas = false; // Flag para evitar múltiplas chamadas simultâneas
     let bsCollapseFiltros = null;
@@ -1213,8 +1674,31 @@ document.addEventListener('DOMContentLoaded', function () {
         
         showSkeletonLoading();
         try {
-            const params = new URLSearchParams(new FormData(form));
-            params.delete('daterange_input');
+            const formData = new FormData(form);
+            const params = new URLSearchParams();
+            
+            // Processar todos os campos do formulário, incluindo múltiplos valores
+            for (const [key, value] of formData.entries()) {
+                if (key === 'daterange_input') continue;
+                // Para campos múltiplos (TomSelect), adicionar todos os valores
+                if (key === 'tip_id_basica' || key === 'lst_assunto_materia') {
+                    const selectElement = form.elements[key];
+                    if (selectElement && selectElement.tomselect) {
+                        const values = selectElement.tomselect.getValue();
+                        if (Array.isArray(values) && values.length > 0) {
+                            values.forEach(val => params.append(key, val));
+                        } else if (values) {
+                            params.append(key, values);
+                        }
+                    } else {
+                        // Fallback: usar FormData se TomSelect não estiver disponível
+                        params.append(key, value);
+                    }
+                } else {
+                    params.append(key, value);
+                }
+            }
+            
             params.set('pagina', page);
             params.set('itens_por_pagina', itensPorPaginaAtual);
             actualizarURL(params);
@@ -1278,6 +1762,17 @@ document.addEventListener('DOMContentLoaded', function () {
             }
             renderStatsChartAutor(null);
         }
+        if (data.stats_by_assunto && Object.keys(data.stats_by_assunto).length > 0) {
+            renderStatsChartAssunto(data.stats_by_assunto);
+        } else {
+            // Manter aba visível, mas sem dados (será carregado ao clicar)
+            const graficoAssuntoTab = document.querySelector('#grafico-assunto-tab');
+            if (graficoAssuntoTab) {
+                graficoAssuntoTab.parentElement.classList.remove('d-none');
+                graficoAssuntoTab.parentElement.classList.add('d-block');
+            }
+            renderStatsChartAssunto(null);
+        }
         const btnToggleFiltros = document.getElementById('btn-toggle-filtros');
         if (btnToggleFiltros) {
             btnToggleFiltros.classList.remove('d-none');
@@ -1291,7 +1786,7 @@ document.addEventListener('DOMContentLoaded', function () {
             <div class="d-flex flex-column flex-md-row align-items-center mb-3">
                 <div class="form-group mb-2 mb-md-0 me-md-3">
                     <label for="itens_por_pagina" class="me-2">Itens por página:</label>
-                    <select class="form-select form-select-sm d-inline-block w-auto" id="itens_por_pagina">
+                    <select class="form-select d-inline-block w-auto" id="itens_por_pagina">
                         <option value="12" ${itensPorPagina == 12 ? 'selected' : ''}>12</option>
                         <option value="24" ${itensPorPagina == 24 ? 'selected' : ''}>24</option>
                         <option value="36" ${itensPorPagina == 36 ? 'selected' : ''}>36</option>
@@ -1374,6 +1869,14 @@ document.addEventListener('DOMContentLoaded', function () {
             }
             if (graficoAutorTab) {
                 graficoAutorTab.addEventListener('shown.bs.tab', function() {
+                    if (!statsCarregadas && !carregandoEstatisticas) {
+                        carregarEstatisticas();
+                    }
+                });
+            }
+            const graficoAssuntoTab = document.querySelector('#grafico-assunto-tab');
+            if (graficoAssuntoTab) {
+                graficoAssuntoTab.addEventListener('shown.bs.tab', function() {
                     if (!statsCarregadas && !carregandoEstatisticas) {
                         carregarEstatisticas();
                     }
@@ -1549,12 +2052,10 @@ document.addEventListener('DOMContentLoaded', function () {
                             <i class="fas fa-file-alt text-primary me-2"></i>
                             ${materia.tipo_item === 'acessoria_principal' ? '<span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 me-1"><i class="fa fa-file me-1"></i>Acessória</span>' : ''}
                             ${materia.identificacao ? sanitizeHTML(materia.identificacao) : `${sanitizeHTML(materia.des_tipo_materia || '')} n° ${sanitizeHTML(materia.num_ident_basica)}/${sanitizeHTML(materia.ano_ident_basica)}`}
-                            <i class="fa fa-external-link-alt text-secondary ms-2 small" aria-hidden="true"></i>
                         </a>
                     </div>
                     <div class="card-body">
                         <div class="mb-4">
-                            <strong class="text-uppercase small fw-bold text-body d-block mb-2">Ementa</strong>
                             <div class="text-break text-body">${ementaDestacada || '<em class="text-secondary">Sem ementa</em>'}</div>
                         </div>
                         <div class="mb-4">
@@ -1600,6 +2101,12 @@ document.addEventListener('DOMContentLoaded', function () {
                                         }).join(', ')}</span>
                                     </div>
                                 ` : ''}
+                                ${materia.assunto ? `
+                                    <div class="mt-2">
+                                        <i class="fa fa-tag text-muted me-2"></i>
+                                        <strong class="text-body fw-medium">Assunto:</strong> <span class="text-secondary">${sanitizeHTML(materia.assunto)}</span>
+                                    </div>
+                                ` : ''}
                             </div>
                         </div>
                         ${(materia.tipo_item === 'principal' || !materia.tipo_item) || (materia.ult_tramitacao && (materia.ult_tramitacao.nom_unidade || materia.ult_tramitacao.des_status || materia.ult_tramitacao.dat_fim_prazo)) || materia.norma_derivada ? `
@@ -1630,8 +2137,8 @@ document.addEventListener('DOMContentLoaded', function () {
                                         <a href="${materia.norma_derivada.url || '#'}" 
                                            class="text-primary text-decoration-none" 
                                            target="_blank"
-                                           title="Ver norma ${sanitizeHTML(materia.norma_derivada.sgl_norma)} ${materia.norma_derivada.num_norma}/${materia.norma_derivada.ano_norma}">
-                                            ${sanitizeHTML(materia.norma_derivada.sgl_norma)} ${materia.norma_derivada.num_norma}/${materia.norma_derivada.ano_norma}
+                                           title="Ver norma ${sanitizeHTML(materia.norma_derivada.sgl_norma || '')} ${String(materia.norma_derivada.num_norma || '')}/${String(materia.norma_derivada.ano_norma || '')}">
+                                            ${sanitizeHTML(materia.norma_derivada.sgl_norma || '')} ${String(materia.norma_derivada.num_norma || '')}/${String(materia.norma_derivada.ano_norma || '')}
                                         </a>
                                     </div>
                                 ` : ''}
@@ -1643,10 +2150,10 @@ document.addEventListener('DOMContentLoaded', function () {
                     <div class="card-footer bg-transparent border-top">
                         <div class="d-flex flex-wrap gap-1">
                             ${botoesDocumentos}
-                            ${materia.qtd_substitutivos > 0 ? `<span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25 badge-documento badge-clickable" data-bs-toggle="tooltip" title="Clique para ver substitutivos" data-cod-materia="${materia.cod_materia}" data-tipo="substitutivos" data-tipo-materia="${sanitizeHTML(materia.des_tipo_materia || '')}" data-sigla-materia="${sanitizeHTML(materia.sgl_tipo_materia || '')}" data-num-materia="${sanitizeHTML(materia.num_ident_basica)}" data-ano-materia="${sanitizeHTML(materia.ano_ident_basica)}"><i class="fa fa-file-alt me-1"></i>Substitutivo${materia.qtd_substitutivos > 1 ? 's' : ''} (${materia.qtd_substitutivos})</span>` : ''}
-                            ${materia.qtd_emendas > 0 ? `<span class="badge bg-warning bg-opacity-10 text-warning-emphasis border border-warning border-opacity-25 badge-documento badge-clickable" data-bs-toggle="tooltip" title="Clique para ver emendas" data-cod-materia="${materia.cod_materia}" data-tipo="emendas" data-tipo-materia="${sanitizeHTML(materia.des_tipo_materia || '')}" data-sigla-materia="${sanitizeHTML(materia.sgl_tipo_materia || '')}" data-num-materia="${sanitizeHTML(materia.num_ident_basica)}" data-ano-materia="${sanitizeHTML(materia.ano_ident_basica)}"><i class="fa fa-edit me-1"></i>Emenda${materia.qtd_emendas > 1 ? 's' : ''} (${materia.qtd_emendas})</span>` : ''}
-                            ${materia.qtd_documentos_acessorios > 0 ? `<span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 badge-documento badge-clickable" data-bs-toggle="tooltip" title="Clique para ver documentos acessórios" data-cod-materia="${materia.cod_materia}" data-tipo="documentos_acessorios" data-tipo-materia="${sanitizeHTML(materia.des_tipo_materia || '')}" data-sigla-materia="${sanitizeHTML(materia.sgl_tipo_materia || '')}" data-num-materia="${sanitizeHTML(materia.num_ident_basica)}" data-ano-materia="${sanitizeHTML(materia.ano_ident_basica)}"><i class="fa fa-file me-1"></i>Doc. Acessório${materia.qtd_documentos_acessorios > 1 ? 's' : ''} (${materia.qtd_documentos_acessorios})</span>` : ''}
-                            ${materia.qtd_pareceres > 0 ? `<span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 badge-documento badge-clickable" data-bs-toggle="tooltip" title="Clique para ver pareceres" data-cod-materia="${materia.cod_materia}" data-tipo="pareceres" data-tipo-materia="${sanitizeHTML(materia.des_tipo_materia || '')}" data-sigla-materia="${sanitizeHTML(materia.sgl_tipo_materia || '')}" data-num-materia="${sanitizeHTML(materia.num_ident_basica)}" data-ano-materia="${sanitizeHTML(materia.ano_ident_basica)}"><i class="fa fa-gavel me-1"></i>Parecer${materia.qtd_pareceres > 1 ? 'es' : ''} (${materia.qtd_pareceres})</span>` : ''}
+                            ${materia.qtd_substitutivos > 0 ? `<span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25 badge-documento badge-clickable" data-bs-toggle="tooltip" title="Clique para ver substitutivos" data-cod-materia="${materia.cod_materia}" data-tipo="substitutivos" data-tipo-materia="${sanitizeHTML(materia.des_tipo_materia || '')}" data-sigla-materia="${sanitizeHTML(materia.sgl_tipo_materia || '')}" data-num-materia="${String(materia.num_ident_basica || '')}" data-ano-materia="${String(materia.ano_ident_basica || '')}"><i class="fa fa-file-alt me-1"></i>Substitutivo${materia.qtd_substitutivos > 1 ? 's' : ''} (${materia.qtd_substitutivos})</span>` : ''}
+                            ${materia.qtd_emendas > 0 ? `<span class="badge bg-warning bg-opacity-10 text-warning-emphasis border border-warning border-opacity-25 badge-documento badge-clickable" data-bs-toggle="tooltip" title="Clique para ver emendas" data-cod-materia="${materia.cod_materia}" data-tipo="emendas" data-tipo-materia="${sanitizeHTML(materia.des_tipo_materia || '')}" data-sigla-materia="${sanitizeHTML(materia.sgl_tipo_materia || '')}" data-num-materia="${String(materia.num_ident_basica || '')}" data-ano-materia="${String(materia.ano_ident_basica || '')}"><i class="fa fa-edit me-1"></i>Emenda${materia.qtd_emendas > 1 ? 's' : ''} (${materia.qtd_emendas})</span>` : ''}
+                            ${materia.qtd_documentos_acessorios > 0 ? `<span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 badge-documento badge-clickable" data-bs-toggle="tooltip" title="Clique para ver documentos acessórios" data-cod-materia="${materia.cod_materia}" data-tipo="documentos_acessorios" data-tipo-materia="${sanitizeHTML(materia.des_tipo_materia || '')}" data-sigla-materia="${sanitizeHTML(materia.sgl_tipo_materia || '')}" data-num-materia="${String(materia.num_ident_basica || '')}" data-ano-materia="${String(materia.ano_ident_basica || '')}"><i class="fa fa-file me-1"></i>Doc. Acessório${materia.qtd_documentos_acessorios > 1 ? 's' : ''} (${materia.qtd_documentos_acessorios})</span>` : ''}
+                            ${materia.qtd_pareceres > 0 ? `<span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 badge-documento badge-clickable" data-bs-toggle="tooltip" title="Clique para ver pareceres" data-cod-materia="${materia.cod_materia}" data-tipo="pareceres" data-tipo-materia="${sanitizeHTML(materia.des_tipo_materia || '')}" data-sigla-materia="${sanitizeHTML(materia.sgl_tipo_materia || '')}" data-num-materia="${String(materia.num_ident_basica || '')}" data-ano-materia="${String(materia.ano_ident_basica || '')}"><i class="fa fa-gavel me-1"></i>Parecer${materia.qtd_pareceres > 1 ? 'es' : ''} (${materia.qtd_pareceres})</span>` : ''}
                         </div>
                     </div>
                     ` : ''}
@@ -2052,7 +2559,9 @@ document.addEventListener('DOMContentLoaded', function () {
                         beginAtZero: true,
                         max: maxXAxisValue, // Limitar o eixo X para criar espaço para labels de até 4 dígitos
                         ticks: {
-                            stepSize: 1,
+                            stepSize: maxXAxisValue > 1000 ? Math.ceil(maxXAxisValue / 20) : (maxXAxisValue > 100 ? Math.ceil(maxXAxisValue / 10) : 1),
+                            maxTicksLimit: 20,
+                            autoSkip: true,
                             font: { size: 11 }
                         },
                         title: {
@@ -2126,6 +2635,32 @@ document.addEventListener('DOMContentLoaded', function () {
                 // Recriar gráfico se já houver dados
                 if (window.ultimoStatsData) {
                     renderStatsChart(window.ultimoStatsData);
+                }
+            });
+        }
+        
+        // Event listeners para alternar tipo de gráfico por assunto
+        const btnBarraAssunto = document.getElementById('btn-grafico-barra-assunto');
+        const btnPizzaAssunto = document.getElementById('btn-grafico-pizza-assunto');
+        
+        if (btnBarraAssunto && btnPizzaAssunto) {
+            btnBarraAssunto.addEventListener('click', function() {
+                tipoGraficoAssunto = 'bar';
+                btnBarraAssunto.classList.add('active');
+                btnPizzaAssunto.classList.remove('active');
+                // Recriar gráfico se já houver dados
+                if (window.ultimoStatsAssuntoData) {
+                    renderStatsChartAssunto(window.ultimoStatsAssuntoData);
+                }
+            });
+            
+            btnPizzaAssunto.addEventListener('click', function() {
+                tipoGraficoAssunto = 'pie';
+                btnPizzaAssunto.classList.add('active');
+                btnBarraAssunto.classList.remove('active');
+                // Recriar gráfico se já houver dados
+                if (window.ultimoStatsAssuntoData) {
+                    renderStatsChartAssunto(window.ultimoStatsAssuntoData);
                 }
             });
         }
@@ -2518,7 +3053,9 @@ document.addEventListener('DOMContentLoaded', function () {
                     stacked: true, // Barras empilhadas - cada autor tem uma barra dividida por cores
                     max: maxXAxisValue, // Limitar o eixo X para criar espaço para labels de até 4 dígitos
                     ticks: {
-                        stepSize: 1,
+                        stepSize: maxXAxisValue > 1000 ? Math.ceil(maxXAxisValue / 20) : (maxXAxisValue > 100 ? Math.ceil(maxXAxisValue / 10) : 1),
+                        maxTicksLimit: 20,
+                        autoSkip: true,
                         font: { size: 11 }
                     },
                     title: {
@@ -2623,6 +3160,393 @@ document.addEventListener('DOMContentLoaded', function () {
         }
         
         // Tooltip padrão do Chart.js está habilitado e funcionará ao passar o mouse
+    }
+
+    function renderStatsChartAssunto(statsData) {
+        const tabButton = document.querySelector('#grafico-assunto-tab');
+        if (!tabButton) return;
+        // Sempre mostrar a aba, mesmo sem dados (será carregado sob demanda)
+        tabButton.parentElement.classList.remove('d-none');
+        tabButton.parentElement.classList.add('d-block');
+        
+        if (!statsData || Object.keys(statsData).length === 0) {
+            // Se não há dados, apenas destruir o gráfico existente, mas manter a aba visível
+            if (window.statsChartAssuntoInstance) {
+                try {
+                    window.statsChartAssuntoInstance.destroy();
+                } catch (e) {
+                    // Ignorar erros ao destruir
+                }
+                window.statsChartAssuntoInstance = null;
+            }
+            // Mostrar mensagem de que os dados serão carregados ao clicar
+            const canvas = document.getElementById('stats-chart-assunto');
+            if (canvas) {
+                const container = canvas.parentElement;
+                if (container && !container.querySelector('.stats-placeholder')) {
+                    container.innerHTML = '<div class="stats-placeholder text-center p-4"><p class="text-muted">Clique na aba para carregar as estatísticas</p></div>';
+                }
+            }
+            return;
+        }
+        // Destruir gráfico existente apenas se já existir
+        if (window.statsChartAssuntoInstance) {
+            try {
+                window.statsChartAssuntoInstance.destroy();
+            } catch (e) {
+                // Ignorar erros ao destruir
+            }
+            window.statsChartAssuntoInstance = null;
+        }
+        
+        // Restaurar o canvas se foi substituído por placeholder
+        const statsContainer = document.querySelector('#resumo-estatistico-assunto .canvas-container');
+        if (statsContainer && statsContainer.querySelector('.stats-placeholder')) {
+            statsContainer.innerHTML = '<canvas id="stats-chart-assunto" aria-label="Gráfico de resumo estatístico por assunto"></canvas>';
+        }
+        const canvas = document.getElementById('stats-chart-assunto');
+        if (!canvas) {
+            console.error('Canvas stats-chart-assunto não encontrado!');
+            return;
+        }
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+            console.error('Não foi possível obter contexto 2D do canvas!');
+            return;
+        }
+        
+        // Ordenar por quantidade (decrescente) e depois alfabeticamente
+        const sortedEntries = Object.entries(statsData).sort((a, b) => {
+            if (b[1] !== a[1]) {
+                return b[1] - a[1]; // Ordenar por quantidade (decrescente)
+            }
+            return a[0].localeCompare(b[0]); // Se quantidade igual, ordenar alfabeticamente
+        });
+        const labels = sortedEntries.map(([assunto]) => assunto);
+        const dataValues = sortedEntries.map(([assunto, quantidade]) => quantidade);
+        
+        // Cores para os assuntos
+        const coresAssuntos = [
+            'rgba(68, 162, 210, 0.85)',   // Azul
+            'rgba(255, 159, 64, 0.85)',   // Laranja
+            'rgba(75, 192, 192, 0.85)',   // Verde-água
+            'rgba(153, 102, 255, 0.85)',  // Roxo
+            'rgba(54, 162, 235, 0.85)',   // Azul claro
+            'rgba(255, 99, 132, 0.85)',   // Rosa
+            'rgba(201, 203, 207, 0.85)',  // Cinza
+            'rgba(255, 205, 86, 0.85)',   // Amarelo
+            'rgba(50, 205, 50, 0.85)',    // Verde limão
+            'rgba(255, 99, 71, 0.85)',    // Vermelho coral
+            'rgba(138, 43, 226, 0.85)',   // Azul violeta
+            'rgba(255, 140, 0, 0.85)',    // Laranja escuro
+            'rgba(0, 191, 255, 0.85)',    // Azul céu
+            'rgba(220, 20, 60, 0.85)',    // Vermelho carmesim
+            'rgba(34, 139, 34, 0.85)',    // Verde floresta
+            'rgba(148, 0, 211, 0.85)'     // Violeta
+        ];
+        
+        // Criar array de cores para cada barra
+        const backgroundColors = labels.map((assunto, index) => {
+            return coresAssuntos[index % coresAssuntos.length];
+        });
+        const borderColors = backgroundColors.map(cor => cor.replace('0.85', '1'));
+
+        // Calcular o total de matérias
+        const totalMaterias = dataValues.reduce((sum, val) => sum + val, 0);
+        
+        // Calcular o valor máximo para definir o max do eixo X com margem
+        let maxTotalValue = Math.max(...dataValues);
+        const margin = maxTotalValue < 100 ? 40 : maxTotalValue < 500 ? Math.ceil(maxTotalValue * 0.25) : Math.ceil(maxTotalValue * 0.20);
+        const maxXAxisValue = Math.ceil(maxTotalValue + margin);
+        
+        // Ajustar altura do container baseado no número de assuntos
+        const container = canvas.parentElement;
+        const numItems = labels.length;
+        const minHeight = numItems <= 5 ? 300 : Math.min(300 + (numItems - 5) * 15, 450);
+        container.style.minHeight = `${minHeight}px`;
+        container.style.maxHeight = '450px';
+
+        // Criar configurações baseadas no tipo de gráfico
+        let chartConfig;
+        if (tipoGraficoAssunto === 'pie') {
+            // Para gráfico de pizza com muitos assuntos, agrupar assuntos pequenos em "Outros"
+            let pieLabels = labels;
+            let pieDataValues = dataValues;
+            let pieBackgroundColors = backgroundColors;
+            let pieBorderColors = borderColors;
+            const threshold = 0.02; // 2% do total
+            const minItemsToGroup = 8;
+            
+            if (numItems > minItemsToGroup) {
+                const total = totalMaterias;
+                const thresholdValue = total * threshold;
+                const mainItems = [];
+                const otherItems = [];
+                let otherTotal = 0;
+                
+                labels.forEach((label, index) => {
+                    if (dataValues[index] >= thresholdValue) {
+                        mainItems.push({
+                            label: label,
+                            value: dataValues[index],
+                            color: backgroundColors[index],
+                            borderColor: borderColors[index]
+                        });
+                    } else {
+                        otherTotal += dataValues[index];
+                        otherItems.push(label);
+                    }
+                });
+                
+                if (otherTotal > 0 && otherItems.length > 0) {
+                    mainItems.push({
+                        label: `Outros (${otherItems.length})`,
+                        value: otherTotal,
+                        color: 'rgba(128, 128, 128, 0.85)',
+                        borderColor: 'rgba(128, 128, 128, 1)'
+                    });
+                }
+                
+                pieLabels = mainItems.map(item => item.label);
+                pieDataValues = mainItems.map(item => item.value);
+                pieBackgroundColors = mainItems.map(item => item.color);
+                pieBorderColors = mainItems.map(item => item.borderColor);
+            }
+            
+            chartConfig = {
+                type: 'pie',
+                data: {
+                    labels: pieLabels,
+                    datasets: [{
+                        label: 'Quantidade',
+                        data: pieDataValues,
+                        backgroundColor: pieBackgroundColors,
+                        borderColor: pieBorderColors,
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { 
+                            display: true,
+                            position: numItems > 8 ? 'right' : 'right',
+                            align: 'start',
+                            labels: {
+                                boxWidth: 15,
+                                padding: numItems > 8 ? 8 : 12,
+                                font: { size: numItems > 8 ? 10 : 11 },
+                                usePointStyle: true,
+                                pointStyle: 'circle',
+                                generateLabels: function(chart) {
+                                    const data = chart.data;
+                                    if (data.labels.length && data.datasets.length) {
+                                        return data.labels.map((label, i) => {
+                                            const value = data.datasets[0].data[i];
+                                            const total = data.datasets[0].data.reduce((a, b) => a + b, 0);
+                                            const percentage = ((value / total) * 100).toFixed(1);
+                                            return {
+                                                text: `${label} (${percentage}%)`,
+                                                fillStyle: data.datasets[0].backgroundColor[i],
+                                                strokeStyle: data.datasets[0].borderColor[i],
+                                                lineWidth: 1,
+                                                hidden: false,
+                                                index: i
+                                            };
+                                        });
+                                    }
+                                    return [];
+                                }
+                            }
+                        },
+                        tooltip: { 
+                            enabled: true,
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            padding: 12,
+                            titleFont: { size: 13, weight: 'bold' },
+                            bodyFont: { size: 12 },
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.parsed || 0;
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = ((value / total) * 100).toFixed(1);
+                                    return `${label}: ${value} (${percentage}%)`;
+                                }
+                            }
+                        },
+                        datalabels: {
+                            color: '#fff',
+                            font: { weight: 'bold', size: numItems > 8 ? 10 : 11 },
+                            formatter: function(value, context) {
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = ((value / total) * 100).toFixed(1);
+                                return parseFloat(percentage) >= 3 ? percentage + '%' : '';
+                            },
+                            offset: numItems > 8 ? 5 : 8
+                        },
+                        title: {
+                            display: true,
+                            text: `Total: ${totalMaterias} ${totalMaterias === 1 ? 'matéria' : 'matérias'}`,
+                            font: { size: 14, weight: 'bold' },
+                            padding: { bottom: 10 }
+                        }
+                    },
+                    animation: {
+                        duration: 0
+                    }
+                },
+                plugins: [ChartDataLabels]
+            };
+        } else {
+            // Configuração para gráfico de barra
+            chartConfig = {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Quantidade',
+                        data: dataValues,
+                        backgroundColor: backgroundColors,
+                        borderColor: borderColors,
+                        borderWidth: 1,
+                        barThickness: 'flex',
+                        maxBarThickness: 30,
+                        minBarLength: 0
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    clip: false,
+                    layout: {
+                        padding: {
+                            right: 250,
+                            top: 30,
+                            bottom: 30,
+                            left: 25
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            enabled: true,
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            padding: 12,
+                            titleFont: { size: 13, weight: 'bold' },
+                            bodyFont: { size: 12 },
+                            callbacks: {
+                                label: function(context) {
+                                    const value = context.parsed.x || 0;
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = ((value / total) * 100).toFixed(1);
+                                    return `Quantidade: ${value} (${percentage}%)`;
+                                }
+                            }
+                        },
+                        datalabels: {
+                            anchor: 'end',
+                            align: 'right',
+                            color: '#000',
+                            font: { weight: 'bold', size: 11 },
+                            formatter: function(value) {
+                                return value;
+                            },
+                            offset: 12,
+                            clip: false,
+                            backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                            borderColor: 'transparent',
+                            borderWidth: 0,
+                            borderRadius: 0
+                        },
+                        title: {
+                            display: true,
+                            text: `Total: ${totalMaterias} ${totalMaterias === 1 ? 'matéria' : 'matérias'}`,
+                            font: { size: 14, weight: 'bold' },
+                            padding: { bottom: 10 }
+                        }
+                    },
+                    scales: { 
+                        x: { 
+                            beginAtZero: true,
+                            max: maxXAxisValue,
+                            ticks: {
+                                stepSize: maxXAxisValue > 1000 ? Math.ceil(maxXAxisValue / 20) : (maxXAxisValue > 100 ? Math.ceil(maxXAxisValue / 10) : 1),
+                                maxTicksLimit: 20,
+                                autoSkip: true,
+                                font: { size: 11 }
+                            },
+                            title: {
+                                display: true,
+                                text: 'Quantidade de Matérias',
+                                font: { size: 12, weight: 'bold' }
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.1)',
+                                drawOnChartArea: true
+                            }
+                        },
+                        y: {
+                            ticks: {
+                                display: true,
+                                autoSkip: false,
+                                maxRotation: 0,
+                                minRotation: 0,
+                                font: { size: 11 },
+                                stepSize: 1,
+                                maxTicksLimit: undefined
+                            },
+                            afterFit: function(scale) {
+                                scale.width = Math.max(scale.width, 280);
+                            },
+                            grid: {
+                                display: false
+                            }
+                        }
+                    },
+                    animation: {
+                        duration: 0
+                    }
+                },
+                plugins: [ChartDataLabels]
+            };
+        }
+        
+        window.statsChartAssuntoInstance = new Chart(ctx, chartConfig);
+        
+        // Armazenar dados para poder recriar o gráfico ao alternar tipo
+        window.ultimoStatsAssuntoData = statsData;
+        
+        // Ajustar o container após renderização
+        setTimeout(() => {
+            if (window.statsChartAssuntoInstance && window.statsChartAssuntoInstance.canvas) {
+                const canvas = window.statsChartAssuntoInstance.canvas;
+                const container = canvas.parentElement;
+                const parentContainer = container ? container.parentElement : null;
+                
+                if (container) {
+                    container.style.width = '100%';
+                    container.style.overflow = 'visible';
+                    container.style.maxWidth = 'none';
+                }
+                if (parentContainer) {
+                    parentContainer.style.width = '100%';
+                    parentContainer.style.overflow = 'visible';
+                    parentContainer.style.maxWidth = 'none';
+                }
+                
+                canvas.style.maxWidth = 'none';
+                window.statsChartAssuntoInstance.update('none');
+                
+                setTimeout(() => {
+                    window.statsChartAssuntoInstance.resize();
+                }, 50);
+            }
+        }, 300);
     }
 
     let statsCarregadas = false; // Flag para controlar se as estatísticas já foram carregadas
@@ -2800,6 +3724,30 @@ document.addEventListener('DOMContentLoaded', function () {
                 console.log('Sem dados de stats_by_author para renderizar ou stats_by_author vazio');
             }
             
+            if (response && response.stats_by_assunto && Object.keys(response.stats_by_assunto).length > 0) {
+                console.log('Renderizando gráfico por assunto com dados:', response.stats_by_assunto);
+                const statsAssuntoEl = document.getElementById('stats-chart-assunto');
+                if (!statsAssuntoEl) {
+                    // Canvas será criado dinamicamente se não existir
+                    const graficoAssuntoPane = document.querySelector('#grafico-assunto-pane');
+                    if (graficoAssuntoPane && !graficoAssuntoPane.querySelector('#resumo-estatistico-assunto')) {
+                        graficoAssuntoPane.innerHTML = '<div id="resumo-estatistico-assunto" class="p-3"><div class="d-flex justify-content-end mb-2"><div class="btn-group" role="group" aria-label="Tipo de gráfico"><button type="button" class="btn btn-sm btn-outline-primary active" id="btn-grafico-barra-assunto" data-tipo="bar"><i class="fa fa-chart-bar me-1"></i>Barra</button><button type="button" class="btn btn-sm btn-outline-primary" id="btn-grafico-pizza-assunto" data-tipo="pie"><i class="fa fa-chart-pie me-1"></i>Pizza</button></div></div><div class="canvas-container"><canvas id="stats-chart-assunto" aria-label="Gráfico de resumo estatístico por assunto"></canvas></div></div>';
+                    }
+                    const statsAssuntoContainer = document.querySelector('#resumo-estatistico-assunto .canvas-container');
+                    if (statsAssuntoContainer) {
+                        statsAssuntoContainer.innerHTML = '<canvas id="stats-chart-assunto" aria-label="Gráfico de resumo estatístico por assunto"></canvas>';
+                    }
+                }
+                try {
+                    renderStatsChartAssunto(response.stats_by_assunto);
+                    console.log('Gráfico por assunto renderizado com sucesso');
+                } catch (e) {
+                    console.error('Erro ao renderizar gráfico por assunto:', e);
+                }
+            } else {
+                console.log('Sem dados de stats_by_assunto para renderizar ou stats_by_assunto vazio');
+            }
+            
             statsCarregadas = true;
             carregandoEstatisticas = false;
         } catch (error) {
@@ -2938,14 +3886,11 @@ document.addEventListener('DOMContentLoaded', function () {
                 } else if (tipo === 'documentos_acessorios') {
                     titulo = doc.nom_documento || doc.des_tipo_documento || 'Documento';
                     const partesSubtitulo = [];
-                    if (doc.nom_autor_documento) {
-                        partesSubtitulo.push(`<i class="fa fa-user-edit me-1"></i><strong>Autoria:</strong> ${sanitizeHTML(doc.nom_autor_documento)}`);
-                    }
-                    if (doc.des_tipo_documento && doc.nom_documento) {
-                        partesSubtitulo.push(`<i class="fa fa-tag me-1"></i>${sanitizeHTML(doc.des_tipo_documento)}`);
-                    }
                     if (doc.dat_documento) {
                         partesSubtitulo.push(`<i class="fa fa-calendar-alt me-1"></i>${sanitizeHTML(doc.dat_documento)}`);
+                    }
+                    if (doc.nom_autor_documento) {
+                        partesSubtitulo.push(`<i class="fa fa-user-edit me-1"></i><strong>Autoria:</strong> ${sanitizeHTML(doc.nom_autor_documento)}`);
                     }
                     subtitulo = partesSubtitulo.join(' <span class="text-muted">|</span> ');
                 }
@@ -3023,7 +3968,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const valueToRemove = badge.dataset.filterValue;
         const element = form.elements[keyToRemove];
 
-        if (keyToRemove === 'tip_id_basica' && element && element.tomselect) {
+        if ((keyToRemove === 'tip_id_basica' || keyToRemove === 'lst_assunto_materia') && element && element.tomselect) {
             let atual = element.tomselect.getValue();
             if (Array.isArray(atual)) {
                 atual = atual.filter(v => v != valueToRemove);
@@ -3196,7 +4141,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const labels = {
             'tip_id_basica': 'Tipo', // ...
             'num_ident_basica': 'Número', 'ano_ident_basica': 'Ano',
-            'des_assunto': 'Assunto/Ementa', 'num_protocolo': 'Protocolo', 'num_processo': 'Processo',
+            'des_assunto': 'Assunto/Ementa', 'lst_assunto_materia': 'Assunto/Classificação', 'num_protocolo': 'Protocolo', 'num_processo': 'Processo',
             'cod_autor': 'Autoria', 'tip_autor': 'Tipo Autor', 'chk_coautor': 'Coautor', 'chk_primeiro_autor': '1º Autor',
             'cod_relator': 'Relator', 'cod_status': 'Situação', 'cod_unid_tramitacao': 'Localização',
             'cod_unid_tramitacao2': 'Tramitou Em', 'dat_apresentacao': 'Data Apres.',
@@ -3218,9 +4163,23 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         }
 
-        // Outros campos (exceto tip_id_basica)
+        // BADGES INDIVIDUAIS PARA ASSUNTO/CLASSIFICAÇÃO
+        const assuntoSelect = form.elements['lst_assunto_materia'];
+        if (assuntoSelect && assuntoSelect.tomselect && assuntoSelect.tomselect.items.length > 0) {
+            assuntoSelect.tomselect.items.forEach(val => {
+                let label = assuntoSelect.tomselect.options[val]?.descricao || val;
+                filtrosAtivosBadges.push(
+                    `<span class="filter-badge" data-filter-key="lst_assunto_materia" data-filter-value="${val}">
+                        <strong>${labels['lst_assunto_materia']}</strong>: ${sanitizeHTML(label)}
+                        <button type="button" class="btn-close" aria-label="Remover filtro Assunto"></button>
+                    </span>`
+                );
+            });
+        }
+
+        // Outros campos (exceto tip_id_basica e lst_assunto_materia)
         Object.keys(labels).forEach(key => {
-            if (key === 'tip_id_basica') return;
+            if (key === 'tip_id_basica' || key === 'lst_assunto_materia') return;
             let valorExibido = '', originalValue = '';
             if (key === 'dat_apresentacao') {
                 const startDate = activeParams.get('dat_apresentacao');
@@ -3353,6 +4312,15 @@ document.addEventListener('DOMContentLoaded', function () {
                 placeholder: 'Carregando tipos de matéria...',
                 maxItems: null,
                 maxOptions: null,
+                // Garantir estilo consistente
+                render: {
+                    option: function(data, escape) {
+                        return '<div>' + escape(data.text || '') + '</div>';
+                    },
+                    item: function(data, escape) {
+                        return '<div>' + escape(data.text || '') + '</div>';
+                    }
+                },
                 onInitialize: function() { this.wrapper.dataset.tomselectInitialized = true; }
             });
         }
@@ -3405,13 +4373,87 @@ document.addEventListener('DOMContentLoaded', function () {
     async function carregarSelectSimples(endpoint, selector, placeholder) {
         const selectElement = document.querySelector(selector);
         if (!selectElement) return;
+        
+        // Detectar qual campo usar baseado no endpoint
+        let labelField = 'text';
+        let searchField = 'text';
+        if (endpoint.includes('assuntos_materia') || endpoint.includes('assuntos_norma')) {
+            labelField = 'descricao';
+            searchField = 'descricao';
+        }
+        
         const tomselect = new TomSelect(selectElement, {
             valueField: 'id',
-            labelField: 'text',
-            searchField: 'text',
+            labelField: labelField,
+            searchField: searchField,
             placeholder: 'Carregando...',
             plugins: ['clear_button'],
             maxOptions: null,
+            // Garantir estilo consistente com selects múltiplos
+            render: {
+                option: function(data, escape) {
+                    // Usar ambos os campos como fallback (descricao para assuntos, text para outros)
+                    const label = data.descricao || data.text || '';
+                    return '<div>' + escape(label) + '</div>';
+                },
+                item: function(data, escape) {
+                    // Usar ambos os campos como fallback (descricao para assuntos, text para outros)
+                    const label = data.descricao || data.text || '';
+                    return '<div>' + escape(label) + '</div>';
+                }
+            }
+        });
+        tomselect.disable();
+        try {
+            const data = await fetchWithCache(endpoint);
+            // Verificar o primeiro item para confirmar o campo correto
+            if (data && data.length > 0) {
+                const firstItem = data[0];
+                // Se o campo esperado não existir, ajustar dinamicamente
+                if (!firstItem[labelField] && firstItem.descricao) {
+                    labelField = 'descricao';
+                    searchField = 'descricao';
+                    tomselect.settings.labelField = labelField;
+                    tomselect.settings.searchField = searchField;
+                } else if (!firstItem[labelField] && firstItem.text) {
+                    labelField = 'text';
+                    searchField = 'text';
+                    tomselect.settings.labelField = labelField;
+                    tomselect.settings.searchField = searchField;
+                }
+            }
+            tomselect.clear();
+            tomselect.clearOptions();
+            tomselect.addOptions(data);
+            tomselect.enable();
+            tomselect.settings.placeholder = placeholder;
+            tomselect.sync();
+        } catch (error) {
+            console.error(`Falha ao carregar dados de ${endpoint}:`, error);
+            tomselect.settings.placeholder = 'Erro ao carregar!';
+            tomselect.sync();
+        }
+    }
+    
+    async function carregarSelectMultiplo(endpoint, selector, placeholder) {
+        const selectElement = document.querySelector(selector);
+        if (!selectElement) return;
+        const tomselect = new TomSelect(selectElement, {
+            valueField: 'id',
+            labelField: 'descricao',
+            searchField: 'descricao',
+            placeholder: 'Carregando...',
+            plugins: ['clear_button', 'remove_button'],
+            maxOptions: null,
+            // Garantir estilo consistente
+            render: {
+                option: function(data, escape) {
+                    return '<div>' + escape(data.descricao || data.text || '') + '</div>';
+                },
+                item: function(data, escape) {
+                    return '<div>' + escape(data.descricao || data.text || '') + '</div>';
+                }
+            }
         });
         tomselect.disable();
         try {
@@ -3439,6 +4481,15 @@ document.addEventListener('DOMContentLoaded', function () {
             placeholder: 'Carregando tipos de autor...',
             plugins: ['clear_button'],
             maxOptions: null,
+            // Garantir estilo consistente
+            render: {
+                option: function(data, escape) {
+                    return '<div>' + escape(data.text || '') + '</div>';
+                },
+                item: function(data, escape) {
+                    return '<div>' + escape(data.text || '') + '</div>';
+                }
+            }
         });
         tomselect.disable();
         try {
@@ -3477,10 +4528,78 @@ document.addEventListener('DOMContentLoaded', function () {
     function highlightText(text, query) {
         if (!query || !text) return text;
         const escapeRegExp = (string) => string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        const terms = query.split(/\s+/).filter(Boolean).map(escapeRegExp);
-        if (terms.length === 0) return text;
-        const regex = new RegExp(`(${terms.join('|')})`, 'gi');
-        return text.replace(regex, '<mark>$1</mark>');
+        
+        // Função para normalizar acentos (remove acentos para comparação)
+        const normalizeAccents = (str) => {
+            return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+        };
+        
+        // Lista de stop words para filtrar antes do highlight (mesmas do backend)
+        const stopWords = new Set([
+            'a', 'à', 'ao', 'aos', 'as', 'da', 'das', 'de', 'do', 'dos', 'e', 'em', 'na', 'nas', 'no', 'nos',
+            'o', 'os', 'um', 'uma', 'uns', 'umas',
+            'para', 'por', 'com', 'sem', 'sob', 'sobre', 'entre', 'contra', 'ate', 'desde', 'perante', 'mediante',
+            'que', 'se', 'me', 'te', 'nos', 'vos', 'lhe', 'lhes', 'este', 'esta', 'estes', 'estas',
+            'esse', 'essa', 'esses', 'essas', 'aquele', 'aquela', 'aqueles', 'aquelas',
+            'ou', 'mas', 'porem', 'todavia', 'contudo', 'entretanto', 'logo', 'portanto', 'assim', 'entao',
+            'tambem', 'tampouco', 'nao', 'nem'
+        ]);
+        
+        // Filtrar stop words e palavras muito curtas (1-2 caracteres)
+        // Guardar termos originais (com acentos) para usar no highlight
+        const termsOriginal = query.split(/\s+/)
+            .filter(Boolean)
+            .filter(term => term.length > 2 && !stopWords.has(normalizeAccents(term.toLowerCase())));
+            
+        if (termsOriginal.length === 0) return text;
+        
+        // Para cada termo, criar um padrão regex que corresponde ao termo exato (com acentos)
+        // Usar uma abordagem que funciona melhor com caracteres acentuados
+        // Em vez de \b (que não funciona bem com acentos), usar lookahead/lookbehind ou substituição manual
+        let resultText = text;
+        
+        // Processar termos do maior para o menor para evitar sobreposição
+        const sortedTerms = [...termsOriginal].sort((a, b) => b.length - a.length);
+        
+        // Processar cada termo e destacar, considerando variações de acentos
+        // Normalizar termos de busca para comparação, mas destacar texto original
+        sortedTerms.forEach(term => {
+            const termNormalized = normalizeAccents(term.toLowerCase());
+            
+            // Processar texto palavra por palavra, normalizando para comparar
+            // Dividir texto preservando delimitadores
+            const parts = resultText.split(/(<[^>]*>|[a-zA-Z\u00C0-\u017F]+|[^a-zA-Z\u00C0-\u017F]+)/);
+            const processedParts = parts.map(part => {
+                // Se já está dentro de uma tag mark ou é uma tag HTML, não processar
+                if (part.startsWith('<') || part.includes('<mark>') || part.includes('</mark>')) {
+                    return part;
+                }
+                
+                // Se é uma palavra (contém letras)
+                if (part.match(/^[a-zA-Z\u00C0-\u017F]+$/)) {
+                    const partNormalized = normalizeAccents(part.toLowerCase());
+                    
+                    // Verificar se a palavra normalizada contém o termo normalizado
+                    if (partNormalized.includes(termNormalized)) {
+                        // Encontrar onde o termo aparece na palavra normalizada
+                        const termIndex = partNormalized.indexOf(termNormalized);
+                        if (termIndex !== -1) {
+                            // Destacar a palavra inteira (já que corresponde)
+                            return '<mark>' + part + '</mark>';
+                        }
+                    }
+                }
+                
+                return part;
+            });
+            
+            resultText = processedParts.join('');
+        });
+        
+        // Limpar highlights aninhados
+        resultText = resultText.replace(/<mark>([^<]*)<mark>([^<]*)<\/mark>([^<]*)<\/mark>/gi, '<mark>$1$2$3</mark>');
+        
+        return resultText;
     }
 
     function sanitizeHTML(str) {
@@ -3499,7 +4618,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
     Promise.all([
         carregarTiposMateria(),
-        carregarSelectSimples('autores_json', '#cod_autor', 'Selecione um autor...')
+        carregarSelectSimples('autores_json', '#cod_autor', 'Selecione um autor...'),
+        carregarSelectSimples('assuntos_materia_json', '#lst_assunto_materia', 'Selecione um assunto...')
     ]).then(() => {
         if (window.location.search) {
             popularFormPelaURL();
@@ -3747,5 +4867,3 @@ document.addEventListener('DOMContentLoaded', function () {
     adicionarAcessibilidadeBadges();
 });
 </script>
-
-<dtml-var footer_html>

@@ -1,23 +1,26 @@
-                       <div class="row mb-3 d-print-none">
-                            <div class="col-12 col-md-6">
-                                <div class="page-title-box">
-                                    <div class="page-title-left">
-                                        <ol class="breadcrumb m-0">
-                                            <li class="breadcrumb-item"><a tal:attributes="href container/absolute_url">Início</a></li>
-                                            <tal:block tal:repeat="crumb here/pysc/breadcrumbs">
-                                              <li tal:condition="not: repeat/crumb/end" class="breadcrumb-item" style="text-transform: capitalize;"><a tal:attributes="href string:${crumb/absolute_url};" tal:content="crumb/title_or_id">Início</a></li>   
-                                              <li tal:condition="repeat/crumb/end" class="breadcrumb-item active" style="text-transform: capitalize;"><span tal:content="crumb/title_or_id"> Início </span></li>  
-                                            </tal:block>
-                                        </ol>
+                       <div class="row mt-3 mb-3 d-print-none">
+                            <tal:block tal:define="breadcrumbs_list here/pysc/breadcrumbs | nothing;
+                                                     has_breadcrumbs python:breadcrumbs_list and len(breadcrumbs_list) > 0">
+                                <div tal:condition="has_breadcrumbs" class="col-12 col-lg-6 col-xl-6 d-none d-lg-block">
+                                    <div class="page-title-box">
+                                        <div class="page-title-left">
+                                            <ol class="breadcrumb m-0">
+                                                <li class="breadcrumb-item"><a tal:attributes="href container/absolute_url">Início</a></li>
+                                                <tal:block tal:repeat="crumb breadcrumbs_list">
+                                                  <li tal:condition="not: repeat/crumb/end" class="breadcrumb-item" style="text-transform: capitalize;"><a tal:attributes="href string:${crumb/absolute_url};" tal:content="crumb/title_or_id">Início</a></li>   
+                                                  <li tal:condition="repeat/crumb/end" class="breadcrumb-item active" style="text-transform: capitalize;"><span tal:content="crumb/title_or_id"> Início </span></li>  
+                                                </tal:block>
+                                            </ol>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="col-12 col-md-6 text-start text-md-end">
-                               <div class="btn-group btn-group-md">
-                                 <a tal:attributes="href string:${container/absolute_url}/consultas/sessao_plenaria" class="btn btn-defaul"><i class="mdi mdi-calendar-month"></i><span class=""> Sessões </span></a>
-                                 <a tal:attributes="href string:${container/absolute_url}/consultas/materia" class="btn btn-defaul"><i class="mdi mdi-buffer"></i><span class=""> Matérias </span></a>
-                                 <a tal:attributes="href string:${container/absolute_url}/consultas/norma_juridica" class="btn btn-defaul"><i class="mdi mdi-scale-balance"></i><span class=""> Legislação</span></a>
-                                 <a tal:attributes="href string:${container/absolute_url}/consultas/documento_administrativo" class="btn btn-defaul"><i class="mdi mdi-book-open-page-variant"></i><span class=""> Documentos</span></a>
-                               </div>
-                            </div>
+                                <div tal:attributes="class python:'col-12 col-md-12 col-lg-6 col-xl-6 text-start text-md-end d-flex align-items-center justify-content-start justify-content-md-end' if has_breadcrumbs else 'col-12 text-start text-end d-flex align-items-center justify-content-end'">
+                                   <div class="d-inline-flex align-items-center" style="gap: 1.25rem;">
+                                     <a tal:attributes="href string:${container/absolute_url}/consultas/sessao_plenaria" class="btn btn-link text-muted p-0 border-0 bg-transparent text-decoration-none shadow-none"><i class="mdi mdi-calendar-month"></i><span class=""> Sessões </span></a>
+                                     <a tal:attributes="href string:${container/absolute_url}/consultas/materia/pesquisa_materias" class="btn btn-link text-muted p-0 border-0 bg-transparent text-decoration-none shadow-none"><i class="mdi mdi-buffer"></i><span class=""> Matérias </span></a>
+                                     <a tal:attributes="href string:${container/absolute_url}/consultas/norma_juridica/pesquisa_normas" class="btn btn-link text-muted p-0 border-0 bg-transparent text-decoration-none shadow-none"><i class="mdi mdi-scale-balance"></i><span class=""> Legislação</span></a>
+                                     <a tal:attributes="href string:${container/absolute_url}/consultas/documento_administrativo" class="btn btn-link text-muted p-0 border-0 bg-transparent text-decoration-none shadow-none"><i class="mdi mdi-book-open-page-variant"></i><span class=""> Documentos</span></a>
+                                   </div>
+                                </div>
+                            </tal:block>
                        </div>

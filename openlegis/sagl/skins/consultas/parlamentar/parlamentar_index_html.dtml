@@ -1,54 +1,64 @@
 <dtml-var header_html>
 
- <div class="row">
+<div class="row mb-3">
   <div class="col-8 col-md-6 d-flex align-items-start">
     <h1 class="firstHeading font-size-18 mb-0">Vereadores</h1>
   </div>
   <div class="col-4 col-md-6">
-    <div class="input-group d-flex justify-content-end">
-   <a class="btn btn-light d-print-none" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Pesquisar Vereador" data-src="parlamentar_pesquisar_form?modal=1"><i class="fa fa-fw fa-search"></i> <span >Pesquisar</span></a>  
+    <div class="d-flex justify-content-end">
+      <a class="btn btn-light d-print-none" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Pesquisar Vereador" data-src="parlamentar_pesquisar_form?modal=1">
+        <i class="fas fa-search me-1"></i><span>Pesquisar</span>
+      </a>  
     </div>
   </div>
- </div>
+</div>
 
 <form name="index_form">
- <div class="row">
-  <div class="col-12 mb-3">
-   <label class="form-label" for="lst_num_legislatura">Selecione a Legislatura </label>
-   <div class="input-group">
-    <select class="form-select" id="lst_num_legislatura">
-            <dtml-in expr="zsql.legislatura_obter_zsql()">
-               <option 
-                  <dtml-if expr="_.has_key('hdn_num_legislatura') and num_legislatura==_.int(hdn_num_legislatura)">
-                     selected
-                  <dtml-elif expr="not _.has_key('hdn_num_legislatura') and DateTime(datefmt='international').strftime('%Y-%m-%d') >= DateTime(dat_inicio,datefmt='international').strftime('%Y-%m-%d') and DateTime(datefmt='international').strftime('%Y-%m-%d') <= DateTime(dat_fim,datefmt='international').strftime('%Y-%m-%d')">
-                     <dtml-call expr="REQUEST.set('hdn_num_legislatura', num_legislatura)">
-                     selected
-                  </dtml-if>
-                  value="<dtml-var ACTUAL_URL>?hdn_num_legislatura=<dtml-var num_legislatura>">
-                  <dtml-var expr="str(num_legislatura) + 'ª Legislatura (' + DateTime(dat_inicio, datefmt='international').strftime('%Y') + ' - ' + DateTime(dat_fim, datefmt='international').strftime('%Y') + ')'">
-                  <dtml-if expr="(DateTime(datefmt='international').strftime('%Y-%m-%d') >= DateTime(dat_inicio,datefmt='international').strftime('%Y-%m-%d') and DateTime(datefmt='international').strftime('%Y-%m-%d') <= DateTime(dat_fim,datefmt='international').strftime('%Y-%m-%d'))">
-                     (Atual)
-                  </dtml-if>
-               </option>
-            </dtml-in>
-            <option 
-               <dtml-if expr="_.has_key('hdn_num_legislatura') and hdn_num_legislatura=='-1'">
-                  selected
+  <div class="card mb-3">
+    <div class="card-body">
+      <div class="row">
+        <div class="col-12">
+          <label class="form-label" for="lst_num_legislatura">
+            <i class="fas fa-calendar-alt me-1"></i>Selecione a Legislatura
+          </label>
+          <div class="input-group">
+            <select class="form-select" id="lst_num_legislatura">
+              <dtml-in expr="zsql.legislatura_obter_zsql()">
+                 <option 
+                    <dtml-if expr="_.has_key('hdn_num_legislatura') and num_legislatura==_.int(hdn_num_legislatura)">
+                       selected
+                    <dtml-elif expr="not _.has_key('hdn_num_legislatura') and DateTime(datefmt='international').strftime('%Y-%m-%d') >= DateTime(dat_inicio,datefmt='international').strftime('%Y-%m-%d') and DateTime(datefmt='international').strftime('%Y-%m-%d') <= DateTime(dat_fim,datefmt='international').strftime('%Y-%m-%d')">
+                       <dtml-call expr="REQUEST.set('hdn_num_legislatura', num_legislatura)">
+                       selected
+                    </dtml-if>
+                    value="<dtml-var ACTUAL_URL>?hdn_num_legislatura=<dtml-var num_legislatura>">
+                    <dtml-var expr="str(num_legislatura) + 'ª Legislatura (' + DateTime(dat_inicio, datefmt='international').strftime('%Y') + ' - ' + DateTime(dat_fim, datefmt='international').strftime('%Y') + ')'">
+                    <dtml-if expr="(DateTime(datefmt='international').strftime('%Y-%m-%d') >= DateTime(dat_inicio,datefmt='international').strftime('%Y-%m-%d') and DateTime(datefmt='international').strftime('%Y-%m-%d') <= DateTime(dat_fim,datefmt='international').strftime('%Y-%m-%d'))">
+                       (Atual)
+                    </dtml-if>
+                 </option>
+              </dtml-in>
+              <option 
+                 <dtml-if expr="_.has_key('hdn_num_legislatura') and hdn_num_legislatura=='-1'">
+                    selected
+                 </dtml-if>
+                 value="<dtml-var ACTUAL_URL>?hdn_num_legislatura=-1">sem mandato cadastrado
+              </option>
+              <dtml-if expr="not _.has_key('hdn_num_legislatura')">
+                 <dtml-call expr="REQUEST.set('hdn_num_legislatura', '-1')">
+              </dtml-if>
+            </select>
+            <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Parlamentar', 'Operador Tabela Auxiliar'])">
+               <dtml-if expr="_.has_key('hdn_num_legislatura') and hdn_num_legislatura!= '-1' ">
+                  <a class="btn btn-primary" href="<dtml-var portal_url>/cadastros/parlamentar/parlamentar_form?lst_num_legislatura=<dtml-var hdn_num_legislatura missing>" data-confirm="Deseja incluir um vereador com mandato na <dtml-var hdn_num_legislatura missing>ª Legislatura?">
+                    <i class="fas fa-plus me-1"></i>Incluir Vereador
+                  </a>
                </dtml-if>
-               value="<dtml-var ACTUAL_URL>?hdn_num_legislatura=-1">sem mandato cadastrado
-            </option>
-            <dtml-if expr="not _.has_key('hdn_num_legislatura')">
-               <dtml-call expr="REQUEST.set('hdn_num_legislatura', '-1')">
-            </dtml-if>
-    </select>
-     <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Parlamentar', 'Operador Tabela Auxiliar'])">
-        <dtml-if expr="_.has_key('hdn_num_legislatura') and hdn_num_legislatura!= '-1' ">
-           <a class="btn btn-primary" href="<dtml-var portal_url>/cadastros/parlamentar/parlamentar_form?lst_num_legislatura=<dtml-var hdn_num_legislatura missing>" data-confirm="Deseja incluir um vereador com mandato na <dtml-var hdn_num_legislatura missing>ª Legislatura?"><i class="fa fa-fw fa-plus"></i> Incluir Vereador</a>
-        </dtml-if>
-     </dtml-if>  
+            </dtml-if>  
+          </div>
+        </div>
+      </div>
     </div>
-   </div>
   </div>
 </form>   
 
@@ -68,49 +78,61 @@
   <dtml-in expr="vereadores_atuais_pysc(num_legislatura=hdn_num_legislatura, lista='ativos')" mapping>
     <dtml-if sequence-start>
       <div class="mt-2 mb-3">
-        <p class="h6"><b>Vereadores em exercício:</b> [<dtml-var sequence-length>]</p>
+        <h2 class="h5 text-muted">Vereadores em exercício: <strong><dtml-var sequence-length></strong></h2>
       </div>
-      <div class="row text-center">
+      <div class="row g-4 mb-4">
     </dtml-if>
-        <!-- Parlamentar -->
-        <div class="col-md-6 col-lg-4 col-xl-3">
-          <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Parlamentar'])">
-            <a href="<dtml-var portal_url>/cadastros/parlamentar/parlamentar_mostrar_proc?cod_parlamentar=<dtml-var cod_parlamentar>" title="<dtml-var nom_completo>" >
-          <dtml-else>
-            <a href="<dtml-var portal_url>/consultas/parlamentar/parlamentar_mostrar_proc?cod_parlamentar=<dtml-var cod_parlamentar>" title="<dtml-var nom_completo>">
-          </dtml-if>
-            <div class="card profile" style="height: 90%">
-               <div class="card-body">
-                 <div class="text-center">
-                 <dtml-call expr="REQUEST.set('id_foto', str(cod_parlamentar)+'_foto_parlamentar')">
-                 <dtml-if expr="hasattr(sapl_documentos.parlamentar.fotos,id_foto)">
-                    <img alt="<dtml-var nom_completo>" src="<dtml-var portal_url>/sapl_documentos/parlamentar/fotos/<dtml-var id_foto>" width="140" class="rounded-circle img-thumbnail avatar-xl">
-                 <dtml-else>
-                    <img alt="<dtml-var nom_completo>" src="<dtml-var portal_url>/imagens/avatar.png" width="140" class="rounded-circle img-thumbnail avatar-xl">
-                 </dtml-if>
-                 <h5 class="mt-3 mb-1 font-size-14 font-color-dark">
-                    <dtml-var nom_parlamentar>
-                 </h5>
-                 <p class="small text-uppercase text-muted">
-                     <dtml-in expr="zsql.parlamentar_data_filiacao_obter_zsql(num_legislatura=hdn_num_legislatura, cod_parlamentar=cod_parlamentar)">
-                       <dtml-if expr="dat_filiacao != '0' and dat_filiacao != None">
-                          <dtml-in expr="zsql.parlamentar_partido_obter_zsql(dat_filiacao=dat_filiacao, cod_parlamentar=cod_parlamentar)">
-                             <dtml-var sgl_partido null="">
-                          </dtml-in>
-                       </dtml-if>
-                     </dtml-in>
-                 </p>
-                 <dtml-if expr="sex_parlamentar == 'F'">
-                    <button class="btn btn-outline-secondary btn-rounded py-1 font-size-13">Dados da Vereadora</button>
-                 <dtml-else>
-                    <button class="btn btn-outline-secondary btn-rounded py-1 font-size-13">Dados do Vereador</button>
-                 </dtml-if>
-              </div>
+      <!-- Parlamentar -->
+      <div class="col-md-6 col-lg-4 col-xl-3">
+        <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Parlamentar'])">
+          <a href="<dtml-var portal_url>/cadastros/parlamentar/parlamentar_mostrar_proc?cod_parlamentar=<dtml-var cod_parlamentar>" 
+             class="text-decoration-none d-block h-100"
+             title="<dtml-var nom_completo>"
+             aria-label="Ver detalhes de <dtml-var nom_completo>">
+        <dtml-else>
+          <a href="<dtml-var portal_url>/consultas/parlamentar/parlamentar_mostrar_proc?cod_parlamentar=<dtml-var cod_parlamentar>" 
+             class="text-decoration-none d-block h-100"
+             title="<dtml-var nom_completo>"
+             aria-label="Ver detalhes de <dtml-var nom_completo>">
+        </dtml-if>
+          <div class="card profile h-100">
+             <div class="card-body text-center">
+               <dtml-call expr="REQUEST.set('id_foto', str(cod_parlamentar)+'_foto_parlamentar')">
+               <dtml-if expr="hasattr(sapl_documentos.parlamentar.fotos,id_foto)">
+                  <img alt="Foto de <dtml-var nom_completo>" 
+                       src="<dtml-var portal_url>/sapl_documentos/parlamentar/fotos/<dtml-var id_foto>" 
+                       class="rounded-circle img-thumbnail avatar-xl mb-3" 
+                       style="object-fit: cover;"
+                       loading="lazy">
+               <dtml-else>
+                  <img alt="Foto de perfil padrão de <dtml-var nom_completo>" 
+                       src="<dtml-var portal_url>/imagens/avatar.png" 
+                       class="rounded-circle img-thumbnail avatar-xl mb-3"
+                       style="object-fit: cover;"
+                       loading="lazy">
+               </dtml-if>
+               <h3 class="h5 mt-3 mb-2 text-primary">
+                  <dtml-var nom_parlamentar>
+               </h3>
+               <p class="small text-uppercase text-muted mb-2">
+                  <dtml-in expr="zsql.parlamentar_data_filiacao_obter_zsql(num_legislatura=hdn_num_legislatura, cod_parlamentar=cod_parlamentar)">
+                    <dtml-if expr="dat_filiacao != '0' and dat_filiacao != None">
+                       <dtml-in expr="zsql.parlamentar_partido_obter_zsql(dat_filiacao=dat_filiacao, cod_parlamentar=cod_parlamentar)">
+                          <dtml-var sgl_partido null="">
+                       </dtml-in>
+                    </dtml-if>
+                  </dtml-in>
+               </p>
+               <dtml-if expr="sex_parlamentar == 'F'">
+                  <button class="btn btn-outline-secondary btn-sm">Dados da Vereadora</button>
+               <dtml-else>
+                  <button class="btn btn-outline-secondary btn-sm">Dados do Vereador</button>
+               </dtml-if>
             </div>
-           </div>
-          </a>
-        </div>
-        <!-- Fim Parlamentar--> 
+          </div>
+        </a>
+      </div>
+      <!-- Fim Parlamentar--> 
     <dtml-if sequence-end>
       </div>
     </dtml-if>        
@@ -119,44 +141,56 @@
   <dtml-in expr="vereadores_atuais_pysc(num_legislatura=hdn_num_legislatura, lista='inativos')" mapping>
     <dtml-if sequence-start>
       <div class="mt-2 mb-3">
-        <p class="h6"><b>Vereador<dtml-if expr="_['sequence-length'] > 1">es</dtml-if> fora de exercício:</b> [<dtml-var sequence-length>]</p>
+        <h2 class="h5 text-muted">Vereador<dtml-if expr="_['sequence-length'] > 1">es</dtml-if> fora de exercício: <strong><dtml-var sequence-length></strong></h2>
       </div>
-      <div class="row">
+      <div class="row g-4 mb-4">
     </dtml-if>
-        <!-- Parlamentar -->
-        <div class="col-sm-6 col-md-3 col-lg-2 col-xl-2 mb-3">
-          <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Parlamentar'])">
-            <a href="<dtml-var portal_url>/cadastros/parlamentar/parlamentar_mostrar_proc?cod_parlamentar=<dtml-var cod_parlamentar>" title="<dtml-var nom_completo>" >
-          <dtml-else>
-            <a href="<dtml-var portal_url>/consultas/parlamentar/parlamentar_mostrar_proc?cod_parlamentar=<dtml-var cod_parlamentar>" title="<dtml-var nom_completo>">
-          </dtml-if>
-            <div class="card profile" style="height: 90%">
-               <div class="card-body">
-                 <div class="text-center">
-                 <dtml-call expr="REQUEST.set('id_foto', str(cod_parlamentar)+'_foto_parlamentar')">
-                 <dtml-if expr="hasattr(sapl_documentos.parlamentar.fotos,id_foto)">
-                    <img alt="<dtml-var nom_completo>" src="<dtml-var portal_url>/sapl_documentos/parlamentar/fotos/<dtml-var id_foto>" width="140" class="rounded-circle img-thumbnail avatar-xl">
-                 <dtml-else>
-                    <img alt="<dtml-var nom_completo>" src="<dtml-var portal_url>/imagens/avatar.png" width="140" class="rounded-circle img-thumbnail avatar-xl">
-                 </dtml-if>
-                 <h5 class="mt-3 mb-1 font-size-14 font-color-dark">
-                    <dtml-var nom_parlamentar>
-                 </h5>
-                 <p class="small text-uppercase text-muted">
-                     <dtml-in expr="zsql.parlamentar_data_filiacao_obter_zsql(num_legislatura=hdn_num_legislatura, cod_parlamentar=cod_parlamentar)">
-                       <dtml-if expr="dat_filiacao != '0' and dat_filiacao != None">
-                          <dtml-in expr="zsql.parlamentar_partido_obter_zsql(dat_filiacao=dat_filiacao, cod_parlamentar=cod_parlamentar)">
-                             <dtml-var sgl_partido null="">
-                          </dtml-in>
-                       </dtml-if>
-                     </dtml-in>
-                 </p>
-              </div>
+      <!-- Parlamentar -->
+      <div class="col-sm-6 col-md-3 col-lg-2 col-xl-2">
+        <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Parlamentar'])">
+          <a href="<dtml-var portal_url>/cadastros/parlamentar/parlamentar_mostrar_proc?cod_parlamentar=<dtml-var cod_parlamentar>" 
+             class="text-decoration-none d-block h-100"
+             title="<dtml-var nom_completo>"
+             aria-label="Ver detalhes de <dtml-var nom_completo>">
+        <dtml-else>
+          <a href="<dtml-var portal_url>/consultas/parlamentar/parlamentar_mostrar_proc?cod_parlamentar=<dtml-var cod_parlamentar>" 
+             class="text-decoration-none d-block h-100"
+             title="<dtml-var nom_completo>"
+             aria-label="Ver detalhes de <dtml-var nom_completo>">
+        </dtml-if>
+          <div class="card profile h-100">
+             <div class="card-body text-center">
+               <dtml-call expr="REQUEST.set('id_foto', str(cod_parlamentar)+'_foto_parlamentar')">
+               <dtml-if expr="hasattr(sapl_documentos.parlamentar.fotos,id_foto)">
+                  <img alt="Foto de <dtml-var nom_completo>" 
+                       src="<dtml-var portal_url>/sapl_documentos/parlamentar/fotos/<dtml-var id_foto>" 
+                       class="rounded-circle img-thumbnail avatar-xl mb-3" 
+                       style="object-fit: cover;"
+                       loading="lazy">
+               <dtml-else>
+                  <img alt="Foto de perfil padrão de <dtml-var nom_completo>" 
+                       src="<dtml-var portal_url>/imagens/avatar.png" 
+                       class="rounded-circle img-thumbnail avatar-xl mb-3"
+                       style="object-fit: cover;"
+                       loading="lazy">
+               </dtml-if>
+               <h3 class="h5 mt-3 mb-2 text-primary">
+                  <dtml-var nom_parlamentar>
+               </h3>
+               <p class="small text-uppercase text-muted">
+                  <dtml-in expr="zsql.parlamentar_data_filiacao_obter_zsql(num_legislatura=hdn_num_legislatura, cod_parlamentar=cod_parlamentar)">
+                    <dtml-if expr="dat_filiacao != '0' and dat_filiacao != None">
+                       <dtml-in expr="zsql.parlamentar_partido_obter_zsql(dat_filiacao=dat_filiacao, cod_parlamentar=cod_parlamentar)">
+                          <dtml-var sgl_partido null="">
+                       </dtml-in>
+                    </dtml-if>
+                  </dtml-in>
+               </p>
             </div>
-           </div>
-          </a>
-        </div>
-        <!-- Fim Parlamentar--> 
+          </div>
+        </a>
+      </div>
+      <!-- Fim Parlamentar--> 
     <dtml-if sequence-end>
       </div>
     </dtml-if>          
@@ -165,44 +199,56 @@
   <dtml-in expr="vereadores_atuais_pysc(num_legislatura=hdn_num_legislatura, lista='suplentes')" mapping>
     <dtml-if sequence-start>
       <div class="mt-2 mb-3">
-        <p class="h6"><b>Suplente<dtml-if expr="_['sequence-length'] > 1">s</dtml-if> que <dtml-if expr="_['sequence-length'] > 1">exerceram<dtml-else>exerceu</dtml-if> o cargo:</b> [<dtml-var sequence-length>]</p>
+        <h2 class="h5 text-muted">Suplente<dtml-if expr="_['sequence-length'] > 1">s</dtml-if> que <dtml-if expr="_['sequence-length'] > 1">exerceram<dtml-else>exerceu</dtml-if> o cargo: <strong><dtml-var sequence-length></strong></h2>
       </div>
-      <div class="row text-center">
+      <div class="row g-4 mb-4">
     </dtml-if>
-        <!-- Parlamentar -->
-        <div class="col-sm-6 col-md-3 col-lg-2 col-xl-2">
-          <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Parlamentar'])">
-            <a href="<dtml-var portal_url>/cadastros/parlamentar/parlamentar_mostrar_proc?cod_parlamentar=<dtml-var cod_parlamentar>" title="<dtml-var nom_completo>" >
-          <dtml-else>
-            <a href="<dtml-var portal_url>/consultas/parlamentar/parlamentar_mostrar_proc?cod_parlamentar=<dtml-var cod_parlamentar>" title="<dtml-var nom_completo>">
-          </dtml-if>
-            <div class="card profile" style="height: 90%">
-               <div class="card-body">
-                 <div class="text-center">
-                 <dtml-call expr="REQUEST.set('id_foto', str(cod_parlamentar)+'_foto_parlamentar')">
-                 <dtml-if expr="hasattr(sapl_documentos.parlamentar.fotos,id_foto)">
-                    <img alt="<dtml-var nom_completo>" src="<dtml-var portal_url>/sapl_documentos/parlamentar/fotos/<dtml-var id_foto>" width="140" class="rounded-circle img-thumbnail avatar-xl">
-                 <dtml-else>
-                    <img alt="<dtml-var nom_completo>" src="<dtml-var portal_url>/imagens/avatar.png" width="140" class="rounded-circle img-thumbnail avatar-xl">
-                 </dtml-if>
-                 <h5 class="mt-3 mb-1 font-size-14 font-color-dark">
-                    <dtml-var nom_parlamentar>
-                 </h5>
-                 <p class="small text-uppercase text-muted">
-                     <dtml-in expr="zsql.parlamentar_data_filiacao_obter_zsql(num_legislatura=hdn_num_legislatura, cod_parlamentar=cod_parlamentar)">
-                       <dtml-if expr="dat_filiacao != '0' and dat_filiacao != None">
-                          <dtml-in expr="zsql.parlamentar_partido_obter_zsql(dat_filiacao=dat_filiacao, cod_parlamentar=cod_parlamentar)">
-                             <dtml-var sgl_partido null="">
-                          </dtml-in>
-                       </dtml-if>
-                     </dtml-in>
-                 </p>
-              </div>
+      <!-- Parlamentar -->
+      <div class="col-sm-6 col-md-3 col-lg-2 col-xl-2">
+        <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Parlamentar'])">
+          <a href="<dtml-var portal_url>/cadastros/parlamentar/parlamentar_mostrar_proc?cod_parlamentar=<dtml-var cod_parlamentar>" 
+             class="text-decoration-none d-block h-100"
+             title="<dtml-var nom_completo>"
+             aria-label="Ver detalhes de <dtml-var nom_completo>">
+        <dtml-else>
+          <a href="<dtml-var portal_url>/consultas/parlamentar/parlamentar_mostrar_proc?cod_parlamentar=<dtml-var cod_parlamentar>" 
+             class="text-decoration-none d-block h-100"
+             title="<dtml-var nom_completo>"
+             aria-label="Ver detalhes de <dtml-var nom_completo>">
+        </dtml-if>
+          <div class="card profile h-100">
+             <div class="card-body text-center">
+               <dtml-call expr="REQUEST.set('id_foto', str(cod_parlamentar)+'_foto_parlamentar')">
+               <dtml-if expr="hasattr(sapl_documentos.parlamentar.fotos,id_foto)">
+                  <img alt="Foto de <dtml-var nom_completo>" 
+                       src="<dtml-var portal_url>/sapl_documentos/parlamentar/fotos/<dtml-var id_foto>" 
+                       class="rounded-circle img-thumbnail avatar-xl mb-3" 
+                       style="object-fit: cover;"
+                       loading="lazy">
+               <dtml-else>
+                  <img alt="Foto de perfil padrão de <dtml-var nom_completo>" 
+                       src="<dtml-var portal_url>/imagens/avatar.png" 
+                       class="rounded-circle img-thumbnail avatar-xl mb-3"
+                       style="object-fit: cover;"
+                       loading="lazy">
+               </dtml-if>
+               <h3 class="h5 mt-3 mb-2 text-primary">
+                  <dtml-var nom_parlamentar>
+               </h3>
+               <p class="small text-uppercase text-muted">
+                  <dtml-in expr="zsql.parlamentar_data_filiacao_obter_zsql(num_legislatura=hdn_num_legislatura, cod_parlamentar=cod_parlamentar)">
+                    <dtml-if expr="dat_filiacao != '0' and dat_filiacao != None">
+                       <dtml-in expr="zsql.parlamentar_partido_obter_zsql(dat_filiacao=dat_filiacao, cod_parlamentar=cod_parlamentar)">
+                          <dtml-var sgl_partido null="">
+                       </dtml-in>
+                    </dtml-if>
+                  </dtml-in>
+               </p>
             </div>
-           </div>
-          </a>
-        </div>
-        <!-- Fim Parlamentar--> 
+          </div>
+        </a>
+      </div>
+      <!-- Fim Parlamentar--> 
     <dtml-if sequence-end>
       </div>
     </dtml-if>          
@@ -224,61 +270,71 @@
     </dtml-if primeiro_listado>
     <dtml-if sequence-start>
       <div class="mt-2 mb-3">
-        <p class="h6"><b>Titulares:</b> [<dtml-var sequence-length>]</p>
+        <h2 class="h5 text-muted">Titulares: <strong><dtml-var sequence-length></strong></h2>
       </div>
-      <div class="row text-center">
+      <div class="row g-4 mb-4">
     </dtml-if>  
-        <!-- Parlamentar -->
-        <div class="col-md-6 col-lg-4 col-xl-3">
-          <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Parlamentar'])">
-            <a href="<dtml-var portal_url>/cadastros/parlamentar/parlamentar_mostrar_proc?cod_parlamentar=<dtml-var cod_parlamentar>" title="<dtml-var nom_completo>" >
-          <dtml-else>
-            <a href="<dtml-var portal_url>/consultas/parlamentar/parlamentar_mostrar_proc?cod_parlamentar=<dtml-var cod_parlamentar>" title="<dtml-var nom_completo>">
-          </dtml-if>
-            <div class="card profile" style="height: 90%">
-               <div class="card-body">
-                 <div class="text-center">
-                 <dtml-call expr="REQUEST.set('id_foto', str(cod_parlamentar)+'_foto_parlamentar')">
-                 <dtml-if expr="hasattr(sapl_documentos.parlamentar.fotos,id_foto)">
-                    <img alt="<dtml-var nom_completo>" src="<dtml-var portal_url>/sapl_documentos/parlamentar/fotos/<dtml-var id_foto>" width="140" class="rounded-circle img-thumbnail avatar-xl">
-                 <dtml-else>
-                    <img alt="<dtml-var nom_completo>" src="<dtml-var portal_url>/imagens/avatar.png" width="140" class="rounded-circle img-thumbnail avatar-xl">
-                 </dtml-if>
-                 <h5 class="mt-3 mb-1 font-size-14 font-color-dark">
-                    <dtml-var nom_parlamentar>
-                 </h5>
-                 <p class="small text-uppercase text-muted">
-                     <dtml-in expr="zsql.parlamentar_data_filiacao_obter_zsql(num_legislatura=hdn_num_legislatura, cod_parlamentar=cod_parlamentar)">
-                       <dtml-if expr="dat_filiacao != '0' and dat_filiacao != None">
-                          <dtml-in expr="zsql.parlamentar_partido_obter_zsql(dat_filiacao=dat_filiacao, cod_parlamentar=cod_parlamentar)">
-                             <dtml-var sgl_partido null="">
-                          </dtml-in>
-                       <dtml-else>
-                         sem registro
-                       </dtml-if>
-                     <dtml-else>
-                       Sem registro
-                     </dtml-in>
-                 </p>
-              </div>
-            </div>
-           </div>
-          </a>
-        </div>
-        <!-- Fim Parlamentar--> 
-        <dtml-if sequence-end>
-          </div>
+      <!-- Parlamentar -->
+      <div class="col-md-6 col-lg-4 col-xl-3">
+        <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Parlamentar'])">
+          <a href="<dtml-var portal_url>/cadastros/parlamentar/parlamentar_mostrar_proc?cod_parlamentar=<dtml-var cod_parlamentar>" 
+             class="text-decoration-none d-block h-100"
+             title="<dtml-var nom_completo>"
+             aria-label="Ver detalhes de <dtml-var nom_completo>">
+        <dtml-else>
+          <a href="<dtml-var portal_url>/consultas/parlamentar/parlamentar_mostrar_proc?cod_parlamentar=<dtml-var cod_parlamentar>" 
+             class="text-decoration-none d-block h-100"
+             title="<dtml-var nom_completo>"
+             aria-label="Ver detalhes de <dtml-var nom_completo>">
         </dtml-if>
+          <div class="card profile h-100">
+             <div class="card-body text-center">
+               <dtml-call expr="REQUEST.set('id_foto', str(cod_parlamentar)+'_foto_parlamentar')">
+               <dtml-if expr="hasattr(sapl_documentos.parlamentar.fotos,id_foto)">
+                  <img alt="Foto de <dtml-var nom_completo>" 
+                       src="<dtml-var portal_url>/sapl_documentos/parlamentar/fotos/<dtml-var id_foto>" 
+                       class="rounded-circle img-thumbnail avatar-xl mb-3" 
+                       style="object-fit: cover;"
+                       loading="lazy">
+               <dtml-else>
+                  <img alt="Foto de perfil padrão de <dtml-var nom_completo>" 
+                       src="<dtml-var portal_url>/imagens/avatar.png" 
+                       class="rounded-circle img-thumbnail avatar-xl mb-3"
+                       style="object-fit: cover;"
+                       loading="lazy">
+               </dtml-if>
+               <h3 class="h5 mt-3 mb-2 text-primary">
+                  <dtml-var nom_parlamentar>
+               </h3>
+               <p class="small text-uppercase text-muted">
+                  <dtml-in expr="zsql.parlamentar_data_filiacao_obter_zsql(num_legislatura=hdn_num_legislatura, cod_parlamentar=cod_parlamentar)">
+                    <dtml-if expr="dat_filiacao != '0' and dat_filiacao != None">
+                       <dtml-in expr="zsql.parlamentar_partido_obter_zsql(dat_filiacao=dat_filiacao, cod_parlamentar=cod_parlamentar)">
+                          <dtml-var sgl_partido null="">
+                       </dtml-in>
+                    <dtml-else>
+                      sem registro
+                    </dtml-if>
+                  <dtml-else>
+                    Sem registro
+                  </dtml-in>
+               </p>
+            </div>
+          </div>
+        </a>
+      </div>
+      <!-- Fim Parlamentar--> 
+      <dtml-if sequence-end>
+        </div>
+      </dtml-if>
   </dtml-if listar>
 </dtml-in>
 
 <dtml-if existe_ocorrencia>
 <dtml-else>
- <div class="row">
-  <div class="col-12 text-start">
-    <span>Nenhum vereador cadastrado.</span>
+  <div class="alert alert-info mb-0" role="alert">
+    <i class="fas fa-info-circle me-2"></i>Nenhum vereador cadastrado.
   </div>
- </div>
 </dtml-if>
 
 <dtml-call expr="REQUEST.set('existe_suplente', 0)">
@@ -300,60 +356,74 @@
     </dtml-if suplente_listado>
     <dtml-if sequence-start>
       <div class="mt-2 mb-3">
-        <p class="h6"><b>Suplente<dtml-if expr="_['sequence-length'] > 1">s</dtml-if> que <dtml-if expr="_['sequence-length'] > 1">exerceram<dtml-else>exerceu</dtml-if> o cargo:</b> [<dtml-var sequence-length>]</p>
+        <h2 class="h5 text-muted">Suplente<dtml-if expr="_['sequence-length'] > 1">s</dtml-if> que <dtml-if expr="_['sequence-length'] > 1">exerceram<dtml-else>exerceu</dtml-if> o cargo: <strong><dtml-var sequence-length></strong></h2>
       </div>
-      <div class="row text-center vereador-display">
+      <div class="row g-4 mb-4">
   </dtml-if>
-        <!-- Parlamentar -->
-        <div class="col-6 col-sm-6 col-md-3 col-lg-2 col-xl-2">
-          <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Parlamentar'])">
-            <a href="<dtml-var portal_url>/cadastros/parlamentar/parlamentar_mostrar_proc?cod_parlamentar=<dtml-var cod_parlamentar>" title="<dtml-var nom_completo>" >
-          <dtml-else>
-            <a href="<dtml-var portal_url>/consultas/parlamentar/parlamentar_mostrar_proc?cod_parlamentar=<dtml-var cod_parlamentar>" title="<dtml-var nom_completo>">
-          </dtml-if>
-            <div class="card profile" style="height: 90%">
-               <div class="card-body">
-                 <div class="text-center">
-                 <dtml-call expr="REQUEST.set('id_foto', str(cod_parlamentar)+'_foto_parlamentar')">
-                 <dtml-if expr="hasattr(sapl_documentos.parlamentar.fotos,id_foto)">
-                    <img alt="<dtml-var nom_completo>" src="<dtml-var portal_url>/sapl_documentos/parlamentar/fotos/<dtml-var id_foto>" width="140" class="rounded-circle img-thumbnail avatar-xl">
-                 <dtml-else>
-                    <img alt="<dtml-var nom_completo>" src="<dtml-var portal_url>/imagens/avatar.png" width="140" class="rounded-circle img-thumbnail avatar-xl">
-                 </dtml-if>
-                 <h5 class="mt-3 mb-1 font-size-14 font-color-dark">
-                    <dtml-var nom_parlamentar>
-                 </h5>
-                 <p class="small text-uppercase text-muted">
-                     <dtml-in expr="zsql.parlamentar_data_filiacao_obter_zsql(num_legislatura=hdn_num_legislatura, cod_parlamentar=cod_parlamentar)">
-                       <dtml-if expr="dat_filiacao != '0' and dat_filiacao != None">
-                          <dtml-in expr="zsql.parlamentar_partido_obter_zsql(dat_filiacao=dat_filiacao, cod_parlamentar=cod_parlamentar)">
-                             <dtml-var sgl_partido null="">
-                          </dtml-in>
-                       <dtml-else>
-                         sem registro
-                       </dtml-if>
-                     <dtml-else>
-                       Sem registro
-                     </dtml-in>
-                 </p>
-              </div>
+      <!-- Parlamentar -->
+      <div class="col-6 col-sm-6 col-md-3 col-lg-2 col-xl-2">
+        <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Parlamentar'])">
+          <a href="<dtml-var portal_url>/cadastros/parlamentar/parlamentar_mostrar_proc?cod_parlamentar=<dtml-var cod_parlamentar>" 
+             class="text-decoration-none d-block h-100"
+             title="<dtml-var nom_completo>"
+             aria-label="Ver detalhes de <dtml-var nom_completo>">
+        <dtml-else>
+          <a href="<dtml-var portal_url>/consultas/parlamentar/parlamentar_mostrar_proc?cod_parlamentar=<dtml-var cod_parlamentar>" 
+             class="text-decoration-none d-block h-100"
+             title="<dtml-var nom_completo>"
+             aria-label="Ver detalhes de <dtml-var nom_completo>">
+        </dtml-if>
+          <div class="card profile h-100">
+             <div class="card-body text-center">
+               <dtml-call expr="REQUEST.set('id_foto', str(cod_parlamentar)+'_foto_parlamentar')">
+               <dtml-if expr="hasattr(sapl_documentos.parlamentar.fotos,id_foto)">
+                  <img alt="Foto de <dtml-var nom_completo>" 
+                       src="<dtml-var portal_url>/sapl_documentos/parlamentar/fotos/<dtml-var id_foto>" 
+                       class="rounded-circle img-thumbnail avatar-xl mb-3" 
+                       style="object-fit: cover;"
+                       loading="lazy">
+               <dtml-else>
+                  <img alt="Foto de perfil padrão de <dtml-var nom_completo>" 
+                       src="<dtml-var portal_url>/imagens/avatar.png" 
+                       class="rounded-circle img-thumbnail avatar-xl mb-3"
+                       style="object-fit: cover;"
+                       loading="lazy">
+               </dtml-if>
+               <h3 class="h5 mt-3 mb-2 text-primary">
+                  <dtml-var nom_parlamentar>
+               </h3>
+               <p class="small text-uppercase text-muted">
+                  <dtml-in expr="zsql.parlamentar_data_filiacao_obter_zsql(num_legislatura=hdn_num_legislatura, cod_parlamentar=cod_parlamentar)">
+                    <dtml-if expr="dat_filiacao != '0' and dat_filiacao != None">
+                       <dtml-in expr="zsql.parlamentar_partido_obter_zsql(dat_filiacao=dat_filiacao, cod_parlamentar=cod_parlamentar)">
+                          <dtml-var sgl_partido null="">
+                       </dtml-in>
+                    <dtml-else>
+                      sem registro
+                    </dtml-if>
+                  <dtml-else>
+                    Sem registro
+                  </dtml-in>
+               </p>
             </div>
-           </div>
-          </a>
-        </div>
-        <!-- Fim Parlamentar--> 
+          </div>
+        </a>
+      </div>
+      <!-- Fim Parlamentar--> 
   </dtml-if listar_suplente>
 </dtml-in>
-</div>
 </dtml-if>
 
-      <div class="col-12 small text-muted mt-1 text-end">
-        <a href="<dtml-var portal_url>/@@vereadores" target="_blank"> <i class="mdi mdi-database-arrow-down"></i> Dados abertos</a>  
-      </div>
+<div class="row mt-3">
+  <div class="col-12 small text-muted text-end">
+    <a href="<dtml-var portal_url>/@@vereadores" target="_blank" class="text-decoration-none">
+      <i class="mdi mdi-database-arrow-down me-1"></i>Dados abertos
+    </a>  
+  </div>
+</div>
 
 <dtml-var js_slot>
 <script>
-
     function initJumpMenus() {
         // Turns all <select> elements with the 'jumpmenu' class into jump menus
         var selectElements = document.getElementsByTagName("select");

@@ -28,6 +28,7 @@ import base64
 from zlib import crc32
 import json
 from openlegis.sagl.restpki import *
+import transaction
 from zope.testbrowser.browser import Browser
 browser = Browser()
 ## Troca de senha
@@ -42,7 +43,6 @@ mailPassword = 'Mail forgotten password'
 addPermission(mailPassword, ('Anonymous', 'Manager',))
 from Acquisition import aq_base
 import logging
-import tasks
 import qrcode
 import pypdf
 from pypdf.errors import PdfReadError
@@ -505,8 +505,32 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
                 pdf_data = BytesIO(f.read())
             os.unlink(nom_arquivo_pdf)
             if action == 'gerar':
-                if hasattr(self.temp_folder, nom_arquivo_pdf):
-                   self.temp_folder.manage_delObjects(ids=nom_arquivo_pdf)
+                # CRÍTICO: Faz commit intermediário antes de acessar ZODBMountPoint
+                # Isso garante que todos os objetos na transação estejam registrados corretamente
+                # e evita o erro "TypeError: object of type 'NoneType' has no len()"
+                # quando o ZODBMountPoint tenta criar um savepoint otimista
+                try:
+                    txn = transaction.get()
+                    if txn is not None and not txn.isDoomed():
+                        # Faz commit intermediário para garantir que todos os objetos estejam registrados
+                        transaction.commit()
+                        # Inicia nova transação após commit
+                        transaction.begin()
+                except Exception as commit_err:
+                    # Se falhar, aborta e inicia nova transação
+                    try:
+                        transaction.abort()
+                    except:
+                        pass
+                    transaction.begin()
+                
+                # Verifica se o arquivo existe antes de tentar deletar
+                if hasattr(self.temp_folder, nom_arquivo_pdf) and nom_arquivo_pdf in self.temp_folder.objectIds():
+                    try:
+                        self.temp_folder.manage_delObjects(ids=nom_arquivo_pdf)
+                    except Exception:
+                        # Se falhar ao deletar, continua (arquivo pode não existir)
+                        pass
                 self.temp_folder.manage_addFile(id=nom_arquivo_pdf, file=pdf_data)
             elif action == 'download':
                 return self._enviar_arquivo_resposta(
@@ -2752,6 +2776,8 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         return async_result
 
     def index_file(self, url):
+        # Importa tasks dentro do método para evitar problemas de permissão no carregamento do módulo
+        import tasks
         try:
             arquivo = self.unrestrictedTraverse(url)
             with BytesIO(bytes(arquivo.data)) as arquivo:
@@ -2761,5 +2787,598 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         except Exception as e:
             print(f"Erro ao processar o arquivo PDF: {e}")
             return []
+
+    # Métodos para monitorar tarefas Celery
+    def get_task_status(self, task_id):
+        """
+        Obtém o status atual de uma tarefa Celery.
+        
+        Args:
+            task_id (str): ID da tarefa retornado por apply_async() ou delay()
+        
+        Returns:
+            dict: Dicionário com informações sobre o status da tarefa
+        """
+        from tasks_folder.task_monitor import get_task_status
+        return get_task_status(task_id)
+
+    def wait_for_task(self, task_id, timeout=None, interval=1):
+        """
+        Aguarda a conclusão de uma tarefa (bloqueante).
+        
+        Args:
+            task_id (str): ID da tarefa
+            timeout (int, optional): Tempo máximo de espera em segundos
+            interval (float): Intervalo entre verificações em segundos
+        
+        Returns:
+            dict: Resultado da tarefa
+        """
+        from tasks_folder.task_monitor import wait_for_task
+        return wait_for_task(task_id, timeout=timeout, interval=interval)
+
+    def get_task_result(self, task_id):
+        """
+        Obtém o resultado de uma tarefa concluída.
+        
+        Args:
+            task_id (str): ID da tarefa
+        
+        Returns:
+            O resultado da tarefa, ou None se ainda não concluída
+        """
+        from tasks_folder.task_monitor import get_task_result
+        return get_task_result(task_id)
+
+    def revoke_task(self, task_id, terminate=False):
+        """
+        Cancela uma tarefa Celery.
+        
+        Args:
+            task_id (str): ID da tarefa
+            terminate (bool): Se True, força a terminação imediata
+        
+        Returns:
+            bool: True se cancelada com sucesso
+        """
+        from tasks_folder.task_monitor import revoke_task
+        return revoke_task(task_id, terminate=terminate)
+
+    def list_pending_and_failed_tasks(self):
+        """
+        Lista todas as tarefas pendentes e com erro no Celery.
+        
+        Returns:
+            dict: Dicionário com:
+                - pending: Lista de tarefas pendentes (active, reserved, scheduled)
+                - failed: Lista de tarefas com erro (se encontradas)
+                - summary: Resumo com contadores
+        """
+        from tasks_folder.task_monitor import list_pending_and_failed_tasks
+        return list_pending_and_failed_tasks()
+    
+    def find_failed_tasks_in_redis(self, limit=100):
+        """
+        Tenta encontrar tarefas com erro no Redis diretamente.
+        
+        Args:
+            limit (int): Limite de tarefas a verificar (padrão: 100)
+        
+        Returns:
+            list: Lista de dicionários com informações sobre tarefas com erro
+        """
+        from tasks_folder.task_monitor import find_failed_tasks_in_redis
+        return find_failed_tasks_in_redis(limit=limit)
+
+    def proposicao_autuar_async_with_status(self, cod_proposicao):
+        """
+        Inicia autuação assíncrona e retorna o task_id para monitoramento.
+        
+        Args:
+            cod_proposicao (int): Código da proposição
+        
+        Returns:
+            dict: Dicionário com task_id e status inicial
+        """
+        portal_url = str(self.url())
+        async_result = tasks.proposicao_autuar_task.apply_async(
+            kwargs={'cod_proposicao': cod_proposicao, 'portal_url': portal_url},
+            countdown=random.randint(1, 3)
+        )
+        return {
+            'task_id': async_result.id,
+            'status': 'PENDING',
+            'message': 'Tarefa enfileirada com sucesso'
+        }
+
+    def _get_current_user_id(self):
+        """
+        Obtém o ID do usuário atual se disponível.
+        
+        Returns:
+            str|None: ID do usuário ou None se não disponível
+        """
+        try:
+            from AccessControl import getSecurityManager
+            user = getSecurityManager().getUser()
+            if user:
+                return user.getId()
+        except:
+            pass
+        return None
+
+    def _import_task_function(self):
+        """
+        Importa e valida a função de task do Celery.
+        
+        Returns:
+            callable: Função da task
+        
+        Raises:
+            AttributeError: Se a task não existir no módulo tasks
+            Exception: Se a task for None após importação
+        """
+        import tasks
+        import logging
+        
+        if not hasattr(tasks, 'gerar_processo_leg_integral_task'):
+            raise AttributeError('tasks não tem gerar_processo_leg_integral_task')
+        
+        task_func = tasks.gerar_processo_leg_integral_task
+        if task_func is None:
+            raise Exception('Tarefa gerar_processo_leg_integral_task é None após importação')
+        
+        return task_func
+
+    def _check_task_matches(self, task, cod_materia, user_id):
+        """
+        Verifica se uma task corresponde aos critérios (mesmo cod_materia e user_id).
+        
+        Args:
+            task (dict): Dados da task
+            cod_materia: Código da matéria
+            user_id: ID do usuário
+        
+        Returns:
+            tuple: (bool, str|None) - (True se corresponde, task_id se encontrado)
+        """
+        task_kwargs = task.get('kwargs', {})
+        task_name = task.get('name', '')
+        task_cod_materia = task_kwargs.get('cod_materia')
+        task_user_id = task_kwargs.get('user_id')
+        
+        # Normaliza tipos para comparação (ambos como string)
+        task_cod_str = str(task_cod_materia) if task_cod_materia is not None else None
+        cod_materia_str = str(cod_materia)
+        task_user_str = str(task_user_id) if task_user_id is not None else None
+        user_id_str = str(user_id) if user_id is not None else None
+        
+        if (task_cod_str == cod_materia_str and 
+            task_user_str == user_id_str and
+            'gerar_processo_leg_integral_task' in task_name):
+            task_id = task.get('id')
+            return (True, task_id) if task_id else (False, None)
+        
+        return (False, None)
+
+    def _check_existing_task(self, task_func, cod_materia, user_id, portal_url):
+        """
+        Verifica se já existe uma task em execução ou na fila para o mesmo cod_materia e user_id.
+        
+        Args:
+            task_func: Função da task do Celery
+            cod_materia: Código da matéria
+            user_id: ID do usuário
+            portal_url: URL base do portal
+        
+        Returns:
+            dict|None: Dicionário com informações da task existente ou None se não encontrada
+        """
+        import logging
+        
+        try:
+            if not hasattr(task_func, 'app'):
+                return None
+            
+            celery_app = task_func.app
+            inspect = celery_app.control.inspect(timeout=0.2)  # Timeout reduzido para 200ms
+            
+            if inspect is None:
+                logging.debug("[processo_leg_integral_async] Não foi possível obter inspect (workers podem não estar conectados)")
+                return None
+            
+            # Verifica tasks ativas (mais rápido e geralmente suficiente)
+            try:
+                active_tasks = inspect.active()
+                if active_tasks:
+                    total_active = sum(len(tasks) for tasks in active_tasks.values())
+                    logging.debug(f"[processo_leg_integral_async] Verificando {total_active} tasks ativas")
+                    for worker, tasks in active_tasks.items():
+                        for task in tasks:
+                            matches, task_id = self._check_task_matches(task, cod_materia, user_id)
+                            if matches and task_id:
+                                logging.debug(f"[processo_leg_integral_async] Task já existe e está ativa: {task_id}")
+                                return {
+                                    'task_id': task_id,
+                                    'status': 'PROGRESS',
+                                    'message': 'Tarefa já está em execução',
+                                    'monitor_url': f"{portal_url}/@@processo_leg_integral_status?task_id={task_id}"
+                                }
+            except Exception as active_err:
+                logging.debug(f"[processo_leg_integral_async] Erro ao verificar tasks ativas: {active_err}")
+            
+            # Verifica tasks reservadas apenas se necessário
+            try:
+                reserved_tasks = inspect.reserved()
+                if reserved_tasks:
+                    total_reserved = sum(len(tasks) for tasks in reserved_tasks.values())
+                    logging.debug(f"[processo_leg_integral_async] Verificando {total_reserved} tasks reservadas")
+                    for worker, tasks in reserved_tasks.items():
+                        for task in tasks:
+                            matches, task_id = self._check_task_matches(task, cod_materia, user_id)
+                            if matches and task_id:
+                                logging.debug(f"[processo_leg_integral_async] Task já existe e está pendente: {task_id}")
+                                return {
+                                    'task_id': task_id,
+                                    'status': 'PENDING',
+                                    'message': 'Tarefa já está na fila',
+                                    'monitor_url': f"{portal_url}/@@processo_leg_integral_status?task_id={task_id}"
+                                }
+            except Exception as reserved_err:
+                logging.debug(f"[processo_leg_integral_async] Erro ao verificar tasks reservadas: {reserved_err}")
+            
+            logging.debug(f"[processo_leg_integral_async] Nenhuma task duplicada encontrada, criando nova task para cod_materia={cod_materia}, user_id={user_id}")
+        except Exception as check_error:
+            logging.debug(f"[processo_leg_integral_async] Erro ao verificar tasks existentes: {check_error}")
+        
+        return None
+
+    def _prepare_task_kwargs(self, cod_materia, portal_url, user_id):
+        """
+        Prepara os argumentos para a task do Celery, garantindo que sejam serializáveis.
+        
+        Args:
+            cod_materia: Código da matéria
+            portal_url: URL base do portal
+            user_id: ID do usuário (opcional)
+        
+        Returns:
+            dict: Dicionário com argumentos serializáveis para a task
+        """
+        task_kwargs = {
+            'site_path': 'sagl',  # CRÍTICO: Define qual site o decorator deve criar
+            'cod_materia': str(cod_materia),  # Garante que seja string
+            'portal_url': str(portal_url) if portal_url else '',  # Garante que seja string
+        }
+        if user_id:
+            task_kwargs['user_id'] = str(user_id)  # Garante que seja string
+        
+        # Valida que os kwargs são serializáveis
+        import json
+        try:
+            json.dumps(task_kwargs)
+        except (TypeError, ValueError) as ser_err:
+            import logging
+            logging.error(f"[processo_leg_integral_async] ERRO: kwargs não são serializáveis: {ser_err}")
+            raise Exception(f"Argumentos não são serializáveis: {ser_err}")
+        
+        return task_kwargs
+
+    def _execute_async_task(self, task_func, task_kwargs):
+        """
+        Executa a task assíncrona no Celery.
+        
+        Args:
+            task_func: Função da task do Celery
+            task_kwargs: Argumentos para a task
+        
+        Returns:
+            Objeto resultado assíncrono do Celery
+        
+        Raises:
+            Exception: Se houver erro na execução
+        """
+        import logging
+        
+        try:
+            async_result = task_func.apply_async(kwargs=task_kwargs)
+            if not hasattr(async_result, 'id'):
+                logging.warning(f"[processo_leg_integral_async] Objeto não tem 'id'. Atributos: {[a for a in dir(async_result) if not a.startswith('_')][:10]}")
+            return async_result
+        except Exception as e:
+            logging.error(f"[processo_leg_integral_async] Erro no apply_async: {e}", exc_info=True)
+            raise
+
+    def _extract_task_id(self, async_result):
+        """
+        Extrai o task_id do resultado assíncrono do Celery.
+        
+        Args:
+            async_result: Resultado da execução assíncrona
+        
+        Returns:
+            str: ID da task
+        
+        Raises:
+            Exception: Se não conseguir obter o task_id
+        """
+        if async_result is None:
+            raise Exception('apply_async retornou None')
+        
+        # Tenta obter o ID diretamente
+        if hasattr(async_result, 'id'):
+            task_id = getattr(async_result, 'id', None)
+            if task_id:
+                return task_id
+        
+        # Tenta obter de outras formas
+        task_id = None
+        if hasattr(async_result, 'task_id'):
+            task_id = getattr(async_result, 'task_id', None)
+        elif hasattr(async_result, 'task'):
+            task_obj = getattr(async_result, 'task', None)
+            if task_obj is not None and hasattr(task_obj, 'id'):
+                task_id = getattr(task_obj, 'id', None)
+        
+        if task_id is None:
+            result_type = type(async_result).__name__
+            result_attrs = [a for a in dir(async_result) if not a.startswith("_")][:10]
+            raise Exception(f'Falha ao obter task_id: objeto do tipo {result_type} não tem atributo "id" acessível. Atributos: {result_attrs}')
+        
+        # Atribui o ID encontrado ao objeto se não tiver
+        if not hasattr(async_result, 'id'):
+            async_result.id = task_id
+        
+        return task_id
+
+    def _create_success_response(self, task_id, portal_url):
+        """
+        Cria a resposta de sucesso com informações da task criada.
+        
+        Args:
+            task_id: ID da task
+            portal_url: URL base do portal
+        
+        Returns:
+            dict: Dicionário com informações da resposta
+        """
+        return {
+            'task_id': task_id,
+            'status': 'PENDING',
+            'message': 'Tarefa de geração iniciada com sucesso',
+            'monitor_url': f"{portal_url}/@@processo_leg_integral_status?task_id={task_id}"
+        }
+
+    security.declarePublic('processo_leg_integral_async')
+    def processo_leg_integral_async(self, cod_materia, portal_url=None):
+        """
+        Inicia geração assíncrona do processo legislativo integral.
+        
+        Args:
+            cod_materia (int): Código da matéria
+            portal_url (str, optional): URL base do portal
+        
+        Returns:
+            dict: Dicionário com task_id e status inicial
+        """
+        import logging
+        
+        # Prepara portal_url se não fornecido
+        if not portal_url:
+            portal_url = str(self.url())
+        
+        # Obtém user_id se disponível
+        user_id = self._get_current_user_id()
+        
+        # Importa e valida função da task
+        task_func = self._import_task_function()
+        
+        # Verifica se já existe task em execução ou na fila
+        existing_task = self._check_existing_task(task_func, cod_materia, user_id, portal_url)
+        if existing_task:
+            return existing_task
+        
+        # Prepara argumentos da task
+        task_kwargs = self._prepare_task_kwargs(cod_materia, portal_url, user_id)
+        
+        # Executa task assíncrona
+        async_result = self._execute_async_task(task_func, task_kwargs)
+        
+        # Extrai task_id do resultado
+        task_id = self._extract_task_id(async_result)
+        
+        # Retorna resposta de sucesso
+        return self._create_success_response(task_id, portal_url)
+
+    def _import_task_function_norma(self):
+        """
+        Importa e valida a função de task do Celery para normas.
+        
+        Returns:
+            callable: Função da task
+        
+        Raises:
+            AttributeError: Se a task não existir no módulo tasks
+            Exception: Se a task for None após importação
+        """
+        import tasks
+        import logging
+        
+        if not hasattr(tasks, 'gerar_processo_norma_integral_task'):
+            raise AttributeError('tasks não tem gerar_processo_norma_integral_task')
+        
+        task_func = tasks.gerar_processo_norma_integral_task
+        if task_func is None:
+            raise Exception('Tarefa gerar_processo_norma_integral_task é None após importação')
+        
+        return task_func
+
+    def _check_existing_task_norma(self, task_func, cod_norma, user_id, portal_url):
+        """
+        Verifica se já existe uma task em execução ou na fila para o mesmo cod_norma e user_id.
+        
+        Args:
+            task_func: Função da task do Celery
+            cod_norma: Código da norma
+            user_id: ID do usuário
+            portal_url: URL base do portal
+        
+        Returns:
+            dict|None: Dicionário com informações da task existente ou None se não encontrada
+        """
+        import logging
+        
+        try:
+            if not hasattr(task_func, 'app'):
+                return None
+            
+            celery_app = task_func.app
+            inspect = celery_app.control.inspect(timeout=0.2)
+            
+            if not inspect:
+                logging.debug("[processo_norma_integral_async] Não foi possível obter inspect (workers podem não estar conectados)")
+                return None
+            
+            # Verifica tasks ativas
+            try:
+                active = inspect.active()
+                if active:
+                    for worker, tasks_list in active.items():
+                        if not tasks_list:
+                            continue
+                        for task in (tasks_list if isinstance(tasks_list, list) else [tasks_list]):
+                            task_kwargs = task.get('kwargs', {})
+                            task_cod_norma = task_kwargs.get('cod_norma')
+                            task_name = str(task.get('name', '') or task.get('task', ''))
+                            
+                            if (str(task_cod_norma) == str(cod_norma) and
+                                'gerar_processo_norma_integral_task' in task_name):
+                                task_id = task.get('id')
+                                return {
+                                    'task_id': task_id,
+                                    'status': 'PROGRESS',
+                                    'message': 'Tarefa já está em execução',
+                                    'monitor_url': f"{portal_url}/@@processo_norma_integral_status?task_id={task_id}"
+                                }
+            except Exception as active_err:
+                logging.debug(f"[processo_norma_integral_async] Erro ao verificar tasks ativas: {active_err}")
+            
+            # Verifica tasks reservadas (na fila)
+            try:
+                reserved = inspect.reserved()
+                if reserved:
+                    for worker, tasks_list in reserved.items():
+                        if not tasks_list:
+                            continue
+                        for task in (tasks_list if isinstance(tasks_list, list) else [tasks_list]):
+                            task_kwargs = task.get('kwargs', {})
+                            task_cod_norma = task_kwargs.get('cod_norma')
+                            task_name = str(task.get('name', '') or task.get('task', ''))
+                            
+                            if (str(task_cod_norma) == str(cod_norma) and
+                                'gerar_processo_norma_integral_task' in task_name):
+                                task_id = task.get('id')
+                                return {
+                                    'task_id': task_id,
+                                    'status': 'PENDING',
+                                    'message': 'Tarefa já está na fila',
+                                    'monitor_url': f"{portal_url}/@@processo_norma_integral_status?task_id={task_id}"
+                                }
+            except Exception as reserved_err:
+                logging.debug(f"[processo_norma_integral_async] Erro ao verificar tasks reservadas: {reserved_err}")
+            
+        except Exception as check_error:
+            logging.debug(f"[processo_norma_integral_async] Erro ao verificar tasks existentes: {check_error}")
+        
+        return None
+
+    def _prepare_task_kwargs_norma(self, cod_norma, portal_url, user_id):
+        """
+        Prepara os argumentos para a task do Celery de normas, garantindo que sejam serializáveis.
+        
+        Args:
+            cod_norma: Código da norma
+            portal_url: URL base do portal
+            user_id: ID do usuário (opcional)
+        
+        Returns:
+            dict: Dicionário com argumentos serializáveis para a task
+        """
+        task_kwargs = {
+            'site_path': 'sagl',  # CRÍTICO: Define qual site o decorator deve criar
+            'cod_norma': int(cod_norma) if cod_norma else None,  # Garante que seja int
+            'portal_url': str(portal_url) if portal_url else '',  # Garante que seja string
+        }
+        if user_id:
+            task_kwargs['user_id'] = str(user_id)  # Garante que seja string
+        
+        # Valida que os kwargs são serializáveis
+        try:
+            import json
+            json.dumps(task_kwargs)
+        except Exception as ser_err:
+            logging.error(f"[processo_norma_integral_async] ERRO: kwargs não são serializáveis: {ser_err}")
+            raise
+        
+        return task_kwargs
+
+    def _create_success_response_norma(self, task_id, portal_url):
+        """
+        Cria a resposta de sucesso com informações da task criada para normas.
+        
+        Args:
+            task_id: ID da task
+            portal_url: URL base do portal
+        
+        Returns:
+            dict: Dicionário com informações da resposta
+        """
+        return {
+            'task_id': task_id,
+            'status': 'PENDING',
+            'message': 'Tarefa de geração iniciada com sucesso',
+            'monitor_url': f"{portal_url}/@@processo_norma_integral_status?task_id={task_id}"
+        }
+
+    security.declarePublic('processo_norma_integral_async')
+    def processo_norma_integral_async(self, cod_norma, portal_url=None):
+        """
+        Inicia geração assíncrona do processo integral de norma jurídica.
+        
+        Args:
+            cod_norma (int): Código da norma
+            portal_url (str, optional): URL base do portal
+        
+        Returns:
+            dict: Dicionário com task_id e status inicial
+        """
+        import logging
+        
+        # Prepara portal_url se não fornecido
+        if not portal_url:
+            portal_url = str(self.url())
+        
+        # Obtém user_id se disponível
+        user_id = self._get_current_user_id()
+        
+        # Importa e valida função da task
+        task_func = self._import_task_function_norma()
+        
+        # Verifica se já existe task em execução ou na fila
+        existing_task = self._check_existing_task_norma(task_func, cod_norma, user_id, portal_url)
+        if existing_task:
+            return existing_task
+        
+        # Prepara argumentos da task
+        task_kwargs = self._prepare_task_kwargs_norma(cod_norma, portal_url, user_id)
+        
+        # Executa task assíncrona
+        async_result = self._execute_async_task(task_func, task_kwargs)
+        
+        # Extrai task_id do resultado
+        task_id = self._extract_task_id(async_result)
+        
+        # Retorna resposta de sucesso
+        return self._create_success_response_norma(task_id, portal_url)
 
 InitializeClass(SAGLTool)

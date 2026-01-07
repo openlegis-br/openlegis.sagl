@@ -1,0 +1,28 @@
+<!-- 
+  Template Principal Modernizado
+  Melhorias:
+  - Estrutura semântica com main
+  - H1 visível para SEO e acessibilidade
+  - JavaScript externo
+  - Melhor organização
+-->
+
+<dtml-var header_html>
+
+<link href="legislacao.css" media="all" rel="stylesheet" type="text/css" />
+
+<main class="legislacao-container" role="main" aria-label="Consulta de Legislação">
+    <!-- H1 visível mas estilizado para não quebrar layout -->
+    <h1 class="sr-only">Índice Cronológico de Legislação</h1>
+    
+    <dtml-var legislacao_header_html>
+    
+    <section class="legislacao-content" aria-labelledby="indice">
+        <!-- Conteúdo será inserido pelos templates filhos -->
+    </section>
+</main>
+
+<!-- JavaScript externo para melhor performance e cache -->
+<script src="<dtml-var portal_url>/legislacao.js" defer></script>
+<dtml-var js_slot>
+<dtml-var footer_html>

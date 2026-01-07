@@ -1,0 +1,208 @@
+/**
+ * JavaScript Modernizado para Legislação
+ * 
+ * Melhorias:
+ * - Código modular e reutilizável
+ * - Event listeners modernos
+ * - Suporte a busca/filtro
+ * - Feedback visual
+ */
+
+(function() {
+    'use strict';
+
+    /**
+     * Inicializa menus de seleção que redirecionam
+     */
+    function initJumpMenus() {
+        const selectElements = document.querySelectorAll('select.jumpmenu');
+        
+        selectElements.forEach(function(select) {
+            select.addEventListener('change', function() {
+                const value = this.options[this.selectedIndex].value;
+                if (value && value !== '') {
+                    // Adicionar feedback visual
+                    showLoading();
+                    window.location.href = value;
+                }
+            });
+        });
+    }
+
+    /**
+     * Inicializa filtro de ano com melhorias
+     */
+    function initAnoFilter() {
+        const anoSelect = document.getElementById('lst_ano');
+        if (!anoSelect) return;
+
+        // Adicionar classe para estilização
+        anoSelect.classList.add('ano-filter__select');
+
+        // Melhorar acessibilidade
+        if (!anoSelect.getAttribute('aria-label')) {
+            anoSelect.setAttribute('aria-label', 'Selecione o ano para filtrar');
+        }
+    }
+
+    /**
+     * Inicializa busca em tempo real (se implementada)
+     */
+    function initBusca() {
+        const buscaInput = document.getElementById('filtro-busca');
+        if (!buscaInput) return;
+
+        let timeout;
+        buscaInput.addEventListener('input', function() {
+            clearTimeout(timeout);
+            const termo = this.value.trim();
+
+            timeout = setTimeout(function() {
+                if (termo.length >= 2) {
+                    filtrarResultados(termo);
+                } else {
+                    mostrarTodosResultados();
+                }
+            }, 300); // Debounce de 300ms
+        });
+    }
+
+    /**
+     * Filtra resultados da tabela por termo de busca
+     */
+    function filtrarResultados(termo) {
+        const tabela = document.querySelector('.legislacao-table tbody');
+        if (!tabela) return;
+
+        const linhas = tabela.querySelectorAll('tr');
+        let resultados = 0;
+
+        linhas.forEach(function(linha) {
+            const texto = linha.textContent.toLowerCase();
+            const match = texto.includes(termo.toLowerCase());
+
+            if (match) {
+                linha.style.display = '';
+                resultados++;
+            } else {
+                linha.style.display = 'none';
+            }
+        });
+
+        // Mostrar mensagem se não houver resultados
+        mostrarMensagemResultados(resultados);
+    }
+
+    /**
+     * Mostra todos os resultados
+     */
+    function mostrarTodosResultados() {
+        const tabela = document.querySelector('.legislacao-table tbody');
+        if (!tabela) return;
+
+        const linhas = tabela.querySelectorAll('tr');
+        linhas.forEach(function(linha) {
+            linha.style.display = '';
+        });
+
+        ocultarMensagemResultados();
+    }
+
+    /**
+     * Mostra mensagem de resultados
+     */
+    function mostrarMensagemResultados(count) {
+        let mensagem = document.getElementById('legislacao-mensagem-resultados');
+        
+        if (!mensagem) {
+            mensagem = document.createElement('div');
+            mensagem.id = 'legislacao-mensagem-resultados';
+            mensagem.className = 'alert alert-info mt-3';
+            mensagem.setAttribute('role', 'alert');
+            
+            const tabela = document.querySelector('.legislacao-table');
+            if (tabela) {
+                tabela.parentNode.insertBefore(mensagem, tabela);
+            }
+        }
+
+        if (count === 0) {
+            mensagem.textContent = 'Nenhum resultado encontrado para a busca.';
+            mensagem.className = 'alert alert-warning mt-3';
+        } else {
+            mensagem.textContent = count + ' resultado(s) encontrado(s).';
+            mensagem.className = 'alert alert-info mt-3';
+        }
+    }
+
+    /**
+     * Oculta mensagem de resultados
+     */
+    function ocultarMensagemResultados() {
+        const mensagem = document.getElementById('legislacao-mensagem-resultados');
+        if (mensagem) {
+            mensagem.remove();
+        }
+    }
+
+    /**
+     * Mostra indicador de carregamento
+     */
+    function showLoading() {
+        // Implementar se necessário
+        // Pode adicionar um spinner ou mensagem
+    }
+
+    /**
+     * Melhora acessibilidade de tabelas em mobile
+     */
+    function melhorarTabelasMobile() {
+        if (window.innerWidth > 768) return;
+
+        const tabelas = document.querySelectorAll('.legislacao-table');
+        tabelas.forEach(function(tabela) {
+            const thead = tabela.querySelector('thead');
+            const tbody = tabela.querySelector('tbody');
+            
+            if (!thead || !tbody) return;
+
+            const headers = thead.querySelectorAll('th');
+            const linhas = tbody.querySelectorAll('tr');
+
+            linhas.forEach(function(linha) {
+                const celulas = linha.querySelectorAll('td');
+                celulas.forEach(function(celula, index) {
+                    if (headers[index]) {
+                        const label = headers[index].textContent.trim();
+                        celula.setAttribute('data-label', label);
+                    }
+                });
+            });
+        });
+    }
+
+    /**
+     * Inicialização quando DOM estiver pronto
+     */
+    function init() {
+        initJumpMenus();
+        initAnoFilter();
+        initBusca();
+        melhorarTabelasMobile();
+
+        // Re-executar em resize para melhorar tabelas mobile
+        let resizeTimeout;
+        window.addEventListener('resize', function() {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(melhorarTabelasMobile, 250);
+        });
+    }
+
+    // Inicializar quando DOM estiver pronto
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
+
+})();

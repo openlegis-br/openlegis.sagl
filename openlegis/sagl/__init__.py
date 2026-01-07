@@ -33,6 +33,21 @@ from openlegis.sagl.document_manager import SAPLDocumentManager
 # Logger
 logger = logging.getLogger(__name__)
 
+def get_logger(name=None):
+    """
+    Função pública para obter um logger.
+    Pode ser usada em PythonScripts do Zope.
+    
+    Args:
+        name (str, optional): Nome do logger. Se None, usa o nome do módulo.
+    
+    Returns:
+        logging.Logger: Instância do logger
+    """
+    if name is None:
+        name = __name__
+    return logging.getLogger(name)
+
 ###############################################################################
 # CONFIGURAÇÃO DE SEGURANÇA
 ###############################################################################
@@ -132,11 +147,41 @@ def configure_module_security():
         'email.utils', 'email.mime.application', 'email.mime.multipart',
         'email.mime.text', 'AccessControl.PermissionRole',
         'collections.Counter', 'reportlab', 'reportlab.lib', 'logging',
-        'reportlab.lib.utils', 'operator', 'locale', 'zlib.crc32'
+        'reportlab.lib.utils', 'operator', 'locale', 'zlib.crc32',
+        'openlegis.sagl',  # Permite importar o módulo principal
+        'openlegis.sagl.browser',  # Permite importar módulos browser
+        'openlegis.sagl.browser.processo_leg',  # Permite importar processo_leg
+        'tasks',  # Permite importar módulo tasks (usado pelo SAGLTool)
+        'tasks_folder',  # Permite importar módulos de tasks_folder
+        'tasks_folder.processo_leg_task',  # Permite importar processo_leg_task
+        'celery'  # Permite importar Celery (usado pelo tasks)
     ]
 
     for module in allowed_modules:
         allow_module(module)
+    
+    # Declara funções públicas no módulo openlegis.sagl
+    sagl_security = ModuleSecurityInfo('openlegis.sagl')
+    sagl_security.declarePublic('get_logger')
+    sagl_security.declarePublic('get_base_path')
+    
+    # Declara classes públicas no módulo processo_leg
+    processo_leg_security = ModuleSecurityInfo('openlegis.sagl.browser.processo_leg')
+    processo_leg_security.declarePublic('ProcessoLegView')
+    processo_leg_security.declarePublic('PDFGenerationError')
+    processo_leg_security.declarePublic('SecurityError')
+    processo_leg_security.declarePublic('ProcessoLegStatusView')
+    processo_leg_security.declarePublic('PaginaProcessoLeg')
+    processo_leg_security.declarePublic('LimparProcessoLegView')
+    processo_leg_security.declarePublic('ProcessoLegTaskExecutor')
+    processo_leg_security.declarePublic('PastaDigitalView')
+    processo_leg_security.declarePublic('PastaDigitalDataView')
+    processo_leg_security.declarePublic('ProcessoLegService')
+    processo_leg_security.declarePublic('secure_path_join')
+    processo_leg_security.declarePublic('get_processo_dir')
+    
+    # Permite acesso ao módulo processo_leg completo
+    allow_module('openlegis.sagl.browser.processo_leg')
 
 ###############################################################################
 # VERIFICAÇÃO DE INSTÂNCIA E PORTA

@@ -58,16 +58,17 @@
 <dtml-in expr="recebimento_normas_pysc()">
 <script type='text/javascript'>
   $(document).ready(function() {    
+    var codPeticao = String(<dtml-var expr="_['sequence-item']['cod_peticao']">);
     var options = {
         html: true,
         title: "Motivo da Devolução",
         //html element
-        //content: $("#popover-content-<dtml-var expr="_['sequence-item']['cod_peticao']">")
-        content: $('[data-name="popover-content-<dtml-var expr="_['sequence-item']['cod_peticao']">"]')
+        //content: $("#popover-content-" + codPeticao)
+        content: $('[data-name="popover-content-' + codPeticao + '"]')
         //Doing below won't work. Shows title only
-       //content: $("#popover-content-<dtml-var expr="_['sequence-item']['cod_peticao']">").html()         
+       //content: $("#popover-content-" + codPeticao).html()         
     }
-    var exampleEl = document.getElementById('btnDevolver-<dtml-var expr="_['sequence-item']['cod_peticao']">')
+    var exampleEl = document.getElementById('btnDevolver-' + codPeticao)
     var popover = new bootstrap.Popover(exampleEl, options)
   })
 </script>

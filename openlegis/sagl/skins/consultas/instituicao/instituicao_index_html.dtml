@@ -11,13 +11,15 @@
 //-->
 </script>
 
- <div class="row mb-2">
+ <div class="row mb-3">
       <div class="col-12 col-md-8 align-self-center">
-        <h1 class="firstHeading font-size-18">Pesquisa de Entidades</h1>
+        <h1 class="firstHeading font-size-18 mb-0">Pesquisa de Entidades</h1>
       </div>
       <div class="col-12 col-md-4 text-start text-md-end">
          <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Entidade', 'Operador Modulo Administrativo'])">
-             <a class="btn btn-primary d-print-none" href="<dtml-var portal_url>/cadastros/instituicao/instituicao_form""><i class="fa fa-fw fa-plus"></i> Incluir Entidade</a>
+             <a class="btn btn-primary d-print-none" href="<dtml-var portal_url>/cadastros/instituicao/instituicao_form">
+               <i class="fas fa-plus me-1"></i>Incluir Entidade
+             </a>
          </dtml-if>
       </div>
  </div>
@@ -25,28 +27,35 @@
 <form class="pf-form" name="pesq_basica_form" action="instituicao_pesquisar_proc">
   <input type="hidden" name="existe_ocorrencia" value="0" />
   <input type="hidden" name="lst_categoria" value="" />
-  <div class="row">
-    <div class="col-12 col-md-4 mb-3">
-       <label class="form-label" for="lst_tip_instituicao">Tipo de Entidade</label>    
+  
+  <div class="card mb-3">
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-12 col-md-4">
+          <label class="form-label" for="lst_tip_instituicao">
+            <i class="fas fa-building me-1"></i>Tipo de Entidade
+          </label>    
           <select class="form-select" id="lst_tip_instituicao" name="lst_tip_instituicao">
             <option value="">Todos</option>
             <dtml-in expr="zsql.tipo_instituicao_obter_zsql(ind_excluido=0)">
               <option value="<dtml-var tip_instituicao missing>"
                 <dtml-if expr="_.has_key('hdn_tip_instituicao') and tip_instituicao==_.int(hdn_tip_instituicao)">
-                    <dtml-call expr="REQUEST.set('hdn_tip_instituicao', tip_instituicao)">
-                     selected
+                  <dtml-call expr="REQUEST.set('hdn_tip_instituicao', tip_instituicao)">
+                  selected
                 </dtml-if>
-               >
+              >
                 <dtml-var nom_tipo_instituicao>
               </option>
             </dtml-in>
             <dtml-if expr="not _.has_key('hdn_tip_instituicao')">
-               <dtml-call expr="REQUEST.set('hdn_tip_instituicao', '-1')">
+              <dtml-call expr="REQUEST.set('hdn_tip_instituicao', '-1')">
             </dtml-if>
           </select>
-    </div>
-    <div class="col-12 col-md-4 mb-3">
-       <label class="form-label" for="lst_txt_atividade">Atividade</label>
+        </div>
+        <div class="col-12 col-md-4">
+          <label class="form-label" for="lst_txt_atividade">
+            <i class="fas fa-briefcase me-1"></i>Atividade
+          </label>
           <select class="form-select" id="lst_txt_atividade" name="lst_txt_atividade">
             <option value="">Todas</option>
             <dtml-in expr="zsql.instituicao_atividade_obter_zsql()">
@@ -55,9 +64,11 @@
               </option>
             </dtml-in>
           </select>
-    </div>
-    <div class="col-12 col-md-4 mb-3">
-       <label class="form-label" for="lst_txt_origem">Origem</label>
+        </div>
+        <div class="col-12 col-md-4">
+          <label class="form-label" for="lst_txt_origem">
+            <i class="fas fa-map-marker-alt me-1"></i>Origem
+          </label>
           <select class="form-select" id="lst_txt_origem" name="lst_txt_origem">
             <option value="">Todas</option>
             <dtml-in expr="zsql.instituicao_origem_obter_zsql()">
@@ -66,60 +77,67 @@
               </option>
             </dtml-in>
           </select>
-    </div>
-    
-  </div>
-
-  <div class="row">
-    <div class="col-12 col-md-6 mb-3">
-         <label class="form-label" for="txa_txt_nom_instituicao">Nome da Entidade</label>
-         <input class="form-control" id="txa_txt_nom_instituicao" type="text" name="txa_txt_nom_instituicao" null="" maxlength="80" />
-    </div>
-    <div class="col-12 col-md-6 mb-3">
-         <label class="form-label" for="txa_txt_nom_responsavel">Nome do Responsável</label>
-         <input class="form-control" id="txa_txt_nom_responsavel" type="text" name="txa_txt_nom_responsavel" null="" />
-    </div>    
-  </div>
-
-  <div class="row">
-    <div class="col-12 col-md-6 mb-3">
-         <label class="form-label" for="txt_cargo">Cargo</label>
-         <input class="form-control" id="txt_cargo" type="text" name="txt_cargo" null="" />
-    </div>
-    <div class="col-12 col-md-6 mb-3">
-         <label class="form-label" for="txt_email">Endereço de E-mail</label>
-         <input class="form-control" id="txt_email" type="text" name="txt_email" null="" />
-    </div>    
-  </div>
-
-  <div class="row">
-    <div class="col-12 col-md-6 mb-3">
-         <label class="form-label" for="lst_localidade">Localidade</label>
+        </div>
+        <div class="col-12 col-md-6">
+          <label class="form-label" for="txa_txt_nom_instituicao">
+            <i class="fas fa-building me-1"></i>Nome da Entidade
+          </label>
+          <input class="form-control" id="txa_txt_nom_instituicao" type="text" name="txa_txt_nom_instituicao" null="" maxlength="80" />
+        </div>
+        <div class="col-12 col-md-6">
+          <label class="form-label" for="txa_txt_nom_responsavel">
+            <i class="fas fa-user me-1"></i>Nome do Responsável
+          </label>
+          <input class="form-control" id="txa_txt_nom_responsavel" type="text" name="txa_txt_nom_responsavel" null="" />
+        </div>    
+        <div class="col-12 col-md-6">
+          <label class="form-label" for="txt_cargo">
+            <i class="fas fa-briefcase me-1"></i>Cargo
+          </label>
+          <input class="form-control" id="txt_cargo" type="text" name="txt_cargo" null="" />
+        </div>
+        <div class="col-12 col-md-6">
+          <label class="form-label" for="txt_email">
+            <i class="fas fa-envelope me-1"></i>Endereço de E-mail
+          </label>
+          <input class="form-control" id="txt_email" type="text" name="txt_email" null="" />
+        </div>    
+        <div class="col-12 col-md-6">
+          <label class="form-label" for="lst_localidade">
+            <i class="fas fa-map-marker-alt me-1"></i>Localidade
+          </label>
           <select class="form-select" id="lst_localidade" name="lst_localidade">
             <option value="">Todas</option>
             <dtml-in expr="zsql.instituicao_localidade_obter_zsql()">
               <option value="<dtml-var cod_localidade missing>">
-                  <dtml-var nom_localidade>
+                <dtml-var nom_localidade>
               </option>
             </dtml-in>
           </select>
-    </div>
-    <div class="col-12 col-md-6 mb-3">
-         <label class="form-label d-block">Ordenação do Resultado</label>
+        </div>
+        <div class="col-12 col-md-6">
+          <label class="form-label d-block">
+            <i class="fas fa-sort me-1"></i>Ordenação do Resultado
+          </label>
           <dtml-in expr="[('Descendente', '1'), ('Ascendente', '2')]">
-           <div class="form-check form-check-inline">          
-            <input class="form-check-input" type="radio" name="rd_ordem" value="<dtml-var expr="_['sequence-item']">" id="rd_ordem<dtml-var expr="_['sequence-item']">"
+            <div class="form-check form-check-inline">          
+              <input class="form-check-input" type="radio" name="rd_ordem" value="<dtml-var expr="_['sequence-item']">" id="rd_ordem<dtml-var expr="_['sequence-item']">"
                 <dtml-if expr="_['sequence-item']=='2'">checked="1"</dtml-if> />
-            <label class="form-check-label" for="rd_ordem<dtml-var expr="_['sequence-item']">"><dtml-var expr="_['sequence-key']"> </label>
-           </div>
+              <label class="form-check-label" for="rd_ordem<dtml-var expr="_['sequence-item']">">
+                <dtml-var expr="_['sequence-key']">
+              </label>
+            </div>
           </dtml-in>
-    </div>    
+        </div>    
+      </div>
+      
+      <div class="mt-3">
+        <button type="submit" class="btn btn-primary">
+          <i class="fas fa-search me-1"></i>Pesquisar
+        </button>  
+      </div>
+    </div>
   </div>
-
-  <div class="text-start">
-     <button type="submit" class="btn btn-primary"><i class="fa fa-fw fa-search"></i> Pesquisar</button>  
-  </div>
-
 </form>
 <dtml-var js_slot>
 <dtml-var footer_html>

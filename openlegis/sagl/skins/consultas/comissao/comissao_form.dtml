@@ -10,99 +10,174 @@
 //-->
 </script>
 
- <div class="row mb-3">
-  <div class="col-9 col-md-8 d-flex align-items-center">
+<div class="row mb-3">
+  <div class="col-12 col-md-9 d-flex align-items-center">
     <h1 class="firstHeading font-size-18 mb-0"><dtml-var nom_comissao></h1>
   </div>
-  <div class="col-3 col-md-4">
-    <div class="input-group mt-1 mt-md-0 d-flex justify-content-end">
-   <a class="btn btn-light" href="<dtml-var portal_url>/consultas/comissao"><i class="fas fa-undo"></i> Voltar</a>   
-    </div>
+  <div class="col-12 col-md-3 text-start text-md-end">
+    <a class="btn btn-outline-secondary btn-sm" href="<dtml-var portal_url>/consultas/comissao">
+      <i class="fas fa-arrow-left me-1"></i>Voltar
+    </a>   
   </div>
- </div>
+</div>
 
 <div class="row">
  <div class="col-12 col-lg-4">
-   <div class="card mb-4">
-     <h6 class="card-header">Dados da Comissão</h6>
+   <div class="card border-0 shadow-sm mb-4">
+     <div class="card-header">
+       <strong>Dados da Comissão</strong>
+     </div>
      <div class="card-body">
-        <p class="card-text"><b>Sigla:</b> <dtml-var sgl_comissao></p>        
+        <div class="mb-3">
+          <small class="text-muted d-block">Sigla</small>
+          <div><dtml-var sgl_comissao></div>
+        </div>
         <dtml-in expr="zsql.tipo_comissao_obter_zsql(tip_comissao=tip_comissao)">
-            <p class="card-text"><b>Tipo:</b> Comissão <dtml-var nom_tipo_comissao></p>
+          <div class="mb-3">
+            <small class="text-muted d-block">Tipo</small>
+            <div>Comissão <dtml-var nom_tipo_comissao></div>
+          </div>
         </dtml-in>
-        <p class="card-text"><b>Instalação:</b> <dtml-var dat_criacao></p>
-        <p class="card-text"><b>Situação:</b> <dtml-if dat_extincao>Inativa<dtml-else>Ativa</dtml-if></p>
+        <div class="mb-3">
+          <small class="text-muted d-block">Instalação</small>
+          <div><dtml-var dat_criacao></div>
+        </div>
+        <div class="mb-3">
+          <small class="text-muted d-block">Situação</small>
+          <div>
+            <dtml-if dat_extincao>
+              <span class="badge bg-secondary">Inativa</span>
+            <dtml-else>
+              <span class="badge bg-success">Ativa</span>
+            </dtml-if>
+          </div>
+        </div>
         <dtml-if dat_extincao>
-           <p class="card-text"><b>Extinção:</b> <dtml-var dat_extincao></p>
+          <div class="mb-3">
+            <small class="text-muted d-block">Extinção</small>
+            <div><dtml-var dat_extincao></div>
+          </div>
         </dtml-if>
         <dtml-if expr="des_agenda_reuniao">
-           <p class="card-text"><b>Reuniões:</b> <dtml-var des_agenda_reuniao></p>
+          <div class="mb-3">
+            <small class="text-muted d-block">Reuniões</small>
+            <div><dtml-var des_agenda_reuniao></div>
+          </div>
         </dtml-if>
         <dtml-if expr="num_tel_secretaria">
-           <p class="card-text"><b>Telefone:</b> <dtml-var num_tel_secretaria></p>           
+          <div class="mb-3">
+            <small class="text-muted d-block">Telefone</small>
+            <div>
+              <a href="tel:<dtml-var num_tel_secretaria>" class="text-decoration-none">
+                <i class="fas fa-phone me-1"></i><dtml-var num_tel_secretaria>
+              </a>
+            </div>
+          </div>
         </dtml-if>
-
-         <p><a href="materia/materia_index_html?cod_comissao=<dtml-var cod_comissao>"><i class="fas fa-fw fa-caret-right"></i>Matérias em análise</a></p>
-        <p><a href="parecer/parecer_index_html?cod_comissao=<dtml-var cod_comissao>"><i class="fas fa-fw fa-caret-right"></i>Pareceres emitidos</a></p>
-
+        <hr>
+        <div class="d-grid gap-2">
+          <a href="materia/materia_index_html?cod_comissao=<dtml-var cod_comissao>" class="btn btn-outline-secondary btn-sm text-start">
+            <i class="fas fa-file-alt me-2"></i>Matérias em análise
+          </a>
+          <a href="parecer/parecer_index_html?cod_comissao=<dtml-var cod_comissao>" class="btn btn-outline-secondary btn-sm text-start">
+            <i class="fas fa-gavel me-2"></i>Pareceres emitidos
+          </a>
+        </div>
      </div>
    </div> 
 
       <div class="col-12 mb-4">
-         <div class="card">
-           <h6 class="card-header">Reuniões</h6>
+         <div class="card border-0 shadow-sm">
+           <div class="card-header">
+             <strong>Reuniões</strong>
+           </div>
            <ul class="list-group list-group-flush">
               <dtml-in expr="zsql.reuniao_comissao_obter_zsql(cod_comissao=cod_comissao)" size=3>
                 <li class="list-group-item">
-                  <div class="mb-1"><dtml-var num_reuniao>ª Reunião <dtml-var des_tipo_reuniao> - <dtml-var dat_inicio_reuniao><dtml-if hr_inicio_reuniao> <dtml-var hr_inicio_reuniao missing null=""></dtml-if></div>
-                <div class="btn-group btn-group-sm text-start">
-                 <dtml-let id_pauta="str(cod_reuniao)+'_pauta.pdf'">
-                  <dtml-if "hasattr(sapl_documentos.reuniao_comissao,id_pauta)">
-                    <dtml-let pauta="getattr(sapl_documentos.reuniao_comissao,id_pauta).absolute_url">
-                      <a class="btn btn-primary" href="<dtml-var pauta>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fas fa-file-pdf"></i> <span class="">Pauta</span></a>
+                  <div class="mb-2">
+                    <i class="fas fa-calendar-alt me-2 text-muted"></i>
+                    <strong><dtml-var num_reuniao>ª Reunião <dtml-var des_tipo_reuniao></strong>
+                    <br>
+                    <small class="text-muted">
+                      <i class="fas fa-clock me-1"></i><dtml-var dat_inicio_reuniao><dtml-if hr_inicio_reuniao> <dtml-var hr_inicio_reuniao missing null=""></dtml-if>
+                    </small>
+                  </div>
+                  <div class="btn-group btn-group-sm flex-wrap">
+                    <dtml-let id_pauta="str(cod_reuniao)+'_pauta.pdf'">
+                      <dtml-if "hasattr(sapl_documentos.reuniao_comissao,id_pauta)">
+                        <dtml-let pauta="getattr(sapl_documentos.reuniao_comissao,id_pauta).absolute_url">
+                          <a class="btn btn-outline-secondary" href="<dtml-var pauta>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank">
+                            <i class="fas fa-file-pdf me-1"></i>Pauta
+                          </a>
+                        </dtml-let>
+                      </dtml-if>
                     </dtml-let>
-                  </dtml-if>
-                </dtml-let>
-                <dtml-let id_ata="str(cod_reuniao)+'_ata.pdf'">
-                  <dtml-if "hasattr(sapl_documentos.reuniao_comissao,id_ata)">
-                    <dtml-let ata="getattr(sapl_documentos.reuniao_comissao,id_ata).absolute_url">
-                      <a class="btn btn-secondary" href="<dtml-var ata>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fas fa-file-pdf"></i> <span class="">Ata</span></a>
+                    <dtml-let id_ata="str(cod_reuniao)+'_ata.pdf'">
+                      <dtml-if "hasattr(sapl_documentos.reuniao_comissao,id_ata)">
+                        <dtml-let ata="getattr(sapl_documentos.reuniao_comissao,id_ata).absolute_url">
+                          <a class="btn btn-outline-secondary" href="<dtml-var ata>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank">
+                            <i class="fas fa-file-pdf me-1"></i>Ata
+                          </a>
+                        </dtml-let>
+                      </dtml-if>
                     </dtml-let>
-                  </dtml-if>
-                 </dtml-let>
-                 <dtml-if url_video>
-                    <a href="<dtml-var url_video>" class="popup-youtube btn btn-danger"><i class="fab fa-fw fa-youtube"></i>Vídeo</a>               
-                 </dtml-if> 
-                </div> 
+                    <dtml-if url_video>
+                      <a href="<dtml-var url_video>" class="popup-youtube btn btn-outline-secondary">
+                        <i class="fab fa-youtube me-1"></i>Vídeo
+                      </a>               
+                    </dtml-if> 
+                  </div> 
                 </li>
               <dtml-else>
-                <li class="list-group-item">Nenhuma reunião cadastrada</li>                
+                <li class="list-group-item">
+                  <div class="alert alert-info mb-0">
+                    <i class="fas fa-info-circle me-2"></i>Nenhuma reunião cadastrada
+                  </div>
+                </li>                
               </dtml-in>
-              <li class="list-group-item text-end small"><a href="<dtml-var portal_url>/consultas/reuniao_comissao/reuniao_comissao_index_html?cod_comissao_sel=<dtml-var cod_comissao>">Todas as reuniões</a></li>
+              <li class="list-group-item text-end">
+                <a href="<dtml-var portal_url>/consultas/reuniao_comissao/reuniao_comissao_index_html?cod_comissao_sel=<dtml-var cod_comissao>" class="text-decoration-none small">
+                  Todas as reuniões <i class="fas fa-arrow-right ms-1"></i>
+                </a>
+              </li>
            </ul>
          </div>
        </div>
 
       <div class="col-12 mb-4">
-         <div class="card">
-           <h6 class="card-header">Documentos Publicados</h6>
+         <div class="card border-0 shadow-sm">
+           <div class="card-header">
+             <strong>Documentos Publicados</strong>
+           </div>
            <ul class="list-group list-group-flush">
               <dtml-in expr="zsql.documento_comissao_obter_zsql(cod_comissao=cod_comissao,ind_excluido=0)" size=3>
                 <li class="list-group-item">
-                 <dtml-let id_documento="str(cod_documento)+'_documento.pdf'">
-                  <dtml-if "hasattr(sapl_documentos.documento_comissao,id_documento)">
-                    <dtml-let documento="getattr(sapl_documentos.documento_comissao,id_documento).absolute_url">
-                       <a target="_blank" href="<dtml-var documento>"><dtml-var dat_documento> - <dtml-var txt_descricao></a>
-                    </dtml-let>
-                  <dtml-else>
-                      <dtml-var dat_documento> - <dtml-var txt_descricao>
-                  </dtml-if>
-                 </dtml-let>
+                  <dtml-let id_documento="str(cod_documento)+'_documento.pdf'">
+                    <dtml-if "hasattr(sapl_documentos.documento_comissao,id_documento)">
+                      <dtml-let documento="getattr(sapl_documentos.documento_comissao,id_documento).absolute_url">
+                        <a target="_blank" href="<dtml-var documento>" class="text-decoration-none">
+                          <i class="fas fa-file-pdf me-2 text-danger"></i>
+                          <strong><dtml-var dat_documento></strong> - <dtml-var txt_descricao>
+                        </a>
+                      </dtml-let>
+                    <dtml-else>
+                      <i class="fas fa-file me-2 text-muted"></i>
+                      <strong><dtml-var dat_documento></strong> - <dtml-var txt_descricao>
+                    </dtml-if>
+                  </dtml-let>
                 </li>
               <dtml-else>
-                <li class="list-group-item">Nenhum documento cadastrado</li>
+                <li class="list-group-item">
+                  <div class="alert alert-info mb-0">
+                    <i class="fas fa-info-circle me-2"></i>Nenhum documento cadastrado
+                  </div>
+                </li>
               </dtml-in>
-              <li class="list-group-item text-end small"><a href="<dtml-var portal_url>/consultas/comissao/documento/documento_index_html?cod_comissao=<dtml-var cod_comissao>">Todos os documentos</a></li>
+              <li class="list-group-item text-end">
+                <a href="<dtml-var portal_url>/consultas/comissao/documento/documento_index_html?cod_comissao=<dtml-var cod_comissao>" class="text-decoration-none small">
+                  Todos os documentos <i class="fas fa-arrow-right ms-1"></i>
+                </a>
+              </li>
            </ul>
          </div>
        </div>
@@ -110,76 +185,102 @@
 
  <div class="col-12 col-lg-8">
    <div class="row">
-      <div class="col-12">
-        <div class="card">
-        <h6 class="card-header">Composição Atual</h6>
-        <dtml-in expr="zsql.periodo_comp_comissao_obter_zsql(ind_excluido=0)">
-           <dtml-if expr="(DateTime(datefmt='international') >= DateTime(dat_inicio, datefmt='international')) and (DateTime(datefmt='international') <= DateTime(dat_fim, datefmt='international'))">
-            <dtml-in expr="zsql.composicao_comissao_obter_zsql(cod_comissao=cod_comissao, cod_periodo_comp=cod_periodo_comp)">
+      <div class="col-12 mb-4">
+        <div class="card border-0 shadow-sm">
+          <div class="card-header">
+            <strong>Composição Atual</strong>
+          </div>
+          <dtml-call expr="REQUEST.set('tem_composicao', 0)">
+          <dtml-in expr="zsql.periodo_comp_comissao_obter_zsql(ind_excluido=0)">
+            <dtml-if expr="(DateTime(datefmt='international') >= DateTime(dat_inicio, datefmt='international')) and (DateTime(datefmt='international') <= DateTime(dat_fim, datefmt='international'))">
+              <dtml-call expr="REQUEST.set('tem_composicao', 1)">
+              <dtml-in expr="zsql.composicao_comissao_obter_zsql(cod_comissao=cod_comissao, cod_periodo_comp=cod_periodo_comp)">
                 <dtml-if sequence-start>
-                <div class="table-responsive px-2">
-                  <table class="table table-striped table-centered table-nowrap">
-                     <thead>
+                  <div class="table-responsive">
+                    <table class="table table-striped align-middle mb-0">
+                      <thead class="table-light">
                         <tr>
-                           <th>Vereador</th>
-                           <th>Partido</th>
-                           <th>Cargo</th>
+                          <th>Vereador</th>
+                          <th>Partido</th>
+                          <th>Cargo</th>
                         </tr>
-                     </thead>
-                     <tbody>
+                      </thead>
+                      <tbody>
                 </dtml-if>
-                            <tr>
-                              <td>
-                                 <a href="<dtml-var portal_url>/consultas/parlamentar/parlamentar_mostrar_proc?cod_parlamentar=<dtml-var cod_parlamentar>">
-                                   <dtml-call expr="REQUEST.set('id_foto', str(cod_parlamentar)+'_foto_parlamentar')">
-                                    <dtml-if expr="hasattr(sapl_documentos.parlamentar.fotos,id_foto)">
-                                       <img src="<dtml-var portal_url>/sapl_documentos/parlamentar/fotos/<dtml-var id_foto>" alt="" class="avatar-xs rounded-circle me-2">
-                                    <dtml-else>
-                                       <img src="<dtml-var portal_url>/imagens/avatar.png" alt="" class="avatar-xs rounded-circle me-2">
-                                    </dtml-if>
-                                     <dtml-var nom_parlamentar></a>
-                              </td>
-                              <td>
-                               <dtml-in expr="zsql.filiacao_obter_zsql(cod_parlamentar=cod_parlamentar)" size="1">
-                                  <dtml-if expr="cod_partido!=None">
-                                     <dtml-in expr="zsql.partido_obter_zsql(cod_partido=cod_partido)">
-                                        <dtml-var sgl_partido missing>                                        
-                                     </dtml-in>
-                                  <dtml-else>
-                                     sem partido
-                                  </dtml-if>
-                               </dtml-in>
-                              </td>
-                              <td><dtml-var des_cargo></td>
-                            </tr>
+                        <tr>
+                          <td>
+                            <a href="<dtml-var portal_url>/consultas/parlamentar/parlamentar_mostrar_proc?cod_parlamentar=<dtml-var cod_parlamentar>" class="text-decoration-none d-flex align-items-center">
+                              <dtml-call expr="REQUEST.set('id_foto', str(cod_parlamentar)+'_foto_parlamentar')">
+                              <dtml-if expr="hasattr(sapl_documentos.parlamentar.fotos,id_foto)">
+                                <img src="<dtml-var portal_url>/sapl_documentos/parlamentar/fotos/<dtml-var id_foto>" alt="<dtml-var nom_parlamentar>" class="rounded-circle me-2" style="width: 32px; height: 32px; object-fit: cover;">
+                              <dtml-else>
+                                <img src="<dtml-var portal_url>/imagens/avatar.png" alt="<dtml-var nom_parlamentar>" class="rounded-circle me-2" style="width: 32px; height: 32px; object-fit: cover;">
+                              </dtml-if>
+                              <dtml-var nom_parlamentar>
+                            </a>
+                          </td>
+                          <td>
+                            <dtml-in expr="zsql.filiacao_obter_zsql(cod_parlamentar=cod_parlamentar)" size="1">
+                              <dtml-if expr="cod_partido!=None">
+                                <dtml-in expr="zsql.partido_obter_zsql(cod_partido=cod_partido)">
+                                  <dtml-var sgl_partido missing>                                        
+                                </dtml-in>
+                              <dtml-else>
+                                <span class="text-muted">sem partido</span>
+                              </dtml-if>
+                            </dtml-in>
+                          </td>
+                          <td><dtml-var des_cargo></td>
+                        </tr>
                 <dtml-if sequence-end>
-                       </tbody>
+                      </tbody>
                     </table>
-                   <div class="col-12 text-end">
-                        <p class="text-end small me-3"><a href="<dtml-var portal_url>/consultas/comissao/composicao/index_html?cod_comissao=<dtml-var cod_comissao>">Composições anteriores</a></p>
-                   </div>
-                </div>
+                  </div>
+                  <div class="card-footer bg-white text-end">
+                    <a href="<dtml-var portal_url>/consultas/comissao/composicao/index_html?cod_comissao=<dtml-var cod_comissao>" class="text-decoration-none small">
+                      Composições anteriores <i class="fas fa-arrow-right ms-1"></i>
+                    </a>
+                  </div>
                 </dtml-if>
               </dtml-in>
-           </dtml-if>
-         </dtml-in>
+            </dtml-if>
+          </dtml-in>
+          <dtml-if expr="tem_composicao==0">
+            <div class="card-body">
+              <div class="alert alert-info mb-0">
+                <i class="fas fa-info-circle me-2"></i>Nenhuma composição ativa no momento.
+              </div>
+            </div>
+          </dtml-if>
+        </div>
       </div>
-     </div>
+    </div>
     <dtml-if txt_finalidade>
       <div class="col-12">
-        <div class="card">
-          <h6 class="card-header">Finalidade</h6>
+        <div class="card border-0 shadow-sm">
+          <div class="card-header">
+            <strong>Finalidade</strong>
+          </div>
           <div class="card-body">
-          <dtml-in expr="zsql.tipo_comissao_obter_zsql(tip_comissao=tip_comissao)">
-             <dtml-var txt_finalidade>
-          </dtml-in>
+            <dtml-in expr="zsql.tipo_comissao_obter_zsql(tip_comissao=tip_comissao)">
+              <div class="text-justify">
+                <dtml-var txt_finalidade>
+              </div>
+            </dtml-in>
           </div>
         </div>
       </div>
     </dtml-if>
   </div>
 </div>
-<div class="col-12 small d-flex align-items-start justify-content-end"><a href="<dtml-var portal_url>/@@comissoes/<dtml-var cod_comissao>" target="_blank"> <i class="mdi mdi-database-arrow-down"></i> Dados abertos</a></div>
+<div class="row mt-4 mb-3">
+  <div class="col-12 text-end">
+    <a href="<dtml-var portal_url>/@@comissoes/<dtml-var cod_comissao>" target="_blank" class="btn btn-outline-secondary btn-sm">
+      <i class="fas fa-database me-1"></i>Dados abertos
+      <i class="fas fa-external-link-alt ms-1 small"></i>
+    </a>
+  </div>
+</div>
 
 <link href="<dtml-var portal_url>/assets/libs/magnific-popup/magnific-popup.css" rel="stylesheet" type="text/css" />
 

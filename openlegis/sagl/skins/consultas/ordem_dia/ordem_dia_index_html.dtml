@@ -10,161 +10,188 @@
     //-->
 </script>
 
-<div class="helpsagl"><a id="ajuda" href="<dtml-var portal_url>/ajuda/consultas#cons_ordem_dia">Ajuda</a></div>
-<h1>Ordem do Dia</h1>
+<h1 class="firstHeading font-size-18 mb-3">Ordem do Dia</h1>
 
 <form name="index_form" method="post" action="ordem_dia_form">
-  <fieldset>
-   <legend class="font-size-16">Ordem do Dia</legend>
-      <table class="table">
-        <tr>
-         <th align="right"><label class="form-label" for="lst_dat_ordem">Selecione a Data:</label></th>
-          <td colspan="2" align="left">
-   <select class="form-select"  id="lst_dat_ordem" name="lst_dat_ordem" size="1" onChange="atualiza_ordem_dia(document.index_form.lst_dat_ordem[document.index_form.lst_dat_ordem.selectedIndex].value)">
-       <dtml-in expr="zsql.data_ordem_dia_obter_zsql(ind_excluido = 0)">
-        <option
-          <dtml-if expr="REQUEST.has_key('dat_ordem_sel') and dat_ordem_sel==dat_ordem">
-               selected
-               <dtml-call expr="REQUEST.set('dat_ordem', dat_ordem)">
-          <dtml-elif expr="_['sequence-start'] and not _.has_key('dat_ordem_sel')">
-               selected
-          </dtml-if>
-          value="<dtml-var dat_ordem missing>"><dtml-var dat_ordem missing>
-        </option>
-        <dtml-if expr="_['sequence-start'] and not _.has_key('dat_ordem_sel')">
-              <dtml-call expr="REQUEST.set('dat_ordem', dat_ordem)">
-        </dtml-if>
-      </dtml-in>
-   </select>
-         </td>
-        </tr>
-<dtml-if dat_ordem>
-<dtml-call "REQUEST.set('existe_seq_anterior', 0)">
-<dtml-call "REQUEST.set('existe_seq_posterior', 0)">
-<dtml-if page>
-  <dtml-call "REQUEST.set('page', _.int(page))">
-<dtml-else>
-  <dtml-call "REQUEST.set('page', 1)">
-</dtml-if>
-<dtml-if step>
-  <dtml-call "REQUEST.set('step', _.int(step))">
-<dtml-else>
-  <dtml-call "REQUEST.set('step', 16)">
-</dtml-if>
-<dtml-call "REQUEST.set('start',(page-1) * step + 1)">
-<dtml-in expr="zsql.ordem_dia_obter_zsql(dat_ordem = pysc.data_converter_pysc(data=dat_ordem), ind_excluido=0)" size="step" start="start" orphan=0>
-<dtml-if sequence-start>
-    <dtml-if previous-sequence>
-      <dtml-call "REQUEST.set('existe_seq_anterior', 1)">
-    </dtml-if previous-sequence>      
-</dtml-if sequence-start> 
-       <tr><td align="center" colspan="2">
-         <b><dtml-var num_ordem missing></b><br>
-                        <dtml-call expr="REQUEST.set('txt_materia_excluida', 'N')">
-                        <dtml-in expr="zsql.materia_obter_zsql(cod_materia = cod_materia, ind_excluido=0)">
-                            <a href="<dtml-var portal_url>/consultas/materia/materia_mostrar_proc?cod_materia=<dtml-var cod_materia>"><b>
-<dtml-var sgl_tipo_materia missing> <dtml-var num_ident_basica missing> <dtml-var ano_ident_basica missing> - <dtml-var des_tipo_materia></b></a>
-                        <dtml-else>
-                             <dtml-call expr="REQUEST.set('txt_materia_excluida', '*** Aten&ccedil;&atilde;o: Matéria Exclu&iacute;da ***')">
-                        </dtml-in>
-                    </td>
-                    </tr>
-                    <tr bgcolor="#FFFFFF">
-                        <td align="left" colspan="2"><dtml-var txt_observacao>
-                         <dtml-if expr="txt_materia_excluida=='N'">  </td>
-                         <dtml-else> - <b><dtml-var txt_materia_excluida></b></td>
-                         </dtml-if>
-                    </tr>
-       <tr><td colspan="2"><b>Processo:</b>
-           <dtml-in expr="zsql.numeracao_obter_zsql(cod_materia=cod_materia)">
-               <dtml-if num_materia>
-                  <dtml-var num_materia>/<dtml-var ano_materia>
-               <dtml-else>
-                  - n&atilde;o consta -
-               </dtml-if>
-            <dtml-else>
-                 - n&atilde;o consta -
-            </dtml-in></td>
-       </tr>
-  
-           <dtml-in expr="zsql.tramitacao_obter_zsql(cod_materia=cod_materia, ind_ult_tramitacao=1)">
-              <dtml-in expr="[('P','Primeiro'), ('S','Segundo'), ('U','&Uacute;nico'), ('L','Suplementar'), ('A', 'Vota&ccedil;&atilde;o &Uacute;nica em Regime de Urg&ecirc;ncia'), ('B','1ª Vota&ccedil;&atilde;o'), ('C', '2ª e 3ª Vota&ccedil;&atilde;o')]">
-                <dtml-if expr="sgl_turno==_['sequence-key']">
-                      <tr><td align="left" colspan="2"><b>Turno:</b><dtml-var sequence-item></td></tr>
-		</dtml-if>    
-              </dtml-in>
-              
-              <dtml-if des_status>
-                 <dtml-call expr="REQUEST.set('des_status', des_status)">
+  <div class="card mb-3">
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-12 col-md-4">
+          <label class="form-label" for="lst_dat_ordem">
+            <i class="fas fa-calendar-alt me-1"></i>Selecione a Data:
+          </label>
+          <select class="form-select" id="lst_dat_ordem" name="lst_dat_ordem" size="1" onChange="atualiza_ordem_dia(document.index_form.lst_dat_ordem[document.index_form.lst_dat_ordem.selectedIndex].value)">
+            <dtml-in expr="zsql.data_ordem_dia_obter_zsql(ind_excluido = 0)">
+              <option
+                <dtml-if expr="REQUEST.has_key('dat_ordem_sel') and dat_ordem_sel==dat_ordem">
+                  selected
+                  <dtml-call expr="REQUEST.set('dat_ordem', dat_ordem)">
+                <dtml-elif expr="_['sequence-start'] and not _.has_key('dat_ordem_sel')">
+                  selected
+                </dtml-if>
+                value="<dtml-var dat_ordem missing>">
+                <dtml-var dat_ordem missing>
+              </option>
+              <dtml-if expr="_['sequence-start'] and not _.has_key('dat_ordem_sel')">
+                <dtml-call expr="REQUEST.set('dat_ordem', dat_ordem)">
               </dtml-if>
-           </dtml-in></td>
-         </tr>
-        <tr><td colspan="2" align="left">
-          <dtml-in expr="zsql.autoria_obter_zsql(cod_materia=cod_materia)">
-              <dtml-in expr="zsql.autor_obter_zsql(cod_autor=cod_autor)">
-                 <dtml-if cod_parlamentar>
-                    <dtml-in expr="zsql.parlamentar_obter_zsql(cod_parlamentar=cod_parlamentar)">
-		       <b>Autor: </b> <dtml-var nom_parlamentar>
-                    </dtml-in>
-                 <dtml-elif cod_comissao>
-                    <dtml-in expr="zsql.comissao_obter_zsql(cod_comissao=cod_comissao)">
-		       <b>Autor: </b> <dtml-var nom_comissao>
-                    </dtml-in>
-                 <dtml-else>
-			<b>Autor: </b><dtml-var nom_autor>
-                 </dtml-if>
-              </dtml-in>
+            </dtml-in>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+<dtml-if dat_ordem>
+  <dtml-call "REQUEST.set('existe_seq_anterior', 0)">
+  <dtml-call "REQUEST.set('existe_seq_posterior', 0)">
+  <dtml-if page>
+    <dtml-call "REQUEST.set('page', _.int(page))">
+  <dtml-else>
+    <dtml-call "REQUEST.set('page', 1)">
+  </dtml-if>
+  <dtml-if step>
+    <dtml-call "REQUEST.set('step', _.int(step))">
+  <dtml-else>
+    <dtml-call "REQUEST.set('step', 16)">
+  </dtml-if>
+  <dtml-call "REQUEST.set('start',(page-1) * step + 1)">
+  
+  <dtml-in expr="zsql.ordem_dia_obter_zsql(dat_ordem = pysc.data_converter_pysc(data=dat_ordem), ind_excluido=0)" size="step" start="start" orphan=0>
+    <dtml-if sequence-start>
+      <dtml-if previous-sequence>
+        <dtml-call "REQUEST.set('existe_seq_anterior', 1)">
+      </dtml-if>
+    </dtml-if>
+    
+    <div class="card border-0 shadow-sm mb-3">
+      <div class="card-body">
+        <div class="mb-3">
+          <div class="text-center mb-3">
+            <span class="badge bg-primary fs-6"><dtml-var num_ordem missing></span>
+          </div>
+          <dtml-call expr="REQUEST.set('txt_materia_excluida', 'N')">
+          <dtml-in expr="zsql.materia_obter_zsql(cod_materia = cod_materia, ind_excluido=0)">
+            <div class="mb-2">
+              <a href="<dtml-var portal_url>/consultas/materia/materia_mostrar_proc?cod_materia=<dtml-var cod_materia>" class="text-decoration-none">
+                <strong><dtml-var sgl_tipo_materia missing> <dtml-var num_ident_basica missing> <dtml-var ano_ident_basica missing> - <dtml-var des_tipo_materia></strong>
+              </a>
+            </div>
+          <dtml-else>
+            <dtml-call expr="REQUEST.set('txt_materia_excluida', '*** Atenção: Matéria Excluída ***')">
+            <div class="alert alert-warning mb-2">
+              <i class="fas fa-exclamation-triangle me-2"></i><strong><dtml-var txt_materia_excluida></strong>
+            </div>
           </dtml-in>
-            </td>
-         </tr>
-         <tr>
-           <td colspan="2"><b>Situação: </b>
-           <dtml-var des_status missing> </td>
-         </tr>
-         <tr><td colspan="2" align="left">
-           <dtml-comment>Buscar o "RELATOR:..."</dtml-comment>
+          
+          <dtml-if txt_observacao>
+            <div class="mb-2">
+              <small class="text-muted"><dtml-var txt_observacao></small>
+            </div>
+          </dtml-if>
+          
+          <div class="row g-3 mb-2">
+            <div class="col-12 col-md-6">
+              <small class="text-muted d-block">Processo</small>
+              <dtml-in expr="zsql.numeracao_obter_zsql(cod_materia=cod_materia)">
+                <dtml-if num_materia>
+                  <strong><dtml-var num_materia>/<dtml-var ano_materia></strong>
+                <dtml-else>
+                  <span class="text-muted fst-italic">- não consta -</span>
+                </dtml-if>
+              <dtml-else>
+                <span class="text-muted fst-italic">- não consta -</span>
+              </dtml-in>
+            </div>
+            
+            <div class="col-12 col-md-6">
+              <small class="text-muted d-block">Situação</small>
+              <dtml-in expr="zsql.tramitacao_obter_zsql(cod_materia=cod_materia, ind_ult_tramitacao=1)">
+                <dtml-if des_status>
+                  <dtml-call expr="REQUEST.set('des_status', des_status)">
+                </dtml-if>
+                <strong><dtml-var des_status missing></strong>
+              </dtml-in>
+            </div>
+          </div>
+          
+          <dtml-in expr="zsql.tramitacao_obter_zsql(cod_materia=cod_materia, ind_ult_tramitacao=1)">
+            <dtml-in expr="[('P','Primeiro'), ('S','Segundo'), ('U','Único'), ('L','Suplementar'), ('A', 'Votação Única em Regime de Urgência'), ('B','1ª Votação'), ('C', '2ª e 3ª Votação')]">
+              <dtml-if expr="sgl_turno==_['sequence-key']">
+                <div class="mb-2">
+                  <small class="text-muted d-block">Turno</small>
+                  <strong><dtml-var sequence-item></strong>
+                </div>
+              </dtml-if>    
+            </dtml-in>
+          </dtml-in>
+          
+          <div class="mb-2">
+            <small class="text-muted d-block">Autor</small>
+            <dtml-in expr="zsql.autoria_obter_zsql(cod_materia=cod_materia)">
+              <dtml-in expr="zsql.autor_obter_zsql(cod_autor=cod_autor)">
+                <dtml-if cod_parlamentar>
+                  <dtml-in expr="zsql.parlamentar_obter_zsql(cod_parlamentar=cod_parlamentar)">
+                    <i class="fas fa-user me-1 text-muted"></i>
+                    <strong><dtml-var nom_parlamentar></strong>
+                  </dtml-in>
+                <dtml-elif cod_comissao>
+                  <dtml-in expr="zsql.comissao_obter_zsql(cod_comissao=cod_comissao)">
+                    <i class="fas fa-users me-1 text-muted"></i>
+                    <strong><dtml-var nom_comissao></strong>
+                  </dtml-in>
+                <dtml-else>
+                  <i class="fas fa-user me-1 text-muted"></i>
+                  <strong><dtml-var nom_autor></strong>
+                </dtml-if>
+              </dtml-in>
+            </dtml-in>
+          </div>
+          
           <dtml-in expr="zsql.relatoria_obter_zsql(cod_materia=cod_materia)">
-	  <b>Relator: </b>
-              <dtml-if expr="not _['sequence-start']">
-                  </dtml-if>
+            <div class="mb-2">
+              <small class="text-muted d-block">Relator</small>
               <dtml-in expr="zsql.parlamentar_obter_zsql(cod_parlamentar=cod_parlamentar)">
-                 <dtml-var nom_parlamentar> - 
+                <i class="fas fa-user me-1 text-muted"></i>
+                <strong><dtml-var nom_parlamentar></strong> - 
               </dtml-in>
               <dtml-in expr="zsql.comissao_obter_zsql(cod_comissao=cod_comissao)">
-                 <dtml-var nom_comissao>
+                <strong><dtml-var nom_comissao></strong>
               </dtml-in>
+            </div>
           </dtml-in>
-        </td></tr>
-        <dtml-comment> obter ULTIMA AÇÃO ...   24/08/2011 </dtml-comment>
-       <dtml-call expr="REQUEST.set('txt_tramitacao', '')">
-       <dtml-comment>obtém a última tramitação da matéria.</dtml-comment>
-       <dtml-in expr="zsql.tramitacao_obter_zsql(cod_materia=cod_materia, ind_ult_tramitacao=1)">
-         <dtml-call expr="REQUEST.set('txt_tramitacao', txt_tramitacao)">
-       </dtml-in>
-       <dtml-if txt_tramitacao>
-         <tr><td align="left" colspan="2">
-             <b>&Uacute;ltima A&ccedil;&atilde;o: </b><dtml-var txt_tramitacao></td>
-         </tr>
-       </dtml-if>
-
-       <tr><td colspan="2"><hr width="50%" height="1" align="center"></td></tr>
-  <dtml-if sequence-end>
-    <dtml-if next-sequence>
-      <dtml-call "REQUEST.set('existe_seq_posterior', 1)">
-    </dtml-if next-sequence>
-    <dtml-if expr="existe_seq_anterior or existe_seq_posterior">
-      <tr> <td colspan ="2" align="center"><b>        
-      <dtml-var "pysc.PageListOutput_pysc('ordem_dia_index_html', page, step, _['sequence-length'], dat_ordem_sel=dat_ordem)">
-      </b></td> </tr>
+          
+          <dtml-call expr="REQUEST.set('txt_tramitacao', '')">
+          <dtml-in expr="zsql.tramitacao_obter_zsql(cod_materia=cod_materia, ind_ult_tramitacao=1)">
+            <dtml-call expr="REQUEST.set('txt_tramitacao', txt_tramitacao)">
+          </dtml-in>
+          <dtml-if txt_tramitacao>
+            <div class="mb-2">
+              <small class="text-muted d-block">Última Ação</small>
+              <strong><dtml-var txt_tramitacao></strong>
+            </div>
+          </dtml-if>
+        </div>
+        <hr>
+      </div>
+    </div>
+    
+    <dtml-if sequence-end>
+      <dtml-if next-sequence>
+        <dtml-call "REQUEST.set('existe_seq_posterior', 1)">
+      </dtml-if>
+      <dtml-if expr="existe_seq_anterior or existe_seq_posterior">
+        <div class="d-flex justify-content-center">
+          <dtml-var "pysc.PageListOutput_pysc('ordem_dia_index_html', page, step, _['sequence-length'], dat_ordem_sel=dat_ordem)">
+        </div>
+      </dtml-if>
     </dtml-if>
-</dtml-if sequence-end>
-</dtml-in>
+  </dtml-in>
 <dtml-else>
-       <tr><td colspan="2">Nenhuma ordem do dia cadastrada.</td></tr>
+  <div class="alert alert-info">
+    <i class="fas fa-info-circle me-2"></i>Nenhuma ordem do dia cadastrada.
+  </div>
 </dtml-if>
-   </table>
-  </fieldset>
- </form>
+</form>
 
 <dtml-var js_slot>
 <dtml-var footer_html>

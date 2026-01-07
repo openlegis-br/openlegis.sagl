@@ -33,13 +33,22 @@ for local in context.zsql.localidade_obter_zsql(cod_localidade = casa['cod_local
 
 for materia in context.zsql.materia_obter_zsql(cod_materia=cod_materia):
  if materia.num_protocolo:
-    for protocolo in context.zsql.protocolo_pesquisar_zsql(num_protocolo=materia.num_protocolo,ano_protocolo=materia.ano_ident_basica):
-      if protocolo.cod_protocolo:
-         capa_dic['num_protocolo'] = str(protocolo.num_protocolo) + '/' + str(protocolo.ano_protocolo)
-         capa_dic['dat_protocolo'] = context.pysc.iso_to_port_pysc(protocolo.dat_protocolo)
-         capa_dic['hor_protocolo'] = protocolo.hor_protocolo[0:2]+':'+protocolo.hor_protocolo[3:5]
-         capa_dic["dia_protocolo"] = context.pysc.data_converter_por_extenso_pysc(data=context.pysc.iso_to_port_pysc(protocolo.dat_protocolo))
-         capa_dic["dia_semana"] = context.pysc.data_converter_dia_semana_pysc(data=context.pysc.iso_to_port_pysc(protocolo.dat_protocolo))
+    try:
+        for protocolo in context.zsql.protocolo_pesquisar_zsql(num_protocolo=materia.num_protocolo,ano_protocolo=materia.ano_ident_basica):
+          if protocolo.cod_protocolo:
+             capa_dic['num_protocolo'] = str(protocolo.num_protocolo) + '/' + str(protocolo.ano_protocolo)
+             capa_dic['dat_protocolo'] = context.pysc.iso_to_port_pysc(protocolo.dat_protocolo)
+             capa_dic['hor_protocolo'] = protocolo.hor_protocolo[0:2]+':'+protocolo.hor_protocolo[3:5]
+             capa_dic["dia_protocolo"] = context.pysc.data_converter_por_extenso_pysc(data=context.pysc.iso_to_port_pysc(protocolo.dat_protocolo))
+             capa_dic["dia_semana"] = context.pysc.data_converter_dia_semana_pysc(data=context.pysc.iso_to_port_pysc(protocolo.dat_protocolo))
+             break
+    except:
+        # Se não conseguir acessar protocolo_pesquisar_zsql, usa dados da matéria
+        capa_dic['num_protocolo'] = str(materia.num_protocolo) + '/' + str(materia.ano_ident_basica) if materia.num_protocolo else ''
+        capa_dic['dat_protocolo'] = materia.dat_apresentacao
+        capa_dic['hor_protocolo'] = ''
+        capa_dic["dia_protocolo"] = context.pysc.data_converter_por_extenso_pysc(data=materia.dat_apresentacao)
+        capa_dic["dia_semana"] = context.pysc.data_converter_dia_semana_pysc(data=materia.dat_apresentacao)
 
  else:
     capa_dic['num_protocolo'] = ''

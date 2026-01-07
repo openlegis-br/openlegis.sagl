@@ -1,134 +1,217 @@
 <dtml-var header_html>
 
-<div class="row">
- <div class="col-9">
-    <h1 class="firstHeading font-size-18">
-       <dtml-var nom_parlamentar>
-    </h1>
- </div>
- <div class="col-3 text-end align-self-center">
-     <dtml-call expr="REQUEST.set('logo_partido', str(cod_partido)+'_logo.png')">
-     <dtml-if expr="cod_partido!=None">
-        <dtml-if expr="hasattr(sapl_documentos.partido, logo_partido)">
-          <img class="img-fluid" alt="<dtml-var cod_partido>" width="80px" src="<dtml-var portal_url>/sapl_documentos/partido/<dtml-var logo_partido>">
-        </dtml-if>
-     <dtml-else>
-        <small class="text-muted">Sem partido</small>
-     </dtml-if>
- </div>
+<div class="mb-4">
+  <h1 class="firstHeading font-size-18 mb-2">
+    <dtml-var nom_parlamentar>
+  </h1>
+  <dtml-call expr="REQUEST.set('dat_atual', DateTime(datefmt='international').strftime('%d/%m/%Y'))">
+  <dtml-if expr="pysc.autoria_parlamentar_validar_pysc(cod_parlamentar=cod_parlamentar,txt_dat_apresentacao=dat_atual)">
+    <span class="badge bg-success">
+      <i class="fas fa-check-circle me-1"></i>Em exercício
+    </span>
+  <dtml-else>
+    <span class="badge bg-secondary">
+      <i class="fas fa-times-circle me-1"></i>Inativo
+    </span>
+  </dtml-if>
 </div>
 
-<div class="card mb-3">
- <div class="card-body">
-  <div class="row">
-    <div class="col-12 col-md-3 col-lg-2 text-center text-md-start">
-                 <dtml-call expr="REQUEST.set('id_foto', str(cod_parlamentar)+'_foto_parlamentar')">
-                 <dtml-if expr="hasattr(sapl_documentos.parlamentar.fotos,id_foto)">
-                    <img alt="<dtml-var nom_completo>" src="<dtml-var portal_url>/sapl_documentos/parlamentar/fotos/<dtml-var id_foto>" width="140" class="rounded-circle img-thumbnail">
-                 <dtml-else>
-                    <img alt="<dtml-var nom_completo>" src="<dtml-var portal_url>/imagens/avatar.png" width="140" class="rounded-circle img-thumbnail">
-                 </dtml-if>
-    </div>
-    <div class="col-12 col-md-9 col-lg-10 text-center text-md-start">
-      <div class="card-body p-0">
-          <dtml-call expr="REQUEST.set('dat_atual', DateTime(datefmt='international').strftime('%d/%m/%Y'))">                   
-          <dtml-if expr="pysc.autoria_parlamentar_validar_pysc(cod_parlamentar=cod_parlamentar,txt_dat_apresentacao=dat_atual)">
-             <div class="text-center text-md-end mb-1"><span class="badge bg-dark-success mt-1 align-text-top">Em exercício</span></div>
-          <dtml-else>
-             <div class="text-center text-md-end mb-1"><span class="badge bg-danger mt-1 align-text-top text-lowercase">Inativo</span></div>
-          </dtml-if>
-          <span><b>Nome civil:</b> <dtml-var nom_completo></span>
+<div class="card border-0 shadow-sm mb-4">
+  <div class="card-body p-4">
+    <div class="row align-items-start">
+      <div class="col-12 col-md-3 col-lg-2 text-center text-md-start mb-3 mb-md-0">
+        <dtml-call expr="REQUEST.set('id_foto', str(cod_parlamentar)+'_foto_parlamentar')">
+        <dtml-if expr="hasattr(sapl_documentos.parlamentar.fotos,id_foto)">
+          <img alt="<dtml-var nom_completo>" 
+               src="<dtml-var portal_url>/sapl_documentos/parlamentar/fotos/<dtml-var id_foto>" 
+               width="140" 
+               height="140"
+               class="rounded-circle img-thumbnail border"
+               style="object-fit: cover;"
+               loading="lazy">
+        <dtml-else>
+          <img alt="<dtml-var nom_completo>" 
+               src="<dtml-var portal_url>/imagens/avatar.png" 
+               width="140" 
+               height="140"
+               class="rounded-circle img-thumbnail border"
+               style="object-fit: cover;"
+               loading="lazy">
+        </dtml-if>
+      </div>
+      <div class="col-12 col-md-9 col-lg-10">
+        <div class="row g-4">
+          <div class="col-12">
+            <div class="d-flex align-items-start">
+              <i class="fas fa-user text-muted me-3 mt-1"></i>
+              <div class="flex-grow-1">
+                <small class="text-muted d-block mb-1">Nome civil</small>
+                <div><dtml-var nom_completo></div>
+              </div>
+            </div>
+          </div>
           <dtml-if cod_partido>
-             <br><span><b>Partido:</b> <dtml-in expr="zsql.partido_obter_zsql(cod_partido=cod_partido)"><dtml-var sgl_partido></dtml-in></span>
+            <div class="col-12 col-md-6">
+              <div class="d-flex align-items-start">
+                <i class="fas fa-flag text-muted me-3 mt-1"></i>
+                <div class="flex-grow-1">
+                  <small class="text-muted d-block mb-1">Partido</small>
+                  <div>
+                    <dtml-in expr="zsql.partido_obter_zsql(cod_partido=cod_partido)">
+                      <dtml-var sgl_partido>
+                    </dtml-in>
+                  </div>
+                </div>
+              </div>
+            </div>
           </dtml-if>
           <dtml-if expr="pysc.autoria_parlamentar_validar_pysc(cod_parlamentar=cod_parlamentar,txt_dat_apresentacao=dat_atual)">
-           <dtml-if num_tel_parlamentar>
-              <br><span><b>Telefone: </b><dtml-var num_tel_parlamentar missing></span>
-           </dtml-if>
-           <dtml-if expr="end_email">
-              <br><span><a href="mailto:<dtml-var end_email>"><dtml-var end_email></a></span>
-           </dtml-if>
-         </dtml-if>
-           <dtml-if end_web>
-              <br><span><a href="<dtml-var end_web>" target="_blank"><i class="fas fa-fw fa-external-link-square-alt"></i> Site pessoal</a></span>
-           </dtml-if>
+            <dtml-if num_tel_parlamentar>
+              <div class="col-12 col-md-6">
+                <div class="d-flex align-items-start">
+                  <i class="fas fa-phone text-muted me-3 mt-1"></i>
+                  <div class="flex-grow-1">
+                    <small class="text-muted d-block mb-1">Telefone</small>
+                    <a href="tel:<dtml-var num_tel_parlamentar missing>" class="text-decoration-none">
+                      <dtml-var num_tel_parlamentar missing>
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </dtml-if>
+            <dtml-if expr="end_email">
+              <div class="col-12 col-md-6">
+                <div class="d-flex align-items-start">
+                  <i class="fas fa-envelope text-muted me-3 mt-1"></i>
+                  <div class="flex-grow-1">
+                    <small class="text-muted d-block mb-1">E-mail</small>
+                    <a href="mailto:<dtml-var end_email>" class="text-decoration-none">
+                      <dtml-var end_email>
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </dtml-if>
+          </dtml-if>
+          <dtml-if end_web>
+            <div class="col-12 col-md-6">
+              <div class="d-flex align-items-start">
+                <i class="fas fa-globe text-muted me-3 mt-1"></i>
+                <div class="flex-grow-1">
+                  <small class="text-muted d-block mb-1">Site pessoal</small>
+                  <a href="<dtml-var end_web>" target="_blank" class="text-decoration-none">
+                    <dtml-var end_web>
+                    <i class="fas fa-external-link-alt ms-1 small"></i>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </dtml-if>
+        </div>
       </div>
     </div>
   </div>
- </div>
-
-<div class="card-header">
-<ul class="nav nav-tabs card-header-tabs">
-  <li class="nav-item">
-    <a class="nav-link active" id="biografia-tab" data-bs-toggle="tab" href="#biografia" role="tab" aria-controls="biografia" aria-selected="true">Biografia</a>
-  </li>
-  <li class="nav-item">
-    <a class="nav-link " id="filiacao-tab" data-bs-toggle="tab" href="#filiacao" role="tab" aria-controls="filiacao" aria-selected="false">Filiações</a>
-  </li>
-  <li class="nav-item">
-    <a class="nav-link " id="mandato-tab" data-bs-toggle="tab" href="#mandato" role="tab" aria-controls="mandato" aria-selected="false">Mandatos</a>
-  </li>
-  <li class="nav-item">
-    <a class="nav-link " id="mesa-tab" data-bs-toggle="tab" href="#mesa" role="tab" aria-controls="mesa" aria-selected="false"><dtml-var expr="sapl_documentos.props_sagl.nome_mesa"></a>
-  </li>
-  <li class="nav-item">
-    <a class="nav-link " id="comissao-tab" data-bs-toggle="tab" href="#comissao" role="tab" aria-controls="comissao" aria-selected="false">Comissões</a>
-  </li>
-  <li class="nav-item">
-    <a class="nav-link " id="proposicao-tab" data-bs-toggle="tab" href="#proposicao" role="tab" aria-controls="proposicao" aria-selected="false">Proposições</a>
-  </li>
-  <li class="nav-item">
-    <a class="nav-link " id="relatoria-tab" data-bs-toggle="tab" href="#relatoria" role="tab" aria-controls="relatoria" aria-selected="false">Relatorias</a>
-  </li>
-</ul>
 </div>
 
-<div class="tab-content">
-   <div class="tab-pane p-3 fade show active" id="biografia">
-        <dtml-with biografia>
-          <dtml-var biografia_index_html>
-        </dtml-with>
-   </div>
-   <div class="tab-pane p-3 fade" id="filiacao">
-       <dtml-with filiacao_partidaria>
-         <dtml-var filiacao_partidaria_index_html>
-       </dtml-with>
-   </div>
-   <div class="tab-pane p-3 fade" id="mandato">
-       <dtml-with mandato>
-         <dtml-var mandato_index_html>
-       </dtml-with>
-   </div>
-   <div class="tab-pane p-3 fade" id="mesa">
-       <dtml-with mesa>
-         <dtml-var mesa_index_html>
-       </dtml-with>
-   </div>
-   <div class="tab-pane p-3 fade" id="comissao">
-       <dtml-with comissoes>
-         <dtml-var comissoes_index_html>
-       </dtml-with>
-   </div>
-   <div class="tab-pane p-3 fade" id="proposicao">
-       <dtml-with proposicoes>
-         <dtml-var proposicoes_index_html>
-       </dtml-with>
-   </div>
-   <div class="tab-pane p-3 fade" id="relatoria">
-       <dtml-with relatoria>
-         <dtml-var relatoria_index_html>
-       </dtml-with>
-   </div>
-</div>
+<div class="card border-0 shadow-sm mb-4">
+  <div class="card-header">
+    <ul class="nav nav-tabs card-header-tabs" role="tablist">
+      <li class="nav-item" role="presentation">
+        <a class="nav-link active" id="biografia-tab" data-bs-toggle="tab" href="#biografia" role="tab" aria-controls="biografia" aria-selected="true">
+          <i class="fas fa-user-circle me-2"></i>Biografia
+        </a>
+      </li>
+      <li class="nav-item" role="presentation">
+        <a class="nav-link" id="filiacao-tab" data-bs-toggle="tab" href="#filiacao" role="tab" aria-controls="filiacao" aria-selected="false">
+          <i class="fas fa-handshake me-2"></i>Filiações
+        </a>
+      </li>
+      <li class="nav-item" role="presentation">
+        <a class="nav-link" id="mandato-tab" data-bs-toggle="tab" href="#mandato" role="tab" aria-controls="mandato" aria-selected="false">
+          <i class="fas fa-calendar-check me-2"></i>Mandatos
+        </a>
+      </li>
+      <li class="nav-item" role="presentation">
+        <a class="nav-link" id="mesa-tab" data-bs-toggle="tab" href="#mesa" role="tab" aria-controls="mesa" aria-selected="false">
+          <i class="fas fa-gavel me-2"></i><dtml-var expr="sapl_documentos.props_sagl.nome_mesa">
+        </a>
+      </li>
+      <li class="nav-item" role="presentation">
+        <a class="nav-link" id="comissao-tab" data-bs-toggle="tab" href="#comissao" role="tab" aria-controls="comissao" aria-selected="false">
+          <i class="fas fa-users me-2"></i>Comissões
+        </a>
+      </li>
+      <li class="nav-item" role="presentation">
+        <a class="nav-link" id="proposicao-tab" data-bs-toggle="tab" href="#proposicao" role="tab" aria-controls="proposicao" aria-selected="false">
+          <i class="fas fa-file-alt me-2"></i>Proposições
+        </a>
+      </li>
+      <li class="nav-item" role="presentation">
+        <a class="nav-link" id="relatoria-tab" data-bs-toggle="tab" href="#relatoria" role="tab" aria-controls="relatoria" aria-selected="false">
+          <i class="fas fa-clipboard-check me-2"></i>Relatorias
+        </a>
+      </li>
+    </ul>
+  </div>
+  <div class="tab-content">
+    <div class="tab-pane p-4 fade show active" id="biografia">
+      <dtml-with biografia>
+        <dtml-var biografia_index_html>
+      </dtml-with>
+    </div>
+    <div class="tab-pane p-4 fade" id="filiacao">
+      <dtml-with filiacao_partidaria>
+        <dtml-var filiacao_partidaria_index_html>
+      </dtml-with>
+    </div>
+    <div class="tab-pane p-4 fade" id="mandato">
+      <dtml-with mandato>
+        <dtml-var mandato_index_html>
+      </dtml-with>
+    </div>
+    <div class="tab-pane p-4 fade" id="mesa">
+      <dtml-with mesa>
+        <dtml-var mesa_index_html>
+      </dtml-with>
+    </div>
+    <div class="tab-pane p-4 fade" id="comissao">
+      <dtml-with comissoes>
+        <dtml-var comissoes_index_html>
+      </dtml-with>
+    </div>
+    <div class="tab-pane p-4 fade" id="proposicao">
+      <dtml-with proposicoes>
+        <dtml-var proposicoes_index_html>
+      </dtml-with>
+    </div>
+    <div class="tab-pane p-4 fade" id="relatoria">
+      <dtml-with relatoria>
+        <dtml-var relatoria_index_html>
+      </dtml-with>
+    </div>
+  </div>
 </div>
 
 <dtml-if expr="_.has_key('cod_parlamentar')">
-    <div class="row">
-      <div class="col-12 small text-muted mt-1 text-end">
-        <a href="<dtml-var portal_url>/@@vereadores/<dtml-var cod_parlamentar>" target="_blank"> <i class="mdi mdi-database-arrow-down"></i> Dados abertos</a>  
-      </div>
+  <div class="row mt-4 mb-3">
+    <div class="col-12 text-end">
+      <a href="<dtml-var portal_url>/@@vereadores/<dtml-var cod_parlamentar>" target="_blank" class="btn btn-outline-secondary btn-sm">
+        <i class="fas fa-database me-1"></i>Dados abertos
+        <i class="fas fa-external-link-alt ms-1 small"></i>
+      </a>  
     </div>
+  </div>
 </dtml-if>
+
+<style>
+  .img-thumbnail {
+    transition: transform 0.2s ease;
+  }
+  
+  .img-thumbnail:hover {
+    transform: scale(1.02);
+  }
+</style>
 
 <dtml-var js_slot>
 <script>
@@ -147,7 +230,7 @@ $(document).ready(() => {
   let url = location.href.replace(/\/$/, "");
    if (location.hash) {
     const hash = url.split("#");
-    $('#nav_materia a[href="#'+hash[1]+'"]').tab("show");
+    $('.nav-tabs a[href="#'+hash[1]+'"]').tab("show");
     url = location.href.replace(/\/#/, "#");
     history.replaceState(null, null, url);
   } 

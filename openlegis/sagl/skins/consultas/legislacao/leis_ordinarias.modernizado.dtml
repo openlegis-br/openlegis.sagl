@@ -1,0 +1,102 @@
+<!-- 
+  Template Modernizado para Leis Ordinárias
+  Melhorias:
+  - Melhor acessibilidade (ARIA, scope, caption)
+  - Classes CSS modernas
+  - Estrutura semântica
+  - Feedback visual melhorado
+-->
+
+<dtml-var header_html>
+
+<dtml-var legislacao_header_html>
+
+<main class="legislacao-container" role="main">
+    <section aria-labelledby="indice">
+        <h1 class="firstHeading font-size-16" id="indice">Leis Ordinárias</h1>
+
+        <div class="legislacao-descricao" id="lista">
+            <b>São as leis típicas, ou as mais comuns, aprovadas pela maioria dos parlamentares da Câmara Municipal presentes durante a votação.</b>
+        </div>
+
+        <div class="ano-filter">
+            <form class="form-inline" role="search" aria-label="Filtrar leis por ano">
+                <label class="ano-filter__label" for="lst_ano">Selecione o Ano</label>
+                <select class="ano-filter__select jumpmenu" 
+                        id="lst_ano" 
+                        name="lst_ano"
+                        aria-label="Selecione o ano para filtrar as leis ordinárias">
+                    <option value="<dtml-var ACTUAL_URL>#lista">Todos os anos</option>
+                    <dtml-in expr="ano_tipo_obter_zsql(des_tipo_norma='Lei Ordinária')">
+                        <option value="<dtml-var ACTUAL_URL>?ano_norma=<dtml-var ano_norma>#lista"
+                            <dtml-if expr="REQUEST.has_key('ano_norma') and int(REQUEST.form['ano_norma'])==int(_['sequence-key'])">
+                                selected
+                            </dtml-if>
+                        ><dtml-var ano_norma></option>       
+                    </dtml-in>
+                </select>
+            </form>
+        </div>
+
+        <dtml-if ano_norma>
+            <p class="h5 text-center mb-3" id="lista">
+                <b>Leis Ordinárias - <dtml-var ano_norma></b>
+            </p>
+            
+            <dtml-in expr="zsql.norma_juridica_obter_zsql(des_tipo_norma='Lei Ordinária',ano_norma=ano_norma)">
+                <dtml-if sequence-start>
+                    <table class="legislacao-table" 
+                           role="table" 
+                           aria-label="Lista de Leis Ordinárias do ano <dtml-var ano_norma>">
+                        <caption class="sr-only">Leis Ordinárias - <dtml-var ano_norma></caption>
+                        <thead>
+                            <tr>
+                                <th scope="col" style="text-align:center" width="30%">Número</th>
+                                <th scope="col">Ementa</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                </dtml-if sequence-start>
+                            <tr>
+                                <td class="legislacao-numero" data-label="Número">
+                                    <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Norma'])">
+                                        <a href="<dtml-var portal_url>/cadastros/norma_juridica/norma_juridica_mostrar_proc?cod_norma=<dtml-var cod_norma>"
+                                           class="legislacao-numero__link">
+                                    <dtml-else>
+                                        <a href="<dtml-var portal_url>/consultas/norma_juridica/norma_juridica_mostrar_proc?cod_norma=<dtml-var cod_norma missing>"
+                                           class="legislacao-numero__link">
+                                    </dtml-if>
+                                        <dtml-var num_norma>, de <dtml-var dat_norma>
+                                    </a>
+                                    <dtml-if dat_publicacao>
+                                        <span class="legislacao-publicacao">
+                                            Publicada <dtml-if des_veiculo_publicacao> no <dtml-var des_veiculo_publicacao></dtml-if> em <dtml-var dat_publicacao missing null="">
+                                        </span>
+                                    </dtml-if>
+                                </td>
+                                <td data-label="Ementa"><dtml-var txt_ementa></td>
+                            </tr>
+                <dtml-if sequence-end>
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="2" class="legislacao-total">
+                                    Total de Registros: <dtml-var sequence-length>
+                                </td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </dtml-if sequence-end>
+            </dtml-in>
+        <dtml-else>
+            <div class="legislacao-empty">
+                <div class="legislacao-empty__icon">📋</div>
+                <p>Selecione um ano para visualizar as Leis Ordinárias.</p>
+            </div>
+        </dtml-if>
+    </section>
+</div>
+
+<script src="<dtml-var portal_url>/legislacao.js" defer></script>
+<dtml-var js_slot>
+<dtml-var footer_html>

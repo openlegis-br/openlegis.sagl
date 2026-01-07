@@ -1,0 +1,304 @@
+/* 
+ * CSS Modernizado para Legislação
+ * Substitui float por Grid/Flexbox
+ * Melhora responsividade e acessibilidade
+ */
+
+/* Container Principal */
+.legislacao-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1rem;
+}
+
+/* Menu de Navegação */
+.legislacao-nav {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.legislacao-nav__title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #3259A7;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid #e9ecef;
+}
+
+.legislacao-nav__list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 0.5rem;
+}
+
+.legislacao-nav__item {
+    padding: 0.5rem 0;
+}
+
+.legislacao-nav__link {
+    color: #495057;
+    text-decoration: none;
+    padding: 0.5rem 1rem;
+    display: block;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    font-size: 0.95rem;
+}
+
+.legislacao-nav__link:hover {
+    background-color: #f8f9fa;
+    color: #3259A7;
+    text-decoration: none;
+}
+
+.legislacao-nav__link:focus {
+    outline: 2px solid #3259A7;
+    outline-offset: 2px;
+}
+
+.legislacao-nav__link--active {
+    font-weight: 600;
+    color: #3259A7;
+    background-color: #e7f1ff;
+    border-left: 3px solid #3259A7;
+}
+
+/* Filtro de Ano */
+.ano-filter {
+    background: #f8f9fa;
+    padding: 1rem;
+    border-radius: 8px;
+    margin: 1.5rem 0;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.ano-filter__label {
+    font-weight: 500;
+    color: #495057;
+    margin: 0;
+}
+
+.ano-filter__select {
+    min-width: 200px;
+    padding: 0.5rem;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-size: 1rem;
+    background-color: #fff;
+}
+
+.ano-filter__select:focus {
+    outline: 2px solid #3259A7;
+    outline-offset: 2px;
+    border-color: #3259A7;
+}
+
+/* Tabela de Resultados */
+.legislacao-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1.5rem;
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.legislacao-table thead {
+    background-color: #3259A7;
+    color: #fff;
+}
+
+.legislacao-table th {
+    padding: 1rem;
+    text-align: left;
+    font-weight: 600;
+}
+
+.legislacao-table td {
+    padding: 1rem;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.legislacao-table tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+.legislacao-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.legislacao-numero {
+    text-align: center;
+    font-weight: 500;
+}
+
+.legislacao-numero__link {
+    color: #3259A7;
+    text-decoration: none;
+}
+
+.legislacao-numero__link:hover {
+    text-decoration: underline;
+}
+
+.legislacao-numero__link:focus {
+    outline: 2px solid #3259A7;
+    outline-offset: 2px;
+    border-radius: 2px;
+}
+
+.legislacao-publicacao {
+    font-size: 0.875rem;
+    color: #6c757d;
+    margin-top: 0.25rem;
+    display: block;
+}
+
+.legislacao-total {
+    text-align: center;
+    font-weight: 600;
+    background-color: #f8f9fa;
+    padding: 1rem;
+}
+
+/* Descrição do Tipo */
+.legislacao-descricao {
+    margin: 1rem 0;
+    padding: 1rem;
+    background-color: #f8f9fa;
+    border-left: 4px solid #3259A7;
+    border-radius: 4px;
+}
+
+/* Estados de Loading e Empty */
+.legislacao-loading {
+    text-align: center;
+    padding: 2rem;
+    color: #6c757d;
+}
+
+.legislacao-empty {
+    text-align: center;
+    padding: 2rem;
+    color: #6c757d;
+}
+
+.legislacao-empty__icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .legislacao-nav__list {
+        grid-template-columns: 1fr;
+    }
+    
+    .legislacao-table {
+        font-size: 0.875rem;
+        display: block;
+        overflow-x: auto;
+    }
+    
+    .legislacao-table thead,
+    .legislacao-table tbody,
+    .legislacao-table tr,
+    .legislacao-table td,
+    .legislacao-table th {
+        display: block;
+    }
+    
+    .legislacao-table thead {
+        display: none;
+    }
+    
+    .legislacao-table tr {
+        margin-bottom: 1rem;
+        border: 1px solid #e9ecef;
+        border-radius: 4px;
+        padding: 0.5rem;
+    }
+    
+    .legislacao-table td {
+        border-bottom: none;
+        padding: 0.5rem;
+    }
+    
+    .legislacao-table td:before {
+        content: attr(data-label) ": ";
+        font-weight: 600;
+        display: inline-block;
+        width: 100px;
+    }
+    
+    .ano-filter {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .ano-filter__select {
+        width: 100%;
+    }
+}
+
+/* Acessibilidade - Screen Reader Only */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+}
+
+/* Animações Suaves */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.legislacao-table tbody tr {
+    animation: fadeIn 0.3s ease-in;
+}
+
+/* Compatibilidade com código legado */
+#portlet-legislacao {
+    margin-bottom: 2em;
+}
+
+#portlet-legislacao .portletHeader {
+    border: 0 none;
+    padding: 8px 0 8px 10px;
+    font-size: 180%;
+    font-weight: bold;
+    color: #3259A7;
+    border: 1px solid #f1f1f1;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+    letter-spacing: -0.05em;
+}
+
+.selected {
+    font-weight: bold;
+}

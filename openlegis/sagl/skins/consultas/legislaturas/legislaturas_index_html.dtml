@@ -1,43 +1,51 @@
 <dtml-var header_html>
 
-<h1 class="firstHeading font-size-18 mb-3">Legislaturas</h1> 
+<h1 class="firstHeading font-size-18">Legislaturas</h1> 
 
 <form name="index_form">
- <div class="row">
-  <div class="col-12 mb-3">
-    <label class="form-label" for="lst_num_legislatura">Selecione a Legislatura </label>
-      <div class="input-group">
-         <select class="form-select jumpmenu" id="lst_num_legislatura" name="lst_num_legislatura">    
-            <dtml-in expr="zsql.legislatura_obter_zsql()">
-               <option 
-                  <dtml-if expr="_.has_key('hdn_num_legislatura') and num_legislatura==_.int(hdn_num_legislatura)">
-                     selected
-                  <dtml-elif expr="not _.has_key('hdn_num_legislatura') and DateTime(datefmt='international').strftime('%Y-%m-%d') >= DateTime(dat_inicio, datefmt='international').strftime('%Y-%m-%d') and DateTime(datefmt='international').strftime('%Y-%m-%d') <= DateTime(dat_fim, datefmt='international').strftime('%Y-%m-%d')">
-                     <dtml-call expr="REQUEST.set('hdn_num_legislatura', num_legislatura)">
-                     selected
-                  </dtml-if>
-                  value="<dtml-var ACTUAL_URL>?hdn_num_legislatura=<dtml-var num_legislatura>">
-                  <dtml-var expr="str(num_legislatura) + 'ª Legislatura (' + DateTime(dat_inicio, datefmt='international').strftime('%Y') + ' - ' + DateTime(dat_fim, datefmt='international').strftime('%Y') + ')'">
-                  <dtml-if expr="(DateTime(datefmt='international').strftime('%Y-%m-%d') >= DateTime(dat_inicio, datefmt='international').strftime('%Y-%m-%d') and DateTime(datefmt='international').strftime('%Y-%m-%d') <= DateTime(dat_fim, datefmt='international').strftime('%Y-%m-%d'))">
-                     (Atual)
-                  </dtml-if>
-               </option>
-            </dtml-in>
-            <option 
-               <dtml-if expr="_.has_key('hdn_num_legislatura') and hdn_num_legislatura=='-1'">
-                  selected
-               </dtml-if>
-               value="<dtml-var ACTUAL_URL>?hdn_num_legislatura=-1"">sem mandato cadastrado
-            </option>
-            <dtml-if expr="not _.has_key('hdn_num_legislatura')">
-               <dtml-call expr="REQUEST.set('hdn_num_legislatura', '-1')">
-            </dtml-if>
-         </select>
-      <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Tabela Auxiliar'])">
-          <a class="btn btn-primary" href="<dtml-var portal_url>/cadastros/auxiliares/legislatura"><i class="fa fa-fw fa-edit"></i> Editar</a>
-      </dtml-if> 
+  <div class="card mb-3">
+    <div class="card-body">
+      <div class="row">
+        <div class="col-12">
+          <label class="form-label" for="lst_num_legislatura">
+            <i class="fas fa-calendar-alt me-1"></i>Selecione a Legislatura
+          </label>
+          <div class="input-group">
+            <select class="form-select jumpmenu" id="lst_num_legislatura" name="lst_num_legislatura">    
+              <dtml-in expr="zsql.legislatura_obter_zsql()">
+                 <option 
+                    <dtml-if expr="_.has_key('hdn_num_legislatura') and num_legislatura==_.int(hdn_num_legislatura)">
+                       selected
+                    <dtml-elif expr="not _.has_key('hdn_num_legislatura') and DateTime(datefmt='international').strftime('%Y-%m-%d') >= DateTime(dat_inicio, datefmt='international').strftime('%Y-%m-%d') and DateTime(datefmt='international').strftime('%Y-%m-%d') <= DateTime(dat_fim, datefmt='international').strftime('%Y-%m-%d')">
+                       <dtml-call expr="REQUEST.set('hdn_num_legislatura', num_legislatura)">
+                       selected
+                    </dtml-if>
+                    value="<dtml-var ACTUAL_URL>?hdn_num_legislatura=<dtml-var num_legislatura>">
+                    <dtml-var expr="str(num_legislatura) + 'ª Legislatura (' + DateTime(dat_inicio, datefmt='international').strftime('%Y') + ' - ' + DateTime(dat_fim, datefmt='international').strftime('%Y') + ')'">
+                    <dtml-if expr="(DateTime(datefmt='international').strftime('%Y-%m-%d') >= DateTime(dat_inicio, datefmt='international').strftime('%Y-%m-%d') and DateTime(datefmt='international').strftime('%Y-%m-%d') <= DateTime(dat_fim, datefmt='international').strftime('%Y-%m-%d'))">
+                       (Atual)
+                    </dtml-if>
+                 </option>
+              </dtml-in>
+              <option 
+                 <dtml-if expr="_.has_key('hdn_num_legislatura') and hdn_num_legislatura=='-1'">
+                    selected
+                 </dtml-if>
+                 value="<dtml-var ACTUAL_URL>?hdn_num_legislatura=-1">sem mandato cadastrado
+              </option>
+              <dtml-if expr="not _.has_key('hdn_num_legislatura')">
+                 <dtml-call expr="REQUEST.set('hdn_num_legislatura', '-1')">
+              </dtml-if>
+            </select>
+            <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Tabela Auxiliar'])">
+               <a class="btn btn-primary" href="<dtml-var portal_url>/cadastros/auxiliares/legislatura">
+                 <i class="fas fa-edit me-1"></i>Editar
+               </a>
+            </dtml-if> 
+          </div>
+        </div>
+      </div>
     </div>
-   </div>
   </div>
 </form>
 
@@ -62,13 +70,15 @@
            <dtml-call expr="REQUEST.set('legislatura_atual', 1)">
         </dtml-if>
      </dtml-in>
-     <legend class="h6 mt-1 mb-2">Veradores Titulares: <dtml-var sequence-length></legend>
+     <div class="mt-2 mb-3">
+       <h2 class="h5 text-muted">Vereadores Titulares: <strong><dtml-var sequence-length></strong></h2>
+     </div>
     <div class="table-responsive mb-3">
      <table class="table table-sm table-striped align-middle caption-top">
        <thead>
               <tr> 
                 <th>Nome do Vereador</th>
-                <th width="20%">Partido </th>
+                <th width="20%">Partido</th>
               </tr>
        </thead>
        <tbody class="table-group-divider">
@@ -107,7 +117,9 @@
   </table>  
   </div> 
 <dtml-else>
-     <p>Não há nenhum parlamentar cadastrado na legislatura.</p>
+  <div class="alert alert-info mb-0" role="alert">
+    <i class="fas fa-info-circle me-2"></i>Não há nenhum parlamentar cadastrado na legislatura.
+  </div>
 </dtml-if>
 
 <dtml-call expr="REQUEST.set('existe_suplente', 0)">
@@ -129,14 +141,16 @@
         <dtml-call expr="REQUEST.set('suplente_listado', 0)">          
     </dtml-if suplente_listado>
     <dtml-if sequence-start>
-     <legend class="h6 mt-1 mb-2">Suplentes em Exercício: <dtml-var sequence-length></legend>
+     <div class="mt-2 mb-3">
+       <h2 class="h5 text-muted">Suplentes em Exercício: <strong><dtml-var sequence-length></strong></h2>
+     </div>
     <div class="table-responsive mb-3">
-     <table class="table table-sm table-striped">
+     <table class="table table-sm table-striped align-middle">
        <thead>
               <tr> 
                 <th>Nome do Suplente</th>
-                <th width="30%">Mandato </th>
-                <th width="20%">Partido </th>
+                <th width="30%">Mandato</th>
+                <th width="20%">Partido</th>
               </tr>
        </thead>
        <tbody class="table-group-divider">
@@ -155,7 +169,7 @@
           <dtml-in expr="zsql.mandato_obter_zsql(cod_parlamentar=cod_parlamentar,nom_parlamentar=nom_parlamentar,num_legislatura=hdn_num_legislatura,ind_titular='0')">
           <dtml-if sequence-start>
           </dtml-if>
-               <span><dtml-var dat_inicio_mandato null=""> a <dtml-var dat_fim_mandato null=""></span><dtml-unless sequence-end>,</dtml-unless></span>
+               <span><dtml-var dat_inicio_mandato null=""> a <dtml-var dat_fim_mandato null=""></span><dtml-unless sequence-end>,</dtml-unless>
           </dtml-in>
       </td>
       <td>
@@ -183,14 +197,16 @@
 </dtml-in>
 
 <dtml-in expr="zsql.periodo_comp_mesa_obter_zsql(num_legislatura=hdn_num_legislatura)">
-     <legend class="h6 mt-1 mb-2"><dtml-var expr="sapl_documentos.props_sagl.nome_mesa"> (<dtml-var dat_inicio_periodo> a <dtml-var dat_fim_periodo>)</legend>
+     <div class="mt-2 mb-3">
+       <h2 class="h5 text-muted"><dtml-var expr="sapl_documentos.props_sagl.nome_mesa"> (<dtml-var dat_inicio_periodo> a <dtml-var dat_fim_periodo>)</h2>
+     </div>
      <div class="table-responsive mb-3">
-     <table class="table table-sm table-striped">
+     <table class="table table-sm table-striped align-middle">
        <thead>
               <tr> 
                 <th>Nome do Vereador</th>
-                <th width="30%">Cargo </th>
-                <th width="20%">Partido </th>
+                <th width="30%">Cargo</th>
+                <th width="20%">Partido</th>
               </tr>
        </thead>
        <tbody class="table-group-divider">
@@ -231,15 +247,21 @@
      </dtml-in>
 
     <dtml-if expr="txt_observacao!=None and txt_observacao!=''">
-	    <p><strong>* Observações:</strong> <dtml-var txt_observacao></p>
+      <tr>
+        <td colspan="3">
+          <p class="mb-0"><strong>* Observações:</strong> <dtml-var txt_observacao></p>
+        </td>
+      </tr>
     </dtml-if>
          </tbody>
       </table>
       </div>
 </dtml-in>
-  <legend class="h6 mt-1 mb-2">Poder Executivo</legend>
+  <div class="mt-2 mb-3">
+    <h2 class="h5 text-muted">Poder Executivo</h2>
+  </div>
   <div class="table-responsive">
-     <table class="table table-sm table-striped">
+     <table class="table table-sm table-striped align-middle">
        <thead>
         <tr>
           <th>Nome do Agente</th>
@@ -274,13 +296,13 @@
                  <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Parlamentar'])">
                    <td colspan="3">
                      <a href="#" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Cadastro de <dtml-var des_cargo>" data-src="composicao_executivo_form?num_legislatura=<dtml-var hdn_num_legislatura>&cod_cargo=<dtml-var cod_cargo>&modal=1">
-                        <i class="fa fa-fw fa-edit"></i> Editar <dtml-var des_cargo>
+                        <i class="fas fa-edit me-1"></i>Editar <dtml-var des_cargo>
                      </a>
                    </td>
                  <dtml-else>
                  </dtml-if>
                </dtml-in>
-          <tr>
+          </tr>
         </dtml-in>
        </tbody>
     </table>

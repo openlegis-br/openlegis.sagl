@@ -1,54 +1,59 @@
 <dtml-var header_html>
 
-<h1 class="firstHeading font-size-18">Matérias com Prazo de Tramitação Vencendo em <dtml-var expr="ZopeTime().strftime('%d/%m/%Y')"></h1>
+<h1 class="firstHeading font-size-18 mb-3">Matérias com Prazo de Tramitação Vencendo em <dtml-var expr="ZopeTime().strftime('%d/%m/%Y')"></h1>
 
-    <dtml-in expr="zsql.tramitacao_prazo_vincendo_obter_zsql()">
-        <dtml-if sequence-start>
+<dtml-in expr="zsql.tramitacao_prazo_vincendo_obter_zsql()">
+  <dtml-if sequence-start>
+    <div class="card mb-3">
+      <div class="card-body p-0">
         <div class="table-responsive">
-        <table class="table" id="jdTable">
-         <thead class="table-light">
-            <tr>
+          <table class="table table-striped align-middle mb-0" id="jdTable">
+            <thead class="table-light">
+              <tr>
                 <th width="50%">Identificação da Matéria</th>
                 <th>Localização</th>
                 <th>Situação</th>
                 <th>Vencimento</th>
-            </tr>
-         </thead>
-        </dtml-if sequence-start>
-          <tr>
-            <td>
-              <b><a href="<dtml-var portal_url>/cadastros/materia/materia_mostrar_proc?cod_materia=<dtml-var cod_materia>#tramitacao" target="_blank">
-                 <dtml-var des_tipo_materia missing> nº <dtml-var num_ident_basica missing>/<dtml-var ano_ident_basica missing></b></a> - 
-                 <dtml-in expr="zsql.autoria_obter_zsql(cod_materia=cod_materia)">
-                   <b><dtml-var nom_autor_join><dtml-unless sequence-end>,</dtml-unless></b>
-                 </dtml-in>
-                 <br /> <b>Ementa:</b> <dtml-var txt_ementa>
-            </td>
-            <td>
-              <dtml-if cod_unid_tram_dest>
-                <dtml-in expr="zsql.unidade_tramitacao_obter_zsql(cod_unid_tramitacao=cod_unid_tram_dest)">
-                   <dtml-var nom_unidade_join>
-                </dtml-in>
-              <dtml-else>
-                <dtml-in expr="zsql.unidade_tramitacao_obter_zsql(cod_unid_tramitacao=cod_unid_tram_local)">
-                   <dtml-var nom_unidade_join>
-                </dtml-in>
-              </dtml-if>
-            </td>
-            <td>
-               <dtml-var des_status>
-            </td>
-            <td>
-               <dtml-var dat_fim_prazo>
-            </td>
-        </tr>
-    <dtml-if sequence-end>
-     </table>
-     </div>
+              </tr>
+            </thead>
+            <tbody>
+  </dtml-if sequence-start>
+              <tr>
+                <td>
+                  <a href="<dtml-var portal_url>/cadastros/materia/materia_mostrar_proc?cod_materia=<dtml-var cod_materia>#tramitacao" target="_blank" class="text-decoration-none">
+                    <strong><dtml-var des_tipo_materia missing> nº <dtml-var num_ident_basica missing>/<dtml-var ano_ident_basica missing></strong>
+                  </a>
+                  <dtml-in expr="zsql.autoria_obter_zsql(cod_materia=cod_materia)">
+                    - <strong><dtml-var nom_autor_join><dtml-unless sequence-end>,</dtml-unless></strong>
+                  </dtml-in>
+                  <br><small class="text-muted"><strong>Ementa:</strong> <dtml-var txt_ementa></small>
+                </td>
+                <td>
+                  <dtml-if cod_unid_tram_dest>
+                    <dtml-in expr="zsql.unidade_tramitacao_obter_zsql(cod_unid_tramitacao=cod_unid_tram_dest)">
+                      <dtml-var nom_unidade_join>
+                    </dtml-in>
+                  <dtml-else>
+                    <dtml-in expr="zsql.unidade_tramitacao_obter_zsql(cod_unid_tramitacao=cod_unid_tram_local)">
+                      <dtml-var nom_unidade_join>
+                    </dtml-in>
+                  </dtml-if>
+                </td>
+                <td><dtml-var des_status></td>
+                <td><dtml-var dat_fim_prazo></td>
+              </tr>
+  <dtml-if sequence-end>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
   </dtml-if sequence-end>
   <dtml-else>
-    <p>Nenhuma tramitação vencendo hoje.</p>
-</dtml-in>
+    <div class="alert alert-info">
+      <i class="fas fa-info-circle me-1"></i>Nenhuma tramitação vencendo hoje.
+    </div>
+  </dtml-in>
 <dtml-var js_slot>
 <script>
 $(document).ready(function() {

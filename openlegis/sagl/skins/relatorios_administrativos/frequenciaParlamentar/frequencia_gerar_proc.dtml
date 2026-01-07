@@ -6,26 +6,32 @@
    <dtml-call expr="REQUEST.set('hdn_num_legislatura', num_legislatura)">
 </dtml-in>
 
- <div class="row mb-2">
-      <div class="col-12 col-md-6 align-self-center">
-        <h1 class="firstHeading font-size-18">Frequência nas Sessões - <dtml-var lst_ano_sessao></h1>
-      </div>
-      <div class="col-12 col-md-6 text-start text-md-end">
-         <div class="btn-group btn-sm d-print-none ">
-           <input class="btn btn-primary" type="button" name="print_button" value="Imprimir" onClick="window.print();" />
-           <input class="btn btn-secondary" type="button" value="Voltar" onclick="history.go(-1)">   
-         </div>
-      </div>
- </div>
+<div class="row mb-3">
+  <div class="col-12 col-md-6 align-self-center">
+    <h1 class="firstHeading font-size-18 mb-0">Frequência nas Sessões - <dtml-var lst_ano_sessao></h1>
+  </div>
+  <div class="col-12 col-md-6 text-start text-md-end">
+    <div class="btn-group btn-group-sm d-print-none">
+      <button class="btn btn-outline-secondary" type="button" name="print_button" onClick="window.print();">
+        <i class="fas fa-print me-1"></i>Imprimir
+      </button>
+      <button class="btn btn-outline-secondary" type="button" onclick="history.go(-1)">
+        <i class="fas fa-arrow-left me-1"></i>Voltar
+      </button>
+    </div>
+  </div>
+</div>
 
-<div class="table-responsive mt-3">
-<table class="table table-sm table-bordered">
+<div class="card mb-3">
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-sm table-bordered mb-0">
   <thead class="table-light">
       <tr class="text-center">
         <th rowspan="2" style="vertical-align: middle">
           PARLAMENTAR
         </th>
-        <th colspan="3"">
+        <th colspan="3">
           JAN
         </th>
         <th colspan="3">
@@ -182,18 +188,25 @@
   </tr> 
 </dtml-in>
  </tbody>
-  <tfoot>
-   <tr>
-      <th colspan="42" class="table-light text-center">Legenda: P = presença, A = ausência justificada, F = falta, S = suplente</th>
-   </tr>
-  <tfoot>
-</table>
+        <tfoot>
+          <tr>
+            <th colspan="42" class="table-light text-center">Legenda: P = presença, A = ausência justificada, F = falta, S = suplente</th>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </div>
 </div>
 
 <div style="page-break-after: always"></div>
 
-<legend class="font-size-16 text-center">Sessões Ordinárias</legend>
-<table class="table table-sm table-bordered text-center">
+<div class="card mb-3">
+  <div class="card-header">
+    <h3 class="h5 mb-0 text-center"><i class="fas fa-calendar-check me-1"></i>Sessões Ordinárias</h3>
+  </div>
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-sm table-bordered text-center mb-0">
  <thead class="table-light">
    <tr>
      <th width="25%">Número</th>
@@ -243,14 +256,21 @@
      </td>
    </tr>
  </dtml-in>
- </tbody>
-</table>
+      </tbody>
+      </table>
+    </div>
+  </div>
+</div>
 
-<br/>
 <div style="page-break-after: always"></div>
 
-<legend class="font-size-16 text-center">Sessões Extraordinárias</legend>
-<table class="table table-sm table-bordered text-center">
+<div class="card mb-3">
+  <div class="card-header">
+    <h3 class="h5 mb-0 text-center"><i class="fas fa-calendar-alt me-1"></i>Sessões Extraordinárias</h3>
+  </div>
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-sm table-bordered text-center mb-0">
  <thead class="table-light">
    <tr>
      <th width="25%">Número</th>
@@ -300,54 +320,61 @@
      </td>
    </tr>
  </dtml-in>
- </tbody>
-</table>
+      </tbody>
+      </table>
+    </div>
+  </div>
+</div>
 
-<br/>
 <div style="page-break-after: always"></div>
 
-<legend class="font-size-16 text-center">Afastamentos / Licenças</legend>
-
-<dtml-in expr="zsql.afastamento_ano_obter_zsql(ano=lst_ano_sessao)">
-
-  <dtml-if sequence-start>
-        <table class="table table-sm table-bordered text-center">
-         <thead class="table-light">
-           <tr>
-             <th>Parlamentar</th>
-             <th>Motivo</th>
-             <th>Data Início</th>
-             <th>Data Fim</th>
-             <th>Suplente em exercício</th>
-           </tr>
-         </thead>
-  </dtml-if sequence-start>
-
-   <tr>
-     <td>
-          <dtml-var nom_completo>
-     </td>
-     <td>
-          <dtml-in expr="zsql.tipo_afastamento_obter_zsql(tip_afastamento=tip_afastamento_sel)">
-             <dtml-var des_afastamento>
-          </dtml-in>
-     </td>
-     <td><dtml-var dat_inicio_afastamento></td>
-     <td><dtml-var dat_fim_afastamento missing null=""></td>
-     <td>
-          <dtml-in expr="zsql.parlamentar_obter_zsql(cod_parlamentar=cod_parlamentar_suplente)">
-           <dtml-var nom_completo>
-          </dtml-in>
-     </td>
-   </tr>
-
-  <dtml-if sequence-end>
-        </table>
-  </dtml-if sequence-end>
-  <dtml-else>
-  <p class="texto">Não há afastamentos ou licenças neste exercício.</p>
-
-</dtml-in>
+<div class="card mb-3">
+  <div class="card-header">
+    <h3 class="h5 mb-0 text-center"><i class="fas fa-user-clock me-1"></i>Afastamentos / Licenças</h3>
+  </div>
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <dtml-in expr="zsql.afastamento_ano_obter_zsql(ano=lst_ano_sessao)">
+        <dtml-if sequence-start>
+          <table class="table table-sm table-bordered text-center mb-0">
+            <thead class="table-light">
+              <tr>
+                <th><i class="fas fa-user me-1"></i>Parlamentar</th>
+                <th><i class="fas fa-info-circle me-1"></i>Motivo</th>
+                <th><i class="fas fa-calendar me-1"></i>Data Início</th>
+                <th><i class="fas fa-calendar me-1"></i>Data Fim</th>
+                <th><i class="fas fa-user-tie me-1"></i>Suplente em exercício</th>
+              </tr>
+            </thead>
+            <tbody>
+        </dtml-if>
+              <tr>
+                <td><dtml-var nom_completo></td>
+                <td>
+                  <dtml-in expr="zsql.tipo_afastamento_obter_zsql(tip_afastamento=tip_afastamento_sel)">
+                    <dtml-var des_afastamento>
+                  </dtml-in>
+                </td>
+                <td><dtml-var dat_inicio_afastamento></td>
+                <td><dtml-var dat_fim_afastamento missing null=""></td>
+                <td>
+                  <dtml-in expr="zsql.parlamentar_obter_zsql(cod_parlamentar=cod_parlamentar_suplente)">
+                    <dtml-var nom_completo>
+                  </dtml-in>
+                </td>
+              </tr>
+        <dtml-if sequence-end>
+            </tbody>
+          </table>
+        </dtml-if>
+        <dtml-else>
+          <div class="alert alert-info mb-0">
+            <i class="fas fa-info-circle me-1"></i>Não há afastamentos ou licenças neste exercício.
+          </div>
+        </dtml-in>
+    </div>
+  </div>
+</div>
 
 <dtml-var js_slot>
 <dtml-var footer_html>

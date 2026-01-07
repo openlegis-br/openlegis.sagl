@@ -8,173 +8,168 @@
    </dtml-if>
 </dtml-let>
 
- <div class="row mb-2">
-      <div class="col-12 col-md-7 align-self-center">
-        <h1 class="firstHeading font-size-18">Pesquisa de Processos Administrativos</h1>
-      </div>
-      <div class="col-12 col-md-5 text-start text-md-end">
-        <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Modulo Administrativo', 'Operador Materia'])">
-          <div class="btn-group">  
-            <a class="btn btn-primary d-print-none" href="<dtml-var portal_url>/cadastros/documento_administrativo/documento_administrativo_form" ><i class="fa fa-fw fa-plus"></i> Incluir Processo</a>
-            <a class="btn btn-secondary d-print-none" href="<dtml-var portal_url>/cadastros/documento_administrativo/numero_reservar_form" ><i class="fas fa-fw fa-list-ol"></i> Reservar</a>
-          </div>
-        <dtml-elif expr="AUTHENTICATED_USER.has_role(['Authenticated'])">
-          <dtml-if expr="zsql.usuario_tipo_documento_obter_zsql(cod_usuario=cod_usuario_corrente, ind_excluido=0)">
-            <a class="btn btn-light d-print-none" href="<dtml-var portal_url>/cadastros/documento_administrativo/documento_administrativo_form" ><i class="fa fa-fw fa-plus"></i> Incluir Processo</a>
-          </dtml-if>
+<div class="row mb-3">
+  <div class="col-12 col-md-6 d-flex align-items-center">
+    <h1 class="firstHeading font-size-18 mb-0">Pesquisa de Processos Administrativos</h1>
+  </div>
+  <div class="col-12 col-md-6 text-start text-md-end">
+    <div class="btn-group btn-group-sm flex-wrap">
+      <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Modulo Administrativo', 'Operador Materia'])">
+        <a class="btn btn-primary d-print-none" href="<dtml-var portal_url>/cadastros/documento_administrativo/documento_administrativo_form"><i class="fas fa-plus me-1"></i>Incluir Processo</a>
+        <a class="btn btn-outline-secondary d-print-none" href="<dtml-var portal_url>/cadastros/documento_administrativo/numero_reservar_form"><i class="fas fa-list-ol me-1"></i>Reservar</a>
+      <dtml-elif expr="AUTHENTICATED_USER.has_role(['Authenticated'])">
+        <dtml-if expr="zsql.usuario_tipo_documento_obter_zsql(cod_usuario=cod_usuario_corrente, ind_excluido=0)">
+          <a class="btn btn-primary d-print-none" href="<dtml-var portal_url>/cadastros/documento_administrativo/documento_administrativo_form"><i class="fas fa-plus me-1"></i>Incluir Processo</a>
         </dtml-if>
-      </div>
- </div>
+      </dtml-if>
+    </div>
+  </div>
+</div>
 
-<ul class="nav nav-tabs border-0" role="tablist">
+<ul class="nav nav-tabs" role="tablist">
   <li class="nav-item">
-    <a class="nav-link active" id="pesquisa-tab" data-bs-toggle="tab" href="#pesquisa" role="tab" aria-controls="pesquisa" aria-selected="true">Formulário de Pesquisa</a>
+    <a class="nav-link active" id="pesquisa-tab" data-bs-toggle="tab" href="#pesquisa" role="tab" aria-controls="pesquisa" aria-selected="true"><i class="fas fa-search me-1"></i>Formulário de Pesquisa</a>
   </li>
 </ul>
 
-<div class="tab-content">
+<div class="tab-content" style="margin-top: -1px">
   <div class="tab-pane p-3 border fade show active" id="pesquisa">
 
-
 <form id="pesq_basica_form" name="pesq_basica_form" action="documento_administrativo_pesquisar_proc">
-  <div class="row">
-    <div class="col-12 col-md-6 mb-3">
-      <label class="form-label" for="lst_tip_documento">Tipo de Processo</label>
-      <select class="select2 form-select"  id="lst_tip_documento" name="lst_tip_documento" multiple="multiple" style="width: 100%; min-height:34px !important;" data-placeholder="Todos">
-          <dtml-in expr="permissao_tipo()" mapping>
-             <option value="<dtml-var tip_documento>"><dtml-var des_tipo_documento></option>
-          <dtml-else>
-            <dtml-call expr="REQUEST.set('nenhum_tipo_publico', '1')">
-          </dtml-in>
-      </select>
-    </div>
-    <div class="col-6 col-md-3 mb-3">
-      <label class="form-label" for="txt_num_documento">Número</label>
-      <input name="txt_num_documento" id="txt_num_documento" type="number" min="1" maxlength="6" class="form-control number" autocomplete="off">
-    </div>
-    <div class="col-6 col-md-3 mb-3 controls">
-      <label class="form-label" for="txt_ano_documento">Ano</label>
-      <input name="txt_ano_documento" id="txt_ano_documento" type="number" min="1900" maxlength="4" class="form-control year" autocomplete="off">
-    </div>
-  </div>
-  <div class="row">
-    <div class="col-6 col-md-3 mb-3">
-      <label class="form-label" for="txt_num_protocolo">Protocolo</label>
-      <input id="txt_num_protocolo" name="txt_num_protocolo" min="1" type="number" maxlength="8" class="form-control number" autocomplete="off">
-    </div>
-    <div class="col-6 col-md-3 mb-3">
-      <label class="form-label" for="txt_npc">Processo</label>
-      <input id="txt_npc" name="txt_npc" min="1" type="number" maxlength="6" class="form-control number" autocomplete="off">
-    </div>
-    <div class="col-6 col-md-3 mb-3">
-      <label class="form-label" for="dt_apres1">Data Inicial</label>
-        <div class="input-group">
-           <input type="text" class="form-control datepicker" placeholder="dd/mm/aaaa" name="dt_apres1" id="dt_apres1" data-provide="datepicker" data-date-autoclose="true" autocomplete="off">
-           <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
+  <div class="card mb-3">
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-12 col-md-6">
+          <label class="form-label" for="lst_tip_documento"><i class="fas fa-filter me-1"></i>Tipo de Processo</label>
+          <select class="select2 form-select" id="lst_tip_documento" name="lst_tip_documento" multiple="multiple" style="width: 100%; min-height:34px !important;" data-placeholder="Todos">
+            <dtml-in expr="permissao_tipo()" mapping>
+              <option value="<dtml-var tip_documento>"><dtml-var des_tipo_documento></option>
+            <dtml-else>
+              <dtml-call expr="REQUEST.set('nenhum_tipo_publico', '1')">
+            </dtml-in>
+          </select>
         </div>
-    </div>
-   <div class="col-6 col-md-3 mb-3">
-      <label class="form-label" for="dt_apres2">Data Final</label>
-        <div class="input-group">
-           <input type="text" class="form-control datepicker" placeholder="dd/mm/aaaa" name="dt_apres2" id="dt_apres2" data-provide="datepicker" data-date-autoclose="true" autocomplete="off">
-           <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
+        <div class="col-6 col-md-3">
+          <label class="form-label" for="txt_num_documento"><i class="fas fa-hashtag me-1"></i>Número</label>
+          <input name="txt_num_documento" id="txt_num_documento" type="number" min="1" maxlength="6" class="form-control number" autocomplete="off">
         </div>
-    </div> 
-  </div>
-  <div class="row">
-    <div class="col-12 col-md-6 mb-3">
-      <label class="form-label" for="txa_txt_interessado">Interessado</label>
-      <input type="text" class="form-control" name="txa_txt_interessado" id="txa_txt_interessado"/>
-    </div>
-    <div class="col-12 col-sm-6 mb-3">
-       <label class="form-label" for="txa_txt_assunto">Termos da Pesquisa</label>
-      <input type="text" class="form-control" name="txa_txt_assunto" id="txa_txt_assunto" maxlenght="50" autocomplete="off" data-bs-toggle="popover" data-bs-placement="top" title="Dicas de Preenchimento" data-bs-trigger="focus" data-bs-content="A frase colocada entre aspas duplas pesquisa por registros com a frase exata. Um asterisco (*) é um operador de truncamento que pode ser inserido ao fim de uma palavra. Um sinal de mais (+) precedente indica que a palavra deve estar presente no texto. Um sinal de menos (-) precedente indica que a palavra não deve estar presente em qualquer parte do texto." />
-    </div>
-  </div>
-  <div class="row">
-    <div class="col-12 col-md-4 mb-3">
-      <label class="form-label" for="lst_tramitou">Tramitou por</label>
-        <select class="form-select" id="lst_tramitou" name="lst_tramitou">
+        <div class="col-6 col-md-3">
+          <label class="form-label" for="txt_ano_documento"><i class="fas fa-calendar-alt me-1"></i>Ano</label>
+          <input name="txt_ano_documento" id="txt_ano_documento" type="number" min="1900" maxlength="4" class="form-control year" autocomplete="off">
+        </div>
+        <div class="col-6 col-md-3">
+          <label class="form-label" for="txt_num_protocolo"><i class="fas fa-file-alt me-1"></i>Protocolo</label>
+          <input id="txt_num_protocolo" name="txt_num_protocolo" min="1" type="number" maxlength="8" class="form-control number" autocomplete="off">
+        </div>
+        <div class="col-6 col-md-3">
+          <label class="form-label" for="txt_npc"><i class="fas fa-file-invoice me-1"></i>Processo</label>
+          <input id="txt_npc" name="txt_npc" min="1" type="number" maxlength="6" class="form-control number" autocomplete="off">
+        </div>
+        <div class="col-6 col-md-3">
+          <label class="form-label" for="dt_apres1"><i class="fas fa-calendar me-1"></i>Data Inicial</label>
+          <div class="input-group">
+            <input type="text" class="form-control datepicker" placeholder="dd/mm/aaaa" name="dt_apres1" id="dt_apres1" data-provide="datepicker" data-date-autoclose="true" autocomplete="off">
+            <span class="input-group-text"><i class="fas fa-calendar"></i></span>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <label class="form-label" for="dt_apres2"><i class="fas fa-calendar-day me-1"></i>Data Final</label>
+          <div class="input-group">
+            <input type="text" class="form-control datepicker" placeholder="dd/mm/aaaa" name="dt_apres2" id="dt_apres2" data-provide="datepicker" data-date-autoclose="true" autocomplete="off">
+            <span class="input-group-text"><i class="fas fa-calendar"></i></span>
+          </div>
+        </div>
+        <div class="col-12 col-md-6">
+          <label class="form-label" for="txa_txt_interessado"><i class="fas fa-user me-1"></i>Interessado</label>
+          <input type="text" class="form-control" name="txa_txt_interessado" id="txa_txt_interessado"/>
+        </div>
+        <div class="col-12 col-md-6">
+          <label class="form-label" for="txa_txt_assunto"><i class="fas fa-search me-1"></i>Termos da Pesquisa</label>
+          <input type="text" class="form-control" name="txa_txt_assunto" id="txa_txt_assunto" maxlenght="50" autocomplete="off" data-bs-toggle="popover" data-bs-placement="top" title="Dicas de Preenchimento" data-bs-trigger="focus" data-bs-content="A frase colocada entre aspas duplas pesquisa por registros com a frase exata. Um asterisco (*) é um operador de truncamento que pode ser inserido ao fim de uma palavra. Um sinal de mais (+) precedente indica que a palavra deve estar presente no texto. Um sinal de menos (-) precedente indica que a palavra não deve estar presente em qualquer parte do texto." />
+        </div>
+        <div class="col-12 col-md-4">
+          <label class="form-label" for="lst_tramitou"><i class="fas fa-route me-1"></i>Tramitou por</label>
+          <select class="form-select" id="lst_tramitou" name="lst_tramitou">
             <option value=""></option>
             <dtml-in expr="zsql.unidade_tramitacao_obter_zsql(ind_adm=1)">
               <option value="<dtml-var cod_unid_tramitacao missing>">
                 <dtml-var nom_unidade_join>
               </option>
             </dtml-in>
-       </select>
-    </div>
-    <div class="col-12 col-md-4 mb-3">
-      <label class="form-label" for="lst_localizacao">Localização Atual</label>
-        <select class="form-select" id="lst_localizacao" name="lst_localizacao" data-size="6">
+          </select>
+        </div>
+        <div class="col-12 col-md-4">
+          <label class="form-label" for="lst_localizacao"><i class="fas fa-map-marker-alt me-1"></i>Localização Atual</label>
+          <select class="form-select" id="lst_localizacao" name="lst_localizacao" data-size="6">
             <option value="">Todas</option>
             <dtml-in expr="zsql.unidade_tramitacao_obter_zsql(ind_adm=1)">
               <option value="<dtml-var cod_unid_tramitacao missing>">
                 <dtml-var nom_unidade_join>
               </option>
             </dtml-in>
-       </select>
-    </div>
-    <div class="col-12 col-md-4 mb-3">
-      <label class="form-label" for="lst_status">Situação Atual</label>
-        <select class="form-select" id="lst_status" name="lst_status" data-size="6">
+          </select>
+        </div>
+        <div class="col-12 col-md-4">
+          <label class="form-label" for="lst_status"><i class="fas fa-info-circle me-1"></i>Situação Atual</label>
+          <select class="form-select" id="lst_status" name="lst_status" data-size="6">
             <option value="">Todas</option>
             <dtml-in expr="zsql.status_tramitacao_administrativo_obter_zsql(ind_excluido=0)">
               <option value="<dtml-var cod_status missing>">
                 <dtml-var sgl_status> - <dtml-var des_status>
               </option>
             </dtml-in>
-       </select>
-    </div>
-  </div>
-  <div class="row">
-    <div class="col-12 col-md-4 mb-3">
-      <label class="form-label" for="lst_assunto">Classificação</label>
-        <select class="form-select" id="lst_assunto" name="lst_assunto">
+          </select>
+        </div>
+        <div class="col-12 col-md-4">
+          <label class="form-label" for="lst_assunto"><i class="fas fa-tags me-1"></i>Classificação</label>
+          <select class="form-select" id="lst_assunto" name="lst_assunto">
             <option value="">Todos</option>
             <dtml-in expr="zsql.tipo_peticionamento_obter_zsql(ind_doc_adm=1, ind_excluido=0)">
               <option value="<dtml-var tip_peticionamento missing>">
                 <dtml-var des_tipo_peticionamento>
               </option>
             </dtml-in>
-       </select>
-    </div>
-  <div class="col-6 col-sm-4 mb-3">
-      <label class="form-label" for="rad_tramitando" class="d-block">Em Tramitação?</label>
-        <select class="form-select" id="rad_tramitando" name="rad_tramitando">
-         <dtml-in expr="[('Não', '0'), ('Sim', '1'), ('Tanto faz', '')]">      
-            <option value="<dtml-var expr="_['sequence-item']">" <dtml-if expr="_['sequence-item']==''">selected</dtml-if>><dtml-var expr="_['sequence-key']"></option>
-         </dtml-in>
-        </select>
-   </div>                         
-    <div class="col-6 col-sm-4 mb-3">
-      <label class="form-label" for="rd_ordenacao" class="d-block">Ordenação</label>
-        <select class="form-select" id="rd_ordenacao" name="rd_ordenacao"">
-         <dtml-in expr="[('Descendente', '1'), ('Ascendente', '2')]">      
-            <option value="<dtml-var expr="_['sequence-item']">" <dtml-if expr="_['sequence-item']==''">selected</dtml-if>><dtml-var expr="_['sequence-key']"></option>
-         </dtml-in>
-        </select>
-    </div>
-  </div>  
-  <div class="row">
-    <div class="col-12 col-md-12 mt-2 text-center text-md-start"> 
-        <dtml-let isAnon="portal_membership.isAnonymousUser()">
+          </select>
+        </div>
+        <div class="col-6 col-md-4">
+          <label class="form-label" for="rad_tramitando">Em Tramitação?</label>
+          <select class="form-select" id="rad_tramitando" name="rad_tramitando">
+            <dtml-in expr="[('Não', '0'), ('Sim', '1'), ('Tanto faz', '')]">      
+              <option value="<dtml-var expr="_['sequence-item']">" <dtml-if expr="_['sequence-item']==''">selected</dtml-if>><dtml-var expr="_['sequence-key']"></option>
+            </dtml-in>
+          </select>
+        </div>
+        <div class="col-6 col-md-4">
+          <label class="form-label" for="rd_ordenacao">Ordenação</label>
+          <select class="form-select" id="rd_ordenacao" name="rd_ordenacao">
+            <dtml-in expr="[('Descendente', '1'), ('Ascendente', '2')]">      
+              <option value="<dtml-var expr="_['sequence-item']">" <dtml-if expr="_['sequence-item']==''">selected</dtml-if>><dtml-var expr="_['sequence-key']"></option>
+            </dtml-in>
+          </select>
+        </div>
+        <div class="col-12">
+          <dtml-let isAnon="portal_membership.isAnonymousUser()">
             <dtml-if expr="isAnon and sapl_documentos.props_sagl.recaptcha_key">
-                <div class="g-recaptcha mb-3" data-sitekey="<dtml-var "sapl_documentos.props_sagl.recaptcha_key">"></div>
+              <div class="g-recaptcha mb-3" data-sitekey="<dtml-var "sapl_documentos.props_sagl.recaptcha_key">"></div>
             </dtml-if>
-         </dtml-let>
-         <dtml-if nenhum_tipo_publico>
-            <button type="button" id="search-btn" class="btn btn-primary disabled" onClick="return documento_criticar()"><i class="fa fa-fw fa-search"></i> Pesquisar</button>
-         <dtml-else>
-            <button type="button" id="search-btn" class="btn btn-primary" onClick="return documento_criticar()"><i class="fa fa-fw fa-search"></i> Pesquisar</button>
-         </dtml-if>
-         <input class="btn btn-light" type="reset" value="Limpar" />
+          </dtml-let>
+          <div class="d-flex gap-2">
+            <dtml-if nenhum_tipo_publico>
+              <button type="button" id="search-btn" class="btn btn-primary disabled" onClick="return documento_criticar()"><i class="fas fa-search me-1"></i>Pesquisar</button>
+            <dtml-else>
+              <button type="button" id="search-btn" class="btn btn-primary" onClick="return documento_criticar()"><i class="fas fa-search me-1"></i>Pesquisar</button>
+            </dtml-if>
+            <button type="reset" class="btn btn-outline-secondary"><i class="fas fa-eraser me-1"></i>Limpar</button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
   <input type="hidden" name="existe_ocorrencia" value="0" />
-</div>
-</div>
-
 </form>
+
+</div>
+</div>
 
 <dtml-var js_slot>
 <script>

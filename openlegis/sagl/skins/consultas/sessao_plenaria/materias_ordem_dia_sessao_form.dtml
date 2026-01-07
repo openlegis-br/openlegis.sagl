@@ -10,28 +10,34 @@
    //]]>
   </script>
 
-<h3 class="firstHeading text-center"><dtml-var sessao_plenaria_header></h3>
+<h1 class="firstHeading text-center mb-4"><dtml-var sessao_plenaria_header></h1>
 
-  <div class="table-responsive">
-    <table class="table table-striped">
-      <thead > 
-        <tr>
-          <th>
-            Votação de matérias da Ordem do Dia
-          </th>
-        </tr>
-      </thead>
-        <dtml-in expr="zsql.ordem_dia_obter_zsql(cod_sessao_plen = cod_sessao_plen, ind_excluido=0)">    
-         <dtml-if expr="cod_materia != '' and cod_materia != None">
+<div class="card border-0 shadow-sm mb-4">
+  <div class="card-header bg-light">
+    <h5 class="mb-0"><i class="fas fa-list-ol me-1"></i><strong>Votação de matérias da Ordem do Dia</strong></h5>
+  </div>
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-striped align-middle mb-0">
+        <thead class="table-light">
           <tr>
-            <td>
-               <div align="center"><b>Item nº <dtml-var num_ordem></b></div> 
+            <th>Item</th>
+          </tr>
+        </thead>
+        <tbody>
+        <dtml-in expr="zsql.ordem_dia_obter_zsql(cod_sessao_plen = cod_sessao_plen, ind_excluido=0)">
+          <dtml-if expr="cod_materia != '' and cod_materia != None">
+            <tr>
+              <td>
+                <div class="text-center mb-2">
+                  <strong>Item nº <dtml-var num_ordem></strong>
+                </div> 
                <dtml-in expr="zsql.turno_discussao_obter_zsql(cod_turno=tip_turno)">
 	         <b><dtml-var des_turno upper> -</b>
                </dtml-in>
                 <dtml-in expr="zsql.materia_obter_zsql(cod_materia=cod_materia, ind_excluido=0)">
-                    <a href="<dtml-var portal_url>/consultas/materia/materia_mostrar_proc?cod_materia=<dtml-var cod_materia>" target="_blank">
-                       <b><dtml-var des_tipo_materia> nº <dtml-var num_ident_basica missing>/<dtml-var ano_ident_basica missing></b></a> - 
+                  <a href="<dtml-var portal_url>/consultas/materia/materia_mostrar_proc?cod_materia=<dtml-var cod_materia>" target="_blank" class="text-decoration-none">
+                    <strong><dtml-var des_tipo_materia> nº <dtml-var num_ident_basica missing>/<dtml-var ano_ident_basica missing></strong></a> - 
                     <dtml-in expr="zsql.autoria_obter_zsql(cod_materia=cod_materia)">
                     <dtml-in expr="zsql.autor_obter_zsql(cod_autor=cod_autor)">
                        <dtml-var nom_autor_join> -
@@ -237,11 +243,16 @@
           </tr>
 	 </dtml-if>
         </dtml-in>
-    </table>
+        </tbody>
+      </table>
+    </div>
   </div>
-    
-<p align="center">
-  <input type="button" class="btn btn-primary" id="hideprint" name="print_button" value="Imprimir" onClick="printFrame();return false;" />
-</p>
+</div>
+
+<div class="text-center d-print-none">
+  <button type="button" class="btn btn-primary" id="print_button" onClick="printFrame();return false;">
+    <i class="fas fa-print me-1"></i>Imprimir
+  </button>
+</div>
 <dtml-var js_slot>
 <dtml-var footer_html>

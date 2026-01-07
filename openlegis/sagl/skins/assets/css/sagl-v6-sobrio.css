@@ -1,0 +1,1631 @@
+/* ============================================
+   SAGL 6.0 - Tema Sóbrio e Profissional
+   Sistema de Gestão de Processos Digitais
+   Adequado para Órgãos Públicos
+   ============================================ */
+
+/* ============================================
+   1. VARIÁVEIS CSS - CORES SOBRIAS
+   ============================================ */
+:root {
+    /* Cores Principais - Azul Institucional */
+    --primary-color: #1e3a5f;
+    --primary-dark: #152a47;
+    --primary-light: #2c5282;
+    --primary-lighter: #4a6fa5;
+    
+    /* Cores Secundárias - Neutras */
+    --secondary-color: #6b7280;
+    --secondary-dark: #4b5563;
+    --secondary-light: #9ca3af;
+    
+    /* Cores de Status - Sóbrias */
+    --success-color: #059669;
+    --success-light: #10b981;
+    --info-color: #0284c7;
+    --info-light: #0ea5e9;
+    --warning-color: #d97706;
+    --warning-light: #f59e0b;
+    --danger-color: #dc2626;
+    --danger-light: #ef4444;
+    
+    /* Cores Neutras - Escala de Cinza */
+    --gray-50: #f9fafb;
+    --gray-100: #f3f4f6;
+    --gray-200: #e5e7eb;
+    --gray-300: #d1d5db;
+    --gray-400: #9ca3af;
+    --gray-500: #6b7280;
+    --gray-600: #4b5563;
+    --gray-700: #374151;
+    --gray-800: #1f2937;
+    --gray-900: #111827;
+    
+    /* Cores de Fundo */
+    --bg-primary: #ffffff;
+    --bg-secondary: #f9fafb;
+    --bg-tertiary: #f3f4f6;
+    
+    /* Sombras Sóbrias */
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    --shadow-xl: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    
+    /* Bordas */
+    --radius-sm: 0.25rem;
+    --radius-md: 0.375rem;
+    --radius-lg: 0.5rem;
+    --radius-xl: 0.75rem;
+    
+    /* Cores de Borda */
+    --border-color: #e5e7eb;
+    --border-color-dark: #d1d5db;
+    
+    /* Cores de Acento - Sóbrias mas Vibrantes */
+    --accent-blue-light: #e0f2fe;
+    --accent-blue: #3b82f6;
+    --accent-blue-dark: #2563eb;
+    --accent-green-light: #d1fae5;
+    --accent-green: #10b981;
+    --accent-yellow-light: #fef3c7;
+    --accent-yellow: #f59e0b;
+    --accent-red-light: #fee2e2;
+    --accent-red: #ef4444;
+    --accent-purple-light: #ede9fe;
+    --accent-purple: #8b5cf6;
+}
+
+/* ============================================
+   2. HEADER SOBRIO E PROFISSIONAL
+   ============================================ */
+/* Sobrescrever estilos do app.css para garantir cores corretas */
+/* Usar valores fixos em vez de variáveis para evitar sobrescrita por páginas específicas */
+#page-topbar,
+body[data-topbar=dark] #page-topbar,
+body[data-layout=horizontal][data-topbar=dark] #page-topbar,
+body[data-layout=horizontal][data-topbar=colored] #page-topbar {
+    background: linear-gradient(135deg, #1e3a5f 0%, #2c5282 100%) !important;
+    background-color: transparent !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.1) !important;
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 1000 !important;
+    margin-bottom: 0 !important;
+    padding-bottom: 0 !important;
+    width: 100% !important;
+}
+
+#page-topbar.scrolled,
+body[data-topbar=dark] #page-topbar.scrolled,
+body[data-layout=horizontal][data-topbar=dark] #page-topbar.scrolled {
+    background: linear-gradient(135deg, rgba(30, 58, 95, 0.98) 0%, rgba(44, 82, 130, 0.98) 100%) !important;
+    background-color: transparent !important;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08) !important;
+}
+
+/* Garantir que não haja espaçamento após o header */
+#page-topbar .navbar-header {
+    margin-bottom: 0 !important;
+    padding-bottom: 0 !important;
+}
+
+/* Ícones no header com cor branca para corresponder ao texto */
+#page-topbar .mdi,
+#page-topbar .fas,
+#page-topbar .far,
+#page-topbar .fab,
+#page-topbar i,
+body[data-topbar=dark] #page-topbar .mdi,
+body[data-topbar=dark] #page-topbar .fas,
+body[data-topbar=dark] #page-topbar .far,
+body[data-topbar=dark] #page-topbar .fab,
+body[data-topbar=dark] #page-topbar i {
+    color: #ffffff !important;
+}
+
+#page-topbar .btn.header-item,
+#page-topbar .header-item,
+body[data-topbar=dark] #page-topbar .btn.header-item,
+body[data-topbar=dark] #page-topbar .header-item {
+    color: #ffffff !important;
+}
+
+#page-topbar .btn.header-item .mdi,
+#page-topbar .btn.header-item .fas,
+#page-topbar .btn.header-item .far,
+#page-topbar .btn.header-item .fab,
+#page-topbar .btn.header-item i,
+#page-topbar .header-item .mdi,
+#page-topbar .header-item .fas,
+#page-topbar .header-item .far,
+#page-topbar .header-item .fab,
+#page-topbar .header-item i,
+body[data-topbar=dark] #page-topbar .btn.header-item .mdi,
+body[data-topbar=dark] #page-topbar .btn.header-item .fas,
+body[data-topbar=dark] #page-topbar .btn.header-item .far,
+body[data-topbar=dark] #page-topbar .btn.header-item .fab,
+body[data-topbar=dark] #page-topbar .btn.header-item i,
+body[data-topbar=dark] #page-topbar .header-item .mdi,
+body[data-topbar=dark] #page-topbar .header-item .fas,
+body[data-topbar=dark] #page-topbar .header-item .far,
+body[data-topbar=dark] #page-topbar .header-item .fab,
+body[data-topbar=dark] #page-topbar .header-item i {
+    color: #ffffff !important;
+}
+
+#page-topbar .btn.header-item:hover,
+#page-topbar .header-item:hover,
+body[data-topbar=dark] #page-topbar .btn.header-item:hover,
+body[data-topbar=dark] #page-topbar .header-item:hover {
+    color: #ffffff !important;
+    opacity: 0.9;
+}
+
+#page-topbar .btn.header-item:hover .mdi,
+#page-topbar .btn.header-item:hover .fas,
+#page-topbar .btn.header-item:hover .far,
+#page-topbar .btn.header-item:hover .fab,
+#page-topbar .btn.header-item:hover i,
+#page-topbar .header-item:hover .mdi,
+#page-topbar .header-item:hover .fas,
+#page-topbar .header-item:hover .far,
+#page-topbar .header-item:hover .fab,
+#page-topbar .header-item:hover i,
+body[data-topbar=dark] #page-topbar .btn.header-item:hover .mdi,
+body[data-topbar=dark] #page-topbar .btn.header-item:hover .fas,
+body[data-topbar=dark] #page-topbar .btn.header-item:hover .far,
+body[data-topbar=dark] #page-topbar .btn.header-item:hover .fab,
+body[data-topbar=dark] #page-topbar .btn.header-item:hover i,
+body[data-topbar=dark] #page-topbar .header-item:hover .mdi,
+body[data-topbar=dark] #page-topbar .header-item:hover .fas,
+body[data-topbar=dark] #page-topbar .header-item:hover .far,
+body[data-topbar=dark] #page-topbar .header-item:hover .fab,
+body[data-topbar=dark] #page-topbar .header-item:hover i {
+    color: #ffffff !important;
+}
+
+/* Texto no header também branco */
+#page-topbar .text-white,
+#page-topbar .siteTitle,
+#page-topbar .siteSubTitle,
+#page-topbar span:not(.badge):not(.text-success):not(.text-dark),
+#page-topbar .d-none.d-lg-inline-block,
+#page-topbar .d-none.d-xl-inline-block,
+body[data-topbar=dark] #page-topbar .text-white,
+body[data-topbar=dark] #page-topbar .siteTitle,
+body[data-topbar=dark] #page-topbar .siteSubTitle,
+body[data-topbar=dark] #page-topbar span:not(.badge):not(.text-success):not(.text-dark),
+body[data-topbar=dark] #page-topbar .d-none.d-lg-inline-block,
+body[data-topbar=dark] #page-topbar .d-none.d-xl-inline-block {
+    color: #ffffff !important;
+}
+
+/* Dropdown toggle e outros elementos do header */
+#page-topbar .dropdown-toggle,
+#page-topbar .dropdown-toggle span,
+#page-topbar .dropdown-toggle .mdi,
+#page-topbar .dropdown-toggle .fas,
+body[data-topbar=dark] #page-topbar .dropdown-toggle,
+body[data-topbar=dark] #page-topbar .dropdown-toggle span,
+body[data-topbar=dark] #page-topbar .dropdown-toggle .mdi,
+body[data-topbar=dark] #page-topbar .dropdown-toggle .fas {
+    color: #ffffff !important;
+}
+
+#page-topbar .dropdown-toggle:hover,
+#page-topbar .dropdown-toggle:hover span,
+#page-topbar .dropdown-toggle:hover .mdi,
+#page-topbar .dropdown-toggle:hover .fas,
+body[data-topbar=dark] #page-topbar .dropdown-toggle:hover,
+body[data-topbar=dark] #page-topbar .dropdown-toggle:hover span,
+body[data-topbar=dark] #page-topbar .dropdown-toggle:hover .mdi,
+body[data-topbar=dark] #page-topbar .dropdown-toggle:hover .fas {
+    color: #ffffff !important;
+    opacity: 0.9;
+}
+
+/* Perfil do usuário no header */
+#page-topbar .header-profile-user,
+body[data-topbar=dark] #page-topbar .header-profile-user {
+    border: 2px solid rgba(255, 255, 255, 0.3) !important;
+    background-color: transparent !important;
+}
+
+#page-topbar .rounded-circle.header-profile-user + span,
+body[data-topbar=dark] #page-topbar .rounded-circle.header-profile-user + span {
+    color: #ffffff !important;
+}
+
+/* Noti-icon também branco */
+body[data-topbar=dark] #page-topbar .noti-icon i,
+#page-topbar .noti-icon i {
+    color: #ffffff !important;
+}
+
+/* Logo com efeito sutil */
+.navbar-brand {
+    transition: all 0.3s ease;
+    border-radius: var(--radius-md);
+    padding: 8px 12px;
+}
+
+.navbar-brand:hover {
+    background: rgba(255, 255, 255, 0.08);
+    transform: translateY(-1px);
+}
+
+.navbar-brand .logo {
+    transition: transform 0.3s ease;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.15));
+}
+
+.navbar-brand:hover .logo {
+    transform: scale(1.02);
+}
+
+/* Badge de versão discreto */
+.version-badge {
+    animation: subtlePulse 3s infinite;
+}
+
+@keyframes subtlePulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.9; }
+}
+
+.version-badge .badge,
+.version-badge .badge.bg-white,
+.version-badge .badge.bg-light {
+    font-weight: 500 !important;
+    font-size: 0.7rem !important;
+    letter-spacing: 0.3px !important;
+    box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2) !important;
+    border: 1px solid var(--accent-blue-light) !important;
+    padding: 0.4rem 0.8rem !important;
+    background: linear-gradient(135deg, #ffffff 0%, var(--accent-blue-light) 100%) !important;
+    color: #1f2937 !important;
+}
+
+.version-badge .badge .text-success,
+.version-badge .badge .mdi-check-circle {
+    color: var(--success-color) !important;
+}
+
+/* ============================================
+   3. MENU DE NAVEGAÇÃO PROFISSIONAL
+   ============================================ */
+.topnav {
+    background: var(--bg-primary) !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08) !important;
+    border-bottom: 1px solid var(--border-color);
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 999 !important;
+    width: 100% !important;
+    /* Forçar sobrescrever position: fixed do app.css */
+    left: 0 !important;
+    right: 0 !important;
+}
+
+/* Remover espaçamento entre header e menu - sobrescrever app.css */
+#page-topbar + .topnav,
+header#page-topbar + .topnav,
+header + .topnav {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 999 !important;
+    width: 100% !important;
+    /* Sobrescrever position: fixed do app.css */
+    left: auto !important;
+    right: auto !important;
+}
+
+.topnav {
+    position: sticky !important;
+    top: 80px !important; /* Altura aproximada do header - será ajustado via JS */
+}
+
+/* Garantir que sticky funcione mesmo com position fixed do app.css - MÁXIMA ESPECIFICIDADE */
+body[data-layout=horizontal] .topnav,
+body[data-layout=horizontal][data-topbar=dark] .topnav,
+body[data-layout=horizontal][data-topbar=light] .topnav,
+body[data-layout=horizontal][data-topbar=colored] .topnav,
+body[data-layout=horizontal] #layout-wrapper .topnav,
+body[data-layout=horizontal] .topnav.navbar-light,
+div.topnav,
+.topnav.topnav,
+#layout-wrapper > .topnav {
+    position: sticky !important;
+    margin-top: 0 !important;
+    left: auto !important;
+    right: auto !important;
+    top: 80px !important; /* Altura aproximada do header - será ajustado via JS */
+    z-index: 999 !important;
+    width: 100% !important;
+}
+
+.navbar-header + .topnav {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 999 !important;
+    width: 100% !important;
+}
+
+.nav-link {
+    position: relative;
+    padding: 1rem 1.25rem !important;
+    transition: all 0.2s ease;
+    border-radius: var(--radius-sm);
+    margin: 0 2px;
+    color: var(--gray-600, #4b5563) !important;
+    font-weight: 600;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    letter-spacing: 0.01em;
+}
+
+.nav-link::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 0;
+    height: 2px;
+    background: var(--primary-color);
+    transition: all 0.3s ease;
+    transform: translateX(-50%);
+    border-radius: 2px 2px 0 0;
+}
+
+.nav-link:hover::before {
+    width: 70%;
+    background: var(--primary-color);
+}
+
+.nav-link.active::before {
+    width: 100%;
+    background: var(--primary-color);
+    height: 2px;
+}
+
+.nav-link:hover {
+    background: var(--bg-secondary);
+    color: var(--primary-color) !important;
+}
+
+.nav-link.active {
+    color: var(--primary-color) !important;
+    font-weight: 700;
+    background: var(--bg-secondary);
+}
+
+/* Melhorar legibilidade dos ícones no menu de navegação */
+.nav-link i,
+.nav-link .mdi,
+.nav-link .fas {
+    color: var(--gray-600, #4b5563);
+    margin-right: 0.5rem;
+    font-size: 1rem;
+}
+
+.nav-link:hover i,
+.nav-link:hover .mdi,
+.nav-link:hover .fas {
+    color: var(--primary-color) !important;
+}
+
+.nav-link.active i,
+.nav-link.active .mdi,
+.nav-link.active .fas {
+    color: var(--primary-color) !important;
+}
+
+.nav-link.active::before {
+    background: var(--primary-color);
+    height: 2px;
+}
+
+/* Estilos específicos para itens principais de navegação - maior legibilidade */
+.topnav .navbar-nav .nav-link,
+.topnav .topnav-menu .navbar-nav .nav-link {
+    font-size: 0.95rem !important;
+    font-weight: 600 !important;
+    color: var(--gray-600, #4b5563) !important;
+    letter-spacing: 0.02em !important;
+    line-height: 1.6 !important;
+}
+
+.topnav .navbar-nav .nav-link:hover,
+.topnav .topnav-menu .navbar-nav .nav-link:hover {
+    font-weight: 600 !important;
+    color: var(--primary-color) !important;
+}
+
+.topnav .navbar-nav .nav-link.active,
+.topnav .topnav-menu .navbar-nav .nav-link.active,
+.topnav .navbar-nav .dropdown.active > a {
+    font-weight: 700 !important;
+    color: var(--primary-color) !important;
+}
+
+.topnav .navbar-nav .nav-link i,
+.topnav .topnav-menu .navbar-nav .nav-link i,
+.topnav .navbar-nav .nav-link .mdi,
+.topnav .topnav-menu .navbar-nav .nav-link .mdi {
+    font-size: 1rem !important;
+    color: var(--gray-600, #4b5563) !important;
+}
+
+.topnav .navbar-nav .nav-link:hover i,
+.topnav .topnav-menu .navbar-nav .nav-link:hover i,
+.topnav .navbar-nav .nav-link:hover .mdi,
+.topnav .topnav-menu .navbar-nav .nav-link:hover .mdi {
+    color: var(--primary-color) !important;
+}
+
+.topnav .navbar-nav .nav-link.active i,
+.topnav .topnav-menu .navbar-nav .nav-link.active i,
+.topnav .navbar-nav .nav-link.active .mdi,
+.topnav .topnav-menu .navbar-nav .nav-link.active .mdi {
+    color: var(--primary-color) !important;
+}
+
+/* Melhorar legibilidade dos itens do dropdown de navegação */
+.topnav .navbar-nav .dropdown-menu .dropdown-item,
+.topnav .dropdown-menu .dropdown-item {
+    font-size: 0.95rem !important;
+    font-weight: 500 !important;
+    color: var(--gray-800, #1f2937) !important;
+    padding: 0.65rem 1.25rem !important;
+    line-height: 1.5 !important;
+}
+
+.topnav .navbar-nav .dropdown-menu .dropdown-item:hover,
+.topnav .dropdown-menu .dropdown-item:hover {
+    font-weight: 600 !important;
+    color: var(--primary-color) !important;
+    background-color: var(--bg-secondary) !important;
+}
+
+.topnav .navbar-nav .dropdown-menu .dropdown-item.active,
+.topnav .dropdown-menu .dropdown-item.active {
+    font-weight: 600 !important;
+    color: var(--primary-color) !important;
+    background-color: var(--bg-secondary) !important;
+}
+
+.topnav .navbar-nav .dropdown-menu .dropdown-header,
+.topnav .dropdown-menu .dropdown-header {
+    font-size: 0.85rem !important;
+    font-weight: 700 !important;
+    color: var(--gray-700, #374151) !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+    padding: 0.75rem 1.25rem 0.5rem !important;
+}
+
+/* ============================================
+   4. BOTÕES SOBRIOS E PROFISSIONAIS
+   ============================================ */
+/* Garantir alinhamento consistente entre botões <a> e <button> */
+a.btn,
+button.btn,
+input[type="submit"].btn,
+input[type="button"].btn {
+    display: inline-block;
+    vertical-align: middle;
+    text-align: center;
+    text-decoration: none;
+    line-height: 1.5;
+}
+
+.btn-primary,
+button.btn-primary,
+a.btn-primary,
+input[type="submit"].btn-primary {
+    background: var(--primary-color) !important;
+    border: 1px solid var(--primary-dark) !important;
+    box-shadow: 0 1px 3px rgba(30, 58, 95, 0.2) !important;
+    transition: all 0.2s ease;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+    color: #ffffff !important;
+    border-radius: var(--radius-md);
+    padding: 0.625rem 1.25rem;
+}
+
+.btn-primary:hover,
+button.btn-primary:hover,
+a.btn-primary:hover {
+    background: var(--primary-dark) !important;
+    border-color: var(--primary-dark) !important;
+    box-shadow: 0 2px 6px rgba(30, 58, 95, 0.3) !important;
+    transform: translateY(-1px);
+    color: #ffffff !important;
+}
+
+.btn-primary:active,
+button.btn-primary:active,
+a.btn-primary:active {
+    transform: translateY(0);
+    box-shadow: 0 1px 2px rgba(30, 58, 95, 0.2) !important;
+}
+
+.btn-primary:focus,
+button.btn-primary:focus,
+a.btn-primary:focus {
+    box-shadow: 0 0 0 0.2rem rgba(30, 58, 95, 0.25) !important;
+}
+
+.btn-outline-primary {
+    border: 1.5px solid var(--primary-color);
+    color: var(--primary-color);
+    background: transparent;
+    transition: all 0.2s ease;
+    font-weight: 500;
+    border-radius: var(--radius-md);
+}
+
+.btn-outline-primary:hover {
+    background: var(--primary-color);
+    color: #ffffff !important;
+    border-color: var(--primary-color);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(30, 58, 95, 0.2);
+}
+
+/* Garantir que ícones nos botões de acesso rápido fiquem legíveis no hover */
+.btn-outline-primary:hover i,
+.btn-outline-primary:hover .fas,
+.btn-outline-primary:hover .far,
+.btn-outline-primary:hover .fab,
+.btn-outline-primary:hover .mdi {
+    color: #ffffff !important;
+    opacity: 1 !important;
+}
+
+.btn-secondary {
+    background: var(--gray-600);
+    border: 1px solid var(--gray-700);
+    color: white;
+    border-radius: var(--radius-md);
+}
+
+.btn-secondary:hover {
+    background: var(--gray-700);
+    border-color: var(--gray-700);
+    color: white;
+}
+
+/* Botão btn-defaul (compatibilidade com typo existente) */
+.btn-defaul,
+.btn-defaul:focus,
+.btn-defaul:active {
+    background: var(--bg-primary) !important;
+    border: 1px solid var(--border-color) !important;
+    color: var(--gray-700) !important;
+    transition: all 0.2s ease;
+    font-weight: 500;
+    border-radius: var(--radius-md);
+}
+
+.btn-defaul:hover {
+    background: var(--bg-secondary) !important;
+    border-color: var(--border-color-dark) !important;
+    color: var(--primary-color) !important;
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+}
+
+/* ============================================
+   5. CARDS LIMPOS E ELEGANTES
+   ============================================ */
+.card {
+    background: var(--bg-primary) !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm) !important;
+    transition: all 0.2s ease;
+    overflow: hidden;
+    animation: fadeIn 0.5s ease-out;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md) !important;
+    border-color: var(--border-color-dark) !important;
+}
+
+.card-header {
+    background: var(--bg-secondary) !important;
+    border-bottom: 1px solid var(--border-color) !important;
+    padding: 1rem 1.25rem;
+    font-weight: 600;
+    color: var(--gray-800);
+    font-size: 0.95rem;
+}
+
+.card-body {
+    padding: 1.25rem;
+    color: var(--gray-700);
+    background: var(--bg-primary) !important;
+}
+
+.card-footer {
+    background: var(--bg-secondary) !important;
+    border-top: 1px solid var(--border-color) !important;
+    padding: 0.75rem 1.25rem;
+}
+
+/* ============================================
+   6. BADGES DISCRETOS
+   ============================================ */
+.badge {
+    padding: 0.4rem 0.65rem;
+    border-radius: var(--radius-md);
+    font-weight: 500;
+    font-size: 0.75rem;
+    letter-spacing: 0.2px;
+    box-shadow: none;
+    border: 1px solid transparent;
+}
+
+.badge-primary {
+    background: linear-gradient(135deg, var(--accent-blue) 0%, var(--primary-color) 100%);
+    color: white;
+    border-color: var(--primary-dark);
+    box-shadow: 0 1px 3px rgba(59, 130, 246, 0.3);
+}
+
+.badge-success {
+    background: linear-gradient(135deg, var(--success-light) 0%, var(--success-color) 100%);
+    color: white;
+    border-color: #047857;
+    box-shadow: 0 1px 3px rgba(5, 150, 105, 0.3);
+}
+
+.badge-info {
+    background: linear-gradient(135deg, var(--info-light) 0%, var(--info-color) 100%);
+    color: white;
+    border-color: #0369a1;
+    box-shadow: 0 1px 3px rgba(2, 132, 199, 0.3);
+}
+
+.badge-warning {
+    background: linear-gradient(135deg, var(--warning-light) 0%, var(--warning-color) 100%);
+    color: white;
+    border-color: #b45309;
+    box-shadow: 0 1px 3px rgba(217, 119, 6, 0.3);
+}
+
+.badge-danger {
+    background: linear-gradient(135deg, var(--danger-light) 0%, var(--danger-color) 100%);
+    color: white;
+    border-color: #b91c1c;
+    box-shadow: 0 1px 3px rgba(220, 38, 38, 0.3);
+}
+
+.badge-secondary {
+    background: var(--gray-500);
+    color: white;
+    border-color: var(--gray-600);
+}
+
+/* ============================================
+   7. FOOTER INSTITUCIONAL
+   ============================================ */
+.footer-institutional {
+    position: relative;
+    background: var(--gray-800);
+    color: #ffffff;
+    margin-top: auto;
+    padding: 2.5rem 0 1.5rem;
+    border-top: 3px solid var(--primary-color);
+    flex-shrink: 0;
+}
+
+.footer-top-border {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--primary-color), var(--primary-light));
+}
+
+.footer-title {
+    font-weight: 600;
+    font-size: 0.875rem;
+    margin-bottom: 1rem;
+    color: #ffffff;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.footer-text {
+    line-height: 1.6;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.footer-links {
+    list-style: none;
+    padding: 0;
+}
+
+.footer-links li {
+    margin-bottom: 0.5rem;
+}
+
+.footer-link {
+    color: rgba(255, 255, 255, 0.7);
+    text-decoration: none;
+    transition: all 0.2s ease;
+    display: inline-block;
+    font-size: 0.875rem;
+}
+
+.footer-link:hover {
+    color: var(--accent-blue-light);
+    transform: translateX(3px);
+    text-decoration: none;
+}
+
+.footer-link .mdi,
+.footer-link .fas {
+    color: var(--accent-blue-light);
+    margin-right: 0.5rem;
+}
+
+.footer-link:hover .mdi,
+.footer-link:hover .fas {
+    color: #ffffff;
+    transform: scale(1.1);
+}
+
+.version-info {
+    margin-top: 0.5rem;
+}
+
+/* ============================================
+   8. FORMULÁRIOS PROFISSIONAIS
+   ============================================ */
+.form-control,
+.form-select,
+select.form-control,
+select.form-select {
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    transition: all 0.2s ease;
+    padding: 0.375rem 0.75rem;
+    height: 38px;
+    line-height: 1.5;
+    font-size: 0.93rem;
+    box-sizing: border-box;
+}
+
+.form-control:focus,
+.form-select:focus,
+select.form-control:focus,
+select.form-select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.15rem rgba(30, 58, 95, 0.15);
+    outline: none;
+}
+
+/* TomSelect - garantir mesma altura dos inputs (38px) */
+.ts-wrapper {
+    height: 38px !important;
+    min-height: 38px !important;
+}
+
+.ts-wrapper .ts-control,
+.ts-wrapper.single .ts-control,
+.ts-wrapper.multi .ts-control {
+    height: 38px !important;
+    min-height: 38px !important;
+    max-height: 38px !important;
+    padding: 0.375rem 0.75rem !important;
+    padding-top: 0.375rem !important;
+    padding-bottom: 0.375rem !important;
+    line-height: 1.5 !important;
+    font-size: 0.93rem !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: var(--radius-md) !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    align-items: center !important;
+}
+
+.ts-wrapper .ts-control input {
+    padding: 0 !important;
+    height: auto !important;
+    min-height: auto !important;
+    line-height: 1.5 !important;
+    font-size: 0.93rem !important;
+    margin: 0 !important;
+    border: none !important;
+}
+
+.ts-wrapper .ts-control .item {
+    padding: 0.125rem 0.375rem !important;
+    margin: 0.125rem 0.25rem 0.125rem 0 !important;
+    line-height: 1.5 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+}
+
+/* Garantir que o wrapper do TomSelect não adicione altura extra quando tem itens */
+.ts-wrapper.has-items .ts-control {
+    padding-top: 0.375rem !important;
+    padding-bottom: 0.375rem !important;
+    height: 38px !important;
+}
+
+/* TomSelect - garantir funcionamento correto e dropdown não cortado */
+.ts-wrapper {
+    position: relative !important;
+}
+
+.ts-wrapper .ts-control {
+    cursor: pointer !important;
+}
+
+/* TomSelect dropdown - garantir z-index alto e não ser cortado */
+.ts-dropdown {
+    z-index: 9999 !important;
+    max-height: 300px !important;
+    overflow-y: auto !important;
+    /* Não forçar posicionamento - deixar TomSelect calcular dinamicamente */
+}
+
+.ts-dropdown-content {
+    overflow: visible !important;
+}
+
+.ts-dropdown .option {
+    overflow: visible !important;
+    white-space: normal !important;
+    word-wrap: break-word !important;
+}
+
+/* Garantir que filter-card e seus containers permitam dropdown visível */
+.filter-card,
+.filter-card .card,
+.filter-card .card-body {
+    overflow: visible !important;
+}
+
+/* Garantir que containers que contêm filter-card também permitam overflow visible */
+.col-lg-12 .filter-card,
+.col-xl-12 .filter-card,
+.container-fluid .filter-card,
+.container .filter-card {
+    overflow: visible !important;
+}
+
+.col-lg-12 .filter-card .card-body,
+.col-xl-12 .filter-card .card-body,
+.container-fluid .filter-card .card-body,
+.container .filter-card .card-body {
+    overflow: visible !important;
+}
+
+/* Garantir que o wrapper do TomSelect tenha position relative para o dropdown funcionar */
+.ts-wrapper {
+    position: relative !important;
+    overflow: visible !important;
+}
+
+/* Quando o dropdown está visível, garantir z-index alto */
+.ts-dropdown[style*="display: block"],
+.ts-dropdown[style*="visibility: visible"] {
+    z-index: 9999 !important;
+}
+
+/* Garantir que containers que contêm TomSelect permitam dropdown visível */
+.card:has(.ts-wrapper),
+.card-body:has(.ts-wrapper),
+.col-lg-12:has(.ts-wrapper),
+.col-xl-12:has(.ts-wrapper),
+.col-md-12:has(.ts-wrapper),
+.col-sm-12:has(.ts-wrapper),
+.col-12:has(.ts-wrapper),
+.row:has(.ts-wrapper),
+div:has(.ts-wrapper) {
+    overflow: visible !important;
+}
+
+/* Fallback para navegadores que não suportam :has() - aplicar em containers comuns */
+.card .ts-wrapper,
+.card-body .ts-wrapper,
+.col-lg-12 .ts-wrapper,
+.col-xl-12 .ts-wrapper,
+.col-md-12 .ts-wrapper,
+.col-sm-12 .ts-wrapper,
+.col-12 .ts-wrapper {
+    position: relative !important;
+}
+
+/* Garantir que o container pai do ts-wrapper não corte o dropdown */
+.ts-wrapper,
+.ts-wrapper * {
+    overflow: visible !important;
+}
+
+/* Garantir que selects nativos também tenham altura correta */
+select.form-select:not([data-tomselect]),
+select.form-control:not([data-tomselect]) {
+    height: 38px !important;
+    padding: 0.375rem 0.75rem !important;
+    line-height: 1.5 !important;
+    box-sizing: border-box !important;
+}
+
+.form-label {
+    font-weight: 500;
+    color: var(--gray-700);
+    margin-bottom: 0.5rem;
+}
+
+/* ============================================
+   9. ANIMAÇÕES DISCRETAS
+   ============================================ */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.main-content {
+    animation: fadeIn 0.4s ease-out;
+}
+
+/* Layout wrapper para flexbox - footer sempre no final */
+#layout-wrapper {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* Remover espaçamento do conteúdo principal após o menu */
+.main-content {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+    flex: 1 0 auto;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Garantir que page-content ocupe espaço disponível */
+.page-content {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+    flex: 1 0 auto;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Remover padding superior do container após o menu */
+.main-content > .container-fluid,
+.page-content > .container-fluid,
+.main-content > .container,
+.page-content > .container {
+    padding-top: 0 !important;
+}
+
+/* Breadcrumb sem margem superior - conectado ao menu */
+.breadcrumb,
+.breadcrumbs {
+    margin-top: 0 !important;
+    padding-top: 0.75rem !important;
+    padding-bottom: 0.5rem !important;
+    margin-bottom: 0 !important;
+}
+
+/* Alinhamento vertical do breadcrumb e links de navegação */
+.row.mb-3.d-print-none {
+    align-items: center !important;
+    display: flex !important;
+}
+
+/* Garantir que o container do breadcrumb tenha alinhamento vertical */
+.row.mb-3.d-print-none > .col-12.col-md-6:first-child {
+    display: flex !important;
+    align-items: center !important;
+}
+
+/* Garantir que o container dos links tenha alinhamento vertical */
+.row.mb-3.d-print-none > .col-12.col-md-6.text-start.text-md-end {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+}
+
+/* Alinhar verticalmente o page-title-box com o breadcrumb */
+.page-title-box {
+    display: flex !important;
+    align-items: center !important;
+    margin-top: 0 !important;
+}
+
+/* Alinhar verticalmente o btn-group com o breadcrumb */
+.col-12.col-md-6.text-start.text-md-end .btn-group {
+    display: inline-flex !important;
+    align-items: center !important;
+    vertical-align: middle !important;
+}
+
+/* Ajustar altura dos botões para alinhar com o breadcrumb */
+.col-12.col-md-6.text-start.text-md-end .btn-group .btn,
+.col-12.col-md-6.text-start.text-md-end .btn-group .btn-defaul {
+    height: auto !important;
+    line-height: 1.5 !important;
+    padding: 0.5rem 0.75rem !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    vertical-align: middle !important;
+}
+
+/* Espaçamento entre ícones e textos nos links de navegação */
+.col-12.col-md-6.text-start.text-md-end .btn-group .btn i.mdi,
+.col-12.col-md-6.text-start.text-md-end .btn-group .btn-defaul i.mdi {
+    margin-right: 0.375rem !important;
+}
+
+.col-12.col-md-6.text-start.text-md-end .btn-group .btn span,
+.col-12.col-md-6.text-start.text-md-end .btn-group .btn-defaul span {
+    margin-left: 0 !important;
+}
+
+/* Links com underline sutil e cores sóbrias */
+a {
+    transition: all 0.2s ease;
+    text-decoration: none;
+    color: var(--primary-color);
+}
+
+a:hover {
+    text-decoration: underline;
+    text-decoration-thickness: 1.5px;
+    text-underline-offset: 2px;
+    color: var(--primary-dark);
+    text-decoration-color: var(--primary-color);
+}
+
+/* Links em breadcrumbs */
+.breadcrumb a {
+    color: var(--primary-color);
+}
+
+.breadcrumb a:hover {
+    color: var(--primary-dark);
+}
+
+.breadcrumb-item + .breadcrumb-item::before {
+    color: var(--gray-500);
+    opacity: 0.8;
+}
+
+/* ============================================
+   NAV-TABS - TABS DE NAVEGAÇÃO
+   ============================================ */
+.nav-tabs .nav-link,
+.nav-tabs .nav-item .nav-link {
+    font-size: 0.875rem !important;
+    font-weight: 500 !important;
+    color: var(--gray-600, #4b5563) !important;
+    padding: 0.5rem 1rem !important;
+}
+
+.nav-tabs .nav-link:hover,
+.nav-tabs .nav-item .nav-link:hover {
+    color: var(--primary-color) !important;
+}
+
+.nav-tabs .nav-link.active,
+.nav-tabs .nav-item.show .nav-link,
+.nav-tabs .nav-item .nav-link.active {
+    font-size: 0.875rem !important;
+    font-weight: 600 !important;
+    color: var(--primary-color) !important;
+}
+
+/* ============================================
+   10. BANNER DE NOVA VERSÃO DISCRETO
+   ============================================ */
+.new-version-notice {
+    background: #e0f2fe;
+    border-left: 4px solid var(--info-color);
+    color: var(--gray-800);
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 1rem;
+}
+
+.new-version-notice .btn-close {
+    opacity: 0.6;
+}
+
+.new-version-notice .btn-close:hover {
+    opacity: 1;
+}
+
+/* ============================================
+   11. RESPONSIVIDADE
+   ============================================ */
+@media (max-width: 991.98px) {
+    #topnav-menu-content {
+        background: var(--bg-primary);
+        border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+        box-shadow: var(--shadow-md);
+        padding: 0.75rem;
+        margin-top: 0.5rem;
+        border: 1px solid var(--border-color);
+    }
+    
+    .nav-link {
+        padding: 0.75rem 1rem !important;
+        border-radius: var(--radius-md);
+        margin-bottom: 0.25rem;
+    }
+    
+    .nav-link:hover {
+        background: var(--bg-secondary);
+    }
+    
+    .version-badge {
+        display: none;
+    }
+}
+
+/* ============================================
+   12. TIPOGRAFIA INSTITUCIONAL
+   ============================================ */
+/* Layout flexbox para footer sempre no final */
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--gray-800);
+    font-weight: 400;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--gray-900);
+    letter-spacing: -0.01em;
+}
+
+h1 { 
+    font-size: 2.25rem; 
+    font-weight: 700;
+}
+h2 { 
+    font-size: 1.875rem; 
+    font-weight: 600;
+}
+h3 { 
+    font-size: 1.5rem; 
+    font-weight: 600;
+}
+h4 { 
+    font-size: 1.25rem; 
+    font-weight: 600;
+}
+h5 { 
+    font-size: 1.125rem; 
+    font-weight: 600;
+}
+h6 { 
+    font-size: 1rem; 
+    font-weight: 600;
+}
+
+.siteTitle {
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.siteSubTitle {
+    font-size: 0.875rem;
+    opacity: 0.9;
+    font-weight: 400;
+}
+
+/* ============================================
+   13. SCROLL SUAVE
+   ============================================ */
+html {
+    scroll-behavior: smooth;
+}
+
+/* ============================================
+   14. ÍCONES PROFISSIONAIS COM CORES SOBRIAS
+   ============================================ */
+.mdi, .fas, .far {
+    transition: transform 0.2s ease, color 0.2s ease;
+}
+
+/* Ícones com cores de status - apenas quando necessário */
+.mdi.mdi-check-circle.text-success,
+.mdi.mdi-check.text-success,
+.fas.fa-check.text-success {
+    color: var(--success-color) !important;
+}
+
+.mdi.mdi-information.text-info,
+.mdi.mdi-information-outline.text-info,
+.fas.fa-info-circle.text-info {
+    color: var(--info-color) !important;
+}
+
+.mdi.mdi-alert.text-warning,
+.mdi.mdi-alert-circle.text-warning,
+.fas.fa-exclamation-triangle.text-warning {
+    color: var(--warning-color) !important;
+}
+
+.mdi.mdi-alert-octagon.text-danger,
+.mdi.mdi-close-circle.text-danger,
+.fas.fa-times-circle.text-danger {
+    color: var(--danger-color) !important;
+}
+
+/* Ícones no menu - cor neutra com hover sutil */
+.nav-link .mdi,
+.nav-link .fas {
+    color: var(--gray-600);
+    margin-right: 0.5rem;
+}
+
+.nav-link:hover .mdi,
+.nav-link:hover .fas {
+    color: var(--primary-color);
+    transform: scale(1.05);
+}
+
+.nav-link.active .mdi,
+.nav-link.active .fas {
+    color: var(--primary-color);
+}
+
+.btn:hover .mdi,
+.btn:hover .fas {
+    transform: scale(1.05);
+}
+
+/* Ícones em links - cor neutra */
+a .mdi,
+a .fas {
+    color: var(--gray-600);
+}
+
+a:hover .mdi,
+a:hover .fas {
+    color: var(--primary-color);
+}
+
+/* Ícones em breadcrumbs e botões - cor neutra */
+.breadcrumb .mdi,
+.btn-defaul .mdi,
+.btn .mdi {
+    color: var(--gray-600);
+}
+
+.breadcrumb a:hover .mdi,
+.btn-defaul:hover .mdi,
+.btn:hover .mdi {
+    color: var(--primary-color);
+}
+
+/* ============================================
+   15. UTILITÁRIOS
+   ============================================ */
+.text-primary {
+    color: var(--primary-color) !important;
+}
+
+.bg-primary {
+    background-color: var(--primary-color) !important;
+}
+
+.border-primary {
+    border-color: var(--primary-color) !important;
+}
+
+.shadow-professional {
+    box-shadow: var(--shadow-md);
+}
+
+/* ============================================
+   16. AJUSTES DE ESPECIFICIDADE
+   ============================================ */
+
+/* Garantir que o header use o gradiente */
+#page-topbar,
+header#page-topbar {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%) !important;
+}
+
+/* Garantir menu de navegação */
+.topnav,
+.navbar-light {
+    background: var(--bg-primary) !important;
+}
+
+/* Garantir footer institucional */
+.footer-institutional,
+footer.footer-institutional {
+    background: var(--gray-800) !important;
+    border-top: 3px solid var(--primary-color) !important;
+}
+
+/* Override para garantir cores do tema */
+:root {
+    --bs-primary: var(--primary-color);
+    --bs-primary-rgb: 30, 58, 95;
+}
+
+/* ============================================
+   17. CARDS DE PERFIL - GALERIA DE PRESIDENTES
+   ============================================ */
+.card.profile {
+    transition: all 0.3s ease;
+    border: 1px solid var(--border-color) !important;
+    background: var(--bg-primary) !important;
+    height: 100%;
+}
+
+.card.profile:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md) !important;
+    border-color: var(--primary-color) !important;
+}
+
+.card.profile a {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+    height: 100%;
+}
+
+.card.profile .card-body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+}
+
+.card.profile .avatar-xl {
+    transition: transform 0.3s ease, filter 0.3s ease;
+    border: 3px solid var(--border-color);
+    width: 140px;
+    height: 140px;
+    object-fit: cover;
+}
+
+.card.profile:hover .avatar-xl {
+    transform: scale(1.05);
+    filter: grayscale(0%) !important;
+    border-color: var(--primary-color);
+}
+
+/* Efeito hover profissional para cards de perfil com classe hover-effect */
+.card.profile.hover-effect {
+    cursor: pointer;
+}
+
+.card.profile.hover-effect:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12) !important;
+    border-color: var(--primary-color, #1e3a5f) !important;
+}
+
+.card.profile.hover-effect:hover .avatar-xl {
+    filter: grayscale(0%) !important;
+    transform: scale(1.05);
+    transition: all 0.3s ease;
+}
+
+/* Garantir que ícones apareçam nos badges */
+.badge i,
+.badge .mdi,
+.badge .fas,
+.badge .far,
+.badge .fab {
+    display: inline-block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    font-size: inherit !important;
+    line-height: 1 !important;
+    vertical-align: middle !important;
+}
+
+.card.profile h3 {
+    transition: color 0.3s ease;
+}
+
+.card.profile:hover h3 {
+    color: var(--primary-color) !important;
+}
+
+/* Estado vazio melhorado */
+.card.border-0 .mdi {
+    opacity: 0.5;
+}
+
+.card.border-0 .card-body {
+    background: var(--bg-secondary);
+}
+
+/* Garantir que galeria de presidentes use largura completa respeitando margens laterais */
+.card-body > .row.g-4 {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
+.card-body > h1.firstHeading,
+.card-body > .mb-4:first-of-type {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
+/* ============================================
+   CORREÇÃO: Ícones dos menus dropdown do header
+   ============================================ */
+/* Os ícones dentro dos dropdown-menus do header devem ter a mesma cor do texto,
+   não a cor branca do header */
+#page-topbar .dropdown-menu i,
+#page-topbar .dropdown-menu .mdi,
+#page-topbar .dropdown-menu .dripicons,
+#page-topbar .dropdown-menu .fas,
+#page-topbar .dropdown-menu .far,
+#page-topbar .dropdown-menu .fab {
+    color: var(--gray-600, #6b7280) !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    display: inline-block !important;
+}
+
+/* Garantir que ícones com classe text-muted tenham a cor correta */
+#page-topbar .dropdown-menu .dropdown-item i.text-muted,
+#page-topbar .dropdown-menu .dropdown-item .text-muted {
+    color: var(--gray-600, #6b7280) !important;
+}
+
+/* Ícones específicos de suporte - garantir visibilidade */
+#page-topbar .dropdown-menu .dropdown-item .fa-headset,
+#page-topbar .dropdown-menu .dropdown-item .fa-whatsapp,
+#page-topbar .dropdown-menu .dropdown-item .fab.fa-whatsapp,
+#page-topbar .dropdown-menu .dropdown-item .fas.fa-headset {
+    color: var(--gray-600, #6b7280) !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    display: inline-block !important;
+    margin-right: 0.5rem !important;
+}
+
+/* ============================================
+   GARANTIR CORES DO HEADER EM TODAS AS PÁGINAS
+   ============================================ */
+/* Regra adicional para garantir que mesmo com estilos inline ou variáveis CSS locais,
+   o header mantenha as cores corretas */
+html body #page-topbar,
+html body[data-topbar=dark] #page-topbar,
+html body[data-layout=horizontal][data-topbar=dark] #page-topbar,
+html body[data-layout=horizontal][data-topbar=colored] #page-topbar {
+    background: linear-gradient(135deg, #1e3a5f 0%, #2c5282 100%) !important;
+    background-color: transparent !important;
+}
+
+/* ============================================
+   BOTÃO DE FECHAR PESQUISA GLOBAL
+   ============================================ */
+.search-wrap .close-search,
+#page-topbar .search-wrap .close-search {
+    color: #6b7280 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    width: 36px !important;
+    height: 64px !important;
+    line-height: 64px !important;
+    text-align: center !important;
+    text-decoration: none !important;
+}
+
+.search-wrap .close-search:hover,
+#page-topbar .search-wrap .close-search:hover {
+    color: #dc2626 !important;
+    opacity: 1 !important;
+    background-color: rgba(0, 0, 0, 0.05) !important;
+}
+
+.search-wrap .close-search .mdi-close-circle,
+#page-topbar .search-wrap .close-search .mdi-close-circle,
+.search-wrap .close-search i,
+#page-topbar .search-wrap .close-search i {
+    color: inherit !important;
+    font-size: 24px !important;
+    display: inline-block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+/* ============================================
+   BOTÃO DE FECHAR PAINEL DE PREFERÊNCIAS
+   ============================================ */
+.right-bar .right-bar-toggle,
+.rightbar-title .right-bar-toggle {
+    background-color: var(--gray-800, #1f2937) !important;
+    height: 32px !important;
+    width: 32px !important;
+    line-height: 32px !important;
+    color: #ffffff !important;
+    border-radius: 50% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-decoration: none !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+}
+
+.right-bar .right-bar-toggle:hover,
+.rightbar-title .right-bar-toggle:hover {
+    background-color: var(--gray-900, #111827) !important;
+    color: #ffffff !important;
+    opacity: 1 !important;
+    transform: scale(1.05) !important;
+}
+
+.right-bar .right-bar-toggle .mdi-close,
+.rightbar-title .right-bar-toggle .mdi-close,
+.right-bar .right-bar-toggle i,
+.rightbar-title .right-bar-toggle i {
+    color: #ffffff !important;
+    font-size: 18px !important;
+    display: inline-block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+/* ============================================
+   FIM DO TEMA SAGL 6.0 SOBRIO
+   ============================================ */

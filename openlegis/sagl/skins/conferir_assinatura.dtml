@@ -1,40 +1,97 @@
 <dtml-var header_html>
 
-<h1 class="firstHeading font-size-18">Validação de Documento Digital</h1> 
+<h1 class="firstHeading font-size-18 mb-3">Validação de Documento Digital</h1> 
 
-<p>Informe o código de validação do documento assinado digitalmente.</p>
-
-<form class="form-inline" method="post" name="conferir_assinatura_form" action="conferir_assinatura_proc">
-  <div class="col-12 col-md-6">
-    <div class="input-group">
-      <div class="input-group-text"><i class="mdi mdi-key-variant"></i></div>
-      <input type="text" class="form-control" name="txt_codigo_verificacao" id="txt_codigo_verificacao" size="19" minlength="19" maxlength="19" autofocus autocomplete="off" style="text-transform: uppercase" data-inputmask="'mask': '&&&&-&&&&-&&&&-&&&&'" required />
-      <div class="invalid-feedback">
-        Este campo é obrigatório!
-      </div>
-      <button class="btn btn-primary" type="button" id="btn_consultar"><i class="mdi mdi-certificate"></i> Validar</button>
+<div class="card mb-3">
+  <div class="card-body">
+    <div class="alert alert-info mb-4" role="alert">
+      <i class="fas fa-info-circle me-2"></i>Informe o código de validação do documento assinado digitalmente.
     </div>
-  </div> 
-</form>
+    
+    <form name="conferir_assinatura_form" action="conferir_assinatura_proc" method="post" class="needs-validation" novalidate>
+      <div class="row">
+        <div class="col-12 col-md-8 col-lg-6">
+          <label class="form-label fw-bold" for="txt_codigo_verificacao">
+            <i class="fas fa-key me-1"></i>Código de Validação
+          </label>
+          <div class="input-group input-group-lg">
+            <span class="input-group-text bg-light">
+              <i class="fas fa-key text-muted"></i>
+            </span>
+            <input type="text" 
+                   class="form-control" 
+                   name="txt_codigo_verificacao" 
+                   id="txt_codigo_verificacao" 
+                   size="19" 
+                   minlength="19" 
+                   maxlength="19" 
+                   autofocus 
+                   autocomplete="off" 
+                   required 
+                   style="text-transform: uppercase; font-family: monospace; letter-spacing: 0.1em;" 
+                   data-inputmask="'mask': '&&&&-&&&&-&&&&-&&&&'" 
+                   placeholder="XXXX-XXXX-XXXX-XXXX" />
+            <button class="btn btn-primary" type="button" id="btn_consultar">
+              <i class="fas fa-certificate me-1"></i>Validar
+            </button>
+          </div>
+          <div class="invalid-feedback">
+            Por favor, informe o código de validação válido.
+          </div>
+          <div class="form-text mt-2">
+            <i class="fas fa-info-circle me-1"></i>Digite o código de validação no formato: <strong>XXXX-XXXX-XXXX-XXXX</strong>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
 
 <dtml-var js_slot>
 
 <script>
   $(document).ready(function () {
-        $("#btn_consultar").click(function () {
-            var form = document.conferir_assinatura_form;
-            var chave = $('#txt_codigo_verificacao');
-            if (chave.val() === '') {
-                bootstrap.showModal({title: "Preenchimento obrigatório", body: "É necessário informar o código de validação!"});
-                $("#txt_codigo_verificacao").focus();
-                return false;
-            }
-           if ($("#txt_codigo_verificacao").val().length < 18) {
-                bootstrap.showModal({title: "Mensagem do SIstema", body: "Formato do código inválido. Informe os dados corretamente."});
-                return false;
-            }
-            return form.submit();
-        });
+    // Validação do formulário
+    var form = document.conferir_assinatura_form;
+    
+    form.addEventListener('submit', function(event) {
+      if (!form.checkValidity()) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+      form.classList.add('was-validated');
+    }, false);
+    
+    $("#btn_consultar").click(function () {
+      var chave = $('#txt_codigo_verificacao');
+      var chaveValue = chave.val().replace(/-/g, ''); // Remove hífens para validação
+      
+      // Adicionar classe de validação
+      form.classList.add('was-validated');
+      
+      if (chave.val() === '' || chaveValue.length === 0) {
+        chave.addClass('is-invalid');
+        bootstrap.showModal({title: "Preenchimento obrigatório", body: "É necessário informar o código de validação!"});
+        $("#txt_codigo_verificacao").focus();
+        return false;
+      }
+      
+      if (chaveValue.length < 16 || chave.val().length < 19) {
+        chave.addClass('is-invalid');
+        bootstrap.showModal({title: "Mensagem do Sistema", body: "Formato do código inválido. Informe os dados corretamente."});
+        $("#txt_codigo_verificacao").focus();
+        return false;
+      }
+      
+      chave.removeClass('is-invalid');
+      chave.addClass('is-valid');
+      return form.submit();
+    });
+    
+    // Limpar validação ao digitar
+    $('#txt_codigo_verificacao').on('input', function() {
+      $(this).removeClass('is-invalid is-valid');
+    });
   });
 </script>
 <dtml-var footer_html>

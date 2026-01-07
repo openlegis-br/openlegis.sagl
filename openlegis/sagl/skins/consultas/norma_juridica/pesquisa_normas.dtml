@@ -1,286 +1,772 @@
 <dtml-var header_html>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 <link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.bootstrap5.css" rel="stylesheet">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/shepherd.js@10.0.1/dist/css/shepherd.css">
 
 <style>
-.filter-toggle-icon {
-    transition: transform 0.35s ease-in-out;
-    display: inline-block;
-}
-.filter-toggle-icon.expanded {
-    transform: rotate(90deg);
-}
-.ts-dropdown .optgroup-header {
-    font-weight: bold;
-    font-size: 0.9em;
-    padding-top: 8px;
-    padding-bottom: 2px;
-    background-color: #f8f9fa;
-}
-.skeleton-loading {
-    animation: skeleton-loading 1.5s infinite ease-in-out;
-    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-    background-size: 200% 100%;
-}
-@keyframes skeleton-loading {
-    0% { background-position: 200% 0; }
-    100% { background-position: -200% 0; }
-}
-.skeleton-row {
-    height: 38px;
-    margin-bottom: 8px;
-    border-radius: 4px;
-}
-.sr-only {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
-    border-width: 0;
-}
-[aria-busy="true"] {
-    opacity: 0.7;
-    cursor: progress;
-}
-.filter-badge {
-    display: inline-flex;
-    align-items: center;
-    margin-right: 8px;
-    margin-bottom: 8px;
-    padding: .35em .65em;
-    font-size: .875em;
-    font-weight: 500;
-    line-height: 1;
-    color: #333;
-    background-color: #e2e6ea;
-    border-radius: .25rem;
-}
-.filter-badge .btn-close {
-    font-size: .65em;
-    margin-left: .5em;
-    opacity: .75;
-}
-.filter-badge .btn-close:hover {
-    opacity: 1;
-}
-.sortable-header {
-    cursor: pointer;
-    position: relative;
-    padding-right: 20px;
-    white-space: nowrap;
-}
-.sortable-header:hover {
-    color: #44a2d2;
-}
-.sortable-header::after {
-    content: '';
-    position: absolute;
-    right: 5px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 0;
-    height: 0;
-    border-left: 5px solid transparent;
-    border-right: 5px solid transparent;
-    opacity: 0.4;
-}
-.sortable-header.asc::after {
-    border-bottom: 5px solid black;
-    opacity: 1;
-}
-.sortable-header.desc::after {
-    border-top: 5px solid black;
-    opacity: 1;
-}
-.toast-container {
-    right: 1rem;
-    z-index: 1;
-}
-.card-view-container {
-    display: grid;
-    gap: 15px;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    margin-top: 15px;
-}
-.card-norma {
-    border: 1px solid #e0e0e0;
-    border-radius: 0.25rem;
-    padding: 15px;
-    background-color: #fff;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-    display: flex;
-    flex-direction: column;
-}
-.card-norma .card-header-custom {
-    font-weight: bold;
-    margin-bottom: 0.5rem;
-    font-size: 1.1em;
-    color: #44a2d2;
-    transition: color 0.2s ease-in-out;
-    line-height: 1.3;
-}
-.card-norma a.card-header-custom:hover {
-    color: #2a7da2;
-    text-decoration: underline;
-}
-.card-norma .card-author {
-    font-size: 0.9em;
-    font-weight: 500;
-    padding: 5px 0;
-    margin-bottom: 5px;
-    border-bottom: 1px solid #f0f0f0;
-    display: flex;
-    align-items: center;
-}
-.card-norma .card-body-custom {
-    font-size: 0.9em;
-    margin-bottom: 10px;
-    flex-grow: 1;
-}
-.card-norma .card-meta-custom {
-    font-size: 0.85em;
-    color: #6c757d;
-    margin-bottom: 5px;
-    display: flex;
-    align-items: center;
-}
-.card-norma .card-actions-custom {
-    margin-top: auto;
-    text-align: right;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 5px;
-    justify-content: flex-end;
-}
-mark {
-    background-color: #FFEB3B;
-    padding: 0.1em 0.2em;
-    border-radius: 3px;
-}
-.timeline {
-    position: relative;
-    padding-left: 30px;
-    border-left: 2px solid #e0e0e0;
-}
-.timeline-item {
-    position: relative;
-    margin-bottom: 25px;
-}
-.timeline-dot {
-    position: absolute;
-    left: -40px;
-    top: 5px;
-    width: 18px;
-    height: 18px;
-    border-radius: 50%;
-    background-color: #ccc;
-    border: 3px solid #fff;
-    box-shadow: 0 0 0 2px #ccc;
-}
-.timeline-item.concluido .timeline-dot {
-    background-color: #28a745;
-    box-shadow: 0 0 0 2px #28a745;
-}
-.timeline-item.atual .timeline-dot {
-    background-color: #0d6efd;
-    box-shadow: 0 0 0 2px #0d6efd;
-    transform: scale(1.2);
-}
-.timeline-content {
-    position: relative;
-    top: -5px;
-}
-.timeline-date {
-    font-size: 0.85em;
-    color: #6c757d;
-    margin-bottom: 5px;
-    font-weight: bold;
-}
-.timeline-title {
-    font-size: 1.1em;
-    margin-bottom: 8px;
-}
-.timeline-item.atual .timeline-title {
-    color: #0d6efd;
-}
-.timeline-text {
-    font-size: 0.9em;
-    color: #343a40;
-    margin-bottom: 0;
-}
-#form-pesquisa .card-body {
-    padding: 1.5rem;
-}
-#form-pesquisa .card-body h5 {
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: #495057;
-    margin-bottom: 1rem;
-    padding-bottom: 0.5rem;
-    border-bottom: 1px solid #dee2e6;
-}
-#resultados table .celula-titulo-norma {
-    font-weight: 600;
-    color: #343a40;
-    font-size: 0.95em;
-    vertical-align: middle;
-}
-/* Shepherd Tour Styles */
-.shepherd-theme-custom .shepherd-header {
-    background-color: #44a2d2;
-    color: white;
-    padding: 0.8rem;
-    border-radius: 5px 5px 0 0;
-}
-.shepherd-theme-custom .shepherd-text {
-    color: #333;
-    padding: 1rem;
-    font-size: 0.95rem;
-}
-.shepherd-theme-custom .shepherd-footer {
-    padding: 0 1rem 1rem;
-}
-.shepherd-theme-custom .shepherd-button {
-    background: #44a2d2;
-    color: white;
-    border: none;
-    padding: 0.5rem 1rem;
-    margin: 0 0.5rem;
-    border-radius: 3px;
-    transition: background 0.3s;
-}
-.shepherd-theme-custom .shepherd-button:hover {
-    background: #2a7da2;
-}
-.shepherd-theme-custom .shepherd-button.shepherd-button-secondary {
-    background: #f8f9fa;
-    color: #333;
-}
-.shepherd-theme-custom .shepherd-cancel-icon {
-    color: white;
-}
-/* Help Button */
-#btn-ajuda-tour {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    z-index: 1000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-}
+    /* ============================================
+       CLASSES CUSTOMIZADAS APENAS QUANDO NECESSÁRIO
+       PADRONIZAÇÃO COM TEMA GLOBAL DO SISTEMA
+       Cores principais do tema: --bs-primary (#44a2d2)
+       Fonte padrão: --bs-body-font-size (0.93rem)
+       Fonte botões: --bs-btn-font-size (13px)
+       ============================================ */
+    
+    /* 1. Filter Toggle Icon - animação específica */
+    .filter-toggle-icon {
+        transition: transform 0.35s ease-in-out;
+        display: inline-block;
+    }
+    .filter-toggle-icon.expanded {
+        transform: rotate(90deg);
+    }
+    
+    /* 1.1. Garantir legibilidade do botão de filtros avançados no hover */
+    button[data-bs-target="#advancedSearch"],
+    button[data-bs-target="#advancedSearch"]:hover,
+    button[data-bs-target="#advancedSearch"]:focus,
+    button[data-bs-target="#advancedSearch"]:active {
+        color: var(--bs-body-color, #212529) !important;
+        background-color: transparent !important;
+    }
+    button[data-bs-target="#advancedSearch"]:hover {
+        color: var(--bs-primary, #44a2d2) !important;
+        background-color: transparent !important;
+    }
+    button[data-bs-target="#advancedSearch"] span.fw-semibold,
+    button[data-bs-target="#advancedSearch"]:hover span.fw-semibold,
+    button[data-bs-target="#advancedSearch"]:focus span.fw-semibold {
+        color: inherit !important;
+    }
+    button[data-bs-target="#advancedSearch"] i,
+    button[data-bs-target="#advancedSearch"]:hover i {
+        color: var(--bs-primary, #44a2d2) !important;
+    }
+    
+    /* 1.2. Garantir legibilidade do card-header dos filtros avançados no hover */
+    #advancedSearch .card-header,
+    #advancedSearch .card-header:hover,
+    #advancedSearch .card-header h5,
+    #advancedSearch .card-header h5:hover {
+        background-color: #fff !important;
+        color: var(--bs-body-color, #212529) !important;
+    }
+    #advancedSearch .card-header i,
+    #advancedSearch .card-header i:hover {
+        color: var(--bs-primary, #44a2d2) !important;
+    }
+    
+    /* 2. TomSelect customizações */
+    .ts-dropdown {
+        font-size: var(--bs-body-font-size, 1rem);
+    }
+    
+    .ts-dropdown .optgroup-header {
+        font-size: 0.9em;
+        padding-top: 8px;
+        padding-bottom: 2px;
+        background-color: var(--bs-gray-100, #f8f9fa);
+    }
+    
+    /* Harmonizar tamanho de fonte das opções no dropdown */
+    .ts-dropdown .option,
+    .ts-dropdown .ts-option {
+        font-size: var(--bs-body-font-size, 1rem);
+        padding: 0.5rem 0.75rem;
+        line-height: 1.5;
+    }
+    
+    /* Garantir que o texto das opções tenha tamanho consistente */
+    .ts-dropdown .option .text,
+    .ts-dropdown .ts-option .text,
+    .ts-dropdown .option,
+    .ts-dropdown .ts-option {
+        font-size: var(--bs-body-font-size, 1rem);
+    }
+    
+    /* Input de busca no dropdown */
+    .ts-dropdown input[type="text"],
+    .ts-dropdown input[type="search"],
+    .ts-dropdown .input-wrap input {
+        font-size: var(--bs-body-font-size, 1rem);
+        padding: 0.5rem 0.75rem;
+    }
+    
+    /* Garantir que o texto de "no results" e outros textos no dropdown tenham tamanho consistente */
+    .ts-dropdown .no-results,
+    .ts-dropdown .create {
+        font-size: var(--bs-body-font-size, 1rem);
+        padding: 0.5rem 0.75rem;
+    }
+    
+    /* 2.1. Padronização visual entre selects múltiplos e simples */
+    /* Garantir que selects simples e múltiplos tenham aparência consistente quando selecionados */
+    
+    /* Estilo padronizado para chips em selects múltiplos - mais discretos */
+    .ts-wrapper.multi .ts-control .item {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.125rem 0.375rem;
+        margin: 0;
+        background-color: var(--bs-tertiary-bg, #f8f9fa);
+        color: var(--bs-body-color, #212529);
+        border: 1px solid var(--bs-border-color-translucent, rgba(0, 0, 0, 0.075));
+        border-radius: 0.25rem;
+        font-size: var(--bs-body-font-size, 1rem);
+        line-height: 1.5;
+        font-weight: 400;
+        height: auto;
+        max-height: calc(1.5em + 0.25rem);
+    }
+    
+    /* Estilo para o item selecionado em selects simples - mais discreto */
+    .ts-wrapper.single .ts-control .item {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.125rem 0.375rem;
+        margin: 0;
+        background-color: var(--bs-tertiary-bg, #f8f9fa);
+        color: var(--bs-body-color, #212529);
+        border: 1px solid var(--bs-border-color-translucent, rgba(0, 0, 0, 0.075));
+        border-radius: 0.25rem;
+        font-size: var(--bs-body-font-size, 1rem);
+        line-height: 1.5;
+        font-weight: 400;
+        height: auto;
+        max-height: calc(1.5em + 0.25rem);
+    }
+    
+    /* Garantir padding e font-size consistente no controle - usar mesma fonte dos inputs */
+    /* Altura fixa para não mudar quando há itens selecionados */
+    .ts-wrapper.single .ts-control,
+    .ts-wrapper.multi .ts-control {
+        padding: 0.375rem 0.75rem;
+        min-height: calc(1.5em + 0.75rem + 2px);
+        height: calc(1.5em + 0.75rem + 2px);
+        font-size: var(--bs-body-font-size, 1rem);
+        line-height: 1.5;
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.25rem;
+        overflow: hidden;
+    }
+    
+    /* Garantir que o controle tenha tamanho de fonte e altura consistente em todos os estados */
+    .ts-wrapper.single .ts-control,
+    .ts-wrapper.multi .ts-control,
+    .ts-wrapper.single:not(.has-items) .ts-control,
+    .ts-wrapper.multi:not(.has-items) .ts-control,
+    .ts-wrapper.single.has-items .ts-control,
+    .ts-wrapper.multi.has-items .ts-control {
+        font-size: var(--bs-body-font-size, 1rem);
+        height: calc(1.5em + 0.75rem + 2px);
+        min-height: calc(1.5em + 0.75rem + 2px);
+    }
+    
+    /* Botão de remoção consistente para selects múltiplos - mais discreto */
+    .ts-wrapper.multi .ts-control .item .remove {
+        border-left: 1px solid var(--bs-border-color-translucent, rgba(0, 0, 0, 0.075));
+        padding-left: 0.375rem;
+        margin-left: 0.375rem;
+        cursor: pointer;
+        opacity: 0.5;
+        color: var(--bs-body-color, #212529);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        align-self: center;
+    }
+    
+    .ts-wrapper.multi .ts-control .item .remove:hover {
+        opacity: 1;
+        background-color: var(--bs-danger-bg-subtle, rgba(220, 53, 69, 0.1));
+        color: var(--bs-danger, #dc3545);
+    }
+    
+    /* Botão clear para selects simples */
+    .ts-wrapper.single .ts-control .clear-button {
+        color: #6c757d;
+        opacity: 0.6;
+    }
+    
+    .ts-wrapper.single .ts-control .clear-button:hover {
+        opacity: 1;
+        color: #212529;
+    }
+    
+    /* Garantir que o input de busca tenha o mesmo estilo em ambos */
+    .ts-wrapper.single .ts-control input,
+    .ts-wrapper.multi .ts-control input {
+        font-size: var(--bs-body-font-size, 1rem);
+        padding: 0;
+        margin: 0;
+        color: inherit;
+        height: auto;
+        line-height: 1.5;
+        border: none;
+        background: transparent;
+        flex: 1;
+        min-width: 50px;
+    }
+    
+    /* Placeholder consistente */
+    .ts-wrapper.single .ts-control .placeholder,
+    .ts-wrapper.multi .ts-control .placeholder {
+        color: #6c757d;
+        font-size: var(--bs-body-font-size, 1rem);
+        padding: 0;
+        line-height: 1.5;
+    }
+    
+    /* Garantir que o placeholder tenha o mesmo tamanho mesmo quando o controle está vazio */
+    .ts-wrapper.single:not(.has-items) .ts-control .placeholder,
+    .ts-wrapper.multi:not(.has-items) .ts-control .placeholder {
+        font-size: var(--bs-body-font-size, 1rem);
+    }
+    
+    /* Garantir altura fixa mesmo quando há itens selecionados */
+    .ts-wrapper.single.has-items .ts-control,
+    .ts-wrapper.multi.has-items .ts-control {
+        min-height: calc(1.5em + 0.75rem + 2px);
+        height: calc(1.5em + 0.75rem + 2px);
+        font-size: var(--bs-body-font-size, 1rem);
+    }
+    
+    /* Harmonizar selects nativos com TomSelect */
+    /* Aplicar apenas a selects que não estão dentro de um wrapper TomSelect */
+    select.form-select:not(.ts-hidden-accessible) {
+        padding: 0.375rem 0.75rem;
+        font-size: var(--bs-body-font-size, 1rem);
+        line-height: 1.5;
+        min-height: calc(1.5em + 0.75rem + 2px);
+    }
+    
+    /* Garantir que selects dentro de wrapper TomSelect não sejam afetados */
+    .ts-wrapper select.form-select {
+        padding: 0;
+        font-size: inherit;
+        line-height: inherit;
+        min-height: auto;
+    }
+    
+    /* 3. Skeleton Loading - funcionalidade específica */
+    .skeleton-loading {
+        animation: skeleton-loading 1.5s infinite ease-in-out;
+        background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+        background-size: 200% 100%;
+    }
+    @keyframes skeleton-loading {
+        0% { background-position: 200% 0; }
+        100% { background-position: -200% 0; }
+    }
+    .skeleton-row {
+        height: 38px;
+        margin-bottom: 8px;
+        border-radius: var(--bs-border-radius, 0.25rem);
+    }
+    
+    /* 4. Acessibilidade - usar classes Bootstrap quando possível */
+    [aria-busy="true"] {
+        opacity: 0.7;
+        cursor: progress;
+    }
+    
+    /* 5. Badges de Filtro - usar Bootstrap badge + utilities */
+    .filter-badge {
+        display: inline-flex;
+        align-items: center;
+        margin-right: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    /* 6. Sortable Header - funcionalidade específica de ordenação */
+    .sortable-header {
+        cursor: pointer;
+        user-select: none;
+        position: relative;
+        padding-right: 2rem !important;
+        white-space: nowrap;
+    }
+    .sortable-header:hover {
+        color: var(--bs-primary, #44a2d2);
+        background-color: rgba(68, 162, 210, 0.05) !important; /* Opacidade do tema primário */
+    }
+    .sortable-header::after {
+        content: '⇅';
+        position: absolute;
+        right: 0.5rem;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 0.875rem;
+        color: var(--bs-secondary, #6c757d);
+        opacity: 0.4;
+        font-weight: normal;
+        transition: all 0.15s ease;
+    }
+    .sortable-header:hover::after {
+        opacity: 0.7;
+        color: var(--bs-primary, #44a2d2);
+    }
+    .sortable-header.asc::after {
+        content: '↑';
+        color: var(--bs-primary, #44a2d2);
+        opacity: 1;
+        font-weight: bold;
+    }
+    .sortable-header.desc::after {
+        content: '↓';
+        color: var(--bs-primary, #44a2d2);
+        opacity: 1;
+        font-weight: bold;
+    }
+    .sortable-header.asc,
+    .sortable-header.desc {
+        background-color: rgba(68, 162, 210, 0.08) !important; /* Opacidade do tema primário */
+        font-weight: 600;
+    }
+    
+    /* 7. Toast Container - usar position utilities do Bootstrap quando possível */
+    .toast-container {
+        position: fixed;
+        top: 1rem;
+        right: 1rem;
+        z-index: 1055;
+    }
+    
+    /* 8. Card View Container - grid específico para cards */
+    .card-view-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+    @media (max-width: 576px) {
+        .card-view-container {
+            grid-template-columns: 1fr;
+        }
+    }
+    @media (min-width: 992px) {
+        .card-view-container {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+    @media (min-width: 1400px) {
+        .card-view-container {
+            grid-template-columns: repeat(3, 1fr);
+        }
+    }
+    
+    /* 9. Card Norma - layout específico (usar Bootstrap card + esta classe) */
+    .card-norma {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        position: relative;
+        transition: box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        /* Otimizações para evitar borda serrilhada no hover */
+        will-change: transform, box-shadow;
+        backface-visibility: hidden;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        /* Força renderização suave dos cantos */
+        border-radius: var(--bs-border-radius, 0.375rem);
+        isolation: isolate; /* Cria novo contexto de empilhamento */
+        /* Renderização suave de bordas com aceleração de hardware */
+        -webkit-transform: translateZ(0);
+        transform: translateZ(0);
+        -webkit-backface-visibility: hidden;
+        /* Anti-aliasing específico para bordas arredondadas */
+        -webkit-perspective: 1000px;
+        perspective: 1000px;
+        /* Força renderização de subpixels para bordas suaves */
+        -webkit-transform-style: preserve-3d;
+        transform-style: preserve-3d;
+    }
+    /* Pseudo-elemento para borda suave no hover */
+    .card-norma::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        border-radius: inherit;
+        border: 1px solid transparent;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        -webkit-transform: translateZ(0);
+        transform: translateZ(0);
+        -webkit-backface-visibility: hidden;
+        backface-visibility: hidden;
+    }
+    .card-norma:hover {
+        /* Usa translate3d para melhor renderização */
+        -webkit-transform: translate3d(0, -4px, 0);
+        transform: translate3d(0, -4px, 0);
+        box-shadow: 0 0.75rem 1.5rem rgba(0, 0, 0, 0.15) !important;
+        border-color: transparent; /* Remove borda padrão no hover */
+    }
+    .card-norma:hover::before {
+        opacity: 1;
+        border-color: var(--bs-primary, #44a2d2); /* Cor primária do tema */
+    }
+    .card-norma:focus-within {
+        outline: 2px solid var(--bs-primary, #44a2d2); /* Cor primária do tema */
+        outline-offset: 2px;
+    }
+    .card-norma .card-body {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        padding: 1.5rem;
+    }
+    
+    /* CARD HEADER - Padronização com tema global */
+    .card-norma .card-header {
+        background-color: rgba(68, 162, 210, 0.12) !important; /* Fundo destacado com cor primária do tema - mantém legibilidade */
+        border-bottom: 2px solid rgba(68, 162, 210, 0.2) !important; /* Borda inferior para mais destaque */
+        padding: 1rem 1.25rem !important; /* Espaçamento adequado */
+    }
+    
+    /* Seções com background unificado - usando cores do tema */
+    .card-section-detalhes,
+    .card-section-status {
+        background-color: rgba(68, 162, 210, 0.08) !important; /* Opacidade da cor primária do tema */
+        border-left: 3px solid var(--bs-primary, #44a2d2); /* Cor primária do tema */
+        border-radius: var(--bs-border-radius, 0.375rem);
+        padding: 1.25rem;
+        margin-bottom: 1.25rem;
+    }
+    
+    /* Redução da margem inferior da seção de status para aproximar do footer */
+    .card-section-status {
+        margin-bottom: 0.5rem;
+    }
+    
+    /* Texto das informações sem negrito para diferenciar do label */
+    .card-section-detalhes span,
+    .card-section-status span {
+        font-weight: 400 !important; /* Peso normal para valores, labels mantêm negrito */
+    }
+    
+    /* Melhorias de legibilidade e espaçamento */
+    .card-body .mb-4 {
+        margin-bottom: 1.5rem !important;
+    }
+    .card-body strong.text-uppercase {
+        font-size: 0.875rem;
+        letter-spacing: 0.5px;
+        font-weight: 600;
+        color: var(--bs-dark, #212529);
+    }
+    .card-body .text-break {
+        line-height: 1.7;
+        font-size: 0.95rem;
+        color: var(--bs-body-color, #212529);
+    }
+    /* Melhor contraste para texto secundário */
+    .card-body .text-secondary {
+        color: var(--bs-gray-700, #495057) !important;
+        font-weight: 500;
+    }
+    /* Ícones importantes mais visíveis (mantém text-primary e text-muted conforme HTML) */
+    .card-body .text-primary.fa,
+    .card-body .text-primary.fas,
+    .card-body .text-primary.far {
+        color: var(--bs-primary, #44a2d2) !important; /* Cor primária do tema */
+    }
+    .card-body .text-muted.fa,
+    .card-body .text-muted.fas,
+    .card-body .text-muted.far {
+        color: var(--bs-gray-600, #6c757d) !important;
+    }
+    
+    /* 11. Badge clicável - cursor pointer - melhorado feedback visual */
+    .badge-clickable {
+        cursor: pointer;
+        transition: all 0.2s ease;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        /* Otimizações para evitar borda serrilhada no hover */
+        will-change: transform;
+        backface-visibility: hidden;
+        transform: translateZ(0); /* Força aceleração de hardware */
+    }
+    /* Estado normal - garantir legibilidade do texto em badges com fundo claro */
+    .badge.bg-primary.bg-opacity-10.text-primary.badge-clickable,
+    .badge.bg-primary.bg-opacity-10.text-primary.badge-clickable *,
+    .badge.bg-primary.bg-opacity-10.text-primary.badge-clickable i {
+        color: var(--bs-primary, #44a2d2) !important; /* Cor primária do tema */
+        font-weight: 500;
+    }
+    /* Garantir que links visitados também mantenham cor legível */
+    .badge.bg-primary.bg-opacity-10.text-primary.badge-clickable:link,
+    .badge.bg-primary.bg-opacity-10.text-primary.badge-clickable:visited,
+    .badge.bg-primary.bg-opacity-10.text-primary.badge-clickable:link *,
+    .badge.bg-primary.bg-opacity-10.text-primary.badge-clickable:visited * {
+        color: var(--bs-primary, #44a2d2) !important; /* Cor primária do tema */
+    }
+    /* Estado focus para badges com bg-opacity-10 - mudar para fundo sólido e texto branco */
+    .badge.bg-primary.bg-opacity-10.text-primary.badge-clickable:focus,
+    .badge.bg-primary.bg-opacity-10.text-primary.badge-clickable:focus-visible,
+    .badge.bg-primary.bg-opacity-10.text-primary.badge-clickable:focus *,
+    .badge.bg-primary.bg-opacity-10.text-primary.badge-clickable:focus-visible * {
+        background-color: var(--bs-primary, #44a2d2) !important; /* Cor primária do tema */
+        color: #fff !important;
+        border-color: var(--bs-primary, #44a2d2) !important;
+        outline: 2px solid var(--bs-primary, #44a2d2) !important;
+        outline-offset: 2px !important;
+    }
+    .badge-clickable:hover {
+        transform: translate3d(0, -2px, 0) scale(1.05); /* Usa translate3d para melhor renderização */
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    }
+    /* Hover para botões de Texto Integral e Texto Consolidado - texto branco */
+    .badge.bg-primary.badge-clickable:hover,
+    .badge.bg-primary.badge-clickable:hover * {
+        background-color: var(--bs-primary, #44a2d2) !important; /* Cor primária do tema */
+        color: #fff !important;
+        border-color: var(--bs-primary, #44a2d2) !important;
+    }
+    /* Hover específico para badges com bg-opacity-10 - garantir texto branco legível */
+    .badge.bg-primary.bg-opacity-10.text-primary.badge-clickable:hover,
+    .badge.bg-primary.bg-opacity-10.text-primary.badge-clickable:hover *,
+    .badge.bg-primary.bg-opacity-10.text-primary.badge-clickable:hover i,
+    .badge.bg-primary.bg-opacity-10.text-primary.badge-clickable:link:hover,
+    .badge.bg-primary.bg-opacity-10.text-primary.badge-clickable:visited:hover,
+    .badge.bg-primary.bg-opacity-10.text-primary.badge-clickable:link:hover *,
+    .badge.bg-primary.bg-opacity-10.text-primary.badge-clickable:visited:hover * {
+        background-color: var(--bs-primary, #44a2d2) !important; /* Cor primária do tema */
+        color: #fff !important;
+        border-color: var(--bs-primary, #44a2d2) !important;
+    }
+    /* Estados active para botões de Texto Integral quando não está em hover */
+    .badge.bg-primary.badge-clickable:active:not(:hover),
+    .badge.bg-primary.badge-clickable:active:not(:hover) * {
+        background-color: var(--bs-primary, #44a2d2) !important; /* Cor primária do tema */
+        color: #fff !important;
+        border-color: var(--bs-primary, #44a2d2) !important;
+    }
+    /* Estado focus - garantir texto legível (branco sobre fundo azul) */
+    .badge.bg-primary.badge-clickable:focus,
+    .badge.bg-primary.badge-clickable:focus-visible,
+    .badge.bg-primary.badge-clickable:focus *,
+    .badge.bg-primary.badge-clickable:focus-visible * {
+        background-color: var(--bs-primary, #44a2d2) !important; /* Cor primária do tema */
+        color: #fff !important;
+        border-color: var(--bs-primary, #44a2d2) !important;
+        outline: 2px solid var(--bs-primary, #44a2d2) !important;
+        outline-offset: 2px !important;
+    }
+    /* Quando focus e hover juntos, manter texto branco */
+    .badge.bg-primary.badge-clickable:focus:hover,
+    .badge.bg-primary.badge-clickable:focus-visible:hover,
+    .badge.bg-primary.badge-clickable:focus:hover *,
+    .badge.bg-primary.badge-clickable:focus-visible:hover * {
+        background-color: var(--bs-primary, #44a2d2) !important; /* Cor primária do tema */
+        color: #fff !important;
+        border-color: var(--bs-primary, #44a2d2) !important;
+    }
+    /* Visited mantém estado normal (texto azul escuro) a menos que esteja em hover ou focus */
+    .badge.bg-primary.badge-clickable:visited:not(:hover):not(:focus):not(:focus-visible),
+    .badge.bg-primary.badge-clickable:visited:not(:hover):not(:focus):not(:focus-visible) * {
+        background-color: rgba(68, 162, 210, 0.1) !important; /* Opacidade da cor primária do tema */
+        color: var(--bs-primary, #44a2d2) !important; /* Cor primária do tema */
+        border-color: rgba(68, 162, 210, 0.25) !important;
+    }
+    .badge.bg-success.badge-clickable:hover,
+    .badge.bg-success.badge-clickable:hover * {
+        background-color: var(--bs-success, #28a745) !important;
+        color: #fff !important;
+        border-color: var(--bs-success, #28a745) !important;
+    }
+    /* Estados active para botões de Texto Consolidado */
+    .badge.bg-success.badge-clickable:active,
+    .badge.bg-success.badge-clickable:active * {
+        background-color: var(--bs-success, #28a745) !important;
+        color: #fff !important;
+        border-color: var(--bs-success, #28a745) !important;
+    }
+    /* Estado focus para botões de Texto Consolidado - garantir legibilidade */
+    .badge.bg-success.badge-clickable:focus,
+    .badge.bg-success.badge-clickable:focus-visible,
+    .badge.bg-success.badge-clickable:focus *,
+    .badge.bg-success.badge-clickable:focus-visible * {
+        background-color: var(--bs-success, #28a745) !important;
+        color: #fff !important;
+        border-color: var(--bs-success, #28a745) !important;
+        outline: 2px solid var(--bs-success, #28a745) !important;
+        outline-offset: 2px !important;
+    }
+    /* Visited mantém estado normal a menos que esteja em hover ou focus */
+    .badge.bg-success.badge-clickable:visited:not(:hover):not(:focus):not(:focus-visible),
+    .badge.bg-success.badge-clickable:visited:not(:hover):not(:focus):not(:focus-visible) * {
+        background-color: rgba(40, 167, 69, 0.1) !important;
+        color: var(--bs-success, #28a745) !important;
+        border-color: rgba(40, 167, 69, 0.25) !important;
+    }
+    /* Hover para badge de Pasta Digital - texto preto */
+    .badge.bg-warning.badge-clickable:hover,
+    .badge.bg-warning.badge-clickable:hover * {
+        background-color: var(--bs-warning, #ffc107) !important;
+        color: #000 !important;
+        border-color: var(--bs-warning, #ffc107) !important;
+    }
+    /* Estado focus para badge de Pasta Digital - garantir legibilidade */
+    .badge.bg-warning.badge-clickable:focus,
+    .badge.bg-warning.badge-clickable:focus-visible,
+    .badge.bg-warning.badge-clickable:focus *,
+    .badge.bg-warning.badge-clickable:focus-visible * {
+        background-color: var(--bs-warning, #ffc107) !important;
+        color: #000 !important;
+        border-color: var(--bs-warning, #ffc107) !important;
+        outline: 2px solid var(--bs-warning, #ffc107) !important;
+        outline-offset: 2px !important;
+    }
+    /* Quando focus e hover juntos, manter texto preto */
+    .badge.bg-warning.badge-clickable:focus:hover,
+    .badge.bg-warning.badge-clickable:focus-visible:hover,
+    .badge.bg-warning.badge-clickable:focus:hover *,
+    .badge.bg-warning.badge-clickable:focus-visible:hover * {
+        background-color: var(--bs-warning, #ffc107) !important;
+        color: #000 !important;
+        border-color: var(--bs-warning, #ffc107) !important;
+    }
+    /* Estados active para badge de Pasta Digital */
+    .badge.bg-warning.badge-clickable:active,
+    .badge.bg-warning.badge-clickable:active * {
+        background-color: var(--bs-warning, #ffc107) !important;
+        color: #000 !important;
+        border-color: var(--bs-warning, #ffc107) !important;
+    }
+    
+    /* 12. Card title link - indicar que é clicável */
+    .card-title-link {
+        transition: color 0.2s ease;
+        cursor: pointer;
+    }
+    .card-title-link:hover {
+        color: var(--bs-primary, #44a2d2) !important; /* Cor primária do tema */
+    }
+    .card-title-link:focus {
+        outline: 2px solid var(--bs-primary, #44a2d2); /* Cor primária do tema */
+        outline-offset: 2px;
+        border-radius: 0.25rem;
+    }
+    .card-title-link .fa-external-link-alt {
+        opacity: 0.5;
+        transition: opacity 0.2s ease;
+        font-size: 0.85em;
+    }
+    .card-title-link:hover .fa-external-link-alt {
+        opacity: 1;
+    }
+    
+    /* 10. Highlight de texto de busca */
+    mark {
+        background-color: #FFEB3B;
+        padding: 0.1em 0.2em;
+        border-radius: var(--bs-border-radius-sm, 0.25rem);
+    }
+    
+    /* 11. Timeline - componente específico (se usado) */
+    .timeline {
+        position: relative;
+        padding-left: 1.875rem;
+        border-left: 2px solid var(--bs-gray-300, #dee2e6);
+    }
+    .timeline-item {
+        position: relative;
+        margin-bottom: 1.5rem;
+    }
+    .timeline-dot {
+        position: absolute;
+        left: -2.5rem;
+        top: 0.3rem;
+        width: 1.125rem;
+        height: 1.125rem;
+        border-radius: 50%;
+        background-color: var(--bs-gray-400, #ced4da);
+        border: 3px solid #fff;
+        box-shadow: 0 0 0 2px var(--bs-gray-400, #ced4da);
+    }
+    .timeline-item.concluido .timeline-dot {
+        background-color: var(--bs-success, #28a745);
+        box-shadow: 0 0 0 2px var(--bs-success, #28a745);
+    }
+    .timeline-item.atual .timeline-dot {
+        background-color: var(--bs-primary, #44a2d2);
+        box-shadow: 0 0 0 2px var(--bs-primary, #44a2d2);
+        transform: scale(1.2);
+    }
+    
+    /* 12. Canvas container - max width e centralizado */
+    .canvas-container {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+    #resumo-estatistico .canvas-container {
+        min-height: 300px;
+        max-height: 450px;
+        height: auto;
+        overflow: visible !important;
+        max-width: none !important;
+        width: 100% !important;
+        padding-right: 80px !important;
+    }
+    #resumo-estatistico {
+        overflow: visible !important;
+        width: 100% !important;
+        padding-right: 0 !important;
+    }
+    #resumo-estatistico canvas {
+        max-width: none !important;
+        width: 100% !important;
+    }
+    
+    /* 13. Skip links - acessibilidade */
+    .skip-link {
+        position: fixed;
+        top: -100px;
+        left: 0;
+        background: var(--bs-primary, #44a2d2);
+        color: #fff;
+        padding: 12px 20px;
+        text-decoration: none;
+        z-index: 9999;
+        border-radius: 0 0 4px 4px;
+        font-weight: 600;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        transition: top 0.2s ease-in-out;
+    }
+    .skip-link:focus {
+        top: 0;
+        outline: 3px solid var(--bs-warning, #ffc107);
+        outline-offset: 2px;
+    }
+    
+    /* 14. Focus visible - melhorar navegação por teclado */
+    *:focus-visible {
+        outline: 2px solid var(--bs-primary, #44a2d2);
+        outline-offset: 2px;
+    }
+    
+    /* 15. Skeleton title - para loading */
+    .skeleton-title {
+        height: 20px;
+        width: 200px;
+        margin-bottom: 15px;
+    }
 </style>
 
-<div class="toast-container position-fixed top-0 end-0 p-3">
+<!-- Skip Links para Acessibilidade -->
+<a href="#form-pesquisa" class="skip-link">Pular para filtros de pesquisa</a>
+<a href="#container-principal-resultados" class="skip-link">Pular para resultados</a>
+
+<div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1055;"><!-- z-index necessário para sobrepor modais -->
     <div class="toast" id="filter-cleared-toast" role="alert" aria-live="assertive" aria-atomic="true">
         <div class="toast-header">
             <i class="fa fa-info-circle text-info me-2"></i>
@@ -294,57 +780,139 @@ mark {
     </div>
 </div>
 
-<h1 class="firstHeading font-size-18">Pesquisa de Normas Jurídicas</h1>
+<div class="row mb-2">
+    <div class="col-12 col-md-8 align-self-center">
+        <h1 class="firstHeading font-size-18">Pesquisa de Legislação</h1>
+    </div>
+    <div class="col-12 col-md-4 text-start text-md-end">
+        <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Norma'])">
+            <a class="btn btn-primary d-print-none" href="<dtml-var portal_url>/cadastros/norma_juridica/norma_juridica_form"><i class="fa fa-fw fa-plus"></i> Incluir Norma</a>
+        </dtml-if>
+    </div>
+</div>
 <div class="d-grid gap-2 mb-3">
-    <button class="btn btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#filtro-container" aria-expanded="false" id="btn-toggle-filtros" style="display: none;">
+    <button class="btn btn-outline-primary" type="button" id="btn-toggle-filtros" data-bs-toggle="collapse" data-bs-target="#filtro-container" aria-expanded="false">
         <i class="fa fa-filter me-2"></i> Mostrar / Editar Filtros
     </button>
 </div>
 
-<form method="get" action="<dtml-var portal_url>/normas_table_json" id="form-pesquisa" autocomplete="off">
+<!-- Modal para Normas Relacionadas -->
+<div class="modal fade" id="modalNormasRelacionadas" tabindex="-1" aria-labelledby="modalNormasRelacionadasLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalNormasRelacionadasLabel">Normas Relacionadas</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body" id="modalNormasRelacionadasBody">
+                <!-- Conteúdo carregado via AJAX -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<main id="main-content">
+<form method="get" action="<dtml-var portal_url>/normas_table_json" id="form-pesquisa" autocomplete="off" role="search" aria-label="Formulário de pesquisa de legislação">
   <input type="hidden" name="formato" value="" id="formato">
   <input type="hidden" name="pagina" value="1" id="pagina">
   <input type="hidden" name="ordem_campo" value="" id="ordem_campo">
   <input type="hidden" name="ordem_direcao" value="" id="ordem_direcao">
   <div class="collapse show" id="filtro-container">
-    <div class="card card-body bg-light mb-3">
-      <h5>Filtros Básicos</h5>
+    <div class="card mb-4">
+      <div class="card-header bg-white border-bottom">
+        <h5 class="mb-0 fw-semibold">
+          <i class="fas fa-filter text-primary me-2"></i>Filtros Básicos
+        </h5>
+      </div>
+      <div class="card-body">
       <div class="row g-3">
         <div class="col-md-6">
-          <label for="lst_tip_norma" class="form-label form-label-sm mb-1">Tipo de Norma:</label>
-          <select name="lst_tip_norma" id="lst_tip_norma" class="form-control form-control-sm" multiple placeholder="Selecione..."></select>
+          <label for="lst_tip_norma" class="form-label form-label-sm mb-1 fw-semibold">
+            <i class="fas fa-file-alt text-muted me-1"></i>Tipo de Norma:
+          </label>
+          <select name="lst_tip_norma" id="lst_tip_norma" class="form-select" multiple placeholder="Selecione..." aria-label="Selecione tipo de norma"></select>
         </div>
         <div class="col-md-3">
-          <label for="txt_numero" class="form-label form-label-sm mb-1">Número:</label>
-          <input type="text" name="txt_numero" id="txt_numero" class="form-control form-control-sm" placeholder="Ex: 123">
+          <label for="txt_numero" class="form-label form-label-sm mb-1 fw-semibold">
+            <i class="fas fa-hashtag text-muted me-1"></i>Número:
+          </label>
+          <input type="text" name="txt_numero" id="txt_numero" 
+                 class="form-control" 
+                 placeholder="Ex: 123"
+                 inputmode="numeric"
+                 pattern="[0-9]*"
+                 aria-describedby="txt_numero_feedback"
+                 aria-label="Número da norma">
+          <div class="invalid-feedback" id="txt_numero_feedback">
+            Por favor, insira apenas números.
+          </div>
         </div>
         <div class="col-md-3">
-          <label for="txt_ano" class="form-label form-label-sm mb-1">Ano:</label>
-          <input type="text" name="txt_ano" id="txt_ano" class="form-control form-control-sm" placeholder="Ex: 2024">
-        </div>
-      </div>
-      <div class="row g-3 mt-3">
-        <div class="col-md-4">
-          <label for="lst_tip_situacao_norma" class="form-label form-label-sm mb-1">Situação:</label>
-          <select name="lst_tip_situacao_norma" id="lst_tip_situacao_norma" class="form-control form-control-sm" placeholder="Situação..."></select>
-        </div>
-        <div class="col-md-8">
-          <label for="txt_assunto" class="form-label form-label-sm mb-1">Assunto ou Ementa:</label>
-          <input type="text" name="txt_assunto" id="txt_assunto" class="form-control form-control-sm" placeholder="Digite palavras-chave para buscar...">
-          <div class="form-check form-switch mt-1">
-            <input type="checkbox" class="form-check-input" name="chk_textual" id="chk_textual" value="on">
-            <label class="form-check-label" for="chk_textual">Pesquisar nos Textos Integrais</label>
+          <label for="txt_ano" class="form-label form-label-sm mb-1 fw-semibold">
+            <i class="fas fa-calendar text-muted me-1"></i>Ano:
+          </label>
+          <input type="text" name="txt_ano" id="txt_ano" 
+                 class="form-control" 
+                 placeholder="Ex: 2024"
+                 inputmode="numeric"
+                 pattern="[0-9]*"
+                 maxlength="4"
+                 aria-describedby="txt_ano_feedback"
+                 aria-label="Ano da norma">
+          <div class="invalid-feedback" id="txt_ano_feedback">
+            Por favor, insira um ano válido com 4 dígitos.
           </div>
         </div>
       </div>
+      <div class="row g-3 mt-0">
+        <div class="col-md-6">
+          <label for="lst_tip_situacao_norma" class="form-label form-label-sm mb-1 fw-semibold">
+            <i class="fas fa-info-circle text-muted me-1"></i>Situação:
+          </label>
+          <select name="lst_tip_situacao_norma" id="lst_tip_situacao_norma" class="form-select" placeholder="Situação..." aria-label="Selecione situação"></select>
+        </div>
+        <div class="col-md-6">
+          <label for="txt_assunto" class="form-label form-label-sm mb-1 fw-semibold">
+            <i class="fas fa-search text-muted me-1"></i>Assunto ou Ementa:
+          </label>
+          <input type="text" name="txt_assunto" id="txt_assunto" 
+                 class="form-control" 
+                 placeholder="Digite palavras-chave para buscar..."
+                 aria-describedby="txt_assunto_feedback">
+          <small id="txt_assunto_feedback" class="form-text text-muted d-none" role="status" aria-live="polite">
+            <i class="fa fa-spinner fa-spin me-1"></i> Buscando...
+          </small>
+          <div class="form-check form-switch mt-2">
+            <input type="checkbox" class="form-check-input" name="chk_textual" id="chk_textual" value="1">
+            <label class="form-check-label" for="chk_textual">
+              <i class="fas fa-file-alt text-muted me-1"></i>Pesquisar nos Textos Integrais
+            </label>
+          </div>
+        </div>
+      </div>
+      </div>
     </div>
 
-    <div class="row">
-        <div class="col-md-12">
-            <button type="button" class="btn btn-link py-0" data-bs-toggle="collapse" data-bs-target="#advancedSearch" aria-expanded="false" aria-controls="advancedSearch">
-                <i class="fas fa-chevron-right filter-toggle-icon me-2"></i>Filtros Avançados
-                <span id="badge-filtros" class="badge bg-secondary ms-1"
-                      data-bs-toggle="tooltip" data-bs-placement="top" title="Nenhum filtro ativo">
+    <div class="row mt-3">
+        <div class="col-12">
+            <button type="button" 
+                    class="btn btn-link py-2 text-decoration-none d-flex align-items-center" 
+                    data-bs-toggle="collapse" 
+                    data-bs-target="#advancedSearch" 
+                    aria-expanded="false" 
+                    aria-controls="advancedSearch"
+                    aria-label="Expandir filtros avançados">
+                <i class="fas fa-chevron-right filter-toggle-icon me-2"></i>
+                <span class="fw-semibold">Filtros Avançados</span>
+                <span id="badge-filtros" 
+                      class="badge bg-secondary ms-2"
+                      data-bs-toggle="tooltip" 
+                      data-bs-placement="top" 
+                      title="Nenhum filtro ativo"
+                      aria-label="Filtros ativos">
                     0
                 </span>
             </button>
@@ -352,35 +920,92 @@ mark {
     </div>
 
     <div id="advancedSearch" class="collapse">
-      <div class="card card-body bg-light mt-3">
-        <h5>Filtros Detalhados</h5>
-        <div class="row g-3">
-          <div class="col-md-4">
-            <label for="lst_assunto_norma" class="form-label form-label-sm mb-1">Assunto / Classificação:</label>
-            <select name="lst_assunto_norma" id="lst_assunto_norma" class="form-control form-control-sm" multiple placeholder="Selecione..."></select>
+      <div class="card mt-3 border-0 shadow-sm">
+        <div class="card-header bg-white border-bottom">
+          <h5 class="mb-0 fw-semibold">
+            <i class="fas fa-sliders-h text-primary me-2"></i>Filtros Avançados
+          </h5>
+        </div>
+        <div class="card-body">
+          <!-- Seção: Classificação -->
+          <div class="mb-4">
+            <h6 class="text-muted text-uppercase small mb-3 fw-semibold border-bottom pb-2">
+              <i class="fas fa-tag me-2"></i>Classificação
+            </h6>
+            <div class="row g-3">
+              <div class="col-md-12">
+                <label for="lst_assunto_norma" class="form-label form-label-sm mb-1 fw-semibold">
+                  <i class="fas fa-tag text-muted me-1"></i>Assunto / Classificação:
+                </label>
+                <select name="lst_assunto_norma" id="lst_assunto_norma" class="form-select" placeholder="Selecione um assunto..." aria-label="Selecione um assunto"></select>
+              </div>
+            </div>
           </div>
-          <div class="col-md-2">
-            <label for="dt_norma" class="form-label form-label-sm mb-1">Data Inicial da Norma:</label>
-            <input type="text" name="dt_norma" id="dt_norma" class="form-control form-control-sm flatpickr" placeholder="dd/mm/aaaa">
-          </div>
-          <div class="col-md-2">
-            <label for="dt_norma2" class="form-label form-label-sm mb-1">Data Final da Norma:</label>
-            <input type="text" name="dt_norma2" id="dt_norma2" class="form-control form-control-sm flatpickr" placeholder="dd/mm/aaaa">
-          </div>
-          <div class="col-md-2">
-            <label for="dt_public" class="form-label form-label-sm mb-1">Publicação Inicial:</label>
-            <input type="text" name="dt_public" id="dt_public" class="form-control form-control-sm flatpickr" placeholder="dd/mm/aaaa">
-          </div>
-          <div class="col-md-2">
-            <label for="dt_public2" class="form-label form-label-sm mb-1">Publicação Final:</label>
-            <input type="text" name="dt_public2" id="dt_public2" class="form-control form-control-sm flatpickr" placeholder="dd/mm/aaaa">
+          
+          <hr class="my-4">
+          
+          <!-- Seção: Datas -->
+          <div class="mb-4">
+            <h6 class="text-muted text-uppercase small mb-3 fw-semibold border-bottom pb-2">
+              <i class="fas fa-calendar-alt me-2"></i>Datas
+            </h6>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label for="daterange_norma" class="form-label form-label-sm mb-1 fw-semibold">
+                  <i class="far fa-calendar text-muted me-1"></i>Data da Norma
+                </label>
+                <div class="input-group">
+                  <span class="input-group-text"><i class="fas fa-calendar"></i></span>
+                  <input type="text" 
+                         id="daterange_norma" 
+                         class="form-control bg-white" 
+                         placeholder="Selecione um período..." 
+                         aria-label="Período de data da norma"
+                         aria-describedby="daterange_norma_help">
+                  <small id="daterange_norma_help" class="form-text text-muted d-block mt-1">Formato: DD/MM/AAAA - DD/MM/AAAA</small>
+                </div>
+                <div class="btn-group btn-group-sm w-100 mt-2" role="group" id="date-presets-norma">
+                  <button type="button" class="btn btn-outline-secondary btn-sm" data-preset="hoje">Hoje</button>
+                  <button type="button" class="btn btn-outline-secondary btn-sm" data-preset="semana">7 dias</button>
+                  <button type="button" class="btn btn-outline-secondary btn-sm" data-preset="mes_atual">Este Mês</button>
+                  <button type="button" class="btn btn-outline-secondary btn-sm" data-preset="mes_passado">Mês Passado</button>
+                </div>
+                <input type="hidden" name="dt_norma" id="dt_norma_hidden">
+                <input type="hidden" name="dt_norma2" id="dt_norma2_hidden">
+              </div>
+              <div class="col-md-6">
+                <label for="daterange_publicacao" class="form-label form-label-sm mb-1 fw-semibold">
+                  <i class="far fa-newspaper text-muted me-1"></i>Data de Publicação
+                </label>
+                <div class="input-group">
+                  <span class="input-group-text"><i class="fas fa-calendar"></i></span>
+                  <input type="text" 
+                         id="daterange_publicacao" 
+                         class="form-control bg-white" 
+                         placeholder="Selecione um período..." 
+                         aria-label="Período de data de publicação"
+                         aria-describedby="daterange_publicacao_help">
+                  <small id="daterange_publicacao_help" class="form-text text-muted d-block mt-1">Formato: DD/MM/AAAA - DD/MM/AAAA</small>
+                </div>
+                <div class="btn-group btn-group-sm w-100 mt-2" role="group" id="date-presets-publicacao">
+                  <button type="button" class="btn btn-outline-secondary btn-sm" data-preset="hoje">Hoje</button>
+                  <button type="button" class="btn btn-outline-secondary btn-sm" data-preset="semana">7 dias</button>
+                  <button type="button" class="btn btn-outline-secondary btn-sm" data-preset="mes_atual">Este Mês</button>
+                  <button type="button" class="btn btn-outline-secondary btn-sm" data-preset="mes_passado">Mês Passado</button>
+                </div>
+                <input type="hidden" name="dt_public" id="dt_public_hidden">
+                <input type="hidden" name="dt_public2" id="dt_public2_hidden">
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </div>
-    <div class="row mt-4">
+    <div class="row mt-4 align-items-center">
         <div class="col-md-6">
-            <label class="mb-1">Ordenação Padrão:</label><br>
+            <label class="form-label mb-2 fw-semibold">
+                <i class="fas fa-sort text-muted me-1"></i>Ordenação Padrão:
+            </label>
             <div class="form-check form-check-inline">
                 <input class="form-check-input" type="radio" name="rd_ordem" id="rd_ordem_1" value="1" checked>
                 <label class="form-check-label" for="rd_ordem_1">Mais Recentes Primeiro</label>
@@ -391,19 +1016,26 @@ mark {
             </div>
         </div>
         <div class="col-md-6 text-center text-md-end mt-3 mt-md-0">
-            <button type="submit" class="btn btn-primary" id="btn-pesquisar">
-                <i class="fa fa-search"></i> Pesquisar
+            <button type="submit" 
+                    class="btn btn-primary" 
+                    id="btn-pesquisar"
+                    aria-label="Pesquisar legislação">
+                <i class="fa fa-search me-1"></i> Pesquisar
             </button>
-            <button type="button" class="btn btn-outline-primary ms-2" id="btn-limpar" style="display: none;">
-                <i class="fa fa-times"></i> Limpar
+            <button type="button" 
+                    class="btn btn-outline-primary ms-2 d-none" 
+                    id="btn-limpar" 
+                    aria-label="Limpar filtros de pesquisa">
+                <i class="fa fa-times me-1"></i> Limpar
             </button>
         </div>
     </div>
 </div>
 </form>
+</main>
 
-<div id="resumo-filtros" class="mt-3"></div>
-<div id="container-principal-resultados" class="mt-4" style="display: none;">
+<div id="resumo-filtros" class="mt-3" role="status" aria-live="polite"></div>
+<div id="container-principal-resultados" class="mt-4 d-none">
     <ul class="nav nav-tabs" id="resultado-tabs" role="tablist">
         <li class="nav-item" role="presentation">
             <button class="nav-link active" id="lista-tab" data-bs-toggle="tab" data-bs-target="#resultados-pane" type="button" role="tab" aria-controls="resultados-pane" aria-selected="true">
@@ -412,7 +1044,12 @@ mark {
         </li>
         <li class="nav-item" role="presentation">
             <button class="nav-link" id="grafico-tab" data-bs-toggle="tab" data-bs-target="#grafico-pane" type="button" role="tab" aria-controls="grafico-pane" aria-selected="false">
-                <i class="fa fa-chart-bar me-2"></i>Resumo Gráfico
+                <i class="fa fa-chart-bar me-2"></i>Resumo por Tipo
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="grafico-assunto-tab" data-bs-toggle="tab" data-bs-target="#grafico-assunto-pane" type="button" role="tab" aria-controls="grafico-assunto-pane" aria-selected="false">
+                <i class="fa fa-tags me-2"></i>Resumo por Assunto
             </button>
         </li>
     </ul>
@@ -422,8 +1059,35 @@ mark {
         </div>
         <div class="tab-pane fade" id="grafico-pane" role="tabpanel" aria-labelledby="grafico-tab">
             <div id="resumo-estatistico" class="p-3">
-                <div style="max-width: 800px; margin: auto;">
-                    <canvas id="stats-chart"></canvas>
+                <div class="d-flex justify-content-end mb-2">
+                    <div class="btn-group" role="group" aria-label="Tipo de gráfico">
+                        <button type="button" class="btn btn-sm btn-outline-primary active" id="btn-grafico-barra-tipo" data-tipo="bar">
+                            <i class="fa fa-chart-bar me-1"></i>Barra
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-primary" id="btn-grafico-pizza-tipo" data-tipo="pie">
+                            <i class="fa fa-chart-pie me-1"></i>Pizza
+                        </button>
+                    </div>
+                </div>
+                <div class="canvas-container">
+                    <canvas id="stats-chart" aria-label="Gráfico de resumo estatístico das normas"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="tab-pane fade" id="grafico-assunto-pane" role="tabpanel" aria-labelledby="grafico-assunto-tab">
+            <div id="resumo-estatistico-assunto" class="p-3">
+                <div class="d-flex justify-content-end mb-2">
+                    <div class="btn-group" role="group" aria-label="Tipo de gráfico">
+                        <button type="button" class="btn btn-sm btn-outline-primary active" id="btn-grafico-barra-assunto" data-tipo="bar">
+                            <i class="fa fa-chart-bar me-1"></i>Barra
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-primary" id="btn-grafico-pizza-assunto" data-tipo="pie">
+                            <i class="fa fa-chart-pie me-1"></i>Pizza
+                        </button>
+                    </div>
+                </div>
+                <div class="canvas-container">
+                    <canvas id="stats-chart-assunto" aria-label="Gráfico de resumo estatístico por assunto das normas"></canvas>
                 </div>
             </div>
         </div>
@@ -431,18 +1095,13 @@ mark {
 </div>
 <div id="painel-sem-resultados" class="mt-4"></div>
 
-<!-- Botão de Ajuda Flutuante -->
-<button id="btn-ajuda-tour" class="btn btn-info" title="Ajuda / Tutorial">
-    <i class="fa fa-question"></i>
-</button>
-
 <dtml-var js_slot>
 
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/pt.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/shepherd.js@10.0.1/dist/js/shepherd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
 
 <script type="text/javascript">
 document.addEventListener('DOMContentLoaded', function () {
@@ -455,12 +1114,24 @@ document.addEventListener('DOMContentLoaded', function () {
     const btnToggleFiltros = document.getElementById('btn-toggle-filtros');
     const badgeFiltros = document.getElementById('badge-filtros');
     const filterClearedToastEl = document.getElementById('filter-cleared-toast');
+    const txtAssuntoInput = document.getElementById('txt_assunto');
     let filterClearedToast = null;
     let advancedFiltersLoaded = false;
     let itensPorPaginaSelect = null;
     let statsChartInstance = null;
+    let statsChartAssuntoInstance = null;
     let currentViewMode = localStorage.getItem('normaViewMode') || 'cards';
     let searchStarted = false;
+    let tipoGraficoTipo = 'bar'; // 'bar' ou 'pie' - tipo de gráfico por tipo
+    let tipoGraficoAssunto = 'bar'; // 'bar' ou 'pie' - tipo de gráfico por assunto
+    const apiCache = new Map();
+    const ordemCampoInput = document.getElementById('ordem_campo');
+    const ordemDirecaoInput = document.getElementById('ordem_direcao');
+    const resultadosDiv = document.getElementById('resultados');
+    const painelSemResultados = document.getElementById('painel-sem-resultados');
+    const containerPrincipal = document.getElementById('container-principal-resultados');
+    const txtNumeroInput = document.getElementById('txt_numero');
+    const txtAnoInput = document.getElementById('txt_ano');
 
     // Carregar selects com TomSelect
     const selectsTomSelect = ['lst_tip_norma', 'lst_tip_situacao_norma', 'lst_assunto_norma'];
@@ -483,32 +1154,194 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    function carregarSelect(endpoint, selector, placeholder) {
+    async function fetchWithCache(url) {
+        if (apiCache.has(url)) return apiCache.get(url);
+        try {
+            const response = await fetch(url);
+            if (!response.ok) throw new Error('Erro na resposta do servidor');
+            const data = await response.json();
+            apiCache.set(url, data);
+            return data;
+        } catch (error) {
+            console.error('Erro na requisição:', error);
+            throw error;
+        }
+    }
+
+    async function carregarSelect(endpoint, selector, placeholder) {
         const el = document.querySelector(selector);
         if (!el) return;
         const tom = new TomSelect(el, {
-            valueField: 'id', labelField: 'descricao', searchField: 'descricao',
-            placeholder, plugins: ['clear_button', 'remove_button'], maxOptions: null,
+            valueField: 'id', 
+            labelField: 'descricao', 
+            searchField: 'descricao',
+            placeholder, 
+            plugins: ['clear_button', 'remove_button'], 
+            maxOptions: null,
+            // Garantir estilo consistente
+            render: {
+                option: function(data, escape) {
+                    return '<div>' + escape(data.descricao) + '</div>';
+                },
+                item: function(data, escape) {
+                    return '<div>' + escape(data.descricao) + '</div>';
+                }
+            }
         });
         tom.disable();
-        fetch(endpoint).then(r => r.json()).then(data => {
+        try {
+            const data = await fetchWithCache(endpoint);
             tom.clear(); tom.clearOptions(); tom.addOptions(data); tom.enable();
             tom.settings.placeholder = placeholder; tom.sync();
             el.dispatchEvent(new CustomEvent('tomselect:load', { bubbles: true }));
-        }).catch(() => { tom.settings.placeholder = 'Erro ao carregar!'; tom.sync(); });
+        } catch (error) {
+            tom.settings.placeholder = 'Erro ao carregar!';
+            tom.sync();
+        }
     }
+    
+    async function carregarSelectSimples(endpoint, selector, placeholder) {
+        const el = document.querySelector(selector);
+        if (!el) return;
+        const tom = new TomSelect(el, {
+            valueField: 'id', 
+            labelField: 'descricao', 
+            searchField: 'descricao',
+            placeholder, 
+            plugins: ['clear_button'], 
+            maxOptions: null,
+            // Garantir estilo consistente com selects múltiplos
+            render: {
+                option: function(data, escape) {
+                    return '<div>' + escape(data.descricao) + '</div>';
+                },
+                item: function(data, escape) {
+                    // Renderizar como chip similar aos selects múltiplos para consistência visual
+                    return '<div>' + escape(data.descricao) + '</div>';
+                }
+            }
+        });
+        tom.disable();
+        try {
+            const data = await fetchWithCache(endpoint);
+            tom.clear(); tom.clearOptions(); tom.addOptions(data); tom.enable();
+            tom.settings.placeholder = placeholder; tom.sync();
+            el.dispatchEvent(new CustomEvent('tomselect:load', { bubbles: true }));
+        } catch (error) {
+            tom.settings.placeholder = 'Erro ao carregar!';
+            tom.sync();
+        }
+    }
+    
     carregarSelect('tipos_norma_json', '#lst_tip_norma', 'Selecione um ou mais tipos...');
-    carregarSelect('situacoes_norma_json', '#lst_tip_situacao_norma', 'Selecione a situação...');
-    carregarSelect('assuntos_norma_json', '#lst_assunto_norma', 'Selecione os assuntos...');
+    carregarSelectSimples('situacoes_norma_json', '#lst_tip_situacao_norma', 'Selecione a situação...');
+    carregarSelectSimples('assuntos_norma_json', '#lst_assunto_norma', 'Selecione um assunto...');
 
     // Inicializar datepickers
-    flatpickr('.flatpickr', { locale: 'pt', dateFormat: "d/m/Y" });
+    // Date Range Picker - Data da Norma
+    const daterangeNormaPicker = flatpickr('#daterange_norma', {
+        mode: 'range',
+        dateFormat: "d/m/Y",
+        locale: 'pt',
+        onClose: function(selectedDates) {
+            const dataInicioHidden = document.getElementById('dt_norma_hidden');
+            const dataFimHidden = document.getElementById('dt_norma2_hidden');
+            if (selectedDates.length === 2) {
+                dataInicioHidden.value = flatpickr.formatDate(selectedDates[0], "d/m/Y");
+                dataFimHidden.value = flatpickr.formatDate(selectedDates[1], "d/m/Y");
+            } else {
+                dataInicioHidden.value = '';
+                dataFimHidden.value = '';
+            }
+            dataInicioHidden.dispatchEvent(new Event('change'));
+        }
+    });
+    
+    // Date Range Picker - Data de Publicação
+    const daterangePublicacaoPicker = flatpickr('#daterange_publicacao', {
+        mode: 'range',
+        dateFormat: "d/m/Y",
+        locale: 'pt',
+        onClose: function(selectedDates) {
+            const dataInicioHidden = document.getElementById('dt_public_hidden');
+            const dataFimHidden = document.getElementById('dt_public2_hidden');
+            if (selectedDates.length === 2) {
+                dataInicioHidden.value = flatpickr.formatDate(selectedDates[0], "d/m/Y");
+                dataFimHidden.value = flatpickr.formatDate(selectedDates[1], "d/m/Y");
+            } else {
+                dataInicioHidden.value = '';
+                dataFimHidden.value = '';
+            }
+            dataInicioHidden.dispatchEvent(new Event('change'));
+        }
+    });
 
     // Configurar collapse dos filtros
-    let bsCollapseFiltros = filtroContainer ? new bootstrap.Collapse(filtroContainer, {toggle: false}) : null;
+    let bsCollapseFiltros = null;
+    let bsCollapseAdvancedSearch = null;
+    if (document.getElementById('filtro-container')) {
+        bsCollapseFiltros = new bootstrap.Collapse(document.getElementById('filtro-container'), { toggle: false });
+    }
+    if (advancedSearchDiv) {
+        bsCollapseAdvancedSearch = new bootstrap.Collapse(advancedSearchDiv, { toggle: false });
+    }
+    
+    // Event listeners para toggle de filtros
+    // Na pesquisa de matérias, o botão permanece visível quando há resultados ou filtros ativos,
+    // independentemente do estado do collapse
     if (filtroContainer && btnToggleFiltros) {
-        filtroContainer.addEventListener('hide.bs.collapse', e => { if (e.target === filtroContainer) btnToggleFiltros.style.display = 'block'; });
-        filtroContainer.addEventListener('show.bs.collapse', e => { if (e.target === filtroContainer) btnToggleFiltros.style.display = 'none'; });
+        filtroContainer.addEventListener('hide.bs.collapse', function(e) {
+            if (e.target === filtroContainer) {
+                // Mostrar botão quando filtros são fechados, se houver filtros ativos ou resultados
+                if (haFiltrosAtivos() || (containerPrincipal && !containerPrincipal.classList.contains('d-none'))) {
+                    btnToggleFiltros.classList.remove('d-none');
+                    btnToggleFiltros.classList.add('d-block');
+                }
+            }
+        });
+        // Não esconder o botão quando filtros são abertos - ele deve permanecer visível
+        // quando há resultados ou filtros ativos, como na pesquisa de matérias
+    }
+    
+    function scrollParaResultados() {
+        // Rolar até o resumo de filtros (mesmo ponto que a paginação)
+        // Se não houver resumo, rolar até o container de resultados
+        const resumoFiltros = document.getElementById('resumo-filtros');
+        const containerResultados = document.getElementById('container-principal-resultados');
+        
+        // Elemento alvo: sempre usar resumo de filtros se existir (mesmo que vazio), senão container de resultados
+        // Isso garante que role sempre no mesmo ponto, independente de ter filtros ou não
+        const elementoAlvo = resumoFiltros || containerResultados;
+        
+        if (elementoAlvo) {
+            // Calcular offset dos elementos fixos
+            const header = document.getElementById('page-topbar');
+            const topnav = document.querySelector('.topnav');
+            let offset = 0;
+            
+            if (header) {
+                const headerStyle = window.getComputedStyle(header);
+                if (headerStyle.position === 'fixed' || headerStyle.position === 'sticky') {
+                    offset += header.offsetHeight || 0;
+                }
+            }
+            if (topnav && window.getComputedStyle(topnav).display !== 'none') {
+                const topnavStyle = window.getComputedStyle(topnav);
+                if (topnavStyle.position === 'fixed' || topnavStyle.position === 'sticky') {
+                    offset += topnav.offsetHeight || 0;
+                }
+            }
+            
+            // Usar scrollIntoView com cálculo manual para considerar offset
+            // Aguardar um frame para garantir que o elemento está no DOM
+            requestAnimationFrame(() => {
+                const elementRect = elementoAlvo.getBoundingClientRect();
+                const elementTop = elementRect.top + window.scrollY;
+                const scrollPosition = elementTop - offset;
+                
+                window.scrollTo({ top: Math.max(0, scrollPosition), behavior: 'smooth' });
+            });
+        }
     }
 
     // Funções auxiliares
@@ -517,6 +1350,13 @@ document.addEventListener('DOMContentLoaded', function () {
         const temp = document.createElement('div');
         temp.textContent = str;
         return temp.innerHTML;
+    }
+    
+    function stripHTML(html) {
+        if (!html) return '';
+        const temp = document.createElement('div');
+        temp.innerHTML = html;
+        return temp.textContent || temp.innerText || '';
     }
 
     function highlightText(text, query) {
@@ -529,47 +1369,785 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function showSkeletonLoading() {
-        const div = document.getElementById('resultados');
-        div.innerHTML = `<div class="skeleton-loading" style="height: 20px; width: 200px; margin-bottom: 15px;"></div>
-        <div class="table-responsive"><table class="table"><thead><tr><th></th><th></th><th></th><th></th><th></th></tr></thead>
-        <tbody>${Array(5).fill('<tr>'+Array(5).fill('<td><div class="skeleton-loading skeleton-row"></div></td>').join('')+'</tr>').join('')}</tbody></table></div>`;
-        div.setAttribute('aria-busy', 'true');
+        resultadosDiv.innerHTML = `
+            <div class="skeleton-loading skeleton-title"></div>
+            <div class="table-responsive">
+                <table class="table" aria-label="Carregando resultados">
+                    <thead><tr><th class="w-15"></th><th class="w-10"></th><th class="w-20"></th><th class="w-35"></th><th class="w-10"></th><th class="w-10"></th></tr></thead>
+                    <tbody>
+                        ${Array(5).fill('<tr>'+Array(6).fill('<td><div class="skeleton-loading skeleton-row"></div></td>').join('')+'</tr>').join('')}
+                    </tbody>
+                </table>
+            </div>`;
+        resultadosDiv.setAttribute('aria-busy', 'true');
+    }
+    
+    function showInitialMessage() {
+        if (!haFiltrosAtivos()) {
+            if (btnToggleFiltros) {
+                btnToggleFiltros.classList.add('d-none');
+            }
+        }
+        painelSemResultados.innerHTML = `
+            <div class="alert alert-info text-center" role="status">
+                <i class="fa fa-search fa-2x mb-2"></i><br>
+                Utilize os filtros acima para encontrar legislação.
+            </div>`;
+        painelSemResultados.classList.remove('d-none');
+        painelSemResultados.classList.add('d-block');
     }
 
     function renderStatsChart(statsData) {
         const tabButton = document.querySelector('#grafico-tab');
         if (!tabButton) return;
+        // Sempre mostrar a aba, mesmo sem dados
+        tabButton.parentElement.classList.remove('d-none');
+        tabButton.parentElement.classList.add('d-block');
+        
         if (!statsData || Object.keys(statsData).length === 0) {
-            tabButton.parentElement.style.display = 'none';
-            if (statsChartInstance) statsChartInstance.destroy();
+            if (statsChartInstance) {
+                try {
+                    statsChartInstance.destroy();
+                } catch (e) {}
+                statsChartInstance = null;
+                window.statsChartInstance = null;
+            }
+            const canvas = document.getElementById('stats-chart');
+            if (canvas) {
+                const container = canvas.parentElement;
+                if (container && !container.querySelector('.stats-placeholder')) {
+                    container.innerHTML = '<div class="stats-placeholder text-center p-4"><p class="text-muted">Clique na aba para carregar as estatísticas</p></div>';
+                }
+            }
             return;
         }
-        tabButton.parentElement.style.display = 'block';
-        if (statsChartInstance) statsChartInstance.destroy();
-        const labels = Object.keys(statsData);
-        const dataValues = Object.values(statsData);
-        const ctx = document.getElementById('stats-chart').getContext('2d');
-        statsChartInstance = new Chart(ctx, {
-            type: 'bar',
-            data: { labels, datasets: [{ label: 'Quantidade', data: dataValues, backgroundColor: 'rgba(68, 162, 210, 0.6)', borderColor: 'rgba(68, 162, 210, 1)', borderWidth: 1 }] },
-            options: { indexAxis: 'y', responsive: true, maintainAspectRatio: true,
-                plugins: { legend: { display: false }, title: { display: false } }, scales: { x: { beginAtZero: true } } }
+        if (statsChartInstance) {
+            try {
+                statsChartInstance.destroy();
+            } catch (e) {}
+            statsChartInstance = null;
+            window.statsChartInstance = null;
+        }
+        
+        const statsContainer = document.querySelector('#resumo-estatistico .canvas-container');
+        if (statsContainer && statsContainer.querySelector('.stats-placeholder')) {
+            statsContainer.innerHTML = '<canvas id="stats-chart" aria-label="Gráfico de resumo estatístico das normas"></canvas>';
+        }
+        const canvas = document.getElementById('stats-chart');
+        if (!canvas) {
+            console.error('Canvas stats-chart não encontrado!');
+            return;
+        }
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+            console.error('Não foi possível obter contexto 2D do canvas!');
+            return;
+        }
+        
+        // Ordenar por quantidade (decrescente) e depois alfabeticamente
+        const sortedEntries = Object.entries(statsData).sort((a, b) => {
+            if (b[1] !== a[1]) {
+                return b[1] - a[1];
+            }
+            return a[0].localeCompare(b[0]);
         });
+        const labels = sortedEntries.map(([tipo]) => tipo);
+        const dataValues = sortedEntries.map(([tipo, quantidade]) => quantidade);
+        
+        const coresTipos = [
+            'rgba(68, 162, 210, 0.85)', 'rgba(255, 159, 64, 0.85)', 'rgba(75, 192, 192, 0.85)',
+            'rgba(153, 102, 255, 0.85)', 'rgba(54, 162, 235, 0.85)', 'rgba(255, 99, 132, 0.85)',
+            'rgba(201, 203, 207, 0.85)', 'rgba(255, 205, 86, 0.85)', 'rgba(50, 205, 50, 0.85)',
+            'rgba(255, 99, 71, 0.85)', 'rgba(138, 43, 226, 0.85)', 'rgba(255, 140, 0, 0.85)',
+            'rgba(0, 191, 255, 0.85)', 'rgba(220, 20, 60, 0.85)', 'rgba(34, 139, 34, 0.85)',
+            'rgba(148, 0, 211, 0.85)'
+        ];
+        
+        const todosTiposOrdenados = [...labels].sort();
+        const tipoCorMap = {};
+        todosTiposOrdenados.forEach((tipo, index) => {
+            tipoCorMap[tipo] = coresTipos[index % coresTipos.length];
+        });
+        
+        const backgroundColors = labels.map((tipo) => tipoCorMap[tipo] || coresTipos[0]);
+        const borderColors = backgroundColors.map(cor => cor.replace('0.85', '1'));
+
+        const totalNormas = dataValues.reduce((sum, val) => sum + val, 0);
+        let maxTotalValue = Math.max(...dataValues);
+        const margin = maxTotalValue < 100 ? 40 : maxTotalValue < 500 ? Math.ceil(maxTotalValue * 0.25) : Math.ceil(maxTotalValue * 0.20);
+        const maxXAxisValue = Math.ceil(maxTotalValue + margin);
+        
+        const container = canvas.parentElement;
+        const numItems = labels.length;
+        const minHeight = numItems <= 5 ? 300 : Math.min(300 + (numItems - 5) * 15, 450);
+        container.style.minHeight = `${minHeight}px`;
+        container.style.maxHeight = '450px';
+
+        let chartConfig;
+        if (tipoGraficoTipo === 'pie') {
+            let pieLabels = labels;
+            let pieDataValues = dataValues;
+            let pieBackgroundColors = backgroundColors;
+            let pieBorderColors = borderColors;
+            const threshold = 0.02;
+            const minItemsToGroup = 8;
+            
+            if (numItems > minItemsToGroup) {
+                const total = totalNormas;
+                const thresholdValue = total * threshold;
+                const mainItems = [];
+                let otherTotal = 0;
+                
+                labels.forEach((label, index) => {
+                    if (dataValues[index] >= thresholdValue) {
+                        mainItems.push({
+                            label: label,
+                            value: dataValues[index],
+                            color: backgroundColors[index],
+                            borderColor: borderColors[index]
+                        });
+                    } else {
+                        otherTotal += dataValues[index];
+                    }
+                });
+                
+                mainItems.sort((a, b) => b.value - a.value);
+                
+                if (otherTotal > 0) {
+                    mainItems.push({
+                        label: 'Outros',
+                        value: otherTotal,
+                        color: 'rgba(201, 203, 207, 0.85)',
+                        borderColor: 'rgba(201, 203, 207, 1)'
+                    });
+                }
+                
+                pieLabels = mainItems.map(item => item.label);
+                pieDataValues = mainItems.map(item => item.value);
+                pieBackgroundColors = mainItems.map(item => item.color);
+                pieBorderColors = mainItems.map(item => item.borderColor);
+            }
+            
+            chartConfig = {
+                type: 'pie',
+                data: {
+                    labels: pieLabels,
+                    datasets: [{
+                        label: 'Quantidade',
+                        data: pieDataValues,
+                        backgroundColor: pieBackgroundColors,
+                        borderColor: pieBorderColors,
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    clip: false,
+                    layout: {
+                        padding: {
+                            top: 20,
+                            bottom: 20,
+                            left: numItems > 8 ? 10 : 20,
+                            right: numItems > 8 ? 200 : 20
+                        }
+                    },
+                    plugins: {
+                        legend: { 
+                            display: true,
+                            position: 'right',
+                            align: 'start',
+                            labels: {
+                                boxWidth: 15,
+                                padding: numItems > 8 ? 8 : 12,
+                                font: { size: numItems > 8 ? 10 : 11 },
+                                usePointStyle: true,
+                                pointStyle: 'circle',
+                                generateLabels: function(chart) {
+                                    const data = chart.data;
+                                    if (data.labels.length && data.datasets.length) {
+                                        return data.labels.map((label, i) => {
+                                            const value = data.datasets[0].data[i];
+                                            const total = data.datasets[0].data.reduce((a, b) => a + b, 0);
+                                            const percentage = ((value / total) * 100).toFixed(1);
+                                            return {
+                                                text: `${label} (${percentage}%)`,
+                                                fillStyle: data.datasets[0].backgroundColor[i],
+                                                strokeStyle: data.datasets[0].borderColor[i],
+                                                lineWidth: 1,
+                                                hidden: false,
+                                                index: i
+                                            };
+                                        });
+                                    }
+                                    return [];
+                                }
+                            }
+                        },
+                        tooltip: { 
+                            enabled: true,
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            padding: 12,
+                            titleFont: { size: 13, weight: 'bold' },
+                            bodyFont: { size: 12 },
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.parsed || 0;
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = ((value / total) * 100).toFixed(1);
+                                    return `${label}: ${value} (${percentage}%)`;
+                                }
+                            }
+                        },
+                        datalabels: {
+                            color: '#fff',
+                            font: { weight: 'bold', size: numItems > 8 ? 10 : 11 },
+                            formatter: function(value, context) {
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = ((value / total) * 100).toFixed(1);
+                                return parseFloat(percentage) >= 3 ? percentage + '%' : '';
+                            },
+                            offset: numItems > 8 ? 5 : 8
+                        },
+                        title: {
+                            display: true,
+                            text: `Total: ${totalNormas} ${totalNormas === 1 ? 'norma' : 'normas'}`,
+                            font: { size: 14, weight: 'bold' },
+                            padding: { bottom: 10 }
+                        }
+                    },
+                    animation: { duration: 0 }
+                },
+                plugins: [ChartDataLabels]
+            };
+        } else {
+            chartConfig = {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Quantidade',
+                        data: dataValues,
+                        backgroundColor: backgroundColors,
+                        borderColor: borderColors,
+                        borderWidth: 1,
+                        barThickness: 'flex',
+                        maxBarThickness: 30,
+                        minBarLength: 0
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    clip: false,
+                    layout: {
+                        padding: {
+                            right: 250,
+                            top: 30,
+                            bottom: 30,
+                            left: 25
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { 
+                            enabled: true,
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            padding: 12,
+                            titleFont: { size: 13, weight: 'bold' },
+                            bodyFont: { size: 12 },
+                            mode: 'index',
+                            intersect: false,
+                            position: 'nearest',
+                            callbacks: {
+                                title: function(context) {
+                                    if (!context || context.length === 0) return '';
+                                    return context[0].label || '';
+                                },
+                                label: function(context) {
+                                    const quantidade = context.parsed ? context.parsed.x : 0;
+                                    return `Quantidade: ${quantidade}`;
+                                }
+                            }
+                        },
+                        datalabels: {
+                            anchor: 'end',
+                            align: 'end',
+                            color: '#000',
+                            font: { weight: 'bold', size: 12 },
+                            padding: { left: 6, right: 6, top: 3, bottom: 3 },
+                            offset: 12,
+                            clip: false,
+                            backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                            borderColor: 'transparent',
+                            borderWidth: 0,
+                            borderRadius: 0,
+                            formatter: function(value) { return value; }
+                        },
+                        title: {
+                            display: true,
+                            text: `Total: ${totalNormas} ${totalNormas === 1 ? 'norma' : 'normas'}`,
+                            font: { size: 14, weight: 'bold' },
+                            padding: { bottom: 10 }
+                        }
+                    },
+                    scales: { 
+                        x: { 
+                            beginAtZero: true,
+                            max: maxXAxisValue,
+                            ticks: { stepSize: 1, font: { size: 11 } },
+                            title: {
+                                display: true,
+                                text: 'Quantidade de Normas',
+                                font: { size: 12, weight: 'bold' }
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.1)',
+                                drawOnChartArea: true
+                            }
+                        },
+                        y: {
+                            ticks: {
+                                display: true,
+                                autoSkip: false,
+                                maxRotation: 0,
+                                minRotation: 0,
+                                font: { size: 11 },
+                                stepSize: 1,
+                                maxTicksLimit: undefined
+                            },
+                            afterFit: function(scale) {
+                                scale.width = Math.max(scale.width, 280);
+                            },
+                            grid: { display: false }
+                        }
+                    },
+                    interaction: {
+                        mode: 'index',
+                        intersect: false,
+                        axis: 'y'
+                    },
+                    animation: { duration: 0 }
+                },
+                plugins: [ChartDataLabels]
+            };
+        }
+        
+        statsChartInstance = new Chart(ctx, chartConfig);
+        window.statsChartInstance = statsChartInstance;
+        window.ultimoStatsData = statsData;
     }
+    
+    function renderStatsChartAssunto(statsData) {
+        const tabButton = document.querySelector('#grafico-assunto-tab');
+        if (!tabButton) return;
+        // Sempre mostrar a aba, mesmo sem dados
+        tabButton.parentElement.classList.remove('d-none');
+        tabButton.parentElement.classList.add('d-block');
+        
+        if (!statsData || Object.keys(statsData).length === 0) {
+            if (statsChartAssuntoInstance) {
+                try {
+                    statsChartAssuntoInstance.destroy();
+                } catch (e) {}
+                statsChartAssuntoInstance = null;
+                window.statsChartAssuntoInstance = null;
+            }
+            const canvas = document.getElementById('stats-chart-assunto');
+            if (canvas) {
+                const container = canvas.parentElement;
+                if (container && !container.querySelector('.stats-placeholder')) {
+                    container.innerHTML = '<div class="stats-placeholder text-center p-4"><p class="text-muted">Clique na aba para carregar as estatísticas</p></div>';
+                }
+            }
+            return;
+        }
+        if (statsChartAssuntoInstance) {
+            try {
+                statsChartAssuntoInstance.destroy();
+            } catch (e) {}
+            statsChartAssuntoInstance = null;
+            window.statsChartAssuntoInstance = null;
+        }
+        
+        const statsContainer = document.querySelector('#resumo-estatistico-assunto .canvas-container');
+        if (statsContainer && statsContainer.querySelector('.stats-placeholder')) {
+            statsContainer.innerHTML = '<canvas id="stats-chart-assunto" aria-label="Gráfico de resumo estatístico por assunto das normas"></canvas>';
+        }
+        const canvas = document.getElementById('stats-chart-assunto');
+        if (!canvas) {
+            console.error('Canvas stats-chart-assunto não encontrado!');
+            return;
+        }
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+            console.error('Não foi possível obter contexto 2D do canvas!');
+            return;
+        }
+        
+        // Ordenar por quantidade (decrescente) e depois alfabeticamente
+        const sortedEntries = Object.entries(statsData).sort((a, b) => {
+            if (b[1] !== a[1]) {
+                return b[1] - a[1];
+            }
+            return a[0].localeCompare(b[0]);
+        });
+        const labels = sortedEntries.map(([assunto]) => assunto);
+        const dataValues = sortedEntries.map(([assunto, quantidade]) => quantidade);
+        
+        const coresAssuntos = [
+            'rgba(68, 162, 210, 0.85)', 'rgba(255, 159, 64, 0.85)', 'rgba(75, 192, 192, 0.85)',
+            'rgba(153, 102, 255, 0.85)', 'rgba(54, 162, 235, 0.85)', 'rgba(255, 99, 132, 0.85)',
+            'rgba(201, 203, 207, 0.85)', 'rgba(255, 205, 86, 0.85)', 'rgba(50, 205, 50, 0.85)',
+            'rgba(255, 99, 71, 0.85)', 'rgba(138, 43, 226, 0.85)', 'rgba(255, 140, 0, 0.85)',
+            'rgba(0, 191, 255, 0.85)', 'rgba(220, 20, 60, 0.85)', 'rgba(34, 139, 34, 0.85)',
+            'rgba(148, 0, 211, 0.85)'
+        ];
+        
+        const todosAssuntosOrdenados = [...labels].sort();
+        const assuntoCorMap = {};
+        todosAssuntosOrdenados.forEach((assunto, index) => {
+            assuntoCorMap[assunto] = coresAssuntos[index % coresAssuntos.length];
+        });
+        
+        const backgroundColors = labels.map((assunto) => assuntoCorMap[assunto] || coresAssuntos[0]);
+        const borderColors = backgroundColors.map(cor => cor.replace('0.85', '1'));
+
+        const totalNormas = dataValues.reduce((sum, val) => sum + val, 0);
+        let maxTotalValue = Math.max(...dataValues);
+        const margin = maxTotalValue < 100 ? 40 : maxTotalValue < 500 ? Math.ceil(maxTotalValue * 0.25) : Math.ceil(maxTotalValue * 0.20);
+        const maxXAxisValue = Math.ceil(maxTotalValue + margin);
+        
+        const container = canvas.parentElement;
+        const numItems = labels.length;
+        const minHeight = numItems <= 5 ? 300 : Math.min(300 + (numItems - 5) * 15, 450);
+        container.style.minHeight = `${minHeight}px`;
+        container.style.maxHeight = '450px';
+
+        let chartConfig;
+        if (tipoGraficoAssunto === 'pie') {
+            let pieLabels = labels;
+            let pieDataValues = dataValues;
+            let pieBackgroundColors = backgroundColors;
+            let pieBorderColors = borderColors;
+            const threshold = 0.02;
+            const minItemsToGroup = 8;
+            
+            if (numItems > minItemsToGroup) {
+                const total = totalNormas;
+                const thresholdValue = total * threshold;
+                const mainItems = [];
+                let otherTotal = 0;
+                
+                labels.forEach((label, index) => {
+                    if (dataValues[index] >= thresholdValue) {
+                        mainItems.push({
+                            label: label,
+                            value: dataValues[index],
+                            color: backgroundColors[index],
+                            borderColor: borderColors[index]
+                        });
+                    } else {
+                        otherTotal += dataValues[index];
+                    }
+                });
+                
+                mainItems.sort((a, b) => b.value - a.value);
+                
+                if (otherTotal > 0) {
+                    mainItems.push({
+                        label: 'Outros',
+                        value: otherTotal,
+                        color: 'rgba(201, 203, 207, 0.85)',
+                        borderColor: 'rgba(201, 203, 207, 1)'
+                    });
+                }
+                
+                pieLabels = mainItems.map(item => item.label);
+                pieDataValues = mainItems.map(item => item.value);
+                pieBackgroundColors = mainItems.map(item => item.color);
+                pieBorderColors = mainItems.map(item => item.borderColor);
+            }
+            
+            chartConfig = {
+                type: 'pie',
+                data: {
+                    labels: pieLabels,
+                    datasets: [{
+                        label: 'Quantidade',
+                        data: pieDataValues,
+                        backgroundColor: pieBackgroundColors,
+                        borderColor: pieBorderColors,
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    clip: false,
+                    layout: {
+                        padding: {
+                            top: 20,
+                            bottom: 20,
+                            left: 20,
+                            right: 20
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: {
+                                padding: 15,
+                                font: { size: 12 },
+                                usePointStyle: true,
+                                pointStyle: 'circle'
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.parsed || 0;
+                                    const percentage = totalNormas > 0 ? ((value / totalNormas) * 100).toFixed(1) : 0;
+                                    return `${label}: ${value} (${percentage}%)`;
+                                }
+                            }
+                        },
+                        datalabels: {
+                            color: '#fff',
+                            font: { weight: 'bold', size: 11 },
+                            formatter: (value, ctx) => {
+                                const percentage = totalNormas > 0 ? ((value / totalNormas) * 100).toFixed(1) : 0;
+                                return percentage > 3 ? `${percentage}%` : '';
+                            },
+                            offset: numItems > 8 ? 5 : 8
+                        },
+                        title: {
+                            display: true,
+                            text: `Total: ${totalNormas} ${totalNormas === 1 ? 'norma' : 'normas'}`,
+                            font: { size: 14, weight: 'bold' },
+                            padding: { bottom: 10 }
+                        }
+                    },
+                    animation: { duration: 0 }
+                },
+                plugins: [ChartDataLabels]
+            };
+        } else {
+            chartConfig = {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Quantidade',
+                        data: dataValues,
+                        backgroundColor: backgroundColors,
+                        borderColor: borderColors,
+                        borderWidth: 1,
+                        barThickness: 'flex',
+                        maxBarThickness: 30,
+                        minBarLength: 0
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    clip: false,
+                    layout: {
+                        padding: {
+                            top: 20,
+                            bottom: 20,
+                            left: 20,
+                            right: 20
+                        }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            max: maxXAxisValue,
+                            ticks: {
+                                stepSize: maxTotalValue < 100 ? 5 : maxTotalValue < 500 ? 25 : 50,
+                                font: { size: 11 }
+                            },
+                            grid: {
+                                display: true,
+                                color: 'rgba(0, 0, 0, 0.1)'
+                            }
+                        },
+                        y: {
+                            ticks: {
+                                font: { size: 11 },
+                                maxRotation: 0,
+                                autoSkip: false
+                            },
+                            grid: {
+                                display: false
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const value = context.parsed.x || 0;
+                                    const percentage = totalNormas > 0 ? ((value / totalNormas) * 100).toFixed(1) : 0;
+                                    return `Quantidade: ${value} (${percentage}%)`;
+                                }
+                            }
+                        },
+                        datalabels: {
+                            anchor: 'end',
+                            align: 'right',
+                            color: '#333',
+                            font: { weight: 'bold', size: 11 },
+                            formatter: (value, ctx) => {
+                                const percentage = totalNormas > 0 ? ((value / totalNormas) * 100).toFixed(1) : 0;
+                                return `${value} (${percentage}%)`;
+                            },
+                            offset: 5
+                        },
+                        title: {
+                            display: true,
+                            text: `Total: ${totalNormas} ${totalNormas === 1 ? 'norma' : 'normas'}`,
+                            font: { size: 14, weight: 'bold' },
+                            padding: { bottom: 10 }
+                        }
+                    },
+                    animation: { duration: 0 }
+                },
+                plugins: [ChartDataLabels]
+            };
+        }
+        
+        statsChartAssuntoInstance = new Chart(ctx, chartConfig);
+        window.statsChartAssuntoInstance = statsChartAssuntoInstance;
+        window.ultimoStatsAssuntoData = statsData;
+    }
+    
+    // Event listeners para alternar tipo de gráfico
+    setTimeout(function() {
+        const btnBarra = document.getElementById('btn-grafico-barra-tipo');
+        const btnPizza = document.getElementById('btn-grafico-pizza-tipo');
+        
+        if (btnBarra && btnPizza) {
+            btnBarra.addEventListener('click', function() {
+                tipoGraficoTipo = 'bar';
+                btnBarra.classList.add('active');
+                btnPizza.classList.remove('active');
+                if (window.ultimoStatsData) {
+                    renderStatsChart(window.ultimoStatsData);
+                }
+            });
+            
+            btnPizza.addEventListener('click', function() {
+                tipoGraficoTipo = 'pie';
+                btnPizza.classList.add('active');
+                btnBarra.classList.remove('active');
+                if (window.ultimoStatsData) {
+                    renderStatsChart(window.ultimoStatsData);
+                }
+            });
+        }
+        
+        const btnBarraAssunto = document.getElementById('btn-grafico-barra-assunto');
+        const btnPizzaAssunto = document.getElementById('btn-grafico-pizza-assunto');
+        
+        if (btnBarraAssunto && btnPizzaAssunto) {
+            btnBarraAssunto.addEventListener('click', function() {
+                tipoGraficoAssunto = 'bar';
+                btnBarraAssunto.classList.add('active');
+                btnPizzaAssunto.classList.remove('active');
+                if (window.ultimoStatsAssuntoData) {
+                    renderStatsChartAssunto(window.ultimoStatsAssuntoData);
+                }
+            });
+            
+            btnPizzaAssunto.addEventListener('click', function() {
+                tipoGraficoAssunto = 'pie';
+                btnPizzaAssunto.classList.add('active');
+                btnBarraAssunto.classList.remove('active');
+                if (window.ultimoStatsAssuntoData) {
+                    renderStatsChartAssunto(window.ultimoStatsAssuntoData);
+                }
+            });
+        }
+    }, 100);
 
     function contarFiltrosAtivos() {
-        const formData = new FormData(form); let count = 0, tooltipContent = [];
-        const labels = {'lst_tip_norma':'Tipo','txt_numero':'Número','txt_ano':'Ano','txt_assunto':'Palavra-chave','lst_tip_situacao_norma':'Situação','lst_assunto_norma':'Assunto','dt_norma':'Data Inicial','dt_norma2':'Data Final','dt_public':'Publicação Ini.','dt_public2':'Publicação Fim.','chk_textual':'Texto integral'};
-        for (let [k,v] of formData.entries()) {
-            if (!v || ['formato','pagina','ordem_campo','ordem_direcao'].includes(k)) continue;
-            const el = form.elements[k];
-            if (el && el.tomselect && el.tomselect.items.length === 0) continue;
-            if (el && el.type === 'checkbox' && !el.checked) continue;
-            if (el && el.tagName === 'SELECT' && el.type === 'select-one' && el.value === '') continue;
-            count++; if (labels[k]) tooltipContent.push(labels[k]);
+        let count = 0;
+        const tooltipContent = [];
+        
+        // Campos que devem ser ignorados (sistema e ordenação)
+        const camposIgnorados = ['formato', 'rd_ordem', 'pagina', 'ordem_campo', 'ordem_direcao', 'itens_por_pagina'];
+        
+        // Campos básicos que NÃO devem ser contados como filtros avançados
+        const camposBasicos = [
+            'lst_tip_norma',        // Tipo de Norma
+            'txt_numero',           // Número
+            'txt_ano',              // Ano
+            'txt_assunto',          // Assunto ou Ementa
+            'lst_tip_situacao_norma', // Situação
+            'chk_textual'           // Checkbox de pesquisa textual
+        ];
+        
+        // Labels para tooltip
+        const labels = {
+            'lst_assunto_norma': 'Assunto/Classificação',
+            'dt_norma': 'Data Inicial da Norma',
+            'dt_norma2': 'Data Final da Norma',
+            'dt_public': 'Publicação Inicial',
+            'dt_public2': 'Publicação Final'
+        };
+        
+        for (let el of form.elements) {
+            if (!el.name || camposIgnorados.includes(el.name) || camposBasicos.includes(el.name)) continue;
+            
+            // Verificar campos TomSelect (selects múltiplos) - apenas filtros avançados
+            if (el.tomselect && el.tomselect.getValue && el.tomselect.getValue().length > 0) {
+                count++;
+                if (labels[el.name]) tooltipContent.push(labels[el.name]);
+                continue;
+            }
+            
+            // Verificar checkboxes - apenas filtros avançados (não há checkboxes avançados em normas, mas mantido para compatibilidade)
+            if (el.type === 'checkbox' && el.checked) {
+                count++;
+                if (labels[el.name]) tooltipContent.push(labels[el.name]);
+                continue;
+            }
+            
+            // Verificar selects normais (exceto o valor padrão vazio)
+            if (el.tagName === 'SELECT' && el.value !== '') {
+                count++;
+                if (labels[el.name]) tooltipContent.push(labels[el.name]);
+                continue;
+            }
+            
+            // Verificar campos de data (hidden) - apenas filtros avançados
+            if (['dt_norma_hidden', 'dt_norma2_hidden', 'dt_public_hidden', 'dt_public2_hidden'].includes(el.name) && el.value) {
+                // Contar apenas uma vez por par de datas (inicial e final)
+                if (el.name === 'dt_norma_hidden' || el.name === 'dt_public_hidden') {
+                    count++;
+                    const labelKey = el.name === 'dt_norma_hidden' ? 'dt_norma' : 'dt_public';
+                    if (labels[labelKey]) tooltipContent.push(labels[labelKey]);
+                }
+                continue;
+            }
+            
+            // Verificar inputs de texto e número - apenas filtros avançados (exceto datas que já foram tratadas)
+            if ((el.type === 'text' || el.type === 'number') && el.value.trim() !== '') {
+                continue;
+            }
         }
+        
         badgeFiltros.textContent = count;
-        badgeFiltros.setAttribute('title', tooltipContent.length ? "Filtros: "+tooltipContent.join(', ') : "Nenhum filtro ativo");
+        badgeFiltros.setAttribute('title', tooltipContent.length ? "Filtros avançados: " + tooltipContent.join(', ') : "Nenhum filtro avançado ativo");
     }
 
     function mostrarResumoFiltros(formData) {
@@ -579,7 +2157,12 @@ document.addEventListener('DOMContentLoaded', function () {
         Object.keys(labels).forEach(key => {
             let valorExibido = '', originalValue = '';
             if (['dt_norma','dt_norma2','dt_public','dt_public2'].includes(key)) {
-                valorExibido = activeParams.get(key)||''; originalValue = valorExibido;
+                // Buscar valores dos campos hidden
+                const hiddenField = document.getElementById(key === 'dt_norma' ? 'dt_norma_hidden' : 
+                                                           key === 'dt_norma2' ? 'dt_norma2_hidden' :
+                                                           key === 'dt_public' ? 'dt_public_hidden' : 'dt_public2_hidden');
+                valorExibido = hiddenField ? hiddenField.value : (activeParams.get(key) || '');
+                originalValue = valorExibido;
             } else {
                 const el = form.elements[key];
                 if (el) {
@@ -598,35 +2181,75 @@ document.addEventListener('DOMContentLoaded', function () {
             if (valorExibido) {
                 filtrosAtivosBadges.push(
                     `<span class="filter-badge" data-filter-key="${key}" data-filter-value="${Array.isArray(originalValue)?originalValue.join(','):originalValue}">
-                        ${labels[key]}: <strong>${sanitizeHTML(valorExibido)}</strong>
+                        <strong>${labels[key]}</strong>: ${sanitizeHTML(valorExibido)}
                         <button type="button" class="btn-close" aria-label="Remover filtro ${labels[key]}"></button>
                     </span>`
                 );
             }
         });
-        if (filtrosAtivosBadges.length) {
-            resumoFiltrosDiv.innerHTML =
-                `<div class="alert alert-info py-2" role="status"><strong>Filtros Ativos:</strong> ${filtrosAtivosBadges.join('')}</div>`;
+        if (filtrosAtivosBadges.length > 0) {
+            resumoFiltrosDiv.classList.remove('d-none');
+            resumoFiltrosDiv.classList.add('d-block');
+            resumoFiltrosDiv.innerHTML = `
+                <div class="alert alert-info py-2" role="status">
+                    <strong>Filtros Ativos:</strong> ${filtrosAtivosBadges.join('')}
+                </div>`;
+            resumoFiltrosDiv.querySelectorAll('.filter-badge .btn-close').forEach(btn => btn.addEventListener('click', handleRemoveFilter));
         } else {
-            resumoFiltrosDiv.innerHTML =
-                `<div class="alert alert-secondary py-2" role="status"><em>Nenhum filtro foi aplicado. Todos os registros estão sendo exibidos.</em></div>`;
+            resumoFiltrosDiv.classList.add('d-none');
+            resumoFiltrosDiv.classList.remove('d-block');
+            resumoFiltrosDiv.innerHTML = '';
         }
-        resumoFiltrosDiv.querySelectorAll('.filter-badge .btn-close').forEach(btn => btn.addEventListener('click', handleRemoveFilter));
     }
 
     function handleRemoveFilter(event) {
+        event.stopPropagation();
         const badge = event.target.closest('.filter-badge');
         if (!badge) return;
         const keyToRemove = badge.dataset.filterKey;
         const valueToRemove = badge.dataset.filterValue;
         const element = form.elements[keyToRemove];
+        
         if (element) {
-            if (element.tomselect) element.tomselect.clear();
-            else if (element.type === 'text' || element.type === 'number') element.value = '';
-            else if (element.type === 'checkbox') element.checked = false;
-            else if (element.tagName === 'SELECT') element.value = '';
+            if (element.tomselect) {
+                if (element.tomselect.isMultiple) {
+                    // Para selects múltiplos, remover apenas o valor específico
+                    const valuesToKeep = element.tomselect.getValue().filter(val => !valueToRemove.split(',').includes(val.toString()));
+                    element.tomselect.setValue(valuesToKeep);
+                } else {
+                    element.tomselect.clear();
+                }
+            } else if (element.type === 'checkbox') {
+                element.checked = false;
+            } else if (element.tagName === 'SELECT') {
+                element.value = '';
+            } else if (element.type === 'text' || element.type === 'number') {
+                element.value = '';
+            }
         }
-        realizarBusca(1);
+        
+        // Limpar datepickers se for campo de data
+        if (['dt_norma', 'dt_norma2'].includes(keyToRemove)) {
+            if (daterangeNormaPicker) {
+                daterangeNormaPicker.clear();
+            }
+        }
+        if (['dt_public', 'dt_public2'].includes(keyToRemove)) {
+            if (daterangePublicacaoPicker) {
+                daterangePublicacaoPicker.clear();
+            }
+        }
+        
+        // Aguardar atualização e verificar se ainda há filtros
+        setTimeout(() => {
+            contarFiltrosAtivos();
+            mostrarResumoFiltros(new FormData(form));
+            if (!haFiltrosAtivos()) {
+                handleLimparClick();
+            } else {
+                realizarBusca(1);
+            }
+        }, 10);
     }
 
     function actualizarURL(params) {
@@ -635,50 +2258,115 @@ document.addEventListener('DOMContentLoaded', function () {
         window.history.pushState({ path: newUrl }, '', newUrl);
     }
 
-    function renderizarErro(msg) {
-        const painelSemResultados = document.getElementById('painel-sem-resultados');
-        painelSemResultados.innerHTML = `<div class="alert alert-danger text-center" role="alert"><i class="fa fa-exclamation-triangle"></i> ${sanitizeHTML(msg)}</div>`;
-        painelSemResultados.style.display = 'block';
+    function renderizarErro(mensagem) {
+        painelSemResultados.innerHTML = `
+            <div class="alert alert-danger text-center" role="alert">
+                <i class="fa fa-exclamation-triangle"></i> ${sanitizeHTML(mensagem)}
+            </div>`;
+        painelSemResultados.classList.remove('d-none');
+        painelSemResultados.classList.add('d-block');
+    }
+    
+    function validarFormulario() {
+        let isValid = true;
+        txtNumeroInput.classList.remove('is-invalid');
+        txtNumeroInput.setAttribute('aria-invalid', 'false');
+        txtAnoInput.classList.remove('is-invalid');
+        txtAnoInput.setAttribute('aria-invalid', 'false');
+        if (txtAnoInput.value && !/^\d{4}$/.test(txtAnoInput.value)) {
+            txtAnoInput.classList.add('is-invalid');
+            txtAnoInput.setAttribute('aria-invalid', 'true');
+            isValid = false;
+        }
+        if (txtNumeroInput.value && !/^\d+$/.test(txtNumeroInput.value)) {
+            txtNumeroInput.classList.add('is-invalid');
+            txtNumeroInput.setAttribute('aria-invalid', 'true');
+            isValid = false;
+        }
+        return isValid;
+    }
+    
+    function haFiltrosAtivos() {
+        const formData = new FormData(form);
+        const ignorar = ['formato', 'rd_ordem', 'pagina', 'ordem_campo', 'ordem_direcao', 'itens_por_pagina'];
+        for (let [k, v] of formData.entries()) {
+            if (ignorar.includes(k)) continue;
+            if (v && v !== '' && !(k === 'chk_textual' && v === '0')) return true;
+        }
+        return false;
+    }
+    
+    // Inicializar visibilidade do botão toggle baseado em filtros ativos
+    if (!haFiltrosAtivos()) {
+        if (btnToggleFiltros) {
+            btnToggleFiltros.classList.add('d-none');
+        }
     }
 
     function renderizarResultados(data) {
-        const painelSemResultados = document.getElementById('painel-sem-resultados');
-        const containerPrincipal = document.getElementById('container-principal-resultados');
         painelSemResultados.innerHTML = '';
-        painelSemResultados.style.display = 'none';
-        containerPrincipal.style.display = 'none';
+        painelSemResultados.classList.add('d-none');
+        painelSemResultados.classList.remove('d-block');
+        containerPrincipal.classList.add('d-none');
+        containerPrincipal.classList.remove('d-block');
+        
         if (!data || data.total === 0) {
-            painelSemResultados.innerHTML = `<div class="text-center p-4 p-md-5 bg-light rounded border">
-                <div class="mb-3"><i class="fa fa-search-minus fa-3x text-warning"></i></div>
-                <h4 class="fw-bold">Nenhum Registro Encontrado</h4>
-                <p class="text-muted mb-4">Não encontramos normas que correspondam aos filtros aplicados.</p>
-                <div class="mt-4">
-                    <button class="btn btn-primary btn-lg" id="btn-limpar-filtros-no-results">
-                        <i class="fa fa-times me-2"></i>Limpar Filtros e Tentar Novamente
-                    </button>
-                </div>
-            </div>`;
+            containerPrincipal.classList.add('d-none');
+            containerPrincipal.classList.remove('d-block');
+            painelSemResultados.innerHTML = `
+                <div class="text-center p-4 p-md-5 bg-light rounded border">
+                    <div class="mb-3"><i class="fa fa-search-minus fa-3x text-warning" aria-hidden="true"></i></div>
+                    <h4 class="fw-bold">Nenhum Registro Encontrado</h4>
+                    <p class="text-muted mb-4">Não encontramos normas que correspondam aos filtros aplicados.</p>
+                    <div class="mt-4">
+                        <button class="btn btn-primary btn-lg" id="btn-limpar-filtros-no-results" aria-label="Limpar filtros e tentar nova busca">
+                            <i class="fa fa-times me-2"></i>Limpar Filtros e Tentar Novamente
+                        </button>
+                    </div>
+                </div>`;
             const btnLimparNoResults = document.getElementById('btn-limpar-filtros-no-results');
-            if (btnLimparNoResults && limparBtn) btnLimparNoResults.addEventListener('click', () => limparBtn.click());
-            painelSemResultados.style.display = 'block';
+            if (btnLimparNoResults) {
+                btnLimparNoResults.addEventListener('click', handleLimparClick);
+            }
+            painelSemResultados.classList.remove('d-none');
+            painelSemResultados.classList.add('d-block');
             renderStatsChart(null);
+            renderStatsChartAssunto(null);
+            // Mostrar botão toggle quando há filtros ativos, mesmo sem resultados
+            if (haFiltrosAtivos() && btnToggleFiltros) {
+                btnToggleFiltros.classList.remove('d-none');
+                btnToggleFiltros.classList.add('d-block');
+            }
             return;
         }
-        containerPrincipal.style.display = 'block';
+        containerPrincipal.classList.remove('d-none');
+        containerPrincipal.classList.add('d-block');
         renderStatsChart(data.stats);
+        renderStatsChartAssunto(data.stats_by_assunto || {});
+        
+        // Mostrar botão toggle quando há resultados
+        if (btnToggleFiltros) {
+            btnToggleFiltros.classList.remove('d-none');
+            btnToggleFiltros.classList.add('d-block');
+        }
+        
         const resultadosDiv = document.getElementById('resultados');
         const { page, per_page, total } = data;
         const inicioFaixa = (page - 1) * per_page + 1;
         const fimFaixa = Math.min(page * per_page, total);
-        const termosBusca = document.getElementById('txt_assunto').value;
+        const termosBusca = txtAssuntoInput.value;
         let html = `<div class="d-flex flex-column flex-md-row align-items-center mb-3">
             <div class="form-group mb-2 mb-md-0 me-md-3">
                 <label for="itens_por_pagina" class="me-2">Itens por página:</label>
-                <select class="form-select form-select-sm d-inline-block w-auto" id="itens_por_pagina">
-                    <option value="10" ${per_page == 10 ? 'selected' : ''}>10</option>
-                    <option value="25" ${per_page == 25 ? 'selected' : ''}>25</option>
-                    <option value="50" ${per_page == 50 ? 'selected' : ''}>50</option>
-                    <option value="100" ${per_page == 100 ? 'selected' : ''}>100</option>
+                <select class="form-select d-inline-block w-auto" id="itens_por_pagina">
+                    <option value="12" ${per_page == 12 ? 'selected' : ''}>12</option>
+                    <option value="24" ${per_page == 24 ? 'selected' : ''}>24</option>
+                    <option value="36" ${per_page == 36 ? 'selected' : ''}>36</option>
+                    <option value="48" ${per_page == 48 ? 'selected' : ''}>48</option>
+                    <option value="60" ${per_page == 60 ? 'selected' : ''}>60</option>
+                    <option value="72" ${per_page == 72 ? 'selected' : ''}>72</option>
+                    <option value="84" ${per_page == 84 ? 'selected' : ''}>84</option>
+                    <option value="96" ${per_page == 96 ? 'selected' : ''}>96</option>
                 </select>
             </div>
             <div class="btn-group btn-group-sm mb-2 mb-md-0">
@@ -722,40 +2410,25 @@ document.addEventListener('DOMContentLoaded', function () {
                     <td>${sanitizeHTML(norma.num_norma||'')}</td>
                     <td>${sanitizeHTML(norma.ano_norma||'')}</td>
                     <td>${sanitizeHTML(norma.dat_norma||'')}</td>
-                    <td>${highlightText(sanitizeHTML(norma.txt_ementa||''), termosBusca)}</td>
+                    <td>${highlightText(stripHTML(norma.txt_ementa||''), termosBusca)}</td>
                     <td>${sanitizeHTML(norma.situacao||'')}</td>
                     <td>
                         <a href="${norma.detail_url||'#'}" class="btn btn-sm btn-outline-primary" title="Detalhes"><i class="fa fa-eye"></i></a>
+                        ${norma.url_pasta_digital?`<a href="${norma.url_pasta_digital}" class="btn btn-sm btn-outline-warning" target="_blank" title="Pasta Digital"><i class="far fa-folder-open"></i></a>`:''}
                         ${norma.url_texto_integral?`<a href="${norma.url_texto_integral}" class="btn btn-sm btn-outline-primary" target="_blank" title="Texto Integral"><i class="far fa-file-pdf"></i></a>`:''}
                     </td>
                 </tr>`;
             });
             html += '</tbody></table></div>';
         } else {
-            html += `<div class="card-view-container mb-3">`;
-            data.data.forEach(norma => {
-html += `<div class="card-norma">
-    <a href="${norma.detail_url||'#'}" class="card-header-custom text-decoration-none">
-        ${sanitizeHTML(norma.des_tipo_norma||'')} ${sanitizeHTML(norma.num_norma||'')}/${sanitizeHTML(norma.ano_norma||'')}
-    </a>
-    <div class="card-meta-custom">
-        <i class="fa fa-calendar-alt fa-fw me-2 text-muted"></i>
-        <span>${sanitizeHTML(norma.dat_norma||'')}</span>
-        <span class="ms-2"><i class="fa fa-bullhorn fa-fw me-2 text-muted"></i>${sanitizeHTML(norma.situacao||'')}</span>
-    </div>
-    <div class="card-body-custom"><strong>Ementa:</strong> ${highlightText(sanitizeHTML(norma.txt_ementa||''), termosBusca)}</div>
-    ${norma.assunto ? `<div class="card-meta-custom"><i class="fa fa-tag fa-fw me-2 text-muted"></i>${sanitizeHTML(norma.assunto)}</div>` : ""}
-    <div class="card-actions-custom">
-        ${norma.url_texto_integral?`<a href="${norma.url_texto_integral}" class="btn btn-sm btn-outline-primary" target="_blank" title="Texto Integral"><i class="far fa-file-pdf"></i></a>`:''}
-    </div>
-</div>`;
-            });
-            html += `</div>`;
+            html += renderCardsView(data, termosBusca);
         }
         html += renderizarPaginacao(data);
         resultadosDiv.innerHTML = html;
-        document.getElementById('btn-view-table').addEventListener('click', () => { currentViewMode='table'; localStorage.setItem('normaViewMode','table'); realizarBusca(page, itensPorPaginaSelect ? itensPorPaginaSelect.value : '10'); });
-        document.getElementById('btn-view-cards').addEventListener('click', () => { currentViewMode='cards'; localStorage.setItem('normaViewMode','cards'); realizarBusca(page, itensPorPaginaSelect ? itensPorPaginaSelect.value : '10'); });
+        document.getElementById('btn-view-table').classList.toggle('active', currentViewMode === 'table');
+        document.getElementById('btn-view-cards').classList.toggle('active', currentViewMode === 'cards');
+        document.getElementById('btn-view-table').addEventListener('click', () => { currentViewMode='table'; localStorage.setItem('normaViewMode','table'); realizarBusca(page, itensPorPaginaSelect ? itensPorPaginaSelect.value : '12'); });
+        document.getElementById('btn-view-cards').addEventListener('click', () => { currentViewMode='cards'; localStorage.setItem('normaViewMode','cards'); realizarBusca(page, itensPorPaginaSelect ? itensPorPaginaSelect.value : '12'); });
         itensPorPaginaSelect = document.getElementById('itens_por_pagina');
         if(itensPorPaginaSelect) itensPorPaginaSelect.addEventListener('change', (e) => realizarBusca(1, e.target.value));
         document.querySelectorAll('.sortable-header').forEach(h => h.addEventListener('click', handleColumnSort));
@@ -763,12 +2436,115 @@ html += `<div class="card-norma">
         if (navPaginacao) navPaginacao.addEventListener('click', e => {
             const pageLink = e.target.closest('a.page-link');
             if (pageLink && pageLink.dataset.page && !pageLink.closest('.page-item.disabled')) {
-                e.preventDefault(); realizarBusca(parseInt(pageLink.dataset.page), itensPorPaginaSelect ? itensPorPaginaSelect.value : '10');
+                e.preventDefault(); realizarBusca(parseInt(pageLink.dataset.page), itensPorPaginaSelect ? itensPorPaginaSelect.value : '12');
             }
         });
         attachExportListeners();
+        
+        // Re-inicializar tooltips após renderizar resultados
+        const newTooltips = resultadosDiv.querySelectorAll('[data-bs-toggle="tooltip"]');
+        newTooltips.forEach(function(el) {
+            if (!bootstrap.Tooltip.getInstance(el)) {
+                new bootstrap.Tooltip(el);
+            }
+        });
+        
         const triggerEl = document.querySelector('#lista-tab');
         bootstrap.Tab.getInstance(triggerEl)?.show() || new bootstrap.Tab(triggerEl).show();
+        
+        // Esconder filtros e mostrar botão toggle após renderizar resultados
+        if (bsCollapseFiltros && document.getElementById('filtro-container').classList.contains('show')) {
+            bsCollapseFiltros.hide();
+            document.getElementById('filtro-container').addEventListener('hidden.bs.collapse', function handler() {
+                // Aguardar um frame para garantir que o DOM foi atualizado
+                requestAnimationFrame(() => {
+                    setTimeout(() => scrollParaResultados(), 50);
+                });
+                this.removeEventListener('hidden.bs.collapse', handler);
+            });
+        } else {
+            // Aguardar um frame para garantir que o DOM foi atualizado
+            requestAnimationFrame(() => {
+                setTimeout(() => scrollParaResultados(), 50);
+            });
+        }
+    }
+
+    function renderCardsView(data, termosBusca) {
+        let html = '<div class="card-view-container mb-3">';
+        data.data.forEach(norma => {
+            const ementaDestacada = highlightText(stripHTML(norma.txt_ementa || ''), termosBusca);
+            let botoesDocumentos = '';
+            
+            // Badge de Pasta Digital (apenas para normas com texto integral e usuários autenticados) - DEVE VIR ANTES
+            if (norma.url_pasta_digital) {
+                botoesDocumentos += `<a href="${norma.url_pasta_digital}" class="badge bg-warning bg-opacity-10 text-warning-emphasis border border-warning border-opacity-25 badge-clickable text-decoration-none me-1 mb-1 d-inline-block" target="_blank" title="Pasta Digital" data-bs-toggle="tooltip"><i class="far fa-folder-open me-1"></i>Pasta Digital</a>`;
+            }
+            // Texto Integral
+            if (norma.url_texto_integral) {
+                botoesDocumentos += `<a href="${norma.url_texto_integral}" class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 badge-clickable text-decoration-none me-1 mb-1 d-inline-block" target="_blank" title="Texto Integral" data-bs-toggle="tooltip"><i class="far fa-file-pdf me-1"></i>Texto Integral</a>`;
+            }
+            // Texto Consolidado
+            if (norma.url_texto_consolidado) {
+                botoesDocumentos += `<a href="${norma.url_texto_consolidado}" class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 badge-clickable text-decoration-none me-1 mb-1 d-inline-block" target="_blank" title="Texto Consolidado" data-bs-toggle="tooltip"><i class="fas fa-file-pdf me-1"></i>Texto Consolidado</a>`;
+            }
+            
+            // Normas Relacionadas
+            if (norma.qtd_normas_relacionadas > 0) {
+                botoesDocumentos += `<span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25 badge-norma-relacionada badge-clickable" data-bs-toggle="tooltip" title="Clique para ver normas relacionadas" data-cod-norma="${norma.cod_norma}" data-tipo-norma="${sanitizeHTML(norma.des_tipo_norma || '')}" data-num-norma="${sanitizeHTML(norma.num_norma || '')}" data-ano-norma="${sanitizeHTML(norma.ano_norma || '')}"><i class="fa fa-link me-1"></i>Normas Relacionadas (${norma.qtd_normas_relacionadas})</span>`;
+            }
+            
+            html += `
+                <div class="card card-norma mb-3 position-relative shadow-sm">
+                    <div class="card-header bg-light">
+                        <a href="${norma.detail_url || '#'}" 
+                           class="text-decoration-none text-body fw-semibold d-block card-title-link"
+                           title="Ver Detalhes da Norma"
+                           aria-label="Ver detalhes da norma ${sanitizeHTML(norma.des_tipo_norma || '')} n° ${sanitizeHTML(norma.num_norma || '')}/${sanitizeHTML(norma.ano_norma || '')}">
+                            <i class="fas fa-file-alt text-primary me-2"></i>
+                            ${sanitizeHTML(norma.des_tipo_norma || '')} n° ${sanitizeHTML(norma.num_norma || '')}/${sanitizeHTML(norma.ano_norma || '')}
+                        </a>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-4">
+                            <div class="text-break text-body">${ementaDestacada || '<em class="text-secondary">Sem ementa</em>'}</div>
+                        </div>
+                        <div class="card-section-detalhes">
+                            <div class="small">
+                                <div class="mb-2">
+                                    <i class="fa fa-calendar-alt text-muted me-2"></i>
+                                    <strong class="text-body fw-medium">Data da Norma:</strong> <span class="text-secondary">${sanitizeHTML(norma.dat_norma || 'N/A')}</span>
+                                </div>
+                                ${norma.dat_publicacao ? `
+                                    <div class="mb-2">
+                                        <i class="far fa-newspaper text-muted me-2"></i>
+                                        <strong class="text-body fw-medium">Data de Publicação:</strong> <span class="text-secondary">${sanitizeHTML(norma.dat_publicacao)}</span>
+                                    </div>
+                                ` : ''}
+                                <div class="mb-2">
+                                    <i class="fa fa-info-circle text-muted me-2"></i>
+                                    <strong class="text-body fw-medium">Situação:</strong> <span class="${(norma.situacao && norma.situacao.includes('Revogado')) ? 'text-danger fw-semibold' : 'text-secondary'}">${sanitizeHTML(norma.situacao || 'Não informada')}</span>
+                                </div>
+                                ${norma.assunto ? `
+                                    <div>
+                                        <i class="fa fa-tag text-muted me-2"></i>
+                                        <strong class="text-body fw-medium">Assunto:</strong> <span class="text-secondary">${sanitizeHTML(norma.assunto)}</span>
+                                    </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                    </div>
+                    ${botoesDocumentos ? `
+                    <div class="card-footer bg-transparent border-top">
+                        <div class="d-flex flex-wrap gap-1">
+                            ${botoesDocumentos}
+                        </div>
+                    </div>
+                    ` : ''}
+                </div>`;
+        });
+        html += '</div>';
+        return html;
     }
 
     function renderizarPaginacao(data) {
@@ -826,25 +2602,136 @@ html += `<div class="card-norma">
 
     // Configurar eventos do formulário
     form.addEventListener('submit', e => { e.preventDefault(); realizarBusca(1); });
-    limparBtn.addEventListener('click', () => {
-        window.history.pushState({}, '', window.location.pathname);
+    
+    function handleLimparClick() {
+        // Limpar campos do formulário
         form.reset();
-        document.querySelectorAll('select.form-control, select.form-select').forEach(el => { if (el.tomselect) el.tomselect.clear(); });
-        document.getElementById('ordem_campo').value = '';
-        document.getElementById('ordem_direcao').value = '';
-        if (itensPorPaginaSelect) itensPorPaginaSelect.value = '10';
+        
+        // Limpar selects com TomSelect
+        document.querySelectorAll('select.form-control, select.form-select').forEach(el => { 
+            if (el.tomselect) el.tomselect.clear(); 
+        });
+        
+        // Limpar datepickers de range
+        if (daterangeNormaPicker) {
+            daterangeNormaPicker.clear();
+        }
+        if (daterangePublicacaoPicker) {
+            daterangePublicacaoPicker.clear();
+        }
+        
+        // Limpar campos hidden
+        const hiddenDateFields = ['dt_norma_hidden', 'dt_norma2_hidden', 'dt_public_hidden', 'dt_public2_hidden'];
+        hiddenDateFields.forEach(field => {
+            const el = document.getElementById(field);
+            if (el) el.value = '';
+        });
+        
+        // Limpar ordenação e paginação
+        ordemCampoInput.value = '';
+        ordemDirecaoInput.value = '';
+        document.getElementById('pagina').value = '1';
+        if (itensPorPaginaSelect) itensPorPaginaSelect.value = '12';
         document.getElementById('rd_ordem_1').checked = true;
-        document.getElementById('container-principal-resultados').style.display = 'none';
-        document.getElementById('painel-sem-resultados').innerHTML = '';
+        
+        // Esconder resultados
+        containerPrincipal.classList.add('d-none');
+        containerPrincipal.classList.remove('d-block');
+        resumoFiltrosDiv.classList.add('d-none');
+        resumoFiltrosDiv.classList.remove('d-block');
         resumoFiltrosDiv.innerHTML = '';
-        limparBtn.style.display = 'none';
-        contarFiltrosAtivos();
+        
+        // Esconder botão limpar
+        limparBtn.classList.add('d-none');
+        limparBtn.classList.remove('d-inline-block');
+        
+        // Esconder botão toggle se não há filtros (verificar após limpar)
+        const btnToggleFiltros = document.getElementById('btn-toggle-filtros');
+        if (btnToggleFiltros) {
+            btnToggleFiltros.classList.add('d-none');
+        }
+        
+        // Mostrar mensagem inicial
+        showInitialMessage();
+        
+        // Mostrar toast
         if (filterClearedToast) filterClearedToast.show();
-        if (bsCollapseFiltros) bsCollapseFiltros.show();
-        btnToggleFiltros.style.display = 'none';
-        const initialMessageDiv = document.getElementById('painel-sem-resultados');
-        if(initialMessageDiv) initialMessageDiv.innerHTML = `<div class="alert alert-info text-center" role="status"><i class="fa fa-search fa-2x mb-2"></i><br>Utilize os filtros acima para encontrar normas.</div>`;
+        
+        // Abrir filtro-container se estiver fechado
+        if (bsCollapseFiltros && !document.getElementById('filtro-container').classList.contains('show')) {
+            bsCollapseFiltros.show();
+        }
+        
+        // Fechar filtros avançados se estiverem abertos
+        if (bsCollapseAdvancedSearch && advancedSearchDiv.classList.contains('show')) {
+            bsCollapseAdvancedSearch.hide();
+        }
+        
+        // Atualizar contagem e resumo de filtros
+        contarFiltrosAtivos();
+        mostrarResumoFiltros(new FormData(form));
+        
+        // Atualizar URL sem recarregar
+        window.history.replaceState({}, document.title, window.location.pathname);
+        
         searchStarted = false;
+    }
+    
+    limparBtn.addEventListener('click', handleLimparClick);
+    
+    // Event listeners usando delegação
+    document.body.addEventListener('click', function(e) {
+        if (e.target.closest('.badge-norma-relacionada')) {
+            e.preventDefault();
+            handleNormasRelacionadasClick(e.target.closest('.badge-norma-relacionada'));
+        }
+        if (e.target.closest('[data-preset]')) {
+            const btn = e.target.closest('[data-preset]');
+            const preset = btn.dataset.preset;
+            if (!preset) return;
+            
+            // Determinar qual datepicker usar baseado no grupo de botões
+            const btnGroup = btn.closest('[role="group"]');
+            let picker = null;
+            if (btnGroup && btnGroup.id === 'date-presets-norma') {
+                picker = daterangeNormaPicker;
+            } else if (btnGroup && btnGroup.id === 'date-presets-publicacao') {
+                picker = daterangePublicacaoPicker;
+            }
+            
+            if (picker) {
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                let startDate, endDate;
+                switch (preset) {
+                    case 'hoje':
+                        startDate = today;
+                        endDate = today;
+                        break;
+                    case 'semana':
+                        endDate = new Date(today);
+                        startDate = new Date(today);
+                        startDate.setDate(today.getDate() - 6);
+                        break;
+                    case 'mes_atual':
+                        startDate = new Date(today.getFullYear(), today.getMonth(), 1);
+                        endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+                        break;
+                    case 'mes_passado':
+                        const prevMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+                        startDate = new Date(prevMonth.getFullYear(), prevMonth.getMonth(), 1);
+                        endDate = new Date(prevMonth.getFullYear(), prevMonth.getMonth() + 1, 0);
+                        break;
+                }
+                if (startDate && endDate) {
+                    picker.setDate([startDate, endDate], true);
+                    const onCloseCallback = picker.config.onClose[0];
+                    if (onCloseCallback) {
+                        onCloseCallback(picker.selectedDates, '', picker);
+                    }
+                }
+            }
+        }
     });
 
     // Inicializar toast
@@ -858,6 +2745,73 @@ html += `<div class="card-norma">
     if (advancedSearchDiv && toggleIcon) {
         advancedSearchDiv.addEventListener('show.bs.collapse', function () { toggleIcon.classList.add('expanded'); });
         advancedSearchDiv.addEventListener('hide.bs.collapse', function () { toggleIcon.classList.remove('expanded'); });
+    }
+
+    async function handleNormasRelacionadasClick(badge) {
+        const codNorma = badge.dataset.codNorma;
+        if (!codNorma) return;
+        
+        const modal = new bootstrap.Modal(document.getElementById('modalNormasRelacionadas'));
+        const modalBody = document.getElementById('modalNormasRelacionadasBody');
+        const modalTitle = document.getElementById('modalNormasRelacionadasLabel');
+        
+        // Obter identificação da norma
+        const tipoNorma = badge.dataset.tipoNorma || '';
+        const numNorma = badge.dataset.numNorma || '';
+        const anoNorma = badge.dataset.anoNorma || '';
+        
+        // Formatar identificação: tipo número/ano (ex: Lei 10/2015)
+        let identificacaoNorma = '';
+        if (numNorma && anoNorma) {
+            identificacaoNorma = tipoNorma 
+                ? `${tipoNorma} n° ${numNorma}/${anoNorma}`
+                : `${numNorma}/${anoNorma}`;
+        }
+        
+        // Montar título do modal
+        modalTitle.textContent = identificacaoNorma 
+            ? `Normas Relacionadas - ${identificacaoNorma}`
+            : 'Normas Relacionadas';
+        modalBody.innerHTML = '<div class="text-center p-5"><i class="fa fa-spinner fa-spin fa-2x"></i><p class="mt-2">Carregando normas relacionadas...</p></div>';
+        modal.show();
+        
+        try {
+            const data = await fetchWithCache(`normas_relacionadas_json?cod_norma=${codNorma}`);
+            const normas = data.normas_relacionadas || [];
+            
+            if (normas.length === 0) {
+                modalBody.innerHTML = `<p class="text-center text-muted">Nenhuma norma relacionada encontrada.</p>`;
+                return;
+            }
+            
+            let html = '<ul class="list-group">';
+            normas.forEach(norma => {
+                const identificacao = norma.sgl_tipo_norma 
+                    ? `${norma.sgl_tipo_norma} ${norma.num_norma}/${norma.ano_norma}`
+                    : `${norma.des_tipo_norma} n° ${norma.num_norma}/${norma.ano_norma}`;
+                
+                html += `
+                    <li class="list-group-item">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div class="flex-grow-1">
+                                <a href="${norma.detail_url}" target="_blank" class="text-decoration-none">
+                                    <i class="fa fa-file-alt text-primary me-2"></i>
+                                    <strong>${sanitizeHTML(identificacao)}</strong>
+                                </a>
+                                ${norma.txt_ementa ? `<div class="mt-2"><small class="text-body">${sanitizeHTML(stripHTML(norma.txt_ementa))}</small></div>` : ''}
+                                ${norma.des_vinculo ? `<div class="mt-2"><small class="text-muted"><i class="fa fa-link me-1"></i><strong>Tipo de Vinculação:</strong> ${sanitizeHTML(norma.des_vinculo)}</small></div>` : ''}
+                            </div>
+                            <i class="fa fa-external-link-alt text-muted ms-2"></i>
+                        </div>
+                    </li>
+                `;
+            });
+            html += '</ul>';
+            modalBody.innerHTML = html;
+        } catch (error) {
+            console.error('Erro ao carregar normas relacionadas:', error);
+            modalBody.innerHTML = `<div class="alert alert-danger">Erro ao carregar normas relacionadas: ${sanitizeHTML(error.message)}</div>`;
+        }
     }
 
     // Popular formulário a partir da URL
@@ -894,6 +2848,36 @@ html += `<div class="card-norma">
                 else el.value = params.get(key);
             }
         });
+        
+        // Popular datepickers de range se houver valores na URL
+        const dtNorma = params.get('dt_norma');
+        const dtNorma2 = params.get('dt_norma2');
+        if (dtNorma && dtNorma2 && daterangeNormaPicker) {
+            try {
+                const date1 = flatpickr.parseDate(dtNorma, 'd/m/Y');
+                const date2 = flatpickr.parseDate(dtNorma2, 'd/m/Y');
+                if (date1 && date2) {
+                    daterangeNormaPicker.setDate([date1, date2], true);
+                }
+            } catch (e) {
+                console.warn('Erro ao popular data da norma:', e);
+            }
+        }
+        
+        const dtPublic = params.get('dt_public');
+        const dtPublic2 = params.get('dt_public2');
+        if (dtPublic && dtPublic2 && daterangePublicacaoPicker) {
+            try {
+                const date1 = flatpickr.parseDate(dtPublic, 'd/m/Y');
+                const date2 = flatpickr.parseDate(dtPublic2, 'd/m/Y');
+                if (date1 && date2) {
+                    daterangePublicacaoPicker.setDate([date1, date2], true);
+                }
+            } catch (e) {
+                console.warn('Erro ao popular data de publicação:', e);
+            }
+        }
+        
         document.getElementById('ordem_campo').value = params.get('ordem_campo') || '';
         document.getElementById('ordem_direcao').value = params.get('ordem_direcao') || '';
         contarFiltrosAtivos();
@@ -902,13 +2886,22 @@ html += `<div class="card-norma">
 
     // Função principal de busca
     async function realizarBusca(page=1, itensPorPaginaParam=null) {
+        if (!validarFormulario()) return;
         if (!searchStarted) searchStarted = true;
         if (bsCollapseFiltros) bsCollapseFiltros.hide();
-        const itensPorPaginaAtual = itensPorPaginaParam || (itensPorPaginaSelect ? itensPorPaginaSelect.value : '10');
+        const itensPorPaginaAtual = itensPorPaginaParam || (itensPorPaginaSelect ? itensPorPaginaSelect.value : '12');
         document.getElementById('pagina').value = page;
         pesquisarBtn.disabled = true;
         pesquisarBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Buscando...';
         pesquisarBtn.setAttribute('aria-busy', 'true');
+        
+        // Mostrar indicador de busca no campo de assunto/ementa se houver valor
+        const txtAssuntoFeedback = document.getElementById('txt_assunto_feedback');
+        if (txtAssuntoInput && txtAssuntoInput.value.trim().length > 0 && txtAssuntoFeedback) {
+            txtAssuntoFeedback.classList.remove('d-none');
+            txtAssuntoFeedback.classList.add('d-block');
+        }
+        
         showSkeletonLoading();
         const params = new URLSearchParams(new FormData(form));
         params.set('pagina', page);
@@ -916,146 +2909,155 @@ html += `<div class="card-norma">
         actualizarURL(params);
         mostrarResumoFiltros(new FormData(form));
         try {
-            const response = await fetch(`normas_table_json?${params.toString()}`);
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
-                throw new Error(errorData.details || 'Falha na resposta do servidor.');
-            }
-            const data = await response.json();
-            renderizarResultados(data);
-            limparBtn.style.display = 'inline-block';
+            const response = await fetchWithCache(`normas_table_json?${params.toString()}`);
+            renderizarResultados(response);
+            limparBtn.classList.remove('d-none');
+            limparBtn.classList.add('d-inline-block');
+            if (bsCollapseFiltros) bsCollapseFiltros.hide();
         } catch (error) {
-            renderizarErro(error.message);
+            console.error('Erro na busca:', error);
+            renderizarErro(error.message || 'Ocorreu um erro ao buscar os dados.');
         } finally {
             pesquisarBtn.disabled = false;
-            pesquisarBtn.innerHTML = '<i class="fa fa-search"></i> Pesquisar';
+            pesquisarBtn.innerHTML = '<i class="fa fa-search me-1"></i> Pesquisar';
             pesquisarBtn.removeAttribute('aria-busy');
-            const resultadosDiv = document.getElementById('resultados');
             if (resultadosDiv) resultadosDiv.removeAttribute('aria-busy');
+            
+            // Ocultar indicador de busca no campo de assunto/ementa
+            const txtAssuntoFeedback = document.getElementById('txt_assunto_feedback');
+            if (txtAssuntoFeedback) {
+                txtAssuntoFeedback.classList.add('d-none');
+                txtAssuntoFeedback.classList.remove('d-block');
+            }
         }
     }
 
-    // Inicialização da página
-    if (!window.location.search) {
-        document.getElementById('painel-sem-resultados').innerHTML = `<div class="alert alert-info text-center" role="status"><i class="fa fa-search fa-2x mb-2"></i><br>Utilize os filtros acima para encontrar normas.</div>`;
-    }
-
-    // ==================== TOUR GUIADO ====================
-    function iniciarTour() {
-        const tour = new Shepherd.Tour({
-            defaultStepOptions: {
-                cancelIcon: { enabled: true },
-                scrollTo: { behavior: 'smooth', block: 'center' },
-                classes: 'shepherd-theme-custom',
-                arrow: true
-            },
-            useModalOverlay: true,
-            tourName: 'PesquisaNormasTour'
-        });
-
-        // Passo 1: Introdução
-        tour.addStep({
-            title: 'Bem-vindo à Pesquisa de Normas Jurídicas!',
-            text: 'Este guia rápido vai te ajudar a usar os filtros e recursos da pesquisa.',
-            buttons: [
-                { text: 'Sair', action: tour.cancel },
-                { text: 'Próximo', action: tour.next }
-            ],
-            attachTo: {
-                element: '#form-pesquisa',
-                on: 'bottom'
+    // Validação de número (apenas números) com feedback melhorado
+    if (txtNumeroInput) {
+        txtNumeroInput.addEventListener('keypress', function(e) {
+            // Permitir apenas números (0-9)
+            if (!/[0-9]/.test(e.key) && !['Backspace', 'Delete', 'Tab', 'Enter', 'ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(e.key)) {
+                e.preventDefault();
             }
         });
-
-        // Passo 2: Filtros Básicos
-        tour.addStep({
-            title: 'Filtros Básicos',
-            text: 'Comece selecionando o tipo de norma, número, ano ou palavras-chave para encontrar o que precisa.',
-            buttons: [
-                { text: 'Voltar', action: tour.back },
-                { text: 'Próximo', action: tour.next }
-            ],
-            attachTo: {
-                element: '#form-pesquisa .card-body h5',
-                on: 'bottom'
+        txtNumeroInput.addEventListener('input', function(e) {
+            // Remover qualquer caractere não numérico
+            const value = e.target.value.replace(/\D/g, '');
+            if (e.target.value !== value) {
+                e.target.value = value;
             }
-        });
-
-        // Passo 3: Filtros Avançados
-        tour.addStep({
-            title: 'Filtros Avançados',
-            text: 'Refine sua busca com datas específicas, assuntos detalhados ou período de publicação.',
-            buttons: [
-                { text: 'Voltar', action: tour.back },
-                { text: 'Próximo', action: tour.next }
-            ],
-            attachTo: {
-                element: '#advancedSearch',
-                on: 'bottom'
-            },
-            beforeShowPromise: function() {
-                return new Promise(function(resolve) {
-                    const advancedSearch = document.querySelector('#advancedSearch');
-                    if (advancedSearch.classList.contains('collapse')) {
-                        const bsCollapse = new bootstrap.Collapse(advancedSearch, { toggle: true });
-                        bsCollapse.show();
-                    }
-                    resolve();
-                });
-            }
-        });
-
-        // Passo 4: Resultados
-        tour.addStep({
-            title: 'Visualização de Resultados',
-            text: 'Altere entre tabela e cards, ordene colunas ou exporte os dados conforme sua necessidade.',
-            buttons: [
-                { text: 'Voltar', action: tour.back },
-                { text: 'Próximo', action: tour.next }
-            ],
-            attachTo: {
-                element: '#resultado-tabs',
-                on: 'bottom'
-            },
-            when: {
-                show: function() {
-                    document.querySelector('#container-principal-resultados').style.display = 'block';
+            
+            const feedbackEl = document.getElementById('txt_numero_feedback');
+            if (value && !/^\d+$/.test(value)) {
+                e.target.classList.add('is-invalid');
+                e.target.setAttribute('aria-invalid', 'true');
+                if (feedbackEl) {
+                    feedbackEl.textContent = 'Por favor, insira apenas números.';
+                    feedbackEl.classList.add('d-block');
+                }
+            } else {
+                e.target.classList.remove('is-invalid');
+                e.target.setAttribute('aria-invalid', 'false');
+                if (feedbackEl) {
+                    feedbackEl.classList.remove('d-block');
                 }
             }
         });
-
-        // Passo 5: Finalização
-        tour.addStep({
-            title: 'Pronto para começar!',
-            text: 'Agora você pode explorar todas as normas jurídicas. <br><small>Dica: Os filtros ativos aparecem no topo da página.</small>',
-            buttons: [
-                { text: 'Fechar', action: tour.complete }
-            ],
-            attachTo: {
-                element: '#btn-pesquisar',
-                on: 'top'
+    }
+    
+    // Validação de ano (4 dígitos) com feedback melhorado
+    if (txtAnoInput) {
+        txtAnoInput.addEventListener('keypress', function(e) {
+            // Permitir apenas números (0-9)
+            if (!/[0-9]/.test(e.key) && !['Backspace', 'Delete', 'Tab', 'Enter', 'ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(e.key)) {
+                e.preventDefault();
+            }
+            // Limitar a 4 dígitos
+            if (e.target.value.length >= 4 && /[0-9]/.test(e.key)) {
+                e.preventDefault();
             }
         });
-
-        // Inicia o tour se for a primeira visita
-        if (!localStorage.getItem('tourNormasFinalizado')) {
-            tour.start();
-            localStorage.setItem('tourNormasFinalizado', 'true');
+        txtAnoInput.addEventListener('input', function(e) {
+            // Remover qualquer caractere não numérico e limitar a 4 dígitos
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length > 4) {
+                value = value.substring(0, 4);
+            }
+            if (e.target.value !== value) {
+                e.target.value = value;
+            }
+            
+            const feedbackEl = document.getElementById('txt_ano_feedback');
+            if (value && (!/^\d{4}$/.test(value) || parseInt(value) < 1900 || parseInt(value) > 2100)) {
+                e.target.classList.add('is-invalid');
+                e.target.setAttribute('aria-invalid', 'true');
+                if (feedbackEl) {
+                    if (!/^\d{4}$/.test(value)) {
+                        feedbackEl.textContent = 'Por favor, insira um ano válido com 4 dígitos (ex: 2025).';
+                    } else {
+                        feedbackEl.textContent = 'Por favor, insira um ano entre 1900 e 2100.';
+                    }
+                    feedbackEl.classList.add('d-block');
+                }
+            } else {
+                e.target.classList.remove('is-invalid');
+                e.target.setAttribute('aria-invalid', 'false');
+                if (feedbackEl) {
+                    feedbackEl.classList.remove('d-block');
+                }
+            }
+        });
+    }
+    
+    // ============================================
+    // MELHORIAS DE UX: ATALHOS DE TECLADO
+    // ============================================
+    
+    document.addEventListener('keydown', function(e) {
+        // Ctrl+K / Cmd+K: Foco no primeiro campo de busca
+        if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+            e.preventDefault();
+            const assuntoInput = txtAssuntoInput;
+            if (assuntoInput) {
+                assuntoInput.focus();
+                assuntoInput.select();
+            }
         }
         
-        return tour;
-    }
-
-    // Botão de ajuda para reiniciar o tour
-    document.getElementById('btn-ajuda-tour').addEventListener('click', function() {
-        iniciarTour().start();
+        // Enter: Executar busca (se não estiver em textarea ou input de múltiplas linhas)
+        if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA' && !e.target.isContentEditable) {
+            if (e.target.closest('#form-pesquisa') && !e.target.closest('.btn')) {
+                e.preventDefault();
+                pesquisarBtn?.click();
+            }
+        }
+        
+        // Esc: Limpar filtros (se não estiver em input/textarea)
+        if (e.key === 'Escape' && !['INPUT', 'TEXTAREA'].includes(e.target.tagName)) {
+            if (haFiltrosAtivos()) {
+                limparBtn?.click();
+            }
+        }
+        
+        // /: Foco no primeiro campo (se não estiver em input)
+        if (e.key === '/' && !['INPUT', 'TEXTAREA'].includes(e.target.tagName)) {
+            e.preventDefault();
+            const primeiroCampo = form.querySelector('input[type="text"], select');
+            if (primeiroCampo) {
+                primeiroCampo.focus();
+            }
+        }
     });
-
-    // Inicia o tour automaticamente na primeira visita
-    if (!localStorage.getItem('tourNormasFinalizado')) {
-        setTimeout(() => {
-            iniciarTour().start();
-        }, 1000);
+    
+    // Inicialização da página
+    if (!window.location.search) {
+        showInitialMessage();
+    } else {
+        if (!haFiltrosAtivos()) {
+            if (btnToggleFiltros) {
+                btnToggleFiltros.classList.add('d-none');
+            }
+        }
     }
 
     // Carregar dados da URL se existirem

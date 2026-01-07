@@ -4,32 +4,36 @@
 
 <dtml-in expr="zsql.composicao_comissao_obter_zsql(cod_parlamentar=cod_parlamentar)">
   <dtml-if sequence-start>
-  <div class="table-responsive">
-  <table class="table w-100">
-   <thead>
-    <tr> 
-       <th width="60%">Comissão</th>
-       <th width="15%">Cargo</th>
-       <th>Período</th>
-    </tr>
-   <thead>
+    <div class="table-responsive">
+      <table class="table table-striped align-middle">
+        <thead class="table-light">
+          <tr> 
+            <th width="60%">Comissão</th>
+            <th width="15%">Cargo</th>
+            <th>Período</th>
+          </tr>
+        </thead>
+        <tbody>
   </dtml-if>
     <tr>
-     <td>
-       <dtml-var nom_comissao>
-     </td>
-     <td>
+      <td>
+        <dtml-var nom_comissao>
+      </td>
+      <td>
         <dtml-var des_cargo> 
-     </td>
-     <td>
+      </td>
+      <td>
         <dtml-var dat_designacao> a <dtml-if expr="dat_desligamento!=None"><dtml-var dat_desligamento missing null><dtml-else><dtml-in expr="zsql.periodo_comp_comissao_obter_zsql(cod_periodo_comp=cod_periodo_comp)"><dtml-var dat_fim_periodo></dtml-in></dtml-if>
-     </td>
+      </td>
     </tr>
   <dtml-if sequence-end>
-   </table>
-   </div>
+        </tbody>
+      </table>
+    </div>
   </dtml-if>
-<dtml-else>
-   <p>Nenhuma participação cadastrada.</p>
-</dtml-in>
+  <dtml-else>
+    <div class="alert alert-info mb-0">
+      <i class="fas fa-info-circle me-2"></i>Nenhuma participação cadastrada.
+    </div>
+  </dtml-in>
 

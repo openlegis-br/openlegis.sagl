@@ -1,120 +1,167 @@
 <dtml-var header_html>
 
-<h1 class="firstHeading font-size-18">Histórico de Tramitações</h1>
+<h1 class="firstHeading font-size-18 mb-3">Histórico de Tramitações</h1>
 
-<form method="post" action="" name="historicoTramitacoes_form">
-
-  <legend class="font-size-16">Parâmetros da Pesquisa</legend>
-  <p><b>Período:</b> <dtml-var dat_inicio> a <dtml-var dat_fim></p>
-  <p><b>Unidade de Tramitação:</b>
-    <dtml-if expr="lst_cod_unid_tram_dest=='0'">
-       Todas
-    <dtml-else>
-       <dtml-in "listaLocaisTramitacao(local=lst_cod_unid_tram_dest)">
-          <dtml-if cod_orgao>
-             <dtml-var nom_orgao missing>
-          <dtml-elif cod_comissao><dtml-var nom_comissao missing>
-             <dtml-else><dtml-var nom_parlamentar></b>
-          </dtml-if>
-       </dtml-in>
-    </dtml-if>
-  </p>
-  <p><b>Tipo Matéria: </b>
-      <dtml-if expr="lst_tip_materia=='0'">
-         Todos
-      <dtml-else>
-         <dtml-in "listaTiposMaterias(tipo=lst_tip_materia)">
-             <dtml-var des_tipo_materia>
-         </dtml-in>
-      </dtml-if>
-  </p>
-  <p><b>Status de Tramitação:</b>
-         <dtml-if expr="lst_status=='0'">Todos
-         <dtml-else>
-            <dtml-in "listaStatusTramitacao(status=lst_status)">
-               <dtml-var des_status>
-            </dtml-in>
-         </dtml-if>
-   </p>
+<div class="card mb-3">
+  <div class="card-header">
+    <h3 class="h5 mb-0"><i class="fas fa-filter me-1"></i>Parâmetros da Pesquisa</h3>
+  </div>
+  <div class="card-body">
+    <dl class="row mb-0">
+      <dt class="col-sm-3"><i class="fas fa-calendar-alt me-1"></i>Período:</dt>
+      <dd class="col-sm-9"><dtml-var dat_inicio> a <dtml-var dat_fim></dd>
+      <dt class="col-sm-3"><i class="fas fa-building me-1"></i>Unidade de Tramitação:</dt>
+      <dd class="col-sm-9">
+        <dtml-if expr="lst_cod_unid_tram_dest=='0'">
+          Todas
+        <dtml-else>
+          <dtml-in "listaLocaisTramitacao(local=lst_cod_unid_tram_dest)">
+            <dtml-if cod_orgao>
+              <dtml-var nom_orgao missing>
+            <dtml-elif cod_comissao>
+              <dtml-var nom_comissao missing>
+            <dtml-else>
+              <dtml-var nom_parlamentar>
+            </dtml-if>
+          </dtml-in>
+        </dtml-if>
+      </dd>
+      <dt class="col-sm-3"><i class="fas fa-file-alt me-1"></i>Tipo Matéria:</dt>
+      <dd class="col-sm-9">
+        <dtml-if expr="lst_tip_materia=='0'">
+          Todos
+        <dtml-else>
+          <dtml-in "listaTiposMaterias(tipo=lst_tip_materia)">
+            <dtml-var des_tipo_materia>
+          </dtml-in>
+        </dtml-if>
+      </dd>
+      <dt class="col-sm-3"><i class="fas fa-info-circle me-1"></i>Status de Tramitação:</dt>
+      <dd class="col-sm-9">
+        <dtml-if expr="lst_status=='0'">
+          Todos
+        <dtml-else>
+          <dtml-in "listaStatusTramitacao(status=lst_status)">
+            <dtml-var des_status>
+          </dtml-in>
+        </dtml-if>
+      </dd>
+    </dl>
+  </div>
+</div>
 
 <dtml-call name="REQUEST">
 <dtml-if dat_inicio>
-  <hr />
-  <legend class="font-size-16">Resultado da Pesquisa</legend>
   <dtml-call expr="REQUEST.set('dat_inicio_c',pysc.data_converter_pysc(dat_inicio))">
-  <dtml-call expr="REQUEST.set('dat_fim_c',pysc.data_converter_pysc(dat_fim))"> 
-  <dtml-in "qtdeGeral(dat_inicio=dat_inicio_c, dat_fim=dat_fim_c)"><b>Total de Tramitações:</b> <dtml-var qtde></p>
-  <hr />
-    <dtml-call expr="REQUEST.set('tip_materia',lst_tip_materia)">
-    <dtml-call expr="REQUEST.set('cod_unid_tramitacao', lst_cod_unid_tram_dest)">
-    <dtml-call expr="REQUEST.set('cod_status', lst_status)">
+  <dtml-call expr="REQUEST.set('dat_fim_c',pysc.data_converter_pysc(dat_fim))">
+  <dtml-in "qtdeGeral(dat_inicio=dat_inicio_c, dat_fim=dat_fim_c)">
+    <div class="alert alert-info mb-3">
+      <i class="fas fa-info-circle me-1"></i><strong>Total de Tramitações:</strong> <dtml-var qtde>
+    </div>
+  </dtml-in>
+  <dtml-call expr="REQUEST.set('tip_materia',lst_tip_materia)">
+  <dtml-call expr="REQUEST.set('cod_unid_tramitacao', lst_cod_unid_tram_dest)">
+  <dtml-call expr="REQUEST.set('cod_status', lst_status)">
 
-    <dtml-in "listaLocaisTramitacaoP(dat_inicio=dat_inicio_c, dat_fim=dat_fim_c, local=cod_unid_tramitacao)">   
-
-       <dtml-in "qtdeLocal(dat_inicio=dat_inicio_c, dat_fim=dat_fim_c, local=cod_unid_tramitacao)">
-          <dtml-if expr="qtde>0">
-           <p class="h5" align="left"><b>Unidade de Destino:</b> <dtml-if cod_orgao><dtml-var nom_orgao null=""><dtml-elif cod_comissao><dtml-var nom_comissao null=""><dtml-else><dtml-var nom_parlamentar></dtml-if> / <b>Tramitações no Período:</b> <dtml-var qtde></p>
-
+  <dtml-in "listaLocaisTramitacaoP(dat_inicio=dat_inicio_c, dat_fim=dat_fim_c, local=cod_unid_tramitacao)">
+    <dtml-in "qtdeLocal(dat_inicio=dat_inicio_c, dat_fim=dat_fim_c, local=cod_unid_tramitacao)">
+      <dtml-if expr="qtde>0">
+        <div class="card mb-3">
+          <div class="card-header">
+            <h3 class="h5 mb-0">
+              <i class="fas fa-building me-1"></i>Unidade de Destino: 
+              <dtml-if cod_orgao><dtml-var nom_orgao null=""><dtml-elif cod_comissao><dtml-var nom_comissao null=""><dtml-else><dtml-var nom_parlamentar></dtml-if>
+              <span class="badge bg-secondary ms-2"><dtml-var qtde> tramitações</span>
+            </h3>
+          </div>
+          <div class="card-body">
             <dtml-in "listaTiposMateriasL(dat_inicio=dat_inicio_c, dat_fim=dat_fim_c, local=cod_unid_tramitacao, tipo=tip_materia)">
-
-               <dtml-in "qtdeTipo(dat_inicio=dat_inicio_c, dat_fim=dat_fim_c, local=cod_unid_tramitacao, tipo=tip_materia)"> 
-                 <dtml-if expr="qtde>0"><br />
-  <p><dtml-var document_title><b>Tipo de Matéria: </b><dtml-var des_tipo_materia> <b>[<dtml-var qtde></b>]</p>
+              <dtml-in "qtdeTipo(dat_inicio=dat_inicio_c, dat_fim=dat_fim_c, local=cod_unid_tramitacao, tipo=tip_materia)">
+                <dtml-if expr="qtde>0">
+                  <h4 class="h6 mb-2"><i class="fas fa-file-alt me-1"></i>Tipo de Matéria: <strong><dtml-var des_tipo_materia></strong> <span class="badge bg-secondary"><dtml-var qtde></span></h4>
                   <dtml-in "listaStatusTramitacaoS(dat_inicio=dat_inicio_c, dat_fim=dat_fim_c, tipo=tip_materia, local=cod_unid_tramitacao, status=cod_status)">
                     <dtml-in "qtdeStatusTramitacao(dat_inicio=dat_inicio_c, dat_fim=dat_fim_c, tipo=tip_materia, local=cod_unid_tramitacao, status=cod_status)">
                       <dtml-if expr="qtde>0">
-  <p align="left"><dtml-var document_title><b>Status de Tramitação:</b> <dtml-var des_status> <b>[<dtml-var qtde>]</b></p>
-                         <dtml-in "materiaTipoLocal(dat_inicio=dat_inicio_c, dat_fim=dat_fim_c,tipo=tip_materia, local=cod_unid_tramitacao, status=cod_status)">
-     <p>
-         <b><dtml-var dat_tramitacao_tr> - <a target="_blank" href="<dtml-var portal_url>/consultas/materia/materia_mostrar_proc?cod_materia=<dtml-var expr="pysc.b64encode_pysc(codigo=cod_materia)">"><dtml-var des_tipo_materia missing> nº <dtml-var num_ident_basica>/<dtml-var ano_ident_basica></a></b> - <b><dtml-var expr="exibe_autor_pysc(cod_autor=cod_autor)"></b> - <dtml-var txt_ementa>
-     <br />
-
-     </p> <dtml-if dat_fim_prazo> - Prazo: <dtml-var dat_fim_prazo missing null=""></dtml-if>
-         
-                        </dtml-in>                     
-                     </dtml-if>
+                        <h5 class="h6 mb-2"><i class="fas fa-info-circle me-1"></i>Status de Tramitação: <strong><dtml-var des_status></strong> <span class="badge bg-secondary"><dtml-var qtde></span></h5>
+                        <div class="list-group mb-3">
+                          <dtml-in "materiaTipoLocal(dat_inicio=dat_inicio_c, dat_fim=dat_fim_c,tipo=tip_materia, local=cod_unid_tramitacao, status=cod_status)">
+                            <div class="list-group-item">
+                              <div class="d-flex w-100 justify-content-between mb-1">
+                                <a target="_blank" href="<dtml-var portal_url>/consultas/materia/materia_mostrar_proc?cod_materia=<dtml-var expr="pysc.b64encode_pysc(codigo=cod_materia)">" class="text-decoration-none">
+                                  <strong><dtml-var dat_tramitacao_tr> - <dtml-var des_tipo_materia missing> nº <dtml-var num_ident_basica>/<dtml-var ano_ident_basica></strong>
+                                </a>
+                              </div>
+                              <p class="mb-1">
+                                <i class="fas fa-user me-1 text-muted"></i><strong><dtml-var expr="exibe_autor_pysc(cod_autor=cod_autor)"></strong>
+                              </p>
+                              <p class="mb-1 text-muted"><dtml-var txt_ementa></p>
+                              <dtml-if dat_fim_prazo>
+                                <small class="text-muted"><i class="fas fa-calendar-alt me-1"></i>Prazo: <dtml-var dat_fim_prazo missing null=""></small>
+                              </dtml-if>
+                            </div>
+                          </dtml-in>
+                        </div>
+                      </dtml-if>
                     </dtml-in>
                   </dtml-in>
-                 </dtml-if>
-               </dtml-in>
+                </dtml-if>
+              </dtml-in>
             </dtml-in>
-          </dtml-if>
-       </dtml-in>
+          </div>
+        </div>
+      </dtml-if>
     </dtml-in>
   </dtml-in>
-  
-  <legend class="font-size-16">Quadro Geral</legend>
-    <table class="table table-sm">
-      <thead>
-      <tr>
-       <td>Unidade de Tramitação</td>
-       <td align="center">Tramitações</td>
-      </tr>
-      </thead>
-       <dtml-in "qtdeLocalF(dat_inicio=dat_inicio_c, dat_fim=dat_fim_c)">
-         <dtml-if expr="qtde>0">
-          <tr>
-           <td><dtml-var cod_unid_tramitacao> - <dtml-if nom_comissao> <dtml-var nom_comissao missing>
-                            <dtml-elif nom_orgao>   <dtml-var nom_orgao    missing>
-                            <dtml-else>             <dtml-var nom_parlamentar missing>
-                            </dtml-if>
-           </td>
-           <td align="center"><dtml-var qtde></td>
-          </tr>
-         </dtml-if>
-       </dtml-in>
-       <dtml-in "qtdeGeral(dat_inicio=dat_inicio_c, dat_fim=dat_fim_c)">
-          <tr>
-          <td><b>TOTAL</b></td>
-          <td align="center"><b><dtml-var qtde></b></td>
-          </tr>
-        </dtml-in>
-      </table>
-</dtml-if>
-</table>
-<form>
 
-<p><input class="btn btn-primary d-print-none" type="button" value="Voltar" onClick="history.go(-1)" /></p>
+  <div class="card mb-3">
+    <div class="card-header">
+      <h3 class="h5 mb-0"><i class="fas fa-chart-bar me-1"></i>Quadro Geral</h3>
+    </div>
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-striped align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>Unidade de Tramitação</th>
+              <th class="text-center">Tramitações</th>
+            </tr>
+          </thead>
+          <tbody>
+            <dtml-in "qtdeLocalF(dat_inicio=dat_inicio_c, dat_fim=dat_fim_c)">
+              <dtml-if expr="qtde>0">
+                <tr>
+                  <td>
+                    <dtml-var cod_unid_tramitacao> - 
+                    <dtml-if nom_comissao>
+                      <dtml-var nom_comissao missing>
+                    <dtml-elif nom_orgao>
+                      <dtml-var nom_orgao missing>
+                    <dtml-else>
+                      <dtml-var nom_parlamentar missing>
+                    </dtml-if>
+                  </td>
+                  <td class="text-center"><dtml-var qtde></td>
+                </tr>
+              </dtml-if>
+            </dtml-in>
+            <dtml-in "qtdeGeral(dat_inicio=dat_inicio_c, dat_fim=dat_fim_c)">
+              <tr class="table-secondary">
+                <td><strong>TOTAL</strong></td>
+                <td class="text-center"><strong><dtml-var qtde></strong></td>
+              </tr>
+            </dtml-in>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</dtml-if>
+
+<div class="d-print-none">
+  <button class="btn btn-outline-secondary" type="button" onClick="history.go(-1)">
+    <i class="fas fa-arrow-left me-1"></i>Voltar
+  </button>
+</div>
 
 <dtml-var js_slot>
 <dtml-var footer_html>

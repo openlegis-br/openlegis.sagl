@@ -5,64 +5,95 @@
   <dtml-call expr="REQUEST.set('sgl_comissao', sgl_comissao)">
 </dtml-in>
 
- <div class="row mb-3">
-  <div class="col-9 col-md-8 d-flex align-items-center">
-    <h1 class="firstHeading font-size-18 mb-0"><dtml-var nom_comissao></h1>
+<div class="row mb-3">
+  <div class="col-12 col-md-9 d-flex align-items-center">
+    <h1 class="firstHeading font-size-18 mb-0">Matérias em Análise - <dtml-var nom_comissao></h1>
   </div>
-  <div class="col-3 col-md-4">
-    <div class="input-group mt-1 mt-md-0 d-flex justify-content-end">
-   <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia'])"> 
-      <a class="btn btn-light" href="<dtml-var portal_url>/cadastros/comissao/comissao_mostrar_proc?cod_comissao=<dtml-var cod_comissao>"><i class="fas fa-undo"></i> Voltar</a>  
-   <dtml-else>
-      <a class="btn btn-light" href="<dtml-var portal_url>/consultas/comissao/comissao_mostrar_proc?cod_comissao=<dtml-var cod_comissao>"><i class="fas fa-undo"></i> Voltar</a>    
-   </dtml-if>  
-    </div>
+  <div class="col-12 col-md-3 text-start text-md-end">
+    <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia'])"> 
+      <a class="btn btn-outline-secondary btn-sm" href="<dtml-var portal_url>/cadastros/comissao/comissao_mostrar_proc?cod_comissao=<dtml-var cod_comissao>">
+        <i class="fas fa-arrow-left me-1"></i>Voltar
+      </a>  
+    <dtml-else>
+      <a class="btn btn-outline-secondary btn-sm" href="<dtml-var portal_url>/consultas/comissao/comissao_mostrar_proc?cod_comissao=<dtml-var cod_comissao>">
+        <i class="fas fa-arrow-left me-1"></i>Voltar
+      </a>    
+    </dtml-if>  
   </div>
- </div>
+</div>
 
 <dtml-in expr="materias_comissao_pysc(cod_comissao=cod_comissao)" prefix="materia">
   <dtml-if sequence-start>
-    <div class="row">
-      <div class="col-12">
-        <legend class="font-size-16">Matérias em Análise: <dtml-var sequence-length> matéria<dtml-if expr="_['sequence-length'] > 1">s</dtml-if> com parecer pendente.</legend>
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-header">
+        <strong>
+          <i class="fas fa-file-alt me-2"></i>
+          <dtml-var sequence-length> matéria<dtml-if expr="_['sequence-length'] > 1">s</dtml-if> com parecer pendente
+        </strong>
+      </div>
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table id="matcom" class="table table-striped align-middle mb-0 datatable w-100">
+            <thead class="table-light">
+              <tr>            
+                <th width="30%">Identificação da Matéria</th>
+                <th width="40%">Ementa</th>
+                <th>Autoria</th>
+              </tr>
+            </thead>
+            <tbody>
+  </dtml-if>
+            <tr>
+              <dtml-in expr="zsql.materia_obter_zsql(cod_materia=materia_item)">
+                <td>
+                  <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia'])">
+                    <a href="<dtml-var portal_url>/cadastros/materia/materia_mostrar_proc?cod_materia=<dtml-var cod_materia>" class="text-decoration-none">
+                      <strong><dtml-var des_tipo_materia> nº <dtml-var num_ident_basica>/<dtml-var ano_ident_basica></strong>
+                    </a>
+                  <dtml-else>
+                    <a href="<dtml-var portal_url>/consultas/materia/materia_mostrar_proc?cod_materia=<dtml-var expr="pysc.b64encode_pysc(codigo=cod_materia)">" class="text-decoration-none">
+                      <strong><dtml-var des_tipo_materia> nº <dtml-var num_ident_basica>/<dtml-var ano_ident_basica></strong>
+                    </a>
+                  </dtml-if>
+                </td>
+                <td>
+                  <dtml-var txt_ementa>
+                </td>
+                <td>
+                  <dtml-call expr="REQUEST.set('tem_autoria', 0)">
+                  <dtml-in expr="zsql.autoria_obter_zsql(cod_materia=materia_item, ind_excluido=0)">
+                    <dtml-call expr="REQUEST.set('tem_autoria', 1)">
+                    <dtml-if sequence-start>
+                      <div class="d-flex flex-wrap align-items-center gap-1">
+                    </dtml-if>
+                    <span class="badge bg-secondary-subtle text-secondary-emphasis border border-secondary-subtle d-inline-flex align-items-center mb-1">
+                      <i class="fas fa-user me-1" style="font-size: 0.75rem;"></i>
+                      <span><dtml-var nom_autor_join></span>
+                    </span>
+                    <dtml-if sequence-end>
+                      </div>
+                    </dtml-if>
+                  </dtml-in>
+                  <dtml-if expr="not REQUEST.get('tem_autoria', 0)">
+                    <span class="text-muted fst-italic">
+                      <i class="fas fa-user-slash me-1"></i>Não informada
+                    </span>
+                  </dtml-if>
+                </td>
+              </dtml-in>
+            </tr>
+  <dtml-if sequence-end>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
-     <div class="table-responsive">
-     <table id="matcom" class="table datatable w-100">
-       <thead class="table-light">
-         <tr>            
-            <th width="30%">Identificação da Matéria</th>
-            <th width="40%">Ementa</th>
-            <th>Autoria</th>
-       </thead>
-  </dtml-if sequence-start>
-  <tr>
-      <dtml-in expr="zsql.materia_obter_zsql(cod_materia=materia_item)">
-         <td>
-           <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia'])">
-	      <a href="&dtml-portal_url;/cadastros/materia/materia_mostrar_proc?cod_materia=<dtml-var cod_materia>">
-           <dtml-else>
-	      <a href="&dtml-portal_url;/consultas/materia/materia_mostrar_proc?cod_materia=<dtml-var expr="pysc.b64encode_pysc(codigo=cod_materia)">">
-           </dtml-if>
-           <dtml-var des_tipo_materia> nº <dtml-var num_ident_basica>/<dtml-var ano_ident_basica></a>
-         </td>
-         <td>
-           <dtml-var txt_ementa>
-         </td>
-         <td>
-           <dtml-in expr="zsql.autoria_obter_zsql(cod_materia=materia_item, ind_excluido=0)">
-            <dtml-var nom_autor_join>
-           </dtml-in>
-         </td>
-      </dtml-in>
-  </tr>
- <dtml-if sequence-end>
-    </table>
-   </div>
- </dtml-if sequence-end>
-<dtml-else>
-  <p>Não há matérias pendentes de parecer nesta Comissão.</p>
-</dtml-in>
+  </dtml-if>
+  <dtml-else>
+    <div class="alert alert-info mb-0">
+      <i class="fas fa-info-circle me-2"></i>Não há matérias pendentes de parecer nesta Comissão.
+    </div>
+  </dtml-in>
 
 <dtml-var js_slot>
 <dtml-var footer_html>

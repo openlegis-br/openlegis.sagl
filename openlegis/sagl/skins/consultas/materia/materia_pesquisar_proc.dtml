@@ -1,18 +1,18 @@
 <dtml-var header_html>
 
- <div class="row mb-3">
+<div class="row mb-3">
   <div class="col-12 col-md-6 d-flex align-items-center">
-    <h1 class="firstHeading font-size-18">Pesquisa de Matérias Legislativas</h1>
+    <h1 class="firstHeading font-size-18 mb-0">Pesquisa de Matérias Legislativas</h1>
   </div>
-  <div class="col-12 col-md-6">
-    <div class="input-group mt-1 mt-md-0 d-flex justify-content-start justify-content-md-end">
-     <a class="btn btn-light" href="<dtml-var portal_url>/consultas/materia" ><i class="fa fa-fw fa-search"></i> Pesquisa</a>
-     <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia'])">
-        <a class="btn btn-primary" href="<dtml-var portal_url>/cadastros/materia/materia_form_resumido" ><i class="fa fa-fw fa-plus"></i> Incluir Matéria</a>
-     </dtml-if>   
+  <div class="col-12 col-md-6 text-start text-md-end">
+    <div class="btn-group btn-group-sm flex-wrap">
+      <a class="btn btn-outline-secondary" href="<dtml-var portal_url>/consultas/materia"><i class="fas fa-search me-1"></i>Pesquisa</a>
+      <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia'])">
+        <a class="btn btn-primary" href="<dtml-var portal_url>/cadastros/materia/materia_form_resumido"><i class="fas fa-plus me-1"></i>Incluir Matéria</a>
+      </dtml-if>
     </div>
   </div>
- </div>
+</div>
 
 <dtml-if hdn_cod_autor>
   <dtml-in expr="zsql.autor_obter_zsql(cod_autor=hdn_cod_autor)">
@@ -82,24 +82,24 @@
       <div class="card-header">
        <div class="row">
       <div class="col-8 col-sm-9 align-self-center">
-         <i class="far fa-list-alt"></i> Resultado: <dtml-var sequence-length> matéria<dtml-if expr="_['sequence-length'] > 1">s</dtml-if>
+        <i class="fas fa-list-alt me-1"></i>Resultado: <dtml-var sequence-length> matéria<dtml-if expr="_['sequence-length'] > 1">s</dtml-if>
       </div>
       <div class="col-4 col-sm-3 text-end align-self-center">
-         <div class="btn-group">
-           <button class="btn btn-sm btn-white" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-             <i class="fas fa-file-export"></i> Exportar
-           </button>
-           <div class="dropdown-menu dropdown-menu-right">
-              <dtml-let isAnon="portal_membership.isAnonymousUser()">
-                 <dtml-if expr="not isAnon">
-                     <a class="dropdown-item" href="<dtml-var portal_url>/relatorios/pdf_materia_preparar_pysc?<dtml-var "REQUEST.get('QUERY_STRING','')">&tipo_materia=<dtml-var "REQUEST.form.get('lst_tip_materia')">" target="_blank"><i class="far fa-file-pdf"></i> PDF</a>
-                     <a class="dropdown-item" href="<dtml-var portal_url>/consultas/materia/exportar_materias_ods_pysc?<dtml-var "REQUEST.get('QUERY_STRING','')">&tipo_materia=<dtml-var "REQUEST.form.get('lst_tip_materia')">" target="_blank"><i class="far fa-file-excel"></i> ODS</a>
-                     <a class="dropdown-item" href="<dtml-var portal_url>/consultas/materia/materias_json?<dtml-var "REQUEST.get('QUERY_STRING','')">&tipo_materia=<dtml-var "REQUEST.form.get('lst_tip_materia')">" target="_blank"><i class="fa fa-file-code"></i> JSON</a>
-                 </dtml-if>
-              </dtml-let>
-               <a class="dropdown-item" href="<dtml-var portal_url>/generico/RSS2_materias?<dtml-var "REQUEST.get('QUERY_STRING','')">&tipo_materia=<dtml-var "REQUEST.form.get('lst_tip_materia')">" target="_blank"><i class="fas fa-rss"></i> RSS</a>
-           </div>
-         </div>
+        <div class="btn-group btn-group-sm">
+          <button class="btn btn-outline-secondary" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <i class="fas fa-file-export me-1"></i>Exportar
+          </button>
+          <div class="dropdown-menu dropdown-menu-end">
+            <dtml-let isAnon="portal_membership.isAnonymousUser()">
+              <dtml-if expr="not isAnon">
+                <a class="dropdown-item" href="<dtml-var portal_url>/relatorios/pdf_materia_preparar_pysc?<dtml-var "REQUEST.get('QUERY_STRING','')">&tipo_materia=<dtml-var "REQUEST.form.get('lst_tip_materia')">" target="_blank"><i class="fas fa-file-pdf me-1"></i>PDF</a>
+                <a class="dropdown-item" href="<dtml-var portal_url>/consultas/materia/exportar_materias_ods_pysc?<dtml-var "REQUEST.get('QUERY_STRING','')">&tipo_materia=<dtml-var "REQUEST.form.get('lst_tip_materia')">" target="_blank"><i class="fas fa-file-excel me-1"></i>ODS</a>
+                <a class="dropdown-item" href="<dtml-var portal_url>/consultas/materia/materias_json?<dtml-var "REQUEST.get('QUERY_STRING','')">&tipo_materia=<dtml-var "REQUEST.form.get('lst_tip_materia')">" target="_blank"><i class="fas fa-file-code me-1"></i>JSON</a>
+              </dtml-if>
+            </dtml-let>
+            <a class="dropdown-item" href="<dtml-var portal_url>/generico/RSS2_materias?<dtml-var "REQUEST.get('QUERY_STRING','')">&tipo_materia=<dtml-var "REQUEST.form.get('lst_tip_materia')">" target="_blank"><i class="fas fa-rss me-1"></i>RSS</a>
+          </div>
+        </div>
       </div>
        </div>
       </div>
@@ -108,15 +108,15 @@
    <li class="list-group-item">
     <div class="row">
       <div class="col-12 col-md-10 d-flex align-self-start">
-               <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia'])">
-                 <a href="<dtml-var portal_url>/cadastros/materia/materia_mostrar_proc?cod_materia=<dtml-var cod_materia>">
-               <dtml-else>
-                 <a href="<dtml-var portal_url>/consultas/materia/materia_mostrar_proc?cod_materia=<dtml-var expr="pysc.b64encode_pysc(codigo=cod_materia)">" >
-               </dtml-if>
-               <span class="h6 font-size-14 font-weight-bold text-uppercase mb-1"><dtml-var des_tipo_materia> nº <dtml-var num_ident_basica>/<dtml-var ano_ident_basica></span></a>
-      </div> 
-      <div class="col-12 col-md-2 d-flex align-self-center justify-content-start justify-content-md-end">
-          <dtml-if expr="ind_tramitacao == 1"><span class="badge bg-dark-success align-text-top">Em tramitação</span></dtml-if></a> 
+              <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia'])">
+                <a href="<dtml-var portal_url>/cadastros/materia/materia_mostrar_proc?cod_materia=<dtml-var cod_materia>" class="text-decoration-none">
+              <dtml-else>
+                <a href="<dtml-var portal_url>/consultas/materia/materia_mostrar_proc?cod_materia=<dtml-var expr="pysc.b64encode_pysc(codigo=cod_materia)">" class="text-decoration-none">
+              </dtml-if>
+              <strong><dtml-var des_tipo_materia> nº <dtml-var num_ident_basica>/<dtml-var ano_ident_basica></strong></a>
+          </div>
+          <div class="col-12 col-md-2 d-flex align-self-center justify-content-start justify-content-md-end">
+            <dtml-if expr="ind_tramitacao == 1"><span class="badge bg-success">Em tramitação</span></dtml-if> 
       </div>
     </div>
 
@@ -393,7 +393,7 @@
       <dtml-if "hasattr(sapl_documentos.materia,texto_original)">
           <dtml-let isAnon="portal_membership.isAnonymousUser()">
              <dtml-if expr="not isAnon">
-                <a class="btn btn-sm btn-primary" href="<dtml-var portal_url>/consultas/materia/pasta_digital/?cod_materia=<dtml-var cod_materia>&action=pasta" target="_blank"><i class="far fa-folder-open"></i> Pasta Digital</a>
+                <a class="btn btn-sm btn-primary" href="<dtml-var portal_url>/@@pasta_digital?cod_materia=<dtml-var cod_materia>&action=pasta" target="_blank"><i class="far fa-folder-open"></i> Pasta Digital</a>
              </dtml-if>
           </dtml-let>
           <a class="btn btn-sm btn-light" href="<dtml-var portal_url>/pysc/download_materia_pysc?cod_materia=<dtml-var expr="pysc.b64encode_pysc(codigo=cod_materia)">&texto_original=1" target="_blank"><i class="far fa-file-pdf"></i> Texto Integral</a>
@@ -436,18 +436,16 @@
 </dtml-if sequence-end>
 
 <dtml-else>
- <div class="row">
-    <div class="col-12">
-       <p>Nenhuma ocorrência encontrada.</p>
-    </div>
- </div>
+  <div class="alert alert-info">
+    <i class="fas fa-info-circle me-1"></i>Nenhuma ocorrência encontrada.
+  </div>
 </dtml-in>
 <dtml-else>
   <div class="alert alert-danger alert-dismissible fade show" role="alert">
     <h5 class="alert-heading">Confirme que você não é um robô.</h5>
     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
   </div>
-  <a class="btn btn-danger" href="javascript:void(0)" onClick="window.history.go(-1); return false;"><i class="fa fa-fw fa-undo"></i> Voltar</a>
+  <a class="btn btn-outline-secondary" href="javascript:void(0)" onClick="window.history.go(-1); return false;"><i class="fas fa-arrow-left me-1"></i>Voltar</a>
 </dtml-if>
 
 <dtml-var js_slot>

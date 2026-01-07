@@ -2,145 +2,244 @@
 
 <script src="<dtml-var portal_url>/javascript/data_validar.js"></script>
 
- <div class="row mb-2">
-      <div class="col-12 col-md-8 align-self-center">
-        <h1 class="firstHeading font-size-18">Pesquisa de Protocolos</h1>
+<div class="row mb-3">
+  <div class="col-12 col-md-8 align-self-center">
+    <h1 class="firstHeading font-size-18 mb-0">Pesquisa de Protocolos</h1>
+  </div>
+  <div class="col-12 col-md-4 text-start text-md-end">
+    <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Protocolo'])">
+      <div class="btn-group">
+        <button type="button" class="btn btn-primary d-print-none dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          <i class="fas fa-plus me-1"></i>Incluir Protocolo
+        </button>
+        <div class="dropdown-menu">
+          <a class="dropdown-item" href="<dtml-var portal_url>/cadastros/protocolo/protocolo_administrativo_form">
+            <i class="fas fa-file-alt me-1"></i>Administrativo
+          </a>
+          <a class="dropdown-item" href="<dtml-var portal_url>/cadastros/protocolo/protocolo_legislativo_form">
+            <i class="fas fa-file-contract me-1"></i>Legislativo
+          </a>
+        </div>
       </div>
-      <div class="col-12 col-md-4 text-start text-md-end">
-       <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Protocolo'])">
-         <div class="btn-group btn-group-sm">
-           <button type="button" class="btn btn-primary d-print-none mb-2 dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-             <i class="fa fa-fw fa-plus"></i> Incluir Protocolo
-           </button>
-           <div class="dropdown-menu">
-             <a class="dropdown-item" href="<dtml-var portal_url>/cadastros/protocolo/protocolo_administrativo_form">Administrativo</a>
-             <a class="dropdown-item" href="<dtml-var portal_url>/cadastros/protocolo/protocolo_legislativo_form">Legislativo</a>
-           </div>
-         </div>
-       </dtml-if>
-      </div>
- </div>
+    </dtml-if>
+  </div>
+</div>
 
-<!-- Nav tabs -->
-<ul class="nav nav-tabs border-0 mt-2" role="tablist">
+<ul class="nav nav-tabs border-0" role="tablist">
   <li class="nav-item">
-    <a class="nav-link active" id="protocolo-tab" data-bs-toggle="tab" href="#protocolo" role="tab" aria-controls="principais" aria-selected="true">Pesquisa de Protocolos</a>
+    <a class="nav-link active" id="protocolo-tab" data-bs-toggle="tab" href="#protocolo" role="tab" aria-controls="protocolo" aria-selected="true">
+      <i class="fas fa-search me-1"></i>Pesquisa de Protocolos
+    </a>
   </li>
 </ul>
 
 <div class="tab-content">
   <div class="tab-pane p-3 border fade show active" id="protocolo">
-
-<form name="pesq_avancada_form" id="pesq_avancada_form" action="protocolo_pesquisar_proc">
-
-  <div class="row"> 
-    <div class="col-6 col-md-3 mb-3">
-      <label class="form-label" for="txt_num_protocolo">Número</label>
-      <input name="txt_num_protocolo" id="txt_num_protocolo" type="number" min="1" maxlength="6" class="form-control" autocomplete="off">
-    </div>
-    <div class="col-6 col-md-3 mb-3 controls">
-      <label class="form-label" for="txt_ano_protocolo">Ano</label>
-      <input name="txt_ano_protocolo" id="txt_ano_protocolo" type="number" min="1900" maxlength="4" class="form-control" autocomplete="off">
-    </div>
-    <div class="col-12 col-md-6 mb-3">
-      <label class="form-label" for="txt_assunto">Assunto</label>
-      <input class="form-control" name="txt_assunto" id="txt_assunto" type="text" autocomplete="off">
-    </div>
-  </div>
-  <div class="row">
-  <div class="col-6 col-lg-3 mb-3">
-      <label class="form-label" for="dt_apres">Data Inicial</label>
-        <div class="input-group">
-           <input type="text" class="form-control datepicker" placeholder="dd/mm/aaaa" name="dt_apres" id="dt_apres" data-provide="datepicker" data-date-autoclose="true" autocomplete="off">
-           <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
+    <form name="pesq_avancada_form" id="pesq_avancada_form" action="protocolo_pesquisar_proc">
+      <div class="card mb-3">
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-6 col-md-3">
+              <label class="form-label" for="txt_num_protocolo">
+                <i class="fas fa-hashtag me-1"></i>Número
+              </label>
+              <input name="txt_num_protocolo" id="txt_num_protocolo" type="number" min="1" maxlength="6" class="form-control" autocomplete="off">
+            </div>
+            <div class="col-6 col-md-3">
+              <label class="form-label" for="txt_ano_protocolo">
+                <i class="fas fa-calendar-alt me-1"></i>Ano
+              </label>
+              <input name="txt_ano_protocolo" id="txt_ano_protocolo" type="number" min="1900" maxlength="4" class="form-control" autocomplete="off">
+            </div>
+            <div class="col-12 col-md-6">
+              <label class="form-label" for="txt_assunto">
+                <i class="fas fa-file-alt me-1"></i>Assunto
+              </label>
+              <input class="form-control" name="txt_assunto" id="txt_assunto" type="text" autocomplete="off">
+            </div>
+          </div>
+          <div class="row g-3 mt-0">
+            <div class="col-6 col-lg-3">
+              <label class="form-label" for="dt_apres">
+                <i class="fas fa-calendar me-1"></i>Data Inicial
+              </label>
+              <div class="input-group">
+                <input type="text" class="form-control datepicker" placeholder="dd/mm/aaaa" name="dt_apres" id="dt_apres" data-provide="datepicker" data-date-autoclose="true" autocomplete="off">
+                <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
+              </div>
+            </div>
+            <div class="col-6 col-lg-3">
+              <label class="form-label" for="dt_apres2">
+                <i class="fas fa-calendar me-1"></i>Data Final
+              </label>
+              <div class="input-group">
+                <input type="text" class="form-control datepicker" placeholder="dd/mm/aaaa" name="dt_apres2" id="dt_apres2" data-provide="datepicker" data-date-autoclose="true" autocomplete="off">
+                <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
+              </div>
+            </div>
+            <div class="col-12 col-sm-6 col-md-6 col-lg-3">
+              <label class="form-label mb-2">
+                <i class="fas fa-filter me-1"></i>Tipo de Protocolo
+              </label>
+              <div class="btn-group w-100" role="group" aria-label="Tipo de protocolo">
+                <input type="radio" class="btn-check" name="rad_tip_protocolo" id="option1" value="0" autocomplete="off" checked>
+                <label class="btn btn-outline-secondary active" for="option1">Recebimento</label>
+                <input type="radio" class="btn-check" name="rad_tip_protocolo" id="option2" value="1" autocomplete="off">
+                <label class="btn btn-outline-secondary" for="option2">Envio</label>
+              </div>
+            </div>
+            <div class="col-12 col-sm-6 col-md-6 col-lg-3">
+              <label class="form-label mb-2">
+                <i class="fas fa-info-circle me-1"></i>Natureza do Processo
+              </label>
+              <div class="btn-group w-100" role="group" aria-label="Natureza do processo">
+                <input type="radio" class="btn-check" name="rad_tip_processo" id="tp1" value="0" autocomplete="off">
+                <label class="btn btn-outline-secondary" for="tp1">ADM</label>
+                <input type="radio" class="btn-check" name="rad_tip_processo" id="tp2" value="1" autocomplete="off">
+                <label class="btn btn-outline-secondary" for="tp2">LEG</label>
+                <input type="radio" class="btn-check" name="rad_tip_processo" id="tp3" value="" autocomplete="off" checked>
+                <label class="btn btn-outline-secondary active" for="tp3">Ambos</label>
+              </div>
+            </div>
+          </div>
         </div>
-  </div>
-  <div class="col-6 col-lg-3 mb-3">
-      <label class="form-label" for="dt_apres2">Data Final</label>
-        <div class="input-group">
-           <input type="text" class="form-control datepicker" placeholder="dd/mm/aaaa" name="dt_apres2" id="dt_apres2" data-provide="datepicker" data-date-autoclose="true" autocomplete="off">
-           <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
+      </div>
+      
+      <div id="divAdm" class="card mb-3" style="display:none;">
+        <div class="card-header">
+          <i class="fas fa-file-alt me-2"></i>Filtros Administrativos
         </div>
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-12 col-sm-6">
+              <label class="form-label" for="lst_tip_documento">
+                <i class="fas fa-filter me-1"></i>Tipo de Documento
+              </label>
+              <select class="form-select" id="lst_tip_documento" name="lst_tip_documento">
+                <option value="">Selecione</option>
+                <dtml-in expr="zsql.tipo_documento_administrativo_obter_zsql(ind_excluido=0)">
+                  <option value="<dtml-var tip_documento missing>">
+                    <dtml-var sgl_tipo_documento> - <dtml-var des_tipo_documento>
+                  </option>
+                </dtml-in>
+              </select>
+            </div>
+            <div class="col-12 col-sm-6">
+              <label class="form-label" for="txa_txt_interessado">
+                <i class="fas fa-user me-1"></i>Interessado
+              </label>
+              <input class="form-control" id="txa_txt_interessado" type="text" name="txa_txt_interessado" />
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div id="divLeg" class="card mb-3" style="display:none;">
+        <div class="card-header">
+          <i class="fas fa-file-contract me-2"></i>Filtros Legislativos
+        </div>
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-12 col-sm-6">
+              <label class="form-label" for="lst_tip_materia">
+                <i class="fas fa-filter me-1"></i>Tipo de Matéria
+              </label>
+              <select class="form-select" id="lst_tip_materia" name="lst_tip_materia">
+                <option value="">Selecione</option>
+                <dtml-in expr="zsql.tipo_materia_legislativa_obter_zsql(ind_excluido=0)">
+                  <option value="<dtml-var tip_materia missing>">
+                    <dtml-var sgl_tipo_materia> - <dtml-var des_tipo_materia>
+                  </option>
+                </dtml-in>
+              </select>
+            </div>
+            <div class="col-12 col-sm-6">
+              <label class="form-label" for="hdn_cod_autor">
+                <i class="fas fa-user-edit me-1"></i>Autoria
+              </label>
+              <select id="hdn_cod_autor" name="hdn_cod_autor" class="form-select" data-size="6" data-live-search="true" title="Todos" data-header="Pesquisar Autor">
+                <option value="">Todos</option>
+                <dtml-in expr="zsql.autor_obter_zsql(ind_excluido=0)">
+                  <option value="<dtml-var cod_autor>"><dtml-var nom_autor_join></option>
+                </dtml-in>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <input type="hidden" name="incluir" value="<dtml-var incluir missing>" />
+      <input type="hidden" name="existe_ocorrencia" value="0" />
+      <div class="text-start mt-3">
+        <button type="button" id="search-btn" class="btn btn-primary" onClick="return protocolo_criticar()">
+          <i class="fas fa-search me-1"></i>Pesquisar
+        </button>
+        <button type="reset" class="btn btn-outline-secondary">
+          <i class="fas fa-eraser me-1"></i>Limpar
+        </button>
+      </div>
+    </form>
   </div>
-    <div class="col-12 col-sm-6 col-md-6 col-lg-3 mb-3">
-       <label class="form-label d-block">Tipo de Protocolo</label>
-       <div class="btn-group-toggle" data-bs-toggle="buttons">
-         <label class="btn btn-light active">
-           <input type="radio" name="rad_tip_protocolo" id="option1" value="0" autocomplete="off" checked> Recebimento
-         </label>
-         <label class="btn btn-light">
-           <input type="radio" name="rad_tip_protocolo" id="option2" value="1" autocomplete="off"> Envio
-         </label>
-       </div>
-    </div>
-    <div class="col-12 col-sm-6 col-md-6 col-lg-3 mb-3">
-       <label class="form-label d-block">Natureza do Processo</label>
-       <div class="btn-group-toggle" data-bs-toggle="buttons">
-         <label class="btn btn-light">
-           <input type="radio" name="rad_tip_processo" id="tp1" value="0" autocomplete="off"> ADM
-         </label>
-         <label class="btn btn-light">
-           <input type="radio" name="rad_tip_processo" id="tp2" value="1" autocomplete="off"> LEG
-         </label>
-         <label class="btn btn-light active">
-           <input type="radio" name="rad_tip_processo" id="tp2" value="" autocomplete="off" checked> Ambos
-         </label>
-       </div>
-    </div>
-  </div>
-  <div id="divAdm" class="row" style="display:none;">
-    <div class="col-12 col-sm-6 mb-3">
-          <label class="form-label" for="lst_tip_documento">Tipo de Documento</label>
-          <select class="form-select" id="lst_tip_documento" name="lst_tip_documento">
-            <option value="">Selecione</option>
-            <dtml-in expr="zsql.tipo_documento_administrativo_obter_zsql(ind_excluido=0)">
-              <option value="<dtml-var tip_documento missing>">
-                <dtml-var sgl_tipo_documento> - <dtml-var des_tipo_documento>
-              </option>
-            </dtml-in>
-          </select>
-     </div>
-    <div class="col-12 col-sm-6 mb-3">
-        <label class="form-label" for="txa_txt_interessado">Interessado</label>
-        <input class="form-control" id="txa_txt_interessado" type="text" name="txa_txt_interessado" />
-     </div>
-  </div>
-  <div id="divLeg" class="row" style="display:none;">
-    <div class="col-12 col-sm-6 mb-3">
-          <label class="form-label" for="lst_tip_materia">Tipo de Matéria</label>
-          <select class="form-select" id="lst_tip_materia" name="lst_tip_materia">
-            <option value="">Selecione</option>
-            <dtml-in expr="zsql.tipo_materia_legislativa_obter_zsql(ind_excluido=0)">
-              <option value="<dtml-var tip_materia missing>">
-                <dtml-var sgl_tipo_materia> - <dtml-var des_tipo_materia>
-              </option>
-            </dtml-in>
-          </select>
-     </div>
-    <div class="col-12 col-sm-6 mb-3">
-        <label class="form-label" for="hdn_cod_autor">Autoria</label>
-        <select id="hdn_cod_autor" name="hdn_cod_autor" class="form-select" data-size="6" data-live-search="true" title="Todos" data-header="Pesquisar Autor">
-           <option value="">Todos</option>
-           <dtml-in expr="zsql.autor_obter_zsql(ind_excluido=0)">
-                <option value="<dtml-var cod_autor>"><dtml-var nom_autor_join></option>
-           </dtml-in>
-       </select>
-     </div>
-  </div>
-  <input type="hidden" name="incluir" value="<dtml-var incluir missing>" />
-  <input type="hidden" name="existe_ocorrencia" value="0" />
-  <div class="text-start mt-2">
-     <button type="button" id="search-btn" class="btn btn-primary" onClick="return protocolo_criticar()"><i class="fa fa-fw fa-search"></i> Pesquisar</button>
-     <input class="btn btn-light" type="reset" value="Limpar" />
-  </div>
-</form>
-</div>
 </div>
 
 <dtml-var js_slot>
+<style>
+/* Ajustar bordas do btn-group para estados corretos seguindo padrão Bootstrap 5 */
+.btn-group .btn-check:checked + .btn-outline-secondary,
+.btn-group .btn-check:active + .btn-outline-secondary,
+.btn-group .btn-outline-secondary.active {
+  border-color: #6c757d !important;
+  background-color: #6c757d !important;
+  color: #ffffff !important;
+  z-index: 1;
+}
 
+.btn-group .btn-outline-secondary:not(.active):hover {
+  border-color: #6c757d;
+  background-color: transparent;
+  color: #6c757d;
+  z-index: 2;
+}
+
+.btn-group .btn-outline-secondary:not(.active):focus,
+.btn-group .btn-check:focus + .btn-outline-secondary {
+  border-color: #6c757d;
+  box-shadow: 0 0 0 0.25rem rgba(108, 117, 125, 0.25);
+  z-index: 3;
+}
+
+/* Remover bordas duplicadas entre botões adjacentes */
+.btn-group > .btn-check + .btn-outline-secondary:not(:first-child) {
+  margin-left: -1px;
+}
+
+/* Garantir bordas arredondadas apenas nas extremidades */
+.btn-group > .btn-check:first-child + .btn-outline-secondary {
+  border-top-left-radius: 0.375rem;
+  border-bottom-left-radius: 0.375rem;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.btn-group > .btn-check:last-child + .btn-outline-secondary {
+  border-top-right-radius: 0.375rem;
+  border-bottom-right-radius: 0.375rem;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+/* Botões do meio sem bordas arredondadas */
+.btn-group > .btn-check:not(:first-child):not(:last-child) + .btn-outline-secondary {
+  border-radius: 0;
+}
+
+/* Garantir que botão ativo tenha borda visível mesmo quando adjacente */
+.btn-group .btn-check:checked + .btn-outline-secondary,
+.btn-group .btn-outline-secondary.active {
+  position: relative;
+}
+</style>
 <script>
-
 (function ($) {
   $(function () {
     document.onkeypress = function (event) {
@@ -152,27 +251,26 @@
   });
 }(jQuery));
 
-  $(document).ready(function() {
-    var clicked = false;
-    $("#search-btn").on("click", function(event) {
-      if (clicked) {
-        event.preventDefault();
-        return;
-      }
-      clicked = true;
-      var $this = $(this);
-      $this.html("Pesquisando...")
-      $this.addClass('disabled');
-      setTimeout(function() {
-        clicked = false;
-        $this.html("Pesquisar")
-        $this.removeClass('disabled');
-      }, 3000);
-    });
+$(document).ready(function() {
+  var clicked = false;
+  $("#search-btn").on("click", function(event) {
+    if (clicked) {
+      event.preventDefault();
+      return;
+    }
+    clicked = true;
+    var $this = $(this);
+    $this.html('<i class="fas fa-spinner fa-spin me-1"></i>Pesquisando...')
+    $this.addClass('disabled');
+    setTimeout(function() {
+      clicked = false;
+      $this.html('<i class="fas fa-search me-1"></i>Pesquisar')
+      $this.removeClass('disabled');
+    }, 3000);
   });
+});
 
 function protocolo_criticar(form){  
-
   var form = document.pesq_avancada_form;
 
   if (form.dt_apres.value != "" && !IsValidDate(form.dt_apres.value)) {
@@ -188,33 +286,53 @@ function protocolo_criticar(form){
   form.submit();
 }
 
-$(document).ready(function(){
-  $('input:radio[name="rad_tip_processo"]').change(function(){
-             if($(this).val()=="0")
-             {
-               $("#divAdm").show();
-               $("#divLeg").hide();
-               $('#lst_tip_materia').val(function() {
-                  return this.defaultValue;
-               });
-             }
-             else if($(this).val()=="1")
-             {
-                 $("#divLeg").show();
-                 $("#divAdm").hide();
-                 $('#lst_tip_documento').val(function() {
-                    return this.defaultValue;
-                 });
-                 $('#txa_txt_interessado').val(function() {
-                    return this.defaultValue;
-                 });
-             }
-             else
-             {
-                 $("#divLeg").hide();
-                 $("#divAdm").hide();
-             }
-    });
+// Gerenciar estados dos botões do btn-group
+function updateButtonStates() {
+  $('.btn-check').each(function() {
+    var $label = $(this).next('label');
+    if ($(this).prop('checked')) {
+      $label.addClass('active');
+    } else {
+      $label.removeClass('active');
+    }
   });
+}
+
+$(document).ready(function(){
+  // Inicializar estados dos botões
+  updateButtonStates();
+  
+  // Atualizar estados quando botões são clicados
+  $('.btn-check').on('change', function() {
+    updateButtonStates();
+  });
+  
+  $('input:radio[name="rad_tip_processo"]').change(function(){
+    if($(this).val()=="0")
+    {
+      $("#divAdm").show();
+      $("#divLeg").hide();
+      $('#lst_tip_materia').val(function() {
+        return this.defaultValue;
+      });
+    }
+    else if($(this).val()=="1")
+    {
+      $("#divLeg").show();
+      $("#divAdm").hide();
+      $('#lst_tip_documento').val(function() {
+        return this.defaultValue;
+      });
+      $('#txa_txt_interessado').val(function() {
+        return this.defaultValue;
+      });
+    }
+    else
+    {
+      $("#divLeg").hide();
+      $("#divAdm").hide();
+    }
+  });
+});
 </script>
 <dtml-var footer_html>

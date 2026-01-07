@@ -1,208 +1,335 @@
 <dtml-var header_html>
 
-<a id="ajuda" href="<dtml-var portal_url>/ajuda/pauta_sessao">Ajuda</a>
-
-<a id="ajuda" href="<dtml-var portal_url>/relatorios/pdf_pauta_sessao_preparar_pysc?data=<dtml-var dat_inicio_sessao>&cod_sessao_plen=<dtml-var cod_sessao_plen>"
-target="_blank">PDF</a>
-
 <dtml-in expr="zsql.tipo_sessao_plenaria_obter_zsql(tip_sessao=tip_sessao)">
-
-<h1 class="firstHeading font-size-18">Pauta da <dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao"></h1>
-
-<h3 align="center"><dtml-var sessao_plenaria_header></h3>
-
+  <div class="row mb-3">
+    <div class="col-12 col-md-8">
+      <h1 class="firstHeading font-size-18 mb-0">Pauta da <dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao"></h1>
+    </div>
+    <div class="col-12 col-md-4 text-start text-md-end">
+      <div class="btn-group btn-group-sm flex-wrap">
+        <a class="btn btn-outline-secondary d-print-none" href="<dtml-var portal_url>/relatorios/pdf_pauta_sessao_preparar_pysc?data=<dtml-var dat_inicio_sessao>&cod_sessao_plen=<dtml-var cod_sessao_plen>" target="_blank">
+          <i class="fas fa-file-pdf me-1"></i>PDF
+        </a>
+      </div>
+    </div>
+  </div>
+  
+  <h3 class="text-center mb-4"><dtml-var sessao_plenaria_header></h3>
 </dtml-in>
 
-<fieldset>
- <legend class="font-size-16">Matérias do Expediente</legend>
-    <table class="table">
-     <dtml-in expr="zsql.expediente_materia_obter_zsql(cod_sessao_plen = cod_sessao_plen, ind_excluido=0)">
-     <dtml-if sequence-start>
-        <tr>
-            <th width="5%">Item</th>
-            <th width="30%">Matéria</th>
-            <th width="50%">Ementa</th>
-            <th width="15%">Situação</th>
-        </tr>
-     </dtml-if sequence-start>
-         <dtml-if sequence-even>
-          <tr>
-         <dtml-else>
-          <tr class="even">
-         </dtml-if>
-       <dtml-in expr="zsql.votacao_expediente_materia_obter_zsql(cod_ordem = cod_ordem, ind_excluido=0)"> 
-            <td>
-              <b><dtml-var num_ordem></b> 
-            </td>
-            <td>
+<div class="card border-0 shadow-sm mb-4">
+  <div class="card-header">
+    <strong><i class="fas fa-list-alt me-2"></i>Matérias do Expediente</strong>
+  </div>
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-striped align-middle mb-0">
+        <dtml-in expr="zsql.expediente_materia_obter_zsql(cod_sessao_plen = cod_sessao_plen, ind_excluido=0)">
+          <dtml-if sequence-start>
+            <thead class="table-light">
+              <tr>
+                <th width="5%">Item</th>
+                <th width="30%">Matéria</th>
+                <th width="50%">Ementa</th>
+                <th width="15%">Situação</th>
+              </tr>
+            </thead>
+            <tbody>
+          </dtml-if>
+          <dtml-in expr="zsql.votacao_expediente_materia_obter_zsql(cod_ordem = cod_ordem, ind_excluido=0)"> 
+            <tr>
+              <td class="text-center">
+                <strong><dtml-var num_ordem></strong>
+              </td>
+              <td>
                 <dtml-in expr="zsql.materia_obter_zsql(cod_materia=cod_materia, ind_excluido=0)">
-                    <a href="<dtml-var portal_url>/consultas/materia/materia_mostrar_proc?cod_materia=<dtml-var cod_materia>">
-                        <b><dtml-var sgl_tipo_materia missing> <dtml-var num_ident_basica missing>/<dtml-var ano_ident_basica missing> - <dtml-var des_tipo_materia></b></a><br />
-
-               <dtml-if num_protocolo>
-                  <b>Protocolo:</b> <dtml-var num_protocolo>/<dtml-var ano_ident_basica>
-                  <br />
-               </dtml-if>
-
+                  <div class="mb-2">
+                    <a href="<dtml-var portal_url>/consultas/materia/materia_mostrar_proc?cod_materia=<dtml-var cod_materia>" class="text-decoration-none">
+                      <strong><dtml-var sgl_tipo_materia missing> <dtml-var num_ident_basica missing>/<dtml-var ano_ident_basica missing> - <dtml-var des_tipo_materia></strong>
+                    </a>
+                  </div>
+                  <dtml-if num_protocolo>
+                    <div class="mb-1">
+                      <small class="text-muted">
+                        <i class="fas fa-hashtag me-1"></i>Protocolo: <strong><dtml-var num_protocolo>/<dtml-var ano_ident_basica></strong>
+                      </small>
+                    </div>
+                  </dtml-if>
                 </dtml-in>
-
                 <dtml-in expr="zsql.autoria_obter_zsql(cod_materia=cod_materia)">
-                <dtml-in expr="zsql.autor_obter_zsql(cod_autor=cod_autor)">
-                    <dtml-if cod_parlamentar>
-                        <dtml-in expr="zsql.parlamentar_obter_zsql(cod_parlamentar=cod_parlamentar)">
-                            <b>Autor:</b> <dtml-var nom_parlamentar>
-                        </dtml-in>
-                    <dtml-elif cod_comissao>
-                        <dtml-in expr="zsql.comissao_obter_zsql(cod_comissao=cod_comissao)">
-                            <b>Autor:</b> <dtml-var nom_comissao>
-                        </dtml-in>
-                    <dtml-else>
-                        <b>Autor:</b> <dtml-var nom_autor>
-                    </dtml-if>
+                  <dtml-in expr="zsql.autor_obter_zsql(cod_autor=cod_autor)">
+                    <div class="mb-1">
+                      <small class="text-muted">
+                        <dtml-if cod_parlamentar>
+                          <dtml-in expr="zsql.parlamentar_obter_zsql(cod_parlamentar=cod_parlamentar)">
+                            <i class="fas fa-user me-1"></i>Autor: <strong><dtml-var nom_parlamentar></strong>
+                          </dtml-in>
+                        <dtml-elif cod_comissao>
+                          <dtml-in expr="zsql.comissao_obter_zsql(cod_comissao=cod_comissao)">
+                            <i class="fas fa-users me-1"></i>Autor: <strong><dtml-var nom_comissao></strong>
+                          </dtml-in>
+                        <dtml-else>
+                          <i class="fas fa-user me-1"></i>Autor: <strong><dtml-var nom_autor></strong>
+                        </dtml-if>
+                      </small>
+                    </div>
+                  </dtml-in>
                 </dtml-in>
+              </td>
+              <td>
+                <small class="text-muted"><dtml-in expr="zsql.materia_obter_zsql(cod_materia=cod_materia, ind_excluido=0)"><dtml-var txt_ementa></dtml-in></small>
+              </td>
+              <td>
+                <dtml-in expr="zsql.tramitacao_obter_zsql(cod_materia=cod_materia, ind_ult_tramitacao=1)">
+                  <dtml-if des_status>
+                    <dtml-call expr="REQUEST.set('des_status', des_status)">
+                  </dtml-if>
+                  <small class="text-muted"><dtml-var des_status missing></small>
                 </dtml-in>
-            </td>
-            <td>
-                <dtml-in expr="zsql.materia_obter_zsql(cod_materia=cod_materia, ind_excluido=0)">
-                    <dtml-var txt_ementa>
-                </dtml-in>
-            </td>
-            <td>
-           <dtml-in expr="zsql.tramitacao_obter_zsql(cod_materia=cod_materia, ind_ult_tramitacao=1)">
-              <dtml-if des_status>
-                 <dtml-call expr="REQUEST.set('des_status', des_status)">
-              </dtml-if>
-		    <dtml-var des_status missing>
-	   </dtml-in>
-            </td>
-        </tr>
-        <dtml-else><tr><td>Não constam matérias no Expediente</td></tr> 
-        </dtml-in> 
-        <dtml-else><tr><td>Não constam matérias no Expediente</td></tr> 
+              </td>
+            </tr>
+          </dtml-in>
         </dtml-in>
-    </table>
-</fieldset>
+        <dtml-else>
+          <thead class="table-light">
+            <tr>
+              <th width="5%">Item</th>
+              <th width="30%">Matéria</th>
+              <th width="50%">Ementa</th>
+              <th width="15%">Situação</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td colspan="4">
+                <div class="alert alert-info mb-0">
+                  <i class="fas fa-info-circle me-2"></i>Não constam matérias no Expediente
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </dtml-in>
+      </table>
+    </div>
+  </div>
+</div>
 
 <dtml-if expr="zsql.oradores_expediente_obter_zsql(cod_sessao_plen=cod_sessao_plen, ind_excluido=0)">
-<fieldset>
-   <legend class="font-size-16">Oradores Inscritos no Expediente</legend>
-    <table class="table">
-        <dtml-in expr="zsql.oradores_expediente_obter_zsql(cod_sessao_plen=cod_sessao_plen, ind_excluido=0)">
-        <dtml-in expr="zsql.parlamentar_obter_zsql(cod_parlamentar=cod_parlamentar, ind_excluido=0)">
-        <tr>
-        <td>
-                 <b><dtml-var num_ordem></b> - <dtml-var nom_parlamentar>/<dtml-var sgl_partido missing null="">
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-header">
+      <strong><i class="fas fa-microphone me-2"></i>Oradores Inscritos no Expediente</strong>
+    </div>
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-striped align-middle mb-0">
+          <dtml-in expr="zsql.oradores_expediente_obter_zsql(cod_sessao_plen=cod_sessao_plen, ind_excluido=0)">
+            <dtml-if sequence-start>
+              <thead class="table-light">
+                <tr>
+                  <th width="10%">Ordem</th>
+                  <th>Vereador / Partido</th>
+                </tr>
+              </thead>
+              <tbody>
+            </dtml-if>
+            <dtml-in expr="zsql.parlamentar_obter_zsql(cod_parlamentar=cod_parlamentar, ind_excluido=0)">
+              <tr>
+                <td class="text-center">
+                  <strong><dtml-var num_ordem></strong>
                 </td>
-        </tr>
-        </dtml-in>
-        <dtml-else>
-          <tr><td>Não há oradores inscritos no Expediente.</td></tr>
-        </dtml-in>
-    </table>
-</fieldset>
+                <td>
+                  <i class="fas fa-user me-2 text-muted"></i>
+                  <strong><dtml-var nom_parlamentar></strong>
+                  <dtml-if sgl_partido> / <dtml-var sgl_partido missing null=""></dtml-if>
+                </td>
+              </tr>
+            </dtml-in>
+            <dtml-else>
+              <tr>
+                <td colspan="2">
+                  <div class="alert alert-info mb-0">
+                    <i class="fas fa-info-circle me-2"></i>Não há oradores inscritos no Expediente.
+                  </div>
+                </td>
+              </tr>
+            </dtml-in>
+          </dtml-in>
+        </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 </dtml-if>
 
-<fieldset>
-    <legend class="font-size-16">Ordem do Dia</legend>
-    <table class="table">
+<div class="card border-0 shadow-sm mb-4">
+  <div class="card-header">
+    <strong><i class="fas fa-list-ol me-2"></i>Ordem do Dia</strong>
+  </div>
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-striped align-middle mb-0">
         <dtml-in expr="zsql.ordem_dia_obter_zsql(cod_sessao_plen = cod_sessao_plen, ind_excluido=0)">
-     <dtml-if sequence-start>
-        <tr>
-            <th width="5%">Item</th>
-            <th width="30%">Matéria</th>
-            <th width="50%">Ementa</th>
-            <th width="15%">Situação</th>
-        </tr>
-     </dtml-if sequence-start>
-         <dtml-if sequence-even>
-          <tr>
-         <dtml-else>
-          <tr class="even">
-         </dtml-if>
-        <dtml-in expr="zsql.votacao_ordem_dia_obter_zsql(cod_ordem = cod_ordem, ind_excluido=0)">
-            <td>
-              <b><dtml-var num_ordem></b> 
-            </td>        
-            <td>
+          <dtml-if sequence-start>
+            <thead class="table-light">
+              <tr>
+                <th width="5%">Item</th>
+                <th width="30%">Matéria</th>
+                <th width="50%">Ementa</th>
+                <th width="15%">Situação</th>
+              </tr>
+            </thead>
+            <tbody>
+          </dtml-if>
+          <dtml-in expr="zsql.votacao_ordem_dia_obter_zsql(cod_ordem = cod_ordem, ind_excluido=0)">
+            <tr>
+              <td class="text-center">
+                <strong><dtml-var num_ordem></strong>
+              </td>        
+              <td>
                 <dtml-in expr="zsql.materia_obter_zsql(cod_materia=cod_materia, ind_excluido=0)">
-		 <a href="<dtml-var portal_url>/consultas/materia/materia_mostrar_proc?cod_materia=<dtml-var cod_materia>">
-			<b><dtml-var sgl_tipo_materia missing> <dtml-var num_ident_basica missing>/<dtml-var ano_ident_basica missing> - <dtml-var des_tipo_materia></b></a><br />
-               <dtml-if num_protocolo>
-                  <b>Protocolo:</b> <dtml-var num_protocolo>/<dtml-var ano_ident_basica>
-                  <br />
-               </dtml-if>
-           <dtml-in expr="zsql.numeracao_obter_zsql(cod_materia=cod_materia)">
-               <dtml-if num_materia>
-                  <b>Processo:</b> <dtml-var num_materia>/<dtml-var ano_materia>
-                  <br />
-               </dtml-if>
-            </dtml-in>
-	                        <dtml-in expr="zsql.tramitacao_obter_zsql(cod_materia=cod_materia, ind_ult_tramitacao=1)">
-	                        <dtml-in expr="[('P','Primeiro'), ('S','Segundo'), ('U','Único'), ('L','Suplementar'), ('F','Final'), ('A','Votação Única em Regime de Urgência'), ('B','1ª Votação'), ('C','2ª e 3ª Votações')]">
-	                            <dtml-if expr="sgl_turno==_['sequence-key']">
-	                                <b>Turno</b>: <dtml-var sequence-item> <br />
-	                            </dtml-if>
-	                        </dtml-in></dtml-in>
+                  <div class="mb-2">
+                    <a href="<dtml-var portal_url>/consultas/materia/materia_mostrar_proc?cod_materia=<dtml-var cod_materia>" class="text-decoration-none">
+                      <strong><dtml-var sgl_tipo_materia missing> <dtml-var num_ident_basica missing>/<dtml-var ano_ident_basica missing> - <dtml-var des_tipo_materia></strong>
+                    </a>
+                  </div>
+                  <dtml-if num_protocolo>
+                    <div class="mb-1">
+                      <small class="text-muted">
+                        <i class="fas fa-hashtag me-1"></i>Protocolo: <strong><dtml-var num_protocolo>/<dtml-var ano_ident_basica></strong>
+                      </small>
+                    </div>
+                  </dtml-if>
+                  <dtml-in expr="zsql.numeracao_obter_zsql(cod_materia=cod_materia)">
+                    <dtml-if num_materia>
+                      <div class="mb-1">
+                        <small class="text-muted">
+                          <i class="fas fa-file-alt me-1"></i>Processo: <strong><dtml-var num_materia>/<dtml-var ano_materia></strong>
+                        </small>
+                      </div>
+                    </dtml-if>
+                  </dtml-in>
+                  <dtml-in expr="zsql.tramitacao_obter_zsql(cod_materia=cod_materia, ind_ult_tramitacao=1)">
+                    <dtml-in expr="[('P','Primeiro'), ('S','Segundo'), ('U','Único'), ('L','Suplementar'), ('F','Final'), ('A','Votação Única em Regime de Urgência'), ('B','1ª Votação'), ('C','2ª e 3ª Votações')]">
+                      <dtml-if expr="sgl_turno==_['sequence-key']">
+                        <div class="mb-1">
+                          <small class="text-muted">
+                            <i class="fas fa-sync me-1"></i>Turno: <strong><dtml-var sequence-item></strong>
+                          </small>
+                        </div>
+                      </dtml-if>
+                    </dtml-in>
+                  </dtml-in>
                 </dtml-in>
                 <dtml-in expr="zsql.autoria_obter_zsql(cod_materia=cod_materia)">
-                <dtml-in expr="zsql.autor_obter_zsql(cod_autor=cod_autor)">
-                    <dtml-if cod_parlamentar>
-                        <dtml-in expr="zsql.parlamentar_obter_zsql(cod_parlamentar=cod_parlamentar)">
-                            <b>Autor:</b> <dtml-var nom_parlamentar>
-                        </dtml-in>
-                    <dtml-elif cod_comissao>
-                        <dtml-in expr="zsql.comissao_obter_zsql(cod_comissao=cod_comissao)">
-                            <b>Autor:</b> <dtml-var nom_comissao>
-                        </dtml-in>
-                    <dtml-else>
-                        <b>Autor:</b> <dtml-var nom_autor>
-                    </dtml-if>
+                  <dtml-in expr="zsql.autor_obter_zsql(cod_autor=cod_autor)">
+                    <div class="mb-1">
+                      <small class="text-muted">
+                        <dtml-if cod_parlamentar>
+                          <dtml-in expr="zsql.parlamentar_obter_zsql(cod_parlamentar=cod_parlamentar)">
+                            <i class="fas fa-user me-1"></i>Autor: <strong><dtml-var nom_parlamentar></strong>
+                          </dtml-in>
+                        <dtml-elif cod_comissao>
+                          <dtml-in expr="zsql.comissao_obter_zsql(cod_comissao=cod_comissao)">
+                            <i class="fas fa-users me-1"></i>Autor: <strong><dtml-var nom_comissao></strong>
+                          </dtml-in>
+                        <dtml-else>
+                          <i class="fas fa-user me-1"></i>Autor: <strong><dtml-var nom_autor></strong>
+                        </dtml-if>
+                      </small>
+                    </div>
+                  </dtml-in>
                 </dtml-in>
+              </td>
+              <td>
+                <small class="text-muted"><dtml-in expr="zsql.materia_obter_zsql(cod_materia=cod_materia, ind_excluido=0)"><dtml-var txt_ementa></dtml-in></small>
+              </td>
+              <td>
+                <dtml-in expr="zsql.tramitacao_obter_zsql(cod_materia=cod_materia, ind_ult_tramitacao=1)">
+                  <dtml-if des_status>
+                    <dtml-call expr="REQUEST.set('des_status', des_status)">
+                  </dtml-if>
+                  <small class="text-muted"><dtml-var des_status missing></small>
                 </dtml-in>
-            </td>
-            <td>
-                <dtml-in expr="zsql.materia_obter_zsql(cod_materia=cod_materia, ind_excluido=0)">
-                    <dtml-var txt_ementa>
-                </dtml-in>
-            </td>
-            <td>
-           <dtml-in expr="zsql.tramitacao_obter_zsql(cod_materia=cod_materia, ind_ult_tramitacao=1)">
-              <dtml-if des_status>
-                 <dtml-call expr="REQUEST.set('des_status', des_status)">
-              </dtml-if>
-		    <dtml-var des_status missing>
-	   </dtml-in>
-            </td>
-        </tr>
-       <dtml-else><tr><td>Não constam matérias na Ordem do Dia</td></tr> 
-       </dtml-in> 
-       <dtml-else><tr><td>Não constam matérias na Ordem do Dia</td></tr> 
-       </dtml-in>
-    </table>
-</fieldset>
-
-<dtml-if expr="zsql.oradores_obter_zsql(cod_sessao_plen=cod_sessao_plen, ind_excluido=0)">
-<fieldset>
-   <legend class="font-size-16">Explicações Pessoais</legend>
-    <table class="table">
-        <dtml-in expr="zsql.oradores_obter_zsql(cod_sessao_plen=cod_sessao_plen, ind_excluido=0)">
-        <dtml-in expr="zsql.parlamentar_obter_zsql(cod_parlamentar=cod_parlamentar, ind_excluido=0)">
-        <tr>
-        <td>
-                 <b><dtml-var num_ordem></b> - <dtml-var nom_parlamentar>/<dtml-var sgl_partido missing null="">
-                </td>
-        </tr>
+              </td>
+            </tr>
+          </dtml-in>
         </dtml-in>
         <dtml-else>
-          <tr><td>Não há oradores inscritos nas Explicações Pessoais</td></tr>
+          <thead class="table-light">
+            <tr>
+              <th width="5%">Item</th>
+              <th width="30%">Matéria</th>
+              <th width="50%">Ementa</th>
+              <th width="15%">Situação</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td colspan="4">
+                <div class="alert alert-info mb-0">
+                  <i class="fas fa-info-circle me-2"></i>Não constam matérias na Ordem do Dia
+                </div>
+              </td>
+            </tr>
+          </tbody>
         </dtml-in>
-    </table>
-</fieldset>
+      </table>
+    </div>
+  </div>
+</div>
+
+<dtml-if expr="zsql.oradores_obter_zsql(cod_sessao_plen=cod_sessao_plen, ind_excluido=0)">
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-header">
+      <strong><i class="fas fa-microphone me-2"></i>Explicações Pessoais</strong>
+    </div>
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-striped align-middle mb-0">
+          <dtml-in expr="zsql.oradores_obter_zsql(cod_sessao_plen=cod_sessao_plen, ind_excluido=0)">
+            <dtml-if sequence-start>
+              <thead class="table-light">
+                <tr>
+                  <th width="10%">Ordem</th>
+                  <th>Vereador / Partido</th>
+                </tr>
+              </thead>
+              <tbody>
+            </dtml-if>
+            <dtml-in expr="zsql.parlamentar_obter_zsql(cod_parlamentar=cod_parlamentar, ind_excluido=0)">
+              <tr>
+                <td class="text-center">
+                  <strong><dtml-var num_ordem></strong>
+                </td>
+                <td>
+                  <i class="fas fa-user me-2 text-muted"></i>
+                  <strong><dtml-var nom_parlamentar></strong>
+                  <dtml-if sgl_partido> / <dtml-var sgl_partido missing null=""></dtml-if>
+                </td>
+              </tr>
+            </dtml-in>
+            <dtml-else>
+              <tr>
+                <td colspan="2">
+                  <div class="alert alert-info mb-0">
+                    <i class="fas fa-info-circle me-2"></i>Não há oradores inscritos nas Explicações Pessoais
+                  </div>
+                </td>
+              </tr>
+            </dtml-in>
+          </dtml-in>
+        </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 </dtml-if>
 
-<p align="center">
-  <input type="button" value="Voltar" OnClick="history.go(-1)" />
-</p>
+<div class="d-flex justify-content-center mb-3">
+  <button type="button" class="btn btn-outline-secondary" onclick="history.go(-1)">
+    <i class="fas fa-arrow-left me-1"></i>Voltar
+  </button>
+</div>
 
 <dtml-var js_slot>
 <dtml-var footer_html>

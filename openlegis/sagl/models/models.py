@@ -2790,6 +2790,8 @@ class Relatoria(Base):
         Index('idx_relat_materia', 'cod_materia', 'cod_parlamentar', 'ind_excluido'),
         # Índice para buscar relatorias por matéria com parecer
         Index('idx_relatoria_cod_materia', 'cod_materia', 'ind_excluido', 'num_parecer'),
+        # Índice composto para otimizar queries de relatorias por matéria (usado em pasta digital)
+        Index('idx_relatoria_materia_excluido', 'cod_materia', 'ind_excluido'),
         # Índice para buscar relatorias por relator (parlamentar) com exclusão
         Index('idx_relatoria_cod_relator', 'cod_parlamentar', 'ind_excluido'),
         Index('num_protocolo', 'num_protocolo'),
@@ -3997,6 +3999,8 @@ class Tramitacao(Base):
         Index('idx_tramit_ultmat', 'ind_ult_tramitacao', 'dat_tramitacao', 'cod_materia', 'ind_excluido'),
         # Índice para buscar última tramitação por matéria (ordem otimizada)
         Index('idx_tramitacao_materia_ult', 'cod_materia', 'ind_ult_tramitacao', 'ind_excluido', 'dat_tramitacao'),
+        # Índice composto para otimizar queries de tramitações por matéria com ORDER BY (usado em pasta digital)
+        Index('idx_tramitacao_materia_excluido_data', 'cod_materia', 'ind_excluido', 'dat_tramitacao'),
         # Índice para filtros por status com exclusão
         Index('idx_tramitacao_status', 'cod_status', 'ind_excluido'),
         # Índice para filtros por unidade de tramitação com exclusão

@@ -1,26 +1,30 @@
 <dtml-var header_html>
 
-<h1 class="firstHeading font-size-18 mb-3"><dtml-var expr="sapl_documentos.props_sagl.nome_mesa"></h1>
+<h1 class="firstHeading font-size-18"><dtml-var expr="sapl_documentos.props_sagl.nome_mesa"></h1>
 
-  <div class="row">
-    <div class="col-12 col-sm-6 mb-3">
-      <label class="form-label" for="lst_num_legislatura">Selecione a Legislatura</label>
+<div class="card mb-3">
+  <div class="card-body">
+    <div class="row">
+      <div class="col-12 col-sm-6 mb-3 mb-sm-0">
+        <label class="form-label" for="lst_num_legislatura">
+          <i class="fas fa-calendar-alt me-1"></i>Selecione a Legislatura
+        </label>
         <select class="form-select jumpmenu" data-size="6" id="lst_num_legislatura" name="lst_num_legislatura" size="1" onChange="atualiza_num_leg(form.lst_num_legislatura [form.lst_num_legislatura.selectedIndex].value)">
-          <dtml-in expr="zsql.legislatura_obter_zsql(ind_excluido=0)">
-             <option
-               <dtml-if expr="(not _.has_key('num_legislatura_sel') and (DateTime(datefmt='international').strftime('%Y-%m-%d') >= DateTime(dat_inicio, datefmt='international').strftime('%Y-%m-%d') and DateTime(datefmt='international').strftime('%Y-%m-%d') <= DateTime(dat_fim, datefmt='international').strftime('%Y-%m-%d')))
-                           or (_.has_key('num_legislatura_sel') and num_legislatura == _.int(num_legislatura_sel))">
-                 selected
-                 <dtml-call expr="REQUEST.set('num_legislatura_sel', num_legislatura)">
-               </dtml-if>
-                 value="<dtml-var ACTUAL_URL>?num_legislatura_sel=<dtml-var num_legislatura>">
-               <dtml-var expr="pysc.periodo_legislatura_format_pysc(num_legislatura, dat_inicio, dat_fim)">
-               <dtml-if expr="(DateTime(datefmt='international').strftime('%Y-%m-%d') >= DateTime(dat_inicio, datefmt='international').strftime('%Y-%m-%d')) and (DateTime(datefmt='international').strftime('%Y-%m-%d') <= DateTime(dat_fim, datefmt='international').strftime('%Y-%m-%d'))">(Atual)</dtml-if>
-             </option>
-          <dtml-else>
-             <option selected value="-1"></option>
-             <dtml-call expr="REQUEST.set('num_legislatura_sel', '-1')">
-          </dtml-in>
+            <dtml-in expr="zsql.legislatura_obter_zsql(ind_excluido=0)">
+               <option
+                 <dtml-if expr="(not _.has_key('num_legislatura_sel') and (DateTime(datefmt='international').strftime('%Y-%m-%d') >= DateTime(dat_inicio, datefmt='international').strftime('%Y-%m-%d') and DateTime(datefmt='international').strftime('%Y-%m-%d') <= DateTime(dat_fim, datefmt='international').strftime('%Y-%m-%d')))
+                             or (_.has_key('num_legislatura_sel') and num_legislatura == _.int(num_legislatura_sel))">
+                   selected
+                   <dtml-call expr="REQUEST.set('num_legislatura_sel', num_legislatura)">
+                 </dtml-if>
+                   value="<dtml-var ACTUAL_URL>?num_legislatura_sel=<dtml-var num_legislatura>">
+                 <dtml-var expr="pysc.periodo_legislatura_format_pysc(num_legislatura, dat_inicio, dat_fim)">
+                 <dtml-if expr="(DateTime(datefmt='international').strftime('%Y-%m-%d') >= DateTime(dat_inicio, datefmt='international').strftime('%Y-%m-%d')) and (DateTime(datefmt='international').strftime('%Y-%m-%d') <= DateTime(dat_fim, datefmt='international').strftime('%Y-%m-%d'))">(Atual)</dtml-if>
+               </option>
+            <dtml-else>
+               <option selected value="-1"></option>
+               <dtml-call expr="REQUEST.set('num_legislatura_sel', '-1')">
+            </dtml-in>
         </select>
         <dtml-if expr="not _.has_key('num_legislatura_sel')">
           <dtml-in expr="zsql.legislatura_obter_zsql(ind_excluido=0)">
@@ -30,100 +34,131 @@
           </dtml-in>
         </dtml-if>
       </div>
-    <div class="col-12 col-sm-6 mb-3">
-      <label class="form-label" for="lst_periodo_comp">Selecione o Período</label>
-       <div class="input-group">
-         <select class="form-select jumpmenu" id="lst_periodo_comp" name="lst_periodo_comp" size="1" onChange="atualiza_periodo_comp(form.lst_periodo_comp[form.lst_periodo_comp.selectedIndex].value, form.lst_num_legislatura[form.lst_num_legislatura.selectedIndex].value)">
-           <dtml-in expr="zsql.periodo_comp_mesa_obter_zsql(num_legislatura=num_legislatura_sel)">
-              <option
-                <dtml-if expr="((not _.has_key('cod_periodo_comp_sel') and not _.has_key('prim_sel') 
-                                and (DateTime(datefmt='international').strftime('%Y-%m-%d') >= DateTime(dat_inicio, datefmt='international').strftime('%Y-%m-%d') and DateTime(datefmt='international').strftime('%Y-%m-%d') <= DateTime(dat_fim, datefmt='international').strftime('%Y-%m-%d'))))
-                                or (not _.has_key('cod_periodo_comp_sel') and not _.has_key('prim_sel')) 
-                                or (_.has_key('cod_periodo_comp_sel') and cod_periodo_comp == cod_periodo_comp_sel)">
-                     selected
-                     <dtml-call expr="REQUEST.set('prim_sel', cod_periodo_comp)">
-                     <dtml-call expr="REQUEST.set('cod_periodo_comp_sel', cod_periodo_comp)">
-                </dtml-if>
-                value="<dtml-var ACTUAL_URL>?cod_periodo_comp_sel=<dtml-var cod_periodo_comp>&num_legislatura_sel=<dtml-var num_legislatura>">
-                <dtml-var dat_inicio_periodo> a <dtml-var dat_fim_periodo>
-		<dtml-if expr="(DateTime(datefmt='international').strftime('%Y-%m-%d') >= DateTime(dat_inicio, datefmt='international').strftime('%Y-%m-%d')) and (DateTime(datefmt='international').strftime('%Y-%m-%d') <= DateTime(dat_fim, datefmt='international').strftime('%Y-%m-%d'))">(Atual)</dtml-if>
-              </option>
-           </dtml-in>
-         </select>
-         <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Mesa Diretora'])">
-            <dtml-if cod_periodo_comp_sel>
-                <a class="btn btn-primary" href="<dtml-var portal_url>/cadastros/mesa_diretora/mesa_diretora_index_html?cod_periodo_comp_sel=<dtml-var cod_periodo_comp_sel>&num_legislatura_sel=<dtml-var num_legislatura_sel>"><i class="fa fa-fw fa-edit"></i> Composição</a>
-            </dtml-if>
-         </dtml-if>
-       </div>
+      <div class="col-12 col-sm-6">
+        <label class="form-label" for="lst_periodo_comp">
+          <i class="fas fa-filter me-1"></i>Selecione o Período
+        </label>
+        <div class="input-group">
+          <select class="form-select jumpmenu" id="lst_periodo_comp" name="lst_periodo_comp" size="1" onChange="atualiza_periodo_comp(form.lst_periodo_comp[form.lst_periodo_comp.selectedIndex].value, form.lst_num_legislatura[form.lst_num_legislatura.selectedIndex].value)">
+            <dtml-in expr="zsql.periodo_comp_mesa_obter_zsql(num_legislatura=num_legislatura_sel)">
+               <option
+                 <dtml-if expr="((not _.has_key('cod_periodo_comp_sel') and not _.has_key('prim_sel') 
+                                 and (DateTime(datefmt='international').strftime('%Y-%m-%d') >= DateTime(dat_inicio, datefmt='international').strftime('%Y-%m-%d') and DateTime(datefmt='international').strftime('%Y-%m-%d') <= DateTime(dat_fim, datefmt='international').strftime('%Y-%m-%d'))))
+                                 or (not _.has_key('cod_periodo_comp_sel') and not _.has_key('prim_sel')) 
+                                 or (_.has_key('cod_periodo_comp_sel') and cod_periodo_comp == cod_periodo_comp_sel)">
+                    selected
+                    <dtml-call expr="REQUEST.set('prim_sel', cod_periodo_comp)">
+                    <dtml-call expr="REQUEST.set('cod_periodo_comp_sel', cod_periodo_comp)">
+                 </dtml-if>
+                 value="<dtml-var ACTUAL_URL>?cod_periodo_comp_sel=<dtml-var cod_periodo_comp>&num_legislatura_sel=<dtml-var num_legislatura>">
+                 <dtml-var dat_inicio_periodo> a <dtml-var dat_fim_periodo>
+                 <dtml-if expr="(DateTime(datefmt='international').strftime('%Y-%m-%d') >= DateTime(dat_inicio, datefmt='international').strftime('%Y-%m-%d')) and (DateTime(datefmt='international').strftime('%Y-%m-%d') <= DateTime(dat_fim, datefmt='international').strftime('%Y-%m-%d'))">(Atual)</dtml-if>
+               </option>
+            </dtml-in>
+          </select>
+          <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Mesa Diretora'])">
+             <dtml-if cod_periodo_comp_sel>
+                 <a class="btn btn-primary" href="<dtml-var portal_url>/cadastros/mesa_diretora/mesa_diretora_index_html?cod_periodo_comp_sel=<dtml-var cod_periodo_comp_sel>&num_legislatura_sel=<dtml-var num_legislatura_sel>"><i class="fas fa-edit me-1"></i>Composição</a>
+             </dtml-if>
+          </dtml-if>
+        </div>
+      </div>
     </div>
   </div>
+</div>
 
-  <div class="mt-2 mb-3">
-      <p class="h6">Composição da <dtml-var expr="sapl_documentos.props_sagl.nome_mesa"></p>
-  </div>
-  <div class="row text-center">
-    <dtml-if cod_periodo_comp_sel>
-      <dtml-in expr="zsql.composicao_mesa_obter_zsql(cod_periodo_comp=cod_periodo_comp_sel, ind_excluido=0)">
-        <dtml-in expr="zsql.parlamentar_obter_zsql(cod_parlamentar=cod_parlamentar, ind_excluido=0)">
-          <dtml-in expr="zsql.cargo_mesa_obter_zsql(cod_cargo=cod_cargo, ind_excluido=0)">
-        <!-- Parlamentar -->
-        <div class="col-md-6 col-lg-4 col-xl-3">
-          <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Parlamentar'])">
-            <a href="<dtml-var portal_url>/cadastros/parlamentar/parlamentar_mostrar_proc?cod_parlamentar=<dtml-var cod_parlamentar>" title="<dtml-var nom_completo>" >
-          <dtml-else>
-            <a href="<dtml-var portal_url>/consultas/parlamentar/parlamentar_mostrar_proc?cod_parlamentar=<dtml-var cod_parlamentar>" title="<dtml-var nom_completo>">
-          </dtml-if>
-            <div class="card profile" style="height: 90%">
-               <div class="card-body">
-                 <div class="text-center">
-                 <dtml-call expr="REQUEST.set('id_foto', str(cod_parlamentar)+'_foto_parlamentar')">
-                 <dtml-if expr="hasattr(sapl_documentos.parlamentar.fotos,id_foto)">
-                    <img alt="<dtml-var nom_completo>" src="<dtml-var portal_url>/sapl_documentos/parlamentar/fotos/<dtml-var id_foto>" width="140" class="rounded-circle img-thumbnail avatar-xl">
-                 <dtml-else>
-                    <img alt="<dtml-var nom_completo>" src="<dtml-var portal_url>/imagens/avatar.png" width="140" class="rounded-circle img-thumbnail avatar-xl">
-                 </dtml-if>
-                 <h5 class="mt-3 mb-1 font-size-14 font-color-dark">
-                    <dtml-var nom_parlamentar>
-                 </h5>
-                 <p class="small text-uppercase text-muted">
-                     <dtml-in expr="zsql.parlamentar_data_filiacao_obter_zsql(num_legislatura=num_legislatura_sel, cod_parlamentar=cod_parlamentar)">
-                       <dtml-if expr="dat_filiacao != '0' and dat_filiacao != None">
-                          <dtml-in expr="zsql.parlamentar_partido_obter_zsql(dat_filiacao=dat_filiacao, cod_parlamentar=cod_parlamentar)">
-                             <dtml-var sgl_partido null="">
-                          </dtml-in>
-                       </dtml-if>
-                     </dtml-in>
-                 </p>
-                <p class="text-muted mt-0">
-                   <dtml-var des_cargo>
-                </p>
-              </div>
-            </div>
-           </div>
-          </a>
-        </div>
-        <!-- Fim Parlamentar-->
-        </dtml-in>                
-       </dtml-in>
-     <dtml-else>
-       <div class="col-12 text-start">
-          <p>Nenhum parlamentar cadastrado na composição da <dtml-var expr="sapl_documentos.props_sagl.nome_mesa">.</p>
-       </div>
-     </dtml-in> 
-    <dtml-else>
-      <div class="col-12 text-start">
-        <dtml-if expr="num_legislatura_sel=='-1'">
-          <p>Não há nenhum período de composição cadastrado.</p>
+<div class="mt-2 mb-3">
+    <h2 class="h5 text-muted">Composição da <dtml-var expr="sapl_documentos.props_sagl.nome_mesa"></h2>
+</div>
+<dtml-if cod_periodo_comp_sel>
+  <dtml-call expr="REQUEST.set('composicao_lista', zsql.composicao_mesa_obter_zsql(cod_periodo_comp=cod_periodo_comp_sel, ind_excluido=0))">
+  <dtml-if expr="composicao_lista">
+    <dtml-in expr="composicao_lista">
+      <dtml-if sequence-start>
+        <div class="row g-4 mb-4">
+      </dtml-if>
+      <dtml-in expr="zsql.parlamentar_obter_zsql(cod_parlamentar=cod_parlamentar, ind_excluido=0)">
+        <dtml-in expr="zsql.cargo_mesa_obter_zsql(cod_cargo=cod_cargo, ind_excluido=0)">
+      <!-- Parlamentar -->
+      <div class="col-md-6 col-lg-4 col-xl-3">
+        <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Parlamentar'])">
+          <a href="<dtml-var portal_url>/cadastros/parlamentar/parlamentar_mostrar_proc?cod_parlamentar=<dtml-var cod_parlamentar>" 
+             class="text-decoration-none d-block h-100"
+             aria-label="Ver detalhes de <dtml-var nom_completo>, <dtml-var des_cargo> da Mesa Diretora"
+             title="<dtml-var nom_completo>">
         <dtml-else>
-          <p>Não existe Sessão Legislativa ou Período de Composição cadastrado na Legislatura.</p>
+          <a href="<dtml-var portal_url>/consultas/parlamentar/parlamentar_mostrar_proc?cod_parlamentar=<dtml-var cod_parlamentar>" 
+             class="text-decoration-none d-block h-100"
+             aria-label="Ver detalhes de <dtml-var nom_completo>, <dtml-var des_cargo> da Mesa Diretora"
+             title="<dtml-var nom_completo>">
         </dtml-if>
-      </div>     
-</dtml-if>
-
-      <div class="col-12 small text-muted mt-1 text-end">
-        <a href="<dtml-var portal_url>/@@mesas" target="_blank"> <i class="mdi mdi-database-arrow-down"></i> Dados abertos</a>  
+          <div class="card profile h-100">
+             <div class="card-body text-center">
+               <dtml-call expr="REQUEST.set('id_foto', str(cod_parlamentar)+'_foto_parlamentar')">
+               <dtml-if expr="hasattr(sapl_documentos.parlamentar.fotos,id_foto)">
+                  <img alt="Foto de <dtml-var nom_completo>, <dtml-var des_cargo> da Mesa Diretora" 
+                       src="<dtml-var portal_url>/sapl_documentos/parlamentar/fotos/<dtml-var id_foto>" 
+                       class="rounded-circle img-thumbnail avatar-xl mb-3" 
+                       style="object-fit: cover;"
+                       loading="lazy">
+               <dtml-else>
+                  <img alt="Foto de perfil padrão de <dtml-var nom_completo>, <dtml-var des_cargo> da Mesa Diretora" 
+                       src="<dtml-var portal_url>/imagens/avatar.png" 
+                       class="rounded-circle img-thumbnail avatar-xl mb-3"
+                       style="object-fit: cover;"
+                       loading="lazy">
+               </dtml-if>
+               <h3 class="h5 mt-3 mb-2 text-primary">
+                  <dtml-var nom_parlamentar>
+               </h3>
+               <p class="small text-uppercase text-muted mb-2">
+                  <dtml-in expr="zsql.parlamentar_data_filiacao_obter_zsql(num_legislatura=num_legislatura_sel, cod_parlamentar=cod_parlamentar)">
+                    <dtml-if expr="dat_filiacao != '0' and dat_filiacao != None">
+                       <dtml-in expr="zsql.parlamentar_partido_obter_zsql(dat_filiacao=dat_filiacao, cod_parlamentar=cod_parlamentar)">
+                          <dtml-var sgl_partido null="">
+                       </dtml-in>
+                    </dtml-if>
+                  </dtml-in>
+               </p>
+              <p class="text-muted mt-0 small">
+                 <i class="mdi mdi-account-tie me-1"></i><dtml-var des_cargo>
+              </p>
+            </div>
+          </div>
+        </a>
       </div>
+      <!-- Fim Parlamentar-->
+      </dtml-in>                
+     </dtml-in>
+      <dtml-if sequence-end>
+        </div>
+      </dtml-if>
+    </dtml-in>
+   <dtml-else>
+     <div class="alert alert-info mb-0" role="alert">
+       <i class="fas fa-info-circle me-2"></i><strong>Nenhum parlamentar cadastrado</strong><br>
+       <small>Nenhum parlamentar cadastrado na composição da <dtml-var expr="sapl_documentos.props_sagl.nome_mesa">.</small>
+     </div>
+   </dtml-if>
+  <dtml-else>
+    <div class="alert alert-warning mb-0" role="alert">
+      <dtml-if expr="num_legislatura_sel=='-1'">
+        <i class="fas fa-calendar-times me-2"></i><strong>Nenhum período de composição cadastrado</strong><br>
+        <small>Não há nenhum período de composição cadastrado.</small>
+      <dtml-else>
+        <i class="fas fa-calendar-question me-2"></i><strong>Período não encontrado</strong><br>
+        <small>Não existe Sessão Legislativa ou Período de Composição cadastrado na Legislatura.</small>
+      </dtml-if>
+    </div>
+  </dtml-if>
+
+<div class="row mt-3">
+  <div class="col-12 small text-muted text-end">
+    <a href="<dtml-var portal_url>/@@mesas" target="_blank" class="text-decoration-none"> 
+      <i class="mdi mdi-database-arrow-down me-1"></i>Dados abertos
+    </a>  
+  </div>
+</div>
 
 <dtml-var js_slot>
 <script>

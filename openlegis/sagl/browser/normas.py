@@ -148,7 +148,7 @@ class Normas(GrokView):
             'title': f"{materia.des_tipo_materia} nº {materia.num_ident_basica}/{materia.ano_ident_basica}",
             'description': getattr(materia, 'txt_ementa', '') or '',
             'remoteUrl': (
-                f"{self.portal_url}/consultas/materia/pasta_digital?"
+                f"{self.portal_url}/@@pasta_digital?"
                 f"cod_materia={materia.cod_materia}"
             ),
         }

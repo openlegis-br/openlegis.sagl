@@ -20,12 +20,12 @@
 
     if (form.txt_dat_fim_mandato.value == "") {
       $('#txt_dat_fim_mandato').addClass('is-invalid');
-      form.ttxt_dat_fim_mandato.focus();
+      form.txt_dat_fim_mandato.focus();
       return false;
     }
 
     if (!IsValidDate(form.txt_dat_inicio_mandato.value)) {
-        bootstrap.showModal({title: "Mensagem do Sistema", body: "Digite uma data de iní­cio de mandato válida!"});
+        bootstrap.showModal({title: "Mensagem do Sistema", body: "Digite uma data de início de mandato válida!"});
         form.txt_dat_inicio_mandato.focus();
         return false;
     }
@@ -33,7 +33,7 @@
     if (form.txt_dat_fim_mandato.value != "") {
         if (!IsValidDate(form.txt_dat_fim_mandato.value)) {
            bootstrap.showModal({title: "Mensagem do Sistema", body: "Digite uma data de fim de mandato válida!"});
-           form.txt_txt_dat_fim_mandato.focus();
+           form.txt_dat_fim_mandato.focus();
            return false;
         }
     }
@@ -43,94 +43,107 @@
   
 </script>
 
- <h1 class="firstHeading font-size-18">Poder Executivo</h1>
+<h1 class="firstHeading font-size-18 mb-3">Poder Executivo</h1>
 
- <form id="composicao_executivo_form" name="composicao_executivo_form" action="composicao_executivo_salvar_proc">
-   <input type="hidden" name="hdn_cod_cargo" value="<dtml-var cod_cargo>" />
-   <input type="hidden" name="hdn_num_legislatura" value="<dtml-var num_legislatura>" />
-   <input type="hidden" name="hdn_cod_composicao" value="<dtml-var cod_composicao missing>" />
-   <input type="hidden" name="modal" value="1"/>
+<form id="composicao_executivo_form" name="composicao_executivo_form" action="composicao_executivo_salvar_proc" class="needs-validation" novalidate>
+  <input type="hidden" name="hdn_cod_cargo" value="<dtml-var cod_cargo>" />
+  <input type="hidden" name="hdn_num_legislatura" value="<dtml-var num_legislatura>" />
+  <input type="hidden" name="hdn_cod_composicao" value="<dtml-var cod_composicao missing>" />
+  <input type="hidden" name="modal" value="1"/>
 
-   <div class="row">
-     <div class="col-6 mb-3">
-        <label class="form-label" for="txt_cargo">Cargo</label>
+  <div class="card border-0 shadow-sm mb-3">
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-12 col-md-6">
+          <label class="form-label" for="txt_cargo">
+            <i class="fas fa-briefcase me-1"></i>Cargo
+          </label>
           <dtml-in expr="zsql.cargo_executivo_obter_zsql(cod_cargo=cod_cargo,ind_excluido=0)">
             <input class="form-control" id="txt_cargo" type="text" name="txt_cargo" value="<dtml-var des_cargo>" disabled />
           </dtml-in>
-      </div>
-      <div class="col-6 mb-3">
-        <label class="form-label" for="txt_legislatura">Legislatura</label>
+        </div>
+        <div class="col-12 col-md-6">
+          <label class="form-label" for="txt_legislatura">
+            <i class="fas fa-calendar-alt me-1"></i>Legislatura
+          </label>
           <dtml-in expr="zsql.legislatura_obter_zsql(num_legislatura=num_legislatura,ind_excluido=0)">
             <input class="form-control" id="txt_legislatura" type="text" name="txt_legislatura" value="<dtml-var expr="pysc.periodo_legislatura_format_pysc(num_legislatura,dat_inicio,dat_fim)">" disabled />
           </dtml-in>
-      </div>
-     </div>
-   <div class="row">
-      <div class="col-12 col-sm-7 mb-3">
-        <label class="form-label required" for="txt_nom_completo" class="form-label required">Nome</label>
-        <input class="form-control" id="txt_nom_completo" type="text" name="txt_nom_completo" value="<dtml-var nom_completo missing>" required />
-        <div class="invalid-feedback">
-          Este campo é obrigatório !
         </div>
-      </div>
-      <div class="col-12 col-sm-5 mb-3">
-        <label class="form-label" for="lst_cod_partido">Partido</label>
-        <dtml-if cod_partido>
-          <dtml-call expr="REQUEST.set('cod_partido_sel', cod_partido)">
-        </dtml-if>
-        <select class="form-select" name="lst_cod_partido" id="lst_cod_partido">
-                  <option value="">Selecione</option>
-                  <dtml-in expr="zsql.partido_obter_zsql(ind_excluido=0)">
-                    <option
-                      <dtml-if cod_partido_sel>
-                        <dtml-if expr="(_.int(cod_partido) == _.int(cod_partido_sel))">
-                          selected
-                        </dtml-if>
-                      </dtml-if>
-                      value="<dtml-var cod_partido>">
-                      <dtml-var sgl_partido>
-                    </option>               
-                  </dtml-in>
-        </select>
-      </div>
-     </div>
-      <dtml-in expr="zsql.legislatura_obter_zsql(num_legislatura=num_legislatura)">
+        <div class="col-12 col-sm-7">
+          <label class="form-label required" for="txt_nom_completo">
+            <i class="fas fa-user me-1"></i>Nome
+          </label>
+          <input class="form-control" id="txt_nom_completo" type="text" name="txt_nom_completo" value="<dtml-var nom_completo missing>" required />
+          <div class="invalid-feedback">
+            Este campo é obrigatório!
+          </div>
+        </div>
+        <div class="col-12 col-sm-5">
+          <label class="form-label" for="lst_cod_partido">
+            <i class="fas fa-flag me-1"></i>Partido
+          </label>
+          <dtml-if cod_partido>
+            <dtml-call expr="REQUEST.set('cod_partido_sel', cod_partido)">
+          </dtml-if>
+          <select class="form-select" name="lst_cod_partido" id="lst_cod_partido">
+            <option value="">Selecione</option>
+            <dtml-in expr="zsql.partido_obter_zsql(ind_excluido=0)">
+              <option
+                <dtml-if cod_partido_sel>
+                  <dtml-if expr="(_.int(cod_partido) == _.int(cod_partido_sel))">
+                    selected
+                  </dtml-if>
+                </dtml-if>
+                value="<dtml-var cod_partido>">
+                <dtml-var sgl_partido>
+              </option>               
+            </dtml-in>
+          </select>
+        </div>
+        <dtml-in expr="zsql.legislatura_obter_zsql(num_legislatura=num_legislatura)">
           <dtml-call expr="REQUEST.set('dat_inicio_mandato', dat_inicio_conv)">
           <dtml-call expr="REQUEST.set('dat_fim_mandato', dat_fim_conv)">
-      </dtml-in>
-   <div class="row">
-      <div class="col-6 mb-3">
-        <label class="form-label required" for="txt_dat_inicio_mandato" class="form-label required">Início do Mandato</label>
-        <input class="form-control date" type="text" id="txt_dat_inicio_mandato" name="txt_dat_inicio_mandato" value="<dtml-var dat_inicio_mandato missing>" required />
-        <div class="invalid-feedback">
-          Este campo é obrigatório !
+        </dtml-in>
+        <div class="col-12 col-md-6">
+          <label class="form-label required" for="txt_dat_inicio_mandato">
+            <i class="fas fa-calendar-check me-1"></i>Início do Mandato
+          </label>
+          <input class="form-control date" type="text" id="txt_dat_inicio_mandato" name="txt_dat_inicio_mandato" value="<dtml-var dat_inicio_mandato missing>" required />
+          <div class="invalid-feedback">
+            Este campo é obrigatório!
+          </div>
+        </div>
+        <div class="col-12 col-md-6">
+          <label class="form-label required" for="txt_dat_fim_mandato">
+            <i class="fas fa-calendar-times me-1"></i>Fim do Mandato
+          </label>
+          <input class="form-control date" type="text" id="txt_dat_fim_mandato" name="txt_dat_fim_mandato" value="<dtml-var dat_fim_mandato missing>" required />
+          <div class="invalid-feedback">
+            Este campo é obrigatório!
+          </div>
+        </div>
+        <div class="col-12">
+          <label class="form-label" for="txa_txt_observacao">
+            <i class="fas fa-comment me-1"></i>Observações
+          </label>
+          <textarea class="form-control" name="txa_txt_observacao" id="txa_txt_observacao" rows="3"><dtml-var txt_observacao missing></textarea>
         </div>
       </div>
-      <div class="col-6 mb-3">
-        <label class="form-label required" for="txt_dat_fim_mandato" class="form-label required">Fim do Mandato</label>
-        <input class="form-control date" type="text" id="txt_dat_fim_mandato" name="txt_dat_fim_mandato" value="<dtml-var dat_fim_mandato missing>" required />
-        <div class="invalid-feedback">
-          Este campo é obrigatório !
-        </div>
+      
+      <div class="mt-3">
+        <button class="btn btn-primary" type="button" name="btn_salvar" onclick="campos_criticar(document.composicao_executivo_form)">
+          <i class="fas fa-save me-1"></i>Salvar
+        </button>
       </div>
-   </div>
-   <div class="row">
-      <div class="col-12 mb-3">
-        <label class="form-label" for="txa_txt_observacao">Observações</label>
-        <textarea class="form-control" name="txa_txt_observacao" id="txa_txt_observacao"><dtml-var txt_observacao missing></textarea>
+      
+      <div class="mt-2">
+        <p class="text-muted small mb-0">
+          <i class="fas fa-asterisk text-danger"></i> Campos obrigatórios
+        </p>
       </div>
-   </div>
-
-  <div class="text-start">
-        <input class="btn btn-primary" type="button" name="btn_salvar" value="Salvar" onClick="campos_criticar(document.composicao_executivo_form)" />
-  </div>
-  
-  <div class="row">
-    <div class="col-md-12 mt-2">
-       <p class="text-muted small font-size-12"><i class="fas fa-asterisk text-danger"></i> Campos obrigatórios</p>
     </div>
   </div>
-
 </form>
 
 <dtml-var js_slot>

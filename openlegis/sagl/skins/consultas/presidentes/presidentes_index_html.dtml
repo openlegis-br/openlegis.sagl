@@ -1,54 +1,74 @@
 <dtml-var header_html>
 
-  <h1 class="firstHeading font-size-18">Presidentes</h1>
+<h1 class="firstHeading font-size-18">Presidentes</h1>
 
-  <div class="mt-2 mb-3">
-      <p class="h6 text-start">Galeria de Presidentes</p>
-  </div>
-  <dtml-in expr="zsql.presidentes_obter_zsql()">     
-   <dtml-if sequence-start>
-     <div class="row text-center">  
-   </dtml-if>
-        <!-- Parlamentar -->
-        <div class="col-md-6 col-lg-4 col-xl-3">
-          <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Parlamentar'])">
-            <a href="<dtml-var portal_url>/cadastros/parlamentar/parlamentar_mostrar_proc?cod_parlamentar=<dtml-var cod_parlamentar>" title="<dtml-var nom_completo>" >
-          <dtml-else>
-            <a href="<dtml-var portal_url>/consultas/parlamentar/parlamentar_mostrar_proc?cod_parlamentar=<dtml-var cod_parlamentar>" title="<dtml-var nom_completo>">
-          </dtml-if>
-            <div class="card profile" style="height: 90%">
-               <div class="card-body">
-                 <div class="text-center">
-                 <dtml-call expr="REQUEST.set('id_foto', str(cod_parlamentar)+'_foto_parlamentar')">
-                 <dtml-if expr="hasattr(sapl_documentos.parlamentar.fotos,id_foto)">
-                    <img alt="<dtml-var nom_completo>" src="<dtml-var portal_url>/sapl_documentos/parlamentar/fotos/<dtml-var id_foto>" width="140" class="rounded-circle img-thumbnail avatar-xl" style="filter: grayscale(100%);">
-                 <dtml-else>
-                    <img alt="<dtml-var nom_completo>" src="<dtml-var portal_url>/imagens/avatar.png" width="140" class="rounded-circle img-thumbnail avatar-xl">
-                 </dtml-if>
-                 <h5 class="mt-3 mb-1 font-size-14 font-color-dark">
-                    <dtml-var nom_completo>
-                 </h5>
-                <p class="small text-muted">
-                   <dtml-in expr="zsql.presidentes_periodos_obter_zsql(cod_parlamentar=cod_parlamentar)">
-                       <i class="fa fa-caret-right"></i> <dtml-var dat_inicio> a <dtml-var dat_fim> <dtml-unless sequence-end><br /></dtml-unless>
-                   </dtml-in>
-                </p>
+<div class="mt-2 mb-3">
+  <h2 class="h5 text-muted">Galeria de Presidentes</h2>
+</div>
+
+<dtml-call expr="REQUEST.set('presidentes_lista', zsql.presidentes_obter_zsql())">
+<dtml-if expr="presidentes_lista">
+  <dtml-in expr="presidentes_lista">     
+    <dtml-if sequence-start>
+      <div class="row g-4 mb-4">  
+    </dtml-if>
+    
+    <!-- Card de Presidente -->
+    <div class="col-md-6 col-lg-4 col-xl-3">
+      <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Parlamentar'])">
+        <a href="<dtml-var portal_url>/cadastros/parlamentar/parlamentar_mostrar_proc?cod_parlamentar=<dtml-var cod_parlamentar>" 
+           class="text-decoration-none d-block h-100"
+           aria-label="Ver detalhes de <dtml-var nom_completo>, Presidente da Câmara"
+           title="<dtml-var nom_completo>">
+      <dtml-else>
+        <a href="<dtml-var portal_url>/consultas/parlamentar/parlamentar_mostrar_proc?cod_parlamentar=<dtml-var cod_parlamentar>" 
+           class="text-decoration-none d-block h-100"
+           aria-label="Ver detalhes de <dtml-var nom_completo>, Presidente da Câmara"
+           title="<dtml-var nom_completo>">
+      </dtml-if>
+        <div class="card profile h-100">
+          <div class="card-body text-center">
+            <dtml-call expr="REQUEST.set('id_foto', str(cod_parlamentar)+'_foto_parlamentar')">
+            <dtml-if expr="hasattr(sapl_documentos.parlamentar.fotos,id_foto)">
+              <img alt="Foto de <dtml-var nom_completo>, Presidente da Câmara Municipal" 
+                   src="<dtml-var portal_url>/sapl_documentos/parlamentar/fotos/<dtml-var id_foto>" 
+                   class="rounded-circle img-thumbnail avatar-xl mb-3" 
+                   style="filter: grayscale(80%); object-fit: cover;"
+                   loading="lazy">
+            <dtml-else>
+              <img alt="Foto de perfil padrão de <dtml-var nom_completo>, Presidente da Câmara Municipal" 
+                   src="<dtml-var portal_url>/imagens/avatar.png" 
+                   class="rounded-circle img-thumbnail avatar-xl mb-3"
+                   style="object-fit: cover;"
+                   loading="lazy">
+            </dtml-if>
+            <h3 class="h5 mt-3 mb-2 text-primary">
+              <dtml-var nom_completo>
+            </h3>
+            <div class="text-muted small">
+              <dtml-in expr="zsql.presidentes_periodos_obter_zsql(cod_parlamentar=cod_parlamentar)">
+                <div class="mb-1">
+                  <i class="fas fa-calendar-alt me-1"></i>
+                  <dtml-var dat_inicio> a <dtml-var dat_fim>
+                </div>
+              </dtml-in>
             </div>
-           </div>
+          </div>
         </div>
-           </a>
-        </div>
-        <!-- Fim Parlamentar-->
-   <dtml-if sequence-end>
-     </div>
-   </dtml-if>
-  <dtml-else>
-    <div class="row">
-      <div class="col-12 mb-4">
-          Nenhum presidente cadastrado.
-      </div>
+      </a>
     </div>
-  </dtml-in>  
+    <!-- Fim Card de Presidente -->
+    
+    <dtml-if sequence-end>
+      </div>
+    </dtml-if>
+  </dtml-in>
+<dtml-else>
+  <div class="alert alert-info mb-0" role="alert">
+    <i class="fas fa-info-circle me-2"></i><strong>Nenhum presidente cadastrado</strong><br>
+    <small>Não há registros de presidentes disponíveis no momento.</small>
+  </div>
+</dtml-if>
 
 <dtml-var js_slot>
 <dtml-var footer_html>

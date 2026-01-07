@@ -1,10 +1,10 @@
-from celery import Celery
+from .utils import celery
 import base64
 from io import BytesIO
 import pymupdf
 from multiprocessing.dummy import Pool
 
-app = Celery('tasks', config_source='celeryconfig')
+app = celery
 
 def processar_pagina(pagina):
     """Função auxiliar para processar uma página."""

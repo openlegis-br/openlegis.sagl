@@ -71,90 +71,87 @@ function clear_form_elements(ele) {
 }
 </script>
 
-<h1 class="firstHeading font-size-18">Matérias por Autor</h1>
+<h1 class="firstHeading font-size-18 mb-3">Matérias por Autor</h1>
 
 <dtml-if expr="not _.has_key('impressao') or (_.has_key('impressao') and not _.has_key('dt_apres') and not _.has_key('dt_apres2'))">
-
-<form class="d-print-none" method="post" id="materia_autor_form" name="materia_autor_form" action="materiaAutor_index_html">
-
-  <dtml-if impressao>
-    <input type="hidden" name="impressao" value="<dtml-var impressao>">
-  </dtml-if>
-  
-  <div class="row">
-    <div class="col-12 col-sm-6 mb-3">
-      <label class="form-label" for="txt_autor">Autor</label>
-        <select id="hdn_cod_autor" name="hdn_cod_autor" class="select2 form-control selectpicker show-tick" data-size="6" data-live-search="true" data-header="Pesquisar Autor" style="width: 100%">
+  <form class="d-print-none" method="post" id="materia_autor_form" name="materia_autor_form" action="materiaAutor_index_html">
+    <div class="card mb-3">
+      <div class="card-body">
+        <dtml-if impressao>
+          <input type="hidden" name="impressao" value="<dtml-var impressao>">
+        </dtml-if>
+        <div class="row g-3">
+          <div class="col-12 col-sm-6">
+            <label class="form-label" for="txt_autor"><i class="fas fa-user me-1"></i>Autor</label>
+            <select id="hdn_cod_autor" name="hdn_cod_autor" class="select2 form-control selectpicker show-tick" data-size="6" data-live-search="true" data-header="Pesquisar Autor" style="width: 100%">
               <option value="0">Selecione</option>
               <dtml-in expr="zsql.autor_obter_zsql(ind_excluido=0)">
                 <option value="<dtml-var cod_autor>"
-                 <dtml-if expr="_.has_key('hdn_cod_autor') and _.int(cod_autor)==_.int(hdn_cod_autor)">
-                  selected</dtml-if>
+                  <dtml-if expr="_.has_key('hdn_cod_autor') and _.int(cod_autor)==_.int(hdn_cod_autor)">
+                    selected
+                  </dtml-if>
                 ><dtml-var nom_autor_join></option>
               </dtml-in>
-       </select>
-     </div>
-    <div class="col-12 col-sm-6 mb-3">
-      <label class="form-label" for="lst_tip_materia">Tipo de Matéria</label>
-        <select  id="lst_tip_materia" name="lst_tip_materia" class="select2 form-control selectpicker" data-dropup-auto="false" data-size="6" multiple="multiple" data-actions-box="true" title="Todos" data-header="Tipo de Matéria" style="width: 100%">
-          <dtml-in expr="zsql.tipo_materia_legislativa_obter_zsql(tip_natureza='P', ind_excluido=0)">
-            <option
-             <dtml-if expr="_.has_key('lst_tip_materia') and pysc.verifica_lista_pysc(lst_tip_materia)">            
-                <dtml-if expr="_.has_key('lst_tip_materia') and str(tip_materia)==str(lst_tip_materia)">
-                  selected
-                </dtml-if> 
-             <dtml-else>
-                <dtml-if expr="_.has_key('lst_tip_materia') and (str(tip_materia) in lst_tip_materia)">             
-                  selected
-                </dtml-if>        
-             </dtml-if>
-               value="<dtml-var tip_materia missing>">
-                <dtml-var des_tipo_materia>
-            </option>
-          </dtml-in>
-        </select>
-    </div>     
-   </div>
-
-   <div class="row">
-     <div class="col-6 col-md-3 mb-3">
-            <label class="form-label required" for="dt_apres">Data Inicial</label>
+            </select>
+          </div>
+          <div class="col-12 col-sm-6">
+            <label class="form-label" for="lst_tip_materia"><i class="fas fa-file-alt me-1"></i>Tipo de Matéria</label>
+            <select id="lst_tip_materia" name="lst_tip_materia" class="select2 form-control selectpicker" data-dropup-auto="false" data-size="6" multiple="multiple" data-actions-box="true" title="Todos" data-header="Tipo de Matéria" style="width: 100%">
+              <dtml-in expr="zsql.tipo_materia_legislativa_obter_zsql(tip_natureza='P', ind_excluido=0)">
+                <option
+                  <dtml-if expr="_.has_key('lst_tip_materia') and pysc.verifica_lista_pysc(lst_tip_materia)">
+                    <dtml-if expr="_.has_key('lst_tip_materia') and str(tip_materia)==str(lst_tip_materia)">
+                      selected
+                    </dtml-if>
+                  <dtml-else>
+                    <dtml-if expr="_.has_key('lst_tip_materia') and (str(tip_materia) in lst_tip_materia)">
+                      selected
+                    </dtml-if>
+                  </dtml-if>
+                  value="<dtml-var tip_materia missing>">
+                  <dtml-var des_tipo_materia>
+                </option>
+              </dtml-in>
+            </select>
+          </div>
+          <div class="col-6 col-md-3">
+            <label class="form-label required" for="dt_apres"><i class="fas fa-calendar me-1"></i>Data Inicial</label>
             <div class="input-group" id="datepicker1">
               <input type="text" class="form-control datepicker" placeholder="dd/mm/aaaa" name="dt_apres" id="dt_apres" data-provide="datepicker" data-date-autoclose="true" autocomplete="off" value="<dtml-var dt_apres missing>">
-              <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
-           </div>   
-     </div>
-     <div class="col-6 col-md-3 mb-3">
-           <label class="form-label" for="dt_apres2" class="form-label required">Data Final</label>
+              <span class="input-group-text"><i class="fas fa-calendar"></i></span>
+            </div>
+          </div>
+          <div class="col-6 col-md-3">
+            <label class="form-label required" for="dt_apres2"><i class="fas fa-calendar me-1"></i>Data Final</label>
             <div class="input-group" id="datepicker2">
               <input type="text" class="form-control datepicker" placeholder="dd/mm/aaaa" name="dt_apres2" id="dt_apres2" data-provide="datepicker" data-date-autoclose="true" autocomplete="off" value="<dtml-var dt_apres2 missing>">
-              <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
-           </div> 
-     </div>
-    <div class="col-6 col-md-3 mb-3">
-      <label class="form-label d-block">Modo de Exibição</label>
-          <dtml-in expr="['Resumido', 'Detalhado']">
-            <div class="form-check form-check-inline">
-              <input class="form-check-input" type="radio" id="rad<dtml-var expr="_['sequence-item']">" name="rad_mod_exibicao" value="<dtml-var expr="_['sequence-item'][0]">"
-                <dtml-if expr="_.has_key('rad_mod_exibicao') and rad_mod_exibicao==_['sequence-item'][0]">
-                   checked=1
-                <dtml-elif expr="_['sequence-item']=='Resumido'">checked=1</dtml-if>>
-              <label class="form-check-label" for="rad<dtml-var expr="_['sequence-item']">"><dtml-var expr="_['sequence-item']"></label>
-             </div>
-             </dtml-in>
-       </div>
-  </div>
-
-      <div class="text-start">
-        <input class="btn btn-primary" type="button" name="button" value="Gerar relatório" onClick="return campos_criticar(form)" />
+              <span class="input-group-text"><i class="fas fa-calendar"></i></span>
+            </div>
+          </div>
+          <div class="col-6 col-md-3">
+            <label class="form-label d-block"><i class="fas fa-eye me-1"></i>Modo de Exibição</label>
+            <dtml-in expr="['Resumido', 'Detalhado']">
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" id="rad<dtml-var expr="_['sequence-item']">" name="rad_mod_exibicao" value="<dtml-var expr="_['sequence-item'][0]">"
+                  <dtml-if expr="_.has_key('rad_mod_exibicao') and rad_mod_exibicao==_['sequence-item'][0]">
+                    checked=1
+                  <dtml-elif expr="_['sequence-item']=='Resumido'">checked=1</dtml-if>>
+                <label class="form-check-label" for="rad<dtml-var expr="_['sequence-item']">"><dtml-var expr="_['sequence-item']"></label>
+              </div>
+            </dtml-in>
+          </div>
+          <div class="col-12">
+            <div class="btn-group">
+              <button class="btn btn-primary" type="button" name="button" onClick="return campos_criticar(form)">
+                <i class="fas fa-file-alt me-1"></i>Gerar relatório
+              </button>
+            </div>
+            <p class="text-muted small mt-2 mb-0"><i class="fas fa-asterisk text-danger"></i> Campos obrigatórios</p>
+          </div>
+        </div>
       </div>
-<div class="row">
-    <div class="col-md-12 mt-2">
-       <p class="text-muted small font-size-12"><i class="fas fa-asterisk text-danger"></i> Campos obrigatórios</p>
     </div>
-</div>
-
-</form>
+  </form>
 </dtml-if>
 
 <dtml-if expr="_.has_key('dt_apres') or _.has_key('dt_apres2')">
@@ -166,119 +163,126 @@ function clear_form_elements(ele) {
 </dtml-if>
 
 <dtml-in expr="autorMateriaAno(cod_autor=hdn_cod_autor,tip_materia_sel=lst_tip_materia,dat_apresentacao=dt_apres,dat_apresentacao2=dt_apres2)">
- <table class="table table-sm mt-4">
- <thead> 
-  <tr>
-   <th colspan="3" class="table-light text-center">
-     <h5 class="mb-0">
-       <dtml-var nom_autor_join missing> 
-     </h5>
-   </th>
-  </tr>
- </thead>
-  <tr>
-     <td width="80%"><b>Tipo de Matéria</b></td>
-     <td><b>Quantidade</b></td>
-  </tr> 
- <dtml-in expr="tipoQtdeAutor(autor=cod_autor,tip_materia_sel=lst_tip_materia,dat_apresentacao=dt_apres,dat_apresentacao2=dt_apres2)">
-  <tr>
-   <td>
-     <dtml-var des_tipo_materia>
-   </td>
-   <td>
-     <dtml-var qtde>
-   </td>
-  </tr>
- </dtml-in>
- <dtml-in expr="qtdeAutor(autor=cod_autor,tip_materia_sel=lst_tip_materia,dat_apresentacao=dt_apres,dat_apresentacao2=dt_apres2)">
-  <tr>
-   <td>
-     <b>TOTAL DO AUTOR</b>
-   </td>
-   <td>
-     <b><dtml-var qtde></b>
-   </td>
-  </tr>
- </table>
+  <div class="card mb-3">
+    <div class="card-header">
+      <h3 class="h5 mb-0"><i class="fas fa-user me-1"></i><dtml-var nom_autor_join missing></h3>
+    </div>
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-striped align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th width="80%">Tipo de Matéria</th>
+              <th>Quantidade</th>
+            </tr>
+          </thead>
+          <tbody>
+            <dtml-in expr="tipoQtdeAutor(autor=cod_autor,tip_materia_sel=lst_tip_materia,dat_apresentacao=dt_apres,dat_apresentacao2=dt_apres2)">
+              <tr>
+                <td><dtml-var des_tipo_materia></td>
+                <td><dtml-var qtde></td>
+              </tr>
+            </dtml-in>
+            <dtml-in expr="qtdeAutor(autor=cod_autor,tip_materia_sel=lst_tip_materia,dat_apresentacao=dt_apres,dat_apresentacao2=dt_apres2)">
+              <tr class="table-secondary">
+                <td><strong>TOTAL DO AUTOR</strong></td>
+                <td><strong><dtml-var qtde></strong></td>
+              </tr>
+            </dtml-in>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 </dtml-in>
 
 <dtml-if expr="_.has_key('rad_mod_exibicao') and rad_mod_exibicao=='D'">
- <dtml-in expr="materiaAutorAno(autor=cod_autor,tip_materia_sel=lst_tip_materia,dat_apresentacao=dt_apres,dat_apresentacao2=dt_apres2)">
- <dtml-if sequence-start>
-   <table class="table table-sm">
-     <thead class="table-light">
-     <tr>
-      <th>Identificação da Matéria</th>
-      <th width="20%">Situação</th>
-     </thead>
-  </dtml-if>
-  </tr>
-  <tr>
-   <td>
-     <dtml-var sequence-number>)
-     <a href="<dtml-var portal_url>/consultas/materia/materia_mostrar_proc?cod_materia=<dtml-var expr="pysc.b64encode_pysc(codigo=cod_materia)">" target="_blank">
-      <dtml-var des_tipo_materia> nº <dtml-var num_ident_basica>/<dtml-var ano_ident_basica></a>
-     <br /> <b>Ementa:</b> <dtml-var txt_ementa> 
-     <dtml-if expr="sgl_tipo_materia=='IND' and dat_fim_prazo and dat_fim_prazo!=''">
-       - <b>Vencimento:</b> <dtml-var dat_fim_prazo>
-     </dtml-if>
-   </td>
-   <td>
-     <dtml-in expr="zsql.tramitacao_obter_zsql(cod_materia=cod_materia, ind_ult_tramitacao=1)">
-         <dtml-var des_status missing>
-     </dtml-in>
-     <dtml-in expr="zsql.materia_buscar_norma_juridica_zsql(cod_materia=cod_materia)">
-       <dtml-if sequence-start>
-       </dtml-if>
-       <dtml-if expr="cod_norma and cod_norma!=''">
-          <br /><a href="<dtml-var portal_url>/consultas/norma_juridica/norma_juridica_mostrar_proc?cod_norma=<dtml-var cod_norma>"><b><dtml-var sgl_norma> <dtml-var num_norma>/<dtml-var ano_norma></b></a>
-       </dtml-if>
-     </dtml-in>
-   </td>
-  </tr>
- </dtml-in>
-  <tr>
-<dtml-if sequence-end>
- </table>
+  <div class="card mb-3">
+    <div class="card-header">
+      <h3 class="h5 mb-0"><i class="fas fa-list me-1"></i>Detalhamento das Matérias</h3>
+    </div>
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <dtml-in expr="materiaAutorAno(autor=cod_autor,tip_materia_sel=lst_tip_materia,dat_apresentacao=dt_apres,dat_apresentacao2=dt_apres2)">
+          <dtml-if sequence-start>
+            <table class="table table-striped align-middle mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th>Identificação da Matéria</th>
+                  <th width="20%">Situação</th>
+                </tr>
+              </thead>
+              <tbody>
+          </dtml-if>
+                <tr>
+                  <td>
+                    <dtml-var sequence-number>)
+                    <a href="<dtml-var portal_url>/consultas/materia/materia_mostrar_proc?cod_materia=<dtml-var expr="pysc.b64encode_pysc(codigo=cod_materia)">" target="_blank" class="text-decoration-none">
+                      <strong><dtml-var des_tipo_materia> nº <dtml-var num_ident_basica>/<dtml-var ano_ident_basica></strong>
+                    </a>
+                    <br><small class="text-muted"><strong>Ementa:</strong> <dtml-var txt_ementa></small>
+                    <dtml-if expr="sgl_tipo_materia=='IND' and dat_fim_prazo and dat_fim_prazo!=''">
+                      <br><small class="text-muted"><strong>Vencimento:</strong> <dtml-var dat_fim_prazo></small>
+                    </dtml-if>
+                  </td>
+                  <td>
+                    <dtml-in expr="zsql.tramitacao_obter_zsql(cod_materia=cod_materia, ind_ult_tramitacao=1)">
+                      <dtml-var des_status missing>
+                    </dtml-in>
+                    <dtml-in expr="zsql.materia_buscar_norma_juridica_zsql(cod_materia=cod_materia)">
+                      <dtml-if expr="cod_norma and cod_norma!=''">
+                        <br><a href="<dtml-var portal_url>/consultas/norma_juridica/norma_juridica_mostrar_proc?cod_norma=<dtml-var cod_norma>" class="text-decoration-none">
+                          <strong><dtml-var sgl_norma> <dtml-var num_norma>/<dtml-var ano_norma></strong>
+                        </a>
+                      </dtml-if>
+                    </dtml-in>
+                  </td>
+                </tr>
+          <dtml-if sequence-end>
+              </tbody>
+            </table>
+          </dtml-if>
+        </dtml-in>
+      </div>
+    </div>
+  </div>
 </dtml-if>
-</dtml-if>
-</dtml-in>
 
- <dtml-in expr="tipoQtdeGeral(tip_materia_sel=lst_tip_materia,dat_apresentacao=dt_apres,dat_apresentacao2=dt_apres2)">
-  <dtml-if sequence-start>
-  <table class="table table-sm">
-     <thead class="table-light">
-       <tr>
-        <th colspan="2" class="label text-center"><h5 class="mb-0">QUADRO GERAL</h5></th>
-      </tr>
-     </thead>
-     <tr>
-       <td width="80%"><b>Tipo de Matéria</b></td>
-       <td><b>Quantidade</b></td>
-    </tr>    
-  </dtml-if>
-  <tr>
-   <td>
-     <dtml-var sgl_tipo_materia> - <dtml-var des_tipo_materia>
-   </td>
-   <td>
-     <dtml-var qtde>
-   </td>
-  </tr>
- </dtml-in>
- <dtml-in expr="qtdeGeral(tip_materia_sel=lst_tip_materia,dat_apresentacao=dt_apres,dat_apresentacao2=dt_apres2)">
-  <tr>
-   <td>
-     <b>TOTAL GERAL</b>
-   </td>
-   <td>
-     <b><dtml-var qtde></b>
-   </td>
-  </tr>
-  <dtml-if sequence-end>  
-    </table>
-  </dtml-if>
-</dtml-in>
+<div class="card mb-3">
+  <div class="card-header">
+    <h3 class="h5 mb-0"><i class="fas fa-chart-bar me-1"></i>Quadro Geral</h3>
+  </div>
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <dtml-in expr="tipoQtdeGeral(tip_materia_sel=lst_tip_materia,dat_apresentacao=dt_apres,dat_apresentacao2=dt_apres2)">
+        <dtml-if sequence-start>
+          <table class="table table-striped align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th width="80%">Tipo de Matéria</th>
+                <th>Quantidade</th>
+              </tr>
+            </thead>
+            <tbody>
+        </dtml-if>
+              <tr>
+                <td><dtml-var sgl_tipo_materia> - <dtml-var des_tipo_materia></td>
+                <td><dtml-var qtde></td>
+              </tr>
+      </dtml-in>
+      <dtml-in expr="qtdeGeral(tip_materia_sel=lst_tip_materia,dat_apresentacao=dt_apres,dat_apresentacao2=dt_apres2)">
+              <tr class="table-secondary">
+                <td><strong>TOTAL GERAL</strong></td>
+                <td><strong><dtml-var qtde></strong></td>
+              </tr>
+        <dtml-if sequence-end>
+            </tbody>
+          </table>
+        </dtml-if>
+      </dtml-in>
+    </div>
+  </div>
+</div>
 </dtml-if>
 
 <dtml-var js_slot>

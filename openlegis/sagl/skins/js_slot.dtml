@@ -5,27 +5,16 @@
                     <!-- container-fluid -->
                 </div>
                 <!-- End Page-content -->
- <dtml-if expr="not REQUEST.get('modal', '')">
-                <footer class="footer">
-                    <div class="container-fluid">
-                        <div class="row">
-                            <div class="col-sm-6">
-                             <div class="text--sm-start d-sm-block">
-                                <script>document.write(new Date().getFullYear())</script> <i class="mdi mdi-creative-commons"></i> <a class="text-muted" href="https://www.openlegis.com.br" target="_blank">OpenLegis</a>
-                             </div>
-                            </div>
-                            <div class="col-sm-6 text-sm-end d-none d-sm-block">
-                                <i class="mdi mdi-zigbee"></i> SAGL 6.0
-                            </div>
-                        </div>
-                    </div>
-                </footer>
+            <dtml-if expr="not REQUEST.get('modal', '')">
+            <dtml-var footer_html>
+            </dtml-if>
             </div>
             <!-- end main content-->
 
         </div>
         <!-- END layout-wrapper -->
 
+        <dtml-if expr="not REQUEST.get('modal', '')">
         <!-- Right Sidebar -->
         <div class="right-bar">
             <div data-simplebar class="h-100">
@@ -42,7 +31,7 @@
 
                 <div class="p-4">
                     <div class="mb-2">
-                        <img src="<dtml-var portal_url>/assets/images/layouts/layout-1.jpg" class="img-fluid img-thumbnail" alt="">
+                        <img src="<dtml-var portal_url>/assets/images/layouts/layout-1.jpg" class="img-fluid img-thumbnail" alt="Visualização do modo claro">
                     </div>
                     <div class="form-check form-switch mb-3">
                         <input type="checkbox" class="form-check-input theme-choice" id="light-mode-switch" checked />
@@ -50,7 +39,7 @@
                     </div>
 
                     <div class="mb-2">
-                        <img src="<dtml-var portal_url>/assets/images/layouts/layout-2.jpg" class="img-fluid img-thumbnail" alt="">
+                        <img src="<dtml-var portal_url>/assets/images/layouts/layout-2.jpg" class="img-fluid img-thumbnail" alt="Visualização do modo escuro">
                     </div>
                     <div class="form-check form-switch mb-3">
                         <input type="checkbox" class="form-check-input theme-choice" id="dark-mode-switch"
@@ -74,13 +63,12 @@
 <script src="<dtml-var portal_url>/assets/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
 <script src="<dtml-var portal_url>/assets/libs/bootstrap/javascript/iframeResizer.contentWindow.min.js"></script>
 <script src="<dtml-var portal_url>/assets/libs/bootstrap-datepicker/js/bootstrap-datepicker.min.js"></script>
+<script src="<dtml-var portal_url>/assets/libs/bootstrap-datepicker/locales/bootstrap-datepicker.pt-BR.min.js"></script>
 <script src="<dtml-var portal_url>/assets/libs/metismenu/metisMenu.min.js"></script>
 <script src="<dtml-var portal_url>/assets/libs/simplebar/simplebar.min.js"></script>
 <script src="<dtml-var portal_url>/assets/libs/node-waves/waves.min.js"></script>
 <script src="<dtml-var portal_url>/assets/libs/select2/js/select2.min.js"></script>
 <script src="<dtml-var portal_url>/assets/libs/select2/js/i18n/pt-BR.js"></script>
-<script src="<dtml-var portal_url>/assets/libs/bootstrap-datepicker/js/bootstrap-datepicker.min.js"></script>
-<script src="<dtml-var portal_url>/assets/libs/bootstrap-datepicker/locales/bootstrap-datepicker.pt-BR.min.js"></script>
 <script src="<dtml-var portal_url>/assets/libs/spectrum-colorpicker2/spectrum.min.js"></script>
 <script src="<dtml-var portal_url>/assets/libs/bootstrap-touchspin/jquery.bootstrap-touchspin.min.js"></script>
 <script src="<dtml-var portal_url>/assets/libs/bootstrap-maxlength/bootstrap-maxlength.min.js"></script>
@@ -325,7 +313,35 @@ $(document).on('click', 'a[data-confirm], button[data-confirm]', function(ev) {
         let resultado = true;
         if (action) {
             // Se tem uma ação JS definida (como nos botões de gerar ODT/PDF)
-            resultado = eval(action);
+            // Substituição segura de eval() - verifica se é uma função válida
+            try {
+                if (typeof window[action] === 'function') {
+                    // Se action é o nome de uma função global
+                    resultado = window[action]();
+                } else if (action.startsWith('function') || action.includes('=>')) {
+                    // Se action é uma função anônima, usar Function constructor com validação
+                    const allowedPattern = /^[a-zA-Z_$][a-zA-Z0-9_$]*\s*\([^)]*\)\s*\{[^}]*\}$/;
+                    if (allowedPattern.test(action) || action.includes('exibirMensagemProcessamento')) {
+                        const fn = new Function('return (' + action + ')')();
+                        resultado = typeof fn === 'function' ? fn() : fn;
+                    } else {
+                        console.warn('Ação não permitida por segurança:', action);
+                        resultado = false;
+                    }
+                } else {
+                    // Tentar executar como expressão simples (mais seguro)
+                    const safeAction = action.replace(/[^a-zA-Z0-9_$().]/g, '');
+                    if (safeAction && safeAction.length > 0 && safeAction.length < 100) {
+                        resultado = new Function('return ' + safeAction)();
+                    } else {
+                        console.warn('Ação inválida ou muito longa:', action);
+                        resultado = false;
+                    }
+                }
+            } catch (error) {
+                console.error('Erro ao executar ação:', error);
+                resultado = false;
+            }
             // Só exibe overlay se ação não retornar false
             if (resultado !== false) {
                 if (typeof exibirMensagemProcessamento === "function") exibirMensagemProcessamento();
@@ -367,5 +383,33 @@ autosize(document.querySelectorAll('textarea'));
         form.classList.add('was-validated')
       }, false)
     })
+})();
+
+// Fixar menu abaixo do header
+(function() {
+    function fixTopnav() {
+        const topbar = document.getElementById('page-topbar');
+        const topnav = document.querySelector('.topnav');
+        
+        if (topbar && topnav) {
+            const topbarHeight = topbar.offsetHeight;
+            topnav.style.position = 'sticky';
+            topnav.style.top = topbarHeight + 'px';
+            topnav.style.zIndex = '999';
+            topnav.style.marginTop = '0';
+            topnav.style.left = 'auto';
+            topnav.style.right = 'auto';
+        }
+    }
+    
+    // Executar quando a página carregar
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', fixTopnav);
+    } else {
+        fixTopnav();
+    }
+    
+    // Re-executar em caso de redimensionamento
+    window.addEventListener('resize', fixTopnav);
 })()
 </script> 

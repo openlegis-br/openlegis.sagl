@@ -1,41 +1,60 @@
 <dtml-var header_html>
 
-<h1 class="firstHeading font-size-18">Matérias - Prazos de Deliberação a Vencer</h1>
+<h1 class="firstHeading font-size-18 mb-3">
+  <i class="fas fa-calendar-times me-2"></i>Matérias - Prazos de Deliberação a Vencer
+</h1>
 
 <dtml-in expr="listarDatas_zsql()">
-  <dtml-if sequence-start>
-    <table class="table">
-      <thead>
-      <tr>
-         <th>Vencimento</th>
-         <th>Matéria</th>
-      </tr>
-      </thead>
-  </dtml-if>
-      <tr>
-         <td><dtml-var data_fim_prazo></td>
-         <td>
-            <dtml-in expr="listarMaterias_zsql(data=dat_fim_prazo)">
-                <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia'])">
-                  <a href="<dtml-var portal_url>/cadastros/materia/materia_mostrar_proc?cod_materia=<dtml-var cod_materia>">
-                <dtml-else>
-                  <a href="<dtml-var portal_url>/consultas/materia/materia_mostrar_proc?cod_materia=<dtml-var expr="pysc.b64encode_pysc(codigo=cod_materia)">" >
-                </dtml-if>
-                  <b><dtml-var des_tipo_materia> nº <dtml-var num_ident_basica>/<dtml-var ano_ident_basica></b>
-                </a> - 
-                 <dtml-in expr="zsql.autoria_obter_zsql(cod_materia=cod_materia)">
-                   <dtml-var nom_autor_join><dtml-unless sequence-end>,</dtml-unless>
-                 </dtml-in>
-                - <dtml-var txt_ementa>
-            </dtml-in>
-         </td>
-      </tr>
-  <dtml-if sequence-end>
-    </table>
-  </dtml-if>
-<dtml-else>
-  <p>Nenhuma ocorrência.</p>
-</dtml-in>
+  <div class="card mb-3 border-start border-4 border-warning">
+    <div class="card-header bg-warning bg-opacity-10">
+      <h3 class="h6 mb-0">
+        <i class="fas fa-calendar-alt me-2"></i>Vencimento: <strong><dtml-var data_fim_prazo></strong>
+      </h3>
+    </div>
+    <div class="card-body">
+      <div class="list-group list-group-flush">
+        <dtml-in expr="listarMaterias_zsql(data=dat_fim_prazo)">
+          <div class="list-group-item border-0 px-0">
+            <div class="d-flex w-100 justify-content-between align-items-start mb-2">
+              <div class="flex-grow-1">
+                <h5 class="mb-1">
+                  <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia'])">
+                    <a href="<dtml-var portal_url>/cadastros/materia/materia_mostrar_proc?cod_materia=<dtml-var cod_materia>" class="text-decoration-none">
+                  <dtml-else>
+                    <a href="<dtml-var portal_url>/consultas/materia/materia_mostrar_proc?cod_materia=<dtml-var expr="pysc.b64encode_pysc(codigo=cod_materia)">" class="text-decoration-none">
+                  </dtml-if>
+                  <i class="fas fa-file-alt me-1 text-muted"></i>
+                  <strong><dtml-var des_tipo_materia> nº <dtml-var num_ident_basica>/<dtml-var ano_ident_basica></strong>
+                  </a>
+                </h5>
+                <p class="mb-1">
+                  <i class="fas fa-user me-1 text-muted"></i>
+                  <small>
+                    <dtml-in expr="zsql.autoria_obter_zsql(cod_materia=cod_materia)">
+                      <dtml-var nom_autor_join><dtml-unless sequence-end>, </dtml-unless>
+                    </dtml-in>
+                  </small>
+                </p>
+                <p class="mb-0 text-muted small">
+                  <i class="fas fa-align-left me-1"></i><dtml-var txt_ementa>
+                </p>
+              </div>
+            </div>
+          </div>
+          <dtml-unless sequence-end>
+            <hr class="my-2">
+          </dtml-unless>
+        </dtml-in>
+      </div>
+    </div>
+  </div>
+  <dtml-else>
+    <div class="alert alert-info">
+      <i class="fas fa-info-circle me-2"></i>
+      <strong>Nenhuma matéria com prazo de deliberação a vencer encontrada.</strong>
+      <p class="mb-0 mt-2 small">Não há matérias com prazos de deliberação próximos ao vencimento.</p>
+    </div>
+  </dtml-in>
 
 <dtml-var js_slot>
 <dtml-var footer_html>

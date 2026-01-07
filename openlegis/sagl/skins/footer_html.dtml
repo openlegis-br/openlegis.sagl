@@ -1,3 +1,74 @@
-            </main>
-    </body>
-</html>
+<!-- Footer Institucional -->
+<dtml-if expr="not REQUEST.get('_footer_rendered', '') and not REQUEST.get('modal', '')">
+<dtml-call expr="REQUEST.set('_footer_rendered', 1)">
+<footer class="footer-institutional" style="background-color: #2d7ba0 !important; color: #ffffff !important; border-top: 1px solid rgba(255, 255, 255, 0.08) !important; position: relative !important; z-index: 10 !important; clear: both !important; display: block !important; visibility: visible !important; opacity: 1 !important; width: 100% !important; margin-top: 0 !important;">
+    <div class="container-fluid">
+        <div class="row align-items-center py-2 py-md-1 py-sm-1">
+            <!-- Grupo 1: Informações da Instituição -->
+            <div class="col-12 col-sm-6 col-md-4 mb-2 mb-sm-0">
+                <div class="footer-section">
+                    <p class="footer-institution-name mb-1">
+                        <dtml-var "sapl_documentos.props_sagl.nom_casa">
+                    </p>
+                    <p class="footer-copyright mb-0">
+                        <i class="mdi mdi-copyright me-1"></i><dtml-var expr="_.DateTime().year()"> - Copyleft
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Grupo 2: Informações do Sistema -->
+            <div class="col-12 col-sm-6 col-md-4 mb-2 mb-sm-0 text-center">
+                <div class="footer-section">
+                    <div class="d-flex flex-column align-items-center gap-1">
+                        <span class="footer-system-name">SAGL - Sistema Aberto de Gestão Legislativa</span>
+                        <span class="badge footer-badge">
+                            <i class="mdi mdi-zigbee me-1"></i>v6.0
+                        </span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Grupo 3: Créditos e Links -->
+            <div class="col-12 col-sm-12 col-md-4 text-center text-md-end">
+                <div class="footer-section">
+                    <div class="d-flex flex-column flex-sm-row flex-md-column align-items-center justify-content-center justify-content-md-end gap-2">
+                        <div class="footer-link-item">
+                            <i class="mdi mdi-code-tags me-1"></i>
+                            <span class="footer-dev-text">Desenvolvido por</span>
+                            <a href="https://www.openlegis.com.br" target="_blank" rel="noopener noreferrer" class="footer-link">
+                                OpenLegis <i class="mdi mdi-open-in-new" style="font-size: 0.6rem;"></i>
+                            </a>
+                        </div>
+                        <div class="footer-link-item">
+                            <i class="mdi mdi-headset me-1"></i>
+                            <a href="https://suporte.openlegis.com.br" target="_blank" rel="noopener noreferrer" class="footer-link">
+                                Suporte Técnico <i class="mdi mdi-open-in-new" style="font-size: 0.6rem;"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</footer>
+<script>
+// Oculta o footer se a página estiver dentro de um iframe (modal)
+(function() {
+    try {
+        // Verifica se está dentro de um iframe
+        if (window.self !== window.top) {
+            var footer = document.querySelector('.footer-institutional');
+            if (footer) {
+                footer.style.display = 'none';
+            }
+        }
+    } catch(e) {
+        // Se houver erro ao acessar window.top (cross-origin), assume que está em iframe
+        var footer = document.querySelector('.footer-institutional');
+        if (footer) {
+            footer.style.display = 'none';
+        }
+    }
+})();
+</script>
+</dtml-if>

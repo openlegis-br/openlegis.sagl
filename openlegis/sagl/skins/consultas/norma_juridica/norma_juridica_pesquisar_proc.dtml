@@ -1,20 +1,20 @@
 <dtml-var header_html>
 
- <div class="row mb-3">
+<div class="row mb-3">
   <div class="col-12 col-md-6 d-flex align-items-center">
-    <h1 class="firstHeading font-size-18">Pesquisa de Legislação</h1>
+    <h1 class="firstHeading font-size-18 mb-0">Pesquisa de Legislação</h1>
   </div>
   <div class="col-12 col-md-6 text-start text-md-end">
-    <div class="btn-group" role="group" aria-label="Button group with nested dropdown">
-     <a class="btn btn-light" href="<dtml-var portal_url>/consultas/norma_juridica" ><i class="fa fa-fw fa-search"></i> Pesquisa</a>
-     <dtml-call expr="REQUEST.set('chk_ind_publico', 1)">    
-     <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Norma'])">
-        <dtml-call expr="REQUEST.set('chk_ind_publico', '')">    
-        <a class="btn btn-primary" href="<dtml-var portal_url>/cadastros/norma_juridica/norma_juridica_form" ><i class="fa fa-fw fa-plus"></i> Incluir Norma</a>
-     </dtml-if>   
+    <div class="btn-group btn-group-sm flex-wrap">
+      <a class="btn btn-outline-secondary" href="<dtml-var portal_url>/consultas/norma_juridica"><i class="fas fa-search me-1"></i>Pesquisa</a>
+      <dtml-call expr="REQUEST.set('chk_ind_publico', 1)">
+      <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Norma'])">
+        <dtml-call expr="REQUEST.set('chk_ind_publico', '')">
+        <a class="btn btn-primary" href="<dtml-var portal_url>/cadastros/norma_juridica/norma_juridica_form"><i class="fas fa-plus me-1"></i>Incluir Norma</a>
+      </dtml-if>
     </div>
   </div>
- </div>
+</div>
 
 <dtml-if lst_tip_norma>
     <dtml-call expr="REQUEST.set('lst_tip_norma', str(lst_tip_norma))">
@@ -50,23 +50,23 @@
       <div class="card-header">
        <div class="row">
       <div class="col-8 col-sm-9 align-self-center">
-         <i class="far fa-list-alt"></i> Resultado: <dtml-var sequence-length> norma<dtml-if expr="_['sequence-length'] > 1">s</dtml-if>
+        <i class="fas fa-list-alt me-1"></i>Resultado: <dtml-var sequence-length> norma<dtml-if expr="_['sequence-length'] > 1">s</dtml-if>
       </div>
       <div class="col-4 col-sm-3 text-end align-self-center">
-         <div class="btn-group">
-           <button class="btn btn-sm btn-white" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-             <i class="fas fa-file-export"></i> Exportar
-           </button>
-           <div class="dropdown-menu dropdown-menu-right">
-              <dtml-let isAnon="portal_membership.isAnonymousUser()">
-                 <dtml-if expr="not isAnon">
-                     <a class="dropdown-item" href="<dtml-var portal_url>/relatorios/pdf_norma_preparar_pysc?<dtml-var "REQUEST.get('QUERY_STRING','')">&tipo_norma=<dtml-var "REQUEST.form.get('lst_tip_norma')">" target="_blank"><i class="far fa-file-pdf"></i> PDF</a>
-                     <a class="dropdown-item" href="<dtml-var portal_url>/consultas/norma_juridica/exportar_normas_ods_pysc?<dtml-var "REQUEST.get('QUERY_STRING','')">&tipo_norma=<dtml-var "REQUEST.form.get('lst_tip_norma')">" target="_blank"><i class="far fa-file-excel"></i> ODS</a>
-                 </dtml-if>
-              </dtml-let>
-               <a class="dropdown-item" href="<dtml-var portal_url>/generico/RSS2_normas?<dtml-var "REQUEST.get('QUERY_STRING','')">&tipo_norma=<dtml-var "REQUEST.form.get('lst_tip_norma')">" target="_blank"><i class="fas fa-rss"></i> RSS</a>
-           </div>
-         </div>
+        <div class="btn-group btn-group-sm">
+          <button class="btn btn-outline-secondary" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <i class="fas fa-file-export me-1"></i>Exportar
+          </button>
+          <div class="dropdown-menu dropdown-menu-end">
+            <dtml-let isAnon="portal_membership.isAnonymousUser()">
+              <dtml-if expr="not isAnon">
+                <a class="dropdown-item" href="<dtml-var portal_url>/relatorios/pdf_norma_preparar_pysc?<dtml-var "REQUEST.get('QUERY_STRING','')">&tipo_norma=<dtml-var "REQUEST.form.get('lst_tip_norma')">" target="_blank"><i class="fas fa-file-pdf me-1"></i>PDF</a>
+                <a class="dropdown-item" href="<dtml-var portal_url>/consultas/norma_juridica/exportar_normas_ods_pysc?<dtml-var "REQUEST.get('QUERY_STRING','')">&tipo_norma=<dtml-var "REQUEST.form.get('lst_tip_norma')">" target="_blank"><i class="fas fa-file-excel me-1"></i>ODS</a>
+              </dtml-if>
+            </dtml-let>
+            <a class="dropdown-item" href="<dtml-var portal_url>/generico/RSS2_normas?<dtml-var "REQUEST.get('QUERY_STRING','')">&tipo_norma=<dtml-var "REQUEST.form.get('lst_tip_norma')">" target="_blank"><i class="fas fa-rss me-1"></i>RSS</a>
+          </div>
+        </div>
       </div>
        </div>
       </div>
@@ -78,11 +78,11 @@
  <div class="row">
    <div class="col-12">
      <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Norma'])">
-        <a href="<dtml-var portal_url>/cadastros/norma_juridica/norma_juridica_mostrar_proc?cod_norma=<dtml-var cod_norma>">
+       <a href="<dtml-var portal_url>/cadastros/norma_juridica/norma_juridica_mostrar_proc?cod_norma=<dtml-var cod_norma>" class="text-decoration-none">
      <dtml-else>
-        <a href="<dtml-var portal_url>/consultas/norma_juridica/norma_juridica_mostrar_proc?cod_norma=<dtml-var cod_norma missing>">
+       <a href="<dtml-var portal_url>/consultas/norma_juridica/norma_juridica_mostrar_proc?cod_norma=<dtml-var cod_norma missing>" class="text-decoration-none">
      </dtml-if>
-    <p class="h6 font-size-14 font-weight-bold text-uppercase mb-1"><dtml-var des_tipo_norma> nº <dtml-var num_norma>, de <dtml-var dat_norma></p></a>
+     <strong><dtml-var des_tipo_norma> nº <dtml-var num_norma>, de <dtml-var dat_norma></strong></a>
    </div>
  </div>
  <div class="row">
@@ -183,7 +183,7 @@
     <div class="col-12 text-start mt-2"> 
      <div class="">
       <dtml-if "hasattr(sapl_documentos.norma_juridica,texto_original)">
-          <a class="btn btn-sm btn-primary" href="<dtml-var portal_url>/consultas/norma_juridica/pasta_digital/?cod_norma=<dtml-var cod_norma>&action=pasta" target="_blank"><i class="far fa-folder-open"></i> Pasta Digital</a>
+          <a class="btn btn-sm btn-primary" href="<dtml-var portal_url>/@@pasta_digital_norma?cod_norma=<dtml-var cod_norma>&action=pasta" target="_blank"><i class="far fa-folder-open"></i> Pasta Digital</a>
           <a class="btn btn-sm btn-light" href="<dtml-var portal_url>/pysc/download_norma_pysc?cod_norma=<dtml-var cod_norma>&texto_original=1" target="_blank">
             <dtml-if expr="zsql.assinatura_documento_obter_zsql(codigo=cod_norma, tipo_doc='norma',ind_assinado=1, cod_usuario=None)">
               <i class="fa fa-certificate"></i> Texto Original
@@ -216,18 +216,16 @@
     </dtml-if>
 </dtml-if sequence-end>
 <dtml-else>
- <div class="row">
-    <div class="col-12">
-       <p>Nenhuma ocorrência encontrada.</p>
-    </div>
- </div>
+  <div class="alert alert-info">
+    <i class="fas fa-info-circle me-1"></i>Nenhuma ocorrência encontrada.
+  </div>
 </dtml-in>
 <dtml-else>
   <div class="alert alert-danger alert-dismissible fade show" role="alert">
     <h5 class="alert-heading">Confirme que você não é um robô.</h5>
     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
   </div>
-  <a class="btn btn-danger" href="javascript:void(0)" onClick="window.history.go(-1); return false;"><i class="fa fa-fw fa-undo"></i> Voltar</a>
+  <a class="btn btn-outline-secondary" href="javascript:void(0)" onClick="window.history.go(-1); return false;"><i class="fas fa-arrow-left me-1"></i>Voltar</a>
 </dtml-if>
 <dtml-var js_slot>
 <dtml-var footer_html>

@@ -1,61 +1,91 @@
 <dtml-var header_html>
 
-<h1 class="firstHeading font-size-18">Lista de Membros - <dtml-var nome_bancada></h1>
+<h1 class="firstHeading font-size-18 mb-3">Lista de Membros - <dtml-var nome_bancada></h1>
 
 <dtml-in expr="zsql.periodo_comp_bancada_obter_zsql(cod_periodo_comp=cod_periodo_comp)">
   <dtml-call expr="REQUEST.set('dat_inicio', dat_inicio_periodo)">
   <dtml-call expr="REQUEST.set('dat_fim', dat_fim_periodo)">
 </dtml-in>
 
-<h6 class="mb-3">Período de Composição: <dtml-var dat_inicio> a <dtml-var dat_fim></h6>
+<div class="card border-0 shadow-sm mb-3">
+  <div class="card-body">
+    <div class="d-flex align-items-center">
+      <i class="fas fa-calendar-alt me-3 text-muted"></i>
+      <div>
+        <small class="text-muted d-block">Período de Composição</small>
+        <strong><dtml-var dat_inicio> a <dtml-var dat_fim></strong>
+      </div>
+    </div>
+  </div>
+</div>
 
-  <dtml-in expr="zsql.composicao_bancada_obter_zsql(cod_bancada=cod_bancada,cod_periodo_comp=cod_periodo_comp)">
-    <dtml-if sequence-start>
- <div class="table-responsive mt-2">
-    <table class="table">
-    <thead class="table-light">
-     <tr>
-       <th>Vereador</th>
-       <th width="30%">Cargo na Bancada</th>
-       <th width="20%">Designação</th>
-       <th width="20%">Desligamento</th>
-     </tr>
-    </thead>
-    <tbody> 
-    </dtml-if sequence-start>
-
-      <tr>
-       <td>
-         <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Parlamentar', 'Operador Tabela auxiliar'])">
-           <a href="<dtml-var portal_url>/cadastros/bancada/composicao_bancada_mostrar_proc?cod_comp_bancada=<dtml-var cod_comp_bancada>&num_legislatura=<dtml-var num_legislatura>">
-         <dtml-else>
-           <a href="<dtml-var portal_url>/consultas/parlamentar/parlamentar_mostrar_proc?cod_parlamentar=<dtml-var cod_parlamentar>">
-         </dtml-if>
-           <dtml-var nom_parlamentar></a>
-        </td>
-       <td><dtml-var des_cargo></td>
-       <td><dtml-var dat_designacao></td>
-       <td><dtml-var dat_desligamento missing null></td>
-      </tr>
-    <dtml-if sequence-end>
-      </tbody>
-     </table>
-   </div>
-    </dtml-if>
+<dtml-in expr="zsql.composicao_bancada_obter_zsql(cod_bancada=cod_bancada,cod_periodo_comp=cod_periodo_comp)">
+  <dtml-if sequence-start>
+    <div class="card border-0 shadow-sm mb-3">
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-striped align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>Vereador</th>
+                <th width="30%">Cargo na Bancada</th>
+                <th width="20%">Designação</th>
+                <th width="20%">Desligamento</th>
+              </tr>
+            </thead>
+            <tbody>
+  </dtml-if>
+  <tr>
+    <td>
+      <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Parlamentar', 'Operador Tabela auxiliar'])">
+        <a href="<dtml-var portal_url>/cadastros/bancada/composicao_bancada_mostrar_proc?cod_comp_bancada=<dtml-var cod_comp_bancada>&num_legislatura=<dtml-var num_legislatura>" class="text-decoration-none">
+          <i class="fas fa-user me-2 text-muted"></i>
+          <strong><dtml-var nom_parlamentar></strong>
+        </a>
+      <dtml-else>
+        <a href="<dtml-var portal_url>/consultas/parlamentar/parlamentar_mostrar_proc?cod_parlamentar=<dtml-var cod_parlamentar>" class="text-decoration-none">
+          <i class="fas fa-user me-2 text-muted"></i>
+          <strong><dtml-var nom_parlamentar></strong>
+        </a>
+      </dtml-if>
+    </td>
+    <td><dtml-var des_cargo></td>
+    <td><i class="fas fa-calendar-check me-1 text-muted"></i><dtml-var dat_designacao></td>
+    <td>
+      <dtml-if dat_desligamento>
+        <i class="fas fa-calendar-times me-1 text-muted"></i><dtml-var dat_desligamento missing null>
+      <dtml-else>
+        <span class="text-muted fst-italic">-</span>
+      </dtml-if>
+    </td>
+  </tr>
+  <dtml-if sequence-end>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </dtml-if>
   <dtml-else>
-    <div class="text-start">
-         <p>Não há nenhum membro cadastrado.</p>
+    <div class="alert alert-info">
+      <i class="fas fa-info-circle me-2"></i>Não há nenhum membro cadastrado.
     </div>
   </dtml-in>
 
-   <div class="row">
-    <div class="col-12 text-start">
-     <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Parlamentar'])">
-        <a class="btn btn-primary d-print-none mb-3" href="<dtml-var portal_url>/cadastros/bancada/composicao_bancada_form?cod_bancada=<dtml-var cod_bancada>&cod_periodo_comp=<dtml-var cod_periodo_comp>&num_legislatura=<dtml-var num_legislatura>"><i class="fa fa-fw fa-plus"></i> Incluir Membro</a>
-     </dtml-if>
-        <a class="btn btn-light d-print-none mb-3" href="<dtml-var portal_url>/consultas/bancada/bancada_index_html?cod_periodo_comp_sel=<dtml-var cod_periodo_comp>&num_legislatura=<dtml-var num_legislatura>"><i class="fa fa-fw fa-undo"></i> Voltar</a>
+<div class="row mb-3">
+  <div class="col-12">
+    <div class="btn-group btn-group-sm flex-wrap">
+      <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Parlamentar'])">
+        <a class="btn btn-primary d-print-none" href="<dtml-var portal_url>/cadastros/bancada/composicao_bancada_form?cod_bancada=<dtml-var cod_bancada>&cod_periodo_comp=<dtml-var cod_periodo_comp>&num_legislatura=<dtml-var num_legislatura>">
+          <i class="fas fa-plus me-1"></i>Incluir Membro
+        </a>
+      </dtml-if>
+      <a class="btn btn-outline-secondary d-print-none" href="<dtml-var portal_url>/consultas/bancada/bancada_index_html?cod_periodo_comp_sel=<dtml-var cod_periodo_comp>&num_legislatura=<dtml-var num_legislatura>">
+        <i class="fas fa-arrow-left me-1"></i>Voltar
+      </a>
     </div>
-   </div>
+  </div>
+</div>
 
 <dtml-var js_slot>
 <dtml-var footer_html>

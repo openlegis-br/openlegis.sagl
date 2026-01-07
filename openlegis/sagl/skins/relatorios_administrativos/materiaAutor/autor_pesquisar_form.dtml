@@ -51,56 +51,66 @@
 
 <body class="fadeIn">
 
-<h1 class="firstHeading font-size-18">Pesquisar Autores</h1> 
+<h1 class="firstHeading font-size-18 mb-3">Pesquisar Autores</h1>
 
-<form class="pf-form" name="autor_pesquisar_form" action="autor_pesquisar_form" onsubmit="return false;">
- <fieldset>
-    <div class="pf-element">
-     <label class="form-label" for="txt_autor">
-      <span class="pf-label">Nome do autor</span>
-      <span class="pf-note">Informe o nome ou apelido do autor</span>
-     </label>
-       <div class="pf-group">
-         <input class="pf-field" type="text" name="txt_autor" value="<dtml-var txt_autor missing="">" style="max-width: 224px; width: 60%;">
-         <a href="javascript:if (campos_criticar(document.autor_pesquisar_form)) {document.autor_pesquisar_form.submit()}" class="btn btn-secondary">Buscar</a>
-       </div>
+<form name="autor_pesquisar_form" action="autor_pesquisar_form" onsubmit="return false;">
+  <div class="card mb-3">
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-12">
+          <label class="form-label" for="txt_autor"><i class="fas fa-user me-1"></i>Nome do autor</label>
+          <div class="input-group">
+            <input class="form-control" type="text" name="txt_autor" id="txt_autor" value="<dtml-var txt_autor missing="">" placeholder="Informe o nome ou apelido do autor">
+            <button class="btn btn-outline-secondary" type="button" onClick="if (campos_criticar(document.autor_pesquisar_form)) {document.autor_pesquisar_form.submit()}">
+              <i class="fas fa-search me-1"></i>Buscar
+            </button>
+          </div>
+          <div class="form-text">Informe o nome ou apelido do autor</div>
+        </div>
+      </div>
     </div>
-   <dtml-if expr="REQUEST.has_key('txt_autor')">
-    <div class="pf-element">
-     <label class="form-label" for="lst_autor"><span class="pf-label">Selecione o autor desejado</span>
-       <select class="pf-field" name="lst_autor" size="10" style="max-width: 480px; width: 100%;">
-       <dtml-in expr="zsql.parlamentar_obter_zsql(nom_parlamentar_match=txt_autor)">
-         <dtml-in expr="zsql.autor_obter_zsql(cod_parlamentar=cod_parlamentar)">
-            <option value=<dtml-var cod_autor>-Parlamentar> <dtml-var nom_parlamentar> </option>
-         </dtml-in>
-       </dtml-in>
- 
-       <dtml-in expr="zsql.comissao_obter_zsql(nom_comissao_match=txt_autor)">
-         <dtml-in expr="zsql.autor_obter_zsql(cod_comissao=cod_comissao)">
-           <option value=<dtml-var cod_autor>-Comissao> <dtml-var nom_comissao> </option>
-         </dtml-in>
-       </dtml-in>
-
-       <dtml-in expr="zsql.bancada_obter_zsql(nom_bancada_match=txt_autor)">
-         <dtml-in expr="zsql.autor_obter_zsql(cod_bancada=cod_bancada)">
-           <option value=<dtml-var cod_autor>-Bancada> <dtml-var nom_bancada> 
-             <dtml-in expr="zsql.legislatura_obter_zsql(num_legislatura=num_legislatura_sel,ind_excluido=0)">
-               - <dtml-var expr="pysc.periodo_legislatura_format_pysc(num_legislatura,dat_inicio,dat_fim)">
-             </dtml-in>
-           </option>
-         </dtml-in>
-       </dtml-in>
- 
-       <dtml-in expr="zsql.autor_obter_zsql(nom_autor_match=txt_autor)">
-       <option value="<dtml-var cod_autor>-<dtml-var des_tipo_autor>"> <dtml-var nom_autor> </option>
-       </dtml-in> 
-       </select>
-      </label>
+  </div>
+  <dtml-if expr="REQUEST.has_key('txt_autor')">
+    <div class="card mb-3">
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-12">
+            <label class="form-label" for="lst_autor"><i class="fas fa-list me-1"></i>Selecione o autor desejado</label>
+            <select class="form-select" name="lst_autor" id="lst_autor" size="10">
+              <dtml-in expr="zsql.parlamentar_obter_zsql(nom_parlamentar_match=txt_autor)">
+                <dtml-in expr="zsql.autor_obter_zsql(cod_parlamentar=cod_parlamentar)">
+                  <option value="<dtml-var cod_autor>-Parlamentar"><dtml-var nom_parlamentar></option>
+                </dtml-in>
+              </dtml-in>
+              <dtml-in expr="zsql.comissao_obter_zsql(nom_comissao_match=txt_autor)">
+                <dtml-in expr="zsql.autor_obter_zsql(cod_comissao=cod_comissao)">
+                  <option value="<dtml-var cod_autor>-Comissao"><dtml-var nom_comissao></option>
+                </dtml-in>
+              </dtml-in>
+              <dtml-in expr="zsql.bancada_obter_zsql(nom_bancada_match=txt_autor)">
+                <dtml-in expr="zsql.autor_obter_zsql(cod_bancada=cod_bancada)">
+                  <option value="<dtml-var cod_autor>-Bancada">
+                    <dtml-var nom_bancada>
+                    <dtml-in expr="zsql.legislatura_obter_zsql(num_legislatura=num_legislatura_sel,ind_excluido=0)">
+                      - <dtml-var expr="pysc.periodo_legislatura_format_pysc(num_legislatura,dat_inicio,dat_fim)">
+                    </dtml-in>
+                  </option>
+                </dtml-in>
+              </dtml-in>
+              <dtml-in expr="zsql.autor_obter_zsql(nom_autor_match=txt_autor)">
+                <option value="<dtml-var cod_autor>-<dtml-var des_tipo_autor>"><dtml-var nom_autor></option>
+              </dtml-in>
+            </select>
+          </div>
+          <div class="col-12">
+            <button class="btn btn-primary" type="button" name="btn_OK" onClick="voltar(document.autor_pesquisar_form)">
+              <i class="fas fa-check me-1"></i>OK
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
-    <div class="pf-element pf-buttons pf-centered">
-       <input class="pf-button btn botao" type="button" name="btn_OK" value=" OK " onClick="voltar(document.autor_pesquisar_form)"></td>
-    </div>
-   </dtml-if>
+  </dtml-if>
 </form>
 </body>
 </html>

@@ -8,132 +8,130 @@
  </dtml-if>
 </dtml-let>
 
- <div class="row mb-2">
-      <div class="col-12 col-md-8 align-self-center">
-        <h1 class="firstHeading font-size-18">Pesquisa de Legislação</h1>
-      </div>
-      <div class="col-12 col-md-4 text-start text-md-end">
-         <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Norma'])">      
-             <a class="btn btn-primary d-print-none" href="<dtml-var portal_url>/cadastros/norma_juridica/norma_juridica_form" ><i class="fa fa-fw fa-plus"></i> Incluir Norma</a>
-         </dtml-if>
-      </div>
- </div>
+<div class="row mb-3">
+  <div class="col-12 col-md-6 d-flex align-items-center">
+    <h1 class="firstHeading font-size-18 mb-0">Pesquisa de Legislação</h1>
+  </div>
+  <div class="col-12 col-md-6 text-start text-md-end">
+    <div class="btn-group btn-group-sm flex-wrap">
+      <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Norma'])">
+        <a class="btn btn-primary d-print-none" href="<dtml-var portal_url>/cadastros/norma_juridica/norma_juridica_form"><i class="fas fa-plus me-1"></i>Incluir Norma</a>
+      </dtml-if>
+    </div>
+  </div>
+</div>
 
-<!-- Nav tabs -->
 <ul class="nav nav-tabs" role="tablist">
   <li class="nav-item">
-    <a class="nav-link active" id="pesquisa-tab" data-bs-toggle="tab" href="#pesquisa" role="tab" aria-controls="pesquisa" aria-selected="true">Formulário de Pesquisa</a>
+    <a class="nav-link active" id="pesquisa-tab" data-bs-toggle="tab" href="#pesquisa" role="tab" aria-controls="pesquisa" aria-selected="true"><i class="fas fa-search me-1"></i>Formulário de Pesquisa</a>
   </li>
 </ul>
 
-<div class="tab-content" style="margin-top: -1px">
+<div class="tab-content">
   <div class="tab-pane p-3 border fade show active" id="pesquisa">
 
 
 <form name="norma_pesquisar" id="norma_pesquisar" action="norma_juridica_pesquisar_proc">
-  <div class="row">
-    <div class="col-12 col-md-6 mb-3">
-      <label class="form-label" for="lst_tip_norma">Tipo de Norma</label>
-      <select class="select2 form-select" id="lst_tip_norma" name="lst_tip_norma" multiple="multiple" style="width: 100%; min-height:34px !important;" data-placeholder="Todos">
-           <dtml-in expr="zsql.tipo_norma_juridica_obter_zsql(ind_excluido=0)">
-             <option value="<dtml-var tip_norma>"><dtml-var des_tipo_norma></option>
-           </dtml-in>
-      </select>
-    </div>
-    <div class="col-6 col-md-3 mb-3">
-      <label class="form-label" for="txt_numero">Número</label>
-      <input name="txt_numero" id="txt_numero" type="number" min="1" maxlength="6" class="form-control number" autocomplete="off">
-    </div>
-    <div class="col-6 col-md-3 mb-3 controls">
-      <label class="form-label" for="txt_ano">Ano</label>
-      <input name="txt_ano" id="txt_ano" type="number" min="1900" minlength="4" maxlength="4" class="form-control year" autocomplete="off">
-    </div>
-  </div>
-  <div class="row">
-      <div class="col-6 col-lg-3 mb-3">
-        <label class="form-label" for="dt_norma">Data Inicial da Norma</label>
-        <div class="input-group">
-           <input type="text" class="form-control datepicker" placeholder="dd/mm/aaaa" name="dt_norma" id="dt_norma" data-provide="datepicker" data-date-autoclose="true" autocomplete="off">
-           <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
+  <div class="card mb-3">
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-12 col-md-6">
+          <label class="form-label" for="lst_tip_norma"><i class="fas fa-filter me-1"></i>Tipo de Norma</label>
+          <select class="select2 form-select" id="lst_tip_norma" name="lst_tip_norma" multiple="multiple" style="width: 100%; min-height:34px !important;" data-placeholder="Todos">
+            <dtml-in expr="zsql.tipo_norma_juridica_obter_zsql(ind_excluido=0)">
+              <option value="<dtml-var tip_norma>"><dtml-var des_tipo_norma></option>
+            </dtml-in>
+          </select>
         </div>
-      </div>
-      <div class="col-6 col-lg-3 mb-3">
-         <label class="form-label" for="dt_norma2">Data Final da Norma</label>
-        <div class="input-group">
-           <input type="text" class="form-control datepicker" placeholder="dd/mm/aaaa" name="dt_norma2" id="dt_norma2" data-provide="datepicker" data-date-autoclose="true" autocomplete="off">
-           <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
+        <div class="col-6 col-md-3">
+          <label class="form-label" for="txt_numero"><i class="fas fa-hashtag me-1"></i>Número</label>
+          <input name="txt_numero" id="txt_numero" type="number" min="1" maxlength="6" class="form-control number" autocomplete="off">
         </div>
-      </div>  
-      <div class="col-6 col-lg-3 mb-3">
-        <label class="form-label" for="dt_public">Data Inicial de Publicação</label>
-        <div class="input-group">
-           <input type="text" class="form-control datepicker" placeholder="dd/mm/aaaa" name="dt_public" id="dt_public" data-provide="datepicker" data-date-autoclose="true" autocomplete="off">
-           <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
+        <div class="col-6 col-md-3">
+          <label class="form-label" for="txt_ano"><i class="fas fa-calendar-alt me-1"></i>Ano</label>
+          <input name="txt_ano" id="txt_ano" type="number" min="1900" minlength="4" maxlength="4" class="form-control year" autocomplete="off">
         </div>
-      </div>
-      <div class="col-6 col-lg-3 mb-3">
-         <label class="form-label" for="dt_public2">Data Final de Publicação</label>
-        <div class="input-group">
-           <input type="text" class="form-control datepicker" placeholder="dd/mm/aaaa" name="dt_public2" id="dt_public2" data-provide="datepicker" data-date-autoclose="true" autocomplete="off">
-           <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
+        <div class="col-6 col-lg-3">
+          <label class="form-label" for="dt_norma"><i class="fas fa-calendar me-1"></i>Data Inicial da Norma</label>
+          <div class="input-group">
+            <input type="text" class="form-control datepicker" placeholder="dd/mm/aaaa" name="dt_norma" id="dt_norma" data-provide="datepicker" data-date-autoclose="true" autocomplete="off">
+            <span class="input-group-text"><i class="fas fa-calendar"></i></span>
+          </div>
         </div>
-      </div> 
-  </div>
-  <div class="row">
-      <div class="col-12 col-md-6 mb-3">
-         <label class="form-label" for="lst_assunto_norma">Assunto</label>
-         <select class="form-select" id="lst_assunto_norma" name="lst_assunto_norma">
-         <option value="">Todos</option>
-           <dtml-in expr="zsql.assunto_norma_juridica_obter_zsql(ind_excluido=0)">
-             <option value="<dtml-var cod_assunto missing>">
-               <dtml-var des_assunto>
-             </option>
-           </dtml-in>
-         </select>
-      </div>
-      <div class="col-12 col-md-6 mb-3">
-          <label class="form-label" for="txt_assunto">Termos da Pesquisa</label>
-      <input type="text" class="form-control" name="txt_assunto" id="txt_assunto" maxlenght="50" autocomplete="off" data-bs-toggle="popover" data-bs-placement="top" title="Dicas de Preenchimento" data-bs-trigger="focus" data-bs-content="A frase colocada entre aspas duplas pesquisa por registros com a frase exata. Um asterisco (*) é um operador de truncamento que pode ser inserido ao fim de uma palavra. Um sinal de mais (+) precedente indica que a palavra deve estar presente no texto. Um sinal de menos (-) precedente indica que a palavra não deve estar presente em qualquer parte do texto." />
-      </div>
-  </div>
-  <div class="row">
-      <div class="col-12 col-md-6 mb-3">
-         <label class="form-label" for="lst_tip_situacao_norma">Situação</label>
-         <select class="form-select" data-size="6" id="lst_tip_situacao_norma" name="lst_tip_situacao_norma">
-         <option value="">Todas</option>
-           <dtml-in expr="zsql.tipo_situacao_norma_obter_zsql(ind_excluido=0)">
-             <option value="<dtml-var tip_situacao_norma missing>">
-               <dtml-var des_tipo_situacao>
-             </option>
-           </dtml-in>
-         </select>
-      </div>
-    <div class="col-12 col-sm-6 col-md-3 mb-3">
-      <label class="form-label" for="rd_ordenacao" class="d-block">Ordenação</label>
-        <select class="form-select" id="rd_ordenacao" name="rd_ordenacao">
-         <dtml-in expr="[('Tipo/Ano/Número', '1'), ('Relevância', '2')]">      
-            <option value="<dtml-var expr="_['sequence-item']">" <dtml-if expr="_['sequence-item']==''">selected</dtml-if>><dtml-var expr="_['sequence-key']"></option>
-         </dtml-in>
-        </select>
-    </div>
-    <div class="col-12 col-sm-6 col-md-3 mb-3">
-      <label class="form-label d-block">Pesquisa Textual</label>
-      <div class="form-check form-switch">
-        <input type="checkbox" class="form-check-input" name ="chk_textual" id="chk_textual">
-        <label class="form-check-label" for="chk_textual">Pesquisar nos Textos Integrais</label>
-      </div>
-    </div>
-  </div>
-  <div class="row">
-    <div class="col-12 col-md-12 mt-2 text-center text-md-start"> 
-        <dtml-let isAnon="portal_membership.isAnonymousUser()">
+        <div class="col-6 col-lg-3">
+          <label class="form-label" for="dt_norma2"><i class="fas fa-calendar-day me-1"></i>Data Final da Norma</label>
+          <div class="input-group">
+            <input type="text" class="form-control datepicker" placeholder="dd/mm/aaaa" name="dt_norma2" id="dt_norma2" data-provide="datepicker" data-date-autoclose="true" autocomplete="off">
+            <span class="input-group-text"><i class="fas fa-calendar"></i></span>
+          </div>
+        </div>
+        <div class="col-6 col-lg-3">
+          <label class="form-label" for="dt_public"><i class="fas fa-calendar me-1"></i>Data Inicial de Publicação</label>
+          <div class="input-group">
+            <input type="text" class="form-control datepicker" placeholder="dd/mm/aaaa" name="dt_public" id="dt_public" data-provide="datepicker" data-date-autoclose="true" autocomplete="off">
+            <span class="input-group-text"><i class="fas fa-calendar"></i></span>
+          </div>
+        </div>
+        <div class="col-6 col-lg-3">
+          <label class="form-label" for="dt_public2"><i class="fas fa-calendar-day me-1"></i>Data Final de Publicação</label>
+          <div class="input-group">
+            <input type="text" class="form-control datepicker" placeholder="dd/mm/aaaa" name="dt_public2" id="dt_public2" data-provide="datepicker" data-date-autoclose="true" autocomplete="off">
+            <span class="input-group-text"><i class="fas fa-calendar"></i></span>
+          </div>
+        </div>
+        <div class="col-12 col-md-6">
+          <label class="form-label" for="lst_assunto_norma"><i class="fas fa-tags me-1"></i>Assunto</label>
+          <select class="form-select" id="lst_assunto_norma" name="lst_assunto_norma">
+            <option value="">Todos</option>
+            <dtml-in expr="zsql.assunto_norma_juridica_obter_zsql(ind_excluido=0)">
+              <option value="<dtml-var cod_assunto missing>">
+                <dtml-var des_assunto>
+              </option>
+            </dtml-in>
+          </select>
+        </div>
+        <div class="col-12 col-md-6">
+          <label class="form-label" for="txt_assunto"><i class="fas fa-search me-1"></i>Termos da Pesquisa</label>
+          <input type="text" class="form-control" name="txt_assunto" id="txt_assunto" maxlenght="50" autocomplete="off" data-bs-toggle="popover" data-bs-placement="top" title="Dicas de Preenchimento" data-bs-trigger="focus" data-bs-content="A frase colocada entre aspas duplas pesquisa por registros com a frase exata. Um asterisco (*) é um operador de truncamento que pode ser inserido ao fim de uma palavra. Um sinal de mais (+) precedente indica que a palavra deve estar presente no texto. Um sinal de menos (-) precedente indica que a palavra não deve estar presente em qualquer parte do texto." />
+        </div>
+        <div class="col-12 col-md-6">
+          <label class="form-label" for="lst_tip_situacao_norma"><i class="fas fa-info-circle me-1"></i>Situação</label>
+          <select class="form-select" data-size="6" id="lst_tip_situacao_norma" name="lst_tip_situacao_norma">
+            <option value="">Todas</option>
+            <dtml-in expr="zsql.tipo_situacao_norma_obter_zsql(ind_excluido=0)">
+              <option value="<dtml-var tip_situacao_norma missing>">
+                <dtml-var des_tipo_situacao>
+              </option>
+            </dtml-in>
+          </select>
+        </div>
+        <div class="col-12 col-sm-6 col-md-3">
+          <label class="form-label" for="rd_ordenacao">Ordenação</label>
+          <select class="form-select" id="rd_ordenacao" name="rd_ordenacao">
+            <dtml-in expr="[('Tipo/Ano/Número', '1'), ('Relevância', '2')]">      
+              <option value="<dtml-var expr="_['sequence-item']">" <dtml-if expr="_['sequence-item']==''">selected</dtml-if>><dtml-var expr="_['sequence-key']"></option>
+            </dtml-in>
+          </select>
+        </div>
+        <div class="col-12 col-sm-6 col-md-3">
+          <label class="form-label d-block">Pesquisa Textual</label>
+          <div class="form-check form-switch">
+            <input type="checkbox" class="form-check-input" name="chk_textual" id="chk_textual">
+            <label class="form-check-label" for="chk_textual">Pesquisar nos Textos Integrais</label>
+          </div>
+        </div>
+        <div class="col-12">
+          <dtml-let isAnon="portal_membership.isAnonymousUser()">
             <dtml-if expr="isAnon and sapl_documentos.props_sagl.recaptcha_key">
-                <div class="g-recaptcha mb-3" data-sitekey="<dtml-var "sapl_documentos.props_sagl.recaptcha_key">"></div>
+              <div class="g-recaptcha mb-3" data-sitekey="<dtml-var "sapl_documentos.props_sagl.recaptcha_key">"></div>
             </dtml-if>
-         </dtml-let>
-          <button type="button" id="search-btn" class="btn btn-primary" onClick="return pesquisan_criticar()"><i class="fa fa-fw fa-search"></i> Pesquisar</button>
-         <input class="btn btn-light" type="reset" value="Limpar" />
-
+          </dtml-let>
+          <div class="d-flex gap-2">
+            <button type="button" id="search-btn" class="btn btn-primary" onClick="return pesquisan_criticar()"><i class="fas fa-search me-1"></i>Pesquisar</button>
+            <button type="reset" class="btn btn-outline-secondary"><i class="fas fa-eraser me-1"></i>Limpar</button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
   <input type="hidden" name="incluir" value="<dtml-var incluir missing>"/>
@@ -142,9 +140,9 @@
 </div>
 </div>
 
-      <div class="col-12 small text-muted mt-1 text-end">
-        <a href="<dtml-var portal_url>/@@normas" target="_blank"> <i class="mdi mdi-database-arrow-down"></i> Dados abertos</a>  
-      </div>
+<div class="text-end mb-3">
+  <a href="<dtml-var portal_url>/@@normas" target="_blank" class="text-decoration-none"><i class="fas fa-database me-1"></i>Dados abertos</a>
+</div>
 
 <dtml-var js_slot>
 <script>

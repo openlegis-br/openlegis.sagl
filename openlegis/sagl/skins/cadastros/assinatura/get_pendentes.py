@@ -33,7 +33,7 @@ def get_info(codigo, tipo_doc, anexo):
                     nom_autor = autor.nom_autor_join
                 descricao = "%s nº %s/%s - %s - %s" % (metodo.des_tipo_materia, metodo.num_ident_basica, metodo.ano_ident_basica, nom_autor, metodo.txt_ementa)
                 url = "%s/cadastros/materia/materia_mostrar_proc?cod_materia=%s" % (context.portal_url(), codigo)
-                url_pasta = "%s/consultas/materia/pasta_digital/?cod_materia=%s&action=pasta" % (context.portal_url(), codigo)
+                url_pasta = "%s/@@pasta_digital?cod_materia=%s&action=pasta" % (context.portal_url(), codigo)
         elif tipo_doc == 'redacao_final':
             for metodo in context.zsql.materia_obter_zsql(cod_materia=codigo):
                 tipo_documento = 'Matéria Legislativa - Redação Final'
@@ -42,7 +42,7 @@ def get_info(codigo, tipo_doc, anexo):
                     nom_autor = autor.nom_autor_join
                 descricao = "%s nº %s/%s - %s - %s" % (metodo.des_tipo_materia, metodo.num_ident_basica, metodo.ano_ident_basica, nom_autor, metodo.txt_ementa)
                 url = "%s/cadastros/materia/materia_mostrar_proc?cod_materia=%s" % (context.portal_url(), codigo)
-                url_pasta = "%s/consultas/materia/pasta_digital/?cod_materia=%s&action=pasta" % (context.portal_url(), codigo)
+                url_pasta = "%s/@@pasta_digital?cod_materia=%s&action=pasta" % (context.portal_url(), codigo)
         elif tipo_doc == 'doc_acessorio':
             for metodo in context.zsql.documento_acessorio_obter_zsql(cod_documento=codigo):
                 tipo_documento = 'Matéria Legislativa - Documento Acessório'
@@ -51,7 +51,7 @@ def get_info(codigo, tipo_doc, anexo):
                     materia_txt = "%s nº %s/%s - %s" % (materia.des_tipo_materia, materia.num_ident_basica, materia.ano_ident_basica, materia.txt_ementa)
                 descricao = "%s - %s - %s" % (metodo.des_tipo_documento, metodo.nom_documento, materia_txt)
                 url = "%s/cadastros/materia/materia_mostrar_proc?cod_materia=%s#acessorio" % (context.portal_url(), metodo.cod_materia)
-                url_pasta = "%s/consultas/materia/pasta_digital/?cod_materia=%s&action=pasta" % (context.portal_url(), metodo.cod_materia)
+                url_pasta = "%s/@@pasta_digital?cod_materia=%s&action=pasta" % (context.portal_url(), metodo.cod_materia)
         elif tipo_doc == 'emenda':
             for metodo in context.zsql.emenda_obter_zsql(cod_emenda=codigo):
                 tipo_documento = 'Matéria Legislativa - Emenda'
@@ -63,7 +63,7 @@ def get_info(codigo, tipo_doc, anexo):
                     nom_autor = autor.nom_autor_join
                 descricao = "Emenda %s nº %s - %s, ao %s" % (metodo.des_tipo_emenda, metodo.num_emenda, nom_autor, materia_txt)
                 url = "%s/cadastros/materia/materia_mostrar_proc?cod_materia=%s#emenda" % (context.portal_url(), metodo.cod_materia)
-                url_pasta = "%s/consultas/materia/pasta_digital/?cod_materia=%s&action=pasta" % (context.portal_url(), metodo.cod_materia)
+                url_pasta = "%s/@@pasta_digital?cod_materia=%s&action=pasta" % (context.portal_url(), metodo.cod_materia)
         elif tipo_doc == 'substitutivo':
             for metodo in context.zsql.substitutivo_obter_zsql(cod_substitutivo=codigo):
                 tipo_documento = 'Matéria Legislativa - Substitutivo'
@@ -75,7 +75,7 @@ def get_info(codigo, tipo_doc, anexo):
                     nom_autor = autor.nom_autor_join
                 descricao = "Substitutivo nº %s - %s, ao %s" % (metodo.num_substitutivo, nom_autor, materia_txt)
                 url = "%s/cadastros/materia/materia_mostrar_proc?cod_materia=%s#substitutivo" % (context.portal_url(), metodo.cod_materia)
-                url_pasta = "%s/consultas/materia/pasta_digital/?cod_materia=%s&action=pasta" % (context.portal_url(), metodo.cod_materia)
+                url_pasta = "%s/@@pasta_digital?cod_materia=%s&action=pasta" % (context.portal_url(), metodo.cod_materia)
         elif tipo_doc == 'tramitacao':
             for metodo in context.zsql.tramitacao_obter_zsql(cod_tramitacao=codigo):
                 tipo_documento = 'Matéria Legislativa - Tramitação'
@@ -87,7 +87,7 @@ def get_info(codigo, tipo_doc, anexo):
                     nom_usuario = usuario.nom_completo
                 descricao = "Despacho de %s - %s - %s" % (nom_usuario, metodo.des_status, materia_txt)
                 url = "%s/cadastros/materia/materia_mostrar_proc?cod_materia=%s#tramitacao" % (context.portal_url(), metodo.cod_materia)
-                url_pasta = "%s/consultas/materia/pasta_digital/?cod_materia=%s&action=pasta" % (context.portal_url(), metodo.cod_materia)
+                url_pasta = "%s/@@pasta_digital?cod_materia=%s&action=pasta" % (context.portal_url(), metodo.cod_materia)
         elif tipo_doc == 'parecer_comissao':
             for metodo in context.zsql.relatoria_obter_zsql(cod_relatoria=codigo):
                 tipo_documento = 'Matéria Legislativa - Parecer de Comissão'
@@ -100,7 +100,7 @@ def get_info(codigo, tipo_doc, anexo):
                     materia_txt = "%s nº %s/%s - %s" % (materia.des_tipo_materia, materia.num_ident_basica, materia.ano_ident_basica, materia.txt_ementa)
                 descricao = "Parecer %s nº %s ao %s" % (sgl_comissao, parecer, materia_txt)
                 url = "%s/cadastros/materia/materia_mostrar_proc?cod_materia=%s#parecer" % (context.portal_url(), metodo.cod_materia)
-                url_pasta = "%s/consultas/materia/pasta_digital/?cod_materia=%s&action=pasta" % (context.portal_url(), metodo.cod_materia)
+                url_pasta = "%s/@@pasta_digital?cod_materia=%s&action=pasta" % (context.portal_url(), metodo.cod_materia)
         elif tipo_doc == 'pauta':
             for metodo in context.zsql.sessao_plenaria_obter_zsql(cod_sessao_plen=codigo):
                 tipo_documento = "%s Plenária - Pauta" % context.sapl_documentos.props_sagl.reuniao_sessao
@@ -145,7 +145,7 @@ def get_info(codigo, tipo_doc, anexo):
                 tipo_documento = 'Norma Jurídica - Texto Integral'
                 descricao = "%s nº %s/%s - %s" % (metodo.des_tipo_norma, metodo.num_norma, metodo.ano_norma, metodo.txt_ementa)
                 url = "%s/cadastros/norma_juridica/norma_juridica_mostrar_proc?cod_norma=%s" % (context.portal_url(), metodo.cod_norma)
-                url_pasta = "%s/consultas/norma_juridica/pasta_digital/?cod_norma=%s&action=pasta" % (context.portal_url(), metodo.cod_norma)
+                url_pasta = "%s/@@pasta_digital_norma?cod_norma=%s&action=pasta" % (context.portal_url(), metodo.cod_norma)
         elif tipo_doc == 'documento':
             for metodo in context.zsql.documento_administrativo_obter_zsql(cod_documento=codigo):
                 tipo_documento = 'Processo Administrativo - Texto Integral'

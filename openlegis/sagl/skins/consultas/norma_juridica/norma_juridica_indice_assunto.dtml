@@ -1,31 +1,43 @@
 <dtml-var header_html>
 
 <h1 class="firstHeading font-size-18">Legislação por Assunto</h1>
- <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Norma'])">
-    <dtml-call expr="REQUEST.set('incluir', 1)">
- </dtml-if>
 
-  <table class="table">
-     <dtml-in expr="zsql.assunto_norma_juridica_obter_zsql(ind_excluido=0)">
-     <dtml-if sequence-start>
-      <thead>
-       <tr>
-         <th>Descrição do Assunto</th>
-         <th width="20%">Quantidade de Normas</th>
-       </tr>
-      </thead>
-     </dtml-if sequence-start>
-      <tr>
-      <td>
-        <a href="<dtml-var portal_url>/generico/norma_juridica_pesquisar_proc?incluir=<dtml-var incluir missing>&lst_tip_norma=&txt_numero=&txt_ano=&lst_assunto_norma=<dtml-var cod_assunto>&dt_norma=&dt_norma2=&dt_public=&dt_public2=&txt_assunto=&lst_tip_situacao_norma=&rd_ordenacao=1">
-        <dtml-var des_assunto>
-       </a>
-      </td>
-      <td>
-       <dtml-in expr="zsql.assunto_norma_juridica_contar_zsql(cod_assunto=cod_assunto)"><dtml-var total></dtml-in>
-      </td>
-    </tr>
-     </dtml-in>
-    </table>
+<dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Norma'])">
+    <dtml-call expr="REQUEST.set('incluir', 1)">
+</dtml-if>
+
+<dtml-in expr="zsql.assunto_norma_juridica_obter_zsql(ind_excluido=0)">
+    <dtml-if sequence-start>
+        <div class="card mb-3">
+            <div class="card-header">
+                <i class="far fa-list-alt"></i> Assuntos
+            </div>
+            <ul class="list-group list-group-flush">
+    </dtml-if sequence-start>
+    
+    <li class="list-group-item">
+        <div class="row">
+            <div class="col-12 col-md-8 d-flex align-items-center">
+                <a href="<dtml-var portal_url>/generico/norma_juridica_pesquisar_proc?incluir=<dtml-var incluir missing>&lst_tip_norma=&txt_numero=&txt_ano=&lst_assunto_norma=<dtml-var cod_assunto>&dt_norma=&dt_norma2=&dt_public=&dt_public2=&txt_assunto=&lst_tip_situacao_norma=&rd_ordenacao=1" 
+                   aria-label="Ver normas do assunto <dtml-var des_assunto>">
+                    <i class="fas fa-folder me-2"></i><dtml-var des_assunto>
+                </a>
+            </div>
+            <div class="col-12 col-md-4 mt-1 mt-md-0 d-flex justify-content-start justify-content-md-end">
+                <dtml-in expr="zsql.assunto_norma_juridica_contar_zsql(cod_assunto=cod_assunto)">
+                    <span class="badge bg-secondary">
+                        <i class="fas fa-file-alt me-1"></i><dtml-var total>
+                    </span>
+                </dtml-in>
+            </div>
+        </div>
+    </li>
+    
+    <dtml-if sequence-end>
+            </ul>
+        </div>
+    </dtml-if sequence-end>
+</dtml-in>
+
 <dtml-var js_slot>
 <dtml-var footer_html>

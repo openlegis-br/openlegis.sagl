@@ -1,54 +1,340 @@
 <dtml-var header_html>
 
 <style>
-  .hover-effect {
-    transition: all 0.3s ease;
-    transform: translateY(0);
+  /* ============================================
+     VARIÁVEIS CSS - Identidade Visual do Sistema
+     ============================================ */
+  :root {
+    /* Transições e Animações */
+    --card-hover-transform: translateY(-2px);
+    --card-hover-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    --transition-smooth: all 0.2s ease;
+    
+    /* Dimensões */
+    --card-border-radius: 0.5rem;
+    --card-icon-size: 1.75rem;
+    --card-icon-container-height: 75px;
+    
+    /* Cores Primárias */
+    --color-primary: #2d7ba0;
+    --color-primary-light: rgba(45, 123, 160, 0.08);
+    --color-primary-hover: rgba(45, 123, 160, 0.12);
+    
+    /* Cores por Seção */
+    --color-institucional: #2d7ba0;
+    --color-institucional-light: rgba(45, 123, 160, 0.08);
+    --color-legislativo: #28a745;
+    --color-legislativo-light: rgba(40, 167, 69, 0.08);
+    --color-relatorio: #6c757d;
+    --color-relatorio-light: rgba(108, 117, 125, 0.08);
+    
+    /* Modo Claro (padrão) */
+    --bg-primary: #ffffff;
+    --bg-secondary: #fafbfc;
+    --bg-tertiary: #f8f9fa;
+    --bg-quaternary: #f1f3f5;
+    --text-primary: #2c3e50;
+    --text-secondary: #5a6c7d;
+    --text-tertiary: #6c757d;
+    --border-color: rgba(0, 0, 0, 0.08);
+    --border-color-light: rgba(0, 0, 0, 0.06);
+    --border-color-hover: rgba(0, 0, 0, 0.1);
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03);
+    --shadow-md: 0 4px 14px rgba(0, 0, 0, 0.1), 0 2px 6px rgba(0, 0, 0, 0.06);
+    --overlay-light: rgba(255, 255, 255, 0.5);
+    --gradient-icon-start: #f8f9fa;
+    --gradient-icon-end: #f1f3f5;
+    --gradient-body-start: #ffffff;
+    --gradient-body-end: #fafbfc;
+    --gradient-footer-start: #f8f9fa;
+    --gradient-footer-end: #fafbfc;
   }
 
-  .hover-effect:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+  /* Modo Escuro - Compatível com Bootstrap 5 data-bs-theme */
+  [data-bs-theme="dark"],
+  body[data-bs-theme="dark"],
+  html[data-bs-theme="dark"] {
+    --bg-primary: #1a1d29;
+    --bg-secondary: #212530;
+    --bg-tertiary: #252936;
+    --bg-quaternary: #2a2e3d;
+    --text-primary: #e8eaed;
+    --text-secondary: #bdc1c6;
+    --text-tertiary: #9aa0a6;
+    --border-color: rgba(255, 255, 255, 0.1);
+    --border-color-light: rgba(255, 255, 255, 0.08);
+    --border-color-hover: rgba(255, 255, 255, 0.15);
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
+    --shadow-md: 0 4px 14px rgba(0, 0, 0, 0.4), 0 2px 6px rgba(0, 0, 0, 0.3);
+    --overlay-light: rgba(255, 255, 255, 0.05);
+    --gradient-icon-start: #252936;
+    --gradient-icon-end: #2a2e3d;
+    --gradient-body-start: #1a1d29;
+    --gradient-body-end: #212530;
+    --gradient-footer-start: #252936;
+    --gradient-footer-end: #212530;
+    
+    /* Ajustes de cores primárias para modo escuro */
+    --color-primary-light: rgba(45, 123, 160, 0.15);
+    --color-primary-hover: rgba(45, 123, 160, 0.2);
+    --color-institucional-light: rgba(45, 123, 160, 0.15);
+    --color-legislativo-light: rgba(40, 167, 69, 0.15);
+    --color-relatorio-light: rgba(108, 117, 125, 0.15);
   }
 
-  .card {
-    border-radius: 0.5rem;
+  /* ============================================
+     CARDS - Estilo Discreto e Profissional
+     ============================================ */
+  .card-modern {
+    border-radius: var(--card-border-radius);
+    border: 1px solid var(--border-color);
+    transition: var(--transition-smooth);
     overflow: hidden;
-    border: 1px solid rgba(0,0,0,0.1);
-    transition: all 0.3s ease;
-  }
-
-  .card-header {
-    border-bottom: 1px solid rgba(0,0,0,0.1);
-    padding: 1rem 1.25rem;
-  }
-
-  .card-body {
-    padding: 1.25rem;
-  }
-
-  .card h-100 {
-    height: 100%;
+    background: var(--bg-primary);
     display: flex;
     flex-direction: column;
+    height: 100%;
+    box-shadow: var(--shadow-sm);
+    position: relative;
+    will-change: transform;
   }
-  
-  .card-body {
+
+  .card-modern a {
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .card-modern a:hover {
+    text-decoration: none;
+  }
+
+  .card-modern:hover {
+    transform: var(--card-hover-transform);
+    box-shadow: var(--shadow-md);
+    border-color: var(--border-color-hover);
+    background-color: var(--bg-primary);
+  }
+
+  .card-modern:focus-within {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+  }
+
+  /* Container de Ícone - Discreto e Refinado */
+  .card-icon-container {
+    height: var(--card-icon-container-height);
+    min-height: var(--card-icon-container-height);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--gradient-icon-start) 0%, var(--gradient-icon-end) 100%);
+    margin: 0;
+    transition: var(--transition-smooth);
+    border-bottom: 1px solid var(--border-color-light);
+    position: relative;
+  }
+
+  .card-modern:hover .card-icon-container {
+    background: linear-gradient(135deg, var(--color-primary-hover) 0%, var(--color-primary-light) 100%);
+    border-bottom-color: rgba(0, 0, 0, 0.08);
+  }
+
+  /* Cores diferenciadas no container de ícone por categoria */
+  .card-category-institucional:hover .card-icon-container {
+    background: linear-gradient(135deg, var(--color-institucional-light) 0%, rgba(45, 123, 160, 0.12) 100%);
+  }
+
+  .card-category-legislativo:hover .card-icon-container {
+    background: linear-gradient(135deg, var(--color-legislativo-light) 0%, rgba(40, 167, 69, 0.12) 100%);
+  }
+
+  .card-category-relatorio:hover .card-icon-container {
+    background: linear-gradient(135deg, var(--color-relatorio-light) 0%, rgba(108, 117, 125, 0.12) 100%);
+  }
+
+  .card-icon-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(180deg, var(--overlay-light) 0%, transparent 60%);
+    pointer-events: none;
+    opacity: 0.6;
+  }
+
+  .card-modern:hover .card-icon-container::before {
+    opacity: 0.3;
+  }
+
+  .card-icon {
+    font-size: var(--card-icon-size);
+    color: var(--color-primary);
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    opacity: 0.8;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.05));
+  }
+
+  .card-modern:hover .card-icon {
+    color: var(--color-primary);
+    opacity: 1;
+    transform: scale(1.05);
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+  }
+
+  /* Corpo do Card */
+  .card-body-modern {
+    padding: 1.375rem 1.5rem;
     flex: 1;
     display: flex;
     flex-direction: column;
-    padding: 1.25rem;
-  }
-  
-  .card-footer-access {
-    margin-top: auto;
-    padding: 1rem 1.25rem;
-    border-top: 1px solid rgba(0,0,0,0.05);
-    background: transparent !important;
+    background: linear-gradient(to bottom, var(--gradient-body-start) 0%, var(--gradient-body-end) 100%);
   }
 
+  .card-modern:hover .card-body-modern {
+    background: var(--bg-primary);
+  }
+
+  .card-title-modern {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.75rem;
+    line-height: 1.35;
+    letter-spacing: -0.015em;
+    transition: color 0.25s ease;
+  }
+
+  .card-text-modern {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    line-height: 1.65;
+    flex: 1;
+    margin-bottom: 1rem;
+    text-align: left;
+    font-weight: 400;
+    letter-spacing: 0.01em;
+  }
+
+  /* Footer do Card - Discreto e Refinado */
+  .card-footer-access {
+    margin-top: auto;
+    padding: 1.125rem 1.5rem;
+    border-top: 1px solid var(--border-color-light);
+    background: linear-gradient(to bottom, var(--gradient-footer-start) 0%, var(--gradient-footer-end) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    min-height: 54px;
+  }
+
+  .card-modern:hover .card-footer-access {
+    background: linear-gradient(to bottom, var(--bg-quaternary) 0%, var(--bg-tertiary) 100%);
+    border-top-color: var(--border-color);
+  }
+
+  .badge-access {
+    padding: 0.4em 0.75em;
+    font-weight: 500;
+    font-size: 0.8125rem;
+    border-radius: 0.4rem;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4em;
+    letter-spacing: 0.015em;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  }
+
+  .card-modern:hover .badge-access {
+    background-color: var(--color-primary) !important;
+    color: #ffffff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+    transform: translateY(-1px);
+  }
+
+
+  .badge-access .fa-chevron-right {
+    font-size: 0.7em;
+    transition: transform 0.2s ease;
+  }
+
+  .card-modern:hover .badge-access .fa-chevron-right {
+    transform: translateX(2px);
+  }
+
+  /* ============================================
+     CATEGORIAS DE CARDS - Cores Diferenciadas
+     ============================================ */
+  /* Institucional */
+  .card-category-institucional .card-icon {
+    color: var(--color-institucional);
+  }
+
+  .card-category-institucional:hover {
+    border-color: var(--color-institucional);
+  }
+
+  .card-category-institucional:hover .card-icon-container {
+    background: var(--color-institucional-light);
+  }
+
+  .card-category-institucional:hover .card-title-modern {
+    color: var(--color-institucional);
+  }
+
+  .card-category-institucional:hover .badge-access {
+    background-color: var(--color-institucional) !important;
+  }
+
+  /* Legislativo */
+  .card-category-legislativo .card-icon {
+    color: var(--color-legislativo);
+  }
+
+  .card-category-legislativo:hover {
+    border-color: var(--color-legislativo);
+  }
+
+  .card-category-legislativo:hover .card-icon-container {
+    background: var(--color-legislativo-light);
+  }
+
+  .card-category-legislativo:hover .card-title-modern {
+    color: var(--color-legislativo);
+  }
+
+  .card-category-legislativo:hover .badge-access {
+    background-color: var(--color-legislativo) !important;
+  }
+
+  /* Relatório */
+  .card-category-relatorio .card-icon {
+    color: var(--color-relatorio);
+  }
+
+  .card-category-relatorio:hover {
+    border-color: var(--color-relatorio);
+  }
+
+  .card-category-relatorio:hover .card-icon-container {
+    background: var(--color-relatorio-light);
+  }
+
+  .card-category-relatorio:hover .card-title-modern {
+    color: var(--color-relatorio);
+  }
+
+  .card-category-relatorio:hover .badge-access {
+    background-color: var(--color-relatorio) !important;
+  }
+
+  /* ============================================
+     COMPONENTES AUXILIARES
+     ============================================ */
   .toast {
-    border-radius: 0.5rem;
+    border-radius: var(--card-border-radius);
     border: none;
   }
 
@@ -59,25 +345,12 @@
   }
 
   .list-group-item-action:hover {
-    background-color: #f8f9fa;
+    background-color: var(--bg-tertiary);
   }
 
   .btn-outline-primary {
-    transition: all 0.3s ease;
+    transition: var(--transition-smooth);
     padding: 0.5rem 1rem;
-  }
-
-  .card-icon-container {
-    height: 120px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0;
-  }
-
-  .card-icon {
-    font-size: 3rem;
-    color: #0d6efd;
   }
 
   .notification-icon {
@@ -86,19 +359,186 @@
     text-align: center;
   }
 
-  .badge-access bg-primary {
-    padding: 0.35em 0.65em;
-    font-weight: 500;
-    font-size: 0.85em;
-  }
-
   .alert-dismissible .btn-close {
     padding: 1rem;
   }
+
+  /* ============================================
+     SEÇÕES - Headers e Divisores
+     ============================================ */
+  .section-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1.75rem;
+    padding-bottom: 0.875rem;
+    border-bottom: 1px solid var(--border-color);
+    position: relative;
+  }
+
+  .section-header::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 60px;
+    height: 2.5px;
+    background: var(--color-primary);
+    opacity: 0.5;
+    border-radius: 0 2px 2px 0;
+    transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .section-header:hover::after {
+    width: 100px;
+    opacity: 0.7;
+  }
+
+  .section-header h2 {
+    font-size: 1.25rem;
+    font-weight: 500;
+    margin: 0;
+    color: var(--text-primary);
+    letter-spacing: -0.015em;
+    transition: color 0.2s ease;
+  }
+
+  .section-header:hover h2 {
+    color: var(--text-primary);
+    opacity: 0.9;
+  }
+
+  /* Cores diferenciadas por seção */
+  .section-institucional .section-header::after {
+    background: var(--color-institucional);
+  }
+
+  .section-legislativo .section-header::after {
+    background: var(--color-legislativo);
+  }
+
+  .section-relatorio .section-header::after {
+    background: var(--color-relatorio);
+  }
+
+  /* ============================================
+     SEÇÕES - Espaçamento e Estrutura
+     ============================================ */
+  section {
+    margin-bottom: 2.5rem;
+    position: relative;
+  }
+
+  section.mb-5 {
+    margin-bottom: 2.5rem;
+  }
+
+  section.mb-5:last-child {
+    margin-bottom: 2rem;
+  }
+
+  section.mb-5:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    bottom: -1.25rem;
+    left: 10%;
+    right: 10%;
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--border-color-light), transparent);
+  }
+
+  /* ============================================
+     GRID - Espaçamento Responsivo
+     ============================================ */
+  .row.g-4 {
+    --bs-gutter-x: 1.5rem;
+    --bs-gutter-y: 1.5rem;
+  }
+
+  @media (min-width: 992px) {
+    .row.g-4 {
+      --bs-gutter-x: 2rem;
+      --bs-gutter-y: 2rem;
+    }
+  }
+
+  /* ============================================
+     ACESSIBILIDADE - Estados de Foco
+     ============================================ */
+  a:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+    border-radius: var(--card-border-radius);
+  }
+
+  /* ============================================
+     HEADER DA PÁGINA
+     ============================================ */
+  header.mb-4 {
+    margin-bottom: 1.25rem !important;
+    padding-bottom: 0.75rem;
+  }
+
+  .firstHeading {
+    font-size: 1.625rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 0;
+    letter-spacing: -0.02em;
+    line-height: 1.3;
+  }
+
+  .firstHeading i {
+    color: var(--color-primary);
+    opacity: 0.75;
+    font-size: 1.25rem;
+    margin-right: 0.5rem;
+    transition: opacity 0.2s ease;
+  }
+
+  .firstHeading:hover i {
+    opacity: 1;
+  }
+
+  /* ============================================
+     RESPONSIVIDADE
+     ============================================ */
+  @media (min-width: 992px) {
+    .card-body-modern {
+      padding: 1.375rem 1.625rem;
+    }
+
+    .card-footer-access {
+      padding: 1.125rem 1.625rem;
+    }
+  }
+
+  @media (max-width: 991.98px) {
+    .card-title-modern {
+      font-size: 0.95rem;
+    }
+
+    .card-text-modern {
+      font-size: 0.875rem;
+    }
+  }
+
+  @media (max-width: 575.98px) {
+    .card-icon-container {
+      height: 80px;
+    }
+    
+    .card-icon {
+      font-size: 2rem;
+    }
+    
+    .card-text-modern {
+      font-size: 0.85rem;
+    }
+  }
+
 </style>
 
 <!-- Main Container -->
-<div class="container-fluid1">
 
   <!-- Login Success Toast -->
   <dtml-if expr="_.has_key('QUERY_STRING') and QUERY_STRING == 'retry=1'">
@@ -124,178 +564,222 @@
           <i class="fas fa-user-shield text-primary me-2"></i>Painel do Usuário
         </h2>
       <dtml-else>
-        <h2 class="firstHeading display-7 font-size-20 text-default mb-4 pb-2 border-bottom d-flex align-items-center">
+        <h2 class="firstHeading display-7 font-size-20 text-default mb-3 pb-2 border-bottom d-flex align-items-center">
           <i class="fas fa-landmark text-primary me-2"></i>Portal Legislativo
         </h2>
       </dtml-if>
     </header>
   </dtml-let>
 
+
   <!-- Content for Anonymous Users -->
   <dtml-if expr="(str(REQUEST['AUTHENTICATED_USER']).strip()=='Anonymous User')">
-    <!-- Public Services Section -->
-    <section class="mb-3">
+    <!-- Seção: Institucional -->
+    <section class="mb-5 section-institucional" aria-labelledby="institucional-heading">
+      <div class="section-header">
+        <h2 id="institucional-heading" class="h4 mb-0 text-primary">
+          Institucional
+        </h2>
+      </div>
       
       <div class="row g-4">
-<article class="col-12 col-md-6 col-lg-4 col-xl-3">
-  <div class="card h-100 shadow-sm hover-effect">
-    <a href="<dtml-var portal_url>/consultas/parlamentar" class="text-decoration-none text-reset d-flex flex-column h-100">
-      <div class="card-icon-container bg-light">
-        <i class="fas fa-user-tie card-icon text-primary"></i>
-      </div>
-      <div class="card-body">
-        <h3 class="h5 card-title text-primary mb-3">Vereadores</h3>
-        <p class="card-text">
-          Conheça os representantes do Poder Legislativo Municipal e suas funções legisladoras, administrativas e fiscalizatórias.
-        </p>
-      </div>
-      <div class="card-footer-access">
-        <span class="badge badge-access bg-primary">Acessar <i class="fas fa-chevron-right ms-1"></i></span>
-      </div>
-    </a>
-  </div>
-</article>
+        <!-- Vereadores -->
+        <article class="col-12 col-md-6 col-lg-4 col-xl-4">
+          <div class="card card-modern card-category-institucional shadow-sm h-100">
+            <a href="<dtml-var portal_url>/consultas/parlamentar" 
+               class="text-decoration-none text-reset d-flex flex-column h-100"
+               aria-label="Acessar página de Vereadores - Conheça os representantes do Poder Legislativo Municipal">
+              <div class="card-icon-container">
+                <i class="fas fa-user-tie card-icon" aria-hidden="true"></i>
+              </div>
+              <div class="card-body-modern">
+                <h3 class="card-title-modern">Vereadores</h3>
+                <p class="card-text-modern">
+                  Conheça os representantes do Poder Legislativo Municipal e suas funções legisladoras, administrativas e fiscalizatórias.
+                </p>
+              </div>
+              <div class="card-footer-access">
+                <span class="badge badge-access bg-primary">Acessar <i class="fas fa-chevron-right ms-1" aria-hidden="true"></i></span>
+              </div>
+            </a>
+          </div>
+        </article>
 
-<!-- Mesa Diretora -->
-<article class="col-12 col-md-6 col-lg-4 col-xl-3">
-  <div class="card h-100 shadow-sm hover-effect">
-    <a href="<dtml-var portal_url>/consultas/mesa_diretora" class="text-decoration-none text-reset d-flex flex-column h-100">
-      <div class="card-icon-container bg-light">
-        <i class="fas fa-users card-icon text-primary"></i>
-      </div>
-      <div class="card-body">
-        <h3 class="h5 card-title text-primary mb-3"><dtml-var expr="sapl_documentos.props_sagl.nome_mesa"></h3>
-        <p class="card-text">
-          Órgão responsável pela direção dos trabalhos legislativos eleito por seus pares para mandato de um a dois anos.
-        </p>
-      </div>
-      <div class="card-footer-access">
-        <span class="badge badge-access bg-primary">Acessar <i class="fas fa-chevron-right ms-1"></i></span>
-      </div>
-    </a>
-  </div>
-</article>
+        <!-- Mesa Diretora -->
+        <article class="col-12 col-md-6 col-lg-4 col-xl-4">
+          <div class="card card-modern card-category-institucional shadow-sm h-100">
+            <a href="<dtml-var portal_url>/consultas/mesa_diretora" 
+               class="text-decoration-none text-reset d-flex flex-column h-100"
+               aria-label="Acessar página da Mesa Diretora">
+              <div class="card-icon-container">
+                <i class="fas fa-users card-icon" aria-hidden="true"></i>
+              </div>
+              <div class="card-body-modern">
+                <h3 class="card-title-modern"><dtml-var expr="sapl_documentos.props_sagl.nome_mesa"></h3>
+                <p class="card-text-modern">
+                  Órgão responsável pela direção dos trabalhos legislativos eleito por seus pares para mandato de um a dois anos.
+                </p>
+              </div>
+              <div class="card-footer-access">
+                <span class="badge badge-access bg-primary">Acessar <i class="fas fa-chevron-right ms-1" aria-hidden="true"></i></span>
+              </div>
+            </a>
+          </div>
+        </article>
 
-<!-- Comissões -->
-<article class="col-12 col-md-6 col-lg-4 col-xl-3">
-  <div class="card h-100 shadow-sm hover-effect">
-    <a href="<dtml-var portal_url>/consultas/comissao" class="text-decoration-none text-reset d-flex flex-column h-100">
-      <div class="card-icon-container bg-light">
-        <i class="fas fa-clipboard-list card-icon text-primary"></i>
+        <!-- Comissões -->
+        <article class="col-12 col-md-6 col-lg-4 col-xl-4">
+          <div class="card card-modern card-category-institucional shadow-sm h-100">
+            <a href="<dtml-var portal_url>/consultas/comissao" 
+               class="text-decoration-none text-reset d-flex flex-column h-100"
+               aria-label="Acessar página de Comissões">
+              <div class="card-icon-container">
+                <i class="fas fa-clipboard-list card-icon" aria-hidden="true"></i>
+              </div>
+              <div class="card-body-modern">
+                <h3 class="card-title-modern">Comissões</h3>
+                <p class="card-text-modern">
+                  Órgãos temáticos especializados que elaboram estudos e pareceres sobre projetos ou que investigam irregularidades.
+                </p>
+              </div>
+              <div class="card-footer-access">
+                <span class="badge badge-access bg-primary">Acessar <i class="fas fa-chevron-right ms-1" aria-hidden="true"></i></span>
+              </div>
+            </a>
+          </div>
+        </article>
       </div>
-      <div class="card-body">
-        <h3 class="h5 card-title text-primary mb-3">Comissões</h3>
-        <p class="card-text">
-          Órgãos temáticos especializados que elaboram estudos e pareceres sobre projetos ou que investigam irregularidades.
-        </p>
-      </div>
-      <div class="card-footer-access">
-        <span class="badge badge-access bg-primary">Acessar <i class="fas fa-chevron-right ms-1"></i></span>
-      </div>
-    </a>
-  </div>
-</article>
+    </section>
 
-<!-- Pautas de Sessões -->
-<article class="col-12 col-md-6 col-lg-4 col-xl-3">
-  <div class="card h-100 shadow-sm hover-effect">
-    <a href="<dtml-var portal_url>/consultas/pauta_sessao" class="text-decoration-none text-reset d-flex flex-column h-100">
-      <div class="card-icon-container bg-light">
-        <i class="fas fa-list-ol card-icon text-primary"></i>
+    <!-- Seção: Atividade Legislativa -->
+    <section class="mb-5 section-legislativo" aria-labelledby="atividade-heading">
+      <div class="section-header">
+        <h2 id="atividade-heading" class="h4 mb-0">
+          Atividade Legislativa
+        </h2>
       </div>
-      <div class="card-body">
-        <h3 class="h5 card-title text-primary mb-3">Pautas das <dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao_plural"></h3>
-        <p class="card-text">
-          Matérias que serão discutidas e votadas nas <dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao_plural"> Plenárias.
-        </p>
-      </div>
-      <div class="card-footer-access">
-        <span class="badge badge-access bg-primary">Acessar <i class="fas fa-chevron-right ms-1"></i></span>
-      </div>
-    </a>
-  </div>
-</article>
+      
+      <div class="row g-4">
+        <!-- Pautas de Sessões -->
+        <article class="col-12 col-md-6 col-lg-3 col-xl-3">
+          <div class="card card-modern card-category-legislativo shadow-sm h-100">
+            <a href="<dtml-var portal_url>/consultas/pauta_sessao" 
+               class="text-decoration-none text-reset d-flex flex-column h-100"
+               aria-label="Acessar página de Pautas das Sessões Plenárias">
+              <div class="card-icon-container">
+                <i class="fas fa-list-ol card-icon" aria-hidden="true"></i>
+              </div>
+              <div class="card-body-modern">
+                <h3 class="card-title-modern">Pautas das <dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao_plural"></h3>
+                <p class="card-text-modern">
+                  Matérias que serão discutidas e votadas nas <dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao_plural"> Plenárias.
+                </p>
+              </div>
+              <div class="card-footer-access">
+                <span class="badge badge-access bg-primary">Acessar <i class="fas fa-chevron-right ms-1" aria-hidden="true"></i></span>
+              </div>
+            </a>
+          </div>
+        </article>
 
-<!-- Sessões Plenárias -->
-<article class="col-12 col-md-6 col-lg-4 col-xl-3">
-  <div class="card h-100 shadow-sm hover-effect">
-    <a href="<dtml-var portal_url>/consultas/sessao_plenaria" class="text-decoration-none text-reset d-flex flex-column h-100">
-      <div class="card-icon-container bg-light">
-        <i class="fas fa-gavel card-icon text-primary"></i>
-      </div>
-      <div class="card-body">
-        <h3 class="h5 card-title text-primary mb-3"><dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao_plural"> Plenárias</h3>
-        <p class="card-text">
-          Foro apropriado para a tomada de decisões sobre projetos de lei e outras matérias legislativas.
-        </p>
-      </div>
-      <div class="card-footer-access">
-        <span class="badge badge-access bg-primary">Acessar <i class="fas fa-chevron-right ms-1"></i></span>
-      </div>
-    </a>
-  </div>
-</article>
+        <!-- Sessões Plenárias -->
+        <article class="col-12 col-md-6 col-lg-3 col-xl-3">
+          <div class="card card-modern card-category-legislativo shadow-sm h-100">
+            <a href="<dtml-var portal_url>/consultas/sessao_plenaria" 
+               class="text-decoration-none text-reset d-flex flex-column h-100"
+               aria-label="Acessar página de Sessões Plenárias">
+              <div class="card-icon-container">
+                <i class="fas fa-gavel card-icon" aria-hidden="true"></i>
+              </div>
+              <div class="card-body-modern">
+                <h3 class="card-title-modern"><dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao_plural"> Plenárias</h3>
+                <p class="card-text-modern">
+                  Foro apropriado para a tomada de decisões sobre projetos de lei e outras matérias legislativas.
+                </p>
+              </div>
+              <div class="card-footer-access">
+                <span class="badge badge-access bg-primary">Acessar <i class="fas fa-chevron-right ms-1" aria-hidden="true"></i></span>
+              </div>
+            </a>
+          </div>
+        </article>
 
-<!-- Matérias Legislativas -->
-<article class="col-12 col-md-6 col-lg-4 col-xl-3">
-  <div class="card h-100 shadow-sm hover-effect">
-    <a href="<dtml-var portal_url>/consultas/materia" class="text-decoration-none text-reset d-flex flex-column h-100">
-      <div class="card-icon-container bg-light">
-        <i class="fas fa-file-alt card-icon text-primary"></i>
-      </div>
-      <div class="card-body">
-        <h3 class="h5 card-title text-primary mb-3">Matérias Legislativas</h3>
-        <p class="card-text">
-          Processo de criação de leis e apresentação de projetos no Poder Legislativo.
-        </p>
-      </div>
-      <div class="card-footer-access">
-        <span class="badge badge-access bg-primary">Acessar <i class="fas fa-chevron-right ms-1"></i></span>
-      </div>
-    </a>
-  </div>
-</article>
+        <!-- Matérias Legislativas -->
+        <article class="col-12 col-md-6 col-lg-3 col-xl-3">
+          <div class="card card-modern card-category-legislativo shadow-sm h-100">
+            <a href="<dtml-var portal_url>/consultas/materia/pesquisa_materias" 
+               class="text-decoration-none text-reset d-flex flex-column h-100"
+               aria-label="Acessar página de Matérias Legislativas">
+              <div class="card-icon-container">
+                <i class="fas fa-file-alt card-icon" aria-hidden="true"></i>
+              </div>
+              <div class="card-body-modern">
+                <h3 class="card-title-modern">Matérias Legislativas</h3>
+                <p class="card-text-modern">
+                  Processo de criação de leis e apresentação de projetos no Poder Legislativo.
+                </p>
+              </div>
+              <div class="card-footer-access">
+                <span class="badge badge-access bg-primary">Acessar <i class="fas fa-chevron-right ms-1" aria-hidden="true"></i></span>
+              </div>
+            </a>
+          </div>
+        </article>
 
-<!-- Legislação -->
-<article class="col-12 col-md-6 col-lg-4 col-xl-3">
-  <div class="card h-100 shadow-sm hover-effect">
-    <a href="<dtml-var portal_url>/consultas/norma_juridica" class="text-decoration-none text-reset d-flex flex-column h-100">
-      <div class="card-icon-container bg-light">
-        <i class="fas fa-balance-scale card-icon text-primary"></i>
+        <!-- Legislação -->
+        <article class="col-12 col-md-6 col-lg-3 col-xl-3">
+          <div class="card card-modern card-category-legislativo shadow-sm h-100">
+            <a href="<dtml-var portal_url>/consultas/norma_juridica/pesquisa_normas" 
+               class="text-decoration-none text-reset d-flex flex-column h-100"
+               aria-label="Acessar página de Legislação">
+              <div class="card-icon-container">
+                <i class="fas fa-balance-scale card-icon" aria-hidden="true"></i>
+              </div>
+              <div class="card-body-modern">
+                <h3 class="card-title-modern">Legislação</h3>
+                <p class="card-text-modern">
+                  Emendas à Lei Orgânica, leis complementares, leis ordinárias, decretos legislativos e resoluções.
+                </p>
+              </div>
+              <div class="card-footer-access">
+                <span class="badge badge-access bg-primary">Acessar <i class="fas fa-chevron-right ms-1" aria-hidden="true"></i></span>
+              </div>
+            </a>
+          </div>
+        </article>
       </div>
-      <div class="card-body">
-        <h3 class="h5 card-title text-primary mb-3">Legislação</h3>
-        <p class="card-text">
-          Emendas à Lei Orgânica, leis complementares, leis ordinárias, decretos legislativos e resoluções.
-        </p>
-      </div>
-      <div class="card-footer-access">
-        <span class="badge badge-access bg-primary">Acessar <i class="fas fa-chevron-right ms-1"></i></span>
-      </div>
-    </a>
-  </div>
-</article>
+    </section>
 
-<!-- Relatórios Estatísticos -->
-<article class="col-12 col-md-6 col-lg-4 col-xl-3">
-  <div class="card h-100 shadow-sm hover-effect">
-    <a href="<dtml-var portal_url>/relatorios_administrativos/relatorios_administrativos_index_html" class="text-decoration-none text-reset d-flex flex-column h-100">
-      <div class="card-icon-container bg-light">
-        <i class="fas fa-chart-pie card-icon text-primary"></i>
+    <!-- Seção: Informações -->
+    <section class="mb-5 section-relatorio" aria-labelledby="informacoes-heading">
+      <div class="section-header">
+        <h2 id="informacoes-heading" class="h4 mb-0">
+          Informações
+        </h2>
       </div>
-      <div class="card-body">
-        <h3 class="h5 card-title text-primary mb-3">Relatórios Estatísticos</h3>
-        <p class="card-text">
-          Acesse dados e métricas legislativas, desempenho e análises sobre a atividade parlamentar.
-        </p>
-      </div>
-      <div class="card-footer-access">
-        <span class="badge badge-access bg-primary">Acessar <i class="fas fa-chevron-right ms-1"></i></span>
-      </div>
-    </a>
-  </div>
-</article>
-       
+      
+      <div class="row g-4">
+        <!-- Relatórios Estatísticos -->
+        <article class="col-12 col-md-6 col-lg-4 col-xl-4">
+          <div class="card card-modern card-category-relatorio shadow-sm h-100">
+            <a href="<dtml-var portal_url>/relatorios_administrativos/relatorios_administrativos_index_html" 
+               class="text-decoration-none text-reset d-flex flex-column h-100"
+               aria-label="Acessar página de Relatórios Estatísticos">
+              <div class="card-icon-container">
+                <i class="fas fa-chart-pie card-icon" aria-hidden="true"></i>
+              </div>
+              <div class="card-body-modern">
+                <h3 class="card-title-modern">Relatórios Estatísticos</h3>
+                <p class="card-text-modern">
+                  Acesse dados e métricas legislativas, desempenho e análises sobre a atividade parlamentar.
+                </p>
+              </div>
+              <div class="card-footer-access">
+                <span class="badge badge-access bg-primary">Acessar <i class="fas fa-chevron-right ms-1" aria-hidden="true"></i></span>
+              </div>
+            </a>
+          </div>
+        </article>
       </div>
     </section>
 
@@ -304,7 +788,7 @@
     <!-- User Dashboard -->
     <div class="row">
       <!-- Side Column -->
-      <div class="col-lg-4">
+      <aside class="col-lg-3 mb-4 mb-lg-0" role="complementary" aria-label="Painel lateral do usuário">
         <!-- Quick Links Card -->
         <div class="card shadow-sm mb-4">
           <div class="card-header bg-primary text-white py-3">
@@ -358,47 +842,48 @@
             </div>
           </div>
         </div>     
-          <!-- User Profile Card -->
-          <div class="card shadow-sm mb-4">
-            <div class="card-header bg-primary text-white py-3">
-              <h2 class="h5 mb-0 d-flex align-items-center">
-                <i class="fas fa-user-circle me-2"></i>Meu Perfil
-              </h2>
-            </div>
-            <div class="card-body">
-              <div class="d-flex align-items-center mb-3">
-                <div class="rounded-circle bg-light p-3 me-3">
+        
+        <!-- User Profile Card -->
+        <div class="card shadow-sm mb-4">
+          <div class="card-header bg-primary text-white py-3">
+            <h2 class="h5 mb-0 d-flex align-items-center">
+              <i class="fas fa-user-circle me-2"></i>Meu Perfil
+            </h2>
+          </div>
+          <div class="card-body">
+            <div class="text-center mb-3">
+              <div class="d-flex align-items-center justify-content-center mb-3">
+                <div class="rounded-circle bg-light p-3 d-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
                   <i class="fas fa-user text-primary" style="font-size: 2rem;"></i>
                 </div>
-                <div>
-                  <h3 class="h6 mb-0"><dtml-var AUTHENTICATED_USER></h3>
-                  <small class="text-muted">
-                    <dtml-in expr="AUTHENTICATED_USER.getRoles()">
-                      <dtml-if expr="_['sequence-item'] != 'Authenticated'"> 
-                      <dtml-if sequence-start></dtml-if>
-                      <span class="badge bg-secondary"><dtml-var sequence-item></span><dtml-if sequence-end><dtml-else> </dtml-if>
-                      </dtml-if>
-                    </dtml-in>
-                  </small>
-                </div>
               </div>
-              <div class="d-grid gap-2">
-                <!-- Botão de Editar Perfil -->
-                <a href="<dtml-var portal_url>/cadastros/usuario/usuario_mostrar_proc" 
-                   class="btn btn-outline-primary">
-                  <i class="fas fa-user-edit me-2"></i> Editar Perfil
-                </a>
-                <!-- Botão de Sair -->
-                <a href="<dtml-var portal_url>/generico/log_out_proc" class="btn btn-outline-danger">
-                  <i class="fas fa-sign-out-alt me-2"></i> Sair do Sistema
-                </a>
+              <h3 class="h6 mb-2"><dtml-var AUTHENTICATED_USER></h3>
+              <div class="mb-3">
+                <dtml-in expr="AUTHENTICATED_USER.getRoles()">
+                  <dtml-if expr="_['sequence-item'] != 'Authenticated'"> 
+                    <dtml-if sequence-start></dtml-if>
+                    <span class="badge bg-secondary me-1"><dtml-var sequence-item></span><dtml-if sequence-end><dtml-else> </dtml-if>
+                  </dtml-if>
+                </dtml-in>
               </div>
+            </div>
+            <div class="d-grid gap-2">
+              <!-- Botão de Editar Perfil -->
+              <a href="<dtml-var portal_url>/cadastros/usuario/usuario_mostrar_proc" 
+                 class="btn btn-outline-primary">
+                <i class="fas fa-user-edit me-2"></i> Editar Perfil
+              </a>
+              <!-- Botão de Sair -->
+              <a href="<dtml-var portal_url>/generico/log_out_proc" class="btn btn-outline-danger">
+                <i class="fas fa-sign-out-alt me-2"></i> Sair do Sistema
+              </a>
             </div>
           </div>
         </div>
+      </aside>
 
       <!-- Main Column -->
-      <div class="col-lg-8">
+      <main class="col-lg-9" role="main" aria-label="Conteúdo principal do painel">
         <!-- Notifications Card -->
         <div class="card shadow-sm mb-4">
           <div class="card-header bg-primary text-white py-3">
@@ -415,16 +900,20 @@
                 <dtml-with expr="_.namespace(materias=zsql.materia_prazo_deliberacao_vencido_zsql())">
                   <dtml-if expr="_.len(materias) > 0">
                     <a href="<dtml-var portal_url>/generico/materia_listar_prazo_deliberacao" 
-                       class="list-group-item list-group-item-action list-group-item-danger py-3">
+                       class="list-group-item list-group-item-action list-group-item-danger py-3"
+                       aria-label="Ver matérias com prazos de deliberação vencidos">
                       <div class="d-flex align-items-center">
-                        <i class="fas fa-exclamation-triangle notification-icon text-danger"></i>
+                        <i class="fas fa-exclamation-triangle notification-icon text-danger" aria-hidden="true"></i>
                         <div class="ms-3 flex-grow-1">
-                          <h3 class="h6 mb-1">Prazos de deliberação vencidos</h3>
+                          <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h3 class="h6 mb-0">Prazos de deliberação vencidos</h3>
+                            <span class="badge bg-danger rounded-pill"><dtml-var expr="_.len(materias)"></span>
+                          </div>
                           <p class="mb-0 small text-muted">
                             <dtml-var expr="_.len(materias)"> matéria<dtml-if expr="_.len(materias) > 1">s</dtml-if> com prazo de deliberação vencido
                           </p>
                         </div>
-                        <i class="fas fa-chevron-right text-muted ms-3"></i>
+                        <i class="fas fa-chevron-right text-muted ms-3" aria-hidden="true"></i>
                       </div>
                     </a>
                   </dtml-if>
@@ -434,16 +923,20 @@
                 <dtml-with expr="_.namespace(materias=zsql.tramitacao_prazo_vencido_obter_zsql())">
                   <dtml-if expr="_.len(materias) > 0">
                     <a href="<dtml-var portal_url>/generico/materia_listar_prazo_vencido" 
-                       class="list-group-item list-group-item-action list-group-item-danger py-3">
+                       class="list-group-item list-group-item-action list-group-item-danger py-3"
+                       aria-label="Ver matérias com prazos de tramitação vencidos">
                       <div class="d-flex align-items-center">
-                        <i class="fas fa-hourglass-end notification-icon text-danger"></i>
+                        <i class="fas fa-hourglass-end notification-icon text-danger" aria-hidden="true"></i>
                         <div class="ms-3 flex-grow-1">
-                          <h3 class="h6 mb-1">Prazos de tramitação vencidos</h3>
+                          <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h3 class="h6 mb-0">Prazos de tramitação vencidos</h3>
+                            <span class="badge bg-danger rounded-pill"><dtml-var expr="_.len(materias)"></span>
+                          </div>
                           <p class="mb-0 small text-muted">
                             <dtml-var expr="_.len(materias)"> matéria<dtml-if expr="_.len(materias) > 1">s</dtml-if> com prazo<dtml-if expr="_.len(materias) > 1">s</dtml-if> de tramitação vencido
                           </p>
                         </div>
-                        <i class="fas fa-chevron-right text-muted ms-3"></i>
+                        <i class="fas fa-chevron-right text-muted ms-3" aria-hidden="true"></i>
                       </div>
                     </a>
                   </dtml-if>
@@ -453,16 +946,20 @@
                 <dtml-with expr="_.namespace(materias=zsql.tramitacao_prazo_vincendo_obter_zsql())">
                   <dtml-if expr="_.len(materias) > 0">
                     <a href="<dtml-var portal_url>/generico/materia_listar_prazo" 
-                       class="list-group-item list-group-item-action list-group-item-warning py-3">
+                       class="list-group-item list-group-item-action list-group-item-warning py-3"
+                       aria-label="Ver matérias com prazos vencendo hoje">
                       <div class="d-flex align-items-center">
-                        <i class="fas fa-hourglass-half notification-icon text-warning"></i>
+                        <i class="fas fa-hourglass-half notification-icon text-warning" aria-hidden="true"></i>
                         <div class="ms-3 flex-grow-1">
-                          <h3 class="h6 mb-1">Prazos vencendo hoje</h3>
+                          <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h3 class="h6 mb-0">Prazos vencendo hoje</h3>
+                            <span class="badge bg-warning rounded-pill text-dark"><dtml-var expr="_.len(materias)"></span>
+                          </div>
                           <p class="mb-0 small text-muted">
                             <dtml-var expr="_.len(materias)"> matéria<dtml-if expr="_.len(materias) > 1">s</dtml-if> com prazo<dtml-if expr="_.len(materias) > 1">s</dtml-if> de tramitação vencendo hoje
                           </p>
                         </div>
-                        <i class="fas fa-chevron-right text-muted ms-3"></i>
+                        <i class="fas fa-chevron-right text-muted ms-3" aria-hidden="true"></i>
                       </div>
                     </a>
                   </dtml-if>
@@ -475,16 +972,20 @@
                 <dtml-with expr="_.namespace(normas=zsql.peticao_obter_zsql(ind_norma=1, ind_enviado='1', ind_recebido='0', ind_excluido=0))">
                   <dtml-if expr="_.len(normas) > 0">
                     <a href="<dtml-var portal_url>/cadastros/norma_juridica/recebimento_normas" 
-                       class="list-group-item list-group-item-action list-group-item-info py-3">
+                       class="list-group-item list-group-item-action list-group-item-info py-3"
+                       aria-label="Ver normas pendentes de recebimento">
                       <div class="d-flex align-items-center">
-                        <i class="fas fa-balance-scale notification-icon text-info"></i>
+                        <i class="fas fa-balance-scale notification-icon text-info" aria-hidden="true"></i>
                         <div class="ms-3 flex-grow-1">
-                          <h3 class="h6 mb-1">Recebimento de Normas</h3>
+                          <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h3 class="h6 mb-0">Recebimento de Normas</h3>
+                            <span class="badge bg-info rounded-pill"><dtml-var expr="_.len(normas)"></span>
+                          </div>
                           <p class="mb-0 small text-muted">
                             <dtml-var expr="_.len(normas)"> norma<dtml-if expr="_.len(normas) > 1">s</dtml-if> pendente<dtml-if expr="_.len(normas) > 1">s</dtml-if> de recebimento
                           </p>
                         </div>
-                        <i class="fas fa-chevron-right text-muted ms-3"></i>
+                        <i class="fas fa-chevron-right text-muted ms-3" aria-hidden="true"></i>
                       </div>
                     </a>
                   </dtml-if>
@@ -496,16 +997,20 @@
                 <dtml-with expr="_.namespace(assinaturas=zsql.assinatura_documento_obter_zsql(cod_usuario=cod_usuario_corrente, ind_assinado=0, ind_recusado=0))">
                   <dtml-if expr="_.len(assinaturas) > 0">
                     <a href="<dtml-var portal_url>/cadastros/assinatura/assinador" 
-                       class="list-group-item list-group-item-action list-group-item-primary py-3">
+                       class="list-group-item list-group-item-action list-group-item-primary py-3"
+                       aria-label="Ver documentos aguardando sua assinatura digital">
                       <div class="d-flex align-items-center">
-                        <i class="fas fa-signature notification-icon text-primary"></i>
+                        <i class="fas fa-signature notification-icon text-primary" aria-hidden="true"></i>
                         <div class="ms-3 flex-grow-1">
-                          <h3 class="h6 mb-1">Assinaturas pendentes</h3>
+                          <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h3 class="h6 mb-0">Assinaturas pendentes</h3>
+                            <span class="badge bg-primary rounded-pill"><dtml-var expr="_.len(assinaturas)"></span>
+                          </div>
                           <p class="mb-0 small text-muted">
                             <dtml-var expr="_.len(assinaturas)"> documento<dtml-if expr="_.len(assinaturas) > 1">s</dtml-if> aguardando sua assinatura digital
                           </p>
                         </div>
-                        <i class="fas fa-chevron-right text-muted ms-3"></i>
+                        <i class="fas fa-chevron-right text-muted ms-3" aria-hidden="true"></i>
                       </div>
                     </a>
                   </dtml-if>
@@ -515,16 +1020,20 @@
                 <dtml-with expr="_.namespace(cientificacoes=zsql.cientificacao_documento_obter_zsql(cod_cientificado=cod_usuario_corrente, ind_pendente=1))">
                   <dtml-if expr="_.len(cientificacoes) > 0">
                     <a href="<dtml-var portal_url>/consultas/documento_administrativo/visualizar_processos" 
-                       class="list-group-item list-group-item-action list-group-item-info py-3">
+                       class="list-group-item list-group-item-action list-group-item-info py-3"
+                       aria-label="Ver processos administrativos para conhecimento">
                       <div class="d-flex align-items-center">
-                        <i class="fas fa-envelope notification-icon text-info"></i>
+                        <i class="fas fa-envelope notification-icon text-info" aria-hidden="true"></i>
                         <div class="ms-3 flex-grow-1">
-                          <h3 class="h6 mb-1">Processos para conhecimento</h3>
+                          <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h3 class="h6 mb-0">Processos para conhecimento</h3>
+                            <span class="badge bg-info rounded-pill"><dtml-var expr="_.len(cientificacoes)"></span>
+                          </div>
                           <p class="mb-0 small text-muted">
                             <dtml-var expr="_.len(cientificacoes)"> novo<dtml-if expr="_.len(cientificacoes) > 1">s</dtml-if> processo<dtml-if expr="_.len(cientificacoes) > 1">s</dtml-if> administrativo<dtml-if expr="_.len(cientificacoes) > 1">s</dtml-if>
                           </p>
                         </div>
-                        <i class="fas fa-chevron-right text-muted ms-3"></i>
+                        <i class="fas fa-chevron-right text-muted ms-3" aria-hidden="true"></i>
                       </div>
                     </a>
                   </dtml-if>
@@ -534,32 +1043,40 @@
                 <dtml-if expr="zsql.usuario_unid_tram_obter_zsql(cod_usuario=cod_usuario_corrente)">
                   <dtml-if expr="pysc.caixa_entrada_contar_pysc(cod_usuario=cod_usuario_corrente)>0">
                     <a href="<dtml-var portal_url>/cadastros/tramitacao_materia/tramitacao_lote_form" 
-                       class="list-group-item list-group-item-action list-group-item-success py-3">
+                       class="list-group-item list-group-item-action list-group-item-success py-3"
+                       aria-label="Ver caixa de entrada de matérias legislativas">
                       <div class="d-flex align-items-center">
-                        <i class="fas fa-inbox notification-icon text-success"></i>
+                        <i class="fas fa-inbox notification-icon text-success" aria-hidden="true"></i>
                         <div class="ms-3 flex-grow-1">
-                          <h3 class="h6 mb-1">Caixa de entrada</h3>
+                          <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h3 class="h6 mb-0">Caixa de entrada</h3>
+                            <span class="badge bg-success rounded-pill"><dtml-var expr="pysc.caixa_entrada_contar_pysc(cod_usuario=cod_usuario_corrente)"></span>
+                          </div>
                           <p class="mb-0 small text-muted">
                             <dtml-var expr="pysc.caixa_entrada_contar_pysc(cod_usuario=cod_usuario_corrente)"> matéria<dtml-if expr="pysc.caixa_entrada_contar_pysc(cod_usuario=cod_usuario_corrente)>1">s</dtml-if> legislativa<dtml-if expr="pysc.caixa_entrada_contar_pysc(cod_usuario=cod_usuario_corrente)>1">s</dtml-if>
                           </p>
                         </div>
-                        <i class="fas fa-chevron-right text-muted ms-3"></i>
+                        <i class="fas fa-chevron-right text-muted ms-3" aria-hidden="true"></i>
                       </div>
                     </a>
                   </dtml-if>
 
                   <dtml-if expr="pysc.caixa_entrada_administrativo_contar_pysc(cod_usuario=cod_usuario_corrente)>0">
                     <a href="<dtml-var portal_url>/cadastros/tramitacao_documento/tramitacao_lote_form" 
-                       class="list-group-item list-group-item-action list-group-item-success py-3">
+                       class="list-group-item list-group-item-action list-group-item-success py-3"
+                       aria-label="Ver caixa de entrada de processos administrativos">
                       <div class="d-flex align-items-center">
-                        <i class="fas fa-inbox notification-icon text-success"></i>
+                        <i class="fas fa-inbox notification-icon text-success" aria-hidden="true"></i>
                         <div class="ms-3 flex-grow-1">
-                          <h3 class="h6 mb-1">Caixa de entrada (Administrativo)</h3>
+                          <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h3 class="h6 mb-0">Caixa de entrada (Administrativo)</h3>
+                            <span class="badge bg-success rounded-pill"><dtml-var expr="pysc.caixa_entrada_administrativo_contar_pysc(cod_usuario=cod_usuario_corrente)"></span>
+                          </div>
                           <p class="mb-0 small text-muted">
                             <dtml-var expr="pysc.caixa_entrada_administrativo_contar_pysc(cod_usuario=cod_usuario_corrente)"> processo<dtml-if expr="pysc.caixa_entrada_administrativo_contar_pysc(cod_usuario=cod_usuario_corrente)>1">s</dtml-if> administrativo<dtml-if expr="pysc.caixa_entrada_administrativo_contar_pysc(cod_usuario=cod_usuario_corrente)>1">s</dtml-if>
                           </p>
                         </div>
-                        <i class="fas fa-chevron-right text-muted ms-3"></i>
+                        <i class="fas fa-chevron-right text-muted ms-3" aria-hidden="true"></i>
                       </div>
                     </a>
                   </dtml-if>
@@ -580,16 +1097,20 @@
                 <dtml-with expr="_.namespace(devolvidas=zsql.proposicao_obter_zsql(ind_excluido=0, ind_devolvido='1', col_username=col_username))">
                   <dtml-if expr="_.len(devolvidas) > 0">
                     <a href="<dtml-var portal_url>/cadastros/proposicao?ind_devolvido=1" 
-                       class="list-group-item list-group-item-action list-group-item-warning py-3">
+                       class="list-group-item list-group-item-action list-group-item-warning py-3"
+                       aria-label="Ver proposições devolvidas de sua autoria">
                       <div class="d-flex align-items-center">
-                        <i class="fas fa-undo notification-icon text-warning"></i>
+                        <i class="fas fa-undo notification-icon text-warning" aria-hidden="true"></i>
                         <div class="ms-3 flex-grow-1">
-                          <h3 class="h6 mb-1">Proposições devolvidas</h3>
+                          <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h3 class="h6 mb-0">Proposições devolvidas</h3>
+                            <span class="badge bg-warning rounded-pill text-dark"><dtml-var expr="_.len(devolvidas)"></span>
+                          </div>
                           <p class="mb-0 small text-muted">
                             <dtml-var expr="_.len(devolvidas)"> proposiç<dtml-if expr="_.len(devolvidas) > 1">ões<dtml-else>ão</dtml-if> digita<dtml-if expr="_.len(devolvidas) > 1">is<dtml-else>l</dtml-if> de sua autoria
                           </p>
                         </div>
-                        <i class="fas fa-chevron-right text-muted ms-3"></i>
+                        <i class="fas fa-chevron-right text-muted ms-3" aria-hidden="true"></i>
                       </div>
                     </a>
                   </dtml-if>
@@ -598,10 +1119,9 @@
             </div>
           </div>
         </div>
-      </div>
-    </dtml-if>
-  </div>
-</div>
+      </main>
+    </div>
+  </dtml-if>
 
 <dtml-var js_slot>
 <script>
@@ -615,6 +1135,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     toast.show();
   }
+
 });
 </script>
-<dtml-var footer_html>

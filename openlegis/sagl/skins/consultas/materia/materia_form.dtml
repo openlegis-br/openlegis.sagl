@@ -1,113 +1,150 @@
 <dtml-var header_html>
 
- <div class="row mb-3">
+<div class="row mb-3">
   <div class="col-12 col-md-8 d-flex align-items-center">
     <h1 class="firstHeading font-size-18 mb-0"><dtml-var des_tipo_materia> nº <dtml-var num_ident_basica missing>/<dtml-var ano_ident_basica missing></h1>
   </div>
-  <div class="col-12 col-md-4 d-flex align-items-center justify-content-start justify-content-md-end">
-    <div class="btn-group btn-group-sm mt-3 mt-md-0">
+  <div class="col-12 col-md-4 text-start text-md-end">
+    <div class="btn-group btn-group-sm flex-wrap mt-2 mt-md-0">
       <dtml-let isAnon="portal_membership.isAnonymousUser()">
         <dtml-if expr="not isAnon">
-          <a class="btn btn-primary" href="<dtml-var portal_url>/consultas/materia/pasta_digital/?cod_materia=<dtml-var cod_materia>&action=pasta" target="_blank"><i class="far fa-folder-open"></i> Pasta Digital</a>
+          <a class="btn btn-outline-primary" href="<dtml-var portal_url>/@@pasta_digital?cod_materia=<dtml-var cod_materia>&action=pasta" target="_blank">
+            <i class="fas fa-folder-open me-1"></i>Pasta Digital
+          </a>
           <dtml-call expr="REQUEST.set('id_documento', str(cod_materia)+'_texto_integral.pdf')">
           <dtml-if expr="hasattr(sapl_documentos.materia,id_documento)">
-             <a class="btn btn-secondary" target="_blank" href="<dtml-var portal_url>/pysc/download_materia_pysc?cod_materia=<dtml-var cod_materia>&texto_original=1"><i class="fa fa-file-pdf"></i> Texto Integral</a>
+            <a class="btn btn-outline-secondary" target="_blank" href="<dtml-var portal_url>/pysc/download_materia_pysc?cod_materia=<dtml-var cod_materia>&texto_original=1">
+              <i class="fas fa-file-pdf me-1"></i>Texto Integral
+            </a>
           </dtml-if>
         <dtml-else>
           <dtml-call expr="REQUEST.set('id_documento', str(cod_materia)+'_texto_integral.pdf')">
           <dtml-call expr="REQUEST.set('id_redacao', str(cod_materia)+'_redacao_final.pdf')">
           <dtml-if expr="hasattr(sapl_documentos.materia,id_documento)">
-             <a class="btn btn-primary" target="_blank" href="<dtml-var portal_url>/pysc/download_materia_pysc?cod_materia=<dtml-var expr="pysc.b64encode_pysc(codigo=cod_materia)">&texto_original=1"><i class="fa fa-file-pdf"></i> Texto Integral</a>
+            <a class="btn btn-outline-primary" target="_blank" href="<dtml-var portal_url>/pysc/download_materia_pysc?cod_materia=<dtml-var expr="pysc.b64encode_pysc(codigo=cod_materia)">&texto_original=1">
+              <i class="fas fa-file-pdf me-1"></i>Texto Integral
+            </a>
           </dtml-if>
           <dtml-if expr="hasattr(sapl_documentos.materia,id_redacao)">
-             <a class="btn btn-primary" target="_blank" href="<dtml-var portal_url>/pysc/download_materia_pysc?cod_materia=<dtml-var expr="pysc.b64encode_pysc(codigo=cod_materia)">&redacao_final=1"><i class="fa fa-file-pdf"></i> Redação Final</a>
+            <a class="btn btn-outline-primary" target="_blank" href="<dtml-var portal_url>/pysc/download_materia_pysc?cod_materia=<dtml-var expr="pysc.b64encode_pysc(codigo=cod_materia)">&redacao_final=1">
+              <i class="fas fa-file-pdf me-1"></i>Redação Final
+            </a>
           </dtml-if>
         </dtml-if>
       </dtml-let>
     </div>
   </div>
- </div>
+</div>
 
- <div class="row mb-2">
-  <div class="col-12">
-     <p class="h5 ementa"><dtml-var txt_ementa></p>
+<div class="card border-0 shadow-sm mb-4">
+  <div class="card-body">
+    <h2 class="h5 mb-3 text-primary">Ementa</h2>
+    <p class="mb-0 text-justify"><dtml-var txt_ementa></p>
   </div>
- </div>
+</div>
 
- <div class="row">
-       <p class="col-12">
-        <dtml-if expr="pysc.conta_autores_pysc(cod_materia)">
-           <dtml-if expr="pysc.conta_autores_pysc(cod_materia)>1">
-              <i class="fa fa-users"></i>           
-              <b>Autores:</b>
-           <dtml-else>
-              <i class="fa fa-user"></i>
-              <b>Autoria:</b>
-           </dtml-if>
-        </dtml-if> 
-          <dtml-in expr="zsql.autoria_obter_zsql(cod_materia=cod_materia)">
-            <dtml-var nom_autor_join><dtml-unless sequence-end>,</dtml-unless>
+<div class="card border-0 shadow-sm mb-4">
+  <div class="card-body">
+    <div class="row g-3">
+      <dtml-if expr="pysc.conta_autores_pysc(cod_materia)">
+        <div class="col-12">
+          <small class="text-muted d-block">Autoria</small>
+          <div>
+            <dtml-if expr="pysc.conta_autores_pysc(cod_materia)>1">
+              <i class="fas fa-users me-2 text-muted"></i>
+            <dtml-else>
+              <i class="fas fa-user me-2 text-muted"></i>
+            </dtml-if>
+            <dtml-in expr="zsql.autoria_obter_zsql(cod_materia=cod_materia)">
+              <dtml-var nom_autor_join><dtml-unless sequence-end>, </dtml-unless>
+            </dtml-in>
+          </div>
+        </div>
+      </dtml-if>
+      <div class="col-12 col-md-6">
+        <small class="text-muted d-block">Data de Apresentação</small>
+        <div>
+          <i class="fas fa-calendar-alt me-2 text-muted"></i>
+          <dtml-var dat_apresentacao missing null="">
+        </div>
+      </div>
+
+      <dtml-in expr="zsql.proposicao_obter_zsql(ind_mat_ou_doc='M',cod_mat_ou_doc=cod_materia)">
+        <div class="col-12">
+          <small class="text-muted d-block">Proposição Digital</small>
+          <div>
+            <dtml-let id_proposicao="str(cod_proposicao)+'_signed.pdf'">
+              <dtml-if "hasattr(sapl_documentos.proposicao,id_proposicao)">
+                <dtml-let proposicao="getattr(sapl_documentos.proposicao,id_proposicao).absolute_url">
+                  <dtml-call expr="REQUEST.set('nome_arquivo',str(cod_proposicao)+'_signed.pdf')">
+                  <dtml-call expr="REQUEST.set('cod_documento',pysc.proposicao_calcular_checksum_pysc(cod_proposicao))">
+                  <a target="blank" href="<dtml-var proposicao>" class="text-decoration-none">
+                    <i class="fas fa-file-pdf me-1 text-danger"></i>
+                    <dtml-var cod_documento>
+                  </a>
+                </dtml-let>
+              </dtml-if>
+            </dtml-let>
+          </div>
+        </div>
+      </dtml-in>
+      <dtml-in expr="zsql.numeracao_obter_zsql(cod_materia=cod_materia)">
+        <dtml-call expr="REQUEST.set('temProcesso', num_materia)">
+      </dtml-in>
+      <dtml-if temProcesso>
+        <div class="col-12 col-md-6">
+          <small class="text-muted d-block">Processo</small>
+          <div>
+            <dtml-in expr="zsql.numeracao_obter_zsql(cod_materia=cod_materia)">    
+              <i class="fas fa-hashtag me-2 text-muted"></i>
+              <dtml-var num_materia missing null="">/<dtml-var ano_materia missing null="">
+            </dtml-in>
+          </div>
+        </div>
+      </dtml-if>
+      <dtml-if num_protocolo>
+        <div class="col-12 col-md-6">
+          <small class="text-muted d-block">Protocolo</small>
+          <div>
+            <i class="fas fa-file-alt me-2 text-muted"></i>
+            <dtml-var num_protocolo missing null="">/<dtml-var ano_ident_basica missing>
+          </div>
+        </div>
+      </dtml-if>
+      <dtml-if tip_quorum>
+        <div class="col-12 col-md-6">
+          <small class="text-muted d-block">Quórum</small>
+          <div>
+            <i class="fas fa-users me-2 text-muted"></i>
+            <dtml-in expr="zsql.quorum_votacao_obter_zsql(cod_quorum=tip_quorum)">
+              <dtml-var des_quorum>
+            </dtml-in>
+          </div>
+        </div>
+      </dtml-if>
+      <div class="col-12 col-md-6">
+        <small class="text-muted d-block">Regime de Tramitação</small>
+        <div>
+          <i class="fas fa-clock me-2 text-muted"></i>
+          <dtml-in expr="zsql.regime_tramitacao_obter_zsql(cod_regime_tramitacao = cod_regime_tramitacao)">
+            <span <dtml-if expr="des_regime_tramitacao=='Urgência' or des_regime_tramitacao=='Regime de Urgência Especial' or des_regime_tramitacao=='Urgência Especial'">class="text-danger fw-bold"</dtml-if>>
+              <dtml-var des_regime_tramitacao missing>
+            </span>
           </dtml-in>
-       </p> 
- </div>
-
- <div class="row">
-    <p class="col-12"><b>Data de Apresentação</b>: <dtml-var dat_apresentacao missing null=""></p>
- </div>
-
- <dtml-in expr="zsql.proposicao_obter_zsql(ind_mat_ou_doc='M',cod_mat_ou_doc=cod_materia)">
-   <div class="row">
-      <p class="col-12"><b>Proposição Digital</b>:
-        <dtml-let id_proposicao="str(cod_proposicao)+'_signed.pdf'">
-          <dtml-if "hasattr(sapl_documentos.proposicao,id_proposicao)">
-             <dtml-let proposicao="getattr(sapl_documentos.proposicao,id_proposicao).absolute_url">
-                <dtml-call expr="REQUEST.set('nome_arquivo',str(cod_proposicao)+'_signed.pdf')">
-                <dtml-call expr="REQUEST.set('cod_documento',pysc.proposicao_calcular_checksum_pysc(cod_proposicao))">
-                <a target="blank" href="<dtml-var proposicao>"><dtml-var cod_documento></a>
-             </dtml-let>
-          </dtml-if>
-        </dtml-let>
-      </p>
+        </div>
+      </div>
+      <dtml-if dat_fim_prazo>
+        <div class="col-12 col-md-6">
+          <small class="text-muted d-block">Prazo de Deliberação</small>
+          <div>
+            <i class="fas fa-calendar-check me-2 text-muted"></i>
+            <dtml-var dat_fim_prazo>
+          </div>
+        </div>
+      </dtml-if>
     </div>
- </dtml-in>
-
- <dtml-in expr="zsql.numeracao_obter_zsql(cod_materia=cod_materia)">
-   <dtml-call expr="REQUEST.set('temProcesso', num_materia)">
- </dtml-in>
-
- <dtml-if temProcesso>
-    <div class="row">
-      <dtml-in expr="zsql.numeracao_obter_zsql(cod_materia=cod_materia)">    
-          <p class="col-12 col-md-6"><b>Processo:</b> <dtml-var num_materia missing null="">/<dtml-var ano_materia missing null=""></p>
-      </dtml-in>
-    </div>
-</dtml-if>
-
- <dtml-if num_protocolo>
-  <div class="row"> 
-    <p class="col-12 col-md-6"><b>Protocolo</b>: <dtml-var num_protocolo missing null="">/<dtml-var ano_ident_basica missing>
   </div>
- </dtml-if>
-
- <dtml-if tip_quorum>
-   <div class="row">
-      <dtml-in expr="zsql.quorum_votacao_obter_zsql(cod_quorum=tip_quorum)">
-           <p class="col-12 col-md-6"><b>Quórum:</b> <dtml-var des_quorum></p>
-      </dtml-in>
-   </div>
- </dtml-if>
-
- <div class="row">  
-   <dtml-in expr="zsql.regime_tramitacao_obter_zsql(cod_regime_tramitacao = cod_regime_tramitacao)">
-      <p class="col-12 col-md-6"><b>Regime de Tramitação:</b> <span <dtml-if expr="des_regime_tramitacao=='Urgência' or des_regime_tramitacao=='Regime de Urgência Especial' or des_regime_tramitacao=='Urgência Especial'">class="text-danger font-weight-bold"</dtml-if>><dtml-var des_regime_tramitacao missing></span></p>
-   </dtml-in>    
- </div>
-
- <dtml-if dat_fim_prazo>
-    <div class="row">
-       <p class="col-12 col-md-6"><b>Prazo de Deliberação:</b> <dtml-var dat_fim_prazo></p>  
-    </div>   
- </dtml-if>
+</div>
 
  <dtml-if cod_situacao>
    <div class="row">  
@@ -172,33 +209,39 @@
     <dtml-call expr="REQUEST.set('temTramitacao', 1)">
  </dtml-in>
 
- <div class="row">
-    <div class="col-12">
-      <div class="row mb-3">    
-         <div class="col-6">
-           <span class="h6 font-weight-bold">Situação Atual</span>
-         </div>
-         <div class="col-6 text-end">
-
-             <dtml-if expr="ind_tramitacao==1">
-                <span class="badge bg-dark-success">Em Tramitação</span>
-                <dtml-if expr="int(sapl_documentos.props_sagl.acompanhamento_materia)==1">                
-                  <button type="button" class="btn btn-link d-print-none" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Acompanhar esta matéria" data-src="<dtml-var portal_url>/consultas/materia/acompanhamento/acomp_materia_form?cod_materia=<dtml-var expr="pysc.b64encode_pysc(codigo=cod_materia)">&modal=1"><i class="fa fa-fw fa-envelope"></i><span class="d-none d-md-inline-block"> Acompanhar</span></button> 
-                </dtml-if>
-             <dtml-elif expr="ind_tramitacao==0">                
-                <span class="badge bg-danger">Tramitação Encerrada</span>
-             </dtml-if>
-           </div>            
+<div class="card border-0 shadow-sm mb-4">
+  <div class="card-header">
+    <div class="row align-items-center">
+      <div class="col-12 col-md-6">
+        <strong>Situação Atual</strong>
       </div>
+      <div class="col-12 col-md-6 text-start text-md-end mt-2 mt-md-0">
+        <dtml-if expr="ind_tramitacao==1">
+          <span class="badge bg-success">Em Tramitação</span>
+          <dtml-if expr="int(sapl_documentos.props_sagl.acompanhamento_materia)==1">                
+            <button type="button" class="btn btn-outline-secondary btn-sm ms-2 d-print-none" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Acompanhar esta matéria" data-src="<dtml-var portal_url>/consultas/materia/acompanhamento/acomp_materia_form?cod_materia=<dtml-var expr="pysc.b64encode_pysc(codigo=cod_materia)">&modal=1">
+              <i class="fas fa-envelope me-1"></i>
+              <span class="d-none d-md-inline-block">Acompanhar</span>
+            </button> 
+          </dtml-if>
+        <dtml-elif expr="ind_tramitacao==0">                
+          <span class="badge bg-danger">Tramitação Encerrada</span>
+        </dtml-if>
+      </div>
+    </div>
+  </div>
  <dtml-if temTramitacao>
    <dtml-in expr="zsql.tramitacao_obter_zsql(cod_materia=cod_materia, ind_excluido=0)">
      <dtml-if sequence-start>
       <dtml-call expr="REQUEST.set('cod_ult_origem', int(cod_unid_tram_local))">     
       <dtml-call expr="REQUEST.set('cod_ult_dest', int(cod_unid_tram_dest))">
       <dtml-call expr="REQUEST.set('dat_encaminha', dat_encaminha)">  
-      <div class="card mb-3">
+      <div class="card border-0 shadow-sm mb-3">
        <div class="card-body">
-           <p class="card-text"><b>Último Local:</b> <dtml-var dat_tramitacao>
+           <p class="card-text mb-0">
+             <small class="text-muted d-block">Último Local</small>
+             <i class="fas fa-map-marker-alt me-2 text-muted"></i>
+             <strong><dtml-var dat_tramitacao></strong>
            <dtml-if cod_unid_tram_dest>
              <dtml-in expr="unidade_tramitacao_obter_zsql(cod_unid_tramitacao=_.int(cod_unid_tram_dest))">
                 - <dtml-var nom_unidade_join>
@@ -248,7 +291,7 @@
  </dtml-in>
  <dtml-if expr="_.has_key('temDespacho')">
       <div class="accordion accordion-flush accordion-plus-icon" id="accordionDespacho">
-         <div class="card mb-0 shadow">
+         <div class="card border-0 shadow-sm mb-3">
              <div class="accordion-header" id="headingPar">
                  <h5 class="my-0">
                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePar" aria-expanded="false" aria-controls="collapsePar">Comissões Permanentes</button>
@@ -265,7 +308,16 @@
                        <dtml-let id_parecer="str(cod_relatoria)+'_parecer.pdf'">
                          <dtml-if "hasattr(sapl_documentos.parecer_comissao,id_parecer)">
                            <dtml-let parecer="getattr(sapl_documentos.parecer_comissao,id_parecer).absolute_url">
-                             -<a class="btn btn-link text-primary" target="_blank" href="<dtml-var parecer>">Parecer <dtml-if expr="tip_conclusao=='F'">Favorável</dtml-if><dtml-if expr="tip_conclusao=='C'">Contrário</dtml-if></a>
+                             - <a class="text-decoration-none" target="_blank" href="<dtml-var parecer>">
+                                 <i class="fas fa-file-pdf me-1 text-danger"></i>
+                                 Parecer 
+                                 <dtml-if expr="tip_conclusao=='F'">
+                                   <span class="badge bg-success ms-1">Favorável</span>
+                                 </dtml-if>
+                                 <dtml-if expr="tip_conclusao=='C'">
+                                   <span class="badge bg-danger ms-1">Contrário</span>
+                                 </dtml-if>
+                               </a>
                            </dtml-let>
                          </dtml-if>
                        </dtml-let>
@@ -288,7 +340,7 @@
  </dtml-in>
  <dtml-if temSub> 
       <div class="accordion accordion-flush accordion-plus-icon" id="accordionSub">
-         <div class="card mb-0 shadow">
+         <div class="card border-0 shadow-sm mb-3">
              <div class="accordion-header" id="headingSub">
                  <h5 class="my-0">
                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSub" aria-expanded="false" aria-controls="collapseSub">Substitutivos [<dtml-var qtdSub>]</button>
@@ -299,7 +351,7 @@
                  <dtml-in expr="zsql.substitutivo_obter_zsql(cod_materia=cod_materia)">
                     <dtml-if sequence-start>
                        <div class="table-responsive">
-                         <table class="table">
+                         <table class="table table-striped align-middle">
                            <thead>
                              <tr>
                                <th>Identificação da Matéria</th>
@@ -362,7 +414,7 @@
  </dtml-in>
  <dtml-if temEme>
       <div class="accordion accordion-flush accordion-plus-icon" id="accordionEme">
-         <div class="card mb-0 shadow">
+         <div class="card border-0 shadow-sm mb-3">
              <div class="accordion-header" id="headingEme">
                  <h5 class="my-0">
                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseEme" aria-expanded="false" aria-controls="collapseEme">Emendas [<dtml-var qtdEme>]</button>
@@ -523,7 +575,7 @@
 
  <dtml-if expr="_.has_key('temDocAC') or _.has_key('add_doc')">
       <div class="accordion accordion-flush accordion-plus-icon" id="accordionDoc">
-         <div class="card mb-0 shadow">
+         <div class="card border-0 shadow-sm mb-3">
              <div class="accordion-header" id="headingDoc">
                <h5 class="my-0">
                  <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseDoc" aria-expanded="false" aria-controls="collapseDoc">Documentos Acessórios</button>
@@ -682,7 +734,7 @@
 
 <dtml-if expr="_.has_key('temDocADM')">
       <div class="accordion accordion-flush accordion-plus-icon" id="accordionDocAdm">
-         <div class="card mb-0 shadow">
+         <div class="card border-0 shadow-sm mb-3">
              <div class="accordion-header" id="headingDocAdm">
                <h5 class="my-0">
                  <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseDocAdm" aria-expanded="false" aria-controls="collapseDocAdm">Processos Vinculados</button>
@@ -737,7 +789,7 @@
 
 <dtml-if expr="zsql.tramitacao_obter_zsql(cod_materia=cod_materia)">
       <div class="accordion accordion-flush accordion-plus-icon" id="accordionTram">
-         <div class="card mb-0 shadow">
+         <div class="card border-0 shadow-sm mb-3">
              <div class="accordion-header" id="headingTram">
                <h5 class="my-0">
                  <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTram" aria-expanded="false" aria-controls="collapseTram">Tramitações</button>
@@ -848,7 +900,7 @@
 
     <dtml-if temArquivo>
       <div class="accordion accordion-flush accordion-plus-icon" id="accordionArq">
-         <div class="card mb-0 shadow">
+         <div class="card border-0 shadow-sm mb-3">
              <div class="accordion-header" id="headingArq">
                <h5 class="my-0">
                  <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseArq" aria-expanded="false" aria-controls="collapseArq">Arquivo Permanente</button>
@@ -893,7 +945,7 @@
 
 <div class="col-12">
   <div class="text-start btn-group mt-4">
-    <a class="btn btn-primary d-print-none" href="<dtml-var portal_url>/consultas/materia" ><i class="fa fa-fw fa-search"></i> Pesquisa</a>
+    <a class="btn btn-primary d-print-none" href="<dtml-var portal_url>/consultas/materia/pesquisa_materias" ><i class="fa fa-fw fa-search"></i> Pesquisa</a>
     <a class="btn btn-light" href="javascript:void(0)" onClick="window.history.go(-1); return false;"><i class="fa fa-fw fa-undo"></i> Voltar</a>  
   </div>
 </div>

@@ -4,39 +4,47 @@
 
 <form name="pauta_form" method="post" action="ata_mostrar">
 
-<div class="row">
-  <div class="col-6 mb-3">
-     <label class="form-label" for="lst_ano_sessao">Selecione o Ano:</label>
-     <select class="form-select jumpmenu" id="lst_ano_sessao" name="lst_ano_sessao">
-         <dtml-in expr="zsql.sessao_plenaria_listar_ano_zsql()">
-             <option value="<dtml-var ACTUAL_URL>?ano_sessao_sel=<dtml-var ano_sessao missing>" 
-               <dtml-if expr="((not _.has_key('ano_sessao_sel') and (DateTime(datefmt='international').year() == ano_sessao)))
-                                or (not _.has_key('ano_sessao_sel') and (DateTime(datefmt='international').year() > ano_sessao))
-                                or (_.has_key('ano_sessao_sel') and ano_sessao == _.int(ano_sessao_sel))">
-                 selected
-                 <dtml-call expr="REQUEST.set('ano_sessao_sel', ano_sessao)">
-               </dtml-if>>
-                <dtml-var ano_sessao missing>
-                <dtml-if expr="DateTime().strftime('%Y') == str(ano_sessao)">(Atual)</dtml-if>
-             </option>
-         </dtml-in>
-     </select>
+<div class="card mb-3">
+  <div class="card-body">
+    <div class="row">
+      <div class="col-12 col-md-6 mb-3 mb-md-0">
+         <label class="form-label" for="lst_ano_sessao">
+           <i class="fas fa-calendar-alt me-1"></i>Selecione o Ano:
+         </label>
+         <select class="form-select jumpmenu" id="lst_ano_sessao" name="lst_ano_sessao">
+             <dtml-in expr="zsql.sessao_plenaria_listar_ano_zsql()">
+                 <option value="<dtml-var ACTUAL_URL>?ano_sessao_sel=<dtml-var ano_sessao missing>" 
+                   <dtml-if expr="((not _.has_key('ano_sessao_sel') and (DateTime(datefmt='international').year() == ano_sessao)))
+                                    or (not _.has_key('ano_sessao_sel') and (DateTime(datefmt='international').year() > ano_sessao))
+                                    or (_.has_key('ano_sessao_sel') and ano_sessao == _.int(ano_sessao_sel))">
+                     selected
+                     <dtml-call expr="REQUEST.set('ano_sessao_sel', ano_sessao)">
+                   </dtml-if>>
+                    <dtml-var ano_sessao missing>
+                    <dtml-if expr="DateTime().strftime('%Y') == str(ano_sessao)">(Atual)</dtml-if>
+                 </option>
+             </dtml-in>
+         </select>
+      </div>
+      <div class="col-12 col-md-6">
+         <label class="form-label" for="lst_tip_sessao">
+           <i class="fas fa-filter me-1"></i>Tipo de <dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao">:
+         </label>
+         <select class="form-select jumpmenu" id="lst_tip_sessao" name="lst_tip_sessao">
+           <option value="<dtml-var ACTUAL_URL>?ano_sessao_sel=<dtml-var ano_sessao_sel missing>">Todos</option>
+             <dtml-in expr="zsql.tipo_sessao_plenaria_obter_zsql(ind_excluido=0)">
+                 <option value="<dtml-var ACTUAL_URL>?ano_sessao_sel=<dtml-var ano_sessao_sel missing>&tip_sessao_sel=<dtml-var tip_sessao missing>"
+                   <dtml-if expr="(_.has_key('tip_sessao_sel') and tip_sessao == _.int(tip_sessao_sel))">
+                      selected
+                     <dtml-call expr="REQUEST.set('tip_sessao_sel', tip_sessao)">
+                   </dtml-if>>
+                    <dtml-var nom_sessao>
+                 </option>
+             </dtml-in>
+         </select>
+       </div>
+    </div>
   </div>
-  <div class="col-6 mb-3">
-     <label class="form-label" for="lst_tip_sessao">Tipo de <dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao">:</label>
-     <select class="form-select jumpmenu" id="lst_tip_sessao" name="lst_tip_sessao">
-       <option value="<dtml-var ACTUAL_URL>?ano_sessao_sel=<dtml-var ano_sessao_sel missing>">Todos</option>
-         <dtml-in expr="zsql.tipo_sessao_plenaria_obter_zsql(ind_excluido=0)">
-             <option value="<dtml-var ACTUAL_URL>?ano_sessao_sel=<dtml-var ano_sessao_sel missing>&tip_sessao_sel=<dtml-var tip_sessao missing>"
-               <dtml-if expr="(_.has_key('tip_sessao_sel') and tip_sessao == _.int(tip_sessao_sel))">
-                  selected
-                 <dtml-call expr="REQUEST.set('tip_sessao_sel', tip_sessao)">
-               </dtml-if>>
-                <dtml-var nom_sessao>
-             </option>
-         </dtml-in>
-     </select>
-   </div>
 </div>
 
   <dtml-if expr="not _.has_key('tip_sessao_sel')">
@@ -68,18 +76,14 @@
      </dtml-if previous-sequence>
      <div class="card mb-3">
        <div class="card-header">
-        <div class="row">
-          <div class="col-12">
-            <i class="far fa-list-alt"></i> Número de <span style="text-transform: lowercase;"><dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao_plural"></span>: <dtml-var sequence-length>
-          </div>
-        </div>
+         <i class="far fa-list-alt me-2"></i>Número de <span style="text-transform: lowercase;"><dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao_plural"></span>: <strong><dtml-var sequence-length></strong>
        </div>
        <ul class="list-group list-group-flush">
     </dtml-if sequence-start>
 
    <li class="list-group-item">
      <div class="row">
-       <div class="col-12 col-md-8 d-flex align-items-center"">
+       <div class="col-12 col-md-8 d-flex align-items-center">
          <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Sessao Plenaria'])">
             <a href="<dtml-var portal_url>/cadastros/sessao_plenaria/sessao_plenaria_mostrar_proc?cod_sessao_plen=<dtml-var cod_sessao_plen>&dat_sessao=<dtml-var dat_inicio_sessao>">
          <dtml-in expr="zsql.tipo_sessao_plenaria_obter_zsql(tip_sessao=tip_sessao)">
@@ -89,7 +93,7 @@
             <dtml-let id_pauta="str(cod_sessao_plen)+'_pauta_sessao.pdf'">
                <dtml-if "hasattr(sapl_documentos.pauta_sessao,id_pauta)">              
                    <dtml-in expr="zsql.tipo_sessao_plenaria_obter_zsql(tip_sessao=tip_sessao)">
-                      <dtml-var num_sessao_plen>ª <dtml-if expr="nom_sessao!='Audiência Pública'"><dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao"></dtml-if> <dtml-var nom_sessao> <dtml-if expr="cod_periodo_sessao != None"><dtml-in expr="zsql.periodo_sessao_obter_zsql(cod_periodo=cod_periodo_sessao)"> do <dtml-var num_periodo>º Período</dtml-in></dtml-if> - <dtml-var dat_inicio_sessao> <dtml-var expr="pysc.hora_formatar_pysc(hora=hr_inicio_sessao)"></a>
+                      <dtml-var num_sessao_plen>ª <dtml-if expr="nom_sessao!='Audiência Pública'"><dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao"></dtml-if> <dtml-var nom_sessao> <dtml-if expr="cod_periodo_sessao != None"><dtml-in expr="zsql.periodo_sessao_obter_zsql(cod_periodo=cod_periodo_sessao)"> do <dtml-var num_periodo>º Período</dtml-in></dtml-if> - <dtml-var dat_inicio_sessao> <dtml-var expr="pysc.hora_formatar_pysc(hora=hr_inicio_sessao)">
                   </dtml-in>                   
                <dtml-else>
                    <dtml-in expr="zsql.tipo_sessao_plenaria_obter_zsql(tip_sessao=tip_sessao)">
@@ -99,18 +103,19 @@
             </dtml-let>
          </dtml-if> 
        </div>
-       <div class="col-12 col-md-4 mt-1 mt-md-0 d-flex justify-content-start justify-content-sm-end"">
+       <div class="col-12 col-md-4 mt-2 mt-md-0 d-flex justify-content-start justify-content-md-end">
          <dtml-let id_ata="str(cod_sessao_plen)+'_ata_sessao.pdf'">
             <dtml-if "hasattr(sapl_documentos.ata_sessao,id_ata)">
                <dtml-let ata="getattr(sapl_documentos.ata_sessao,id_ata).absolute_url">
-                <div class="btn-group btn-group-sm mt-1 mt-md-0">
-                  <a class="btn btn-primary" href="<dtml-var ata>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fas fa-file-pdf"></i> Ata</a>
+                <div class="btn-group btn-group-sm">
+                  <a class="btn btn-primary" href="<dtml-var ata>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fas fa-file-pdf me-1"></i>Ata</a>
                 </div>
                </dtml-let>
             </dtml-if>
          </dtml-let>    
        </div>
      </div>
+   </li>
 
  <dtml-if sequence-end>
    </ul>
@@ -127,10 +132,8 @@
   </dtml-if>
   </dtml-if sequence-end>
 <dtml-else>
- <div class="row">
-    <div class="col-12">
-       Nehnuma <dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao"> encontrada.
-    </div>
+ <div class="alert alert-info mb-0" role="alert">
+    <i class="fas fa-info-circle me-2"></i>Nenhuma <dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao"> encontrada.
  </div>
 </dtml-in>
 </form>

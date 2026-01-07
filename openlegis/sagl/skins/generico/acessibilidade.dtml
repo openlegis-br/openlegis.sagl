@@ -1,31 +1,55 @@
 <dtml-var header_html>
 
-<h1 class="firstHeading font-size-18">Acessibilidade</h1>
+<h1 class="firstHeading font-size-18 mb-3">Acessibilidade</h1>
 
-  <p>O termo acessibilidade significa incluir a pessoa com deficiência na participação de atividades como o uso de produtos, serviços e informações. Alguns exemplos são os prédios com rampas de acesso para cadeira de rodas e banheiros adaptados para deficientes.</p>
+<div class="card mb-3">
+  <div class="card-body">
+    <p>O termo acessibilidade significa incluir a pessoa com deficiência na participação de atividades como o uso de produtos, serviços e informações. Alguns exemplos são os prédios com rampas de acesso para cadeira de rodas e banheiros adaptados para deficientes.</p>
 
-  <p>Na internet, acessibilidade refere-se principalmente às recomendações do WCAG (World Content Accessibility Guide) do W3C e no caso do Governo Brasileiro ao e-MAG (Modelo de Acessibilidade em Governo Eletrônico). O e-MAG está alinhado as recomendações internacionais, mas estabelece padrões de comportamento acessível para sites governamentais.</p>
+    <p>Na internet, acessibilidade refere-se principalmente às recomendações do WCAG (World Content Accessibility Guide) do W3C e no caso do Governo Brasileiro ao e-MAG (Modelo de Acessibilidade em Governo Eletrônico). O e-MAG está alinhado as recomendações internacionais, mas estabelece padrões de comportamento acessível para sites governamentais.</p>
 
-  <p style="margin-bottom: 15px;">Esse sistema foi projetado de acordo com os padrões de acessibilidade estabelecidos pela W3C e ao e-MAG, acessível quanto ao uso de leitores de tela, organização de conteúdo, tamanho da fonte, alto contraste e navegação rápida.</p>
+    <p class="mb-0">Esse sistema foi projetado de acordo com os padrões de acessibilidade estabelecidos pela W3C e ao e-MAG, acessível quanto ao uso de leitores de tela, organização de conteúdo, tamanho da fonte, alto contraste e navegação rápida.</p>
+  </div>
+</div>
 
-  <h2>Tamanho do Texto</h2>
+<div class="card mb-3">
+  <div class="card-header">
+    <h2 class="h5 mb-0"><i class="fas fa-text-height me-1"></i>Tamanho do Texto</h2>
+  </div>
+  <div class="card-body">
+    <div class="btn-group" role="group">
+      <button type="button" class="btn btn-outline-secondary" onclick="javascript:setBaseFontSize('largeText',1);" data-bs-toggle="tooltip" data-placement="top" title="Aumentar Fonte">
+        <i class="fas fa-plus me-1"></i>A+
+      </button>
+      <button type="button" class="btn btn-outline-secondary" onclick="javascript:setBaseFontSize('smallText',1);" data-bs-toggle="tooltip" data-placement="top" title="Diminuir Fonte">
+        <i class="fas fa-minus me-1"></i>A-
+      </button>
+      <button type="button" class="btn btn-outline-secondary" onclick="javascript:setBaseFontSize('',1);" data-bs-toggle="tooltip" data-placement="top" title="Fonte Normal">
+        <i class="fas fa-text-width me-1"></i>A
+      </button>
+    </div>
+  </div>
+</div>
 
-  <div class="mb-3"> 
-     <button type="button" class="btn btn-primary" onclick="javascript:setBaseFontSize('largeText',1);" data-bs-toggle="tooltip" data-placement="top" title="Aumentar Fonte">A+</button> 
-     <button type="button" class="btn btn-primary" onclick="javascript:setBaseFontSize('smallText',1);" data-bs-toggle="tooltip" data-placement="top" title="Diminuir Fonte">A-</button> 
-     <button type="button" class="btn btn-primary" onclick="javascript:setBaseFontSize('',1);" data-bs-toggle="tooltip" data-placement="top" title="Fonte Normal">A</button> 
-  </div>  
+<div class="card mb-3">
+  <div class="card-header">
+    <h2 class="h5 mb-0"><i class="fas fa-adjust me-1"></i>Alto Contraste</h2>
+  </div>
+  <div class="card-body">
+    <button type="button" id="onoff" value="On" class="btn btn-outline-secondary" onclick="onoff();" data-bs-toggle="tooltip" data-placement="top" title="Ligar / Desligar Contraste">
+      <i class="fas fa-adjust me-1"></i>Contraste
+    </button>
+  </div>
+</div>
 
-  <h2>Alto Contraste</h2>
-  
-  <div class="mb-3"> 
-     <button type="button" id="onoff" value="On" class="btn btn-primary" onclick="onoff();" data-bs-toggle="tooltip" data-placement="top" title="Ligar / Desligar Contraste"><i class="fa fa-adjust"></i><span>Contraste</span></button> 
-  </div> 
-
-
-  <h2>Navegação pelo teclado</h2>
-
-  <p style="margin-bottom: 20px;">O teclado pode facilitar a navegação na web, tornando-a bastante prática e dinâmica. Usando os atalhos disponíveis em leitores de tela e associando-os às teclas de atalho do próprio site, é possível percorrer por vários conteúdos e prosseguir diretamente ao desejado. A tecla TAB, disponível em todos os computadores, também fornece a navegação pelo teclado de maneira eficiente. Neste sistema, é possível navegar pelos links do site de maneira ordenada e contínua usando esse recurso. Use a tecla ENTER para acessar cada link encontrado pelo TAB.</p>
+<div class="card mb-3">
+  <div class="card-header">
+    <h2 class="h5 mb-0"><i class="fas fa-keyboard me-1"></i>Navegação pelo teclado</h2>
+  </div>
+  <div class="card-body">
+    <p class="mb-0">O teclado pode facilitar a navegação na web, tornando-a bastante prática e dinâmica. Usando os atalhos disponíveis em leitores de tela e associando-os às teclas de atalho do próprio site, é possível percorrer por vários conteúdos e prosseguir diretamente ao desejado. A tecla TAB, disponível em todos os computadores, também fornece a navegação pelo teclado de maneira eficiente. Neste sistema, é possível navegar pelos links do site de maneira ordenada e contínua usando esse recurso. Use a tecla ENTER para acessar cada link encontrado pelo TAB.</p>
+  </div>
+</div>
 
 <dtml-var js_slot>
 <dtml-var footer_html>

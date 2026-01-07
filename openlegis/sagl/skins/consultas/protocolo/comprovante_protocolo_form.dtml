@@ -1,16 +1,47 @@
-<dtml-var header_html>
+<dtml-if expr="REQUEST.get('modal', '') == '1'">
+  <!DOCTYPE html>
+  <html lang="pt-BR">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Comprovante de Protocolo</title>
+    <dtml-var standard_css_slot>
+  </head>
+  <body>
+  <div class="container-fluid p-3">
+<dtml-else>
+  <dtml-try>
+    <dtml-var header_html>
+  <dtml-except>
+    <!DOCTYPE html>
+    <html lang="pt-BR">
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+      <title>Comprovante de Protocolo</title>
+      <dtml-var standard_css_slot>
+    </head>
+    <body>
+  </dtml-try>
+  <div class="container-fluid">
+</dtml-if>
 
 <script>
-     //<![CDATA[
-         function printFrame() {
-             $('#print_button').hide();
-             window.print();
-             $('#print_button').show();
-         }
-     //]]>
+  //<![CDATA[
+  function printFrame() {
+    const printButton = document.getElementById('print_button');
+    if (printButton) {
+      printButton.style.display = 'none';
+    }
+    window.print();
+    if (printButton) {
+      printButton.style.display = 'block';
+    }
+  }
+  //]]>
 </script>
-
-  <div class="row mt-4">
+<dtml-try>
+<div class="row mt-4">
   <dtml-call expr="REQUEST.set('existe_logo', 0)">
   <dtml-call expr="REQUEST.set('id_logo', sapl_documentos.props_sagl.id_logo)">
   <dtml-in expr="sapl_documentos.props_sagl.objectValues('Image')">
@@ -38,182 +69,202 @@
        </p>
      </div>
 </div>
+<dtml-except>
+<div class="row mt-4">
+  <div class="col-12">
+    <p class="h2 mt-2 mb-1">Casa Legislativa</p>
+  </div>
+</div>
+</dtml-try>
 
- <table class="table mt-5">
-  <thead>
-    <tr>
-     <td colspan="2">
-       <dtml-if expr="ind_anulado==1"> <span class="anulado">** NULO **</span></dtml-if>
-       <p class="h4 text-center font-weight-bold mb-0">Comprovante de Protocolo</p>
-       <dtml-if expr="ind_anulado==1"> <span class="anulado"> ** NULO **</span></dtml-if>
-     </td>
-    </tr>
-  </thead>
-  <tr>
-   <td width="30%">
-   </td>
-   <td width="70%">Código de Autenticidade: 
-   <dtml-if expr="ind_anulado==1"> <span class="anulado"> ** NULO **</span>
-   <dtml-else>
-     <dtml-call "REQUEST.set('codb64', pysc.b64encode_pysc(codigo=cod_protocolo))">
-     <dtml-call "REQUEST.set('autenticacao', codb64)">
-     <dtml-var autenticacao></td>
-   </dtml-if>
-  </tr>  
-  <tr>
-   <td><b>Número / Ano</b></td>
-   <td><dtml-var num_protocolo>/<dtml-var ano_protocolo></td>
-  </tr>
-  <tr>
-   <td><b>Data / Horário</b></td>
-   <td><dtml-var data_protocolo> - <dtml-var hor_protocolo></td>
-  </tr>
-  <tr>
-<dtml-if expr="tip_processo==''">
-    <td><b>Assunto/Ementa</b></td>
-<dtml-elif expr="tip_processo==0">
-    <td><b>Assunto</b></td>
-<dtml-elif expr="tip_processo==1">
-    <td><b>Ementa</b></td>
-</dtml-if>
-    <td style="text-align:justify"><dtml-var txt_assunto_ementa></td>
-  </tr>
-<dtml-if expr="tip_processo!=''">
-  <tr>
-   <td>
-	<dtml-if cod_autor>
-		<b>Autoria</b>
+<dtml-try>
+<div class="card border-0 shadow-sm mt-5 mb-3">
+  <div class="card-header text-center">
+    <dtml-if expr="ind_anulado==1">
+      <span class="badge bg-danger mb-2">** NULO **</span>
+    </dtml-if>
+    <h4 class="mb-0">Comprovante de Protocolo</h4>
+  </div>
+  <div class="card-body">
+    <div class="row g-3 mb-3">
+      <div class="col-12">
+        <small class="text-muted d-block">Código de Autenticidade</small>
+        <dtml-if expr="ind_anulado==1">
+          <span class="badge bg-danger">** NULO **</span>
+        <dtml-else>
+          <dtml-try>
+            <dtml-call "REQUEST.set('codb64', pysc.b64encode_pysc(codigo=cod_protocolo))">
+            <dtml-call "REQUEST.set('autenticacao', codb64)">
+            <strong class="font-monospace"><dtml-var autenticacao></strong>
+          <dtml-except>
+            <strong class="font-monospace"><dtml-var cod_protocolo></strong>
+          </dtml-try>
         </dtml-if>
-
-	<dtml-if txt_interessado>
-		<b>Interessado(a)</b>
+      </div>
+      <div class="col-12 col-md-6">
+        <small class="text-muted d-block">Número / Ano</small>
+        <strong><dtml-var num_protocolo>/<dtml-var ano_protocolo></strong>
+      </div>
+      <div class="col-12 col-md-6">
+        <small class="text-muted d-block">Data / Horário</small>
+        <div>
+          <i class="fas fa-calendar-alt me-1 text-muted"></i>
+          <strong><dtml-var data_protocolo></strong>
+          <i class="fas fa-clock me-1 ms-2 text-muted"></i>
+          <strong><dtml-var hor_protocolo></strong>
+        </div>
+      </div>
+      <div class="col-12">
+        <small class="text-muted d-block">
+          <dtml-if expr="tip_processo==''">Assunto/Ementa
+          <dtml-elif expr="tip_processo==0">Assunto
+          <dtml-elif expr="tip_processo==1">Ementa
+          <dtml-else>Assunto/Ementa
+          </dtml-if>
+        </small>
+        <div class="text-justify"><dtml-var txt_assunto_ementa></div>
+      </div>
+    </div>
+    <dtml-if expr="tip_processo!=''">
+      <div class="row g-3 mb-3">
+        <dtml-if cod_autor>
+          <div class="col-12">
+            <small class="text-muted d-block">Autoria</small>
+            <dtml-in expr="zsql.autor_obter_zsql(cod_autor=cod_autor)">
+              <dtml-if cod_parlamentar>
+                <dtml-in expr="zsql.parlamentar_obter_zsql(cod_parlamentar=cod_parlamentar)">
+                  <i class="fas fa-user me-1 text-muted"></i>
+                  <strong><dtml-var nom_parlamentar missing></strong>
+                </dtml-in>
+              <dtml-elif cod_comissao>
+                <dtml-in expr="zsql.comissao_obter_zsql(cod_comissao=cod_comissao)">
+                  <i class="fas fa-users me-1 text-muted"></i>
+                  <strong><dtml-var nom_comissao missing></strong>
+                </dtml-in>
+              <dtml-else>
+                <i class="fas fa-user me-1 text-muted"></i>
+                <strong><dtml-var nom_autor missing null=""></strong>
+              </dtml-if>
+            </dtml-in>
+          </div>
         </dtml-if>
-   </td>
-   <td>
-	<dtml-if cod_autor>
-		<dtml-in expr="zsql.autor_obter_zsql(cod_autor=cod_autor)">
-
-	<dtml-if cod_parlamentar>
-		<dtml-in expr="zsql.parlamentar_obter_zsql(cod_parlamentar=cod_parlamentar)">
-		<dtml-var nom_parlamentar><br /> 
-		</dtml-in>
-
-	<dtml-elif cod_comissao>
-		<dtml-in expr="zsql.comissao_obter_zsql(cod_comissao=cod_comissao)">
-		<dtml-var nom_comissao><br />
-		</dtml-in>
-
-	<dtml-else>
-		<dtml-var nom_autor missing null=""><br />
-	</dtml-if>
-		</dtml-in>
-	</dtml-if>
-
-	<dtml-if txt_interessado>
-		<dtml-var txt_interessado> <br />
-	</dtml-if>
-   </td>
-  </tr>
-  <tr>
-   <td><b>Natureza do Processo</b></td>
-   <td>
-	<dtml-if expr="tip_processo==0">
-		Administrativo
-	</dtml-if>
-
-	<dtml-if expr="tip_processo==1">
-		Legislativo
-	</dtml-if>
-   </td>
-  </tr>
-  <tr>
-   <td>
-	<dtml-if expr="tip_processo==0">
-		<b>Tipo de Documento</b>
-	</dtml-if>
-
-	<dtml-if expr="tip_processo==1">
-		<b>Tipo de Matéria</b>
-	</dtml-if>
-  </td>
-   <td>
-	<dtml-if expr="tip_processo==0">
-	    <dtml-var des_tipo_documento>
-              <dtml-in expr="zsql.documento_administrativo_obter_zsql(num_protocolo=num_protocolo, ano_documento=ano_protocolo)">
-                 <dtml-if sequence-start>
-                    nº <dtml-var num_documento>/<dtml-var ano_documento>
-                 </dtml-if>
-               </dtml-in>		
-	<dtml-elif expr="tip_processo==1 and tip_natureza_materia==1">
+        <dtml-if txt_interessado>
+          <div class="col-12">
+            <small class="text-muted d-block">Interessado(a)</small>
+            <strong><dtml-var txt_interessado missing></strong>
+          </div>
+        </dtml-if>
+        <div class="col-12 col-md-6">
+          <small class="text-muted d-block">Natureza do Processo</small>
+          <dtml-if expr="tip_processo==0">
+            <span class="badge bg-info">Administrativo</span>
+          </dtml-if>
+          <dtml-if expr="tip_processo==1">
+            <span class="badge bg-primary">Legislativo</span>
+          </dtml-if>
+        </div>
+        <div class="col-12 col-md-6">
+          <small class="text-muted d-block">
+            <dtml-if expr="tip_processo==0">Tipo de Documento</dtml-if>
+            <dtml-if expr="tip_processo==1">Tipo de Matéria</dtml-if>
+          </small>
+          <dtml-if expr="tip_processo==0">
+            <strong><dtml-var des_tipo_documento></strong>
+            <dtml-in expr="zsql.documento_administrativo_obter_zsql(num_protocolo=num_protocolo, ano_documento=ano_protocolo)">
+              <dtml-if sequence-start>
+                nº <strong><dtml-var num_documento>/<dtml-var ano_documento></strong>
+              </dtml-if>
+            </dtml-in>		
+          <dtml-elif expr="tip_processo==1 and tip_natureza_materia==1">
             <dtml-in expr="zsql.tipo_materia_legislativa_obter_zsql(tip_materia=tip_materia,tip_natureza='P',ind_excluido=0)">
-                  <dtml-var des_tipo_materia>
+              <strong><dtml-var des_tipo_materia></strong>
             </dtml-in>
-	<dtml-elif expr="tip_processo==1 and tip_natureza_materia==2">
+          <dtml-elif expr="tip_processo==1 and tip_natureza_materia==2">
             <dtml-in expr="zsql.tipo_materia_legislativa_obter_zsql(tip_materia=tip_materia,tip_natureza='A',ind_excluido=0)">
-                  <dtml-var des_tipo_materia>
+              <strong><dtml-var des_tipo_materia></strong>
             </dtml-in>
             <dtml-in expr="zsql.materia_obter_zsql(cod_materia=cod_materia_principal,ind_excluido=0)">
-              - <dtml-var sgl_tipo_materia> <dtml-var num_ident_basica>/<dtml-var ano_ident_basica>
+              - <strong><dtml-var sgl_tipo_materia> <dtml-var num_ident_basica>/<dtml-var ano_ident_basica></strong>
             </dtml-in>
-	<dtml-elif expr="tip_processo==1 and tip_natureza_materia==3">
+          <dtml-elif expr="tip_processo==1 and tip_natureza_materia==3">
             <dtml-in expr="zsql.tipo_documento_obter_zsql(tip_documento=tip_materia, ind_excluido=0)">
-                  <dtml-var des_tipo_documento>
+              <strong><dtml-var des_tipo_documento></strong>
             </dtml-in>
             <dtml-in expr="zsql.materia_obter_zsql(cod_materia=cod_materia_principal,ind_excluido=0)">
-              - <dtml-var sgl_tipo_materia> <dtml-var num_ident_basica>/<dtml-var ano_ident_basica>
+              - <strong><dtml-var sgl_tipo_materia> <dtml-var num_ident_basica>/<dtml-var ano_ident_basica></strong>
             </dtml-in>
-	<dtml-elif expr="tip_processo==1 and tip_natureza_materia==4">
+          <dtml-elif expr="tip_processo==1 and tip_natureza_materia==4">
             <dtml-in expr="zsql.autor_obter_zsql(cod_autor=cod_autor, ind_excluido=0)">
-               <dtml-call "REQUEST.set('cod_comissao', cod_comissao)">
+              <dtml-call "REQUEST.set('cod_comissao', cod_comissao)">
             </dtml-in>
             <dtml-in expr="zsql.comissao_obter_zsql(cod_comissao=cod_comissao, ind_excluido=0)">
-               <dtml-call "REQUEST.set('sgl_comissao', sgl_comissao)">
+              <dtml-call "REQUEST.set('sgl_comissao', sgl_comissao)">
             </dtml-in>
             <dtml-in expr="zsql.relatoria_obter_zsql(cod_materia=cod_materia_principal, cod_comissao=cod_comissao, num_protocolo=num_protocolo, ind_excluido=0)">
-                  Parecer <dtml-var sgl_comissao>
+              <strong>Parecer <dtml-var sgl_comissao></strong>
             </dtml-in>
             <dtml-in expr="zsql.materia_obter_zsql(cod_materia=cod_materia_principal,ind_excluido=0)">
-              - <dtml-var sgl_tipo_materia> <dtml-var num_ident_basica>/<dtml-var ano_ident_basica>
+              - <strong><dtml-var sgl_tipo_materia> <dtml-var num_ident_basica>/<dtml-var ano_ident_basica></strong>
             </dtml-in>
-	</dtml-if>
-  </td>
-  </tr>
-</dtml-if>
-<dtml-if num_paginas>
-  <tr>
-   <td><b>Número de Páginas</b></td>
-   <td><dtml-var num_paginas></td>
-  </tr>
-</dtml-if>
- <dtml-if txt_observacao>
-  <tr>
-   <td><b>Observações</b></td>
-   <td style="text-align:justify"><dtml-var txt_observacao missing></td>
-  </tr>
- </dtml-if>
-  <tr>
-   <td width="30%"><b>Recebido por:</b></td>
-   <td width="70%"><dtml-var txt_user_protocolo missing null></td>
-  </tr>
-<dtml-if expr="tip_processo==0 and codigo_acesso!=None">
-  <tr>
-    <td>
-       <b>Chave de Acesso</b>
-    </td>
-    <td>
-       <dtml-var codigo_acesso>
-    </td>
-   </tr>
-</dtml-if>
- </table>
- <dtml-if expr="tip_processo==0 and codigo_acesso!=None">
-    <p align="center">
-       <b>Consulta de Protocolo</b>: <dtml-var BASE1>/consultas/protocolo</br>
-    </p>
- </dtml-if>
-<p align="center">
-  <input class="btn btn-primary d-print-none" type="button" value="Imprimir" onClick="printFrame();return false;" />
-</p>
+          </dtml-if>
+        </div>
+      </div>
+    </dtml-if>
+    <dtml-if num_paginas>
+      <div class="row g-3 mb-3">
+        <div class="col-12">
+          <small class="text-muted d-block">Número de Páginas</small>
+          <strong><dtml-var num_paginas></strong>
+        </div>
+      </div>
+    </dtml-if>
+    <dtml-if txt_observacao>
+      <div class="row g-3 mb-3">
+        <div class="col-12">
+          <small class="text-muted d-block">Observações</small>
+          <div class="text-justify"><dtml-var txt_observacao></div>
+        </div>
+      </div>
+    </dtml-if>
+    <div class="row g-3 mb-3">
+      <div class="col-12">
+        <small class="text-muted d-block">Recebido por</small>
+        <strong><dtml-var txt_user_protocolo missing null></strong>
+      </div>
+    </div>
+    <dtml-if expr="tip_processo==0 and codigo_acesso">
+      <div class="row g-3 mb-3">
+        <div class="col-12">
+          <small class="text-muted d-block">Chave de Acesso</small>
+          <strong class="font-monospace"><dtml-var codigo_acesso></strong>
+        </div>
+      </div>
+      <div class="alert alert-info mb-3">
+        <i class="fas fa-info-circle me-2"></i>
+        <strong>Consulta de Protocolo:</strong> <dtml-var BASE1>/consultas/protocolo
+      </div>
+    </dtml-if>
+  </div>
+</div>
 
-<dtml-var js_slot>
-<dtml-var footer_html>
+<div class="d-flex justify-content-center mb-3">
+  <button type="button" class="btn btn-primary d-print-none" id="print_button" onclick="printFrame();return false;">
+    <i class="fas fa-print me-1"></i>Imprimir
+  </button>
+</div>
+</dtml-try>
+
+<dtml-if expr="REQUEST.get('modal', '') == '1'">
+  </div><!-- container-fluid p-3 -->
+  </body>
+</html>
+<dtml-else>
+  </div><!-- container-fluid -->
+  <dtml-try>
+    <dtml-var js_slot>
+    <dtml-var footer_html>
+  <dtml-except>
+    </body>
+    </html>
+  </dtml-try>
+</dtml-if>

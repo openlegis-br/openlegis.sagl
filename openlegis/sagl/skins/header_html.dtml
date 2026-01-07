@@ -9,7 +9,7 @@
 <html lang="pt-br">
     <head>
         <meta charset="utf-8" />
-        <title>SAGL</title>
+        <title><dtml-if expr="REQUEST.get('firstHeading', '')"><dtml-var "REQUEST.get('firstHeading', '')"> — </dtml-if>SAGL</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta content="Gestão de Processos Digitais" name="description" />
         <meta content="OpenLegis" name="author" />
@@ -45,6 +45,8 @@
         <link href="<dtml-var portal_url>/assets/css/icons.min.css" rel="stylesheet" type="text/css" />
         <!-- App Css-->
         <link href="<dtml-var portal_url>/assets/css/app.css" id="app-style" rel="stylesheet" type="text/css" />
+        <!-- SAGL 6.0 Tema Sóbrio - DESABILITADO -->
+        <!-- <link href="<dtml-var portal_url>/assets/css/sagl-v6-sobrio.css" rel="stylesheet" type="text/css" /> -->
         <link href="<dtml-var portal_url>/assets/libs/bootstrap-datepicker/css/bootstrap-datepicker.min.css" rel="stylesheet">
     </head>
 
@@ -105,9 +107,9 @@
                    <div class="d-flex">
                       <a class="navbar-brand navbar waves-effect waves-light d-flex ps-2 ps-sm-2 pe-2 pe-sm-5 pt-0 pb-0" href="<dtml-var portal_url>">
                         <dtml-if expr="not existe_logo">
-                           <img class="logo" src="<dtml-var portal_url>/imagens/brasao.gif" alt="Brasão da instituição" height="75">
+                           <img class="logo" src="<dtml-var portal_url>/imagens/brasao.gif" alt="<dtml-var "sapl_documentos.props_sagl.nom_casa"> - Brasão" height="75">
                         <dtml-else>
-                           <img class="logo" src="sapl_documentos/props_sagl/<dtml-var id_logo>" alt="Logo da instituição" height="75" style="max-width: 75px" />
+                           <img class="logo" src="sapl_documentos/props_sagl/<dtml-var id_logo>" alt="<dtml-var "sapl_documentos.props_sagl.nom_casa"> - Logo" height="75" style="max-width: 75px" />
                         </dtml-if>
                         <div class="d-flex flex-column pt-0 pb-0">
                            <h5 class="siteTitle text-white text-uppercase mb-0"><dtml-var "sapl_documentos.props_sagl.nom_casa"></h5>
@@ -176,14 +178,14 @@
                              <dtml-if expr="AUTHENTICATED_USER.has_role(['Authenticated'])">
                                 <li class="dropdown-header">Complementos</li>
                                 <dtml-if expr="sapl_documentos.props_sagl.restpki_access_token!=''">
-                                  <li><a href="https://get.webpkiplugin.com/" target="_blank" class="dropdown-item">WebPKI</a></li>
+                                  <li><a href="https://get.webpkiplugin.com/" target="_blank" rel="noopener noreferrer" class="dropdown-item">WebPKI</a></li>
                                </dtml-if>
-                               <li><a href="https://www.libreoffice.org/download/" target="_blank" class="dropdown-item">LibreOffice</a></li>
-                               <li><a href="https://www.openlegis.com.br/downloads/zopeedit-win32-1.0.0.exe" class="dropdown-item">ZopeEdit</a></li>
+                               <li><a href="https://www.libreoffice.org/download/" target="_blank" rel="noopener noreferrer" class="dropdown-item">LibreOffice</a></li>
+                               <li><a href="https://www.openlegis.com.br/downloads/zopeedit-win32-1.0.0.exe" target="_blank" rel="noopener noreferrer" class="dropdown-item">ZopeEdit</a></li>
                              <li class="dropdown-divider"></li>
                              <li class="dropdown-header">Suporte ao Usuário</li>
-                             <li><a href="https://suporte.openlegis.com.br" target="_blank" class="dropdown-item"><i class="fas fa-headset"></i> Criar Tíquete</a></li>                               
-                             <li><a href="https://wa.me/message/YA2E2WVF6XFSI1" target="_blank" class="dropdown-item"><i class="fab fa-whatsapp"></i> Whatsapp</a></li>            
+                             <li><a href="https://suporte.openlegis.com.br" target="_blank" rel="noopener noreferrer" class="dropdown-item"><i class="fas fa-headset"></i> Criar Tíquete</a></li>                               
+                             <li><a href="https://wa.me/message/YA2E2WVF6XFSI1" target="_blank" rel="noopener noreferrer" class="dropdown-item"><i class="fab fa-whatsapp"></i> Whatsapp</a></li>            
                            </ul>
                           </dtml-if>                   
                        </div>
@@ -230,12 +232,12 @@
                                 <dtml-if cod_parlamentar_corrente>
                                    <dtml-call expr="REQUEST.set('id_foto', str(cod_parlamentar_corrente)+'_foto_parlamentar')">
                                       <dtml-if expr="hasattr(sapl_documentos.parlamentar.fotos,id_foto)">
-                                         <img class="rounded-circle header-profile-user" src="<dtml-var portal_url>/sapl_documentos/parlamentar/fotos/<dtml-var id_foto>" alt="Foto do perfil de <dtml-var AUTHENTICATED_USER>">
+                                         <img class="rounded-circle header-profile-user" src="<dtml-var portal_url>/sapl_documentos/parlamentar/fotos/<dtml-var id_foto>" alt="Foto de perfil de <dtml-var AUTHENTICATED_USER>">
                                       <dtml-else>
-                                         <img class="rounded-circle header-profile-user" src="<dtml-var portal_url>/assets/images/users/user-icon.jpg" alt="Ícone de usuário">
+                                         <img class="rounded-circle header-profile-user" src="<dtml-var portal_url>/assets/images/users/user-icon.jpg" alt="Foto de perfil padrão de <dtml-var AUTHENTICATED_USER>">
                                       </dtml-if>
                                 <dtml-else>
-                                   <img class="rounded-circle header-profile-user" src="<dtml-var portal_url>/assets/images/users/user-icon.jpg" alt="Ícone de usuário">
+                                   <img class="rounded-circle header-profile-user" src="<dtml-var portal_url>/assets/images/users/user-icon.jpg" alt="Foto de perfil padrão de <dtml-var AUTHENTICATED_USER>">
                                 </dtml-if>
                                 <span class="d-none d-xl-inline-block ms-1"><dtml-var AUTHENTICATED_USER></span>
                                 <i class="mdi mdi-chevron-down d-none d-xl-inline-block" aria-hidden="true"></i>
@@ -275,7 +277,7 @@
                     </dtml-if>
                         <div class="dropdown d-none d-md-inline-block">
                             <button type="button" class="btn header-item noti-icon right-bar-toggle waves-effect waves-light" aria-label="Abrir preferências">
-                                <i class="mdi mdi-spin mdi-cog" aria-hidden="true"></i>
+                                <i class="mdi mdi-cog" aria-hidden="true"></i>
                             </button>
                         </div>
 
@@ -323,7 +325,7 @@
                                         <i class="mdi mdi-buffer me-2"></i>Atividade Legislativa
                                     </a>
                                     <div class="dropdown-menu dropdown-menu-left" aria-labelledby="topnav-atividade">
-                                      <a class="dropdown-item" href="<dtml-var portal_url>/consultas/materia">Pesquisa de Matérias</a>
+                                      <a class="dropdown-item" href="<dtml-var portal_url>/consultas/materia/pesquisa_materias">Pesquisa de Matérias</a>
                                       <div class="dropdown">
                                         <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-sessao" role="button"><dtml-var expr="sapl_documentos.props_sagl.reuniao_sessao_plural"> Plenárias <div class="arrow-down"></div></a>
                                           <div class="dropdown-menu" aria-labelledby="topnav-sessao">
@@ -352,7 +354,7 @@
                                         <i class="mdi mdi-scale-balance me-2"></i>Legislação
                                     </a>
                                     <div class="dropdown-menu dropdown-menu-left" aria-labelledby="topnav-leis">
-                                      <a class="dropdown-item" href="<dtml-var portal_url>/consultas/norma_juridica">Pesquisa de Legislação</a>
+                                      <a class="dropdown-item" href="<dtml-var portal_url>/consultas/norma_juridica/pesquisa_normas">Pesquisa de Legislação</a>
                                       <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Norma'])">
                                         <a class="dropdown-item" href="<dtml-var portal_url>/cadastros/norma_juridica/recebimento_normas">Recebimento de Normas</a>
                                       </dtml-if>

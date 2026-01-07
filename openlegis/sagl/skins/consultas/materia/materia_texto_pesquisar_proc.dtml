@@ -6,7 +6,7 @@
   </div>
   <div class="col-12 col-sm-6 text-start text-sm-end mb-2">
     <div class="btn-group" role="group">
-     <a class="btn btn-light" href="<dtml-var portal_url>/consultas/materia" ><i class="fa fa-fw fa-search"></i> Pesquisa</a>
+     <a class="btn btn-light" href="<dtml-var portal_url>/consultas/materia/pesquisa_materias" ><i class="fa fa-fw fa-search"></i> Pesquisa</a>
      <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia'])">         
         <a class="btn btn-primary" href="<dtml-var portal_url>/cadastros/materia/materia_form_resumido" ><i class="fa fa-fw fa-plus"></i> Incluir Matéria</a>
      </dtml-if>   
@@ -294,7 +294,7 @@
       <dtml-if "hasattr(sapl_documentos.materia,texto_original)">
           <dtml-let isAnon="portal_membership.isAnonymousUser()">
              <dtml-if expr="not isAnon">
-                <a class="btn btn-sm btn-primary" href="<dtml-var portal_url>/consultas/materia/pasta_digital/?cod_materia=<dtml-var cod_materia>&action=pasta" target="_blank"><i class="far fa-folder-open"></i> Pasta Digital</a>
+                <a class="btn btn-sm btn-primary" href="<dtml-var portal_url>/@@pasta_digital?cod_materia=<dtml-var cod_materia>&action=pasta" target="_blank"><i class="far fa-folder-open"></i> Pasta Digital</a>
              </dtml-if>
           </dtml-let>
           <a class="btn btn-sm btn-light" href="<dtml-var portal_url>/pysc/download_materia_pysc?cod_materia=<dtml-var expr="pysc.b64encode_pysc(codigo=cod_materia)">&texto_original=1" target="_blank"><i class="far fa-file-pdf"></i> Texto Integral</a>

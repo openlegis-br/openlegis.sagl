@@ -5,91 +5,120 @@
   <dtml-call expr="REQUEST.set('sgl_comissao', sgl_comissao)">
 </dtml-in>
 
- <div class="row mb-3">
-  <div class="col-9 col-md-8 d-flex align-items-center">
-    <h1 class="firstHeading font-size-18 mb-0"><dtml-var nom_comissao></h1>
+<div class="row mb-3">
+  <div class="col-12 col-md-9 d-flex align-items-center">
+    <h1 class="firstHeading font-size-18 mb-0">Pareceres Emitidos - <dtml-var nom_comissao></h1>
   </div>
-  <div class="col-3 col-md-4">
-    <div class="input-group mt-1 mt-md-0 d-flex justify-content-end">
-   <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia'])"> 
-      <a class="btn btn-light" href="<dtml-var portal_url>/cadastros/comissao/comissao_mostrar_proc?cod_comissao=<dtml-var cod_comissao>"><i class="fas fa-undo"></i> Voltar</a>  
-   <dtml-else>
-      <a class="btn btn-light" href="<dtml-var portal_url>/consultas/comissao/comissao_mostrar_proc?cod_comissao=<dtml-var cod_comissao>"><i class="fas fa-undo"></i> Voltar</a>    
-   </dtml-if>  
-    </div>
+  <div class="col-12 col-md-3 text-start text-md-end">
+    <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia'])"> 
+      <a class="btn btn-outline-secondary btn-sm" href="<dtml-var portal_url>/cadastros/comissao/comissao_mostrar_proc?cod_comissao=<dtml-var cod_comissao>">
+        <i class="fas fa-arrow-left me-1"></i>Voltar
+      </a>  
+    <dtml-else>
+      <a class="btn btn-outline-secondary btn-sm" href="<dtml-var portal_url>/consultas/comissao/comissao_mostrar_proc?cod_comissao=<dtml-var cod_comissao>">
+        <i class="fas fa-arrow-left me-1"></i>Voltar
+      </a>    
+    </dtml-if>  
   </div>
- </div>
-
-<div class="row">
- <div class="col-12">
-      <legend class="font-size-16">Pareceres Emitidos</legend>
- </div>
 </div>
 
-<div class="row">
- <div class="col-12 mb-4">
-   <label class="form-label" for="ano_parecer">Selecione o ano</label>
-   <select class="form-select jumpmenu" id="ano_parecer" name="ano_parecer">
-     <option></option>
-     <dtml-in expr="pareceres(listar='anos', cod_comissao=cod_comissao)">
-        <option value="<dtml-var ACTUAL_URL>?cod_comissao=<dtml-var cod_comissao>&ano=<dtml-var sequence-item>"
-           <dtml-if expr="_.has_key('ano') and _.int(ano)==_.int(_['sequence-item'])"> selected</dtml-if>
-        ><dtml-var sequence-item></option>     
-     </dtml-in>
-   </select>
- </div>
+<div class="card border-0 shadow-sm mb-4">
+  <div class="card-body">
+    <div class="row">
+      <div class="col-12 col-md-6">
+        <label class="form-label" for="ano_parecer">
+          <i class="fas fa-calendar-alt me-1"></i>Selecione o ano
+        </label>
+        <select class="form-select jumpmenu" id="ano_parecer" name="ano_parecer">
+          <option value="">Todos os anos</option>
+          <dtml-in expr="pareceres(listar='anos', cod_comissao=cod_comissao)">
+            <option value="<dtml-var ACTUAL_URL>?cod_comissao=<dtml-var cod_comissao>&ano=<dtml-var sequence-item>"
+               <dtml-if expr="_.has_key('ano') and _.int(ano)==_.int(_['sequence-item'])"> selected</dtml-if>
+            ><dtml-var sequence-item></option>     
+          </dtml-in>
+        </select>
+      </div>
+    </div>
+  </div>
 </div>
 
 <dtml-if expr="_.has_key('ano')">
-<div class="table-responsive">
-   <table id="pareceres" class="table w-100 datatable-reverse">
-      <thead class="table-light">
-         <tr>
-           <th>Número</th>
-           <th>Data e Hora</th>
-           <th width="40%">Matéria</th>
-           <th>Relatoria</th>
-           <th>Conclusão</th>           
-         </tr>
-      </thead>
-      <tbody>
-
   <dtml-in expr="pareceres(listar='pareceres', cod_comissao=cod_comissao, ano_parecer=ano)" mapping>
-        <tr>
-          <td>
-               <dtml-call expr="REQUEST.set('texto_parecer', str(cod_relatoria)+'_parecer.pdf')">
-               <dtml-if "hasattr(sapl_documentos.parecer_comissao,texto_parecer)">  
-                 <dtml-let parecer="getattr(sapl_documentos.parecer_comissao,texto_parecer).absolute_url">
-                    <a target="_blank" href="<dtml-var parecer>">        
-                       <dtml-var num_parecer>
+    <dtml-if sequence-start>
+      <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table id="pareceres" class="table table-striped align-middle mb-0 datatable-reverse">
+              <thead class="table-light">
+                <tr>
+                  <th>Número</th>
+                  <th>Data e Hora</th>
+                  <th width="40%">Matéria</th>
+                  <th>Relatoria</th>
+                  <th>Conclusão</th>           
+                </tr>
+              </thead>
+              <tbody>
+    </dtml-if>
+            <tr>
+              <td>
+                <dtml-call expr="REQUEST.set('texto_parecer', str(cod_relatoria)+'_parecer.pdf')">
+                <dtml-if "hasattr(sapl_documentos.parecer_comissao,texto_parecer)">  
+                  <dtml-let parecer="getattr(sapl_documentos.parecer_comissao,texto_parecer).absolute_url">
+                    <a target="_blank" href="<dtml-var parecer>" class="text-decoration-none">
+                      <i class="fas fa-file-pdf me-1 text-danger"></i>
+                      <dtml-var num_parecer>
                     </a>
-                 </dtml-let>
-               <dtml-else>
-                 <dtml-var num_parecer>               
-               </dtml-if>
-          </td>
-          <td> 
+                  </dtml-let>
+                <dtml-else>
+                  <dtml-var num_parecer>               
+                </dtml-if>
+              </td>
+              <td> 
+                <i class="fas fa-calendar-alt me-1 text-muted"></i>
                 <dtml-var dat_parecer>          
-          </td>
-          <td> 
-               <b><a href="<dtml-var portal_url>/consultas/materia/materia_mostrar_proc?cod_materia=<dtml-var cod_materia>" target="_blank"><dtml-var tipo_materia> nº <dtml-var numero_materia>/<dtml-var ano_materia></a> - <dtml-if expr="_.has_key('autoria_materia')"><dtml-var autoria_materia></dtml-if></b> - <dtml-var ementa_materia>
-          </td>          
-          <td>  
-           <dtml-if expr="_.has_key('relator')">
-             <dtml-var relator>
-           </dtml-if>
-          </td>
-          <td> 
-             <dtml-if expr="tip_conclusao=='F'">Favorável</dtml-if><dtml-if expr="tip_conclusao=='C'">Contrário</dtml-if>         
-          </td>          
-        </tr>
-  </dtml-in>
-  
-      </tbody>
-  </table>
-
-</div>
-  
+              </td>
+              <td> 
+                <strong>
+                  <a href="<dtml-var portal_url>/consultas/materia/materia_mostrar_proc?cod_materia=<dtml-var cod_materia>" target="_blank" class="text-decoration-none">
+                    <dtml-var tipo_materia> nº <dtml-var numero_materia>/<dtml-var ano_materia>
+                  </a>
+                  <dtml-if expr="_.has_key('autoria_materia')"> - <dtml-var autoria_materia></dtml-if>
+                </strong>
+                <br>
+                <small class="text-muted"><dtml-var ementa_materia></small>
+              </td>          
+              <td>  
+                <dtml-if expr="_.has_key('relator')">
+                  <i class="fas fa-user me-1 text-muted"></i>
+                  <dtml-var relator>
+                </dtml-if>
+              </td>
+              <td> 
+                <dtml-if expr="tip_conclusao=='F'">
+                  <span class="badge bg-success">Favorável</span>
+                </dtml-if>
+                <dtml-if expr="tip_conclusao=='C'">
+                  <span class="badge bg-danger">Contrário</span>
+                </dtml-if>         
+              </td>          
+            </tr>
+    <dtml-if sequence-end>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </dtml-if>
+    <dtml-else>
+      <div class="alert alert-info mb-0">
+        <i class="fas fa-info-circle me-2"></i>Nenhum parecer encontrado para o ano selecionado.
+      </div>
+    </dtml-in>
+<dtml-else>
+  <div class="alert alert-info mb-0">
+    <i class="fas fa-info-circle me-2"></i>Selecione um ano para visualizar os pareceres.
+  </div>
 </dtml-if>
 
 <script>

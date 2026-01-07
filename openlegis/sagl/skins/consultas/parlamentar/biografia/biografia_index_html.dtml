@@ -1,9 +1,11 @@
-<div style="text-align: justify;">
 <dtml-in expr="zsql.parlamentar_obter_zsql(cod_parlamentar=cod_parlamentar)"> 
   <dtml-if txt_biografia>
+    <div class="text-justify">
       <dtml-var txt_biografia missing null="">
+    </div>
   <dtml-else>
-      Texto não cadastrado.
+    <div class="alert alert-info mb-0">
+      <i class="fas fa-info-circle me-2"></i>Texto não cadastrado.
+    </div>
   </dtml-if>
-</div>
 </dtml-in>

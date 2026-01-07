@@ -1,100 +1,93 @@
 <dtml-var header_html>
 
-<h1 class="firstHeading font-size-18">Tramitação de Matérias</h1> 
-
+<h1 class="firstHeading font-size-18 mb-3">Tramitação de Matérias</h1>
 
 <form method="post" name="tramitacao_materia_form" action="tramitacaoMateriaProc">
-
-   <div class="row">
-    <div class="col-12 col-md-6 mb-3">  
-            <label class="form-label" for="lst_tip_materia">Tipo de Matéria</label>
-             <select id="lst_tip_materia" name="lst_tip_materia" class="select2 form-control selectpicker" data-dropup-auto="false" data-size="6" multiple="multiple" data-actions-box="true" title="Todos" data-header="Tipo de Matéria" style="width: 100%">
-	               <dtml-in expr="zsql.tipo_materia_legislativa_obter_zsql(ind_excluido=0)">
-	                 <option value="<dtml-var tip_materia>">
-	                  <dtml-var des_tipo_materia>
-	                 </option>
-	               </dtml-in>
-	     </select>
-   </div>
-
-   <div class="col-6 col-md-3 mb-3">  
-           <label class="form-label" for="selAno" class="form-label required">Ano da Matéria</label>
-            <select class="form-select" id="selAno" name="selAno">
-                <dtml-in listaAnosMaterias>
-                   <option value="<dtml-var ano_mat>"><dtml-var ano_mat></option>
-                </dtml-in>
-            </select>
-   </div> 
-   <div class="col-6 col-md-3 mb-3">  
-             <label class="form-label" for="dat_przlim">Prazo de Tramitação</label>
-            <div class="input-group" id="datepicker1">
-              <input type="text" class="form-control datepicker" placeholder="dd/mm/aaaa" name="dat_przlim" id="dat_przlim" data-provide="datepicker" data-date-autoclose="true" autocomplete="off" data-date-container="#datepicker1" value="<dtml-var dat_przlim missing>">
-              <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
-           </div>           
-   </div> 
- 
-  </div>
-
-  <div class="row">
-  
-    <div class="col-12 col-md-6 mb-3">
-      <label class="form-label" for="hdn_cod_autor">Autoria</label>
-        <select id="hdn_cod_autor" name="hdn_cod_autor" class="select2 form-control selectpicker" data-size="6" data-live-search="true" title="Todas" data-header="Pesquisar Autor" style="width: 100%">
-              <option value="">Todas</option>
-              <dtml-in expr="zsql.autor_obter_zsql(ind_excluido=0)">
-                <option value="<dtml-var cod_autor>"><dtml-var nom_autor_join></option>
-              </dtml-in>
-       </select>
-    </div>
-
-   
-   <div class="col-12 col-md-6 mb-3">  
-             <label class="form-label" for="Dst_cod_unid_tram_local">Localização</label>
-             <select class="select2 form-select" id="Dst_cod_unid_tram_local" name="Dst_cod_unid_tram_local" style="width: 100%">
-               <option value="">Todas</option>
-                 <dtml-in expr="zsql.unidade_tramitacao_obter_zsql(ind_leg=1)">
-                   <option 
-                  <dtml-if expr="_.has_key('cod_tramitacao') and cod_unid_tram_local==cod_unid_tramitacao"> selected
-                  </dtml-if>
-                 value="<dtml-var cod_unid_tramitacao>">
-               <dtml-if cod_orgao><dtml-var nom_orgao><dtml-else><dtml-var nom_comissao>
-             </dtml-if></option>
-             </dtml-in>
-             </select>
-   </div>  
-
-   <div class="col-12 col-md-6 mb-3">  
-            <label class="form-label" for="lst_status">Situação</label>
-            <select class="select2 form-select" id="lst_status" name="lst_status" style="width: 100%">
-              <option value="">Todas</option>
-              <dtml-in expr="zsql.status_tramitacao_obter_zsql()">
-                <option <dtml-if expr="_.has_key('cod_status')">
-                   </dtml-if>
-                  value="<dtml-var cod_status missing>">
-                         <dtml-var sgl_status> - <dtml-var des_status>
-                </option>
-              </dtml-in>
-            </select>
-   </div>  
-
-   <div class="col-12 col-md-6 mb-3"> 
-            <label class="form-label" for="txt_texto_acao">Texto do Despacho</label>   
-            <input type="text" class="form-control" name="txt_texto_acao" id="txt_texto_acao" maxlenght="50" autocomplete="off" />
-   </div>
-
-  </div>
-     
-  <div class="btn-group text-start">
-    <input class="btn btn-primary" type="submit" value="Pesquisar">
-    <input class="btn btn-secondary" type="reset" value="Limpar">
-  </div>
-
-  <div class="row">
-    <div class="col-md-12 mt-2">
-       <p class="text-muted small font-size-12"><i class="fas fa-asterisk text-danger"></i>  Campos obrigatórios</p>
+  <div class="card mb-3">
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-12 col-md-6">
+          <label class="form-label" for="lst_tip_materia"><i class="fas fa-file-alt me-1"></i>Tipo de Matéria</label>
+          <select id="lst_tip_materia" name="lst_tip_materia" class="select2 form-control selectpicker" data-dropup-auto="false" data-size="6" multiple="multiple" data-actions-box="true" title="Todos" data-header="Tipo de Matéria" style="width: 100%">
+            <dtml-in expr="zsql.tipo_materia_legislativa_obter_zsql(ind_excluido=0)">
+              <option value="<dtml-var tip_materia>">
+                <dtml-var des_tipo_materia>
+              </option>
+            </dtml-in>
+          </select>
+        </div>
+        <div class="col-6 col-md-3">
+          <label class="form-label required" for="selAno"><i class="fas fa-calendar-alt me-1"></i>Ano da Matéria</label>
+          <select class="form-select" id="selAno" name="selAno">
+            <dtml-in listaAnosMaterias>
+              <option value="<dtml-var ano_mat>"><dtml-var ano_mat></option>
+            </dtml-in>
+          </select>
+        </div>
+        <div class="col-6 col-md-3">
+          <label class="form-label" for="dat_przlim"><i class="fas fa-calendar me-1"></i>Prazo de Tramitação</label>
+          <div class="input-group" id="datepicker1">
+            <input type="text" class="form-control datepicker" placeholder="dd/mm/aaaa" name="dat_przlim" id="dat_przlim" data-provide="datepicker" data-date-autoclose="true" autocomplete="off" data-date-container="#datepicker1" value="<dtml-var dat_przlim missing>">
+            <span class="input-group-text"><i class="fas fa-calendar"></i></span>
+          </div>
+        </div>
+        <div class="col-12 col-md-6">
+          <label class="form-label" for="hdn_cod_autor"><i class="fas fa-user me-1"></i>Autoria</label>
+          <select id="hdn_cod_autor" name="hdn_cod_autor" class="select2 form-control selectpicker" data-size="6" data-live-search="true" title="Todas" data-header="Pesquisar Autor" style="width: 100%">
+            <option value="">Todas</option>
+            <dtml-in expr="zsql.autor_obter_zsql(ind_excluido=0)">
+              <option value="<dtml-var cod_autor>"><dtml-var nom_autor_join></option>
+            </dtml-in>
+          </select>
+        </div>
+        <div class="col-12 col-md-6">
+          <label class="form-label" for="Dst_cod_unid_tram_local"><i class="fas fa-building me-1"></i>Localização</label>
+          <select class="select2 form-select" id="Dst_cod_unid_tram_local" name="Dst_cod_unid_tram_local" style="width: 100%">
+            <option value="">Todas</option>
+            <dtml-in expr="zsql.unidade_tramitacao_obter_zsql(ind_leg=1)">
+              <option
+                <dtml-if expr="_.has_key('cod_tramitacao') and cod_unid_tram_local==cod_unid_tramitacao"> selected
+                </dtml-if>
+                value="<dtml-var cod_unid_tramitacao>">
+                <dtml-if cod_orgao><dtml-var nom_orgao><dtml-else><dtml-var nom_comissao>
+              </dtml-if></option>
+            </dtml-in>
+          </select>
+        </div>
+        <div class="col-12 col-md-6">
+          <label class="form-label" for="lst_status"><i class="fas fa-info-circle me-1"></i>Situação</label>
+          <select class="select2 form-select" id="lst_status" name="lst_status" style="width: 100%">
+            <option value="">Todas</option>
+            <dtml-in expr="zsql.status_tramitacao_obter_zsql()">
+              <option
+                <dtml-if expr="_.has_key('cod_status')">
+                </dtml-if>
+                value="<dtml-var cod_status missing>">
+                <dtml-var sgl_status> - <dtml-var des_status>
+              </option>
+            </dtml-in>
+          </select>
+        </div>
+        <div class="col-12 col-md-6">
+          <label class="form-label" for="txt_texto_acao"><i class="fas fa-search me-1"></i>Texto do Despacho</label>
+          <input type="text" class="form-control" name="txt_texto_acao" id="txt_texto_acao" maxlength="50" autocomplete="off" />
+        </div>
+        <div class="col-12">
+          <div class="btn-group">
+            <button class="btn btn-primary" type="submit">
+              <i class="fas fa-search me-1"></i>Pesquisar
+            </button>
+            <button class="btn btn-outline-secondary" type="reset">
+              <i class="fas fa-eraser me-1"></i>Limpar
+            </button>
+          </div>
+        </div>
+        <div class="col-12">
+          <p class="text-muted small mb-0"><i class="fas fa-asterisk text-danger"></i> Campos obrigatórios</p>
+        </div>
+      </div>
     </div>
   </div>
-
 </form>
 
 <dtml-var js_slot>

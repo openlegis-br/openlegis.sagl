@@ -8,35 +8,50 @@
 
 <dtml-call expr="REQUEST.set('ano_prop_anterior',0)">
 
-<table class="table">
-  <dtml-in expr="zsql.parlamentar_obter_proposicao_zsql(cod_parlamentar=cod_parlamentar)"> 
+<dtml-in expr="zsql.parlamentar_obter_proposicao_zsql(cod_parlamentar=cod_parlamentar)"> 
+  <dtml-if sequence-start>
+    <div class="table-responsive">
+      <table class="table table-striped align-middle">
+        <thead class="table-light">
+          <tr>
+            <th>Tipo de Matéria</th>
+            <th class="text-center">Quantidade</th>
+          </tr>
+        </thead>
+        <tbody>
+  </dtml-if>
     <dtml-if expr="ano_prop_anterior!=ano_ident_basica">
-      <thead>
-       <tr class="text-start">
-          <dtml-call expr="REQUEST.set('ano_prop_anterior',ano_ident_basica)">   
-          <td colspan="3"><b>Ano:</b> <dtml-var ano_ident_basica></td>
-       </tr>
-       </thead>
+      <tr class="table-secondary">
+        <dtml-call expr="REQUEST.set('ano_prop_anterior',ano_ident_basica)">   
+        <td colspan="2" class="fw-bold">
+          <i class="fas fa-calendar-alt me-2"></i>Ano: <dtml-var ano_ident_basica>
+        </td>
+      </tr>
     </dtml-if>    
     <tr> 
       <td>
-	   <a href="<dtml-var portal_url>/consultas/materia/materia_pesquisar_proc?incluir=0&existe_ocorrencia=0&lst_tip_materia=<dtml-var tip_materia>&txt_numero=&txt_prot_pref=&txt_ano=<dtml-var ano_ident_basica>&txt_npc=&txt_num_protocolo=&dt_apres=&dt_apres2=&dt_public=&dt_public2=&hdn_txt_autor=&hdn_cod_autor=<dtml-var cod_autor>&lst_tip_autor=Parlamentar&lst_cod_partido=&txt_relator=&txt_assunto=&rad_tramitando=&lst_localizacao=&lst_tramitou=&lst_status=&rd_ordenacao=1&chk_coautor=0"><dtml-var des_tipo_materia></a>
-	   <a href="#" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Gráfico de Proposições" data-src="proposicoes/grafico_html?cod_autor=<dtml-var cod_autor>&txt_ano=<dtml-var ano_ident_basica>&tip_materia_sel=<dtml-var tip_materia>&modal=1">
-                <i class="fa fa-fw fa-chart-area"></i>
-            </a>
+        <a href="<dtml-var portal_url>/consultas/materia/materia_pesquisar_proc?incluir=0&existe_ocorrencia=0&lst_tip_materia=<dtml-var tip_materia>&txt_numero=&txt_prot_pref=&txt_ano=<dtml-var ano_ident_basica>&txt_npc=&txt_num_protocolo=&dt_apres=&dt_apres2=&dt_public=&dt_public2=&hdn_txt_autor=&hdn_cod_autor=<dtml-var cod_autor>&lst_tip_autor=Parlamentar&lst_cod_partido=&txt_relator=&txt_assunto=&rad_tramitando=&lst_localizacao=&lst_tramitou=&lst_status=&rd_ordenacao=1&chk_coautor=0" class="text-decoration-none">
+          <dtml-var des_tipo_materia>
+        </a>
+        <a href="#" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Gráfico de Proposições" data-src="proposicoes/grafico_html?cod_autor=<dtml-var cod_autor>&txt_ano=<dtml-var ano_ident_basica>&tip_materia_sel=<dtml-var tip_materia>&modal=1" class="text-decoration-none ms-2">
+          <i class="fas fa-chart-area"></i>
+        </a>
       </td>
       <td class="text-center"><dtml-var qtde></td>
     </tr>
     <dtml-if sequence-end>
-         <dtml-if expr="total>0">
-         <tr class="table-secondary">
-            <td class="font-weight-bold">Total de Proposições</td>
-            <td class="text-center"><b><dtml-var total></b></td>
-         </tr>
-         </dtml-if>
+      <dtml-if expr="total>0">
+        <tr class="table-secondary">
+          <td class="fw-bold">Total de Proposições</td>
+          <td class="text-center fw-bold"><dtml-var total></td>
+        </tr>
+      </dtml-if>
+        </tbody>
+      </table>
+    </div>
     </dtml-if sequence-end>
-
   <dtml-else>
-        <p>Nenhuma proposição cadastrada.</p>
+    <div class="alert alert-info mb-0">
+      <i class="fas fa-info-circle me-2"></i>Nenhuma proposição cadastrada.
+    </div>
   </dtml-in>
-</table>

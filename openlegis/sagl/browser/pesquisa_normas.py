@@ -3,7 +3,7 @@ from five import grok
 from zope.interface import Interface
 from z3c.saconfig import named_scoped_session
 from openlegis.sagl.models.models import (
-    NormaJuridica, TipoNormaJuridica, TipoSituacaoNorma
+    NormaJuridica, TipoNormaJuridica, TipoSituacaoNorma, VinculoNormaJuridica, TipoVinculoNorma
 )
 from sqlalchemy.orm import joinedload
 from sqlalchemy import and_, or_, func, cast, String, text, asc, desc
@@ -24,15 +24,91 @@ import re
 import logging
 from Products.CMFCore.utils import getToolByName
 from Products.AdvancedQuery import Or, Eq
+from threading import local
 
 logger = logging.getLogger(__name__)
 Session = named_scoped_session('minha_sessao')
+
+# Cache simples em memória para mapa de assuntos (thread-local para segurança)
+_thread_local = local()
+
+def _get_mapa_assunto_cached(session):
+    """
+    Retorna o mapa de assuntos com cache simples.
+    O cache é invalidado a cada requisição (thread-local).
+    """
+    if not hasattr(_thread_local, 'mapa_assunto_cache'):
+        _thread_local.mapa_assunto_cache = {
+            str(row[0]): row[1] for row in session.execute(
+                text("SELECT cod_assunto, des_assunto FROM assunto_norma WHERE ind_excluido=0")
+            )
+        }
+    return _thread_local.mapa_assunto_cache
+
+def _clear_mapa_assunto_cache():
+    """Limpa o cache de assuntos (útil para testes ou quando necessário)"""
+    if hasattr(_thread_local, 'mapa_assunto_cache'):
+        delattr(_thread_local, 'mapa_assunto_cache')
+
+def _is_operador_norma(mtool):
+    """
+    Verifica se o usuário autenticado tem perfil de operador de normas.
+    
+    Considera como operador os perfis:
+    - 'Operador'
+    - 'Operador Norma'
+    
+    Args:
+        mtool: Portal membership tool
+        
+    Returns:
+        bool: True se o usuário é operador, False caso contrário
+    """
+    if mtool.isAnonymousUser():
+        return False
+    member = mtool.getAuthenticatedMember()
+    return member.has_role(['Operador', 'Operador Norma'])
 
 
 def normalize(text):
     if not text:
         return ''
     return ''.join(c for c in unicodedata.normalize('NFD', text) if unicodedata.category(c) != 'Mn').lower()
+
+
+def _filter_monosyllabic_words(palavras):
+    """Filtra palavras monossílabas (stop words) da lista de palavras."""
+    # Lista de palavras monossílabas comuns em português (artigos, preposições, pronomes, etc.)
+    stop_words_monosyllabic = {
+        # Artigos
+        'a', 'à', 'ao', 'aos', 'as', 'da', 'das', 'de', 'do', 'dos', 'e', 'em', 'na', 'nas', 'no', 'nos',
+        'o', 'os', 'um', 'uma', 'uns', 'umas',
+        # Preposições
+        'para', 'por', 'com', 'sem', 'sob', 'sobre', 'entre', 'contra', 'até', 'desde', 'perante', 'mediante',
+        # Pronomes
+        'que', 'se', 'me', 'te', 'nos', 'vos', 'lhe', 'lhes', 'este', 'esta', 'estes', 'estas',
+        'esse', 'essa', 'esses', 'essas', 'aquele', 'aquela', 'aqueles', 'aquelas',
+        # Conjunções
+        'ou', 'mas', 'porém', 'todavia', 'contudo', 'entretanto', 'logo', 'portanto', 'assim', 'então',
+        'também', 'tampouco', 'não', 'nem',
+        # Advérbios
+        'já', 'ainda', 'só', 'sempre', 'nunca', 'jamais', 'agora', 'depois', 'antes', 'hoje', 'ontem',
+        'amanhã', 'aqui', 'aí', 'ali', 'lá', 'cá', 'sim', 'não', 'talvez', 'bem', 'mal',
+        # Verbos auxiliares comuns (formas monossílabas)
+        'é', 'são', 'foi', 'ser', 'ter', 'tem', 'tinha', 'teve', 'há', 'houve', 'era', 'eram', 'foram',
+        'está', 'estão', 'estava', 'estavam', 'esteve', 'estiveram'
+    }
+    
+    # Filtrar palavras monossílabas conhecidas e palavras muito curtas (1-2 caracteres)
+    palavras_filtradas = []
+    for palavra in palavras:
+        palavra_lower = palavra.lower()
+        # Ignorar palavras muito curtas (1-2 caracteres) ou que estão na lista de stop words
+        if len(palavra) <= 2 or palavra_lower in stop_words_monosyllabic:
+            continue
+        palavras_filtradas.append(palavra)
+    
+    return palavras_filtradas
 
 
 def parse_date(value):
@@ -63,8 +139,10 @@ class NormasTableView(grok.View):
                 try:
                     sapl_doc = self.context.restrictedTraverse('sapl_documentos/norma_juridica')
                     catalog = sapl_doc.Catalog
-                    zope_query = Or(Eq('ementa', termo), Eq('PrincipiaSearchSource', termo))
-                    results = catalog.evalAdvancedQuery(zope_query)
+                    from Products.AdvancedQuery import And, Or, Eq, In
+                    query_parts = [Or(Eq('ementa', termo), Eq('PrincipiaSearchSource', termo))]
+                    final_query = And(*query_parts) if len(query_parts) > 1 else query_parts[0]
+                    results = catalog.evalAdvancedQuery(final_query)
                     cods = []
                     for r in results:
                         item_id_raw = r.id
@@ -85,12 +163,50 @@ class NormasTableView(grok.View):
                     logger.error(f"Erro na busca textual via Catálogo Zope: {str(e)}", exc_info=True)
                     return query.filter(expression.false())
             else:
-                like_term = f"%{termo}%"
-                query = query.filter(or_(
-                    NormaJuridica.txt_ementa.ilike(like_term),
-                    NormaJuridica.txt_indexacao.ilike(like_term),
-                    NormaJuridica.txt_observacao.ilike(like_term)
-                ))
+                # Abordagem Híbrida: Remove caracteres especiais e prepara termos
+                termos_limpos = re.sub(r'[^\w\s]', ' ', termo)
+                termos_limpos = ' '.join(termos_limpos.split())  # Remove espaços múltiplos
+                
+                if not termos_limpos:
+                    return query
+                
+                palavras = termos_limpos.split()
+                # Filtrar stop words e palavras muito curtas
+                palavras_filtradas = _filter_monosyllabic_words(palavras)
+                if not palavras_filtradas:
+                    return query
+                
+                # Para cada palavra, criar condição que busca em qualquer campo
+                # OTIMIZAÇÃO: Se a palavra tem 3+ caracteres, usar busca que pode aproveitar índices
+                condicoes_por_palavra = []
+                for palavra in palavras_filtradas:
+                    # Para palavras curtas, usar busca com wildcards (não usa índice mas necessário)
+                    # Para palavras maiores, tentar otimizar quando possível
+                    if len(palavra) >= 3:
+                        # Tentar usar busca que pode aproveitar índices quando o termo começa sem wildcard
+                        # Mas ainda usar ilike para garantir compatibilidade
+                        palavra_term = f"%{palavra}%"
+                    else:
+                        palavra_term = f"%{palavra}%"
+                    
+                    condicao_palavra = or_(
+                        NormaJuridica.txt_ementa.ilike(palavra_term),
+                        NormaJuridica.txt_indexacao.ilike(palavra_term),
+                        NormaJuridica.txt_observacao.ilike(palavra_term)
+                    )
+                    condicoes_por_palavra.append(condicao_palavra)
+                
+                # ESTRATÉGIA: Buscar frase completa OU todas as palavras (AND)
+                # - Frase completa: para resultados exatos (prioridade)
+                # - Todas as palavras (AND): garante que todas as palavras digitadas estejam presentes
+                # Isso garante relevância: resultados devem conter todas as palavras importantes
+                frase_completa_term = f"%{termos_limpos}%"
+                condicao_frase_completa = or_(
+                    NormaJuridica.txt_ementa.ilike(frase_completa_term),
+                    NormaJuridica.txt_indexacao.ilike(frase_completa_term),
+                    NormaJuridica.txt_observacao.ilike(frase_completa_term)
+                )
+                query = query.filter(or_(condicao_frase_completa, and_(*condicoes_por_palavra)))
         if (tipos := request.get('lst_tip_norma')):
             if isinstance(tipos, str):
                 tipos = tipos.split(',')
@@ -105,17 +221,24 @@ class NormasTableView(grok.View):
                 query = query.filter(NormaJuridica.ano_norma == int(ano))
             except Exception:
                 pass
+        # Filtro por assunto (apenas um assunto por vez)
         if (cod_assunto := request.get('lst_assunto_norma')):
-            if isinstance(cod_assunto, str):
-                codigos = [v.strip() for v in cod_assunto.split(',') if v.strip() and v.strip() != '1']
-            elif isinstance(cod_assunto, list):
-                codigos = [str(v).strip() for v in cod_assunto if str(v).strip() and str(v).strip() != '1']
-            else:
-                codigos = []
-            # Monta filtro dinâmico (aceita qualquer posição, considerando campo tipo ",1,2,5,")
-            if codigos:
-                filters = [NormaJuridica.cod_assunto.like(f'%,{c},%') for c in codigos]
-                query = query.filter(or_(*filters))
+            # Processar apenas um assunto (pode vir como string ou lista com um único elemento)
+            if isinstance(cod_assunto, list):
+                cod_assunto = cod_assunto[0] if cod_assunto else None
+            if cod_assunto:
+                c_clean = str(cod_assunto).strip()
+                if c_clean and c_clean != '1':
+                    # Buscar o código em qualquer posição: pode estar no início, meio ou fim
+                    # O campo cod_assunto é CHAR(16) e armazena valores separados por vírgula, possivelmente com vírgulas no início/fim
+                    query = query.filter(
+                        or_(
+                            NormaJuridica.cod_assunto.like(f'%,{c_clean},%'),  # No meio: ,{c},
+                            NormaJuridica.cod_assunto.like(f'%,{c_clean}'),    # No final: ,{c}
+                            NormaJuridica.cod_assunto.like(f'{c_clean},%'),    # No início: {c},
+                            NormaJuridica.cod_assunto.like(f'{c_clean}')       # Valor único: {c}
+                        )
+                    )
         if (sit := request.get('lst_tip_situacao_norma')):
             try:
                 query = query.filter(NormaJuridica.cod_situacao == int(sit))
@@ -169,12 +292,38 @@ class NormasTableView(grok.View):
                 )
         return query
 
-    def _format_results(self, results_raw, mapa_assunto):
+    def _format_results(self, results_raw, mapa_assunto, session, contadores_normas_relacionadas=None):
+        """
+        Formata os resultados das normas.
+        
+        Args:
+            results_raw: Lista de objetos NormaJuridica
+            mapa_assunto: Dicionário com mapeamento de códigos de assunto para descrições
+            session: Sessão do SQLAlchemy
+            contadores_normas_relacionadas: Dicionário opcional com contadores pré-calculados
+                                          {cod_norma: quantidade} para evitar N+1 queries
+        """
         formatted = []
         portal_url = getToolByName(self.context, 'portal_url')()
         mtool = getToolByName(self.context, 'portal_membership')
-        is_operador = mtool.getAuthenticatedMember().has_role(['Operador', 'Operador Norma'])
+        is_operador = _is_operador_norma(mtool)
         docs_folder = self.context.sapl_documentos.norma_juridica
+        
+        # Se contadores não foram fornecidos, buscar todos de uma vez (evita N+1)
+        if contadores_normas_relacionadas is None:
+            cods_normas = [n.cod_norma for n in results_raw]
+            if cods_normas:
+                contadores_query = session.query(
+                    VinculoNormaJuridica.cod_norma_referida,
+                    func.count(VinculoNormaJuridica.cod_vinculo).label('qtd')
+                ).filter(
+                    VinculoNormaJuridica.cod_norma_referida.in_(cods_normas),
+                    VinculoNormaJuridica.ind_excluido == 0
+                ).group_by(VinculoNormaJuridica.cod_norma_referida).all()
+                contadores_normas_relacionadas = {row[0]: row[1] for row in contadores_query}
+            else:
+                contadores_normas_relacionadas = {}
+        
         for norma in results_raw:
             tipo_norma = norma.tipo_norma_juridica
             situacao = norma.tipo_situacao_norma
@@ -191,15 +340,23 @@ class NormasTableView(grok.View):
                 'detail_url': detail_url,
                 'url_texto_integral': None,
                 'url_redacao_final': None,
+                'url_pasta_digital': None,
             }
             texto_integral_pdf = f"{norma.cod_norma}_texto_integral.pdf"
             if hasattr(docs_folder, texto_integral_pdf):
                 item['url_texto_integral'] = f"{portal_url}/pysc/download_norma_pysc?cod_norma={norma.cod_norma}&texto_original=1"
+                # Adicionar link para pasta digital apenas para usuários autenticados
+                if not mtool.isAnonymousUser():
+                    item['url_pasta_digital'] = f"{portal_url}/@@pasta_digital_norma?cod_norma={norma.cod_norma}&action=pasta"
             texto_consolidado_pdf = f"{norma.cod_norma}_texto_consolidado.pdf"
             if hasattr(docs_folder, texto_consolidado_pdf):
                 item['url_texto_consolidado'] = f"{portal_url}/pysc/download_norma_pysc?cod_norma={norma.cod_norma}&texto_consolidado=1"
             codigos = [c.strip() for c in (norma.cod_assunto or '').split(',') if c.strip() and c.strip() != '1']
             item['assunto'] = ", ".join([mapa_assunto.get(c, c) for c in codigos])
+            
+            # Usar contador pré-calculado (evita N+1 queries)
+            item['qtd_normas_relacionadas'] = contadores_normas_relacionadas.get(norma.cod_norma, 0)
+            
             formatted.append(item)
         return formatted
 
@@ -370,11 +527,8 @@ class NormasTableView(grok.View):
     def render(self):
         session = Session()
         try:
-            mapa_assunto = {
-                str(row[0]): row[1] for row in session.execute(
-                    text("SELECT cod_assunto, des_assunto FROM assunto_norma WHERE ind_excluido=0")
-                )
-            }
+            # Usar cache para mapa de assuntos
+            mapa_assunto = _get_mapa_assunto_cached(session)
             query = self._build_query(session)
             formato = self.request.get('formato', '').lower()
             ordered_query = self._apply_ordering(query)
@@ -393,7 +547,26 @@ class NormasTableView(grok.View):
                             'error': 'Exportação muito grande. O limite é de 300 linhas para usuários não autenticados.',
                             'details': 'Use mais filtros ou autentique-se para exportar todos os resultados.'
                         })
-                results_formatted = self._format_results(results_raw, mapa_assunto)
+                
+                # Pré-calcular contadores de normas relacionadas para evitar N+1 queries
+                cods_normas_export = [n.cod_norma for n in results_raw]
+                contadores_normas_relacionadas = {}
+                if cods_normas_export:
+                    contadores_query = session.query(
+                        VinculoNormaJuridica.cod_norma_referida,
+                        func.count(VinculoNormaJuridica.cod_vinculo).label('qtd')
+                    ).filter(
+                        VinculoNormaJuridica.cod_norma_referida.in_(cods_normas_export),
+                        VinculoNormaJuridica.ind_excluido == 0
+                    ).group_by(VinculoNormaJuridica.cod_norma_referida).all()
+                    contadores_normas_relacionadas = {row[0]: row[1] for row in contadores_query}
+                
+                results_formatted = self._format_results(
+                    results_raw, 
+                    mapa_assunto, 
+                    session,
+                    contadores_normas_relacionadas
+                )
                 if formato == 'csv':
                     return self._export_csv(results_formatted, mapa_assunto)
                 elif formato == 'excel':
@@ -408,12 +581,58 @@ class NormasTableView(grok.View):
              .group_by(TipoNormaJuridica.des_tipo_norma) \
              .order_by(desc(func.count(NormaJuridica.cod_norma.distinct())))
             stats = {tipo: contagem for tipo, contagem in stats_query.all()}
+            
+            # Estatísticas por assunto - OTIMIZADO: usa SQL ao invés de carregar todas as normas
+            # Buscar apenas cod_norma e cod_assunto (campos necessários) para reduzir uso de memória
+            stats_by_assunto = {}
+            normas_query = query.with_entities(NormaJuridica.cod_norma, NormaJuridica.cod_assunto).all()
+            normas_sem_assunto = 0
+            
+            for cod_norma, cod_assunto in normas_query:
+                if not cod_assunto or str(cod_assunto).strip() == '':
+                    normas_sem_assunto += 1
+                else:
+                    codigos = [c.strip() for c in str(cod_assunto).split(',') if c.strip() and c.strip() != '1']
+                    if codigos:
+                        # Contar a norma apenas no primeiro assunto válido para que o total bata
+                        cod = codigos[0]
+                        if cod:
+                            assunto_desc = mapa_assunto.get(cod, f'Assunto {cod}')
+                            stats_by_assunto[assunto_desc] = stats_by_assunto.get(assunto_desc, 0) + 1
+                    else:
+                        normas_sem_assunto += 1
+            
+            # Adicionar "Não classficada" se houver normas sem assunto
+            if normas_sem_assunto > 0:
+                stats_by_assunto['Não classficada'] = normas_sem_assunto
+            
+            # Ordenar por quantidade (decrescente)
+            stats_by_assunto = dict(sorted(stats_by_assunto.items(), key=lambda x: x[1], reverse=True))
             page = int(self.request.get('pagina', 1))
             page_size = min(max(int(self.request.get('itens_por_pagina', 10)), 1), 100)
+            
+            # Buscar resultados paginados
+            results_paginados = ordered_query.offset((page - 1) * page_size).limit(page_size).all()
+            
+            # Pré-calcular contadores de normas relacionadas para evitar N+1 queries
+            cods_normas_paginadas = [n.cod_norma for n in results_paginados]
+            contadores_normas_relacionadas = {}
+            if cods_normas_paginadas:
+                contadores_query = session.query(
+                    VinculoNormaJuridica.cod_norma_referida,
+                    func.count(VinculoNormaJuridica.cod_vinculo).label('qtd')
+                ).filter(
+                    VinculoNormaJuridica.cod_norma_referida.in_(cods_normas_paginadas),
+                    VinculoNormaJuridica.ind_excluido == 0
+                ).group_by(VinculoNormaJuridica.cod_norma_referida).all()
+                contadores_normas_relacionadas = {row[0]: row[1] for row in contadores_query}
+            
             data = {
                 'data': self._format_results(
-                    ordered_query.offset((page - 1) * page_size).limit(page_size).all(),
-                    mapa_assunto
+                    results_paginados,
+                    mapa_assunto,
+                    session,
+                    contadores_normas_relacionadas
                 ),
                 'total': total_count,
                 'page': page,
@@ -421,7 +640,8 @@ class NormasTableView(grok.View):
                 'total_pages': (total_count + page_size - 1) // page_size if total_count > 0 else 0,
                 'has_previous': page > 1,
                 'has_next': page < ((total_count + page_size - 1) // page_size if total_count > 0 else 0),
-                'stats': stats
+                'stats': stats,
+                'stats_by_assunto': stats_by_assunto
             }
             self.request.response.setHeader('Content-Type', 'application/json')
             return json.dumps(data)
@@ -489,3 +709,76 @@ class AssuntosNormaJSON(grok.View):
         return json.dumps([
             {'id': str(d[0]), 'descricao': d[1]} for d in dados
         ], ensure_ascii=False)
+
+
+class NormasRelacionadasJSON(grok.View):
+    grok.context(Interface)
+    grok.name('normas_relacionadas_json')
+    grok.require('zope2.View')
+
+    def render(self):
+        session = Session()
+        try:
+            cod_norma = self.request.get('cod_norma')
+            if not cod_norma:
+                self.request.response.setStatus(400)
+                return json.dumps({'error': 'cod_norma é obrigatório'})
+            
+            try:
+                cod_norma = int(cod_norma)
+            except ValueError:
+                self.request.response.setStatus(400)
+                return json.dumps({'error': 'cod_norma deve ser um número'})
+            
+            # Buscar normas relacionadas (que alteraram esta norma)
+            # cod_norma_referida = norma que foi alterada
+            # cod_norma_referente = norma que alterou
+            normas_relacionadas = session.query(
+                NormaJuridica,
+                TipoNormaJuridica,
+                TipoVinculoNorma
+            ).join(
+                VinculoNormaJuridica,
+                VinculoNormaJuridica.cod_norma_referente == NormaJuridica.cod_norma
+            ).join(
+                TipoNormaJuridica,
+                NormaJuridica.tip_norma == TipoNormaJuridica.tip_norma
+            ).join(
+                TipoVinculoNorma,
+                VinculoNormaJuridica.tip_vinculo == TipoVinculoNorma.tipo_vinculo
+            ).filter(
+                VinculoNormaJuridica.cod_norma_referida == cod_norma,
+                VinculoNormaJuridica.ind_excluido == 0,
+                NormaJuridica.ind_excluido == 0,
+                TipoVinculoNorma.ind_excluido == 0
+            ).all()
+            
+            portal_url = getToolByName(self.context, 'portal_url')()
+            mtool = getToolByName(self.context, 'portal_membership')
+            is_operador = _is_operador_norma(mtool)
+            
+            resultado = []
+            for norma, tipo_norma, tipo_vinculo in normas_relacionadas:
+                detail_url = f"{portal_url}/{'cadastros' if is_operador else 'consultas'}/norma_juridica/norma_juridica_mostrar_proc?cod_norma={norma.cod_norma}"
+                resultado.append({
+                    'cod_norma': norma.cod_norma,
+                    'sgl_tipo_norma': tipo_norma.sgl_tipo_norma if tipo_norma else '',
+                    'des_tipo_norma': tipo_norma.des_tipo_norma if tipo_norma else '',
+                    'num_norma': norma.num_norma,
+                    'ano_norma': norma.ano_norma,
+                    'txt_ementa': norma.txt_ementa or '',
+                    'des_vinculo': tipo_vinculo.des_vinculo if tipo_vinculo else '',
+                    'detail_url': detail_url
+                })
+            
+            self.request.response.setHeader('Content-Type', 'application/json; charset=utf-8')
+            return json.dumps({'normas_relacionadas': resultado}, ensure_ascii=False)
+        except Exception as e:
+            logger.error(f"Erro em NormasRelacionadasJSON: {str(e)}", exc_info=True)
+            self.request.response.setStatus(500)
+            return json.dumps({
+                'error': 'Erro interno ao processar a requisição',
+                'details': str(e)
+            })
+        finally:
+            session.close()

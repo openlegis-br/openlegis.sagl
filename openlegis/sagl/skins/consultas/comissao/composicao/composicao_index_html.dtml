@@ -5,114 +5,136 @@
   <dtml-call expr="REQUEST.set('sgl_comissao', sgl_comissao)">
 </dtml-in>
 
- <div class="row mb-3">
+<div class="row mb-3">
   <div class="col-9 col-md-8 d-flex align-items-center">
     <h1 class="firstHeading font-size-18 mb-0"><dtml-var nom_comissao></h1>
   </div>
   <div class="col-3 col-md-4">
-    <div class="input-group mt-1 mt-md-0 d-flex justify-content-end">
-   <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia'])"> 
-      <a class="btn btn-light" href="<dtml-var portal_url>/cadastros/comissao/comissao_mostrar_proc?cod_comissao=<dtml-var cod_comissao>"><i class="fas fa-undo"></i> Voltar</a>  
-   <dtml-else>
-      <a class="btn btn-light" href="<dtml-var portal_url>/consultas/comissao/comissao_mostrar_proc?cod_comissao=<dtml-var cod_comissao>"><i class="fas fa-undo"></i> Voltar</a>    
-   </dtml-if>  
+    <div class="d-flex justify-content-end">
+      <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia'])"> 
+        <a class="btn btn-outline-secondary btn-sm" href="<dtml-var portal_url>/cadastros/comissao/comissao_mostrar_proc?cod_comissao=<dtml-var cod_comissao>">
+          <i class="fas fa-arrow-left me-1"></i>Voltar
+        </a>  
+      <dtml-else>
+        <a class="btn btn-outline-secondary btn-sm" href="<dtml-var portal_url>/consultas/comissao/comissao_mostrar_proc?cod_comissao=<dtml-var cod_comissao>">
+          <i class="fas fa-arrow-left me-1"></i>Voltar
+        </a>    
+      </dtml-if>  
     </div>
   </div>
- </div>
-
-<div class="row">
- <div class="col-12">
-      <legend class="font-size-16">Histórico de Composições</legend>
- </div>
 </div>
 
-<div class="row">
-  <div class="col-12 mb-3 form-group">
-    <label class="form-label" for="cod_periodo_comp">Selecione o período</label>
-      <select class="form-select jumpmenu" name="cod_periodo_comp" id="cod_periodo_comp" >
-        <dtml-in expr="zsql.periodo_comp_comissao_obter_zsql(cod_comissao='')">
-          <option 
-            <dtml-if cod_periodo_comp_sel>
-              <dtml-if expr="(cod_periodo_comp==cod_periodo_comp_sel)"> 
+<div class="card border-0 shadow-sm mb-3">
+  <div class="card-header">
+    <strong><i class="fas fa-users me-2"></i>Histórico de Composições</strong>
+  </div>
+  <div class="card-body">
+    <div class="row">
+      <div class="col-12 col-md-6">
+        <label class="form-label" for="cod_periodo_comp">
+          <i class="fas fa-calendar me-1"></i>Selecione o período
+        </label>
+        <select class="form-select jumpmenu" name="cod_periodo_comp" id="cod_periodo_comp">
+          <dtml-in expr="zsql.periodo_comp_comissao_obter_zsql(cod_comissao='')">
+            <option 
+              <dtml-if cod_periodo_comp_sel>
+                <dtml-if expr="(cod_periodo_comp==cod_periodo_comp_sel)"> 
+                  selected
+                </dtml-if>
+              <dtml-elif expr="(DateTime(datefmt='international') <= DateTime(dat_fim, datefmt='international') and DateTime(datefmt='international') >= DateTime(dat_inicio, datefmt='international'))">
+                <dtml-call expr="REQUEST.set('cod_periodo_comp_sel', cod_periodo_comp)">
                 selected
               </dtml-if>
-            <dtml-elif expr="(DateTime(datefmt='international') <= DateTime(dat_fim, datefmt='international') and DateTime(datefmt='international') >= DateTime(dat_inicio, datefmt='international'))">
-              <dtml-call expr="REQUEST.set('cod_periodo_comp_sel', cod_periodo_comp)">
-              selected
-            </dtml-if>
-            value="<dtml-var ACTUAL_URL>?cod_comissao=<dtml-var cod_comissao>&cod_periodo_comp_sel=<dtml-var cod_periodo_comp>#composicao"><dtml-var dat_inicio_periodo> a <dtml-var dat_fim_periodo>
-          </option>
-       <dtml-else>
-         <dtml-call expr="REQUEST.set('cod_periodo_comp_sel', -1)">           
-       </dtml-in>
-      </select>
-       <dtml-if expr="not _.has_key('cod_periodo_comp_sel')">
-         <dtml-in expr="zsql.periodo_comp_comissao_obter_zsql(cod_comissao='')">
-           <dtml-if sequence-start>
-             <dtml-call expr="REQUEST.set('cod_periodo_comp_sel', cod_periodo_comp)">
-           </dtml-if>
-         </dtml-in>
-       </dtml-if>   
-   </div>        
+              value="<dtml-var ACTUAL_URL>?cod_comissao=<dtml-var cod_comissao>&cod_periodo_comp_sel=<dtml-var cod_periodo_comp>#composicao">
+              <dtml-var dat_inicio_periodo> a <dtml-var dat_fim_periodo>
+            </option>
+            <dtml-else>
+              <dtml-call expr="REQUEST.set('cod_periodo_comp_sel', -1)">           
+            </dtml-in>
+          </select>
+          <dtml-if expr="not _.has_key('cod_periodo_comp_sel')">
+            <dtml-in expr="zsql.periodo_comp_comissao_obter_zsql(cod_comissao='')">
+              <dtml-if sequence-start>
+                <dtml-call expr="REQUEST.set('cod_periodo_comp_sel', cod_periodo_comp)">
+              </dtml-if>
+            </dtml-in>
+          </dtml-if>   
+      </div>
+    </div>
   </div>
+</div>
 
 <dtml-if expr="_.int(cod_periodo_comp_sel) != -1">
   <dtml-in expr="zsql.periodo_comp_comissao_obter_zsql(cod_periodo_comp=cod_periodo_comp_sel)">
-     <dtml-call expr="REQUEST.set('dat_inicio_periodo', dat_inicio_periodo)">
-     <dtml-call expr="REQUEST.set('dat_fim_periodo', dat_fim_periodo)">
-     <input type="hidden" name="dat_inicio_periodo" value="<dtml-var dat_inicio_periodo missing>" >
-     <input type="hidden" name="dat_fim_periodo"    value="<dtml-var dat_fim_periodo missing>" >
+    <dtml-call expr="REQUEST.set('dat_inicio_periodo', dat_inicio_periodo)">
+    <dtml-call expr="REQUEST.set('dat_fim_periodo', dat_fim_periodo)">
+    <input type="hidden" name="dat_inicio_periodo" value="<dtml-var dat_inicio_periodo missing>">
+    <input type="hidden" name="dat_fim_periodo" value="<dtml-var dat_fim_periodo missing>">
   </dtml-in>
   <dtml-in expr="zsql.composicao_comissao_obter_zsql(cod_comissao=cod_comissao, cod_periodo_comp=cod_periodo_comp_sel)">
     <dtml-if sequence-start>
-    <div class="table-responsive">
-     <table class="table">
-       <thead>
-        <tr>
-          <th>Vereador</th>
-          <th>Cargo</th>
-          <th>Titular</th>
-          <th>Data de Designação</th>
-          <th>Data de Desligamento</th>
-        </tr>
-       </thead> 
-    </dtml-if sequence-start>
-       <dtml-unless dat_desligamento>
-        <tr>
-             <td>
-               <a href="<dtml-var portal_url>/consultas/parlamentar/parlamentar_mostrar_proc?cod_parlamentar=<dtml-var cod_parlamentar>">
-                  <dtml-call expr="REQUEST.set('id_foto', str(cod_parlamentar)+'_foto_parlamentar')">
-                  <dtml-if expr="hasattr(sapl_documentos.parlamentar.fotos,id_foto)">
-                     <img src="<dtml-var portal_url>/sapl_documentos/parlamentar/fotos/<dtml-var id_foto>" alt="" class="avatar-xs rounded-circle me-2">
-                  <dtml-else>
-                     <img src="<dtml-var portal_url>/imagens/avatar.png" alt="" class="avatar-xs rounded-circle me-2">
-                  </dtml-if>
-                  <dtml-var nom_parlamentar>
-               </a>
-             </td>
-             <td><dtml-var des_cargo missing></td>
-             <td><dtml-if expr="ind_titular">Sim <dtml-else>Não</dtml-if></td>
-             <td><dtml-var dat_designacao></td>
-             <td>
-                <dtml-if expr="dat_desligamento == ''">             
-                   <dtml-var dat_desligamento missing null="">
-                <dtml-else>
-                   <dtml-var dat_fim_periodo missing>
-                </dtml-if>
-             </td>
-        </tr>
-       </dtml-unless>
+      <div class="card border-0 shadow-sm mb-3">
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-striped align-middle mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th>Vereador</th>
+                  <th>Cargo</th>
+                  <th>Titular</th>
+                  <th>Data de Designação</th>
+                  <th>Data de Desligamento</th>
+                </tr>
+              </thead>
+              <tbody>
+    </dtml-if>
+    <dtml-unless dat_desligamento>
+      <tr>
+        <td>
+          <a href="<dtml-var portal_url>/consultas/parlamentar/parlamentar_mostrar_proc?cod_parlamentar=<dtml-var cod_parlamentar>" class="text-decoration-none d-flex align-items-center">
+            <dtml-call expr="REQUEST.set('id_foto', str(cod_parlamentar)+'_foto_parlamentar')">
+            <dtml-if expr="hasattr(sapl_documentos.parlamentar.fotos,id_foto)">
+              <img src="<dtml-var portal_url>/sapl_documentos/parlamentar/fotos/<dtml-var id_foto>" alt="" class="avatar-xs rounded-circle me-2">
+            <dtml-else>
+              <img src="<dtml-var portal_url>/imagens/avatar.png" alt="" class="avatar-xs rounded-circle me-2">
+            </dtml-if>
+            <strong><dtml-var nom_parlamentar></strong>
+          </a>
+        </td>
+        <td><dtml-var des_cargo missing></td>
+        <td>
+          <dtml-if expr="ind_titular">
+            <span class="badge bg-success">Sim</span>
+          <dtml-else>
+            <span class="badge bg-secondary">Não</span>
+          </dtml-if>
+        </td>
+        <td><i class="fas fa-calendar-check me-1 text-muted"></i><dtml-var dat_designacao></td>
+        <td>
+          <dtml-if expr="dat_desligamento == ''">             
+            <dtml-var dat_desligamento missing null="">
+          <dtml-else>
+            <i class="fas fa-calendar-times me-1 text-muted"></i><dtml-var dat_fim_periodo missing>
+          </dtml-if>
+        </td>
+      </tr>
+    </dtml-unless>
     <dtml-if sequence-end>
-           </table>
-         </div>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
     </dtml-if sequence-end>
   <dtml-else>
-   <p>Nenhum membro cadastrado no período.</p>
-   </fieldset>
+    <div class="alert alert-info">
+      <i class="fas fa-info-circle me-2"></i>Nenhum membro cadastrado no período.
+    </div>
   </dtml-in>
 <dtml-else>
-   <p>Nenhum período de composição cadastrado.</p>
- </fieldset>
+  <div class="alert alert-info">
+    <i class="fas fa-info-circle me-2"></i>Nenhum período de composição cadastrado.
+  </div>
 </dtml-if>
 
 <dtml-var js_slot>

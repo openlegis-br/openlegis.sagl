@@ -22,8 +22,8 @@
       <div class="dropdown-menu">
      <dtml-call expr="REQUEST.set('texto_original', str(cod_norma)+'_texto_integral.pdf')">
      <dtml-if "hasattr(sapl_documentos.norma_juridica,texto_original)">
-      <a class="dropdown-item block" href="<dtml-var portal_url>/consultas/norma_juridica/pasta_digital/?cod_norma=<dtml-var cod_norma>&action=pasta" target="_blank"><i class="far fa-folder-open"></i> Pasta Digital</a>
-      <a class="dropdown-item block" href="<dtml-var portal_url>/consultas/norma_juridica/pasta_digital/pastadigital?cod_norma=<dtml-var cod_norma>&action=download" target="_blank"><i class="far fa-file-pdf"></i> Processo Integral</a>
+      <a class="dropdown-item block" href="<dtml-var portal_url>/@@pasta_digital_norma?cod_norma=<dtml-var cod_norma>&action=pasta" target="_blank"><i class="far fa-folder-open"></i> Pasta Digital</a>
+      <a class="dropdown-item block" href="<dtml-var portal_url>/@@processo_norma_integral?cod_norma=<dtml-var cod_norma>&action=download" target="_blank"><i class="far fa-file-pdf"></i> Processo Integral</a>
      </dtml-if>
         <a class="dropdown-item block" href="<dtml-var portal_url>/modelo_proposicao/capa_norma?cod_norma=<dtml-var cod_norma>&action=download" target="_blank"><i class="far fa-fw fa-file-pdf"></i> Capa da Norma</a>
      <a class="dropdown-item block" href="<dtml-var portal_url>/relatorios/pdf_detalhe_norma_preparar_pysc?cod_norma=<dtml-var cod_norma>" target="_blank" ><i class="fas fa-fw fa-file-pdf"></i> Ficha Textual</a> 
@@ -498,9 +498,15 @@
      <dtml-if sequence-end>
        </table>
      </dtml-if>
-   <dtml-else>
+   </dtml-in>
+   <dtml-in expr="zsql.anexo_norma_obter_zsql(cod_norma=cod_norma)">
+     <dtml-if sequence-start>
+       <dtml-call expr="REQUEST.set('temAnexo', 1)">
+     </dtml-if>
+   </dtml-in>
+   <dtml-unless temAnexo>
        <p>Nenhum anexo cadastrado.</p>
-   </dtml-in> 
+   </dtml-unless> 
 
   <button type="button" class="btn btn-light" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Cadastro de Anexo" data-src="anexos/anexo_norma_juridica_form?cod_norma=<dtml-var cod_norma missing>&modal=1" data-bs-toggle="tooltip" data-placement="bottom" title="Cadastro de Anexo">Incluir Anexo</button>
 
@@ -573,6 +579,7 @@
   <button type="button" class="btn btn-light" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Cadastro de Relacionamento" data-src="vinculo_norma_juridica/vinculo_norma_juridica_form?cod_norma=<dtml-var cod_norma missing>&modal=1" data-bs-toggle="tooltip" data-placement="bottom" title="Cadastro de Relacionamento">Incluir Relacionamento</button>
 </div>
 </dtml-if>
+</div>
 
 <dtml-var js_slot>
 

@@ -1,35 +1,48 @@
 <dtml-var header_html>
 
-<h1 class="firstHeading font-size-18">Documentos - Prazos de Conclusão a Vencer</h1>
+<h1 class="firstHeading font-size-18 mb-3">Documentos - Prazos de Conclusão a Vencer</h1>
 
 <dtml-in expr="listarDatas_zsql()">
   <dtml-if sequence-start>
-    <table class="table">
-      <thead>
-      <tr>
-         <th>Vencimento</th>
-         <th>Documento</th>
-      </tr>
-      </thead>
+    <div class="card mb-3">
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-striped align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th><i class="fas fa-calendar-alt me-1"></i>Vencimento</th>
+                <th><i class="fas fa-file-alt me-1"></i>Documento</th>
+              </tr>
+            </thead>
+            <tbody>
   </dtml-if>
-      <tr>
-         <td><dtml-var data_fim_prazo></td>
-         <td>
-            <dtml-in expr="listarDocumentos_zsql(data=dat_fim_prazo)">
-                <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Modulo Administrativo'])">
-                  <a href="<dtml-var portal_url>/cadastros/documento_administrativo/documento_administrativo_mostrar_proc?cod_documento=<dtml-var cod_documento>">
-                </dtml-if>
-                  <p><b><dtml-var des_tipo_documento> nº <dtml-var num_documento>/<dtml-var ano_documento></b>
-                </a> - <dtml-var txt_interessado> - <dtml-var txt_assunto></p>
-	    </dtml-in>
-         </td>
-      </tr>
+              <tr>
+                <td><dtml-var data_fim_prazo></td>
+                <td>
+                  <dtml-in expr="listarDocumentos_zsql(data=dat_fim_prazo)">
+                    <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Modulo Administrativo'])">
+                      <a href="<dtml-var portal_url>/cadastros/documento_administrativo/documento_administrativo_mostrar_proc?cod_documento=<dtml-var cod_documento>" class="text-decoration-none">
+                    <dtml-else>
+                      <a href="<dtml-var portal_url>/consultas/documento_administrativo/documento_administrativo_mostrar_proc?cod_documento=<dtml-var cod_documento>" class="text-decoration-none">
+                    </dtml-if>
+                    <strong><dtml-var des_tipo_documento> nº <dtml-var num_documento>/<dtml-var ano_documento></strong>
+                    </a>
+                    <br><small class="text-muted"><dtml-var txt_interessado> - <dtml-var txt_assunto></small>
+                  </dtml-in>
+                </td>
+              </tr>
   <dtml-if sequence-end>
-    </table>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
   </dtml-if>
-<dtml-else>
-  <p>Nenhuma ocorrência.</p>  
-</dtml-in>
+  <dtml-else>
+    <div class="alert alert-info">
+      <i class="fas fa-info-circle me-1"></i>Nenhuma ocorrência.
+    </div>
+  </dtml-in>
 
 <dtml-var js_slot>
 <dtml-var footer_html>

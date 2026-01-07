@@ -27,67 +27,71 @@
 //-->
 </script>
 
-<h1 class="firstHeading font-size-18">Histórico de Tramitações</h1> 
+<h1 class="firstHeading font-size-18 mb-3">Histórico de Tramitações</h1>
 
 <form method="post" name="form" action="historicoTramitacoes_mostrar_proc">
-   
-   <div class="row">
-     <div class="col-6 col-md-3 mb-3">
-            <label class="form-label required" for="txt_dat_inicio_periodo">Data Inicial</label>
-            <div class="input-group" id="datepicker1">
-              <input type="text" class="form-control datepicker" placeholder="dd/mm/aaaa" name="txt_dat_inicio_periodo" id="txt_dat_inicio_periodo" data-provide="datepicker" data-date-autoclose="true" autocomplete="off" data-date-container="#datepicker1">
-              <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
-           </div>        
-     </div>
-     <div class="col-6 col-md-3 mb-3">
-           <label class="form-label required" for="txt_dat_fim_periodo">Data Final</label>
-            <div class="input-group" id="datepicker2">
-              <input type="text" class="form-control datepicker" placeholder="dd/mm/aaaa" name="txt_dat_fim_periodo" id="txt_dat_fim_periodo" data-provide="datepicker" data-date-autoclose="true" autocomplete="off" data-date-container="#datepicker2">
-              <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
-           </div>       
-     </div>
-     <div class="col-12 col-md-6 mb-3">
-             <label class="form-label" for="lst_cod_unid_tram_dest">Unidade de Tramitação</label>
-             <select class="form-select" id="lst_cod_unid_tram_dest" name="lst_cod_unid_tram_dest">
-               <option selected value="0">Todos</option>
-                 <dtml-in listaLocaisTramitacao>
-                   <option value="<dtml-var cod_unid_tramitacao>">
-                     <dtml-if cod_orgao><dtml-var nom_orgao missing>
-                     <dtml-elif cod_comissao><dtml-var nom_comissao missing>
-                     <dtml-else><dtml-var nom_parlamentar>
-                     </dtml-if>
-                   </option>
-                 </dtml-in>
-             </select>     
-     </div>         
-   </div>
-
-   <div class="row">
-     <div class="col-12 col-md-6 mb-3">
-             <label class="form-label" for="lst_tip_materia">Tipo de Matéria</label>
-             <select class="form-select" id="lst_tip_materia" name="lst_tip_materia">
-                <option selected value="0">Todos</option>
-                    <dtml-in expr="zsql.tipo_materia_legislativa_obter_zsql(tip_natureza='P', ind_excluido=0)">
-                        <option value="<dtml-var tip_materia>"><dtml-var des_tipo_materia></option>
-                    </dtml-in>
-             </select>
-     </div>
-     <div class="col-12 col-md-6 mb-3">
-           <label class="form-label" for="lst_status">Status de Tramitação</label><br />
-           <select class="form-select" id="lst_status" name="lst_status">
-             <option selected value="0">Todos</option>
-             <dtml-in listaStatusTramitacao>
-               <option value="<dtml-var cod_status>"><dtml-var des_status></option>
-             </dtml-in>
-           </select>
-     </div>     
-   </div>   
-
-   <div class="text-start">
-    <input class="btn btn-primary" type="button" value="Pesquisar" onClick="campos_criticar(form)" />
-    <input class="btn btn-secondary" type="reset" value="Limpar">
-   </div>
-
+  <div class="card mb-3">
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-6 col-md-3">
+          <label class="form-label required" for="txt_dat_inicio_periodo"><i class="fas fa-calendar me-1"></i>Data Inicial</label>
+          <div class="input-group" id="datepicker1">
+            <input type="text" class="form-control datepicker" placeholder="dd/mm/aaaa" name="txt_dat_inicio_periodo" id="txt_dat_inicio_periodo" data-provide="datepicker" data-date-autoclose="true" autocomplete="off" data-date-container="#datepicker1">
+            <span class="input-group-text"><i class="fas fa-calendar"></i></span>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <label class="form-label required" for="txt_dat_fim_periodo"><i class="fas fa-calendar me-1"></i>Data Final</label>
+          <div class="input-group" id="datepicker2">
+            <input type="text" class="form-control datepicker" placeholder="dd/mm/aaaa" name="txt_dat_fim_periodo" id="txt_dat_fim_periodo" data-provide="datepicker" data-date-autoclose="true" autocomplete="off" data-date-container="#datepicker2">
+            <span class="input-group-text"><i class="fas fa-calendar"></i></span>
+          </div>
+        </div>
+        <div class="col-12 col-md-6">
+          <label class="form-label" for="lst_cod_unid_tram_dest"><i class="fas fa-building me-1"></i>Unidade de Tramitação</label>
+          <select class="form-select" id="lst_cod_unid_tram_dest" name="lst_cod_unid_tram_dest">
+            <option selected value="0">Todos</option>
+            <dtml-in listaLocaisTramitacao>
+              <option value="<dtml-var cod_unid_tramitacao>">
+                <dtml-if cod_orgao><dtml-var nom_orgao missing>
+                <dtml-elif cod_comissao><dtml-var nom_comissao missing>
+                <dtml-else><dtml-var nom_parlamentar>
+                </dtml-if>
+              </option>
+            </dtml-in>
+          </select>
+        </div>
+        <div class="col-12 col-md-6">
+          <label class="form-label" for="lst_tip_materia"><i class="fas fa-file-alt me-1"></i>Tipo de Matéria</label>
+          <select class="form-select" id="lst_tip_materia" name="lst_tip_materia">
+            <option selected value="0">Todos</option>
+            <dtml-in expr="zsql.tipo_materia_legislativa_obter_zsql(tip_natureza='P', ind_excluido=0)">
+              <option value="<dtml-var tip_materia>"><dtml-var des_tipo_materia></option>
+            </dtml-in>
+          </select>
+        </div>
+        <div class="col-12 col-md-6">
+          <label class="form-label" for="lst_status"><i class="fas fa-info-circle me-1"></i>Status de Tramitação</label>
+          <select class="form-select" id="lst_status" name="lst_status">
+            <option selected value="0">Todos</option>
+            <dtml-in listaStatusTramitacao>
+              <option value="<dtml-var cod_status>"><dtml-var des_status></option>
+            </dtml-in>
+          </select>
+        </div>
+        <div class="col-12">
+          <div class="btn-group">
+            <button class="btn btn-primary" type="button" onClick="campos_criticar(form)">
+              <i class="fas fa-search me-1"></i>Pesquisar
+            </button>
+            <button class="btn btn-outline-secondary" type="reset">
+              <i class="fas fa-eraser me-1"></i>Limpar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </form>
 
 <dtml-var js_slot>

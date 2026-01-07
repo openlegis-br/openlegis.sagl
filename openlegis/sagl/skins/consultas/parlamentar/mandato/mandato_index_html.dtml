@@ -5,32 +5,40 @@
 <dtml-in expr="zsql.mandato_obter_zsql(cod_parlamentar=cod_parlamentar, ind_excluido=0)">  
   <dtml-if sequence-start>
     <div class="table-responsive">
-    <table class="table">
-      <thead class="table-light">
-        <tr> 
+      <table class="table table-striped align-middle">
+        <thead class="table-light">
+          <tr> 
             <th width="30%">Legislatura</th>
             <th>Titular?</th>
             <th>Votos</th>
             <th>Início</th>
             <th>Fim</th>
-        </tr>
-      </thead>
-      <tbody>
+          </tr>
+        </thead>
+        <tbody>
   </dtml-if sequence-start>
     <tr> 
-       <td>
-         <dtml-var expr="pysc.periodo_legislatura_format_pysc(num_legislatura, dat_inicio, dat_fim)">
-       </td>
-         <td><dtml-if expr="ind_titular==1">Sim<dtml-else>Não</dtml-if></td>
-         <td><dtml-var num_votos_recebidos missing null=""></td>
-         <td><dtml-var dat_inicio_mandato missing null=""></td>
-         <td><dtml-var dat_fim_mandato missing null=""></td>
+      <td>
+        <dtml-var expr="pysc.periodo_legislatura_format_pysc(num_legislatura, dat_inicio, dat_fim)">
+      </td>
+      <td>
+        <dtml-if expr="ind_titular==1">
+          <span class="badge bg-success">Sim</span>
+        <dtml-else>
+          <span class="badge bg-secondary">Não</span>
+        </dtml-if>
+      </td>
+      <td><dtml-var num_votos_recebidos missing null=""></td>
+      <td><dtml-var dat_inicio_mandato missing null=""></td>
+      <td><dtml-var dat_fim_mandato missing null=""></td>
     </tr>
- <dtml-if sequence-end>
-    </tbody>
-  </table>
-  </div>
- </dtml-if sequence-end>
-<dtml-else>
- <p>Não há nenhum mandato cadastrado.</p>
-</dtml-in>
+  <dtml-if sequence-end>
+        </tbody>
+      </table>
+    </div>
+  </dtml-if sequence-end>
+  <dtml-else>
+    <div class="alert alert-info mb-0">
+      <i class="fas fa-info-circle me-2"></i>Não há nenhum mandato cadastrado.
+    </div>
+  </dtml-in>

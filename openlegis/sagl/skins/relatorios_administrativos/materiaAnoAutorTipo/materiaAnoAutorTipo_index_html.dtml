@@ -1,23 +1,27 @@
 <dtml-var header_html>
 
-<h1 class="firstHeading font-size-18">Matérias por Ano, Autor e Tipo</h1>
+<h1 class="firstHeading font-size-18 mb-3">Matérias por Ano, Autor e Tipo</h1>
 
-<form action="view"> 
-  <div class="row">
-    <div class="col-12 col-lg-6">
-       <label class="form-label required" for="ano">Selecione o Ano</label>
-           <div class="input-group">
-             <select class="form-select" id="ano" name="ano">
-               <dtml-in listaAnosMaterias>
-                  <option value="<dtml-var ano_mat>"><dtml-var ano_mat></option>
-               </dtml-in>
-             </select>
-             <div class="input-group-append">
-                 <input class="btn btn-primary" type="submit" value="Gerar Relatório">                      
-             </div>
-           </div>
+<form action="view">
+  <div class="card mb-3">
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-12 col-lg-6">
+          <label class="form-label required" for="ano"><i class="fas fa-calendar-alt me-1"></i>Selecione o Ano</label>
+          <div class="input-group">
+            <select class="form-select" id="ano" name="ano">
+              <dtml-in listaAnosMaterias>
+                <option value="<dtml-var ano_mat>"><dtml-var ano_mat></option>
+              </dtml-in>
+            </select>
+            <button class="btn btn-primary" type="submit">
+              <i class="fas fa-file-alt me-1"></i>Gerar Relatório
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
-   </div>
+  </div>
 </form>
 
 <dtml-var js_slot>

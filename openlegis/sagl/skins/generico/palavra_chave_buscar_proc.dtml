@@ -1,75 +1,94 @@
 <dtml-var header_html>
 
-<h1 class="firstHeading font-size-18">Resultados da pesquisa por "<i><dtml-var expr="txt_palavra_chave.replace('\x22', '%22')"></i>"</h1>
+<h1 class="firstHeading font-size-18 mb-3">Resultados da pesquisa por "<i><dtml-var expr="txt_palavra_chave.replace('\x22', '%22')"></i>"</h1>
 
 <dtml-comment>
 <dtml-call expr="REQUEST.set('txt_palavra_chave', txt_palavra_chave + '*')">
 </dtml-comment>
 
- <dtml-with expr="_.namespace(tipo=zsql.tipo_materia_legislativa_obter_zsql(ind_excluido=0))">
+<dtml-with expr="_.namespace(tipo=zsql.tipo_materia_legislativa_obter_zsql(ind_excluido=0))">
   <dtml-with expr="_.namespace(total=zsql.materia_palavra_buscar_zsql(txt_busca=txt_palavra_chave))">
-   <p class="h5">Matérias Legislativas: <dtml-if expr="_.len(total) == 0">nenhuma<dtml-else> <dtml-var expr="_.len(total)"></dtml-if> ocorrência<dtml-if expr="_.len(total) > 1">s</dtml-if></p>
+    <div class="card mb-3">
+      <div class="card-header">
+        <h3 class="h5 mb-0"><i class="fas fa-file-alt me-1"></i>Matérias Legislativas: <dtml-if expr="_.len(total) == 0">nenhuma<dtml-else><dtml-var expr="_.len(total)"></dtml-if> ocorrência<dtml-if expr="_.len(total) > 1">s</dtml-if></h3>
+      </div>
       <dtml-if expr="_.len(total) >= 1">
-       <table class="table">
-        <thead>
-         <tr>
-          <th>Tipo de Matéria</th>
-          <th>Quantidade</th>
-         </tr>
-        </thead>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-striped align-middle mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th>Tipo de Matéria</th>
+                  <th>Quantidade</th>
+                </tr>
+              </thead>
+              <tbody>
       </dtml-if>
   </dtml-with>
-         <dtml-in name="tipo">
-           <dtml-with expr="_.namespace(subtotal=zsql.materia_palavra_buscar_zsql(tip_id_basica=tip_materia,txt_busca=txt_palavra_chave))">
-           <dtml-if expr="_.len(subtotal) > 0">
-             <tr>
-               <td width="80%">
-                <a href="<dtml-var portal_url>/generico/palavra_materia_pesquisar_proc?incluir=0&existe_ocorrencia=0&lst_tip_materia=<dtml-var tip_materia>&txt_busca=<dtml-var expr="txt_palavra_chave.replace('\x22', '%22')">&btn_materia_pesquisar=Pesquisar">
-                  <dtml-var des_tipo_materia>
-                </a>
-               </td>               
-               <td>
-                  <dtml-var  expr="_.len(subtotal)">
-               </td>
-             </tr>
-           </dtml-if>
-           </dtml-with>
-         </dtml-in>
-       </table>
- </dtml-with>
-</fieldset>
+                <dtml-in name="tipo">
+                  <dtml-with expr="_.namespace(subtotal=zsql.materia_palavra_buscar_zsql(tip_id_basica=tip_materia,txt_busca=txt_palavra_chave))">
+                    <dtml-if expr="_.len(subtotal) > 0">
+                      <tr>
+                        <td>
+                          <a href="<dtml-var portal_url>/generico/palavra_materia_pesquisar_proc?incluir=0&existe_ocorrencia=0&lst_tip_materia=<dtml-var tip_materia>&txt_busca=<dtml-var expr="txt_palavra_chave.replace('\x22', '%22')">&btn_materia_pesquisar=Pesquisar" class="text-decoration-none">
+                            <dtml-var des_tipo_materia>
+                          </a>
+                        </td>
+                        <td><dtml-var expr="_.len(subtotal)"></td>
+                      </tr>
+                    </dtml-if>
+                  </dtml-with>
+                </dtml-in>
+      <dtml-if expr="_.len(total) >= 1">
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </dtml-if>
+    </div>
+</dtml-with>
 
- <dtml-with expr="_.namespace(tipo_norma=zsql.tipo_norma_juridica_obter_zsql(ind_excluido=0))">
+<dtml-with expr="_.namespace(tipo_norma=zsql.tipo_norma_juridica_obter_zsql(ind_excluido=0))">
   <dtml-with expr="_.namespace(total_normas=zsql.norma_palavra_buscar_zsql(des_assunto=txt_palavra_chave))">
-   <p class="h5">Normas Jurídicas: <dtml-if expr="_.len(total_normas) == 0">nenhuma<dtml-else> <dtml-var expr="_.len(total_normas)"></dtml-if> ocorrência<dtml-if expr="_.len(total_normas) > 1">s</dtml-if></p>
+    <div class="card mb-3">
+      <div class="card-header">
+        <h3 class="h5 mb-0"><i class="fas fa-gavel me-1"></i>Normas Jurídicas: <dtml-if expr="_.len(total_normas) == 0">nenhuma<dtml-else><dtml-var expr="_.len(total_normas)"></dtml-if> ocorrência<dtml-if expr="_.len(total_normas) > 1">s</dtml-if></h3>
+      </div>
       <dtml-if expr="_.len(total_normas) >= 1">
-       <table class="table">
-        <thead>       
-         <tr>
-          <th>Tipo de Norma</th>
-          <th>Quantidade</th>
-         </tr>
-        </thead>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-striped align-middle mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th>Tipo de Norma</th>
+                  <th>Quantidade</th>
+                </tr>
+              </thead>
+              <tbody>
       </dtml-if>
   </dtml-with>
-         <dtml-in name="tipo_norma">
-           <dtml-with expr="_.namespace(subtotal_normas=zsql.norma_palavra_buscar_zsql(tip_norma=tip_norma,des_assunto=txt_palavra_chave))">
-           <dtml-if expr="_.len(subtotal_normas) > 0">
-             <tr>
-               <td width="80%">
-                <a href="<dtml-var portal_url>/generico/palavra_norma_pesquisar_proc?incluir=0&lst_tip_norma=<dtml-var tip_norma>&txt_assunto=<dtml-var expr="txt_palavra_chave.replace('\x22', '%22')">">
-                  <dtml-var des_tipo_norma>
-                </a>
-               </td>               
-               <td>
-                  <dtml-var  expr="_.len(subtotal_normas)">
-               </td>
-             </tr>
-           </dtml-if>
-           </dtml-with>
-         </dtml-in>
-       </table>
- </dtml-with>
+                <dtml-in name="tipo_norma">
+                  <dtml-with expr="_.namespace(subtotal_normas=zsql.norma_palavra_buscar_zsql(tip_norma=tip_norma,des_assunto=txt_palavra_chave))">
+                    <dtml-if expr="_.len(subtotal_normas) > 0">
+                      <tr>
+                        <td>
+                          <a href="<dtml-var portal_url>/generico/palavra_norma_pesquisar_proc?incluir=0&lst_tip_norma=<dtml-var tip_norma>&txt_assunto=<dtml-var expr="txt_palavra_chave.replace('\x22', '%22')">" class="text-decoration-none">
+                            <dtml-var des_tipo_norma>
+                          </a>
+                        </td>
+                        <td><dtml-var expr="_.len(subtotal_normas)"></td>
+                      </tr>
+                    </dtml-if>
+                  </dtml-with>
+                </dtml-in>
+      <dtml-if expr="_.len(total_normas) >= 1">
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </dtml-if>
+    </div>
+</dtml-with>
 
 <dtml-var js_slot>
 <dtml-var footer_html>

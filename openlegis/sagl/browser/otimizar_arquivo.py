@@ -607,6 +607,20 @@ class PDFProcessor:
         Trata erros aplicando compressão final.
         """
         try:
+            # Verifica se o PDF tem páginas válidas antes de tentar processar
+            try:
+                with fitz.open(stream=pdf_data, filetype="pdf") as test_doc:
+                    if test_doc.page_count == 0:
+                        logging.warning("PDF não contém páginas válidas, retornando original")
+                        return pdf_data
+            except Exception as e:
+                error_str = str(e).lower()
+                if 'zero pages' in error_str or 'unable to find page tree' in error_str or 'page tree' in error_str:
+                    logging.warning(f"PDF corrompido detectado em _handle_ocr_errors: {str(e)}, retornando original")
+                    return pdf_data
+                # Se for outro erro, tenta processar mesmo assim
+                logging.warning(f"Erro ao verificar PDF em _handle_ocr_errors: {str(e)}, tentando processar mesmo assim")
+            
             if not self.enable_ocr:
                 logging.info("OCR desativado. Aplicando compressão final após erro.")
                 return self._compress_pdf_final(pdf_data)
@@ -614,8 +628,20 @@ class PDFProcessor:
             return self._otimizacao_padrao(pdf_data)
             
         except Exception as e:
-            logging.error(f"OCR falhou: {e}")
-            return self._compress_pdf_final(pdf_data)
+            error_str = str(e).lower()
+            if 'zero pages' in error_str or 'unable to find page tree' in error_str or 'page tree' in error_str:
+                logging.warning(f"PDF corrompido detectado durante tratamento de erro OCR: {str(e)}, retornando original")
+                return pdf_data
+            logging.warning(f"OCR falhou: {e}")
+            try:
+                return self._compress_pdf_final(pdf_data)
+            except Exception as compress_e:
+                error_str_compress = str(compress_e).lower()
+                if 'zero pages' in error_str_compress or 'unable to find page tree' in error_str_compress or 'page tree' in error_str_compress:
+                    logging.warning(f"PDF corrompido detectado durante compressão final: {str(compress_e)}, retornando original")
+                    return pdf_data
+                logging.warning(f"Compressão final também falhou: {str(compress_e)}, retornando PDF original")
+                return pdf_data
 
     def _otimizacao_padrao(self, pdf_data: bytes) -> bytes:
         """
@@ -771,12 +797,25 @@ class PDFProcessor:
         validate_pdf_size(pdf_data)
         try:
             with fitz.open(stream=pdf_data, filetype="pdf") as doc:
+                if doc.page_count == 0:
+                    raise PDFIrrecuperavelError("PDF não contém páginas")
                 if doc.page_count > MAX_PAGES:
                     raise PDFPageLimitExceededError(
                         f"PDF contém {doc.page_count} páginas (limite: {MAX_PAGES})"
                     )
+        except PDFIrrecuperavelError:
+            raise
+        except PDFPageLimitExceededError:
+            raise
         except Exception as e:
-            raise PDFIrrecuperavelError(f"PDF inválido: {str(e)}")
+            # Tenta reparar com pikepdf antes de considerar irrecuperável
+            try:
+                repaired = self._repair_with_pikepdf(pdf_data)
+                with fitz.open(stream=repaired, filetype="pdf") as doc:
+                    if doc.page_count == 0:
+                        raise PDFIrrecuperavelError("PDF reparado mas ainda não contém páginas")
+            except Exception as repair_e:
+                raise PDFIrrecuperavelError(f"PDF inválido e não pôde ser reparado: {str(e)} (tentativa de reparo: {str(repair_e)})")
 
     def _verificar_assinaturas(self, pdf_data: bytes) -> Union[bool, Optional[List[SignatureData]]]:
         try:
@@ -792,28 +831,61 @@ class PDFProcessor:
         Compressão final agressiva usando pikepdf.
         """
         try:
+            # Verifica se o PDF tem páginas antes de tentar comprimir
+            try:
+                with fitz.open(stream=pdf_data, filetype="pdf") as test_doc:
+                    if test_doc.page_count == 0:
+                        logging.warning("PDF não contém páginas, pulando compressão")
+                        return pdf_data
+            except Exception as e:
+                logging.warning(f"Erro ao verificar páginas antes de comprimir: {str(e)}, tentando comprimir mesmo assim")
+            
             with pikepdf.open(BytesIO(pdf_data)) as pdf:
+                # Verifica se o PDF tem páginas
+                if len(pdf.pages) == 0:
+                    logging.warning("PDF não contém páginas (pikepdf), pulando compressão")
+                    return pdf_data
+                
                 output = BytesIO()
                 # Configurações agressivas de compressão
-                pdf.save(
-                    output,
-                    linearize=False,  # Não linearizar para melhor compressão
-                    compress_streams=True,
-                    stream_compress_level=9,  # Nível máximo de compressão
-                    object_stream_mode=pikepdf.ObjectStreamMode.generate,
-                    preserve_pdfa=False,  # Não preservar PDF/A para melhor compressão
-                    compress_fonts=True,
-                    normalize_content=True,
-                    deduplicate_images=True,  # Deduplicar imagens
-                    force_version='1.5'  # Versão mais compatível
-                )
+                save_kwargs = {
+                    'linearize': False,  # Não linearizar para melhor compressão
+                    'compress_streams': True,  # Compressão de streams (já inclui compressão máxima)
+                    'object_stream_mode': pikepdf.ObjectStreamMode.generate,
+                    'preserve_pdfa': False,  # Não preservar PDF/A para melhor compressão
+                    'normalize_content': True,
+                    'force_version': '1.5'  # Versão mais compatível
+                }
+                
+                # Tenta com deduplicate_images se suportado
+                try:
+                    save_kwargs['deduplicate_images'] = True
+                    pdf.save(output, **save_kwargs)
+                except TypeError as e:
+                    # Se deduplicate_images não for suportado, tenta sem ele
+                    if 'deduplicate_images' in str(e):
+                        save_kwargs.pop('deduplicate_images', None)
+                        pdf.save(output, **save_kwargs)
+                    else:
+                        raise
+                except Exception as save_e:
+                    error_str = str(save_e).lower()
+                    if 'zero pages' in error_str or 'unable to find page tree' in error_str or 'page tree' in error_str:
+                        logging.warning(f"PDF corrompido detectado durante compressão: {str(save_e)}, retornando PDF original")
+                        return pdf_data
+                    raise
+                
                 compressed = output.getvalue()
                 if len(compressed) < len(pdf_data):
                     logging.info(f"Compressão final: {len(pdf_data)/1024:.2f}KB -> {len(compressed)/1024:.2f}KB (redução: {calculate_compression_rate(len(pdf_data), len(compressed)):.1f}%)")
                     return compressed
                 return pdf_data
         except Exception as e:
-            logging.warning(f"Compressão final falhou: {str(e)}")
+            error_str = str(e).lower()
+            if 'zero pages' in error_str or 'unable to find page tree' in error_str or 'page tree' in error_str:
+                logging.warning(f"PDF corrompido detectado: {str(e)}, retornando PDF original")
+            else:
+                logging.warning(f"Compressão final falhou: {str(e)}")
             return pdf_data
 
     def processar_pdf(self, pdf_data: bytes) -> bytes:
@@ -822,6 +894,27 @@ class PDFProcessor:
                 logging.warning("PDF mantido original devido à presença de assinatura digital.")
                 return pdf_data
             start_time = time.time()
+            
+            # Verifica se o PDF pode ser aberto e tem páginas válidas
+            try:
+                with fitz.open(stream=pdf_data, filetype="pdf") as test_doc:
+                    if test_doc.page_count == 0:
+                        raise PDFIrrecuperavelError("PDF não contém páginas válidas")
+                    # Tenta acessar a primeira página para garantir que está válida
+                    _ = test_doc[0]
+            except Exception as e:
+                # Tenta reparar com pikepdf
+                try:
+                    logging.warning(f"PDF não pôde ser aberto com fitz, tentando reparar: {str(e)}")
+                    repaired = self._repair_with_pikepdf(pdf_data)
+                    with fitz.open(stream=repaired, filetype="pdf") as test_doc:
+                        if test_doc.page_count == 0:
+                            raise PDFIrrecuperavelError("PDF reparado mas ainda não contém páginas válidas")
+                        _ = test_doc[0]
+                    pdf_data = repaired
+                    logging.info("PDF reparado com sucesso com pikepdf")
+                except Exception as repair_e:
+                    raise PDFIrrecuperavelError(f"PDF irrecuperável: não pôde ser aberto nem reparado. Erro original: {str(e)}, erro de reparo: {str(repair_e)}")
             
             self._safe_update_progress(
                 'resizing',
@@ -949,7 +1042,20 @@ class PDFProcessor:
                         )
                         return self._compress_pdf_final(pdf_data)
         
+        except PDFIrrecuperavelError as e:
+            # PDF irrecuperável - retorna o PDF original sem processamento
+            logging.warning(f"PDF irrecuperável durante processamento: {str(e)}")
+            self._safe_update_progress('error', f'PDF irrecuperável: {str(e)}', 0)
+            # Retorna o PDF original ao invés de tentar processar
+            return pdf_data
         except Exception as e:
+            error_str = str(e).lower()
+            # Verifica se é um erro relacionado a PDF corrompido
+            if 'zero pages' in error_str or 'unable to find page tree' in error_str or 'page tree' in error_str:
+                logging.warning(f"PDF corrompido detectado durante processamento: {str(e)}")
+                self._safe_update_progress('error', f'PDF corrompido: {str(e)}', 0)
+                # Retorna o PDF original ao invés de tentar processar
+                return pdf_data
             logging.error(f"Erro geral no processamento: {str(e)}")
             self._safe_update_progress('error', f'Erro no processamento: {str(e)}', 0)
             return self._handle_ocr_errors(pdf_data)
@@ -1005,8 +1111,13 @@ class PDFSignatureParser(PDFProcessor):
                     except Exception as e:
                         logging.warning(f"Erro na assinatura: {str(e)}")
             return all_signers
+        except PDFIrrecuperavelError as e:
+            # PDF irrecuperável - apenas loga como warning e retorna lista vazia
+            logging.warning(f"PDF irrecuperável ao verificar assinaturas ({filename}): {str(e)}")
+            return []
         except Exception as e:
-            logging.error(f"Erro geral: {str(e)}", exc_info=True)
+            # Outros erros - loga como erro mas retorna lista vazia para não bloquear processamento
+            logging.warning(f"Erro ao verificar assinaturas do PDF ({filename}): {str(e)}")
             return []
 
     def _process_signature(self, signature: Dict[str, Any], filename: str) -> Generator[SignatureData, None, None]:
@@ -1362,9 +1473,19 @@ class PDFUploadProcessorView(grok.View, PDFSignatureParser):
             self._update_progress('error', f'Erro de Limite: {str(e)}', 0)
             raise
         except PDFIrrecuperavelError as e:
-            logging.error(str(e))
+            logging.warning(f"PDF Irrecuperável: {str(e)}")
             self._update_progress('error', f'PDF Irrecuperável: {str(e)}', 0)
-            raise
+            # Retorna o PDF original sem processamento quando irrecuperável
+            result = {'file_stream': BytesIO(original_data), 'error': str(e), 'irrecuperavel': True}
+            if hasattr(self.request, 'SESSION'):
+                self.request.SESSION[cache_key] = {
+                    'status': 'error',
+                    'start_time': start_time,
+                    'end_time': time.time(),
+                    'error': str(e),
+                    'irrecuperavel': True
+                }
+            return result
         except Exception as e:
             logging.error(f"Erro inesperado: {str(e)}", exc_info=True)
             self._update_progress('error', f'Falha no processamento: {str(e)}', 0)

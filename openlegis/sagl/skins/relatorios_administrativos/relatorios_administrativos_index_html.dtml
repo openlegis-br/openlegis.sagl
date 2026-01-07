@@ -1,33 +1,47 @@
 <dtml-var header_html>
 
-<h1 class="firstHeading font-size-18">Relatórios Estatísticos</h1>
+<h1 class="firstHeading font-size-18 mb-3">Relatórios Estatísticos</h1>
 
- <fieldset>
-   <table class="table">
-     <thead>
-       <tr> 
-         <th>Título</th>
-         <th>Descrição</th>
-       </tr>
-     </thead>
-<dtml-in expr="objectValues('Filesystem Directory View')" sort="id">
-  <dtml-if expr="propriedades.nome_relatorio">
-    <dtml-if expr="(propriedades.acesso_publico and str(AUTHENTICATED_USER)=='Anonymous User') or not str(AUTHENTICATED_USER)=='Anonymous User'">
-       <tr>
-         <td>
-            <a href="<dtml-var portal_url>/relatorios_administrativos/<dtml-var id>">
-              <dtml-var expr="propriedades.nome_relatorio">
-            </a>
-         </td>
-         <td>
-           <dtml-var expr="propriedades.desc_relatorio">
-         </td>
-       </tr>
-   </dtml-if>
-  </dtml-if>
-</dtml-in>
-</table>
-</fieldset>
+<div class="card mb-3">
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-hover table-striped align-middle mb-0">
+        <thead class="table-light">
+          <tr> 
+            <th><i class="fas fa-file-alt me-1"></i>Título</th>
+            <th><i class="fas fa-info-circle me-1"></i>Descrição</th>
+          </tr>
+        </thead>
+        <tbody class="table-group-divider">
+          <dtml-in expr="objectValues('Filesystem Directory View')" sort="id">
+            <dtml-if expr="propriedades.nome_relatorio">
+              <dtml-if expr="(propriedades.acesso_publico and str(AUTHENTICATED_USER)=='Anonymous User') or not str(AUTHENTICATED_USER)=='Anonymous User'">
+                <tr>
+                  <td>
+                    <a href="<dtml-var portal_url>/relatorios_administrativos/<dtml-var id>" class="text-decoration-none">
+                      <i class="fas fa-chart-bar me-1 text-muted"></i><span class="text-primary"><dtml-var expr="propriedades.nome_relatorio"></span>
+                    </a>
+                  </td>
+                  <td>
+                    <span class="text-muted"><dtml-var expr="propriedades.desc_relatorio"></span>
+                  </td>
+                </tr>
+              </dtml-if>
+            </dtml-if>
+          <dtml-else>
+            <tr>
+              <td colspan="2" class="text-center py-4">
+                <div class="alert alert-info mb-0" role="alert">
+                  <i class="fas fa-info-circle me-2"></i>Nenhum relatório disponível.
+                </div>
+              </td>
+            </tr>
+          </dtml-in>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
 
 <dtml-var js_slot>
 <dtml-var footer_html>

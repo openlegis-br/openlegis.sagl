@@ -1,45 +1,61 @@
 <dtml-var header_html>
-  <script >
-      function campos_criticar(form) {
-        if (form.lst_parlamentar.value == ""){
-           bootstrap.showModal({title: "Mensagem do Sistema", body: "Selecione um Vereador!"});        
-           return false;        
-        }    
-        return true;
-      }  
+<script>
+  function campos_criticar(form) {
+    if (form.lst_parlamentar.value == ""){
+      bootstrap.showModal({title: "Mensagem do Sistema", body: "Selecione um Vereador!"});        
+      return false;        
+    }    
+    return true;
+  }  
 </script>
 
+<h1 class="firstHeading font-size-18 mb-3">Pesquisa de Vereador</h1>
+
 <form name="parlamentar_pesquisar_form">
-
- <div class="row">
-   <div class="col-12 mb-3">
-     <label class="form-label required" for="lst_parlamentar">Nome do Vereador</label>
-        <div class="input-group w-100">
-        <select id="lst_parlamentar" name="lst_parlamentar" class="select2 form-control mb-3 custom-select" style="width: 85%;">
-         <option></option>
-          <dtml-in expr="zsql.parlamentar_obter_zsql(ind_excluido=0)">
-           <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Parlamentar'])">
-             <option value="<dtml-var portal_url>/cadastros/parlamentar/parlamentar_mostrar_proc?cod_parlamentar=<dtml-var cod_parlamentar>">
-                 <dtml-var nom_completo> <dtml-if expr="nom_completo != nom_parlamentar">(<dtml-var nom_parlamentar>)</dtml-if>
-             </option>
-           <dtml-else>
-             <option value="<dtml-var portal_url>/consultas/parlamentar/parlamentar_mostrar_proc?cod_parlamentar=<dtml-var cod_parlamentar>">
-                 <dtml-var nom_completo> <dtml-if expr="nom_completo != nom_parlamentar">(<dtml-var nom_parlamentar>)</dtml-if> 
-             </option>
-           </dtml-if>
-          </dtml-in>
-       </select>
-      <input class="btn btn-primary" type="button" value="OK" onClick="javascript:
-if (campos_criticar(document.parlamentar_pesquisar_form)) {parent.location.href = this.form.lst_parlamentar.options[this.form.lst_parlamentar.selectedIndex].value; return false;}" style="width: 15%;">
+  <div class="card mb-3">
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-12">
+          <label class="form-label required" for="lst_parlamentar">
+            <i class="fas fa-user me-1"></i>Nome do Vereador
+          </label>
+          <div class="input-group">
+            <select id="lst_parlamentar" name="lst_parlamentar" class="select2 form-select" style="flex: 1 1 auto; min-width: 0;">
+              <option></option>
+              <dtml-in expr="zsql.parlamentar_obter_zsql(ind_excluido=0)">
+                <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Parlamentar'])">
+                  <option value="<dtml-var portal_url>/cadastros/parlamentar/parlamentar_mostrar_proc?cod_parlamentar=<dtml-var cod_parlamentar>">
+                    <dtml-var nom_completo> <dtml-if expr="nom_completo != nom_parlamentar">(<dtml-var nom_parlamentar>)</dtml-if>
+                  </option>
+                <dtml-else>
+                  <option value="<dtml-var portal_url>/consultas/parlamentar/parlamentar_mostrar_proc?cod_parlamentar=<dtml-var cod_parlamentar>">
+                    <dtml-var nom_completo> <dtml-if expr="nom_completo != nom_parlamentar">(<dtml-var nom_parlamentar>)</dtml-if> 
+                  </option>
+                </dtml-if>
+              </dtml-in>
+            </select>
+            <button class="btn btn-primary" type="button" onclick="if (campos_criticar(document.parlamentar_pesquisar_form)) {parent.location.href = document.parlamentar_pesquisar_form.lst_parlamentar.options[document.parlamentar_pesquisar_form.lst_parlamentar.selectedIndex].value; return false;}">
+              <i class="fas fa-search me-1"></i>OK
+            </button>
+          </div>
+          <style>
+            .input-group .select2-container {
+              flex: 1 1 auto;
+              min-width: 0;
+            }
+            .input-group .select2-selection {
+              height: 100%;
+            }
+          </style>
+          <div class="form-text mt-2">
+            <i class="fas fa-info-circle me-1"></i>Selecione um Vereador e clique no botão OK para visualizar seus dados cadastrais.
+          </div>
+        </div>
+      </div>
     </div>
-       <small id="autorHelp" class="form-text text-muted">Selecione um Vereador e clique no botão OK para visualizar seus dados cadastrais.</small>       
-   </div>
+  </div>
 
- </div>
-
-<input type="hidden" name="modal" value="1">
-
-
+  <input type="hidden" name="modal" value="1">
 </form>
 
 <dtml-var js_slot>

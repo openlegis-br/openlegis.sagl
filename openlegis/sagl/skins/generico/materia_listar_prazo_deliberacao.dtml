@@ -1,39 +1,45 @@
 <dtml-var header_html>
 
-<h1 class="firstHeading font-size-18">Matérias com Prazo de Deliberação Vencido</h1>
+<h1 class="firstHeading font-size-18 mb-3">Matérias com Prazo de Deliberação Vencido</h1>
 
-    <dtml-in expr="zsql.materia_prazo_deliberacao_vencido_zsql()">
-        <dtml-if sequence-start>
-        <div class="table-responsive">        
-        <table class="table" id="jdTable">
-         <thead class="table-light">
-            <tr>
+<dtml-in expr="zsql.materia_prazo_deliberacao_vencido_zsql()">
+  <dtml-if sequence-start>
+    <div class="card mb-3">
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-striped align-middle mb-0" id="jdTable">
+            <thead class="table-light">
+              <tr>
                 <th>Identificação da Matéria</th>
                 <th>Prazo de Deliberação</th>
-            </tr>
-         </thead>
-        </dtml-if sequence-start>
-          <tr>
-            <td>
-              <b><a href="<dtml-var portal_url>/cadastros/materia/materia_mostrar_proc?cod_materia=<dtml-var cod_materia>" target="_blank">
-                 <dtml-var des_tipo_materia missing> nº <dtml-var num_ident_basica missing>/<dtml-var ano_ident_basica missing></b></a> - 
-                 <dtml-in expr="zsql.autoria_obter_zsql(cod_materia=cod_materia)">
-                   <b><dtml-var nom_autor_join><dtml-unless sequence-end>,</dtml-unless></b>
-                 </dtml-in>
-                 <br /> <b>Ementa:</b><dtml-var txt_ementa>
-            </td>
-            <td>
-               <dtml-var dat_fim_prazo>
-            </td>
-        </tr>
-    <dtml-if sequence-end>
-         <tbody>
-     </table>
-     </div>
+              </tr>
+            </thead>
+            <tbody>
+  </dtml-if sequence-start>
+              <tr>
+                <td>
+                  <a href="<dtml-var portal_url>/cadastros/materia/materia_mostrar_proc?cod_materia=<dtml-var cod_materia>" target="_blank" class="text-decoration-none">
+                    <strong><dtml-var des_tipo_materia missing> nº <dtml-var num_ident_basica missing>/<dtml-var ano_ident_basica missing></strong>
+                  </a>
+                  <dtml-in expr="zsql.autoria_obter_zsql(cod_materia=cod_materia)">
+                    - <strong><dtml-var nom_autor_join><dtml-unless sequence-end>,</dtml-unless></strong>
+                  </dtml-in>
+                  <br><small class="text-muted"><strong>Ementa:</strong> <dtml-var txt_ementa></small>
+                </td>
+                <td><dtml-var dat_fim_prazo></td>
+              </tr>
+  <dtml-if sequence-end>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
   </dtml-if sequence-end>
   <dtml-else>
-     <p>Nenhuma ocorrência.</p>
-</dtml-in>
+    <div class="alert alert-info">
+      <i class="fas fa-info-circle me-1"></i>Nenhuma ocorrência.
+    </div>
+  </dtml-in>
 
 <dtml-var js_slot>
 <script>

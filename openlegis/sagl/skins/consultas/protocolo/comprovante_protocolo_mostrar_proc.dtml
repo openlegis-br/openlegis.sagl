@@ -1,11 +1,12 @@
-<dtml-try>
-  <dtml-in expr="zsql.protocolo_obter_zsql(cod_protocolo = cod_protocolo)">
-    <dtml-var comprovante_protocolo_form>
+<dtml-in expr="zsql.protocolo_obter_zsql(cod_protocolo = cod_protocolo)">
+  <dtml-var comprovante_protocolo_form>
+  <dtml-else>
+    <dtml-var header_html>
+    <div class="container-fluid">
+      <div class="alert alert-danger mt-3">
+        <i class="fas fa-exclamation-triangle me-2"></i>
+        <strong>Erro:</strong> Protocolo não encontrado.
+      </div>
+    </div>
+    <dtml-var footer_html>
   </dtml-in>
-<dtml-except>
-<dtml-comment>
-  <dtml-let mensagem="'Houve um erro!'">
-     <dtml-var mensagem_emitir>
-  </dtml-let>
-</dtml-comment>
-</dtml-try>

@@ -1,0 +1,112 @@
+<!-- 
+  Header Modernizado para Legislação
+  Melhorias:
+  - Estrutura semântica com nav
+  - Classes BEM para CSS
+  - Melhor acessibilidade (ARIA)
+  - Layout responsivo com Grid
+  - Estados visuais melhorados
+-->
+
+<div class="legislacao-nav legislacao-container">
+    <h2 class="legislacao-nav__title">Índice Cronológico da Legislação</h2>
+    
+    <nav class="legislacao-nav__grid" aria-label="Menu de tipos de legislação">
+        <ul class="legislacao-nav__list">
+            <li class="legislacao-nav__item">
+                <a href="<dtml-var portal_url>/consultas/norma_juridica/norma_juridica_mostrar_proc?cod_norma=1" 
+                   class="legislacao-nav__link"
+                   aria-label="Visualizar Lei Orgânica">
+                    Lei Orgânica
+                </a>
+            </li>
+            <li class="legislacao-nav__item">
+                <a href="<dtml-var portal_url>/consultas/norma_juridica/norma_juridica_mostrar_proc?cod_norma=2" 
+                   class="legislacao-nav__link"
+                   aria-label="Visualizar Regimento Interno">
+                    Regimento Interno
+                </a>
+            </li>
+            <li class="legislacao-nav__item">
+                <a href="leis_ordinarias#indice" 
+                   class="legislacao-nav__link<dtml-if expr="_['REQUEST']['ACTUAL_URL']==(portal_url() + '/consultas/legislacao/leis_ordinarias')"> legislacao-nav__link--active</dtml-if>"
+                   aria-label="Consultar Leis Ordinárias"
+                   <dtml-if expr="_['REQUEST']['ACTUAL_URL']==(portal_url() + '/consultas/legislacao/leis_ordinarias')">aria-current="page"</dtml-if>>
+                    Leis Ordinárias
+                </a>
+            </li>
+            <li class="legislacao-nav__item">
+                <a href="leis_complementares#indice" 
+                   class="legislacao-nav__link<dtml-if expr="_['REQUEST']['ACTUAL_URL']==(portal_url() + '/consultas/legislacao/leis_complementares')"> legislacao-nav__link--active</dtml-if>"
+                   aria-label="Consultar Leis Complementares"
+                   <dtml-if expr="_['REQUEST']['ACTUAL_URL']==(portal_url() + '/consultas/legislacao/leis_complementares')">aria-current="page"</dtml-if>>
+                    Leis Complementares
+                </a>
+            </li>
+            <li class="legislacao-nav__item">
+                <a href="emendas_lom#indice" 
+                   class="legislacao-nav__link<dtml-if expr="_['REQUEST']['ACTUAL_URL']==(portal_url() + '/consultas/legislacao/emendas_lom')"> legislacao-nav__link--active</dtml-if>"
+                   aria-label="Consultar Emendas à Lei Orgânica"
+                   <dtml-if expr="_['REQUEST']['ACTUAL_URL']==(portal_url() + '/consultas/legislacao/emendas_lom')">aria-current="page"</dtml-if>>
+                    Emendas à Lei Orgânica
+                </a>
+            </li>
+            <li class="legislacao-nav__item">
+                <a href="resolucoes#indice" 
+                   class="legislacao-nav__link<dtml-if expr="_['REQUEST']['ACTUAL_URL']==(portal_url() + '/consultas/legislacao/resolucoes')"> legislacao-nav__link--active</dtml-if>"
+                   aria-label="Consultar Resoluções"
+                   <dtml-if expr="_['REQUEST']['ACTUAL_URL']==(portal_url() + '/consultas/legislacao/resolucoes')">aria-current="page"</dtml-if>>
+                    Resoluções
+                </a>
+            </li>
+            <li class="legislacao-nav__item">
+                <a href="decretos_legislativos#indice" 
+                   class="legislacao-nav__link<dtml-if expr="_['REQUEST']['ACTUAL_URL']==(portal_url() + '/consultas/legislacao/decretos_legislativos')"> legislacao-nav__link--active</dtml-if>"
+                   aria-label="Consultar Decretos Legislativos"
+                   <dtml-if expr="_['REQUEST']['ACTUAL_URL']==(portal_url() + '/consultas/legislacao/decretos_legislativos')">aria-current="page"</dtml-if>>
+                    Decretos Legislativos
+                </a>
+            </li>
+            <li class="legislacao-nav__item">
+                <a href="decretos_executivo#indice" 
+                   class="legislacao-nav__link<dtml-if expr="_['REQUEST']['ACTUAL_URL']==(portal_url() + '/consultas/legislacao/decretos_executivo')"> legislacao-nav__link--active</dtml-if>"
+                   aria-label="Consultar Decretos do Executivo"
+                   <dtml-if expr="_['REQUEST']['ACTUAL_URL']==(portal_url() + '/consultas/legislacao/decretos_executivo')">aria-current="page"</dtml-if>>
+                    Decretos do Executivo
+                </a>
+            </li>
+            <li class="legislacao-nav__item">
+                <a href="atos_mesa#indice" 
+                   class="legislacao-nav__link<dtml-if expr="_['REQUEST']['ACTUAL_URL']==(portal_url() + '/consultas/legislacao/atos_mesa')"> legislacao-nav__link--active</dtml-if>"
+                   aria-label="Consultar Atos da Mesa"
+                   <dtml-if expr="_['REQUEST']['ACTUAL_URL']==(portal_url() + '/consultas/legislacao/atos_mesa')">aria-current="page"</dtml-if>>
+                    Atos da Mesa
+                </a>
+            </li>
+            <li class="legislacao-nav__item">
+                <a href="codigos#indice" 
+                   class="legislacao-nav__link<dtml-if expr="_['REQUEST']['ACTUAL_URL']==(portal_url() + '/consultas/legislacao/codigos')"> legislacao-nav__link--active</dtml-if>"
+                   aria-label="Consultar Códigos"
+                   <dtml-if expr="_['REQUEST']['ACTUAL_URL']==(portal_url() + '/consultas/legislacao/codigos')">aria-current="page"</dtml-if>>
+                    Códigos
+                </a>
+            </li>
+            <li class="legislacao-nav__item">
+                <a href="estatutos#indice" 
+                   class="legislacao-nav__link<dtml-if expr="_['REQUEST']['ACTUAL_URL']==(portal_url() + '/consultas/legislacao/estatutos')"> legislacao-nav__link--active</dtml-if>"
+                   aria-label="Consultar Estatutos"
+                   <dtml-if expr="_['REQUEST']['ACTUAL_URL']==(portal_url() + '/consultas/legislacao/estatutos')">aria-current="page"</dtml-if>>
+                    Estatutos
+                </a>
+            </li>
+            <li class="legislacao-nav__item">
+                <a href="portarias#indice" 
+                   class="legislacao-nav__link<dtml-if expr="_['REQUEST']['ACTUAL_URL']==(portal_url() + '/consultas/legislacao/portarias')"> legislacao-nav__link--active</dtml-if>"
+                   aria-label="Consultar Portarias"
+                   <dtml-if expr="_['REQUEST']['ACTUAL_URL']==(portal_url() + '/consultas/legislacao/portarias')">aria-current="page"</dtml-if>>
+                    Portarias
+                </a>
+            </li>
+        </ul>
+    </nav>
+</div>

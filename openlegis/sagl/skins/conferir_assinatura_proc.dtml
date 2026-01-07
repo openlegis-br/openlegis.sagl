@@ -6,113 +6,177 @@
 
  <dtml-if sequence-start> 
 
- <h1 class="firstHeading font-size-18">Validação de Documento Digital</h1>
+ <h1 class="firstHeading font-size-18 mb-4">Validação de Documento Digital</h1>
  
- <p><b>Código de Validação:</b> <dtml-var txt_codigo_verificacao></p>
+ <div class="card border-0 shadow-sm mb-4">
+   <div class="card-header bg-success text-white">
+     <i class="fas fa-check-circle me-2"></i>
+     <strong>Documento Válido</strong>
+   </div>
+   <div class="card-body">
+     <div class="mb-3">
+       <small class="text-muted d-block">Código de Validação</small>
+       <div>
+         <i class="fas fa-key me-2 text-muted"></i>
+         <strong><dtml-var txt_codigo_verificacao></strong>
+       </div>
+     </div>
+   </div>
+ </div>
 
-     <table class="table table-bordered">
-      <thead class="table-light">
-        <tr>
-           <th>Documento Assinado</th>
-        </tr>
-      </thead>
-        <tr>
-           <td>
-               <dtml-if expr="tipo_doc == 'proposicao'">
-                 <a target="_blank" href="<dtml-var portal_url>/sapl_documentos/proposicao/<dtml-var codigo>_signed.pdf">
-                   <i class="far fa-file-pdf"></i> <dtml-var portal_url>/sapl_documentos/proposicao/<dtml-var codigo>_signed.pdf
-                 </a>
-               <dtml-else>
-                 <a target="_blank" href="<dtml-var portal_url>/sapl_documentos/documentos_assinados/<dtml-var txt_codigo>.pdf">
-                   <i class="far fa-file-pdf"></i> <dtml-var portal_url>/sapl_documentos/documentos_assinados/<dtml-var txt_codigo>.pdf
-                 </a>
-               </dtml-if>
-           </td>
-        </tr>
-      <thead class="table-light">        
-        <tr>
-           <th>Versão para Impressão</th>
-        </tr>
-      </thead>
-        <tr>
-           <td>
-               <dtml-if expr="tipo_doc == 'proposicao'">
-                   <dtml-in expr="zsql.proposicao_obter_zsql(cod_proposicao=codigo)">
-                       <dtml-if expr="ind_mat_ou_doc == 'M'">
-                          <a target="_blank" href="<dtml-var portal_url>/sapl_documentos/materia/<dtml-var cod_mat_ou_doc>_texto_integral.pdf">
-                             <i class="far fa-file-pdf"></i> <dtml-var portal_url>/sapl_documentos/materia/<dtml-var cod_mat_ou_doc>_texto_integral.pdf
-                          </a>
-                       <dtml-elif expr="ind_mat_ou_doc == 'D'">
-                          <dtml-if expr="des_tipo_proposicao!='Emenda' and des_tipo_proposicao!='Substitutivo' and des_tipo_proposicao!='Mensagem Aditiva' and des_tipo_proposicao!='Parecer' and des_tipo_proposicao!='Parecer de Comissão'">
-                            <a target="_blank" href="<dtml-var portal_url>/sapl_documentos/materia/<dtml-var cod_mat_ou_doc>.pdf">
-                               <i class="far fa-file-pdf"></i> <dtml-var portal_url>/sapl_documentos/materia/<dtml-var cod_mat_ou_doc>.pdf
-                            </a>
-                          <dtml-elif expr="des_tipo_proposicao=='Emenda' or des_tipo_proposicao=='Mensagem Aditiva'">
-                            <a target="_blank" href="<dtml-var portal_url>/sapl_documentos/emenda/<dtml-var cod_emenda>_emenda.pdf">
-                               <i class="far fa-file-pdf"></i> <dtml-var portal_url>/sapl_documentos/emenda/<dtml-var cod_emenda>_emenda.pdf
-                            </a>
-                          <dtml-elif expr="des_tipo_proposicao=='Substitutivo'">
-                            <a target="_blank" href="<dtml-var portal_url>/sapl_documentos/substitutivo/<dtml-var cod_substitutivo>_substitutivo.pdf">
-                               <i class="far fa-file-pdf"></i> <dtml-var portal_url>/sapl_documentos/substitutivo/<dtml-var cod_substitutivo>_substitutivo.pdf
-                            </a>
-                          <dtml-elif expr="des_tipo_proposicao=='Parecer' or des_tipo_proposicao=='Parecer de Comissão'">
-                            <a target="_blank" href="<dtml-var portal_url>/sapl_documentos/parecer_comissao/<dtml-var cod_parecer>_parecer.pdf">
-                               <i class="far fa-file-pdf"></i> <dtml-var portal_url>/sapl_documentos/parecer_comissao/<dtml-var cod_parecer>_parecer.pdf
-                            </a>
-                          </dtml-if>
-                       </dtml-if>
-                   </dtml-in>
-               <dtml-elif expr="tipo_doc == 'anexo_sessao'">
-                  <dtml-call expr="REQUEST.set('file_item', str(codigo) + '_anexo_' + str(anexo) + '.pdf')">
-                  <dtml-let titulo="getattr(sapl_documentos.anexo_sessao,file_item).title_or_id">
-                    <a target="_blank" href="<dtml-var portal_url>/sapl_documentos/anexo_sessao/<dtml-var file_item>">
-                       <dtml-var titulo>
-                    </a>
-                  </dtml-let>
-               <dtml-elif expr="tipo_doc == 'peticao'">
-                  Vide documento assinado
-               <dtml-else>
-                  <dtml-in expr="zsql.assinatura_storage_obter_zsql(tip_documento=tipo_doc)">
-                    <a target="_blank" href="<dtml-var portal_url>/<dtml-var pdf_location><dtml-var codigo><dtml-var pdf_file>">
-                      <i class="far fa-file-pdf"></i> <dtml-var portal_url>/<dtml-var pdf_location><dtml-var codigo><dtml-var pdf_file>
-                    </a>
-                  </dtml-in>
-               </dtml-if>
-           </td>
-        </tr>
-     </table>
+ <div class="card border-0 shadow-sm mb-4">
+   <div class="card-header">
+     <strong>Documento Assinado</strong>
+   </div>
+   <div class="card-body">
+     <div class="mb-3">
+       <dtml-if expr="tipo_doc == 'proposicao'">
+         <a target="_blank" href="<dtml-var portal_url>/sapl_documentos/proposicao/<dtml-var codigo>_signed.pdf" class="text-decoration-none">
+           <i class="fas fa-file-pdf me-2 text-danger"></i>
+           <strong>Documento Assinado Digitalmente</strong>
+           <i class="fas fa-external-link-alt ms-1 small"></i>
+         </a>
+       <dtml-else>
+         <a target="_blank" href="<dtml-var portal_url>/sapl_documentos/documentos_assinados/<dtml-var txt_codigo>.pdf" class="text-decoration-none">
+           <i class="fas fa-file-pdf me-2 text-danger"></i>
+           <strong>Documento Assinado Digitalmente</strong>
+           <i class="fas fa-external-link-alt ms-1 small"></i>
+         </a>
+       </dtml-if>
+     </div>
+   </div>
+ </div>
 
-    <table class="table table-bordered">
-     <thead class="table-light">
-      <tr>
-          <th width="50%">Signatário</th>
-          <th width="30%">CPF</th>
-          <th width="20%">Data da Assinatura</th>
-      </tr>
-     </thead>      
+ <div class="card border-0 shadow-sm mb-4">
+   <div class="card-header">
+     <strong>Versão para Impressão</strong>
+   </div>
+   <div class="card-body">
+     <div class="mb-3">
+       <dtml-if expr="tipo_doc == 'proposicao'">
+         <dtml-in expr="zsql.proposicao_obter_zsql(cod_proposicao=codigo)">
+           <dtml-if expr="ind_mat_ou_doc == 'M'">
+             <a target="_blank" href="<dtml-var portal_url>/sapl_documentos/materia/<dtml-var cod_mat_ou_doc>_texto_integral.pdf" class="text-decoration-none">
+               <i class="fas fa-file-pdf me-2 text-danger"></i>
+               <strong>Texto Integral</strong>
+               <i class="fas fa-external-link-alt ms-1 small"></i>
+             </a>
+           <dtml-elif expr="ind_mat_ou_doc == 'D'">
+             <dtml-if expr="des_tipo_proposicao!='Emenda' and des_tipo_proposicao!='Substitutivo' and des_tipo_proposicao!='Mensagem Aditiva' and des_tipo_proposicao!='Parecer' and des_tipo_proposicao!='Parecer de Comissão'">
+               <a target="_blank" href="<dtml-var portal_url>/sapl_documentos/materia/<dtml-var cod_mat_ou_doc>.pdf" class="text-decoration-none">
+                 <i class="fas fa-file-pdf me-2 text-danger"></i>
+                 <strong>Documento</strong>
+                 <i class="fas fa-external-link-alt ms-1 small"></i>
+               </a>
+             <dtml-elif expr="des_tipo_proposicao=='Emenda' or des_tipo_proposicao=='Mensagem Aditiva'">
+               <a target="_blank" href="<dtml-var portal_url>/sapl_documentos/emenda/<dtml-var cod_emenda>_emenda.pdf" class="text-decoration-none">
+                 <i class="fas fa-file-pdf me-2 text-danger"></i>
+                 <strong>Emenda</strong>
+                 <i class="fas fa-external-link-alt ms-1 small"></i>
+               </a>
+             <dtml-elif expr="des_tipo_proposicao=='Substitutivo'">
+               <a target="_blank" href="<dtml-var portal_url>/sapl_documentos/substitutivo/<dtml-var cod_substitutivo>_substitutivo.pdf" class="text-decoration-none">
+                 <i class="fas fa-file-pdf me-2 text-danger"></i>
+                 <strong>Substitutivo</strong>
+                 <i class="fas fa-external-link-alt ms-1 small"></i>
+               </a>
+             <dtml-elif expr="des_tipo_proposicao=='Parecer' or des_tipo_proposicao=='Parecer de Comissão'">
+               <a target="_blank" href="<dtml-var portal_url>/sapl_documentos/parecer_comissao/<dtml-var cod_parecer>_parecer.pdf" class="text-decoration-none">
+                 <i class="fas fa-file-pdf me-2 text-danger"></i>
+                 <strong>Parecer</strong>
+                 <i class="fas fa-external-link-alt ms-1 small"></i>
+               </a>
+             </dtml-if>
+           </dtml-if>
+         </dtml-in>
+       <dtml-elif expr="tipo_doc == 'anexo_sessao'">
+         <dtml-call expr="REQUEST.set('file_item', str(codigo) + '_anexo_' + str(anexo) + '.pdf')">
+         <dtml-let titulo="getattr(sapl_documentos.anexo_sessao,file_item).title_or_id">
+           <a target="_blank" href="<dtml-var portal_url>/sapl_documentos/anexo_sessao/<dtml-var file_item>" class="text-decoration-none">
+             <i class="fas fa-file-pdf me-2 text-danger"></i>
+             <strong><dtml-var titulo></strong>
+             <i class="fas fa-external-link-alt ms-1 small"></i>
+           </a>
+         </dtml-let>
+       <dtml-elif expr="tipo_doc == 'peticao'">
+         <span class="text-muted">Vide documento assinado</span>
+       <dtml-else>
+         <dtml-in expr="zsql.assinatura_storage_obter_zsql(tip_documento=tipo_doc)">
+           <a target="_blank" href="<dtml-var portal_url>/<dtml-var pdf_location><dtml-var codigo><dtml-var pdf_file>" class="text-decoration-none">
+             <i class="fas fa-file-pdf me-2 text-danger"></i>
+             <strong>Documento</strong>
+             <i class="fas fa-external-link-alt ms-1 small"></i>
+           </a>
+         </dtml-in>
+       </dtml-if>
+     </div>
+   </div>
+ </div>
+
+ <div class="card border-0 shadow-sm mb-4">
+   <div class="card-header">
+     <strong>Signatários</strong>
+   </div>
+   <div class="card-body p-0">
+     <div class="table-responsive">
+       <table class="table table-striped align-middle mb-0">
+         <thead class="table-light">
+           <tr>
+             <th width="50%">Signatário</th>
+             <th width="30%">CPF</th>
+             <th width="20%">Data da Assinatura</th>
+           </tr>
+         </thead>
+         <tbody>      
   </dtml-if>
       <tr>
-          <td><dtml-var nom_completo></td>
+          <td>
+            <i class="fas fa-user me-2 text-muted"></i>
+            <dtml-var nom_completo>
+          </td>
           <dtml-call expr="REQUEST.set('num_cpf_omitido', '***.' + str(num_cpf[4:7]) + '.' + str(num_cpf[8:11]) + '-**')">
-          <td><dtml-var num_cpf_omitido></td>
-
-          <td><dtml-var dat_assinatura></td>
+          <td>
+            <i class="fas fa-id-card me-2 text-muted"></i>
+            <dtml-var num_cpf_omitido>
+          </td>
+          <td>
+            <i class="fas fa-calendar-alt me-2 text-muted"></i>
+            <dtml-var dat_assinatura>
+          </td>
       </tr>
   <dtml-if sequence-end>
-     </table>
+         </tbody>
+       </table>
+     </div>
+   </div>
+ </div>
   </dtml-if>
 
 <dtml-else>
-  <h1 class="firstHeading font-size-18">Validação Digital</h1> 
-    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-        <h5>O código de validação <b><dtml-var txt_codigo_verificacao></b> não foi localizado!</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  <h1 class="firstHeading font-size-18 mb-4">Validação Digital</h1> 
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-danger text-white">
+      <i class="fas fa-times-circle me-2"></i>
+      <strong>Documento Inválido</strong>
     </div>
+    <div class="card-body">
+      <div class="alert alert-danger mb-0" role="alert">
+        <i class="fas fa-exclamation-triangle me-2"></i>
+        <strong>O código de validação <dtml-var txt_codigo_verificacao></strong> não foi localizado!
+      </div>
+    </div>
+  </div>
 </dtml-in>
 
-<div class="btn-group">
-  <button class="btn btn-primary d-print-none" onClick="history.back()">Nova Validação</button>
-  <button class="btn btn-secondary d-print-none" onClick="window.print();return false;">Impresssão</button>
+<div class="d-print-none">
+  <div class="btn-group">
+    <button class="btn btn-outline-primary" onClick="history.back()">
+      <i class="fas fa-redo me-1"></i>Nova Validação
+    </button>
+    <button class="btn btn-outline-secondary" onClick="window.print();return false;">
+      <i class="fas fa-print me-1"></i>Imprimir
+    </button>
+  </div>
 </div>
 
 <dtml-var js_slot>

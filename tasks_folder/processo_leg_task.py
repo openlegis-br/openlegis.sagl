@@ -563,9 +563,14 @@ def gerar_processo_leg_integral_task(self, site, cod_materia, portal_url, user_i
         )
         
         # Constrói URL da view ProcessoLegTaskExecutor
-        # Remove barra final se houver
+        # IMPORTANTE: A URL precisa incluir /sagl/ para que o contexto seja resolvido corretamente
+        # mesmo que o portal_url seja o domínio direto (sem /sagl/), internamente o Zope espera /sagl/
         base_url = portal_url.rstrip('/')
-        executor_url = f"{base_url}/@@processo_leg_task_executor"
+        # Se a URL não contém /sagl/, adiciona
+        if '/sagl/' not in base_url:
+            executor_url = f"{base_url}/sagl/@@processo_leg_task_executor"
+        else:
+            executor_url = f"{base_url}/@@processo_leg_task_executor"
         
         
         # Prepara dados para POST

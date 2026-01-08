@@ -756,47 +756,43 @@ class ProcessoLegView(grok.View):
             proposta = self._get_proposicao_data(dados_materia['cod_materia'])
             
             # Gera a capa usando o método padrão do sistema (gera no temp_folder)
+            # IMPORTANTE: modelo_proposicao está em /sagl/portal_skins/sk_sagl/modelo_proposicao
+            # Precisa acessar através do caminho completo: portal_skins.sk_sagl.modelo_proposicao
             try:
-                self.context.modelo_proposicao.capa_processo(cod_materia=dados_materia['cod_materia'], action='gerar')
+                # Acessa modelo_proposicao através do caminho completo
+                portal_skins = getattr(self.context, 'portal_skins', None)
+                modelo_proposicao = None
                 
-                # OTIMIZAÇÃO: Polling inteligente ao invés de sleep fixo
-                # Aguarda a geração da capa com polling e timeout
-                max_wait_time = 5.0  # Máximo de 5 segundos
-                poll_interval = 0.1  # Verifica a cada 100ms
+                if portal_skins:
+                    sk_sagl = getattr(portal_skins, 'sk_sagl', None)
+                    if sk_sagl:
+                        modelo_proposicao = getattr(sk_sagl, 'modelo_proposicao', None)
+                
+                # Se não encontrou pelo caminho completo, tenta acesso direto via Acquisition
+                if modelo_proposicao is None:
+                    modelo_proposicao = getattr(self.context, 'modelo_proposicao', None)
+                
+                if modelo_proposicao is not None:
+                    modelo_proposicao.capa_processo(cod_materia=dados_materia['cod_materia'], action='gerar')
+                else:
+                    raise AttributeError("modelo_proposicao não encontrado")
+                
+                # OTIMIZAÇÃO: Polling simplificado - verifica apenas 1 vez rapidamente
+                # Se não estiver pronto, o download com timeout maior vai aguardar a geração
+                time.sleep(0.5)
+                
                 base_url = self.context.absolute_url()
                 url = f"{base_url}/modelo_proposicao/capa_processo?cod_materia={dados_materia['cod_materia']}&action=download"
                 
                 import urllib.request
                 import urllib.error
                 
-                capa_ready = False
-                elapsed_time = 0.0
-                
-                while elapsed_time < max_wait_time and not capa_ready:
-                    try:
-                        # Tenta fazer HEAD request para verificar se arquivo está pronto
-                        req = urllib.request.Request(url, method='HEAD')
-                        req.add_header('User-Agent', 'SAGL-PDF-Generator/1.0')
-                        with urllib.request.urlopen(req, timeout=5) as response:
-                            if response.status == 200:
-                                capa_ready = True
-                                break
-                    except (urllib.error.HTTPError, urllib.error.URLError):
-                        # Ainda não está pronto, continua aguardando
-                        pass
-                    except Exception:
-                        # Outro erro, continua tentando
-                        pass
-                    
-                    time.sleep(poll_interval)
-                    elapsed_time += poll_interval
-                
-                # Faz download via HTTP
+                # Faz download via HTTP (com timeout maior para aguardar geração se necessário)
                 req = urllib.request.Request(url)
                 req.add_header('User-Agent', 'SAGL-PDF-Generator/1.0')
                 
                 try:
-                    with urllib.request.urlopen(req, timeout=30) as response:
+                    with urllib.request.urlopen(req, timeout=60) as response:
                         capa_data = response.read()
                     
                     if capa_data and len(capa_data) > 0:
@@ -1877,20 +1873,37 @@ class ProcessoLegTaskExecutor(grok.View):
                 }, default=default_serializer)
                 
             except Exception as gen_err:
+                import traceback
+                error_traceback = traceback.format_exc()
                 logger.error(f"[ProcessoLegTaskExecutor] Erro ao gerar processo: {gen_err}", exc_info=True)
+                logger.error(f"[ProcessoLegTaskExecutor] Traceback completo:\n{error_traceback}")
                 self.request.RESPONSE.setStatus(500)
                 self.request.RESPONSE.setHeader('Content-Type', 'application/json; charset=utf-8')
                 return json.dumps({
                     'success': False,
                     'error': str(gen_err),
-                    'cod_materia': cod_materia
+                    'error_type': type(gen_err).__name__,
+                    'traceback': error_traceback,
+                    'cod_materia': cod_materia,
+                    'context_type': type(self.context).__name__,
+                    'context_id': getattr(self.context, 'id', 'N/A'),
+                    'has_sapl_documentos': hasattr(self.context, 'sapl_documentos'),
+                    'has_modelo_proposicao': hasattr(self.context, 'modelo_proposicao')
                 })
             
         except Exception as e:
+            import traceback
+            error_traceback = traceback.format_exc()
             logger.error(f"[ProcessoLegTaskExecutor] Erro inesperado: {e}", exc_info=True)
+            logger.error(f"[ProcessoLegTaskExecutor] Traceback completo:\n{error_traceback}")
             self.request.RESPONSE.setStatus(500)
             self.request.RESPONSE.setHeader('Content-Type', 'application/json; charset=utf-8')
-            return json.dumps({'error': str(e), 'success': False})
+            return json.dumps({
+                'error': str(e),
+                'error_type': type(e).__name__,
+                'success': False,
+                'traceback': error_traceback
+            })
 
 
 class ProcessoLegStatusView(grok.View):

@@ -309,7 +309,8 @@ class AssinaturaDocumento(Base):
         Index('idx_cod_assinatura_doc', 'cod_assinatura_doc', 'codigo', 'tipo_doc', 'cod_usuario', unique=True),
         Index('ind_assinado', 'ind_assinado'),
         Index('ind_recusado', 'ind_recusado'),
-        Index('tipo_doc', 'tipo_doc')
+        Index('tipo_doc', 'tipo_doc'),
+        Index('idx_assinatura_codigo_tipo_excluido', 'codigo', 'tipo_doc', 'ind_excluido', 'ind_assinado')
     )
 
     id = mapped_column(Integer, primary_key=True)
@@ -2563,7 +2564,9 @@ class Proposicao(Base):
         Index('cod_revisor', 'cod_revisor'),
         Index('cod_substitutivo', 'cod_substitutivo'),
         Index('idx_prop_autor', 'dat_envio', 'dat_recebimento', 'ind_excluido'),
-        Index('tip_proposicao', 'tip_proposicao')
+        Index('tip_proposicao', 'tip_proposicao'),
+        Index('idx_proposicao_dat_envio_recebimento', 'ind_excluido', 'dat_envio', 'dat_recebimento', 'dat_solicitacao_devolucao', 'dat_devolucao'),
+        Index('idx_proposicao_recebimento_mat_doc', 'ind_excluido', 'dat_recebimento', 'cod_mat_ou_doc')
     )
 
     cod_proposicao = mapped_column(Integer, primary_key=True)

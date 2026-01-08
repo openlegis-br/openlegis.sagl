@@ -1036,8 +1036,47 @@ class ZopeContext:
                     path_parts = [p for p in traverse_path.strip('/').split('/') if p]
                     if path_parts:
                         # IMPORTANTE: Com VirtualHostRoot, o objeto 'sagl' deve existir no root
-                        # Faça traverse para o path especificado
-                        site = app.unrestrictedTraverse(path_parts)
+                        # Primeiro, verifica se o objeto realmente existe no app
+                        object_id = path_parts[0] if path_parts else traverse_path
+                        try:
+                            # Verifica se o objeto existe listando objectIds
+                            if hasattr(app, 'objectIds'):
+                                obj_ids = list(app.objectIds())
+                                self.logger.debug(f"[ZopeContext] Objetos disponíveis no root: {obj_ids[:10]}... (mostrando primeiros 10)")
+                                if object_id not in obj_ids:
+                                    self.logger.warning(f"[ZopeContext] Objeto '{object_id}' não encontrado em objectIds() do root!")
+                                    # Mesmo assim tenta acessar, pode estar disponível via outro mecanismo
+                        except Exception as list_err:
+                            self.logger.debug(f"[ZopeContext] Erro ao listar objectIds: {list_err}")
+                        
+                        # Tenta fazer traverse para o path especificado
+                        try:
+                            site = app.unrestrictedTraverse(path_parts)
+                        except (KeyError, AttributeError) as traverse_err:
+                            # Se traverse falhar, tenta acessar diretamente via diferentes métodos
+                            self.logger.debug(f"[ZopeContext] unrestrictedTraverse falhou: {traverse_err}, tentando métodos alternativos...")
+                            
+                            # Tenta _getOb diretamente
+                            site = None
+                            try:
+                                if hasattr(app, '_getOb'):
+                                    site = app._getOb(object_id, None)
+                                    if site is not None:
+                                        self.logger.debug(f"[ZopeContext] Site obtido via _getOb")
+                            except Exception as getob_err:
+                                self.logger.debug(f"[ZopeContext] _getOb falhou: {getob_err}")
+                            
+                            # Se ainda não encontrou, tenta __getitem__
+                            if site is None:
+                                try:
+                                    site = app[object_id]
+                                    self.logger.debug(f"[ZopeContext] Site obtido via __getitem__")
+                                except (KeyError, TypeError) as getitem_err:
+                                    self.logger.debug(f"[ZopeContext] __getitem__ falhou: {getitem_err}")
+                            
+                            # Se ainda não encontrou, re-levanta o erro original para ser tratado no except externo
+                            if site is None:
+                                raise traverse_err
                         
                         # Verifica se o objeto obtido parece ser um site válido
                         if not (hasattr(site, 'portal_skins') or hasattr(site, 'zsql') or hasattr(site, 'sapl_documentos')):
@@ -1068,48 +1107,97 @@ class ZopeContext:
                 self.logger.info(f"[ZopeContext] Path '{traverse_path}' não encontrado via traverse ({e}), tentando alternativas...")
                 
                 # IMPORTANTE: No Zope, sapl_documentos sempre está em /sagl/sapl_documentos,
-                # então 'sagl' DEVE existir. Tenta acessar diretamente via getattr
+                # então 'sagl' DEVE existir. Tenta múltiplas formas de acessar o objeto
                 if isinstance(traverse_path, str) and '/' not in traverse_path.strip('/'):
+                    site = None
+                    
+                    # Método 1: Tenta getattr direto
                     try:
                         if hasattr(app, traverse_path):
                             site = getattr(app, traverse_path)
-                            self.logger.info(f"[ZopeContext] Encontrado '{traverse_path}' via getattr direto em app")
-                            # Verifica se é um site válido (deve ter sapl_documentos se for /sagl/)
-                            if hasattr(site, 'portal_skins') or hasattr(site, 'zsql') or hasattr(site, 'sapl_documentos'):
-                                self.logger.info(f"[ZopeContext] Objeto '{traverse_path}' é um site válido")
-                            else:
-                                # Se não tem sapl_documentos mas deveria ter, há um problema
-                                if traverse_path == 'sagl':
-                                    error_msg = f"Objeto 'sagl' encontrado mas não tem sapl_documentos/portal_skins/zsql. Isso não deveria acontecer!"
-                                    self.logger.error(f"[ZopeContext] {error_msg}")
-                                    raise Exception(error_msg)
-                                self.logger.warning(f"[ZopeContext] Objeto '{traverse_path}' não parece ser um site válido")
-                                site = app
+                            self.logger.debug(f"[ZopeContext] Encontrado '{traverse_path}' via getattr")
+                    except Exception as e1:
+                        self.logger.debug(f"[ZopeContext] getattr falhou para '{traverse_path}': {e1}")
+                    
+                    # Método 2: Tenta _getOb (método interno do Zope)
+                    if site is None:
+                        try:
+                            if hasattr(app, '_getOb'):
+                                site = app._getOb(traverse_path, None)
+                                if site is not None:
+                                    self.logger.debug(f"[ZopeContext] Encontrado '{traverse_path}' via _getOb")
+                        except Exception as e2:
+                            self.logger.debug(f"[ZopeContext] _getOb falhou para '{traverse_path}': {e2}")
+                    
+                    # Método 3: Tenta objectIds() e depois _getOb
+                    if site is None:
+                        try:
+                            if hasattr(app, 'objectIds'):
+                                obj_ids = app.objectIds()
+                                if traverse_path in obj_ids:
+                                    if hasattr(app, '_getOb'):
+                                        site = app._getOb(traverse_path)
+                                        self.logger.debug(f"[ZopeContext] Encontrado '{traverse_path}' via objectIds + _getOb")
+                        except Exception as e3:
+                            self.logger.debug(f"[ZopeContext] objectIds + _getOb falhou para '{traverse_path}': {e3}")
+                    
+                    # Método 4: Tenta __getitem__ (acesso via dicionário)
+                    if site is None:
+                        try:
+                            site = app[traverse_path]
+                            self.logger.debug(f"[ZopeContext] Encontrado '{traverse_path}' via __getitem__")
+                        except (KeyError, TypeError) as e4:
+                            self.logger.debug(f"[ZopeContext] __getitem__ falhou para '{traverse_path}': {e4}")
+                    
+                    # Se encontrou o objeto, valida se é um site válido
+                    if site is not None:
+                        self.logger.info(f"[ZopeContext] Objeto '{traverse_path}' encontrado usando método alternativo")
+                        # Verifica se é um site válido (deve ter sapl_documentos se for /sagl/)
+                        if hasattr(site, 'portal_skins') or hasattr(site, 'zsql') or hasattr(site, 'sapl_documentos'):
+                            self.logger.info(f"[ZopeContext] Objeto '{traverse_path}' é um site válido")
                         else:
-                            # Path não existe - isso é um erro se for 'sagl'
+                            # Se não tem sapl_documentos mas deveria ter, há um problema
                             if traverse_path == 'sagl':
-                                error_msg = f"Objeto 'sagl' não encontrado no root do Zope! sapl_documentos sempre deve estar em /sagl/sapl_documentos"
+                                error_msg = f"Objeto 'sagl' encontrado mas não tem sapl_documentos/portal_skins/zsql. Isso não deveria acontecer!"
                                 self.logger.error(f"[ZopeContext] {error_msg}")
                                 raise Exception(error_msg)
-                            # Para outros paths, tenta usar root
+                            self.logger.warning(f"[ZopeContext] Objeto '{traverse_path}' não parece ser um site válido")
                             site = app
-                            self.logger.warning(f"[ZopeContext] Path '{traverse_path}' não existe, tentando root como fallback")
-                    except Exception as attr_err:
+                    else:
+                        # Nenhum método funcionou - isso é um erro se for 'sagl'
                         if traverse_path == 'sagl':
-                            # Se é 'sagl' e falhou, isso é crítico
-                            error_msg = f"Erro crítico ao acessar 'sagl': {attr_err}. sapl_documentos sempre deve estar em /sagl/sapl_documentos"
+                            # Lista todos os objetos disponíveis no root para debug
+                            try:
+                                obj_ids = app.objectIds() if hasattr(app, 'objectIds') else []
+                                self.logger.error(f"[ZopeContext] Objeto 'sagl' não encontrado. Objetos disponíveis no root: {obj_ids}")
+                            except Exception:
+                                pass
+                            error_msg = f"Objeto 'sagl' não encontrado no root do Zope após tentar múltiplos métodos! sapl_documentos sempre deve estar em /sagl/sapl_documentos"
                             self.logger.error(f"[ZopeContext] {error_msg}")
-                            raise Exception(error_msg) from attr_err
-                        self.logger.debug(f"[ZopeContext] Erro ao acessar '{traverse_path}' via getattr: {attr_err}")
+                            raise Exception(error_msg)
+                        # Para outros paths, tenta usar root
                         site = app
+                        self.logger.warning(f"[ZopeContext] Path '{traverse_path}' não existe, tentando root como fallback")
                 else:
                     # Path complexo - se for '/sagl' ou similar, tenta usar 'sagl' simples
                     if 'sagl' in str(traverse_path):
-                        try:
-                            site = getattr(app, 'sagl')
-                            self.logger.info(f"[ZopeContext] Path complexo contém 'sagl', usando app.sagl diretamente")
-                        except Exception:
-                            error_msg = f"Path '{traverse_path}' contém 'sagl' mas não foi possível acessar app.sagl"
+                        site = None
+                        # Tenta múltiplos métodos
+                        for method_name, method in [
+                            ('getattr', lambda: getattr(app, 'sagl')),
+                            ('_getOb', lambda: app._getOb('sagl') if hasattr(app, '_getOb') else None),
+                            ('__getitem__', lambda: app['sagl']),
+                        ]:
+                            try:
+                                site = method()
+                                if site is not None:
+                                    self.logger.info(f"[ZopeContext] Path complexo contém 'sagl', encontrado via {method_name}")
+                                    break
+                            except Exception as e:
+                                self.logger.debug(f"[ZopeContext] Método {method_name} falhou: {e}")
+                        
+                        if site is None:
+                            error_msg = f"Path '{traverse_path}' contém 'sagl' mas não foi possível acessar app.sagl com nenhum método"
                             self.logger.error(f"[ZopeContext] {error_msg}")
                             raise Exception(error_msg)
                     else:

@@ -435,7 +435,10 @@ window.appState = window.appState || {
   cache: {},
   filtros: {},
   porPagina: 10,
-  selecaoLote: new Set()
+  selecaoLote: new Set(),
+  pendingRequests: [],
+  pendingCountRequests: [],
+  loadingCounts: false
 };
 
 // === ORDENACAO PADRAO POR CAIXA (P/ USAR AO TROCAR DE ABA) ===
@@ -668,14 +671,33 @@ function showToast(message, type = 'success') {
   setTimeout(() => { $(`#${toastId}`).alert('close'); }, 5000);
 }
 
+// --- CANCELAR REQUISIÇÕES PENDENTES ---
+function cancelPendingRequests() {
+  window.appState.pendingRequests.forEach(xhr => {
+    if (xhr && xhr.readyState !== 4) {
+      try {
+        xhr.abort();
+      } catch (e) {
+        // Ignora erros ao abortar requisições
+      }
+    }
+  });
+  window.appState.pendingRequests = [];
+}
+
 // --- CARREGAMENTO PRINCIPAL AJAX ---
 async function loadData(caixa, page = 1, forceRefresh = false) {
   if (window.appState.isLoading) return;
+  
+  // Cancela requisições anteriores para evitar sobrecarga
+  cancelPendingRequests();
+  
   window.appState.isLoading = true;
   window.appState.currentCaixa = caixa;
   window.appState.currentPage = page;
+  
   try {
-    const response = await $.ajax({
+    const xhr = $.ajax({
       url: APP_CONFIG.API_URL,
       data: Object.assign(
         { 
@@ -689,6 +711,14 @@ async function loadData(caixa, page = 1, forceRefresh = false) {
       ),
       dataType: 'json'
     });
+    
+    window.appState.pendingRequests.push(xhr);
+    
+    const response = await xhr;
+    
+    // Remove requisição da lista de pendentes
+    window.appState.pendingRequests = window.appState.pendingRequests.filter(r => r !== xhr);
+    
     if (window.appState.table) {
       window.appState.table.clear();
       if (response.dados && response.dados.length > 0) {
@@ -702,6 +732,10 @@ async function loadData(caixa, page = 1, forceRefresh = false) {
     window.appState.selecaoLote = new Set();
     updateBotaoLote();
   } catch (error) {
+    // Ignora erros de cancelamento
+    if (error.statusText === 'abort' || error.status === 0) {
+      return;
+    }
     showToast(
       error.responseJSON?.erro || `Erro ao carregar dados: ${error.status}`,
       'danger'
@@ -1128,9 +1162,34 @@ function updateLoteActionsVisibility() {
     $('#marcar-todos-container').hide();
   }
 }
-function loadCounts() {
+// Versão otimizada com debounce e cancelamento de requisições
+const loadCountsDebounced = _.debounce(function() {
+  if (window.appState.loadingCounts) return;
+  
+  // Cancela requisições anteriores de contagem
+  window.appState.pendingCountRequests.forEach(xhr => {
+    if (xhr && xhr.readyState !== 4) {
+      try {
+        xhr.abort();
+      } catch (e) {
+        // Ignora erros ao abortar
+      }
+    }
+  });
+  window.appState.pendingCountRequests = [];
+  
+  window.appState.loadingCounts = true;
+  
   const caixas = ['revisao', 'assinatura', 'protocolo', 'incorporado', 'pedido_devolucao', 'devolvido'];
   const filtros = lerFiltrosForm();
+  let completed = 0;
+  const total = caixas.filter(caixa => $(`[data-caixa="${caixa}"]`).length).length;
+  
+  if (total === 0) {
+    window.appState.loadingCounts = false;
+    return;
+  }
+  
   caixas.forEach(caixa => {
     if ($(`[data-caixa="${caixa}"]`).length) {
       const params = Object.assign(
@@ -1140,15 +1199,36 @@ function loadCounts() {
         },
         filtros
       );
-      $.get(APP_CONFIG.API_URL, params)
+      const xhr = $.get(APP_CONFIG.API_URL, params)
         .done(resp => {
           updateBadge(caixa, resp.paginacao.total);
+          completed++;
+          // Remove da lista quando completar
+          window.appState.pendingCountRequests = window.appState.pendingCountRequests.filter(r => r !== xhr);
+          if (completed === total) {
+            window.appState.loadingCounts = false;
+          }
         })
-        .fail(() => {
-          updateBadge(caixa, 0);
+        .fail(err => {
+          // Ignora erros de cancelamento
+          if (err.statusText !== 'abort' && err.status !== 0 && err.statusText !== 'canceled') {
+            updateBadge(caixa, 0);
+          }
+          completed++;
+          // Remove da lista mesmo em caso de erro
+          window.appState.pendingCountRequests = window.appState.pendingCountRequests.filter(r => r !== xhr);
+          if (completed === total) {
+            window.appState.loadingCounts = false;
+          }
         });
+      
+      window.appState.pendingCountRequests.push(xhr);
     }
   });
+}, 400);
+
+function loadCounts() {
+  loadCountsDebounced();
 }
 
 // --- FILTROS E VIEW ---
@@ -1236,11 +1316,15 @@ function initViewToggle() {
     }
   });
 }
-function handleTabChange(e) {
+async function handleTabChange(e) {
   e.preventDefault();
   const $tab = $(this);
   const caixa = $tab.data('caixa');
   if (window.appState.currentCaixa === caixa) return;
+  
+  // Cancela todas as requisições pendentes ao trocar de aba
+  cancelPendingRequests();
+  
   aplicarOrdenacaoPadraoCaixa(caixa); // <-- Reset ordenação ao trocar de aba
   updateActiveTab(caixa);
   $tab.attr('tabindex', '0').focus();
@@ -1248,11 +1332,20 @@ function handleTabChange(e) {
   window.appState.currentPage = 1;
   showLoadingSkeleton(true);
   showSpinner(true);
-  loadData(caixa, 1, true);
-  loadCounts();
+  
+  // Carrega dados primeiro, depois contagens (com delay para não sobrecarregar)
+  try {
+    await loadData(caixa, 1, true);
+    // Aguarda um pouco antes de carregar contagens para evitar sobrecarga
+    setTimeout(() => {
+      loadCounts();
+    }, 150);
+  } catch (error) {
+    // Ignora erros já tratados em loadData
+  }
+  
   updateTable(window.appState.table?.data().toArray() || []);
   updateLoteActionsVisibility();
-  showToast(`Aba "${$tab.text().trim()}" carregada.`, 'info');
 }
 
 // --- INCORPORAR LOTE ---

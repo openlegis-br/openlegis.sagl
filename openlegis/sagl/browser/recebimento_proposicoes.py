@@ -251,15 +251,26 @@ class ProposicoesAPIBase:
 
         return query
 
-    def _aplicar_filtros_adicionais(self, query):
+    def _aplicar_filtros_adicionais(self, query, session=None):
         """
         Aplica q, tipo, autor, assunto/NPE e intervalo de datas.
         Também restringe às caixas que o usuário tem acesso:
           - se 'caixa' for 'all'/'todas' => OR de todas as caixas permitidas
           - se 'caixa' não permitida => resultado vazio
         Levanta ValueError para datas inválidas (tratado no chamador).
+        
+        Args:
+            query: Query SQLAlchemy
+            session: Sessão do banco de dados (opcional, usa do query se não fornecida)
         """
-        session = Session()
+        # Obtém sessão do query se não fornecida
+        close_session = False
+        if session is None:
+            session = query.session if hasattr(query, 'session') else Session()
+            if session is None or not hasattr(query, 'session'):
+                session = Session()
+                close_session = True
+        
         try:
             caixa_req = (self.request.form.get("caixa") or "").strip().lower()
             if caixa_req in {"all", "todas"}:
@@ -273,7 +284,8 @@ class ProposicoesAPIBase:
                     return query.filter(false())
                 # Se tem acesso, não reaplicamos aqui o filtro da caixa para evitar duplicidade.
         finally:
-            session.close()
+            if close_session:
+                session.close()
 
         # texto livre
         search_term = (self.request.form.get("q") or "").strip()
@@ -343,23 +355,26 @@ class ProposicoesAPIBase:
                         raise ValueError("Data final inválida")
         return query
 
-    def _verificar_documentos_fisicos(self, proposicoes, caixa):
+    def _verificar_documentos_fisicos(self, proposicoes, caixa, session=None):
+        """
+        Verifica documentos físicos e retorna proposições filtradas + cache de documentos.
+        Retorna: (proposicoes_filtradas, doc_cache_dict, pendentes_set)
+        """
         doc_manager = queryUtility(ISAPLDocumentManager)
-        if not doc_manager or not proposicoes:
-            return []
+        if not doc_manager:
+            logger.warning("[proposicoes] Document manager não disponível para caixa=%s", caixa)
+            return [], {}, set()
+        if not proposicoes:
+            return [], {}, set()
 
         resultados = []
         arquivos_necessarios = []
-
+        # Sempre verifica todos os tipos para cache completo (reutilização)
         for prop in proposicoes:
             pid = str(prop.cod_proposicao)
-            if caixa == "revisao":
-                arquivos_necessarios.append((pid, f"{pid}.odt", "odt"))
-            elif caixa == "assinatura":
-                arquivos_necessarios.append((pid, f"{pid}.pdf", "pdf"))
-                arquivos_necessarios.append((pid, f"{pid}_signed.pdf", "pdf_assinado"))
-            elif caixa == "protocolo":
-                arquivos_necessarios.append((pid, f"{pid}_signed.pdf", "pdf_assinado"))
+            arquivos_necessarios.append((pid, f"{pid}.odt", "odt"))
+            arquivos_necessarios.append((pid, f"{pid}.pdf", "pdf"))
+            arquivos_necessarios.append((pid, f"{pid}_signed.pdf", "pdf_assinado"))
 
         arquivos_encontrados = {}
         batch_supported = hasattr(doc_manager, "batch_check_documents")
@@ -368,8 +383,10 @@ class ProposicoesAPIBase:
             nomes = [nome for _, nome, _ in arquivos_necessarios]
             try:
                 batch = doc_manager.batch_check_documents("proposicao", nomes)
+                batch_set = set(batch) if batch else set()
                 for id_base, nome, tipo in arquivos_necessarios:
-                    arquivos_encontrados[(id_base, tipo)] = nome in batch
+                    encontrado = nome in batch_set
+                    arquivos_encontrados[(id_base, tipo)] = encontrado
             except Exception as e:
                 logger.warning("[proposicoes] Batch check falhou (%s). Usando verificação individual.", e)
                 batch_supported = False
@@ -383,21 +400,29 @@ class ProposicoesAPIBase:
                     "proposicao", f"{pid}_signed.pdf"
                 )
 
-        session = Session()
+        # Usa sessão passada ou cria nova apenas se necessário
+        close_session = False
+        if session is None:
+            session = Session()
+            close_session = True
+        
         try:
             pendentes = set()
             if caixa == "assinatura":
-                pendentes = set(
-                    row[0]
-                    for row in session.query(AssinaturaDocumento.codigo)
-                    .filter(
-                        AssinaturaDocumento.tipo_doc == "proposicao",
-                        AssinaturaDocumento.ind_excluido == 0,
-                        AssinaturaDocumento.ind_assinado == 0,
-                        AssinaturaDocumento.codigo.in_([p.cod_proposicao for p in proposicoes]),
+                codigos_proposicoes = [p.cod_proposicao for p in proposicoes]
+                if codigos_proposicoes:
+                    pendentes = set(
+                        row[0]
+                        for row in session.query(AssinaturaDocumento.codigo)
+                        .filter(
+                            AssinaturaDocumento.tipo_doc == "proposicao",
+                            AssinaturaDocumento.ind_excluido == 0,
+                            AssinaturaDocumento.ind_assinado == 0,
+                            AssinaturaDocumento.codigo.in_(codigos_proposicoes),
+                        )
+                        .distinct()
+                        .all()
                     )
-                    .distinct()
-                )
             for prop in proposicoes:
                 pid = str(prop.cod_proposicao)
                 tem_odt = arquivos_encontrados.get((pid, "odt"), False)
@@ -415,8 +440,11 @@ class ProposicoesAPIBase:
                     if tem_pdf_assinado:
                         resultados.append(prop)
         finally:
-            session.close()
-        return resultados
+            if close_session:
+                session.close()
+        
+        # Retorna resultados + cache completo de documentos para reutilização
+        return resultados, arquivos_encontrados, pendentes
 
     def _determinar_caixa_proposicao(self, proposicao):
         if proposicao.dat_devolucao:
@@ -431,11 +459,32 @@ class ProposicoesAPIBase:
             return "revisao"
         return "rascunho"
 
-    def _formatar_proposicao_completo(self, proposicao, caixa):
+    def _formatar_proposicao_completo(self, proposicao, caixa, doc_cache=None, assinaturas_cache=None, session=None):
+        """
+        Formata proposição completa usando cache de documentos e assinaturas quando disponível.
+        
+        Args:
+            proposicao: Objeto Proposicao
+            caixa: Nome da caixa atual
+            doc_cache: Dict {(id_base, tipo): bool} com resultados de verificação de documentos
+            assinaturas_cache: Dict {cod_proposicao: dict} com status de assinaturas
+        """
         id_base = str(proposicao.cod_proposicao)
         doc_manager = queryUtility(ISAPLDocumentManager)
+        
+        # Usa cache se disponível, senão verifica individualmente (fallback)
+        if doc_cache is not None:
+            tem_odt = doc_cache.get((id_base, "odt"), False)
+            tem_pdf = doc_cache.get((id_base, "pdf"), False)
+            tem_pdf_assinado = doc_cache.get((id_base, "pdf_assinado"), False)
+        else:
+            # Fallback: verifica individualmente (menos eficiente)
+            tem_odt = bool(doc_manager and doc_manager.existe_documento("proposicao", id_base + ".odt"))
+            tem_pdf = bool(doc_manager and doc_manager.existe_documento("proposicao", id_base + ".pdf"))
+            tem_pdf_assinado = bool(doc_manager and doc_manager.existe_documento("proposicao", id_base + "_signed.pdf"))
+        
         pdf_assinado_url = None
-        if doc_manager and doc_manager.existe_documento("proposicao", id_base + "_signed.pdf"):
+        if tem_pdf_assinado and doc_manager:
             pdf_assinado_url = f"{doc_manager.sapl_documentos_url}/proposicao/{id_base}_signed.pdf"
 
         dados = {
@@ -453,21 +502,26 @@ class ProposicoesAPIBase:
             "solicitacao_devolucao": None,
             "devolucao": None,
             "justificativa": None,
-            "tem_odt": bool(doc_manager and doc_manager.existe_documento("proposicao", id_base + ".odt")),
-            "tem_pdf": bool(doc_manager and doc_manager.existe_documento("proposicao", id_base + ".pdf")),
-            "tem_pdf_assinado": bool(doc_manager and doc_manager.existe_documento("proposicao", id_base + "_signed.pdf")),
+            "tem_odt": tem_odt,
+            "tem_pdf": tem_pdf,
+            "tem_pdf_assinado": tem_pdf_assinado,
             "pdf_assinado_url": pdf_assinado_url,
             "prioritaria": getattr(proposicao, "ind_prioritaria", 0) == 1,
         }
+        
         if caixa == "assinatura":
-            dados["assinaturas"] = self._obter_status_assinaturas(proposicao.cod_proposicao)
+            # Usa cache de assinaturas se disponível
+            if assinaturas_cache is not None:
+                dados["assinaturas"] = assinaturas_cache.get(proposicao.cod_proposicao, {"total": 0, "assinadas": [], "pendentes": []})
+            else:
+                dados["assinaturas"] = self._obter_status_assinaturas(proposicao.cod_proposicao)
         if caixa == "pedido_devolucao":
             dados["solicitacao_devolucao"] = self._formatar_data_hora(proposicao.dat_solicitacao_devolucao)
         if caixa == "devolvido":
             dados["devolucao"] = self._formatar_data_hora(proposicao.dat_devolucao)
             dados["justificativa"] = proposicao.txt_justif_devolucao
         if caixa == "incorporado":
-            dados["vinculo"] = self._formatar_vinculo(proposicao)
+            dados["vinculo"] = self._formatar_vinculo(proposicao, session)
         return dados
 
     def _formatar_autor(self, autor):
@@ -487,7 +541,7 @@ class ProposicoesAPIBase:
             pass
         return autor.nom_autor
 
-    def _formatar_vinculo(self, proposicao):
+    def _formatar_vinculo(self, proposicao, session=None):
         tipo = getattr(proposicao.tipo_proposicao, "ind_mat_ou_doc", None)
         cod_mat_ou_doc = getattr(proposicao, "cod_mat_ou_doc", None)
         tem_emenda = getattr(proposicao, "cod_emenda", None)
@@ -496,18 +550,21 @@ class ProposicoesAPIBase:
 
         if tipo == "D":
             if not tem_emenda and not tem_subst and not tem_parecer:
-                return self._obter_vinculo_documento(cod_mat_ou_doc)
+                return self._obter_vinculo_documento(cod_mat_ou_doc, session)
             elif cod_mat_ou_doc:
-                return self._obter_vinculo_materia(cod_mat_ou_doc)
+                return self._obter_vinculo_materia(cod_mat_ou_doc, session)
             return None
         if tipo == "M":
-            return self._obter_vinculo_materia(cod_mat_ou_doc)
+            return self._obter_vinculo_materia(cod_mat_ou_doc, session)
         return None
 
-    def _obter_vinculo_materia(self, cod_materia):
+    def _obter_vinculo_materia(self, cod_materia, session=None):
         if not cod_materia:
             return None
-        session = Session()
+        close_session = False
+        if session is None:
+            session = Session()
+            close_session = True
         try:
             materia = (
                 session.query(MateriaLegislativa)
@@ -525,12 +582,16 @@ class ProposicoesAPIBase:
                 }
             return None
         finally:
-            session.close()
+            if close_session:
+                session.close()
 
-    def _obter_vinculo_documento(self, cod_documento):
+    def _obter_vinculo_documento(self, cod_documento, session=None):
         if not cod_documento:
             return None
-        session = Session()
+        close_session = False
+        if session is None:
+            session = Session()
+            close_session = True
         try:
             documento = (
                 session.query(DocumentoAcessorio)
@@ -554,7 +615,8 @@ class ProposicoesAPIBase:
                 }
             return None
         finally:
-            session.close()
+            if close_session:
+                session.close()
 
     def _get_documentos_fisicos(self, proposicao):
         doc_manager = queryUtility(ISAPLDocumentManager)
@@ -612,6 +674,43 @@ class ProposicoesAPIBase:
         if isinstance(obj, datetime):
             return obj.strftime("%d/%m/%Y %H:%M")
         raise TypeError(f"Tipo {type(obj)} não serializável")
+
+    def _obter_status_assinaturas_batch(self, codigos_proposicoes, session):
+        """
+        Carrega assinaturas de múltiplas proposições em uma única query (otimização N+1).
+        Retorna dict {cod_proposicao: {"total": int, "assinadas": list, "pendentes": list}}
+        """
+        if not codigos_proposicoes:
+            return {}
+        
+        assinaturas = (
+            session.query(AssinaturaDocumento, Usuario.nom_completo)
+            .join(Usuario, Usuario.cod_usuario == AssinaturaDocumento.cod_usuario)
+            .filter(
+                AssinaturaDocumento.codigo.in_(codigos_proposicoes),
+                AssinaturaDocumento.tipo_doc == "proposicao",
+                AssinaturaDocumento.ind_excluido == 0,
+            )
+            .all()
+        )
+        
+        resultado = {}
+        # Inicializa com estrutura vazia para todas as proposições
+        for cod in codigos_proposicoes:
+            resultado[cod] = {"total": 0, "assinadas": [], "pendentes": []}
+        
+        # Processa assinaturas encontradas
+        for assinatura, nome in assinaturas:
+            cod = assinatura.codigo
+            if cod not in resultado:
+                resultado[cod] = {"total": 0, "assinadas": [], "pendentes": []}
+            resultado[cod]["total"] += 1
+            if assinatura.ind_assinado:
+                resultado[cod]["assinadas"].append(nome)
+            elif not assinatura.ind_recusado:
+                resultado[cod]["pendentes"].append(nome)
+        
+        return resultado
 
     def _obter_status_assinaturas(self, cod_proposicao):
         session = Session()
@@ -678,7 +777,7 @@ class ProposicoesAPI(GrokView, ProposicoesAPIBase):
             else:
                 base_query = self._aplicar_filtros_caixa(base_query, caixa, session)
 
-            base_query = self._aplicar_filtros_adicionais(base_query)
+            base_query = self._aplicar_filtros_adicionais(base_query, session)
 
             ORDER_MAP = {
                 "envio": Proposicao.dat_envio,
@@ -734,7 +833,13 @@ class ProposicoesAPI(GrokView, ProposicoesAPIBase):
                 if apenas_contar:
                     return self._responder_contagem(total)
 
-                dados = [self._formatar_proposicao_completo(p, caixa) for p in paginados]
+                # Para incorporado não precisa de cache de documentos, mas pode precisar de assinaturas
+                assinaturas_cache = None
+                if caixa == "assinatura" and paginados:
+                    codigos_paginados = [p.cod_proposicao for p in paginados]
+                    assinaturas_cache = self._obter_status_assinaturas_batch(codigos_paginados, session)
+                
+                dados = [self._formatar_proposicao_completo(p, caixa, None, assinaturas_cache, session) for p in paginados]
                 return self._responder_sucesso(
                     dados=dados,
                     paginacao={
@@ -757,8 +862,64 @@ class ProposicoesAPI(GrokView, ProposicoesAPIBase):
             else:
                 query = self._aplicar_filtros_caixa(query, caixa, session)
 
-            query = self._aplicar_filtros_adicionais(query)
+            query = self._aplicar_filtros_adicionais(query, session)
 
+            # Verifica contagem ANTES de aplicar ordenação e options
+            # Isso garante que a query de contagem seja completamente limpa
+            if caixa in {"revisao", "assinatura", "protocolo"} and apenas_contar:
+                # Para contagem, precisa verificar documentos físicos de todas as proposições
+                # que passam pelos filtros básicos do banco
+                # IMPORTANTE: Cria uma query limpa apenas para IDs ANTES de aplicar ordenação/options
+                # Os joins podem multiplicar resultados, então usamos distinct() e set() para garantir unicidade
+                query_ids = query.with_entities(Proposicao.cod_proposicao).distinct()
+                
+                # Executa a query e converte para lista de IDs
+                # Usa set() para garantir que não há duplicatas mesmo após distinct()
+                todas_ids = list(set([row[0] for row in query_ids.all()]))
+                
+                if not todas_ids:
+                    total = 0
+                else:
+                    # Carrega proposições em lotes para verificar documentos físicos
+                    # Processa em lotes de 500 para não sobrecarregar memória
+                    lote_size = 500
+                    total_filtradas = 0
+                    
+                    for i in range(0, len(todas_ids), lote_size):
+                        lote_ids = todas_ids[i:i + lote_size]
+                        if not lote_ids:
+                            continue
+                        
+                        # Recarrega proposições do lote
+                        # IMPORTANTE: Não reaplicamos filtros aqui porque os IDs já foram filtrados
+                        # na query inicial. Reaplicar filtros pode causar inconsistências se houver
+                        # condições de corrida ou mudanças de dados entre as chamadas.
+                        # Apenas verificamos se a proposição ainda existe e não foi excluída
+                        proposicoes_lote = (
+                            session.query(Proposicao)
+                            .filter(Proposicao.cod_proposicao.in_(lote_ids))
+                            .filter(Proposicao.ind_excluido == 0)
+                            .all()
+                        )
+                        
+                        # Se o número de proposições carregadas for diferente do número de IDs,
+                        # significa que algumas foram excluídas ou não existem mais
+                        if len(proposicoes_lote) < len(lote_ids):
+                            logger.warning(
+                                "[proposicoes] Caixa=%s, Lote: %d IDs solicitados, %d carregadas (algumas podem ter sido excluídas)",
+                                caixa, len(lote_ids), len(proposicoes_lote)
+                            )
+                        
+                        if proposicoes_lote:
+                            # Verifica documentos físicos com a caixa correta
+                            filtradas_lote, _, _ = self._verificar_documentos_fisicos(proposicoes_lote, caixa, session)
+                            total_filtradas += len(filtradas_lote)
+                    
+                    total = total_filtradas
+                
+                return self._responder_contagem(total)
+
+            # Aplica ordenação e options apenas para queries de dados (não contagem)
             if ordenar_por:
                 order_field = ORDER_MAP.get(ordenar_por, Proposicao.dat_envio)
                 query = query.order_by(order_field.asc() if (ordenar_direcao == "asc") else order_field.desc())
@@ -780,18 +941,75 @@ class ProposicoesAPI(GrokView, ProposicoesAPIBase):
             )
 
             if caixa in {"revisao", "assinatura", "protocolo"}:
-                todas = query.all()
-                filtradas = self._verificar_documentos_fisicos(todas, caixa)
-                total = len(filtradas)
-                paginados = filtradas[(pagina - 1) * por_pagina : pagina * por_pagina]
+                # Para dados: carrega buffer maior para ter proposições suficientes após filtro
+                buffer_size = max(por_pagina * 5, 200)  # Buffer 5x maior para compensar filtros
+                ids_query = query.with_entities(Proposicao.cod_proposicao)
+                ids_buffer = [row[0] for row in ids_query.limit(buffer_size).offset((pagina - 1) * por_pagina).all()]
+                
+                if not ids_buffer:
+                    filtradas = []
+                    total = 0
+                    paginados = []
+                    doc_cache = {}
+                    assinaturas_cache = None
+                else:
+                    # Carrega proposições apenas do buffer
+                    proposicoes_buffer = (
+                        session.query(Proposicao)
+                        .filter(Proposicao.cod_proposicao.in_(ids_buffer))
+                        .options(
+                            joinedload(Proposicao.tipo_proposicao),
+                            joinedload(Proposicao.autor).joinedload(Autor.parlamentar),
+                            joinedload(Proposicao.autor).joinedload(Autor.comissao),
+                        )
+                        .all()
+                    )
+                    
+                    # Mantém ordem original
+                    proposicoes_dict = {p.cod_proposicao: p for p in proposicoes_buffer}
+                    proposicoes_buffer = [proposicoes_dict[pid] for pid in ids_buffer if pid in proposicoes_dict]
+                    
+                    # Verifica documentos apenas do buffer
+                    filtradas, doc_cache, pendentes = self._verificar_documentos_fisicos(proposicoes_buffer, caixa, session)
+                    
+                    # Pagina resultado filtrado
+                    paginados = filtradas[:por_pagina]
+                    
+                    # Total: para caixas que dependem de documentos físicos, o total deve ser
+                    # baseado apenas nas proposições que realmente passaram no filtro
+                    # Não podemos usar total_banco porque ele não verifica documentos físicos
+                    if len(filtradas) > 0:
+                        # Se há proposições filtradas, estima baseado na proporção do buffer
+                        proporcao_filtrada = len(filtradas) / len(ids_buffer) if ids_buffer else 0
+                        total_banco = query.with_entities(func.count(Proposicao.cod_proposicao)).scalar() or 0
+                        if proporcao_filtrada > 0:
+                            total = int(total_banco * proporcao_filtrada)
+                        else:
+                            total = len(filtradas)  # Usa o número real de filtradas
+                    else:
+                        # Se nenhuma passou no filtro, o total é 0 (não usa total_banco)
+                        # porque total_banco não verifica documentos físicos
+                        total = 0
+                
+                # Carrega assinaturas em batch se necessário
+                assinaturas_cache = None
+                if caixa == "assinatura" and paginados:
+                    codigos_paginados = [p.cod_proposicao for p in paginados]
+                    assinaturas_cache = self._obter_status_assinaturas_batch(codigos_paginados, session)
             else:
                 total = query.with_entities(func.count(Proposicao.cod_proposicao)).order_by(None).scalar()
                 paginados = query.limit(por_pagina).offset((pagina - 1) * por_pagina).all()
+                doc_cache = None
+                assinaturas_cache = None
+                # Para caixa incorporado, carrega assinaturas se necessário
+                if caixa == "assinatura" and paginados:
+                    codigos_paginados = [p.cod_proposicao for p in paginados]
+                    assinaturas_cache = self._obter_status_assinaturas_batch(codigos_paginados, session)
 
             if apenas_contar:
                 return self._responder_contagem(total)
 
-            dados = [self._formatar_proposicao_completo(p, caixa) for p in paginados]
+            dados = [self._formatar_proposicao_completo(p, caixa, doc_cache, assinaturas_cache, session) for p in paginados]
             return self._responder_sucesso(
                 dados=dados,
                 paginacao={
@@ -929,7 +1147,7 @@ class ExportarCSV(GrokView, ProposicoesAPIBase):
                 base_query = self._aplicar_filtros_caixa(base_query, caixa, session)
 
             # Mesmos filtros adicionais da listagem (inclui guarda de perfil e 'all')
-            base_query = self._aplicar_filtros_adicionais(base_query)
+            base_query = self._aplicar_filtros_adicionais(base_query, session)
 
             ORDER_MAP = {
                 "envio": Proposicao.dat_envio,
@@ -985,7 +1203,7 @@ class ExportarCSV(GrokView, ProposicoesAPIBase):
                 proposicoes = [proposicoes_dict[pid] for pid in pag_ids if pid in proposicoes_dict]
 
             if caixa in {"revisao", "assinatura", "protocolo"}:
-                proposicoes = self._verificar_documentos_fisicos(proposicoes, caixa)
+                proposicoes, _, _ = self._verificar_documentos_fisicos(proposicoes, caixa, session)
 
             output = io.StringIO()
             writer = csv.writer(output, delimiter=";", quoting=csv.QUOTE_MINIMAL)

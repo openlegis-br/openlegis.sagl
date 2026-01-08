@@ -3037,20 +3037,24 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         """
         Detecta o site_path correto baseado na estrutura do Zope.
         
-        IMPORTANTE: No Zope, sapl_documentos sempre está em /sagl/sapl_documentos,
-        então o site_path é sempre 'sagl', independentemente da configuração do Apache
+        IMPORTANTE: No Zope, a estrutura é:
+        - Root Folder
+          - sagl (site/container)
+            - sapl_documentos (dentro de sagl)
+        
+        O site_path é sempre 'sagl', independentemente da configuração do Apache 
         (que pode fazer proxy direto ou via VirtualHostRoot).
         
-        Este método valida que 'sagl' existe e contém um site válido, mas sempre
+        Este método valida que 'sagl' existe e é um site válido, mas sempre
         retorna 'sagl' já que essa é a estrutura padrão do sistema.
         
         Returns:
-            str: Sempre retorna 'sagl' (sapl_documentos sempre está em /sagl/sapl_documentos)
+            str: Sempre retorna 'sagl' (/sagl é o container que contém sapl_documentos)
         """
         try:
             # Validação: verifica se estamos em um contexto que tem sapl_documentos
             # Se o próprio SAGLTool consegue acessar sapl_documentos através da aquisição,
-            # confirma que estamos em um site que está em /sagl/
+            # confirma que estamos dentro do site /sagl (que contém sapl_documentos)
             try:
                 if hasattr(self, 'sapl_documentos'):
                     logger.debug("[_detect_site_path] Contexto tem sapl_documentos (via aquisição), confirmando /sagl/")
@@ -3064,17 +3068,17 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
                 app = zope_app_func()
                 if hasattr(app, 'sagl'):
                     sagl_obj = getattr(app, 'sagl')
-                    # Verifica se tem sapl_documentos (sempre deve ter)
-                    if hasattr(sagl_obj, 'sapl_documentos') or hasattr(sagl_obj, 'portal_skins') or hasattr(sagl_obj, 'zsql'):
+                    # Verifica se é um site válido (tem portal_skins ou zsql)
+                    if hasattr(sagl_obj, 'portal_skins') or hasattr(sagl_obj, 'zsql'):
                         logger.debug("[_detect_site_path] Validado: app.sagl existe e é um site válido")
                         return 'sagl'
                     else:
-                        logger.warning("[_detect_site_path] app.sagl existe mas não tem sapl_documentos/portal_skins/zsql - configuração incomum")
-                        # Ainda assim retorna 'sagl' porque sapl_documentos sempre deve estar em /sagl/sapl_documentos
+                        logger.warning("[_detect_site_path] app.sagl existe mas não tem portal_skins/zsql - configuração incomum")
+                        # Ainda assim retorna 'sagl' porque /sagl é o container que contém sapl_documentos
                         return 'sagl'
                 else:
                     # Se app.sagl não existe, isso é um problema de configuração
-                    error_msg = "Objeto 'sagl' não encontrado no root do Zope! sapl_documentos sempre deve estar em /sagl/sapl_documentos"
+                    error_msg = "Objeto 'sagl' não encontrado no root do Zope! /sagl deve ser o container no root (que contém sapl_documentos)"
                     logger.error(f"[_detect_site_path] {error_msg}")
                     # Retorna 'sagl' mesmo assim, deixando que o erro seja tratado no utils.py
                     return 'sagl'
@@ -3083,7 +3087,7 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
                 return 'sagl'
             
         except Exception as e:
-            # Em caso de erro, sempre usa 'sagl' porque sapl_documentos sempre deve estar em /sagl/sapl_documentos
+            # Em caso de erro, sempre usa 'sagl' porque /sagl é o container que contém sapl_documentos
             logger.warning(f"[_detect_site_path] Erro ao detectar site_path: {e}, usando 'sagl' (padrão)")
             return 'sagl'
     

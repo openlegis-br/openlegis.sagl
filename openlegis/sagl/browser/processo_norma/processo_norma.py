@@ -986,9 +986,10 @@ class ProcessoNormaTaskExecutor(grok.View):
                 return json.dumps({'error': 'cod_norma deve ser um número', 'success': False})
             
             # Verifica se o contexto tem os atributos necessários
+            # IMPORTANTE: O contexto deve ser o site /sagl, que contém sapl_documentos
             try:
                 if not hasattr(self.context, 'sapl_documentos'):
-                    error_msg = f"Contexto não tem sapl_documentos. Tipo: {type(self.context).__name__}"
+                    error_msg = f"Contexto não tem sapl_documentos. Tipo: {type(self.context).__name__}. Esperado: site /sagl (que contém sapl_documentos)"
                     logger.error(f"[ProcessoNormaTaskExecutor] {error_msg}")
                     self.request.RESPONSE.setStatus(500)
                     self.request.RESPONSE.setHeader('Content-Type', 'application/json; charset=utf-8')

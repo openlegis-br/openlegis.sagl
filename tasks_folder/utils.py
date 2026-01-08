@@ -10,6 +10,8 @@ import logging
 from celery import Celery, Task
 from celery.signals import worker_process_init, worker_process_shutdown
 import os
+import urllib.request
+import urllib.error
 import pypdf
 from dateutil.parser import parse
 from asn1crypto import cms
@@ -1046,48 +1048,93 @@ class ZopeContext:
                     # Remove barras e divide por '/'
                     path_parts = [p for p in traverse_path.strip('/').split('/') if p]
                     if path_parts:
-                        # IMPORTANTE: Com VirtualHostRoot, o objeto 'sagl' deve existir no root
-                        # Primeiro, verifica se o objeto realmente existe no app
+                        # IMPORTANTE: Quando executado via Celery (sem requisição HTTP), o objeto 'sagl' pode não estar
+                        # disponível no root porque o VirtualHostRoot só é aplicado em requisições HTTP.
+                        # Precisamos criar um REQUEST mock que simula o VirtualHostRoot.
                         object_id = path_parts[0] if path_parts else traverse_path
+                        
+                        # Primeiro, verifica se o objeto existe no root
+                        obj_ids = []
                         try:
-                            # Verifica se o objeto existe listando objectIds
                             if hasattr(app, 'objectIds'):
                                 obj_ids = list(app.objectIds())
-                                self.logger.debug(f"[ZopeContext] Objetos disponíveis no root: {obj_ids[:10]}... (mostrando primeiros 10)")
-                                if object_id not in obj_ids:
-                                    self.logger.warning(f"[ZopeContext] Objeto '{object_id}' não encontrado em objectIds() do root!")
-                                    # Mesmo assim tenta acessar, pode estar disponível via outro mecanismo
+                                self.logger.debug(f"[ZopeContext] Objetos disponíveis no root: {obj_ids}")
+                                if object_id in obj_ids:
+                                    self.logger.debug(f"[ZopeContext] Objeto '{object_id}' encontrado em objectIds()")
                         except Exception as list_err:
                             self.logger.debug(f"[ZopeContext] Erro ao listar objectIds: {list_err}")
                         
                         # Tenta fazer traverse para o path especificado
+                        site = None
                         try:
                             site = app.unrestrictedTraverse(path_parts)
+                            self.logger.debug(f"[ZopeContext] Site obtido via unrestrictedTraverse")
                         except (KeyError, AttributeError) as traverse_err:
-                            # Se traverse falhar, tenta acessar diretamente via diferentes métodos
-                            self.logger.debug(f"[ZopeContext] unrestrictedTraverse falhou: {traverse_err}, tentando métodos alternativos...")
+                            # Se traverse falhar, tenta criar um REQUEST mock com VirtualHostRoot
+                            self.logger.debug(f"[ZopeContext] unrestrictedTraverse falhou: {traverse_err}, tentando com REQUEST mock e VirtualHostRoot...")
                             
-                            # Tenta _getOb diretamente
-                            site = None
+                            # Cria um REQUEST mock que simula o VirtualHostRoot
+                            # IMPORTANTE: O objeto 'sagl' pode não estar disponível quando acessado via código Python
+                            # porque o VirtualHostRoot só é aplicado em requisições HTTP. Tentamos simular isso.
                             try:
-                                if hasattr(app, '_getOb'):
-                                    site = app._getOb(object_id, None)
-                                    if site is not None:
-                                        self.logger.debug(f"[ZopeContext] Site obtido via _getOb")
-                            except Exception as getob_err:
-                                self.logger.debug(f"[ZopeContext] _getOb falhou: {getob_err}")
+                                from Testing.makerequest import makerequest
+                                from Zope2 import app as zope_app_func
+                                
+                                # Obtém o app Zope sem makerequest (raw app)
+                                raw_app = zope_app_func()
+                                
+                                # Cria um novo app com REQUEST mock
+                                mock_app = makerequest(raw_app)
+                                
+                                # Configura o VirtualHostRoot para apontar para /sagl/
+                                if hasattr(mock_app, 'REQUEST') and hasattr(mock_app.REQUEST, 'setVirtualRoot'):
+                                    mock_app.REQUEST.setVirtualRoot(['sagl'])
+                                    self.logger.debug(f"[ZopeContext] VirtualHostRoot configurado para ['sagl']")
+                                
+                                # Tenta fazer traverse com o REQUEST mock
+                                try:
+                                    site = mock_app.unrestrictedTraverse(path_parts)
+                                    self.logger.info(f"[ZopeContext] Site obtido via REQUEST mock com VirtualHostRoot")
+                                except (KeyError, AttributeError) as mock_traverse_err:
+                                    self.logger.debug(f"[ZopeContext] Traverse com REQUEST mock também falhou: {mock_traverse_err}")
+                                    # Tenta acessar diretamente via _getOb ou __getitem__
+                                    try:
+                                        if hasattr(mock_app, '_getOb'):
+                                            site = mock_app._getOb(object_id, None)
+                                            if site is not None:
+                                                self.logger.debug(f"[ZopeContext] Site obtido via mock_app._getOb")
+                                    except Exception:
+                                        pass
+                                    
+                                    if site is None:
+                                        try:
+                                            site = mock_app[object_id]
+                                            self.logger.debug(f"[ZopeContext] Site obtido via mock_app[object_id]")
+                                        except (KeyError, TypeError):
+                                            pass
+                            except Exception as mock_err:
+                                self.logger.debug(f"[ZopeContext] Erro ao criar REQUEST mock: {mock_err}")
                             
-                            # Se ainda não encontrou, tenta __getitem__
+                            # Se ainda não encontrou, tenta métodos diretos no app original
                             if site is None:
                                 try:
-                                    site = app[object_id]
-                                    self.logger.debug(f"[ZopeContext] Site obtido via __getitem__")
-                                except (KeyError, TypeError) as getitem_err:
-                                    self.logger.debug(f"[ZopeContext] __getitem__ falhou: {getitem_err}")
-                            
-                            # Se ainda não encontrou, re-levanta o erro original para ser tratado no except externo
-                            if site is None:
-                                raise traverse_err
+                                    if hasattr(app, '_getOb'):
+                                        site = app._getOb(object_id, None)
+                                        if site is not None:
+                                            self.logger.debug(f"[ZopeContext] Site obtido via app._getOb")
+                                except Exception as getob_err:
+                                    self.logger.debug(f"[ZopeContext] _getOb falhou: {getob_err}")
+                                
+                                if site is None:
+                                    try:
+                                        site = app[object_id]
+                                        self.logger.debug(f"[ZopeContext] Site obtido via app[object_id]")
+                                    except (KeyError, TypeError) as getitem_err:
+                                        self.logger.debug(f"[ZopeContext] __getitem__ falhou: {getitem_err}")
+                                
+                                # Se ainda não encontrou, re-levanta o erro original para ser tratado no except externo
+                                if site is None:
+                                    raise traverse_err
                         
                         # Verifica se o objeto obtido parece ser um site válido
                         # IMPORTANTE: hasattr pode falhar com Acquisition, então tenta acessar diretamente
@@ -1240,8 +1287,13 @@ class ZopeContext:
                                 self.logger.warning(f"[ZopeContext] Objetos similares a 'sagl' encontrados: {similar}")
                             
                             # Última tentativa: tenta usar o root e deixar resolve_site tentar encontrar
-                            self.logger.warning(f"[ZopeContext] Todos os métodos falharam para 'sagl'. Objetos disponíveis: {obj_ids[:20]}")
-                            self.logger.warning(f"[ZopeContext] Tentando usar root como fallback e deixar resolve_site tentar resolver...")
+                            # IMPORTANTE: O objeto 'sagl' pode não estar disponível quando acessado via código Python
+                            # porque o VirtualHostRoot só é aplicado em requisições HTTP. Nesse caso, usamos o root
+                            # e deixamos resolve_site tentar acessar app.sagl diretamente.
+                            self.logger.warning(f"[ZopeContext] Todos os métodos falharam para 'sagl'. Objetos disponíveis no root: {obj_ids[:20]}")
+                            self.logger.warning(f"[ZopeContext] O objeto 'sagl' não está disponível no root quando acessado via código Python.")
+                            self.logger.warning(f"[ZopeContext] Isso é esperado - o VirtualHostRoot só é aplicado em requisições HTTP.")
+                            self.logger.warning(f"[ZopeContext] Usando root como fallback e deixando resolve_site tentar acessar app.sagl diretamente...")
                             site = app
                             # Não levanta exceção ainda - deixa resolve_site tentar resolver
                             # Se resolve_site também falhar, aí sim levanta a exceção no final
@@ -1323,32 +1375,155 @@ class ZopeContext:
                 # Se resolve_site retornou algo diferente do app, provavelmente encontrou
                 if resolved_site == app:
                     # Ainda é o root - verifica se resolve_site tentou acessar app.sagl mas não encontrou
-                    # Verifica se pelo menos tem alguns atributos esperados de um site
-                    has_expected_attrs = False
-                    try:
-                        test_attrs = [
-                            getattr(resolved_site, 'portal_skins', None),
-                            getattr(resolved_site, 'zsql', None),
-                            getattr(resolved_site, 'sapl_documentos', None),
-                        ]
-                        has_expected_attrs = any(attr is not None for attr in test_attrs)
-                    except:
-                        pass
+                    # IMPORTANTE: O objeto 'sagl' pode não estar listado em objectIds() quando acessado via código Python,
+                    # mas pode estar acessível via getattr ou __getitem__. Vamos tentar acessar diretamente.
+                    self.logger.warning(f"[ZopeContext] resolve_site retornou root. Tentando acessar app.sagl diretamente...")
                     
-                    if not has_expected_attrs:
-                        # Lista objetos para debug
-                        obj_ids = []
+                    # Tenta acessar app.sagl diretamente usando múltiplos métodos
+                    sagl_obj = None
+                    try:
+                        # Método 1: getattr
+                        if hasattr(app, 'sagl'):
+                            sagl_obj = getattr(app, 'sagl')
+                            self.logger.info(f"[ZopeContext] app.sagl acessado via getattr com sucesso!")
+                    except Exception as e1:
+                        self.logger.debug(f"[ZopeContext] getattr(app, 'sagl') falhou: {e1}")
+                    
+                    if sagl_obj is None:
                         try:
-                            if hasattr(app, 'objectIds'):
-                                obj_ids = list(app.objectIds())
-                        except:
-                            pass
-                        error_msg = f"Objeto 'sagl' não encontrado no root do Zope mesmo após resolve_site. Objetos disponíveis no root: {obj_ids[:20]}. /sagl deve ser o container no root (que contém sapl_documentos)"
-                        self.logger.error(f"[ZopeContext] {error_msg}")
-                        raise Exception(error_msg)
+                            # Método 2: __getitem__
+                            sagl_obj = app['sagl']
+                            self.logger.info(f"[ZopeContext] app['sagl'] acessado via __getitem__ com sucesso!")
+                        except (KeyError, TypeError) as e2:
+                            self.logger.debug(f"[ZopeContext] app['sagl'] falhou: {e2}")
+                    
+                    if sagl_obj is not None:
+                        # Remove wrappers do Acquisition
+                        try:
+                            from Acquisition import aq_inner
+                            sagl_inner = aq_inner(sagl_obj)
+                            if 'RequestContainer' not in str(type(sagl_inner)):
+                                sagl_obj = sagl_inner
+                        except Exception as e3:
+                            self.logger.debug(f"[ZopeContext] Erro ao remover wrapper: {e3}")
+                        
+                        resolved_site = sagl_obj
+                        self.logger.info(f"[ZopeContext] Site resolvido via acesso direto a app.sagl: {type(resolved_site)}")
                     else:
-                        # Tem atributos esperados - provavelmente está OK mesmo sendo o root
-                        self.logger.info(f"[ZopeContext] Root tem atributos esperados, usando como site")
+                        # Não conseguiu acessar app.sagl diretamente - tenta via HTTP interno
+                        # IMPORTANTE: O objeto 'sagl' pode só estar disponível via requisição HTTP
+                        # que passa pelo VirtualHostRoot. Vamos tentar acessar via HTTP interno.
+                        self.logger.warning(f"[ZopeContext] Não foi possível acessar app.sagl diretamente. Tentando via HTTP interno...")
+                        
+                        sagl_obj = None
+                        try:
+                            # Tenta descobrir a URL base do Zope
+                            # Pode estar em variável de ambiente ou config
+                            zope_url = os.environ.get('ZOPE_URL', 'http://127.0.0.1:8080')
+                            
+                            # Remove trailing slash
+                            zope_url = zope_url.rstrip('/')
+                            
+                            # Tenta acessar /sagl/ via HTTP interno com VirtualHostRoot
+                            # O VirtualHostRoot do Apache aponta para /sagl/VirtualHostRoot/
+                            # Então acessamos diretamente /sagl/ no Zope
+                            test_url = f"{zope_url}/sagl/"
+                            
+                            self.logger.debug(f"[ZopeContext] Tentando acessar via HTTP interno: {test_url}")
+                            
+                            req = urllib.request.Request(test_url)
+                            req.add_header('Host', 'localhost')
+                            
+                            with urllib.request.urlopen(req, timeout=5) as response:
+                                # Se a requisição funcionou, significa que o objeto existe
+                                # Mas não podemos obter o objeto Python via HTTP, então precisamos de outra abordagem
+                                self.logger.info(f"[ZopeContext] HTTP interno confirmou que /sagl/ existe (status: {response.status})")
+                                
+                                # Como não podemos obter o objeto Python via HTTP, vamos tentar
+                                # criar um REQUEST mock com VirtualHostRoot configurado e tentar acessar novamente
+                                from Testing.makerequest import makerequest
+                                from Zope2 import app as zope_app_func
+                                
+                                raw_app = zope_app_func()
+                                mock_app = makerequest(raw_app)
+                                
+                                # Configura VirtualHostRoot
+                                if hasattr(mock_app, 'REQUEST'):
+                                    # Simula o VirtualHostRoot do Apache
+                                    mock_app.REQUEST.setVirtualRoot(['sagl'])
+                                    self.logger.debug(f"[ZopeContext] VirtualHostRoot configurado no REQUEST mock")
+                                    
+                                    # Tenta acessar via traverse com VirtualHostRoot
+                                    try:
+                                        sagl_obj = mock_app.unrestrictedTraverse(['sagl'])
+                                        self.logger.info(f"[ZopeContext] Site obtido via REQUEST mock com VirtualHostRoot após confirmação HTTP!")
+                                    except Exception as traverse_err:
+                                        self.logger.debug(f"[ZopeContext] Traverse com REQUEST mock após HTTP falhou: {traverse_err}")
+                                        
+                                        # Última tentativa: tenta acessar diretamente
+                                        try:
+                                            if hasattr(mock_app, '_getOb'):
+                                                sagl_obj = mock_app._getOb('sagl', None)
+                                            if sagl_obj is None:
+                                                sagl_obj = mock_app['sagl']
+                                        except Exception:
+                                            pass
+                                
+                        except urllib.error.HTTPError as http_err:
+                            self.logger.debug(f"[ZopeContext] HTTP interno retornou erro {http_err.code}: {http_err}")
+                            # Se retornou 404, o objeto realmente não existe
+                            if http_err.code == 404:
+                                self.logger.error(f"[ZopeContext] HTTP interno confirmou que /sagl/ não existe (404)")
+                            else:
+                                # Outro erro HTTP - pode ser que o objeto exista mas não seja acessível via HTTP
+                                self.logger.debug(f"[ZopeContext] HTTP interno retornou {http_err.code}, mas pode ser problema de acesso")
+                        except urllib.error.URLError as url_err:
+                            self.logger.debug(f"[ZopeContext] Erro de URL ao tentar HTTP interno: {url_err}")
+                            # Se não conseguir conectar, pode ser que o Zope não esteja rodando na porta esperada
+                            # ou que não seja possível fazer requisição HTTP interna
+                            self.logger.warning(f"[ZopeContext] Não foi possível fazer requisição HTTP interna. Tentando continuar sem HTTP...")
+                        except Exception as http_internal_err:
+                            self.logger.debug(f"[ZopeContext] Erro ao tentar HTTP interno: {http_internal_err}")
+                        
+                        if sagl_obj is not None:
+                            # Remove wrappers do Acquisition
+                            try:
+                                from Acquisition import aq_inner
+                                sagl_inner = aq_inner(sagl_obj)
+                                if 'RequestContainer' not in str(type(sagl_inner)):
+                                    sagl_obj = sagl_inner
+                            except Exception as e3:
+                                self.logger.debug(f"[ZopeContext] Erro ao remover wrapper: {e3}")
+                            
+                            resolved_site = sagl_obj
+                            self.logger.info(f"[ZopeContext] Site resolvido via HTTP interno + REQUEST mock: {type(resolved_site)}")
+                        else:
+                            # Não conseguiu acessar app.sagl nem via HTTP interno - verifica se pelo menos tem alguns atributos esperados de um site
+                            has_expected_attrs = False
+                            try:
+                                test_attrs = [
+                                    getattr(resolved_site, 'portal_skins', None),
+                                    getattr(resolved_site, 'zsql', None),
+                                    getattr(resolved_site, 'sapl_documentos', None),
+                                ]
+                                has_expected_attrs = any(attr is not None for attr in test_attrs)
+                            except:
+                                pass
+                            
+                            if not has_expected_attrs:
+                                # Lista objetos para debug
+                                obj_ids = []
+                                try:
+                                    if hasattr(app, 'objectIds'):
+                                        obj_ids = list(app.objectIds())
+                                except:
+                                    pass
+                                error_msg = f"Objeto 'sagl' não encontrado no root do Zope mesmo após resolve_site, tentativas diretas e HTTP interno. Objetos disponíveis no root: {obj_ids[:20]}. /sagl deve ser o container no root (que contém sapl_documentos)"
+                                self.logger.error(f"[ZopeContext] {error_msg}")
+                                raise Exception(error_msg)
+                            else:
+                                # Tem atributos esperados - provavelmente está OK mesmo sendo o root
+                                self.logger.info(f"[ZopeContext] Root tem atributos esperados, usando como site")
                 else:
                     # resolve_site encontrou algo diferente do app - provavelmente está OK
                     self.logger.info(f"[ZopeContext] resolve_site conseguiu resolver o site: {type(resolved_site)}")

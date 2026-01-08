@@ -717,7 +717,13 @@ class ZopeContext:
     """
     
     def __init__(self, site_path='sagl', task_id=None, logger=None):
-        self.site_path = site_path.strip().strip('/')
+        """
+        Inicializa ZopeContext.
+        
+        IMPORTANTE: No Zope, sapl_documentos sempre está em /sagl/sapl_documentos,
+        então o site_path padrão é sempre 'sagl'.
+        """
+        self.site_path = site_path.strip().strip('/') if site_path else 'sagl'
         self.task_id = task_id or 'UNKNOWN'
         self.logger = logger or logging.getLogger(__name__)
         self.app = None
@@ -1000,6 +1006,10 @@ class ZopeContext:
         
         Detecta automaticamente se o sistema roda em domínio direto (sem /sagl/)
         ou com subpath (/sagl/), tentando primeiro o path fornecido e depois o root.
+        
+        IMPORTANTE: Mesmo quando o Apache usa VirtualHostRoot apontando para /sagl/,
+        o objeto 'sagl' deve existir no root do Zope para que o traverse funcione
+        corretamente quando executado via código Python (sem requisição HTTP).
         """
         # CRÍTICO: Aborta e reinicia transação para garantir objetos frescos
         # Isso invalida qualquer cache de objetos persistentes
@@ -1012,11 +1022,12 @@ class ZopeContext:
             self.logger.debug(f"[ZopeContext] Erro ao reiniciar transação antes de resolver site: {e}")
         
         # Tenta obter o site através de traverse
-        # Se falhar com KeyError, tenta usar o root diretamente (para domínios diretos)
+        # IMPORTANTE: No Zope, sapl_documentos sempre está em /sagl/sapl_documentos,
+        # então o site sempre deve estar em /sagl/ (ou o path fornecido)
         site = None
-        traverse_path = self.site_path
+        traverse_path = self.site_path or 'sagl'  # Garante que sempre há um path (padrão 'sagl')
         
-        # Se site_path não está vazio, tenta usar o path fornecido
+        # Tenta usar o path fornecido (ou 'sagl' como padrão)
         if traverse_path:
             try:
                 # Converte string para lista de paths se necessário
@@ -1024,28 +1035,106 @@ class ZopeContext:
                     # Remove barras e divide por '/'
                     path_parts = [p for p in traverse_path.strip('/').split('/') if p]
                     if path_parts:
+                        # IMPORTANTE: Com VirtualHostRoot, o objeto 'sagl' deve existir no root
+                        # Faça traverse para o path especificado
                         site = app.unrestrictedTraverse(path_parts)
+                        
+                        # Verifica se o objeto obtido parece ser um site válido
+                        if not (hasattr(site, 'portal_skins') or hasattr(site, 'zsql') or hasattr(site, 'sapl_documentos')):
+                            # O objeto obtido não parece ser um site, tenta verificar se há um site dentro dele
+                            self.logger.warning(f"[ZopeContext] Objeto obtido via '{traverse_path}' não parece ser um site, verificando...")
+                            # Se não é um site válido, tenta usar o root
+                            if hasattr(app, traverse_path):
+                                # O path existe, mas pode não ser o site diretamente
+                                # Continua usando o objeto obtido, o resolve_site pode ajudar
+                                pass
+                            else:
+                                raise KeyError(f"Path '{traverse_path}' não encontrado")
                     else:
                         # Se path está vazio após limpar, usa root
                         site = app
                 else:
                     # Se já é uma lista ou tupla, usa diretamente
                     site = app.unrestrictedTraverse(traverse_path)
+                    
+                    # Verifica se o objeto obtido parece ser um site válido
+                    if not (hasattr(site, 'portal_skins') or hasattr(site, 'zsql') or hasattr(site, 'sapl_documentos')):
+                        self.logger.warning(f"[ZopeContext] Objeto obtido via path não parece ser um site válido")
+                        
                 self.logger.debug(f"[ZopeContext] Site obtido via path '{traverse_path}': {type(site)}")
+                
             except (KeyError, AttributeError) as e:
-                # Se falhar (path não existe), tenta usar o root (domínio direto sem /sagl/)
-                # Isso acontece quando o sistema roda em domínio direto e não há objeto 'sagl' no root
-                self.logger.info(f"[ZopeContext] Path '{traverse_path}' não encontrado ({e}), tentando root (domínio direto)")
-                site = app
-                # Verifica se o root parece ser um site válido
-                if hasattr(site, 'portal_skins') or hasattr(site, 'zsql'):
-                    self.logger.info(f"[ZopeContext] Root parece ser o site válido (tem portal_skins ou zsql)")
+                # Se falhar (path não existe via traverse), tenta outras formas de acessar
+                self.logger.info(f"[ZopeContext] Path '{traverse_path}' não encontrado via traverse ({e}), tentando alternativas...")
+                
+                # IMPORTANTE: No Zope, sapl_documentos sempre está em /sagl/sapl_documentos,
+                # então 'sagl' DEVE existir. Tenta acessar diretamente via getattr
+                if isinstance(traverse_path, str) and '/' not in traverse_path.strip('/'):
+                    try:
+                        if hasattr(app, traverse_path):
+                            site = getattr(app, traverse_path)
+                            self.logger.info(f"[ZopeContext] Encontrado '{traverse_path}' via getattr direto em app")
+                            # Verifica se é um site válido (deve ter sapl_documentos se for /sagl/)
+                            if hasattr(site, 'portal_skins') or hasattr(site, 'zsql') or hasattr(site, 'sapl_documentos'):
+                                self.logger.info(f"[ZopeContext] Objeto '{traverse_path}' é um site válido")
+                            else:
+                                # Se não tem sapl_documentos mas deveria ter, há um problema
+                                if traverse_path == 'sagl':
+                                    error_msg = f"Objeto 'sagl' encontrado mas não tem sapl_documentos/portal_skins/zsql. Isso não deveria acontecer!"
+                                    self.logger.error(f"[ZopeContext] {error_msg}")
+                                    raise Exception(error_msg)
+                                self.logger.warning(f"[ZopeContext] Objeto '{traverse_path}' não parece ser um site válido")
+                                site = app
+                        else:
+                            # Path não existe - isso é um erro se for 'sagl'
+                            if traverse_path == 'sagl':
+                                error_msg = f"Objeto 'sagl' não encontrado no root do Zope! sapl_documentos sempre deve estar em /sagl/sapl_documentos"
+                                self.logger.error(f"[ZopeContext] {error_msg}")
+                                raise Exception(error_msg)
+                            # Para outros paths, tenta usar root
+                            site = app
+                            self.logger.warning(f"[ZopeContext] Path '{traverse_path}' não existe, tentando root como fallback")
+                    except Exception as attr_err:
+                        if traverse_path == 'sagl':
+                            # Se é 'sagl' e falhou, isso é crítico
+                            error_msg = f"Erro crítico ao acessar 'sagl': {attr_err}. sapl_documentos sempre deve estar em /sagl/sapl_documentos"
+                            self.logger.error(f"[ZopeContext] {error_msg}")
+                            raise Exception(error_msg) from attr_err
+                        self.logger.debug(f"[ZopeContext] Erro ao acessar '{traverse_path}' via getattr: {attr_err}")
+                        site = app
                 else:
-                    self.logger.warning(f"[ZopeContext] Root não tem portal_skins/zsql, mas usando mesmo assim")
+                    # Path complexo - se for '/sagl' ou similar, tenta usar 'sagl' simples
+                    if 'sagl' in str(traverse_path):
+                        try:
+                            site = getattr(app, 'sagl')
+                            self.logger.info(f"[ZopeContext] Path complexo contém 'sagl', usando app.sagl diretamente")
+                        except Exception:
+                            error_msg = f"Path '{traverse_path}' contém 'sagl' mas não foi possível acessar app.sagl"
+                            self.logger.error(f"[ZopeContext] {error_msg}")
+                            raise Exception(error_msg)
+                    else:
+                        site = app
+                        self.logger.warning(f"[ZopeContext] Usando root como fallback para path complexo '{traverse_path}'")
+                
+                # Verifica se o site obtido parece ser válido
+                if hasattr(site, 'portal_skins') or hasattr(site, 'zsql') or hasattr(site, 'sapl_documentos'):
+                    self.logger.info(f"[ZopeContext] Site selecionado é válido (tem portal_skins, zsql ou sapl_documentos)")
+                else:
+                    if traverse_path == 'sagl':
+                        error_msg = "Site 'sagl' não tem portal_skins/zsql/sapl_documentos - configuração incorreta do Zope!"
+                        self.logger.error(f"[ZopeContext] {error_msg}")
+                        raise Exception(error_msg)
+                    self.logger.warning(f"[ZopeContext] Site selecionado não tem portal_skins/zsql/sapl_documentos, mas usando mesmo assim")
         else:
-            # Se site_path está vazio, usa o root diretamente
-            site = app
-            self.logger.debug(f"[ZopeContext] site_path vazio, usando root: {type(site)}")
+            # Se site_path está vazio, usa 'sagl' como padrão (não root)
+            # IMPORTANTE: sapl_documentos sempre está em /sagl/sapl_documentos
+            try:
+                site = getattr(app, 'sagl')
+                self.logger.info(f"[ZopeContext] site_path vazio, usando 'sagl' como padrão (sapl_documentos está em /sagl/sapl_documentos)")
+            except AttributeError:
+                error_msg = "site_path vazio e objeto 'sagl' não encontrado no root do Zope! sapl_documentos sempre deve estar em /sagl/sapl_documentos"
+                self.logger.error(f"[ZopeContext] {error_msg}")
+                raise Exception(error_msg)
         
         # Resolve o site removendo wrappers
         resolved_site = resolve_site(site, self.logger)
@@ -1252,7 +1341,10 @@ def zope_task(**task_kw):
         @wraps(func)
         def task_instance(self, *args, **kw):
             task_id = getattr(self.request, 'id', 'UNKNOWN')
-            site_path = kw.pop('site_path', 'sagl').strip().strip('/')
+            # IMPORTANTE: No Zope, sapl_documentos sempre está em /sagl/sapl_documentos,
+            # então o site_path padrão é sempre 'sagl'
+            site_path = kw.pop('site_path', 'sagl')
+            site_path = site_path.strip().strip('/') if site_path else 'sagl'
             cod_proposicao = kw.get('cod_proposicao', None)
             cod_materia = kw.get('cod_materia', None)
             cod_info = f" | cod_proposicao={cod_proposicao}" if cod_proposicao else (f" | cod_materia={cod_materia}" if cod_materia else "")

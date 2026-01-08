@@ -963,6 +963,14 @@ class ProcessoNormaTaskExecutor(grok.View):
         """Executa a geração do processo de norma"""
         import json as json_lib
         try:
+            # Log de debug para identificar problemas de contexto
+            try:
+                context_type = type(self.context).__name__
+                context_id = getattr(self.context, 'id', 'N/A')
+                logger.debug(f"[ProcessoNormaTaskExecutor] Contexto: {context_type}, id: {context_id}")
+            except Exception as ctx_log_err:
+                logger.warning(f"[ProcessoNormaTaskExecutor] Erro ao logar contexto: {ctx_log_err}")
+            
             cod_norma = self.request.form.get('cod_norma') or self.request.get('cod_norma')
             
             if not cod_norma:
@@ -976,6 +984,20 @@ class ProcessoNormaTaskExecutor(grok.View):
                 self.request.RESPONSE.setStatus(400)
                 self.request.RESPONSE.setHeader('Content-Type', 'application/json; charset=utf-8')
                 return json.dumps({'error': 'cod_norma deve ser um número', 'success': False})
+            
+            # Verifica se o contexto tem os atributos necessários
+            try:
+                if not hasattr(self.context, 'sapl_documentos'):
+                    error_msg = f"Contexto não tem sapl_documentos. Tipo: {type(self.context).__name__}"
+                    logger.error(f"[ProcessoNormaTaskExecutor] {error_msg}")
+                    self.request.RESPONSE.setStatus(500)
+                    self.request.RESPONSE.setHeader('Content-Type', 'application/json; charset=utf-8')
+                    return json.dumps({'error': error_msg, 'success': False, 'context_type': context_type})
+            except Exception as attr_err:
+                logger.error(f"[ProcessoNormaTaskExecutor] Erro ao verificar atributos do contexto: {attr_err}", exc_info=True)
+                self.request.RESPONSE.setStatus(500)
+                self.request.RESPONSE.setHeader('Content-Type', 'application/json; charset=utf-8')
+                return json.dumps({'error': f'Erro ao verificar contexto: {str(attr_err)}', 'success': False})
             
             view = ProcessoNormaView(self.context, self.request)
             view.update()
@@ -1086,10 +1108,18 @@ class ProcessoNormaTaskExecutor(grok.View):
                 })
             
         except Exception as e:
+            import traceback
+            error_traceback = traceback.format_exc()
             logger.error(f"[ProcessoNormaTaskExecutor] Erro inesperado: {e}", exc_info=True)
+            logger.error(f"[ProcessoNormaTaskExecutor] Traceback completo:\n{error_traceback}")
             self.request.RESPONSE.setStatus(500)
             self.request.RESPONSE.setHeader('Content-Type', 'application/json; charset=utf-8')
-            return json.dumps({'error': str(e), 'success': False})
+            return json.dumps({
+                'error': str(e),
+                'error_type': type(e).__name__,
+                'success': False,
+                'traceback': error_traceback
+            })
 
 
 class ProcessoNormaStatusView(grok.View):

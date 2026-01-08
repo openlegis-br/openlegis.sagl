@@ -3033,6 +3033,60 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         
         return None
 
+    def _detect_site_path(self):
+        """
+        Detecta o site_path correto baseado na estrutura do Zope.
+        
+        IMPORTANTE: No Zope, sapl_documentos sempre está em /sagl/sapl_documentos,
+        então o site_path é sempre 'sagl', independentemente da configuração do Apache
+        (que pode fazer proxy direto ou via VirtualHostRoot).
+        
+        Este método valida que 'sagl' existe e contém um site válido, mas sempre
+        retorna 'sagl' já que essa é a estrutura padrão do sistema.
+        
+        Returns:
+            str: Sempre retorna 'sagl' (sapl_documentos sempre está em /sagl/sapl_documentos)
+        """
+        try:
+            # Validação: verifica se estamos em um contexto que tem sapl_documentos
+            # Se o próprio SAGLTool consegue acessar sapl_documentos através da aquisição,
+            # confirma que estamos em um site que está em /sagl/
+            try:
+                if hasattr(self, 'sapl_documentos'):
+                    logger.debug("[_detect_site_path] Contexto tem sapl_documentos (via aquisição), confirmando /sagl/")
+                    return 'sagl'
+            except Exception:
+                pass
+            
+            # Validação: verifica diretamente se existe app.sagl
+            try:
+                from Zope2 import app as zope_app_func
+                app = zope_app_func()
+                if hasattr(app, 'sagl'):
+                    sagl_obj = getattr(app, 'sagl')
+                    # Verifica se tem sapl_documentos (sempre deve ter)
+                    if hasattr(sagl_obj, 'sapl_documentos') or hasattr(sagl_obj, 'portal_skins') or hasattr(sagl_obj, 'zsql'):
+                        logger.debug("[_detect_site_path] Validado: app.sagl existe e é um site válido")
+                        return 'sagl'
+                    else:
+                        logger.warning("[_detect_site_path] app.sagl existe mas não tem sapl_documentos/portal_skins/zsql - configuração incomum")
+                        # Ainda assim retorna 'sagl' porque sapl_documentos sempre deve estar em /sagl/sapl_documentos
+                        return 'sagl'
+                else:
+                    # Se app.sagl não existe, isso é um problema de configuração
+                    error_msg = "Objeto 'sagl' não encontrado no root do Zope! sapl_documentos sempre deve estar em /sagl/sapl_documentos"
+                    logger.error(f"[_detect_site_path] {error_msg}")
+                    # Retorna 'sagl' mesmo assim, deixando que o erro seja tratado no utils.py
+                    return 'sagl'
+            except Exception as e:
+                logger.warning(f"[_detect_site_path] Erro ao validar app.sagl: {e}, usando 'sagl' mesmo assim")
+                return 'sagl'
+            
+        except Exception as e:
+            # Em caso de erro, sempre usa 'sagl' porque sapl_documentos sempre deve estar em /sagl/sapl_documentos
+            logger.warning(f"[_detect_site_path] Erro ao detectar site_path: {e}, usando 'sagl' (padrão)")
+            return 'sagl'
+    
     def _prepare_task_kwargs(self, cod_materia, portal_url, user_id):
         """
         Prepara os argumentos para a task do Celery, garantindo que sejam serializáveis.
@@ -3045,8 +3099,11 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         Returns:
             dict: Dicionário com argumentos serializáveis para a task
         """
+        # Detecta automaticamente o site_path correto
+        site_path = self._detect_site_path()
+        
         task_kwargs = {
-            'site_path': 'sagl',  # CRÍTICO: Define qual site o decorator deve criar
+            'site_path': site_path,  # Detectado automaticamente ou fallback para 'sagl'
             'cod_materia': str(cod_materia),  # Garante que seja string
             'portal_url': str(portal_url) if portal_url else '',  # Garante que seja string
         }
@@ -3304,8 +3361,11 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         Returns:
             dict: Dicionário com argumentos serializáveis para a task
         """
+        # Detecta automaticamente o site_path correto
+        site_path = self._detect_site_path()
+        
         task_kwargs = {
-            'site_path': 'sagl',  # CRÍTICO: Define qual site o decorator deve criar
+            'site_path': site_path,  # Detectado automaticamente ou fallback para 'sagl'
             'cod_norma': int(cod_norma) if cod_norma else None,  # Garante que seja int
             'portal_url': str(portal_url) if portal_url else '',  # Garante que seja string
         }

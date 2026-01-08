@@ -237,15 +237,46 @@ class ProcessoNormaView(grok.View):
             data_capa = DateTime(data_norma_str, datefmt='international').strftime('%Y-%m-%d 00:00:01')
             
             # Gera a capa usando o método padrão do sistema (gera no temp_folder)
-            # OTIMIZAÇÃO: Usa sessão temporária apenas para capa, depois será consolidada
-            try:
+            # IMPORTANTE: modelo_proposicao está em /sagl/portal_skins/sk_sagl/modelo_proposicao
+            # Precisa acessar através do caminho completo: portal_skins.sk_sagl.modelo_proposicao
+            url_path = None
+            cod_para_capa = None
+            
                 # Tenta usar método específico para normas, se existir
-                if hasattr(self.context, 'modelo_proposicao') and hasattr(self.context.modelo_proposicao, 'capa_norma'):
-                    self.context.modelo_proposicao.capa_norma(cod_norma=dados_norma['cod_norma'], action='gerar')
-                    url_path = 'capa_norma'
-                else:
-                    # Fallback: usa método de matéria se norma tiver cod_materia
-                    # Usa sessão temporária aqui pois precisa ser antes da sessão principal
+            try:
+                # Tenta acessar através do caminho completo
+                portal_skins = getattr(self.context, 'portal_skins', None)
+                modelo_proposicao = None
+                
+                if portal_skins:
+                    sk_sagl = getattr(portal_skins, 'sk_sagl', None)
+                    if sk_sagl:
+                        modelo_proposicao = getattr(sk_sagl, 'modelo_proposicao', None)
+                        logger.debug(f"[coletar_documentos] modelo_proposicao obtido via portal_skins.sk_sagl: {modelo_proposicao is not None}")
+                        if modelo_proposicao:
+                            # Lista métodos disponíveis para debug
+                            try:
+                                methods = [m for m in dir(modelo_proposicao) if not m.startswith('_') and 'capa' in m.lower()]
+                                logger.debug(f"[coletar_documentos] Métodos com 'capa' em modelo_proposicao: {methods}")
+                            except:
+                                pass
+                
+                # Se não encontrou pelo caminho completo, tenta acesso direto via Acquisition
+                if modelo_proposicao is None:
+                    modelo_proposicao = getattr(self.context, 'modelo_proposicao', None)
+                    logger.debug(f"[coletar_documentos] modelo_proposicao obtido via Acquisition: {modelo_proposicao is not None}")
+                
+                # Tenta chamar capa_norma se o método existir
+                if modelo_proposicao is not None:
+                    if hasattr(modelo_proposicao, 'capa_norma'):
+                        logger.debug(f"[coletar_documentos] Chamando capa_norma para cod_norma={dados_norma['cod_norma']}")
+                        modelo_proposicao.capa_norma(cod_norma=dados_norma['cod_norma'], action='gerar')
+                        url_path = 'capa_norma'
+                    else:
+                        logger.warning(f"[coletar_documentos] modelo_proposicao encontrado mas não tem método capa_norma")
+                
+                # Se não encontrou capa_norma, tenta fallback: usa método de matéria se norma tiver cod_materia
+                if url_path is None:
                     session_capa = self._get_session()
                     try:
                         norma_capa = session_capa.query(NormaJuridica)\
@@ -254,14 +285,33 @@ class ProcessoNormaView(grok.View):
                             .first()
                         
                         if norma_capa and norma_capa.cod_materia:
-                            self.context.modelo_proposicao.capa_processo(cod_materia=norma_capa.cod_materia, action='gerar')
-                            url_path = 'capa_processo'
-                            # Usa cod_materia para download
-                            cod_para_capa = norma_capa.cod_materia
+                            # Acessa modelo_proposicao através do caminho completo
+                            if portal_skins:
+                                sk_sagl = getattr(portal_skins, 'sk_sagl', None)
+                                if sk_sagl:
+                                    modelo_proposicao = getattr(sk_sagl, 'modelo_proposicao', None)
+                                    if modelo_proposicao:
+                                        modelo_proposicao.capa_processo(cod_materia=norma_capa.cod_materia, action='gerar')
+                                        url_path = 'capa_processo'
+                                        cod_para_capa = norma_capa.cod_materia
+                                    else:
+                                        # Fallback: tenta acesso direto
+                                        modelo_proposicao = getattr(self.context, 'modelo_proposicao', None)
+                                        if modelo_proposicao:
+                                            modelo_proposicao.capa_processo(cod_materia=norma_capa.cod_materia, action='gerar')
+                                            url_path = 'capa_processo'
+                                            cod_para_capa = norma_capa.cod_materia
                         else:
                             raise PDFGenerationError("Norma não possui matéria relacionada e não há método capa_norma disponível")
                     finally:
                         session_capa.close()
+                        
+            except Exception as e:
+                logger.error(f"[coletar_documentos] Erro ao gerar/baixar capa do processo: {str(e)}", exc_info=True)
+                logger.error(f"[coletar_documentos] Contexto: {type(self.context).__name__}, tem modelo_proposicao: {hasattr(self.context, 'modelo_proposicao')}")
+                raise PDFGenerationError(f"Falha ao gerar/baixar capa do processo: {str(e)}")
+            
+            try:
                 
                 # OTIMIZAÇÃO: Polling inteligente ao invés de sleep fixo
                 # Aguarda a geração da capa com polling e timeout
@@ -326,7 +376,11 @@ class ProcessoNormaView(grok.View):
                     raise PDFGenerationError(f"Erro ao baixar capa via HTTP: {str(e)}")
                     
             except Exception as e:
+                import traceback
+                error_traceback = traceback.format_exc()
                 logger.error(f"[coletar_documentos] Erro ao gerar/baixar capa do processo: {str(e)}", exc_info=True)
+                logger.error(f"[coletar_documentos] Traceback completo:\n{error_traceback}")
+                logger.error(f"[coletar_documentos] Contexto: {type(self.context).__name__}, tem modelo_proposicao: {hasattr(self.context, 'modelo_proposicao')}")
                 raise PDFGenerationError(f"Falha ao gerar/baixar capa do processo: {str(e)}")
 
             documentos.append({
@@ -1104,13 +1158,22 @@ class ProcessoNormaTaskExecutor(grok.View):
                 }, default=default_serializer)
                 
             except Exception as gen_err:
+                import traceback
+                error_traceback = traceback.format_exc()
                 logger.error(f"[ProcessoNormaTaskExecutor] Erro ao gerar processo: {gen_err}", exc_info=True)
+                logger.error(f"[ProcessoNormaTaskExecutor] Traceback completo:\n{error_traceback}")
                 self.request.RESPONSE.setStatus(500)
                 self.request.RESPONSE.setHeader('Content-Type', 'application/json; charset=utf-8')
                 return json.dumps({
                     'success': False,
                     'error': str(gen_err),
-                    'cod_norma': cod_norma
+                    'error_type': type(gen_err).__name__,
+                    'traceback': error_traceback,
+                    'cod_norma': cod_norma,
+                    'context_type': type(self.context).__name__,
+                    'context_id': getattr(self.context, 'id', 'N/A'),
+                    'has_sapl_documentos': hasattr(self.context, 'sapl_documentos'),
+                    'has_modelo_proposicao': hasattr(self.context, 'modelo_proposicao')
                 })
             
         except Exception as e:

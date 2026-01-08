@@ -997,6 +997,9 @@ class ZopeContext:
         
         CRÍTICO: Garante que estamos obtendo uma referência completamente nova
         ao site, não uma referência de cache de uma transação anterior.
+        
+        Detecta automaticamente se o sistema roda em domínio direto (sem /sagl/)
+        ou com subpath (/sagl/), tentando primeiro o path fornecido e depois o root.
         """
         # CRÍTICO: Aborta e reinicia transação para garantir objetos frescos
         # Isso invalida qualquer cache de objetos persistentes
@@ -1008,9 +1011,41 @@ class ZopeContext:
         except Exception as e:
             self.logger.debug(f"[ZopeContext] Erro ao reiniciar transação antes de resolver site: {e}")
         
-        # Obtém o site através de traverse
-        # Como abortamos a transação acima, isso força o ZODB a carregar objetos frescos
-        site = app.unrestrictedTraverse(self.site_path)
+        # Tenta obter o site através de traverse
+        # Se falhar com KeyError, tenta usar o root diretamente (para domínios diretos)
+        site = None
+        traverse_path = self.site_path
+        
+        # Se site_path não está vazio, tenta usar o path fornecido
+        if traverse_path:
+            try:
+                # Converte string para lista de paths se necessário
+                if isinstance(traverse_path, str):
+                    # Remove barras e divide por '/'
+                    path_parts = [p for p in traverse_path.strip('/').split('/') if p]
+                    if path_parts:
+                        site = app.unrestrictedTraverse(path_parts)
+                    else:
+                        # Se path está vazio após limpar, usa root
+                        site = app
+                else:
+                    # Se já é uma lista ou tupla, usa diretamente
+                    site = app.unrestrictedTraverse(traverse_path)
+                self.logger.debug(f"[ZopeContext] Site obtido via path '{traverse_path}': {type(site)}")
+            except (KeyError, AttributeError) as e:
+                # Se falhar (path não existe), tenta usar o root (domínio direto sem /sagl/)
+                # Isso acontece quando o sistema roda em domínio direto e não há objeto 'sagl' no root
+                self.logger.info(f"[ZopeContext] Path '{traverse_path}' não encontrado ({e}), tentando root (domínio direto)")
+                site = app
+                # Verifica se o root parece ser um site válido
+                if hasattr(site, 'portal_skins') or hasattr(site, 'zsql'):
+                    self.logger.info(f"[ZopeContext] Root parece ser o site válido (tem portal_skins ou zsql)")
+                else:
+                    self.logger.warning(f"[ZopeContext] Root não tem portal_skins/zsql, mas usando mesmo assim")
+        else:
+            # Se site_path está vazio, usa o root diretamente
+            site = app
+            self.logger.debug(f"[ZopeContext] site_path vazio, usando root: {type(site)}")
         
         # Resolve o site removendo wrappers
         resolved_site = resolve_site(site, self.logger)

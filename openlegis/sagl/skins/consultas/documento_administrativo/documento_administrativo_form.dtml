@@ -1,316 +1,341 @@
 <dtml-var header_html>
 
- <div class="row mb-3">
+<div class="row mb-3">
   <div class="col-12 col-md-8 d-flex align-items-center">
-      <h1 class="firstHeading font-size-18"><dtml-var des_tipo_documento> nº <dtml-var num_documento>/<dtml-var ano_documento></h1>
+    <h1 class="firstHeading font-size-18 mb-0"><dtml-var des_tipo_documento> nº <dtml-var num_documento missing>/<dtml-var ano_documento missing></h1>
   </div>
-  <div class="col-12 col-md-4 d-flex align-items-center justify-content-start justify-content-md-end">
-     <div class="btn-group btn-group-sm mt-3 mt-md-0">
-        <dtml-in expr="zsql.assinatura_documento_obter_zsql(codigo=cod_documento, tipo_doc='documento',cod_usuario=None)">
-          <dtml-call "REQUEST.set('cod_assinatura_doc', cod_assinatura_doc)">
-        </dtml-in>
-            <dtml-if expr="AUTHENTICATED_USER.has_role(['Authenticated'])">
-               <a class="btn btn-primary block" href="<dtml-var portal_url>/consultas/documento_administrativo/pasta_digital/?cod_documento=<dtml-var cod_documento>&action=pasta" target="_blank"><i class="far fa-fw fa-folder-open"></i> Pasta Digital</a>
-           </dtml-if>
-        <dtml-call expr="REQUEST.set('id_documento', str(cod_documento)+'_texto_integral.pdf')">
-        <dtml-if expr="hasattr(sapl_documentos.administrativo,id_documento)">
-          <dtml-let documento="getattr(sapl_documentos.administrativo,id_documento).absolute_url">        
-             <a class="btn btn-secondary" target="_blank" href="<dtml-var portal_url>/pysc/download_documento_pysc?cod_documento=<dtml-var cod_documento>">
-               <dtml-if expr="_.has_key('cod_assinatura_doc') and hasattr(sapl_documentos.documentos_assinados, cod_assinatura_doc+'.pdf')">
-                 <i class="fa fa-certificate"></i>Texto Integral
-               <dtml-else>
-                 <i class="fa fa-fw fa-file-pdf"></i>Texto Integral
-               </dtml-if>
-             </a>
-          </dtml-let>
-	</dtml-if>
-        <dtml-call expr="REQUEST.set('id_odt', str(cod_documento)+'_texto_integral.odt')">
-        <dtml-if expr="_.hasattr(sapl_documentos.administrativo,id_odt)">
-           <dtml-let documento_odt="_.getattr(sapl_documentos.administrativo,id_odt).absolute_url">
-              <dtml-if expr="AUTHENTICATED_USER.has_role(['Authenticated'])">
-                 <a class="btn btn-secondary" href="<dtml-var documento_odt>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank">
-                   <i class="fa fa-fw fa-file-alt"></i>ODT
-                 </a>
-              </dtml-if>
-           </dtml-let>
+  <div class="col-12 col-md-4 text-start text-md-end">
+    <div class="btn-group btn-group-sm flex-wrap mt-2 mt-md-0">
+      <dtml-in expr="zsql.assinatura_documento_obter_zsql(codigo=cod_documento, tipo_doc='documento',cod_usuario=None)">
+        <dtml-call "REQUEST.set('cod_assinatura_doc', cod_assinatura_doc)">
+      </dtml-in>
+      <dtml-let isAnon="portal_membership.isAnonymousUser()">
+        <dtml-if expr="not isAnon">
+          <a class="btn btn-primary" href="<dtml-var portal_url>/consultas/documento_administrativo/pasta_digital/?cod_documento=<dtml-var cod_documento>&action=pasta" target="_blank">
+            <i class="fas fa-folder-open me-1"></i>Pasta Digital
+          </a>
+          <dtml-call expr="REQUEST.set('id_documento', str(cod_documento)+'_texto_integral.pdf')">
+          <dtml-if expr="hasattr(sapl_documentos.administrativo,id_documento)">
+            <a class="btn btn-secondary" target="_blank" href="<dtml-var portal_url>/pysc/download_documento_pysc?cod_documento=<dtml-var cod_documento>">
+              <i class="fas fa-file-pdf me-1"></i>Texto Integral
+            </a>
+          </dtml-if>
+          <dtml-call expr="REQUEST.set('id_odt', str(cod_documento)+'_texto_integral.odt')">
+          <dtml-if expr="_.hasattr(sapl_documentos.administrativo,id_odt)">
+            <dtml-let documento_odt="_.getattr(sapl_documentos.administrativo,id_odt).absolute_url">
+              <a class="btn btn-secondary" href="<dtml-var documento_odt>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank">
+                <i class="fas fa-file-alt me-1"></i>ODT
+              </a>
+            </dtml-let>
+          </dtml-if>
+        <dtml-else>
+          <dtml-call expr="REQUEST.set('id_documento', str(cod_documento)+'_texto_integral.pdf')">
+          <dtml-if expr="hasattr(sapl_documentos.administrativo,id_documento)">
+            <a class="btn btn-outline-primary" target="_blank" href="<dtml-var portal_url>/pysc/download_documento_pysc?cod_documento=<dtml-var cod_documento>">
+              <i class="fas fa-file-pdf me-1"></i>Texto Integral
+            </a>
+          </dtml-if>
         </dtml-if>
+      </dtml-let>
     </div>
-   </div>
- </div>
-
- <div class="row mb-2">
-  <div class="col-12">
-     <p class="h5 ementa"><dtml-var txt_assunto></p>
   </div>
- </div>
+</div>
 
- <div class="row">
-       <p class="col-12">
-         <i class="fa fa-user"></i>
-         <b>Interessado:</b> <dtml-var txt_interessado missing>
-       </p>
- </div>
-
- <div class="row">
-    <p class="col-12"><b>Data de Entrada</b>: <dtml-var dat_documento></p>
- </div>
-
- <dtml-if num_protocolo>
-  <div class="row"> 
-    <p class="col-12 col-md-6"><b>Protocolo</b>: <dtml-var num_protocolo>/<dtml-var ano_documento>
+<div class="card border-0 shadow-sm mb-4">
+  <div class="card-body">
+    <h2 class="h5 mb-3 text-primary">Assunto</h2>
+    <p class="mb-0 text-justify"><dtml-var txt_assunto></p>
   </div>
- </dtml-if>
+</div>
 
- <dtml-if txt_observacao>
-   <div class="row"> 
-       <p class="col-12"><b>Observações:</b> <dtml-var txt_observacao></p>
-   </div> 
- </dtml-if>
+<div class="card border-0 shadow-sm mb-4">
+  <div class="card-body">
+    <div class="row g-3">
+      <div class="col-12">
+        <small class="text-muted d-block">Interessado</small>
+        <div>
+          <i class="fas fa-user me-2 text-muted"></i>
+          <dtml-var txt_interessado missing>
+        </div>
+      </div>
+      <div class="col-12 col-md-6">
+        <small class="text-muted d-block">Data de Entrada</small>
+        <div>
+          <i class="fas fa-calendar-alt me-2 text-muted"></i>
+          <dtml-var dat_documento missing null="">
+        </div>
+      </div>
+      <dtml-if num_protocolo>
+        <div class="col-12 col-md-6">
+          <small class="text-muted d-block">Protocolo</small>
+          <div>
+            <i class="fas fa-file-alt me-2 text-muted"></i>
+            <dtml-var num_protocolo missing null="">/<dtml-var ano_documento missing>
+          </div>
+        </div>
+      </dtml-if>
+      <dtml-if dat_fim_prazo>
+        <div class="col-12 col-md-6">
+          <small class="text-muted d-block">Prazo</small>
+          <div>
+            <i class="fas fa-calendar-check me-2 text-muted"></i>
+            <dtml-var dat_fim_prazo>
+          </div>
+        </div>
+      </dtml-if>
+    </div>
+  </div>
+</div>
 
-<dtml-if dat_fim_prazo> 
-   <div class="row">
-     <p class="col-12"><b>Prazo:</b> <dtml-var dat_fim_prazo></p>   
-   </div>
+<dtml-if txt_observacao>
+  <div class="row">
+    <p class="col-12"><b>Observações:</b> <dtml-var txt_observacao missing></p>
+  </div>
 </dtml-if>
 
- <dtml-in expr="zsql.tramitacao_administrativo_obter_zsql(cod_documento=cod_documento, ind_ult_tramitacao=1)">
-    <dtml-call expr="REQUEST.set('temTramitacao', 1)">
- </dtml-in>
+<dtml-in expr="zsql.tramitacao_administrativo_obter_zsql(cod_documento=cod_documento, ind_ult_tramitacao=1)">
+  <dtml-call expr="REQUEST.set('temTramitacao', 1)">
+</dtml-in>
 
- <div class="row">
-    <div class="col-12">
-      <div class="row mb-3">    
-         <div class="col-6">
-           <span class="h6 font-weight-bold">Situação Atual</span>
-         </div>
-         <div class="col-6 text-end">
-             <dtml-if expr="ind_tramitacao==1">
-                <span class="badge bg-dark-success">Em Tramitação</span>
-             <dtml-elif expr="ind_tramitacao==0">                
-                <span class="badge bg-danger">Tramitação Encerrada</span>
-             </dtml-if>
-           </div>            
+<div class="card border-0 shadow-sm mb-4">
+  <div class="card-header">
+    <div class="row align-items-center">
+      <div class="col-12 col-md-6">
+        <strong>Situação Atual</strong>
       </div>
-
-   <dtml-in expr="zsql.tramitacao_administrativo_obter_zsql(cod_documento=cod_documento, ind_ult_tramitacao=1, ind_excluido=0)">
-     <dtml-if sequence-start>
-      <dtml-call expr="REQUEST.set('cod_ult_origem', int(cod_unid_tram_local))">     
-      <dtml-call expr="REQUEST.set('cod_ult_dest', int(cod_unid_tram_dest))">
-      <dtml-call expr="REQUEST.set('dat_encaminha', dat_encaminha)">     
-      <div class="card mb-3">
-       <div class="card-body">
-           <p class="card-text"><b>Último Local:</b> <dtml-var dat_tramitacao>
-           <dtml-if cod_unid_tram_dest>
-             <dtml-in expr="unidade_tramitacao_obter_zsql(cod_unid_tramitacao=_.int(cod_unid_tram_dest))">
-                - <dtml-var nom_unidade_join>
-             </dtml-in>
-           <dtml-else>
-             <dtml-in expr="unidade_tramitacao_obter_zsql(cod_unid_tramitacao=_.int(cod_unid_tram_local))">
-                - <dtml-var nom_unidade_join>
-             </dtml-in>
-           </dtml-if>
-           <dtml-if expr="dat_encaminha!=None">
-              <dtml-call expr="REQUEST.set('pdf', str(cod_tramitacao)+'_tram.pdf')">
-              <dtml-if "hasattr(sapl_documentos.administrativo.tramitacao,pdf)">
-                 <dtml-let pdf="getattr(sapl_documentos.administrativo.tramitacao,pdf).absolute_url">
-                   - <a href="<dtml-var pdf>" target="_blank"><dtml-var expr="des_status"></a>
-                 </dtml-let>
+      <div class="col-12 col-md-6 text-start text-md-end mt-2 mt-md-0">
+        <dtml-if expr="ind_tramitacao==1">
+          <span class="badge bg-success">Em Tramitação</span>
+        <dtml-elif expr="ind_tramitacao==0">                
+          <span class="badge bg-danger">Tramitação Encerrada</span>
+        </dtml-if>
+      </div>
+    </div>
+  </div>
+  <dtml-if temTramitacao>
+    <dtml-in expr="zsql.tramitacao_administrativo_obter_zsql(cod_documento=cod_documento, ind_excluido=0)">
+      <dtml-if sequence-start>
+        <dtml-call expr="REQUEST.set('cod_ult_origem', int(cod_unid_tram_local))">     
+        <dtml-call expr="REQUEST.set('cod_ult_dest', int(cod_unid_tram_dest))">
+        <dtml-call expr="REQUEST.set('dat_encaminha', dat_encaminha)">  
+        <div class="card border-0 mb-3">
+          <div class="card-body">
+            <p class="card-text mb-0">
+              <small class="text-muted d-block">Último Local</small>
+              <i class="fas fa-map-marker-alt me-2 text-muted"></i>
+              <strong><dtml-var dat_tramitacao></strong>
+              <dtml-if cod_unid_tram_dest>
+                <dtml-in expr="unidade_tramitacao_obter_zsql(cod_unid_tramitacao=_.int(cod_unid_tram_dest))">
+                  - <dtml-var nom_unidade_join>
+                </dtml-in>
               <dtml-else>
-                 - <dtml-var expr="des_status" missing null="">
+                <dtml-in expr="unidade_tramitacao_obter_zsql(cod_unid_tramitacao=_.int(cod_unid_tram_local))">
+                  - <dtml-var nom_unidade_join>
+                </dtml-in>
               </dtml-if>
-           <dtml-else>
-              - <dtml-var expr="des_status" missing null="">
-           </dtml-if>
-           <dtml-if dat_fim_prazo>
-              - <b>Prazo: </b> <dtml-var dat_fim_prazo>
-            </dtml-if>
-         </p>
-       </div>
-      </div>
+              <dtml-if expr="dat_encaminha!=None">
+                <dtml-call expr="REQUEST.set('pdf', str(cod_tramitacao)+'_tram.pdf')">
+                <dtml-if "hasattr(sapl_documentos.administrativo.tramitacao,pdf)">
+                  <dtml-let pdf="getattr(sapl_documentos.administrativo.tramitacao,pdf).absolute_url">
+                    - <a href="<dtml-var pdf>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><dtml-var expr="des_status"></a>
+                  </dtml-let>
+                <dtml-else>
+                  - <dtml-var expr="des_status" missing null="">
+                </dtml-if>
+              <dtml-else>
+                - <dtml-var expr="des_status" missing null="">
+              </dtml-if>
+              <dtml-if dat_fim_prazo>
+                - <b>Prazo: </b> <dtml-var dat_fim_prazo>
+              </dtml-if>
+            </p>
+          </div>
+        </div>
+      </dtml-if>
+    </dtml-in>
+  </dtml-if>
+</div>
+
+<dtml-in expr="zsql.documento_acessorio_administrativo_obter_zsql(cod_documento=cod_documento,ind_excluido=0)">
+  <dtml-call expr="REQUEST.set('temDocAC', 1)">
+</dtml-in>
+
+<dtml-if expr="AUTHENTICATED_USER.has_role(['Authenticated']) and _.has_key('cod_usuario_corrente')">
+  <dtml-in expr="zsql.usuario_unid_tram_obter_zsql(cod_usuario=cod_usuario_corrente)">
+    <dtml-if expr="_.has_key('cod_ult_origem') and int(cod_ult_origem) == int(cod_unid_tramitacao) and dat_encaminha==None">
+      <dtml-call expr="REQUEST.set('add_doc', 1)">
+    <dtml-elif expr="_.has_key('cod_ult_dest') and int(cod_ult_dest) == int(cod_unid_tramitacao)">
+      <dtml-call expr="REQUEST.set('add_doc', 1)">
+      <dtml-call expr="REQUEST.set('pode_tramitar', 1)">
     </dtml-if>
-   </dtml-in>
-
- <dtml-in expr="zsql.documento_acessorio_administrativo_obter_zsql(cod_documento=cod_documento,ind_excluido=0)">
-    <dtml-call expr="REQUEST.set('temDocAC', 1)">
- </dtml-in>
-
-    <dtml-if expr="AUTHENTICATED_USER.has_role(['Authenticated']) and _.has_key('cod_usuario_corrente')">
-      <dtml-in expr="zsql.usuario_unid_tram_obter_zsql(cod_usuario=cod_usuario_corrente)">
-         <dtml-if expr="_.has_key('cod_ult_origem') and int(cod_ult_origem) == int(cod_unid_tramitacao) and dat_encaminha==None">
-            <dtml-call expr="REQUEST.set('add_doc', 1)">
-         <dtml-elif expr="_.has_key('cod_ult_dest') and int(cod_ult_dest) == int(cod_unid_tramitacao)">
-            <dtml-call expr="REQUEST.set('add_doc', 1)">
-            <dtml-call expr="REQUEST.set('pode_tramitar', 1)">
-         </dtml-if>
-      </dtml-in>
-     </dtml-if>
+  </dtml-in>
+</dtml-if>
 
 <dtml-if expr="_.has_key('temDocAC') or _.has_key('add_doc')">
-      <div class="accordion accordion-flush accordion-plus-icon" id="accordionDoc">
-         <div class="card mb-0 shadow">
-             <div class="accordion-header" id="headingDoc">
-               <h5 class="my-0">
-                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseDoc" aria-expanded="false" aria-controls="collapseDoc">Documentos Acessórios</button>
-               </h5>
-             </div>
-             <div id="collapseDoc" class="collapse" aria-labelledby="headingDoc" data-bs-parent="#accordionDoc">
-                 <div class="card-body">
-                 
-             <dtml-if expr="AUTHENTICATED_USER.has_role(['Authenticated']) and _.has_key('add_doc')">      
-                <section class="body-content mb-3">
-                     <div hidden>
-                         <div data-name="popover-content">
-                   <form name="myform" id="myform" class="needs-validation" validate role="form" enctype="multipart/form-data" method="post" action="documento_acessorio_salvar_proc" onSubmit="return confirm('Confirma a inclusão do documento acessório?');">
+  <div class="accordion accordion-flush accordion-plus-icon" id="accordionDoc">
+    <div class="card border-0 shadow-sm mb-3">
+      <div class="accordion-header" id="headingDoc">
+        <h5 class="my-0">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseDoc" aria-expanded="false" aria-controls="collapseDoc">Documentos Acessórios</button>
+        </h5>
+      </div>
+      <div id="collapseDoc" class="collapse" aria-labelledby="headingDoc" data-bs-parent="#accordionDoc">
+        <div class="card-body">
+          <dtml-if expr="AUTHENTICATED_USER.has_role(['Authenticated']) and _.has_key('add_doc')">      
+            <section class="body-content mb-3">
+              <div hidden>
+                <div data-name="popover-content">
+                  <form name="myform" id="myform" class="needs-validation" validate role="form" enctype="multipart/form-data" method="post" action="documento_acessorio_salvar_proc" onSubmit="return confirm('Confirma a inclusão do documento acessório?');">
                     <input type="hidden" name="cod_documento" value="<dtml-var cod_documento>" />
                     <input type="hidden" name="cod_usuario" value="<dtml-var cod_usuario_corrente missing>" />
                     <input type="hidden" name="cod_unid_tram_local" value="<dtml-var cod_ult_dest missing>" />
                     <div class="row">
                       <div class="col-12 mb-3">
-                       <label class="form-label required" for="lst_tip_documento">Tipo</label>
-                         <select class="form-select" id="lst_tip_documento" name="lst_tip_documento" required>
-                             <option></option> 
-                             <dtml-in expr="zsql.tipo_documento_administrativo_obter_zsql(tip_natureza='A',ind_excluido=0)">           
-                                <option value="<dtml-var tip_documento>"> <dtml-var des_tipo_documento></option>
-                             </dtml-in>                   
-                          </select>
-                          <div class="invalid-feedback">
-                            Este campo é obrigatório!
-                          </div>
+                        <label class="form-label required" for="lst_tip_documento">Tipo</label>
+                        <select class="form-select" id="lst_tip_documento" name="lst_tip_documento" required>
+                          <option></option> 
+                          <dtml-in expr="zsql.tipo_documento_administrativo_obter_zsql(tip_natureza='A',ind_excluido=0)">           
+                            <option value="<dtml-var tip_documento>"> <dtml-var des_tipo_documento></option>
+                          </dtml-in>                   
+                        </select>
+                        <div class="invalid-feedback">
+                          Este campo é obrigatório!
+                        </div>
                       </div>
                       <div class="col-12 mb-2">
                         <label class="form-label required" for="txt_nom_documento">Descrição</label>        
                         <input class="form-control" type="text" id="txt_nom_documento" name="txt_nom_documento" value="" maxlength="50" required />
-                          <small id="passwordHelpInline" class="text-muted">
-                             Máximo 50 caracteres.
-                          </small>          
-                         <div class="invalid-feedback">
-                           Este campo é obrigatório!
-                         </div> 
-                     </div>                    
-                     <div class="col-12 mb-3">                      
-                         <input type="file" class="form-control" id="file_nom_arquivo" name="file_nom_arquivo" accept="application/pdf" required />
-                     </div>
-                     <div class="col-12">                      
-                        <button class="btn btn-primary btn-block" type="submit" data-bs-toggle="popover" data-placement="bottom" data-html="true" data-title="OK"><i class="fa fa-fw fa-check"></i> Incluir Documento</button>                     
-                     </div>
-                     <div class="col-md-12 mt-2">
-                       <p class="text-muted small font-size-12"><i class="fas fa-asterisk text-danger"></i> Campos obrigatórios</p>
-                     </div>
-                            </div>
-                         </form> 
+                        <small id="passwordHelpInline" class="text-muted">
+                          Máximo 50 caracteres.
+                        </small>          
+                        <div class="invalid-feedback">
+                          Este campo é obrigatório!
+                        </div> 
+                      </div>                    
+                      <div class="col-12 mb-3">                      
+                        <input type="file" class="form-control" id="file_nom_arquivo" name="file_nom_arquivo" accept="application/pdf" required />
                       </div>
-                     </div>  
-                     <a id="addDocAc" tabindex="0" class="btn btn-light" role="button" data-bs-toggle="popover" title="title"><i class="fas fa-plus-circle"></i> Incluir documento</a>
-               </section>   
-             </dtml-if>
+                      <div class="col-12">                      
+                        <button class="btn btn-primary btn-block" type="submit" data-bs-toggle="popover" data-placement="bottom" data-html="true" data-title="OK"><i class="fa fa-fw fa-check"></i> Incluir Documento</button>                     
+                      </div>
+                      <div class="col-md-12 mt-2">
+                        <p class="text-muted small font-size-12"><i class="fas fa-asterisk text-danger"></i> Campos obrigatórios</p>
+                      </div>
+                    </div>
+                  </form> 
+                </div>
+              </div>  
+              <a id="addDocAc" tabindex="0" class="btn btn-light" role="button" data-bs-toggle="popover" title="title"><i class="fas fa-plus-circle"></i> Incluir documento</a>
+            </section>   
+          </dtml-if>
 
           <dtml-in expr="zsql.documento_acessorio_administrativo_obter_zsql(cod_documento=cod_documento, ind_excluido=0)">
             <dtml-if sequence-start>
               <div class="table-responsive">            
-               <table class="table">
-                 <thead class="table-light">
-                   <tr>
-                     <th>Identificação do Documento</th>
-                     <th>Autoria</th>                     
-                     <th>Data</th>
-                   </tr>
-                 </thead>
+                <table class="table">
+                  <thead class="table-light">
+                    <tr>
+                      <th>Identificação do Documento</th>
+                      <th>Autoria</th>                     
+                      <th>Data</th>
+                    </tr>
+                  </thead>
             </dtml-if>
-                 <tr>
-                   <td>
-                    <dtml-call expr="REQUEST.set('id_documento_odt', str(cod_documento_acessorio)+'.odt')">
-                    <dtml-if expr="_.hasattr(sapl_documentos.administrativo,id_documento_odt)">
-                      <dtml-let documento_odt="_.getattr(sapl_documentos.administrativo,id_documento_odt).absolute_url">
-                         <dtml-if expr="AUTHENTICATED_USER.has_role(['Authenticated'])">
-                           <a href="<dtml-var documento_odt>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank">
-                             <i class="fa fa-fw fa-file-alt"></i>ODT
-                           </a>
+            <tr>
+              <td>
+                <dtml-call expr="REQUEST.set('id_documento_odt', str(cod_documento_acessorio)+'.odt')">
+                <dtml-if expr="_.hasattr(sapl_documentos.administrativo,id_documento_odt)">
+                  <dtml-let documento_odt="_.getattr(sapl_documentos.administrativo,id_documento_odt).absolute_url">
+                    <dtml-if expr="AUTHENTICATED_USER.has_role(['Authenticated'])">
+                      <a href="<dtml-var documento_odt>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank">
+                        <i class="fa fa-fw fa-file-alt"></i>ODT
+                      </a>
+                    </dtml-if>
+                  </dtml-let>
+                </dtml-if>
+                <dtml-call expr="REQUEST.set('id_documento', str(cod_documento_acessorio)+'.pdf')">
+                <dtml-if expr="hasattr(sapl_documentos.administrativo,id_documento)">
+                  <dtml-let documento="getattr(sapl_documentos.administrativo,id_documento).absolute_url">
+                    <a href="<dtml-var documento>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank">
+                      <dtml-if expr="zsql.assinatura_documento_obter_zsql(codigo=cod_documento_acessorio, tipo_doc='doc_acessorio_adm',ind_assinado=1, cod_usuario=None)">
+                        <i class="fa fa-fw fa-certificate"></i><dtml-var nom_documento>
+                      <dtml-else>
+                        <i class="fa fa-fw fa-file-pdf"></i><dtml-var nom_documento>
+                      </dtml-if>
+                    </a>
+                    <dtml-if expr="sapl_documentos.props_sagl.restpki_access_token!='' and dbcon_logs">
+                      <dtml-if expr="AUTHENTICATED_USER.has_role(['Authenticated'])">
+                        <dtml-in expr="zsql.logs_pesquisar_zsql(cod_registro=cod_documento_acessorio, modulo='documento_acessorio_adm', ordem=1)">
+                          <dtml-call expr="REQUEST.set('usuario_doc', usuario)">
+                        </dtml-in>
+                        <dtml-in expr="zsql.usuario_obter_zsql(col_username=AUTHENTICATED_USER.getUserName())">
+                          <dtml-call expr="REQUEST.set('usuario_logado', col_username)">
+                        </dtml-in>
+                        <dtml-if expr="_.has_key('add_doc') and _.has_key('usuario_doc') and _.has_key('usuario_logado') and usuario_doc==usuario_logado">
+                          <div class="btn-group btn-group-sm ms-3">
+                            <dtml-if expr="zsql.assinatura_documento_obter_zsql(codigo=cod_documento_acessorio, tipo_doc='doc_acessorio_adm')">
+                            <dtml-else>
+                              <button type="button" class="btn btn-light" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Assinar Digitalmente" data-src="<dtml-var portal_url>/generico/assinador/pades-signature_html?codigo=<dtml-var cod_documento_acessorio>&tipo_doc=doc_acessorio_adm&modal=1"><i class="fas fa-file-signature"></i> Assinar</button>
+                            </dtml-if>
+                            <button type="button" class="btn btn-light" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Assinaturas Digitais" data-src="<dtml-var portal_url>/cadastros/assinatura/assinatura_solicitar_form?codigo=<dtml-var cod_documento_acessorio>&tipo_doc=doc_acessorio_adm&modal=1"><i class="fas fa-file-signature"></i> Assinaturas</button>
+                            <dtml-if expr="pysc.data_reduzir_dias_pysc(DateTime(datefmt='international').strftime('%Y/%m/%d')) < DateTime(dat_documento, datefmt='international').strftime('%Y/%m/%d')">
+                              <button type="button" class="btn btn-danger" onClick="documento_acessorio_excluir(<dtml-var cod_documento_acessorio missing>)"><i class="fas fa-trash"></i> Excluir</button>
+                            </dtml-if>
+                          </div>     
                         </dtml-if>
-                      </dtml-let>
+                      </dtml-if>
                     </dtml-if>
-                    <dtml-call expr="REQUEST.set('id_documento', str(cod_documento_acessorio)+'.pdf')">
-                    <dtml-if expr="hasattr(sapl_documentos.administrativo,id_documento)">
-                      <dtml-let documento="getattr(sapl_documentos.administrativo,id_documento).absolute_url">
-                        <a target="_blank" href="<dtml-var documento>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank">
-                         <dtml-if expr="zsql.assinatura_documento_obter_zsql(codigo=cod_documento_acessorio, tipo_doc='doc_acessorio_adm',ind_assinado=1, cod_usuario=None)">
-                            <i class="fa fa-fw fa-certificate"></i><dtml-var nom_documento>
-                          <dtml-else>
-                            <i class="fa fa-fw fa-file-pdf"></i><dtml-var nom_documento>
-                         </dtml-if>
-			</a>
-			<dtml-if expr="sapl_documentos.props_sagl.restpki_access_token!='' and dbcon_logs">
-                           <dtml-if expr="AUTHENTICATED_USER.has_role(['Authenticated'])">
-                             <dtml-in expr="zsql.logs_pesquisar_zsql(cod_registro=cod_documento_acessorio, modulo='documento_acessorio_adm', ordem=1)">
-                               <dtml-call expr="REQUEST.set('usuario_doc', usuario)">
-                             </dtml-in>
-                             <dtml-in expr="zsql.usuario_obter_zsql(col_username=AUTHENTICATED_USER.getUserName())">
-                               <dtml-call expr="REQUEST.set('usuario_logado', col_username)">
-                             </dtml-in>
-                             <dtml-if expr="_.has_key('add_doc') and _.has_key('usuario_doc') and _.has_key('usuario_logado') and usuario_doc==usuario_logado">
-                              <div class="btn-group btn-group-sm ms-3">
-                               <dtml-if expr="zsql.assinatura_documento_obter_zsql(codigo=cod_documento_acessorio, tipo_doc='doc_acessorio_adm')">
-                               <dtml-else>
-                                  <button type="button" class="btn btn-light" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Assinar Digitalmente" data-src="<dtml-var portal_url>/generico/assinador/pades-signature_html?codigo=<dtml-var cod_documento_acessorio>&tipo_doc=doc_acessorio_adm&modal=1"><i class="fas fa-file-signature"></i> Assinar</button>
-                               </dtml-if>
-                               <button type="button" class="btn btn-light" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Assinaturas Digitais" data-src="<dtml-var portal_url>/cadastros/assinatura/assinatura_solicitar_form?codigo=<dtml-var cod_documento_acessorio>&tipo_doc=doc_acessorio_adm&modal=1"><i class="fas fa-file-signature"></i> Assinaturas</button>
-                               <dtml-if expr="pysc.data_reduzir_dias_pysc(DateTime(datefmt='international').strftime('%Y/%m/%d')) < DateTime(dat_documento, datefmt='international').strftime('%Y/%m/%d')">
-                                  <button type="button" class="btn btn-danger" onClick="documento_acessorio_excluir(<dtml-var cod_documento_acessorio missing>)"><i class="fas fa-trash"></i> Excluir</button>
-                               </dtml-if>
-                                </div>     
-                             </dtml-if>
-                           </dtml-if>
-                        </dtml-if>
-		      </dtml-let>
-                    <dtml-else>
-                       <dtml-var nom_documento>
-                    </dtml-if>
-                   </td>
-                   <td>
-                    <dtml-if expr="nom_autor_documento!=None">
-                       <dtml-var nom_autor_documento>
-                    </dtml-if>
-                   </td>                   
-                   <td>
-                     <dtml-var dat_documento missing null="">                   
-                   </td>                   
-                 </tr>
+                  </dtml-let>
+                <dtml-else>
+                  <dtml-var nom_documento>
+                </dtml-if>
+              </td>
+              <td>
+                <dtml-if expr="nom_autor_documento!=None">
+                  <dtml-var nom_autor_documento>
+                </dtml-if>
+              </td>                   
+              <td>
+                <dtml-var dat_documento missing null="">                   
+              </td>                   
+            </tr>
             <dtml-if sequence-end>
-               </table>
-              </div>
+              </table>
+            </div>
             </dtml-if>
-         </dtml-in>
+          </dtml-in>
         </div>
-	</div>
       </div>
-    </div>         
+    </div>
+  </div>
 </dtml-if> 
 
-    <dtml-if expr="zsql.documento_administrativo_vinculado_obter_zsql(cod_documento_vinculado = cod_documento) or zsql.documento_administrativo_vinculado_obter_zsql(cod_documento_vinculante = cod_documento)">
-       <dtml-call expr="REQUEST.set('temVinculado', 1)">
-    </dtml-if>
+<dtml-if expr="zsql.documento_administrativo_vinculado_obter_zsql(cod_documento_vinculado = cod_documento) or zsql.documento_administrativo_vinculado_obter_zsql(cod_documento_vinculante = cod_documento)">
+  <dtml-call expr="REQUEST.set('temVinculado', 1)">
+</dtml-if>
 
-    <dtml-if temVinculado>
-      <div class="accordion accordion-flush accordion-plus-icon" id="accordionProc">
-         <div class="card mb-0 shadow">
-             <div class="accordion-header" id="headingProc">
-               <h5 class="my-0">
-                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseProc" aria-expanded="false" aria-controls="collapseProc">Processos Vinculados</button>
-               </h5>
-             </div>
-             <div id="collapseProc" class="collapse" aria-labelledby="headingProc" data-bs-parent="#accordionProc">
-                 <div class="card-body">
+<dtml-if temVinculado>
+  <div class="accordion accordion-flush accordion-plus-icon" id="accordionProc">
+    <div class="card border-0 shadow-sm mb-3">
+      <div class="accordion-header" id="headingProc">
+        <h5 class="my-0">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseProc" aria-expanded="false" aria-controls="collapseProc">Processos Vinculados</button>
+        </h5>
+      </div>
+      <div id="collapseProc" class="collapse" aria-labelledby="headingProc" data-bs-parent="#accordionProc">
+        <div class="card-body">
 
-              <div class="table-responsive">
-               <table class="table">
-                 <thead class="table-light">
-                   <tr>
-                    <th>Identificação do Processo</th>
-                    <th>Autoria</th>
-                    <th width="25%">Data de Vinculação</th>
-                   </tr>
-                 </thead>
-                 <tbody>
-                 <dtml-in expr="zsql.documento_administrativo_vinculado_obter_zsql(cod_documento_vinculado = cod_documento)">
+          <div class="table-responsive">
+            <table class="table">
+              <thead class="table-light">
+                <tr>
+                  <th>Identificação do Processo</th>
+                  <th>Autoria</th>
+                  <th width="25%">Data de Vinculação</th>
+                </tr>
+              </thead>
+              <tbody>
+                <dtml-in expr="zsql.documento_administrativo_vinculado_obter_zsql(cod_documento_vinculado = cod_documento)">
                   <tr>
                     <td> 
                       <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia', 'Operador Modulo Administrativo'])">
@@ -318,17 +343,17 @@
                       <dtml-else>
                         <a href="<dtml-var portal_url>/consultas/documento_administrativo/documento_administrativo_mostrar_proc?cod_documento=<dtml-var cod_documento_vinculante>" >
                       </dtml-if>             
-                        <dtml-var sgl_tipo_documento_vinculante> <dtml-var num_documento_vinculante>/<dtml-var ano_documento_vinculante></a> - <dtml-var txt_assunto_vinculante>
-                   </td>
-                   <td>
-                     <dtml-var txt_interessado_vinculante>
-                   </td>
-                   <td>
-                     <dtml-var dat_vinculacao>
-                   </td>
+                      <dtml-var sgl_tipo_documento_vinculante> <dtml-var num_documento_vinculante>/<dtml-var ano_documento_vinculante></a> - <dtml-var txt_assunto_vinculante>
+                    </td>
+                    <td>
+                      <dtml-var txt_interessado_vinculante>
+                    </td>
+                    <td>
+                      <dtml-var dat_vinculacao>
+                    </td>
                   </tr>
-                 </dtml-in>
-                 <dtml-in expr="zsql.documento_administrativo_vinculado_obter_zsql(cod_documento_vinculante = cod_documento)">
+                </dtml-in>
+                <dtml-in expr="zsql.documento_administrativo_vinculado_obter_zsql(cod_documento_vinculante = cod_documento)">
                   <tr>
                     <td> 
                       <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Materia', 'Operador Modulo Administrativo'])">
@@ -336,93 +361,94 @@
                       <dtml-else>
                         <a href="<dtml-var portal_url>/consultas/documento_administrativo/documento_administrativo_mostrar_proc?cod_documento=<dtml-var cod_documento_vinculante>" >
                       </dtml-if>             
-                        <dtml-var sgl_tipo_documento_vinculado> <dtml-var num_documento_vinculado>/<dtml-var ano_documento_vinculado></a> - <dtml-var txt_assunto_vinculado>
-                   </td>
-                   <td>
-                     <dtml-var txt_interessado_vinculado>
-                   </td>
-                   <td>
-                     <dtml-var dat_vinculacao>
-                   </td>
+                      <dtml-var sgl_tipo_documento_vinculado> <dtml-var num_documento_vinculado>/<dtml-var ano_documento_vinculado></a> - <dtml-var txt_assunto_vinculado>
+                    </td>
+                    <td>
+                      <dtml-var txt_interessado_vinculado>
+                    </td>
+                    <td>
+                      <dtml-var dat_vinculacao>
+                    </td>
                   </tr>
-                 </dtml-in>
-                </tbody>  
-               </table>
-              </div>
-           </div>
+                </dtml-in>
+              </tbody>  
+            </table>
           </div>
-         </div>
         </div>
-      </dtml-if>
+      </div>
+    </div>
+  </div>
+</dtml-if>
 
 <dtml-if expr="zsql.documento_administrativo_materia_obter_zsql(cod_documento=cod_documento,ind_excluido=0)">
-      <div class="accordion accordion-flush accordion-plus-icon" id="accordionMat">
-         <div class="card mb-0 shadow">
-             <div class="accordion-header" id="headingMat">
-               <h5 class="my-0">
-                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseMat" aria-expanded="false" aria-controls="collapseMat">Matérias Vinculadas</button>
-               </h5>
-             </div>
-             <div id="collapseMat" class="collapse" aria-labelledby="headingMat" data-bs-parent="#accordionMat">
-                 <div class="card-body">
-         <dtml-in expr="zsql.documento_administrativo_materia_obter_zsql(cod_documento=cod_documento,ind_excluido=0)">
-           <dtml-if sequence-start>
-            <div class="table-responsive">
-             <table class="table">
-              <thead class="table-light">
-               <tr>
-                 <th width="20%">Identificação da Matéria</th>
-                 <th width="20%">Autoria</th>
-                 <th>Ementa</th>
-                 <th width="10%">Arquivo</th>
-               </tr>
-              </thead>
-           </dtml-if sequence-start>
-           <dtml-in expr="zsql.materia_obter_zsql(cod_materia=cod_materia,ind_excluido=0)">
+  <div class="accordion accordion-flush accordion-plus-icon" id="accordionMat">
+    <div class="card border-0 shadow-sm mb-3">
+      <div class="accordion-header" id="headingMat">
+        <h5 class="my-0">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseMat" aria-expanded="false" aria-controls="collapseMat">Matérias Vinculadas</button>
+        </h5>
+      </div>
+      <div id="collapseMat" class="collapse" aria-labelledby="headingMat" data-bs-parent="#accordionMat">
+        <div class="card-body">
+          <dtml-in expr="zsql.documento_administrativo_materia_obter_zsql(cod_documento=cod_documento,ind_excluido=0)">
+            <dtml-if sequence-start>
+              <div class="table-responsive">
+                <table class="table">
+                  <thead class="table-light">
+                    <tr>
+                      <th width="20%">Identificação da Matéria</th>
+                      <th width="20%">Autoria</th>
+                      <th>Ementa</th>
+                      <th width="10%">Arquivo</th>
+                    </tr>
+                  </thead>
+            </dtml-if>
+            <dtml-in expr="zsql.materia_obter_zsql(cod_materia=cod_materia,ind_excluido=0)">
               <tr>
-               <td>
-                 <a href="<dtml-var portal_url>/consultas/materia/materia_mostrar_proc?cod_materia=<dtml-var cod_materia>">
-                     <dtml-var des_tipo_materia> <dtml-var num_ident_basica>/<dtml-var ano_ident_basica>
-                 </a>        
-               </td>
-               <td>
-                 <dtml-in expr="zsql.autoria_obter_zsql(cod_materia=cod_materia)">
-                   <dtml-var nom_autor_join><dtml-unless sequence-end>,</dtml-unless>
-                 </dtml-in>  
-               </td>
-               <td><dtml-var txt_ementa></td>
-               <td>
-                 <dtml-call expr="REQUEST.set('id_materia', str(cod_materia)+'_texto_integral.pdf')">
-                 <dtml-if "hasattr(sapl_documentos.materia,id_materia)">
+                <td>
+                  <a href="<dtml-var portal_url>/consultas/materia/materia_mostrar_proc?cod_materia=<dtml-var cod_materia>">
+                    <dtml-var des_tipo_materia> <dtml-var num_ident_basica>/<dtml-var ano_ident_basica>
+                  </a>        
+                </td>
+                <td>
+                  <dtml-in expr="zsql.autoria_obter_zsql(cod_materia=cod_materia)">
+                    <dtml-var nom_autor_join><dtml-unless sequence-end>,</dtml-unless>
+                  </dtml-in>  
+                </td>
+                <td><dtml-var txt_ementa></td>
+                <td>
+                  <dtml-call expr="REQUEST.set('id_materia', str(cod_materia)+'_texto_integral.pdf')">
+                  <dtml-if "hasattr(sapl_documentos.materia,id_materia)">
                     <dtml-let materia="getattr(sapl_documentos.materia,id_materia).absolute_url">
                       <a target="_blank" href="<dtml-var materia>">
                         <i class="fa fa-file-pdf"></i>
                       </a>
                     </dtml-let>
-                 </dtml-if>
-               </td>
+                  </dtml-if>
+                </td>
               </tr>
-           </dtml-in>
-           <dtml-if sequence-end>
-             </table>
+            </dtml-in>
+            <dtml-if sequence-end>
+              </table>
             </div>
-           </dtml-if sequence-end>  
-         </dtml-in>       
+            </dtml-if>  
+          </dtml-in>       
         </div>
       </div>
     </div>
+  </div>
 </dtml-if>
 
 <dtml-if expr="zsql.tramitacao_administrativo_obter_zsql(cod_documento=cod_documento)">
-      <div class="accordion accordion-flush accordion-plus-icon" id="accordionTram">
-         <div class="card mb-0 shadow">
-             <div class="accordion-header" id="headingTram">
-               <h5 class="my-0">
-                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTram" aria-expanded="false" aria-controls="collapseTram">Tramitações</button>
-               </h5>
-             </div>
-             <div id="collapseTram" class="collapse" aria-labelledby="headingTram" data-bs-parent="#accordionTram">
-                 <div class="card-body">
+  <div class="accordion accordion-flush accordion-plus-icon" id="accordionTram">
+    <div class="card border-0 shadow-sm mb-3">
+      <div class="accordion-header" id="headingTram">
+        <h5 class="my-0">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTram" aria-expanded="false" aria-controls="collapseTram">Tramitações</button>
+        </h5>
+      </div>
+      <div id="collapseTram" class="collapse" aria-labelledby="headingTram" data-bs-parent="#accordionTram">
+        <div class="card-body">
           <dtml-if expr="AUTHENTICATED_USER.has_role(['Authenticated']) and _.has_key('pode_tramitar')">
             <div class="mb-3">
               <a href="#" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Tramitação Individual" data-src="<dtml-var portal_url>/cadastros/tramitacao_documento/tramitacao_form?hdn_cod_documento=<dtml-var cod_documento>&modal=1" class="btn btn-light"><i class="fas fa-external-link-alt"></i><span> Tramitar</span></a>
@@ -441,142 +467,134 @@
                     </tr>
                   </thead>
             </dtml-if>
-                    <tr>
-                      <td><dtml-var dat_tramitacao></td>
-                      <td>
-                       <dtml-in expr="unidade_tramitacao_obter_zsql(cod_unid_tramitacao=_.int(cod_unid_tram_local))">
-                         <dtml-var nom_unidade_join>
-                       </dtml-in>                       
-                      </td>
-                      <td>
-                         <dtml-if cod_unid_tram_dest>                      
-                          <dtml-in expr="unidade_tramitacao_obter_zsql(cod_unid_tramitacao=_.int(cod_unid_tram_dest))">
-                            <dtml-var nom_unidade_join>
-                          </dtml-in>
-                         <dtml-else>
-                         </dtml-if>
-                      </td>
-                      <td>
-                        <dtml-if expr="dat_encaminha!=None">
-                         <dtml-call expr="REQUEST.set('pdf', str(cod_tramitacao)+'_tram.pdf')">
-                         <dtml-if expr="zsql.assinatura_documento_obter_zsql(codigo=cod_tramitacao,tipo_doc='tramitacao_adm', ind_assinado=1)">
-                            <dtml-in expr="zsql.assinatura_documento_obter_zsql(codigo=cod_tramitacao,tipo_doc='tramitacao_adm', ind_assinado=1, ind_prim_assinatura=1)"> 
-                              <dtml-if "hasattr(sapl_documentos.administrativo.tramitacao,pdf)">
-                                 <dtml-let pdf="getattr(sapl_documentos.administrativo.tramitacao,pdf).absolute_url">
-                                    <a href="<dtml-var pdf>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fas fa-certificate"></i> <dtml-var expr="des_status"></a>
-                                </dtml-let>
-                              <dtml-else>             
-                                 <a href="<dtml-var portal_url>/sapl_documentos/documentos_assinados/<dtml-var cod_assinatura_doc>.pdf?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fas fa-certificate"></i>  <dtml-var expr="des_status"></a>
-                              </dtml-if>
-                            </dtml-in>        
-                         <dtml-elif "hasattr(sapl_documentos.administrativo.tramitacao,pdf)">
-                           <dtml-let pdf="getattr(sapl_documentos.administrativo.tramitacao,pdf).absolute_url">
-                               <a href="<dtml-var pdf>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fa fa-file-pdf"></i> <dtml-var expr="des_status"></a>
-                           </dtml-let>
-                         <dtml-else>
-                             <dtml-var expr="des_status">                 
-                         </dtml-if> 
-                       <dtml-else>
-                         <dtml-var expr="des_status">
-                       </dtml-if>
-                      </td>  
-                    </tr>                                          
+            <tr>
+              <td><dtml-var dat_tramitacao></td>
+              <td>
+                <dtml-in expr="unidade_tramitacao_obter_zsql(cod_unid_tramitacao=_.int(cod_unid_tram_local))">
+                  <dtml-var nom_unidade_join>
+                </dtml-in>                       
+              </td>
+              <td>
+                <dtml-if cod_unid_tram_dest>                      
+                  <dtml-in expr="unidade_tramitacao_obter_zsql(cod_unid_tramitacao=_.int(cod_unid_tram_dest))">
+                    <dtml-var nom_unidade_join>
+                  </dtml-in>
+                </dtml-if>
+              </td>
+              <td>
+                <dtml-if expr="dat_encaminha!=None">
+                  <dtml-call expr="REQUEST.set('pdf', str(cod_tramitacao)+'_tram.pdf')">
+                  <dtml-if expr="zsql.assinatura_documento_obter_zsql(codigo=cod_tramitacao,tipo_doc='tramitacao_adm', ind_assinado=1)">
+                    <dtml-in expr="zsql.assinatura_documento_obter_zsql(codigo=cod_tramitacao,tipo_doc='tramitacao_adm', ind_assinado=1, ind_prim_assinatura=1)"> 
+                      <dtml-if "hasattr(sapl_documentos.administrativo.tramitacao,pdf)">
+                        <dtml-let pdf="getattr(sapl_documentos.administrativo.tramitacao,pdf).absolute_url">
+                          <a href="<dtml-var pdf>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fas fa-certificate"></i> <dtml-var expr="des_status"></a>
+                        </dtml-let>
+                      <dtml-else>             
+                        <a href="<dtml-var portal_url>/sapl_documentos/documentos_assinados/<dtml-var cod_assinatura_doc>.pdf?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fas fa-certificate"></i>  <dtml-var expr="des_status"></a>
+                      </dtml-if>
+                    </dtml-in>        
+                  <dtml-elif "hasattr(sapl_documentos.administrativo.tramitacao,pdf)">
+                    <dtml-let pdf="getattr(sapl_documentos.administrativo.tramitacao,pdf).absolute_url">
+                      <a href="<dtml-var pdf>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fa fa-file-pdf"></i> <dtml-var expr="des_status"></a>
+                    </dtml-let>
+                  <dtml-else>
+                    <dtml-var expr="des_status">                 
+                  </dtml-if> 
+                <dtml-else>
+                  <dtml-var expr="des_status">
+                </dtml-if>
+              </td>  
+            </tr>                                          
             <dtml-if sequence-end>
-                 </table>
-              </div>
+              </table>
+            </div>
             </dtml-if>            
           </dtml-in>
         </div>
       </div>
-      </div>
     </div>
+  </div>
 </dtml-if>
 
- <dtml-if expr="AUTHENTICATED_USER.has_role(['Authenticated'])">   
- <dtml-if cod_documento>
+<dtml-if expr="AUTHENTICATED_USER.has_role(['Authenticated'])">   
+  <dtml-if cod_documento>
     <dtml-in expr="zsql.arquivo_recipiente_listar_conteudo_zsql(cod_documento=cod_documento)">
-       <dtml-call expr="REQUEST.set('temArquivo', 1)">
+      <dtml-call expr="REQUEST.set('temArquivo', 1)">
     </dtml-in>
 
     <dtml-if temArquivo> 
-      <div id="accordion" class="arquivo">
-        <div class="card mb-4">
-          <div class="card-header" id="headingOne">
-            <p class="h5 mb-0">
-              <a href="#" class="d-block text-start collapsed" data-bs-toggle="collapse" data-target="#collapseArquivo" aria-expanded="false" aria-controls="collapseArquivo"> 
-                <i class="fa float-right pt-1 align-self-center" aria-hidden="true"></i>
-                 <span class="h6 font-weight-bold">Arquivo Permanente</span>
-              </a>
-            </p>
+      <div class="accordion accordion-flush accordion-plus-icon" id="accordionArq">
+        <div class="card border-0 shadow-sm mb-3">
+          <div class="accordion-header" id="headingArq">
+            <h5 class="my-0">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseArq" aria-expanded="false" aria-controls="collapseArq">Arquivo Permanente</button>
+            </h5>
           </div>
-          <div id="collapseArquivo" class="collapse" aria-labelledby="headingOne" data-parent=".arquivo">
+          <div id="collapseArq" class="collapse" aria-labelledby="headingArq" data-bs-parent="#accordionArq">
             <div class="card-body"> 
-            <dtml-in expr="zsql.arquivo_recipiente_listar_conteudo_zsql(cod_documento=cod_documento)" mapping>
-               <dtml-if sequence-start>
-                 <table class="table">
-                  <thead>
-                   <tr>
-                    <th width="20%">Recipiente</th>
-                    <th width="20%">Data de Arquivamento</th>
-                    <th>Observações</th>
-                   </tr>
-                  </thead>
+              <dtml-in expr="zsql.arquivo_recipiente_listar_conteudo_zsql(cod_documento=cod_documento)" mapping>
+                <dtml-if sequence-start>
+                  <table class="table">
+                    <thead>
+                      <tr>
+                        <th width="20%">Recipiente</th>
+                        <th width="20%">Data de Arquivamento</th>
+                        <th>Observações</th>
+                      </tr>
+                    </thead>
                 </dtml-if>
                 <tr>
                   <td> 
                     <b><dtml-var num_recipiente></b>
-                 </td>
-                 <td> 
-                   <dtml-var dat_arquivamento>
-                 </td>
-                 <td> 
-                   <dtml-var txt_observacao_arquivo missing null="">
-                 </td>
+                  </td>
+                  <td> 
+                    <dtml-var dat_arquivamento>
+                  </td>
+                  <td> 
+                    <dtml-var txt_observacao_arquivo missing null="">
+                  </td>
                 </tr>
-              <dtml-if sequence-end>
-                </table>
-              </dtml-if>
-            </dtml-in>
-           </div>
+                <dtml-if sequence-end>
+                  </table>
+                </dtml-if>
+              </dtml-in>
+            </div>
           </div>
-         </div>
         </div>
-      </dtml-if>
- </dtml-if>
- </dtml-if>
+      </div>
+    </dtml-if>
+  </dtml-if>
+</dtml-if>
 
 <div class="col-12">
   <div class="text-start btn-group mt-4">
-      <a class="btn btn-primary text-white d-print-none" href="<dtml-var portal_url>/consultas/documento_administrativo" ><i class="fa fa-fw fa-search"></i> Pesquisa</a>
-      <a class="btn btn-light" href="javascript:void(0)" onClick="window.history.go(-1); return false;"><i class="fa fa-fw fa-undo"></i> Voltar</a>  
+    <a class="btn btn-primary d-print-none" href="<dtml-var portal_url>/consultas/documento_administrativo" ><i class="fa fa-fw fa-search"></i> Pesquisa</a>
+    <a class="btn btn-light" href="javascript:void(0)" onClick="window.history.go(-1); return false;"><i class="fa fa-fw fa-undo"></i> Voltar</a>  
   </div>
 </div>
 
 <dtml-var js_slot>
 <script>
 
- <dtml-let isAnon="portal_membership.isAnonymousUser()">
-    <dtml-if expr="not isAnon">
-  function documento_acessorio_excluir(cod_documento_acessorio){ 
-       if (confirm("Deseja realmente excluir o documento acessório?")) {          
-          location.href="documento_acessorio_excluir_proc?cod_documento_acessorio="+cod_documento_acessorio+"&cod_documento=<dtml-var cod_documento missing>";
-       }
-  } 
-    </dtml-if> 
- </dtml-let>
+<dtml-let isAnon="portal_membership.isAnonymousUser()">
+  <dtml-if expr="not isAnon">
+    function documento_acessorio_excluir(cod_documento_acessorio){ 
+      if (confirm("Deseja realmente excluir o documento acessório?")) {          
+        location.href="documento_acessorio_excluir_proc?cod_documento_acessorio="+cod_documento_acessorio+"&cod_documento=<dtml-var cod_documento missing>";
+      }
+    } 
+  </dtml-if> 
+</dtml-let>
 
 </script>
 <dtml-if expr="AUTHENTICATED_USER.has_role(['Authenticated']) and _.has_key('add_doc')">
 <script type='text/javascript'>
   $(document).ready(function() {    
     var options = {
-        html: true,
-        title: "Incluir Documento Acessório",
-        //html element
-        //content: $("#popover-content")
-        content: $('[data-name="popover-content"]')
-        //Doing below won't work. Shows title only
-       //content: $("#popover-content").html()         
+      html: true,
+      title: "Incluir Documento Acessório",
+      content: $('[data-name="popover-content"]')
     }
     var exampleEl = document.getElementById('addDocAc')
     var popover = new bootstrap.Popover(exampleEl, options)

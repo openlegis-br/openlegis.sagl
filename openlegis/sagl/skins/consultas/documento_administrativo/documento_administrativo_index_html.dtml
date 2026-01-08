@@ -1,224 +1,3150 @@
 <dtml-var header_html>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.bootstrap5.css" rel="stylesheet">
 
-<script src="<dtml-var portal_url>/javascript/data_validar.js"></script>
+<style>
+    /* ============================================
+       CLASSES CUSTOMIZADAS APENAS QUANDO NECESSÁRIO
+       PADRONIZAÇÃO COM TEMA GLOBAL DO SISTEMA
+       Cores principais do tema: --bs-primary (#44a2d2)
+       Fonte padrão: --bs-body-font-size (0.93rem)
+       Fonte botões: --bs-btn-font-size (13px)
+       ============================================ */
+    
+    /* 1. Filter Toggle Icon - animação específica */
+    .filter-toggle-icon {
+        transition: transform 0.35s ease-in-out;
+        display: inline-block;
+    }
+    .filter-toggle-icon.expanded {
+        transform: rotate(90deg);
+    }
+    
+    /* 1.1. Garantir legibilidade do botão de filtros avançados no hover */
+    button[data-bs-target="#advancedSearch"],
+    button[data-bs-target="#advancedSearch"]:hover,
+    button[data-bs-target="#advancedSearch"]:focus,
+    button[data-bs-target="#advancedSearch"]:active {
+        color: var(--bs-body-color, #212529) !important;
+        background-color: transparent !important;
+    }
+    button[data-bs-target="#advancedSearch"]:hover {
+        color: var(--bs-primary, #44a2d2) !important;
+        background-color: transparent !important;
+    }
+    button[data-bs-target="#advancedSearch"] span.fw-semibold,
+    button[data-bs-target="#advancedSearch"]:hover span.fw-semibold,
+    button[data-bs-target="#advancedSearch"]:focus span.fw-semibold {
+        color: inherit !important;
+    }
+    button[data-bs-target="#advancedSearch"] i,
+    button[data-bs-target="#advancedSearch"]:hover i {
+        color: var(--bs-primary, #44a2d2) !important;
+    }
+    
+    /* 1.2. Garantir legibilidade do card-header dos filtros avançados no hover */
+    #advancedSearch .card-header,
+    #advancedSearch .card-header:hover,
+    #advancedSearch .card-header h5,
+    #advancedSearch .card-header h5:hover {
+        background-color: #fff !important;
+        color: var(--bs-body-color, #212529) !important;
+    }
+    #advancedSearch .card-header i,
+    #advancedSearch .card-header i:hover {
+        color: var(--bs-primary, #44a2d2) !important;
+    }
+    
+    /* 2. TomSelect customizações */
+    .ts-dropdown {
+        font-size: var(--bs-body-font-size, 1rem);
+    }
+    
+    .ts-dropdown .optgroup-header {
+        font-size: 0.9em;
+        padding-top: 8px;
+        padding-bottom: 2px;
+        background-color: var(--bs-gray-100, #f8f9fa);
+    }
+    
+    /* Harmonizar tamanho de fonte das opções no dropdown */
+    .ts-dropdown .option,
+    .ts-dropdown .ts-option {
+        font-size: var(--bs-body-font-size, 1rem);
+        padding: 0.5rem 0.75rem;
+        line-height: 1.5;
+    }
+    
+    /* Garantir que o texto das opções tenha tamanho consistente */
+    .ts-dropdown .option .text,
+    .ts-dropdown .ts-option .text,
+    .ts-dropdown .option,
+    .ts-dropdown .ts-option {
+        font-size: var(--bs-body-font-size, 1rem);
+    }
+    
+    /* Input de busca no dropdown */
+    .ts-dropdown input[type="text"],
+    .ts-dropdown input[type="search"],
+    .ts-dropdown .input-wrap input {
+        font-size: var(--bs-body-font-size, 1rem);
+        padding: 0.5rem 0.75rem;
+    }
+    
+    /* Garantir que o texto de "no results" e outros textos no dropdown tenham tamanho consistente */
+    .ts-dropdown .no-results,
+    .ts-dropdown .create {
+        font-size: var(--bs-body-font-size, 1rem);
+        padding: 0.5rem 0.75rem;
+    }
+    
+    /* 2.1. Padronização visual entre selects múltiplos e simples */
+    /* Garantir que selects simples e múltiplos tenham aparência consistente quando selecionados */
+    
+    /* Estilo padronizado para chips em selects múltiplos - mais discretos */
+    .ts-wrapper.multi .ts-control .item {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.125rem 0.375rem;
+        margin: 0;
+        background-color: var(--bs-tertiary-bg, #f8f9fa);
+        color: var(--bs-body-color, #212529);
+        border: 1px solid var(--bs-border-color-translucent, rgba(0, 0, 0, 0.075));
+        border-radius: 0.25rem;
+        font-size: var(--bs-body-font-size, 1rem);
+        line-height: 1.5;
+        font-weight: 400;
+        height: auto;
+        max-height: calc(1.5em + 0.25rem);
+    }
+    
+    /* Estilo para o item selecionado em selects simples - mais discreto */
+    .ts-wrapper.single .ts-control .item {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.125rem 0.375rem;
+        margin: 0;
+        background-color: var(--bs-tertiary-bg, #f8f9fa);
+        color: var(--bs-body-color, #212529);
+        border: 1px solid var(--bs-border-color-translucent, rgba(0, 0, 0, 0.075));
+        border-radius: 0.25rem;
+        font-size: var(--bs-body-font-size, 1rem);
+        line-height: 1.5;
+        font-weight: 400;
+        height: auto;
+        max-height: calc(1.5em + 0.25rem);
+    }
+    
+    /* Garantir padding e font-size consistente no controle - usar mesma fonte dos inputs */
+    /* Altura fixa para não mudar quando há itens selecionados */
+    .ts-wrapper.single .ts-control,
+    .ts-wrapper.multi .ts-control {
+        padding: 0.375rem 0.75rem;
+        min-height: calc(1.5em + 0.75rem + 2px);
+        height: calc(1.5em + 0.75rem + 2px);
+        font-size: var(--bs-body-font-size, 1rem);
+        line-height: 1.5;
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.25rem;
+        overflow: hidden;
+    }
+    
+    /* Garantir que o controle tenha tamanho de fonte e altura consistente em todos os estados */
+    .ts-wrapper.single .ts-control,
+    .ts-wrapper.multi .ts-control,
+    .ts-wrapper.single:not(.has-items) .ts-control,
+    .ts-wrapper.multi:not(.has-items) .ts-control,
+    .ts-wrapper.single.has-items .ts-control,
+    .ts-wrapper.multi.has-items .ts-control {
+        font-size: var(--bs-body-font-size, 1rem);
+        height: calc(1.5em + 0.75rem + 2px);
+        min-height: calc(1.5em + 0.75rem + 2px);
+    }
+    
+    /* Botão de remoção consistente para selects múltiplos - mais discreto */
+    .ts-wrapper.multi .ts-control .item .remove {
+        border-left: 1px solid var(--bs-border-color-translucent, rgba(0, 0, 0, 0.075));
+        padding-left: 0.375rem;
+        margin-left: 0.375rem;
+        cursor: pointer;
+        opacity: 0.5;
+        color: var(--bs-body-color, #212529);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        align-self: center;
+    }
+    
+    .ts-wrapper.multi .ts-control .item .remove:hover {
+        opacity: 1;
+        background-color: var(--bs-danger-bg-subtle, rgba(220, 53, 69, 0.1));
+        color: var(--bs-danger, #dc3545);
+    }
+    
+    /* Botão clear para selects simples */
+    .ts-wrapper.single .ts-control .clear-button {
+        color: #6c757d;
+        opacity: 0.6;
+    }
+    
+    .ts-wrapper.single .ts-control .clear-button:hover {
+        opacity: 1;
+        color: #212529;
+    }
+    
+    /* Garantir que o input de busca tenha o mesmo estilo em ambos */
+    .ts-wrapper.single .ts-control input,
+    .ts-wrapper.multi .ts-control input {
+        font-size: var(--bs-body-font-size, 1rem);
+        padding: 0;
+        margin: 0;
+        color: inherit;
+        height: auto;
+        line-height: 1.5;
+        border: none;
+        background: transparent;
+        flex: 1;
+        min-width: 50px;
+    }
+    
+    /* Placeholder consistente */
+    .ts-wrapper.single .ts-control .placeholder,
+    .ts-wrapper.multi .ts-control .placeholder {
+        color: #6c757d;
+        font-size: var(--bs-body-font-size, 1rem);
+        padding: 0;
+        line-height: 1.5;
+    }
+    
+    /* Garantir que o placeholder tenha o mesmo tamanho mesmo quando o controle está vazio */
+    .ts-wrapper.single:not(.has-items) .ts-control .placeholder,
+    .ts-wrapper.multi:not(.has-items) .ts-control .placeholder {
+        font-size: var(--bs-body-font-size, 1rem);
+    }
+    
+    /* Garantir altura fixa mesmo quando há itens selecionados */
+    .ts-wrapper.single.has-items .ts-control,
+    .ts-wrapper.multi.has-items .ts-control {
+        min-height: calc(1.5em + 0.75rem + 2px);
+        height: calc(1.5em + 0.75rem + 2px);
+        font-size: var(--bs-body-font-size, 1rem);
+    }
+    
+    /* Harmonizar selects nativos com TomSelect */
+    /* Aplicar apenas a selects que não estão dentro de um wrapper TomSelect */
+    select.form-select:not(.ts-hidden-accessible) {
+        font-size: var(--bs-body-font-size, 1rem);
+        line-height: 1.5;
+        min-height: calc(1.5em + 0.75rem + 2px);
+    }
+    
+    /* Garantir que selects dentro de wrapper TomSelect não sejam afetados */
+    .ts-wrapper select.form-select {
+        padding: 0;
+        font-size: inherit;
+        line-height: inherit;
+        min-height: auto;
+    }
+    
+    /* 3. Skeleton loading */
+    .skeleton-loading {
+        animation: skeleton-loading 1.5s infinite ease-in-out;
+        background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+        background-size: 200% 100%;
+    }
+    @keyframes skeleton-loading {
+        0% { background-position: 200% 0; }
+        100% { background-position: -200% 0; }
+    }
+    .skeleton-row {
+        height: 38px;
+        margin-bottom: 8px;
+        border-radius: var(--bs-border-radius, 0.25rem);
+    }
+    .skeleton-title {
+        height: 20px;
+        width: 200px;
+        margin-bottom: 15px;
+    }
+    
+    /* 4. Filter badge */
+    .filter-badge {
+        display: inline-flex;
+        align-items: center;
+        margin-right: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    /* 5. Card view container - grid responsivo */
+    .card-view-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+    @media (max-width: 768px) {
+        .card-view-container {
+            grid-template-columns: 1fr;
+        }
+    }
+    @media (min-width: 992px) {
+        .card-view-container {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+    @media (min-width: 1400px) {
+        .card-view-container {
+            grid-template-columns: repeat(3, 1fr);
+        }
+    }
+    
+    /* 6. Card de processo administrativo */
+    .card-processo {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        position: relative;
+        transition: box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        /* Otimizações para evitar borda serrilhada no hover */
+        will-change: transform, box-shadow;
+        backface-visibility: hidden;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        /* Força renderização suave dos cantos */
+        border-radius: var(--bs-border-radius, 0.375rem);
+        isolation: isolate; /* Cria novo contexto de empilhamento */
+        /* Renderização suave de bordas com aceleração de hardware */
+        -webkit-transform: translateZ(0);
+        transform: translateZ(0);
+        -webkit-backface-visibility: hidden;
+        /* Anti-aliasing específico para bordas arredondadas */
+        -webkit-perspective: 1000px;
+        perspective: 1000px;
+        /* Força renderização de subpixels para bordas suaves */
+        -webkit-transform-style: preserve-3d;
+        transform-style: preserve-3d;
+    }
+    /* Pseudo-elemento para borda suave no hover */
+    .card-processo::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        border-radius: inherit;
+        border: 1px solid transparent;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        -webkit-transform: translateZ(0);
+        transform: translateZ(0);
+        -webkit-backface-visibility: hidden;
+        backface-visibility: hidden;
+    }
+    .card-processo:hover {
+        /* Usa translate3d para melhor renderização */
+        -webkit-transform: translate3d(0, -4px, 0);
+        transform: translate3d(0, -4px, 0);
+        box-shadow: 0 0.75rem 1.5rem rgba(0, 0, 0, 0.15) !important;
+        border-color: transparent; /* Remove borda padrão no hover */
+    }
+    .card-processo:hover::before {
+        opacity: 1;
+        border-color: var(--bs-primary, #44a2d2); /* Cor primária do tema */
+    }
+    .card-processo:focus-within {
+        outline: 2px solid var(--bs-primary, #44a2d2); /* Cor primária do tema */
+        outline-offset: 2px;
+    }
+    .card-processo .card-body {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        padding: 1.5rem;
+    }
+    
+    /* CARD HEADER - Padronização com tema global */
+    .card-processo .card-header {
+        background-color: rgba(68, 162, 210, 0.12) !important; /* Fundo destacado com cor primária do tema - mantém legibilidade */
+        border-bottom: 2px solid rgba(68, 162, 210, 0.2) !important; /* Borda inferior para mais destaque */
+        padding: 1rem 1.25rem !important; /* Espaçamento adequado */
+    }
+    
+    /* Seções com background unificado - usando cores do tema */
+    .card-section-detalhes,
+    .card-section-status {
+        background-color: rgba(68, 162, 210, 0.08) !important; /* Opacidade da cor primária do tema */
+        border-left: 3px solid var(--bs-primary, #44a2d2); /* Cor primária do tema */
+        border-radius: var(--bs-border-radius, 0.375rem);
+        padding: 1.25rem;
+        margin-bottom: 1.25rem;
+    }
+    
+    /* Redução da margem inferior da seção de status para aproximar do footer */
+    .card-section-status {
+        margin-bottom: 0.5rem;
+    }
+    
+    /* Texto das informações sem negrito para diferenciar do label */
+    .card-section-detalhes span,
+    .card-section-status span {
+        font-weight: 400 !important; /* Peso normal para valores, labels mantêm negrito */
+    }
+    
+    /* 7. Card title link */
+    .card-title-link {
+        transition: color 0.2s ease;
+        cursor: pointer;
+    }
+    .card-title-link:hover {
+        color: var(--bs-primary, #44a2d2) !important;
+    }
+    .card-title-link:focus {
+        outline: 2px solid var(--bs-primary, #44a2d2);
+        outline-offset: 2px;
+        border-radius: 0.25rem;
+    }
+    
+    /* 8. Card header com badge */
+    .card-header-with-badge {
+        padding-right: 6rem;
+    }
+    
+    /* 9. Highlight de texto de busca */
+    mark {
+        background-color: #FFEB3B;
+        padding: 0.1em 0.2em;
+        border-radius: var(--bs-border-radius-sm, 0.25rem);
+    }
+    
+    /* 12. TomSelect customizações - necessário para integração */
+    .ts-wrapper.single .ts-control > input,
+    .ts-wrapper.multi .ts-control > div {
+        color: var(--bs-body-color, #495057);
+    }
+    .ts-control .item::placeholder {
+        color: var(--bs-secondary, #6c757d);
+        opacity: 1;
+    }
+    .ts-wrapper .ts-control {
+        position: relative;
+        padding-right: 2.2em;
+    }
+    .ts-wrapper .ts-control:after {
+        position: absolute;
+        right: 1em;
+        top: 50%;
+        width: 0;
+        height: 0;
+        pointer-events: none;
+        border-left: 5px solid transparent;
+        border-right: 5px solid transparent;
+        border-top: 6px solid var(--bs-gray-600, #6c757d);
+        transform: translateY(-50%);
+        opacity: 0.65;
+    }
+    .ts-wrapper.focus .ts-control:after {
+        border-top-color: var(--bs-primary, #44a2d2); /* Cor primária do tema */
+        opacity: 1;
+    }
+    
+    /* 10. Canvas container */
+    .canvas-container {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+    #resumo-estatistico .canvas-container {
+        min-height: 300px;
+        max-height: 450px;
+        height: auto;
+        overflow: visible !important;
+        max-width: none !important;
+        width: 100% !important;
+        padding-right: 80px !important;
+    }
+    #resumo-estatistico {
+        overflow: visible !important;
+        width: 100% !important;
+        padding-right: 0 !important;
+    }
+    #resumo-estatistico canvas {
+        max-width: none !important;
+        width: 100% !important;
+    }
+    
+    /* 10. Input datepicker */
+    .flatpickr-input.bg-white {
+        background-color: #fff !important;
+    }
+    
+    /* 11. Filtros Avançados */
+    #advancedSearch h6 {
+        font-size: 0.875rem;
+        letter-spacing: 0.5px;
+        font-weight: 600;
+    }
+    
+    /* 12. Responsividade */
+    @media (max-width: 768px) {
+        #advancedSearch .card-body {
+            padding: 1rem !important;
+        }
+    }
+    
+    /* 13. Focus visible */
+    *:focus-visible {
+        outline: 2px solid var(--bs-primary, #44a2d2);
+        outline-offset: 2px;
+    }
+    
+    /* 14. Melhorias de acessibilidade e UX */
+    #btn-toggle-filtros[style*="display: none"] {
+        opacity: 0;
+        transform: translateY(-10px);
+        pointer-events: none;
+        transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+    
+    /* 15. Melhorar contraste de textos de ajuda */
+    .form-text.text-muted {
+        color: var(--bs-gray-700, #495057) !important;
+    }
+    
+    /* 16. Skip links - acessibilidade */
+    .skip-link {
+        position: fixed;
+        top: -100px;
+        left: 0;
+        background: var(--bs-primary, #44a2d2);
+        color: #fff;
+        padding: 12px 20px;
+        text-decoration: none;
+        z-index: 9999;
+        border-radius: 0 0 4px 4px;
+        font-weight: 600;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        transition: top 0.2s ease-in-out;
+    }
+    .skip-link:focus {
+        top: 0;
+        outline: 3px solid var(--bs-warning, #ffc107);
+        outline-offset: 2px;
+    }
+    
+    /* 17. Toast Container */
+    .toast-container {
+        position: fixed;
+        top: 1rem;
+        right: 1rem;
+        z-index: 1055;
+    }
+    
+    /* 18. Badge documento (modais) - comportamento como link */
+    .badge-documento {
+        cursor: pointer !important;
+        user-select: none;
+        transition: all 0.2s ease;
+    }
+    .badge-documento:hover {
+        cursor: pointer !important;
+        opacity: 0.9;
+    }
+    /* Hover específico para badges de documentos com diferentes cores */
+    .badge-documento.bg-info:hover,
+    .badge-documento.bg-info:hover * {
+        background-color: var(--bs-info, #17a2b8) !important;
+        color: #fff !important;
+        border-color: var(--bs-info, #17a2b8) !important;
+    }
+    .badge-documento.bg-warning:hover,
+    .badge-documento.bg-warning:hover * {
+        background-color: var(--bs-warning, #ffc107) !important;
+        color: #000 !important;
+        border-color: var(--bs-warning, #ffc107) !important;
+    }
+    .badge-documento.bg-primary:hover,
+    .badge-documento.bg-primary:hover * {
+        background-color: var(--bs-primary, #44a2d2) !important;
+        color: #fff !important;
+        border-color: var(--bs-primary, #44a2d2) !important;
+    }
+    .badge-documento.bg-success:hover,
+    .badge-documento.bg-success:hover * {
+        background-color: var(--bs-success, #28a745) !important;
+        color: #fff !important;
+        border-color: var(--bs-success, #28a745) !important;
+    }
+    /* Hover para badges com bg-opacity-10 */
+    .badge-documento.bg-info.bg-opacity-10:hover,
+    .badge-documento.bg-info.bg-opacity-10:hover * {
+        background-color: var(--bs-info, #17a2b8) !important;
+        color: #fff !important;
+        border-color: var(--bs-info, #17a2b8) !important;
+    }
+    .badge-documento.bg-warning.bg-opacity-10:hover,
+    .badge-documento.bg-warning.bg-opacity-10:hover * {
+        background-color: var(--bs-warning, #ffc107) !important;
+        color: #000 !important;
+        border-color: var(--bs-warning, #ffc107) !important;
+    }
+    .badge-documento.bg-primary.bg-opacity-10:hover,
+    .badge-documento.bg-primary.bg-opacity-10:hover * {
+        background-color: var(--bs-primary, #44a2d2) !important;
+        color: #fff !important;
+        border-color: var(--bs-primary, #44a2d2) !important;
+    }
+    .badge-documento.bg-success.bg-opacity-10:hover,
+    .badge-documento.bg-success.bg-opacity-10:hover * {
+        background-color: var(--bs-success, #28a745) !important;
+        color: #fff !important;
+        border-color: var(--bs-success, #28a745) !important;
+    }
+    /* Focus para acessibilidade */
+    .badge-documento:focus,
+    .badge-documento:focus-visible {
+        outline: 2px solid var(--bs-primary, #44a2d2) !important;
+        outline-offset: 2px !important;
+        cursor: pointer !important;
+    }
+    
+    /* 19. Badge clicável - garantir legibilidade no hover */
+    .badge-clickable {
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    /* Hover para badges com bg-primary bg-opacity-10 - garantir texto branco legível */
+    .badge.bg-primary.bg-opacity-10.text-primary.badge-clickable:hover,
+    .badge.bg-primary.bg-opacity-10.text-primary.badge-clickable:hover *,
+    .badge.bg-primary.bg-opacity-10.text-primary.badge-clickable:hover i {
+        background-color: var(--bs-primary, #44a2d2) !important;
+        color: #fff !important;
+        border-color: var(--bs-primary, #44a2d2) !important;
+    }
+    /* Hover para badges com bg-success bg-opacity-10 */
+    .badge.bg-success.bg-opacity-10.text-success.badge-clickable:hover,
+    .badge.bg-success.bg-opacity-10.text-success.badge-clickable:hover *,
+    .badge.bg-success.bg-opacity-10.text-success.badge-clickable:hover i {
+        background-color: var(--bs-success, #28a745) !important;
+        color: #fff !important;
+        border-color: var(--bs-success, #28a745) !important;
+    }
+    /* Hover para badges com bg-warning bg-opacity-10 */
+    .badge.bg-warning.bg-opacity-10.text-warning-emphasis.badge-clickable:hover,
+    .badge.bg-warning.bg-opacity-10.text-warning-emphasis.badge-clickable:hover *,
+    .badge.bg-warning.bg-opacity-10.text-warning-emphasis.badge-clickable:hover i {
+        background-color: var(--bs-warning, #ffc107) !important;
+        color: #000 !important;
+        border-color: var(--bs-warning, #ffc107) !important;
+    }
+    /* Focus para badges clicáveis */
+    .badge-clickable:focus,
+    .badge-clickable:focus-visible {
+        outline: 2px solid var(--bs-primary, #44a2d2) !important;
+        outline-offset: 2px !important;
+    }
+</style>
 
-<dtml-let isAnon="portal_membership.isAnonymousUser()">
-   <dtml-if expr="isAnon and sapl_documentos.props_sagl.recaptcha_key">
-      <script src='https://www.google.com/recaptcha/api.js?hl=pt-BR' async defer></script>
-   </dtml-if>
-</dtml-let>
+<!-- Skip Links para Acessibilidade -->
+<a href="#form-pesquisa" class="skip-link">Pular para filtros de pesquisa</a>
+<a href="#container-principal-resultados" class="skip-link">Pular para resultados</a>
 
-<div class="row mb-3">
-  <div class="col-12 col-md-6 d-flex align-items-center">
-    <h1 class="firstHeading font-size-18 mb-0">Pesquisa de Processos Administrativos</h1>
+<div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1055;">
+    <div class="toast" id="filter-cleared-toast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header">
+            <i class="fa fa-info-circle text-info me-2"></i>
+            <strong class="me-auto">Informação</strong>
+            <small>Agora</small>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Fechar"></button>
+        </div>
+        <div class="toast-body">
+            Filtros limpos com sucesso!
+        </div>
+    </div>
+</div>
+
+<div class="row mb-2">
+  <div class="col-12 col-md-8 align-self-center">
+    <h1 class="firstHeading font-size-18">Pesquisa de Processos Administrativos</h1>
   </div>
-  <div class="col-12 col-md-6 text-start text-md-end">
-    <div class="btn-group btn-group-sm flex-wrap">
-      <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Modulo Administrativo', 'Operador Materia'])">
+  <div class="col-12 col-md-4 text-start text-md-end">
+    <div class="btn-group flex-wrap">
+      <dtml-if expr="REQUEST['AUTHENTICATED_USER'].has_role(['Operador', 'Operador Modulo Administrativo', 'Operador Materia'])">
         <a class="btn btn-primary d-print-none" href="<dtml-var portal_url>/cadastros/documento_administrativo/documento_administrativo_form"><i class="fas fa-plus me-1"></i>Incluir Processo</a>
-        <a class="btn btn-outline-secondary d-print-none" href="<dtml-var portal_url>/cadastros/documento_administrativo/numero_reservar_form"><i class="fas fa-list-ol me-1"></i>Reservar</a>
-      <dtml-elif expr="AUTHENTICATED_USER.has_role(['Authenticated'])">
-        <dtml-if expr="zsql.usuario_tipo_documento_obter_zsql(cod_usuario=cod_usuario_corrente, ind_excluido=0)">
-          <a class="btn btn-primary d-print-none" href="<dtml-var portal_url>/cadastros/documento_administrativo/documento_administrativo_form"><i class="fas fa-plus me-1"></i>Incluir Processo</a>
-        </dtml-if>
+        <a class="btn btn-secondary d-print-none" href="<dtml-var portal_url>/cadastros/documento_administrativo/numero_reservar_form"><i class="fas fa-list-ol me-1"></i>Reservar</a>
+      <dtml-elif expr="REQUEST['AUTHENTICATED_USER'].has_role(['Authenticated'])">
+        <dtml-in expr="zsql.usuario_obter_zsql(col_username=REQUEST['AUTHENTICATED_USER'].getUserName())">
+          <dtml-if expr="_.has_key('cod_usuario') and _.get('cod_usuario')">
+            <dtml-in expr="zsql.usuario_tipo_documento_obter_zsql(cod_usuario=int(_.get('cod_usuario')), ind_excluido=0)">
+              <a class="btn btn-primary d-print-none" href="<dtml-var portal_url>/cadastros/documento_administrativo/documento_administrativo_form"><i class="fas fa-plus me-1"></i>Incluir Processo</a>
+            </dtml-in>
+          </dtml-if>
+        </dtml-in>
       </dtml-if>
     </div>
   </div>
 </div>
 
-<ul class="nav nav-tabs" role="tablist">
-  <li class="nav-item">
-    <a class="nav-link active" id="pesquisa-tab" data-bs-toggle="tab" href="#pesquisa" role="tab" aria-controls="pesquisa" aria-selected="true"><i class="fas fa-search me-1"></i>Formulário de Pesquisa</a>
-  </li>
-</ul>
-
-<div class="tab-content" style="margin-top: -1px">
-  <div class="tab-pane p-3 border fade show active" id="pesquisa">
-
-<form id="pesq_basica_form" name="pesq_basica_form" action="documento_administrativo_pesquisar_proc">
-  <div class="card mb-3">
-    <div class="card-body">
-      <div class="row g-3">
-        <div class="col-12 col-md-6">
-          <label class="form-label" for="lst_tip_documento"><i class="fas fa-filter me-1"></i>Tipo de Processo</label>
-          <select class="select2 form-select" id="lst_tip_documento" name="lst_tip_documento" multiple="multiple" style="width: 100%; min-height:34px !important;" data-placeholder="Todos">
-            <dtml-in expr="permissao_tipo()" mapping>
-              <option value="<dtml-var tip_documento>"><dtml-var des_tipo_documento></option>
-            <dtml-else>
-              <dtml-call expr="REQUEST.set('nenhum_tipo_publico', '1')">
-            </dtml-in>
-          </select>
-        </div>
-        <div class="col-6 col-md-3">
-          <label class="form-label" for="txt_num_documento"><i class="fas fa-hashtag me-1"></i>Número</label>
-          <input name="txt_num_documento" id="txt_num_documento" type="number" min="1" maxlength="6" class="form-control number" autocomplete="off">
-        </div>
-        <div class="col-6 col-md-3">
-          <label class="form-label" for="txt_ano_documento"><i class="fas fa-calendar-alt me-1"></i>Ano</label>
-          <input name="txt_ano_documento" id="txt_ano_documento" type="number" min="1900" maxlength="4" class="form-control year" autocomplete="off">
-        </div>
-        <div class="col-6 col-md-3">
-          <label class="form-label" for="txt_num_protocolo"><i class="fas fa-file-alt me-1"></i>Protocolo</label>
-          <input id="txt_num_protocolo" name="txt_num_protocolo" min="1" type="number" maxlength="8" class="form-control number" autocomplete="off">
-        </div>
-        <div class="col-6 col-md-3">
-          <label class="form-label" for="txt_npc"><i class="fas fa-file-invoice me-1"></i>Processo</label>
-          <input id="txt_npc" name="txt_npc" min="1" type="number" maxlength="6" class="form-control number" autocomplete="off">
-        </div>
-        <div class="col-6 col-md-3">
-          <label class="form-label" for="dt_apres1"><i class="fas fa-calendar me-1"></i>Data Inicial</label>
-          <div class="input-group">
-            <input type="text" class="form-control datepicker" placeholder="dd/mm/aaaa" name="dt_apres1" id="dt_apres1" data-provide="datepicker" data-date-autoclose="true" autocomplete="off">
-            <span class="input-group-text"><i class="fas fa-calendar"></i></span>
-          </div>
-        </div>
-        <div class="col-6 col-md-3">
-          <label class="form-label" for="dt_apres2"><i class="fas fa-calendar-day me-1"></i>Data Final</label>
-          <div class="input-group">
-            <input type="text" class="form-control datepicker" placeholder="dd/mm/aaaa" name="dt_apres2" id="dt_apres2" data-provide="datepicker" data-date-autoclose="true" autocomplete="off">
-            <span class="input-group-text"><i class="fas fa-calendar"></i></span>
-          </div>
-        </div>
-        <div class="col-12 col-md-6">
-          <label class="form-label" for="txa_txt_interessado"><i class="fas fa-user me-1"></i>Interessado</label>
-          <input type="text" class="form-control" name="txa_txt_interessado" id="txa_txt_interessado"/>
-        </div>
-        <div class="col-12 col-md-6">
-          <label class="form-label" for="txa_txt_assunto"><i class="fas fa-search me-1"></i>Termos da Pesquisa</label>
-          <input type="text" class="form-control" name="txa_txt_assunto" id="txa_txt_assunto" maxlenght="50" autocomplete="off" data-bs-toggle="popover" data-bs-placement="top" title="Dicas de Preenchimento" data-bs-trigger="focus" data-bs-content="A frase colocada entre aspas duplas pesquisa por registros com a frase exata. Um asterisco (*) é um operador de truncamento que pode ser inserido ao fim de uma palavra. Um sinal de mais (+) precedente indica que a palavra deve estar presente no texto. Um sinal de menos (-) precedente indica que a palavra não deve estar presente em qualquer parte do texto." />
-        </div>
-        <div class="col-12 col-md-4">
-          <label class="form-label" for="lst_tramitou"><i class="fas fa-route me-1"></i>Tramitou por</label>
-          <select class="form-select" id="lst_tramitou" name="lst_tramitou">
-            <option value=""></option>
-            <dtml-in expr="zsql.unidade_tramitacao_obter_zsql(ind_adm=1)">
-              <option value="<dtml-var cod_unid_tramitacao missing>">
-                <dtml-var nom_unidade_join>
-              </option>
-            </dtml-in>
-          </select>
-        </div>
-        <div class="col-12 col-md-4">
-          <label class="form-label" for="lst_localizacao"><i class="fas fa-map-marker-alt me-1"></i>Localização Atual</label>
-          <select class="form-select" id="lst_localizacao" name="lst_localizacao" data-size="6">
-            <option value="">Todas</option>
-            <dtml-in expr="zsql.unidade_tramitacao_obter_zsql(ind_adm=1)">
-              <option value="<dtml-var cod_unid_tramitacao missing>">
-                <dtml-var nom_unidade_join>
-              </option>
-            </dtml-in>
-          </select>
-        </div>
-        <div class="col-12 col-md-4">
-          <label class="form-label" for="lst_status"><i class="fas fa-info-circle me-1"></i>Situação Atual</label>
-          <select class="form-select" id="lst_status" name="lst_status" data-size="6">
-            <option value="">Todas</option>
-            <dtml-in expr="zsql.status_tramitacao_administrativo_obter_zsql(ind_excluido=0)">
-              <option value="<dtml-var cod_status missing>">
-                <dtml-var sgl_status> - <dtml-var des_status>
-              </option>
-            </dtml-in>
-          </select>
-        </div>
-        <div class="col-12 col-md-4">
-          <label class="form-label" for="lst_assunto"><i class="fas fa-tags me-1"></i>Classificação</label>
-          <select class="form-select" id="lst_assunto" name="lst_assunto">
-            <option value="">Todos</option>
-            <dtml-in expr="zsql.tipo_peticionamento_obter_zsql(ind_doc_adm=1, ind_excluido=0)">
-              <option value="<dtml-var tip_peticionamento missing>">
-                <dtml-var des_tipo_peticionamento>
-              </option>
-            </dtml-in>
-          </select>
-        </div>
-        <div class="col-6 col-md-4">
-          <label class="form-label" for="rad_tramitando">Em Tramitação?</label>
-          <select class="form-select" id="rad_tramitando" name="rad_tramitando">
-            <dtml-in expr="[('Não', '0'), ('Sim', '1'), ('Tanto faz', '')]">      
-              <option value="<dtml-var expr="_['sequence-item']">" <dtml-if expr="_['sequence-item']==''">selected</dtml-if>><dtml-var expr="_['sequence-key']"></option>
-            </dtml-in>
-          </select>
-        </div>
-        <div class="col-6 col-md-4">
-          <label class="form-label" for="rd_ordenacao">Ordenação</label>
-          <select class="form-select" id="rd_ordenacao" name="rd_ordenacao">
-            <dtml-in expr="[('Descendente', '1'), ('Ascendente', '2')]">      
-              <option value="<dtml-var expr="_['sequence-item']">" <dtml-if expr="_['sequence-item']==''">selected</dtml-if>><dtml-var expr="_['sequence-key']"></option>
-            </dtml-in>
-          </select>
-        </div>
-        <div class="col-12">
-          <dtml-let isAnon="portal_membership.isAnonymousUser()">
-            <dtml-if expr="isAnon and sapl_documentos.props_sagl.recaptcha_key">
-              <div class="g-recaptcha mb-3" data-sitekey="<dtml-var "sapl_documentos.props_sagl.recaptcha_key">"></div>
-            </dtml-if>
-          </dtml-let>
-          <div class="d-flex gap-2">
-            <dtml-if nenhum_tipo_publico>
-              <button type="button" id="search-btn" class="btn btn-primary disabled" onClick="return documento_criticar()"><i class="fas fa-search me-1"></i>Pesquisar</button>
-            <dtml-else>
-              <button type="button" id="search-btn" class="btn btn-primary" onClick="return documento_criticar()"><i class="fas fa-search me-1"></i>Pesquisar</button>
-            </dtml-if>
-            <button type="reset" class="btn btn-outline-secondary"><i class="fas fa-eraser me-1"></i>Limpar</button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-  <input type="hidden" name="existe_ocorrencia" value="0" />
-</form>
-
+<div class="d-grid gap-2 mb-3">
+    <button class="btn btn-outline-primary" type="button" id="btn-toggle-filtros" data-bs-toggle="collapse" data-bs-target="#filtro-container" aria-expanded="false">
+        <i class="fa fa-filter me-2"></i> Mostrar / Editar Filtros
+    </button>
 </div>
+
+<main id="main-content">
+<form method="get" action="&dtml-URL0;/documentos_administrativos_json" id="form-pesquisa" role="search" aria-label="Formulário de pesquisa de processos administrativos">
+    <input type="hidden" name="pagina" value="1" id="pagina">
+    <input type="hidden" name="itens_por_pagina" value="12" id="itens_por_pagina">
+
+    <div class="collapse show" id="filtro-container">
+        <div class="card mb-4">
+            <div class="card-header bg-white border-bottom">
+                <h5 class="mb-0 fw-semibold">
+                    <i class="fas fa-filter text-primary me-2"></i>Filtros Básicos
+                </h5>
+            </div>
+            <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label for="lst_tip_documento" class="form-label form-label-sm mb-1 fw-semibold">
+                        <i class="fas fa-file-alt text-muted me-1"></i>Tipo de Processo:
+                    </label>
+                    <select name="lst_tip_documento" id="lst_tip_documento" class="form-select" multiple 
+                       placeholder="Selecione um ou mais tipos...">
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="txt_num_documento" class="form-label form-label-sm mb-1 fw-semibold">
+                        <i class="fas fa-hashtag text-muted me-1"></i>Número:
+                    </label>
+                    <input type="text" name="txt_num_documento" id="txt_num_documento" 
+                           class="form-control" placeholder="Ex: 123" inputmode="numeric" pattern="[0-9]*"
+                           aria-describedby="txt_num_documento_feedback">
+                    <div id="txt_num_documento_feedback" class="invalid-feedback d-none"></div>
+                </div>
+                <div class="col-md-3">
+                    <label for="txt_ano_documento" class="form-label form-label-sm mb-1 fw-semibold">
+                        <i class="fas fa-calendar text-muted me-1"></i>Ano:
+                    </label>
+                    <input type="text" name="txt_ano_documento" id="txt_ano_documento" 
+                           class="form-control" placeholder="Ex: 2025" inputmode="numeric" pattern="[0-9]*" maxlength="4"
+                           aria-describedby="txt_ano_documento_feedback">
+                    <div id="txt_ano_documento_feedback" class="invalid-feedback d-none"></div>
+                </div>
+            </div>
+            <div class="row g-3 mt-0">
+                <div class="col-md-6">
+                    <label for="txa_txt_interessado" class="form-label form-label-sm mb-1 fw-semibold">
+                        <i class="fas fa-user text-muted me-1"></i>Interessado:
+                    </label>
+                    <input type="text" name="txa_txt_interessado" id="txa_txt_interessado" 
+                           class="form-control" placeholder="Digite o nome do interessado...">
+                </div>
+                <div class="col-md-6">
+                    <label for="txa_txt_assunto" class="form-label form-label-sm mb-1 fw-semibold">
+                        <i class="fas fa-search text-muted me-1"></i>Termos da Pesquisa:
+                    </label>
+                    <input type="text" name="txa_txt_assunto" id="txa_txt_assunto" 
+                           class="form-control" placeholder="Digite palavras-chave para buscar...">
+                </div>
+            </div>
+
+            </div>
+        </div>
+
+        <div class="row mt-3">
+            <div class="col-12">
+                <button type="button" 
+                        class="btn btn-link py-2 text-decoration-none d-flex align-items-center" 
+                        data-bs-toggle="collapse" 
+                        data-bs-target="#advancedSearch" 
+                        aria-expanded="false" 
+                        aria-controls="advancedSearch"
+                        aria-label="Expandir filtros avançados">
+                    <i class="fas fa-chevron-right filter-toggle-icon me-2"></i>
+                    <span class="fw-semibold">Filtros Avançados</span>
+                    <span id="badge-filtros" 
+                          class="badge bg-secondary ms-2"
+                          data-bs-toggle="tooltip" 
+                          data-bs-placement="top" 
+                          title="Nenhum filtro ativo"
+                          aria-label="Filtros ativos">
+                        0
+                    </span>
+                </button>
+            </div>
+        </div>
+
+        <div id="advancedSearch" class="collapse">
+            <div class="card mt-3 border-0 shadow-sm">
+                <div class="card-header bg-white border-bottom">
+                    <h5 class="mb-0 fw-semibold">
+                        <i class="fas fa-sliders-h text-primary me-2"></i>Filtros Avançados
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <!-- Seção: Identificação -->
+                    <div class="mb-4">
+                        <h6 class="text-muted text-uppercase small mb-3 fw-semibold border-bottom pb-2">
+                            <i class="fas fa-hashtag me-2"></i>Identificação
+                        </h6>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label for="txt_num_protocolo" class="form-label form-label-sm mb-1 fw-semibold">
+                                    <i class="fas fa-file-alt text-muted me-1"></i>Número do Protocolo
+                                </label>
+                                <input type="text" 
+                                       name="txt_num_protocolo" 
+                                       id="txt_num_protocolo" 
+                                       class="form-control" 
+                                       placeholder="Ex: 123"
+                                       aria-label="Número do protocolo do processo administrativo"
+                                       aria-describedby="txt_num_protocolo_help txt_num_protocolo_feedback">
+                                <small id="txt_num_protocolo_help" class="form-text text-muted">
+                                    Número do protocolo de entrada do processo no sistema
+                                </small>
+                                <div id="txt_num_protocolo_feedback" class="invalid-feedback d-none"></div>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="txt_npc" class="form-label form-label-sm mb-1 fw-semibold">
+                                    <i class="fas fa-file-invoice text-muted me-1"></i>Número do Processo (NPC)
+                                </label>
+                                <input type="text" 
+                                       name="txt_npc" 
+                                       id="txt_npc" 
+                                       class="form-control" 
+                                       placeholder="Ex: 456"
+                                       aria-label="Número do processo administrativo"
+                                       aria-describedby="txt_npc_help txt_npc_feedback">
+                                <small id="txt_npc_help" class="form-text text-muted">
+                                    Número do processo administrativo relacionado
+                                </small>
+                                <div id="txt_npc_feedback" class="invalid-feedback d-none"></div>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="rad_tramitando" class="form-label form-label-sm mb-1 fw-semibold">
+                                    <i class="fas fa-exchange-alt text-muted me-1"></i>Em Tramitação?
+                                </label>
+                                <select name="rad_tramitando" id="rad_tramitando" class="form-select">
+                                    <option value="" selected>Tanto faz</option>
+                                    <option value="1">Sim</option>
+                                    <option value="0">Não</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <hr class="my-4">
+                    
+                    <!-- Seção: Datas -->
+                    <div class="mb-4">
+                        <h6 class="text-muted text-uppercase small mb-3 fw-semibold border-bottom pb-2">
+                            <i class="fas fa-calendar-alt me-2"></i>Datas
+                        </h6>
+                        <div class="row g-3">
+                            <div class="col-md-12">
+                                <label for="daterange_input" class="form-label form-label-sm mb-1 fw-semibold">
+                                    <i class="far fa-calendar text-muted me-1"></i>Período
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-calendar"></i></span>
+                                    <input type="text" 
+                                           id="daterange_input" 
+                                           class="form-control bg-white" 
+                                           placeholder="Selecione um período..." 
+                                           aria-label="Período do processo administrativo"
+                                           aria-describedby="daterange_input_help">
+                                    <small id="daterange_input_help" class="form-text text-muted d-block mt-1">Formato: DD/MM/AAAA - DD/MM/AAAA</small>
+                                </div>
+                                <div class="btn-group btn-group-sm w-100 mt-2" role="group" id="date-presets">
+                                    <button type="button" class="btn btn-outline-secondary btn-sm" data-preset="hoje">Hoje</button>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm" data-preset="semana">7 dias</button>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm" data-preset="mes_atual">Este Mês</button>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm" data-preset="mes_passado">Mês Passado</button>
+                                </div>
+                                <input type="hidden" name="dt_apres1" id="dt_apres1_hidden">
+                                <input type="hidden" name="dt_apres2" id="dt_apres2_hidden">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <hr class="my-4">
+                    
+                    <!-- Seção: Tramitação -->
+                    <div class="mb-4">
+                        <h6 class="text-muted text-uppercase small mb-3 fw-semibold border-bottom pb-2">
+                            <i class="fas fa-sitemap me-2"></i>Tramitação
+                        </h6>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label for="lst_status" class="form-label form-label-sm mb-1 fw-semibold">
+                                    <i class="fas fa-info-circle text-muted me-1"></i>Situação Atual
+                                </label>
+                                <select name="lst_status" id="lst_status" 
+                                        class="form-select" 
+                                        placeholder="Selecione uma situação..."
+                                        data-bs-toggle="tooltip" 
+                                        data-bs-placement="top" 
+                                        title="Filtrar por situação atual da tramitação">
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="lst_localizacao" class="form-label form-label-sm mb-1 fw-semibold">
+                                    <i class="fas fa-map-marker-alt text-muted me-1"></i>Localização Atual
+                                </label>
+                                <select name="lst_localizacao" id="lst_localizacao" 
+                                        class="form-select" 
+                                        placeholder="Selecione uma unidade..."
+                                        data-bs-toggle="tooltip" 
+                                        data-bs-placement="top" 
+                                        title="Filtrar por unidade onde o processo está atualmente">
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="lst_tramitou" class="form-label form-label-sm mb-1 fw-semibold">
+                                    <i class="fas fa-route text-muted me-1"></i>Tramitou Em
+                                </label>
+                                <select name="lst_tramitou" id="lst_tramitou" 
+                                        class="form-select" 
+                                        placeholder="Selecione onde tramitou..."
+                                        data-bs-toggle="tooltip" 
+                                        data-bs-placement="top" 
+                                        title="Filtrar por unidades onde o processo já tramitou">
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <hr class="my-4">
+                    
+                    <!-- Seção: Classificação -->
+                    <div class="mb-3">
+                        <h6 class="text-muted text-uppercase small mb-3 fw-semibold border-bottom pb-2">
+                            <i class="fas fa-tags me-2"></i>Classificação
+                        </h6>
+                        <div class="row g-3">
+                            <div class="col-md-12">
+                                <label for="lst_assunto" class="form-label form-label-sm mb-1 fw-semibold">
+                                    <i class="fas fa-tag text-muted me-1"></i>Assunto / Classificação
+                                </label>
+                                <select name="lst_assunto" id="lst_assunto" class="form-select" placeholder="Selecione um assunto..." aria-label="Selecione um assunto"></select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4 align-items-center">
+            <div class="col-md-6">
+                <label class="form-label mb-2 fw-semibold">
+                    <i class="fas fa-sort text-muted me-1"></i>Ordenação Padrão:
+                </label>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="rd_ordenacao" id="rd_ordenacao_1" value="1" checked>
+                    <label class="form-check-label" for="rd_ordenacao_1">Mais Recentes Primeiro</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="rd_ordenacao" id="rd_ordenacao_2" value="2">
+                    <label class="form-check-label" for="rd_ordenacao_2">Mais Antigos Primeiro</label>
+                </div>
+            </div>
+            <div class="col-md-6 text-center text-md-end mt-3 mt-md-0">
+                <dtml-let isAnon="portal_membership.isAnonymousUser()">
+                    <dtml-if expr="isAnon and sapl_documentos.props_sagl.recaptcha_key">
+                        <div class="g-recaptcha mb-3 d-inline-block"></div>
+                    </dtml-if>
+                </dtml-let>
+                <button type="submit" 
+                        class="btn btn-primary" 
+                        id="btn-pesquisar"
+                        aria-label="Pesquisar processos administrativos">
+                    <i class="fa fa-search me-1"></i> Pesquisar
+                </button>
+                <button type="button" 
+                        class="btn btn-outline-primary ms-2 d-none" 
+                        id="btn-limpar" 
+                        aria-label="Limpar filtros de pesquisa">
+                    <i class="fa fa-times me-1"></i> Limpar
+                </button>
+            </div>
+        </div>
+    </div>
+</form>
+</main>
+
+<div id="resumo-filtros" class="mt-3" role="status" aria-live="polite"></div>
+
+<div id="container-principal-resultados" class="mt-4 d-none">
+    <ul class="nav nav-tabs" id="resultado-tabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="lista-tab" data-bs-toggle="tab" data-bs-target="#resultados-pane" type="button" role="tab" aria-controls="resultados-pane" aria-selected="true">
+                <i class="fa fa-list me-2"></i>Resultados
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="grafico-tab" data-bs-toggle="tab" data-bs-target="#grafico-pane" type="button" role="tab" aria-controls="grafico-pane" aria-selected="false">
+                <i class="fa fa-chart-bar me-2"></i>Resumo por Tipo
+            </button>
+        </li>
+    </ul>
+    <div class="tab-content" id="resultado-tabs-content">
+        <div class="tab-pane fade show active" id="resultados-pane" role="tabpanel" aria-labelledby="lista-tab">
+            <div id="resultados" class="pt-3" aria-live="polite"></div>
+        </div>
+        <div class="tab-pane fade" id="grafico-pane" role="tabpanel" aria-labelledby="grafico-tab">
+            <div id="resumo-estatistico" class="p-3">
+                <div class="d-flex justify-content-end mb-2">
+                    <div class="btn-group" role="group" aria-label="Tipo de gráfico">
+                        <button type="button" class="btn btn-sm btn-outline-primary active" id="btn-grafico-barra-tipo" data-tipo="bar">
+                            <i class="fa fa-chart-bar me-1"></i>Barra
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-primary" id="btn-grafico-pizza-tipo" data-tipo="pie">
+                            <i class="fa fa-chart-pie me-1"></i>Pizza
+                        </button>
+                    </div>
+                </div>
+                <div class="canvas-container">
+                    <canvas id="stats-chart" aria-label="Gráfico de resumo estatístico dos processos administrativos"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="painel-sem-resultados" class="mt-4"></div>
+
+<div class="modal fade" id="modalDocumentos" tabindex="-1" aria-labelledby="modalDocumentosLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalDocumentosLabel">Documentos</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body" id="modalDocumentosBody">
+                <!-- Conteúdo carregado via AJAX -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
 </div>
 
 <dtml-var js_slot>
+
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/pt.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
+
 <script>
-
-(function ($) {
-  $(function () {
-    document.onkeypress = function (event) {
-      var form = pesq_basica_form;
-      if (event.keyCode === 13) {
-        form.submit();
-      }
-    };
-  });
-}(jQuery));
-
-  $(document).ready(function() {
-    var clicked = false;
-    $("#search-btn").on("click", function(event) {
-      if (clicked) {
-        event.preventDefault();
-        return;
-      }
-      clicked = true;
-      var $this = $(this);
-      $this.html("Pesquisando...")
-      $this.addClass('disabled');
-      setTimeout(function() {
-        clicked = false;
-        $this.html("Pesquisar")
-        $this.removeClass('disabled');
-      }, 3000);
+document.addEventListener('DOMContentLoaded', function () {
+    const form = document.getElementById('form-pesquisa');
+    const pesquisarBtn = document.getElementById('btn-pesquisar');
+    const limparBtn = document.getElementById('btn-limpar');
+    const resultadosDiv = document.getElementById('resultados');
+    const painelSemResultados = document.getElementById('painel-sem-resultados');
+    const containerPrincipal = document.getElementById('container-principal-resultados');
+    const resumoFiltrosDiv = document.getElementById('resumo-filtros');
+    const badgeFiltros = document.getElementById('badge-filtros');
+    const btnToggleFiltros = document.getElementById('btn-toggle-filtros');
+    const filterClearedToastEl = document.getElementById('filter-cleared-toast');
+    let filterClearedToast = null;
+    const apiCache = new Map();
+    
+    // Bootstrap Collapse para filtros
+    let bsCollapseFiltros = null;
+    let bsCollapseAdvancedSearch = null;
+    if (document.getElementById('filtro-container')) {
+        bsCollapseFiltros = new bootstrap.Collapse(document.getElementById('filtro-container'), { toggle: false });
+    }
+    const advancedSearchDiv = document.getElementById('advancedSearch');
+    if (advancedSearchDiv) {
+        bsCollapseAdvancedSearch = new bootstrap.Collapse(advancedSearchDiv, { toggle: false });
+    }
+    
+    // Event listeners para collapse de filtros avançados
+    if (advancedSearchDiv) {
+        advancedSearchDiv.addEventListener('show.bs.collapse', function() {
+            const icon = document.querySelector('[data-bs-target="#advancedSearch"] .filter-toggle-icon');
+            if (icon) icon.classList.add('expanded');
+        });
+        advancedSearchDiv.addEventListener('hide.bs.collapse', function() {
+            const icon = document.querySelector('[data-bs-target="#advancedSearch"] .filter-toggle-icon');
+            if (icon) icon.classList.remove('expanded');
+        });
+    }
+    
+    // Date Range Picker
+    const daterangePicker = flatpickr('#daterange_input', {
+        mode: 'range',
+        dateFormat: "d/m/Y",
+        locale: 'pt',
+        onClose: function(selectedDates) {
+            const dataInicioHidden = document.getElementById('dt_apres1_hidden');
+            const dataFimHidden = document.getElementById('dt_apres2_hidden');
+            if (selectedDates.length === 2) {
+                dataInicioHidden.value = flatpickr.formatDate(selectedDates[0], "d/m/Y");
+                dataFimHidden.value = flatpickr.formatDate(selectedDates[1], "d/m/Y");
+            } else {
+                dataInicioHidden.value = '';
+                dataFimHidden.value = '';
+            }
+            dataInicioHidden.dispatchEvent(new Event('change'));
+        }
     });
-  });
+    
+    // Função para presets de data
+    function handleDatePreset(btn) {
+        const preset = btn.dataset.preset;
+        if (!preset) return;
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        let startDate, endDate;
+        switch (preset) {
+            case 'hoje':
+                startDate = today;
+                endDate = today;
+                break;
+            case 'semana':
+                endDate = new Date(today);
+                startDate = new Date(today);
+                startDate.setDate(today.getDate() - 6);
+                break;
+            case 'mes_atual':
+                startDate = new Date(today.getFullYear(), today.getMonth(), 1);
+                endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+                break;
+            case 'mes_passado':
+                const prevMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+                startDate = new Date(prevMonth.getFullYear(), prevMonth.getMonth(), 1);
+                endDate = new Date(prevMonth.getFullYear(), prevMonth.getMonth() + 1, 0);
+                break;
+        }
+        if (startDate && endDate) {
+            daterangePicker.setDate([startDate, endDate], true);
+            const onCloseCallback = daterangePicker.config.onClose;
+            if (onCloseCallback) {
+                onCloseCallback(daterangePicker.selectedDates, '', daterangePicker);
+            }
+        }
+    }
+    
+    // Event listeners para presets de data
+    document.querySelectorAll('[data-preset]').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            handleDatePreset(this);
+        });
+    });
 
-function documento_criticar(form){  
+    // Carregar tipos de documento
+    async function carregarTiposDocumento() {
+        const selectElement = document.getElementById('lst_tip_documento');
+        if (!selectElement) {
+            console.error("Elemento lst_tip_documento não encontrado");
+            return;
+        }
+        
+        // Verificar se já existe uma instância do TomSelect
+        let tomselect = selectElement.tomselect;
+        if (!tomselect) {
+            tomselect = new TomSelect(selectElement, {
+                plugins: ['remove_button'],
+                placeholder: 'Carregando tipos...',
+                maxItems: null
+            });
+        }
+        
+        tomselect.disable();
+        try {
+            const endpointUrl = 'tipos_documento_administrativo_json';
+            const response = await fetch(endpointUrl);
+            
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`Erro ao buscar tipos: ${response.status} - ${errorText.substring(0, 200)}`);
+            }
+            
+            const data = await response.json();
+            
+            if (!Array.isArray(data)) {
+                tomselect.settings.placeholder = 'Erro: resposta inválida';
+                tomselect.enable();
+                return;
+            }
+            
+            if (data.length === 0) {
+                tomselect.settings.placeholder = 'Nenhum tipo disponível';
+                tomselect.enable();
+                return;
+            }
+            
+            // Limpar opções existentes
+            tomselect.clear();
+            tomselect.clearOptions();
+            
+            // Converter dados para o formato esperado pelo TomSelect
+            const opcoesFormatadas = data.map(item => {
+                if (item && item.id && item.text) {
+                    return {
+                        value: String(item.id),
+                        text: String(item.text)
+                    };
+                }
+                return null;
+            }).filter(item => item !== null);
+            
+            // Usar load para carregar todas as opções de uma vez
+            tomselect.clearOptions();
+            tomselect.addOptions(opcoesFormatadas, true); // true = silencioso (não dispara eventos)
+            
+            // Habilitar e atualizar
+            tomselect.enable();
+            tomselect.settings.placeholder = 'Selecione um ou mais tipos...';
+            
+            // Forçar atualização visual
+            tomselect.refreshOptions(false);
+        } catch (error) {
+            console.error("Erro ao carregar tipos:", error);
+            tomselect.settings.placeholder = 'Erro ao carregar tipos';
+            tomselect.enable();
+        }
+    }
 
-  var form = document.pesq_basica_form;
+    // Carregar selects simples
+    async function carregarSelectSimples(endpoint, selector, placeholder) {
+        const selectElement = document.querySelector(selector);
+        if (!selectElement) {
+            console.error(`Elemento ${selector} não encontrado`);
+            return;
+        }
+        
+        // Verificar se já existe uma instância do TomSelect
+        let tomselect = selectElement.tomselect;
+        if (!tomselect) {
+            tomselect = new TomSelect(selectElement, {
+                plugins: ['clear_button'],
+                placeholder: 'Carregando...'
+            });
+        } else {
+        }
+        
+        tomselect.disable();
+        try {
+            // Usar nome do endpoint diretamente (Grok resolve automaticamente)
+            const endpointUrl = endpoint.startsWith('http') ? endpoint : endpoint;
+            const response = await fetch(endpointUrl);
+            
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error(`Erro HTTP ${response.status}: ${response.statusText}`);
+                throw new Error(`Erro HTTP ${response.status}: ${response.statusText}`);
+            }
+            
+            const data = await response.json();
+            
+            if (!Array.isArray(data)) {
+                console.error(`Resposta de ${endpoint} não é um array:`, data);
+                tomselect.settings.placeholder = 'Erro: resposta inválida';
+                tomselect.enable();
+                return;
+            }
+            
+            if (data.length === 0) {
+                tomselect.settings.placeholder = 'Nenhum dado disponível';
+                tomselect.enable();
+                return;
+            }
+            
+            
+            // Limpar opções existentes
+            tomselect.clear();
+            tomselect.clearOptions();
+            
+            // Converter dados para o formato esperado pelo TomSelect
+            const opcoesFormatadas = data.map(item => {
+                if (item && (item.id || item.value) && (item.text || item.descricao || item.label)) {
+                    return {
+                        value: String(item.id || item.value),
+                        text: String(item.text || item.descricao || item.label)
+                    };
+                }
+                return null;
+            }).filter(item => item !== null);
+            
+            
+            // Usar addOptions para carregar todas as opções de uma vez
+            tomselect.clearOptions();
+            tomselect.addOptions(opcoesFormatadas, true); // true = silencioso (não dispara eventos)
+            
+            // Habilitar e atualizar
+            tomselect.enable();
+            tomselect.settings.placeholder = placeholder;
+            
+            // Forçar atualização visual
+            tomselect.refreshOptions(false);
+            tomselect.sync();
+            
+        } catch (error) {
+            console.error(`Erro ao carregar ${endpoint}:`, error);
+            tomselect.settings.placeholder = `Erro ao carregar`;
+            tomselect.enable();
+            tomselect.sync();
+        }
+    }
 
-  if (form.dt_apres1.value != "" && !IsValidDate(form.dt_apres1.value)) {
-    bootstrap.showModal({title: "Mensagem do Sistema", body: "Digite uma data inicial válida!"});
-    return false;
-  } 
+    // Variáveis globais para gráficos
+    let statsChartInstance = null;
+    let tipoGraficoTipo = 'bar';
+    let statsCarregadas = false;
+    let carregandoEstatisticas = false;
+    let graficoEventListenersAdicionados = false;
 
-  if (form.dt_apres2.value != "" && !IsValidDate(form.dt_apres2.value)) {
-    bootstrap.showModal({title: "Mensagem do Sistema", body: "Digite uma data final válida!"});
-    return false;
-  } 
+    // Variável para modo de visualização (table ou cards)
+    let currentViewMode = localStorage.getItem('documento_administrativo_view_mode') || 'table';
+    let ultimosDados = null; // Armazenar últimos dados para alternar visualização
 
-  form.submit();
-}
+    // Função para sanitizar HTML
+    function sanitizeHTML(str) {
+        if (!str) return '';
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+    }
+
+    // Função para destacar termos de busca
+    function highlightText(text, termos) {
+        if (!termos || !text) return text;
+        const termosArray = termos.toLowerCase().split(/\s+/).filter(t => t.length > 2);
+        let highlighted = text;
+        termosArray.forEach(termo => {
+            const regex = new RegExp(`(${termo})`, 'gi');
+            highlighted = highlighted.replace(regex, '<mark>$1</mark>');
+        });
+        return highlighted;
+    }
+
+    // Função para aplicar modo de visualização
+    function applyViewMode(mode) {
+        currentViewMode = mode;
+        localStorage.setItem('documento_administrativo_view_mode', mode);
+        
+        // Atualizar botões (se existirem)
+        const btnTable = document.getElementById('btn-view-table');
+        const btnCards = document.getElementById('btn-view-cards');
+        if (btnTable) btnTable.classList.toggle('active', mode === 'table');
+        if (btnCards) btnCards.classList.toggle('active', mode === 'cards');
+        
+        // Re-renderizar resultados se houver dados
+        if (ultimosDados) {
+            renderizarResultados(ultimosDados);
+        }
+    }
+
+    // Função para renderizar tabela
+    function renderTableView(data, termosBusca) {
+        let html = '<div class="table-responsive mb-3"><table class="table table-hover table-sm align-middle">';
+        html += '<thead class="table-light"><tr>';
+        html += '<th class="text-center" style="width: 50px;">Status</th>';
+        html += '<th>Tipo</th>';
+        html += '<th>Número/Ano</th>';
+        html += '<th>Assunto/Interessado</th>';
+        html += '<th class="d-none d-md-table-cell">Data</th>';
+        html += '<th class="d-none d-sm-table-cell">Localização</th>';
+        html += '<th>Ações</th>';
+        html += '</tr></thead><tbody>';
+        
+        data.dados.forEach(doc => {
+            const assuntoDestacado = highlightText(sanitizeHTML(doc.txt_assunto || ''), termosBusca);
+            const interessadoDestacado = highlightText(sanitizeHTML(doc.txt_interessado || ''), termosBusca);
+            
+            let botoesDocumentos = '';
+            if (doc.url_pasta_digital) {
+                botoesDocumentos += `<a href="${doc.url_pasta_digital}" class="badge bg-warning bg-opacity-10 text-warning-emphasis border border-warning border-opacity-25 badge-clickable text-decoration-none me-1 mb-1 d-inline-block" target="_blank" title="Pasta Digital" data-bs-toggle="tooltip"><i class="far fa-folder-open me-1"></i>Pasta Digital</a>`;
+            }
+            if (doc.url_texto_integral) {
+                botoesDocumentos += `<a href="${doc.url_texto_integral}" class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 badge-clickable text-decoration-none me-1 mb-1 d-inline-block" target="_blank" title="Texto Integral" data-bs-toggle="tooltip"><i class="far fa-file-pdf me-1"></i>Texto Integral</a>`;
+            }
+            
+            html += `
+                <tr>
+                    <td class="text-center">
+                        ${doc.ind_tramitacao == 1 ? 
+                            '<span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25" data-bs-toggle="tooltip" title="Em Tramitação"><i class="fa fa-check-circle"></i></span>' : 
+                            '<span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25" data-bs-toggle="tooltip" title="Arquivado"><i class="fa fa-archive"></i></span>'
+                        }
+                    </td>
+                    <td class="text-body">${sanitizeHTML(doc.des_tipo_documento || '')}</td>
+                    <td class="text-body">
+                        <strong>${sanitizeHTML(doc.num_documento || '')}/${sanitizeHTML(doc.ano_documento || '')}</strong>
+                    </td>
+                    <td>
+                        <div class="text-truncate" style="max-width: 300px;" data-bs-toggle="tooltip" title="${sanitizeHTML((doc.txt_assunto || '') + (doc.txt_interessado ? ' - ' + doc.txt_interessado : ''))}">
+                            ${assuntoDestacado || interessadoDestacado || '<em class="text-secondary">Sem informação</em>'}
+                        </div>
+                    </td>
+                    <td class="d-none d-md-table-cell text-body">${sanitizeHTML(doc.dat_documento || '')}</td>
+                    <td class="d-none d-sm-table-cell text-body">${doc.localizacao_atual ? sanitizeHTML(doc.localizacao_atual) : '<em class="text-secondary">-</em>'}</td>
+                    <td>
+                        <div class="d-flex flex-wrap gap-1">
+                            ${botoesDocumentos}
+                            ${doc.qtd_documentos_acessorios > 0 ? `<span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 badge-documento badge-clickable mb-1" data-bs-toggle="tooltip" title="Clique para ver documentos acessórios" data-cod-documento="${doc.cod_documento}" data-tipo="documentos_acessorios" data-tipo-documento="${sanitizeHTML(doc.des_tipo_documento || '')}" data-sgl-tipo-documento="${sanitizeHTML(doc.sgl_tipo_documento || '')}" data-num-documento="${sanitizeHTML(doc.num_documento)}" data-ano-documento="${sanitizeHTML(doc.ano_documento)}"><i class="fa fa-file me-1"></i>Doc. (${doc.qtd_documentos_acessorios})</span>` : ''}
+                            ${doc.qtd_processos_vinculados > 0 ? `<span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25 badge-documento badge-clickable mb-1" data-bs-toggle="tooltip" title="Clique para ver processos vinculados" data-cod-documento="${doc.cod_documento}" data-tipo="processos_vinculados" data-tipo-documento="${sanitizeHTML(doc.des_tipo_documento || '')}" data-sgl-tipo-documento="${sanitizeHTML(doc.sgl_tipo_documento || '')}" data-num-documento="${sanitizeHTML(doc.num_documento)}" data-ano-documento="${sanitizeHTML(doc.ano_documento)}"><i class="fa fa-link me-1"></i>Proc. (${doc.qtd_processos_vinculados})</span>` : ''}
+                            ${doc.qtd_materias_vinculadas > 0 ? `<span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 badge-documento badge-clickable mb-1" data-bs-toggle="tooltip" title="Clique para ver matérias vinculadas" data-cod-documento="${doc.cod_documento}" data-tipo="materias_vinculadas" data-tipo-documento="${sanitizeHTML(doc.des_tipo_documento || '')}" data-sgl-tipo-documento="${sanitizeHTML(doc.sgl_tipo_documento || '')}" data-num-documento="${sanitizeHTML(doc.num_documento)}" data-ano-documento="${sanitizeHTML(doc.ano_documento)}"><i class="fa fa-gavel me-1"></i>Mat. (${doc.qtd_materias_vinculadas})</span>` : ''}
+                            <a href="${doc.url_visualizacao}" class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 badge-clickable text-decoration-none mb-1" title="Ver Processo Completo" data-bs-toggle="tooltip"><i class="fa fa-eye me-1"></i>Ver Processo</a>
+                        </div>
+                    </td>
+                </tr>`;
+        });
+        html += '</tbody></table></div>';
+        return html;
+    }
+
+    // Função para renderizar cards
+    function renderCardsView(data, termosBusca) {
+        let html = '<div class="card-view-container mb-3">';
+        data.dados.forEach(doc => {
+            const assuntoDestacado = highlightText(sanitizeHTML(doc.txt_assunto || ''), termosBusca);
+            const interessadoDestacado = highlightText(sanitizeHTML(doc.txt_interessado || ''), termosBusca);
+            
+            let botoesDocumentos = '';
+            if (doc.url_pasta_digital) {
+                botoesDocumentos += `<a href="${doc.url_pasta_digital}" class="badge bg-warning bg-opacity-10 text-warning-emphasis border border-warning border-opacity-25 badge-clickable text-decoration-none" target="_blank" title="Pasta Digital" data-bs-toggle="tooltip"><i class="far fa-folder-open me-1"></i>Pasta Digital</a>`;
+            }
+            if (doc.url_texto_integral) {
+                botoesDocumentos += `<a href="${doc.url_texto_integral}" class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 badge-clickable text-decoration-none" target="_blank" title="Texto Integral" data-bs-toggle="tooltip"><i class="far fa-file-pdf me-1"></i>Texto Integral</a>`;
+            }
+            
+            html += `
+                <div class="card card-processo mb-3 position-relative shadow-sm">
+                    ${doc.ind_tramitacao == 1 ? `<span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 shadow-sm position-absolute top-0 end-0 m-2 px-2 py-1"><i class="fa fa-check-circle me-1"></i>Em Tramitação</span>` : ''}
+                    <div class="card-header bg-light">
+                        <a href="${doc.url_visualizacao}" 
+                           class="text-decoration-none text-body fw-semibold d-block card-title-link ${doc.ind_tramitacao == 1 ? 'card-header-with-badge' : ''}"
+                           title="Ver Processo Completo"
+                           aria-label="Ver processo completo ${sanitizeHTML(doc.des_tipo_documento || '')} n° ${sanitizeHTML(doc.num_documento || '')}/${sanitizeHTML(doc.ano_documento || '')}">
+                            <i class="fas fa-file-alt text-primary me-2"></i>
+                            ${sanitizeHTML(doc.des_tipo_documento || '')} n° ${sanitizeHTML(doc.num_documento || '')}/${sanitizeHTML(doc.ano_documento || '')}
+                        </a>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-4">
+                            <div class="text-break text-body">${assuntoDestacado || interessadoDestacado || '<em class="text-secondary">Sem informação</em>'}</div>
+                        </div>
+                        ${doc.txt_interessado ? `
+                        <div class="mb-4">
+                            <i class="fas fa-user-edit text-primary me-1"></i>
+                            <span class="text-body">
+                                <strong class="text-body fw-medium">Interessado:</strong> <span class="text-body">${interessadoDestacado || sanitizeHTML(doc.txt_interessado) || '<em class="text-secondary">não informado</em>'}</span>
+                            </span>
+                        </div>
+                        ` : ''}
+                        <div class="card-section-detalhes">
+                            <div class="small">
+                                <div class="mb-2">
+                                    <i class="fa fa-calendar-alt text-muted me-2"></i>
+                                    <strong class="text-body fw-medium">Data:</strong> <span class="text-secondary">${sanitizeHTML(doc.dat_documento || 'N/A')}</span>
+                                </div>
+                                ${doc.num_protocolo ? `
+                                    <div class="mb-2">
+                                        <i class="fa fa-hashtag text-muted me-2"></i>
+                                        <strong class="text-body fw-medium">Protocolo:</strong> <span class="text-secondary">${doc.num_protocolo}/${doc.ano_documento}</span>
+                                    </div>
+                                ` : ''}
+                                ${doc.dat_fim_prazo ? `
+                                    <div class="mb-2">
+                                        <i class="fa fa-calendar-check text-muted me-2"></i>
+                                        <strong class="text-body fw-medium">Prazo:</strong> <span class="text-secondary">${sanitizeHTML(doc.dat_fim_prazo)}</span>
+                                    </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                        ${doc.localizacao_atual || doc.status_atual ? `
+                        <div class="card-section-status">
+                            <div class="small">
+                                ${doc.localizacao_atual ? `
+                                    <div class="mb-2">
+                                        <i class="fa fa-map-marker-alt text-muted me-2"></i>
+                                        <strong class="text-body fw-medium">Localização Atual:</strong> <span class="text-secondary">${sanitizeHTML(doc.localizacao_atual)}</span>
+                                    </div>
+                                ` : ''}
+                                ${doc.status_atual ? `
+                                    <div class="mb-2">
+                                        <i class="fa fa-info-circle text-muted me-2"></i>
+                                        <strong class="text-body fw-medium">${doc.dat_tramitacao ? `Situação em ${sanitizeHTML(doc.dat_tramitacao)}:` : 'Situação:'}</strong> <span class="text-secondary">${sanitizeHTML(doc.status_atual)}</span>
+                                    </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                        ` : ''}
+                    </div>
+                    ${botoesDocumentos ? `
+                    <div class="card-footer bg-transparent border-top">
+                        <div class="d-flex flex-wrap gap-1">
+                            ${botoesDocumentos}
+                            ${doc.qtd_documentos_acessorios > 0 ? `<span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 badge-documento badge-clickable" data-bs-toggle="tooltip" title="Clique para ver documentos acessórios" data-cod-documento="${doc.cod_documento}" data-tipo="documentos_acessorios" data-tipo-documento="${sanitizeHTML(doc.des_tipo_documento || '')}" data-sgl-tipo-documento="${sanitizeHTML(doc.sgl_tipo_documento || '')}" data-num-documento="${String(doc.num_documento || '')}" data-ano-documento="${String(doc.ano_documento || '')}"><i class="fa fa-file me-1"></i>Doc. Acessório${doc.qtd_documentos_acessorios > 1 ? 's' : ''} (${doc.qtd_documentos_acessorios})</span>` : ''}
+                            ${doc.qtd_processos_vinculados > 0 ? `<span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25 badge-documento badge-clickable" data-bs-toggle="tooltip" title="Clique para ver processos vinculados" data-cod-documento="${doc.cod_documento}" data-tipo="processos_vinculados" data-tipo-documento="${sanitizeHTML(doc.des_tipo_documento || '')}" data-sgl-tipo-documento="${sanitizeHTML(doc.sgl_tipo_documento || '')}" data-num-documento="${String(doc.num_documento || '')}" data-ano-documento="${String(doc.ano_documento || '')}"><i class="fa fa-link me-1"></i>Processo${doc.qtd_processos_vinculados > 1 ? 's' : ''} Vinculado${doc.qtd_processos_vinculados > 1 ? 's' : ''} (${doc.qtd_processos_vinculados})</span>` : ''}
+                            ${doc.qtd_materias_vinculadas > 0 ? `<span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 badge-documento badge-clickable" data-bs-toggle="tooltip" title="Clique para ver matérias vinculadas" data-cod-documento="${doc.cod_documento}" data-tipo="materias_vinculadas" data-tipo-documento="${sanitizeHTML(doc.des_tipo_documento || '')}" data-sgl-tipo-documento="${sanitizeHTML(doc.sgl_tipo_documento || '')}" data-num-documento="${String(doc.num_documento || '')}" data-ano-documento="${String(doc.ano_documento || '')}"><i class="fa fa-gavel me-1"></i>Matéria${doc.qtd_materias_vinculadas > 1 ? 's' : ''} Vinculada${doc.qtd_materias_vinculadas > 1 ? 's' : ''} (${doc.qtd_materias_vinculadas})</span>` : ''}
+                        </div>
+                    </div>
+                    ` : (doc.qtd_documentos_acessorios > 0 || doc.qtd_processos_vinculados > 0 || doc.qtd_materias_vinculadas > 0) ? `
+                    <div class="card-footer bg-transparent border-top">
+                        <div class="d-flex flex-wrap gap-1">
+                            ${doc.qtd_documentos_acessorios > 0 ? `<span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 badge-documento badge-clickable" data-bs-toggle="tooltip" title="Clique para ver documentos acessórios" data-cod-documento="${doc.cod_documento}" data-tipo="documentos_acessorios" data-tipo-documento="${sanitizeHTML(doc.des_tipo_documento || '')}" data-sgl-tipo-documento="${sanitizeHTML(doc.sgl_tipo_documento || '')}" data-num-documento="${String(doc.num_documento || '')}" data-ano-documento="${String(doc.ano_documento || '')}"><i class="fa fa-file me-1"></i>Doc. Acessório${doc.qtd_documentos_acessorios > 1 ? 's' : ''} (${doc.qtd_documentos_acessorios})</span>` : ''}
+                            ${doc.qtd_processos_vinculados > 0 ? `<span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25 badge-documento badge-clickable" data-bs-toggle="tooltip" title="Clique para ver processos vinculados" data-cod-documento="${doc.cod_documento}" data-tipo="processos_vinculados" data-tipo-documento="${sanitizeHTML(doc.des_tipo_documento || '')}" data-sgl-tipo-documento="${sanitizeHTML(doc.sgl_tipo_documento || '')}" data-num-documento="${String(doc.num_documento || '')}" data-ano-documento="${String(doc.ano_documento || '')}"><i class="fa fa-link me-1"></i>Processo${doc.qtd_processos_vinculados > 1 ? 's' : ''} Vinculado${doc.qtd_processos_vinculados > 1 ? 's' : ''} (${doc.qtd_processos_vinculados})</span>` : ''}
+                            ${doc.qtd_materias_vinculadas > 0 ? `<span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 badge-documento badge-clickable" data-bs-toggle="tooltip" title="Clique para ver matérias vinculadas" data-cod-documento="${doc.cod_documento}" data-tipo="materias_vinculadas" data-tipo-documento="${sanitizeHTML(doc.des_tipo_documento || '')}" data-sgl-tipo-documento="${sanitizeHTML(doc.sgl_tipo_documento || '')}" data-num-documento="${String(doc.num_documento || '')}" data-ano-documento="${String(doc.ano_documento || '')}"><i class="fa fa-gavel me-1"></i>Matéria${doc.qtd_materias_vinculadas > 1 ? 's' : ''} Vinculada${doc.qtd_materias_vinculadas > 1 ? 's' : ''} (${doc.qtd_materias_vinculadas})</span>` : ''}
+                        </div>
+                    </div>
+                    ` : ''}
+                </div>`;
+        });
+        html += '</div>';
+        return html;
+    }
+
+    // Função para renderizar paginação
+    function renderizarPaginacao(data) {
+        if (data.total_paginas <= 1) return '';
+        let html = '<nav id="nav-paginacao" aria-label="Navegação de páginas"><ul class="pagination justify-content-center flex-wrap">';
+        html += `<li class="page-item ${data.pagina === 1 ? 'disabled' : ''}">
+                <a class="page-link" href="#" data-page="1" title="Primeira página">&laquo;</a>
+            </li>`;
+        html += `<li class="page-item ${data.pagina === 1 ? 'disabled' : ''}">
+                <a class="page-link" href="#" data-page="${data.pagina - 1}">&lsaquo;</a>
+            </li>`;
+        const maxPagesToShow = 3;
+        let startPage = Math.max(1, data.pagina - Math.floor(maxPagesToShow / 2));
+        let endPage = Math.min(data.total_paginas, startPage + maxPagesToShow - 1);
+        if (endPage - startPage + 1 < maxPagesToShow) {
+            startPage = Math.max(1, endPage - maxPagesToShow + 1);
+        }
+        if (startPage > 1) {
+            html += `<li class="page-item"><a class="page-link" href="#" data-page="1">1</a></li>`;
+            if (startPage > 2) html += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+        }
+        for (let i = startPage; i <= endPage; i++) {
+            html += `<li class="page-item ${i === data.pagina ? 'active' : ''}">
+                    <a class="page-link" href="#" data-page="${i}">${i}</a>
+                </li>`;
+        }
+        if (endPage < data.total_paginas) {
+            if (endPage < data.total_paginas - 1) html += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+            html += `<li class="page-item"><a class="page-link" href="#" data-page="${data.total_paginas}">${data.total_paginas}</a></li>`;
+        }
+        html += `<li class="page-item ${data.pagina === data.total_paginas ? 'disabled' : ''}">
+                <a class="page-link" href="#" data-page="${data.pagina + 1}">&rsaquo;</a>
+            </li>`;
+        html += `<li class="page-item ${data.pagina === data.total_paginas ? 'disabled' : ''}">
+                <a class="page-link" href="#" data-page="${data.total_paginas}" title="Última página">&raquo;</a>
+            </li>`;
+        html += '</ul></nav>';
+        return html;
+    }
+
+    // Função para renderizar resultados (chama table ou cards)
+    function renderizarResultados(data) {
+        if (!data || data.total === 0) {
+            showNoResults();
+            return;
+        }
+        containerPrincipal.classList.remove('d-none');
+        containerPrincipal.classList.add('d-block');
+        painelSemResultados.classList.add('d-none');
+        painelSemResultados.classList.remove('d-block');
+        
+        // Renderizar gráficos se disponíveis
+        if (data.stats_by_type && Object.keys(data.stats_by_type).length > 0) {
+            window.ultimoStatsData = data.stats_by_type;
+            renderStatsChart(data.stats_by_type);
+        } else {
+            // Manter aba visível, mas sem dados (será carregado ao clicar)
+            const graficoTab = document.querySelector('#grafico-tab');
+            if (graficoTab) {
+                graficoTab.parentElement.classList.remove('d-none');
+                graficoTab.parentElement.classList.add('d-block');
+            }
+            renderStatsChart(null);
+        }
+        
+        if (btnToggleFiltros) {
+            btnToggleFiltros.classList.remove('d-none');
+            btnToggleFiltros.classList.add('d-block');
+        }
+        
+        ultimosDados = data; // Armazenar para alternar visualização
+        
+        const termosBusca = document.getElementById('txa_txt_assunto')?.value || '';
+        const { pagina, itens_por_pagina, total } = data;
+        const inicioFaixa = (pagina - 1) * itens_por_pagina + 1;
+        const fimFaixa = Math.min(pagina * itens_por_pagina, total);
+        
+        let html = `
+            <div class="d-flex flex-column flex-md-row align-items-center mb-3">
+                <div class="form-group mb-2 mb-md-0 me-md-3">
+                    <label for="itens_por_pagina" class="me-2">Itens por página:</label>
+                    <select class="form-select d-inline-block w-auto" id="itens_por_pagina">
+                        <option value="12" ${itens_por_pagina == 12 ? 'selected' : ''}>12</option>
+                        <option value="24" ${itens_por_pagina == 24 ? 'selected' : ''}>24</option>
+                        <option value="36" ${itens_por_pagina == 36 ? 'selected' : ''}>36</option>
+                        <option value="48" ${itens_por_pagina == 48 ? 'selected' : ''}>48</option>
+                        <option value="60" ${itens_por_pagina == 60 ? 'selected' : ''}>60</option>
+                        <option value="72" ${itens_por_pagina == 72 ? 'selected' : ''}>72</option>
+                        <option value="84" ${itens_por_pagina == 84 ? 'selected' : ''}>84</option>
+                        <option value="96" ${itens_por_pagina == 96 ? 'selected' : ''}>96</option>
+                    </select>
+                </div>
+                <div class="btn-group btn-group-sm mb-2 mb-md-0">
+                    <button type="button" class="btn btn-outline-primary" id="btn-view-table" title="Tabela">
+                        <i class="fa fa-table"></i> Tabela
+                    </button>
+                    <button type="button" class="btn btn-outline-primary" id="btn-view-cards" title="Cards">
+                        <i class="fa fa-th-large"></i> Cards
+                    </button>
+                </div>
+                <div class="btn-group btn-group-sm mb-2 mb-md-0 ms-md-3">
+                    <button type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fa fa-download"></i> Exportar
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item btn-export" href="#" data-format="csv" data-paginar-exportacao="1">
+                            <i class="fa fa-file-csv text-muted"></i> CSV (página atual)
+                        </a></li>
+                        <li><a class="dropdown-item btn-export" href="#" data-format="excel" data-paginar-exportacao="1">
+                            <i class="fa fa-file-excel text-muted"></i> Excel (página atual)
+                        </a></li>
+                        <li><a class="dropdown-item btn-export" href="#" data-format="pdf" data-paginar-exportacao="1">
+                            <i class="fa fa-file-pdf text-muted"></i> PDF (página atual)
+                        </a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item btn-export" href="#" data-format="csv" data-paginar-exportacao="0">
+                            <i class="fa fa-file-csv text-muted"></i> CSV (todas as páginas)
+                        </a></li>
+                        <li><a class="dropdown-item btn-export" href="#" data-format="excel" data-paginar-exportacao="0">
+                            <i class="fa fa-file-excel text-muted"></i> Excel (todas as páginas)
+                        </a></li>
+                        <li><a class="dropdown-item btn-export" href="#" data-format="pdf" data-paginar-exportacao="0">
+                            <i class="fa fa-file-pdf text-muted"></i> PDF (todas as páginas)
+                        </a></li>
+                    </ul>
+                </div>
+                <p role="status" class="text-center text-md-end mb-0 ms-md-auto">
+                    Exibindo ${inicioFaixa}-${fimFaixa} de <strong>${total}</strong> registros.
+                </p>
+            </div>`;
+        
+        // Renderizar visualização escolhida
+        if (currentViewMode === 'cards') {
+            html += renderCardsView(data, termosBusca);
+        } else {
+            html += renderTableView(data, termosBusca);
+        }
+        
+        // Adicionar paginação
+        html += renderizarPaginacao(data);
+        
+        resultadosDiv.innerHTML = html;
+        document.getElementById('btn-view-table').classList.toggle('active', currentViewMode === 'table');
+        document.getElementById('btn-view-cards').classList.toggle('active', currentViewMode === 'cards');
+        
+        // Re-inicializar tooltips após renderizar resultados
+        const newTooltips = resultadosDiv.querySelectorAll('[data-bs-toggle="tooltip"]');
+        newTooltips.forEach(function(el) {
+            try {
+                const bootstrap = window.bootstrap || bootstrap;
+                if (bootstrap && bootstrap.Tooltip) {
+                    if (!bootstrap.Tooltip.getInstance(el)) {
+                        new bootstrap.Tooltip(el);
+                    }
+                }
+            } catch (e) {
+            }
+        });
+        
+        // Resetar flag de estatísticas carregadas quando novos resultados são renderizados
+        statsCarregadas = false;
+        
+        // Event listener para aba de gráfico já foi adicionado na inicialização via delegação
+        
+        itensPorPaginaSelect = document.getElementById('itens_por_pagina');
+        // Event listener já está configurado via delegação no container de resultados
+        
+        const triggerEl = document.querySelector('#lista-tab');
+        if (triggerEl) {
+            try {
+                const bootstrap = window.bootstrap || bootstrap;
+                if (bootstrap && bootstrap.Tab) {
+                    bootstrap.Tab.getInstance(triggerEl)?.show() || new bootstrap.Tab(triggerEl).show();
+                }
+            } catch (e) {
+            }
+        }
+        
+        // Adicionar event listener para paginação após renderizar
+        const navPaginacao = document.getElementById('nav-paginacao');
+        if (navPaginacao) {
+            navPaginacao.addEventListener('click', function(e) {
+                const pageLink = e.target.closest('.page-link');
+                if (pageLink && pageLink.hasAttribute('data-page') && !pageLink.closest('.disabled')) {
+                    e.preventDefault();
+                    const page = parseInt(pageLink.getAttribute('data-page'), 10);
+                    if (!isNaN(page) && page > 0) {
+                        realizarBusca(page, itensPorPaginaSelect ? itensPorPaginaSelect.value : '12');
+                    }
+                }
+            });
+        }
+        
+        if (bsCollapseFiltros && document.getElementById('filtro-container').classList.contains('show')) {
+            bsCollapseFiltros.hide();
+            document.getElementById('filtro-container').addEventListener('hidden.bs.collapse', function handler() {
+                scrollParaResultados();
+                this.removeEventListener('hidden.bs.collapse', handler);
+            });
+        } else {
+            scrollParaResultados();
+        }
+    }
+    
+    // Função para scroll suave até os resultados
+    function scrollParaResultados() {
+        // Considera header fixo (#page-topbar, 80px) e .topnav (54.75px) se visível
+        const header = document.getElementById('page-topbar');
+        const topnav = document.querySelector('.topnav');
+        let offset = 0;
+        if (header) offset += header.offsetHeight || 80;
+        if (topnav && window.getComputedStyle(topnav).display !== 'none') offset += topnav.offsetHeight || 54.75;
+        const res = resultadosDiv.getBoundingClientRect().top + window.scrollY - offset - 15;
+        window.scrollTo({ top: res, behavior: 'smooth' });
+    }
+
+    // Função para verificar se há filtros ativos
+    function haFiltrosAtivos() {
+        const formData = new FormData(form);
+        const ignorar = ['formato', 'rd_ordenacao', 'pagina', 'itens_por_pagina'];
+        for (let [k, v] of formData.entries()) {
+            if (ignorar.includes(k)) continue;
+            if (v && v !== '') return true;
+        }
+        // Verificar TomSelects
+        const selects = ['lst_tip_documento', 'lst_tramitou', 'lst_localizacao', 'lst_status', 'lst_assunto'];
+        for (const selectName of selects) {
+            const el = form.elements[selectName];
+            if (el && el.tomselect) {
+                const value = el.tomselect.getValue();
+                if ((Array.isArray(value) && value.length > 0) || (!Array.isArray(value) && value)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+    
+    // Função para contar filtros ativos
+    function contarFiltrosAtivos() {
+        let count = 0;
+        const camposIgnorados = ['formato', 'rd_ordenacao', 'pagina', 'itens_por_pagina'];
+        const camposBasicos = ['lst_tip_documento', 'txt_num_documento', 'txt_ano_documento', 'txa_txt_interessado', 'txa_txt_assunto'];
+        
+        for (let el of form.elements) {
+            if (!el.name || camposIgnorados.includes(el.name) || camposBasicos.includes(el.name)) continue;
+            
+            if (el.tomselect && el.tomselect.getValue && el.tomselect.getValue().length > 0) { 
+                count++; 
+                continue; 
+            }
+            
+            if (el.type === 'checkbox' && el.checked) { 
+                count++; 
+                continue; 
+            }
+            
+            if (el.tagName === 'SELECT' && el.value !== '') { 
+                count++; 
+                continue; 
+            }
+            
+            if ((el.type === 'text' || el.type === 'number') && el.value.trim() !== '') { 
+                count++; 
+                continue; 
+            }
+            
+            if (el.type === 'hidden' && el.id && (el.id.includes('_hidden') || el.id.includes('hidden'))) {
+                if (el.value.trim() !== '') count++;
+            }
+        }
+        return count;
+    }
+    
+    // Função para mostrar resumo de filtros com badges (igual pesquisa de matérias)
+    function mostrarResumoFiltros(formData) {
+        const count = contarFiltrosAtivos();
+        if (badgeFiltros) {
+            badgeFiltros.textContent = count;
+            badgeFiltros.classList.toggle('bg-secondary', count === 0);
+            badgeFiltros.classList.toggle('bg-primary', count > 0);
+            badgeFiltros.setAttribute('title', count === 0 ? 'Nenhum filtro ativo' : `${count} filtro${count > 1 ? 's' : ''} ativo${count > 1 ? 's' : ''}`);
+        }
+        
+        // Mostrar/ocultar botão limpar
+        if (count > 0 && limparBtn) {
+            limparBtn.classList.remove('d-none');
+            limparBtn.classList.add('d-inline-block');
+        } else if (limparBtn) {
+            limparBtn.classList.add('d-none');
+            limparBtn.classList.remove('d-inline-block');
+        }
+        
+        let filtrosAtivosBadges = [];
+        const labels = {
+            'lst_tip_documento': 'Tipo',
+            'txt_num_documento': 'Número',
+            'txt_ano_documento': 'Ano',
+            'txa_txt_interessado': 'Interessado',
+            'txa_txt_assunto': 'Assunto',
+            'txt_num_protocolo': 'Protocolo',
+            'txt_npc': 'Processo (NPC)',
+            'lst_tramitou': 'Tramitou Em',
+            'lst_localizacao': 'Localização',
+            'lst_status': 'Situação',
+            'lst_assunto': 'Classificação',
+            'rad_tramitando': 'Em Tramitação',
+            'dt_apres1': 'Período'
+        };
+        const activeParams = new URLSearchParams(formData);
+
+        // BADGES INDIVIDUAIS PARA TIPO DE DOCUMENTO
+        const tiposSelect = form.elements['lst_tip_documento'];
+        if (tiposSelect && tiposSelect.tomselect && tiposSelect.tomselect.items.length > 0) {
+            tiposSelect.tomselect.items.forEach(val => {
+                let label = tiposSelect.tomselect.options[val]?.text || val;
+                filtrosAtivosBadges.push(
+                    `<span class="filter-badge" data-filter-key="lst_tip_documento" data-filter-value="${val}">
+                        <strong>${labels['lst_tip_documento']}</strong>: ${sanitizeHTML(label)}
+                        <button type="button" class="btn-close" aria-label="Remover filtro Tipo"></button>
+                    </span>`
+                );
+            });
+        }
+
+        // BADGES INDIVIDUAIS PARA ASSUNTO/CLASSIFICAÇÃO
+        const assuntoSelect = form.elements['lst_assunto'];
+        if (assuntoSelect && assuntoSelect.tomselect && assuntoSelect.tomselect.items.length > 0) {
+            assuntoSelect.tomselect.items.forEach(val => {
+                let label = assuntoSelect.tomselect.options[val]?.text || assuntoSelect.tomselect.options[val]?.descricao || val;
+                filtrosAtivosBadges.push(
+                    `<span class="filter-badge" data-filter-key="lst_assunto" data-filter-value="${val}">
+                        <strong>${labels['lst_assunto']}</strong>: ${sanitizeHTML(label)}
+                        <button type="button" class="btn-close" aria-label="Remover filtro Assunto"></button>
+                    </span>`
+                );
+            });
+        }
+
+        // Outros campos (exceto lst_tip_documento e lst_assunto)
+        Object.keys(labels).forEach(key => {
+            if (key === 'lst_tip_documento' || key === 'lst_assunto') return;
+            let valorExibido = '', originalValue = '';
+            if (key === 'dt_apres1') {
+                const startDate = activeParams.get('dt_apres1') || document.getElementById('dt_apres1_hidden')?.value;
+                const endDate = activeParams.get('dt_apres2') || document.getElementById('dt_apres2_hidden')?.value;
+                if (startDate && endDate) {
+                    valorExibido = `${startDate} a ${endDate}`;
+                    originalValue = `${startDate},${endDate}`;
+                }
+            } else if (key !== 'dt_apres2') {
+                const el = form.elements[key];
+                if (el) {
+                    if (el.tomselect && el.tomselect.items.length > 0) {
+                        valorExibido = el.tomselect.items.map(item => el.tomselect.options[item].text).join(', ');
+                        originalValue = el.tomselect.getValue();
+                    } else if (el.type === 'checkbox' && el.checked) {
+                        valorExibido = 'Sim';
+                        originalValue = '1';
+                    } else if (el.tagName === 'SELECT' && el.value !== '' && el.options[el.selectedIndex]) {
+                        valorExibido = el.options[el.selectedIndex].text;
+                        originalValue = el.value;
+                    } else if ((el.type === 'text' || el.type === 'number') && el.value.trim() !== '') {
+                        valorExibido = el.value.trim();
+                        originalValue = el.value.trim();
+                    }
+                }
+            }
+            if (valorExibido) {
+                filtrosAtivosBadges.push(
+                    `<span class="filter-badge" data-filter-key="${key}" data-filter-value="${Array.isArray(originalValue) ? originalValue.join(',') : originalValue}">
+                        <strong>${labels[key]}</strong>: ${sanitizeHTML(valorExibido)}
+                        <button type="button" class="btn-close" aria-label="Remover filtro ${labels[key]}"></button>
+                    </span>`
+                );
+            }
+        });
+
+        if (filtrosAtivosBadges.length > 0) {
+            resumoFiltrosDiv.classList.remove('d-none');
+            resumoFiltrosDiv.classList.add('d-block');
+            resumoFiltrosDiv.innerHTML = `
+                <div class="alert alert-info py-2" role="status">
+                    <strong>Filtros Ativos:</strong> ${filtrosAtivosBadges.join('')}
+                </div>`;
+        } else {
+            resumoFiltrosDiv.classList.add('d-none');
+            resumoFiltrosDiv.classList.remove('d-block');
+            resumoFiltrosDiv.innerHTML = '';
+        }
+    }
+    
+    // Função para atualizar URL
+    function actualizarURL(params) {
+        const queryString = params.toString();
+        const newUrl = queryString ? `${window.location.pathname}?${queryString}` : window.location.pathname;
+        window.history.pushState({ path: newUrl }, '', newUrl);
+    }
+    
+    // Função para remover filtro individual
+    function handleRemoveFilter(event) {
+        event.stopPropagation();
+        const badge = event.target.closest('.filter-badge');
+        if (!badge) return;
+        const keyToRemove = badge.dataset.filterKey;
+        const valueToRemove = badge.dataset.filterValue;
+        const element = form.elements[keyToRemove];
+        
+        if ((keyToRemove === 'lst_tip_documento' || keyToRemove === 'lst_assunto') && element && element.tomselect) {
+            let atual = element.tomselect.getValue();
+            if (Array.isArray(atual)) {
+                atual = atual.filter(v => v != valueToRemove);
+            } else {
+                atual = atual == valueToRemove ? [] : [atual];
+            }
+            element.tomselect.setValue(atual);
+            setTimeout(() => {
+                mostrarResumoFiltros(new FormData(form));
+                if (!haFiltrosAtivos()) {
+                    handleLimparClick();
+                } else {
+                    realizarBusca(1);
+                }
+            }, 10);
+            return;
+        }
+
+        if (element) {
+            if (element.tomselect) {
+                if (element.tomselect.isMultiple) {
+                    const valuesToKeep = element.tomselect.getValue().filter(val => !valueToRemove.split(',').includes(val.toString()));
+                    element.tomselect.setValue(valuesToKeep);
+                } else {
+                    element.tomselect.clear();
+                }
+            } else if (element.type === 'checkbox') {
+                element.checked = false;
+            } else if (element.tagName === 'SELECT') {
+                element.value = '';
+            } else if (element.type === 'text' || element.type === 'number') {
+                element.value = '';
+            }
+        }
+        
+        // Limpar campos de data
+        if (keyToRemove === 'dt_apres1') {
+            if (daterangePicker) daterangePicker.clear();
+            document.getElementById('dt_apres1_hidden').value = '';
+            document.getElementById('dt_apres2_hidden').value = '';
+        }
+        
+        setTimeout(() => {
+            mostrarResumoFiltros(new FormData(form));
+            if (!haFiltrosAtivos()) {
+                handleLimparClick();
+            } else {
+                realizarBusca(1);
+            }
+        }, 10);
+    }
+    
+    // Função para limpar filtros
+    function handleLimparClick() {
+        form.reset();
+        if (daterangePicker) daterangePicker.clear();
+        document.getElementById('dt_apres1_hidden').value = '';
+        document.getElementById('dt_apres2_hidden').value = '';
+        
+        // Limpar TomSelects
+        const selects = ['lst_tip_documento', 'lst_tramitou', 'lst_localizacao', 'lst_status', 'lst_assunto'];
+        selects.forEach(selectName => {
+            const el = form.elements[selectName];
+            if (el && el.tomselect) {
+                el.tomselect.clear();
+            }
+        });
+        
+        resultadosDiv.innerHTML = '';
+        containerPrincipal.classList.add('d-none');
+        painelSemResultados.classList.add('d-none');
+        showInitialMessage();
+        if (filterClearedToast) filterClearedToast.show();
+        if (bsCollapseFiltros && !document.getElementById('filtro-container').classList.contains('show')) {
+            bsCollapseFiltros.show();
+        }
+        if (bsCollapseAdvancedSearch && advancedSearchDiv && advancedSearchDiv.classList.contains('show')) {
+            bsCollapseAdvancedSearch.hide();
+        }
+        mostrarResumoFiltros(new FormData(form));
+        window.history.replaceState({}, document.title, window.location.pathname);
+        
+        if (btnToggleFiltros) {
+            btnToggleFiltros.classList.add('d-none');
+        }
+    }
+    
+    // Inicializar toast
+    if (filterClearedToastEl) {
+        filterClearedToast = new bootstrap.Toast(filterClearedToastEl, { delay: 3000 });
+    }
+    
+    // Função para cache de requisições
+    async function fetchWithCache(url) {
+        if (apiCache.has(url)) return apiCache.get(url);
+        try {
+            const response = await fetch(url);
+            if (!response.ok) throw new Error('Erro na resposta do servidor');
+            const data = await response.json();
+            apiCache.set(url, data);
+            return data;
+        } catch (error) {
+            console.error('Erro na requisição:', error);
+            throw error;
+        }
+    }
+    
+    // Função para mostrar skeleton loading
+    function showSkeletonLoading() {
+        resultadosDiv.innerHTML = `
+            <div class="skeleton-loading skeleton-title"></div>
+            <div class="table-responsive">
+                <table class="table" aria-label="Carregando resultados">
+                    <thead><tr><th class="w-15"></th><th class="w-10"></th><th class="w-20"></th><th class="w-35"></th><th class="w-10"></th><th class="w-10"></th></tr></thead>
+                    <tbody>
+                        ${Array(5).fill('<tr>'+Array(6).fill('<td><div class="skeleton-loading skeleton-row"></div></td>').join('')+'</tr>').join('')}
+                    </tbody>
+                </table>
+            </div>`;
+        resultadosDiv.setAttribute('aria-busy', 'true');
+    }
+    
+    // Função para mostrar mensagem inicial
+    function showInitialMessage() {
+        if (btnToggleFiltros) {
+            btnToggleFiltros.classList.add('d-none');
+        }
+        painelSemResultados.innerHTML = `
+            <div class="alert alert-info text-center" role="status">
+                <i class="fa fa-search fa-2x mb-2"></i><br>
+                Utilize os filtros acima para encontrar os processos administrativos.
+            </div>`;
+        painelSemResultados.classList.remove('d-none');
+        painelSemResultados.classList.add('d-block');
+    }
+    
+    // Função para mostrar sem resultados
+    function showNoResults() {
+        containerPrincipal.classList.add('d-none');
+        containerPrincipal.classList.remove('d-block');
+        painelSemResultados.innerHTML = `
+            <div class="text-center p-4 p-md-5 bg-light rounded border">
+                <div class="mb-3"><i class="fa fa-search-minus fa-3x text-warning" aria-hidden="true"></i></div>
+                <h4 class="fw-bold">Nenhum Registro Encontrado</h4>
+                <p class="text-muted mb-4">Não encontramos processos que correspondam aos filtros aplicados.</p>
+                <div class="mt-4">
+                    <button class="btn btn-primary btn-lg" id="btn-limpar-filtros-no-results" aria-label="Limpar filtros e tentar nova busca">
+                        <i class="fa fa-times me-2"></i>Limpar Filtros e Tentar Novamente
+                    </button>
+                </div>
+            </div>`;
+        painelSemResultados.classList.remove('d-none');
+        painelSemResultados.classList.add('d-block');
+        renderStatsChart(null);
+    }
+    
+    // Função para renderizar erro
+    function renderizarErro(mensagem) {
+        painelSemResultados.innerHTML = `
+            <div class="alert alert-danger text-center" role="alert">
+                <i class="fa fa-exclamation-triangle"></i> ${sanitizeHTML(mensagem)}
+            </div>`;
+        painelSemResultados.classList.remove('d-none');
+        painelSemResultados.classList.add('d-block');
+    }
+    
+    // Verificar filtros ativos na inicialização
+    if (!haFiltrosAtivos()) {
+        if (btnToggleFiltros) {
+            btnToggleFiltros.classList.add('d-none');
+        }
+    }
+    
+    // Variável para itens por página
+    let itensPorPaginaSelect = null;
+    
+    // Realizar busca
+    // Função de validação do formulário
+    function validarFormulario() {
+        let isValid = true;
+        const numDocumentoInput = document.getElementById('txt_num_documento');
+        const anoDocumentoInput = document.getElementById('txt_ano_documento');
+        const numProtocoloInput = document.getElementById('txt_num_protocolo');
+        const npcInput = document.getElementById('txt_npc');
+        
+        // Remover classes de erro anteriores
+        if (numDocumentoInput) {
+            numDocumentoInput.classList.remove('is-invalid');
+            numDocumentoInput.setAttribute('aria-invalid', 'false');
+        }
+        if (anoDocumentoInput) {
+            anoDocumentoInput.classList.remove('is-invalid');
+            anoDocumentoInput.setAttribute('aria-invalid', 'false');
+        }
+        if (numProtocoloInput) {
+            numProtocoloInput.classList.remove('is-invalid');
+            numProtocoloInput.setAttribute('aria-invalid', 'false');
+        }
+        if (npcInput) {
+            npcInput.classList.remove('is-invalid');
+            npcInput.setAttribute('aria-invalid', 'false');
+        }
+        
+        // Validar ano do documento (4 dígitos)
+        if (anoDocumentoInput && anoDocumentoInput.value && !/^\d{4}$/.test(anoDocumentoInput.value)) {
+            anoDocumentoInput.classList.add('is-invalid');
+            anoDocumentoInput.setAttribute('aria-invalid', 'true');
+            const feedbackEl = document.getElementById('txt_ano_documento_feedback');
+            if (feedbackEl) {
+                feedbackEl.textContent = 'Por favor, insira um ano válido com 4 dígitos (ex: 2025).';
+                feedbackEl.classList.add('d-block');
+                feedbackEl.classList.remove('d-none');
+            }
+            isValid = false;
+        }
+        
+        // Validar número do documento (apenas números)
+        if (numDocumentoInput && numDocumentoInput.value && !/^\d+$/.test(numDocumentoInput.value)) {
+            numDocumentoInput.classList.add('is-invalid');
+            numDocumentoInput.setAttribute('aria-invalid', 'true');
+            const feedbackEl = document.getElementById('txt_num_documento_feedback');
+            if (feedbackEl) {
+                feedbackEl.textContent = 'Por favor, insira apenas números.';
+                feedbackEl.classList.add('d-block');
+                feedbackEl.classList.remove('d-none');
+            }
+            isValid = false;
+        }
+        
+        // Validar número do protocolo (apenas números)
+        if (numProtocoloInput && numProtocoloInput.value && !/^\d+$/.test(numProtocoloInput.value)) {
+            numProtocoloInput.classList.add('is-invalid');
+            numProtocoloInput.setAttribute('aria-invalid', 'true');
+            const feedbackEl = document.getElementById('txt_num_protocolo_feedback');
+            if (feedbackEl) {
+                feedbackEl.textContent = 'Por favor, insira apenas números.';
+                feedbackEl.classList.add('d-block');
+                feedbackEl.classList.remove('d-none');
+            }
+            isValid = false;
+        }
+        
+        // Validar NPC (apenas números)
+        if (npcInput && npcInput.value && !/^\d+$/.test(npcInput.value)) {
+            npcInput.classList.add('is-invalid');
+            npcInput.setAttribute('aria-invalid', 'true');
+            const feedbackEl = document.getElementById('txt_npc_feedback');
+            if (feedbackEl) {
+                feedbackEl.textContent = 'Por favor, insira apenas números.';
+                feedbackEl.classList.add('d-block');
+                feedbackEl.classList.remove('d-none');
+            }
+            isValid = false;
+        }
+        
+        return isValid;
+    }
+
+    async function realizarBusca(page = 1, itensPorPaginaParam = null) {
+        if (!validarFormulario()) return;
+        
+        const itensPorPaginaAtual = itensPorPaginaParam || (itensPorPaginaSelect ? itensPorPaginaSelect.value : '12');
+        document.getElementById('pagina').value = page;
+        pesquisarBtn.disabled = true;
+        pesquisarBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Buscando...';
+        pesquisarBtn.setAttribute('aria-busy', 'true');
+        
+        showSkeletonLoading();
+        try {
+            const formData = new FormData(form);
+            const params = new URLSearchParams();
+            
+            // Processar todos os campos do formulário, incluindo múltiplos valores
+            for (const [key, value] of formData.entries()) {
+                if (key === 'daterange_input') continue;
+                // Para campos múltiplos (TomSelect), adicionar todos os valores
+                if (key === 'lst_tip_documento' || key === 'lst_assunto') {
+                    const selectElement = form.elements[key];
+                    if (selectElement && selectElement.tomselect) {
+                        const values = selectElement.tomselect.getValue();
+                        if (Array.isArray(values) && values.length > 0) {
+                            values.forEach(val => params.append(key, val));
+                        } else if (values) {
+                            params.append(key, values);
+                        }
+                    } else {
+                        // Fallback: usar FormData se TomSelect não estiver disponível
+                        params.append(key, value);
+                    }
+                } else {
+                    params.append(key, value);
+                }
+            }
+            
+            params.set('pagina', page);
+            params.set('itens_por_pagina', itensPorPaginaAtual);
+            actualizarURL(params);
+            mostrarResumoFiltros(new FormData(form));
+            const data = await fetchWithCache(`documentos_administrativos_json?${params.toString()}`);
+            
+            renderizarResultados(data);
+            limparBtn.classList.remove('d-none');
+            limparBtn.classList.add('d-inline-block');
+            if (bsCollapseFiltros) bsCollapseFiltros.hide();
+        } catch (error) {
+            console.error('Erro na busca:', error);
+            renderizarErro(error.message || 'Ocorreu um erro ao buscar os dados.');
+        } finally {
+            pesquisarBtn.disabled = false;
+            pesquisarBtn.innerHTML = '<i class="fa fa-search me-1"></i> Pesquisar';
+            pesquisarBtn.removeAttribute('aria-busy');
+            resultadosDiv.removeAttribute('aria-busy');
+        }
+    }
+
+    // Carregar estatísticas sob demanda
+    async function carregarEstatisticas() {
+        if (statsCarregadas) return; // Já foram carregadas, não precisa carregar novamente
+        if (carregandoEstatisticas) {
+            return; // Já está carregando, não iniciar outra requisição
+        }
+        carregandoEstatisticas = true;
+        
+        const graficoTab = document.querySelector('#grafico-tab');
+        if (!graficoTab) {
+            carregandoEstatisticas = false;
+            return;
+        }
+        
+        // Mostrar indicador de carregamento sem remover o canvas
+        const graficoPane = document.querySelector('#grafico-pane');
+        
+        // Garantir que o container exista
+        if (graficoPane && !graficoPane.querySelector('#resumo-estatistico')) {
+            graficoPane.innerHTML = '<div id="resumo-estatistico" class="p-3" style="position: relative;"><div class="canvas-container"><canvas id="stats-chart" aria-label="Gráfico de resumo estatístico dos processos administrativos"></canvas></div></div>';
+        }
+        
+        const graficoContainer = graficoPane ? graficoPane.querySelector('#resumo-estatistico') : null;
+        
+        // Adicionar overlay de carregamento sem remover o conteúdo existente
+        if (graficoContainer) {
+            let loadingOverlay = graficoContainer.querySelector('.loading-overlay');
+            if (!loadingOverlay) {
+                loadingOverlay = document.createElement('div');
+                loadingOverlay.className = 'loading-overlay position-absolute w-100 h-100 d-flex align-items-center justify-content-center';
+                loadingOverlay.style.cssText = 'top: 0; left: 0; background: rgba(255,255,255,0.9); z-index: 10;';
+                loadingOverlay.innerHTML = '<div class="text-center"><i class="fa fa-spinner fa-spin fa-2x"></i><p class="mt-2">Carregando estatísticas...</p></div>';
+                if (!graficoContainer.style.position) {
+                    graficoContainer.style.position = 'relative';
+                }
+                graficoContainer.appendChild(loadingOverlay);
+            }
+        }
+        
+        try {
+            const params = new URLSearchParams(new FormData(form));
+            params.delete('daterange_input');
+            params.set('calcular_estatisticas', '1');
+            params.set('pagina', '1');
+            params.set('itens_por_pagina', '1'); // Não precisamos dos dados, só das estatísticas
+            
+            // Processar campos TomSelect
+            const selects = ['lst_tip_documento', 'lst_assunto'];
+            selects.forEach(selectName => {
+                params.delete(selectName);
+                const el = form.elements[selectName];
+                if (el && el.tomselect) {
+                    const values = el.tomselect.getValue();
+                    if (Array.isArray(values) && values.length > 0) {
+                        values.forEach(v => params.append(selectName, v));
+                    } else if (values) {
+                        params.append(selectName, values);
+                    }
+                }
+            });
+            
+            const response = await fetchWithCache(`documentos_administrativos_json?${params.toString()}`);
+            
+            
+            // Remover TODOS os overlays de carregamento
+            const allLoadingOverlays = document.querySelectorAll('.loading-overlay');
+            allLoadingOverlays.forEach(overlay => {
+                overlay.remove();
+            });
+            
+            // Também remover qualquer placeholder que possa estar bloqueando
+            const placeholders = document.querySelectorAll('.stats-placeholder');
+            placeholders.forEach(placeholder => {
+                placeholder.remove();
+            });
+            
+            // Garantir que o container existe
+            if (!graficoPane) {
+                console.error('grafico-pane não encontrado!');
+                carregandoEstatisticas = false;
+                return;
+            }
+            
+            // Restaurar a estrutura HTML do container se foi substituída
+            if (!graficoPane.querySelector('#resumo-estatistico')) {
+                graficoPane.innerHTML = '<div id="resumo-estatistico" class="p-3"><div class="d-flex justify-content-end mb-2"><div class="btn-group" role="group" aria-label="Tipo de gráfico"><button type="button" class="btn btn-sm btn-outline-primary active" id="btn-grafico-barra-tipo" data-tipo="bar"><i class="fa fa-chart-bar me-1"></i>Barra</button><button type="button" class="btn btn-sm btn-outline-primary" id="btn-grafico-pizza-tipo" data-tipo="pie"><i class="fa fa-chart-pie me-1"></i>Pizza</button></div></div><div class="canvas-container"><canvas id="stats-chart" aria-label="Gráfico de resumo estatístico dos processos administrativos"></canvas></div></div>';
+            }
+            
+            // Garantir que o canvas exista
+            let statsChartCanvas = document.getElementById('stats-chart');
+            if (!statsChartCanvas) {
+                const statsContainer = document.querySelector('#resumo-estatistico .canvas-container');
+                if (statsContainer) {
+                    // Remover placeholder se existir
+                    const placeholder = statsContainer.querySelector('.stats-placeholder');
+                    if (placeholder) placeholder.remove();
+                    statsContainer.innerHTML = '<canvas id="stats-chart" aria-label="Gráfico de resumo estatístico dos processos administrativos"></canvas>';
+                    statsChartCanvas = document.getElementById('stats-chart');
+                } else {
+                    console.error('Container #resumo-estatistico .canvas-container não encontrado!');
+                }
+            } else {
+                // Remover placeholder se existir e o canvas já existe
+                const statsContainer = statsChartCanvas.parentElement;
+                if (statsContainer) {
+                    const placeholder = statsContainer.querySelector('.stats-placeholder');
+                    if (placeholder) {
+                        placeholder.remove();
+                    }
+                }
+            }
+            
+            if (response && response.stats_by_type && Object.keys(response.stats_by_type).length > 0) {
+                window.ultimoStatsData = response.stats_by_type;
+                renderStatsChart(response.stats_by_type);
+                statsCarregadas = true;
+            } else {
+                const statsContainer = document.querySelector('#resumo-estatistico .canvas-container');
+                if (statsContainer) {
+                    statsContainer.innerHTML = '<div class="stats-placeholder text-center p-4"><p class="text-muted">Nenhuma estatística disponível</p></div>';
+                }
+            }
+        } catch (error) {
+            console.error('Erro ao carregar estatísticas:', error);
+            // Remover overlays em caso de erro
+            const allLoadingOverlays = document.querySelectorAll('.loading-overlay');
+            allLoadingOverlays.forEach(overlay => overlay.remove());
+            
+            const canvas = document.getElementById('stats-chart');
+            if (canvas) {
+                const container = canvas.parentElement;
+                if (container) {
+                    container.innerHTML = '<div class="stats-placeholder text-center p-4"><p class="text-danger">Erro ao carregar estatísticas</p></div>';
+                }
+            }
+        } finally {
+            carregandoEstatisticas = false;
+        }
+    }
+
+    // Função renderizarResultados já foi definida acima (com suporte a table/cards)
+
+    // Função de exportação (igual pesquisa de matérias)
+    function handleExportClick(btn) {
+        const params = new URLSearchParams(new FormData(form));
+        
+        // Processar campos TomSelect
+        const selects = ['lst_tip_documento', 'lst_assunto'];
+        selects.forEach(selectName => {
+            params.delete(selectName);
+            const el = form.elements[selectName];
+            if (el && el.tomselect) {
+                const values = el.tomselect.getValue();
+                if (Array.isArray(values) && values.length > 0) {
+                    values.forEach(v => params.append(selectName, v));
+                } else if (values) {
+                    params.append(selectName, values);
+                }
+            }
+        });
+        
+        params.set('formato', btn.dataset.format);
+        params.set('paginar_exportacao', btn.dataset.paginarExportacao || '0');
+        const itensPorPaginaSelect = document.getElementById('itens_por_pagina');
+        if (btn.dataset.paginarExportacao === '1') {
+            params.set('pagina', document.getElementById('pagina').value || '1');
+            params.set('itens_por_pagina', itensPorPaginaSelect ? itensPorPaginaSelect.value : '12');
+        } else {
+            params.delete('pagina');
+            params.delete('itens_por_pagina');
+        }
+        const exportUrl = `${form.getAttribute('action')}?${params.toString()}`;
+        window.open(exportUrl, '_blank');
+    }
+
+    // Função para renderizar gráfico
+    function renderStatsChart(statsData) {
+        const tabButton = document.querySelector('#grafico-tab');
+        if (!tabButton) return;
+        tabButton.parentElement.classList.remove('d-none');
+        tabButton.parentElement.classList.add('d-block');
+        
+        if (!statsData || Object.keys(statsData).length === 0) {
+            if (statsChartInstance) {
+                try {
+                    statsChartInstance.destroy();
+                } catch (e) {}
+                statsChartInstance = null;
+            }
+            const statsContainer = document.querySelector('#resumo-estatistico .canvas-container');
+            if (statsContainer) {
+                if (!statsContainer.querySelector('.stats-placeholder')) {
+                    statsContainer.innerHTML = '<div class="stats-placeholder text-center p-4"><p class="text-muted">Clique na aba para carregar as estatísticas</p></div>';
+                }
+            } else {
+                // Se o container não existe, criar a estrutura
+                const graficoPane = document.querySelector('#grafico-pane');
+                if (graficoPane) {
+                    graficoPane.innerHTML = '<div id="resumo-estatistico" class="p-3"><div class="canvas-container"><div class="stats-placeholder text-center p-4"><p class="text-muted">Clique na aba para carregar as estatísticas</p></div></div></div>';
+                }
+            }
+            return;
+        }
+        
+        if (statsChartInstance) {
+            try {
+                statsChartInstance.destroy();
+            } catch (e) {}
+            statsChartInstance = null;
+        }
+        
+        const statsContainer = document.querySelector('#resumo-estatistico .canvas-container');
+        if (statsContainer && statsContainer.querySelector('.stats-placeholder')) {
+            statsContainer.innerHTML = '<canvas id="stats-chart" aria-label="Gráfico de resumo estatístico dos processos administrativos"></canvas>';
+        }
+        const canvas = document.getElementById('stats-chart');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+        
+        const sortedEntries = Object.entries(statsData).sort((a, b) => {
+            if (b[1] !== a[1]) {
+                return b[1] - a[1];
+            }
+            return a[0].localeCompare(b[0]);
+        });
+        const labels = sortedEntries.map(([tipo]) => tipo);
+        const dataValues = sortedEntries.map(([tipo, quantidade]) => quantidade);
+        
+        const coresTipos = [
+            'rgba(68, 162, 210, 0.85)', 'rgba(255, 159, 64, 0.85)', 'rgba(75, 192, 192, 0.85)',
+            'rgba(153, 102, 255, 0.85)', 'rgba(54, 162, 235, 0.85)', 'rgba(255, 99, 132, 0.85)',
+            'rgba(201, 203, 207, 0.85)', 'rgba(255, 205, 86, 0.85)', 'rgba(50, 205, 50, 0.85)',
+            'rgba(255, 99, 71, 0.85)', 'rgba(138, 43, 226, 0.85)', 'rgba(255, 140, 0, 0.85)',
+            'rgba(0, 191, 255, 0.85)', 'rgba(220, 20, 60, 0.85)', 'rgba(34, 139, 34, 0.85)',
+            'rgba(148, 0, 211, 0.85)'
+        ];
+        
+        const todosTiposOrdenados = [...labels].sort();
+        const tipoCorMap = {};
+        todosTiposOrdenados.forEach((tipo, index) => {
+            tipoCorMap[tipo] = coresTipos[index % coresTipos.length];
+        });
+        
+        const backgroundColors = labels.map((tipo) => tipoCorMap[tipo] || coresTipos[0]);
+        const borderColors = backgroundColors.map(cor => cor.replace('0.85', '1'));
+        const totalProposicoes = dataValues.reduce((sum, val) => sum + val, 0);
+        const maxTotalValue = Math.max(...dataValues);
+        const margin = maxTotalValue < 100 ? 40 : maxTotalValue < 500 ? Math.ceil(maxTotalValue * 0.25) : Math.ceil(maxTotalValue * 0.20);
+        const maxXAxisValue = Math.ceil(maxTotalValue + margin);
+        const container = canvas.parentElement;
+        const numItems = labels.length;
+        const minHeight = numItems <= 5 ? 300 : Math.min(300 + (numItems - 5) * 15, 450);
+        container.style.minHeight = `${minHeight}px`;
+        container.style.maxHeight = '450px';
+        
+        let chartConfig;
+        if (tipoGraficoTipo === 'pie') {
+            let pieLabels = labels;
+            let pieDataValues = dataValues;
+            let pieBackgroundColors = backgroundColors;
+            let pieBorderColors = borderColors;
+            const threshold = 0.02;
+            const minItemsToGroup = 8;
+            
+            if (numItems > minItemsToGroup) {
+                const total = totalProposicoes;
+                const thresholdValue = total * threshold;
+                const mainItems = [];
+                let otherTotal = 0;
+                
+                labels.forEach((label, index) => {
+                    if (dataValues[index] >= thresholdValue) {
+                        mainItems.push({
+                            label: label,
+                            value: dataValues[index],
+                            color: backgroundColors[index],
+                            borderColor: borderColors[index]
+                        });
+                    } else {
+                        otherTotal += dataValues[index];
+                    }
+                });
+                
+                mainItems.sort((a, b) => b.value - a.value);
+                
+                if (otherTotal > 0) {
+                    mainItems.push({
+                        label: 'Outros',
+                        value: otherTotal,
+                        color: 'rgba(201, 203, 207, 0.85)',
+                        borderColor: 'rgba(201, 203, 207, 1)'
+                    });
+                }
+                
+                pieLabels = mainItems.map(item => item.label);
+                pieDataValues = mainItems.map(item => item.value);
+                pieBackgroundColors = mainItems.map(item => item.color);
+                pieBorderColors = mainItems.map(item => item.borderColor);
+            }
+            
+            chartConfig = {
+                type: 'pie',
+                data: {
+                    labels: pieLabels,
+                    datasets: [{
+                        label: 'Quantidade',
+                        data: pieDataValues,
+                        backgroundColor: pieBackgroundColors,
+                        borderColor: pieBorderColors,
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { 
+                            display: true,
+                            position: 'right',
+                            align: 'start'
+                        },
+                        tooltip: { 
+                            enabled: true,
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.parsed || 0;
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = ((value / total) * 100).toFixed(1);
+                                    return `${label}: ${value} (${percentage}%)`;
+                                }
+                            }
+                        },
+                        datalabels: {
+                            color: '#fff',
+                            font: { weight: 'bold', size: 11 },
+                            formatter: function(value, context) {
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = ((value / total) * 100).toFixed(1);
+                                return parseFloat(percentage) >= 3 ? percentage + '%' : '';
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: `Total: ${totalProposicoes} ${totalProposicoes === 1 ? 'processo' : 'processos'}`,
+                            font: { size: 14, weight: 'bold' },
+                            padding: { bottom: 10 }
+                        }
+                    }
+                },
+                plugins: [ChartDataLabels]
+            };
+        } else {
+            chartConfig = {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Quantidade',
+                        data: dataValues,
+                        backgroundColor: backgroundColors,
+                        borderColor: borderColors,
+                        borderWidth: 1,
+                        barThickness: 'flex',
+                        maxBarThickness: 30
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { 
+                            enabled: true,
+                            callbacks: {
+                                label: function(context) {
+                                    const quantidade = context.parsed ? context.parsed.x : 0;
+                                    return `Quantidade: ${quantidade}`;
+                                }
+                            }
+                        },
+                        datalabels: {
+                            anchor: 'end',
+                            align: 'end',
+                            color: '#000',
+                            font: { weight: 'bold', size: 12 },
+                            formatter: function(value) { return value; }
+                        },
+                        title: {
+                            display: true,
+                            text: `Total: ${totalProposicoes} ${totalProposicoes === 1 ? 'processo' : 'processos'}`,
+                            font: { size: 14, weight: 'bold' },
+                            padding: { bottom: 10 }
+                        }
+                    },
+                    scales: { 
+                        x: { 
+                            beginAtZero: true,
+                            max: maxXAxisValue
+                        },
+                        y: {
+                            ticks: {
+                                font: { size: 11 }
+                            }
+                        }
+                    }
+                },
+                plugins: [ChartDataLabels]
+            };
+        }
+        
+        statsChartInstance = new Chart(ctx, chartConfig);
+        window.statsChartInstance = statsChartInstance;
+    }
+
+    // Event listeners para alternar tipo de gráfico (adicionar após DOM carregar)
+    setTimeout(function() {
+        const btnBarra = document.getElementById('btn-grafico-barra-tipo');
+        const btnPizza = document.getElementById('btn-grafico-pizza-tipo');
+        
+        if (btnBarra) {
+            btnBarra.addEventListener('click', function() {
+                tipoGraficoTipo = 'bar';
+                btnBarra.classList.add('active');
+                if (btnPizza) btnPizza.classList.remove('active');
+                if (window.ultimoStatsData) {
+                    renderStatsChart(window.ultimoStatsData);
+                }
+            });
+        }
+        
+        if (btnPizza) {
+            btnPizza.addEventListener('click', function() {
+                tipoGraficoTipo = 'pie';
+                btnPizza.classList.add('active');
+                if (btnBarra) btnBarra.classList.remove('active');
+                if (window.ultimoStatsData) {
+                    renderStatsChart(window.ultimoStatsData);
+                }
+            });
+        }
+    }, 100);
+
+    // Função para popular formulário a partir da URL
+    function popularFormPelaURL() {
+        const params = new URLSearchParams(window.location.search);
+        if (!params.toString()) return;
+        const uniqueKeys = [...new Set(params.keys())];
+        uniqueKeys.forEach(key => {
+            const el = form.elements[key];
+            if (el) {
+                if (el.tomselect) {
+                    const allValues = params.getAll(key);
+                    el.tomselect.setValue(allValues, true);
+                }
+                else if (el.type === 'radio') {
+                    const radioWithValue = document.querySelector(`input[name="${key}"][value="${params.get(key)}"]`);
+                    if (radioWithValue) radioWithValue.checked = true;
+                }
+                else if (el.type === 'checkbox') {
+                    el.checked = (params.get(key) === '1');
+                }
+                else {
+                    el.value = params.get(key);
+                }
+            }
+        });
+        
+        // Tratar campos de data (período)
+        const startDateParam = params.get('dt_apres1');
+        const endDateParam = params.get('dt_apres2');
+        if (startDateParam || endDateParam) {
+            if (daterangePicker) {
+                daterangePicker.setDate([startDateParam, endDateParam], false);
+            }
+            const dtApres1Hidden = document.getElementById('dt_apres1_hidden');
+            const dtApres2Hidden = document.getElementById('dt_apres2_hidden');
+            if (dtApres1Hidden) dtApres1Hidden.value = startDateParam || '';
+            if (dtApres2Hidden) dtApres2Hidden.value = endDateParam || '';
+        }
+        
+        // Verificar se há filtros avançados na URL
+        const hasAdvancedFilterInURL = ['txt_num_protocolo', 'txt_npc', 'lst_tramitou', 
+                                      'lst_localizacao', 'lst_status', 'lst_assunto', 
+                                      'rad_tramitando'].some(field => params.has(field)) || 
+                                      startDateParam || endDateParam;
+        if (hasAdvancedFilterInURL) {
+            const advancedSearchDiv = document.getElementById('advancedSearch');
+            if (advancedSearchDiv && bsCollapseAdvancedSearch) {
+                bsCollapseAdvancedSearch.show();
+            }
+        }
+        
+        // Aguardar um pouco para garantir que os TomSelects foram populados
+        setTimeout(() => {
+            contarFiltrosAtivos();
+            mostrarResumoFiltros(new FormData(form));
+            realizarBusca(
+               parseInt(params.get('pagina') || '1'),  
+               params.get('itens_por_pagina') || '12'
+            );
+        }, 300);
+    }
+
+    // Event listeners usando delegação
+    document.body.addEventListener('click', function(e) {
+        if (e.target.closest('#btn-view-table')) applyViewMode('table');
+        if (e.target.closest('#btn-view-cards')) applyViewMode('cards');
+        if (e.target.closest('.btn-export')) {
+            e.preventDefault();
+            handleExportClick(e.target.closest('.btn-export'));
+        }
+        if (e.target === limparBtn) handleLimparClick();
+        if (e.target.closest('.filter-badge .btn-close')) handleRemoveFilter(e);
+        if (e.target.closest('[data-preset]')) handleDatePreset(e.target.closest('[data-preset]'));
+        if (e.target.closest('#btn-limpar-filtros-no-results')) handleLimparClick();
+    });
+    
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        realizarBusca(1);
+    });
+
+    limparBtn.addEventListener('click', handleLimparClick);
+    
+    // Event listener para itens por página usando delegação (funciona mesmo quando o select é recriado)
+    resultadosDiv.addEventListener('change', function(e) {
+        if (e.target && e.target.id === 'itens_por_pagina') {
+            e.preventDefault();
+            e.stopPropagation();
+            const valor = e.target.value;
+            realizarBusca(1, valor);
+        }
+    });
+
+    // Adicionar event listener para aba de gráfico usando delegação no container de abas
+    const resultadoTabs = document.getElementById('resultado-tabs');
+    if (resultadoTabs) {
+        resultadoTabs.addEventListener('shown.bs.tab', function(e) {
+            const targetId = e.target.getAttribute('data-bs-target');
+            if (targetId === '#grafico-pane') {
+                if (!statsCarregadas && !carregandoEstatisticas) {
+                    carregarEstatisticas();
+                } else if (statsCarregadas && window.ultimoStatsData) {
+                    // Se já foram carregadas, apenas renderizar novamente
+                    renderStatsChart(window.ultimoStatsData);
+                }
+            }
+        });
+    }
+
+    // ============================================
+    // VALIDAÇÃO DE CAMPOS NUMÉRICOS EM TEMPO REAL
+    // ============================================
+    
+    // Validação de número do documento (apenas números) com feedback melhorado
+    const numDocumentoInput = document.getElementById('txt_num_documento');
+    if (numDocumentoInput) {
+        // Bloquear caracteres não numéricos em tempo real
+        numDocumentoInput.addEventListener('keypress', function(e) {
+            // Permitir apenas números (0-9)
+            if (!/[0-9]/.test(e.key) && !['Backspace', 'Delete', 'Tab', 'Enter', 'ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(e.key)) {
+                e.preventDefault();
+            }
+        });
+        
+        // Também validar no evento input para copiar/colar
+        numDocumentoInput.addEventListener('input', function(e) {
+            // Remover qualquer caractere não numérico
+            const value = e.target.value.replace(/\D/g, '');
+            if (e.target.value !== value) {
+                e.target.value = value;
+            }
+            
+            const feedbackEl = document.getElementById('txt_num_documento_feedback');
+            if (value && !/^\d+$/.test(value)) {
+                e.target.classList.add('is-invalid');
+                e.target.setAttribute('aria-invalid', 'true');
+                if (feedbackEl) {
+                    feedbackEl.textContent = 'Por favor, insira apenas números.';
+                    feedbackEl.classList.add('d-block');
+                    feedbackEl.classList.remove('d-none');
+                }
+            } else {
+                e.target.classList.remove('is-invalid');
+                e.target.setAttribute('aria-invalid', 'false');
+                if (feedbackEl) {
+                    feedbackEl.classList.remove('d-block');
+                    feedbackEl.classList.add('d-none');
+                }
+            }
+        });
+    }
+    
+    // Validação de ano do documento (4 dígitos, entre 1900 e 2100) com feedback melhorado
+    const anoDocumentoInput = document.getElementById('txt_ano_documento');
+    if (anoDocumentoInput) {
+        // Bloquear caracteres não numéricos e limitar a 4 dígitos em tempo real
+        anoDocumentoInput.addEventListener('keypress', function(e) {
+            // Permitir apenas números (0-9)
+            if (!/[0-9]/.test(e.key) && !['Backspace', 'Delete', 'Tab', 'Enter', 'ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(e.key)) {
+                e.preventDefault();
+            }
+            // Limitar a 4 dígitos
+            if (e.target.value.length >= 4 && /[0-9]/.test(e.key)) {
+                e.preventDefault();
+            }
+        });
+        
+        // Também validar no evento input para copiar/colar
+        anoDocumentoInput.addEventListener('input', function(e) {
+            // Remover qualquer caractere não numérico e limitar a 4 dígitos
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length > 4) {
+                value = value.substring(0, 4);
+            }
+            if (e.target.value !== value) {
+                e.target.value = value;
+            }
+            
+            const feedbackEl = document.getElementById('txt_ano_documento_feedback');
+            if (value && (!/^\d{4}$/.test(value) || parseInt(value) < 1900 || parseInt(value) > 2100)) {
+                e.target.classList.add('is-invalid');
+                e.target.setAttribute('aria-invalid', 'true');
+                if (feedbackEl) {
+                    if (!/^\d{4}$/.test(value)) {
+                        feedbackEl.textContent = 'Por favor, insira um ano válido com 4 dígitos (ex: 2025).';
+                    } else {
+                        feedbackEl.textContent = 'Por favor, insira um ano entre 1900 e 2100.';
+                    }
+                    feedbackEl.classList.add('d-block');
+                    feedbackEl.classList.remove('d-none');
+                }
+            } else {
+                e.target.classList.remove('is-invalid');
+                e.target.setAttribute('aria-invalid', 'false');
+                if (feedbackEl) {
+                    feedbackEl.classList.remove('d-block');
+                    feedbackEl.classList.add('d-none');
+                }
+            }
+        });
+    }
+    
+    // Validação de número do protocolo (apenas números) com feedback melhorado
+    const numProtocoloInput = document.getElementById('txt_num_protocolo');
+    if (numProtocoloInput) {
+        // Bloquear caracteres não numéricos em tempo real
+        numProtocoloInput.addEventListener('keypress', function(e) {
+            // Permitir apenas números (0-9)
+            if (!/[0-9]/.test(e.key) && !['Backspace', 'Delete', 'Tab', 'Enter', 'ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(e.key)) {
+                e.preventDefault();
+            }
+        });
+        
+        // Também validar no evento input para copiar/colar
+        numProtocoloInput.addEventListener('input', function(e) {
+            // Remover qualquer caractere não numérico
+            const value = e.target.value.replace(/\D/g, '');
+            if (e.target.value !== value) {
+                e.target.value = value;
+            }
+            
+            const feedbackEl = document.getElementById('txt_num_protocolo_feedback');
+            if (value && !/^\d+$/.test(value)) {
+                e.target.classList.add('is-invalid');
+                e.target.setAttribute('aria-invalid', 'true');
+                if (feedbackEl) {
+                    feedbackEl.textContent = 'Por favor, insira apenas números.';
+                    feedbackEl.classList.add('d-block');
+                    feedbackEl.classList.remove('d-none');
+                }
+            } else {
+                e.target.classList.remove('is-invalid');
+                e.target.setAttribute('aria-invalid', 'false');
+                if (feedbackEl) {
+                    feedbackEl.classList.remove('d-block');
+                    feedbackEl.classList.add('d-none');
+                }
+            }
+        });
+    }
+    
+    // Validação de NPC (apenas números) com feedback melhorado
+    const npcInput = document.getElementById('txt_npc');
+    if (npcInput) {
+        // Bloquear caracteres não numéricos em tempo real
+        npcInput.addEventListener('keypress', function(e) {
+            // Permitir apenas números (0-9)
+            if (!/[0-9]/.test(e.key) && !['Backspace', 'Delete', 'Tab', 'Enter', 'ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(e.key)) {
+                e.preventDefault();
+            }
+        });
+        
+        // Também validar no evento input para copiar/colar
+        npcInput.addEventListener('input', function(e) {
+            // Remover qualquer caractere não numérico
+            const value = e.target.value.replace(/\D/g, '');
+            if (e.target.value !== value) {
+                e.target.value = value;
+            }
+            
+            const feedbackEl = document.getElementById('txt_npc_feedback');
+            if (value && !/^\d+$/.test(value)) {
+                e.target.classList.add('is-invalid');
+                e.target.setAttribute('aria-invalid', 'true');
+                if (feedbackEl) {
+                    feedbackEl.textContent = 'Por favor, insira apenas números.';
+                    feedbackEl.classList.add('d-block');
+                    feedbackEl.classList.remove('d-none');
+                }
+            } else {
+                e.target.classList.remove('is-invalid');
+                e.target.setAttribute('aria-invalid', 'false');
+                if (feedbackEl) {
+                    feedbackEl.classList.remove('d-block');
+                    feedbackEl.classList.add('d-none');
+                }
+            }
+        });
+    }
+
+    // ============================================
+    // MELHORIAS DE UX: ATALHOS DE TECLADO
+    // ============================================
+    
+    document.addEventListener('keydown', function(e) {
+        // Ctrl+K / Cmd+K: Foco no primeiro campo de busca
+        if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+            e.preventDefault();
+            const assuntoInput = document.getElementById('txa_txt_assunto');
+            if (assuntoInput) {
+                assuntoInput.focus();
+                assuntoInput.select();
+            }
+        }
+        
+        // Enter: Executar busca (se não estiver em textarea ou input de múltiplas linhas)
+        if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA' && !e.target.isContentEditable) {
+            if (e.target.closest('#form-pesquisa') && !e.target.closest('.btn')) {
+                e.preventDefault();
+                pesquisarBtn?.click();
+            }
+        }
+        
+        // Esc: Limpar filtros (se não estiver em input/textarea)
+        if (e.key === 'Escape' && !['INPUT', 'TEXTAREA'].includes(e.target.tagName)) {
+            if (haFiltrosAtivos()) {
+                limparBtn?.click();
+            }
+        }
+        
+        // /: Foco no primeiro campo (se não estiver em input)
+        if (e.key === '/' && !['INPUT', 'TEXTAREA'].includes(e.target.tagName)) {
+            e.preventDefault();
+            const primeiroCampo = form.querySelector('input[type="text"], select');
+            if (primeiroCampo) {
+                primeiroCampo.focus();
+            }
+        }
+    });
+
+    // Inicialização
+    Promise.all([
+        carregarTiposDocumento(),
+        carregarSelectSimples('unidades_tramitacao_administrativo_json', '#lst_tramitou', 'Selecione onde tramitou...'),
+        carregarSelectSimples('unidades_tramitacao_administrativo_json', '#lst_localizacao', 'Selecione localização...'),
+        carregarSelectSimples('status_tramitacao_administrativo_json', '#lst_status', 'Selecione situação...'),
+        carregarSelectSimples('tipos_peticionamento_json', '#lst_assunto', 'Selecione classificação...')
+    ]).then(() => {
+        if (window.location.search) {
+            popularFormPelaURL();
+        } else {
+            contarFiltrosAtivos();
+            mostrarResumoFiltros(new FormData(form));
+            showInitialMessage();
+        }
+    }).catch(error => {
+        console.error("Erro ao carregar dados iniciais:", error);
+        renderizarErro("Não foi possível carregar os filtros. Recarregue a página.");
+    });
+
+    // Função para abrir modal de documentos
+    async function handleDocumentoClick(badge) {
+        const codDocumento = badge.dataset.codDocumento;
+        const tipo = badge.dataset.tipo;
+        if (!codDocumento || !tipo) return;
+        
+        const modal = new bootstrap.Modal(document.getElementById('modalDocumentos'));
+        const modalBody = document.getElementById('modalDocumentosBody');
+        const modalTitle = document.getElementById('modalDocumentosLabel');
+        
+        const tipoTitulos = {
+            'documentos_acessorios': 'Documentos Acessórios',
+            'processos_vinculados': 'Processos Vinculados',
+            'materias_vinculadas': 'Matérias Vinculadas'
+        };
+        
+        // Obter identificação do processo
+        const tipoDocumento = badge.dataset.tipoDocumento || '';
+        const numDocumento = badge.dataset.numDocumento || '';
+        const anoDocumento = badge.dataset.anoDocumento || '';
+        const sglTipoDocumento = badge.dataset.sglTipoDocumento || '';
+        
+        // Formatar identificação: sigla número/ano (ex: REQ 10/2015)
+        let identificacaoProcesso = '';
+        if (numDocumento && anoDocumento) {
+            let sigla = sglTipoDocumento;
+            if (!sigla && tipoDocumento) {
+                // Extrair sigla do tipo (ex: "Requerimento" -> "REQ")
+                const palavras = tipoDocumento.split(' ').filter(p => p.length > 2 && /^[A-Z]/.test(p));
+                sigla = palavras.map(p => p[0]).join('').substring(0, 5) || tipoDocumento.substring(0, 10);
+            }
+            identificacaoProcesso = sigla 
+                ? `${sigla} ${numDocumento}/${anoDocumento}`
+                : `${numDocumento}/${anoDocumento}`;
+        }
+        
+        // Montar título do modal
+        const tituloTipo = tipoTitulos[tipo] || 'Documentos';
+        modalTitle.textContent = identificacaoProcesso 
+            ? `${tituloTipo} - ${identificacaoProcesso}`
+            : tituloTipo;
+        modalBody.innerHTML = '<div class="text-center p-5"><i class="fa fa-spinner fa-spin fa-2x"></i><p class="mt-2">Carregando documentos...</p></div>';
+        modal.show();
+        
+        try {
+            const data = await fetchWithCache(`documento_administrativo_documentos_json?cod_documento=${codDocumento}&tipo=${tipo}`);
+            const documentos = data[tipo] || [];
+            
+            if (documentos.length === 0) {
+                modalBody.innerHTML = `<p class="text-center text-muted">Nenhum ${tipoTitulos[tipo].toLowerCase()} encontrado.</p>`;
+                return;
+            }
+            
+            let html = '<ul class="list-group">';
+            documentos.forEach(doc => {
+                let titulo = '';
+                let subtitulo = '';
+                
+                if (tipo === 'documentos_acessorios') {
+                    titulo = doc.nom_documento || doc.des_tipo_documento || 'Documento';
+                    const partesSubtitulo = [];
+                    if (doc.dat_documento) {
+                        partesSubtitulo.push(`<i class="fa fa-calendar-alt me-1"></i>${sanitizeHTML(doc.dat_documento)}`);
+                    }
+                    if (doc.nom_autor_documento) {
+                        partesSubtitulo.push(`<i class="fa fa-user-edit me-1"></i><strong>Autoria:</strong> ${sanitizeHTML(doc.nom_autor_documento)}`);
+                    }
+                    if (doc.txt_assunto) {
+                        partesSubtitulo.push(`<i class="fa fa-file-text me-1"></i>${sanitizeHTML(doc.txt_assunto.substring(0, 100) + (doc.txt_assunto.length > 100 ? '...' : ''))}`);
+                    }
+                    subtitulo = partesSubtitulo.join(' <span class="text-muted">|</span> ');
+                } else if (tipo === 'processos_vinculados') {
+                    titulo = `${doc.sgl_tipo_documento || ''} ${doc.num_documento}/${doc.ano_documento}`.trim();
+                    const partesSubtitulo = [];
+                    if (doc.dat_documento) {
+                        partesSubtitulo.push(`<i class="fa fa-calendar-alt me-1"></i>${sanitizeHTML(doc.dat_documento)}`);
+                    }
+                    if (doc.txt_interessado) {
+                        partesSubtitulo.push(`<i class="fa fa-user me-1"></i><strong>Interessado:</strong> ${sanitizeHTML(doc.txt_interessado)}`);
+                    }
+                    if (doc.txt_assunto) {
+                        partesSubtitulo.push(`<i class="fa fa-file-text me-1"></i>${sanitizeHTML(doc.txt_assunto.substring(0, 100) + (doc.txt_assunto.length > 100 ? '...' : ''))}`);
+                    }
+                    subtitulo = partesSubtitulo.join(' <span class="text-muted">|</span> ');
+                } else if (tipo === 'materias_vinculadas') {
+                    titulo = `${doc.sgl_tipo_materia || ''} ${doc.num_ident_basica}/${doc.ano_ident_basica}`.trim();
+                    const partesSubtitulo = [];
+                    if (doc.dat_apresentacao) {
+                        partesSubtitulo.push(`<i class="fa fa-calendar-alt me-1"></i>${sanitizeHTML(doc.dat_apresentacao)}`);
+                    }
+                    if (doc.txt_ementa) {
+                        partesSubtitulo.push(`<i class="fa fa-file-text me-1"></i>${sanitizeHTML(doc.txt_ementa.substring(0, 100) + (doc.txt_ementa.length > 100 ? '...' : ''))}`);
+                    }
+                    subtitulo = partesSubtitulo.join(' <span class="text-muted">|</span> ');
+                }
+                
+                html += `
+                    <li class="list-group-item">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div class="flex-grow-1">
+                                ${doc.url ? `<a href="${doc.url}" target="_blank" class="text-decoration-none">` : '<span>'}
+                                <i class="fa fa-file-pdf text-danger me-2"></i>
+                                <strong>${sanitizeHTML(titulo)}</strong>
+                                ${doc.url ? '</a>' : '</span>'}
+                                ${subtitulo ? `<div class="mt-2"><small class="text-muted">${subtitulo}</small></div>` : ''}
+                            </div>
+                            ${doc.url ? '<i class="fa fa-external-link-alt text-muted ms-2"></i>' : ''}
+                        </div>
+                    </li>
+                `;
+            });
+            html += '</ul>';
+            modalBody.innerHTML = html;
+        } catch (error) {
+            console.error('Erro ao carregar documentos:', error);
+            modalBody.innerHTML = `<div class="alert alert-danger">Erro ao carregar documentos: ${sanitizeHTML(error.message)}</div>`;
+        }
+    }
+
+    // Event listener para badges de documentos (delegado para resultadosDiv)
+    resultadosDiv.addEventListener('click', function(e) {
+        const badge = e.target.closest('.badge-documento.badge-clickable');
+        if (badge) {
+            e.preventDefault();
+            handleDocumentoClick(badge);
+        }
+    });
+});
 </script>
+
 <dtml-var footer_html>

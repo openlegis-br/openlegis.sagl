@@ -237,7 +237,6 @@
     /* Harmonizar selects nativos com TomSelect */
     /* Aplicar apenas a selects que não estão dentro de um wrapper TomSelect */
     select.form-select:not(.ts-hidden-accessible) {
-        padding: 0.375rem 0.75rem;
         font-size: var(--bs-body-font-size, 1rem);
         line-height: 1.5;
         min-height: calc(1.5em + 0.75rem + 2px);
@@ -654,6 +653,74 @@
         background-color: rgba(255, 193, 7, 0.1) !important;
         color: #856404 !important;
         border-color: rgba(255, 193, 7, 0.25) !important;
+    }
+    
+    /* 12. Badge documento (modais) - comportamento como link */
+    .badge-documento {
+        cursor: pointer !important;
+        user-select: none;
+        transition: all 0.2s ease;
+    }
+    .badge-documento:hover {
+        cursor: pointer !important;
+        opacity: 0.9;
+    }
+    /* Hover específico para badges de documentos com diferentes cores */
+    .badge-documento.bg-info:hover,
+    .badge-documento.bg-info:hover * {
+        background-color: var(--bs-info, #17a2b8) !important;
+        color: #fff !important;
+        border-color: var(--bs-info, #17a2b8) !important;
+    }
+    .badge-documento.bg-warning:hover,
+    .badge-documento.bg-warning:hover * {
+        background-color: var(--bs-warning, #ffc107) !important;
+        color: #000 !important;
+        border-color: var(--bs-warning, #ffc107) !important;
+    }
+    .badge-documento.bg-primary:hover,
+    .badge-documento.bg-primary:hover * {
+        background-color: var(--bs-primary, #44a2d2) !important;
+        color: #fff !important;
+        border-color: var(--bs-primary, #44a2d2) !important;
+    }
+    .badge-documento.bg-success:hover,
+    .badge-documento.bg-success:hover * {
+        background-color: var(--bs-success, #28a745) !important;
+        color: #fff !important;
+        border-color: var(--bs-success, #28a745) !important;
+    }
+    /* Hover para badges com bg-opacity-10 */
+    .badge-documento.bg-info.bg-opacity-10:hover,
+    .badge-documento.bg-info.bg-opacity-10:hover * {
+        background-color: var(--bs-info, #17a2b8) !important;
+        color: #fff !important;
+        border-color: var(--bs-info, #17a2b8) !important;
+    }
+    .badge-documento.bg-warning.bg-opacity-10:hover,
+    .badge-documento.bg-warning.bg-opacity-10:hover * {
+        background-color: var(--bs-warning, #ffc107) !important;
+        color: #000 !important;
+        border-color: var(--bs-warning, #ffc107) !important;
+    }
+    .badge-documento.bg-primary.bg-opacity-10:hover,
+    .badge-documento.bg-primary.bg-opacity-10:hover * {
+        background-color: var(--bs-primary, #44a2d2) !important;
+        color: #fff !important;
+        border-color: var(--bs-primary, #44a2d2) !important;
+    }
+    .badge-documento.bg-success.bg-opacity-10:hover,
+    .badge-documento.bg-success.bg-opacity-10:hover * {
+        background-color: var(--bs-success, #28a745) !important;
+        color: #fff !important;
+        border-color: var(--bs-success, #28a745) !important;
+    }
+    /* Focus para acessibilidade */
+    .badge-documento:focus,
+    .badge-documento:focus-visible {
+        outline: 2px solid var(--bs-primary, #44a2d2) !important;
+        outline-offset: 2px !important;
+        cursor: pointer !important;
     }
     
     /* 12. Card title link - indicar que é clicável */
@@ -4867,3 +4934,5 @@ document.addEventListener('DOMContentLoaded', function () {
     adicionarAcessibilidadeBadges();
 });
 </script>
+
+<dtml-var footer_html>

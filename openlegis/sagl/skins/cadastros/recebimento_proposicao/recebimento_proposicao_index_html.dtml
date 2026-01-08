@@ -687,10 +687,18 @@ function cancelPendingRequests() {
 
 // --- CARREGAMENTO PRINCIPAL AJAX ---
 async function loadData(caixa, page = 1, forceRefresh = false) {
-  if (window.appState.isLoading) return;
-  
   // Cancela requisições anteriores para evitar sobrecarga
   cancelPendingRequests();
+  
+  // Se já estiver carregando, aguarda um pouco antes de tentar novamente
+  if (window.appState.isLoading && !forceRefresh) {
+    setTimeout(function() {
+      if (!window.appState.isLoading) {
+        loadData(caixa, page, forceRefresh);
+      }
+    }, 100);
+    return;
+  }
   
   window.appState.isLoading = true;
   window.appState.currentCaixa = caixa;
@@ -1178,6 +1186,16 @@ const loadCountsDebounced = _.debounce(function() {
   });
   window.appState.pendingCountRequests = [];
   
+  // Se ainda estiver carregando dados, aguarda um pouco mais
+  if (window.appState.isLoading) {
+    setTimeout(function() {
+      if (!window.appState.isLoading) {
+        loadCountsDebounced();
+      }
+    }, 200);
+    return;
+  }
+  
   window.appState.loadingCounts = true;
   
   const caixas = ['revisao', 'assinatura', 'protocolo', 'incorporado', 'pedido_devolucao', 'devolvido'];
@@ -1225,7 +1243,7 @@ const loadCountsDebounced = _.debounce(function() {
       window.appState.pendingCountRequests.push(xhr);
     }
   });
-}, 400);
+}, 800);
 
 function loadCounts() {
   loadCountsDebounced();
@@ -1336,10 +1354,13 @@ async function handleTabChange(e) {
   // Carrega dados primeiro, depois contagens (com delay para não sobrecarregar)
   try {
     await loadData(caixa, 1, true);
-    // Aguarda um pouco antes de carregar contagens para evitar sobrecarga
+    // Aguarda mais tempo antes de carregar contagens para evitar sobrecarga
+    // e priorizar o carregamento dos dados principais
     setTimeout(() => {
-      loadCounts();
-    }, 150);
+      if (!window.appState.isLoading) {
+        loadCounts();
+      }
+    }, 300);
   } catch (error) {
     // Ignora erros já tratados em loadData
   }

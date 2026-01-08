@@ -986,10 +986,15 @@ class ProcessoNormaTaskExecutor(grok.View):
                 return json.dumps({'error': 'cod_norma deve ser um número', 'success': False})
             
             # Verifica se o contexto tem os atributos necessários
-            # IMPORTANTE: O contexto deve ser o site /sagl, que contém sapl_documentos
+            # IMPORTANTE: O contexto deve ser o site /sagl, que contém sapl_documentos.
+            # Quando acessado via HTTP com VirtualHostRoot, o contexto pode ser o root do Zope,
+            # mas o VirtualHostRoot permite que sapl_documentos seja acessado via Acquisition.
             try:
-                if not hasattr(self.context, 'sapl_documentos'):
-                    error_msg = f"Contexto não tem sapl_documentos. Tipo: {type(self.context).__name__}. Esperado: site /sagl (que contém sapl_documentos)"
+                # Tenta acessar sapl_documentos - pode estar disponível via Acquisition mesmo que
+                # o contexto seja o root (quando VirtualHostRoot está configurado)
+                sapl_docs = getattr(self.context, 'sapl_documentos', None)
+                if sapl_docs is None:
+                    error_msg = f"Contexto não tem sapl_documentos. Tipo: {type(self.context).__name__}. Esperado: site /sagl (que contém sapl_documentos) ou root com VirtualHostRoot configurado."
                     logger.error(f"[ProcessoNormaTaskExecutor] {error_msg}")
                     self.request.RESPONSE.setStatus(500)
                     self.request.RESPONSE.setHeader('Content-Type', 'application/json; charset=utf-8')

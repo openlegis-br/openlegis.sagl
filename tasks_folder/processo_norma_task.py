@@ -555,8 +555,14 @@ def gerar_processo_norma_integral_task(self, site, cod_norma, portal_url, user_i
         )
         
         # Constrói URL da view ProcessoNormaTaskExecutor
+        # IMPORTANTE: A URL precisa incluir /sagl/ para que o contexto seja resolvido corretamente
+        # mesmo que o portal_url seja o domínio direto (sem /sagl/), internamente o Zope espera /sagl/
         base_url = portal_url.rstrip('/')
-        executor_url = f"{base_url}/@@processo_norma_task_executor"
+        # Se a URL não contém /sagl/, adiciona
+        if '/sagl/' not in base_url:
+            executor_url = f"{base_url}/sagl/@@processo_norma_task_executor"
+        else:
+            executor_url = f"{base_url}/@@processo_norma_task_executor"
         
         # Prepara dados para POST
         data = {

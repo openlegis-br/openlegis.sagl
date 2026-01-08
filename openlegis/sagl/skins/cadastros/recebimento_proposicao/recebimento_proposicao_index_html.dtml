@@ -1200,16 +1200,31 @@ const loadCountsDebounced = _.debounce(function() {
   
   const caixas = ['revisao', 'assinatura', 'protocolo', 'incorporado', 'pedido_devolucao', 'devolvido'];
   const filtros = lerFiltrosForm();
-  let completed = 0;
-  const total = caixas.filter(caixa => $(`[data-caixa="${caixa}"]`).length).length;
+  // Filtra apenas caixas que existem no DOM
+  const caixasDisponiveis = caixas.filter(caixa => $(`[data-caixa="${caixa}"]`).length);
   
-  if (total === 0) {
+  if (caixasDisponiveis.length === 0) {
     window.appState.loadingCounts = false;
     return;
   }
   
-  caixas.forEach(caixa => {
-    if ($(`[data-caixa="${caixa}"]`).length) {
+  // Processa contagens sequencialmente para evitar sobrecarga
+  // Máximo de 2 requisições simultâneas para balancear velocidade e carga
+  const MAX_CONCURRENT = 2;
+  let currentIndex = 0;
+  
+  function loadNextBatch() {
+    const remaining = caixasDisponiveis.length - currentIndex;
+    if (remaining === 0) {
+      window.appState.loadingCounts = false;
+      return;
+    }
+    
+    // Processa no máximo MAX_CONCURRENT requisições por vez
+    const batch = caixasDisponiveis.slice(currentIndex, currentIndex + MAX_CONCURRENT);
+    let batchCompleted = 0;
+    
+    batch.forEach(caixa => {
       const params = Object.assign(
         {
           caixa: caixa,
@@ -1217,14 +1232,18 @@ const loadCountsDebounced = _.debounce(function() {
         },
         filtros
       );
+      
       const xhr = $.get(APP_CONFIG.API_URL, params)
         .done(resp => {
           updateBadge(caixa, resp.paginacao.total);
-          completed++;
+          batchCompleted++;
           // Remove da lista quando completar
           window.appState.pendingCountRequests = window.appState.pendingCountRequests.filter(r => r !== xhr);
-          if (completed === total) {
-            window.appState.loadingCounts = false;
+          // Quando o lote atual completar, processa o próximo
+          if (batchCompleted === batch.length) {
+            currentIndex += batch.length;
+            // Pequeno delay entre lotes para não sobrecarregar
+            setTimeout(loadNextBatch, 100);
           }
         })
         .fail(err => {
@@ -1232,17 +1251,22 @@ const loadCountsDebounced = _.debounce(function() {
           if (err.statusText !== 'abort' && err.status !== 0 && err.statusText !== 'canceled') {
             updateBadge(caixa, 0);
           }
-          completed++;
+          batchCompleted++;
           // Remove da lista mesmo em caso de erro
           window.appState.pendingCountRequests = window.appState.pendingCountRequests.filter(r => r !== xhr);
-          if (completed === total) {
-            window.appState.loadingCounts = false;
+          // Quando o lote atual completar (mesmo com erros), processa o próximo
+          if (batchCompleted === batch.length) {
+            currentIndex += batch.length;
+            setTimeout(loadNextBatch, 100);
           }
         });
       
       window.appState.pendingCountRequests.push(xhr);
-    }
-  });
+    });
+  }
+  
+  // Inicia o processamento em lotes
+  loadNextBatch();
 }, 800);
 
 function loadCounts() {

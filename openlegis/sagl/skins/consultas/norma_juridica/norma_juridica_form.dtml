@@ -11,10 +11,10 @@
       <dtml-call expr="REQUEST.set('texto_odt', str(cod_norma)+'_texto_integral.odt')">                   
       <dtml-if "hasattr(sapl_documentos.norma_juridica,texto_original) or hasattr(sapl_documentos.norma_juridica,texto_consolidado)">
         <dtml-if "hasattr(sapl_documentos.norma_juridica,texto_original)">
-          <a class="btn btn-outline-primary" href="<dtml-var portal_url>/@@pasta_digital_norma?cod_norma=<dtml-var cod_norma>&action=pasta" target="_blank">
+          <a class="btn btn-primary" href="<dtml-var portal_url>/@@pasta_digital_norma?cod_norma=<dtml-var cod_norma>&action=pasta" target="_blank">
             <i class="fas fa-folder-open me-1"></i>Pasta Digital
           </a>
-          <a class="btn btn-outline-secondary" href="<dtml-var portal_url>/pysc/download_norma_pysc?cod_norma=<dtml-var cod_norma>&texto_original=1" target="_blank">
+          <a class="btn btn-secondary" href="<dtml-var portal_url>/pysc/download_norma_pysc?cod_norma=<dtml-var cod_norma>&texto_original=1" target="_blank">
             <dtml-if expr="zsql.assinatura_documento_obter_zsql(codigo=cod_norma, tipo_doc='norma',ind_assinado=1, cod_usuario=None)">
               <i class="fas fa-certificate me-1"></i>Texto Original
             <dtml-else>
@@ -23,7 +23,7 @@
           </a>
         </dtml-if>
         <dtml-if "hasattr(sapl_documentos.norma_juridica,texto_consolidado)">
-          <a class="btn btn-outline-secondary" href="<dtml-var portal_url>/pysc/download_norma_pysc?cod_norma=<dtml-var cod_norma>&texto_consolidado=1" target="_blank">
+          <a class="btn btn-secondary" href="<dtml-var portal_url>/pysc/download_norma_pysc?cod_norma=<dtml-var cod_norma>&texto_consolidado=1" target="_blank">
             <i class="fas fa-file-pdf me-1"></i>Texto Compilado
           </a>
         </dtml-if> 

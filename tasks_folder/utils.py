@@ -1043,28 +1043,13 @@ class ZopeContext:
         # disponível no root porque o VirtualHostRoot só é aplicado em requisições HTTP.
         # Solução: usar o root como site e configurar VirtualHostRoot=['sagl'] no REQUEST mock.
         if traverse_path == 'sagl':
-            # Verifica rapidamente se o objeto existe (pode não estar em objectIds quando acessado via código Python)
+            # Tenta acessar 'sagl' uma vez
             try:
-                obj_ids = list(app.objectIds()) if hasattr(app, 'objectIds') else []
-                if 'sagl' not in obj_ids:
-                    # Objeto não está disponível via código Python - usa root + VirtualHostRoot
-                    self.logger.info(f"[ZopeContext] Objeto 'sagl' não está disponível no root quando acessado via código Python.")
-                    self.logger.info(f"[ZopeContext] Isso é esperado - o VirtualHostRoot só é aplicado em requisições HTTP.")
-                    self.logger.info(f"[ZopeContext] Usando root como site e configurando VirtualHostRoot=['sagl'] no REQUEST mock.")
-                    self._needs_virtualhost_root = True
-                    site = app
-                else:
-                    # Tenta acessar uma vez
-                    try:
-                        site = app.unrestrictedTraverse(['sagl'])
-                        self.logger.info(f"[ZopeContext] Objeto 'sagl' encontrado e acessado com sucesso.")
-                    except (KeyError, AttributeError):
-                        # Não conseguiu - usa root + VirtualHostRoot
-                        self.logger.info(f"[ZopeContext] Não foi possível acessar 'sagl' diretamente. Usando root + VirtualHostRoot.")
-                        self._needs_virtualhost_root = True
-                        site = app
-            except Exception as e:
-                self.logger.debug(f"[ZopeContext] Erro ao verificar 'sagl': {e}. Usando root + VirtualHostRoot.")
+                site = app.unrestrictedTraverse(['sagl'])
+                self.logger.info(f"[ZopeContext] Objeto 'sagl' encontrado e acessado com sucesso.")
+            except (KeyError, AttributeError):
+                # Não encontrado - usa root + VirtualHostRoot
+                self.logger.info(f"[ZopeContext] Objeto 'sagl' não está disponível via código Python (esperado). Usando root + VirtualHostRoot.")
                 self._needs_virtualhost_root = True
                 site = app
         elif traverse_path:

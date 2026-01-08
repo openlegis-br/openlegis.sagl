@@ -312,40 +312,33 @@ class ProcessoNormaView(grok.View):
                 raise PDFGenerationError(f"Falha ao gerar/baixar capa do processo: {str(e)}")
             
             try:
-                
-                # OTIMIZAÇÃO: Polling inteligente ao invés de sleep fixo
-                # Aguarda a geração da capa com polling e timeout
-                max_wait_time = 5.0  # Máximo de 5 segundos
-                poll_interval = 0.1  # Verifica a cada 100ms
-                waited = 0.0
+                # OTIMIZAÇÃO: Polling simplificado - verifica apenas 2 vezes rapidamente
+                # Se não estiver pronto, o download com timeout maior vai aguardar a geração
                 capa_ready = False
                 
-                while waited < max_wait_time:
-                    try:
-                        # Tenta fazer uma requisição HEAD para verificar se a capa está disponível
-                        test_url = url if 'url' in locals() else None
-                        if test_url:
-                            test_req = urllib.request.Request(test_url)
-                            test_req.add_header('User-Agent', 'SAGL-PDF-Generator/1.0')
-                            test_req.get_method = lambda: 'HEAD'
-                            try:
-                                with urllib.request.urlopen(test_req, timeout=2) as test_response:
-                                    if test_response.status == 200:
-                                        capa_ready = True
-                                        break
-                            except (urllib.error.HTTPError, urllib.error.URLError):
-                                pass  # Ainda não está pronto, continua esperando
-                    except Exception:
-                        pass
-                    
-                    time.sleep(poll_interval)
-                    waited += poll_interval
+                # Primeira verificação rápida após 0.5s
+                time.sleep(0.5)
+                try:
+                    test_url = url if 'url' in locals() else None
+                    if test_url:
+                        test_req = urllib.request.Request(test_url)
+                        test_req.add_header('User-Agent', 'SAGL-PDF-Generator/1.0')
+                        test_req.get_method = lambda: 'HEAD'
+                        try:
+                            with urllib.request.urlopen(test_req, timeout=1) as test_response:
+                                if test_response.status == 200:
+                                    capa_ready = True
+                                    logger.debug(f"[coletar_documentos] Capa verificada como pronta")
+                        except (urllib.error.HTTPError, urllib.error.URLError):
+                            pass  # Ainda não está pronto, continua
+                except Exception:
+                    pass
                 
-                # Se não ficou pronto no tempo esperado, continua mesmo assim
+                # Se não ficou pronto, faz download direto - o timeout maior vai aguardar
                 if not capa_ready:
-                    logger.debug(f"[coletar_documentos] Capa não verificada como pronta após {waited:.1f}s, continuando...")
+                    logger.debug(f"[coletar_documentos] Capa não pronta na primeira verificação, fazendo download direto (timeout 60s)...")
                 
-                # Faz download via HTTP
+                # Faz download via HTTP (com timeout maior para aguardar geração se necessário)
                 base_url = self.context.absolute_url()
                 if 'url_path' in locals() and url_path == 'capa_norma':
                     url = f"{base_url}/modelo_proposicao/capa_norma?cod_norma={dados_norma['cod_norma']}&action=download"
@@ -356,7 +349,10 @@ class ProcessoNormaView(grok.View):
                 req.add_header('User-Agent', 'SAGL-PDF-Generator/1.0')
                 
                 try:
-                    with urllib.request.urlopen(req, timeout=30) as response:
+                    # Timeout aumentado para 60s - a geração de PDF pode demorar
+                    # Se o polling detectou que está pronto, este download será rápido
+                    # Se não detectou, o timeout maior permite que a geração termine
+                    with urllib.request.urlopen(req, timeout=60) as response:
                         capa_data = response.read()
                     
                     if capa_data and len(capa_data) > 0:

@@ -723,8 +723,23 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         return self.gerar_odt(**kwargs)
 
     def capa_norma_gerar_odt(self, capa_dic, action):
+        # Acessa o modelo através do caminho completo: sapl_documentos.modelo.norma.capa_norma.odt
+        try:
+            modelo_arquivo = getattr(self.sapl_documentos.modelo.norma, "capa_norma.odt", None)
+            if modelo_arquivo is None:
+                # Se não encontrou, lista arquivos disponíveis para debug
+                try:
+                    arquivos = self.sapl_documentos.modelo.norma.objectIds() if hasattr(self.sapl_documentos.modelo.norma, 'objectIds') else []
+                    logger.warning(f"[capa_norma_gerar_odt] capa_norma.odt não encontrado. Arquivos disponíveis: {arquivos[:10]}")
+                except:
+                    pass
+                raise AttributeError("capa_norma.odt não encontrado em sapl_documentos.modelo.norma")
+        except AttributeError as e:
+            logger.error(f"[capa_norma_gerar_odt] Erro ao acessar modelo: {e}")
+            raise
+        
         kwargs = {
-            'modelo': getattr(self.sapl_documentos.modelo.norma, "capa_norma.odt"),
+            'modelo': modelo_arquivo,
             'dicionario_dados': locals(),
             'nome_arquivo': capa_dic['nom_arquivo_odt'],
             'nom_arquivo_pdf': capa_dic['nom_arquivo_pdf'],

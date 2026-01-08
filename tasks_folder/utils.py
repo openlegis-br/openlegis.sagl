@@ -1154,8 +1154,8 @@ class ZopeContext:
                 # Se falhar (path não existe via traverse), tenta outras formas de acessar
                 self.logger.info(f"[ZopeContext] Path '{traverse_path}' não encontrado via traverse ({e}), tentando alternativas...")
                 
-            # IMPORTANTE: No Zope, o objeto 'sagl' no root é o site/container que contém sapl_documentos.
-            # Tenta múltiplas formas de acessar o objeto
+                # IMPORTANTE: No Zope, o objeto 'sagl' no root é o site/container que contém sapl_documentos.
+                # Tenta múltiplas formas de acessar o objeto
                 if isinstance(traverse_path, str) and '/' not in traverse_path.strip('/'):
                     site = None
                     
@@ -1211,14 +1211,40 @@ class ZopeContext:
                         # Nenhum método funcionou - isso é um erro se for 'sagl'
                         if traverse_path == 'sagl':
                             # Lista todos os objetos disponíveis no root para debug
+                            obj_ids = []
                             try:
-                                obj_ids = app.objectIds() if hasattr(app, 'objectIds') else []
-                                self.logger.error(f"[ZopeContext] Objeto 'sagl' não encontrado. Objetos disponíveis no root: {obj_ids}")
-                            except Exception:
-                                pass
-                            error_msg = f"Objeto 'sagl' não encontrado no root do Zope após tentar múltiplos métodos! /sagl deve ser o container no root (que contém sapl_documentos)"
-                            self.logger.error(f"[ZopeContext] {error_msg}")
-                            raise Exception(error_msg)
+                                if hasattr(app, 'objectIds'):
+                                    obj_ids = list(app.objectIds())
+                                    self.logger.error(f"[ZopeContext] Objeto 'sagl' não encontrado após todos os métodos. Objetos disponíveis no root: {obj_ids}")
+                                else:
+                                    # Tenta acessar via __dict__ ou outros métodos
+                                    try:
+                                        if hasattr(app, '__dict__'):
+                                            obj_ids = list(app.__dict__.keys())
+                                            self.logger.debug(f"[ZopeContext] Tentando __dict__: {obj_ids[:10]}")
+                                    except:
+                                        pass
+                                    
+                                    # Tenta via dir()
+                                    try:
+                                        obj_attrs = [attr for attr in dir(app) if not attr.startswith('_')]
+                                        self.logger.debug(f"[ZopeContext] Atributos via dir() (primeiros 20): {obj_attrs[:20]}")
+                                    except:
+                                        pass
+                            except Exception as list_err:
+                                self.logger.debug(f"[ZopeContext] Erro ao listar objetos: {list_err}")
+                            
+                            # Se não encontrou 'sagl', verifica se há algo similar
+                            similar = [obj for obj in obj_ids if 'sagl' in str(obj).lower()]
+                            if similar:
+                                self.logger.warning(f"[ZopeContext] Objetos similares a 'sagl' encontrados: {similar}")
+                            
+                            # Última tentativa: tenta usar o root e deixar resolve_site tentar encontrar
+                            self.logger.warning(f"[ZopeContext] Todos os métodos falharam para 'sagl'. Objetos disponíveis: {obj_ids[:20]}")
+                            self.logger.warning(f"[ZopeContext] Tentando usar root como fallback e deixar resolve_site tentar resolver...")
+                            site = app
+                            # Não levanta exceção ainda - deixa resolve_site tentar resolver
+                            # Se resolve_site também falhar, aí sim levanta a exceção no final
                         # Para outros paths, tenta usar root
                         site = app
                         self.logger.warning(f"[ZopeContext] Path '{traverse_path}' não existe, tentando root como fallback")
@@ -1286,7 +1312,49 @@ class ZopeContext:
                 raise Exception(error_msg)
         
         # Resolve o site removendo wrappers
+        # Se site é o app (root) e não encontramos 'sagl', resolve_site pode tentar acessar app.sagl diretamente
         resolved_site = resolve_site(site, self.logger)
+        
+        # Verifica se resolve_site conseguiu resolver corretamente
+        # Se ainda é o app (root) e estávamos procurando por 'sagl', isso pode ser um problema
+        if site == app and traverse_path == 'sagl':
+            # Verifica se resolve_site conseguiu encontrar o site via app.sagl
+            try:
+                # Se resolve_site retornou algo diferente do app, provavelmente encontrou
+                if resolved_site == app:
+                    # Ainda é o root - verifica se resolve_site tentou acessar app.sagl mas não encontrou
+                    # Verifica se pelo menos tem alguns atributos esperados de um site
+                    has_expected_attrs = False
+                    try:
+                        test_attrs = [
+                            getattr(resolved_site, 'portal_skins', None),
+                            getattr(resolved_site, 'zsql', None),
+                            getattr(resolved_site, 'sapl_documentos', None),
+                        ]
+                        has_expected_attrs = any(attr is not None for attr in test_attrs)
+                    except:
+                        pass
+                    
+                    if not has_expected_attrs:
+                        # Lista objetos para debug
+                        obj_ids = []
+                        try:
+                            if hasattr(app, 'objectIds'):
+                                obj_ids = list(app.objectIds())
+                        except:
+                            pass
+                        error_msg = f"Objeto 'sagl' não encontrado no root do Zope mesmo após resolve_site. Objetos disponíveis no root: {obj_ids[:20]}. /sagl deve ser o container no root (que contém sapl_documentos)"
+                        self.logger.error(f"[ZopeContext] {error_msg}")
+                        raise Exception(error_msg)
+                    else:
+                        # Tem atributos esperados - provavelmente está OK mesmo sendo o root
+                        self.logger.info(f"[ZopeContext] Root tem atributos esperados, usando como site")
+                else:
+                    # resolve_site encontrou algo diferente do app - provavelmente está OK
+                    self.logger.info(f"[ZopeContext] resolve_site conseguiu resolver o site: {type(resolved_site)}")
+            except Exception as check_err:
+                # Se houver erro na verificação, propaga o erro
+                raise
         
         return resolved_site
     

@@ -45,13 +45,13 @@ for documento in context.zsql.documento_administrativo_obter_zsql(cod_documento=
         capa_dic['num_protocolo'] = ""
         capa_dic['dat_protocolo'] = documento.dat_documento
         capa_dic['hor_protocolo'] = ''
-        capa_dic["dia_protocolo"] = context.pysc.data_converter_por_extenso_pysc(data=context.pysc.iso_to_port_pysc(documento.data_documento))
+        capa_dic["dia_protocolo"] = context.pysc.data_converter_por_extenso_pysc(data=context.pysc.iso_to_port_pysc(documento.dat_documento))
         capa_dic["dia_semana"] = context.pysc.data_converter_dia_semana_pysc(data=documento.dat_documento)
  else:
     capa_dic['num_protocolo'] = ""
     capa_dic['dat_protocolo'] = documento.dat_documento
     capa_dic['hor_protocolo'] = ''
-    capa_dic["dia_protocolo"] = context.pysc.data_converter_por_extenso_pysc(data=context.pysc.iso_to_port_pysc(documento.data_documento))
+    capa_dic["dia_protocolo"] = context.pysc.data_converter_por_extenso_pysc(data=context.pysc.iso_to_port_pysc(documento.dat_documento))
     capa_dic["dia_semana"] = context.pysc.data_converter_dia_semana_pysc(data=documento.dat_documento)
  capa_dic['dat_vencimento'] = ""
  if documento.dat_fim_prazo != None:

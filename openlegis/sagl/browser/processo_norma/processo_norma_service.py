@@ -219,6 +219,6 @@ class ProcessoNormaService:
                 pass  # Ignora erros na verificação rápida
                 
         except Exception as e:
-            logger.debug(f"[ProcessoNormaService] Erro ao verificar tasks ativas: {e}")
+            pass
         
         return (False, None, None)

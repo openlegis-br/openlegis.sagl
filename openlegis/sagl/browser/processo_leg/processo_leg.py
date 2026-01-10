@@ -734,7 +734,13 @@ class ProcessoLegView(grok.View):
             raise PDFGenerationError(f"Falha ao obter dados da matéria: {str(e)}")
 
     def coletar_documentos(self, dados_materia: Dict, dir_base: str) -> List[Dict]:
-        """Coleta documentos relacionados à matéria"""
+        """
+        Coleta documentos relacionados à matéria
+        
+        Args:
+            dados_materia: Dicionário com dados da matéria (retornado por obter_dados_materia)
+            dir_base: Diretório base onde salvar arquivos
+        """
         nome_camara = self.context.sapl_documentos.props_sagl.getProperty(
             'nom_casa', '(não definido)'
         )
@@ -777,37 +783,87 @@ class ProcessoLegView(grok.View):
                 else:
                     raise AttributeError("modelo_proposicao não encontrado")
                 
-                # OTIMIZAÇÃO: Polling simplificado - verifica apenas 1 vez rapidamente
-                # Se não estiver pronto, o download com timeout maior vai aguardar a geração
-                time.sleep(0.5)
-                
                 base_url = self.context.absolute_url()
                 url = f"{base_url}/modelo_proposicao/capa_processo?cod_materia={dados_materia['cod_materia']}&action=download"
                 
                 import urllib.request
                 import urllib.error
                 
-                # Faz download via HTTP (com timeout maior para aguardar geração se necessário)
-                req = urllib.request.Request(url)
-                req.add_header('User-Agent', 'SAGL-PDF-Generator/1.0')
+                # OTIMIZAÇÃO: Polling adaptativo com retry e backoff exponencial
+                # Tenta fazer download com polling progressivo até a capa estar pronta
+                max_retries = 5
+                base_delay = 0.2  # Delay inicial reduzido para processos pequenos
+                max_timeout = 120  # Timeout máximo de 2 minutos
                 
-                try:
-                    with urllib.request.urlopen(req, timeout=60) as response:
-                        capa_data = response.read()
-                    
-                    if capa_data and len(capa_data) > 0:
-                        # Salva no filesystem
-                        with open(caminho_capa, 'wb') as f:
-                            f.write(capa_data)
-                    else:
-                        raise PDFGenerationError("Download da capa retornou dados vazios")
-                except urllib.error.HTTPError as http_err:
-                    if http_err.code == 404:
-                        raise PDFGenerationError(f"Capa do processo não encontrada (404): {url}")
-                    else:
-                        raise PDFGenerationError(f"Erro HTTP ao baixar capa: {http_err.code} - {http_err.reason}")
-                except Exception as e:
-                    raise PDFGenerationError(f"Erro ao baixar capa via HTTP: {str(e)}")
+                capa_data = None
+                last_error = None
+                
+                for attempt in range(max_retries):
+                    try:
+                        # Delay progressivo: 0.2s, 0.4s, 0.8s, 1.6s, 3.2s
+                        if attempt > 0:
+                            delay = base_delay * (2 ** (attempt - 1))
+                            time.sleep(delay)
+                        
+                        req = urllib.request.Request(url)
+                        req.add_header('User-Agent', 'SAGL-PDF-Generator/1.0')
+                        
+                        # Timeout adaptativo: aumenta com tentativas
+                        timeout = 15 + (attempt * 15)  # 15s, 30s, 45s, 60s, 75s
+                        timeout = min(timeout, max_timeout)
+                        
+                        with urllib.request.urlopen(req, timeout=timeout) as response:
+                            capa_data = response.read()
+                        
+                        if capa_data and len(capa_data) > 0:
+                            # Sucesso - salva no filesystem
+                            with open(caminho_capa, 'wb') as f:
+                                f.write(capa_data)
+                            break
+                        else:
+                            last_error = "Download da capa retornou dados vazios"
+                            
+                    except urllib.error.HTTPError as http_err:
+                        if http_err.code == 404:
+                            # 404 significa que a capa ainda não está pronta, tenta novamente
+                            if attempt < max_retries - 1:
+                                last_error = f"Capa do processo não encontrada (404): {url}"
+                                continue
+                            else:
+                                raise PDFGenerationError(f"Capa do processo não encontrada após {max_retries} tentativas (404): {url}")
+                        elif http_err.code >= 500:
+                            # Erros 5xx são retentáveis
+                            if attempt < max_retries - 1:
+                                last_error = f"Erro HTTP {http_err.code} - {http_err.reason}"
+                                continue
+                            else:
+                                raise PDFGenerationError(f"Erro HTTP {http_err.code} ao baixar capa após {max_retries} tentativas: {http_err.reason}")
+                        else:
+                            # Outros erros HTTP não são retentáveis
+                            raise PDFGenerationError(f"Erro HTTP {http_err.code} ao baixar capa: {http_err.reason}")
+                            
+                    except urllib.error.URLError as url_err:
+                        if attempt < max_retries - 1:
+                            last_error = f"Erro de URL: {url_err}"
+                            continue
+                        else:
+                            raise PDFGenerationError(f"Erro ao baixar capa via HTTP após {max_retries} tentativas: {url_err}")
+                            
+                    except Exception as e:
+                        error_str = str(e).lower()
+                        if 'timeout' in error_str or 'timed out' in error_str:
+                            if attempt < max_retries - 1:
+                                last_error = f"Timeout ao baixar capa: {e}"
+                                continue
+                            else:
+                                raise PDFGenerationError(f"Timeout ao baixar capa após {max_retries} tentativas: {e}")
+                        else:
+                            # Outros erros não são retentáveis
+                            raise PDFGenerationError(f"Erro ao baixar capa via HTTP: {str(e)}")
+                
+                # Se chegou aqui sem sucesso, lança erro
+                if not capa_data or len(capa_data) == 0:
+                    raise PDFGenerationError(f"Falha ao baixar capa após {max_retries} tentativas: {last_error or 'Erro desconhecido'}")
                     
             except Exception as e:
                 logger.error(f"[coletar_documentos] Erro ao gerar/baixar capa do processo: {str(e)}", exc_info=True)
@@ -866,12 +922,15 @@ class ProcessoLegView(grok.View):
             }
 
             # Fichas de votação - geradas no filesystem da pasta digital para uso pelo celery
+            # OTIMIZAÇÃO: Paralelização da geração de fichas de votação
             votacoes = self.context.pysc.votacao_obter_pysc(cod_materia=dados_materia['cod_materia'])
+            
+            # Filtra votações válidas primeiro (antes de paralelizar)
+            votacoes_validas = []
             for i, votacao in enumerate(votacoes):
                 fase = votacao.get('fase', '')
                 if fase == "Expediente - Leitura de Matérias":
-                   # Log removido para reduzir verbosidade
-                   continue
+                    continue
 
                 # Verifica se é "Leitura" ou resultado "Lido em Plenário" - não adiciona na pasta digital
                 turno = votacao.get('txt_turno', '')
@@ -882,50 +941,76 @@ class ProcessoLegView(grok.View):
                 if (turno and 'leitura' in turno.lower()) or \
                    (resultado and 'lido em plenário' in resultado.lower()) or \
                    (tipo_votacao and 'leitura' in tipo_votacao.lower()):
-                    logger.debug(f"[coletar_documentos] Ficha de votação de leitura ignorada: turno={turno}, resultado={resultado}")
-                    continue
-
-                nome_arquivo = f'ficha_votacao_{i + 1}.pdf'
-                caminho_arquivo = secure_path_join(dir_base, nome_arquivo)
-
-                # Gera a ficha de votação diretamente no filesystem da pasta digital
-                gerar_ficha_votacao_pdf(
-                    votacao, caminho_arquivo, nome_camara, nome_sessao, self.context)
-
-                # Valida que o arquivo foi gerado corretamente no filesystem
-                if not os.path.exists(caminho_arquivo):
-                    logger.warning(f"[coletar_documentos] Ficha de votação não foi gerada: {caminho_arquivo}")
                     continue
                 
-                # Verifica que o arquivo não está vazio
-                if os.path.getsize(caminho_arquivo) == 0:
-                    logger.warning(f"[coletar_documentos] Ficha de votação está vazia: {caminho_arquivo}")
-                    continue
-
-                # Valida o conteúdo do PDF
-                with open(caminho_arquivo, 'rb') as f:
-                    pdf_bytes = f.read()
-                validate_pdf_content(pdf_bytes)
-
-                raw_date = votacao.get('dat_sessao', '')
+                votacoes_validas.append((i, votacao))
+            
+            # OTIMIZAÇÃO: Worker para geração paralela de fichas de votação
+            def gerar_ficha_worker(votacao_data):
+                """Worker para gerar uma ficha de votação"""
+                i, votacao = votacao_data
                 try:
-                    date_obj = raw_date if isinstance(raw_date, DateTime) else DateTime(raw_date, datefmt='international')
-                    date_str = date_obj.strftime('%Y-%m-%d')
-                except Exception:
-                    date_str = str(raw_date)[:10]
-                hora_str = votacao.get('hora_sessao', '00:00:00')
-                data_votacao = f"{date_str} {hora_str}"
-
-                # Adiciona documento ao array - já está no filesystem para uso pelo celery
-                documentos.append({
-                    "data": data_votacao,
-                    "file": nome_arquivo,
-                    "title": f"Registro de Votação ({turno})",
-                    "path": dir_base,
-                    "filesystem": True  # Indica que está no filesystem da pasta digital
-                })
-                
-                logger.debug(f"[coletar_documentos] Ficha de votação gerada no filesystem: {caminho_arquivo} ({len(pdf_bytes)} bytes)")
+                    nome_arquivo = f'ficha_votacao_{i + 1}.pdf'
+                    caminho_arquivo = secure_path_join(dir_base, nome_arquivo)
+                    
+                    # Gera a ficha de votação diretamente no filesystem
+                    gerar_ficha_votacao_pdf(
+                        votacao, caminho_arquivo, nome_camara, nome_sessao, self.context)
+                    
+                    # Valida que o arquivo foi gerado corretamente
+                    if not os.path.exists(caminho_arquivo):
+                        logger.warning(f"[coletar_documentos] Ficha de votação não foi gerada: {caminho_arquivo}")
+                        return None
+                    
+                    # Verifica que o arquivo não está vazio
+                    if os.path.getsize(caminho_arquivo) == 0:
+                        logger.warning(f"[coletar_documentos] Ficha de votação está vazia: {caminho_arquivo}")
+                        return None
+                    
+                    # Valida o conteúdo do PDF
+                    with open(caminho_arquivo, 'rb') as f:
+                        pdf_bytes = f.read()
+                    validate_pdf_content(pdf_bytes)
+                    
+                    # Prepara dados do documento
+                    raw_date = votacao.get('dat_sessao', '')
+                    try:
+                        date_obj = raw_date if isinstance(raw_date, DateTime) else DateTime(raw_date, datefmt='international')
+                        date_str = date_obj.strftime('%Y-%m-%d')
+                    except Exception:
+                        date_str = str(raw_date)[:10]
+                    hora_str = votacao.get('hora_sessao', '00:00:00')
+                    data_votacao = f"{date_str} {hora_str}"
+                    turno = votacao.get('txt_turno', '')
+                    
+                    return {
+                        "data": data_votacao,
+                        "file": nome_arquivo,
+                        "title": f"Registro de Votação ({turno})",
+                        "path": dir_base,
+                        "filesystem": True,
+                        "file_size": len(pdf_bytes)
+                    }
+                except Exception as e:
+                    logger.warning(f"[coletar_documentos] Erro ao gerar ficha de votação {i + 1}: {e}")
+                    return None
+            
+            # OTIMIZAÇÃO: Paraleliza geração de fichas usando ThreadPoolExecutor (compatível com Zope)
+            if votacoes_validas:
+                # Limita workers para evitar sobrecarga (2-3 workers é suficiente para geração de PDF)
+                max_ficha_workers = min(3, len(votacoes_validas))
+                with ThreadPoolExecutor(max_workers=max_ficha_workers) as executor:
+                    futures = {executor.submit(gerar_ficha_worker, vot_data): vot_data 
+                              for vot_data in votacoes_validas}
+                    
+                    for future in futures:
+                        try:
+                            doc_ficha = future.result(timeout=120)  # Timeout de 2min por ficha
+                            if doc_ficha:
+                                documentos.append(doc_ficha)
+                        except Exception as e:
+                            vot_data = futures[future]
+                            logger.warning(f"[coletar_documentos] Erro ao processar ficha de votação {vot_data[0] + 1}: {e}")
 
             # OTIMIZAÇÃO: Usar uma única sessão SQLAlchemy para todas as queries
             session = self._get_session()
@@ -1228,8 +1313,40 @@ class ProcessoLegView(grok.View):
             finally:
                 session.close()
 
-            # Ordenar por data
-            documentos.sort(key=lambda x: x['data'])
+            # Ordenar documentos: Capa sempre primeira, Texto integral sempre segundo, 
+            # Redação final sempre terceira (se houver), resto por data
+            # CRÍTICO: Apenas o texto integral e redação final do próprio processo (com cod_materia) devem ser priorizados
+            # Não priorizar textos integrais ou redações finais de matérias vinculadas
+            cod_materia = dados_materia.get('cod_materia')
+            
+            def ordenar_documentos(doc):
+                title = doc.get('title', '').lower()
+                file = doc.get('file', '').lower() if doc.get('file') else ''
+                
+                # Capa do Processo sempre primeira (prioridade 0) - verifica título
+                if 'capa do processo' in title or 'capa' in title:
+                    return (0, doc.get('data', ''))
+                
+                # Texto integral do próprio processo sempre segundo (prioridade 1) - verifica nome do arquivo
+                # Nome do arquivo: {cod_materia}_texto_integral.pdf (ex: 79431_texto_integral.pdf)
+                if file and cod_materia:
+                    # Verifica se o arquivo é exatamente {cod_materia}_texto_integral.pdf do próprio processo
+                    texto_integral_esperado = f"{cod_materia}_texto_integral.pdf"
+                    if file == texto_integral_esperado.lower() or file.endswith(f"{cod_materia}_texto_integral.pdf"):
+                        return (1, doc.get('data', ''))
+                
+                # Redação final do próprio processo sempre terceira (prioridade 2) - verifica nome do arquivo
+                # Nome do arquivo: {cod_materia}_redacao_final.pdf (ex: 79431_redacao_final.pdf)
+                if file and cod_materia:
+                    # Verifica se o arquivo é exatamente {cod_materia}_redacao_final.pdf do próprio processo
+                    redacao_final_esperada = f"{cod_materia}_redacao_final.pdf"
+                    if file == redacao_final_esperada.lower() or file.endswith(f"{cod_materia}_redacao_final.pdf"):
+                        return (2, doc.get('data', ''))
+                
+                # Resto ordenado por data (prioridade 3)
+                return (3, doc.get('data', ''))
+            
+            documentos.sort(key=ordenar_documentos)
             return documentos
 
         except Exception as e:
@@ -1621,7 +1738,6 @@ class ProcessoLegTaskExecutor(grok.View):
         """
         # OTIMIZAÇÃO: Cache - verifica se arquivo já existe antes de baixar
         if os.path.exists(caminho_saida) and os.path.getsize(caminho_saida) > 0:
-            logger.debug(f"[_baixar_documento_via_http_com_retry] Arquivo '{filename}' já existe, usando cache: {caminho_saida}")
             return True
         
         # Cria opener HTTP reutilizável para connection pooling
@@ -1641,22 +1757,19 @@ class ProcessoLegTaskExecutor(grok.View):
                 with opener.open(req, timeout=timeout) as response:
                     file_data = response.read()
                 
-                if file_data and len(file_data) > 0:
-                    # Salva no filesystem
-                    with open(caminho_saida, 'wb') as f:
-                        f.write(file_data)
-                    return True
-                else:
-                    logger.warning(f"[_baixar_documento_via_http_com_retry] Download de '{filename}' retornou dados vazios")
-                    if attempt < max_retries - 1:
-                        delay = base_delay * (2 ** attempt)  # Backoff exponencial
-                        logger.debug(f"[_baixar_documento_via_http_com_retry] Tentando novamente em {delay}s (tentativa {attempt + 1}/{max_retries})...")
-                        time.sleep(delay)
-                    continue
+                    if file_data and len(file_data) > 0:
+                        # Salva no filesystem
+                        with open(caminho_saida, 'wb') as f:
+                            f.write(file_data)
+                        return True
+                    else:
+                        if attempt < max_retries - 1:
+                            delay = base_delay * (2 ** attempt)  # Backoff exponencial
+                            time.sleep(delay)
+                        continue
                     
             except urllib.error.HTTPError as http_err:
                 if http_err.code == 404:
-                    logger.debug(f"[_baixar_documento_via_http_com_retry] Documento '{filename}' não encontrado via HTTP (404): {url}")
                     return False  # 404 não deve ser retentado
                 elif http_err.code >= 500 and attempt < max_retries - 1:
                     # Erros 5xx são retentáveis

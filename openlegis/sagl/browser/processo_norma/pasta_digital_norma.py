@@ -12,6 +12,7 @@ import shutil
 import copy
 import traceback
 import threading
+import re
 from datetime import date, datetime
 from five import grok
 from zope.interface import Interface
@@ -21,6 +22,7 @@ from openlegis.sagl.browser.processo_norma.processo_norma_utils import (
     get_cache_norma_file_path,
     TEMP_DIR_PREFIX_NORMA,
     safe_check_file,
+    safe_check_files_batch,
     get_file_size,
     get_file_info_for_hash,
     secure_path_join
@@ -76,10 +78,9 @@ def _load_cache_from_filesystem(cod_norma_int):
                     timestamp = data['timestamp']
                     documents_hash = data.get('hash', None)
                     documents_sizes = data.get('sizes', None)
-                    logger.debug(f"[_load_cache_from_filesystem] Cache carregado do filesystem para norma {cod_norma_int}")
                     return (documentos_data, timestamp, documents_hash, documents_sizes)
     except Exception as e:
-        logger.debug(f"[_load_cache_from_filesystem] Erro ao carregar cache do filesystem para {cod_norma_int}: {e}")
+        pass
     return None
 
 def _save_cache_to_filesystem(cod_norma_int, documentos_data, timestamp, documents_hash, documents_sizes=None):
@@ -102,7 +103,6 @@ def _save_cache_to_filesystem(cod_norma_int, documentos_data, timestamp, documen
         with open(temp_file, 'w', encoding='utf-8') as f:
             json.dump(data, f, ensure_ascii=False, indent=2, cls=DateTimeJSONEncoder)
         os.replace(temp_file, cache_file)
-        logger.debug(f"[_save_cache_to_filesystem] Cache salvo no filesystem para norma {cod_norma_int}")
     except Exception as e:
         logger.warning(f"[_save_cache_to_filesystem] Erro ao salvar cache no filesystem para {cod_norma_int}: {e}")
 
@@ -112,9 +112,8 @@ def _delete_cache_from_filesystem(cod_norma_int):
         cache_file = get_cache_norma_file_path(cod_norma_int)
         if os.path.exists(cache_file):
             os.unlink(cache_file)
-            logger.debug(f"[_delete_cache_from_filesystem] Cache removido do filesystem para norma {cod_norma_int}")
     except Exception as e:
-        logger.debug(f"[_delete_cache_from_filesystem] Erro ao remover cache do filesystem para {cod_norma_int}: {e}")
+        pass
 
 def _calculate_documents_hash(cod_norma, portal, force_recalculate=False):
     """Calcula hash dos documentos disponíveis para uma norma"""
@@ -128,16 +127,13 @@ def _calculate_documents_hash(cod_norma, portal, force_recalculate=False):
     if force_recalculate:
         # Remove do cache para forçar recálculo
         _hash_cache.pop(cache_key, None)
-        logger.debug(f"[_calculate_documents_hash] Forçando recálculo do hash para norma {cod_norma} (cache ignorado)")
     elif cache_key in _hash_cache:
         cached_hash, cache_timestamp = _hash_cache[cache_key]
         age = current_time - cache_timestamp
         if age < _HASH_CACHE_TTL:
-            logger.debug(f"[_calculate_documents_hash] Usando hash do cache para norma {cod_norma} (idade: {age:.1f}s)")
             return cached_hash
         else:
             del _hash_cache[cache_key]
-            logger.debug(f"[_calculate_documents_hash] Cache expirado para norma {cod_norma} (idade: {age:.1f}s)")
     
     if len(_hash_cache) >= _HASH_CACHE_MAX_SIZE:
         sorted_items = sorted(_hash_cache.items(), key=lambda x: x[1][1])
@@ -187,8 +183,10 @@ def _calculate_documents_hash(cod_norma, portal, force_recalculate=False):
                     .filter(NormaJuridica.cod_norma == cod_norma)\
                     .filter(NormaJuridica.ind_excluido == 0)\
                     .first()
-                
-                if norma and norma.cod_materia:
+            finally:
+                session.close()
+            
+            if norma and norma.cod_materia:
                     arquivo_materia = f"{norma.cod_materia}_texto_integral.pdf"
                     if hasattr(portal.sapl_documentos, 'materia'):
                         if safe_check_file(portal.sapl_documentos.materia, arquivo_materia):
@@ -199,37 +197,43 @@ def _calculate_documents_hash(cod_norma, portal, force_recalculate=False):
                                 hash_data.append(f"materia_relacionada:exists")
                         else:
                             hash_data.append(f"materia_relacionada:not_exists")
-            finally:
-                session.close()
         except Exception as e:
-            logger.debug(f"[_calculate_documents_hash] Erro ao processar matéria relacionada: {e}")
+            pass
         
         # 3. Normas relacionadas (vinculadas)
         try:
             session = Session()
             try:
-                vinculos_referente = session.query(VinculoNormaJuridica, NormaJuridica)\
+                # OTIMIZAÇÃO: Adiciona JOIN com TipoNormaJuridica para evitar N+1 queries
+                vinculos_referente = session.query(VinculoNormaJuridica, NormaJuridica, TipoNormaJuridica)\
                     .join(NormaJuridica, VinculoNormaJuridica.cod_norma_referida == NormaJuridica.cod_norma)\
+                    .join(TipoNormaJuridica, NormaJuridica.tip_norma == TipoNormaJuridica.tip_norma)\
                     .filter(VinculoNormaJuridica.cod_norma_referente == cod_norma)\
                     .filter(NormaJuridica.ind_excluido == 0)\
                     .all()
                 
-                vinculos_referida = session.query(VinculoNormaJuridica, NormaJuridica)\
+                vinculos_referida = session.query(VinculoNormaJuridica, NormaJuridica, TipoNormaJuridica)\
                     .join(NormaJuridica, VinculoNormaJuridica.cod_norma_referente == NormaJuridica.cod_norma)\
+                    .join(TipoNormaJuridica, NormaJuridica.tip_norma == TipoNormaJuridica.tip_norma)\
                     .filter(VinculoNormaJuridica.cod_norma_referida == cod_norma)\
                     .filter(NormaJuridica.ind_excluido == 0)\
                     .all()
                 
                 normas_vinculadas = set()
-                for vinculo_obj, norma_obj in vinculos_referente:
+                # ATUALIZAÇÃO: Agora retorna (vinculo, norma, tipo_norma)
+                for vinculo_obj, norma_obj, tipo_norma_obj in vinculos_referente:
                     normas_vinculadas.add(norma_obj.cod_norma)
-                for vinculo_obj, norma_obj in vinculos_referida:
+                for vinculo_obj, norma_obj, tipo_norma_obj in vinculos_referida:
                     normas_vinculadas.add(norma_obj.cod_norma)
                 
-                for cod_norma_vinculada in sorted(normas_vinculadas):
-                    arquivo_norma = f"{cod_norma_vinculada}_texto_integral.pdf"
-                    if hasattr(portal.sapl_documentos, 'norma_juridica'):
-                        if safe_check_file(portal.sapl_documentos.norma_juridica, arquivo_norma):
+                # OTIMIZAÇÃO: Verifica múltiplos arquivos em batch ao invés de sequencial
+                if normas_vinculadas and hasattr(portal.sapl_documentos, 'norma_juridica'):
+                    arquivos_normas_vinculadas = [f"{cod_norma_vinculada}_texto_integral.pdf" for cod_norma_vinculada in sorted(normas_vinculadas)]
+                    arquivos_existentes = safe_check_files_batch(portal.sapl_documentos.norma_juridica, arquivos_normas_vinculadas)
+                    
+                    for cod_norma_vinculada in sorted(normas_vinculadas):
+                        arquivo_norma = f"{cod_norma_vinculada}_texto_integral.pdf"
+                        if arquivos_existentes.get(arquivo_norma, False):
                             file_info = get_file_info_for_hash(portal.sapl_documentos.norma_juridica, arquivo_norma)
                             if file_info:
                                 hash_data.append(f"norma_vinculada_{cod_norma_vinculada}:{'|'.join(file_info)}")
@@ -240,7 +244,7 @@ def _calculate_documents_hash(cod_norma, portal, force_recalculate=False):
             finally:
                 session.close()
         except Exception as e:
-            logger.debug(f"[_calculate_documents_hash] Erro ao processar normas relacionadas: {e}")
+            pass
         
         # 4. Anexos da norma
         try:
@@ -254,10 +258,14 @@ def _calculate_documents_hash(cod_norma, portal, force_recalculate=False):
                     .all()
                 
                 hash_data.append(f"anexos_count:{len(anexos)}")
-                for anexo in anexos:
-                    id_anexo = f"{cod_norma}_anexo_{anexo.cod_anexo}"
-                    if hasattr(portal.sapl_documentos, 'norma_juridica'):
-                        if safe_check_file(portal.sapl_documentos.norma_juridica, id_anexo):
+                # OTIMIZAÇÃO: Verifica múltiplos anexos em batch ao invés de sequencial
+                if anexos and hasattr(portal.sapl_documentos, 'norma_juridica'):
+                    arquivos_anexos = [f"{cod_norma}_anexo_{anexo.cod_anexo}" for anexo in anexos]
+                    arquivos_existentes = safe_check_files_batch(portal.sapl_documentos.norma_juridica, arquivos_anexos)
+                    
+                    for anexo in anexos:
+                        id_anexo = f"{cod_norma}_anexo_{anexo.cod_anexo}"
+                        if arquivos_existentes.get(id_anexo, False):
                             file_info = get_file_info_for_hash(portal.sapl_documentos.norma_juridica, id_anexo)
                             if file_info:
                                 hash_data.append(f"anexo_{anexo.cod_anexo}:{'|'.join(file_info)}")
@@ -265,12 +273,14 @@ def _calculate_documents_hash(cod_norma, portal, force_recalculate=False):
                                 hash_data.append(f"anexo_{anexo.cod_anexo}:exists")
                         else:
                             hash_data.append(f"anexo_{anexo.cod_anexo}:not_exists")
-                    else:
+                elif anexos:
+                    # Se não tem container, marca todos como não existentes
+                    for anexo in anexos:
                         hash_data.append(f"anexo_{anexo.cod_anexo}:not_exists")
             finally:
                 session.close()
         except Exception as e:
-            logger.debug(f"[_calculate_documents_hash] Erro ao processar anexos: {e}")
+            pass
         
         if hash_data:
             hash_string = "|".join(sorted(hash_data))
@@ -374,7 +384,6 @@ def _collect_current_documents_metadata(cod_norma_int, portal):
                                 session.close()
             except Exception as e:
                 # Se falhar ao obter via HTTP, tenta usar arquivo no diretório
-                logger.debug(f"[_collect_current_documents_metadata] Erro ao obter capa via HTTP: {e}, usando arquivo do diretório")
                 capa_size = _get_collected_file_size(arquivo_capa)
             
             # Sempre inclui a capa na lista (sempre é gerada na coleta)
@@ -384,7 +393,7 @@ def _collect_current_documents_metadata(cod_norma_int, portal):
                 'title': 'Capa da Norma'
             })
         except Exception as e:
-            logger.debug(f"[_collect_current_documents_metadata] Erro ao obter dados da norma: {e}")
+            pass
         
         # 2. Texto integral
         # CRÍTICO: Sempre verifica, mesmo se não existir (para detectar remoções)
@@ -436,35 +445,43 @@ def _collect_current_documents_metadata(cod_norma_int, portal):
             finally:
                 session.close()
         except Exception as e:
-            logger.debug(f"[_collect_current_documents_metadata] Erro ao processar matéria relacionada: {e}")
+            pass
         
         # 5. Normas relacionadas (vinculadas)
         try:
             session = Session()
             try:
-                vinculos_referente = session.query(VinculoNormaJuridica, NormaJuridica)\
+                # OTIMIZAÇÃO: Adiciona JOIN com TipoNormaJuridica para evitar N+1 queries
+                vinculos_referente = session.query(VinculoNormaJuridica, NormaJuridica, TipoNormaJuridica)\
                     .join(NormaJuridica, VinculoNormaJuridica.cod_norma_referida == NormaJuridica.cod_norma)\
+                    .join(TipoNormaJuridica, NormaJuridica.tip_norma == TipoNormaJuridica.tip_norma)\
                     .filter(VinculoNormaJuridica.cod_norma_referente == cod_norma_int)\
                     .filter(NormaJuridica.ind_excluido == 0)\
                     .all()
                 
-                vinculos_referida = session.query(VinculoNormaJuridica, NormaJuridica)\
+                vinculos_referida = session.query(VinculoNormaJuridica, NormaJuridica, TipoNormaJuridica)\
                     .join(NormaJuridica, VinculoNormaJuridica.cod_norma_referente == NormaJuridica.cod_norma)\
+                    .join(TipoNormaJuridica, NormaJuridica.tip_norma == TipoNormaJuridica.tip_norma)\
                     .filter(VinculoNormaJuridica.cod_norma_referida == cod_norma_int)\
                     .filter(NormaJuridica.ind_excluido == 0)\
                     .all()
                 
                 normas_vinculadas = set()
-                for vinculo_obj, norma_obj in vinculos_referente:
+                # ATUALIZAÇÃO: Agora retorna (vinculo, norma, tipo_norma)
+                for vinculo_obj, norma_obj, tipo_norma_obj in vinculos_referente:
                     normas_vinculadas.add(norma_obj.cod_norma)
-                for vinculo_obj, norma_obj in vinculos_referida:
+                for vinculo_obj, norma_obj, tipo_norma_obj in vinculos_referida:
                     normas_vinculadas.add(norma_obj.cod_norma)
                 
-                for cod_norma_vinculada in sorted(normas_vinculadas):
-                    # CRÍTICO: Sempre verifica normas relacionadas, mesmo se não existirem (para detectar remoções)
-                    arquivo_norma = f"{cod_norma_vinculada}_texto_integral.pdf"
-                    if hasattr(portal.sapl_documentos, 'norma_juridica'):
-                        if safe_check_file(portal.sapl_documentos.norma_juridica, arquivo_norma):
+                # OTIMIZAÇÃO: Verifica múltiplos arquivos em batch ao invés de sequencial
+                if normas_vinculadas and hasattr(portal.sapl_documentos, 'norma_juridica'):
+                    arquivos_normas_vinculadas = [f"{cod_norma_vinculada}_texto_integral.pdf" for cod_norma_vinculada in sorted(normas_vinculadas)]
+                    arquivos_existentes = safe_check_files_batch(portal.sapl_documentos.norma_juridica, arquivos_normas_vinculadas)
+                    
+                    for cod_norma_vinculada in sorted(normas_vinculadas):
+                        # CRÍTICO: Sempre verifica normas relacionadas, mesmo se não existirem (para detectar remoções)
+                        arquivo_norma = f"{cod_norma_vinculada}_texto_integral.pdf"
+                        if arquivos_existentes.get(arquivo_norma, False):
                             size = get_file_size(portal.sapl_documentos.norma_juridica, arquivo_norma) or 0
                             documentos_atual.append({
                                 'file': arquivo_norma,
@@ -475,7 +492,7 @@ def _collect_current_documents_metadata(cod_norma_int, portal):
             finally:
                 session.close()
         except Exception as e:
-            logger.debug(f"[_collect_current_documents_metadata] Erro ao processar normas relacionadas: {e}")
+            pass
         
         # 6. Anexos da norma
         try:
@@ -504,7 +521,7 @@ def _collect_current_documents_metadata(cod_norma_int, portal):
             finally:
                 session.close()
         except Exception as e:
-            logger.debug(f"[_collect_current_documents_metadata] Erro ao processar anexos: {e}")
+            pass
         
     except Exception as e:
         logger.warning(f"[_collect_current_documents_metadata] Erro ao coletar metadados dos documentos: {e}")
@@ -541,14 +558,10 @@ def _compare_documents_with_metadados(cod_norma_int, portal):
         documentos_metadados = metadados.get('documentos', [])
         
         if not documentos_metadados:
-            logger.debug(f"[_compare_documents_with_metadados] Nenhum documento nos metadados")
             return (False, {})
         
         # Coleta documentos ATUAIS do sistema
         documentos_atual = _collect_current_documents_metadata(cod_norma_int, portal)
-        
-        # Log apenas em debug para reduzir verbosidade
-        logger.debug(f"[_compare_documents_with_metadados] Comparando documentos para norma {cod_norma_int}: coletados={len(documentos_atual)}, nos metadados={len(documentos_metadados)}")
         
         # Função auxiliar para obter tamanho real do arquivo coletado no diretório
         def _get_collected_file_size_in_dir(filename):
@@ -582,7 +595,6 @@ def _compare_documents_with_metadados(cod_norma_int, portal):
                 'old_count': count_metadados,
                 'new_count': count_atual
             }
-            logger.debug(f"[_compare_documents_with_metadados] Quantidade de documentos mudou para norma {cod_norma_int}: {count_metadados} -> {count_atual} documentos")
             # Continua verificando quais documentos foram adicionados/removidos abaixo
         
         # CRÍTICO: Verifica TODOS os documentos coletados para detectar:
@@ -596,8 +608,6 @@ def _compare_documents_with_metadados(cod_norma_int, portal):
                 # CASO 1: Documento EXCLUÍDO - estava no JSON mas não está mais no sistema
                 has_changes = True
                 details['removed'].append(file_name)
-                size_meta = doc_meta.get('file_size', 0)
-                logger.debug(f"[_compare_documents_with_metadados] Documento EXCLUÍDO: {file_name} estava no JSON ({size_meta} bytes) mas não está mais no sistema")
         
         # Depois, verifica arquivos que estão no sistema (para detectar adições e alterações)
         for file_name, doc_atual in atual_map.items():
@@ -605,8 +615,6 @@ def _compare_documents_with_metadados(cod_norma_int, portal):
                 # CASO 2: Documento ADICIONADO - está no sistema mas não estava no JSON
                 has_changes = True
                 details['added'].append(file_name)
-                size_atual = doc_atual.get('file_size', 0)
-                logger.debug(f"[_compare_documents_with_metadados] Documento ADICIONADO: {file_name} está no sistema ({size_atual} bytes) mas não estava no JSON")
             else:
                 # CASO 3: Documento existe em ambos - verifica se foi ALTERADO ou REMOVIDO
                 doc_meta = metadados_map[file_name]
@@ -631,8 +639,6 @@ def _compare_documents_with_metadados(cod_norma_int, portal):
                     # Arquivo estava no JSON com tamanho válido mas não existe mais no sistema - foi removido
                     has_changes = True
                     details['removed'].append(file_name)
-                    tipo_arquivo = "Capa" if is_capa else "Arquivo"
-                    logger.debug(f"[_compare_documents_with_metadados] {tipo_arquivo} EXCLUÍDO: {file_name} estava no JSON ({size_meta} bytes) mas não existe mais no sistema (tamanho atual: 0)")
                 # SUBCASO 3.2: Documento foi ALTERADO (ambos têm tamanho válido mas são diferentes)
                 elif size_meta > min_size and size_to_compare > min_size:
                     if size_meta != size_to_compare:
@@ -640,10 +646,7 @@ def _compare_documents_with_metadados(cod_norma_int, portal):
                         size_diff = abs(size_meta - size_to_compare)
                         
                         # Se a diferença está dentro da tolerância, ignora (especialmente para capa)
-                        if size_diff <= size_tolerance:
-                            logger.debug(f"[_compare_documents_with_metadados] Diferença de tamanho ignorada para {file_name}: {size_meta} -> {size_to_compare} bytes (diferença: {size_diff} bytes, tolerância: {size_tolerance} bytes)")
-                            # Não marca como modificado - diferença está dentro da tolerância
-                        else:
+                        if size_diff > size_tolerance:
                             # Diferença significativa - marca como modificado
                             has_changes = True
                             details['modified'].append({
@@ -651,33 +654,13 @@ def _compare_documents_with_metadados(cod_norma_int, portal):
                                 'old_size': size_meta,
                                 'new_size': size_to_compare
                             })
-                            logger.debug(f"[_compare_documents_with_metadados] Documento ALTERADO: {file_name} mudou de {size_meta} para {size_to_compare} bytes (diferença: {size_diff} bytes, tolerância: {size_tolerance} bytes)")
                 # SUBCASO 3.3: Documento foi ADICIONADO (não tinha no JSON mas tem agora)
                 elif size_meta == 0 and size_to_compare > min_size:
                     has_changes = True
                     details['added'].append(file_name)
-                    logger.debug(f"[_compare_documents_with_metadados] Documento ADICIONADO: {file_name} não estava no JSON (tamanho 0) mas agora existe ({size_to_compare} bytes)")
-                # SUBCASO 3.4: Ambos têm tamanho 0 - não há mudança (arquivo nunca existiu ou foi removido em ambos)
-                elif size_meta == 0 and size_to_compare == 0:
-                    # Não há mudança - arquivo não existe em ambos
-                    logger.debug(f"[_compare_documents_with_metadados] Documento {file_name} não existe em ambos (tamanho 0 em ambos) - sem mudança")
         
         if has_changes:
-            logger.info(f"[_compare_documents_with_metadados] Mudanças detectadas para norma {cod_norma_int}: "
-                       f"adicionados={len(details.get('added', []))}, "
-                       f"removidos={len(details.get('removed', []))}, "
-                       f"modificados={len(details.get('modified', []))}")
-            if details.get('count_changed'):
-                count_info = details['count_changed']
-                logger.debug(f"[_compare_documents_with_metadados] Quantidade de documentos mudou: {count_info.get('old_count')} -> {count_info.get('new_count')}")
-            if details.get('removed'):
-                logger.debug(f"[_compare_documents_with_metadados] Documentos removidos: {', '.join(details['removed'])}")
-            if details.get('added'):
-                logger.debug(f"[_compare_documents_with_metadados] Documentos adicionados: {', '.join(details['added'])}")
-            if details.get('modified'):
-                logger.debug(f"[_compare_documents_with_metadados] Documentos modificados: {[m.get('file', '?') for m in details['modified']]}")
-        else:
-            logger.debug(f"[_compare_documents_with_metadados] Nenhuma mudança detectada: {len(documentos_atual)} documentos correspondem aos metadados")
+            pass
         
         return (has_changes, details)
         
@@ -710,38 +693,42 @@ def _calculate_documents_sizes(cod_norma, portal):
                     .filter(NormaJuridica.cod_norma == cod_norma)\
                     .filter(NormaJuridica.ind_excluido == 0)\
                     .first()
-                
-                if norma and norma.cod_materia:
+            finally:
+                session.close()
+            
+            if norma and norma.cod_materia:
                     arquivo_materia = f"{norma.cod_materia}_texto_integral.pdf"
                     if hasattr(portal.sapl_documentos, 'materia'):
                         size = get_file_size(portal.sapl_documentos.materia, arquivo_materia)
                         if size:
                             sizes[arquivo_materia] = size
-            finally:
-                session.close()
         except Exception as e:
-            logger.debug(f"[_calculate_documents_sizes] Erro ao obter tamanho de matéria relacionada: {e}")
+            pass
         
         # Normas relacionadas
         try:
             session = Session()
             try:
-                vinculos_referente = session.query(VinculoNormaJuridica, NormaJuridica)\
+                # OTIMIZAÇÃO: Adiciona JOIN com TipoNormaJuridica para evitar N+1 queries
+                vinculos_referente = session.query(VinculoNormaJuridica, NormaJuridica, TipoNormaJuridica)\
                     .join(NormaJuridica, VinculoNormaJuridica.cod_norma_referida == NormaJuridica.cod_norma)\
+                    .join(TipoNormaJuridica, NormaJuridica.tip_norma == TipoNormaJuridica.tip_norma)\
                     .filter(VinculoNormaJuridica.cod_norma_referente == cod_norma)\
                     .filter(NormaJuridica.ind_excluido == 0)\
                     .all()
                 
-                vinculos_referida = session.query(VinculoNormaJuridica, NormaJuridica)\
+                vinculos_referida = session.query(VinculoNormaJuridica, NormaJuridica, TipoNormaJuridica)\
                     .join(NormaJuridica, VinculoNormaJuridica.cod_norma_referente == NormaJuridica.cod_norma)\
+                    .join(TipoNormaJuridica, NormaJuridica.tip_norma == TipoNormaJuridica.tip_norma)\
                     .filter(VinculoNormaJuridica.cod_norma_referida == cod_norma)\
                     .filter(NormaJuridica.ind_excluido == 0)\
                     .all()
                 
                 normas_vinculadas = set()
-                for vinculo_obj, norma_obj in vinculos_referente:
+                # ATUALIZAÇÃO: Agora retorna (vinculo, norma, tipo_norma)
+                for vinculo_obj, norma_obj, tipo_norma_obj in vinculos_referente:
                     normas_vinculadas.add(norma_obj.cod_norma)
-                for vinculo_obj, norma_obj in vinculos_referida:
+                for vinculo_obj, norma_obj, tipo_norma_obj in vinculos_referida:
                     normas_vinculadas.add(norma_obj.cod_norma)
                 
                 for cod_norma_vinculada in normas_vinculadas:
@@ -753,7 +740,7 @@ def _calculate_documents_sizes(cod_norma, portal):
             finally:
                 session.close()
         except Exception as e:
-            logger.debug(f"[_calculate_documents_sizes] Erro ao obter tamanhos de normas relacionadas: {e}")
+            pass
         
         return sizes
     except Exception as e:
@@ -767,6 +754,32 @@ class PastaDigitalNormaMixin:
     def _get_session(self):
         """Retorna sessão SQLAlchemy thread-safe"""
         return Session()
+    
+    def _get_norma_cached(self, cod_norma):
+        """
+        Cache de norma principal para evitar queries repetidas na mesma requisição.
+        
+        Compatível com Zope - cache armazenado na instância da view.
+        Retorna tuple (NormaJuridica, TipoNormaJuridica) ou None.
+        """
+        if not hasattr(self, '_norma_cache'):
+            self._norma_cache = {}
+        cod_str = str(cod_norma)
+        if cod_str not in self._norma_cache:
+            session = self._get_session()
+            try:
+                result = session.query(NormaJuridica, TipoNormaJuridica)\
+                    .join(TipoNormaJuridica, NormaJuridica.tip_norma == TipoNormaJuridica.tip_norma)\
+                    .filter(NormaJuridica.cod_norma == cod_norma)\
+                    .filter(NormaJuridica.ind_excluido == 0)\
+                    .first()
+                self._norma_cache[cod_str] = result
+            except Exception as e:
+                logger.error(f"[_get_norma_cached] Erro ao buscar norma {cod_norma}: {e}", exc_info=True)
+                self._norma_cache[cod_str] = None
+            finally:
+                session.close()
+        return self._norma_cache[cod_str]
     
     def _get_norma_data(self, cod_norma):
         """Obtém dados básicos da norma"""
@@ -872,7 +885,7 @@ class PastaDigitalNormaMixin:
                                             _save_cache_to_filesystem(cod_norma_int, result_copy, current_time, documents_hash, documents_sizes)
                                             return result_copy
                             except Exception as check_err:
-                                logger.debug(f"[_get_pasta_data] Erro ao verificar documentos prontos (task recente): {check_err}")
+                                pass
                             
                             # Se não encontrou documentos prontos, retorna status PENDING
                             if has_recent_task and not needs_regeneration:
@@ -900,7 +913,6 @@ class PastaDigitalNormaMixin:
                                                 'message': 'Tarefa recém-criada, aguardando processamento'
                                             })
                                     except Exception as status_err:
-                                        logger.debug(f"[_get_pasta_data] Erro ao obter status detalhado da task: {status_err}")
                                         base_response.update({
                                             'task_id': str(cached_task_id),
                                             'status': 'PENDING',
@@ -914,10 +926,8 @@ class PastaDigitalNormaMixin:
                     try:
                         service = ProcessoNormaService(self.context, self.request)
                         has_active_task, task_id, task_status = service.verificar_tasks_ativas(cod_norma_int)
-                        if has_active_task:
-                            logger.debug(f"[_get_pasta_data] Task ativa encontrada via serviço: {task_id}, status: {task_status}")
                     except Exception as task_check_err:
-                        logger.debug(f"[_get_pasta_data] Erro ao verificar tasks ativas: {task_check_err}")
+                        pass
                     
                     if not has_active_task and cod_norma_str in _recent_tasks_cache:
                         _recent_tasks_cache.pop(cod_norma_str, None)
@@ -965,7 +975,6 @@ class PastaDigitalNormaMixin:
                                         'message': 'Tarefa já está em execução ou na fila'
                                     })
                             except Exception as status_err:
-                                logger.debug(f"[_get_pasta_data] Erro ao obter status detalhado da task: {status_err}")
                                 base_response.update({
                                     'task_id': str(task_id),
                                     'status': str(task_status or 'PENDING'),
@@ -1009,7 +1018,6 @@ class PastaDigitalNormaMixin:
                                     metadados_hash = metadados.get('documents_hash')
                                     
                                     if metadados_hash and metadados_hash != current_hash_check:
-                                        logger.debug(f"[_get_pasta_data] Hash mudou durante task recente para norma {cod_norma_int}: metadados={metadados_hash[:8] if metadados_hash else None}... != current={current_hash_check[:8]}... - forçando regeneração")
                                         hash_matches = False
                                         # Limpa cache e força nova task
                                         _delete_cache_from_filesystem(cod_norma_int)
@@ -1078,7 +1086,6 @@ class PastaDigitalNormaMixin:
                                     _recent_tasks_cache.pop(cod_norma_str, None)
                                 elif current_hash != cached_hash:
                                     # Hash mudou - documentos foram modificados, excluídos ou adicionados
-                                    logger.debug(f"[_get_pasta_data] Hash mudou para norma {cod_norma_int}: cached={cached_hash[:8] if cached_hash else None}... != current={current_hash[:8] if current_hash else None}... - forçando regeneração")
                                     _delete_cache_from_filesystem(cod_norma_int)
                                     # Limpa cache de tasks recentes para forçar criação de nova task
                                     _recent_tasks_cache.pop(cod_norma_str, None)
@@ -1089,7 +1096,6 @@ class PastaDigitalNormaMixin:
                                     try:
                                         dir_base_cleanup = get_processo_norma_dir(cod_norma_int)
                                         if os.path.exists(dir_base_cleanup):
-                                            logger.debug(f"[_get_pasta_data] Limpando diretório do processo para norma {cod_norma_int} devido a mudança de hash")
                                             shutil.rmtree(dir_base_cleanup, ignore_errors=True)
                                     except Exception as cleanup_err:
                                         logger.warning(f"[_get_pasta_data] Erro ao limpar diretório do processo: {cleanup_err}")
@@ -1113,7 +1119,6 @@ class PastaDigitalNormaMixin:
                                         
                                         if has_changes_metadados:
                                             # Mudanças detectadas mesmo com hash igual - arquivos foram adicionados, removidos ou modificados
-                                            logger.debug(f"[_get_pasta_data] Mudanças detectadas nos metadados para norma {cod_norma_int} mesmo com hash igual: {changes_details}")
                                             _delete_cache_from_filesystem(cod_norma_int)
                                             # Limpa cache de tasks recentes para forçar criação de nova task
                                             _recent_tasks_cache.pop(cod_norma_str, None)
@@ -1125,7 +1130,6 @@ class PastaDigitalNormaMixin:
                                             try:
                                                 dir_base_cleanup = get_processo_norma_dir(cod_norma_int)
                                                 if os.path.exists(dir_base_cleanup):
-                                                    logger.debug(f"[_get_pasta_data] Limpando diretório do processo para norma {cod_norma_int} devido a mudanças detectadas")
                                                     shutil.rmtree(dir_base_cleanup, ignore_errors=True)
                                             except Exception as cleanup_err:
                                                 logger.warning(f"[_get_pasta_data] Erro ao limpar diretório do processo: {cleanup_err}")
@@ -1188,7 +1192,6 @@ class PastaDigitalNormaMixin:
                                 # CRÍTICO: Compara usando documentos_metadados.json (única fonte de verdade)
                                 # Sempre executa comparação, mesmo com hash igual, para detectar mudanças que o hash pode não capturar
                                 # (ex: arquivo adicionado que não estava no hash anterior)
-                                logger.debug(f"[_get_pasta_data] Executando comparação com metadados para norma {cod_norma_int}")
                                 has_changes_metadados, changes_details = _compare_documents_with_metadados(cod_norma_int, portal)
                                 
                                 if has_changes_metadados:
@@ -1326,7 +1329,6 @@ class PastaDigitalNormaMixin:
                                                     'message': 'Tarefa recém-criada, aguardando processamento'
                                                 })
                                         except Exception as status_err:
-                                            logger.debug(f"[_get_pasta_data] Erro ao obter status detalhado da task: {status_err}")
                                             base_response.update({
                                                 'task_id': str(cached_task_id),
                                                 'status': 'PENDING',
@@ -1366,7 +1368,7 @@ class PastaDigitalNormaMixin:
                                                 base_response['stage'] = task_status_detail['stage']
                                             return base_response
                                 except Exception as status_check_err:
-                                    logger.debug(f"[_get_pasta_data] Erro ao verificar status da task: {status_check_err}")
+                                    pass
                                 
                                 time.sleep(0.2)
                                 
@@ -1411,7 +1413,7 @@ class PastaDigitalNormaMixin:
                                                     _save_cache_to_filesystem(cod_norma_int, result_copy, time.time(), documents_hash, documents_sizes)
                                                     return result_copy
                                         except Exception as status_check_err:
-                                            logger.debug(f"[_get_pasta_data] Erro ao verificar status real da task: {status_check_err}")
+                                            pass
                                         
                                         result_copy = copy.deepcopy(check_result)
                                         result_copy['async'] = True
@@ -1449,11 +1451,10 @@ class PastaDigitalNormaMixin:
                                         base_response.update({
                                             'task_id': new_task_id,
                                             'status': str(result.get('status', 'PENDING')),
-                                            'message': result.get('message', 'Regenerando pasta digital...'),
-                                            'async': True
-                                        })
+                                        'message': result.get('message', 'Regenerando pasta digital...'),
+                                        'async': True
+                                    })
                                 except Exception as status_err:
-                                    logger.debug(f"[_get_pasta_data] Erro ao obter status detalhado da task: {status_err}")
                                     base_response.update({
                                         'task_id': new_task_id,
                                         'status': str(result.get('status', 'PENDING')),
@@ -1535,11 +1536,15 @@ class PastaDigitalNormaMixin:
         try:
             session = self._get_session()
             try:
-                # Busca a norma para obter o cod_materia
-                norma = session.query(NormaJuridica)\
-                    .filter(NormaJuridica.cod_norma == cod_norma)\
-                    .filter(NormaJuridica.ind_excluido == 0)\
-                    .first()
+                # OTIMIZAÇÃO: Usa cache de norma se disponível
+                if hasattr(self, '_get_norma_cached'):
+                    result = self._get_norma_cached(cod_norma)
+                    norma = result[0] if result else None
+                else:
+                    norma = session.query(NormaJuridica)\
+                        .filter(NormaJuridica.cod_norma == cod_norma)\
+                        .filter(NormaJuridica.ind_excluido == 0)\
+                        .first()
                 
                 if not norma or not norma.cod_materia:
                     return []
@@ -1724,10 +1729,6 @@ class PastaDigitalNormaView(PastaDigitalNormaMixin, grok.View):
         cod_norma_str = str(cod_norma).strip() if cod_norma else ''
         portal_url_str = str(portal_url).strip() if portal_url else ''
         
-        logger.debug(f"[_render_html] Dados recebidos: cod_norma={cod_norma_str}, action={action}")
-        if isinstance(pasta, dict):
-            logger.debug(f"  pasta keys: {list(pasta.keys())}, documentos: {len(pasta.get('documentos', []))}")
-        
         # GARANTIA ABSOLUTA: pasta nunca é None/null
         if pasta is None:
             logger.warning(f"[_render_html] pasta is None, FORÇANDO dict vazio")
@@ -1752,8 +1753,6 @@ class PastaDigitalNormaView(PastaDigitalNormaMixin, grok.View):
         
         # Serializa o JSON com encoder customizado
         data_json = json.dumps(data_dict, ensure_ascii=False, cls=DateTimeJSONEncoder)
-        
-        logger.debug(f"[_render_html] JSON serializado: {len(data_json)} caracteres")
         
         # Verifica múltiplas formas de "pasta":null
         pasta_null_variations = [
@@ -1998,3 +1997,241 @@ class PastaDigitalNormaDataView(PastaDigitalNormaMixin, grok.View):
                 'error': str(e),
                 'success': False
             }, ensure_ascii=False, cls=DateTimeJSONEncoder)
+
+
+class ProcessoNormaDownloadDocumentoView(PastaDigitalNormaMixin, grok.View):
+    """View para download de documentos individuais da pasta digital de normas"""
+    grok.context(Interface)
+    grok.require('zope2.View')
+    grok.name('processo_norma_download_documento')
+    
+    def render(self):
+        try:
+            # Extrai parâmetros
+            cod_norma_str = self.request.form.get('cod_norma') or self.request.get('cod_norma')
+            filename = self.request.form.get('file') or self.request.get('file')
+            title = self.request.form.get('title') or self.request.get('title') or ''
+            
+            if not cod_norma_str or not filename:
+                self.request.response.setStatus(400)
+                return "Parâmetros cod_norma e file são obrigatórios"
+            
+            # Valida filename (segurança - evita path traversal)
+            if '..' in filename or '/' in filename or '\\' in filename:
+                self.request.response.setStatus(400)
+                return "Nome de arquivo inválido"
+            
+            cod_norma_int = int(cod_norma_str)
+            
+            # IMPORTANTE: Busca sempre no filesystem (diretório da pasta digital)
+            # Se o usuário conseguiu abrir a pasta digital, já tem permissão adequada
+            # Todos os arquivos da pasta digital são copiados para o diretório durante a geração
+            
+            file_content = self._get_file_from_pasta_dir(cod_norma_int, filename)
+            
+            if file_content is None:
+                self.request.response.setStatus(404)
+                return "Arquivo não encontrado"
+            
+            # Define nome do arquivo para download: usa título se disponível, senão usa filename
+            if title:
+                # Sanitiza título para nome de arquivo seguro
+                import re
+                safe_filename = re.sub(r'[^a-zA-Z0-9_-]', '_', title)
+                safe_filename = safe_filename[:100]  # Limita tamanho
+                # Adiciona extensão do arquivo original
+                extension = '.pdf'
+                if '.' in filename:
+                    extension = '.' + filename.rsplit('.', 1)[-1].lower()
+                safe_filename = safe_filename + extension
+            else:
+                safe_filename = filename.replace(' ', '_')  # Nome seguro para download
+            
+            content_type = 'application/pdf'
+            
+            self.request.response.setHeader('Content-Type', content_type)
+            self.request.response.setHeader(
+                'Content-Disposition',
+                f'attachment; filename="{safe_filename}"'
+            )
+            self.request.response.setHeader('Content-Length', str(len(file_content)))
+            
+            return file_content
+            
+        except ValueError:
+            self.request.response.setStatus(400)
+            return "Parâmetro cod_norma inválido"
+        except Exception as e:
+            logger.error(f"[processo_norma_download_documento] Erro: {e}", exc_info=True)
+            self.request.response.setStatus(500)
+            return f"Erro ao baixar documento: {str(e)}"
+    
+    def _get_file_from_pasta_dir(self, cod_norma, filename):
+        """
+        Obtém arquivo do diretório da pasta digital no filesystem.
+        
+        IMPORTANTE: O 'filename' vem do campo 'file' do cache.json, que contém
+        o nome do arquivo original (ex: "capa_DM-5779-2025.pdf", "20038_texto_integral.pdf").
+        
+        Esses arquivos são copiados para o diretório pasta_digital/{cod_norma}/ durante a geração.
+        """
+        try:
+            dir_base = get_processo_norma_dir(cod_norma)
+            
+            # Tenta primeiro no diretório raiz com o nome exato do arquivo
+            file_path = os.path.join(dir_base, filename)
+            
+            # Validação adicional de segurança: garante que o arquivo está dentro do diretório
+            # Resolve caminho absoluto para evitar path traversal
+            dir_base_abs = os.path.abspath(dir_base)
+            file_path_abs = os.path.abspath(file_path)
+            
+            if not file_path_abs.startswith(dir_base_abs):
+                logger.warning(f"[_get_file_from_pasta_dir] Tentativa de path traversal: {filename}")
+                return None
+            
+            if not os.path.exists(file_path) or not os.path.isfile(file_path):
+                logger.debug(f"[_get_file_from_pasta_dir] Arquivo não encontrado no diretório raiz: {file_path}")
+                
+                # Para capa, tenta gerar dinamicamente
+                if filename.startswith('capa_'):
+                    logger.debug(f"[_get_file_from_pasta_dir] Tentando gerar capa dinamicamente: {filename}")
+                    file_content = self._get_capa_dinamica(cod_norma, filename, dir_base)
+                    if file_content:
+                        return file_content
+                
+                # Se não encontrou, tenta buscar o arquivo original no ZODB e salvar no diretório
+                # Isso permite que arquivos sejam baixados mesmo se não foram copiados durante a geração
+                logger.debug(f"[_get_file_from_pasta_dir] Tentando buscar arquivo original no ZODB: {filename}")
+                file_content = self._get_file_from_zodb_and_save(cod_norma, filename, dir_base)
+                if file_content:
+                    return file_content
+                
+                return None
+            
+            # Lê arquivo do filesystem
+            with open(file_path, 'rb') as f:
+                return f.read()
+                
+        except Exception as e:
+            logger.error(f"[_get_file_from_pasta_dir] Erro ao obter {filename} do diretório: {e}", exc_info=True)
+            return None
+    
+    def _get_file_from_zodb_and_save(self, cod_norma, filename, dir_base):
+        """
+        Busca arquivo no ZODB e salva no diretório para uso futuro.
+        Usa o mesmo método que a geração da pasta digital usa para copiar arquivos.
+        """
+        try:
+            from Products.CMFCore.utils import getToolByName
+            from openlegis.sagl.browser.processo_norma.processo_norma_utils import safe_check_file
+            
+            portal = getToolByName(self.context, 'portal_url').getPortalObject()
+            
+            if not hasattr(portal, 'sapl_documentos'):
+                return None
+            
+            # Determina o container baseado no nome do arquivo
+            container = None
+            
+            # Texto integral da norma
+            if filename.endswith('_texto_integral.pdf'):
+                if hasattr(portal.sapl_documentos, 'norma_juridica'):
+                    container = portal.sapl_documentos.norma_juridica
+            # Texto consolidado
+            elif filename.endswith('_texto_consolidado.pdf'):
+                if hasattr(portal.sapl_documentos, 'norma_juridica'):
+                    container = portal.sapl_documentos.norma_juridica
+            # Capa
+            elif filename.startswith('capa_'):
+                # Capa é gerada dinamicamente, não está no ZODB
+                return None
+            # Anexos
+            elif '_anexo_' in filename:
+                if hasattr(portal.sapl_documentos, 'norma_juridica'):
+                    container = portal.sapl_documentos.norma_juridica
+            # Matéria relacionada
+            elif hasattr(portal.sapl_documentos, 'materia'):
+                # Pode ser matéria relacionada
+                container = portal.sapl_documentos.materia
+            
+            if not container:
+                logger.debug(f"[_get_file_from_zodb_and_save] Container não identificado para: {filename}")
+                return None
+            
+            # Verifica se arquivo existe no container
+            if not safe_check_file(container, filename):
+                logger.debug(f"[_get_file_from_zodb_and_save] Arquivo não existe no ZODB: {filename}")
+                return None
+            
+            # Lê arquivo do ZODB
+            if not hasattr(container, filename):
+                return None
+            
+            file_obj = getattr(container, filename)
+            
+            # Extrai dados do arquivo
+            if hasattr(file_obj, 'data'):
+                file_content = file_obj.data
+            elif hasattr(file_obj, 'read'):
+                file_obj.seek(0)
+                file_content = file_obj.read()
+            else:
+                return None
+            
+            if not file_content:
+                return None
+            
+            # Salva no diretório para uso futuro
+            try:
+                file_path = os.path.join(dir_base, filename)
+                os.makedirs(dir_base, mode=0o700, exist_ok=True)
+                with open(file_path, 'wb') as f:
+                    f.write(file_content)
+                logger.info(f"[_get_file_from_zodb_and_save] Arquivo copiado do ZODB e salvo: {filename}")
+            except Exception as save_err:
+                logger.warning(f"[_get_file_from_zodb_and_save] Erro ao salvar arquivo no diretório: {save_err}")
+                # Continua mesmo se não conseguir salvar
+            
+            return file_content
+            
+        except Exception as e:
+            logger.error(f"[_get_file_from_zodb_and_save] Erro ao buscar arquivo no ZODB: {e}", exc_info=True)
+            return None
+    
+    def _get_capa_dinamica(self, cod_norma, filename, dir_base):
+        """
+        Gera capa dinamicamente via HTTP (mesmo método usado durante a coleta).
+        """
+        try:
+            from Products.CMFCore.utils import getToolByName
+            import urllib.request
+            
+            portal = getToolByName(self.context, 'portal_url').getPortalObject()
+            base_url = portal.absolute_url() if hasattr(portal, 'absolute_url') else ''
+            
+            if not base_url:
+                return None
+            
+            # Tenta gerar capa via HTTP
+            url = f"{base_url}/modelo_proposicao/capa_norma?cod_norma={cod_norma}&action=download"
+            req = urllib.request.Request(url)
+            req.add_header('User-Agent', 'SAGL-PDF-Download/1.0')
+            
+            with urllib.request.urlopen(req, timeout=10) as response:
+                capa_data = response.read()
+                if capa_data:
+                    # Salva no diretório para uso futuro
+                    try:
+                        file_path = os.path.join(dir_base, filename)
+                        os.makedirs(dir_base, mode=0o700, exist_ok=True)
+                        with open(file_path, 'wb') as f:
+                            f.write(capa_data)
+                        logger.info(f"[_get_capa_dinamica] Capa gerada e salva: {filename}")
+                    except Exception as save_err:
+                        logger.warning(f"[_get_capa_dinamica] Erro ao salvar capa: {save_err}")
+                    
+                    return capa_data
+        except Exception as e:
+            logger.debug(f"[_get_capa_dinamica] Erro ao gerar capa dinamicamente: {e}")
+            return None

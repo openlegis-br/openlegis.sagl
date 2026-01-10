@@ -118,7 +118,6 @@ def timeit(func):
         start_time = time.perf_counter()
         result = func(*args, **kwargs)
         elapsed = time.perf_counter() - start_time
-        logger.debug(f"[{func.__name__}] Tempo de execução: {elapsed:.2f}s")
         return result
     return wrapper
 
@@ -252,24 +251,14 @@ class ProcessoNormaView(grok.View):
                     sk_sagl = getattr(portal_skins, 'sk_sagl', None)
                     if sk_sagl:
                         modelo_proposicao = getattr(sk_sagl, 'modelo_proposicao', None)
-                        logger.debug(f"[coletar_documentos] modelo_proposicao obtido via portal_skins.sk_sagl: {modelo_proposicao is not None}")
-                        if modelo_proposicao:
-                            # Lista métodos disponíveis para debug
-                            try:
-                                methods = [m for m in dir(modelo_proposicao) if not m.startswith('_') and 'capa' in m.lower()]
-                                logger.debug(f"[coletar_documentos] Métodos com 'capa' em modelo_proposicao: {methods}")
-                            except:
-                                pass
                 
                 # Se não encontrou pelo caminho completo, tenta acesso direto via Acquisition
                 if modelo_proposicao is None:
                     modelo_proposicao = getattr(self.context, 'modelo_proposicao', None)
-                    logger.debug(f"[coletar_documentos] modelo_proposicao obtido via Acquisition: {modelo_proposicao is not None}")
                 
                 # Tenta chamar capa_norma se o método existir
                 if modelo_proposicao is not None:
                     if hasattr(modelo_proposicao, 'capa_norma'):
-                        logger.debug(f"[coletar_documentos] Chamando capa_norma para cod_norma={dados_norma['cod_norma']}")
                         modelo_proposicao.capa_norma(cod_norma=dados_norma['cod_norma'], action='gerar')
                         url_path = 'capa_norma'
                     else:
@@ -328,15 +317,10 @@ class ProcessoNormaView(grok.View):
                             with urllib.request.urlopen(test_req, timeout=1) as test_response:
                                 if test_response.status == 200:
                                     capa_ready = True
-                                    logger.debug(f"[coletar_documentos] Capa verificada como pronta")
                         except (urllib.error.HTTPError, urllib.error.URLError):
                             pass  # Ainda não está pronto, continua
                 except Exception:
                     pass
-                
-                # Se não ficou pronto, faz download direto - o timeout maior vai aguardar
-                if not capa_ready:
-                    logger.debug(f"[coletar_documentos] Capa não pronta na primeira verificação, fazendo download direto (timeout 60s)...")
                 
                 # Faz download via HTTP (com timeout maior para aguardar geração se necessário)
                 base_url = self.context.absolute_url()
@@ -548,7 +532,6 @@ class ProcessoNormaView(grok.View):
                 else:
                     self._container_cache[container_id] = set()
             except Exception as e:
-                logger.debug(f"[_get_container_cache] Erro ao obter objectIds: {e}")
                 self._container_cache[container_id] = set()
         return self._container_cache[container_id]
     
@@ -689,6 +672,7 @@ class ProcessoNormaView(grok.View):
                                 if paginas:
                                     documentos_formatados.append({
                                         'id': doc_id,
+                                        'file': doc_meta.get('file', ''),  # NOVO: Inclui nome do arquivo original para download
                                         'title': doc_meta.get('title', ''),
                                         'data': doc_meta.get('data', ''),
                                         'url': f"{base_url}?cod_norma={self.cod_norma}&pagina={first_id}{cache_bust_param}",
@@ -888,7 +872,6 @@ class ProcessoNormaTaskExecutor(grok.View):
         """
         # OTIMIZAÇÃO: Cache - verifica se arquivo já existe antes de baixar
         if os.path.exists(caminho_saida) and os.path.getsize(caminho_saida) > 0:
-            logger.debug(f"[_baixar_documento_via_http_com_retry] Arquivo '{filename}' já existe, usando cache: {caminho_saida}")
             return True
         
         # Cria opener HTTP reutilizável para connection pooling
@@ -917,13 +900,11 @@ class ProcessoNormaTaskExecutor(grok.View):
                     logger.warning(f"[_baixar_documento_via_http_com_retry] Download de '{filename}' retornou dados vazios")
                     if attempt < max_retries - 1:
                         delay = base_delay * (2 ** attempt)  # Backoff exponencial
-                        logger.debug(f"[_baixar_documento_via_http_com_retry] Tentando novamente em {delay}s (tentativa {attempt + 1}/{max_retries})...")
                         time.sleep(delay)
                     continue
                     
             except urllib.error.HTTPError as http_err:
                 if http_err.code == 404:
-                    logger.debug(f"[_baixar_documento_via_http_com_retry] Documento '{filename}' não encontrado via HTTP (404): {url}")
                     return False  # 404 não deve ser retentado
                 elif http_err.code >= 500 and attempt < max_retries - 1:
                     # Erros 5xx são retentáveis
@@ -1013,14 +994,6 @@ class ProcessoNormaTaskExecutor(grok.View):
         """Executa a geração do processo de norma"""
         import json as json_lib
         try:
-            # Log de debug para identificar problemas de contexto
-            try:
-                context_type = type(self.context).__name__
-                context_id = getattr(self.context, 'id', 'N/A')
-                logger.debug(f"[ProcessoNormaTaskExecutor] Contexto: {context_type}, id: {context_id}")
-            except Exception as ctx_log_err:
-                logger.warning(f"[ProcessoNormaTaskExecutor] Erro ao logar contexto: {ctx_log_err}")
-            
             cod_norma = self.request.form.get('cod_norma') or self.request.get('cod_norma')
             
             if not cod_norma:
@@ -1096,7 +1069,6 @@ class ProcessoNormaTaskExecutor(grok.View):
                                 doc_baixado, sucesso = future.result(timeout=300)  # Timeout de 5 minutos por documento
                                 if sucesso and doc_baixado:
                                     documentos_baixados.append(doc_baixado)
-                                    logger.debug(f"[ProcessoNormaTaskExecutor] Documento '{doc_baixado.get('file', '?')}' baixado com sucesso")
                             except Exception as e:
                                 doc_original = futures[future]
                                 logger.warning(f"[ProcessoNormaTaskExecutor] Erro ao baixar documento '{doc_original.get('file', '?')}': {e}")

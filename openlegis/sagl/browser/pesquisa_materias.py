@@ -2576,7 +2576,7 @@ class MateriaLegislativaView(grok.View):
             if 'autores' in item:
                 item['autoria'] = item.pop('autores')
         
-        fieldnames = ['des_tipo_materia', 'num_ident_basica', 'ano_ident_basica', 'txt_ementa', 'dat_apresentacao', 'autoria']
+        fieldnames = ['des_tipo_materia', 'num_ident_basica', 'ano_ident_basica', 'txt_ementa', 'dat_apresentacao', 'autoria', 'assunto']
         
         writer = csv.DictWriter(output, fieldnames=fieldnames, extrasaction='ignore')
         writer.writeheader()
@@ -2598,7 +2598,7 @@ class MateriaLegislativaView(grok.View):
         ws = wb.active
         ws.title = "Matérias"
         
-        header = ['des_tipo_materia', 'num_ident_basica', 'ano_ident_basica', 'txt_ementa', 'dat_apresentacao', 'autoria']
+        header = ['des_tipo_materia', 'num_ident_basica', 'ano_ident_basica', 'txt_ementa', 'dat_apresentacao', 'autoria', 'assunto']
         
         ws.append(header)
         for r in formatted_for_export:
@@ -2651,8 +2651,8 @@ class MateriaLegislativaView(grok.View):
         elements.append(Spacer(1, 0.5*cm))
         
         # Dados da tabela
-        data_keys = ['des_tipo_materia', 'num_ano_combined', 'txt_ementa', 'dat_apresentacao', 'autoria']
-        header_labels = ['Tipo', 'Número/Ano', 'Ementa', 'Apresentação', 'Autoria']
+        data_keys = ['des_tipo_materia', 'num_ano_combined', 'txt_ementa', 'dat_apresentacao', 'autoria', 'assunto']
+        header_labels = ['Tipo', 'Número/Ano', 'Ementa', 'Apresentação', 'Autoria', 'Assunto']
         
         # Preparar dados da tabela
         table_data = []
@@ -2674,7 +2674,8 @@ class MateriaLegislativaView(grok.View):
                 Paragraph(str(item.get('num_ano_combined', '')), normal_style),
                 Paragraph(str(item.get('txt_ementa', '')), normal_style),
                 Paragraph(str(item.get('dat_apresentacao', '')), normal_style),
-                Paragraph(str(item.get('autoria', '')), normal_style)
+                Paragraph(str(item.get('autoria', '')), normal_style),
+                Paragraph(str(item.get('assunto', '')), normal_style)
             ]
             table_data.append(row)
         
@@ -2684,11 +2685,12 @@ class MateriaLegislativaView(grok.View):
         
         # Larguras das colunas (ajustáveis conforme necessidade)
         col_widths = [
-            0.15 * content_width,  # Tipo
-            0.12 * content_width,  # Número/Ano
-            0.38 * content_width,  # Ementa
-            0.12 * content_width,  # Apresentação
-            0.23 * content_width   # Autoria
+            0.13 * content_width,  # Tipo
+            0.10 * content_width,  # Número/Ano
+            0.32 * content_width,  # Ementa
+            0.10 * content_width,  # Apresentação
+            0.20 * content_width,  # Autoria
+            0.15 * content_width   # Assunto
         ]
         
         # Criar tabela
@@ -2763,7 +2765,7 @@ class MateriaLegislativaView(grok.View):
             if 'autores' in item:
                 item['autoria'] = item.pop('autores')
         
-        fieldnames = ['des_tipo_materia', 'identificacao', 'num_ident_basica', 'ano_ident_basica', 'txt_ementa', 'dat_apresentacao', 'autoria']
+        fieldnames = ['des_tipo_materia', 'identificacao', 'num_ident_basica', 'ano_ident_basica', 'txt_ementa', 'dat_apresentacao', 'autoria', 'assunto']
         
         writer = csv.DictWriter(output, fieldnames=fieldnames, extrasaction='ignore')
         writer.writeheader()
@@ -2784,7 +2786,7 @@ class MateriaLegislativaView(grok.View):
             if 'autores' in item:
                 item['autoria'] = item.pop('autores')
         
-        header = ['Tipo', 'Identificação', 'Número', 'Ano', 'Ementa', 'Apresentação', 'Autoria']
+        header = ['Tipo', 'Identificação', 'Número', 'Ano', 'Ementa', 'Apresentação', 'Autoria', 'Assunto']
         
         ws.append(header)
         for r in formatted_results:
@@ -2795,7 +2797,8 @@ class MateriaLegislativaView(grok.View):
                 str(r.get('ano_ident_basica', '')),
                 str(r.get('txt_ementa', '')),
                 str(r.get('dat_apresentacao', '')),
-                str(r.get('autoria', ''))
+                str(r.get('autoria', '')),
+                str(r.get('assunto', ''))
             ])
         output = io.BytesIO()
         wb.save(output)
@@ -2838,7 +2841,7 @@ class MateriaLegislativaView(grok.View):
         elements.append(Paragraph(f"Total de registros: {len(formatted_results)}", styles['Normal']))
         elements.append(Spacer(1, 0.5*cm))
         
-        header_labels = ['Tipo', 'Identificação', 'Ementa', 'Apresentação', 'Autoria']
+        header_labels = ['Tipo', 'Identificação', 'Ementa', 'Apresentação', 'Autoria', 'Assunto']
         table_data = []
         
         # Renomear 'autores' para 'autoria' nos dados antes de exportar
@@ -2854,7 +2857,8 @@ class MateriaLegislativaView(grok.View):
                 Paragraph(str(item.get('identificacao', '')), normal_style),
                 Paragraph(str(item.get('txt_ementa', '')), normal_style),
                 Paragraph(str(item.get('dat_apresentacao', '')), normal_style),
-                Paragraph(str(item.get('autoria', '')), normal_style)
+                Paragraph(str(item.get('autoria', '')), normal_style),
+                Paragraph(str(item.get('assunto', '')), normal_style)
             ]
             table_data.append(row)
         
@@ -2862,11 +2866,12 @@ class MateriaLegislativaView(grok.View):
         content_width = page_width - doc.leftMargin - doc.rightMargin
         
         col_widths = [
+            0.13 * content_width,
+            0.18 * content_width,
+            0.30 * content_width,
+            0.10 * content_width,
             0.15 * content_width,
-            0.20 * content_width,
-            0.35 * content_width,
-            0.12 * content_width,
-            0.18 * content_width
+            0.14 * content_width
         ]
         
         table = Table(

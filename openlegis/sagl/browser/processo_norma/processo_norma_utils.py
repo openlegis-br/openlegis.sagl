@@ -108,7 +108,6 @@ def safe_check_file(container, filename):
             return exists
         return False
     except Exception as e:
-        logger.debug(f"[safe_check_file] Erro ao verificar {filename}: {e}")
         return False
 
 
@@ -135,7 +134,7 @@ def get_file_size(container, filename):
                 if size is not None and size > 0:
                     return size
     except Exception as e:
-        logger.debug(f"[get_file_size] Erro ao obter tamanho de {filename}: {e}")
+        pass
     return None
 
 
@@ -174,7 +173,7 @@ def get_file_info_for_hash(container, filename):
                 except:
                     pass
     except Exception as e:
-        logger.debug(f"[get_file_info_for_hash] Erro ao obter info de {filename}: {e}")
+        pass
     
     return file_info
 
@@ -219,7 +218,6 @@ def safe_check_files_batch(container, filenames):
                                     continue
                         results[filename] = True
                     except Exception as e:
-                        logger.debug(f"[safe_check_files_batch] Erro ao verificar {filename}: {e}")
                         results[filename] = True  # Assume que existe se está em objectIds
                 else:
                     results[filename] = False
@@ -228,7 +226,6 @@ def safe_check_files_batch(container, filenames):
             for filename in filenames:
                 results[filename] = False
     except Exception as e:
-        logger.debug(f"[safe_check_files_batch] Erro ao verificar arquivos: {e}")
         # Em caso de erro, marca todos como não existentes
         for filename in filenames:
             results[filename] = False

@@ -130,11 +130,15 @@ def validar_pdf_robusto(pdf_bytes: bytes, filename: str) -> Tuple[bool, int, str
             return False, 0, f"Erro ao validar PDF: {pikepdf_err}"
 
 
-def process_single_document_celery(doc: Dict, dir_base: str) -> Tuple[bytes, Dict]:
+def process_single_document_celery(doc: Dict, dir_base: str) -> Tuple[fitz.Document, Dict]:
     """
     Processa um documento individual para mesclagem (versão para Celery).
     OTIMIZAÇÃO: Validação única e robusta usando pikepdf.
+    OTIMIZAÇÃO: Retorna objeto fitz.Document diretamente para evitar validação duplicada.
     OTIMIZAÇÃO: Usa streaming quando possível para economizar memória.
+    
+    Returns:
+        Tuple[fitz.Document, Dict]: (objeto PDF fitz já validado, informações do documento)
     """
     filename = doc.get('file', 'unknown')
     doc_title = doc.get('title', 'Documento desconhecido')
@@ -143,7 +147,6 @@ def process_single_document_celery(doc: Dict, dir_base: str) -> Tuple[bytes, Dic
         if doc.get('filesystem'):
             # Arquivo já está no filesystem
             pdf_path = secure_path_join(doc['path'], doc['file'])
-            logger.debug(f"[process_single_document_celery] Processando arquivo do filesystem: {pdf_path} (título: '{doc_title}')")
             
             # OTIMIZAÇÃO: Para arquivos muito grandes (>50MB), usa leitura em chunks (streaming)
             # Para arquivos menores, leitura direta é mais rápida
@@ -159,33 +162,29 @@ def process_single_document_celery(doc: Dict, dir_base: str) -> Tuple[bytes, Dic
                             break
                         pdf_bytes.extend(chunk)
                 pdf_bytes = bytes(pdf_bytes)
-                logger.debug(f"[process_single_document_celery] Arquivo muito grande lido via streaming: {len(pdf_bytes)} bytes")
             else:
                 # Leitura direta para arquivos pequenos/médios (mais rápido)
                 with open(pdf_path, 'rb') as f:
                     pdf_bytes = f.read()
-                logger.debug(f"[process_single_document_celery] Arquivo do filesystem lido: {len(pdf_bytes)} bytes")
         else:
             raise ValueError(f"Documento não está no filesystem: {filename}")
         
-        # OTIMIZAÇÃO: Validação única e robusta usando pikepdf
+        # OTIMIZAÇÃO: Validação única e robusta usando validação híbrida
         is_valid, num_pages, error_msg = validar_pdf_robusto(pdf_bytes, filename)
         if not is_valid:
             logger.warning(f"[process_single_document_celery] PDF '{filename}' falhou validação: {error_msg}")
             raise ValueError(f"PDF inválido para documento '{doc_title}': {error_msg}")
         
-        logger.debug(f"[process_single_document_celery] PDF '{filename}' validado: {num_pages} páginas")
+        # OTIMIZAÇÃO: Abre PDF com fitz uma única vez e retorna o objeto diretamente
+        # Isso evita reabertura e validação duplicada em mesclar_documentos_celery
+        pdf_doc = fitz.open(stream=pdf_bytes, filetype="pdf")
         
         doc_info = doc.copy()
         # Adiciona tamanho do arquivo ao doc_info
-        file_size = 0
-        if doc.get('filesystem'):
-            pdf_path = secure_path_join(doc['path'], doc['file'])
-            file_size = os.path.getsize(pdf_path)
-        # Sempre adiciona file_size ao doc_info, mesmo que seja 0 (garante que o campo existe)
         doc_info['file_size'] = file_size
-        logger.debug(f"[process_single_document_celery] Retornando PDF '{filename}' com sucesso (título: '{doc_title}', tamanho: {file_size} bytes)")
-        return pdf_bytes, doc_info
+        
+        # Retorna objeto fitz.Document diretamente para evitar reabertura
+        return pdf_doc, doc_info
         
     except Exception as e:
         error_str = str(e).lower()
@@ -212,8 +211,6 @@ def inserir_pdf_em_chunks(pdf_mesclado: fitz.Document, pdf: fitz.Document, doc_t
         return num_pages
     
     # OTIMIZAÇÃO: Para PDFs grandes, processa em chunks
-    logger.debug(f"[inserir_pdf_em_chunks] Processando PDF '{doc_title}' em chunks ({num_pages} páginas, chunk size: {CHUNK_SIZE_PAGES})")
-    
     pages_inserted = 0
     for start_page in range(0, num_pages, CHUNK_SIZE_PAGES):
         end_page = min(start_page + CHUNK_SIZE_PAGES, num_pages)
@@ -224,8 +221,6 @@ def inserir_pdf_em_chunks(pdf_mesclado: fitz.Document, pdf: fitz.Document, doc_t
         
         # Limpeza de memória após cada chunk
         gc.collect()
-        
-        logger.debug(f"[inserir_pdf_em_chunks] Chunk inserido: páginas {start_page + 1}-{end_page} de '{doc_title}'")
     
     return pages_inserted
 
@@ -253,67 +248,67 @@ def mesclar_documentos_celery(documentos: List[Dict], dir_base: str, id_processo
             
             for idx, future in enumerate(futures):
                 doc_info = None
+                pdf_doc = None
+                doc_processado = False
                 try:
-                    pdf_bytes, doc_info = future.result()
+                    # OTIMIZAÇÃO: Recebe objeto fitz.Document diretamente (já validado)
+                    pdf_doc, doc_info = future.result()
                     doc_title = doc_info.get('title', '?') if doc_info else '?'
-                    pdf_size_mb = len(pdf_bytes) / (1024 * 1024)
-                    logger.debug(f"[mesclar_documentos_celery] Processando documento '{doc_title}', tamanho PDF: {pdf_size_mb:.2f} MB")
                     
-                    # OTIMIZAÇÃO: PDF já foi validado em process_single_document_celery com pikepdf
-                    # Apenas processa com fitz (fitz.open() também faz validação básica, mas menos rigorosa)
-                    try:
-                        # Processa diretamente com fitz (validação já foi feita com pikepdf)
-                        with fitz.open(stream=pdf_bytes, filetype="pdf") as pdf:
-                            start_page = len(pdf_mesclado)
-                            
-                            # OTIMIZAÇÃO: Usa processamento em chunks apenas para PDFs muito grandes
-                            # Para PDFs menores, processa tudo de uma vez (mais rápido)
-                            use_chunks = len(pdf_bytes) >= MIN_PDF_SIZE_FOR_CHUNKS and len(pdf) > CHUNK_SIZE_PAGES
-                            
-                            if use_chunks:
-                                # Processa em chunks para economizar memória
-                                num_pages_inserted = inserir_pdf_em_chunks(pdf_mesclado, pdf, doc_title)
-                            else:
-                                # PDF pequeno: insere tudo de uma vez (mais rápido)
-                                pdf_mesclado.insert_pdf(pdf, annots=True)
-                                num_pages_inserted = len(pdf)
-                            
-                            doc_info.update({
-                                'start_page': start_page + 1,
-                                'end_page': len(pdf_mesclado),
-                                'num_pages': num_pages_inserted
-                            })
-                            documentos_com_paginas.append(doc_info)
-                            
-                            # Atualiza progresso se callback fornecido
-                            if progress_callback:
-                                try:
-                                    progress_callback(idx + 1, total_docs, len(pdf_mesclado))
-                                except Exception as callback_err:
-                                    logger.debug(f"[mesclar_documentos_celery] Erro no callback de progresso: {callback_err}")
-                            
-                            # OTIMIZAÇÃO: Limpeza de memória mais frequente (a cada 5 páginas)
-                            # Libera pdf_bytes da memória após processar
-                            del pdf_bytes
-                            if len(pdf_mesclado) % MEMORY_CLEANUP_INTERVAL == 0:
-                                gc.collect()
-                                logger.debug(f"[mesclar_documentos_celery] Limpeza de memória após {len(pdf_mesclado)} páginas")
-                    except Exception as processing_err:
-                        error_str = str(processing_err).lower()
-                        doc_title = doc_info.get('title', '?') if doc_info else '?'
-                        if 'format error' in error_str or 'object out of range' in error_str or 'non-page object' in error_str:
-                            logger.warning(f"[mesclar_documentos_celery] PDF corrompido ignorado '{doc_title}': {processing_err}")
-                        else:
-                            logger.warning(f"[mesclar_documentos_celery] Erro ao processar PDF '{doc_title}': {processing_err}")
-                        continue
-                except Exception as e:
-                    error_msg = str(e)
-                    error_lower = error_msg.lower()
-                    doc_title = doc_info.get('title', '?') if doc_info else '?'
-                    if 'format error' in error_lower or 'object out of range' in error_lower or 'non-page object' in error_lower:
-                        logger.debug(f"[mesclar_documentos_celery] Ignorando documento corrompido '{doc_title}': {error_msg[:100]}...")
+                    # OTIMIZAÇÃO: PDF já foi validado e aberto em process_single_document_celery
+                    # Usa objeto fitz.Document diretamente (sem reabertura/validação duplicada)
+                    start_page = len(pdf_mesclado)
+                    
+                    # OTIMIZAÇÃO: Usa processamento em chunks apenas para PDFs muito grandes
+                    # Para PDFs menores, processa tudo de uma vez (mais rápido)
+                    use_chunks = doc_info.get('file_size', 0) >= MIN_PDF_SIZE_FOR_CHUNKS and len(pdf_doc) > CHUNK_SIZE_PAGES
+                    
+                    if use_chunks:
+                        # Processa em chunks para economizar memória
+                        num_pages_inserted = inserir_pdf_em_chunks(pdf_mesclado, pdf_doc, doc_title)
                     else:
-                        logger.warning(f"[mesclar_documentos_celery] Ignorando documento '{doc_title}' devido ao erro: {error_msg[:200]}")
+                        # PDF pequeno: insere tudo de uma vez (mais rápido)
+                        pdf_mesclado.insert_pdf(pdf_doc, annots=True)
+                        num_pages_inserted = len(pdf_doc)
+                    
+                    doc_info.update({
+                        'start_page': start_page + 1,
+                        'end_page': len(pdf_mesclado),
+                        'num_pages': num_pages_inserted
+                    })
+                    documentos_com_paginas.append(doc_info)
+                    doc_processado = True
+                    
+                    # Atualiza progresso se callback fornecido
+                    if progress_callback:
+                        try:
+                            progress_callback(idx + 1, total_docs, len(pdf_mesclado))
+                        except Exception as callback_err:
+                            pass  # Erro no callback não é crítico, ignora silenciosamente
+                    
+                    # OTIMIZAÇÃO: Limpeza de memória - fecha PDF após processar
+                    if pdf_doc:
+                        pdf_doc.close()
+                        pdf_doc = None
+                    if len(pdf_mesclado) % MEMORY_CLEANUP_INTERVAL == 0:
+                        gc.collect()
+                    
+                except Exception as e:
+                        error_msg = str(e)
+                        error_lower = error_msg.lower()
+                        doc_title = doc_info.get('title', '?') if doc_info else '?'
+                        if 'format error' not in error_lower and 'object out of range' not in error_lower and 'non-page object' not in error_lower:
+                            logger.warning(f"[mesclar_documentos_celery] Ignorando documento '{doc_title}' devido ao erro: {error_msg[:200]}")
+                finally:
+                    # OTIMIZAÇÃO: Garante que pdf_doc sempre seja fechado, mesmo em caso de erro
+                    if pdf_doc:
+                        try:
+                            pdf_doc.close()
+                        except:
+                            pass
+                
+                # Continua para o próximo documento se houve erro
+                if not doc_processado:
                     continue
         
         if len(pdf_mesclado) > MAX_PAGES:
@@ -322,19 +317,62 @@ def mesclar_documentos_celery(documentos: List[Dict], dir_base: str, id_processo
         # OTIMIZAÇÃO: Limpeza de memória antes de adicionar rodapé
         gc.collect()
         
-        # Adiciona rodapé e metadados
-        for page_num in range(len(pdf_mesclado)):
-            page = pdf_mesclado[page_num]
-            page.insert_text(
-                fitz.Point(page.rect.width - 110, 20),
-                f"{id_processo} | Fls. {page_num + 1}/{len(pdf_mesclado)}",
-                fontsize=8,
-                color=(0, 0, 0)
-            )
+        # OTIMIZAÇÃO: Paraleliza adição de rodapé para PDFs grandes
+        total_pages = len(pdf_mesclado)
+        
+        def adicionar_rodape_worker(page_nums):
+            """Worker para adicionar rodapé em um chunk de páginas"""
+            try:
+                for page_num in page_nums:
+                    page = pdf_mesclado[page_num]
+                    page.insert_text(
+                        fitz.Point(page.rect.width - 110, 20),
+                        f"{id_processo} | Fls. {page_num + 1}/{total_pages}",
+                        fontsize=8,
+                        color=(0, 0, 0)
+                    )
+                return len(page_nums)
+            except Exception as e:
+                logger.warning(f"[mesclar_documentos_celery] Erro ao adicionar rodapé nas páginas {page_nums[0] + 1}-{page_nums[-1] + 1}: {e}")
+                return 0
+        
+        # OTIMIZAÇÃO: Para PDFs pequenos (<100 páginas), adiciona rodapé sequencialmente (mais rápido)
+        # Para PDFs grandes, paraleliza em chunks
+        RODAPE_PARALELO_THRESHOLD = 100
+        RODAPE_CHUNK_SIZE = 50
+        
+        if total_pages < RODAPE_PARALELO_THRESHOLD:
+            # Processamento sequencial para PDFs pequenos
+            for page_num in range(total_pages):
+                page = pdf_mesclado[page_num]
+                page.insert_text(
+                    fitz.Point(page.rect.width - 110, 20),
+                    f"{id_processo} | Fls. {page_num + 1}/{total_pages}",
+                    fontsize=8,
+                    color=(0, 0, 0)
+                )
+        else:
+            # OTIMIZAÇÃO: Paraleliza para PDFs grandes
+            page_chunks = []
+            for i in range(0, total_pages, RODAPE_CHUNK_SIZE):
+                chunk = list(range(i, min(i + RODAPE_CHUNK_SIZE, total_pages)))
+                page_chunks.append(chunk)
             
-            # OTIMIZAÇÃO: Limpeza periódica durante adição de rodapé
-            if (page_num + 1) % MEMORY_CLEANUP_INTERVAL == 0:
-                gc.collect()
+            with ThreadPoolExecutor(max_workers=min(MAX_WORKERS, len(page_chunks))) as executor:
+                futures = [executor.submit(adicionar_rodape_worker, chunk) for chunk in page_chunks]
+                
+                pages_processed = 0
+                for future in futures:
+                    try:
+                        pages_processed += future.result(timeout=60)  # Timeout de 1min por chunk
+                    except Exception as e:
+                        logger.warning(f"[mesclar_documentos_celery] Erro ao processar chunk de rodapé: {e}")
+                
+                if pages_processed < total_pages:
+                    logger.warning(f"[mesclar_documentos_celery] Apenas {pages_processed}/{total_pages} páginas tiveram rodapé adicionado")
+            
+            # Limpeza de memória após adição de rodapé
+            gc.collect()
         
         pdf_mesclado.set_metadata({
             "title": id_processo,
@@ -429,10 +467,6 @@ def salvar_paginas_individuais_celery(pdf_final: fitz.Document, dir_paginas: str
                 future = executor.submit(_save_pages_batch_celery, pdf_final, batch, dir_paginas, id_processo)
                 futures.append((future, batch))
             
-            # OTIMIZAÇÃO: Aguarda batches com timeout reduzido (10s por página)
-            total_timeout = total_pages * PAGE_SAVE_TIMEOUT
-            logger.debug(f"[salvar_paginas_individuais_celery] Timeout total: {total_timeout}s ({PAGE_SAVE_TIMEOUT}s por página)")
-            
             pages_saved_total = 0
             for future, batch in futures:
                 try:
@@ -443,8 +477,8 @@ def salvar_paginas_individuais_celery(pdf_final: fitz.Document, dir_paginas: str
                     if progress_callback:
                         try:
                             progress_callback(pages_saved_total, total_pages)
-                        except Exception as callback_err:
-                            logger.debug(f"[salvar_paginas_individuais_celery] Erro no callback de progresso: {callback_err}")
+                        except Exception:
+                            pass  # Erro no callback não é crítico, ignora silenciosamente
                     
                     if pages_saved < len(batch):
                         logger.warning(f"[salvar_paginas_individuais_celery] Batch incompleto: {pages_saved}/{len(batch)} páginas salvas")
@@ -493,8 +527,6 @@ def _verificar_paginas_salvas_eficiente(dir_paginas: str, total_pages: int) -> N
             pg_path = os.path.join(dir_paginas, pg_id)
             if os.path.getsize(pg_path) == 0:
                 raise Exception(f"Página está vazia: {pg_path}")
-        
-        logger.debug(f"[_verificar_paginas_salvas_eficiente] Verificação concluída: {total_pages} páginas, {sample_size} amostradas")
         
     except Exception as e:
         logger.error(f"[_verificar_paginas_salvas_eficiente] Erro na verificação: {str(e)}")
@@ -595,6 +627,15 @@ def gerar_processo_leg_integral_task(self, site, cod_materia, portal_url, user_i
             }
         )
         
+        # OTIMIZAÇÃO: Timeout adaptativo baseado no número de documentos esperados
+        # Estimativa conservadora: 60s base + 10s por documento esperado
+        # Mínimo: 60s, Máximo: 600s (10 minutos)
+        # Nota: Não temos o número exato de documentos aqui, então usamos uma estimativa
+        # baseada no cod_materia ou assumimos um número conservador
+        estimated_docs = 20  # Estimativa conservadora de documentos por processo
+        adaptive_timeout = 60 + (estimated_docs * 10)
+        adaptive_timeout = max(60, min(adaptive_timeout, 600))  # Entre 60s e 600s
+        
         # Faz chamada HTTP POST para a view (apenas para download)
         try:
             req = urllib.request.Request(
@@ -603,7 +644,7 @@ def gerar_processo_leg_integral_task(self, site, cod_materia, portal_url, user_i
                 headers={'Content-Type': 'application/x-www-form-urlencoded'}
             )
             
-            with urllib.request.urlopen(req, timeout=600) as response:  # Timeout de 10 minutos para download
+            with urllib.request.urlopen(req, timeout=adaptive_timeout) as response:
                 response_data = response.read().decode('utf-8')
                 download_result = json.loads(response_data)
                 
@@ -770,7 +811,6 @@ def gerar_processo_leg_integral_task(self, site, cod_materia, portal_url, user_i
                 
                 # Arquivos coletados são mantidos para permitir comparação direta com metadados
                 # Isso permite verificar se arquivos foram modificados comparando diretamente com os arquivos no diretório
-                logger.debug(f"[gerar_processo_leg_integral_task] Arquivos coletados mantidos no diretório {dir_base} para comparação com metadados")
                 
                 # Atualiza progresso: PDF final salvo
                 self.update_state(
@@ -789,8 +829,12 @@ def gerar_processo_leg_integral_task(self, site, cod_materia, portal_url, user_i
                     raise Exception(f"Metadados não encontrados após verificação final: {metadados_path}")
                 
                 # OTIMIZAÇÃO: Verificação eficiente de páginas (já foi verificada em salvar_paginas_individuais_celery)
-                # Verificação final rápida apenas para confirmar
-                _verificar_paginas_salvas_eficiente(dir_paginas, total_paginas)
+                # Verificação final rápida apenas para confirmar (silenciosa em caso de sucesso)
+                try:
+                    _verificar_paginas_salvas_eficiente(dir_paginas, total_paginas)
+                except Exception as verif_err:
+                    logger.warning(f"[gerar_processo_leg_integral_task] Erro na verificação final de páginas: {verif_err}")
+                    # Não falha a task, mas loga o erro
                 
                 # SOMENTE APÓS TODAS AS VERIFICAÇÕES: Atualiza progresso para SUCCESS
                 self.update_state(

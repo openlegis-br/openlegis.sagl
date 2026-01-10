@@ -49,6 +49,16 @@ for item in context.zsql.materia_pesquisar_zsql(
         lista_autor.append(nome_autor)
     materia["nom_autor"] = ', '.join(['%s' % (value) for (value) in lista_autor])
 
+    materia['cod_assunto'] = ''
+    materia['nome_assunto'] = ''
+    # Buscar assunto principal usando cod_assunto de materia_pesquisar_zsql
+    if hasattr(item, 'cod_assunto') and item.cod_assunto:
+        assunto_principal = context.zsql.assunto_materia_obter_zsql(cod_assunto=item.cod_assunto, ind_excluido=0)
+        for assunto in assunto_principal:
+            materia['cod_assunto'] = assunto.cod_assunto
+            materia['nome_assunto'] = assunto.des_assunto
+            break
+
     materia['localizacao_atual']= ""
     materia['des_situacao'] = ""
     materia['ultima_acao'] = ""

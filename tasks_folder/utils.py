@@ -1102,7 +1102,16 @@ class ZopeContext:
                 delattr(base, 'REQUEST')
             setattr(base, 'REQUEST', request)
         except Exception as e:
-            self.logger.warning(f"[ZopeContext] Erro ao injetar REQUEST no site: {e}")
+            # WARNING esperado: Application não tem REQUEST por padrão (só em requisições HTTP)
+            # Isso é normal em contextos assíncronos (Celery tasks) - usa debug ao invés de warning
+            error_msg = str(e)
+            error_msg_lower = error_msg.lower()
+            if ("'application' object has no attribute 'request'" in error_msg_lower or 
+                "'application' object has no attribute 'REQUEST'" in error_msg_lower or
+                "has no attribute 'REQUEST'" in error_msg_lower):
+                self.logger.debug(f"[ZopeContext] REQUEST não pode ser injetado no Application (esperado em tasks assíncronas): {e}")
+            else:
+                self.logger.warning(f"[ZopeContext] Erro ao injetar REQUEST no site: {e}")
             try:
                 setattr(site, 'REQUEST', request)
             except:
@@ -1162,7 +1171,13 @@ class ZopeContext:
             newSecurityManager(None, user)
             setSite(self.site)
         except Exception as e:
-            self.logger.warning(f"[ZopeContext] Erro ao configurar segurança: {e}")
+            # WARNING esperado: Component registry pode não estar disponível em contextos assíncronos
+            # Isso é normal em Celery tasks - usa debug ao invés de warning se for erro conhecido
+            error_msg = str(e).lower()
+            if 'no component registry defined' in error_msg or 'component registry' in error_msg:
+                self.logger.debug(f"[ZopeContext] Component registry não disponível (esperado em tasks assíncronas): {e}")
+            else:
+                self.logger.warning(f"[ZopeContext] Erro ao configurar segurança: {e}")
     
     def commit(self):
         """Faz commit da transação"""

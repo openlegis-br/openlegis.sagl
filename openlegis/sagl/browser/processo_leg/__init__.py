@@ -28,7 +28,8 @@ from openlegis.sagl.browser.processo_leg.processo_leg_utils import (
 from openlegis.sagl.browser.processo_leg.processo_leg_service import ProcessoLegService
 from openlegis.sagl.browser.processo_leg.pasta_digital import (
     PastaDigitalView,
-    PastaDigitalDataView
+    PastaDigitalDataView,
+    ProcessoLegDownloadDocumentoView
 )
 
 __all__ = [
@@ -40,6 +41,7 @@ __all__ = [
     'ProcessoLegStatusView',
     'PastaDigitalView',
     'PastaDigitalDataView',
+    'ProcessoLegDownloadDocumentoView',
     # Serviços
     'ProcessoLegService',
     # Utilitários

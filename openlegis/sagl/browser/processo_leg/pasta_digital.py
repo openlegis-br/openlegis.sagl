@@ -1516,6 +1516,7 @@ class PastaDigitalMixin:
                     .join(DocumentoAdministrativo, DocumentoAdministrativoMateria.cod_documento == DocumentoAdministrativo.cod_documento)\
                     .join(TipoDocumentoAdministrativo, DocumentoAdministrativo.tip_documento == TipoDocumentoAdministrativo.tip_documento)\
                     .filter(DocumentoAdministrativoMateria.cod_materia == cod_materia)\
+                    .filter(DocumentoAdministrativoMateria.ind_excluido == 0)\
                     .filter(DocumentoAdministrativo.ind_excluido == 0)\
                     .all()
                 
@@ -3095,3 +3096,236 @@ class PastaDigitalDataView(PastaDigitalMixin, grok.View):
             }, ensure_ascii=False, cls=DateTimeJSONEncoder)
 
 
+class ProcessoLegDownloadDocumentoView(PastaDigitalMixin, grok.View):
+    """View para download de documentos individuais da pasta digital legislativa"""
+    grok.context(Interface)
+    grok.require('zope2.View')
+    grok.name('processo_leg_download_documento')
+    
+    def render(self):
+        try:
+            # Extrai parâmetros
+            cod_materia_str = self.request.form.get('cod_materia') or self.request.get('cod_materia')
+            filename = self.request.form.get('file') or self.request.get('file')
+            
+            if not cod_materia_str or not filename:
+                self.request.response.setStatus(400)
+                return "Parâmetros cod_materia e file são obrigatórios"
+            
+            # Valida filename (segurança - evita path traversal)
+            if '..' in filename or '/' in filename or '\\' in filename:
+                self.request.response.setStatus(400)
+                return "Nome de arquivo inválido"
+            
+            cod_materia_int = int(cod_materia_str)
+            
+            # IMPORTANTE: Busca sempre no filesystem (diretório da pasta digital)
+            # Se o usuário conseguiu abrir a pasta digital, já tem permissão adequada
+            # Todos os arquivos da pasta digital são copiados para o diretório durante a geração
+            
+            file_content = self._get_file_from_pasta_dir(cod_materia_int, filename)
+            
+            if file_content is None:
+                self.request.response.setStatus(404)
+                return "Arquivo não encontrado"
+            
+            # Define headers de resposta
+            safe_filename = filename.replace(' ', '_')  # Nome seguro para download
+            content_type = 'application/pdf'
+            
+            self.request.response.setHeader('Content-Type', content_type)
+            self.request.response.setHeader(
+                'Content-Disposition',
+                f'attachment; filename="{safe_filename}"'
+            )
+            self.request.response.setHeader('Content-Length', str(len(file_content)))
+            
+            return file_content
+            
+        except ValueError:
+            self.request.response.setStatus(400)
+            return "Parâmetro cod_materia inválido"
+        except Exception as e:
+            logger.error(f"[processo_leg_download_documento] Erro: {e}", exc_info=True)
+            self.request.response.setStatus(500)
+            return f"Erro ao baixar documento: {str(e)}"
+    
+    def _get_file_from_pasta_dir(self, cod_materia, filename):
+        """
+        Obtém arquivo do diretório da pasta digital no filesystem.
+        
+        IMPORTANTE: O 'filename' vem do campo 'file' do cache.json, que contém
+        o nome do arquivo original (ex: "capa_PL-123-2025.pdf", "79431_texto_integral.pdf").
+        
+        Esses arquivos são copiados para o diretório pasta_digital/{cod_materia}/ durante a geração.
+        """
+        try:
+            dir_base = get_processo_dir(cod_materia)
+            
+            # Tenta primeiro no diretório raiz com o nome exato do arquivo
+            file_path = os.path.join(dir_base, filename)
+            
+            # Validação adicional de segurança: garante que o arquivo está dentro do diretório
+            # Resolve caminho absoluto para evitar path traversal
+            dir_base_abs = os.path.abspath(dir_base)
+            file_path_abs = os.path.abspath(file_path)
+            
+            if not file_path_abs.startswith(dir_base_abs):
+                logger.warning(f"[_get_file_from_pasta_dir] Tentativa de path traversal: {filename}")
+                return None
+            
+            if not os.path.exists(file_path) or not os.path.isfile(file_path):
+                logger.debug(f"[_get_file_from_pasta_dir] Arquivo não encontrado no diretório raiz: {file_path}")
+                
+                # Para capa, tenta gerar dinamicamente
+                if filename.startswith('capa_'):
+                    logger.debug(f"[_get_file_from_pasta_dir] Tentando gerar capa dinamicamente: {filename}")
+                    file_content = self._get_capa_dinamica(cod_materia, filename, dir_base)
+                    if file_content:
+                        return file_content
+                
+                # Se não encontrou, tenta buscar o arquivo original no ZODB e salvar no diretório
+                # Isso permite que arquivos sejam baixados mesmo se não foram copiados durante a geração
+                logger.debug(f"[_get_file_from_pasta_dir] Tentando buscar arquivo original no ZODB: {filename}")
+                file_content = self._get_file_from_zodb_and_save(cod_materia, filename, dir_base)
+                if file_content:
+                    return file_content
+                
+                return None
+            
+            # Lê arquivo do filesystem
+            with open(file_path, 'rb') as f:
+                return f.read()
+                
+        except Exception as e:
+            logger.error(f"[_get_file_from_pasta_dir] Erro ao obter {filename} do diretório: {e}", exc_info=True)
+            return None
+    
+    def _get_file_from_zodb_and_save(self, cod_materia, filename, dir_base):
+        """
+        Busca arquivo no ZODB e salva no diretório para uso futuro.
+        Usa o mesmo método que a geração da pasta digital usa para copiar arquivos.
+        """
+        try:
+            from Products.CMFCore.utils import getToolByName
+            
+            portal = getToolByName(self.context, 'portal_url').getPortalObject()
+            
+            if not hasattr(portal, 'sapl_documentos'):
+                return None
+            
+            # Determina o container baseado no nome do arquivo
+            container = None
+            
+            # Matéria principal - texto integral
+            if filename.endswith('_texto_integral.pdf'):
+                if hasattr(portal.sapl_documentos, 'materia'):
+                    container = portal.sapl_documentos.materia
+            # Emendas
+            elif '_emenda_' in filename or filename.endswith('_emenda.pdf'):
+                if hasattr(portal.sapl_documentos, 'emenda'):
+                    container = portal.sapl_documentos.emenda
+            # Substitutivos
+            elif '_substitutivo_' in filename or filename.endswith('_substitutivo.pdf'):
+                if hasattr(portal.sapl_documentos, 'substitutivo'):
+                    container = portal.sapl_documentos.substitutivo
+            # Relatorias
+            elif '_relatoria_' in filename or filename.endswith('_relatoria.pdf'):
+                if hasattr(portal.sapl_documentos, 'relatoria'):
+                    container = portal.sapl_documentos.relatoria
+            # Documentos acessórios
+            elif '_acessorio_' in filename or filename.endswith('_acessorio.pdf'):
+                if hasattr(portal.sapl_documentos, 'materia') and hasattr(portal.sapl_documentos.materia, 'documento_acessorio'):
+                    container = portal.sapl_documentos.materia.documento_acessorio
+            # Tramitações
+            elif '_tram.pdf' in filename or filename.endswith('_tramitacao.pdf'):
+                if hasattr(portal.sapl_documentos, 'materia') and hasattr(portal.sapl_documentos.materia, 'tramitacao'):
+                    container = portal.sapl_documentos.materia.tramitacao
+            # Capa
+            elif filename.startswith('capa_'):
+                # Capa é gerada dinamicamente, não está no ZODB
+                return None
+            
+            if not container:
+                logger.debug(f"[_get_file_from_zodb_and_save] Container não identificado para: {filename}")
+                return None
+            
+            # Verifica se arquivo existe no container
+            if not safe_check_file(container, filename):
+                logger.debug(f"[_get_file_from_zodb_and_save] Arquivo não existe no ZODB: {filename}")
+                return None
+            
+            # Lê arquivo do ZODB
+            if not hasattr(container, filename):
+                return None
+            
+            file_obj = getattr(container, filename)
+            
+            # Extrai dados do arquivo
+            if hasattr(file_obj, 'data'):
+                file_content = file_obj.data
+            elif hasattr(file_obj, 'read'):
+                file_obj.seek(0)
+                file_content = file_obj.read()
+            else:
+                return None
+            
+            if not file_content:
+                return None
+            
+            # Salva no diretório para uso futuro
+            try:
+                file_path = os.path.join(dir_base, filename)
+                os.makedirs(dir_base, mode=0o700, exist_ok=True)
+                with open(file_path, 'wb') as f:
+                    f.write(file_content)
+                logger.info(f"[_get_file_from_zodb_and_save] Arquivo copiado do ZODB e salvo: {filename}")
+            except Exception as save_err:
+                logger.warning(f"[_get_file_from_zodb_and_save] Erro ao salvar arquivo no diretório: {save_err}")
+                # Continua mesmo se não conseguir salvar
+            
+            return file_content
+            
+        except Exception as e:
+            logger.error(f"[_get_file_from_zodb_and_save] Erro ao buscar arquivo no ZODB: {e}", exc_info=True)
+            return None
+    
+    def _get_capa_dinamica(self, cod_materia, filename, dir_base):
+        """
+        Gera capa dinamicamente via HTTP (mesmo método usado durante a coleta).
+        """
+        try:
+            from Products.CMFCore.utils import getToolByName
+            import urllib.request
+            
+            portal = getToolByName(self.context, 'portal_url').getPortalObject()
+            base_url = portal.absolute_url() if hasattr(portal, 'absolute_url') else ''
+            
+            if not base_url:
+                return None
+            
+            # URL da view de capa (mesma usada durante a geração)
+            capa_url = f"{base_url}/modelo_proposicao/capa_processo?cod_materia={cod_materia}"
+            
+            # Faz requisição HTTP para gerar capa
+            with urllib.request.urlopen(capa_url) as response:
+                file_content = response.read()
+                
+                if file_content:
+                    # Salva no diretório para uso futuro
+                    try:
+                        file_path = os.path.join(dir_base, filename)
+                        os.makedirs(dir_base, mode=0o700, exist_ok=True)
+                        with open(file_path, 'wb') as f:
+                            f.write(file_content)
+                        logger.info(f"[_get_capa_dinamica] Capa gerada e salva: {filename}")
+                    except Exception as save_err:
+                        logger.warning(f"[_get_capa_dinamica] Erro ao salvar capa: {save_err}")
+                    
+                    return file_content
+            
+            return None
+            
+        except Exception as e:
+            logger.error(f"[_get_capa_dinamica] Erro ao gerar capa dinamicamente: {e}", exc_info=True)
+            return None

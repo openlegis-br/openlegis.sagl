@@ -58,7 +58,7 @@
             
             /* Variáveis específicas da Pasta Digital (mantidas para compatibilidade) */
             --primary-blue: var(--bs-primary, #44a2d2);
-            --sidebar-width: 320px;
+            --sidebar-width: 380px;
             --header-height: 64px;
             --toolbar-height: 64px;
             --bg-light: var(--bs-body-bg, #f8f9fa);
@@ -449,6 +449,45 @@
             color: #ffffff;
             box-shadow: 0 2px 4px rgba(68, 162, 210, 0.25);
             border-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        /* Botão de download de documento */
+        .doc-download-btn {
+            margin-left: auto;
+            padding: 4px 8px;
+            background: transparent;
+            border: none;
+            color: var(--bs-gray-600, #6c757d);
+            cursor: pointer;
+            opacity: 0.3; /* Temporário: sempre visível para debug */
+            visibility: visible; /* Temporário: sempre visível para debug */
+            transition: opacity 0.2s ease, color 0.2s ease, visibility 0.2s ease, background 0.2s ease;
+            border-radius: 0.25rem;
+            flex-shrink: 0;
+            display: inline-flex !important;
+            align-items: center;
+            justify-content: center;
+            min-width: 28px;
+            height: 28px;
+            font-size: 16px;
+            line-height: 1;
+        }
+
+        .doc-item:hover .doc-download-btn,
+        .doc-item.active .doc-download-btn,
+        .doc-item-content:hover .doc-download-btn {
+            opacity: 1 !important;
+            visibility: visible !important;
+        }
+
+        .doc-download-btn:hover {
+            color: var(--bs-primary, #44a2d2);
+            background: var(--bs-gray-100, #f8f9fa);
+        }
+
+        .doc-download-btn:active {
+            color: var(--bs-primary-dark, #2d7ba8);
+            background: var(--bs-gray-200, #e9ecef);
         }
         
         /* Container do documento com páginas */
@@ -1492,13 +1531,13 @@
                 </div>
                 
                 <div id="documentos-adm-section" style="display:none">
-                    <div class="section-title">Documentos Administrativos</div>
-                    <nav id="documentos-adm-nav" aria-label="Documentos administrativos"></nav>
+                    <div class="section-title">Processos Vinculados</div>
+                    <nav id="documentos-adm-nav" aria-label="Processos vinculados"></nav>
                 </div>
                 
                 <div id="normas-section" style="display:none">
-                    <div class="section-title">Normas Jurídicas</div>
-                    <nav id="normas-nav" aria-label="Normas jurídicas"></nav>
+                    <div class="section-title">Norma Derivada</div>
+                    <nav id="normas-nav" aria-label="Norma derivada"></nav>
                 </div>
             </div>
             
@@ -1636,13 +1675,46 @@
             TOAST_DEFAULT_DURATION: 5000,
             PRELOAD_ADJACENT_PAGES: true,
             CACHE_BUSTING_ENABLED: true,
-            DEBUG_MODE: false,
+            DEBUG_MODE: false, // Habilitado temporariamente para debug do ajuste de scroll
             SCROLL_NAVIGATION_ENABLED: false,  // Desabilitado para permitir rolagem normal do documento
             SCROLL_THRESHOLD: 0.98,  // 98% do scroll para mudar de página (muito restritivo - permite ler página inteira)
             SCROLL_THROTTLE: 600,    // 600ms entre mudanças de página (aumentado para evitar mudanças rápidas)
             SCROLL_EDGE_THRESHOLD: 10, // 10px da borda para considerar "no final" (muito restritivo)
             SCROLL_MIN_STOP_TIME: 300, // 300ms parado no final antes de navegar (permite ler)
-            SCROLL_DEBUG: false      // Habilita logs de debug
+            SCROLL_DEBUG: false,      // Habilita logs de debug
+            
+            // ⚠️ PROTEÇÕES CONTRA NAVEGAÇÃO ACIDENTAL (Valores Conservadores)
+            MIN_PAGE_VIEW_PERCENT: 0.80,        // 80%: Mínimo que usuário DEVE visualizar antes de permitir navegação
+            ABSOLUTE_BOTTOM_THRESHOLD: 0.99,    // 99%: Final absoluto necessário para navegar (muito restritivo)
+            ABSOLUTE_TOP_THRESHOLD: 0.01,       // 1%: Topo absoluto para voltar página anterior
+            MIN_STOP_TIME: 800,                 // ms: Tempo mínimo parado no final antes de navegar
+            SCROLL_STOP_TIMEOUT: 500,           // ms: Tempo sem scroll antes de considerar "parado"
+            MIN_PAGE_TIME: 2000,                // ms: Tempo mínimo na página antes de permitir navegação
+            ADDITIONAL_CONFIRMATION_TIME: 300,  // ms: Tempo extra após todas validações antes de navegar
+            
+            // Triggers (Somente após proteções passarem)
+            PRELOAD_TRIGGER: 0.95,              // 95%: Pré-carrega próxima página (apenas visualização silenciosa)
+            NAVIGATE_TRIGGER: 0.99,             // 99%: Inicia validação para navegação (MUITO restritivo)
+            TOP_NAVIGATE_TRIGGER: 0.01,         // 1%: Volta para anterior (apenas no topo absoluto)
+            
+            // Validações de Segurança
+            REQUIRE_FULL_STOP: true,            // true: Requer parar completamente antes de navegar
+            REQUIRE_MIN_VIEW_PERCENT: true,     // true: Requer visualizar mínimo da página
+            REQUIRE_MIN_PAGE_TIME: true,        // true: Requer tempo mínimo na página
+            CANCEL_ON_SCROLL_BACK: true,        // true: Cancela navegação se voltar a rolar
+            CANCEL_ON_MOVE_AWAY: true,          // true: Cancela se sair do final/topo
+            
+            // Performance (OTIMIZADO para documentos grandes - milhares de páginas)
+            PRELOAD_ONLY_ADJACENT: true,        // true: Pré-carrega APENAS anterior (se existir) e próxima (se existir)
+            PRELOAD_PREV: true,                 // true: Pré-carrega página anterior (se currentPage > 1)
+            PRELOAD_NEXT: true,                 // true: Pré-carrega próxima página (se currentPage < totalPages)
+            CACHE_SIZE: 3,                      // 3: Cache mínimo (atual, anterior, próxima) - máximo necessário
+            CLEANUP_OLD_CACHE: true,            // true: Remove páginas do cache quando não são mais adjacentes
+            MAX_CACHE_SIZE: 3,                  // 3: Máximo absoluto - nunca manter mais que 3 páginas em cache
+            
+            // Debug (para desenvolvimento)
+            DEBUG_VALIDATIONS: false,           // Logs de cada validação
+            DEBUG_TIMING: false                 // Logs de tempos e timeouts
         };
         
         let APP_DATA = {
@@ -2376,7 +2448,8 @@
         }
         
         // Função para pré-carregar páginas adjacentes
-        function preloadAdjacentPages(currentPage) {
+        // Função antiga mantida para compatibilidade - será substituída pela nova implementação otimizada
+        function preloadAdjacentPages_OLD(currentPage) {
             var currentPageNum = parseInt(currentPage);
             if (isNaN(currentPageNum)) return;
             
@@ -2399,8 +2472,12 @@
             });
         }
         
+        // Variável global para rastrear direção da navegação (para ajustar scroll após carregamento)
+        var lastNavigationDirection = null; // 'up' ou 'down' ou null
+        
         function prevPagina() {
             if (currentPage > 1) {
+                lastNavigationDirection = 'up'; // Navegação para cima = abrir no final
                 goToPage(currentPage - 1);
             } else {
                 if (typeof announceToScreenReader === 'function') {
@@ -2411,6 +2488,7 @@
         
         function nextPagina() {
             if (currentPage < totalPages) {
+                lastNavigationDirection = 'down'; // Navegação para baixo = abrir no topo
                 goToPage(currentPage + 1);
             } else {
                 if (typeof announceToScreenReader === 'function') {
@@ -2441,6 +2519,34 @@
         var scrollStopTimer = null; // Timer para detectar quando parou de rolar
         var pendingNavigation = null; // Navegação pendente (aguardando confirmação)
         
+        // ============================================
+        // RASTREAMENTO DE VISUALIZAÇÃO COMPLETA
+        // ============================================
+        var pageViewTracker = {
+            pageStartTime: null,           // Timestamp quando entrou na página
+            minScrollPosition: Infinity,   // Menor posição de scroll alcançada
+            maxScrollPosition: 0,          // Maior posição de scroll alcançada
+            scrollPath: [],                // Array de posições visitadas (para calcular % visualizado)
+            lastScrollTime: null,          // Último momento de scroll
+            scrollStopTimer: null,         // Timer para detectar parada
+            navigationPendingTimer: null,  // Timer para navegação pendente (próxima página)
+            navigationPendingTimerTop: null, // Timer para navegação pendente (página anterior)
+            hasReachedBottom: false,       // Se chegou ao final da página
+            hasReachedTop: false,          // Se chegou ao topo da página
+            navigationCancelled: false,    // Se navegação foi cancelada
+            navigationCancelledTop: false  // Se navegação para cima foi cancelada
+        };
+        
+        // ============================================
+        // CACHE DE PRÉ-CARREGAMENTO (OTIMIZADO)
+        // ============================================
+        var pageCache = {
+            current: null,      // Página atual (carregada no iframe principal)
+            previous: null,     // Página anterior (se existir)
+            next: null,         // Próxima página (se existir)
+            iframes: {}         // Objeto com iframes de cache: { pageNum: iframeElement }
+        };
+        
         /**
          * Verifica se o scroll chegou ao topo ou ao final da página
          * Tenta múltiplas abordagens para funcionar com PDF.js
@@ -2468,6 +2574,63 @@
             // Tenta obter da janela do iframe (para PDF.js)
             if (iframeWindow) {
                 try {
+                    // Primeiro tenta acessar o iframe interno do PDF.js (onde o PDF realmente está renderizado)
+                    var pdfjsIframe = null;
+                    try {
+                        var iframeDoc = iframeWindow.document;
+                        if (iframeDoc) {
+                            // PDF.js renderiza dentro de um iframe interno
+                            pdfjsIframe = iframeDoc.querySelector('iframe#viewer') || 
+                                         iframeDoc.querySelector('iframe.viewer') ||
+                                         iframeDoc.querySelector('iframe');
+                        }
+                    } catch (e) {
+                        // CORS - ignora
+                    }
+                    
+                    // Se encontrou iframe interno, tenta obter scroll dele
+                    if (pdfjsIframe && pdfjsIframe.contentWindow) {
+                        try {
+                            var innerWin = pdfjsIframe.contentWindow;
+                            var innerScrollTop = innerWin.pageYOffset || innerWin.scrollY || 0;
+                            var innerScrollHeight = innerWin.document.documentElement.scrollHeight || 
+                                                   innerWin.document.body.scrollHeight || 0;
+                            var innerClientHeight = innerWin.innerHeight || 
+                                                  innerWin.document.documentElement.clientHeight || 0;
+                            
+                            if (innerScrollHeight > scrollHeight) {
+                                scrollTop = innerScrollTop;
+                                scrollHeight = innerScrollHeight;
+                                clientHeight = innerClientHeight;
+                            }
+                        } catch (e) {
+                            // CORS no iframe interno - continua com iframeWindow original
+                        }
+                    }
+                    
+                    // Tenta também via window.frames se disponível
+                    if (iframeWindow.frames && iframeWindow.frames.length > 0) {
+                        try {
+                            var firstFrame = iframeWindow.frames[0];
+                            if (firstFrame && firstFrame.document) {
+                                var frameScrollTop = firstFrame.pageYOffset || firstFrame.scrollY || 0;
+                                var frameScrollHeight = firstFrame.document.documentElement.scrollHeight || 
+                                                       firstFrame.document.body.scrollHeight || 0;
+                                var frameClientHeight = firstFrame.innerHeight || 
+                                                      firstFrame.document.documentElement.clientHeight || 0;
+                                
+                                if (frameScrollHeight > scrollHeight) {
+                                    scrollTop = frameScrollTop;
+                                    scrollHeight = frameScrollHeight;
+                                    clientHeight = frameClientHeight;
+                                }
+                            }
+                        } catch (e) {
+                            // CORS - ignora
+                        }
+                    }
+                    
+                    // Tenta obter do iframeWindow original
                     var winScrollTop = iframeWindow.pageYOffset || iframeWindow.scrollY || 0;
                     var winScrollHeight = iframeWindow.document.documentElement.scrollHeight || 
                                          iframeWindow.document.body.scrollHeight || 0;
@@ -2669,21 +2832,35 @@
                     // Para cima: 3+ eventos
                     var requiredCount = isScrollingDown ? 8 : 3;
                     
+                    // IMPORTANTE: Comportamento antigo (sem validações rigorosas) só se proteções estão desabilitadas
+                    // Se proteções estão habilitadas, validações já foram aplicadas acima e retornaram
                     if (scrollDirectionCount >= requiredCount) {
-                        if (isScrollingDown && currentPage < totalPages) {
+                        // Navegação para baixo - só se proteções não estão habilitadas
+                        if (isScrollingDown && currentPage < totalPages &&
+                            (!CONFIG.SCROLL_NAVIGATION_ENABLED || !scrollNavigationEnabled ||
+                             (!CONFIG.REQUIRE_MIN_VIEW_PERCENT && !CONFIG.REQUIRE_MIN_PAGE_TIME))) {
                             lastScrollTime = now;
                             scrollDirectionCount = 0;
                             event.preventDefault();
                             event.stopPropagation();
                             nextPagina();
                             return;
-                        } else if (isScrollingUp && scrollPos.atTop && currentPage > 1) {
-                            lastScrollTime = now;
-                            scrollDirectionCount = 0;
-                            event.preventDefault();
-                            event.stopPropagation();
-                            prevPagina();
-                            return;
+                        }
+                        // Navegação para cima - só se proteções não estão habilitadas
+                        // Se proteções estão habilitadas, a lógica acima já tratou isso
+                        else if (isScrollingUp && scrollPos.atTop && currentPage > 1 &&
+                                (!CONFIG.SCROLL_NAVIGATION_ENABLED || !scrollNavigationEnabled ||
+                                 (!CONFIG.REQUIRE_MIN_VIEW_PERCENT && !CONFIG.REQUIRE_MIN_PAGE_TIME))) {
+                            // Para cima sem validações: só navega se realmente está no topo
+                            // Aplica validação básica de estar no topo (5%)
+                            if (scrollPos.scrollPercent <= 0.05) {
+                                lastScrollTime = now;
+                                scrollDirectionCount = 0;
+                                event.preventDefault();
+                                event.stopPropagation();
+                                prevPagina();
+                                return;
+                            }
                         }
                     }
                 }
@@ -2694,6 +2871,122 @@
                     var distanceFromBottom = scrollPos.maxScroll - scrollPos.scrollTop;
                     var isAtBottom = scrollPos.atBottom;
                     
+                    // ⚠️ VALIDAÇÕES DE PROTEÇÃO (se habilitadas E scroll navigation está habilitado)
+                    // IMPORTANTE: Validações só são aplicadas se scroll navigation estiver habilitado
+                    if (CONFIG.SCROLL_NAVIGATION_ENABLED && scrollNavigationEnabled && 
+                        (CONFIG.REQUIRE_MIN_VIEW_PERCENT || CONFIG.REQUIRE_MIN_PAGE_TIME)) {
+                        
+                        // Valida se chegou ao final absoluto (99%+)
+                        var isAtAbsoluteBottom = scrollPos.scrollPercent >= CONFIG.ABSOLUTE_BOTTOM_THRESHOLD;
+                        
+                        // Se não está no final absoluto, não navega
+                        if (!isAtAbsoluteBottom) {
+                            // Atualiza último tempo de scroll para rastreamento
+                            if (pageViewTracker && typeof pageViewTracker === 'object') {
+                                pageViewTracker.lastScrollTime = Date.now();
+                            }
+                            return; // Permite scroll normal dentro da página
+                        }
+                        
+                        // Valida visualização mínima (80%)
+                        if (CONFIG.REQUIRE_MIN_VIEW_PERCENT && typeof getPageViewPercent === 'function') {
+                            var viewPercent = getPageViewPercent();
+                            if (viewPercent < CONFIG.MIN_PAGE_VIEW_PERCENT) {
+                                if (CONFIG.DEBUG_MODE || CONFIG.SCROLL_DEBUG) {
+                                    console.log('[handleScrollNavigation] Bloqueado: Visualizou apenas', Math.round(viewPercent * 100) + '% da página (mínimo: ' + Math.round(CONFIG.MIN_PAGE_VIEW_PERCENT * 100) + '%)');
+                                }
+                                if (pageViewTracker && typeof pageViewTracker === 'object') {
+                                    pageViewTracker.lastScrollTime = Date.now();
+                                }
+                                return; // Não visualizou suficiente, bloqueia navegação
+                            }
+                        }
+                        
+                        // Valida tempo mínimo na página (2s)
+                        if (CONFIG.REQUIRE_MIN_PAGE_TIME && pageViewTracker && typeof pageViewTracker === 'object' && pageViewTracker.pageStartTime) {
+                            var timeOnPage = Date.now() - pageViewTracker.pageStartTime;
+                            if (timeOnPage < CONFIG.MIN_PAGE_TIME) {
+                                if (CONFIG.DEBUG_MODE || CONFIG.SCROLL_DEBUG) {
+                                    console.log('[handleScrollNavigation] Bloqueado: Tempo na página insuficiente (' + Math.round(timeOnPage / 1000) + 's, mínimo: ' + CONFIG.MIN_PAGE_TIME / 1000 + 's)');
+                                }
+                                if (pageViewTracker && typeof pageViewTracker === 'object') {
+                                    pageViewTracker.lastScrollTime = Date.now();
+                                }
+                                return; // Tempo insuficiente, bloqueia navegação
+                            }
+                        }
+                        
+                        // Se passou nas validações, usa startNavigationProcess para navegação controlada
+                        // Mas apenas se ainda não iniciou o processo
+                        if (pageViewTracker && typeof pageViewTracker === 'object' && 
+                            (!pageViewTracker.hasReachedBottom || !pageViewTracker.navigationPendingTimer)) {
+                            // Chama onReachedBottom que vai usar todas as validações
+                            if (typeof onReachedBottom === 'function') {
+                                onReachedBottom(scrollPos);
+                            }
+                        }
+                        return; // Retorna, a navegação será feita pelo startNavigationProcess
+                    }
+                    
+                    // ⚠️ VALIDAÇÕES DE PROTEÇÃO PARA ROLAGEM PARA CIMA (página anterior)
+                    // IMPORTANTE: Validações só são aplicadas se scroll navigation estiver habilitado
+                    if (CONFIG.SCROLL_NAVIGATION_ENABLED && scrollNavigationEnabled && 
+                        (CONFIG.REQUIRE_MIN_VIEW_PERCENT || CONFIG.REQUIRE_MIN_PAGE_TIME) &&
+                        isScrollingUp && currentPage > 1) {
+                        
+                        // Valida se chegou ao topo absoluto (1% ou menos)
+                        var isAtAbsoluteTop = scrollPos.scrollPercent <= CONFIG.ABSOLUTE_TOP_THRESHOLD;
+                        
+                        // Se não está no topo absoluto, não navega
+                        if (!isAtAbsoluteTop) {
+                            // Atualiza último tempo de scroll para rastreamento
+                            if (pageViewTracker && typeof pageViewTracker === 'object') {
+                                pageViewTracker.lastScrollTime = Date.now();
+                            }
+                            return; // Permite scroll normal dentro da página
+                        }
+                        
+                        // Valida visualização mínima (80%) - usuário precisa ter visualizado a página atual
+                        if (CONFIG.REQUIRE_MIN_VIEW_PERCENT && typeof getPageViewPercent === 'function') {
+                            var viewPercent = getPageViewPercent();
+                            if (viewPercent < CONFIG.MIN_PAGE_VIEW_PERCENT) {
+                                if (CONFIG.DEBUG_MODE || CONFIG.SCROLL_DEBUG) {
+                                    console.log('[handleScrollNavigation] Bloqueado (cima): Visualizou apenas', Math.round(viewPercent * 100) + '% da página (mínimo: ' + Math.round(CONFIG.MIN_PAGE_VIEW_PERCENT * 100) + '%)');
+                                }
+                                if (pageViewTracker && typeof pageViewTracker === 'object') {
+                                    pageViewTracker.lastScrollTime = Date.now();
+                                }
+                                return; // Não visualizou suficiente, bloqueia navegação
+                            }
+                        }
+                        
+                        // Valida tempo mínimo na página (2s)
+                        if (CONFIG.REQUIRE_MIN_PAGE_TIME && pageViewTracker && typeof pageViewTracker === 'object' && pageViewTracker.pageStartTime) {
+                            var timeOnPage = Date.now() - pageViewTracker.pageStartTime;
+                            if (timeOnPage < CONFIG.MIN_PAGE_TIME) {
+                                if (CONFIG.DEBUG_MODE || CONFIG.SCROLL_DEBUG) {
+                                    console.log('[handleScrollNavigation] Bloqueado (cima): Tempo na página insuficiente (' + Math.round(timeOnPage / 1000) + 's, mínimo: ' + CONFIG.MIN_PAGE_TIME / 1000 + 's)');
+                                }
+                                if (pageViewTracker && typeof pageViewTracker === 'object') {
+                                    pageViewTracker.lastScrollTime = Date.now();
+                                }
+                                return; // Tempo insuficiente, bloqueia navegação
+                            }
+                        }
+                        
+                        // Se passou nas validações, usa startNavigationProcessTop para navegação controlada
+                        // Mas apenas se ainda não iniciou o processo
+                        if (pageViewTracker && typeof pageViewTracker === 'object' && 
+                            (!pageViewTracker.hasReachedTop || !pageViewTracker.navigationPendingTimerTop)) {
+                            // Chama onReachedTop que vai usar todas as validações
+                            if (typeof onReachedTop === 'function') {
+                                onReachedTop(scrollPos);
+                            }
+                        }
+                        return; // Retorna, a navegação será feita pelo startNavigationProcessTop
+                    }
+                    
+                    // Comportamento padrão (sem validações rigorosas): usa threshold normal
                     // Verifica se chegou ao final absoluto (dentro de 10px e 98%+)
                     if (isAtBottom) {
                         // Cancela qualquer navegação pendente anterior
@@ -2929,11 +3222,979 @@
             
             if (enabled) {
                 initScrollNavigation();
+                
+                // Inicia rastreamento e monitoramento apenas se scroll navigation está habilitado E proteções estão habilitadas
+                if (CONFIG.SCROLL_NAVIGATION_ENABLED && scrollNavigationEnabled && 
+                    (CONFIG.REQUIRE_MIN_VIEW_PERCENT || CONFIG.REQUIRE_MIN_PAGE_TIME)) {
+                    if (typeof resetPageViewTracking === 'function') {
+                        resetPageViewTracking();
+                    }
+                    if (typeof startPageViewMonitoring === 'function') {
+                        startPageViewMonitoring();
+                    }
+                }
+                
+                // Pré-carrega páginas adjacentes apenas se scroll navigation está habilitado
+                if (CONFIG.SCROLL_NAVIGATION_ENABLED && scrollNavigationEnabled &&
+                    CONFIG.PRELOAD_ONLY_ADJACENT && typeof preloadAdjacentPages === 'function') {
+                    setTimeout(function() {
+                        preloadAdjacentPages();
+                    }, 300);
+                }
             }
             
             if (CONFIG.DEBUG_MODE) {
                 console.log('[setScrollNavigationEnabled] Navegação por scroll:', enabled ? 'habilitada' : 'desabilitada');
             }
+        }
+        
+        // ============================================
+        // RASTREAMENTO DE VISUALIZAÇÃO COMPLETA
+        // ============================================
+        
+        /**
+         * Reseta rastreamento ao entrar em nova página
+         */
+        function resetPageViewTracking() {
+            // Limpa timers pendentes
+            if (pageViewTracker && pageViewTracker.navigationPendingTimer) {
+                clearTimeout(pageViewTracker.navigationPendingTimer);
+            }
+            if (pageViewTracker && pageViewTracker.navigationPendingTimerTop) {
+                clearTimeout(pageViewTracker.navigationPendingTimerTop);
+            }
+            
+            pageViewTracker = {
+                pageStartTime: Date.now(),
+                minScrollPosition: Infinity,
+                maxScrollPosition: 0,
+                scrollPath: [],
+                lastScrollTime: null,
+                scrollStopTimer: null,
+                navigationPendingTimer: null,
+                navigationPendingTimerTop: null,
+                hasReachedBottom: false,
+                hasReachedTop: false,
+                navigationCancelled: false,
+                navigationCancelledTop: false
+            };
+            
+            if (CONFIG.DEBUG_MODE) {
+                console.log('[resetPageViewTracking] Rastreamento resetado para nova página');
+            }
+        }
+        
+        /**
+         * Monitora visualização da página continuamente
+         * Inicia loop de monitoramento (chamado apenas uma vez)
+         */
+        var pageViewMonitoringActive = false;
+        
+        function startPageViewMonitoring() {
+            // Evita iniciar múltiplas instâncias do monitoramento
+            if (pageViewMonitoringActive) {
+                if (CONFIG.DEBUG_MODE) {
+                    console.log('[startPageViewMonitoring] Monitoramento já está ativo');
+                }
+                return;
+            }
+            
+            // Verifica se proteções estão habilitadas
+            if (!CONFIG.REQUIRE_MIN_VIEW_PERCENT && !CONFIG.REQUIRE_MIN_PAGE_TIME) {
+                if (CONFIG.DEBUG_MODE) {
+                    console.log('[startPageViewMonitoring] Proteções desabilitadas, monitoramento não necessário');
+                }
+                return;
+            }
+            
+            pageViewMonitoringActive = true;
+            
+            function monitor() {
+                // Se navegação por scroll foi desabilitada, para o monitoramento
+                if (!scrollNavigationEnabled || !CONFIG.SCROLL_NAVIGATION_ENABLED) {
+                    pageViewMonitoringActive = false;
+                    return;
+                }
+                
+                // Verifica se pageViewTracker existe e está inicializado
+                if (!pageViewTracker || typeof pageViewTracker !== 'object') {
+                    pageViewMonitoringActive = false;
+                    return;
+                }
+                
+                try {
+                    var iframe = document.getElementById('iframeViewer');
+                    if (!iframe) {
+                        if (pageViewMonitoringActive && scrollNavigationEnabled && CONFIG.SCROLL_NAVIGATION_ENABLED) {
+                            requestAnimationFrame(monitor);
+                        } else {
+                            pageViewMonitoringActive = false;
+                        }
+                        return;
+                    }
+                    
+                    var iframeWindow = iframe.contentWindow;
+                    if (!iframeWindow) {
+                        if (pageViewMonitoringActive && scrollNavigationEnabled && CONFIG.SCROLL_NAVIGATION_ENABLED) {
+                            requestAnimationFrame(monitor);
+                        } else {
+                            pageViewMonitoringActive = false;
+                        }
+                        return;
+                    }
+                    
+                    var scrollPos = getScrollPosition(null, iframeWindow);
+                    
+                    // Verifica se obteve posição válida
+                    if (!scrollPos || scrollPos.scrollHeight === 0) {
+                        if (pageViewMonitoringActive && scrollNavigationEnabled && CONFIG.SCROLL_NAVIGATION_ENABLED) {
+                            requestAnimationFrame(monitor);
+                        } else {
+                            pageViewMonitoringActive = false;
+                        }
+                        return;
+                    }
+                    
+                    // Atualiza posição máxima alcançada
+                    if (scrollPos.scrollTop > pageViewTracker.maxScrollPosition) {
+                        pageViewTracker.maxScrollPosition = scrollPos.scrollTop;
+                    }
+                    
+                    // Atualiza posição mínima
+                    if (scrollPos.scrollTop < pageViewTracker.minScrollPosition) {
+                        pageViewTracker.minScrollPosition = scrollPos.scrollTop;
+                    }
+                    
+                    // Registra posição no caminho (para cálculo de % visualizado)
+                    var currentPercent = scrollPos.scrollPercent || 0;
+                    if (pageViewTracker.scrollPath.indexOf(currentPercent) === -1) {
+                        pageViewTracker.scrollPath.push(currentPercent);
+                    }
+                    
+                    // Atualiza último tempo de scroll
+                    pageViewTracker.lastScrollTime = Date.now();
+                    
+                    // Verifica se chegou ao final (apenas se validações estão habilitadas E scroll navigation está ativo)
+                    if (scrollPos.atBottom && !pageViewTracker.hasReachedBottom) {
+                        pageViewTracker.hasReachedBottom = true;
+                        if (typeof onReachedBottom === 'function') {
+                            onReachedBottom(scrollPos);
+                        }
+                    }
+                    
+                    // Verifica se chegou ao topo (apenas se validações estão habilitadas E scroll navigation está ativo)
+                    if (scrollPos.atTop && !pageViewTracker.hasReachedTop && currentPage > 1) {
+                        pageViewTracker.hasReachedTop = true;
+                        if (typeof onReachedTop === 'function') {
+                            onReachedTop(scrollPos);
+                        }
+                    }
+                    
+                    // Atualiza indicador visual de progresso
+                    if (typeof updatePageViewProgress === 'function') {
+                        updatePageViewProgress(scrollPos);
+                    }
+                    
+                    // Cancela navegação se necessário (tanto para baixo quanto para cima)
+                    if (typeof cancelNavigationIfNeeded === 'function') {
+                        cancelNavigationIfNeeded(scrollPos);
+                    }
+                    
+                } catch (e) {
+                    // Ignora erros de CORS
+                    if (CONFIG.DEBUG_MODE) {
+                        console.warn('[startPageViewMonitoring] Erro no monitoramento:', e);
+                    }
+                }
+                
+                // Continua o loop de monitoramento (chama novamente apenas se ainda estiver ativo)
+                if (pageViewMonitoringActive && scrollNavigationEnabled && CONFIG.SCROLL_NAVIGATION_ENABLED) {
+                    requestAnimationFrame(monitor);
+                } else {
+                    pageViewMonitoringActive = false;
+                }
+            }
+            
+            // Inicia loop de monitoramento
+            requestAnimationFrame(monitor);
+            
+            if (CONFIG.DEBUG_MODE) {
+                console.log('[startPageViewMonitoring] Monitoramento de visualização iniciado');
+            }
+        }
+        
+        /**
+         * Calcula percentual da página visualizada
+         */
+        function getPageViewPercent() {
+            if (pageViewTracker.scrollPath.length === 0) return 0;
+            
+            // Remove duplicatas e ordena
+            var uniquePath = [...new Set(pageViewTracker.scrollPath)].sort(function(a, b) {
+                return a - b;
+            });
+            
+            if (uniquePath.length === 0) return 0;
+            
+            var maxPercent = uniquePath[uniquePath.length - 1];
+            
+            // Se chegou ao final (99%+), consideramos 100% visualizada
+            if (maxPercent >= CONFIG.ABSOLUTE_BOTTOM_THRESHOLD) {
+                return 1.0; // 100% visualizada
+            }
+            
+            return Math.min(1.0, maxPercent);
+        }
+        
+        /**
+         * Valida todas as condições necessárias para navegação (para baixo)
+         */
+        function validateNavigationConditions() {
+            var validations = {
+                hasMinimumViewPercent: false,
+                isAtAbsoluteBottom: false,
+                hasStoppedScrolling: false,
+                hasMinimumPageTime: false,
+                notCancelled: true
+            };
+            
+            try {
+                var iframe = document.getElementById('iframeViewer');
+                if (!iframe) return validations;
+                
+                var iframeWindow = iframe.contentWindow;
+                var scrollPos = getScrollPosition(null, iframeWindow);
+                
+                // Validação 1: Visualizou mínimo da página (80%)
+                var viewPercent = getPageViewPercent();
+                validations.hasMinimumViewPercent = viewPercent >= CONFIG.MIN_PAGE_VIEW_PERCENT;
+                
+                // Validação 2: Está no final absoluto (99%+)
+                validations.isAtAbsoluteBottom = scrollPos.scrollPercent >= CONFIG.ABSOLUTE_BOTTOM_THRESHOLD;
+                
+                // Validação 3: Parou de rolar (sem movimento por 500ms)
+                var timeSinceLastScroll = Date.now() - (pageViewTracker.lastScrollTime || 0);
+                validations.hasStoppedScrolling = timeSinceLastScroll >= CONFIG.SCROLL_STOP_TIMEOUT;
+                
+                // Validação 4: Tempo mínimo na página (2s)
+                var timeOnPage = Date.now() - (pageViewTracker.pageStartTime || Date.now());
+                validations.hasMinimumPageTime = timeOnPage >= CONFIG.MIN_PAGE_TIME;
+                
+                // Validação 5: Navegação não foi cancelada
+                validations.notCancelled = !pageViewTracker.navigationCancelled;
+                
+            } catch (e) {
+                // Erro ao validar - assume que não está pronto
+                if (CONFIG.DEBUG_VALIDATIONS) {
+                    console.warn('[validateNavigationConditions] Erro:', e);
+                }
+            }
+            
+            if (CONFIG.DEBUG_VALIDATIONS) {
+                console.log('[validateNavigationConditions]', validations);
+            }
+            
+            return validations;
+        }
+        
+        /**
+         * Valida todas as condições necessárias para navegação (para cima - página anterior)
+         */
+        function validateNavigationConditionsTop() {
+            var validations = {
+                hasMinimumViewPercent: false,
+                isAtAbsoluteTop: false,
+                hasStoppedScrolling: false,
+                hasMinimumPageTime: false,
+                notCancelled: true
+            };
+            
+            try {
+                var iframe = document.getElementById('iframeViewer');
+                if (!iframe) return validations;
+                
+                var iframeWindow = iframe.contentWindow;
+                var scrollPos = getScrollPosition(null, iframeWindow);
+                
+                // Validação 1: Visualizou mínimo da página (80%)
+                // Para navegação para cima, também precisa ter visualizado a página atual
+                var viewPercent = getPageViewPercent();
+                validations.hasMinimumViewPercent = viewPercent >= CONFIG.MIN_PAGE_VIEW_PERCENT;
+                
+                // Validação 2: Está no topo absoluto (1% ou menos)
+                validations.isAtAbsoluteTop = scrollPos.scrollPercent <= CONFIG.ABSOLUTE_TOP_THRESHOLD;
+                
+                // Validação 3: Parou de rolar (sem movimento por 500ms)
+                var timeSinceLastScroll = Date.now() - (pageViewTracker.lastScrollTime || 0);
+                validations.hasStoppedScrolling = timeSinceLastScroll >= CONFIG.SCROLL_STOP_TIMEOUT;
+                
+                // Validação 4: Tempo mínimo na página (2s)
+                var timeOnPage = Date.now() - (pageViewTracker.pageStartTime || Date.now());
+                validations.hasMinimumPageTime = timeOnPage >= CONFIG.MIN_PAGE_TIME;
+                
+                // Validação 5: Navegação não foi cancelada
+                validations.notCancelled = !pageViewTracker.navigationCancelledTop;
+                
+            } catch (e) {
+                // Erro ao validar - assume que não está pronto
+                if (CONFIG.DEBUG_VALIDATIONS) {
+                    console.warn('[validateNavigationConditionsTop] Erro:', e);
+                }
+            }
+            
+            if (CONFIG.DEBUG_VALIDATIONS) {
+                console.log('[validateNavigationConditionsTop]', validations);
+            }
+            
+            return validations;
+        }
+        
+        /**
+         * Chamado quando usuário chega ao final da página
+         */
+        function onReachedBottom(scrollPos) {
+            if (CONFIG.DEBUG_MODE) {
+                console.log('[onReachedBottom] Chegou ao final da página');
+            }
+            
+            // Cancela qualquer navegação pendente anterior
+            if (pageViewTracker.navigationPendingTimer) {
+                clearTimeout(pageViewTracker.navigationPendingTimer);
+                pageViewTracker.navigationPendingTimer = null;
+            }
+            
+            // Valida condições
+            var validations = validateNavigationConditions();
+            
+            // Se não passou nas validações críticas, não navega
+            if (CONFIG.REQUIRE_MIN_VIEW_PERCENT && !validations.hasMinimumViewPercent) {
+                if (CONFIG.DEBUG_MODE) {
+                    console.log('[onReachedBottom] Bloqueado: Usuário não visualizou mínimo da página');
+                }
+                return;
+            }
+            
+            if (!validations.isAtAbsoluteBottom) {
+                // Não está no final absoluto ainda
+                return;
+            }
+            
+            // Inicia processo de navegação com timeout de segurança
+            startNavigationProcess();
+        }
+        
+        /**
+         * Chamado quando usuário chega ao topo da página (para navegação para cima)
+         */
+        function onReachedTop(scrollPos) {
+            if (CONFIG.DEBUG_MODE) {
+                console.log('[onReachedTop] Chegou ao topo da página');
+            }
+            
+            // Só navega para cima se não estiver na primeira página
+            if (currentPage <= 1) {
+                if (CONFIG.DEBUG_MODE) {
+                    console.log('[onReachedTop] Já está na primeira página, não navega');
+                }
+                return;
+            }
+            
+            // Cancela qualquer navegação pendente anterior
+            if (pageViewTracker.navigationPendingTimerTop) {
+                clearTimeout(pageViewTracker.navigationPendingTimerTop);
+                pageViewTracker.navigationPendingTimerTop = null;
+            }
+            
+            // Valida condições
+            var validations = validateNavigationConditionsTop();
+            
+            // Se não passou nas validações críticas, não navega
+            if (CONFIG.REQUIRE_MIN_VIEW_PERCENT && !validations.hasMinimumViewPercent) {
+                if (CONFIG.DEBUG_MODE) {
+                    console.log('[onReachedTop] Bloqueado: Usuário não visualizou mínimo da página');
+                }
+                return;
+            }
+            
+            if (!validations.isAtAbsoluteTop) {
+                // Não está no topo absoluto ainda
+                return;
+            }
+            
+            // Inicia processo de navegação para cima com timeout de segurança
+            startNavigationProcessTop();
+        }
+        
+        /**
+         * Inicia processo de navegação com todas as validações
+         */
+        function startNavigationProcess() {
+            // Cancela timer anterior se existir
+            if (pageViewTracker.navigationPendingTimer) {
+                clearTimeout(pageViewTracker.navigationPendingTimer);
+            }
+            
+            // Marca que navegação está pendente
+            pageViewTracker.navigationCancelled = false;
+            
+            // Valida condições novamente
+            var validations = validateNavigationConditions();
+            
+            // Se todas as validações passaram, inicia timeout final
+            if (validations.hasMinimumViewPercent && 
+                validations.isAtAbsoluteBottom && 
+                validations.hasStoppedScrolling &&
+                validations.hasMinimumPageTime &&
+                validations.notCancelled) {
+                
+                // Aguarda tempo adicional de confirmação (300ms)
+                pageViewTracker.navigationPendingTimer = setTimeout(function() {
+                    // Valida UMA ÚLTIMA VEZ antes de navegar
+                    var finalValidations = validateNavigationConditions();
+                    
+                    if (finalValidations.hasMinimumViewPercent && 
+                        finalValidations.isAtAbsoluteBottom && 
+                        finalValidations.hasStoppedScrolling &&
+                        finalValidations.hasMinimumPageTime &&
+                        finalValidations.notCancelled) {
+                        
+                        // TODAS as condições atendidas: NAVEGA
+                        executeNavigation();
+                    } else {
+                        // Condições mudaram, cancela navegação
+                        if (CONFIG.DEBUG_MODE) {
+                            console.log('[startNavigationProcess] Navegação cancelada - condições mudaram');
+                        }
+                        pageViewTracker.navigationPendingTimer = null;
+                    }
+                }, CONFIG.ADDITIONAL_CONFIRMATION_TIME);
+                
+            } else {
+                // Não passou em todas as validações, aguarda mais tempo no final
+                pageViewTracker.navigationPendingTimer = setTimeout(function() {
+                    // Tenta novamente após tempo mínimo parado (800ms)
+                    var timeSinceBottom = Date.now() - (pageViewTracker.lastScrollTime || Date.now());
+                    
+                    if (timeSinceBottom >= CONFIG.MIN_STOP_TIME) {
+                        // Aguardou tempo suficiente, tenta navegar novamente
+                        startNavigationProcess();
+                    }
+                }, CONFIG.MIN_STOP_TIME);
+            }
+        }
+        
+        /**
+         * Cancela navegação se usuário voltar a rolar ou sair do final/topo
+         */
+        function cancelNavigationIfNeeded(scrollPos) {
+            // Se usuário saiu do final absoluto, cancela navegação para baixo
+            if (scrollPos.scrollPercent < CONFIG.ABSOLUTE_BOTTOM_THRESHOLD) {
+                if (pageViewTracker.navigationPendingTimer) {
+                    clearTimeout(pageViewTracker.navigationPendingTimer);
+                    pageViewTracker.navigationPendingTimer = null;
+                    pageViewTracker.navigationCancelled = true;
+                    pageViewTracker.hasReachedBottom = false; // Reseta flag
+                    
+                    if (CONFIG.DEBUG_MODE) {
+                        console.log('[cancelNavigationIfNeeded] Navegação para baixo cancelada - usuário saiu do final');
+                    }
+                }
+            }
+            
+            // Se usuário saiu do topo absoluto, cancela navegação para cima
+            if (scrollPos.scrollPercent > CONFIG.ABSOLUTE_TOP_THRESHOLD) {
+                if (pageViewTracker.navigationPendingTimerTop) {
+                    clearTimeout(pageViewTracker.navigationPendingTimerTop);
+                    pageViewTracker.navigationPendingTimerTop = null;
+                    pageViewTracker.navigationCancelledTop = true;
+                    pageViewTracker.hasReachedTop = false; // Reseta flag
+                    
+                    if (CONFIG.DEBUG_MODE) {
+                        console.log('[cancelNavigationIfNeeded] Navegação para cima cancelada - usuário saiu do topo');
+                    }
+                }
+            }
+            
+            // Se usuário voltou a rolar, cancela navegação pendente
+            if (pageViewTracker.navigationPendingTimer && 
+                Date.now() - pageViewTracker.lastScrollTime < CONFIG.SCROLL_STOP_TIMEOUT) {
+                clearTimeout(pageViewTracker.navigationPendingTimer);
+                pageViewTracker.navigationPendingTimer = null;
+                pageViewTracker.navigationCancelled = true;
+                pageViewTracker.hasReachedBottom = false; // Reseta flag
+                
+                if (CONFIG.DEBUG_MODE) {
+                    console.log('[cancelNavigationIfNeeded] Navegação para baixo cancelada - usuário voltou a rolar');
+                }
+            }
+            
+            // Se usuário voltou a rolar, cancela navegação para cima pendente
+            if (pageViewTracker.navigationPendingTimerTop && 
+                Date.now() - pageViewTracker.lastScrollTime < CONFIG.SCROLL_STOP_TIMEOUT) {
+                clearTimeout(pageViewTracker.navigationPendingTimerTop);
+                pageViewTracker.navigationPendingTimerTop = null;
+                pageViewTracker.navigationCancelledTop = true;
+                pageViewTracker.hasReachedTop = false; // Reseta flag
+                
+                if (CONFIG.DEBUG_MODE) {
+                    console.log('[cancelNavigationIfNeeded] Navegação para cima cancelada - usuário voltou a rolar');
+                }
+            }
+        }
+        
+        /**
+         * Executa navegação para próxima página (após todas as validações)
+         */
+        function executeNavigation() {
+            if (CONFIG.DEBUG_MODE) {
+                console.log('[executeNavigation] Navegando para próxima página (abrirá no TOPO)');
+            }
+            
+            // Limpa timers
+            if (pageViewTracker.navigationPendingTimer) {
+                clearTimeout(pageViewTracker.navigationPendingTimer);
+                pageViewTracker.navigationPendingTimer = null;
+            }
+            
+            // Navega para próxima página (já define lastNavigationDirection = 'down' no nextPagina)
+            if (currentPage < totalPages) {
+                nextPagina(); // Isso define lastNavigationDirection = 'down' (abrir no topo)
+                
+                // Reseta rastreamento para nova página após um delay
+                setTimeout(function() {
+                    resetPageViewTracking();
+                }, 500);
+            }
+        }
+        
+        /**
+         * Inicia processo de navegação para cima (página anterior) com todas as validações
+         */
+        function startNavigationProcessTop() {
+            // Cancela timer anterior se existir
+            if (pageViewTracker.navigationPendingTimerTop) {
+                clearTimeout(pageViewTracker.navigationPendingTimerTop);
+            }
+            
+            // Marca que navegação está pendente
+            pageViewTracker.navigationCancelledTop = false;
+            
+            // Valida condições novamente
+            var validations = validateNavigationConditionsTop();
+            
+            // Se todas as validações passaram, inicia timeout final
+            if (validations.hasMinimumViewPercent && 
+                validations.isAtAbsoluteTop && 
+                validations.hasStoppedScrolling &&
+                validations.hasMinimumPageTime &&
+                validations.notCancelled) {
+                
+                // Aguarda tempo adicional de confirmação (300ms)
+                pageViewTracker.navigationPendingTimerTop = setTimeout(function() {
+                    // Valida UMA ÚLTIMA VEZ antes de navegar
+                    var finalValidations = validateNavigationConditionsTop();
+                    
+                    if (finalValidations.hasMinimumViewPercent && 
+                        finalValidations.isAtAbsoluteTop && 
+                        finalValidations.hasStoppedScrolling &&
+                        finalValidations.hasMinimumPageTime &&
+                        finalValidations.notCancelled) {
+                        
+                        // TODAS as condições atendidas: NAVEGA PARA CIMA
+                        executeNavigationTop();
+                    } else {
+                        // Condições mudaram, cancela navegação
+                        if (CONFIG.DEBUG_MODE) {
+                            console.log('[startNavigationProcessTop] Navegação cancelada - condições mudaram');
+                        }
+                        pageViewTracker.navigationPendingTimerTop = null;
+                    }
+                }, CONFIG.ADDITIONAL_CONFIRMATION_TIME);
+                
+            } else {
+                // Não passou em todas as validações, aguarda mais tempo no topo
+                pageViewTracker.navigationPendingTimerTop = setTimeout(function() {
+                    // Tenta novamente após tempo mínimo parado (800ms)
+                    var timeSinceTop = Date.now() - (pageViewTracker.lastScrollTime || Date.now());
+                    
+                    if (timeSinceTop >= CONFIG.MIN_STOP_TIME) {
+                        // Aguardou tempo suficiente, tenta navegar novamente
+                        startNavigationProcessTop();
+                    }
+                }, CONFIG.MIN_STOP_TIME);
+            }
+        }
+        
+        /**
+         * Executa navegação para página anterior (após todas as validações)
+         * A página anterior será aberta no FINAL (base)
+         */
+        function executeNavigationTop() {
+            if (CONFIG.DEBUG_MODE) {
+                console.log('[executeNavigationTop] Navegando para página anterior (abrirá no FINAL)');
+            }
+            
+            // Limpa timers
+            if (pageViewTracker.navigationPendingTimerTop) {
+                clearTimeout(pageViewTracker.navigationPendingTimerTop);
+                pageViewTracker.navigationPendingTimerTop = null;
+            }
+            
+            // Navega para página anterior (já define lastNavigationDirection = 'up' no prevPagina)
+            if (currentPage > 1) {
+                prevPagina(); // Isso define lastNavigationDirection = 'up' (abrir no final)
+                
+                // Reseta rastreamento para nova página após um delay
+                setTimeout(function() {
+                    resetPageViewTracking();
+                }, 500);
+            }
+        }
+        
+        /**
+         * Atualiza indicador visual de progresso de visualização
+         */
+        function updatePageViewProgress(scrollPos) {
+            // Implementação opcional de UI - pode ser adicionada depois
+        }
+        
+        // ============================================
+        // PRÉ-CARREGAMENTO OTIMIZADO (APENAS ADJACENTES)
+        // ============================================
+        
+        /**
+         * Pré-carrega APENAS páginas adjacentes (anterior e próxima)
+         * OTIMIZADO para documentos grandes (milhares de páginas)
+         * NUNCA pré-carrega mais que 2 páginas (anterior + próxima)
+         */
+        function preloadAdjacentPages() {
+            // Verifica se scroll navigation está habilitado (pré-requisito para pré-carregamento)
+            if (!CONFIG.SCROLL_NAVIGATION_ENABLED || !scrollNavigationEnabled) {
+                if (CONFIG.DEBUG_MODE) {
+                    console.log('[preloadAdjacentPages] Scroll navigation desabilitado, pré-carregamento não necessário');
+                }
+                return; // Scroll navigation desabilitado, não faz pré-carregamento
+            }
+            
+            // Verifica se pré-carregamento está habilitado e otimizado
+            if (!CONFIG.PRELOAD_ONLY_ADJACENT) {
+                if (CONFIG.DEBUG_MODE) {
+                    console.log('[preloadAdjacentPages] Pré-carregamento otimizado desabilitado');
+                }
+                return; // Pré-carregamento desabilitado ou não otimizado
+            }
+            
+            // Limpa cache de páginas que não são mais adjacentes
+            cleanupNonAdjacentPages();
+            
+            // Pré-carrega PRÓXIMA página (se existir e ainda não está em cache)
+            if (CONFIG.PRELOAD_NEXT && currentPage < totalPages) {
+                var nextPageNum = currentPage + 1;
+                
+                // Verifica se já está em cache
+                if (!pageCache.next || pageCache.next.pageNum !== nextPageNum) {
+                    preloadPage(nextPageNum, 'next');
+                }
+            } else {
+                // Não há próxima página ou pré-carregamento desabilitado
+                if (pageCache.next) {
+                    unloadPageFromCache(pageCache.next.pageNum);
+                    pageCache.next = null;
+                }
+            }
+            
+            // Pré-carrega PÁGINA ANTERIOR (se existir e ainda não está em cache)
+            if (CONFIG.PRELOAD_PREV && currentPage > 1) {
+                var prevPageNum = currentPage - 1;
+                
+                // Verifica se já está em cache
+                if (!pageCache.previous || pageCache.previous.pageNum !== prevPageNum) {
+                    preloadPage(prevPageNum, 'previous');
+                }
+            } else {
+                // Não há página anterior (estamos na primeira página)
+                if (pageCache.previous) {
+                    unloadPageFromCache(pageCache.previous.pageNum);
+                    pageCache.previous = null;
+                }
+            }
+            
+            // Atualiza página atual no cache
+            pageCache.current = {
+                pageNum: currentPage,
+                loaded: true,
+                url: getPageUrl(currentPage)
+            };
+            
+            if (CONFIG.DEBUG_MODE) {
+                console.log('[preloadAdjacentPages] Cache atualizado:', {
+                    current: pageCache.current?.pageNum,
+                    previous: pageCache.previous?.pageNum,
+                    next: pageCache.next?.pageNum,
+                    cacheSize: Object.keys(pageCache.iframes).length
+                });
+            }
+        }
+        
+        /**
+         * Pré-carrega uma página específica
+         * @param {number} pageNum - Número da página a pré-carregar
+         * @param {string} position - 'previous' ou 'next'
+         */
+        function preloadPage(pageNum, position) {
+            // Verifica se já está em cache
+            if (pageCache.iframes[pageNum]) {
+                if (CONFIG.DEBUG_MODE) {
+                    console.log('[preloadPage] Página', pageNum, 'já está em cache');
+                }
+                updateCachePosition(pageNum, position);
+                return;
+            }
+            
+            // Limita tamanho do cache (nunca mais que 3 páginas)
+            if (Object.keys(pageCache.iframes).length >= CONFIG.MAX_CACHE_SIZE) {
+                if (CONFIG.DEBUG_MODE) {
+                    console.log('[preloadPage] Cache cheio, limpando antes de adicionar página', pageNum);
+                }
+                cleanupNonAdjacentPages(); // Limpa antes de adicionar nova
+            }
+            
+            var pageUrl = getPageUrl(pageNum);
+            if (!pageUrl) {
+                if (CONFIG.DEBUG_MODE) {
+                    console.warn('[preloadPage] URL não encontrada para página', pageNum);
+                }
+                return;
+            }
+            
+            // Cria iframe oculto para pré-carregamento
+            var hiddenIframe = document.createElement('iframe');
+            hiddenIframe.style.display = 'none';
+            hiddenIframe.style.width = '0';
+            hiddenIframe.style.height = '0';
+            hiddenIframe.style.border = 'none';
+            hiddenIframe.setAttribute('data-page-num', pageNum);
+            hiddenIframe.setAttribute('data-cache-position', position);
+            
+            // Armazena no cache antes de carregar
+            pageCache.iframes[pageNum] = hiddenIframe;
+            
+            // Atualiza posição no cache
+            if (position === 'next') {
+                pageCache.next = {
+                    pageNum: pageNum,
+                    loaded: false,
+                    url: pageUrl,
+                    iframe: hiddenIframe
+                };
+            } else if (position === 'previous') {
+                pageCache.previous = {
+                    pageNum: pageNum,
+                    loaded: false,
+                    url: pageUrl,
+                    iframe: hiddenIframe
+                };
+            }
+            
+            // Event listener para quando carregar
+            hiddenIframe.addEventListener('load', function() {
+                if (position === 'next') {
+                    pageCache.next.loaded = true;
+                } else if (position === 'previous') {
+                    pageCache.previous.loaded = true;
+                }
+                
+                if (CONFIG.DEBUG_MODE) {
+                    console.log('[preloadPage] Página', pageNum, 'pré-carregada com sucesso');
+                }
+            }, { once: true });
+            
+            hiddenIframe.addEventListener('error', function() {
+                // Remove do cache em caso de erro
+                unloadPageFromCache(pageNum);
+                
+                if (CONFIG.DEBUG_MODE) {
+                    console.warn('[preloadPage] Erro ao pré-carregar página', pageNum);
+                }
+            }, { once: true });
+            
+            // Adiciona ao DOM e inicia carregamento
+            document.body.appendChild(hiddenIframe);
+            hiddenIframe.src = pageUrl;
+            
+            if (CONFIG.DEBUG_MODE) {
+                console.log('[preloadPage] Iniciando pré-carregamento da página', pageNum, '(' + position + ')');
+            }
+        }
+        
+        /**
+         * Remove página do cache e do DOM
+         */
+        function unloadPageFromCache(pageNum) {
+            if (pageCache.iframes[pageNum]) {
+                var iframe = pageCache.iframes[pageNum];
+                
+                // Remove event listeners
+                iframe.src = 'about:blank';
+                
+                // Remove do DOM
+                if (iframe.parentNode) {
+                    iframe.parentNode.removeChild(iframe);
+                }
+                
+                // Remove do cache
+                delete pageCache.iframes[pageNum];
+                
+                // Atualiza referências
+                if (pageCache.previous && pageCache.previous.pageNum === pageNum) {
+                    pageCache.previous = null;
+                }
+                if (pageCache.next && pageCache.next.pageNum === pageNum) {
+                    pageCache.next = null;
+                }
+                
+                if (CONFIG.DEBUG_MODE) {
+                    console.log('[unloadPageFromCache] Página', pageNum, 'removida do cache');
+                }
+            }
+        }
+        
+        /**
+         * Limpa páginas do cache que não são mais adjacentes
+         * Garante que cache nunca tenha mais que 3 páginas (atual, anterior, próxima)
+         */
+        function cleanupNonAdjacentPages() {
+            if (!CONFIG.CLEANUP_OLD_CACHE) {
+                return;
+            }
+            
+            var pagesToKeep = new Set();
+            
+            // Mantém página atual
+            if (pageCache.current) {
+                pagesToKeep.add(pageCache.current.pageNum);
+            }
+            
+            // Mantém página anterior (se existe e está na posição correta)
+            if (pageCache.previous && pageCache.previous.pageNum === currentPage - 1) {
+                pagesToKeep.add(pageCache.previous.pageNum);
+            }
+            
+            // Mantém próxima página (se existe e está na posição correta)
+            if (pageCache.next && pageCache.next.pageNum === currentPage + 1) {
+                pagesToKeep.add(pageCache.next.pageNum);
+            }
+            
+            // Remove todas as páginas que não são adjacentes
+            for (var pageNum in pageCache.iframes) {
+                pageNum = parseInt(pageNum);
+                
+                // Se não está na lista de manter e não é a página atual, remove
+                if (!pagesToKeep.has(pageNum) && pageNum !== currentPage) {
+                    unloadPageFromCache(pageNum);
+                }
+            }
+            
+            // Garante que nunca temos mais que MAX_CACHE_SIZE páginas
+            var cacheSize = Object.keys(pageCache.iframes).length;
+            if (cacheSize > CONFIG.MAX_CACHE_SIZE) {
+                // Remove páginas mais antigas primeiro (exceto adjacentes)
+                var sortedPages = Object.keys(pageCache.iframes)
+                    .map(function(p) { return parseInt(p); })
+                    .filter(function(p) { return !pagesToKeep.has(p) && p !== currentPage; })
+                    .sort(function(a, b) { return Math.abs(a - currentPage) - Math.abs(b - currentPage); });
+                
+                var toRemove = sortedPages.slice(0, cacheSize - CONFIG.MAX_CACHE_SIZE);
+                toRemove.forEach(function(pageNum) {
+                    unloadPageFromCache(pageNum);
+                });
+            }
+            
+            if (CONFIG.DEBUG_MODE && Object.keys(pageCache.iframes).length > 0) {
+                console.log('[cleanupNonAdjacentPages] Cache limpo. Páginas restantes:', Object.keys(pageCache.iframes));
+            }
+        }
+        
+        /**
+         * Atualiza posição de uma página já em cache
+         */
+        function updateCachePosition(pageNum, newPosition) {
+            if (pageCache.iframes[pageNum]) {
+                var iframe = pageCache.iframes[pageNum];
+                iframe.setAttribute('data-cache-position', newPosition);
+                
+                if (newPosition === 'next') {
+                    pageCache.next = {
+                        pageNum: pageNum,
+                        loaded: iframe.contentDocument?.readyState === 'complete',
+                        url: getPageUrl(pageNum),
+                        iframe: iframe
+                    };
+                } else if (newPosition === 'previous') {
+                    pageCache.previous = {
+                        pageNum: pageNum,
+                        loaded: iframe.contentDocument?.readyState === 'complete',
+                        url: getPageUrl(pageNum),
+                        iframe: iframe
+                    };
+                }
+            }
+        }
+        
+        /**
+         * Obtém URL de uma página específica
+         */
+        function getPageUrl(pageNum) {
+            // Procura página nos documentos
+            if (typeof APP_DATA !== 'undefined' && APP_DATA.pasta && APP_DATA.pasta.documentos) {
+                for (var i = 0; i < APP_DATA.pasta.documentos.length; i++) {
+                    var doc = APP_DATA.pasta.documentos[i];
+                    if (doc.paginas) {
+                        for (var j = 0; j < doc.paginas.length; j++) {
+                            var pagina = doc.paginas[j];
+                            if (parseInt(pagina.num_pagina) === pageNum) {
+                                // Garante que a URL tenha cache-busting (adiciona se não tiver)
+                                var url = pagina.url;
+                                if (url && url.indexOf('&_t=') === -1 && url.indexOf('?_t=') === -1) {
+                                    url += (url.indexOf('?') === -1 ? '?' : '&') + '_t=' + Date.now();
+                                }
+                                return url;
+                            }
+                        }
+                    }
+                }
+            }
+            
+            // Fallback: constrói URL padrão usando APP_DATA
+            var portalUrl = (typeof APP_DATA !== 'undefined' && APP_DATA.portal_url) ? APP_DATA.portal_url : window.location.origin + window.location.pathname;
+            var codMateria = (typeof APP_DATA !== 'undefined' && APP_DATA.cod_materia) ? APP_DATA.cod_materia : '';
+            
+            if (!portalUrl || !codMateria) {
+                if (CONFIG.DEBUG_MODE) {
+                    console.warn('[getPageUrl] Dados insuficientes - portalUrl:', portalUrl, 'codMateria:', codMateria);
+                }
+                return null;
+            }
+            
+            // Remove /consultas/materia da URL base se existir
+            var baseUrl = portalUrl;
+            if (baseUrl.includes('/consultas/materia')) {
+                baseUrl = baseUrl.replace('/consultas/materia', '');
+            }
+            baseUrl = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
+            
+            // Formata o número da página como pg_XXXX.pdf
+            var paginaFormatada = 'pg_' + String(pageNum).padStart(4, '0') + '.pdf';
+            
+            // Constrói a URL completa com cache busting
+            var cacheBust = '&_t=' + Date.now();
+            var url = baseUrl + '/@@pagina_processo_leg_integral?cod_materia=' + encodeURIComponent(codMateria) + '&pagina=' + encodeURIComponent(paginaFormatada) + cacheBust;
+            
+            if (CONFIG.DEBUG_MODE) {
+                console.log('[getPageUrl] URL construída para página', pageNum, ':', url);
+            }
+            
+            return url;
         }
         
         function goToPage(pagina) {
@@ -2982,6 +4243,295 @@
             goPagina();
         }
         
+        /**
+         * Ajusta posição do scroll após carregar página baseado na direção da navegação
+         * @param {Window} iframeWindow - Janela do iframe
+         * @param {string} direction - Direção da navegação: 'down' (topo) ou 'up' (final)
+         */
+        function adjustScrollPosition(iframeWindow, direction) {
+            if (!iframeWindow || !direction) {
+                if (CONFIG.DEBUG_MODE) {
+                    console.log('[adjustScrollPosition] Sem iframeWindow ou direction:', { iframeWindow: !!iframeWindow, direction: direction });
+                }
+                return; // Sem direção especificada, não ajusta
+            }
+            
+            if (CONFIG.DEBUG_MODE) {
+                console.log('[adjustScrollPosition] Iniciando ajuste de scroll, direção:', direction);
+            }
+            
+            // Função auxiliar para tentar ajustar o scroll
+            function tryAdjustScroll(attempt, maxAttempts) {
+                try {
+                    // Tenta múltiplas janelas para encontrar onde o PDF está renderizado
+                    var windows = [iframeWindow];
+                    
+                    // Tenta acessar frames se disponível
+                    try {
+                        if (iframeWindow.frames && iframeWindow.frames.length > 0) {
+                            for (var i = 0; i < iframeWindow.frames.length; i++) {
+                                try {
+                                    var frame = iframeWindow.frames[i];
+                                    if (frame && frame.document) {
+                                        windows.push(frame);
+                                    }
+                                } catch (e) {
+                                    // CORS - ignora este frame
+                                }
+                            }
+                        }
+                    } catch (e) {
+                        // CORS - ignora
+                    }
+                    
+                    var bestScrollPos = null;
+                    var bestWindow = null;
+                    
+                    // Testa todas as janelas e escolhe a que tem o maior maxScroll
+                    for (var i = 0; i < windows.length; i++) {
+                        try {
+                            var testWindow = windows[i];
+                            var testScrollPos = getScrollPosition(null, testWindow);
+                            
+                            if (CONFIG.DEBUG_MODE && attempt === 1) {
+                                console.log('[adjustScrollPosition] Testando janela', i, '- scrollPos:', {
+                                    scrollTop: testScrollPos.scrollTop,
+                                    maxScroll: testScrollPos.maxScroll,
+                                    scrollHeight: testScrollPos.scrollHeight,
+                                    clientHeight: testScrollPos.clientHeight
+                                });
+                            }
+                            
+                            // Escolhe a janela com o maior maxScroll (mais provável de ser o PDF renderizado)
+                            // MAS só considera se tiver scroll disponível (scrollHeight > clientHeight)
+                            if (testScrollPos.scrollHeight > testScrollPos.clientHeight) {
+                                if (!bestScrollPos || testScrollPos.maxScroll > bestScrollPos.maxScroll) {
+                                    bestScrollPos = testScrollPos;
+                                    bestWindow = testWindow;
+                                }
+                            }
+                        } catch (e) {
+                            // CORS - ignora esta janela
+                            if (CONFIG.DEBUG_MODE && attempt === 1) {
+                                console.log('[adjustScrollPosition] Erro ao acessar janela', i, ':', e.message);
+                            }
+                        }
+                    }
+                    
+                    // Se não encontrou nenhuma janela válida, usa a primeira
+                    if (!bestWindow) {
+                        bestWindow = iframeWindow;
+                        bestScrollPos = getScrollPosition(null, bestWindow);
+                    }
+                    
+                    var scrollPos = bestScrollPos;
+                    var targetWindow = bestWindow;
+                    
+                    // Verifica se o PDF.js terminou de renderizar (scrollHeight > clientHeight)
+                    var hasScrollableContent = scrollPos.scrollHeight > scrollPos.clientHeight;
+                    
+                    // Tenta verificar se o PDF.js renderizou verificando elementos do viewer
+                    var pdfjsRendered = false;
+                    try {
+                        var iframeDoc = iframeWindow.document;
+                        if (iframeDoc) {
+                            // Verifica se há canvas ou elementos de página renderizados
+                            var canvas = iframeDoc.querySelector('canvas');
+                            var pageContainer = iframeDoc.querySelector('#pageContainer') || iframeDoc.querySelector('.page');
+                            pdfjsRendered = !!(canvas || pageContainer);
+                            
+                            if (CONFIG.DEBUG_MODE && attempt === 1) {
+                                console.log('[adjustScrollPosition] Verificação PDF.js renderizado:', {
+                                    hasCanvas: !!canvas,
+                                    hasPageContainer: !!pageContainer,
+                                    pdfjsRendered: pdfjsRendered
+                                });
+                            }
+                        }
+                    } catch (e) {
+                        // CORS - ignora
+                    }
+                    
+                    if (CONFIG.DEBUG_MODE) {
+                        console.log('[adjustScrollPosition] Tentativa', attempt, '- Posição atual:', {
+                            scrollTop: scrollPos.scrollTop,
+                            maxScroll: scrollPos.maxScroll,
+                            scrollPercent: scrollPos.scrollPercent,
+                            scrollHeight: scrollPos.scrollHeight,
+                            clientHeight: scrollPos.clientHeight,
+                            hasScrollableContent: hasScrollableContent
+                        });
+                    }
+                    
+                    // Se estamos tentando rolar para cima e ainda não há scroll disponível
+                    if (direction === 'up' && !hasScrollableContent) {
+                        // Se o PDF.js já renderizou mas não há scroll, assume que o PDF não tem scroll
+                        // (página pequena que cabe inteira na viewport)
+                        if (pdfjsRendered && attempt >= 3) {
+                            if (CONFIG.DEBUG_MODE) {
+                                console.log('[adjustScrollPosition] PDF.js renderizou mas não há scroll disponível. PDF provavelmente não tem scroll (página pequena). Assumindo que já está no final.');
+                            }
+                            // Não há scroll, então não há como rolar para o final
+                            // A página já está na posição correta (sem scroll = já está "no final")
+                            return; // Termina sem fazer nada
+                        }
+                        
+                        // Se o PDF.js ainda não renderizou, aguarda
+                        if (CONFIG.DEBUG_MODE) {
+                            console.warn('[adjustScrollPosition] PDF.js ainda não renderizou completamente (scrollHeight:', scrollPos.scrollHeight, '== clientHeight:', scrollPos.clientHeight, '), aguardando... (tentativa', attempt, 'de', maxAttempts, ')');
+                        }
+                        if (attempt < maxAttempts) {
+                            // Delay progressivo aumenta com cada tentativa
+                            var delay = Math.min(2000, 500 + (attempt * 300)); // 500ms, 800ms, 1100ms, 1400ms, 1700ms, 2000ms...
+                            setTimeout(function() {
+                                tryAdjustScroll(attempt + 1, maxAttempts);
+                            }, delay);
+                        } else {
+                            if (CONFIG.DEBUG_MODE) {
+                                console.warn('[adjustScrollPosition] Máximo de tentativas atingido. PDF.js pode não ter renderizado completamente ou o PDF não tem scroll (página muito pequena).');
+                            }
+                        }
+                        return; // Sai e tenta novamente
+                    }
+                    
+                    if (direction === 'down') {
+                        // Navegação para baixo: rola para o TOPO (scrollTop = 0)
+                        if (targetWindow.scrollTo) {
+                            targetWindow.scrollTo(0, 0);
+                            if (CONFIG.DEBUG_MODE) {
+                                console.log('[adjustScrollPosition] Scroll ajustado para TOPO usando scrollTo(0, 0)');
+                            }
+                        } else if (targetWindow.scrollY !== undefined) {
+                            targetWindow.scrollY = 0;
+                            if (CONFIG.DEBUG_MODE) {
+                                console.log('[adjustScrollPosition] Scroll ajustado para TOPO usando scrollY = 0');
+                            }
+                        }
+                        
+                        // Verifica se funcionou após um pequeno delay
+                        setTimeout(function() {
+                            try {
+                                var checkPos = getScrollPosition(null, targetWindow);
+                                if (checkPos.scrollTop > 5 && attempt < maxAttempts) {
+                                    // Ainda não está no topo, tenta novamente
+                                    if (CONFIG.DEBUG_MODE) {
+                                        console.log('[adjustScrollPosition] Ainda não está no topo (scrollTop:', checkPos.scrollTop, '), tentando novamente...');
+                                    }
+                                    tryAdjustScroll(attempt + 1, maxAttempts);
+                                } else if (checkPos.scrollTop <= 5) {
+                                    if (CONFIG.DEBUG_MODE) {
+                                        console.log('[adjustScrollPosition] ✓ Scroll ajustado para TOPO com sucesso');
+                                    }
+                                }
+                            } catch (e) {
+                                if (CONFIG.DEBUG_MODE) {
+                                    console.warn('[adjustScrollPosition] Erro ao verificar posição:', e);
+                                }
+                            }
+                        }, 100);
+                        
+                    } else if (direction === 'up') {
+                        // Navegação para cima: rola para o FINAL (scrollTop = maxScroll)
+                        // Só tenta se houver scroll disponível
+                        if (hasScrollableContent && scrollPos && scrollPos.maxScroll > 0) {
+                            var targetScroll = scrollPos.maxScroll;
+                            
+                            if (targetWindow.scrollTo) {
+                                targetWindow.scrollTo(0, targetScroll);
+                                if (CONFIG.DEBUG_MODE) {
+                                    console.log('[adjustScrollPosition] Scroll ajustado para FINAL usando scrollTo(0,', targetScroll, ')');
+                                }
+                            } else if (targetWindow.scrollY !== undefined) {
+                                targetWindow.scrollY = targetScroll;
+                                if (CONFIG.DEBUG_MODE) {
+                                    console.log('[adjustScrollPosition] Scroll ajustado para FINAL usando scrollY =', targetScroll);
+                                }
+                            }
+                            
+                            // Verifica se funcionou após um pequeno delay
+                            setTimeout(function() {
+                                try {
+                                    var checkPos = getScrollPosition(null, targetWindow);
+                                    var distanceFromBottom = checkPos.maxScroll > 0 ? checkPos.maxScroll - checkPos.scrollTop : Infinity;
+                                    
+                                    if (distanceFromBottom > 10 && attempt < maxAttempts) {
+                                        // Ainda não está no final, tenta novamente
+                                        if (CONFIG.DEBUG_MODE) {
+                                            console.log('[adjustScrollPosition] Ainda não está no final (distância:', distanceFromBottom, ', scrollTop:', checkPos.scrollTop, ', maxScroll:', checkPos.maxScroll, '), tentando novamente...');
+                                        }
+                                        tryAdjustScroll(attempt + 1, maxAttempts);
+                                    } else if (distanceFromBottom <= 10) {
+                                        if (CONFIG.DEBUG_MODE) {
+                                            console.log('[adjustScrollPosition] ✓ Scroll ajustado para FINAL com sucesso (scrollTop:', checkPos.scrollTop, ', maxScroll:', checkPos.maxScroll, ')');
+                                        }
+                                    }
+                                } catch (e) {
+                                    if (CONFIG.DEBUG_MODE) {
+                                        console.warn('[adjustScrollPosition] Erro ao verificar posição:', e);
+                                    }
+                                }
+                            }, 100);
+                        } else {
+                            // Ainda não há scroll disponível
+                            // Se o PDF.js já renderizou mas não há scroll, assume que o PDF não tem scroll
+                            if (pdfjsRendered && attempt >= 3) {
+                                if (CONFIG.DEBUG_MODE) {
+                                    console.log('[adjustScrollPosition] PDF.js renderizou mas não há scroll disponível. PDF provavelmente não tem scroll (página pequena). Assumindo que já está no final.');
+                                }
+                                // Não há scroll, então não há como rolar para o final
+                                // A página já está na posição correta (sem scroll = já está "no final")
+                                return; // Termina sem fazer nada
+                            }
+                            
+                            // Se o PDF.js ainda não renderizou, tenta novamente
+                            if (CONFIG.DEBUG_MODE) {
+                                console.warn('[adjustScrollPosition] maxScroll ainda não disponível (scrollPos:', {
+                                    scrollTop: scrollPos.scrollTop,
+                                    maxScroll: scrollPos.maxScroll,
+                                    scrollHeight: scrollPos.scrollHeight,
+                                    clientHeight: scrollPos.clientHeight,
+                                    hasScrollableContent: hasScrollableContent,
+                                    pdfjsRendered: pdfjsRendered
+                                }, '), tentando novamente... (tentativa', attempt, 'de', maxAttempts, ')');
+                            }
+                            if (attempt < maxAttempts) {
+                                // Delay progressivo aumenta com cada tentativa
+                                var delay = Math.min(2000, 500 + (attempt * 300)); // 500ms, 800ms, 1100ms, 1400ms, 1700ms, 2000ms...
+                                setTimeout(function() {
+                                    tryAdjustScroll(attempt + 1, maxAttempts);
+                                }, delay);
+                            } else {
+                                if (CONFIG.DEBUG_MODE) {
+                                    console.warn('[adjustScrollPosition] Máximo de tentativas atingido. PDF.js pode não ter renderizado completamente ou o PDF não tem scroll (página muito pequena).');
+                                }
+                            }
+                        }
+                    }
+                } catch (e) {
+                    if (CONFIG.DEBUG_MODE) {
+                        console.warn('[adjustScrollPosition] Erro na tentativa', attempt, ':', e);
+                    }
+                    if (attempt < maxAttempts) {
+                        // Delay progressivo para erros também
+                        var delay = Math.min(2000, 500 + (attempt * 300)); // 500ms, 800ms, 1100ms, 1400ms, 1700ms, 2000ms...
+                        setTimeout(function() {
+                            tryAdjustScroll(attempt + 1, maxAttempts);
+                        }, delay);
+                    }
+                }
+            }
+            
+            // Aguarda o PDF.js estar completamente pronto antes de tentar ajustar
+            // PDF.js precisa de tempo para renderizar o canvas e calcular as dimensões
+            // Usa delays mais longos para garantir que o PDF foi renderizado
+            
+            // Primeira tentativa após 1s (PDF.js precisa de tempo para renderizar o canvas)
+            // As tentativas recursivas dentro de tryAdjustScroll cuidam dos retries
+            setTimeout(function() {
+                tryAdjustScroll(1, 15); // Máximo de 15 tentativas com delays progressivos
+            }, 1000);
+        }
+        
         function goPagina(paginaParam) {
             try {
                 var paginaEl = document.getElementById('page-input');
@@ -3007,6 +4557,24 @@
                 paginaEl.setAttribute('aria-valuenow', pagina);
                 paginaEl.setAttribute('aria-valuemax', totalPages);
                 paginaEl.setAttribute('aria-invalid', 'false');
+            
+            // Detecta direção da navegação automaticamente se não foi especificada
+            // Se navegou para uma página maior, assume navegação para baixo (topo)
+            // Se navegou para uma página menor, assume navegação para cima (final)
+            if (!lastNavigationDirection && currentPage) {
+                if (pagina > currentPage) {
+                    lastNavigationDirection = 'down'; // Navegação para baixo = abrir no topo
+                    if (CONFIG.DEBUG_MODE) {
+                        console.log('[goPagina] Direção detectada automaticamente: DOWN (página', currentPage, '->', pagina, ')');
+                    }
+                } else if (pagina < currentPage) {
+                    lastNavigationDirection = 'up'; // Navegação para cima = abrir no final
+                    if (CONFIG.DEBUG_MODE) {
+                        console.log('[goPagina] Direção detectada automaticamente: UP (página', currentPage, '->', pagina, ')');
+                    }
+                }
+                // Se for a mesma página, mantém null (não ajusta scroll)
+            }
             
             currentPage = pagina;
             
@@ -3138,8 +4706,19 @@
             
             console.log('[goPagina] URL do PDF.js viewer:', pdfjsViewerUrl);
             
-            // Pré-carrega páginas adjacentes
-            preloadAdjacentPages(pagina);
+            // RESETA rastreamento de visualização para nova página (apenas se scroll navigation está habilitado)
+            if (CONFIG.SCROLL_NAVIGATION_ENABLED && scrollNavigationEnabled &&
+                (CONFIG.REQUIRE_MIN_VIEW_PERCENT || CONFIG.REQUIRE_MIN_PAGE_TIME)) {
+                if (typeof resetPageViewTracking === 'function') {
+                    resetPageViewTracking();
+                }
+            }
+            
+            // Pré-carrega APENAS páginas adjacentes (anterior e próxima) - apenas se scroll navigation está habilitado
+            if (CONFIG.SCROLL_NAVIGATION_ENABLED && scrollNavigationEnabled &&
+                CONFIG.PRELOAD_ONLY_ADJACENT && typeof preloadAdjacentPages === 'function') {
+                preloadAdjacentPages();
+            }
             
             // Remove o overlay quando o iframe carregar
             var iframe = document.getElementById('iframeViewer');
@@ -3158,7 +4737,41 @@
                     // Inicializa navegação por scroll quando o iframe carregar
                     if (srcDefined && loadCount === 1) {
                         setTimeout(function() {
+                            // AJUSTA SCROLL BASEADO NA DIREÇÃO DA NAVEGAÇÃO (ANTES DE INICIALIZAR OUTRAS COISAS)
+                            // Isso garante que a página seja aberta na posição correta (topo ou final)
+                            // Esta é uma tentativa adicional caso o loadHandler não tenha conseguido ajustar
+                            if (lastNavigationDirection && iframe && iframe.contentWindow) {
+                                adjustScrollPosition(iframe.contentWindow, lastNavigationDirection);
+                                // Reseta após um delay maior para garantir que todas as tentativas foram feitas
+                                setTimeout(function() {
+                                    lastNavigationDirection = null;
+                                }, 3000);
+                            }
+                            
                             initScrollNavigation();
+                            
+                            // Inicia monitoramento de visualização apenas se scroll navigation está habilitado E proteções estão habilitadas
+                            if (CONFIG.SCROLL_NAVIGATION_ENABLED && scrollNavigationEnabled &&
+                                (CONFIG.REQUIRE_MIN_VIEW_PERCENT || CONFIG.REQUIRE_MIN_PAGE_TIME)) {
+                                if (pageViewTracker && (!pageViewTracker.pageStartTime)) {
+                                    if (typeof resetPageViewTracking === 'function') {
+                                        resetPageViewTracking();
+                                    }
+                                }
+                                
+                                // Inicia monitoramento se ainda não foi iniciado
+                                if (typeof startPageViewMonitoring === 'function') {
+                                    startPageViewMonitoring();
+                                }
+                            }
+                            
+                            // Pré-carrega páginas adjacentes após carregar (apenas se scroll navigation está habilitado)
+                            if (CONFIG.SCROLL_NAVIGATION_ENABLED && scrollNavigationEnabled &&
+                                CONFIG.PRELOAD_ONLY_ADJACENT && typeof preloadAdjacentPages === 'function') {
+                                setTimeout(function() {
+                                    preloadAdjacentPages();
+                                }, 300); // Aguarda 300ms após carregar para pré-carregar
+                            }
                         }, 500); // Aguarda 500ms para garantir que o PDF.js carregou
                     }
                     
@@ -3179,8 +4792,24 @@
                     try {
                         // Tenta acessar o conteúdo do iframe para verificar se carregou
                         var iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                        var iframeWindow = iframe.contentWindow;
+                        
                         if (iframeDoc && iframeDoc.readyState === 'complete') {
                             console.log('[goPagina] Iframe carregado com sucesso (PDF.js):', pdfjsViewerUrl);
+                            
+                            // Ajusta scroll baseado na direção da navegação
+                            // Aguarda um pouco para garantir que o PDF.js carregou completamente
+                            // NÃO reseta lastNavigationDirection aqui - será resetado dentro de adjustScrollPosition após sucesso
+                            setTimeout(function() {
+                                if (lastNavigationDirection) {
+                                    adjustScrollPosition(iframeWindow, lastNavigationDirection);
+                                    // Reseta após um delay maior para garantir que todas as tentativas foram feitas
+                                    setTimeout(function() {
+                                        lastNavigationDirection = null;
+                                    }, 3000);
+                                }
+                            }, 800); // Aguarda 800ms para garantir que o PDF.js renderizou
+                            
                             iframe.removeEventListener('load', loadHandler);
                             iframe.removeEventListener('error', errorHandler);
                             return;
@@ -3188,10 +4817,45 @@
                     } catch (e) {
                         // Erro de CORS ao acessar conteúdo do iframe é normal
                         console.log('[goPagina] Não foi possível verificar conteúdo do iframe (CORS normal):', e.message);
+                        
+                        // Mesmo com erro de CORS, tenta ajustar scroll (pode funcionar)
+                        setTimeout(function() {
+                            try {
+                                if (lastNavigationDirection) {
+                                    adjustScrollPosition(iframe.contentWindow, lastNavigationDirection);
+                                    // Reseta após um delay maior para garantir que todas as tentativas foram feitas
+                                    setTimeout(function() {
+                                        lastNavigationDirection = null;
+                                    }, 3000);
+                                }
+                            } catch (e2) {
+                                if (CONFIG.DEBUG_MODE) {
+                                    console.warn('[goPagina] Não foi possível ajustar scroll (CORS):', e2);
+                                }
+                            }
+                        }, 1000); // Aguarda mais tempo para PDF.js renderizar quando há CORS
                     }
                     
                     // Se chegou aqui, assume que carregou (mesmo que não possa verificar devido a CORS)
                     console.log('[goPagina] Assumindo que iframe carregou (PDF.js):', pdfjsViewerUrl);
+                    
+                    // Tenta ajustar scroll mesmo sem poder verificar o conteúdo
+                    setTimeout(function() {
+                        try {
+                            if (lastNavigationDirection) {
+                                adjustScrollPosition(iframe.contentWindow, lastNavigationDirection);
+                                // Reseta após um delay maior para garantir que todas as tentativas foram feitas
+                                setTimeout(function() {
+                                    lastNavigationDirection = null;
+                                }, 3000);
+                            }
+                        } catch (e) {
+                            if (CONFIG.DEBUG_MODE) {
+                                console.warn('[goPagina] Não foi possível ajustar scroll:', e);
+                            }
+                        }
+                    }, 1000);
+                    
                     iframe.removeEventListener('load', loadHandler);
                     iframe.removeEventListener('error', errorHandler);
                 };
@@ -3285,6 +4949,14 @@
                 document.getElementById('async-monitor').style.display = 'none';
                 stopDownloadButtonCheck(); // Para verificação periódica
                 enableToolbarControls(); // Reabilita controles
+                // Atualiza sidebar ANTES de mostrar documentos
+                var sidebarData = {
+                    materias_relacionadas: data.materias_relacionadas || {},
+                    documentos_administrativos: data.documentos_administrativos || [],
+                    normas_juridicas: data.normas_juridicas || [],
+                    portal_url: data.portal_url || (typeof APP_DATA !== 'undefined' && APP_DATA.portal_url) || (window.location.origin + window.location.pathname.split('/').slice(0, -1).join('/'))
+                };
+                updateSidebar(sidebarData);
                 showDocumentos(pasta);
                 return;
             }
@@ -3312,6 +4984,14 @@
                         loadingState.style.display = 'none';
                     }
                     enableToolbarControls(); // Reabilita controles
+                    // Atualiza sidebar ANTES de mostrar documentos
+                    var sidebarData = {
+                        materias_relacionadas: data.materias_relacionadas || {},
+                        documentos_administrativos: data.documentos_administrativos || [],
+                        normas_juridicas: data.normas_juridicas || [],
+                        portal_url: data.portal_url || (typeof APP_DATA !== 'undefined' && APP_DATA.portal_url) || (window.location.origin + window.location.pathname.split('/').slice(0, -1).join('/'))
+                    };
+                    updateSidebar(sidebarData);
                     showDocumentos(pasta);
                 }, 500); // 500ms para mostrar mensagem de carregamento
                 return; // CRÍTICO: Retorna aqui para evitar verificação adicional que pode iniciar polls
@@ -3333,6 +5013,14 @@
                     document.getElementById('async-monitor').style.display = 'none';
                     stopDownloadButtonCheck();
                     enableToolbarControls();
+                    // Atualiza sidebar ANTES de mostrar documentos
+                    var sidebarData = {
+                        materias_relacionadas: data.materias_relacionadas || {},
+                        documentos_administrativos: data.documentos_administrativos || [],
+                        normas_juridicas: data.normas_juridicas || [],
+                        portal_url: data.portal_url || (typeof APP_DATA !== 'undefined' && APP_DATA.portal_url) || (window.location.origin + window.location.pathname.split('/').slice(0, -1).join('/'))
+                    };
+                    updateSidebar(sidebarData);
                     showDocumentos(pasta);
                 }, 2000);
                 return;
@@ -3361,6 +5049,14 @@
                 document.getElementById('async-monitor').style.display = 'none';
                 stopDownloadButtonCheck(); // Para verificação periódica
                 enableToolbarControls(); // Reabilita controles
+                // Atualiza sidebar ANTES de mostrar documentos
+                var sidebarData = {
+                    materias_relacionadas: data.materias_relacionadas || {},
+                    documentos_administrativos: data.documentos_administrativos || [],
+                    normas_juridicas: data.normas_juridicas || [],
+                    portal_url: data.portal_url || (typeof APP_DATA !== 'undefined' && APP_DATA.portal_url) || (window.location.origin + window.location.pathname.split('/').slice(0, -1).join('/'))
+                };
+                updateSidebar(sidebarData);
                 showDocumentos(pasta);
                 return; // CRÍTICO: Retorna aqui para evitar verificação adicional que pode iniciar polls
             }
@@ -3408,6 +5104,14 @@
                                 if (allAvailable) {
                                     // Todos os arquivos disponíveis, mostra documentos
                                     console.log('[updateInterface] Todos os arquivos disponíveis, mostrando documentos');
+                                    // Atualiza sidebar ANTES de mostrar documentos
+                                    var sidebarData = {
+                                        materias_relacionadas: data.materias_relacionadas || {},
+                                        documentos_administrativos: data.documentos_administrativos || [],
+                                        normas_juridicas: data.normas_juridicas || [],
+                                        portal_url: data.portal_url || (typeof APP_DATA !== 'undefined' && APP_DATA.portal_url) || (window.location.origin + window.location.pathname.split('/').slice(0, -1).join('/'))
+                                    };
+                                    updateSidebar(sidebarData);
                                     showDocumentos(checkData.pasta);
                                 } else {
                                     // Se não estão disponíveis, mantém o monitor
@@ -3422,6 +5126,14 @@
                             }).catch(function(error) {
                                 console.error('[updateInterface] Erro ao verificar arquivos:', error);
                                 // Em caso de erro, mostra os documentos mesmo assim
+                                // Atualiza sidebar ANTES de mostrar documentos
+                                var sidebarData = {
+                                    materias_relacionadas: data.materias_relacionadas || {},
+                                    documentos_administrativos: data.documentos_administrativos || [],
+                                    normas_juridicas: data.normas_juridicas || [],
+                                    portal_url: data.portal_url || (typeof APP_DATA !== 'undefined' && APP_DATA.portal_url) || (window.location.origin + window.location.pathname.split('/').slice(0, -1).join('/'))
+                                };
+                                updateSidebar(sidebarData);
                                 showDocumentos(checkData.pasta);
                             });
                         } else {
@@ -3441,6 +5153,14 @@
                         console.error('[updateInterface] Erro ao verificar task ativa:', error);
                         // Em caso de erro, se tem documentos, mostra eles; senão mostra monitor
                         if (pasta.documentos && pasta.documentos.length > 0) {
+                            // Atualiza sidebar ANTES de mostrar documentos
+                            var sidebarData = {
+                                materias_relacionadas: data.materias_relacionadas || {},
+                                documentos_administrativos: data.documentos_administrativos || [],
+                                normas_juridicas: data.normas_juridicas || [],
+                                portal_url: data.portal_url || (typeof APP_DATA !== 'undefined' && APP_DATA.portal_url) || (window.location.origin + window.location.pathname.split('/').slice(0, -1).join('/'))
+                            };
+                            updateSidebar(sidebarData);
                             showDocumentos(pasta);
                         } else {
                             showAsyncMonitor({
@@ -3474,6 +5194,14 @@
                 // Verifica se todos os arquivos estão disponíveis antes de mostrar
                 verifyAllPagesAvailable(pasta, baseUrl, data.cod_materia).then(function(allAvailable) {
                     if (allAvailable) {
+                        // Atualiza sidebar ANTES de mostrar documentos
+                        var sidebarData = {
+                            materias_relacionadas: data.materias_relacionadas || {},
+                            documentos_administrativos: data.documentos_administrativos || [],
+                            normas_juridicas: data.normas_juridicas || [],
+                            portal_url: data.portal_url || (typeof APP_DATA !== 'undefined' && APP_DATA.portal_url) || (window.location.origin + window.location.pathname.split('/').slice(0, -1).join('/'))
+                        };
+                        updateSidebar(sidebarData);
                         showDocumentos(pasta);
                     } else {
                         // Se não estão disponíveis, mostra monitor e tenta novamente
@@ -3488,6 +5216,14 @@
                 }).catch(function(error) {
                     console.error('Erro ao verificar arquivos:', error);
                     // Em caso de erro, mostra os documentos mesmo assim
+                    // Atualiza sidebar ANTES de mostrar documentos
+                    var sidebarData = {
+                        materias_relacionadas: data.materias_relacionadas || {},
+                        documentos_administrativos: data.documentos_administrativos || [],
+                        normas_juridicas: data.normas_juridicas || [],
+                        portal_url: data.portal_url || (typeof APP_DATA !== 'undefined' && APP_DATA.portal_url) || (window.location.origin + window.location.pathname.split('/').slice(0, -1).join('/'))
+                    };
+                    updateSidebar(sidebarData);
                     showDocumentos(pasta);
                 });
             } else if (pasta.error) {
@@ -3497,7 +5233,16 @@
             }
             
             // Atualiza sidebar com informações relacionadas
-            updateSidebar(data);
+            // Garante que portal_url está presente nos dados
+            var sidebarData = {
+                materias_relacionadas: data.materias_relacionadas || {},
+                documentos_administrativos: data.documentos_administrativos || [],
+                normas_juridicas: data.normas_juridicas || [],
+                portal_url: data.portal_url || (typeof APP_DATA !== 'undefined' && APP_DATA.portal_url) || (window.location.origin + window.location.pathname.split('/').slice(0, -1).join('/'))
+            };
+            
+            console.log('[updateInterface] Chamando updateSidebar com dados:', sidebarData);
+            updateSidebar(sidebarData);
         }
         
         /**
@@ -3758,6 +5503,151 @@
             return allAvailable;
         }
         
+        // Função para adicionar botão de download ao documento
+        function addDownloadButtonToDocument(docItem, doc) {
+            // Verifica se documento tem arquivo (processo_adm usa 'file')
+            var filename = doc.file || doc.id;
+            console.log('[addDownloadButtonToDocument] Verificando documento:', {
+                title: doc.title,
+                file: doc.file,
+                id: doc.id,
+                filename: filename,
+                docKeys: Object.keys(doc)
+            });
+            
+            if (!filename) {
+                console.warn('[addDownloadButtonToDocument] Documento sem arquivo:', doc.title, 'doc completo:', doc);
+                return; // Documentos sem arquivo não têm download
+            }
+            
+            var downloadBtn = document.createElement('button');
+            downloadBtn.className = 'doc-download-btn';
+            downloadBtn.setAttribute('data-file', filename);
+            downloadBtn.setAttribute('data-title', doc.title || 'Documento');
+            downloadBtn.setAttribute('aria-label', 'Baixar ' + (doc.title || 'documento'));
+            downloadBtn.innerHTML = '<i class="mdi mdi-download" aria-hidden="true"></i>';
+            
+            // Handler de clique
+            downloadBtn.onclick = function(e) {
+                e.preventDefault();
+                e.stopPropagation(); // Evita que clique propague para o doc-item
+                
+                var filenameAttr = this.getAttribute('data-file');
+                var title = this.getAttribute('data-title');
+                
+                downloadDocument(filenameAttr, title, doc);
+            };
+            
+            // Insere botão no doc-item-content (entre título e badge)
+            var docContent = docItem.querySelector('.doc-item-content');
+            if (docContent) {
+                console.log('[addDownloadButtonToDocument] docContent encontrado, inserindo botão. docContent HTML:', docContent.innerHTML.substring(0, 100));
+                // Adiciona botão antes do badge se existir, senão no final
+                var badge = docContent.querySelector('.doc-item-badge');
+                if (badge) {
+                    console.log('[addDownloadButtonToDocument] Badge encontrado, inserindo antes do badge');
+                    docContent.insertBefore(downloadBtn, badge);
+                } else {
+                    console.log('[addDownloadButtonToDocument] Sem badge, adicionando no final do docContent');
+                    docContent.appendChild(downloadBtn);
+                }
+                console.log('[addDownloadButtonToDocument] Botão inserido. docContent HTML final:', docContent.innerHTML.substring(0, 150));
+                // Verifica se o botão realmente está no DOM
+                var insertedBtn = docContent.querySelector('.doc-download-btn');
+                if (insertedBtn) {
+                    console.log('[addDownloadButtonToDocument] ✅ Botão confirmado no DOM');
+                } else {
+                    console.error('[addDownloadButtonToDocument] ❌ Botão NÃO encontrado no DOM após inserção!');
+                }
+            } else {
+                console.warn('[addDownloadButtonToDocument] doc-content não encontrado, usando fallback. docItem HTML:', docItem.innerHTML.substring(0, 200));
+                // Fallback: adiciona no final do doc-item
+                docItem.appendChild(downloadBtn);
+                console.log('[addDownloadButtonToDocument] Botão adicionado via fallback. docItem HTML final:', docItem.innerHTML.substring(0, 200));
+            }
+        }
+
+        // Função para baixar documento
+        function downloadDocument(filename, title, docData) {
+            try {
+                var portalUrl = APP_DATA.portal_url || '';
+                
+                // Detecta o tipo de processo baseado nos dados disponíveis
+                var codMateria = APP_DATA.cod_materia || '';
+                var codDocumento = APP_DATA.cod_documento || '';
+                var codNorma = APP_DATA.cod_norma || '';
+                var isNorma = APP_DATA.is_norma || false;
+                var isAdm = APP_DATA.is_adm || false;
+                
+                var url = '';
+                var codParam = '';
+                
+                // Determina endpoint e parâmetro baseado no tipo de processo
+                if (codNorma || isNorma) {
+                    // Processo Norma
+                    codParam = codNorma;
+                    if (!codParam) {
+                        showToast('error', 'Erro', 'Dados insuficientes para download (cod_norma)', 3000);
+                        return;
+                    }
+                    url = portalUrl + '/@@processo_norma_download_documento?cod_norma=' + 
+                          encodeURIComponent(codParam) + 
+                          '&file=' + encodeURIComponent(filename) +
+                          '&title=' + encodeURIComponent(title || 'documento') +
+                          '&_t=' + Date.now();
+                } else if (codDocumento || isAdm) {
+                    // Processo Administrativo
+                    codParam = codDocumento;
+                    if (!codParam) {
+                        showToast('error', 'Erro', 'Dados insuficientes para download (cod_documento)', 3000);
+                        return;
+                    }
+                    url = portalUrl + '/@@processo_adm_download_documento?cod_documento=' + 
+                          encodeURIComponent(codParam) + 
+                          '&file=' + encodeURIComponent(filename) +
+                          '&title=' + encodeURIComponent(title || 'documento') +
+                          '&_t=' + Date.now();
+                } else if (codMateria) {
+                    // Processo Legislativo (padrão)
+                    codParam = codMateria;
+                    url = portalUrl + '/@@processo_leg_download_documento?cod_materia=' + 
+                          encodeURIComponent(codParam) + 
+                          '&file=' + encodeURIComponent(filename) +
+                          '&title=' + encodeURIComponent(title || 'documento') +
+                          '&_t=' + Date.now();
+                } else {
+                    showToast('error', 'Erro', 'Dados insuficientes para download', 3000);
+                    return;
+                }
+                
+                if (!portalUrl || !codParam) {
+                    showToast('error', 'Erro', 'Dados insuficientes para download', 3000);
+                    return;
+                }
+                
+                // Mostra feedback
+                showToast('info', 'Baixando...', 'Preparando download de ' + title, 2000);
+                
+                // Cria link temporário e dispara download
+                var link = document.createElement('a');
+                link.href = url;
+                
+                // Nome do arquivo para download (sanitizado)
+                var safeTitle = (title || 'documento').replace(/[^a-zA-Z0-9]/g, '_').toLowerCase();
+                var extension = filename.match(/\.(pdf|doc|docx)$/i) ? filename.match(/\.(pdf|doc|docx)$/i)[0] : '.pdf';
+                link.download = safeTitle + extension;
+                
+                link.style.display = 'none';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+            } catch (error) {
+                console.error('[downloadDocument] Erro:', error);
+                showToast('error', 'Erro', 'Não foi possível baixar o documento', 3000);
+            }
+        }
+        
         function showDocumentos(pasta) {
             try {
                 // Cache de elementos DOM para performance
@@ -3783,6 +5673,16 @@
                 
                 console.log('[showDocumentos] Iniciando renderização. Total de documentos:', documentos.length);
                 console.log('[showDocumentos] Documentos recebidos:', documentos);
+                // Debug: verifica campos 'file' nos documentos
+                documentos.forEach(function(doc, idx) {
+                    console.log('[showDocumentos] Documento ' + idx + ':', {
+                        title: doc.title,
+                        file: doc.file,
+                        id: doc.id,
+                        hasFile: !!(doc.file || doc.id),
+                        keys: Object.keys(doc)
+                    });
+                });
                 
                 if (!navList) {
                     console.error('[showDocumentos] Elemento documentos-nav não encontrado');
@@ -3802,6 +5702,14 @@
                 documentosList = [];
             
             documentos.forEach(function(doc, index) {
+                // DEBUG: Log do documento no início do loop
+                console.log('[showDocumentos] Processando documento', index, ':', {
+                    title: doc.title,
+                    file: doc.file,
+                    id: doc.id,
+                    hasFile: !!(doc.file || doc.id)
+                });
+                
                 // Calcula start_page e end_page
                 var startPage = 1;
                 var endPage = 1;
@@ -3973,6 +5881,18 @@
                         '<span class="doc-item-title">' + docTitle + '</span>' +
                         badgeHtml +
                     '</div>';
+                
+                // NOVO: Adiciona botão de download ANTES de adicionar ao wrapper (para garantir que está no DOM)
+                console.log('[showDocumentos] 🔍 VERIFICANDO download - docTitle:', docTitle, 'doc.file:', doc.file, 'doc.id:', doc.id, 'doc.file type:', typeof doc.file, 'doc.id type:', typeof doc.id);
+                var hasFile = !!(doc.file || doc.id);
+                console.log('[showDocumentos] hasFile:', hasFile);
+                
+                if (hasFile) {
+                    console.log('[showDocumentos] ✅ ADICIONANDO botão de download para:', docTitle, 'arquivo:', doc.file || doc.id);
+                    addDownloadButtonToDocument(docItem, doc);
+                } else {
+                    console.warn('[showDocumentos] ❌ Documento SEM arquivo - não adicionando botão:', docTitle, 'doc completo:', JSON.stringify(doc));
+                }
                 
                 // Container de páginas (sub-itens)
                 var docPagesContainer = document.createElement('div');
@@ -4156,23 +6076,34 @@
                     }
                     
                     // Carrega a primeira página e inicializa navegação por scroll
-                    goToPage(firstDocStartPage);
-                    
-                    // Inicializa navegação por scroll após carregar a primeira página
-                    setTimeout(function() {
-                        initScrollNavigation();
-                    }, 1500); // Aguarda 1.5s para garantir que o PDF.js carregou completamente
-                }
-                
-                // Carrega a primeira página
-                if (documentos.length > 0) {
-                    var firstDocStartPage = documentosList.length > 0 ? documentosList[0].pagina_inicial : 1;
                     goPagina(firstDocStartPage);
                     
-                    // Inicializa navegação por scroll após carregar a primeira página
-                    setTimeout(function() {
-                        initScrollNavigation();
-                    }, 1500); // Aguarda 1.5s para garantir que o PDF.js carregou completamente
+                    // Inicializa navegação por scroll após carregar a primeira página (apenas se habilitado)
+                    if (CONFIG.SCROLL_NAVIGATION_ENABLED) {
+                        setTimeout(function() {
+                            initScrollNavigation();
+                            
+                            // Inicia rastreamento de visualização apenas se scroll navigation está habilitado E proteções estão habilitadas
+                            if (scrollNavigationEnabled && 
+                                (CONFIG.REQUIRE_MIN_VIEW_PERCENT || CONFIG.REQUIRE_MIN_PAGE_TIME)) {
+                                if (typeof resetPageViewTracking === 'function') {
+                                    resetPageViewTracking();
+                                }
+                                // Inicia monitoramento se ainda não foi iniciado
+                                if (typeof startPageViewMonitoring === 'function') {
+                                    startPageViewMonitoring();
+                                }
+                            }
+                            
+                            // Pré-carrega páginas adjacentes apenas se scroll navigation está habilitado
+                            if (scrollNavigationEnabled && CONFIG.PRELOAD_ONLY_ADJACENT && 
+                                typeof preloadAdjacentPages === 'function') {
+                                setTimeout(function() {
+                                    preloadAdjacentPages();
+                                }, 300);
+                            }
+                        }, 1500); // Aguarda 1.5s para garantir que o PDF.js carregou completamente
+                    }
                     
                     // Mostra notificação de sucesso
                     showToast('success', 'Pasta Digital Carregada', 
@@ -4192,23 +6123,52 @@
         }
         
         function updateSidebar(data) {
-            // Matérias relacionadas
+            console.log('[updateSidebar] Chamada com dados:', {
+                materias_relacionadas: data.materias_relacionadas,
+                documentos_administrativos: data.documentos_administrativos,
+                normas_juridicas: data.normas_juridicas,
+                portal_url: data.portal_url
+            });
+            
+            // Matérias relacionadas (anexadas/anexadoras)
             if (data.materias_relacionadas && data.materias_relacionadas.tem_relacionadas) {
                 var section = document.getElementById('relacionadas-section');
                 var nav = document.getElementById('relacionadas-nav');
-                section.style.display = 'block';
-                nav.innerHTML = '';
+                console.log('[updateSidebar] Matérias relacionadas encontradas:', {
+                    tem_relacionadas: data.materias_relacionadas.tem_relacionadas,
+                    anexadas: data.materias_relacionadas.anexadas,
+                    anexadoras: data.materias_relacionadas.anexadoras,
+                    section: section,
+                    nav: nav
+                });
                 
-                var anexadas = data.materias_relacionadas.anexadas || [];
-                var anexadoras = data.materias_relacionadas.anexadoras || [];
+                if (section && nav) {
+                    section.style.display = 'block';
+                    nav.innerHTML = '';
+                    
+                    var anexadas = data.materias_relacionadas.anexadas || [];
+                    var anexadoras = data.materias_relacionadas.anexadoras || [];
+                    
+                    console.log('[updateSidebar] Adicionando matérias relacionadas:', anexadas.length + anexadoras.length);
                 
                 [...anexadas, ...anexadoras].forEach(function(m) {
                     var link = document.createElement('a');
-                    link.href = data.portal_url + '/@@pasta_digital?cod_materia=' + m.cod_materia + '&action=pasta';
+                    // Matérias anexadas/anexadoras usam pasta_digital do legislativo
+                    var portalUrl = data.portal_url || (typeof APP_DATA !== 'undefined' && APP_DATA.portal_url) || (window.location.origin + window.location.pathname.split('/').slice(0, -1).join('/'));
+                    link.href = portalUrl + '/@@pasta_digital?cod_materia=' + m.cod_materia + '&action=pasta';
                     link.className = 'doc-item';
                     link.innerHTML = '<i class="mdi mdi-link-variant text-primary"></i><span class="text-truncate">' + m.titulo + '</span>';
                     link.target = '_blank';
                     nav.appendChild(link);
+                    console.log('[updateSidebar] Link de matéria adicionado:', m.titulo, 'URL:', link.href);
+                });
+                } else {
+                    console.warn('[updateSidebar] Seção ou nav de matérias relacionadas não encontrado');
+                }
+            } else {
+                console.log('[updateSidebar] Sem matérias relacionadas:', {
+                    materias_relacionadas: data.materias_relacionadas,
+                    tem_relacionadas: data.materias_relacionadas ? data.materias_relacionadas.tem_relacionadas : 'N/A'
                 });
             }
             
@@ -4216,31 +6176,62 @@
             if (data.documentos_administrativos && data.documentos_administrativos.length > 0) {
                 var section = document.getElementById('documentos-adm-section');
                 var nav = document.getElementById('documentos-adm-nav');
-                section.style.display = 'block';
-                nav.innerHTML = '';
-                
-                data.documentos_administrativos.forEach(function(doc) {
-                    var link = document.createElement('a');
-                    link.href = '#';
-                    link.className = 'doc-item';
-                    link.innerHTML = '<i class="mdi mdi-file-document-outline text-info"></i><span class="text-truncate">' + doc.titulo + '</span>';
-                    nav.appendChild(link);
+                if (section && nav) {
+                    section.style.display = 'block';
+                    nav.innerHTML = '';
+                    
+                    data.documentos_administrativos.forEach(function(doc) {
+                        var link = document.createElement('a');
+                        // Link para pasta digital do documento administrativo vinculado
+                        var portalUrl = data.portal_url || (typeof APP_DATA !== 'undefined' && APP_DATA.portal_url) || (window.location.origin + window.location.pathname.split('/').slice(0, -1).join('/'));
+                        link.href = portalUrl + '/@@pasta_digital_adm?cod_documento=' + doc.cod_documento + '&action=pasta';
+                        link.className = 'doc-item';
+                        link.innerHTML = '<i class="mdi mdi-link-variant text-primary"></i><span class="text-truncate">' + doc.titulo + '</span>';
+                        link.target = '_blank';
+                        nav.appendChild(link);
+                        console.log('[updateSidebar] Link de documento administrativo adicionado:', doc.titulo, 'URL:', link.href);
+                    });
+                } else {
+                    console.warn('[updateSidebar] Seção ou nav de documentos administrativos não encontrado');
+                }
+            } else {
+                console.log('[updateSidebar] Sem documentos administrativos:', {
+                    documentos_administrativos: data.documentos_administrativos
                 });
             }
             
-            // Normas jurídicas
+            // Normas jurídicas (derivadas)
             if (data.normas_juridicas && data.normas_juridicas.length > 0) {
                 var section = document.getElementById('normas-section');
                 var nav = document.getElementById('normas-nav');
-                section.style.display = 'block';
-                nav.innerHTML = '';
+                console.log('[updateSidebar] Normas jurídicas encontradas:', {
+                    count: data.normas_juridicas.length,
+                    normas: data.normas_juridicas,
+                    section: section,
+                    nav: nav
+                });
                 
-                data.normas_juridicas.forEach(function(norma) {
-                    var link = document.createElement('a');
-                    link.href = '#';
-                    link.className = 'doc-item';
-                    link.innerHTML = '<i class="mdi mdi-book-open-page-variant text-success"></i><span class="text-truncate">' + norma.titulo + '</span>';
-                    nav.appendChild(link);
+                if (section && nav) {
+                    section.style.display = 'block';
+                    nav.innerHTML = '';
+                    
+                    data.normas_juridicas.forEach(function(norma) {
+                        var link = document.createElement('a');
+                        // Link para pasta digital da norma derivada
+                        var portalUrl = data.portal_url || (typeof APP_DATA !== 'undefined' && APP_DATA.portal_url) || (window.location.origin + window.location.pathname.split('/').slice(0, -1).join('/'));
+                        link.href = portalUrl + '/@@pasta_digital_norma?cod_norma=' + norma.cod_norma + '&action=pasta';
+                        link.className = 'doc-item';
+                        link.innerHTML = '<i class="mdi mdi-link-variant text-primary"></i><span class="text-truncate">' + norma.titulo + '</span>';
+                        link.target = '_blank';
+                        nav.appendChild(link);
+                        console.log('[updateSidebar] Link de norma derivada adicionado:', norma.titulo, 'URL:', link.href);
+                    });
+                } else {
+                    console.warn('[updateSidebar] Seção ou nav de normas jurídicas não encontrado');
+                }
+            } else {
+                console.log('[updateSidebar] Sem normas jurídicas:', {
+                    normas_juridicas: data.normas_juridicas
                 });
             }
         }
@@ -4671,6 +6662,18 @@
                     if (data.materias_relacionadas) APP_DATA.materias_relacionadas = data.materias_relacionadas;
                     if (data.documentos_administrativos) APP_DATA.documentos_administrativos = data.documentos_administrativos;
                     if (data.normas_juridicas) APP_DATA.normas_juridicas = data.normas_juridicas;
+                    
+                    // CRÍTICO: Atualiza sidebar com informações relacionadas após carregar documentos
+                    // Garante que portal_url está presente nos dados
+                    var sidebarData = {
+                        materias_relacionadas: data.materias_relacionadas || APP_DATA.materias_relacionadas || {},
+                        documentos_administrativos: data.documentos_administrativos || APP_DATA.documentos_administrativos || [],
+                        normas_juridicas: data.normas_juridicas || APP_DATA.normas_juridicas || [],
+                        portal_url: data.portal_url || APP_DATA.portal_url || window.location.origin + window.location.pathname.split('/').slice(0, -1).join('/')
+                    };
+                    
+                    console.log('[loadDocumentosAfterSuccess] Atualizando sidebar com dados:', sidebarData);
+                    updateSidebar(sidebarData);
                     
                     // Atualiza header se necessário
                     if (data.materia) {

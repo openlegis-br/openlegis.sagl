@@ -36,6 +36,15 @@ for materia in context.zsql.materia_pesquisar_zsql(tip_id_basica=tipo_materia,
             nome_autor = autor['nom_autor_join']
         lista_autor.append(nome_autor)
     data['autoria'] = ', '.join(['%s' % (value) for (value) in lista_autor])
+    data['cod_assunto'] = ''
+    data['nome_assunto'] = ''
+    # Buscar assunto principal usando cod_assunto de materia_pesquisar_zsql
+    if hasattr(materia, 'cod_assunto') and materia.cod_assunto:
+        assunto_principal = context.zsql.assunto_materia_obter_zsql(cod_assunto=materia.cod_assunto, ind_excluido=0)
+        for assunto in assunto_principal:
+            data['cod_assunto'] = assunto.cod_assunto
+            data['nome_assunto'] = assunto.des_assunto
+            break
     data['partido'] = ''
     data['linkarquivo'] = ''
     if hasattr(context.sapl_documentos.materia, str(materia.cod_materia) + '_texto_integral.pdf'):

@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Pasta Digital - Visualização de Processo Legislativo">
+    <meta name="description" content="Pasta Digital - Visualização de Processo Administrativo">
     <title id="page-title">Pasta Digital</title>
     
     <!-- Favicon e recursos estáticos serão injetados -->
@@ -187,7 +187,7 @@
             opacity: 1;
         }
 
-        .materia-badge {
+        .documento-badge {
             background: linear-gradient(135deg, rgba(68, 162, 210, 0.1) 0%, rgba(68, 162, 210, 0.15) 100%);
             color: var(--bs-primary, #44a2d2);
             padding: 6px 16px;
@@ -203,7 +203,7 @@
             gap: 0.5rem;
         }
 
-        .materia-badge:hover {
+        .documento-badge:hover {
             box-shadow: var(--shadow-md);
             transform: translateY(-1px);
         }
@@ -329,7 +329,7 @@
             transition: opacity 0.3s ease, visibility 0.3s ease;
         }
         
-        .materia-codigo {
+        .documento-codigo {
             font-size: 0.8125rem;
             color: var(--bs-gray-600, #6c757d);
             font-weight: 500;
@@ -480,20 +480,14 @@
             visibility: visible !important;
         }
 
-        /* Quando estiver funcionando, altere opacity para 0 e visibility para hidden acima */
-
         .doc-download-btn:hover {
             color: var(--bs-primary, #44a2d2);
             background: var(--bs-gray-100, #f8f9fa);
         }
 
         .doc-download-btn:active {
-            transform: scale(0.95);
-        }
-
-        .doc-download-btn:focus {
-            outline: 2px solid var(--bs-primary, #44a2d2);
-            outline-offset: 2px;
+            color: var(--bs-primary-dark, #2d7ba8);
+            background: var(--bs-gray-200, #e9ecef);
         }
         
         /* Container do documento com páginas */
@@ -893,7 +887,7 @@
                 display: none;
             }
             
-            .materia-badge {
+            .documento-badge {
                 font-size: 0.75rem;
                 padding: 4px 12px;
             }
@@ -1084,7 +1078,7 @@
                 padding: 0 var(--spacing-md);
             }
 
-            .materia-badge {
+            .documento-badge {
                 font-size: 0.75rem;
                 padding: 5px 12px;
             }
@@ -1511,7 +1505,7 @@
             </button>
             <i class="mdi mdi-folder-open text-primary me-2" style="font-size: 24px;" aria-hidden="true"></i>
             <h1 class="h5 mb-0 fw-bold text-dark">Pasta Digital</h1>
-            <span class="ms-3 materia-badge" id="materia-titulo">Carregando...</span>
+            <span class="ms-3 documento-badge" id="documento-titulo">Carregando...</span>
         </div>
         
         <div class="d-flex gap-2">
@@ -1531,14 +1525,14 @@
                 <div class="section-title">Navegação do Processo</div>
                 <nav id="documentos-nav" aria-label="Lista de documentos"></nav>
 
-                <div id="relacionadas-section" style="display:none">
-                    <div class="section-title">Matérias Relacionadas</div>
-                    <nav id="relacionadas-nav" aria-label="Matérias relacionadas"></nav>
+                <div id="vinculadas-section" style="display:none">
+                    <div class="section-title">Matérias Vinculadas</div>
+                    <nav id="vinculadas-nav" aria-label="Matérias vinculadas"></nav>
                 </div>
                 
                 <div id="documentos-adm-section" style="display:none">
-                    <div class="section-title">Documentos Administrativos</div>
-                    <nav id="documentos-adm-nav" aria-label="Documentos administrativos"></nav>
+                    <div class="section-title">Processos Vinculados</div>
+                    <nav id="documentos-adm-nav" aria-label="Processos vinculados"></nav>
                 </div>
                 
                 <div id="normas-section" style="display:none">
@@ -1548,7 +1542,7 @@
             </div>
             
             <div class="sidebar-footer">
-                <div class="materia-codigo" id="materia-codigo"></div>
+                <div class="documento-codigo" id="documento-codigo"></div>
             </div>
         </aside>
 
@@ -1662,7 +1656,7 @@
                     </div>
                 </div>
 
-                <iframe id="iframeViewer" name="iframeViewer" src="about:blank" title="Visualizador de PDF" aria-label="Visualizador de PDF do processo legislativo"></iframe>
+                <iframe id="iframeViewer" name="iframeViewer" src="about:blank" title="Visualizador de PDF" aria-label="Visualizador de PDF do processo administrativo"></iframe>
             </div>
             </section>
         </main>
@@ -1691,12 +1685,12 @@
         };
         
         let APP_DATA = {
-            cod_norma: null,
+            cod_documento: null,
             portal_url: null,
             pasta: null,
-            norma: null,
+            documento: null,
             portal_config: null,
-            materias_relacionadas: null,
+            materias_vinculadas: null,
             documentos_administrativos: null,
             normas_juridicas: null
         };
@@ -1716,6 +1710,50 @@
                     }
                 } catch (e) {
                     // Ignora se DOM não estiver pronto
+                }
+                
+                // CRÍTICO: Atualiza título e badge do header se APP_DATA.documento estiver disponível
+                // Esta função é executada imediatamente, então faz atualização básica
+                // A atualização completa será feita depois que todas as funções estiverem carregadas
+                function updateTitleAndBadge() {
+                    if (typeof APP_DATA !== 'undefined' && APP_DATA.documento) {
+                        var id_processo = APP_DATA.documento.id_processo || APP_DATA.documento.titulo || ('Documento ' + (APP_DATA.documento.cod_documento || APP_DATA.cod_documento || ''));
+                        var tituloEl = document.getElementById('documento-titulo');
+                        var codigoEl = document.getElementById('documento-codigo');
+                        var pageTitleEl = document.getElementById('page-title');
+                        
+                        if (tituloEl) tituloEl.textContent = id_processo;
+                        if (codigoEl && APP_DATA.documento.cod_documento) {
+                            codigoEl.textContent = 'Código: ' + APP_DATA.documento.cod_documento;
+                        }
+                        
+                        // Atualiza título da aba do navegador
+                        if (pageTitleEl) {
+                            pageTitleEl.textContent = 'Pasta Digital - ' + id_processo;
+                        }
+                        document.title = 'Pasta Digital - ' + id_processo;
+                        
+                        // Atualiza breadcrumbs (se função já estiver definida)
+                        if (typeof updateBreadcrumbs === 'function') {
+                            updateBreadcrumbs(APP_DATA.documento);
+                        }
+                        
+                        console.log('[checkInitialState] ✅ Título e badge atualizados: ' + id_processo);
+                    }
+                }
+                
+                // Tenta atualizar imediatamente (pode falhar se DOM não estiver pronto)
+                try {
+                    updateTitleAndBadge();
+                } catch (e) {
+                    // Ignora erro se DOM não estiver pronto
+                }
+                
+                // Também agenda para quando DOM estiver pronto
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', updateTitleAndBadge, { once: true });
+                } else {
+                    setTimeout(updateTitleAndBadge, 0);
                 }
                 
                 // Verifica se APP_DATA foi injetado pelo servidor e tem pasta
@@ -2106,17 +2144,29 @@
                 }
             }
         
-        // Função para atualizar breadcrumbs
-        function updateBreadcrumbs(norma) {
+        // Função para atualizar breadcrumbs (funciona com processo administrativo e legislativo)
+        function updateBreadcrumbs(doc) {
             var breadcrumbCurrent = document.getElementById('breadcrumb-current');
             var breadcrumbHome = document.getElementById('breadcrumb-home');
             
-            if (breadcrumbCurrent && norma) {
-                // Usa id_exibicao (sigla tipo + número/ano) ou constrói a partir dos dados
-                var titulo = norma.id_exibicao || 
-                            (norma.tipo && norma.numero && norma.ano ? 
-                             `${norma.tipo} ${norma.numero}/${norma.ano}` : 
-                             (norma.titulo || 'Norma'));
+            if (breadcrumbCurrent && doc) {
+                // CRÍTICO: Para processo administrativo, usa id_processo (formato: PA 308/2025)
+                // Para processo legislativo, usa formato padrão
+                var titulo;
+                if (doc.id_processo) {
+                    // Processo administrativo
+                    titulo = doc.id_processo;
+                } else if (doc.titulo) {
+                    titulo = doc.titulo;
+                } else if (doc.sgl_tipo_documento && doc.num_documento && doc.ano_documento) {
+                    // Processo administrativo sem id_processo - constrói manualmente
+                    titulo = doc.sgl_tipo_documento + ' ' + doc.num_documento + '/' + doc.ano_documento;
+                } else if (doc.sgl_tipo_materia && doc.num_ident_basica && doc.ano_ident_basica) {
+                    // Processo legislativo
+                    titulo = doc.sgl_tipo_materia + ' ' + doc.num_ident_basica + '/' + doc.ano_ident_basica;
+                } else {
+                    titulo = 'Documento ' + (doc.cod_documento || doc.cod_materia || '');
+                }
                 breadcrumbCurrent.textContent = titulo;
             }
             
@@ -2285,7 +2335,7 @@
             
             var stageMessages = {
                 'init': 'Inicializando',
-                'dados_norma': 'Obtendo dados da norma',
+                'dados_materia': 'Obtendo dados da documento',
                 'preparar_dirs': 'Preparando diretórios',
                 'coletar_docs': 'Coletando documentos',
                 'mesclar_docs': 'Mesclando documentos',
@@ -3030,6 +3080,10 @@
             goPagina();
         }
         
+        // Flag para evitar múltiplas verificações simultâneas
+        var verifyingPage = false;
+        var pendingPageLoad = null;
+        
         function goPagina(paginaParam) {
             try {
                 var paginaEl = document.getElementById('page-input');
@@ -3050,13 +3104,22 @@
                     return;
                 }
                 
+                // Se já está verificando outra página, aguarda
+                if (verifyingPage) {
+                    console.log('[goPagina] Verificação em andamento, aguardando...');
+                    pendingPageLoad = pagina;
+                    return;
+                }
+                
                 // Atualiza o input com o valor correto e atributos de acessibilidade
                 paginaEl.value = pagina;
                 paginaEl.setAttribute('aria-valuenow', pagina);
                 paginaEl.setAttribute('aria-valuemax', totalPages);
                 paginaEl.setAttribute('aria-invalid', 'false');
-            
-            currentPage = pagina;
+                
+                // Armazena a página anterior antes de atualizar currentPage (para uso em caso de erro)
+                var previousPage = currentPage || 1;
+                currentPage = pagina;
             
             // Remove classe active e expanded de todos os wrappers, itens e páginas
             var allWrappers = document.querySelectorAll('.doc-wrapper');
@@ -3120,7 +3183,7 @@
             // Constrói a URL da página dinamicamente
             // Tenta usar a URL do documento se disponível, senão constrói manualmente
             var link = null;
-            var codNorma = APP_DATA.cod_norma || '';
+            var codDocumento = APP_DATA.cod_documento || '';
             
             // Primeiro, tenta encontrar a URL no array de documentos
             if (APP_DATA.pasta && APP_DATA.pasta.documentos) {
@@ -3149,16 +3212,16 @@
                 console.log('[goPagina] URL não encontrada no array, construindo manualmente para página:', pagina);
                 var portalUrl = APP_DATA.portal_url || '';
                 
-                if (!portalUrl || !codNorma) {
-                    console.error('[goPagina] Dados insuficientes - portalUrl:', portalUrl, 'codNorma:', codNorma);
+                if (!portalUrl || !codDocumento) {
+                    console.error('[goPagina] Dados insuficientes - portalUrl:', portalUrl, 'codDocumento:', codDocumento);
                     alert('Dados insuficientes para carregar a página!');
                     return;
                 }
                 
-                // Remove /consultas/materia da URL base se existir
+                // Remove /consultas/documento_administrativo da URL base se existir
                 var baseUrl = portalUrl;
-                if (baseUrl.includes('/consultas/materia')) {
-                    baseUrl = baseUrl.replace('/consultas/materia', '');
+                if (baseUrl.includes('/consultas/documento_administrativo')) {
+                    baseUrl = baseUrl.replace('/consultas/documento_administrativo', '');
                 }
                 baseUrl = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
                 
@@ -3168,12 +3231,115 @@
                 // Constrói a URL completa com cache busting
                 // Adiciona timestamp para evitar cache de versões antigas
                 var cacheBust = '&_t=' + Date.now();
-                link = baseUrl + '/@@pagina_processo_norma_integral?cod_norma=' + encodeURIComponent(codNorma) + '&pagina=' + encodeURIComponent(paginaFormatada) + cacheBust;
+                link = baseUrl + '/@@pagina_processo_adm_integral?cod_documento=' + encodeURIComponent(codDocumento) + '&pagina=' + encodeURIComponent(paginaFormatada) + cacheBust;
                 console.log('[goPagina] URL construída manualmente:', link);
             }
             
             console.log('[goPagina] URL do PDF:', link);
             
+            // Tenta carregar diretamente, sem verificação prévia
+            // Se der erro 404, tenta novamente após um delay (página pode estar sendo gerada)
+            // Isso evita bloqueio desnecessário quando a página existe mas demora para renderizar
+            loadPageIntoIframeWithRetry(link, pagina, previousPage, 0);
+            } catch (error) {
+                console.error('[goPagina] Erro:', error);
+                showToast('error', 'Erro', 'Não foi possível carregar a página', 3000);
+            }
+        }
+        
+        // Função para carregar página no iframe com retry automático em caso de 404
+        // Isso trata o caso onde a página existe mas ainda está sendo gerada/renderizada
+        function loadPageIntoIframeWithRetry(link, pagina, previousPage, retryCount) {
+            var maxRetries = 3;
+            var retryDelay = 1000; // 1 segundo entre tentativas
+            
+            // Libera a flag de verificação
+            verifyingPage = false;
+            
+            if (retryCount > 0) {
+                console.log('[loadPageIntoIframeWithRetry] Tentativa', retryCount, 'de', maxRetries, 'para página', pagina);
+            }
+            
+            // Verifica se a página existe (ou se está sendo gerada)
+            // Usa GET para verificar disponibilidade da página
+            fetch(link, { method: 'GET', cache: 'no-store' })
+                .then(function(response) {
+                    var pageExists = response.ok && response.status === 200;
+                    var contentType = response.headers.get('Content-Type') || '';
+                    var isPDF = contentType.includes('application/pdf') || contentType.includes('pdf');
+                    pageExists = pageExists && isPDF;
+                    
+                    if (!pageExists && retryCount < maxRetries) {
+                        // Página não existe ainda, pode estar sendo gerada - tenta novamente
+                        console.log('[loadPageIntoIframeWithRetry] Página ainda não disponível (status:', response.status, '), tentando novamente em', retryDelay, 'ms...');
+                        setTimeout(function() {
+                            loadPageIntoIframeWithRetry(link, pagina, previousPage, retryCount + 1);
+                        }, retryDelay);
+                        return;
+                    }
+                    
+                    if (!pageExists) {
+                        // Após várias tentativas, página realmente não existe
+                        console.warn('[loadPageIntoIframeWithRetry] Página não encontrada após', maxRetries, 'tentativas:', link, 'status:', response.status);
+                        // Reverte currentPage para a página anterior
+                        currentPage = previousPage;
+                        // Reverte o input também
+                        var paginaEl = document.getElementById('page-input');
+                        if (paginaEl) {
+                            paginaEl.value = previousPage;
+                            paginaEl.setAttribute('aria-valuenow', previousPage);
+                        }
+                        showToast('error', 'Página não encontrada', 'A página ' + pagina + ' não pôde ser carregada após várias tentativas. Por favor, tente novamente ou selecione outra página.', 5000);
+                        
+                        // Se há uma página pendente, processa ela
+                        if (pendingPageLoad !== null) {
+                            var pending = pendingPageLoad;
+                            pendingPageLoad = null;
+                            setTimeout(function() {
+                                goPagina(pending);
+                            }, 100);
+                        }
+                        return;
+                    }
+                    
+                    // Página existe, carrega normalmente
+                    loadPageIntoIframe(link, pagina);
+                    
+                    // Se há uma página pendente, processa ela
+                    if (pendingPageLoad !== null) {
+                        var pending = pendingPageLoad;
+                        pendingPageLoad = null;
+                        setTimeout(function() {
+                            goPagina(pending);
+                        }, 100);
+                    }
+                })
+                .catch(function(error) {
+                    // Em caso de erro de rede ou timeout, tenta carregar mesmo assim após algumas tentativas
+                    if (retryCount < maxRetries) {
+                        console.log('[loadPageIntoIframeWithRetry] Erro ao verificar página, tentando novamente:', error);
+                        setTimeout(function() {
+                            loadPageIntoIframeWithRetry(link, pagina, previousPage, retryCount + 1);
+                        }, retryDelay);
+                    } else {
+                        // Após várias tentativas com erro, tenta carregar mesmo assim
+                        console.error('[loadPageIntoIframeWithRetry] Erro após', maxRetries, 'tentativas, tentando carregar mesmo assim:', error);
+                        loadPageIntoIframe(link, pagina);
+                        
+                        // Se há uma página pendente, processa ela
+                        if (pendingPageLoad !== null) {
+                            var pending = pendingPageLoad;
+                            pendingPageLoad = null;
+                            setTimeout(function() {
+                                goPagina(pending);
+                            }, 100);
+                        }
+                    }
+                });
+        }
+        
+        // Função auxiliar para carregar página no iframe (extraída para reutilização)
+        function loadPageIntoIframe(link, pagina) {
             // Constrói a URL do PDF.js viewer
             var portalUrl = APP_DATA.portal_url || '';
             // Usa o viewer do PDF.js disponível em skins
@@ -3291,30 +3457,26 @@
                     }, 15000);
                 }, 100);
             }
-            } catch (error) {
-                console.error('[goPagina] Erro:', error);
-                showToast('error', 'Erro', 'Não foi possível carregar a página', 3000);
-            }
         }
         
         // Função para atualizar interface
         function updateInterface(data) {
             // Atualiza header
-            if (data.norma) {
-                // Usa id_exibicao (sigla tipo + número/ano) ou constrói a partir dos dados
-                var titulo = data.norma.id_exibicao || 
-                            (data.norma.tipo && data.norma.numero && data.norma.ano ? 
-                             `${data.norma.tipo} ${data.norma.numero}/${data.norma.ano}` : 
-                             'Norma ' + data.cod_norma);
-                document.getElementById('materia-titulo').textContent = titulo;
-                document.getElementById('materia-codigo').textContent = 'Código: ' + data.cod_norma;
+            if (data.documento) {
+                // CRÍTICO: Usa id_processo (formato: PA 308/2025) para badge e título
+                var id_processo = data.documento.id_processo || data.documento.titulo || ('Documento ' + data.cod_documento);
+                var titulo_completo = data.documento.titulo || data.documento.id_processo || ('Documento ' + data.cod_documento);
+                
+                // Atualiza badge do header com identificação do processo (ex: PA 308/2025)
+                document.getElementById('documento-titulo').textContent = id_processo;
+                document.getElementById('documento-codigo').textContent = 'Código: ' + data.cod_documento;
                 
                 // Atualiza breadcrumbs
-                updateBreadcrumbs(data.norma);
-                // Atualiza título da página e da aba do navegador
-                var pageTitle = 'Pasta Digital - ' + titulo;
-                document.getElementById('page-title').textContent = pageTitle;
-                document.title = pageTitle;
+                updateBreadcrumbs(data.documento);
+                
+                // CRÍTICO: Atualiza título da aba do navegador com identificação do processo
+                document.getElementById('page-title').textContent = 'Pasta Digital - ' + id_processo;
+                document.title = 'Pasta Digital - ' + id_processo;  // Garante que o título está atualizado
             }
             
             var pasta = data.pasta || {};
@@ -3340,6 +3502,14 @@
                 document.getElementById('async-monitor').style.display = 'none';
                 stopDownloadButtonCheck(); // Para verificação periódica
                 enableToolbarControls(); // Reabilita controles
+                // Atualiza sidebar ANTES de mostrar documentos
+                var sidebarData = {
+                    materias_vinculadas: data.materias_vinculadas || {},
+                    documentos_administrativos: data.documentos_administrativos || [],
+                    normas_juridicas: data.normas_juridicas || [],
+                    portal_url: data.portal_url || (typeof APP_DATA !== 'undefined' && APP_DATA.portal_url) || (window.location.origin + window.location.pathname.split('/').slice(0, -1).join('/'))
+                };
+                updateSidebar(sidebarData);
                 showDocumentos(pasta);
                 return;
             }
@@ -3367,6 +3537,14 @@
                         loadingState.style.display = 'none';
                     }
                     enableToolbarControls(); // Reabilita controles
+                    // Atualiza sidebar ANTES de mostrar documentos
+                    var sidebarData = {
+                        materias_vinculadas: data.materias_vinculadas || {},
+                        documentos_administrativos: data.documentos_administrativos || [],
+                        normas_juridicas: data.normas_juridicas || [],
+                        portal_url: data.portal_url || (typeof APP_DATA !== 'undefined' && APP_DATA.portal_url) || (window.location.origin + window.location.pathname.split('/').slice(0, -1).join('/'))
+                    };
+                    updateSidebar(sidebarData);
                     showDocumentos(pasta);
                 }, 500); // 500ms para mostrar mensagem de carregamento
                 return; // CRÍTICO: Retorna aqui para evitar verificação adicional que pode iniciar polls
@@ -3388,6 +3566,14 @@
                     document.getElementById('async-monitor').style.display = 'none';
                     stopDownloadButtonCheck();
                     enableToolbarControls();
+                    // Atualiza sidebar ANTES de mostrar documentos
+                    var sidebarData = {
+                        materias_vinculadas: data.materias_vinculadas || {},
+                        documentos_administrativos: data.documentos_administrativos || [],
+                        normas_juridicas: data.normas_juridicas || [],
+                        portal_url: data.portal_url || (typeof APP_DATA !== 'undefined' && APP_DATA.portal_url) || (window.location.origin + window.location.pathname.split('/').slice(0, -1).join('/'))
+                    };
+                    updateSidebar(sidebarData);
                     showDocumentos(pasta);
                 }, 2000);
                 return;
@@ -3416,6 +3602,14 @@
                 document.getElementById('async-monitor').style.display = 'none';
                 stopDownloadButtonCheck(); // Para verificação periódica
                 enableToolbarControls(); // Reabilita controles
+                // Atualiza sidebar ANTES de mostrar documentos
+                var sidebarData = {
+                    materias_vinculadas: data.materias_vinculadas || {},
+                    documentos_administrativos: data.documentos_administrativos || [],
+                    normas_juridicas: data.normas_juridicas || [],
+                    portal_url: data.portal_url || (typeof APP_DATA !== 'undefined' && APP_DATA.portal_url) || (window.location.origin + window.location.pathname.split('/').slice(0, -1).join('/'))
+                };
+                updateSidebar(sidebarData);
                 showDocumentos(pasta);
                 return; // CRÍTICO: Retorna aqui para evitar verificação adicional que pode iniciar polls
             }
@@ -3437,11 +3631,11 @@
                 // Faz uma chamada para verificar se há task ativa
                 var portalUrl = data.portal_url || APP_DATA.portal_url || '';
                 var baseUrl = portalUrl;
-                if (baseUrl.includes('/consultas/materia')) {
-                    baseUrl = baseUrl.replace('/consultas/materia', '');
+                if (baseUrl.includes('/consultas/documento_administrativo')) {
+                    baseUrl = baseUrl.replace('/consultas/documento_administrativo', '');
                 }
                 baseUrl = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
-                var checkUrl = baseUrl + '/@@pasta_digital_norma_data?cod_norma=' + encodeURIComponent(data.cod_norma) + '&action=pasta';
+                var checkUrl = baseUrl + '/@@pasta_digital_adm_data?cod_documento=' + encodeURIComponent(data.cod_documento) + '&action=pasta';
                 fetch(checkUrl)
                     .then(function(response) { return response.json(); })
                     .then(function(checkData) {
@@ -3459,10 +3653,18 @@
                                 status: 'Verificando disponibilidade dos arquivos...'
                             });
                             // Verifica se todos os arquivos estão disponíveis antes de mostrar
-                            verifyAllPagesAvailable(checkData.pasta, baseUrl, data.cod_norma).then(function(allAvailable) {
+                            verifyAllPagesAvailable(checkData.pasta, baseUrl, data.cod_documento).then(function(allAvailable) {
                                 if (allAvailable) {
                                     // Todos os arquivos disponíveis, mostra documentos
                                     console.log('[updateInterface] Todos os arquivos disponíveis, mostrando documentos');
+                                    // Atualiza sidebar ANTES de mostrar documentos
+                                    var sidebarData = {
+                                        materias_vinculadas: data.materias_vinculadas || {},
+                                        documentos_administrativos: data.documentos_administrativos || [],
+                                        normas_juridicas: data.normas_juridicas || [],
+                                        portal_url: data.portal_url || (typeof APP_DATA !== 'undefined' && APP_DATA.portal_url) || (window.location.origin + window.location.pathname.split('/').slice(0, -1).join('/'))
+                                    };
+                                    updateSidebar(sidebarData);
                                     showDocumentos(checkData.pasta);
                                 } else {
                                     // Se não estão disponíveis, mantém o monitor
@@ -3477,6 +3679,14 @@
                             }).catch(function(error) {
                                 console.error('[updateInterface] Erro ao verificar arquivos:', error);
                                 // Em caso de erro, mostra os documentos mesmo assim
+                                // Atualiza sidebar ANTES de mostrar documentos
+                                var sidebarData = {
+                                    materias_vinculadas: data.materias_vinculadas || {},
+                                    documentos_administrativos: data.documentos_administrativos || [],
+                                    normas_juridicas: data.normas_juridicas || [],
+                                    portal_url: data.portal_url || (typeof APP_DATA !== 'undefined' && APP_DATA.portal_url) || (window.location.origin + window.location.pathname.split('/').slice(0, -1).join('/'))
+                                };
+                                updateSidebar(sidebarData);
                                 showDocumentos(checkData.pasta);
                             });
                         } else {
@@ -3496,6 +3706,14 @@
                         console.error('[updateInterface] Erro ao verificar task ativa:', error);
                         // Em caso de erro, se tem documentos, mostra eles; senão mostra monitor
                         if (pasta.documentos && pasta.documentos.length > 0) {
+                            // Atualiza sidebar ANTES de mostrar documentos
+                            var sidebarData = {
+                                materias_vinculadas: data.materias_vinculadas || {},
+                                documentos_administrativos: data.documentos_administrativos || [],
+                                normas_juridicas: data.normas_juridicas || [],
+                                portal_url: data.portal_url || (typeof APP_DATA !== 'undefined' && APP_DATA.portal_url) || (window.location.origin + window.location.pathname.split('/').slice(0, -1).join('/'))
+                            };
+                            updateSidebar(sidebarData);
                             showDocumentos(pasta);
                         } else {
                             showAsyncMonitor({
@@ -3521,14 +3739,22 @@
                 // Constrói baseUrl para verificação
                 var portalUrl = data.portal_url || APP_DATA.portal_url || '';
                 var baseUrl = portalUrl;
-                if (baseUrl.includes('/consultas/materia')) {
-                    baseUrl = baseUrl.replace('/consultas/materia', '');
+                if (baseUrl.includes('/consultas/documento_administrativo')) {
+                    baseUrl = baseUrl.replace('/consultas/documento_administrativo', '');
                 }
                 baseUrl = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
                 
                 // Verifica se todos os arquivos estão disponíveis antes de mostrar
-                verifyAllPagesAvailable(pasta, baseUrl, data.cod_norma).then(function(allAvailable) {
+                verifyAllPagesAvailable(pasta, baseUrl, data.cod_documento).then(function(allAvailable) {
                     if (allAvailable) {
+                        // Atualiza sidebar ANTES de mostrar documentos
+                        var sidebarData = {
+                            materias_vinculadas: data.materias_vinculadas || {},
+                            documentos_administrativos: data.documentos_administrativos || [],
+                            normas_juridicas: data.normas_juridicas || [],
+                            portal_url: data.portal_url || (typeof APP_DATA !== 'undefined' && APP_DATA.portal_url) || (window.location.origin + window.location.pathname.split('/').slice(0, -1).join('/'))
+                        };
+                        updateSidebar(sidebarData);
                         showDocumentos(pasta);
                     } else {
                         // Se não estão disponíveis, mostra monitor e tenta novamente
@@ -3543,6 +3769,14 @@
                 }).catch(function(error) {
                     console.error('Erro ao verificar arquivos:', error);
                     // Em caso de erro, mostra os documentos mesmo assim
+                    // Atualiza sidebar ANTES de mostrar documentos
+                    var sidebarData = {
+                        materias_vinculadas: data.materias_vinculadas || {},
+                        documentos_administrativos: data.documentos_administrativos || [],
+                        normas_juridicas: data.normas_juridicas || [],
+                        portal_url: data.portal_url || (typeof APP_DATA !== 'undefined' && APP_DATA.portal_url) || (window.location.origin + window.location.pathname.split('/').slice(0, -1).join('/'))
+                    };
+                    updateSidebar(sidebarData);
                     showDocumentos(pasta);
                 });
             } else if (pasta.error) {
@@ -3552,7 +3786,16 @@
             }
             
             // Atualiza sidebar com informações relacionadas
-            updateSidebar(data);
+            // Garante que portal_url está presente nos dados
+            var sidebarData = {
+                materias_vinculadas: data.materias_vinculadas || {},
+                documentos_administrativos: data.documentos_administrativos || [],
+                normas_juridicas: data.normas_juridicas || [],
+                portal_url: data.portal_url || (typeof APP_DATA !== 'undefined' && APP_DATA.portal_url) || (window.location.origin + window.location.pathname.split('/').slice(0, -1).join('/'))
+            };
+            
+            console.log('[updateInterface] Chamando updateSidebar com dados:', sidebarData);
+            updateSidebar(sidebarData);
         }
         
         /**
@@ -3584,12 +3827,12 @@
             // Só mostra o botão se o menu tiver itens renderizados E monitor não estiver ativo
             if (hasMenuItems) {
                 var portalUrl = APP_DATA.portal_url || '';
-                var codNorma = APP_DATA.cod_norma || '';
-                if (portalUrl && codNorma) {
+                var codDocumento = APP_DATA.cod_documento || '';
+                if (portalUrl && codDocumento) {
                     // Adiciona cache-busting para forçar navegador a baixar sem cache
                     var cacheBust = '&_t=' + Date.now();
-                    downloadBtn.href = portalUrl + '/@@processo_norma_integral?cod_norma=' + 
-                                      encodeURIComponent(codNorma) + '&action=download' + cacheBust;
+                    downloadBtn.href = portalUrl + '/@@processo_adm_integral?cod_documento=' + 
+                                      encodeURIComponent(codDocumento) + '&action=download' + cacheBust;
                     // Usa setProperty com !important para sobrescrever o display:none !important do HTML
                     downloadBtn.style.setProperty('display', 'flex', 'important');
                 } else {
@@ -3739,7 +3982,7 @@
         }
         
         // Função para verificar se todos os arquivos de página estão disponíveis
-        async function verifyAllPagesAvailable(pasta, baseUrl, codNorma) {
+        async function verifyAllPagesAvailable(pasta, baseUrl, codDocumento) {
             if (!pasta.documentos || !Array.isArray(pasta.documentos) || pasta.documentos.length === 0) {
                 console.log('[verifyAllPagesAvailable] Sem documentos válidos:', {
                     hasDocumentos: !!pasta.documentos,
@@ -3750,11 +3993,16 @@
             }
             
             // Verifica algumas páginas chave (primeira, última, e algumas do meio)
-            var totalPages = pasta.paginas_geral || 0;
+            // CRÍTICO: Usa total_paginas (retornado pelo backend) em vez de paginas_geral
+            var totalPages = pasta.total_paginas || pasta.paginas_geral || 0;
             if (totalPages === 0) {
-                console.log('[verifyAllPagesAvailable] Total de páginas é 0');
-                // Se não tem paginas_geral mas tem documentos, assume que está OK
-                // (pode ser que paginas_geral não esteja sendo retornado corretamente)
+                console.log('[verifyAllPagesAvailable] Total de páginas é 0', {
+                    total_paginas: pasta.total_paginas,
+                    paginas_geral: pasta.paginas_geral,
+                    pasta_keys: Object.keys(pasta)
+                });
+                // Se não tem total_paginas mas tem documentos, assume que está OK
+                // (pode ser que total_paginas não esteja sendo retornado corretamente)
                 if (pasta.documentos && pasta.documentos.length > 0) {
                     console.log('[verifyAllPagesAvailable] Total de páginas é 0 mas tem documentos, assumindo OK');
                     return true;
@@ -3782,7 +4030,7 @@
             
             var checkPromises = pagesToCheck.map(function(pageNum) {
                 var paginaFormatada = 'pg_' + String(pageNum).padStart(4, '0') + '.pdf';
-                var pageUrl = baseUrl + '/@@pagina_processo_norma_integral?cod_norma=' + encodeURIComponent(codNorma) + '&pagina=' + encodeURIComponent(paginaFormatada) + '&_t=' + Date.now();
+                var pageUrl = baseUrl + '/@@pagina_processo_adm_integral?cod_documento=' + encodeURIComponent(codDocumento) + '&pagina=' + encodeURIComponent(paginaFormatada) + '&_t=' + Date.now();
                 
                 // Usa GET em vez de HEAD para garantir que o arquivo realmente existe e está acessível
                 // Alguns servidores podem retornar 200 no HEAD mas 404 no GET
@@ -3813,35 +4061,20 @@
             return allAvailable;
         }
         
-        function showDocumentos(pasta) {
-            try {
-                // Cache de elementos DOM para performance
-                var asyncMonitor = document.getElementById('async-monitor');
-                var loadingState = document.getElementById('loading-state');
-                var viewerControls = document.getElementById('viewer-controls');
-                var navList = document.getElementById('documentos-nav');
-                var totalPagesEl = document.getElementById('total-pages');
-                
-                if (asyncMonitor) asyncMonitor.style.display = 'none';
-                if (loadingState) loadingState.style.display = 'none';
-                if (viewerControls) viewerControls.style.display = 'flex';
-                
-                // Para a verificação periódica do botão quando o monitor é escondido
-                stopDownloadButtonCheck();
-                
-                enableToolbarControls(); // Reabilita controles
-                
-                // Botão de download já está escondido por padrão (display:none no HTML)
-                // Será mostrado apenas após documentos renderizados
-                
-                var documentos = pasta.documentos || [];
-                
-            // Função para adicionar botão de download ao documento
+        // Função para adicionar botão de download ao documento
         function addDownloadButtonToDocument(docItem, doc) {
-            // Verifica se documento tem arquivo (processo_norma usa 'id', processo_adm usa 'file')
+            // Verifica se documento tem arquivo (processo_adm usa 'file')
             var filename = doc.file || doc.id;
+            console.log('[addDownloadButtonToDocument] Verificando documento:', {
+                title: doc.title,
+                file: doc.file,
+                id: doc.id,
+                filename: filename,
+                docKeys: Object.keys(doc)
+            });
+            
             if (!filename) {
-                console.warn('[addDownloadButtonToDocument] Documento sem arquivo:', doc.title);
+                console.warn('[addDownloadButtonToDocument] Documento sem arquivo:', doc.title, 'doc completo:', doc);
                 return; // Documentos sem arquivo não têm download
             }
             
@@ -3866,20 +4099,29 @@
             // Insere botão no doc-item-content (entre título e badge)
             var docContent = docItem.querySelector('.doc-item-content');
             if (docContent) {
-                console.log('[addDownloadButtonToDocument] docContent encontrado, inserindo botão');
+                console.log('[addDownloadButtonToDocument] docContent encontrado, inserindo botão. docContent HTML:', docContent.innerHTML.substring(0, 100));
                 // Adiciona botão antes do badge se existir, senão no final
                 var badge = docContent.querySelector('.doc-item-badge');
                 if (badge) {
-                    console.log('[addDownloadButtonToDocument] Badge encontrado, inserindo antes');
+                    console.log('[addDownloadButtonToDocument] Badge encontrado, inserindo antes do badge');
                     docContent.insertBefore(downloadBtn, badge);
                 } else {
-                    console.log('[addDownloadButtonToDocument] Sem badge, adicionando no final');
+                    console.log('[addDownloadButtonToDocument] Sem badge, adicionando no final do docContent');
                     docContent.appendChild(downloadBtn);
                 }
+                console.log('[addDownloadButtonToDocument] Botão inserido. docContent HTML final:', docContent.innerHTML.substring(0, 150));
+                // Verifica se o botão realmente está no DOM
+                var insertedBtn = docContent.querySelector('.doc-download-btn');
+                if (insertedBtn) {
+                    console.log('[addDownloadButtonToDocument] ✅ Botão confirmado no DOM');
+                } else {
+                    console.error('[addDownloadButtonToDocument] ❌ Botão NÃO encontrado no DOM após inserção!');
+                }
             } else {
-                console.warn('[addDownloadButtonToDocument] doc-content não encontrado, usando fallback');
+                console.warn('[addDownloadButtonToDocument] doc-content não encontrado, usando fallback. docItem HTML:', docItem.innerHTML.substring(0, 200));
                 // Fallback: adiciona no final do doc-item
                 docItem.appendChild(downloadBtn);
+                console.log('[addDownloadButtonToDocument] Botão adicionado via fallback. docItem HTML final:', docItem.innerHTML.substring(0, 200));
             }
         }
 
@@ -3887,9 +4129,9 @@
         function downloadDocument(filename, title, docData) {
             try {
                 var portalUrl = APP_DATA.portal_url || '';
-                var codNorma = APP_DATA.cod_norma || '';
+                var codDocumento = APP_DATA.cod_documento || '';
                 
-                if (!portalUrl || !codNorma) {
+                if (!portalUrl || !codDocumento) {
                     showToast('error', 'Erro', 'Dados insuficientes para download', 3000);
                     return;
                 }
@@ -3898,8 +4140,8 @@
                 showToast('info', 'Baixando...', 'Preparando download de ' + title, 2000);
                 
                 // Constrói URL do endpoint
-                var url = portalUrl + '/@@processo_norma_download_documento?cod_norma=' + 
-                          encodeURIComponent(codNorma) + 
+                var url = portalUrl + '/@@processo_adm_download_documento?cod_documento=' + 
+                          encodeURIComponent(codDocumento) + 
                           '&file=' + encodeURIComponent(filename) +
                           '&title=' + encodeURIComponent(title || 'documento') +
                           '&_t=' + Date.now(); // Cache busting
@@ -3923,9 +4165,63 @@
                 showToast('error', 'Erro', 'Não foi possível baixar o documento', 3000);
             }
         }
-
-            console.log('[showDocumentos] Iniciando renderização. Total de documentos:', documentos.length);
+        
+        function showDocumentos(pasta) {
+            try {
+                // Cache de elementos DOM para performance
+                var asyncMonitor = document.getElementById('async-monitor');
+                var loadingState = document.getElementById('loading-state');
+                var viewerControls = document.getElementById('viewer-controls');
+                var navList = document.getElementById('documentos-nav');
+                var totalPagesEl = document.getElementById('total-pages');
+                
+                if (asyncMonitor) asyncMonitor.style.display = 'none';
+                if (loadingState) loadingState.style.display = 'none';
+                if (viewerControls) viewerControls.style.display = 'flex';
+                
+                // Para a verificação periódica do botão quando o monitor é escondido
+                stopDownloadButtonCheck();
+                
+                enableToolbarControls(); // Reabilita controles
+                
+                // CRÍTICO: Atualiza título e badge do header se APP_DATA.documento estiver disponível
+                if (typeof APP_DATA !== 'undefined' && APP_DATA.documento) {
+                    var id_processo = APP_DATA.documento.id_processo || APP_DATA.documento.titulo || ('Documento ' + (APP_DATA.documento.cod_documento || APP_DATA.cod_documento || ''));
+                    var tituloEl = document.getElementById('documento-titulo');
+                    var codigoEl = document.getElementById('documento-codigo');
+                    var pageTitleEl = document.getElementById('page-title');
+                    
+                    if (tituloEl) tituloEl.textContent = id_processo;
+                    if (codigoEl && APP_DATA.documento.cod_documento) {
+                        codigoEl.textContent = 'Código: ' + APP_DATA.documento.cod_documento;
+                    }
+                    
+                    // Atualiza título da aba do navegador
+                    if (pageTitleEl) {
+                        pageTitleEl.textContent = 'Pasta Digital - ' + id_processo;
+                    }
+                    document.title = 'Pasta Digital - ' + id_processo;
+                    
+                    console.log('[showDocumentos] ✅ Título e badge atualizados: ' + id_processo);
+                }
+                
+                // Botão de download já está escondido por padrão (display:none no HTML)
+                // Será mostrado apenas após documentos renderizados
+                
+                var documentos = pasta.documentos || [];
+                
+                console.log('[showDocumentos] Iniciando renderização. Total de documentos:', documentos.length);
                 console.log('[showDocumentos] Documentos recebidos:', documentos);
+                // Debug: verifica campos 'file' nos documentos
+                documentos.forEach(function(doc, idx) {
+                    console.log('[showDocumentos] Documento ' + idx + ':', {
+                        title: doc.title,
+                        file: doc.file,
+                        id: doc.id,
+                        hasFile: !!(doc.file || doc.id),
+                        keys: Object.keys(doc)
+                    });
+                });
                 
                 if (!navList) {
                     console.error('[showDocumentos] Elemento documentos-nav não encontrado');
@@ -3935,7 +4231,14 @@
                 navList.innerHTML = '';
                 navList.setAttribute('aria-label', 'Lista de documentos do processo');
                 
-                totalPages = pasta.paginas_geral || 0;
+                // CRÍTICO: Usa total_paginas (retornado pelo backend) em vez de paginas_geral
+                totalPages = pasta.total_paginas || pasta.paginas_geral || 0;
+                console.log('[showDocumentos] Total de páginas definido:', {
+                    total_paginas: pasta.total_paginas,
+                    paginas_geral: pasta.paginas_geral,
+                    totalPages: totalPages,
+                    pasta_keys: Object.keys(pasta)
+                });
                 if (totalPagesEl) {
                     totalPagesEl.textContent = totalPages;
                     totalPagesEl.setAttribute('aria-label', 'Total de ' + totalPages + ' páginas');
@@ -3945,6 +4248,14 @@
                 documentosList = [];
             
             documentos.forEach(function(doc, index) {
+                // DEBUG: Log do documento no início do loop
+                console.log('[showDocumentos] Processando documento', index, ':', {
+                    title: doc.title,
+                    file: doc.file,
+                    id: doc.id,
+                    hasFile: !!(doc.file || doc.id)
+                });
+                
                 // Calcula start_page e end_page
                 var startPage = 1;
                 var endPage = 1;
@@ -4114,16 +4425,19 @@
                     expandIconHtml +
                     '<div class="doc-item-content">' +
                         '<span class="doc-item-title">' + docTitle + '</span>' +
-                        badgeHtml +
+                        (badgeHtml ? ' ' + badgeHtml : '') +
                     '</div>';
                 
-                // NOVO: Adiciona botão de download se documento tem arquivo (processo_norma usa 'id', processo_adm usa 'file')
-                var filename = doc.file || doc.id;
-                if (filename) {
-                    console.log('[showDocumentos] Adicionando botão de download para documento:', doc.title, 'arquivo:', filename);
+                // NOVO: Adiciona botão de download ANTES de adicionar ao wrapper (para garantir que está no DOM)
+                console.log('[showDocumentos] 🔍 VERIFICANDO download - docTitle:', docTitle, 'doc.file:', doc.file, 'doc.id:', doc.id, 'doc.file type:', typeof doc.file, 'doc.id type:', typeof doc.id);
+                var hasFile = !!(doc.file || doc.id);
+                console.log('[showDocumentos] hasFile:', hasFile);
+                
+                if (hasFile) {
+                    console.log('[showDocumentos] ✅ ADICIONANDO botão de download para:', docTitle, 'arquivo:', doc.file || doc.id);
                     addDownloadButtonToDocument(docItem, doc);
                 } else {
-                    console.log('[showDocumentos] Documento sem arquivo (sem download):', doc.title);
+                    console.warn('[showDocumentos] ❌ Documento SEM arquivo - não adicionando botão:', docTitle, 'doc completo:', JSON.stringify(doc));
                 }
                 
                 // Container de páginas (sub-itens)
@@ -4276,7 +4590,13 @@
             });
             
             console.log('[showDocumentos] Renderização concluída. Total de itens criados:', navList.children.length);
-            console.log('[showDocumentos] Itens na navegação:', Array.from(navList.children).map(function(el) { return el.textContent.trim(); }));
+            console.log('[showDocumentos] Itens na navegação:', Array.from(navList.children).map(function(el) {
+                var titleEl = el.querySelector('.doc-item-title');
+                var badgeEl = el.querySelector('.doc-item-badge');
+                var title = titleEl ? titleEl.textContent.trim() : '';
+                var badge = badgeEl ? badgeEl.textContent.trim() : '';
+                return title + (badge ? ' (' + badge + ')' : '');
+            }));
             
                 // Carrega primeira página
                 if (documentos.length > 0) {
@@ -4344,23 +4664,52 @@
         }
         
         function updateSidebar(data) {
-            // Matérias relacionadas
-            if (data.materias_relacionadas && data.materias_relacionadas.tem_relacionadas) {
-                var section = document.getElementById('relacionadas-section');
-                var nav = document.getElementById('relacionadas-nav');
-                section.style.display = 'block';
-                nav.innerHTML = '';
+            console.log('[updateSidebar] Chamada com dados:', {
+                materias_vinculadas: data.materias_vinculadas,
+                documentos_administrativos: data.documentos_administrativos,
+                normas_juridicas: data.normas_juridicas,
+                portal_url: data.portal_url
+            });
+            
+            // Matérias vinculadas
+            if (data.materias_vinculadas && data.materias_vinculadas.tem_vinculadas) {
+                var section = document.getElementById('vinculadas-section');
+                var nav = document.getElementById('vinculadas-nav');
+                console.log('[updateSidebar] Matérias vinculadas encontradas:', {
+                    tem_vinculadas: data.materias_vinculadas.tem_vinculadas,
+                    anexadas: data.materias_vinculadas.anexadas,
+                    anexadoras: data.materias_vinculadas.anexadoras,
+                    section: section,
+                    nav: nav
+                });
                 
-                var anexadas = data.materias_relacionadas.anexadas || [];
-                var anexadoras = data.materias_relacionadas.anexadoras || [];
-                
-                [...anexadas, ...anexadoras].forEach(function(m) {
-                    var link = document.createElement('a');
-                    link.href = data.portal_url + '/@@pasta_digital_norma?cod_norma=' + m.cod_norma + '&action=pasta';
-                    link.className = 'doc-item';
-                    link.innerHTML = '<i class="mdi mdi-link-variant text-primary"></i><span class="text-truncate">' + m.titulo + '</span>';
-                    link.target = '_blank';
-                    nav.appendChild(link);
+                if (section && nav) {
+                    section.style.display = 'block';
+                    nav.innerHTML = '';
+                    
+                    var anexadas = data.materias_vinculadas.anexadas || [];
+                    var anexadoras = data.materias_vinculadas.anexadoras || [];
+                    
+                    console.log('[updateSidebar] Adicionando matérias vinculadas:', anexadas.length + anexadoras.length);
+                    
+                    [...anexadas, ...anexadoras].forEach(function(m) {
+                        var link = document.createElement('a');
+                        // Matérias vinculadas usam pasta_digital do legislativo (não administrativo)
+                        var portalUrl = data.portal_url || (typeof APP_DATA !== 'undefined' && APP_DATA.portal_url) || (window.location.origin + window.location.pathname.split('/').slice(0, -1).join('/'));
+                        link.href = portalUrl + '/@@pasta_digital?cod_materia=' + m.cod_materia + '&action=pasta';
+                        link.className = 'doc-item';
+                        link.innerHTML = '<i class="mdi mdi-link-variant text-primary"></i><span class="text-truncate">' + m.titulo + '</span>';
+                        link.target = '_blank';
+                        nav.appendChild(link);
+                        console.log('[updateSidebar] Link de matéria adicionado:', m.titulo, 'URL:', link.href);
+                    });
+                } else {
+                    console.warn('[updateSidebar] Seção ou nav de matérias vinculadas não encontrado');
+                }
+            } else {
+                console.log('[updateSidebar] Sem matérias vinculadas:', {
+                    materias_vinculadas: data.materias_vinculadas,
+                    tem_vinculadas: data.materias_vinculadas ? data.materias_vinculadas.tem_vinculadas : 'N/A'
                 });
             }
             
@@ -4368,15 +4717,34 @@
             if (data.documentos_administrativos && data.documentos_administrativos.length > 0) {
                 var section = document.getElementById('documentos-adm-section');
                 var nav = document.getElementById('documentos-adm-nav');
-                section.style.display = 'block';
-                nav.innerHTML = '';
+                console.log('[updateSidebar] Documentos administrativos encontrados:', {
+                    count: data.documentos_administrativos.length,
+                    documentos: data.documentos_administrativos,
+                    section: section,
+                    nav: nav
+                });
                 
-                data.documentos_administrativos.forEach(function(doc) {
-                    var link = document.createElement('a');
-                    link.href = '#';
-                    link.className = 'doc-item';
-                    link.innerHTML = '<i class="mdi mdi-file-document-outline text-info"></i><span class="text-truncate">' + doc.titulo + '</span>';
-                    nav.appendChild(link);
+                if (section && nav) {
+                    section.style.display = 'block';
+                    nav.innerHTML = '';
+                    
+                    data.documentos_administrativos.forEach(function(doc) {
+                        var link = document.createElement('a');
+                        // Link para pasta digital do documento administrativo vinculado
+                        var portalUrl = data.portal_url || APP_DATA.portal_url || window.location.origin + window.location.pathname.split('/').slice(0, -1).join('/');
+                        link.href = portalUrl + '/@@pasta_digital_adm?cod_documento=' + doc.cod_documento + '&action=pasta';
+                        link.className = 'doc-item';
+                        link.innerHTML = '<i class="mdi mdi-link-variant text-primary"></i><span class="text-truncate">' + doc.titulo + '</span>';
+                        link.target = '_blank';
+                        nav.appendChild(link);
+                        console.log('[updateSidebar] Link de documento administrativo adicionado:', doc.titulo, 'URL:', link.href);
+                    });
+                } else {
+                    console.warn('[updateSidebar] Seção ou nav de documentos administrativos não encontrado');
+                }
+            } else {
+                console.log('[updateSidebar] Sem documentos administrativos:', {
+                    documentos_administrativos: data.documentos_administrativos
                 });
             }
             
@@ -4486,7 +4854,7 @@
                 
                 // Constrói URL correta: se portalUrl não termina com /, adiciona
                 const baseUrl = portalUrl.endsWith('/') ? portalUrl.slice(0, -1) : portalUrl;
-                const statusUrl = baseUrl + '/@@processo_norma_integral_status?task_id=' + encodeURIComponent(taskId);
+                const statusUrl = baseUrl + '/@@processo_adm_integral_status?task_id=' + encodeURIComponent(taskId);
                 fetch(statusUrl)
                     .then(function(response) { 
                         if (!response.ok) {
@@ -4570,7 +4938,7 @@
                                 console.log('[checkStatusOnce] Chamando loadDocumentosAfterSuccess após SUCCESS (com delay de 500ms para dar tempo ao backend)');
                                 // Adiciona um pequeno delay para dar tempo ao backend processar os documentos
                                 setTimeout(function() {
-                                    loadDocumentosAfterSuccess(portalUrl, APP_DATA.cod_norma);
+                                    loadDocumentosAfterSuccess(portalUrl, APP_DATA.cod_documento);
                                 }, 500);
                             } else {
                                 console.log('[checkStatusOnce] loadDocumentosAfterSuccess já em progresso, ignorando');
@@ -4630,7 +4998,7 @@
         }
         
         // Função para carregar documentos após sucesso sem recarregar a página
-        async function loadDocumentosAfterSuccess(portalUrl, codNorma) {
+        async function loadDocumentosAfterSuccess(portalUrl, codDocumento) {
             // Evita múltiplas chamadas simultâneas (dupla verificação)
             if (loadingInProgress || loadDocumentosLock) {
                 console.log('[loadDocumentosAfterSuccess] Carregamento já em progresso, ignorando (loadingInProgress:', loadingInProgress, ', lock:', loadDocumentosLock, ')');
@@ -4666,16 +5034,16 @@
                 document.getElementById('async-monitor').style.display = 'none';
                 document.getElementById('loading-state').style.display = 'flex';
                 
-                // Constrói URL correta: usa o portal_url base (sem /consultas/materia)
-                // A view @@pasta_digital_data está no contexto raiz do portal
+                // Constrói URL correta: usa o portal_url base (sem /consultas/documento_administrativo)
+                // A view @@pasta_digital_adm_data está no contexto raiz do portal
                 let baseUrl = portalUrl;
-                if (baseUrl.includes('/consultas/materia')) {
-                    // Remove /consultas/materia da URL
-                    baseUrl = baseUrl.replace('/consultas/materia', '');
+                if (baseUrl.includes('/consultas/documento_administrativo')) {
+                    // Remove /consultas/documento_administrativo da URL
+                    baseUrl = baseUrl.replace('/consultas/documento_administrativo', '');
                 }
                 // Remove barra final se existir
                 baseUrl = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
-                const apiUrl = baseUrl + '/@@pasta_digital_norma_data?cod_norma=' + encodeURIComponent(codNorma) + '&action=pasta';
+                const apiUrl = baseUrl + '/@@pasta_digital_adm_data?cod_documento=' + encodeURIComponent(codDocumento) + '&action=pasta';
                 console.log('[loadDocumentosAfterSuccess] Fazendo fetch para:', apiUrl);
                 const response = await fetch(apiUrl);
                 
@@ -4688,6 +5056,16 @@
                 if (!data.success) {
                     throw new Error(data.error || 'Erro ao carregar dados');
                 }
+                
+                // CRÍTICO: Log da resposta completa antes de processar
+                console.log('[loadDocumentosAfterSuccess] 🔍 Resposta JSON completa do backend:', {
+                    success: data.success,
+                    data_keys: Object.keys(data),
+                    data_completo: JSON.stringify(data).substring(0, 2000),
+                    pasta_exists: !!data.pasta,
+                    pasta_keys: data.pasta ? Object.keys(data.pasta) : [],
+                    pasta_total_paginas: data.pasta ? data.pasta.total_paginas : 'pasta não existe'
+                });
                 
                 // Verifica se todos os arquivos de página estão disponíveis
                 var pasta = data.pasta || {};
@@ -4707,7 +5085,12 @@
                     hasTaskId: pasta.task_id !== null && pasta.task_id !== '',
                     task_id: pasta.task_id,
                     status: pasta.status,
-                    pasta_completo: JSON.stringify(pasta).substring(0, 500)
+                    total_paginas: pasta.total_paginas,  // CRÍTICO: Log do total_paginas
+                    total_paginas_type: typeof pasta.total_paginas,  // Tipo do valor
+                    total_paginas_undefined: pasta.total_paginas === undefined,  // Se está undefined
+                    paginas_geral: pasta.paginas_geral,  // Para comparação
+                    data_total_paginas: data.total_paginas,  // Se está no objeto raiz
+                    pasta_completo: JSON.stringify(pasta)
                 });
                 
                 // CRÍTICO: Verifica se documentos são válidos, mas NÃO força async=false
@@ -4735,21 +5118,7 @@
                         task_id: pasta.task_id
                     });
                     // Não força async=false - permite que monitor apareça se backend retornou async=true
-                    
-                    // Verifica se todos os arquivos de página estão disponíveis
-                    // Mas não bloqueia se a verificação falhar - pode ser problema de timing/rede
-                    var allFilesAvailable = await verifyAllPagesAvailable(pasta, baseUrl, codNorma);
-                    
-                    if (!allFilesAvailable) {
-                        console.log('[loadDocumentosAfterSuccess] Verificação de arquivos falhou, mas documentos existem. Tentando mostrar mesmo assim...');
-                        // Se temos documentos válidos, tenta mostrar mesmo que a verificação tenha falhado
-                        // A verificação pode falhar por problemas de rede ou timing, mas os arquivos podem estar OK
-                        // Se realmente não estiverem disponíveis, o usuário verá erro ao tentar abrir
-                        // Mas pelo menos tentamos mostrar a interface
-                        console.log('[loadDocumentosAfterSuccess] Prosseguindo com exibição dos documentos apesar da verificação falhar');
-                    } else {
-                        console.log('[loadDocumentosAfterSuccess] Verificação de arquivos OK, todos disponíveis');
-                    }
+                    // A verificação de páginas será feita mais abaixo, antes de renderizar o sidebar
                 } else {
                     // Não tem documentos ainda, mantém async se o backend retornou
                     console.log('[loadDocumentosAfterSuccess] Nenhum documento encontrado ainda', {
@@ -4768,7 +5137,7 @@
                             console.log('[loadDocumentosAfterSuccess] Sem documentos e sem task, tentativa ' + loadDocumentosRetryCount + '/' + loadDocumentosMaxRetries + ', aguardando ' + delay + 'ms...');
                             setTimeout(function() {
                                 loadDocumentosLock = false;
-                                loadDocumentosAfterSuccess(portalUrl, codNorma);
+                                loadDocumentosAfterSuccess(portalUrl, codDocumento);
                             }, delay);
                             return;
                         } else {
@@ -4794,53 +5163,150 @@
                                             pasta.documentos.length > 0;
                 
                 if (hasValidDocumentsFinal) {
-                    // CRÍTICO: Esconde o monitor antes de mostrar documentos
-                    document.getElementById('async-monitor').style.display = 'none';
-                    document.getElementById('loading-state').style.display = 'none';
-                    stopDownloadButtonCheck(); // Para verificação periódica
-                    enableToolbarControls(); // Reabilita controles
-                    
-                    // CRÍTICO: Log detalhado antes de chamar updateInterface
-                    console.log('[loadDocumentosAfterSuccess] Dados antes de updateInterface:', {
+                    // CRÍTICO: Log detalhado antes de verificar páginas
+                    console.log('[loadDocumentosAfterSuccess] Dados antes de verificar páginas:', {
                         hasDocuments: true,
                         documentosCount: pasta.documentos.length,
                         isAsync: pasta.async,
                         hasTaskId: pasta.task_id !== null && pasta.task_id !== '',
                         task_id: pasta.task_id,
                         status: pasta.status,
+                        total_paginas: pasta.total_paginas,  // CRÍTICO: Log do total_paginas
+                        paginas_geral: pasta.paginas_geral,  // Para comparação
                         pasta_keys: Object.keys(pasta)
                     });
                     
-                    // CRÍTICO: Atualiza interface com os documentos - chama showDocumentos diretamente para garantir
-                    console.log('[loadDocumentosAfterSuccess] Chamando showDocumentos diretamente com documentos prontos');
-                    // Reseta contador de retry quando encontra documentos
-                    loadDocumentosRetryCount = 0;
-                    showDocumentos(pasta);
+                    // CRÍTICO: Reutiliza baseUrl já construído anteriormente (mesmo padrão do processo_leg)
+                    // baseUrl já foi construído acima na linha 4859, apenas reutiliza
+                    // Captura baseUrl em uma variável local para evitar problemas de escopo em callbacks
+                    var currentBaseUrl = baseUrl;
                     
-                    // Também atualiza APP_DATA completo para garantir consistência
-                    if (data.norma) APP_DATA.norma = data.norma;
-                    if (data.portal_config) APP_DATA.portal_config = data.portal_config;
-                    if (data.materias_relacionadas) APP_DATA.materias_relacionadas = data.materias_relacionadas;
-                    if (data.documentos_administrativos) APP_DATA.documentos_administrativos = data.documentos_administrativos;
-                    if (data.normas_juridicas) APP_DATA.normas_juridicas = data.normas_juridicas;
-                    
-                    // Atualiza header se necessário
-                    if (data.norma) {
-                        // Usa id_exibicao (sigla tipo + número/ano) ou constrói a partir dos dados
-                        var titulo = data.norma.id_exibicao || 
-                                    (data.norma.tipo && data.norma.numero && data.norma.ano ? 
-                                     `${data.norma.tipo} ${data.norma.numero}/${data.norma.ano}` : 
-                                     'Norma ' + codNorma);
-                        var tituloEl = document.getElementById('materia-titulo');
-                        var codigoEl = document.getElementById('materia-codigo');
-                        if (tituloEl) tituloEl.textContent = titulo;
-                        if (codigoEl) codigoEl.textContent = 'Código: ' + codNorma;
-                        // Atualiza título da página e da aba do navegador
-                        var pageTitle = 'Pasta Digital - ' + titulo;
-                        var pageTitleEl = document.getElementById('page-title');
-                        if (pageTitleEl) pageTitleEl.textContent = pageTitle;
-                        document.title = pageTitle;
-                    }
+                    // CRÍTICO: Verifica se todas as páginas estão disponíveis antes de mostrar sidebar e documentos
+                    // Mesmo padrão do processo_leg: sidebar só renderiza quando todas as páginas estão disponíveis
+                    verifyAllPagesAvailable(pasta, currentBaseUrl, codDocumento).then(function(allAvailable) {
+                        if (allAvailable) {
+                            // Todos os arquivos disponíveis, mostra documentos e sidebar
+                            console.log('[loadDocumentosAfterSuccess] Todos os arquivos disponíveis, mostrando documentos e sidebar');
+                            
+                            // CRÍTICO: Esconde o monitor antes de mostrar documentos
+                            document.getElementById('async-monitor').style.display = 'none';
+                            document.getElementById('loading-state').style.display = 'none';
+                            stopDownloadButtonCheck(); // Para verificação periódica
+                            enableToolbarControls(); // Reabilita controles
+                            
+                            // Reseta contador de retry quando encontra documentos
+                            loadDocumentosRetryCount = 0;
+                            
+                            // Também atualiza APP_DATA completo para garantir consistência
+                            if (data.documento) APP_DATA.documento = data.documento;
+                            if (data.portal_config) APP_DATA.portal_config = data.portal_config;
+                            if (data.materias_vinculadas) APP_DATA.materias_vinculadas = data.materias_vinculadas;
+                            if (data.documentos_administrativos) APP_DATA.documentos_administrativos = data.documentos_administrativos;
+                            if (data.normas_juridicas) APP_DATA.normas_juridicas = data.normas_juridicas;
+                            
+                            // CRÍTICO: Atualiza sidebar ANTES de mostrar documentos (mesmo padrão do processo_leg)
+                            var sidebarData = {
+                                materias_vinculadas: data.materias_vinculadas || APP_DATA.materias_vinculadas || {},
+                                documentos_administrativos: data.documentos_administrativos || APP_DATA.documentos_administrativos || [],
+                                normas_juridicas: data.normas_juridicas || APP_DATA.normas_juridicas || [],
+                                portal_url: data.portal_url || APP_DATA.portal_url || window.location.origin + window.location.pathname.split('/').slice(0, -1).join('/')
+                            };
+                            
+                            console.log('[loadDocumentosAfterSuccess] Atualizando sidebar com dados:', sidebarData);
+                            updateSidebar(sidebarData);
+                            
+                            // CRÍTICO: Atualiza interface com os documentos - chama showDocumentos diretamente
+                            console.log('[loadDocumentosAfterSuccess] Chamando showDocumentos diretamente com documentos prontos');
+                            showDocumentos(pasta);
+                            
+                            // CRÍTICO: Atualiza header com identificação do processo (id_processo)
+                            if (data.documento) {
+                                // Usa id_processo (formato: PA 308/2025) para badge e título
+                                var id_processo = data.documento.id_processo || data.documento.titulo || ('Documento ' + codDocumento);
+                                var tituloEl = document.getElementById('documento-titulo');
+                                var codigoEl = document.getElementById('documento-codigo');
+                                var pageTitleEl = document.getElementById('page-title');
+                                
+                                if (tituloEl) tituloEl.textContent = id_processo;
+                                if (codigoEl) codigoEl.textContent = 'Código: ' + codDocumento;
+                                
+                                // CRÍTICO: Atualiza título da aba do navegador
+                                if (pageTitleEl) {
+                                    pageTitleEl.textContent = 'Pasta Digital - ' + id_processo;
+                                }
+                                document.title = 'Pasta Digital - ' + id_processo;  // Garante que o título está atualizado
+                                
+                                console.log('[loadDocumentosAfterSuccess] ✅ Título atualizado: Pasta Digital - ' + id_processo);
+                            }
+                        } else {
+                            // Se não estão disponíveis, aguarda e tenta novamente
+                            console.log('[loadDocumentosAfterSuccess] Arquivos ainda não disponíveis, aguardando...');
+                            showAsyncMonitor({
+                                task_id: null,
+                                status: 'Verificando disponibilidade dos arquivos...'
+                            });
+                            document.getElementById('monitor-status').textContent = 'Verificando disponibilidade dos arquivos...';
+                            // Tenta novamente após 2 segundos
+                            setTimeout(function() {
+                                loadDocumentosLock = false;
+                                loadDocumentosAfterSuccess(portalUrl, codDocumento);
+                            }, 2000);
+                        }
+                    }).catch(function(error) {
+                        console.error('[loadDocumentosAfterSuccess] Erro ao verificar arquivos:', error);
+                        // Em caso de erro, mostra os documentos mesmo assim (pode ser problema de rede)
+                        console.log('[loadDocumentosAfterSuccess] Erro na verificação, mostrando documentos mesmo assim');
+                        
+                        // CRÍTICO: Esconde o monitor antes de mostrar documentos
+                        document.getElementById('async-monitor').style.display = 'none';
+                        document.getElementById('loading-state').style.display = 'none';
+                        stopDownloadButtonCheck(); // Para verificação periódica
+                        enableToolbarControls(); // Reabilita controles
+                        
+                        // Reseta contador de retry quando encontra documentos
+                        loadDocumentosRetryCount = 0;
+                        
+                        // Também atualiza APP_DATA completo para garantir consistência
+                        if (data.documento) APP_DATA.documento = data.documento;
+                        if (data.portal_config) APP_DATA.portal_config = data.portal_config;
+                        if (data.materias_vinculadas) APP_DATA.materias_vinculadas = data.materias_vinculadas;
+                        if (data.documentos_administrativos) APP_DATA.documentos_administrativos = data.documentos_administrativos;
+                        if (data.normas_juridicas) APP_DATA.normas_juridicas = data.normas_juridicas;
+                        
+                        // CRÍTICO: Atualiza sidebar ANTES de mostrar documentos (mesmo padrão do processo_leg)
+                        var sidebarData = {
+                            materias_vinculadas: data.materias_vinculadas || APP_DATA.materias_vinculadas || {},
+                            documentos_administrativos: data.documentos_administrativos || APP_DATA.documentos_administrativos || [],
+                            normas_juridicas: data.normas_juridicas || APP_DATA.normas_juridicas || [],
+                            portal_url: data.portal_url || APP_DATA.portal_url || window.location.origin + window.location.pathname.split('/').slice(0, -1).join('/')
+                        };
+                        
+                        console.log('[loadDocumentosAfterSuccess] Atualizando sidebar com dados (após erro):', sidebarData);
+                        updateSidebar(sidebarData);
+                        
+                        console.log('[loadDocumentosAfterSuccess] Chamando showDocumentos diretamente com documentos prontos (após erro)');
+                        showDocumentos(pasta);
+                        
+                        // CRÍTICO: Atualiza header com identificação do processo (id_processo)
+                        if (data.documento) {
+                            // Usa id_processo (formato: PA 308/2025) para badge e título
+                            var id_processo = data.documento.id_processo || data.documento.titulo || ('Documento ' + codDocumento);
+                            var tituloEl = document.getElementById('documento-titulo');
+                            var codigoEl = document.getElementById('documento-codigo');
+                            var pageTitleEl = document.getElementById('page-title');
+                            
+                            if (tituloEl) tituloEl.textContent = id_processo;
+                            if (codigoEl) codigoEl.textContent = 'Código: ' + codDocumento;
+                            
+                            // CRÍTICO: Atualiza título da aba do navegador
+                            if (pageTitleEl) {
+                                pageTitleEl.textContent = 'Pasta Digital - ' + id_processo;
+                            }
+                            document.title = 'Pasta Digital - ' + id_processo;  // Garante que o título está atualizado
+                            
+                            console.log('[loadDocumentosAfterSuccess] ✅ Título atualizado: Pasta Digital - ' + id_processo);
+                        }
+                    });
                 } else {
                     // Não há documentos ainda, mantém monitor visível
                     console.log('[loadDocumentosAfterSuccess] Nenhum documento encontrado, mantendo monitor');
@@ -4942,7 +5408,7 @@
                 stageIndicator.style.display = 'block';
                 var stageMessages = {
                     'init': 'Inicializando',
-                    'dados_norma': 'Obtendo dados da norma',
+                    'dados_materia': 'Obtendo dados da documento',
                     'preparar_dirs': 'Preparando diretórios',
                     'coletar_docs': 'Coletando documentos',
                     'mesclar_docs': 'Mesclando documentos',
@@ -5039,7 +5505,7 @@
                 pasta_async: APP_DATA && APP_DATA.pasta ? APP_DATA.pasta.async : null,
                 pasta_task_id: APP_DATA && APP_DATA.pasta ? APP_DATA.pasta.task_id : null,
                 hasInjectedData: hasInjectedData,
-                cod_norma: APP_DATA.cod_norma,
+                cod_documento: APP_DATA.cod_documento,
                 portal_url: APP_DATA.portal_url
             });
             // Log completo do APP_DATA em uma linha separada para facilitar debug
@@ -5050,24 +5516,24 @@
             // SEMPRE completa, mesmo que os valores já existam (garante que não sejam null/undefined)
             const urlParams = new URLSearchParams(window.location.search);
             
-            // Completa cod_norma da URL se estiver faltando ou vazio
-            if (!APP_DATA.cod_norma || APP_DATA.cod_norma === '' || APP_DATA.cod_norma === null || APP_DATA.cod_norma === undefined) {
-                let codFromUrl = urlParams.get('cod_norma');
+            // Completa cod_documento da URL se estiver faltando ou vazio
+            if (!APP_DATA.cod_documento || APP_DATA.cod_documento === '' || APP_DATA.cod_documento === null || APP_DATA.cod_documento === undefined) {
+                let codFromUrl = urlParams.get('cod_documento');
                 
                 // Se não encontrou na query string, tenta extrair da URL completa
                 if (!codFromUrl) {
                     const fullUrl = window.location.href;
-                    const match = fullUrl.match(/[?&]cod_norma=([^&]+)/);
+                    const match = fullUrl.match(/[?&]cod_documento=([^&]+)/);
                     if (match) {
                         codFromUrl = decodeURIComponent(match[1]);
                     }
                 }
                 
                 if (codFromUrl) {
-                    APP_DATA.cod_norma = codFromUrl;
-                    console.log('[loadPastaDigitalData] cod_norma completado da URL:', codFromUrl);
+                    APP_DATA.cod_documento = codFromUrl;
+                    console.log('[loadPastaDigitalData] cod_documento completado da URL:', codFromUrl);
                 } else {
-                    console.warn('[loadPastaDigitalData] cod_norma não encontrado na URL. URL completa:', window.location.href, 'Search:', window.location.search);
+                    console.warn('[loadPastaDigitalData] cod_documento não encontrado na URL. URL completa:', window.location.href, 'Search:', window.location.search);
                 }
             }
             
@@ -5105,8 +5571,8 @@
             console.log('[loadPastaDigitalData] Verificando dados injetados:', {
                 hasAPP_DATA: typeof APP_DATA !== 'undefined',
                 hasPortalUrl: APP_DATA && APP_DATA.portal_url && APP_DATA.portal_url !== '',
-                hasCodNorma: APP_DATA && APP_DATA.cod_norma && APP_DATA.cod_norma !== '',
-                codNormaValue: APP_DATA ? APP_DATA.cod_norma : null,
+                hasCodMateria: APP_DATA && APP_DATA.cod_documento && APP_DATA.cod_documento !== '',
+                codMateriaValue: APP_DATA ? APP_DATA.cod_documento : null,
                 portalUrlValue: APP_DATA ? APP_DATA.portal_url : null,
                 hasPasta: APP_DATA && APP_DATA.pasta !== undefined,
                 pastaType: APP_DATA && typeof APP_DATA.pasta,
@@ -5115,21 +5581,21 @@
                 APP_DATA_keys: APP_DATA ? Object.keys(APP_DATA) : null
             });
             
-            // Se tem pasta e conseguiu completar cod_norma e portal_url, usa dados injetados
+            // Se tem pasta e conseguiu completar cod_documento e portal_url, usa dados injetados
             // Verifica se os valores não são null, undefined ou strings vazias
-            const hasValidCodNorma = APP_DATA.cod_norma && APP_DATA.cod_norma !== '' && APP_DATA.cod_norma !== null && APP_DATA.cod_norma !== undefined;
+            const hasValidCodMateria = APP_DATA.cod_documento && APP_DATA.cod_documento !== '' && APP_DATA.cod_documento !== null && APP_DATA.cod_documento !== undefined;
             const hasValidPortalUrl = APP_DATA.portal_url && APP_DATA.portal_url !== '' && APP_DATA.portal_url !== null && APP_DATA.portal_url !== undefined;
             
             console.log('[loadPastaDigitalData] Validação final:', {
                 hasInjectedData: hasInjectedData,
-                hasValidCodNorma: hasValidCodNorma,
+                hasValidCodMateria: hasValidCodMateria,
                 hasValidPortalUrl: hasValidPortalUrl,
-                cod_norma: APP_DATA.cod_norma,
+                cod_documento: APP_DATA.cod_documento,
                 portal_url: APP_DATA.portal_url,
                 pasta: APP_DATA.pasta
             });
             
-            if (hasInjectedData && hasValidCodNorma && hasValidPortalUrl) {
+            if (hasInjectedData && hasValidCodMateria && hasValidPortalUrl) {
                 console.log('[loadPastaDigitalData] Usando dados injetados pelo servidor (completados)');
                 // Verifica se precisa gerar processo antes de esconder loading
                 var pasta = APP_DATA.pasta || {};
@@ -5156,12 +5622,12 @@
                 
                 updateStaticResources(APP_DATA.portal_url);
                 updateInterface({
-                    cod_norma: APP_DATA.cod_norma,
+                    cod_documento: APP_DATA.cod_documento,
                     action: APP_DATA.action || 'pasta',
-                    norma: APP_DATA.norma || {},
+                    materia: APP_DATA.documento || {},
                     pasta: pasta,
                     portal_config: APP_DATA.portal_config || {},
-                    materias_relacionadas: APP_DATA.materias_relacionadas || {},
+                    materias_vinculadas: APP_DATA.materias_vinculadas || {},
                     documentos_administrativos: APP_DATA.documentos_administrativos || [],
                     normas_juridicas: APP_DATA.normas_juridicas || [],
                     portal_url: APP_DATA.portal_url
@@ -5172,8 +5638,8 @@
             } else {
                 if (!hasInjectedData) {
                     console.warn('[loadPastaDigitalData] Dados não foram injetados pelo servidor');
-                } else if (!hasValidCodNorma) {
-                    console.warn('[loadPastaDigitalData] cod_norma inválido:', APP_DATA.cod_norma);
+                } else if (!hasValidCodMateria) {
+                    console.warn('[loadPastaDigitalData] cod_documento inválido:', APP_DATA.cod_documento);
                 } else if (!hasValidPortalUrl) {
                     console.warn('[loadPastaDigitalData] portal_url inválido:', APP_DATA.portal_url);
                 }
@@ -5181,21 +5647,21 @@
             
             // Fallback: carrega via API apenas se realmente necessário
             // urlParams já foi declarado acima, apenas reutiliza
-            let cod_norma = urlParams.get('cod_norma') || APP_DATA.cod_norma;
+            let cod_documento = urlParams.get('cod_documento') || APP_DATA.cod_documento;
             
             // Se ainda não encontrou, tenta extrair da URL completa
-            if (!cod_norma) {
+            if (!cod_documento) {
                 const fullUrl = window.location.href;
-                const match = fullUrl.match(/[?&]cod_norma=([^&]+)/);
+                const match = fullUrl.match(/[?&]cod_documento=([^&]+)/);
                 if (match) {
-                    cod_norma = decodeURIComponent(match[1]);
+                    cod_documento = decodeURIComponent(match[1]);
                 }
             }
             
             const action = urlParams.get('action') || APP_DATA.action || 'pasta';
             
-            if (!cod_norma) {
-                showError('Parâmetro cod_norma é obrigatório');
+            if (!cod_documento) {
+                showError('Parâmetro cod_documento é obrigatório');
                 return;
             }
             
@@ -5204,7 +5670,7 @@
             if (hasInjectedData && APP_DATA.pasta && APP_DATA.pasta.async && APP_DATA.pasta.task_id) {
                 console.log('[loadPastaDigitalData] Usando dados parcialmente injetados (modo assíncrono)');
                 // Se está em modo assíncrono, podemos usar os dados parciais
-                if (!APP_DATA.cod_norma) APP_DATA.cod_norma = cod_norma;
+                if (!APP_DATA.cod_documento) APP_DATA.cod_documento = cod_documento;
                 if (!APP_DATA.portal_url) {
                     try {
                         const urlObj = new URL(window.location.href);
@@ -5241,12 +5707,12 @@
                 
                 updateStaticResources(APP_DATA.portal_url);
                 updateInterface({
-                    cod_norma: APP_DATA.cod_norma,
+                    cod_documento: APP_DATA.cod_documento,
                     action: APP_DATA.action || action,
-                    norma: APP_DATA.norma || {},
+                    materia: APP_DATA.documento || {},
                     pasta: pasta,
                     portal_config: APP_DATA.portal_config || {},
-                    materias_relacionadas: APP_DATA.materias_relacionadas || {},
+                    materias_vinculadas: APP_DATA.materias_vinculadas || {},
                     documentos_administrativos: APP_DATA.documentos_administrativos || [],
                     normas_juridicas: APP_DATA.normas_juridicas || [],
                     portal_url: APP_DATA.portal_url
@@ -5260,27 +5726,27 @@
             
             if (typeof APP_DATA === 'undefined') {
                 APP_DATA = {
-                    cod_norma: null,
-                    portal_url: null,
-                    pasta: null,
-                    norma: null,
+                    cod_documento: null,
+            portal_url: null,
+            pasta: null,
+            documento: null,
                     portal_config: null,
-                    materias_relacionadas: null,
+                    materias_vinculadas: null,
                     documentos_administrativos: null,
                     normas_juridicas: null
                 };
             }
             
-            APP_DATA.cod_norma = cod_norma;
+            APP_DATA.cod_documento = cod_documento;
             
             try {
-                // Constrói URL correta: remove /consultas/norma_juridica se existir
+                // Constrói URL correta: remove /consultas/documento_administrativo se existir
                 let baseUrl = APP_DATA.portal_url || window.location.origin + window.location.pathname.split('/').slice(0, -1).join('/');
-                if (baseUrl.includes('/consultas/norma_juridica')) {
-                    baseUrl = baseUrl.replace('/consultas/norma_juridica', '');
+                if (baseUrl.includes('/consultas/documento_administrativo')) {
+                    baseUrl = baseUrl.replace('/consultas/documento_administrativo', '');
                 }
                 baseUrl = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
-                const apiUrl = baseUrl + '/@@pasta_digital_norma_data?cod_norma=' + encodeURIComponent(cod_norma) + '&action=' + encodeURIComponent(action);
+                const apiUrl = baseUrl + '/@@pasta_digital_adm_data?cod_documento=' + encodeURIComponent(cod_documento) + '&action=' + encodeURIComponent(action);
                 
                 console.log('[loadPastaDigitalData] Fazendo fetch para:', apiUrl);
                 
@@ -5303,11 +5769,32 @@
                         console.log('[loadPastaDigitalData] Task já está sendo monitorada, não atualizando. Task atual:', currentTaskId, 'Nova task:', data.pasta.task_id);
                         // Apenas atualiza outros dados, mas mantém a pasta atual
                         APP_DATA.portal_url = data.portal_url;
-                        APP_DATA.norma = data.norma;
+                        APP_DATA.documento = data.documento;
                         APP_DATA.portal_config = data.portal_config;
-                        APP_DATA.materias_relacionadas = data.materias_relacionadas;
+                        if (data.materias_vinculadas) APP_DATA.materias_vinculadas = data.materias_vinculadas;
+                        if (data.documentos_administrativos) APP_DATA.documentos_administrativos = data.documentos_administrativos;
                         APP_DATA.documentos_administrativos = data.documentos_administrativos;
                         APP_DATA.normas_juridicas = data.normas_juridicas;
+                        
+                        // CRÍTICO: Atualiza título e badge mesmo quando task já está sendo monitorada
+                        if (data.documento) {
+                            var id_processo = data.documento.id_processo || data.documento.titulo || ('Documento ' + (data.documento.cod_documento || APP_DATA.cod_documento || ''));
+                            var tituloEl = document.getElementById('documento-titulo');
+                            var codigoEl = document.getElementById('documento-codigo');
+                            var pageTitleEl = document.getElementById('page-title');
+                            
+                            if (tituloEl) tituloEl.textContent = id_processo;
+                            if (codigoEl && data.documento.cod_documento) {
+                                codigoEl.textContent = 'Código: ' + data.documento.cod_documento;
+                            }
+                            
+                            if (pageTitleEl) {
+                                pageTitleEl.textContent = 'Pasta Digital - ' + id_processo;
+                            }
+                            document.title = 'Pasta Digital - ' + id_processo;
+                            updateBreadcrumbs(data.documento);
+                        }
+                        
                         updateStaticResources(data.portal_url);
                         // Não chama updateInterface para evitar reiniciar o monitor
                         initialized = true;
@@ -5318,11 +5805,35 @@
                 
                 APP_DATA.portal_url = data.portal_url;
                 APP_DATA.pasta = data.pasta;
-                APP_DATA.norma = data.norma;
+                APP_DATA.documento = data.documento;
                 APP_DATA.portal_config = data.portal_config;
-                APP_DATA.materias_relacionadas = data.materias_relacionadas;
-                APP_DATA.documentos_administrativos = data.documentos_administrativos;
-                APP_DATA.normas_juridicas = data.normas_juridicas;
+                if (data.materias_vinculadas) APP_DATA.materias_vinculadas = data.materias_vinculadas;
+                if (data.documentos_administrativos) APP_DATA.documentos_administrativos = data.documentos_administrativos;
+                if (data.normas_juridicas) APP_DATA.normas_juridicas = data.normas_juridicas;
+                
+                // CRÍTICO: Atualiza título e badge do header se documento estiver disponível
+                if (data.documento) {
+                    var id_processo = data.documento.id_processo || data.documento.titulo || ('Documento ' + (data.documento.cod_documento || APP_DATA.cod_documento || ''));
+                    var tituloEl = document.getElementById('documento-titulo');
+                    var codigoEl = document.getElementById('documento-codigo');
+                    var pageTitleEl = document.getElementById('page-title');
+                    
+                    if (tituloEl) tituloEl.textContent = id_processo;
+                    if (codigoEl && data.documento.cod_documento) {
+                        codigoEl.textContent = 'Código: ' + data.documento.cod_documento;
+                    }
+                    
+                    // Atualiza título da aba do navegador
+                    if (pageTitleEl) {
+                        pageTitleEl.textContent = 'Pasta Digital - ' + id_processo;
+                    }
+                    document.title = 'Pasta Digital - ' + id_processo;
+                    
+                    // Atualiza breadcrumbs
+                    updateBreadcrumbs(data.documento);
+                    
+                    console.log('[loadPastaDigitalData] ✅ Título e badge atualizados: ' + id_processo);
+                }
                 
                 updateStaticResources(data.portal_url);
                 updateInterface(data);
@@ -5392,15 +5903,15 @@
             // Verifica se estamos acessando via view Grok (@@pasta_digital) ou HTML estático
             // Se for HTML estático (sem @@pasta_digital na URL), redireciona para @@pasta_digital
             var urlParams = new URLSearchParams(window.location.search);
-            var codNorma = urlParams.get('cod_norma');
+            var codDocumento = urlParams.get('cod_documento');
             var action = urlParams.get('action') || 'pasta';
             var currentPath = window.location.pathname;
             var currentHref = window.location.href;
-            var isGrokView = currentPath.includes('@@pasta_digital_norma') || currentHref.includes('@@pasta_digital_norma');
+            var isGrokView = currentPath.includes('@@pasta_digital') || currentHref.includes('@@pasta_digital');
             
-            // Se não é view Grok e tem cod_norma, redireciona para @@pasta_digital_norma
+            // Se não é view Grok e tem cod_documento, redireciona para @@pasta_digital
             // Isso garante que sempre use a view Grok que injeta os dados
-            if (!isGrokView && codNorma) {
+            if (!isGrokView && codDocumento) {
                 // Constrói a URL base removendo 'pasta_digital' do path
                 var pathParts = currentPath.split('/').filter(p => p);
                 // Remove 'pasta_digital' se for o último segmento
@@ -5409,7 +5920,7 @@
                 }
                 var basePath = pathParts.length > 0 ? '/' + pathParts.join('/') : '';
                 var baseUrl = window.location.origin + basePath;
-                var redirectUrl = baseUrl + '/@@pasta_digital_norma?cod_norma=' + encodeURIComponent(codNorma) + '&action=' + encodeURIComponent(action);
+                var redirectUrl = baseUrl + '/@@pasta_digital_adm?cod_documento=' + encodeURIComponent(codDocumento) + '&action=' + encodeURIComponent(action);
                 
                 // Evita loop de redirecionamento verificando se já tentou redirecionar
                 if (!sessionStorage.getItem('pasta_digital_redirected')) {
@@ -5498,20 +6009,6 @@
             
             showToast('info', 'Atalhos de Teclado', helpText.replace(/\n/g, '<br>'), 5000);
         }
-        
-        // Remove cod_materia da URL se existir (garante que apenas cod_norma seja usado)
-        (function() {
-            const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.has('cod_materia')) {
-                urlParams.delete('cod_materia');
-                const newUrl = window.location.pathname + 
-                    (urlParams.toString() ? '?' + urlParams.toString() : '') + 
-                    window.location.hash;
-                if (window.history && window.history.replaceState) {
-                    window.history.replaceState({}, '', newUrl);
-                }
-            }
-        })();
         
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', initApp);

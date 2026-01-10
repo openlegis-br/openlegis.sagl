@@ -3426,4 +3426,222 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         # Retorna resposta de sucesso
         return self._create_success_response_norma(task_id, portal_url)
 
+    def _import_task_function_adm(self):
+        """
+        Importa e valida a função de task do Celery para documentos administrativos.
+        
+        Returns:
+            callable: Função da task
+        
+        Raises:
+            AttributeError: Se a task não existir no módulo tasks
+            Exception: Se a task for None após importação
+        """
+        import tasks
+        import logging
+        
+        if not hasattr(tasks, 'gerar_processo_adm_integral_task'):
+            raise AttributeError('tasks não tem gerar_processo_adm_integral_task')
+        
+        task_func = tasks.gerar_processo_adm_integral_task
+        if task_func is None:
+            raise Exception('Tarefa gerar_processo_adm_integral_task é None após importação')
+        
+        return task_func
+
+    def _check_task_matches_adm(self, task, cod_documento, user_id):
+        """
+        Verifica se uma task corresponde aos critérios (mesmo cod_documento e user_id).
+        
+        Args:
+            task (dict): Dados da task
+            cod_documento: Código do documento administrativo
+            user_id: ID do usuário
+        
+        Returns:
+            tuple: (bool, str|None) - (True se corresponde, task_id se encontrado)
+        """
+        task_kwargs = task.get('kwargs', {})
+        task_name = task.get('name', '')
+        task_cod_documento = task_kwargs.get('cod_documento')
+        task_user_id = task_kwargs.get('user_id')
+        
+        # Normaliza tipos para comparação (ambos como string)
+        task_cod_str = str(task_cod_documento) if task_cod_documento is not None else None
+        cod_documento_str = str(cod_documento)
+        task_user_str = str(task_user_id) if task_user_id is not None else None
+        user_id_str = str(user_id) if user_id is not None else None
+        
+        if (task_cod_str == cod_documento_str and 
+            task_user_str == user_id_str and
+            'gerar_processo_adm_integral_task' in task_name):
+            task_id = task.get('id')
+            return (True, task_id) if task_id else (False, None)
+        
+        return (False, None)
+
+    def _check_existing_task_adm(self, task_func, cod_documento, user_id, portal_url):
+        """
+        Verifica se já existe uma task em execução ou na fila para o mesmo cod_documento e user_id.
+        
+        Args:
+            task_func: Função da task do Celery
+            cod_documento: Código do documento administrativo
+            user_id: ID do usuário
+            portal_url: URL base do portal
+        
+        Returns:
+            dict|None: Dicionário com informações da task existente ou None se não encontrada
+        """
+        import logging
+        
+        try:
+            if not hasattr(task_func, 'app'):
+                return None
+            
+            celery_app = task_func.app
+            inspect = celery_app.control.inspect(timeout=0.2)
+            
+            if inspect is None:
+                logging.debug("[processo_adm_integral_async] Não foi possível obter inspect (workers podem não estar conectados)")
+                return None
+            
+            # Verifica tasks ativas
+            try:
+                active_tasks = inspect.active()
+                if active_tasks:
+                    total_active = sum(len(tasks) for tasks in active_tasks.values())
+                    logging.debug(f"[processo_adm_integral_async] Verificando {total_active} tasks ativas")
+                    for worker, tasks in active_tasks.items():
+                        for task in tasks:
+                            matches, task_id = self._check_task_matches_adm(task, cod_documento, user_id)
+                            if matches and task_id:
+                                logging.debug(f"[processo_adm_integral_async] Task já existe e está ativa: {task_id}")
+                                return {
+                                    'task_id': task_id,
+                                    'status': 'PROGRESS',
+                                    'message': 'Tarefa já está em execução',
+                                    'monitor_url': f"{portal_url}/@@processo_adm_integral_status?task_id={task_id}"
+                                }
+            except Exception as active_err:
+                logging.debug(f"[processo_adm_integral_async] Erro ao verificar tasks ativas: {active_err}")
+            
+            # Verifica tasks reservadas
+            try:
+                reserved_tasks = inspect.reserved()
+                if reserved_tasks:
+                    total_reserved = sum(len(tasks) for tasks in reserved_tasks.values())
+                    logging.debug(f"[processo_adm_integral_async] Verificando {total_reserved} tasks reservadas")
+                    for worker, tasks in reserved_tasks.items():
+                        for task in tasks:
+                            matches, task_id = self._check_task_matches_adm(task, cod_documento, user_id)
+                            if matches and task_id:
+                                logging.debug(f"[processo_adm_integral_async] Task já existe e está pendente: {task_id}")
+                                return {
+                                    'task_id': task_id,
+                                    'status': 'PENDING',
+                                    'message': 'Tarefa já está na fila',
+                                    'monitor_url': f"{portal_url}/@@processo_adm_integral_status?task_id={task_id}"
+                                }
+            except Exception as reserved_err:
+                logging.debug(f"[processo_adm_integral_async] Erro ao verificar tasks reservadas: {reserved_err}")
+            
+            logging.debug(f"[processo_adm_integral_async] Nenhuma task duplicada encontrada, criando nova task para cod_documento={cod_documento}, user_id={user_id}")
+        except Exception as check_error:
+            logging.debug(f"[processo_adm_integral_async] Erro ao verificar tasks existentes: {check_error}")
+        
+        return None
+
+    def _prepare_task_kwargs_adm(self, cod_documento, portal_url, user_id):
+        """
+        Prepara os argumentos para a task do Celery de documentos administrativos, garantindo que sejam serializáveis.
+        
+        Args:
+            cod_documento: Código do documento administrativo
+            portal_url: URL base do portal
+            user_id: ID do usuário (opcional, não usado na task ADM mas mantido para compatibilidade)
+        
+        Returns:
+            dict: Dicionário com argumentos serializáveis para a task
+        """
+        # Detecta automaticamente o site_path correto
+        site_path = self._detect_site_path()
+        
+        task_kwargs = {
+            'site_path': site_path,  # Detectado automaticamente ou fallback para 'sagl'
+            'cod_documento': int(cod_documento) if cod_documento else None,  # Garante que seja int
+            'portal_url': str(portal_url) if portal_url else '',  # Garante que seja string
+        }
+        # NOTA: user_id não é passado para a task ADM, apenas usado para verificação de duplicatas
+        
+        # Valida que os kwargs são serializáveis
+        try:
+            import json
+            json.dumps(task_kwargs)
+        except Exception as ser_err:
+            import logging
+            logging.error(f"[processo_adm_integral_async] ERRO: kwargs não são serializáveis: {ser_err}")
+            raise
+        
+        return task_kwargs
+
+    def _create_success_response_adm(self, task_id, portal_url):
+        """
+        Cria a resposta de sucesso com informações da task criada para documentos administrativos.
+        
+        Args:
+            task_id: ID da task
+            portal_url: URL base do portal
+        
+        Returns:
+            dict: Dicionário com informações da resposta
+        """
+        return {
+            'task_id': task_id,
+            'status': 'PENDING',
+            'message': 'Tarefa de geração iniciada com sucesso',
+            'monitor_url': f"{portal_url}/@@processo_adm_integral_status?task_id={task_id}"
+        }
+
+    security.declarePublic('processo_adm_integral_async')
+    def processo_adm_integral_async(self, cod_documento, portal_url=None):
+        """
+        Inicia geração assíncrona do processo administrativo integral.
+        
+        Args:
+            cod_documento (int): Código do documento administrativo
+            portal_url (str, optional): URL base do portal
+        
+        Returns:
+            dict: Dicionário com task_id e status inicial
+        """
+        import logging
+        
+        # Prepara portal_url se não fornecido
+        if not portal_url:
+            portal_url = str(self.url())
+        
+        # Obtém user_id se disponível
+        user_id = self._get_current_user_id()
+        
+        # Importa e valida função da task
+        task_func = self._import_task_function_adm()
+        
+        # Verifica se já existe task em execução ou na fila
+        existing_task = self._check_existing_task_adm(task_func, cod_documento, user_id, portal_url)
+        if existing_task:
+            return existing_task
+        
+        # Prepara argumentos da task
+        task_kwargs = self._prepare_task_kwargs_adm(cod_documento, portal_url, user_id)
+        
+        # Executa task assíncrona
+        async_result = self._execute_async_task(task_func, task_kwargs)
+        
+        # Extrai task_id do resultado
+        task_id = self._extract_task_id(async_result)
+        
+        # Retorna resposta de sucesso
+        return self._create_success_response_adm(task_id, portal_url)
+
 InitializeClass(SAGLTool)

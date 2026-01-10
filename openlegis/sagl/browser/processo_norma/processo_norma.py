@@ -508,8 +508,34 @@ class ProcessoNormaView(grok.View):
             finally:
                 session.close()
 
-            # Ordenar por data
-            documentos.sort(key=lambda x: x['data'])
+            # Ordenação específica para documentos da norma:
+            # 1. Capa (sempre primeiro)
+            # 2. Texto Integral da própria norma (sempre segundo)
+            # 3. Texto Consolidado da própria norma (sempre terceiro)
+            # 4. Demais documentos (ordenados por data)
+            cod_norma_str = str(dados_norma['cod_norma'])
+            
+            def get_document_priority(doc):
+                """Retorna prioridade do documento para ordenação"""
+                file_name = doc.get('file', '')
+                title = doc.get('title', '').lower()
+                
+                # Prioridade 1: Capa
+                if file_name.startswith('capa_') or 'capa' in title:
+                    return (1, doc.get('data', ''))
+                
+                # Prioridade 2: Texto Integral da própria norma
+                if file_name == f"{cod_norma_str}_texto_integral.pdf":
+                    return (2, doc.get('data', ''))
+                
+                # Prioridade 3: Texto Consolidado da própria norma
+                if file_name == f"{cod_norma_str}_texto_consolidado.pdf":
+                    return (3, doc.get('data', ''))
+                
+                # Prioridade 4: Demais documentos (ordenados por data)
+                return (4, doc.get('data', ''))
+            
+            documentos.sort(key=get_document_priority)
             return documentos
 
         except Exception as e:
@@ -683,6 +709,31 @@ class ProcessoNormaView(grok.View):
                                     })
             
                         if documentos_formatados:
+                            # Aplica a mesma ordenação: Capa, Texto Integral, Texto Consolidado, demais documentos
+                            cod_norma_str = str(self.cod_norma)
+                            
+                            def get_document_priority_for_meta(doc):
+                                """Retorna prioridade do documento para ordenação (versão para metadados)"""
+                                file_name = doc.get('file', '')
+                                title = doc.get('title', '').lower()
+                                
+                                # Prioridade 1: Capa
+                                if file_name.startswith('capa_') or 'capa' in title:
+                                    return (1, doc.get('data', ''))
+                                
+                                # Prioridade 2: Texto Integral da própria norma
+                                if file_name == f"{cod_norma_str}_texto_integral.pdf":
+                                    return (2, doc.get('data', ''))
+                                
+                                # Prioridade 3: Texto Consolidado da própria norma
+                                if file_name == f"{cod_norma_str}_texto_consolidado.pdf":
+                                    return (3, doc.get('data', ''))
+                                
+                                # Prioridade 4: Demais documentos (ordenados por data)
+                                return (4, doc.get('data', ''))
+                            
+                            documentos_formatados.sort(key=get_document_priority_for_meta)
+                            
                             result = {
                                 'documentos': documentos_formatados,
                                 'total_paginas': metadados.get('total_paginas', 0),

@@ -731,6 +731,36 @@ def gerar_processo_norma_integral_task(self, site, cod_norma, portal_url, user_i
                     'documentos': []
                 }
                 
+                # Ordenação específica para documentos da norma:
+                # 1. Capa (sempre primeiro)
+                # 2. Texto Integral da própria norma (sempre segundo)
+                # 3. Texto Consolidado da própria norma (sempre terceiro)
+                # 4. Demais documentos (ordenados por data)
+                cod_norma_str = str(cod_norma)
+                
+                def get_document_priority_task(doc):
+                    """Retorna prioridade do documento para ordenação (versão para task)"""
+                    file_name = doc.get('file', '')
+                    title = doc.get('title', '').lower()
+                    
+                    # Prioridade 1: Capa
+                    if file_name.startswith('capa_') or 'capa' in title:
+                        return (1, doc.get('data', ''))
+                    
+                    # Prioridade 2: Texto Integral da própria norma
+                    if file_name == f"{cod_norma_str}_texto_integral.pdf":
+                        return (2, doc.get('data', ''))
+                    
+                    # Prioridade 3: Texto Consolidado da própria norma
+                    if file_name == f"{cod_norma_str}_texto_consolidado.pdf":
+                        return (3, doc.get('data', ''))
+                    
+                    # Prioridade 4: Demais documentos (ordenados por data)
+                    return (4, doc.get('data', ''))
+                
+                # Aplica ordenação antes de salvar
+                documentos_com_paginas.sort(key=get_document_priority_task)
+                
                 for doc in documentos_com_paginas:
                     metadados['documentos'].append({
                         'title': doc.get('title', ''),

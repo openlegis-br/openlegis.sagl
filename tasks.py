@@ -115,6 +115,116 @@ except Exception as e:
     # Não re-raise para não quebrar o worker, mas loga o erro
     # raise
 
+# Import tramitacao_pdf_task - CRÍTICO: deve ser importado para registrar a tarefa
+# Se houver erro aqui, a tarefa não será registrada e o worker não conseguirá executá-la
+try:
+    from tasks_folder.tramitacao_pdf_task import gerar_pdf_despacho_task
+    
+    if hasattr(gerar_pdf_despacho_task, 'name'):
+        task_name = gerar_pdf_despacho_task.name
+        # Verifica se está registrada no Celery
+        if task_name not in app.tasks:
+            logger.error(f"[tasks.py] ✗ Tarefa {task_name} NÃO está registrada no Celery!")
+            logger.error(f"[tasks.py] Tarefas disponíveis: {list(app.tasks.keys())[:20]}")
+            # Tenta registrar manualmente
+            logger.warning(f"[tasks.py] Tentando registrar manualmente...")
+            try:
+                app.register_task(gerar_pdf_despacho_task)
+            except Exception as reg_err:
+                logger.error(f"[tasks.py] Erro ao registrar manualmente: {reg_err}", exc_info=True)
+    else:
+        logger.warning(f"[tasks.py] Tarefa importada mas sem atributo 'name'")
+except Exception as e:
+    logger.error(f"[tasks.py] ERRO ao importar gerar_pdf_despacho_task: {e}", exc_info=True)
+    import traceback
+    logger.error(f"[tasks.py] Traceback completo:\n{traceback.format_exc()}")
+    # CRÍTICO: Define como None para evitar AttributeError
+    gerar_pdf_despacho_task = None
+
+# CRÍTICO: Garante que a task está sempre exposta no módulo (mesmo que seja None em caso de erro)
+if 'gerar_pdf_despacho_task' not in globals():
+    gerar_pdf_despacho_task = None
+
+# Import tramitacao_anexo_task - CRÍTICO: deve ser importado para registrar a tarefa
+# Se houver erro aqui, a tarefa não será registrada e o worker não conseguirá executá-la
+try:
+    from tasks_folder.tramitacao_anexo_task import juntar_pdfs_task
+    
+    if hasattr(juntar_pdfs_task, 'name'):
+        task_name = juntar_pdfs_task.name
+        # Verifica se está registrada no Celery
+        if task_name not in app.tasks:
+            logger.error(f"[tasks.py] ✗ Tarefa {task_name} NÃO está registrada no Celery!")
+            logger.error(f"[tasks.py] Tarefas disponíveis: {list(app.tasks.keys())[:20]}")
+            # Tenta registrar manualmente
+            logger.warning(f"[tasks.py] Tentando registrar manualmente...")
+            try:
+                app.register_task(juntar_pdfs_task)
+            except Exception as reg_err:
+                logger.error(f"[tasks.py] Erro ao registrar manualmente: {reg_err}", exc_info=True)
+    else:
+        logger.warning(f"[tasks.py] Tarefa importada mas sem atributo 'name'")
+except Exception as e:
+    logger.error(f"[tasks.py] ERRO ao importar juntar_pdfs_task: {e}", exc_info=True)
+    import traceback
+    logger.error(f"[tasks.py] Traceback completo:\n{traceback.format_exc()}")
+    # CRÍTICO: Define como None para evitar AttributeError
+    juntar_pdfs_task = None
+
+# CRÍTICO: Garante que a task está sempre exposta no módulo (mesmo que seja None em caso de erro)
+if 'juntar_pdfs_task' not in globals():
+    juntar_pdfs_task = None
+
+# Import tramitacao_pdf_lote_task - CRÍTICO: deve ser importado para registrar a tarefa
+try:
+    from tasks_folder.tramitacao_pdf_lote_task import gerar_pdf_despacho_lote_task
+    
+    if hasattr(gerar_pdf_despacho_lote_task, 'name'):
+        task_name = gerar_pdf_despacho_lote_task.name
+        if task_name not in app.tasks:
+            logger.error(f"[tasks.py] ✗ Tarefa {task_name} NÃO está registrada no Celery!")
+            logger.error(f"[tasks.py] Tarefas disponíveis: {list(app.tasks.keys())[:20]}")
+            logger.warning(f"[tasks.py] Tentando registrar manualmente...")
+            try:
+                app.register_task(gerar_pdf_despacho_lote_task)
+            except Exception as reg_err:
+                logger.error(f"[tasks.py] Erro ao registrar manualmente: {reg_err}", exc_info=True)
+    else:
+        logger.warning(f"[tasks.py] Tarefa importada mas sem atributo 'name'")
+except Exception as e:
+    logger.error(f"[tasks.py] ERRO ao importar gerar_pdf_despacho_lote_task: {e}", exc_info=True)
+    import traceback
+    logger.error(f"[tasks.py] Traceback completo:\n{traceback.format_exc()}")
+    gerar_pdf_despacho_lote_task = None
+
+if 'gerar_pdf_despacho_lote_task' not in globals():
+    gerar_pdf_despacho_lote_task = None
+
+# Import tramitacao_anexo_lote_task - CRÍTICO: deve ser importado para registrar a tarefa
+try:
+    from tasks_folder.tramitacao_anexo_lote_task import juntar_pdfs_lote_task
+    
+    if hasattr(juntar_pdfs_lote_task, 'name'):
+        task_name = juntar_pdfs_lote_task.name
+        if task_name not in app.tasks:
+            logger.error(f"[tasks.py] ✗ Tarefa {task_name} NÃO está registrada no Celery!")
+            logger.error(f"[tasks.py] Tarefas disponíveis: {list(app.tasks.keys())[:20]}")
+            logger.warning(f"[tasks.py] Tentando registrar manualmente...")
+            try:
+                app.register_task(juntar_pdfs_lote_task)
+            except Exception as reg_err:
+                logger.error(f"[tasks.py] Erro ao registrar manualmente: {reg_err}", exc_info=True)
+    else:
+        logger.warning(f"[tasks.py] Tarefa importada mas sem atributo 'name'")
+except Exception as e:
+    logger.error(f"[tasks.py] ERRO ao importar juntar_pdfs_lote_task: {e}", exc_info=True)
+    import traceback
+    logger.error(f"[tasks.py] Traceback completo:\n{traceback.format_exc()}")
+    juntar_pdfs_lote_task = None
+
+if 'juntar_pdfs_lote_task' not in globals():
+    juntar_pdfs_lote_task = None
+
 # Logs removidos - apenas logs de erro são mantidos
 
 # Alias para compatibilidade com código que espera 'celery' em vez de 'app'

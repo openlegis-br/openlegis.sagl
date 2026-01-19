@@ -21,20 +21,24 @@
             </a>
           </td>
          <td>
-         <dtml-in expr="unidade_tramitacao_obter_zsql(cod_unid_tramitacao=cod_unid_tram_local)">
-           <dtml-if cod_orgao><dtml-var nom_orgao>
-           <dtml-elif cod_comissao><dtml-var nom_comissao>   
-           <dtml-else> <dtml-var nom_parlamentar>
-           </dtml-if>
-         </dtml-in></td>
+         <dtml-if expr="_.has_key('cod_unid_tram_local')">
+           <dtml-in expr="unidade_tramitacao_obter_zsql(cod_unid_tramitacao=_.int(cod_unid_tram_local))">
+             <dtml-if cod_orgao><dtml-var nom_orgao>
+             <dtml-elif cod_comissao><dtml-var nom_comissao>   
+             <dtml-else> <dtml-var nom_parlamentar>
+             </dtml-if>
+           </dtml-in>
+         </dtml-if>
+         </td>
          <td><dtml-if cod_unid_tram_dest>
-           <dtml-in expr="unidade_tramitacao_obter_zsql(cod_unid_tramitacao=cod_unid_tram_dest)">
+           <dtml-in expr="unidade_tramitacao_obter_zsql(cod_unid_tramitacao=_.int(cod_unid_tram_dest))">
              <dtml-if cod_orgao><dtml-var nom_orgao>
              <dtml-elif cod_comissao><dtml-var nom_comissao>   
              <dtml-else><dtml-var nom_parlamentar> 
              </dtml-if>
            </dtml-in>
-         </dtml-if></td> 
+         </dtml-if>
+         </td> 
          <td><dtml-var des_status></td>
          <td>
         <dtml-call expr="REQUEST.set('pdf', str(cod_tramitacao)+'_tram.pdf')">

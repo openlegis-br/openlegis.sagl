@@ -4694,6 +4694,46 @@
             
             console.log('[goPagina] URL do PDF:', link);
             
+            // Verifica se o arquivo existe ANTES de carregar o iframe
+            // Se retornar 404 com header X-Pasta-Regenerate, força regeneração
+            // Aguarda a verificação antes de continuar
+            var checkUrl = link;
+            var xhrCheck = new XMLHttpRequest();
+            var shouldContinue = false;
+            var regenerateNeeded = false;
+            
+            // Faz verificação síncrona (bloqueia até completar)
+            try {
+                xhrCheck.open('HEAD', checkUrl, false); // false = síncrono
+                xhrCheck.send(null);
+                
+                // Verifica resposta
+                if (xhrCheck.status === 404 && xhrCheck.getResponseHeader('X-Pasta-Regenerate') === 'true') {
+                    console.warn('[goPagina] Base path não existe, forçando regeneração da pasta digital');
+                    showToast('info', 'Regenerando Pasta Digital', 'O diretório da pasta digital não existe. Regenerando...', 5000);
+                    // Força regeneração recarregando a página com action=pasta
+                    var currentUrl = new URL(window.location.href);
+                    currentUrl.searchParams.set('action', 'pasta');
+                    currentUrl.searchParams.set('force_regenerate', 'true');
+                    // Recarrega a página para forçar regeneração
+                    setTimeout(function() {
+                        window.location.href = currentUrl.toString();
+                    }, 1000); // Aguarda 1 segundo para o usuário ver a mensagem
+                    return; // Sai da função, não continua carregando o iframe
+                }
+                // Se não é erro de regeneração, continua normalmente
+                shouldContinue = true;
+            } catch (e) {
+                // Se houver erro (CORS, rede, etc.), continua com o carregamento normal
+                console.log('[goPagina] Erro ao verificar arquivo (possível CORS):', e, '- continuando com carregamento normal');
+                shouldContinue = true;
+            }
+            
+            // Se não deve continuar (regeneração detectada), sai
+            if (!shouldContinue) {
+                return;
+            }
+            
             // Constrói a URL do PDF.js viewer
             var portalUrl = APP_DATA.portal_url || '';
             // Usa o viewer do PDF.js disponível em skins
@@ -4795,6 +4835,80 @@
                         var iframeWindow = iframe.contentWindow;
                         
                         if (iframeDoc && iframeDoc.readyState === 'complete') {
+                            // Verifica se há erro no PDF.js (ex: "Missing PDF")
+                            // Verifica imediatamente e depois novamente após delay
+                            function checkForPDFError() {
+                                try {
+                                    var bodyText = iframeDoc.body ? iframeDoc.body.textContent || iframeDoc.body.innerText : '';
+                                    var titleText = iframeDoc.title || '';
+                                    var hasError = bodyText.indexOf('Missing PDF') !== -1 || 
+                                                  bodyText.indexOf('Arquivo PDF ausente') !== -1 ||
+                                                  bodyText.indexOf('MissingPDFException') !== -1 ||
+                                                  titleText.indexOf('PDF.js') !== -1 && bodyText.indexOf('404') !== -1;
+                                    
+                                    if (hasError) {
+                                        console.warn('[goPagina] Erro detectado no PDF.js, verificando se precisa regenerar pasta');
+                                        // Faz nova verificação da URL do PDF para ver se precisa regenerar
+                                        var checkUrlAgain = link;
+                                        var xhrCheckAgain = new XMLHttpRequest();
+                                        // Tenta síncrono primeiro
+                                        try {
+                                            xhrCheckAgain.open('HEAD', checkUrlAgain, false);
+                                            xhrCheckAgain.send(null);
+                                            if (xhrCheckAgain.status === 404 && xhrCheckAgain.getResponseHeader('X-Pasta-Regenerate') === 'true') {
+                                                console.warn('[goPagina] Base path não existe detectado após erro do PDF.js, forçando regeneração');
+                                                showToast('info', 'Regenerando Pasta Digital', 'O diretório da pasta digital não existe. Regenerando...', 5000);
+                                                var currentUrlAgain = new URL(window.location.href);
+                                                currentUrlAgain.searchParams.set('action', 'pasta');
+                                                currentUrlAgain.searchParams.set('force_regenerate', 'true');
+                                                setTimeout(function() {
+                                                    window.location.href = currentUrlAgain.toString();
+                                                }, 1000);
+                                                iframe.removeEventListener('load', loadHandler);
+                                                iframe.removeEventListener('error', errorHandler);
+                                                return true; // Indica que deve parar processamento
+                                            }
+                                        } catch (e) {
+                                            // Se síncrono falhar (CORS), tenta assíncrono
+                                            console.log('[goPagina] Verificação síncrona falhou, tentando assíncrona:', e);
+                                            xhrCheckAgain.open('HEAD', checkUrlAgain, true);
+                                            xhrCheckAgain.onload = function() {
+                                                if (xhrCheckAgain.status === 404 && xhrCheckAgain.getResponseHeader('X-Pasta-Regenerate') === 'true') {
+                                                    console.warn('[goPagina] Base path não existe detectado após erro do PDF.js (async), forçando regeneração');
+                                                    showToast('info', 'Regenerando Pasta Digital', 'O diretório da pasta digital não existe. Regenerando...', 5000);
+                                                    var currentUrlAgain2 = new URL(window.location.href);
+                                                    currentUrlAgain2.searchParams.set('action', 'pasta');
+                                                    currentUrlAgain2.searchParams.set('force_regenerate', 'true');
+                                                    setTimeout(function() {
+                                                        window.location.href = currentUrlAgain2.toString();
+                                                    }, 1000);
+                                                    iframe.removeEventListener('load', loadHandler);
+                                                    iframe.removeEventListener('error', errorHandler);
+                                                }
+                                            };
+                                            xhrCheckAgain.send();
+                                        }
+                                    }
+                                    return false; // Continua processamento normal
+                                } catch (e) {
+                                    // Erro ao verificar conteúdo - CORS ou outro problema, ignora
+                                    console.log('[goPagina] Erro ao verificar erro do PDF.js:', e);
+                                    return false;
+                                }
+                            }
+                            
+                            // Verifica imediatamente
+                            if (checkForPDFError()) {
+                                return; // Se detectou erro e regeneração necessária, sai
+                            }
+                            
+                            // Verifica novamente após delay (caso o erro apareça depois)
+                            setTimeout(function() {
+                                if (checkForPDFError()) {
+                                    return; // Se detectou erro e regeneração necessária, sai
+                                }
+                            }, 2000); // Aguarda 2 segundos para o PDF.js processar
+                            
                             console.log('[goPagina] Iframe carregado com sucesso (PDF.js):', pdfjsViewerUrl);
                             
                             // Ajusta scroll baseado na direção da navegação
@@ -4868,19 +4982,54 @@
                     }
                     
                     console.error('[goPagina] Erro ao carregar iframe:', pdfjsViewerUrl, e);
-                    currentRetry++;
                     
-                    if (currentRetry < maxRetries) {
-                        console.log('[goPagina] Tentando novamente (tentativa', currentRetry + 1, 'de', maxRetries, ') após', retryDelay, 'ms');
-                        setTimeout(function() {
-                            iframe.setAttribute('src', pdfjsViewerUrl);
-                        }, retryDelay);
-                        retryDelay *= 2; // Backoff exponencial
-                    } else {
-                        console.error('[goPagina] Máximo de tentativas atingido');
-                        alert('Erro ao carregar a página após ' + maxRetries + ' tentativas. Tente novamente.');
-                        iframe.removeEventListener('load', loadHandler);
-                        iframe.removeEventListener('error', errorHandler);
+                    // Verifica se o erro é devido ao diretório base não existir
+                    // Faz uma requisição AJAX para verificar o header X-Pasta-Regenerate
+                    var checkUrl = link; // URL do PDF original (não do viewer)
+                    var xhr = new XMLHttpRequest();
+                    xhr.open('HEAD', checkUrl, true);
+                    xhr.onload = function() {
+                        // Se retornou 404 e tem header X-Pasta-Regenerate, força regeneração
+                        if (xhr.status === 404 && xhr.getResponseHeader('X-Pasta-Regenerate') === 'true') {
+                            console.warn('[goPagina] Base path não existe detectado no erro, forçando regeneração da pasta digital');
+                            showToast('info', 'Regenerando Pasta Digital', 'O diretório da pasta digital não existe. Regenerando...', 5000);
+                            // Força regeneração recarregando a página com action=pasta
+                            var currentUrl = new URL(window.location.href);
+                            currentUrl.searchParams.set('action', 'pasta');
+                            currentUrl.searchParams.set('force_regenerate', 'true');
+                            // Recarrega a página para forçar regeneração
+                            setTimeout(function() {
+                                window.location.href = currentUrl.toString();
+                            }, 1000); // Aguarda 1 segundo para o usuário ver a mensagem
+                            iframe.removeEventListener('load', loadHandler);
+                            iframe.removeEventListener('error', errorHandler);
+                            return;
+                        }
+                        // Se não é erro de regeneração, continua com retry normal
+                        _continueWithRetry();
+                    };
+                    xhr.onerror = function() {
+                        // Em caso de erro de rede, continua com retry normal
+                        console.log('[goPagina] Erro ao verificar arquivo (possível CORS), continuando com retry normal');
+                        _continueWithRetry();
+                    };
+                    xhr.send();
+                    
+                    // Função auxiliar para continuar com retry normal
+                    function _continueWithRetry() {
+                        currentRetry++;
+                        if (currentRetry < maxRetries) {
+                            console.log('[goPagina] Tentando novamente (tentativa', currentRetry + 1, 'de', maxRetries, ') após', retryDelay, 'ms');
+                            setTimeout(function() {
+                                iframe.setAttribute('src', pdfjsViewerUrl);
+                            }, retryDelay);
+                            retryDelay *= 2; // Backoff exponencial
+                        } else {
+                            console.error('[goPagina] Máximo de tentativas atingido');
+                            alert('Erro ao carregar a página após ' + maxRetries + ' tentativas. Tente novamente.');
+                            iframe.removeEventListener('load', loadHandler);
+                            iframe.removeEventListener('error', errorHandler);
+                        }
                     }
                 };
                 

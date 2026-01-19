@@ -806,9 +806,83 @@
 </div>
 
 <div class="tab-pane p-3 border fade" id="tramitacao">
-   <dtml-with tramitacao>
-     <dtml-var tramitacao_index_html>
-   </dtml-with>
+<legend class="font-size-16">Tramitações</legend>
+
+<dtml-in expr="zsql.tramitacao_obter_zsql(cod_materia=cod_materia)">
+  <dtml-unless expr="ind_ult_tramitacao==0 and not dat_encaminha">
+    <dtml-if expr="not REQUEST.get('tram_table_started')">
+      <dtml-call expr="REQUEST.set('tram_table_started', 1)">
+      <div class="table-responsive">
+      <table id="tramitacoes_table" class="table datatable-tramitacao w-100">
+       <thead class="table-light">
+        <tr>  
+           <th width="15%">Data e Hora</th>
+           <th>Unidade de Origem</th>
+           <th>Unidade de Destino</th>
+           <th>Status</th>
+           <th width="10%">Despacho</th>
+        </tr>
+       </thead>
+    </dtml-if>
+        <tr <dtml-if expr="ind_ult_tramitacao==1">class="bg-light"</dtml-if>> 
+         <td>
+            <a href="#" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Visualização de Tramitação" data-src="tramitacao/tramitacao_mostrar_proc?hdn_cod_tramitacao=<dtml-var cod_tramitacao>&cod_materia=<dtml-var cod_materia>&modal=1">  
+              <dtml-var dat_tramitacao>
+            </a>
+          </td>
+         <td>
+         <dtml-in expr="unidade_tramitacao_obter_zsql(cod_unid_tramitacao=cod_unid_tram_local)">
+           <dtml-var nom_unidade_join>
+         </dtml-in></td>
+         <td><dtml-if cod_unid_tram_dest>
+           <dtml-in expr="unidade_tramitacao_obter_zsql(cod_unid_tramitacao=cod_unid_tram_dest)">
+             <dtml-var nom_unidade_join>
+           </dtml-in>
+         </dtml-if></td> 
+         <td><dtml-var des_status></td>
+         <td>
+        <dtml-call expr="REQUEST.set('pdf', str(cod_tramitacao)+'_tram.pdf')">
+        <dtml-call expr="REQUEST.set('pdf_assinado', str(cod_tramitacao)+'_tram_signed.pdf')">        
+        <dtml-if "hasattr(sapl_documentos.materia.tramitacao,pdf_assinado)">
+           <dtml-let pdf_assinado="getattr(sapl_documentos.materia.tramitacao,pdf_assinado).absolute_url">
+              <a href="<dtml-var pdf_assinado>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fas fa-certificate"></i><span class="d-none">PDF</span>
+           </dtml-let>  
+        <dtml-elif expr="zsql.assinatura_documento_obter_zsql(codigo=cod_tramitacao,tipo_doc='tramitacao', ind_assinado=1)">
+           <dtml-in expr="zsql.assinatura_documento_obter_zsql(codigo=cod_tramitacao, tipo_doc='tramitacao', ind_assinado=1)">
+             <dtml-if sequence-start>
+                <dtml-if "hasattr(sapl_documentos.materia.tramitacao,pdf)">
+                   <dtml-let pdf="getattr(sapl_documentos.materia.tramitacao,pdf).absolute_url">
+                      <a href="<dtml-var pdf>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fas fa-certificate"></i><span class="d-none">PDF</span></a>
+                   </dtml-let>  
+                <dtml-else>         
+                     <a href="<dtml-var portal_url>/sapl_documentos/documentos_assinados/<dtml-var cod_assinatura_doc>.pdf?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fas fa-fw fa-certificate"></i><span class="d-none">PDF</span>
+                </dtml-if>
+             </dtml-if>
+           </dtml-in>            
+         <dtml-elif "hasattr(sapl_documentos.materia.tramitacao,pdf)">
+            <dtml-let pdf="getattr(sapl_documentos.materia.tramitacao,pdf).absolute_url">
+               <a href="<dtml-var pdf>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fa fa-fw fa-file-pdf"></i><span class="d-none">PDF</span></a>
+            </dtml-let>              
+        <dtml-else>
+           <i class="fa fa-file-pdf" style="color: #e9e9e9"></i>                   
+        </dtml-if> 
+         </td>
+      </tr>
+  </dtml-unless>
+  <dtml-if sequence-end>
+    <dtml-if expr="REQUEST.get('tram_table_started')">
+      <dtml-call expr="REQUEST.set('tram_table_started', 0)">
+      </table>
+      </div>
+    </dtml-if>
+  </dtml-if sequence-end>
+<dtml-else>
+    <p>Nenhuma tramitação cadastrada.</p>
+</dtml-in>
+
+  <div class="text-start">
+     <button type="button" class="btn btn-light d-print-none" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Cadastro de Tramitação" data-src="tramitacao/tramitacao_form?cod_materia=<dtml-var cod_materia>&modal=1">Incluir Tramitação</button> 
+  </div>
 </div>
 
 <div class="tab-pane p-3 border fade" id="votacao">

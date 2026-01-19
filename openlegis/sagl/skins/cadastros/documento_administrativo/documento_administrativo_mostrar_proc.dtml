@@ -7,11 +7,32 @@
          <dtml-call expr="zsql.tramitacao_administrativo_visualizacao_zsql(cod_tramitacao=hdn_tramitacao, cod_usuario=cod_usuario_corrente)">
       </dtml-if>
       <dtml-if expr="AUTHENTICATED_USER.has_role(['Operador', 'Operador Modulo Administrativo'])">
-          <dtml-var documento_administrativo_form>
+          <dtml-try>
+            <dtml-var documento_administrativo_form>
+          <dtml-except>
+            <div class="alert alert-danger">
+              <h4>Erro ao carregar formulário</h4>
+              <p><strong>Mensagem:</strong> <dtml-var error_value></p>
+            </div>
+          </dtml-try>
       <dtml-elif expr="AUTHENTICATED_USER.has_role(['Operador Materia']) and ind_publico==1">
-          <dtml-var documento_administrativo_form>
+          <dtml-try>
+            <dtml-var documento_administrativo_form>
+          <dtml-except>
+            <div class="alert alert-danger">
+              <h4>Erro ao carregar formulário</h4>
+              <p><strong>Mensagem:</strong> <dtml-var error_value></p>
+            </div>
+          </dtml-try>
       <dtml-elif expr="AUTHENTICATED_USER.has_role(['Authenticated']) and zsql.usuario_tipo_documento_obter_zsql(tip_documento=tip_documento, cod_usuario=cod_usuario_corrente, ind_excluido=0)">
-          <dtml-var documento_administrativo_form>
+          <dtml-try>
+            <dtml-var documento_administrativo_form>
+          <dtml-except>
+            <div class="alert alert-danger">
+              <h4>Erro ao carregar formulário</h4>
+              <p><strong>Mensagem:</strong> <dtml-var error_value></p>
+            </div>
+          </dtml-try>
       <dtml-else>
           <dtml-let mensagem="'Você não tem permissão para visualizar este registro!'" tipo_mensagem="'danger'">
              <dtml-var mensagem_emitir>
@@ -22,7 +43,7 @@
       <dtml-call expr="zsql.logs_registrar_zsql(
             usuario      = REQUEST['AUTHENTICATED_USER'].getUserName(), 
             data         = DateTime(datefmt='international').strftime('%Y-%m-%d %H:%M:%S'),
-            modulo       = str(_['REQUEST']['URL1']).split('/')[-1],
+            modulo       = str(REQUEST['URL1']).split('/')[-1],
             metodo       = 'cadastros/documento_administrativo_mostrar_proc',
             IP           = pysc.get_ip(),
             dados        = 'acessou form de cadastro',
@@ -32,5 +53,9 @@
   <dtml-let mensagem="'Houve um erro!'" tipo_mensagem="'danger'">
      <dtml-var mensagem_emitir>
   </dtml-let>
+  <div class="alert alert-danger mt-3">
+    <h4>Detalhes do Erro:</h4>
+    <p><strong>Mensagem:</strong> <dtml-var error_value></p>
+    <p><strong>Código do Documento:</strong> <dtml-var cod_documento missing="Não definido"></p>
+  </div>
 </dtml-try>
-

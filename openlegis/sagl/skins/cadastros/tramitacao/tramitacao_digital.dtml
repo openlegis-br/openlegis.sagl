@@ -1,0 +1,497 @@
+<dtml-let isAnon="portal_membership.isAnonymousUser()">
+<dtml-if expr="isAnon">
+  <dtml-call expr="REQUEST.RESPONSE.redirect(portal_url + '/login_form?came_from=' + REQUEST['URL'])">
+<dtml-else>
+<dtml-in expr="zsql.usuario_obter_zsql(col_username=AUTHENTICATED_USER.getUserName())">
+  <dtml-call expr="REQUEST.set('cod_usuario_corrente', int(cod_usuario))">
+</dtml-in>
+<dtml-var header_html>
+
+<!-- CSS Modular -->
+<link href="<dtml-var portal_url>/css/tramitacao_email_style.css" rel="stylesheet" type="text/css" />
+
+<!-- Trumbowyg WYSIWYG Editor (CDN) -->
+<link href="https://cdn.jsdelivr.net/npm/trumbowyg@2/dist/ui/trumbowyg.min.css" rel="stylesheet" type="text/css" />
+
+<!-- Container Principal -->
+<div class="tramitacao-email-container">
+    
+    <!-- Sidebar Esquerda -->
+    <aside class="tramitacao-sidebar" id="tramitacao-sidebar">
+        <div class="tramitacao-sidebar-header">
+            <h2 class="mb-0">
+                <i class="mdi mdi-menu me-2"></i>
+                Tramitação
+            </h2>
+                </div>
+        <nav class="tramitacao-sidebar-nav" role="navigation" aria-label="Navegação de tramitação">
+            <a href="#" class="contador-item ativo" data-filtro="entrada" id="contador-entrada" 
+               role="button" aria-label="Caixa de Entrada" aria-current="page" tabindex="0">
+                            <i class="mdi mdi-inbox" aria-hidden="true"></i>
+                        <div class="flex-grow-1">
+                    <div class="contador-label">Caixa de Entrada</div>
+                            </div>
+                <div class="contador-valor" aria-label="0 processos">0</div>
+            </a>
+            <a href="#" class="contador-item" data-filtro="rascunhos" id="contador-rascunhos"
+               role="button" aria-label="Rascunhos" tabindex="0">
+                <i class="mdi mdi-file-outline" aria-hidden="true"></i>
+                        <div class="flex-grow-1">
+                    <div class="contador-label">Rascunhos</div>
+                            </div>
+                <div class="contador-valor" aria-label="0 rascunhos">0</div>
+                    </a>
+            <a href="#" class="contador-item" data-filtro="enviados" id="contador-enviados"
+               role="button" aria-label="Enviados" tabindex="0">
+                            <i class="mdi mdi-send" aria-hidden="true"></i>
+                        <div class="flex-grow-1">
+                    <div class="contador-label">Enviados</div>
+                            </div>
+                <div class="contador-valor" aria-label="0 enviados">0</div>
+                    </a>
+                </nav>
+        </aside>
+
+    <!-- Área Principal -->
+    <main class="tramitacao-main">
+        
+            <!-- Header da Lista -->
+        <div class="tramitacao-lista-header">
+            <h1 class="firstHeading font-size-18 mb-0">
+                <i class="mdi mdi-inbox me-2"></i>
+                Tramitação de Processos
+            </h1>
+                </div>
+                
+        <!-- Breadcrumb de Contexto -->
+        <nav class="breadcrumb-contexto" id="breadcrumb-contexto" style="display: none;" aria-label="Navegação contextual">
+            <a href="#" class="badge bg-primary text-decoration-none" id="breadcrumb-caixa"
+               role="button" aria-label="Ir para caixa de entrada" tabindex="0">
+                Caixa de Entrada
+            </a>
+            <i class="mdi mdi-chevron-right" aria-hidden="true"></i>
+            <div class="dropdown">
+                <span class="badge bg-secondary dropdown-toggle" id="breadcrumb-unidade" 
+                      data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true"
+                      role="button" aria-label="Selecionar unidade" tabindex="0">
+                    Todas as unidades
+                </span>
+                <ul class="dropdown-menu" id="breadcrumb-unidade-dropdown" aria-labelledby="breadcrumb-unidade" role="menu">
+                    <li><a class="dropdown-item" href="#" data-cod-unidade="" role="menuitem" tabindex="0"><i class="mdi mdi-view-grid-outline me-2" aria-hidden="true"></i>Todas as unidades</a></li>
+                </ul>
+                    </div>
+            <span class="badge bg-light text-dark ms-2" id="breadcrumb-contador" aria-live="polite" aria-atomic="true">0 processos</span>
+            <div id="breadcrumb-filtros" class="ms-2" aria-live="polite" aria-atomic="true"></div>
+        </nav>
+        
+        <!-- Busca Rápida -->
+        <div class="search-bar-rapida" id="search-bar-rapida" style="display: none;">
+            <div class="input-group">
+                <span class="input-group-text">
+                    <i class="mdi mdi-magnify"></i>
+                </span>
+                <input type="text" class="form-control" id="busca-rapida" 
+                       placeholder="Buscar processos..." 
+                       aria-label="Buscar processos"
+                       aria-describedby="busca-rapida-help">
+                <button class="btn btn-outline-secondary" type="button" id="btn-toggle-filtros-rapido"
+                        aria-label="Mostrar filtros avançados" aria-expanded="false" aria-controls="painel-filtros">
+                    <i class="mdi mdi-filter" aria-hidden="true"></i> Filtros Avançados
+                        </button>
+                </div>
+            </div>
+
+        <!-- Controles de Lista -->
+        <div id="controles-lista" style="display: none;">
+            <div id="container-selecao">
+                    <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="selecionar-todos"
+                           aria-label="Selecionar todos os processos visíveis">
+                    <label class="form-check-label" for="selecionar-todos">
+                            Selecionar todos
+                        </label>
+                    </div>
+                <button type="button" class="btn btn-primary btn-sm" id="btn-tramitar-lote" style="display: none;"
+                        aria-label="Tramitar processos selecionados">
+                    <i class="mdi mdi-send" aria-hidden="true"></i>
+                    Tramitar Selecionados
+                    <span class="badge bg-light text-dark ms-2" id="contador-selecionados" style="display: none;" aria-live="polite" aria-atomic="true">0</span>
+                </button>
+                </div>
+                    <div class="d-flex align-items-center gap-2">
+                <button type="button" class="btn btn-outline-secondary btn-sm" id="btn-ordenar-data" 
+                        title="Ordenar por data de tramitação" aria-label="Ordenar por data de tramitação">
+                    <i class="mdi mdi-sort-calendar-descending" id="icone-ordenar-data" aria-hidden="true"></i>
+                    <span class="ms-1 d-none d-md-inline">Data</span>
+                </button>
+                <label class="mb-0 small">Itens por página:</label>
+                <select class="form-select form-select-sm" id="itens-por-pagina" style="width: auto;">
+                    <option value="10">10</option>
+                    <option value="25">25</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                        </select>
+                <span class="small text-muted" id="info-paginacao">0-0 de 0</span>
+                <div class="btn-group btn-group-sm">
+                    <button type="button" class="btn btn-outline-secondary paginacao-btn" data-acao="primeira" title="Primeira página">
+                        <i class="mdi mdi-page-first"></i>
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary paginacao-btn" data-acao="anterior" title="Página anterior">
+                        <i class="mdi mdi-chevron-left"></i>
+                    </button>
+                    <input type="number" class="form-control form-control-sm text-center" id="pagina-atual" 
+                           value="1" min="1" style="width: 60px;" readonly>
+                    <span class="input-group-text small">de&nbsp;<span id="total-paginas">1</span></span>
+                    <button type="button" class="btn btn-outline-secondary paginacao-btn" data-acao="proxima" title="Próxima página">
+                        <i class="mdi mdi-chevron-right"></i>
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary paginacao-btn" data-acao="ultima" title="Última página">
+                        <i class="mdi mdi-page-last"></i>
+                    </button>
+                    </div>
+                </div>
+            </div>
+
+        <!-- Filtros Avançados -->
+        <div id="secao-filtros" style="display: none;">
+            <div class="collapse" id="painel-filtros">
+                <div class="card card-body">
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <label class="form-label">Tipo de Processo</label>
+                            <select class="form-select form-select-sm" id="filtro-tipo-processo">
+                                <option value="TODOS">Todos</option>
+                                <option value="MATERIA">Legislativo</option>
+                                <option value="DOCUMENTO">Administrativo</option>
+                            </select>
+                </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Tipo de Documento (sigla)</label>
+                            <input type="text" class="form-control form-control-sm" id="filtro-tipo-documento" placeholder="Ex: OF">
+            </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Número</label>
+                            <input type="text" class="form-control form-control-sm" id="filtro-numero" placeholder="Número">
+    </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Ano</label>
+                            <input type="text" class="form-control form-control-sm" id="filtro-ano" placeholder="Ano">
+</div>
+                        <div class="col-md-2">
+                            <label class="form-label">Interessado</label>
+                            <input type="text" class="form-control form-control-sm" id="filtro-interessado" placeholder="Interessado">
+            </div>
+                        <!-- Novos filtros: Status e Data -->
+                        <div class="col-md-3">
+                            <label class="form-label">Status de Tramitação</label>
+                            <select class="form-select form-select-sm" id="filtro-status">
+                                <option value="">Todos os status</option>
+                                <!-- Opções carregadas dinamicamente -->
+                        </select>
+                    </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Data Inicial</label>
+                            <input type="date" class="form-control form-control-sm" id="filtro-data-inicial">
+                    </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Data Final</label>
+                            <input type="date" class="form-control form-control-sm" id="filtro-data-final">
+                    </div>
+                    </div>
+                    <div class="mt-3 d-flex gap-2 flex-wrap align-items-center">
+                        <button type="button" class="btn btn-sm btn-outline-secondary" id="btn-limpar-filtros">
+                            <i class="mdi mdi-filter-remove"></i> Limpar Filtros
+                    </button>
+                        <button type="button" class="btn btn-sm btn-outline-primary" id="btn-salvar-filtros">
+                            <i class="mdi mdi-bookmark-outline"></i> Salvar Filtros
+                    </button>
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-outline-info dropdown-toggle" type="button" id="btn-filtros-salvos" 
+                                    data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="mdi mdi-bookmark"></i> Filtros Salvos
+                            </button>
+                            <ul class="dropdown-menu" id="dropdown-filtros-salvos" aria-labelledby="btn-filtros-salvos">
+                                <li><span class="dropdown-item-text small text-muted">Nenhum filtro salvo</span></li>
+                            </ul>
+                </div>
+                    </div>
+        </div>
+    </div>
+</div>
+
+        <!-- Container de Processos -->
+        <div class="processos-container" style="display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 500px; grid-template-columns: none; gap: 0; padding: 2rem;">
+            <div class="d-flex flex-column align-items-center justify-content-center">
+                <span class="spinner-border mb-3" role="status" aria-hidden="true" style="width: 3rem; height: 3rem;"></span>
+                <p class="text-muted mb-0 fs-6">Carregando...</p>
+            </div>
+                    </div>
+                    
+    </main>
+    
+                    </div>
+                    
+<!-- Select hidden para compatibilidade -->
+<select class="d-none" id="lst_cod_unid_tram_local">
+    <option value="">-- Selecione uma unidade --</option>
+    <dtml-in expr="zsql.usuario_unid_tram_obter_zsql(cod_usuario=cod_usuario_corrente)">
+        <dtml-in expr="zsql.unidade_tramitacao_obter_zsql(cod_unid_tramitacao=cod_unid_tramitacao)" size="1">
+            <option value="<dtml-var cod_unid_tramitacao>"><dtml-var nom_unidade_join></option>
+        </dtml-in>
+    </dtml-in>
+                        </select>
+
+<!-- Container para Toasts -->
+<div class="toast-container position-fixed top-0 end-0 p-3"></div>
+
+<dtml-var js_slot>
+
+<!-- JavaScript Modular -->
+<script>
+// Injeta código do usuário no JavaScript
+window.COD_USUARIO_CORRENTE = <dtml-var cod_usuario_corrente missing="0">;
+// Injeta portal_url no JavaScript (mesmo padrão de recebimento_proposicoes)
+window.PORTAL_URL = '<dtml-var portal_url>';
+
+    // Função para atualizar contadores preservando os rótulos
+function atualizarContadoresTramitacao(contadores) {
+    if (!contadores) return;
+    
+    console.log('[Tramitação] Atualizando contadores:', contadores);
+    
+    // Contador de entrada - atualiza apenas o .contador-valor
+    if (contadores.entrada !== undefined) {
+        var contadorPrincipal = document.getElementById('contador-entrada');
+        if (contadorPrincipal) {
+            var elemValor = contadorPrincipal.querySelector('.contador-valor');
+            if (elemValor) {
+                elemValor.textContent = contadores.entrada;
+                elemValor.setAttribute('aria-label', contadores.entrada + ' processos');
+                console.log('[Tramitação] Contador entrada atualizado para:', contadores.entrada);
+            } else {
+                console.warn('[Tramitação] Elemento .contador-valor não encontrado em contador-entrada');
+            }
+        } else {
+            console.warn('[Tramitação] Elemento contador-entrada não encontrado');
+        }
+    }
+    
+    // Contador de rascunhos
+    if (contadores.rascunhos !== undefined) {
+        var contadorPrincipal = document.getElementById('contador-rascunhos');
+        if (contadorPrincipal) {
+            var elemValor = contadorPrincipal.querySelector('.contador-valor');
+            if (elemValor) {
+                elemValor.textContent = contadores.rascunhos;
+                elemValor.setAttribute('aria-label', contadores.rascunhos + ' rascunhos');
+                console.log('[Tramitação] Contador rascunhos atualizado para:', contadores.rascunhos);
+            } else {
+                console.warn('[Tramitação] Elemento .contador-valor não encontrado em contador-rascunhos');
+            }
+        } else {
+            console.warn('[Tramitação] Elemento contador-rascunhos não encontrado');
+        }
+    }
+    
+    // Contador de enviados
+    if (contadores.enviados !== undefined) {
+        var contadorPrincipal = document.getElementById('contador-enviados');
+        if (contadorPrincipal) {
+            var elemValor = contadorPrincipal.querySelector('.contador-valor');
+            if (elemValor) {
+                elemValor.textContent = contadores.enviados;
+                elemValor.setAttribute('aria-label', contadores.enviados + ' enviados');
+                console.log('[Tramitação] Contador enviados atualizado para:', contadores.enviados);
+            } else {
+                console.warn('[Tramitação] Elemento .contador-valor não encontrado em contador-enviados');
+            }
+        } else {
+            console.warn('[Tramitação] Elemento contador-enviados não encontrado');
+        }
+    }
+}
+
+// Intercepta respostas AJAX de salvar/enviar tramitação
+(function() {
+    'use strict';
+    
+    // Intercepta jQuery.ajax se disponível
+    if (typeof jQuery !== 'undefined' && jQuery.ajax) {
+        var originalAjax = jQuery.ajax;
+        
+        jQuery.ajax = function(options) {
+            var originalSuccess = options.success;
+            var url = options.url || '';
+            
+            // Verifica se é uma chamada de salvar tramitação
+            var isTramitacaoSalvar = url.indexOf('tramitacao_individual_salvar_json') !== -1 ||
+                                     url.indexOf('tramitacao_lote_salvar_json') !== -1;
+            
+            if (isTramitacaoSalvar) {
+                // Intercepta o callback de sucesso
+                options.success = function(response) {
+                    // Chama o callback original primeiro (se existir)
+                    if (typeof originalSuccess === 'function') {
+                        originalSuccess.apply(this, arguments);
+                    }
+                    
+                    // Processa a resposta automaticamente após um delay
+                    setTimeout(function() {
+                        // Aceita resposta com sucesso:true OU sem erro (compatibilidade)
+                        var isSuccess = (response && (response.sucesso === true || (!response.erro && response.mensagem)));
+                        if (isSuccess) {
+                            console.log('[Tramitação] Processando resposta:', response.acao || 'ação desconhecida', response);
+                            
+                            // Processa tasks de PDF/anexo se disponíveis (individual ou lote)
+                            if (url.indexOf('tramitacao_individual_salvar_json') !== -1 && response.cod_tramitacao) {
+                                // Tramitação individual - processa tasks se disponíveis
+                                console.log('[Tramitação] Verificando tasks para tramitação individual:', {
+                                    cod_tramitacao: response.cod_tramitacao,
+                                    task_pdf: response.task_pdf,
+                                    task_anexo: response.task_anexo,
+                                    temFuncao: typeof processarRespostaSalvarTramitacao === 'function'
+                                });
+                                if (typeof processarRespostaSalvarTramitacao === 'function') {
+                                    // IMPORTANTE: Se foi ENVIADO, passa true para naoRecarregarFormulario
+                                    // Isso evita que o formulário seja recarregado após o envio
+                                    var foiEnviado = response.tramitacao_enviada === true || response.acao === 'tramitacao_enviada';
+                                    var naoRecarregarFormulario = foiEnviado ? true : false;
+                                    processarRespostaSalvarTramitacao(response, response.cod_tramitacao, naoRecarregarFormulario);
+                                } else {
+                                    console.warn('[Tramitação] Função processarRespostaSalvarTramitacao não encontrada!');
+                                }
+                            } else if (url.indexOf('tramitacao_lote_salvar_json') !== -1) {
+                                // Tramitação em lote - processa tasks se disponíveis
+                                // Extrai códigos de tramitações da resposta ou dos processos selecionados
+                                var codTramitacoes = [];
+                                if (response.cod_tramitacoes && Array.isArray(response.cod_tramitacoes)) {
+                                    codTramitacoes = response.cod_tramitacoes;
+                                }
+                                if (typeof processarRespostaTramitarEmLote === 'function') {
+                                    processarRespostaTramitarEmLote(response, codTramitacoes);
+                                }
+                            }
+                            
+                            // ATUALIZA CONTADORES PRIMEIRO (usando valores da resposta)
+                            // IMPORTANTE: Se também vai recarregar listas via clique, o clique já recarrega os contadores corretamente
+                            // Então só atualizamos os contadores da resposta se NÃO for recarregar listas, ou se os valores parecerem corretos
+                            var vaiRecarregarListas = (response.reload_listas || response.reload_interface);
+                            
+                            if (response.reload_contadores && response.contadores && !vaiRecarregarListas) {
+                                // Se NÃO vai recarregar listas, atualiza imediatamente com os valores da resposta
+                                atualizarContadoresTramitacao(response.contadores);
+                                console.log('[Tramitação] ✅ Contadores atualizados imediatamente com valores da resposta (sem recarregar listas)');
+                            } else if (response.reload_contadores && !vaiRecarregarListas) {
+                                // Se não tiver contadores na resposta mas pediu reload E não vai recarregar listas, recarrega via AJAX
+                                var codUsuario = window.COD_USUARIO_CORRENTE;
+                                if (codUsuario) {
+                                    jQuery.ajax({
+                                        url: '/sagl/tramitacao_contadores_json?cod_usuario=' + codUsuario,
+                                        method: 'GET',
+                                        dataType: 'json',
+                                        success: function(resp) {
+                                            if (resp && resp.dados) {
+                                                atualizarContadoresTramitacao(resp.dados);
+                                            } else if (resp) {
+                                                atualizarContadoresTramitacao(resp);
+                                            }
+                                            console.log('[Tramitação] ✅ Contadores recarregados via AJAX (sem recarregar listas)');
+                                        }
+                                    });
+                                }
+                            } else if (vaiRecarregarListas) {
+                                // Se vai recarregar listas, os contadores serão atualizados pelo clique simulado
+                                // Não atualizamos aqui para evitar valores incorretos sendo aplicados
+                                console.log('[Tramitação] ⏭️ Contadores serão atualizados automaticamente pelo clique simulado (evitando valores incorretos da resposta)');
+                            }
+                            
+                            // RECARREGA LISTA E CARDS APENAS DA CAIXA ATUAL (a que está selecionada)
+                            // IMPORTANTE: Aguarda um pouco para garantir que contadores foram atualizados primeiro
+                            if (response.reload_listas || response.reload_interface) {
+                                // Aguarda para garantir que sidebar foi fechado e contadores já atualizados
+                                setTimeout(function() {
+                                    console.log('[Tramitação] Recarregando lista e cards da caixa atual após:', response.acao || 'ação desconhecida');
+                                    
+                                    // Identifica qual caixa está ativa e simula clique nela
+                                    // Isso recarrega a lista E os cards, usando o código existente que já funciona
+                                    var itemAtivo = document.querySelector('.contador-item.ativo, .contador-item.active');
+                                    if (itemAtivo) {
+                                        var filtroAtivo = itemAtivo.getAttribute('data-filtro');
+                                        console.log('[Tramitação] Caixa atual identificada:', filtroAtivo);
+                                        
+                                        try {
+                                            // Usa clique simulado no item ativo da sidebar
+                                            // Isso força o recarregamento APENAS da lista atual (caixa selecionada)
+                                            // e usa o código existente que já processa os dados e atualiza os cards
+                                            // NOTA: Não restauramos os contadores após o clique porque:
+                                            // 1. O clique já recarrega os contadores corretamente via AJAX
+                                            // 2. Os contadores da resposta podem estar incorretos (ex: quando salva rascunho, enviados pode voltar 0 incorretamente)
+                                            setTimeout(function() {
+                                                try {
+                                                    // Simula um clique completo para recarregar a lista e cards da caixa atual
+                                                    var clickEvent = new MouseEvent('click', {
+                                                        view: window,
+                                                        bubbles: true,
+                                                        cancelable: true,
+                                                        buttons: 1
+                                                    });
+                                                    itemAtivo.dispatchEvent(clickEvent);
+                                                    console.log('[Tramitação] ✅ Clique simulado disparado para recarregar lista e cards');
+                                                    console.log('[Tramitação] Os contadores serão atualizados automaticamente pelo clique via AJAX');
+                                                } catch(e) {
+                                                    console.warn('[Tramitação] Erro ao simular clique:', e);
+                                                    // Fallback: tenta click() direto
+                                                    try {
+                                                        itemAtivo.click();
+                                                        console.log('[Tramitação] ✅ Clique direto disparado');
+                                                    } catch(e2) {
+                                                        console.warn('[Tramitação] Erro no fallback click():', e2);
+                                                    }
+                                                }
+                                            }, 150);
+                                        } catch(e) {
+                                            console.warn('[Tramitação] Erro ao processar recarregamento:', e);
+                                            // Fallback: dispara evento
+                                            document.dispatchEvent(new CustomEvent('tramitacao:recarregar-lista'));
+                                        }
+                                    } else {
+                                        console.warn('[Tramitação] Item ativo não encontrado. Disparando evento de fallback.');
+                                        // Dispara evento de fallback
+                                        document.dispatchEvent(new CustomEvent('tramitacao:recarregar-lista'));
+                                    }
+                                    
+                                    // Dispara evento para outros componentes
+                                    if (typeof document !== 'undefined') {
+                                        document.dispatchEvent(new CustomEvent('tramitacao:interface-atualizada', {
+                                            detail: {
+                                                acao: response.acao,
+                                                contadores: response.contadores,
+                                                cod_tramitacao: response.cod_tramitacao
+                                            }
+                                        }));
+                                    }
+                                }, 500);
+                            }
+                        }
+                    }, 200);
+                };
+            }
+            
+            // Chama o jQuery.ajax original
+            return originalAjax.apply(this, arguments);
+        };
+        
+        console.log('[Tramitação] Interceptor AJAX inicializado');
+    }
+})();
+</script>
+
+<!-- Trumbowyg WYSIWYG Editor JS (CDN) -->
+<script src="https://cdn.jsdelivr.net/npm/trumbowyg@2/dist/trumbowyg.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/trumbowyg@2/dist/langs/pt_br.min.js"></script>
+
+<script src="<dtml-var portal_url>/js/tramitacao_email_style.js"></script>
+
+<dtml-var footer_html>
+</dtml-if>
+</dtml-let>

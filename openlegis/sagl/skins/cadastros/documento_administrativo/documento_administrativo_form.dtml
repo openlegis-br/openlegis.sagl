@@ -1,11 +1,15 @@
+<dtml-try>
 <dtml-var header_html>
+<dtml-except>
+  <div class="alert alert-warning">Aviso: Erro ao carregar header_html - <dtml-var error_value></div>
+</dtml-try>
 
 <script src="<dtml-var portal_url>/javascript/data_validar.js"></script>
 
 <div class="row mb-2">
   <div class="col-12 col-md-6">
     <dtml-if expr="_.has_key('cod_documento')">
-       <h1 class="firstHeading font-size-18"><dtml-var des_tipo_documento> nº <dtml-var num_documento>/<dtml-var ano_documento></h1>
+       <h1 class="firstHeading font-size-18"><dtml-var des_tipo_documento missing=""> nº <dtml-var num_documento>/<dtml-var ano_documento></h1>
     <dtml-else>
        <h1 class="firstHeading font-size-18">Cadastro de Processo Administrativo</h1>
     </dtml-if>
@@ -113,25 +117,29 @@
        <label class="form-label required" for="lst_tip_documento">Tipo de Processo</label>
           <select class="form-select" id="lst_tip_documento" name="lst_tip_documento" <dtml-unless cod_documento>onChange="numero_buscar(document.documento_administrativo_form)"</dtml-unless> required>
             <option>Selecione</option>
-          <dtml-in expr="consultas.documento_administrativo.permissao_tipo()" mapping>
-             <dtml-if expr="ind_incluir == 1">
-             <option 
-                 <dtml-if tip_documento_sel>
-                     <dtml-if expr="_.int(tip_documento) == _.int(tip_documento_sel)">
-                        selected
-                     </dtml-if>     
-                  </dtml-if>
-                  <dtml-if expr="REQUEST.has_key('tip_documento_novo')">
-                     <dtml-if expr="_.int(tip_documento) == _.int(tip_documento_novo)">
-                        selected
-                     </dtml-if>
-                  </dtml-if> 
-                  value="<dtml-var tip_documento>" 
-             >
-                 <dtml-var sgl_tipo_documento> - <dtml-var des_tipo_documento>
-             </option>
-             </dtml-if>
-          </dtml-in>
+          <dtml-try>
+            <dtml-in expr="consultas.documento_administrativo.permissao_tipo()" mapping>
+               <dtml-if expr="ind_incluir == 1">
+               <option 
+                   <dtml-if tip_documento_sel>
+                       <dtml-if expr="_.int(tip_documento) == _.int(tip_documento_sel)">
+                          selected
+                       </dtml-if>     
+                    </dtml-if>
+                    <dtml-if expr="REQUEST.has_key('tip_documento_novo')">
+                       <dtml-if expr="_.int(tip_documento) == _.int(tip_documento_novo)">
+                          selected
+                       </dtml-if>
+                    </dtml-if> 
+                    value="<dtml-var tip_documento>" 
+               >
+                   <dtml-var sgl_tipo_documento> - <dtml-var des_tipo_documento>
+               </option>
+               </dtml-if>
+            </dtml-in>
+          <dtml-except>
+            <option value="">Erro ao carregar tipos: <dtml-var error_value></option>
+          </dtml-try>
           </select>
     </div>
     <div class="col-6 col-lg-3 mb-3">
@@ -140,7 +148,7 @@
        <input class="form-control number" type="number" id="txt_num_documento" name="txt_num_documento" value="<dtml-var num_documento missing null="">" required />
     </div>
     <div class="col-6 col-lg-3 mb-3">
-       <label class="form-label" for="txt_ano_documento" class="form-label required">Ano</label>
+       <label class="form-label required" for="txt_ano_documento">Ano</label>
        <dtml-unless ano_documento>
           <dtml-call expr="REQUEST.set('ano_documento', _.DateTime.year(DateTime(datefmt='international')))">
        </dtml-unless>
@@ -247,7 +255,13 @@
   	       </dtml-let>
   	      </div>
             <dtml-else>
-               <dtml-call expr="REQUEST.set('prefixo_arquivo', str(sgl_tipo_documento)+'-')">
+               <dtml-if expr="_.has_key('sgl_tipo_documento')">
+                 <dtml-let sgl_tipo_doc="sgl_tipo_documento">
+                   <dtml-call expr="REQUEST.set('prefixo_arquivo', str(sgl_tipo_doc)+'-')">
+                 </dtml-let>
+               <dtml-else>
+                 <dtml-call expr="REQUEST.set('prefixo_arquivo', '')">
+               </dtml-if>
                <div class="input-group">
                  <select class="form-select" id="lst_modelo" name="lst_modelo">
                    <option value="0">Selecione um modelo</option>
@@ -291,7 +305,7 @@
  	 </div>
 	<dtml-else>
           <dtml-let id_documento_odt="str(cod_documento)+'_texto_integral.odt'">
-             <dtml-if "hasattr(sapl_documentos.administrativo,id_documento_odt)">
+             <dtml-if expr="hasattr(sapl_documentos.administrativo,id_documento_odt)">
                 <dtml-call expr="REQUEST.set('temODT', 1)">
              </dtml-if>
           </dtml-let>	
@@ -401,34 +415,140 @@
 
 <dtml-if cod_documento>
   <div class="tab-pane p-3 border fade" id="acessorios">
-    <dtml-with documento_acessorio>
-      <dtml-var documento_acessorio_index_html>
-    </dtml-with>
+    <dtml-try>
+      <dtml-with documento_acessorio>
+        <dtml-var documento_acessorio_index_html>
+      </dtml-with>
+    <dtml-except>
+      <div class="alert alert-danger">Erro ao carregar abas: acessorios</div>
+    </dtml-try>
   </div>
   <div class="tab-pane p-3 border fade" id="vinculados">
-    <dtml-with documento_vinculado>
-      <dtml-var documento_vinculado_index_html>
-    </dtml-with>
+    <dtml-try>
+      <dtml-with documento_vinculado>
+        <dtml-var documento_vinculado_index_html>
+      </dtml-with>
+    <dtml-except>
+      <div class="alert alert-danger">Erro ao carregar abas: vinculados</div>
+    </dtml-try>
   </div>
   <div class="tab-pane p-3 border fade" id="materias">
-    <dtml-with materia_vinculada>
-      <dtml-var materia_vinculada_index_html>
-    </dtml-with>
+    <dtml-try>
+      <dtml-with materia_vinculada>
+        <dtml-var materia_vinculada_index_html>
+      </dtml-with>
+    <dtml-except>
+      <div class="alert alert-danger">Erro ao carregar abas: materias</div>
+    </dtml-try>
   </div>  
   <div class="tab-pane p-3 border fade" id="tramitacao">
-    <dtml-with tramitacao>
-      <dtml-var tramitacao_index_html>
-    </dtml-with>
+    <dtml-try>
+      <legend class="font-size-16">Tramitações</legend>
+
+      <dtml-in expr="zsql.tramitacao_administrativo_obter_zsql(cod_documento=cod_documento)">
+        <dtml-unless expr="ind_ult_tramitacao==0 and not dat_encaminha">
+        <dtml-if sequence-start>
+          <div class="table-responsive mb-2">
+          <table id="tramitacoes_table" class="table datatable-tramitacao w-100">
+           <thead class="table-light">
+            <tr>  
+               <th width="15%">Data e Hora</th>
+               <th>Unidade de Origem</th>
+               <th>Unidade de Destino</th>
+               <th>Status</th>
+               <th width="10%">Despacho</th>
+            </tr>
+           </thead>
+          </dtml-if sequence-start>
+            <tr <dtml-if expr="ind_ult_tramitacao==1">class="bg-light"</dtml-if>> 
+               <td>
+                  <a href="#" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Visualização de Tramitação" data-src="tramitacao/tramitacao_mostrar_proc?hdn_cod_tramitacao=<dtml-var cod_tramitacao>&cod_documento=<dtml-var cod_documento>&modal=1">  
+                    <dtml-var dat_tramitacao>
+                  </a>
+                </td>
+               <td>
+               <dtml-if expr="_.has_key('cod_unid_tram_local')">
+                 <dtml-in expr="unidade_tramitacao_obter_zsql(cod_unid_tramitacao=_.int(cod_unid_tram_local))">
+                   <dtml-if cod_orgao><dtml-var nom_orgao>
+                   <dtml-elif cod_comissao><dtml-var nom_comissao>   
+                   <dtml-else> <dtml-var nom_parlamentar>
+                   </dtml-if>
+                 </dtml-in>
+               </dtml-if>
+               </td>
+               <td><dtml-if cod_unid_tram_dest>
+                 <dtml-in expr="unidade_tramitacao_obter_zsql(cod_unid_tramitacao=_.int(cod_unid_tram_dest))">
+                   <dtml-if cod_orgao><dtml-var nom_orgao>
+                   <dtml-elif cod_comissao><dtml-var nom_comissao>   
+                   <dtml-else><dtml-var nom_parlamentar> 
+                   </dtml-if>
+                 </dtml-in>
+               </dtml-if>
+               </td> 
+               <td><dtml-var des_status></td>
+               <td>
+              <dtml-call expr="REQUEST.set('pdf', str(cod_tramitacao)+'_tram.pdf')">
+              <dtml-call expr="REQUEST.set('pdf_assinado', str(cod_tramitacao)+'_tram_signed.pdf')">
+              <dtml-if "hasattr(sapl_documentos.administrativo.tramitacao,pdf_assinado)">
+                 <dtml-let pdf_assinado="getattr(sapl_documentos.administrativo.tramitacao,pdf_assinado).absolute_url">
+                    <a href="<dtml-var pdf_assinado>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fas fa-certificate"></i><span class="d-none">PDF</span>
+                 </dtml-let>
+              <dtml-elif expr="zsql.assinatura_documento_obter_zsql(codigo=cod_tramitacao,tipo_doc='tramitacao_adm', ind_assinado=1)">
+                 <dtml-in expr="zsql.assinatura_documento_obter_zsql(codigo=cod_tramitacao,tipo_doc='tramitacao_adm', ind_assinado=1, ind_prim_assinatura=1)"> 
+                   <dtml-if "hasattr(sapl_documentos.administrativo.tramitacao,pdf)">
+                     <dtml-let pdf="getattr(sapl_documentos.administrativo.tramitacao,pdf).absolute_url">
+                        <a href="<dtml-var pdf>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fas fa-certificate"></i><span class="d-none">PDF</span></a>
+                     </dtml-let>
+                   <dtml-else>             
+                      <a href="<dtml-var portal_url>/sapl_documentos/documentos_assinados/<dtml-var cod_assinatura_doc>.pdf?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fas fa-certificate"></i><span class="d-none">PDF</span>
+                   </dtml-if>
+                 </dtml-in>        
+              <dtml-elif "hasattr(sapl_documentos.administrativo.tramitacao,pdf)">
+                 <dtml-let pdf="getattr(sapl_documentos.administrativo.tramitacao,pdf).absolute_url">
+                    <a href="<dtml-var pdf>?<dtml-var expr="ZopeTime().timeTime()">" target="_blank"><i class="fa fa-file-pdf"></i><span class="d-none">PDF</span></a>
+                 </dtml-let>
+              <dtml-else>
+                 <i class="fa fa-file-pdf" style="color: #e9e9e9"></i>                   
+              </dtml-if> 
+               </td>
+            </tr>
+          <dtml-if sequence-end>   
+            </table>
+            </div>
+          </dtml-if sequence-end>
+        </dtml-unless>
+      <dtml-else>
+          <p>Nenhuma tramitação cadastrada.</p>
+      </dtml-in>
+
+        <div class="text-start">
+           <button type="button" class="btn btn-light d-print-none" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Cadastro de Tramitação" data-src="tramitacao/tramitacao_form?cod_documento=<dtml-var cod_documento>&modal=1">Incluir Tramitação</button> 
+        </div>
+    <dtml-except>
+      <div class="alert alert-danger">
+        <h5>Erro ao carregar aba: tramitacao</h5>
+        <p><strong>Erro:</strong> <dtml-var error_value></p>
+        <p><strong>Código do Documento:</strong> <dtml-var cod_documento missing="Não definido"></p>
+      </div>
+    </dtml-try>
   </div>
   <div class="tab-pane p-3 border fade" id="cientificacoes">
-    <dtml-with cientificacao>
-      <dtml-var cientificacao_index_html>
-    </dtml-with>
+    <dtml-try>
+      <dtml-with cientificacao>
+        <dtml-var cientificacao_index_html>
+      </dtml-with>
+    <dtml-except>
+      <div class="alert alert-danger">Erro ao carregar abas: cientificacoes</div>
+    </dtml-try>
   </div>
   <div class="tab-pane p-3 border fade" id="destinatarios">
-    <dtml-with destinatario>
-      <dtml-var destinatario_index_html>
-    </dtml-with>
+    <dtml-try>
+      <dtml-with destinatario>
+        <dtml-var destinatario_index_html>
+      </dtml-with>
+    <dtml-except>
+      <div class="alert alert-danger">Erro ao carregar abas: destinatarios</div>
+    </dtml-try>
   </div>   
 </dtml-if>
 

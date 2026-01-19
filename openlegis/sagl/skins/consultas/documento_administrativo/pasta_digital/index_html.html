@@ -3237,6 +3237,45 @@
             
             console.log('[goPagina] URL do PDF:', link);
             
+            // Verifica se o arquivo existe ANTES de carregar o iframe
+            // Se retornar 404 com header X-Pasta-Regenerate, força regeneração
+            // Aguarda a verificação antes de continuar
+            var checkUrl = link;
+            var xhrCheck = new XMLHttpRequest();
+            var shouldContinue = false;
+            
+            // Faz verificação síncrona (bloqueia até completar)
+            try {
+                xhrCheck.open('HEAD', checkUrl, false); // false = síncrono
+                xhrCheck.send(null);
+                
+                // Verifica resposta
+                if (xhrCheck.status === 404 && xhrCheck.getResponseHeader('X-Pasta-Regenerate') === 'true') {
+                    console.warn('[goPagina] Base path não existe, forçando regeneração da pasta digital');
+                    showToast('info', 'Regenerando Pasta Digital', 'O diretório da pasta digital não existe. Regenerando...', 5000);
+                    // Força regeneração recarregando a página com action=pasta
+                    var currentUrl = new URL(window.location.href);
+                    currentUrl.searchParams.set('action', 'pasta');
+                    currentUrl.searchParams.set('force_regenerate', 'true');
+                    // Recarrega a página para forçar regeneração
+                    setTimeout(function() {
+                        window.location.href = currentUrl.toString();
+                    }, 1000); // Aguarda 1 segundo para o usuário ver a mensagem
+                    return; // Sai da função, não continua carregando o iframe
+                }
+                // Se não é erro de regeneração, continua normalmente
+                shouldContinue = true;
+            } catch (e) {
+                // Se houver erro (CORS, rede, etc.), continua com o carregamento normal
+                console.log('[goPagina] Erro ao verificar arquivo (possível CORS):', e, '- continuando com carregamento normal');
+                shouldContinue = true;
+            }
+            
+            // Se não deve continuar (regeneração detectada), sai
+            if (!shouldContinue) {
+                return;
+            }
+            
             // Tenta carregar diretamente, sem verificação prévia
             // Se der erro 404, tenta novamente após um delay (página pode estar sendo gerada)
             // Isso evita bloqueio desnecessário quando a página existe mas demora para renderizar
@@ -3264,6 +3303,21 @@
             // Usa GET para verificar disponibilidade da página
             fetch(link, { method: 'GET', cache: 'no-store' })
                 .then(function(response) {
+                    // Verifica se o erro é "Base path does not exist" - indica que precisa regenerar pasta
+                    if (response.status === 404 && response.headers.get('X-Pasta-Regenerate') === 'true') {
+                        console.warn('[loadPageIntoIframeWithRetry] Base path não existe detectado, forçando regeneração da pasta digital');
+                        showToast('info', 'Regenerando Pasta Digital', 'O diretório da pasta digital não existe. Regenerando...', 5000);
+                        // Força regeneração recarregando a página com action=pasta
+                        var currentUrl = new URL(window.location.href);
+                        currentUrl.searchParams.set('action', 'pasta');
+                        currentUrl.searchParams.set('force_regenerate', 'true');
+                        // Recarrega a página para forçar regeneração
+                        setTimeout(function() {
+                            window.location.href = currentUrl.toString();
+                        }, 1000);
+                        return; // Sai da função, não continua com retry
+                    }
+                    
                     var pageExists = response.ok && response.status === 200;
                     var contentType = response.headers.get('Content-Type') || '';
                     var isPDF = contentType.includes('application/pdf') || contentType.includes('pdf');

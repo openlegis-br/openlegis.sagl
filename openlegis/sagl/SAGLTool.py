@@ -505,24 +505,11 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
                 pdf_data = BytesIO(f.read())
             os.unlink(nom_arquivo_pdf)
             if action == 'gerar':
-                # CRÍTICO: Faz commit intermediário antes de acessar ZODBMountPoint
-                # Isso garante que todos os objetos na transação estejam registrados corretamente
-                # e evita o erro "TypeError: object of type 'NoneType' has no len()"
-                # quando o ZODBMountPoint tenta criar um savepoint otimista
-                try:
-                    txn = transaction.get()
-                    if txn is not None and not txn.isDoomed():
-                        # Faz commit intermediário para garantir que todos os objetos estejam registrados
-                        transaction.commit()
-                        # Inicia nova transação após commit
-                        transaction.begin()
-                except Exception as commit_err:
-                    # Se falhar, aborta e inicia nova transação
-                    try:
-                        transaction.abort()
-                    except:
-                        pass
-                    transaction.begin()
+                # ❌ NÃO faça commit intermediário - o Zope gerencia transações automaticamente
+                # ❌ NÃO chame transaction.commit() ou transaction.abort() manualmente
+                # O Zope fará commit no final do request através do transaction manager
+                # Se você precisa garantir que objetos estejam registrados, use flush() na sessão SQLAlchemy
+                pass
                 
                 # Verifica se o arquivo existe antes de tentar deletar
                 if hasattr(self.temp_folder, nom_arquivo_pdf) and nom_arquivo_pdf in self.temp_folder.objectIds():

@@ -1245,10 +1245,13 @@ class ProcessoLegView(grok.View):
                     }
 
                 # Tramitações - SQLAlchemy (com JOIN para status)
+                # Exclui rascunhos: inclui apenas se ind_ult_tramitacao == 1 OU dat_encaminha IS NOT NULL
+                # Rascunho = ind_ult_tramitacao == 0 E dat_encaminha IS NULL
                 tramitacoes = session.query(Tramitacao, StatusTramitacao)\
                     .join(StatusTramitacao, Tramitacao.cod_status == StatusTramitacao.cod_status)\
                     .filter(Tramitacao.cod_materia == dados_materia['cod_materia'])\
                     .filter(Tramitacao.ind_excluido == 0)\
+                    .filter(or_(Tramitacao.ind_ult_tramitacao == 1, Tramitacao.dat_encaminha.isnot(None)))\
                     .order_by(Tramitacao.dat_tramitacao, Tramitacao.cod_tramitacao)\
                     .all()
                 
@@ -1658,7 +1661,22 @@ class PaginaProcessoLeg(grok.View):
             self.request.RESPONSE.setStatus(404)
             return "Página não encontrada"
         except SecurityError as se:
+            error_msg = str(se)
             logger.error(f"[PaginaProcessoLeg] Erro de segurança ao acessar: {file_path or pagina} - {se}")
+            # Verifica se o erro é "Base path does not exist" - indica que precisa regenerar pasta
+            if "Base path does not exist" in error_msg:
+                # Retorna status 404 com header especial indicando que precisa regenerar
+                self.request.RESPONSE.setStatus(404)
+                self.request.RESPONSE.setHeader('X-Pasta-Regenerate', 'true')
+                self.request.RESPONSE.setHeader('X-Pasta-Cod-Materia', str(cod_materia))
+                self.request.RESPONSE.setHeader('Content-Type', 'application/json; charset=utf-8')
+                import json
+                return json.dumps({
+                    'error': 'Base path does not exist',
+                    'regenerate': True,
+                    'cod_materia': str(cod_materia)
+                }, ensure_ascii=False)
+            # Outros erros de segurança retornam 403
             self.request.RESPONSE.setStatus(403)
             return "Acesso não permitido"
         except Exception as e:

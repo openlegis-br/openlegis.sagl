@@ -257,6 +257,10 @@ def _calculate_documents_sizes_adm(cod_documento, portal):
                 tramitacoes = session.query(TramitacaoAdministrativo)\
                     .filter(TramitacaoAdministrativo.cod_documento == cod_documento)\
                     .filter(TramitacaoAdministrativo.ind_excluido == 0)\
+                    .filter(or_(
+                        TramitacaoAdministrativo.ind_ult_tramitacao == 1,
+                        TramitacaoAdministrativo.dat_encaminha.isnot(None)
+                    ))\
                     .all()
                 for tram_obj in tramitacoes:
                     filename = f"{tram_obj.cod_tramitacao}_tram.pdf"
@@ -391,7 +395,9 @@ def _collect_current_documents_metadata_adm(cod_documento_int, portal):
             tramitacoes = session.query(TramitacaoAdministrativo)\
                 .filter(and_(
                     TramitacaoAdministrativo.cod_documento == cod_documento_int,
-                    TramitacaoAdministrativo.ind_excluido == 0
+                    TramitacaoAdministrativo.ind_excluido == 0,
+                    # Exclui rascunhos: inclui apenas se ind_ult_tramitacao == 1 OU dat_encaminha IS NOT NULL
+                    or_(TramitacaoAdministrativo.ind_ult_tramitacao == 1, TramitacaoAdministrativo.dat_encaminha.isnot(None))
                 ))\
                 .order_by(TramitacaoAdministrativo.dat_tramitacao, TramitacaoAdministrativo.cod_tramitacao)\
                 .all()
@@ -775,7 +781,9 @@ def _calculate_documents_hash_adm(cod_documento, portal):
                 tramitacoes_query = session.query(TramitacaoAdministrativo)\
                     .filter(and_(
                         TramitacaoAdministrativo.cod_documento == cod_documento,
-                        TramitacaoAdministrativo.ind_excluido == 0
+                        TramitacaoAdministrativo.ind_excluido == 0,
+                        # Exclui rascunhos: inclui apenas se ind_ult_tramitacao == 1 OU dat_encaminha IS NOT NULL
+                        or_(TramitacaoAdministrativo.ind_ult_tramitacao == 1, TramitacaoAdministrativo.dat_encaminha.isnot(None))
                     ))
                 
                 tramitacoes = tramitacoes_query.all()
@@ -977,7 +985,8 @@ def verificar_permissao_acesso(context, cod_documento, user, session=None):
         # f) Usuário de origem ou destino em tramitações
         tramitacoes = session.query(TramitacaoAdministrativo).filter(
             TramitacaoAdministrativo.cod_documento == cod_documento,
-            TramitacaoAdministrativo.ind_excluido == 0
+            TramitacaoAdministrativo.ind_excluido == 0,
+            or_(TramitacaoAdministrativo.ind_ult_tramitacao == 1, TramitacaoAdministrativo.dat_encaminha.isnot(None))
         ).all()
         
         for tram in tramitacoes:

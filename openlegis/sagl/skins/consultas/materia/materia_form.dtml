@@ -235,7 +235,8 @@
     </div>
   </div>
  <dtml-if temTramitacao>
-   <dtml-in expr="zsql.tramitacao_obter_zsql(cod_materia=cod_materia, ind_excluido=0)">
+   <dtml-in expr="zsql.tramitacao_obter_zsql(cod_materia=cod_materia, ind_ult_tramitacao=1, ind_excluido=0)">
+     <dtml-unless expr="ind_ult_tramitacao==0 and not dat_encaminha">
      <dtml-if sequence-start>
       <dtml-call expr="REQUEST.set('cod_ult_origem', int(cod_unid_tram_local))">     
       <dtml-call expr="REQUEST.set('cod_ult_dest', int(cod_unid_tram_dest))">
@@ -287,6 +288,7 @@
        </div>
       </div>
     </dtml-if>
+    </dtml-unless>
   </dtml-in>
 </dtml-if>
 </div>
@@ -808,9 +810,14 @@
                     </div>
                   </dtml-if>
           <dtml-in expr="zsql.tramitacao_obter_zsql(cod_materia=cod_materia)">
-            <dtml-if sequence-start>
+            <dtml-unless expr="ind_ult_tramitacao==0 and not dat_encaminha">
+            <dtml-if expr="not REQUEST.get('tram_timeline_started')">
+              <dtml-call expr="REQUEST.set('tram_timeline_started', 1)">
+              <dtml-call expr="REQUEST.set('tram_timeline_is_first', 1)">
               <div class="col-md-10 offset-md-1">                     
                  <div class="container">
+            <dtml-else>
+              <dtml-call expr="REQUEST.set('tram_timeline_is_first', 0)">
             </dtml-if>
 
              <!-- timeline item 1 -->
@@ -818,11 +825,11 @@
                  <!-- timeline item 1 left dot -->
                  <div class="col-auto text-center flex-column d-none d-sm-flex">
                      <div class="row h-50">
-                         <div class="col <dtml-unless sequence-start>border-end</dtml-unless>">&nbsp;</div>
+                         <div class="col <dtml-unless expr="REQUEST.get('tram_timeline_is_first')">border-end</dtml-unless>">&nbsp;</div>
                          <div class="col">&nbsp;</div>
                      </div>
                      <h5 class="m-2">
-                         <span class="badge rounded-pill <dtml-if sequence-start>bg-primary</dtml-if> border">&nbsp;</span>
+                         <span class="badge rounded-pill <dtml-if expr="REQUEST.get('tram_timeline_is_first')">bg-primary</dtml-if> border">&nbsp;</span>
                      </h5>
                      <div class="row h-50">
                          <div class="col border-end order">&nbsp;</div>
@@ -884,12 +891,17 @@
              <!--/row-->
                    
             <dtml-if sequence-end>
+              <dtml-if expr="REQUEST.get('tram_timeline_started')">
                  </ul>
                </div>
               </div>
              </div>
+              </dtml-if>
             </dtml-if>            
+            </dtml-unless>
           </dtml-in>
+          <dtml-call expr="REQUEST.set('tram_timeline_started', 0)">
+          <dtml-call expr="REQUEST.set('tram_timeline_is_first', 0)">
         </div>
       </div>
       <div class="card-body">

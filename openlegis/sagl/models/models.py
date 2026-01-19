@@ -1063,7 +1063,9 @@ class DocumentoAdministrativo(Base):
         Index('idx_fulltext_documento_adm', 'txt_assunto', 'txt_observacao', mysql_prefix='FULLTEXT'),
         Index('num_protocolo', 'num_protocolo'),
         Index('tip_documento', 'tip_documento', 'num_documento', 'ano_documento'),
-        Index('txt_interessado', 'txt_interessado')
+        Index('txt_interessado', 'txt_interessado'),
+        # Índice para filtro por tramitação com exclusão
+        Index('idx_documento_tramitacao', 'ind_tramitacao', 'ind_excluido')
     )
 
     cod_documento = mapped_column(Integer, primary_key=True)
@@ -3548,7 +3550,9 @@ class StatusTramitacao(Base):
     __tablename__ = 'status_tramitacao'
     __table_args__ = (
         Index('des_status', 'des_status'),
-        Index('sgl_status', 'sgl_status')
+        Index('sgl_status', 'sgl_status'),
+        # Índice de performance para JOINs com tramitacao (ind_retorno_tramitacao usado em JOIN)
+        Index('idx_status_tramitacao_retorno', 'cod_status', 'ind_retorno_tramitacao', 'ind_excluido')
     )
 
     cod_status = mapped_column(Integer, primary_key=True)
@@ -3569,7 +3573,9 @@ class StatusTramitacaoAdministrativo(Base):
     __tablename__ = 'status_tramitacao_administrativo'
     __table_args__ = (
         Index('des_status', 'des_status'),
-        Index('sgl_status', 'sgl_status')
+        Index('sgl_status', 'sgl_status'),
+        # Índice de performance para JOINs com tramitacao_administrativo (ind_retorno_tramitacao usado em JOIN)
+        Index('idx_status_tramitacao_adm_retorno', 'cod_status', 'ind_retorno_tramitacao', 'ind_excluido')
     )
 
     cod_status = mapped_column(Integer, primary_key=True)
@@ -4000,17 +4006,29 @@ class Tramitacao(Base):
         Index('cod_usuario_local', 'cod_usuario_local'),
         Index('cod_usuario_visualiza', 'cod_usuario_visualiza'),
         Index('idx_tramit_ultmat', 'ind_ult_tramitacao', 'dat_tramitacao', 'cod_materia', 'ind_excluido'),
+        # Índices essenciais otimizados (alinhados com o banco de dados)
+        # Índice básico para consultas genéricas por matéria
+        Index('idx_tramitacao_cod_materia', 'cod_materia'),
         # Índice para buscar última tramitação por matéria (ordem otimizada)
         Index('idx_tramitacao_materia_ult', 'cod_materia', 'ind_ult_tramitacao', 'ind_excluido', 'dat_tramitacao'),
         # Índice composto para otimizar queries de tramitações por matéria com ORDER BY (usado em pasta digital)
         Index('idx_tramitacao_materia_excluido_data', 'cod_materia', 'ind_excluido', 'dat_tramitacao'),
+        # Índice para rascunhos com ordenação por data (usado em listagens de rascunhos)
+        Index('idx_tramitacao_rascunho_materia', 'cod_usuario_local', 'ind_ult_tramitacao', 'dat_encaminha', 'ind_excluido', 'dat_tramitacao'),
+        # Índice para rascunhos (última tramitação, sem ordenação por data)
+        Index('idx_tramitacao_rascunhos_ult', 'cod_usuario_local', 'ind_ult_tramitacao', 'ind_excluido', 'dat_encaminha'),
         # Índice para filtros por status com exclusão
         Index('idx_tramitacao_status', 'cod_status', 'ind_excluido'),
-        # Índice para filtros por unidade de tramitação com exclusão
-        Index('idx_tramitacao_unidade', 'cod_unid_tram_dest', 'ind_excluido'),
         # Índice para filtros por data de tramitação com exclusão
         Index('idx_tramitacao_data', 'dat_tramitacao', 'ind_excluido'),
-        Index('sgl_turno', 'sgl_turno')
+        Index('sgl_turno', 'sgl_turno'),
+        # Índices de performance para views de tramitação
+        # Índice para caixa de entrada (query mais frequente)
+        Index('idx_tramitacao_caixa_entrada', 'cod_unid_tram_dest', 'ind_ult_tramitacao', 'ind_excluido', 'dat_encaminha', 'dat_recebimento'),
+        # Índice para itens enviados
+        Index('idx_tramitacao_itens_enviados', 'cod_usuario_local', 'ind_ult_tramitacao', 'ind_excluido', 'dat_encaminha', 'dat_recebimento'),
+        # Índice para busca por usuário destino (usado em caixa de entrada não-responsável)
+        Index('idx_tramitacao_usuario_dest', 'cod_unid_tram_dest', 'cod_usuario_dest', 'ind_ult_tramitacao', 'ind_excluido', 'dat_encaminha', 'dat_recebimento')
     )
 
     cod_tramitacao = mapped_column(Integer, primary_key=True)
@@ -4061,7 +4079,23 @@ class TramitacaoAdministrativo(Base):
         Index('cod_usuario_dest', 'cod_usuario_dest'),
         Index('cod_usuario_local', 'cod_usuario_local'),
         Index('cod_usuario_visualiza', 'cod_usuario_visualiza'),
-        Index('tramitacao_ind1', 'ind_ult_tramitacao')
+        Index('tramitacao_ind1', 'ind_ult_tramitacao'),
+        # Índices essenciais otimizados (alinhados com o banco de dados)
+        # Índice básico para consultas genéricas por documento
+        Index('idx_tramitacao_adm_cod_documento', 'cod_documento'),
+        # Índice para rascunhos com ordenação por data (usado em listagens de rascunhos)
+        Index('idx_tramitacao_rascunho_doc', 'cod_usuario_local', 'ind_ult_tramitacao', 'dat_encaminha', 'ind_excluido', 'dat_tramitacao'),
+        # Índice para rascunhos administrativos (última tramitação, sem ordenação por data)
+        Index('idx_tramitacao_adm_rascunhos_ult', 'cod_usuario_local', 'ind_ult_tramitacao', 'ind_excluido', 'dat_encaminha'),
+        # Índice para EXISTS subqueries por documento (verificar rascunhos pendentes)
+        Index('idx_tramitacao_adm_rascunhos_doc', 'cod_documento', 'ind_ult_tramitacao', 'ind_excluido', 'dat_encaminha'),
+        # Índices de performance para views de tramitação administrativa
+        # Índice para caixa de entrada administrativa
+        Index('idx_tramitacao_adm_caixa_entrada', 'cod_unid_tram_dest', 'ind_ult_tramitacao', 'ind_excluido', 'dat_encaminha', 'dat_recebimento'),
+        # Índice para itens enviados administrativos
+        Index('idx_tramitacao_adm_itens_enviados', 'cod_usuario_local', 'ind_ult_tramitacao', 'ind_excluido', 'dat_encaminha', 'dat_recebimento'),
+        # Índice para busca por usuário destino administrativo
+        Index('idx_tramitacao_adm_usuario_dest', 'cod_unid_tram_dest', 'cod_usuario_dest', 'ind_ult_tramitacao', 'ind_excluido', 'dat_encaminha', 'dat_recebimento')
     )
 
     cod_tramitacao = mapped_column(Integer, primary_key=True)
@@ -4294,7 +4328,8 @@ class UsuarioUnidTram(Base):
         ForeignKeyConstraint(['cod_unid_tramitacao'], ['unidade_tramitacao.cod_unid_tramitacao'], ondelete='CASCADE', name='usuario_unid_tram_ibfk_1'),
         ForeignKeyConstraint(['cod_usuario'], ['usuario.cod_usuario'], ondelete='CASCADE', name='usuario_unid_tram_ibfk_2'),
         Index('idx_unid_tramitacao', 'cod_unid_tramitacao'),
-        Index('idx_usuario', 'cod_usuario')
+        # Índice para buscar unidades do usuário (usado para filtrar por usuário, exclusão e responsável)
+        Index('idx_usuario_unid_tram', 'cod_usuario', 'ind_excluido', 'ind_responsavel')
     )
 
     id = mapped_column(Integer, primary_key=True)

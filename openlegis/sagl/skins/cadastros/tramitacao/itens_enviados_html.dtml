@@ -1,0 +1,343 @@
+<dtml-let isAnon="portal_membership.isAnonymousUser()">
+<dtml-if expr="isAnon">
+  <dtml-call expr="REQUEST.RESPONSE.redirect(portal_url + '/login_form?came_from=' + REQUEST['URL'])">
+<dtml-else>
+<dtml-var header_html>
+
+<style scoped>
+tr.clickable:hover td {
+    cursor: pointer;
+    background: #F3F5F7 !important;
+}
+.badge-tipo-materia {
+    background-color: #0d6efd;
+    color: white;
+    padding: 0.25em 0.5em;
+    border-radius: 0.25rem;
+    font-size: 0.875em;
+}
+.badge-tipo-documento {
+    background-color: #198754;
+    color: white;
+    padding: 0.25em 0.5em;
+    border-radius: 0.25rem;
+    font-size: 0.875em;
+}
+.prazo-vencido {
+    color: #DE1E1E;
+    font-weight: bold;
+}
+.prazo-proximo {
+    color: #FF8C00;
+    font-weight: bold;
+}
+/* Ementa/assunto com elipsis */
+.ementa-assunto {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+    font-size: 0.875rem;
+    color: #495057;
+    line-height: 1.4;
+    cursor: help;
+}
+</style>
+
+<div class="row mb-3">
+    <div class="col-12">
+        <h1 class="firstHeading font-size-18">Itens Enviados - Tramitações Encaminhadas</h1>
+    </div>
+</div>
+
+<!-- Filtros -->
+<div class="card mb-3">
+    <div class="card-body">
+        <div class="btn-group" role="group">
+            <button type="button" class="btn btn-outline-primary active" data-filtro="TODOS" onclick="filtrarItensEnviados('TODOS')">
+                <i class="fas fa-list"></i> Todas
+            </button>
+            <button type="button" class="btn btn-outline-primary" data-filtro="MATERIA" onclick="filtrarItensEnviados('MATERIA')">
+                <i class="fas fa-file-alt"></i> Matérias
+            </button>
+            <button type="button" class="btn btn-outline-primary" data-filtro="DOCUMENTO" onclick="filtrarItensEnviados('DOCUMENTO')">
+                <i class="fas fa-file"></i> Documentos
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Container de Itens Enviados -->
+<div id="itens-enviados-container">
+    <div class="text-center p-5">
+        <i class="fa fa-spinner fa-spin fa-2x"></i>
+        <p class="mt-2">Carregando itens enviados...</p>
+    </div>
+</div>
+
+<dtml-var js_slot>
+
+<script>
+let todasTramitacoes = [];
+let filtroAtual = 'TODOS';
+
+// Carrega dados via view assíncrona unificada
+$(document).ready(function() {
+    carregarItensEnviados();
+    
+    // Verifica se há filtro na URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const filtroURL = urlParams.get('filtro');
+    if (filtroURL) {
+        filtrarItensEnviados(filtroURL);
+    }
+});
+
+function carregarItensEnviados(filtro = '') {
+    $('#itens-enviados-container').html(
+        '<div class="text-center p-5"><i class="fa fa-spinner fa-spin fa-2x"></i><p class="mt-2">Carregando...</p></div>'
+    );
+    
+    $.ajax({
+        url: '/tramitacao_itens_enviados_json',
+        method: 'GET',
+        data: filtro ? {tipo: filtro} : {},
+        dataType: 'json',
+        success: function(dados) {
+            if (dados.erro) {
+                $('#itens-enviados-container').html(
+                    '<div class="alert alert-danger">Erro: ' + dados.erro + '</div>'
+                );
+                return;
+            }
+            
+            todasTramitacoes = dados.tramitacoes || [];
+            renderizarItensEnviados(filtro || filtroAtual);
+        },
+        error: function(xhr, status, error) {
+            $('#itens-enviados-container').html(
+                '<div class="alert alert-danger">Erro ao carregar itens enviados: ' + error + '</div>'
+            );
+        }
+    });
+}
+
+function filtrarItensEnviados(tipo) {
+    filtroAtual = tipo;
+    
+    // Atualiza botões
+    $('[data-filtro]').removeClass('active');
+    $('[data-filtro="' + tipo + '"]').addClass('active');
+    
+    renderizarItensEnviados(tipo);
+}
+
+function renderizarItensEnviados(filtro) {
+    let tramitacoes = todasTramitacoes;
+    
+    // Aplica filtro
+    if (filtro !== 'TODOS') {
+        tramitacoes = tramitacoes.filter(t => t.tipo === filtro);
+    }
+    
+    if (tramitacoes.length === 0) {
+        $('#itens-enviados-container').html(
+            '<div class="alert alert-info">Nenhum item enviado encontrado.</div>'
+        );
+        return;
+    }
+    
+    // Monta tabela
+    let html = `
+        <div class="table-responsive">
+            <table class="table table-hover table-border display w-100" id="tabela-itens-enviados">
+                <thead class="table-light">
+                    <tr>
+                        <th width="8%">Tipo</th>
+                        <th width="20%">Tramitação</th>
+                        <th width="40%">Processo</th>
+                        <th width="16%">Origem</th>
+                        <th width="16%">Destino</th>
+                        <th width="10%">Prazo</th>
+                    </tr>
+                </thead>
+                <tbody>
+    `;
+    
+    const hoje = new Date();
+    hoje.setHours(0, 0, 0, 0);
+    
+    tramitacoes.forEach(function(tram) {
+        const tipoBadge = tram.tipo === 'MATERIA' 
+            ? '<span class="badge badge-tipo-materia">Matéria</span>'
+            : '<span class="badge badge-tipo-documento">Documento</span>';
+        
+        let processo = '';
+        let ementaAssunto = '';
+        if (tram.tipo === 'MATERIA') {
+            ementaAssunto = tram.materia_ementa || '';
+            processo = `
+                <b>${tram.materia_sigla || ''} ${tram.materia_num || ''}/${tram.materia_ano || ''}</b>
+                <br><small class="ementa-assunto" 
+                           title="${ementaAssunto}"
+                           data-bs-toggle="tooltip" 
+                           data-bs-placement="top">${ementaAssunto}</small>
+            `;
+        } else {
+            ementaAssunto = tram.documento_assunto || '';
+            processo = `
+                <b>${tram.documento_sigla || ''} ${tram.documento_num || ''}/${tram.documento_ano || ''}</b>
+                <br><small class="ementa-assunto" 
+                           title="${ementaAssunto}"
+                           data-bs-toggle="tooltip" 
+                           data-bs-placement="top">${ementaAssunto}</small>
+            `;
+        }
+        
+        // Verifica prazo
+        let prazoHtml = '';
+        let prazoClass = '';
+        if (tram.dat_fim_prazo) {
+            const prazo = new Date(tram.dat_fim_prazo);
+            prazo.setHours(0, 0, 0, 0);
+            const diasRestantes = Math.ceil((prazo - hoje) / (1000 * 60 * 60 * 24));
+            
+            if (diasRestantes < 0) {
+                prazoClass = 'prazo-vencido';
+                prazoHtml = formatarData(tram.dat_fim_prazo) + ' <span class="badge bg-danger">Vencido</span>';
+            } else if (diasRestantes <= 3) {
+                prazoClass = 'prazo-proximo';
+                prazoHtml = formatarData(tram.dat_fim_prazo) + ' <span class="badge bg-warning">' + diasRestantes + ' dias</span>';
+            } else {
+                prazoHtml = formatarData(tram.dat_fim_prazo);
+            }
+        }
+        
+        const urlVisualizar = tram.tipo === 'MATERIA'
+            ? '/cadastros/tramitacao_materia/tramitacao_mostrar_proc?hdn_cod_tramitacao=' + tram.cod_tramitacao
+            : '/cadastros/tramitacao_documento/tramitacao_mostrar_proc?hdn_cod_tramitacao=' + tram.cod_tramitacao;
+        
+        html += `
+            <tr class="clickable" onclick="window.location.href='${urlVisualizar}'">
+                <td>${tipoBadge}</td>
+                <td>${tram.dat_encaminha ? formatarData(tram.dat_encaminha) : ''}</td>
+                <td>${processo}</td>
+                <td>${tram.unidade_origem || ''}</td>
+                <td>${tram.unidade_destino || ''}</td>
+                <td class="${prazoClass}">${prazoHtml}</td>
+            </tr>
+        `;
+    });
+    
+    html += `
+                </tbody>
+            </table>
+        </div>
+    `;
+    
+    $('#itens-enviados-container').html(html);
+    
+    // Inicializa tooltips do Bootstrap para ementas/assuntos
+    if (typeof bootstrap !== 'undefined' && bootstrap.Tooltip) {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    }
+    
+    // Aguarda DataTables estar disponível e inicializa
+    if (typeof $.fn.DataTable !== 'undefined') {
+        // Destroi DataTable existente se houver
+        if ($.fn.DataTable.isDataTable("#tabela-itens-enviados")) {
+            $("#tabela-itens-enviados").DataTable().destroy();
+        }
+        
+        // Inicializa DataTables
+        var tableItensEnviados = $("#tabela-itens-enviados").DataTable({
+            language: {
+                emptyTable: "Nenhum item enviado encontrado",
+                info: "Mostrando _START_ até _END_ de _TOTAL_ registros",
+                infoEmpty: "Mostrando 0 até 0 de 0 registros",
+                infoFiltered: "(Filtrados de _MAX_ registros)",
+                lengthMenu: "Mostrar _MENU_ registros",
+                search: "Buscar:",
+                zeroRecords: "Nenhum registro encontrado",
+                paginate: {
+                    first: "Primeiro",
+                    last: "Último",
+                    next: "Próximo",
+                    previous: "Anterior"
+                }
+            },
+            order: [[1, 'desc']], // Ordena por data de encaminhamento (coluna 1)
+            pageLength: 10,
+            lengthMenu: [[10, 20, 30, 40, -1], [10, 20, 30, 40, "Todos"]],
+            responsive: true,
+            columnDefs: [
+                { orderable: true, targets: [0, 1, 2, 3, 4, 5] }
+            ]
+        });
+        
+        // Reinicializa tooltips após DataTables atualizar o DOM
+        tableItensEnviados.on('draw', function () {
+            if (typeof bootstrap !== 'undefined' && bootstrap.Tooltip) {
+                // Destroi tooltips existentes
+                var tooltipList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+                tooltipList.forEach(function (tooltipEl) {
+                    var tooltipInstance = bootstrap.Tooltip.getInstance(tooltipEl);
+                    if (tooltipInstance) {
+                        tooltipInstance.dispose();
+                    }
+                });
+                // Reinicializa tooltips
+                tooltipList.forEach(function (tooltipTriggerEl) {
+                    new bootstrap.Tooltip(tooltipTriggerEl);
+                });
+            }
+        });
+    } else {
+        // Fallback: aguarda DataTables carregar
+        setTimeout(function() {
+            if (typeof $.fn.DataTable !== 'undefined') {
+                $("#tabela-itens-enviados").DataTable({
+                    language: {
+                        emptyTable: "Nenhum item enviado encontrado",
+                        info: "Mostrando _START_ até _END_ de _TOTAL_ registros",
+                        infoEmpty: "Mostrando 0 até 0 de 0 registros",
+                        infoFiltered: "(Filtrados de _MAX_ registros)",
+                        lengthMenu: "Mostrar _MENU_ registros",
+                        search: "Buscar:",
+                        zeroRecords: "Nenhum registro encontrado",
+                        paginate: {
+                            first: "Primeiro",
+                            last: "Último",
+                            next: "Próximo",
+                            previous: "Anterior"
+                        }
+                    },
+                    order: [[1, 'desc']],
+                    pageLength: 10,
+                    lengthMenu: [[10, 20, 30, 40, -1], [10, 20, 30, 40, "Todos"]],
+                    responsive: true
+                });
+            }
+        }, 100);
+    }
+}
+
+function formatarData(dataISO) {
+    if (!dataISO) return '';
+    try {
+        const data = new Date(dataISO);
+        return data.toLocaleDateString('pt-BR') + ' ' + data.toLocaleTimeString('pt-BR', {hour: '2-digit', minute: '2-digit'});
+    } catch (e) {
+        return dataISO;
+    }
+}
+</script>
+
+<dtml-var footer_html>
+</dtml-if>
+</dtml-let>

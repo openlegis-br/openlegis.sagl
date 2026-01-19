@@ -3174,6 +3174,45 @@
             
             console.log('[goPagina] URL do PDF:', link);
             
+            // Verifica se o arquivo existe ANTES de carregar o iframe
+            // Se retornar 404 com header X-Pasta-Regenerate, força regeneração
+            // Aguarda a verificação antes de continuar
+            var checkUrl = link;
+            var xhrCheck = new XMLHttpRequest();
+            var shouldContinue = false;
+            
+            // Faz verificação síncrona (bloqueia até completar)
+            try {
+                xhrCheck.open('HEAD', checkUrl, false); // false = síncrono
+                xhrCheck.send(null);
+                
+                // Verifica resposta
+                if (xhrCheck.status === 404 && xhrCheck.getResponseHeader('X-Pasta-Regenerate') === 'true') {
+                    console.warn('[goPagina] Base path não existe, forçando regeneração da pasta digital');
+                    showToast('info', 'Regenerando Pasta Digital', 'O diretório da pasta digital não existe. Regenerando...', 5000);
+                    // Força regeneração recarregando a página com action=pasta
+                    var currentUrl = new URL(window.location.href);
+                    currentUrl.searchParams.set('action', 'pasta');
+                    currentUrl.searchParams.set('force_regenerate', 'true');
+                    // Recarrega a página para forçar regeneração
+                    setTimeout(function() {
+                        window.location.href = currentUrl.toString();
+                    }, 1000); // Aguarda 1 segundo para o usuário ver a mensagem
+                    return; // Sai da função, não continua carregando o iframe
+                }
+                // Se não é erro de regeneração, continua normalmente
+                shouldContinue = true;
+            } catch (e) {
+                // Se houver erro (CORS, rede, etc.), continua com o carregamento normal
+                console.log('[goPagina] Erro ao verificar arquivo (possível CORS):', e, '- continuando com carregamento normal');
+                shouldContinue = true;
+            }
+            
+            // Se não deve continuar (regeneração detectada), sai
+            if (!shouldContinue) {
+                return;
+            }
+            
             // Constrói a URL do PDF.js viewer
             var portalUrl = APP_DATA.portal_url || '';
             // Usa o viewer do PDF.js disponível em skins
@@ -3252,19 +3291,54 @@
                     }
                     
                     console.error('[goPagina] Erro ao carregar iframe:', pdfjsViewerUrl, e);
-                    currentRetry++;
                     
-                    if (currentRetry < maxRetries) {
-                        console.log('[goPagina] Tentando novamente (tentativa', currentRetry + 1, 'de', maxRetries, ') após', retryDelay, 'ms');
-                        setTimeout(function() {
-                            iframe.setAttribute('src', pdfjsViewerUrl);
-                        }, retryDelay);
-                        retryDelay *= 2; // Backoff exponencial
-                    } else {
-                        console.error('[goPagina] Máximo de tentativas atingido');
-                        alert('Erro ao carregar a página após ' + maxRetries + ' tentativas. Tente novamente.');
-                        iframe.removeEventListener('load', loadHandler);
-                        iframe.removeEventListener('error', errorHandler);
+                    // Verifica se o erro é devido ao diretório base não existir
+                    // Faz uma requisição AJAX para verificar o header X-Pasta-Regenerate
+                    var checkUrl = link; // URL do PDF original (não do viewer)
+                    var xhr = new XMLHttpRequest();
+                    xhr.open('HEAD', checkUrl, true);
+                    xhr.onload = function() {
+                        // Se retornou 404 e tem header X-Pasta-Regenerate, força regeneração
+                        if (xhr.status === 404 && xhr.getResponseHeader('X-Pasta-Regenerate') === 'true') {
+                            console.warn('[goPagina] Base path não existe detectado no erro, forçando regeneração da pasta digital');
+                            showToast('info', 'Regenerando Pasta Digital', 'O diretório da pasta digital não existe. Regenerando...', 5000);
+                            // Força regeneração recarregando a página com action=pasta
+                            var currentUrl = new URL(window.location.href);
+                            currentUrl.searchParams.set('action', 'pasta');
+                            currentUrl.searchParams.set('force_regenerate', 'true');
+                            // Recarrega a página para forçar regeneração
+                            setTimeout(function() {
+                                window.location.href = currentUrl.toString();
+                            }, 1000); // Aguarda 1 segundo para o usuário ver a mensagem
+                            iframe.removeEventListener('load', loadHandler);
+                            iframe.removeEventListener('error', errorHandler);
+                            return;
+                        }
+                        // Se não é erro de regeneração, continua com retry normal
+                        _continueWithRetry();
+                    };
+                    xhr.onerror = function() {
+                        // Em caso de erro de rede, continua com retry normal
+                        console.log('[goPagina] Erro ao verificar arquivo (possível CORS), continuando com retry normal');
+                        _continueWithRetry();
+                    };
+                    xhr.send();
+                    
+                    // Função auxiliar para continuar com retry normal
+                    function _continueWithRetry() {
+                        currentRetry++;
+                        if (currentRetry < maxRetries) {
+                            console.log('[goPagina] Tentando novamente (tentativa', currentRetry + 1, 'de', maxRetries, ') após', retryDelay, 'ms');
+                            setTimeout(function() {
+                                iframe.setAttribute('src', pdfjsViewerUrl);
+                            }, retryDelay);
+                            retryDelay *= 2; // Backoff exponencial
+                        } else {
+                            console.error('[goPagina] Máximo de tentativas atingido');
+                            alert('Erro ao carregar a página após ' + maxRetries + ' tentativas. Tente novamente.');
+                            iframe.removeEventListener('load', loadHandler);
+                            iframe.removeEventListener('error', errorHandler);
+                        }
                     }
                 };
                 

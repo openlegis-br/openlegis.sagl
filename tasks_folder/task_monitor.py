@@ -50,8 +50,33 @@ def get_task_status(task_id):
         
         if result.ready():
             if result.successful():
-                response['result'] = result.result
+                # Armazena o resultado da task
+                task_result = result.result
+                response['result'] = task_result
                 response['date_done'] = datetime.now().isoformat()
+                
+                # Se o resultado é um dict e tem pdf_base64, já está disponível
+                if isinstance(task_result, dict) and 'pdf_base64' in task_result:
+                    logger.debug(f"[get_task_status] PDF encontrado no result da task {task_id}")
+                # Tenta obter meta do backend para incluir informações de progresso (ex: pdf_base64)
+                try:
+                    if hasattr(result, 'backend') and result.backend:
+                        meta = result.backend.get_task_meta(task_id)
+                        if meta:
+                            # Inclui meta no response (contém informações do último update_state)
+                            if 'meta' in meta:
+                                response['meta'] = meta['meta']
+                            # Se não tem 'meta', mas tem outras informações úteis, inclui
+                            elif isinstance(meta, dict):
+                                # Filtra apenas campos relevantes do meta
+                                meta_filtered = {k: v for k, v in meta.items() 
+                                                if k in ['status', 'status_text', 'current', 'total', 
+                                                        'stage', 'pdf_base64', 'pdf_filename', 
+                                                        'tipo', 'cod_tramitacao', 'resultados']}
+                                if meta_filtered:
+                                    response['meta'] = meta_filtered
+                except Exception as meta_err:
+                    logger.debug(f"[get_task_status] Erro ao obter meta do backend para task concluída {task_id}: {meta_err}")
             else:
                 # Tarefa falhou - trata exceções mal serializadas
                 try:

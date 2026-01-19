@@ -10,6 +10,7 @@ FROM tramitacao_administrativo
 
 <dtml-sqlgroup where>
   tramitacao_administrativo.ind_excluido = 0
+  AND NOT (tramitacao_administrativo.ind_ult_tramitacao = 0 AND tramitacao_administrativo.dat_encaminha IS NULL)
 
 <dtml-and>
   <dtml-sqltest cod_documento column="tramitacao_administrativo.cod_documento" op="=" type="int" optional>

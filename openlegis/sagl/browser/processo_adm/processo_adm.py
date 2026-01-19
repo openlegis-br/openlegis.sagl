@@ -1708,7 +1708,22 @@ class PaginaProcessoAdmView(grok.View):
             return data
             
         except SecurityError as se:
+            error_msg = str(se)
             logger.error(f"[PaginaProcessoAdmView] Erro de segurança ao acessar: {file_path or pagina} - {se}")
+            # Verifica se o erro é "Base path does not exist" - indica que precisa regenerar pasta
+            if "Base path does not exist" in error_msg:
+                # Retorna status 404 com header especial indicando que precisa regenerar
+                self.request.RESPONSE.setStatus(404)
+                self.request.RESPONSE.setHeader('X-Pasta-Regenerate', 'true')
+                self.request.RESPONSE.setHeader('X-Pasta-Cod-Documento', str(cod_documento))
+                self.request.RESPONSE.setHeader('Content-Type', 'application/json; charset=utf-8')
+                import json
+                return json.dumps({
+                    'error': 'Base path does not exist',
+                    'regenerate': True,
+                    'cod_documento': str(cod_documento)
+                }, ensure_ascii=False)
+            # Outros erros de segurança retornam 403
             self.request.RESPONSE.setStatus(403)
             self.request.RESPONSE.setHeader('Content-Type', 'text/plain; charset=utf-8')
             return "Acesso não permitido"

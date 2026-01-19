@@ -1,0 +1,330 @@
+<dtml-let isAnon="portal_membership.isAnonymousUser()">
+<dtml-if expr="isAnon">
+  <dtml-call expr="REQUEST.RESPONSE.redirect(portal_url + '/login_form?came_from=' + REQUEST['URL'])">
+<dtml-else>
+<dtml-var header_html>
+
+<style scoped>
+tr.clickable:hover td {
+    cursor: pointer;
+    background: #F3F5F7 !important;
+}
+.badge-tipo-materia {
+    background-color: #0d6efd;
+    color: white;
+    padding: 0.25em 0.5em;
+    border-radius: 0.25rem;
+    font-size: 0.875em;
+}
+.badge-tipo-documento {
+    background-color: #198754;
+    color: white;
+    padding: 0.25em 0.5em;
+    border-radius: 0.25rem;
+    font-size: 0.875em;
+}
+/* Badge de status com elipsis */
+.badge-status {
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: inline-block;
+    cursor: help;
+    vertical-align: middle;
+}
+/* Ementa/assunto com elipsis */
+.ementa-assunto {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+    font-size: 0.875rem;
+    color: #495057;
+    line-height: 1.4;
+    cursor: help;
+}
+</style>
+
+<div class="row mb-3">
+    <div class="col-12">
+        <h1 class="firstHeading font-size-18">Rascunhos - Tramitações Não Enviadas</h1>
+    </div>
+</div>
+
+<!-- Filtros -->
+<div class="card mb-3">
+    <div class="card-body">
+        <div class="btn-group" role="group">
+            <button type="button" class="btn btn-outline-primary active" data-filtro="TODOS" onclick="filtrarRascunhos('TODOS')">
+                <i class="fas fa-list"></i> Todas
+            </button>
+            <button type="button" class="btn btn-outline-primary" data-filtro="MATERIA" onclick="filtrarRascunhos('MATERIA')">
+                <i class="fas fa-file-alt"></i> Matérias
+            </button>
+            <button type="button" class="btn btn-outline-primary" data-filtro="DOCUMENTO" onclick="filtrarRascunhos('DOCUMENTO')">
+                <i class="fas fa-file"></i> Documentos
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Container de Rascunhos -->
+<div id="rascunhos-container">
+    <div class="text-center p-5">
+        <i class="fa fa-spinner fa-spin fa-2x"></i>
+        <p class="mt-2">Carregando rascunhos...</p>
+    </div>
+</div>
+
+<dtml-var js_slot>
+
+<script>
+let todasTramitacoes = [];
+let filtroAtual = 'TODOS';
+
+// Carrega dados via view assíncrona unificada
+$(document).ready(function() {
+    carregarRascunhos();
+    
+    // Verifica se há filtro na URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const filtroURL = urlParams.get('filtro');
+    if (filtroURL) {
+        filtrarRascunhos(filtroURL);
+    }
+});
+
+function carregarRascunhos(filtro = '') {
+    $('#rascunhos-container').html(
+        '<div class="text-center p-5"><i class="fa fa-spinner fa-spin fa-2x"></i><p class="mt-2">Carregando...</p></div>'
+    );
+    
+    $.ajax({
+        url: '/tramitacao_rascunhos_json',
+        method: 'GET',
+        data: filtro ? {tipo: filtro} : {},
+        dataType: 'json',
+        success: function(dados) {
+            if (dados.erro) {
+                $('#rascunhos-container').html(
+                    '<div class="alert alert-danger">Erro: ' + dados.erro + '</div>'
+                );
+                return;
+            }
+            
+            todasTramitacoes = dados.tramitacoes || [];
+            renderizarRascunhos(filtro || filtroAtual);
+        },
+        error: function(xhr, status, error) {
+            $('#rascunhos-container').html(
+                '<div class="alert alert-danger">Erro ao carregar rascunhos: ' + error + '</div>'
+            );
+        }
+    });
+}
+
+function filtrarRascunhos(tipo) {
+    filtroAtual = tipo;
+    
+    // Atualiza botões
+    $('[data-filtro]').removeClass('active');
+    $('[data-filtro="' + tipo + '"]').addClass('active');
+    
+    renderizarRascunhos(tipo);
+}
+
+function renderizarRascunhos(filtro) {
+    let tramitacoes = todasTramitacoes;
+    
+    // Aplica filtro
+    if (filtro !== 'TODOS') {
+        tramitacoes = tramitacoes.filter(t => t.tipo === filtro);
+    }
+    
+    if (tramitacoes.length === 0) {
+        $('#rascunhos-container').html(
+            '<div class="alert alert-info">Nenhum rascunho encontrado.</div>'
+        );
+        return;
+    }
+    
+    // Monta tabela
+    let html = `
+        <div class="table-responsive">
+            <table class="table table-hover table-border display w-100" id="tabela-rascunhos">
+                <thead class="table-light">
+                    <tr>
+                        <th width="8%">Tipo</th>
+                        <th width="20%">Tramitação</th>
+                        <th width="40%">Processo</th>
+                        <th width="16%">Origem</th>
+                        <th width="16%">Destino</th>
+                        <th width="10%">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+    `;
+    
+    tramitacoes.forEach(function(tram) {
+        const tipoBadge = tram.tipo === 'MATERIA' 
+            ? '<span class="badge badge-tipo-materia">Matéria</span>'
+            : '<span class="badge badge-tipo-documento">Documento</span>';
+        
+        let processo = '';
+        let ementaAssunto = '';
+        if (tram.tipo === 'MATERIA') {
+            ementaAssunto = tram.materia_ementa || '';
+            processo = `
+                <b>${tram.materia_sigla || ''} ${tram.materia_num || ''}/${tram.materia_ano || ''}</b>
+                <br><small class="ementa-assunto" 
+                           title="${ementaAssunto}"
+                           data-bs-toggle="tooltip" 
+                           data-bs-placement="top">${ementaAssunto}</small>
+            `;
+        } else {
+            ementaAssunto = tram.documento_assunto || '';
+            processo = `
+                <b>${tram.documento_sigla || ''} ${tram.documento_num || ''}/${tram.documento_ano || ''}</b>
+                <br><small class="ementa-assunto" 
+                           title="${ementaAssunto}"
+                           data-bs-toggle="tooltip" 
+                           data-bs-placement="top">${ementaAssunto}</small>
+            `;
+        }
+        
+        const urlEditar = tram.tipo === 'MATERIA'
+            ? '/cadastros/tramitacao_materia/tramitacao_form?hdn_cod_tramitacao=' + tram.cod_tramitacao + '&hdn_cod_materia=' + tram.cod_entidade
+            : '/cadastros/tramitacao_documento/tramitacao_form?hdn_cod_tramitacao=' + tram.cod_tramitacao + '&hdn_cod_documento=' + tram.cod_entidade;
+        
+        html += `
+            <tr class="clickable" onclick="window.location.href='${urlEditar}'">
+                <td>${tipoBadge}</td>
+                <td>${tram.dat_tramitacao ? formatarData(tram.dat_tramitacao) : ''}</td>
+                <td>${processo}</td>
+                <td>${tram.unidade_origem || ''}</td>
+                <td>${tram.unidade_destino || ''}</td>
+                <td>
+                    <span class="badge bg-secondary badge-status" 
+                          title="${tram.des_status || 'Não informado'}"
+                          data-bs-toggle="tooltip" 
+                          data-bs-placement="top">
+                        ${tram.des_status || '—'}
+                    </span>
+                </td>
+            </tr>
+        `;
+    });
+    
+    html += `
+                </tbody>
+            </table>
+        </div>
+    `;
+    
+    $('#rascunhos-container').html(html);
+    
+    // Inicializa tooltips do Bootstrap para badges de status e ementas/assuntos
+    if (typeof bootstrap !== 'undefined' && bootstrap.Tooltip) {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    }
+    
+    // Aguarda DataTables estar disponível e inicializa
+    if (typeof $.fn.DataTable !== 'undefined') {
+        // Destroi DataTable existente se houver
+        if ($.fn.DataTable.isDataTable("#tabela-rascunhos")) {
+            $("#tabela-rascunhos").DataTable().destroy();
+        }
+        
+        // Inicializa DataTables
+        var tableRascunhos = $("#tabela-rascunhos").DataTable({
+            language: {
+                emptyTable: "Nenhum rascunho encontrado",
+                info: "Mostrando _START_ até _END_ de _TOTAL_ registros",
+                infoEmpty: "Mostrando 0 até 0 de 0 registros",
+                infoFiltered: "(Filtrados de _MAX_ registros)",
+                lengthMenu: "Mostrar _MENU_ registros",
+                search: "Buscar:",
+                zeroRecords: "Nenhum registro encontrado",
+                paginate: {
+                    first: "Primeiro",
+                    last: "Último",
+                    next: "Próximo",
+                    previous: "Anterior"
+                }
+            },
+            order: [[1, 'desc']], // Ordena por data de tramitação (coluna 1)
+            pageLength: 10,
+            lengthMenu: [[10, 20, 30, 40, -1], [10, 20, 30, 40, "Todos"]],
+            responsive: true,
+            columnDefs: [
+                { orderable: true, targets: [0, 1, 2, 3, 4, 5] }
+            ]
+        });
+        
+        // Reinicializa tooltips após DataTables atualizar o DOM
+        tableRascunhos.on('draw', function () {
+            if (typeof bootstrap !== 'undefined' && bootstrap.Tooltip) {
+                // Destroi tooltips existentes
+                var tooltipList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+                tooltipList.forEach(function (tooltipEl) {
+                    var tooltipInstance = bootstrap.Tooltip.getInstance(tooltipEl);
+                    if (tooltipInstance) {
+                        tooltipInstance.dispose();
+                    }
+                });
+                // Reinicializa tooltips
+                tooltipList.forEach(function (tooltipTriggerEl) {
+                    new bootstrap.Tooltip(tooltipTriggerEl);
+                });
+            }
+        });
+    } else {
+        // Fallback: aguarda DataTables carregar
+        setTimeout(function() {
+            if (typeof $.fn.DataTable !== 'undefined') {
+                $("#tabela-rascunhos").DataTable({
+                    language: {
+                        emptyTable: "Nenhum rascunho encontrado",
+                        info: "Mostrando _START_ até _END_ de _TOTAL_ registros",
+                        infoEmpty: "Mostrando 0 até 0 de 0 registros",
+                        infoFiltered: "(Filtrados de _MAX_ registros)",
+                        lengthMenu: "Mostrar _MENU_ registros",
+                        search: "Buscar:",
+                        zeroRecords: "Nenhum registro encontrado",
+                        paginate: {
+                            first: "Primeiro",
+                            last: "Último",
+                            next: "Próximo",
+                            previous: "Anterior"
+                        }
+                    },
+                    order: [[1, 'desc']],
+                    pageLength: 10,
+                    lengthMenu: [[10, 20, 30, 40, -1], [10, 20, 30, 40, "Todos"]],
+                    responsive: true
+                });
+            }
+        }, 100);
+    }
+}
+
+function formatarData(dataISO) {
+    if (!dataISO) return '';
+    try {
+        const data = new Date(dataISO);
+        return data.toLocaleDateString('pt-BR') + ' ' + data.toLocaleTimeString('pt-BR', {hour: '2-digit', minute: '2-digit'});
+    } catch (e) {
+        return dataISO;
+    }
+}
+</script>
+
+<dtml-var footer_html>
+</dtml-if>
+</dtml-let>

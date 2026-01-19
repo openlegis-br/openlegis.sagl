@@ -839,7 +839,22 @@ class PaginaProcessoNorma(grok.View):
             self.request.RESPONSE.setStatus(404)
             return "Página não encontrada"
         except SecurityError as se:
+            error_msg = str(se)
             logger.error(f"[PaginaProcessoNorma] Erro de segurança ao acessar: {file_path or pagina} - {se}")
+            # Verifica se o erro é "Base path does not exist" - indica que precisa regenerar pasta
+            if "Base path does not exist" in error_msg:
+                # Retorna status 404 com header especial indicando que precisa regenerar
+                self.request.RESPONSE.setStatus(404)
+                self.request.RESPONSE.setHeader('X-Pasta-Regenerate', 'true')
+                self.request.RESPONSE.setHeader('X-Pasta-Cod-Norma', str(cod_norma))
+                self.request.RESPONSE.setHeader('Content-Type', 'application/json; charset=utf-8')
+                import json
+                return json.dumps({
+                    'error': 'Base path does not exist',
+                    'regenerate': True,
+                    'cod_norma': str(cod_norma)
+                }, ensure_ascii=False)
+            # Outros erros de segurança retornam 403
             self.request.RESPONSE.setStatus(403)
             return "Acesso não permitido"
         except Exception as e:

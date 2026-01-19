@@ -587,7 +587,10 @@ def _collect_current_documents_metadata(cod_materia_int, portal):
                 .join(StatusTramitacao, Tramitacao.cod_status == StatusTramitacao.cod_status)\
                 .filter(and_(
                     Tramitacao.cod_materia == cod_materia_int,
-                    Tramitacao.ind_excluido == 0
+                    Tramitacao.ind_excluido == 0,
+                    # Exclui rascunhos: inclui apenas se ind_ult_tramitacao == 1 OU dat_encaminha IS NOT NULL
+                    # Rascunho = ind_ult_tramitacao == 0 E dat_encaminha IS NULL
+                    or_(Tramitacao.ind_ult_tramitacao == 1, Tramitacao.dat_encaminha.isnot(None))
                 ))\
                 .order_by(Tramitacao.dat_tramitacao, Tramitacao.cod_tramitacao)\
                 .all()
@@ -1049,7 +1052,14 @@ def _calculate_documents_hash(cod_materia, portal):
             try:
                 # OTIMIZAÇÃO: Eager loading usando selectinload
                 tramitacoes_query = session.query(Tramitacao)\
-                    .filter(and_(Tramitacao.cod_materia == cod_materia, Tramitacao.ind_excluido == 0))\
+                    .filter(and_(
+                        Tramitacao.cod_materia == cod_materia,
+                        Tramitacao.ind_excluido == 0,
+                        # Exclui rascunhos: exclui quando ind_ult_tramitacao == 0 E dat_encaminha IS NULL
+                        # Equivale a: NOT (ind_ult_tramitacao == 0 AND dat_encaminha IS NULL)
+                        # Ou seja, inclui se: ind_ult_tramitacao == 1 OU dat_encaminha IS NOT NULL
+                        ~and_(Tramitacao.ind_ult_tramitacao == 0, Tramitacao.dat_encaminha.is_(None))
+                    ))\
                     .order_by(Tramitacao.dat_tramitacao)
                 
                 # OTIMIZAÇÃO: Tenta adicionar eager loading se houver relações definidas no modelo

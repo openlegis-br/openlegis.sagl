@@ -455,7 +455,9 @@
             </div>
           </dtml-if>
           <dtml-in expr="zsql.tramitacao_administrativo_obter_zsql(cod_documento=cod_documento)">
-            <dtml-if sequence-start>             
+            <dtml-unless expr="ind_ult_tramitacao==0 and not dat_encaminha">
+            <dtml-if expr="not REQUEST.get('tram_adm_table_started')">
+              <dtml-call expr="REQUEST.set('tram_adm_table_started', 1)">
               <div class="table-responsive">
                 <table class="table">
                   <thead class="table-light">
@@ -507,10 +509,14 @@
               </td>  
             </tr>                                          
             <dtml-if sequence-end>
+              <dtml-if expr="REQUEST.get('tram_adm_table_started')">
               </table>
             </div>
+              </dtml-if>
             </dtml-if>            
+            </dtml-unless>
           </dtml-in>
+          <dtml-call expr="REQUEST.set('tram_adm_table_started', 0)">
         </div>
       </div>
     </div>

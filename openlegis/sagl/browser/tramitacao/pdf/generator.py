@@ -310,7 +310,14 @@ class TramitacaoPDFGenerator:
             tramitacao_dic['dat_tramitacao'] = ''
             tramitacao_dic['dat_extenso'] = ''
         
-        tramitacao_dic['dat_encaminha'] = tram.dat_encaminha
+        # Converte dat_encaminha para string se for datetime
+        if tram.dat_encaminha:
+            if hasattr(tram.dat_encaminha, 'strftime'):
+                tramitacao_dic['dat_encaminha'] = tram.dat_encaminha.strftime('%d/%m/%Y')
+            else:
+                tramitacao_dic['dat_encaminha'] = str(tram.dat_encaminha)
+        else:
+            tramitacao_dic['dat_encaminha'] = None
         tramitacao_dic['txt_tramitacao'] = tram.txt_tramitacao or ''
         
         # Status

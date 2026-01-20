@@ -270,14 +270,15 @@ class TramitacaoAnexoService:
         cod_tramitacao: int
     ) -> Optional[BytesIO]:
         """
-        Obtém PDF da tramitação (com anexos já juntados)
+        Obtém PDF da tramitação (com anexos já juntados).
+        Se o PDF não existir, gera automaticamente.
         
         Args:
             tipo: 'MATERIA' ou 'DOCUMENTO'
             cod_tramitacao: Código da tramitação
             
         Returns:
-            BytesIO com PDF ou None se não encontrado
+            BytesIO com PDF ou None se não encontrado e não puder ser gerado
         """
         if not self.contexto_zope:
             return None
@@ -289,8 +290,32 @@ class TramitacaoAnexoService:
         else:
             repo = self.contexto_zope.sapl_documentos.administrativo.tramitacao
         
-        if not hasattr(repo, pdf_filename):
-            return None
+        # Se PDF existe, retorna
+        if hasattr(repo, pdf_filename):
+            pdf_obj = getattr(repo, pdf_filename)
+            return BytesIO(bytes(pdf_obj.data))
         
-        pdf_obj = getattr(repo, pdf_filename)
-        return BytesIO(bytes(pdf_obj.data))
+        # Se não existe, tenta gerar
+        try:
+            from openlegis.sagl.browser.tramitacao.pdf.generator import TramitacaoPDFGenerator
+            
+            # Gera PDF usando o generator
+            generator = TramitacaoPDFGenerator(self.session, self.contexto_zope)
+            pdf_buffer = generator.gerar_pdf(tipo, cod_tramitacao)
+            
+            if pdf_buffer:
+                # Salva no repositório para uso futuro
+                try:
+                    pdf_bytes = pdf_buffer.getvalue()
+                    generator.salvar_pdf_no_repositorio(tipo, cod_tramitacao, pdf_bytes, self.contexto_zope)
+                    logger.info(f"PDF gerado e salvo automaticamente: {pdf_filename}")
+                except Exception as e:
+                    logger.warning(f"Erro ao salvar PDF gerado no repositório: {e}")
+                
+                # Retorna o buffer (reset para leitura)
+                pdf_buffer.seek(0)
+                return pdf_buffer
+        except Exception as e:
+            logger.error(f"Erro ao gerar PDF automaticamente para {cod_tramitacao}: {e}", exc_info=True)
+        
+        return None

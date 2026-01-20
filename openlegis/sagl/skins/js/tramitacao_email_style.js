@@ -8437,11 +8437,43 @@ class TramitacaoSidebarManager {
                 } else {
                     const total = dados.total || this.app.processosSelecionados.size;
                     this.app.mostrarToast('Sucesso', `Tramitação em lote realizada! ${total} processo(s) tramitado(s) com sucesso.`, 'success');
-                    // Desativa proteção antes de fechar (já foi enviado, não precisa proteger)
-                    this.protecaoFechamentoLote = false;
-                    // Atualiza backdrop para permitir fechamento
-                    this._atualizarBackdropProtecao('lote');
-                    this.fecharSidebarLote(true);
+                    
+                    // ✅ Atualiza contadores e listas antes de fechar o sidebar
+                    if (dados.reload_contadores || dados.reload_listas) {
+                        if (this.app && typeof this.app.atualizarContadores === 'function') {
+                            // atualizarContadores sincroniza contadores + lista se necessário
+                            this.app.atualizarContadores(dados.reload_listas === true).then(() => {
+                                // Desativa proteção antes de fechar (já foi enviado, não precisa proteger)
+                                this.protecaoFechamentoLote = false;
+                                // Atualiza backdrop para permitir fechamento
+                                this._atualizarBackdropProtecao('lote');
+                                this.fecharSidebarLote(false); // false porque já atualizamos acima
+                            }).catch((error) => {
+                                console.error('[salvarTramitacaoLote] Erro ao atualizar contadores:', error);
+                                // Mesmo com erro, fecha o sidebar
+                                this.protecaoFechamentoLote = false;
+                                this._atualizarBackdropProtecao('lote');
+                                this.fecharSidebarLote(true);
+                            });
+                        } else {
+                            // Fallback: atualiza individualmente se a função não existir
+                            if (dados.reload_contadores && this.app && typeof this.app.carregarContadores === 'function') {
+                                this.app.carregarContadores();
+                            }
+                            if (dados.reload_listas && this.app && typeof this.app.carregarTramitacoes === 'function') {
+                                this.app.carregarTramitacoes();
+                            }
+                            // Desativa proteção antes de fechar
+                            this.protecaoFechamentoLote = false;
+                            this._atualizarBackdropProtecao('lote');
+                            this.fecharSidebarLote(true);
+                        }
+                    } else {
+                        // Se não há flags de atualização, apenas fecha o sidebar
+                        this.protecaoFechamentoLote = false;
+                        this._atualizarBackdropProtecao('lote');
+                        this.fecharSidebarLote(true);
+                    }
                 }
             },
             error: (xhr) => {

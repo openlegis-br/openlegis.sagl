@@ -151,6 +151,34 @@ def gerar_pdf_despacho_lote_task(
                     
                     pdf_filename = f"{cod_tramitacao}_tram.pdf"
                     
+                    # ✅ Salva PDF no repositório via chamada HTTP (como na task individual)
+                    try:
+                        salvar_url = base_url.rstrip('/')
+                        if '/sagl/' not in salvar_url:
+                            salvar_url = f"{salvar_url}/sagl/@@tramitacao_salvar_pdf"
+                        else:
+                            salvar_url = f"{salvar_url}/@@tramitacao_salvar_pdf"
+                        
+                        # Chama view para salvar PDF
+                        save_data = urllib.parse.urlencode({
+                            'tipo': str(tipo),
+                            'cod_tramitacao': str(cod_tramitacao),
+                            'pdf_base64': pdf_base64
+                        }).encode('utf-8')
+                        
+                        save_req = urllib.request.Request(
+                            salvar_url,
+                            data=save_data,
+                            headers={'Content-Type': 'application/x-www-form-urlencoded'}
+                        )
+                        
+                        with urllib.request.urlopen(save_req, timeout=60) as save_response:
+                            save_result = save_response.read().decode('utf-8')
+                            logger.info(f"[gerar_pdf_despacho_lote_task] PDF salvo no repositório via view HTTP (cod_tramitacao={cod_tramitacao})")
+                    except Exception as e:
+                        logger.error(f"[gerar_pdf_despacho_lote_task] Erro ao salvar PDF via view HTTP para tramitação {cod_tramitacao}: {e}", exc_info=True)
+                        # Continua mesmo se houver erro ao salvar (PDF ainda está disponível em base64)
+                    
                     resultados.append({
                         'cod_tramitacao': cod_tramitacao,
                         'status': 'SUCCESS',

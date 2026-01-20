@@ -186,21 +186,64 @@ def juntar_pdfs_lote_task(
                     executor_url = f"{base_url}/@@tramitacao_anexo_task_executor"
                 
                 # Faz chamada HTTP POST para obter PDF principal
-                data_check = {'tipo': str(tipo), 'cod_tramitacao': str(cod_tramitacao)}
-                post_data_check = urllib.parse.urlencode(data_check).encode('utf-8')
-                req_check = urllib.request.Request(executor_url, data=post_data_check, headers={'Content-Type': 'application/x-www-form-urlencoded'})
+                # Tenta até 3 vezes com delay crescente (para lidar com problemas de timing/commit)
+                max_retries = 3
+                retry_delay = 0.5  # 500ms inicial
+                pdf_principal_bytes = None
                 
-                with urllib.request.urlopen(req_check, timeout=300) as response_check:
-                    result_check = json.loads(response_check.read().decode('utf-8'))
-                    if not result_check.get('success'):
-                        error_msg = result_check.get('error', 'Erro desconhecido')
-                        raise Exception(f"Erro ao obter PDF principal: {error_msg}")
+                for attempt in range(max_retries):
+                    try:
+                        data_check = {'tipo': str(tipo), 'cod_tramitacao': str(cod_tramitacao)}
+                        post_data_check = urllib.parse.urlencode(data_check).encode('utf-8')
+                        req_check = urllib.request.Request(executor_url, data=post_data_check, headers={'Content-Type': 'application/x-www-form-urlencoded'})
+                        
+                        with urllib.request.urlopen(req_check, timeout=300) as response_check:
+                            result_check = json.loads(response_check.read().decode('utf-8'))
+                            
+                            if result_check.get('success'):
+                                pdf_principal_base64 = result_check.get('pdf_base64')
+                                if pdf_principal_base64:
+                                    pdf_principal_bytes = base64.b64decode(pdf_principal_base64)
+                                    break  # Sucesso, sai do loop
+                            
+                            # Se não teve sucesso, verifica se é erro de tramitação não encontrada
+                            error_msg = result_check.get('error', 'Erro desconhecido')
+                            if 'não encontrada' in error_msg.lower() or 'not found' in error_msg.lower():
+                                if attempt < max_retries - 1:
+                                    # Aguarda antes de tentar novamente (pode ser problema de timing/commit)
+                                    import time
+                                    logger.warning(f"[juntar_pdfs_lote_task] Tramitação {cod_tramitacao} não encontrada (tentativa {attempt + 1}/{max_retries}), aguardando {retry_delay}s...")
+                                    time.sleep(retry_delay)
+                                    retry_delay *= 2  # Backoff exponencial
+                                    continue
+                                else:
+                                    # Última tentativa falhou
+                                    raise Exception(f"Erro ao obter PDF principal: {error_msg}")
+                            else:
+                                # Outro tipo de erro, não tenta novamente
+                                raise Exception(f"Erro ao obter PDF principal: {error_msg}")
                     
-                    pdf_principal_base64 = result_check.get('pdf_base64')
-                    if not pdf_principal_base64:
-                        raise Exception("PDF principal não encontrado no resultado")
-                    
-                    pdf_principal_bytes = base64.b64decode(pdf_principal_base64)
+                    except urllib.error.HTTPError as e:
+                        if attempt < max_retries - 1:
+                            import time
+                            logger.warning(f"[juntar_pdfs_lote_task] Erro HTTP {e.code} ao obter PDF principal (tentativa {attempt + 1}/{max_retries}), aguardando {retry_delay}s...")
+                            time.sleep(retry_delay)
+                            retry_delay *= 2
+                            continue
+                        else:
+                            raise Exception(f"Erro HTTP {e.code} ao obter PDF principal após {max_retries} tentativas")
+                    except Exception as e:
+                        if attempt < max_retries - 1 and ('não encontrada' in str(e).lower() or 'not found' in str(e).lower()):
+                            import time
+                            logger.warning(f"[juntar_pdfs_lote_task] Erro ao obter PDF principal (tentativa {attempt + 1}/{max_retries}): {e}, aguardando {retry_delay}s...")
+                            time.sleep(retry_delay)
+                            retry_delay *= 2
+                            continue
+                        else:
+                            raise
+                
+                if not pdf_principal_bytes:
+                    raise Exception("PDF principal não encontrado após todas as tentativas")
                 
                 # Reseta BytesIO para cada tramitação (reutiliza o mesmo arquivo)
                 arquivo_pdf.seek(0)

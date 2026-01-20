@@ -301,7 +301,37 @@ class TramitacaoAPIBase:
             String JSON
         """
         self._configurar_headers_json()
-        return json.dumps(dados, ensure_ascii=False)
+        
+        # Função auxiliar para converter objetos datetime para string
+        def converter_datetime(obj):
+            """Converte objetos datetime para string ISO format"""
+            from datetime import datetime, date
+            # Verifica se é datetime/date do Python
+            if isinstance(obj, (datetime, date)):
+                return obj.isoformat()
+            # Verifica se é DateTime do Zope (tem método strftime)
+            elif hasattr(obj, 'strftime') and hasattr(obj, 'year'):
+                try:
+                    # Tenta converter para datetime do Python primeiro
+                    if hasattr(obj, 'asdatetime'):
+                        dt = obj.asdatetime()
+                        return dt.isoformat()
+                    # Fallback: usa strftime
+                    return obj.strftime('%Y-%m-%dT%H:%M:%S')
+                except Exception:
+                    # Último recurso: converte para string
+                    return str(obj)
+            elif isinstance(obj, dict):
+                return {k: converter_datetime(v) for k, v in obj.items()}
+            elif isinstance(obj, list):
+                return [converter_datetime(item) for item in obj]
+            elif isinstance(obj, tuple):
+                return tuple(converter_datetime(item) for item in obj)
+            return obj
+        
+        # Converte dados antes de serializar
+        dados_convertidos = converter_datetime(dados)
+        return json.dumps(dados_convertidos, ensure_ascii=False)
     
     def _resposta_erro(self, mensagem: str, codigo: Optional[str] = None) -> str:
         """
@@ -2413,7 +2443,20 @@ class TramitacaoLoteSalvarView(GrokView, TramitacaoAPIBase):
             from .services import TramitacaoService
             
             # Obtém processos selecionados
-            processos = self.request.form.getall('check_tram')
+            # Suporta tanto MultiDict (getall) quanto dict regular (get)
+            if hasattr(self.request.form, 'getall'):
+                processos = self.request.form.getall('check_tram')
+            else:
+                # Para dict regular, obtém o valor e normaliza para lista
+                valor = self.request.form.get('check_tram')
+                if valor is None:
+                    processos = []
+                elif isinstance(valor, list):
+                    processos = valor
+                else:
+                    # Valor único, converte para lista
+                    processos = [valor]
+            
             if not processos:
                 return self._resposta_erro('Nenhum processo selecionado')
             
@@ -2540,6 +2583,7 @@ class TramitacaoLoteSalvarView(GrokView, TramitacaoAPIBase):
                 return self._resposta_erro('Nenhum processo foi tramitado', codigo='nenhum_processo')
             
             # Dispara tasks de geração de PDF e anexo em lote (se necessário)
+            # Nota: Tasks são disparadas antes do commit, mas têm retry logic para lidar com problemas de timing
             task_pdf_lote = None
             task_anexo_lote = None
             
@@ -2611,7 +2655,12 @@ class TramitacaoLoteSalvarView(GrokView, TramitacaoAPIBase):
             # Prepara resposta
             resposta = {
                 'total': total_retorno,
-                'total_processos': total_processos_retorno
+                'total_processos': total_processos_retorno,
+                # ✅ Flags para atualização da interface após tramitação em lote
+                'reload_contadores': True,  # Indica que os contadores devem ser recarregados
+                'reload_listas': True,  # Indica que as listas das caixas devem ser recarregadas
+                'atualizar_caixas': True,  # Flag para indicar que as caixas devem ser atualizadas
+                'reload_interface': True  # Flag para indicar que a interface deve ser recarregada
             }
             
             if erros_retorno:
@@ -4633,10 +4682,19 @@ class TramitacaoDespachoPDFSalvarLoteView(GrokView, TramitacaoAPIBase):
                 })
             
             # Extrai resultados do lote
+            # Tenta obter de meta primeiro (do último update_state), depois de result (retorno da função)
             meta = status.get('meta', {})
             resultados = meta.get('resultados', [])
             
+            # Se não encontrou em meta, tenta em result (retorno direto da função)
             if not resultados:
+                result = status.get('result', {})
+                if isinstance(result, dict):
+                    resultados = result.get('resultados', [])
+            
+            if not resultados:
+                # Log para debug
+                logger.warning(f"Nenhum resultado encontrado na task {task_id}. Status completo: {status}")
                 return self._resposta_json({'erro': 'Nenhum resultado encontrado na task'})
             
             # Salva cada PDF no repositório Zope
@@ -5246,10 +5304,19 @@ class TramitacaoAnexarArquivoLoteSalvarView(GrokView, TramitacaoAPIBase):
                 })
             
             # Extrai resultados do lote
+            # Tenta obter de meta primeiro (do último update_state), depois de result (retorno da função)
             meta = status.get('meta', {})
             resultados = meta.get('resultados', [])
             
+            # Se não encontrou em meta, tenta em result (retorno direto da função)
             if not resultados:
+                result = status.get('result', {})
+                if isinstance(result, dict):
+                    resultados = result.get('resultados', [])
+            
+            if not resultados:
+                # Log para debug
+                logger.warning(f"Nenhum resultado encontrado na task {task_id}. Status completo: {status}")
                 return self._resposta_json({'erro': 'Nenhum resultado encontrado na task'})
             
             # Salva cada PDF no repositório Zope

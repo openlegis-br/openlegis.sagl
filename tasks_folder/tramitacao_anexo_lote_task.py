@@ -193,12 +193,12 @@ def juntar_pdfs_lote_task(
                 
                 for attempt in range(max_retries):
                     try:
-                data_check = {'tipo': str(tipo), 'cod_tramitacao': str(cod_tramitacao)}
-                post_data_check = urllib.parse.urlencode(data_check).encode('utf-8')
-                req_check = urllib.request.Request(executor_url, data=post_data_check, headers={'Content-Type': 'application/x-www-form-urlencoded'})
-                
-                with urllib.request.urlopen(req_check, timeout=300) as response_check:
-                    result_check = json.loads(response_check.read().decode('utf-8'))
+                        data_check = {'tipo': str(tipo), 'cod_tramitacao': str(cod_tramitacao)}
+                        post_data_check = urllib.parse.urlencode(data_check).encode('utf-8')
+                        req_check = urllib.request.Request(executor_url, data=post_data_check, headers={'Content-Type': 'application/x-www-form-urlencoded'})
+                        
+                        with urllib.request.urlopen(req_check, timeout=300) as response_check:
+                            result_check = json.loads(response_check.read().decode('utf-8'))
                             
                             if result_check.get('success'):
                                 pdf_principal_base64 = result_check.get('pdf_base64')
@@ -207,7 +207,7 @@ def juntar_pdfs_lote_task(
                                     break  # Sucesso, sai do loop
                             
                             # Se não teve sucesso, verifica se é erro de tramitação não encontrada
-                        error_msg = result_check.get('error', 'Erro desconhecido')
+                            error_msg = result_check.get('error', 'Erro desconhecido')
                             if 'não encontrada' in error_msg.lower() or 'not found' in error_msg.lower():
                                 if attempt < max_retries - 1:
                                     # Aguarda antes de tentar novamente (pode ser problema de timing/commit)
@@ -221,7 +221,7 @@ def juntar_pdfs_lote_task(
                                     raise Exception(f"Erro ao obter PDF principal: {error_msg}")
                             else:
                                 # Outro tipo de erro, não tenta novamente
-                        raise Exception(f"Erro ao obter PDF principal: {error_msg}")
+                                raise Exception(f"Erro ao obter PDF principal: {error_msg}")
                     
                     except urllib.error.HTTPError as e:
                         if attempt < max_retries - 1:

@@ -960,14 +960,21 @@ class TramitacaoPDFGenerator:
         # Isso significa: left=3cm, bottom=3.5cm, right=21-3-16.7=1.3cm, top=29.7-3.5-23=3.2cm
         # O cabeçalho será desenhado ACIMA da margem superior (no espaço entre topo da página e margem)
         # Então mantemos a margem original e desenhamos o cabeçalho no espaço acima dela
+        # Margem esquerda reduzida de 3cm para 2cm
         doc = SimpleDocTemplate(
             buffer,
             pagesize=A4,
             rightMargin=1.3*cm,
-            leftMargin=3*cm,
+            leftMargin=2*cm,
             topMargin=3.2*cm,  # Margem original - cabeçalho fica acima desta margem
             bottomMargin=3.5*cm
         )
+        
+        # Calcula largura disponível para alinhar elementos com margens esquerda e direita
+        # A4 width = 21cm = 595.275 pontos, leftMargin=2cm=56.7pt, rightMargin=1.3cm=36.855pt
+        # Largura disponível = 595.275 - 56.7 - 36.855 = 501.72 pontos
+        # Usa o atributo width do SimpleDocTemplate que calcula automaticamente
+        available_width = doc.width
         
         # Estilos (baseados no RML original)
         styles = getSampleStyleSheet()
@@ -1277,16 +1284,16 @@ class TramitacaoPDFGenerator:
                 # Sempre tenta desenhar o brasão se img_reader existe
                 if img_reader is not None:
                     if img_width > 0 and img_height > 0:
-                        # Posição da imagem: alinhada à esquerda (3.1cm), no topo do cabeçalho
+                        # Posição da imagem: alinhada à esquerda (2.1cm), no topo do cabeçalho
                         # Começa do topo da página menos pequeno espaçamento
                         img_y = page_height - img_height - header_top_margin  # Topo da página menos altura da imagem menos espaçamento
                         
-                        # Desenha imagem no topo (x=3.1cm da esquerda)
+                        # Desenha imagem no topo (x=2.1cm da esquerda)
                         # Carrega como PNG sem processamento de transparência
                         try:
                             canvas.drawImage(
                                 img_reader, 
-                                3.1*cm, 
+                                2.1*cm, 
                                 img_y, 
                                 width=img_width, 
                                 height=img_height
@@ -1302,14 +1309,14 @@ class TramitacaoPDFGenerator:
                             canvas.setFont('Helvetica-Bold', 14)  # Otimizado para caber em uma página
                             nom_camara = inf_basicas_dic.get('nom_camara', '')
                             if nom_camara:
-                                canvas.drawString(6.7*cm, camara_y, nom_camara)
+                                canvas.drawString(5.7*cm, camara_y, nom_camara)
                             
                             # Estado (abaixo do nome da câmara)
                             estado_y = camara_y - 18  # Espaçamento otimizado
                             canvas.setFont('Helvetica', 11)  # Otimizado
                             nom_estado = inf_basicas_dic.get('nom_estado', '')
                             if nom_estado:
-                                canvas.drawString(6.7*cm, estado_y, nom_estado)
+                                canvas.drawString(5.7*cm, estado_y, nom_estado)
                     else:
                         logger.warning(f"img_reader existe mas dimensões inválidas: width={img_width}, height={img_height}")
                 else:
@@ -1319,22 +1326,26 @@ class TramitacaoPDFGenerator:
                     canvas.setFont('Helvetica-Bold', 14)  # Otimizado
                     nom_camara = inf_basicas_dic.get('nom_camara', '')
                     if nom_camara:
-                        canvas.drawString(3.1*cm, text_y, nom_camara)
+                        canvas.drawString(2.1*cm, text_y, nom_camara)
                     
                     # Estado abaixo do nome
                     estado_y = text_y - 18  # Espaçamento otimizado
                     canvas.setFont('Helvetica', 11)  # Otimizado
                     nom_estado = inf_basicas_dic.get('nom_estado', '')
                     if nom_estado:
-                        canvas.drawString(3.1*cm, estado_y, nom_estado)
+                        canvas.drawString(2.1*cm, estado_y, nom_estado)
                 
                 # Adiciona linha divisória sutil abaixo do cabeçalho (sempre desenhada)
                 try:
                     # Linha divisória na posição da margem superior do conteúdo
+                    # Alinhada com margens esquerda e direita
                     divider_y = page_height - top_margin
                     canvas.setStrokeColor(colors.HexColor('#e0e0e0'))  # Cinza muito claro
                     canvas.setLineWidth(0.5)
-                    canvas.line(3*cm, divider_y, 19.7*cm, divider_y)  # Linha do início ao fim do conteúdo
+                    # Linha do início (margem esquerda) ao fim (margem esquerda + largura disponível)
+                    line_x1 = 2*cm  # Margem esquerda
+                    line_x2 = 2*cm + available_width  # Margem esquerda + largura disponível
+                    canvas.line(line_x1, divider_y, line_x2, divider_y)
                 except Exception:
                     pass  # Ignora erro se não conseguir desenhar linha
             except Exception as e:
@@ -1345,7 +1356,7 @@ class TramitacaoPDFGenerator:
                     canvas.setFont('Helvetica-Bold', 15)
                     nom_camara = inf_basicas_dic.get('nom_camara', '')
                     if nom_camara:
-                        canvas.drawString(3.1*cm, text_y, nom_camara)
+                        canvas.drawString(2.1*cm, text_y, nom_camara)
                 except:
                     pass
         
@@ -1370,8 +1381,9 @@ class TramitacaoPDFGenerator:
             id_entidade = tramitacao_dic.get('id_documento', '')
         
         # Card de título principal - Design elegante com sombra sutil
+        # Largura alinhada com margens esquerda e direita
         title_card_data = [[processo_title]]
-        title_card = Table(title_card_data, colWidths=[460])
+        title_card = Table(title_card_data, colWidths=[available_width])
         title_card.setStyle(TableStyle([
             ('BACKGROUND', (0, 0), (-1, -1), primary_color),
             ('TEXTCOLOR', (0, 0), (-1, -1), colors.white),
@@ -1444,8 +1456,9 @@ class TramitacaoPDFGenerator:
                 processo_content.append(Paragraph(f'<b>{label_ementa}</b> <font color="#424242">{escape(ementa)}</font>', ementa_style))
             
             # Cria card com campos organizados
+            # Largura alinhada com margens esquerda e direita
             id_card_data = [[item] for item in processo_content]
-            id_card = Table(id_card_data, colWidths=[460])
+            id_card = Table(id_card_data, colWidths=[available_width])
             id_card.setStyle(TableStyle([
                 ('BACKGROUND', (0, 0), (-1, -1), bg_section_light),
                 ('TEXTCOLOR', (0, 0), (-1, -1), text_dark),
@@ -1511,7 +1524,9 @@ class TramitacaoPDFGenerator:
             info_data.append([linha_3_col1, linha_3_col2])
         
         # Tabela moderna com duas colunas - Design elegante
-        info_table = Table(info_data, colWidths=[230, 230])
+        # Largura alinhada com margens esquerda e direita (metade da largura disponível por coluna)
+        col_width = available_width / 2
+        info_table = Table(info_data, colWidths=[col_width, col_width])
         info_table.setStyle(TableStyle([
             ('BACKGROUND', (0, 0), (-1, -1), bg_card),
             ('TEXTCOLOR', (0, 0), (-1, -1), text_dark),
@@ -1688,8 +1703,9 @@ class TramitacaoPDFGenerator:
                 texto_para_pdf = texto_para_pdf.strip()
             
             # Card moderno para o texto - Design elegante
+            # Largura alinhada com margens esquerda e direita
             texto_card_data = [[Paragraph(texto_para_pdf, content_style)]]
-            texto_card = Table(texto_card_data, colWidths=[460])
+            texto_card = Table(texto_card_data, colWidths=[available_width])
             texto_card.setStyle(TableStyle([
                 ('BACKGROUND', (0, 0), (-1, -1), bg_card),
                 ('TEXTCOLOR', (0, 0), (-1, -1), text_dark),
@@ -1708,7 +1724,8 @@ class TramitacaoPDFGenerator:
         story.append(Spacer(1, 0.5*cm))  # Aumentado para respiração
         
         # Linha divisória elegante com gradiente sutil (simulado com múltiplas linhas)
-        linha_divisoria = Table([['']], colWidths=[460])
+        # Largura alinhada com margens esquerda e direita
+        linha_divisoria = Table([['']], colWidths=[available_width])
         linha_divisoria.setStyle(TableStyle([
             ('LINEBELOW', (0, 0), (-1, -1), 1, border_light),  # Linha principal suave
         ]))
@@ -1736,7 +1753,8 @@ class TramitacaoPDFGenerator:
                 assinatura_data.append([Paragraph(escape(nom_cargo_usuario_origem), footer_style)])
             
             if assinatura_data:
-                assinatura_table = Table(assinatura_data, colWidths=[460])
+                # Largura alinhada com margens esquerda e direita
+                assinatura_table = Table(assinatura_data, colWidths=[available_width])
                 assinatura_table.setStyle(TableStyle([
                     ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
                     ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),

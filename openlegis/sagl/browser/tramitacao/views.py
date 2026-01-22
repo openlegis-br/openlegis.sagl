@@ -114,16 +114,26 @@ def _set_cached_contadores(cod_usuario, cod_unid_tramitacao, filtro_tipo, dados)
 
 def _invalidate_cache_contadores(cod_usuario=None, cod_unid_tramitacao=None):
     """
-    Invalida cache de contadores.
+    Invalida cache de contadores (função local que também chama a função do módulo cache).
     
     Args:
         cod_usuario: Se fornecido, invalida apenas para esse usuário
         cod_unid_tramitacao: Se fornecido, invalida apenas para essa unidade
     """
+    # Chama a função do módulo cache para garantir invalidação consistente
+    try:
+        from .cache import invalidate_cache_contadores
+        invalidate_cache_contadores(cod_usuario, cod_unid_tramitacao)
+    except Exception as e:
+        logger.warning(f"Erro ao invalidar cache via módulo cache: {e}")
+    
+    # Também invalida cache local (se houver)
     with _cache_lock:
         if cod_usuario is None:
             # Invalida todo o cache
+            cache_size_before = len(_contadores_cache)
             _contadores_cache.clear()
+            logger.debug(f"[_invalidate_cache_contadores] Cache local completamente invalidado ({cache_size_before} entradas removidas)")
         else:
             # Invalida cache específico
             keys_to_remove = []
@@ -134,6 +144,9 @@ def _invalidate_cache_contadores(cod_usuario=None, cod_unid_tramitacao=None):
             
             for key in keys_to_remove:
                 del _contadores_cache[key]
+            
+            if keys_to_remove:
+                logger.debug(f"[_invalidate_cache_contadores] Cache local invalidado para usuário {cod_usuario} (unidade: {cod_unid_tramitacao or 'todas'}) - {len(keys_to_remove)} entradas removidas")
 
 # ============================================
 # FUNÇÕES DE ORDENAÇÃO
@@ -1298,6 +1311,19 @@ class TramitacaoRascunhosView(GrokView, TramitacaoAPIBase):
         
         filtro_tipo = self.request.form.get('tipo', '')
         
+        # Filtros por tipo específico de matéria ou documento
+        filtro_tipo_materia = self.request.form.get('tipo_materia', '').strip()
+        filtro_tipo_documento = self.request.form.get('tipo_documento', '').strip()
+        
+        # Parâmetros de busca e filtros avançados (aplicados no backend para todos os resultados)
+        busca_termo = self.request.form.get('busca', '').strip()
+        filtro_numero = self.request.form.get('numero', '').strip()
+        filtro_ano = self.request.form.get('ano', '').strip()
+        filtro_interessado = self.request.form.get('interessado', '').strip()
+        filtro_status = self.request.form.get('status', '').strip()
+        filtro_data_inicial = self.request.form.get('data_inicial', '').strip()
+        filtro_data_final = self.request.form.get('data_final', '').strip()
+        
         # Parâmetro de ordenação (asc ou desc, padrão: asc)
         ordenacao = self.request.form.get('ordenacao', 'asc').lower()
         if ordenacao not in ['asc', 'desc']:
@@ -1351,6 +1377,130 @@ class TramitacaoRascunhosView(GrokView, TramitacaoAPIBase):
                 
                 todas_tramitacoes = []
                 
+                # ✅ CRÍTICO: Calcula total real ANTES de aplicar paginação SQL
+                # Isso é necessário para que a paginação funcione corretamente
+                total_materias_count = 0
+                total_documentos_count = 0
+                if limit is not None:
+                    # Calcula total de matérias
+                    if not filtro_tipo or filtro_tipo == 'MATERIA':
+                        filtros_materia_count = [
+                            Tramitacao.cod_usuario_local == cod_usuario,
+                            Tramitacao.ind_ult_tramitacao == 0,
+                            Tramitacao.ind_excluido == 0,
+                            Tramitacao.dat_encaminha.is_(None)
+                        ]
+                        query_count_materia = session.query(func.count(Tramitacao.cod_tramitacao)).filter(
+                            *filtros_materia_count
+                        ).join(
+                            MateriaLegislativa, Tramitacao.cod_materia == MateriaLegislativa.cod_materia
+                        ).filter(
+                            MateriaLegislativa.ind_tramitacao == 1,
+                            MateriaLegislativa.ind_excluido == 0
+                        )
+                        
+                        # Aplica filtros avançados
+                        if filtro_tipo_materia:
+                            query_count_materia = query_count_materia.join(
+                                TipoMateriaLegislativa, MateriaLegislativa.tip_id_basica == TipoMateriaLegislativa.tip_materia
+                            ).filter(
+                                TipoMateriaLegislativa.sgl_tipo_materia == filtro_tipo_materia
+                            )
+                        if filtro_numero:
+                            query_count_materia = query_count_materia.filter(MateriaLegislativa.num_ident_basica.like(f'%{filtro_numero}%'))
+                        if filtro_ano:
+                            query_count_materia = query_count_materia.filter(MateriaLegislativa.ano_ident_basica.like(f'%{filtro_ano}%'))
+                        if filtro_status:
+                            query_count_materia = query_count_materia.join(
+                                StatusTramitacao, Tramitacao.cod_status == StatusTramitacao.cod_status
+                            ).filter(StatusTramitacao.des_status == filtro_status)
+                        if filtro_data_inicial:
+                            try:
+                                from datetime import datetime
+                                data_inicial_obj = datetime.strptime(filtro_data_inicial, '%Y-%m-%d')
+                                query_count_materia = query_count_materia.filter(Tramitacao.dat_tramitacao >= data_inicial_obj)
+                            except (ValueError, TypeError):
+                                pass
+                        if filtro_data_final:
+                            try:
+                                from datetime import datetime
+                                data_final_obj = datetime.strptime(filtro_data_final, '%Y-%m-%d')
+                                data_final_obj = datetime.combine(data_final_obj.date(), datetime.max.time().replace(microsecond=0))
+                                query_count_materia = query_count_materia.filter(Tramitacao.dat_tramitacao <= data_final_obj)
+                            except (ValueError, TypeError):
+                                pass
+                        if busca_termo:
+                            query_count_materia = query_count_materia.filter(
+                                or_(
+                                    MateriaLegislativa.txt_ementa.like(f'%{busca_termo}%'),
+                                    func.concat(MateriaLegislativa.num_ident_basica, '/', MateriaLegislativa.ano_ident_basica).like(f'%{busca_termo}%')
+                                )
+                            )
+                        
+                        total_materias_count = query_count_materia.scalar() or 0
+                        query_count += 1
+                    
+                    # Calcula total de documentos
+                    if not filtro_tipo or filtro_tipo == 'DOCUMENTO':
+                        filtros_doc_count = [
+                            TramitacaoAdministrativo.cod_usuario_local == cod_usuario,
+                            TramitacaoAdministrativo.ind_ult_tramitacao == 0,
+                            TramitacaoAdministrativo.ind_excluido == 0,
+                            TramitacaoAdministrativo.dat_encaminha.is_(None)
+                        ]
+                        query_count_doc = session.query(func.count(TramitacaoAdministrativo.cod_tramitacao)).filter(
+                            *filtros_doc_count
+                        ).join(
+                            DocumentoAdministrativo, TramitacaoAdministrativo.cod_documento == DocumentoAdministrativo.cod_documento
+                        ).filter(
+                            DocumentoAdministrativo.ind_tramitacao == 1,
+                            DocumentoAdministrativo.ind_excluido == 0
+                        )
+                        
+                        # Aplica filtros avançados
+                        if filtro_tipo_documento:
+                            query_count_doc = query_count_doc.join(
+                                TipoDocumentoAdministrativo, DocumentoAdministrativo.tip_documento == TipoDocumentoAdministrativo.tip_documento
+                            ).filter(
+                                TipoDocumentoAdministrativo.sgl_tipo_documento == filtro_tipo_documento
+                            )
+                        if filtro_numero:
+                            query_count_doc = query_count_doc.filter(DocumentoAdministrativo.num_documento.like(f'%{filtro_numero}%'))
+                        if filtro_ano:
+                            query_count_doc = query_count_doc.filter(DocumentoAdministrativo.ano_documento.like(f'%{filtro_ano}%'))
+                        if filtro_interessado:
+                            query_count_doc = query_count_doc.filter(DocumentoAdministrativo.txt_interessado.like(f'%{filtro_interessado}%'))
+                        if filtro_status:
+                            query_count_doc = query_count_doc.join(
+                                StatusTramitacaoAdministrativo, TramitacaoAdministrativo.cod_status == StatusTramitacaoAdministrativo.cod_status
+                            ).filter(StatusTramitacaoAdministrativo.des_status == filtro_status)
+                        if filtro_data_inicial:
+                            try:
+                                from datetime import datetime
+                                data_inicial_obj = datetime.strptime(filtro_data_inicial, '%Y-%m-%d')
+                                query_count_doc = query_count_doc.filter(TramitacaoAdministrativo.dat_tramitacao >= data_inicial_obj)
+                            except (ValueError, TypeError):
+                                pass
+                        if filtro_data_final:
+                            try:
+                                from datetime import datetime
+                                data_final_obj = datetime.strptime(filtro_data_final, '%Y-%m-%d')
+                                data_final_obj = datetime.combine(data_final_obj.date(), datetime.max.time().replace(microsecond=0))
+                                query_count_doc = query_count_doc.filter(TramitacaoAdministrativo.dat_tramitacao <= data_final_obj)
+                            except (ValueError, TypeError):
+                                pass
+                        if busca_termo:
+                            query_count_doc = query_count_doc.filter(
+                                or_(
+                                    DocumentoAdministrativo.txt_assunto.like(f'%{busca_termo}%'),
+                                    DocumentoAdministrativo.txt_interessado.like(f'%{busca_termo}%'),
+                                    func.concat(DocumentoAdministrativo.num_documento, '/', DocumentoAdministrativo.ano_documento).like(f'%{busca_termo}%')
+                                )
+                            )
+                        
+                        total_documentos_count = query_count_doc.scalar() or 0
+                        query_count += 1
+                
                 # Busca rascunhos de MATÉRIAS
                 # Rascunho = ind_ult_tramitacao == 0 (não é última tramitação) E dat_encaminha IS NULL (não foi enviado)
                 if not filtro_tipo or filtro_tipo == 'MATERIA':
@@ -1377,6 +1527,44 @@ class TramitacaoRascunhosView(GrokView, TramitacaoAPIBase):
                         MateriaLegislativa.ind_tramitacao == 1,
                         MateriaLegislativa.ind_excluido == 0
                     )
+                    
+                    # Aplica filtros avançados
+                    if filtro_tipo_materia:
+                        query_materia = query_materia.join(
+                            TipoMateriaLegislativa, MateriaLegislativa.tip_id_basica == TipoMateriaLegislativa.tip_materia
+                        ).filter(
+                            TipoMateriaLegislativa.sgl_tipo_materia == filtro_tipo_materia
+                        )
+                    if filtro_numero:
+                        query_materia = query_materia.filter(MateriaLegislativa.num_ident_basica.like(f'%{filtro_numero}%'))
+                    if filtro_ano:
+                        query_materia = query_materia.filter(MateriaLegislativa.ano_ident_basica.like(f'%{filtro_ano}%'))
+                    if filtro_status:
+                        query_materia = query_materia.join(
+                            StatusTramitacao, Tramitacao.cod_status == StatusTramitacao.cod_status
+                        ).filter(StatusTramitacao.des_status == filtro_status)
+                    if filtro_data_inicial:
+                        try:
+                            from datetime import datetime
+                            data_inicial_obj = datetime.strptime(filtro_data_inicial, '%Y-%m-%d')
+                            query_materia = query_materia.filter(Tramitacao.dat_tramitacao >= data_inicial_obj)
+                        except (ValueError, TypeError):
+                            pass
+                    if filtro_data_final:
+                        try:
+                            from datetime import datetime
+                            data_final_obj = datetime.strptime(filtro_data_final, '%Y-%m-%d')
+                            data_final_obj = datetime.combine(data_final_obj.date(), datetime.max.time().replace(microsecond=0))
+                            query_materia = query_materia.filter(Tramitacao.dat_tramitacao <= data_final_obj)
+                        except (ValueError, TypeError):
+                            pass
+                    if busca_termo:
+                        query_materia = query_materia.filter(
+                            or_(
+                                MateriaLegislativa.txt_ementa.like(f'%{busca_termo}%'),
+                                func.concat(MateriaLegislativa.num_ident_basica, '/', MateriaLegislativa.ano_ident_basica).like(f'%{busca_termo}%')
+                            )
+                        )
                     
                     # Aplica ordenação completa (data, ano, número)
                     # Para rascunhos, usa dat_tramitacao em vez de dat_encaminha (rascunhos não têm dat_encaminha)
@@ -1429,12 +1617,12 @@ class TramitacaoRascunhosView(GrokView, TramitacaoAPIBase):
                             query_materia = query_materia.order_by(ML.num_ident_basica.asc().nulls_last())
                     
                     # OTIMIZAÇÃO: Aplica paginação SQL quando possível
-                    # Se há limit, busca um pouco mais (limit * 2) para garantir dados suficientes após merge
+                    # Se há limit, busca um pouco mais (limit * 2 + offset) para garantir dados suficientes após merge
+                    # NÃO aplica offset aqui - será aplicado em Python após mesclar e ordenar
                     if limit is not None:
                         # Busca mais dados para garantir que temos suficientes após mesclar com documentos
-                        query_materia = query_materia.limit(limit * 2 + offset)
-                        if offset > 0:
-                            query_materia = query_materia.offset(offset)
+                        # Calcula quantos itens precisamos: offset + limit * 2 (para garantir dados após merge)
+                        query_materia = query_materia.limit(offset + (limit * 2))
                     
                     rascunhos_materia = query_materia.all()
                     query_count += 1  # MONITORAMENTO
@@ -1484,6 +1672,47 @@ class TramitacaoRascunhosView(GrokView, TramitacaoAPIBase):
                         DocumentoAdministrativo.ind_tramitacao == 1,
                         DocumentoAdministrativo.ind_excluido == 0
                     )
+                    
+                    # Aplica filtros avançados
+                    if filtro_tipo_documento:
+                        query_doc = query_doc.join(
+                            TipoDocumentoAdministrativo, DocumentoAdministrativo.tip_documento == TipoDocumentoAdministrativo.tip_documento
+                        ).filter(
+                            TipoDocumentoAdministrativo.sgl_tipo_documento == filtro_tipo_documento
+                        )
+                    if filtro_numero:
+                        query_doc = query_doc.filter(DocumentoAdministrativo.num_documento.like(f'%{filtro_numero}%'))
+                    if filtro_ano:
+                        query_doc = query_doc.filter(DocumentoAdministrativo.ano_documento.like(f'%{filtro_ano}%'))
+                    if filtro_interessado:
+                        query_doc = query_doc.filter(DocumentoAdministrativo.txt_interessado.like(f'%{filtro_interessado}%'))
+                    if filtro_status:
+                        query_doc = query_doc.join(
+                            StatusTramitacaoAdministrativo, TramitacaoAdministrativo.cod_status == StatusTramitacaoAdministrativo.cod_status
+                        ).filter(StatusTramitacaoAdministrativo.des_status == filtro_status)
+                    if filtro_data_inicial:
+                        try:
+                            from datetime import datetime
+                            data_inicial_obj = datetime.strptime(filtro_data_inicial, '%Y-%m-%d')
+                            query_doc = query_doc.filter(TramitacaoAdministrativo.dat_tramitacao >= data_inicial_obj)
+                        except (ValueError, TypeError):
+                            pass
+                    if filtro_data_final:
+                        try:
+                            from datetime import datetime
+                            data_final_obj = datetime.strptime(filtro_data_final, '%Y-%m-%d')
+                            data_final_obj = datetime.combine(data_final_obj.date(), datetime.max.time().replace(microsecond=0))
+                            query_doc = query_doc.filter(TramitacaoAdministrativo.dat_tramitacao <= data_final_obj)
+                        except (ValueError, TypeError):
+                            pass
+                    if busca_termo:
+                        query_doc = query_doc.filter(
+                            or_(
+                                DocumentoAdministrativo.txt_assunto.like(f'%{busca_termo}%'),
+                                DocumentoAdministrativo.txt_interessado.like(f'%{busca_termo}%'),
+                                func.concat(DocumentoAdministrativo.num_documento, '/', DocumentoAdministrativo.ano_documento).like(f'%{busca_termo}%')
+                            )
+                        )
                     
                     # Aplica ordenação completa (data, ano, número)
                     # Para rascunhos, usa dat_tramitacao em vez de dat_encaminha
@@ -1536,10 +1765,11 @@ class TramitacaoRascunhosView(GrokView, TramitacaoAPIBase):
                             query_doc = query_doc.order_by(DA.num_documento.asc().nulls_last())
                     
                     # OTIMIZAÇÃO: Aplica paginação SQL quando possível
+                    # NÃO aplica offset aqui - será aplicado em Python após mesclar e ordenar
                     if limit is not None:
-                        query_doc = query_doc.limit(limit * 2 + offset)
-                        if offset > 0:
-                            query_doc = query_doc.offset(offset)
+                        # Busca mais dados para garantir que temos suficientes após mesclar com matérias
+                        # Calcula quantos itens precisamos: offset + limit * 2 (para garantir dados após merge)
+                        query_doc = query_doc.limit(offset + (limit * 2))
                     
                     rascunhos_doc = query_doc.all()
                     query_count += 1  # MONITORAMENTO
@@ -1595,12 +1825,19 @@ class TramitacaoRascunhosView(GrokView, TramitacaoAPIBase):
                 
                 todas_tramitacoes.sort(key=chave_ordenacao_rascunho, reverse=(ordenacao == 'desc'))
                 
-                # Estatísticas (calcula antes de aplicar paginação)
-                # NOTA: Como aplicamos paginação SQL parcial, o total pode não ser exato
-                # Para obter total exato, seria necessário query COUNT separada (trade-off performance)
-                total_materias = sum(1 for t in todas_tramitacoes if t['tipo'] == 'MATERIA')
-                total_documentos = sum(1 for t in todas_tramitacoes if t['tipo'] == 'DOCUMENTO')
-                total_geral = len(todas_tramitacoes)
+                # Estatísticas
+                # Se já calculamos o total via COUNT, usa esses valores
+                # Caso contrário, calcula a partir dos resultados retornados
+                if limit is not None and (total_materias_count > 0 or total_documentos_count > 0):
+                    # Usa totais calculados via COUNT (mais preciso)
+                    total_materias = total_materias_count
+                    total_documentos = total_documentos_count
+                    total_geral = total_materias + total_documentos
+                else:
+                    # Sem paginação ou sem COUNT, calcula a partir dos resultados
+                    total_materias = sum(1 for t in todas_tramitacoes if t['tipo'] == 'MATERIA')
+                    total_documentos = sum(1 for t in todas_tramitacoes if t['tipo'] == 'DOCUMENTO')
+                    total_geral = len(todas_tramitacoes)
                 
                 # Paginação já foi aplicada parcialmente no SQL, agora aplica final em Python
                 # (necessário porque mesclamos resultados de matérias e documentos)
@@ -1651,6 +1888,19 @@ class TramitacaoItensEnviadosView(GrokView, TramitacaoAPIBase):
         query_count = 0
         
         filtro_tipo = self.request.form.get('tipo', '')
+        
+        # Filtros por tipo específico de matéria ou documento
+        filtro_tipo_materia = self.request.form.get('tipo_materia', '').strip()
+        filtro_tipo_documento = self.request.form.get('tipo_documento', '').strip()
+        
+        # Parâmetros de busca e filtros avançados (aplicados no backend para todos os resultados)
+        busca_termo = self.request.form.get('busca', '').strip()
+        filtro_numero = self.request.form.get('numero', '').strip()
+        filtro_ano = self.request.form.get('ano', '').strip()
+        filtro_interessado = self.request.form.get('interessado', '').strip()
+        filtro_status = self.request.form.get('status', '').strip()
+        filtro_data_inicial = self.request.form.get('data_inicial', '').strip()
+        filtro_data_final = self.request.form.get('data_final', '').strip()
         
         # Parâmetro de ordenação (asc ou desc, padrão: asc)
         ordenacao = self.request.form.get('ordenacao', 'asc').lower()
@@ -1705,6 +1955,132 @@ class TramitacaoItensEnviadosView(GrokView, TramitacaoAPIBase):
                 
                 todas_tramitacoes = []
                 
+                # ✅ CRÍTICO: Calcula total real ANTES de aplicar paginação SQL
+                # Isso é necessário para que a paginação funcione corretamente
+                total_materias_count = 0
+                total_documentos_count = 0
+                if limit is not None:
+                    # Calcula total de matérias
+                    if not filtro_tipo or filtro_tipo == 'MATERIA':
+                        filtros_materia_count = [
+                            Tramitacao.cod_usuario_local == cod_usuario,
+                            Tramitacao.ind_ult_tramitacao == 1,
+                            Tramitacao.dat_encaminha.isnot(None),
+                            Tramitacao.dat_recebimento.is_(None),
+                            Tramitacao.ind_excluido == 0
+                        ]
+                        query_count_materia = session.query(func.count(Tramitacao.cod_tramitacao)).filter(
+                            *filtros_materia_count
+                        ).join(
+                            MateriaLegislativa, Tramitacao.cod_materia == MateriaLegislativa.cod_materia
+                        ).filter(
+                            MateriaLegislativa.ind_tramitacao == 1,
+                            MateriaLegislativa.ind_excluido == 0
+                        )
+                        
+                        # Aplica filtros avançados
+                        if filtro_tipo_materia:
+                            query_count_materia = query_count_materia.join(
+                                TipoMateriaLegislativa, MateriaLegislativa.tip_id_basica == TipoMateriaLegislativa.tip_materia
+                            ).filter(
+                                TipoMateriaLegislativa.sgl_tipo_materia == filtro_tipo_materia
+                            )
+                        if filtro_numero:
+                            query_count_materia = query_count_materia.filter(MateriaLegislativa.num_ident_basica.like(f'%{filtro_numero}%'))
+                        if filtro_ano:
+                            query_count_materia = query_count_materia.filter(MateriaLegislativa.ano_ident_basica.like(f'%{filtro_ano}%'))
+                        if filtro_status:
+                            query_count_materia = query_count_materia.join(
+                                StatusTramitacao, Tramitacao.cod_status == StatusTramitacao.cod_status
+                            ).filter(StatusTramitacao.des_status == filtro_status)
+                        if filtro_data_inicial:
+                            try:
+                                from datetime import datetime
+                                data_inicial_obj = datetime.strptime(filtro_data_inicial, '%Y-%m-%d')
+                                query_count_materia = query_count_materia.filter(Tramitacao.dat_encaminha >= data_inicial_obj)
+                            except (ValueError, TypeError):
+                                pass
+                        if filtro_data_final:
+                            try:
+                                from datetime import datetime
+                                data_final_obj = datetime.strptime(filtro_data_final, '%Y-%m-%d')
+                                data_final_obj = datetime.combine(data_final_obj.date(), datetime.max.time().replace(microsecond=0))
+                                query_count_materia = query_count_materia.filter(Tramitacao.dat_encaminha <= data_final_obj)
+                            except (ValueError, TypeError):
+                                pass
+                        if busca_termo:
+                            query_count_materia = query_count_materia.filter(
+                                or_(
+                                    MateriaLegislativa.txt_ementa.like(f'%{busca_termo}%'),
+                                    func.concat(MateriaLegislativa.num_ident_basica, '/', MateriaLegislativa.ano_ident_basica).like(f'%{busca_termo}%')
+                                )
+                            )
+                        
+                        total_materias_count = query_count_materia.scalar() or 0
+                        query_count += 1
+                    
+                    # Calcula total de documentos
+                    if not filtro_tipo or filtro_tipo == 'DOCUMENTO':
+                        filtros_doc_count = [
+                            TramitacaoAdministrativo.cod_usuario_local == cod_usuario,
+                            TramitacaoAdministrativo.ind_ult_tramitacao == 1,
+                            TramitacaoAdministrativo.dat_encaminha.isnot(None),
+                            TramitacaoAdministrativo.dat_recebimento.is_(None),
+                            TramitacaoAdministrativo.ind_excluido == 0
+                        ]
+                        query_count_doc = session.query(func.count(TramitacaoAdministrativo.cod_tramitacao)).filter(
+                            *filtros_doc_count
+                        ).join(
+                            DocumentoAdministrativo, TramitacaoAdministrativo.cod_documento == DocumentoAdministrativo.cod_documento
+                        ).filter(
+                            DocumentoAdministrativo.ind_tramitacao == 1,
+                            DocumentoAdministrativo.ind_excluido == 0
+                        )
+                        
+                        # Aplica filtros avançados
+                        if filtro_tipo_documento:
+                            query_count_doc = query_count_doc.join(
+                                TipoDocumentoAdministrativo, DocumentoAdministrativo.tip_documento == TipoDocumentoAdministrativo.tip_documento
+                            ).filter(
+                                TipoDocumentoAdministrativo.sgl_tipo_documento == filtro_tipo_documento
+                            )
+                        if filtro_numero:
+                            query_count_doc = query_count_doc.filter(DocumentoAdministrativo.num_documento.like(f'%{filtro_numero}%'))
+                        if filtro_ano:
+                            query_count_doc = query_count_doc.filter(DocumentoAdministrativo.ano_documento.like(f'%{filtro_ano}%'))
+                        if filtro_interessado:
+                            query_count_doc = query_count_doc.filter(DocumentoAdministrativo.txt_interessado.like(f'%{filtro_interessado}%'))
+                        if filtro_status:
+                            query_count_doc = query_count_doc.join(
+                                StatusTramitacaoAdministrativo, TramitacaoAdministrativo.cod_status == StatusTramitacaoAdministrativo.cod_status
+                            ).filter(StatusTramitacaoAdministrativo.des_status == filtro_status)
+                        if filtro_data_inicial:
+                            try:
+                                from datetime import datetime
+                                data_inicial_obj = datetime.strptime(filtro_data_inicial, '%Y-%m-%d')
+                                query_count_doc = query_count_doc.filter(TramitacaoAdministrativo.dat_encaminha >= data_inicial_obj)
+                            except (ValueError, TypeError):
+                                pass
+                        if filtro_data_final:
+                            try:
+                                from datetime import datetime
+                                data_final_obj = datetime.strptime(filtro_data_final, '%Y-%m-%d')
+                                data_final_obj = datetime.combine(data_final_obj.date(), datetime.max.time().replace(microsecond=0))
+                                query_count_doc = query_count_doc.filter(TramitacaoAdministrativo.dat_encaminha <= data_final_obj)
+                            except (ValueError, TypeError):
+                                pass
+                        if busca_termo:
+                            query_count_doc = query_count_doc.filter(
+                                or_(
+                                    DocumentoAdministrativo.txt_assunto.like(f'%{busca_termo}%'),
+                                    DocumentoAdministrativo.txt_interessado.like(f'%{busca_termo}%'),
+                                    func.concat(DocumentoAdministrativo.num_documento, '/', DocumentoAdministrativo.ano_documento).like(f'%{busca_termo}%')
+                                )
+                            )
+                        
+                        total_documentos_count = query_count_doc.scalar() or 0
+                        query_count += 1
+                
                 # Busca itens enviados de MATÉRIAS
                 # Itens enviados = ind_encaminha=1 AND ind_recebido=0 = dat_encaminha IS NOT NULL AND dat_recebimento IS NULL
                 if not filtro_tipo or filtro_tipo == 'MATERIA':
@@ -1733,14 +2109,53 @@ class TramitacaoItensEnviadosView(GrokView, TramitacaoAPIBase):
                         MateriaLegislativa.ind_excluido == 0
                     )
                     
+                    # Aplica filtros avançados
+                    if filtro_tipo_materia:
+                        query_materia = query_materia.join(
+                            TipoMateriaLegislativa, MateriaLegislativa.tip_id_basica == TipoMateriaLegislativa.tip_materia
+                        ).filter(
+                            TipoMateriaLegislativa.sgl_tipo_materia == filtro_tipo_materia
+                        )
+                    if filtro_numero:
+                        query_materia = query_materia.filter(MateriaLegislativa.num_ident_basica.like(f'%{filtro_numero}%'))
+                    if filtro_ano:
+                        query_materia = query_materia.filter(MateriaLegislativa.ano_ident_basica.like(f'%{filtro_ano}%'))
+                    if filtro_status:
+                        query_materia = query_materia.join(
+                            StatusTramitacao, Tramitacao.cod_status == StatusTramitacao.cod_status
+                        ).filter(StatusTramitacao.des_status == filtro_status)
+                    if filtro_data_inicial:
+                        try:
+                            from datetime import datetime
+                            data_inicial_obj = datetime.strptime(filtro_data_inicial, '%Y-%m-%d')
+                            query_materia = query_materia.filter(Tramitacao.dat_encaminha >= data_inicial_obj)
+                        except (ValueError, TypeError):
+                            pass
+                    if filtro_data_final:
+                        try:
+                            from datetime import datetime
+                            data_final_obj = datetime.strptime(filtro_data_final, '%Y-%m-%d')
+                            data_final_obj = datetime.combine(data_final_obj.date(), datetime.max.time().replace(microsecond=0))
+                            query_materia = query_materia.filter(Tramitacao.dat_encaminha <= data_final_obj)
+                        except (ValueError, TypeError):
+                            pass
+                    if busca_termo:
+                        query_materia = query_materia.filter(
+                            or_(
+                                MateriaLegislativa.txt_ementa.like(f'%{busca_termo}%'),
+                                func.concat(MateriaLegislativa.num_ident_basica, '/', MateriaLegislativa.ano_ident_basica).like(f'%{busca_termo}%')
+                            )
+                        )
+                    
                     # Aplica ordenação completa (data, ano, número)
                     query_materia = _obter_ordenacao_completa_materia(query_materia, ordenacao)
                     
                     # OTIMIZAÇÃO: Aplica paginação SQL quando possível
+                    # NÃO aplica offset aqui - será aplicado em Python após mesclar e ordenar
                     if limit is not None:
-                        query_materia = query_materia.limit(limit * 2 + offset)
-                        if offset > 0:
-                            query_materia = query_materia.offset(offset)
+                        # Busca mais dados para garantir que temos suficientes após mesclar com documentos
+                        # Calcula quantos itens precisamos: offset + limit * 2 (para garantir dados após merge)
+                        query_materia = query_materia.limit(offset + (limit * 2))
                     
                     itens_materia = query_materia.all()
                     query_count += 1  # MONITORAMENTO
@@ -1795,14 +2210,56 @@ class TramitacaoItensEnviadosView(GrokView, TramitacaoAPIBase):
                         DocumentoAdministrativo.ind_excluido == 0
                     )
                     
+                    # Aplica filtros avançados
+                    if filtro_tipo_documento:
+                        query_doc = query_doc.join(
+                            TipoDocumentoAdministrativo, DocumentoAdministrativo.tip_documento == TipoDocumentoAdministrativo.tip_documento
+                        ).filter(
+                            TipoDocumentoAdministrativo.sgl_tipo_documento == filtro_tipo_documento
+                        )
+                    if filtro_numero:
+                        query_doc = query_doc.filter(DocumentoAdministrativo.num_documento.like(f'%{filtro_numero}%'))
+                    if filtro_ano:
+                        query_doc = query_doc.filter(DocumentoAdministrativo.ano_documento.like(f'%{filtro_ano}%'))
+                    if filtro_interessado:
+                        query_doc = query_doc.filter(DocumentoAdministrativo.txt_interessado.like(f'%{filtro_interessado}%'))
+                    if filtro_status:
+                        query_doc = query_doc.join(
+                            StatusTramitacaoAdministrativo, TramitacaoAdministrativo.cod_status == StatusTramitacaoAdministrativo.cod_status
+                        ).filter(StatusTramitacaoAdministrativo.des_status == filtro_status)
+                    if filtro_data_inicial:
+                        try:
+                            from datetime import datetime
+                            data_inicial_obj = datetime.strptime(filtro_data_inicial, '%Y-%m-%d')
+                            query_doc = query_doc.filter(TramitacaoAdministrativo.dat_encaminha >= data_inicial_obj)
+                        except (ValueError, TypeError):
+                            pass
+                    if filtro_data_final:
+                        try:
+                            from datetime import datetime
+                            data_final_obj = datetime.strptime(filtro_data_final, '%Y-%m-%d')
+                            data_final_obj = datetime.combine(data_final_obj.date(), datetime.max.time().replace(microsecond=0))
+                            query_doc = query_doc.filter(TramitacaoAdministrativo.dat_encaminha <= data_final_obj)
+                        except (ValueError, TypeError):
+                            pass
+                    if busca_termo:
+                        query_doc = query_doc.filter(
+                            or_(
+                                DocumentoAdministrativo.txt_assunto.like(f'%{busca_termo}%'),
+                                DocumentoAdministrativo.txt_interessado.like(f'%{busca_termo}%'),
+                                func.concat(DocumentoAdministrativo.num_documento, '/', DocumentoAdministrativo.ano_documento).like(f'%{busca_termo}%')
+                            )
+                        )
+                    
                     # Aplica ordenação completa (data, ano, número)
                     query_doc = _obter_ordenacao_completa_documento(query_doc, ordenacao)
                     
                     # OTIMIZAÇÃO: Aplica paginação SQL quando possível
+                    # NÃO aplica offset aqui - será aplicado em Python após mesclar e ordenar
                     if limit is not None:
-                        query_doc = query_doc.limit(limit * 2 + offset)
-                        if offset > 0:
-                            query_doc = query_doc.offset(offset)
+                        # Busca mais dados para garantir que temos suficientes após mesclar com matérias
+                        # Calcula quantos itens precisamos: offset + limit * 2 (para garantir dados após merge)
+                        query_doc = query_doc.limit(offset + (limit * 2))
                     
                     itens_doc = query_doc.all()
                     query_count += 1  # MONITORAMENTO
@@ -1845,11 +2302,19 @@ class TramitacaoItensEnviadosView(GrokView, TramitacaoAPIBase):
                 # Isso garante que MATERIA vem antes de DOCUMENTO quando datas são iguais
                 todas_tramitacoes = _ordenar_lista_tramitacoes(todas_tramitacoes, ordenacao)
                 
-                # Estatísticas (calcula antes de aplicar paginação)
-                # NOTA: Como aplicamos paginação SQL parcial, o total pode não ser exato
-                total_materias = sum(1 for t in todas_tramitacoes if t['tipo'] == 'MATERIA')
-                total_documentos = sum(1 for t in todas_tramitacoes if t['tipo'] == 'DOCUMENTO')
-                total_geral = len(todas_tramitacoes)
+                # Estatísticas
+                # Se já calculamos o total via COUNT, usa esses valores
+                # Caso contrário, calcula a partir dos resultados retornados
+                if limit is not None and (total_materias_count > 0 or total_documentos_count > 0):
+                    # Usa totais calculados via COUNT (mais preciso)
+                    total_materias = total_materias_count
+                    total_documentos = total_documentos_count
+                    total_geral = total_materias + total_documentos
+                else:
+                    # Sem paginação ou sem COUNT, calcula a partir dos resultados
+                    total_materias = sum(1 for t in todas_tramitacoes if t['tipo'] == 'MATERIA')
+                    total_documentos = sum(1 for t in todas_tramitacoes if t['tipo'] == 'DOCUMENTO')
+                    total_geral = len(todas_tramitacoes)
                 
                 # Paginação já foi aplicada parcialmente no SQL, agora aplica final em Python
                 # (necessário porque mesclamos resultados de matérias e documentos)

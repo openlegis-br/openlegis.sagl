@@ -31,6 +31,24 @@ from openlegis.sagl.models.models import (
     Usuario,
 )
 
+# Imports para exportação PDF e ODS
+try:
+    from reportlab.lib.pagesizes import landscape, A4
+    from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+    from reportlab.lib import colors
+    from reportlab.lib.enums import TA_CENTER
+    from reportlab.lib.units import cm
+    REPORTLAB_AVAILABLE = True
+except ImportError:
+    REPORTLAB_AVAILABLE = False
+
+try:
+    import openpyxl
+    OPENPYXL_AVAILABLE = True
+except ImportError:
+    OPENPYXL_AVAILABLE = False
+
 Session = named_scoped_session("minha_sessao")
 
 logger = logging.getLogger("proposicoes")
@@ -635,6 +653,36 @@ class ProposicoesAPIBase:
             docs.append("PDF Assinado")
         return ", ".join(docs)
 
+    def _formatar_vinculo_texto(self, vinculo):
+        """
+        Formata o vínculo como texto para exportação (igual à página HTML).
+        Usa a mesma lógica do frontend: formatarVinculoTabela
+        """
+        if not vinculo:
+            return ""
+        
+        # Lógica do frontend: if (data && (data.materia_id || (data.tipo === 'matéria' && data.id)))
+        # Para matéria: verifica se tem materia_id OU (tipo é matéria E tem id)
+        if vinculo.get("materia_id") or (vinculo.get("tipo") == "matéria" and vinculo.get("id")):
+            sigla = vinculo.get("sigla", "")
+            numero = vinculo.get("numero", "")
+            ano = vinculo.get("ano", "")
+            texto = f"{sigla} {numero}/{ano}".strip()
+            return texto if texto else ""
+        # Fallback do frontend: else if (data && data.tipo === 'matéria')
+        elif vinculo.get("tipo") == "matéria":
+            sigla = vinculo.get("sigla", "")
+            numero = vinculo.get("numero", "")
+            ano = vinculo.get("ano", "")
+            texto = f"{sigla} {numero}/{ano}".strip()
+            return texto if texto else ""
+        # Lógica do frontend: else if (data && data.tipo === 'documento')
+        elif vinculo.get("tipo") == "documento":
+            doc_id = vinculo.get("id", "")
+            return f"Documento {doc_id}" if doc_id else ""
+        
+        return ""
+
     def _determinar_status(self, proposicao):
         if proposicao.dat_devolucao:
             return "devolvida"
@@ -736,6 +784,107 @@ class ProposicoesAPIBase:
             return {"total": len(assinaturas), "assinadas": assinadas, "pendentes": pendentes}
         finally:
             session.close()
+
+    def _obter_dados_para_exportacao(self, session, caixa):
+        """
+        Obtém dados formatados para exportação (CSV, ODS, PDF).
+        Retorna lista de dicionários com dados formatados.
+        Exporta TODOS os dados que passam pelos filtros (sem paginação).
+        """
+        base_query = session.query(Proposicao)
+        base_query = base_query.join(Proposicao.tipo_proposicao)
+        base_query = base_query.filter(Proposicao.ind_excluido == 0)
+        base_query = base_query.join(Proposicao.autor)
+        base_query = base_query.outerjoin(Autor.parlamentar)
+        base_query = base_query.outerjoin(Autor.comissao)
+
+        if caixa in {"all", "todas"}:
+            pass
+        else:
+            base_query = self._aplicar_filtros_caixa(base_query, caixa, session)
+
+        base_query = self._aplicar_filtros_adicionais(base_query, session)
+
+        ORDER_MAP = {
+            "envio": Proposicao.dat_envio,
+            "tipo": TipoProposicao.des_tipo_proposicao,
+            "descricao": Proposicao.txt_descricao,
+            "autor": Autor.nom_autor,
+            "recebimento": Proposicao.dat_recebimento,
+            "devolucao": Proposicao.dat_devolucao,
+            "solicitacao_devolucao": Proposicao.dat_solicitacao_devolucao,
+        }
+        ordenar_por = self.request.form.get("ordenar_por")
+        ordenar_direcao = self.request.form.get("ordenar_direcao")
+
+        if caixa == "incorporado":
+            if ordenar_por != "recebimento":
+                ordenar_por = None
+            if ordenar_por == "recebimento":
+                if ordenar_direcao == "asc":
+                    base_query = base_query.order_by(Proposicao.dat_recebimento.asc(), Proposicao.cod_proposicao.asc())
+                else:
+                    base_query = base_query.order_by(
+                        Proposicao.dat_recebimento.desc(), Proposicao.cod_proposicao.desc()
+                    )
+            else:
+                base_query = base_query.order_by(Proposicao.dat_recebimento.desc(), Proposicao.cod_proposicao.desc())
+        else:
+            if ordenar_por:
+                order_field = ORDER_MAP.get(ordenar_por, Proposicao.dat_envio)
+                base_query = base_query.order_by(order_field.asc() if (ordenar_direcao == "asc") else order_field.desc())
+            else:
+                base_query = base_query.order_by(Proposicao.dat_envio.desc())
+
+        # Para exportação, buscar todos os resultados (não paginar)
+        all_ids = [row[0] for row in base_query.with_entities(Proposicao.cod_proposicao).all()]
+
+        if not all_ids:
+            proposicoes = []
+        else:
+            query = (
+                session.query(Proposicao)
+                .join(Proposicao.tipo_proposicao)
+                .join(Proposicao.autor)
+                .outerjoin(Autor.parlamentar)
+                .outerjoin(Autor.comissao)
+                .filter(Proposicao.cod_proposicao.in_(all_ids))
+                .options(
+                    joinedload(Proposicao.tipo_proposicao),
+                    joinedload(Proposicao.autor).joinedload(Autor.parlamentar),
+                    joinedload(Proposicao.autor).joinedload(Autor.comissao),
+                )
+            )
+            proposicoes_dict = {p.cod_proposicao: p for p in query.all()}
+            proposicoes = [proposicoes_dict[pid] for pid in all_ids if pid in proposicoes_dict]
+
+        if caixa in {"revisao", "assinatura", "protocolo"}:
+            proposicoes, _, _ = self._verificar_documentos_fisicos(proposicoes, caixa, session)
+
+        # Formatar dados para exportação
+        dados_formatados = []
+        for prop in proposicoes:
+            # Obter vínculo se disponível
+            vinculo = None
+            if prop.cod_mat_ou_doc:
+                vinculo = self._formatar_vinculo(prop, session)
+            
+            # Formatar vínculo como texto (sem a palavra "Vínculo:")
+            vinculo_texto = self._formatar_vinculo_texto(vinculo)
+            
+            dados_formatados.append({
+                "npe": f"NPE{prop.cod_proposicao}",
+                "tipo": getattr(prop.tipo_proposicao, "des_tipo_proposicao", ""),
+                "descricao": (prop.txt_descricao or "").replace("\r", " ").replace("\n", " ").strip(),
+                "autor": self._formatar_autor(prop.autor),
+                "status": self._determinar_status(prop),
+                "data_envio": self._formatar_data_hora(prop.dat_envio) or "",
+                "data_recebimento": self._formatar_data_hora(prop.dat_recebimento) or "",
+                "data_devolucao": self._formatar_data_hora(prop.dat_devolucao) or "",
+                "vinculo": vinculo_texto,
+            })
+
+        return dados_formatados
 
 
 # ---------------------------------------------------------------------
@@ -1205,27 +1354,48 @@ class ExportarCSV(GrokView, ProposicoesAPIBase):
             if caixa in {"revisao", "assinatura", "protocolo"}:
                 proposicoes, _, _ = self._verificar_documentos_fisicos(proposicoes, caixa, session)
 
+            # Usar método auxiliar para obter dados formatados (inclui vínculo)
+            dados = []
+            for prop in proposicoes:
+                # Obter vínculo se disponível
+                vinculo = None
+                if prop.cod_mat_ou_doc:
+                    vinculo = self._formatar_vinculo(prop, session)
+                
+                # Formatar vínculo como texto (sem a palavra "Vínculo:")
+                vinculo_texto = self._formatar_vinculo_texto(vinculo)
+                
+                dados.append({
+                    "npe": f"NPE{prop.cod_proposicao}",
+                    "tipo": getattr(prop.tipo_proposicao, "des_tipo_proposicao", ""),
+                    "descricao": (prop.txt_descricao or "").replace("\r", " ").replace("\n", " ").strip(),
+                    "autor": self._formatar_autor(prop.autor),
+                    "status": self._determinar_status(prop),
+                    "data_envio": self._formatar_data_hora(prop.dat_envio) or "",
+                    "data_recebimento": self._formatar_data_hora(prop.dat_recebimento) or "",
+                    "data_devolucao": self._formatar_data_hora(prop.dat_devolucao) or "",
+                    "vinculo": vinculo_texto,
+                })
+
             output = io.StringIO()
             writer = csv.writer(output, delimiter=";", quoting=csv.QUOTE_MINIMAL)
             writer.writerow(
-                ["NPE", "Tipo", "Descrição", "Autor", "Status", "Data Envio", "Data Recebimento", "Data Devolução", "Documentos"]
+                ["NPE", "Tipo", "Descrição", "Autor", "Status", "Data Envio", "Data Recebimento", "Data Devolução", "Vínculo"]
             )
 
             # stream do CSV para a response
-            for prop in proposicoes:
-                writer.writerow(
-                    [
-                        f"NPE{prop.cod_proposicao}",
-                        getattr(prop.tipo_proposicao, "des_tipo_proposicao", ""),
-                        (prop.txt_descricao or "").replace("\r", " ").replace("\n", " ").strip(),
-                        self._formatar_autor(prop.autor),
-                        self._determinar_status(prop),
-                        self._formatar_data_hora(prop.dat_envio) or "",
-                        self._formatar_data_hora(prop.dat_recebimento) or "",
-                        self._formatar_data_hora(prop.dat_devolucao) or "",
-                        self._get_documentos_fisicos(prop),
-                    ]
-                )
+            for item in dados:
+                writer.writerow([
+                    item.get("npe", ""),
+                    item.get("tipo", ""),
+                    item.get("descricao", ""),
+                    item.get("autor", ""),
+                    item.get("status", ""),
+                    item.get("data_envio", ""),
+                    item.get("data_recebimento", ""),
+                    item.get("data_devolucao", ""),
+                    item.get("vinculo", ""),
+                ])
                 chunk = output.getvalue()
                 if chunk:
                     # Zope response espera bytes
@@ -1241,5 +1411,241 @@ class ExportarCSV(GrokView, ProposicoesAPIBase):
             traceback.print_exc()
             self.request.response.setStatus(500)
             return json.dumps({"sucesso": False, "erro": f"Erro ao gerar CSV: {str(e)}"})
+        finally:
+            session.close()
+
+
+# ---------------------------------------------------------------------
+# @@proposicoes-excel
+# ---------------------------------------------------------------------
+class ExportarExcel(GrokView, ProposicoesAPIBase):
+    context(Interface)
+    name("proposicoes-excel")
+    require("zope2.View")
+
+    def render(self):
+        if not OPENPYXL_AVAILABLE:
+            self.request.response.setStatus(500)
+            return json.dumps({"sucesso": False, "erro": "Biblioteca openpyxl não disponível"})
+
+        session = Session()
+        try:
+            caixa = self.request.form.get("caixa", "revisao")
+
+            if caixa not in {"all", "todas"} and not self._verificar_permissao_caixa(caixa):
+                self.request.response.setStatus(403)
+                return json.dumps({"sucesso": False, "erro": "Acesso não autorizado para esta caixa"})
+
+            filename = f"proposicoes_{caixa}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
+            self.request.response.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+            self.request.response.setHeader("Content-Disposition", f'attachment; filename="{filename}"')
+
+            dados = self._obter_dados_para_exportacao(session, caixa)
+
+            wb = openpyxl.Workbook()
+            ws = wb.active
+            ws.title = "Proposições"
+
+            # Cabeçalho
+            ws.append(["NPE", "Tipo", "Descrição", "Autor", "Status", "Data Envio", "Data Recebimento", "Data Devolução", "Vínculo"])
+
+            # Dados
+            for item in dados:
+                ws.append([
+                    item.get("npe", ""),
+                    item.get("tipo", ""),
+                    item.get("descricao", ""),
+                    item.get("autor", ""),
+                    item.get("status", ""),
+                    item.get("data_envio", ""),
+                    item.get("data_recebimento", ""),
+                    item.get("data_devolucao", ""),
+                    item.get("vinculo", ""),
+                ])
+
+            # Ajustar largura das colunas
+            for column in ws.columns:
+                max_length = 0
+                column = [cell for cell in column]
+                for cell in column:
+                    try:
+                        if len(str(cell.value)) > max_length:
+                            max_length = len(str(cell.value))
+                    except Exception:
+                        pass
+                adjusted_width = min(max_length + 2, 50)
+                ws.column_dimensions[column[0].column_letter].width = adjusted_width
+
+            output = io.BytesIO()
+            wb.save(output)
+            return output.getvalue()
+
+        except ValueError as e:
+            self.request.response.setStatus(400)
+            return json.dumps({"sucesso": False, "erro": f"Parâmetros inválidos: {str(e)}"})
+        except Exception as e:
+            traceback.print_exc()
+            self.request.response.setStatus(500)
+            return json.dumps({"sucesso": False, "erro": f"Erro ao gerar Excel: {str(e)}"})
+        finally:
+            session.close()
+
+
+# ---------------------------------------------------------------------
+# @@proposicoes-pdf
+# ---------------------------------------------------------------------
+class ExportarPDF(GrokView, ProposicoesAPIBase):
+    context(Interface)
+    name("proposicoes-pdf")
+    require("zope2.View")
+
+    def render(self):
+        if not REPORTLAB_AVAILABLE:
+            self.request.response.setStatus(500)
+            return json.dumps({"sucesso": False, "erro": "Biblioteca ReportLab não disponível"})
+
+        session = Session()
+        try:
+            caixa = self.request.form.get("caixa", "revisao")
+
+            if caixa not in {"all", "todas"} and not self._verificar_permissao_caixa(caixa):
+                self.request.response.setStatus(403)
+                return json.dumps({"sucesso": False, "erro": "Acesso não autorizado para esta caixa"})
+
+            filename = f"proposicoes_{caixa}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
+            self.request.response.setHeader("Content-Type", "application/pdf")
+            self.request.response.setHeader("Content-Disposition", f'attachment; filename="{filename}"')
+
+            dados = self._obter_dados_para_exportacao(session, caixa)
+
+            if not dados:
+                return b""
+
+            buffer = io.BytesIO()
+            doc = SimpleDocTemplate(
+                buffer,
+                pagesize=landscape(A4),
+                rightMargin=1.5*cm,
+                leftMargin=1.5*cm,
+                topMargin=2*cm,
+                bottomMargin=2*cm,
+                title="Relatório de Recebimento de Proposições"
+            )
+            styles = getSampleStyleSheet()
+            normal_style = styles['Normal']
+            normal_style.fontSize = 8
+            normal_style.leading = 10
+            normal_style.wordWrap = 'LTR'
+            header_style = styles['Heading4']
+            header_style.fontSize = 9
+            header_style.leading = 12
+            header_style.textColor = colors.white
+            header_style.alignment = 1
+
+            elements = []
+            elements.append(Paragraph("RELATÓRIO DE RECEBIMENTO DE PROPOSIÇÕES", styles['Title']))
+            elements.append(Paragraph(f"Data de geração: {datetime.now().strftime('%d/%m/%Y %H:%M')}", styles['Normal']))
+            elements.append(Paragraph(f"Total de registros: {len(dados)}", styles['Normal']))
+            elements.append(Spacer(1, 0.5*cm))
+
+            header_labels = [
+                'NPE',
+                'Tipo',
+                'Descrição',
+                'Autor',
+                'Status',
+                'Data Envio',
+                'Data Recebimento',
+                'Data Devolução',
+                'Vínculo'
+            ]
+
+            table_data = []
+            table_data.append([Paragraph(label, header_style) for label in header_labels])
+
+            for item in dados:
+                row = [
+                    Paragraph(str(item.get('npe', '')), normal_style),
+                    Paragraph(str(item.get('tipo', '')), normal_style),
+                    Paragraph(str(item.get('descricao', '')), normal_style),
+                    Paragraph(str(item.get('autor', '')), normal_style),
+                    Paragraph(str(item.get('status', '')), normal_style),
+                    Paragraph(str(item.get('data_envio', '')), normal_style),
+                    Paragraph(str(item.get('data_recebimento', '')), normal_style),
+                    Paragraph(str(item.get('data_devolucao', '')), normal_style),
+                    Paragraph(str(item.get('vinculo', '')), normal_style),
+                ]
+                table_data.append(row)
+
+            page_width, page_height = landscape(A4)
+            content_width = page_width - doc.leftMargin - doc.rightMargin
+            col_widths = [
+                0.08 * content_width,  # NPE
+                0.11 * content_width,  # Tipo
+                0.23 * content_width,  # Descrição
+                0.14 * content_width,  # Autor
+                0.09 * content_width,  # Status
+                0.09 * content_width,  # Data Envio
+                0.08 * content_width,  # Data Recebimento
+                0.08 * content_width,  # Data Devolução
+                0.10 * content_width   # Vínculo
+            ]
+
+            table = Table(
+                table_data,
+                colWidths=col_widths,
+                repeatRows=1,
+                hAlign='LEFT'
+            )
+
+            table.setStyle(TableStyle([
+                ('BACKGROUND', (0,0), (-1,0), colors.HexColor('#4472C4')),
+                ('TEXTCOLOR', (0,0), (-1,0), colors.white),
+                ('ALIGN', (0,0), (-1,0), 'CENTER'),
+                ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
+                ('FONTSIZE', (0,0), (-1,0), 9),
+                ('BOTTOMPADDING', (0,0), (-1,0), 6),
+                ('TEXTCOLOR', (0,1), (-1,-1), colors.black),
+                ('FONTNAME', (0,1), (-1,-1), 'Helvetica'),
+                ('FONTSIZE', (0,1), (-1,-1), 8),
+                ('VALIGN', (0,0), (-1,-1), 'TOP'),
+                ('ALIGN', (0,1), (0,-1), 'CENTER'),  # NPE centralizado
+                ('ALIGN', (1,1), (1,-1), 'CENTER'),  # Tipo centralizado
+                ('ALIGN', (2,1), (2,-1), 'LEFT'),     # Descrição à esquerda
+                ('ALIGN', (3,1), (3,-1), 'LEFT'),    # Autor à esquerda
+                ('ALIGN', (4,1), (4,-1), 'CENTER'),  # Status centralizado
+                ('ALIGN', (5,1), (7,-1), 'CENTER'),  # Datas centralizadas
+                ('ALIGN', (8,1), (8,-1), 'CENTER'),  # Documentos centralizado
+                ('GRID', (0,0), (-1,-1), 0.5, colors.lightgrey),
+                ('LINEBELOW', (0,0), (-1,0), 1, colors.HexColor('#2F5597')),
+                ('ROWBACKGROUNDS', (0,1), (-1,-1), [colors.white, colors.HexColor('#F2F2F2')]),
+                ('LEFTPADDING', (0,0), (-1,-1), 3),
+                ('RIGHTPADDING', (0,0), (-1,-1), 3),
+                ('TOPPADDING', (0,0), (-1,-1), 2),
+                ('BOTTOMPADDING', (0,0), (-1,-1), 2),
+            ]))
+
+            elements.append(table)
+
+            def footer(canvas, doc_):
+                canvas.saveState()
+                canvas.setFont('Helvetica', 8)
+                page_num = f"Página {doc_.page}"
+                canvas.drawRightString(page_width - 1.5*cm, 1*cm, page_num)
+                canvas.drawString(1.5*cm, 1*cm, "SAGL")
+                canvas.restoreState()
+
+            doc.build(elements, onFirstPage=footer, onLaterPages=footer)
+            pdf_data = buffer.getvalue()
+            buffer.close()
+            return pdf_data
+
+        except ValueError as e:
+            self.request.response.setStatus(400)
+            return json.dumps({"sucesso": False, "erro": f"Parâmetros inválidos: {str(e)}"})
+        except Exception as e:
+            traceback.print_exc()
+            self.request.response.setStatus(500)
+            return json.dumps({"sucesso": False, "erro": f"Erro ao gerar PDF: {str(e)}"})
         finally:
             session.close()

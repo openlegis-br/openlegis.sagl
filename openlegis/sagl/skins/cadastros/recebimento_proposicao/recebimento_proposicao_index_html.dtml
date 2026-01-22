@@ -302,9 +302,22 @@
           <button id="reset-filters" class="btn btn-outline-danger" type="button" title="Limpar todos os filtros">
             <i class="fas fa-eraser me-1"></i> Limpar Filtros
           </button>
-          <button id="export-csv" class="btn btn-success" type="button" title="Exportar para CSV">
-            <i class="fas fa-file-csv me-1"></i> Exportar
-          </button>
+          <div class="btn-group">
+            <button id="export-btn" class="btn btn-success dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Exportar dados">
+              <i class="fas fa-download me-1"></i> Exportar
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" href="#" id="export-csv" title="Exportar para CSV">
+                <i class="fas fa-file-csv me-2"></i> CSV
+              </a></li>
+              <li><a class="dropdown-item" href="#" id="export-excel" title="Exportar para Excel">
+                <i class="fas fa-file-excel me-2"></i> Excel
+              </a></li>
+              <li><a class="dropdown-item" href="#" id="export-pdf" title="Exportar para PDF">
+                <i class="fas fa-file-pdf me-2"></i> PDF
+              </a></li>
+            </ul>
+          </div>
         </div>
       </div>
     </div>
@@ -1316,8 +1329,7 @@ function initFilters() {
     loadData(window.appState.currentCaixa, 1, true);
     loadCounts();
   });
-  $('#export-csv').on('click', function(e) {
-    e.preventDefault();
+  function exportarDados(formato) {
     const filtros = lerFiltrosForm();
     const params = Object.assign(
       { 
@@ -1329,7 +1341,32 @@ function initFilters() {
       filtros
     );
     const query = $.param(params);
-    window.open(`${APP_CONFIG.PORTAL_URL}/proposicoes-csv?${query}`, '_blank');
+    let endpoint = '';
+    if (formato === 'csv') {
+      endpoint = 'proposicoes-csv';
+    } else if (formato === 'excel') {
+      endpoint = 'proposicoes-excel';
+    } else if (formato === 'pdf') {
+      endpoint = 'proposicoes-pdf';
+    }
+    if (endpoint) {
+      window.open(`${APP_CONFIG.PORTAL_URL}/${endpoint}?${query}`, '_blank');
+    }
+  }
+
+  $('#export-csv').on('click', function(e) {
+    e.preventDefault();
+    exportarDados('csv');
+  });
+
+  $('#export-excel').on('click', function(e) {
+    e.preventDefault();
+    exportarDados('excel');
+  });
+
+  $('#export-pdf').on('click', function(e) {
+    e.preventDefault();
+    exportarDados('pdf');
   });
   $('#select-por-pagina').on('change', function() {
     window.appState.porPagina = parseInt($(this).val(), 10);

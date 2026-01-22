@@ -31,7 +31,9 @@ def invalidate_cache_contadores(cod_usuario=None, cod_unid_tramitacao=None):
     with _cache_lock:
         if cod_usuario is None:
             # Invalida todo o cache
+            cache_size_before = len(_contadores_cache)
             _contadores_cache.clear()
+            logger.info(f"[invalidate_cache_contadores] Cache completamente invalidado ({cache_size_before} entradas removidas)")
         else:
             # Invalida cache específico
             keys_to_remove = []
@@ -42,3 +44,6 @@ def invalidate_cache_contadores(cod_usuario=None, cod_unid_tramitacao=None):
             
             for key in keys_to_remove:
                 del _contadores_cache[key]
+            
+            if keys_to_remove:
+                logger.info(f"[invalidate_cache_contadores] Cache invalidado para usuário {cod_usuario} (unidade: {cod_unid_tramitacao or 'todas'}) - {len(keys_to_remove)} entradas removidas")

@@ -37,6 +37,20 @@ from openlegis.sagl.browser.processo_norma.processo_norma_utils import (
     secure_path_join
 )
 
+# Imports para tratamento de conflitos de transação ZODB
+try:
+    from ZODB.POSException import ConflictError
+    from transaction import abort, retry
+    ZODB_CONFLICT_HANDLING = True
+except ImportError:
+    # Fallback se ZODB não estiver disponível
+    ConflictError = Exception
+    ZODB_CONFLICT_HANDLING = False
+    def abort():
+        pass
+    def retry():
+        pass
+
 # Configuração de logging melhorada (similar a processo_leg)
 def setup_logging():
     """Configura o logging de forma segura sem resource leaks"""
@@ -1057,7 +1071,65 @@ class ProcessoNormaTaskExecutor(grok.View):
             return None, False
 
     def render(self):
-        """Executa a geração do processo de norma"""
+        """
+        Executa a geração do processo de norma.
+        
+        Aceita POST ou GET com parâmetros:
+        - cod_norma: Código da norma (obrigatório)
+        - portal_url: URL base do portal (opcional)
+        - user_id: ID do usuário (opcional)
+        
+        Implementa retry automático para conflitos de transação ZODB.
+        """
+        import json as json_lib
+        
+        # Máximo de tentativas para retry de conflitos
+        MAX_RETRIES = 3
+        retry_count = 0
+        
+        while retry_count < MAX_RETRIES:
+            try:
+                return self._render_impl()
+            except ConflictError as conflict_err:
+                retry_count += 1
+                if retry_count >= MAX_RETRIES:
+                    # Excedeu número máximo de retries, loga erro e retorna resposta de erro
+                    logger.error(
+                        f"[ProcessoNormaTaskExecutor] ConflictError após {MAX_RETRIES} tentativas: {conflict_err}",
+                        exc_info=True
+                    )
+                    self.request.RESPONSE.setStatus(500)
+                    self.request.RESPONSE.setHeader('Content-Type', 'application/json; charset=utf-8')
+                    return json.dumps({
+                        'error': f'Database conflict error após {MAX_RETRIES} tentativas. Tente novamente.',
+                        'error_type': 'ConflictError',
+                        'success': False,
+                        'retries': retry_count
+                    })
+                else:
+                    # Aborta transação atual e tenta novamente
+                    logger.info(
+                        f"[ProcessoNormaTaskExecutor] ConflictError detectado (tentativa {retry_count}/{MAX_RETRIES}), "
+                        f"retry automático: {conflict_err}"
+                    )
+                    try:
+                        abort()
+                    except Exception:
+                        pass  # Ignora erros ao abortar
+                    
+                    # Delay progressivo antes de retry para reduzir chance de conflito
+                    # Usa backoff exponencial: 0.1s, 0.2s, 0.4s
+                    delay = 0.1 * (2 ** (retry_count - 1))
+                    time.sleep(delay)
+                    
+                    # Continua no loop para tentar novamente
+                    continue
+    
+    def _render_impl(self):
+        """
+        Implementação interna do render, sem tratamento de conflitos.
+        Chamado por render() que implementa o retry.
+        """
         import json as json_lib
         try:
             cod_norma = self.request.form.get('cod_norma') or self.request.get('cod_norma')
@@ -1210,6 +1282,9 @@ class ProcessoNormaTaskExecutor(grok.View):
                     'has_modelo_proposicao': hasattr(self.context, 'modelo_proposicao')
                 })
             
+        except ConflictError:
+            # Re-lança ConflictError para ser tratado pelo render()
+            raise
         except Exception as e:
             import traceback
             error_traceback = traceback.format_exc()

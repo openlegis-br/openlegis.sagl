@@ -5,6 +5,11 @@ import fitz as pymupdf
 import pikepdf
 from DateTime import DateTime
 import logging
+import urllib.request
+import urllib.parse
+import urllib.error
+import json
+import base64
 
 
 def reparar_pdf_stream(file_stream: BytesIO) -> BytesIO:
@@ -75,126 +80,98 @@ def reparar_pdf_stream(file_stream: BytesIO) -> BytesIO:
 
 
 @zope_task(bind=True, max_retries=5, default_retry_delay=5)
-def peticao_autuar_task(self, portal, cod_peticao, portal_url):
+def peticao_autuar_task(self, site, cod_peticao, portal_url):
+    """
+    Tarefa Celery para autuar petição.
+    
+    Segue padrão de tramitacao_pdf_task: faz chamadas HTTP para views que têm
+    contexto Zope correto, evitando problemas com RequestContainer.
+    
+    Args:
+        self: Instância da task (injetado pelo decorator)
+        site: Objeto site do Zope (injetado pelo decorator @zope_task, mas não usado diretamente)
+        cod_peticao: Código da petição
+        portal_url: URL base do portal
+    
+    Returns:
+        Nome do arquivo PDF gerado
+    """
     if getattr(self.request, "retries", 0) > 0:
         logging.info(f"[peticao_autuar_task] Retry #{self.request.retries} | cod_peticao={cod_peticao}")
 
     logging.info(f"[peticao_autuar_task] Iniciando task para petição {cod_peticao}")
-    skins = portal.portal_skins.sk_sagl
 
     try:
         # ======================
-        # 1) Obter PDF-fonte + autor / assinatura
+        # 1) Obter dados da petição via chamada HTTP (view tem contexto Zope correto)
         # ======================
-        arq_data = None
-        cod_validacao_doc = ''
-        nom_autor = None
-        outros = ''
+        base_url = portal_url.rstrip('/')
+        if '/sagl/' not in base_url:
+            executor_url = f"{base_url}/sagl/@@peticao_autuar_executor"
+        else:
+            executor_url = f"{base_url}/@@peticao_autuar_executor"
+        
+        # Prepara dados para POST
+        data = {
+            'cod_peticao': str(cod_peticao),
+        }
+        post_data = urllib.parse.urlencode(data).encode('utf-8')
+        
+        logging.info(f"[peticao_autuar_task] Obtendo dados da petição via HTTP: {executor_url}")
+        
+        # Faz chamada HTTP POST para obter dados preparados
+        req = urllib.request.Request(
+            executor_url,
+            data=post_data,
+            headers={'Content-Type': 'application/x-www-form-urlencoded'}
+        )
+        
+        with urllib.request.urlopen(req, timeout=300) as response:
+            response_data = response.read().decode('utf-8')
+            
+            if not response_data or not response_data.strip():
+                raise Exception("Resposta vazia do servidor executor")
+            
+            try:
+                result = json.loads(response_data)
+            except json.JSONDecodeError as e:
+                logging.error(f"[peticao_autuar_task] Resposta não é JSON válido. Primeiros 500 chars: {response_data[:500]}")
+                raise
+            
+            if not result.get('success'):
+                error_msg = result.get('error', 'Erro desconhecido')
+                raise Exception(f"Erro ao obter dados: {error_msg}")
+            
+            # Extrai dados preparados
+            dados = result.get('dados', {})
+            
+            # Dados necessários para processamento
+            pdf_base64 = dados.get('pdf_base64')
+            if not pdf_base64:
+                raise ValueError("PDF não encontrado nos dados retornados")
+            
+            arq_data = base64.b64decode(pdf_base64)
+            cod_validacao_doc = dados.get('cod_validacao_doc', '')
+            nom_autor = dados.get('nom_autor')
+            outros = dados.get('outros', '')
+            texto = dados.get('texto', '')
+            info_protocolo = dados.get('info_protocolo', '')
+            caminho = dados.get('caminho', '')
+            nom_pdf_saida = dados.get('nom_pdf_saida', '')
+            ind_doc_adm = dados.get('ind_doc_adm', '')
+            ind_norma = dados.get('ind_norma', '')
+            cod_norma = dados.get('cod_norma')
+            
+            if not nom_pdf_saida:
+                raise ValueError("Nome do arquivo de saída não encontrado nos dados retornados")
 
-        for peticao in skins.zsql.peticao_obter_zsql(cod_peticao=cod_peticao):
-            # Tenta pegar PDF assinado (documentos_assinados)
-            for validacao in skins.zsql.assinatura_documento_obter_zsql(
-                tipo_doc='peticao',
-                codigo=peticao.cod_peticao,
-                ind_assinado=1
-            ):
-                nom_pdf_peticao = f"{validacao.cod_assinatura_doc}.pdf"
-                cod_validacao_doc = str(
-                    skins.cadastros.assinatura.format_verification_code(code=validacao.cod_assinatura_doc)
-                )
-
-                if nom_pdf_peticao in portal.sapl_documentos.documentos_assinados.objectIds():
-                    arq_data = portal.sapl_documentos.documentos_assinados[nom_pdf_peticao].data
-                else:
-                    raise FileNotFoundError(
-                        f"Arquivo assinado {nom_pdf_peticao} não encontrado em documentos_assinados."
-                    )
-
-                # Repara o stream uma única vez e reaproveita
-                pdf_stream = reparar_pdf_stream(BytesIO(bytes(arq_data)))
-
-                # Tenta ler assinaturas
-                signers = []
-                try:
-                    pdf_stream.seek(0)
-                    signers = (get_signatures(pdf_stream) or [])
-                except Exception as e:
-                    logging.warning(f"Falha ao extrair assinaturas com get_signatures: {e!r}")
-
-                if signers:
-                    nom_autor = signers[0].get('signer_name')
-                    qtde_assinaturas = len(signers)
-                    if qtde_assinaturas == 2:
-                        outros = " e outro"
-                    elif qtde_assinaturas > 2:
-                        outros = " e outros"
-                # Já achou PDF assinado; sai do loop de validações
-                break
-            else:
-                # Não havia assinatura “documentos_assinados”: usa PDF em /peticao
-                nom_pdf_peticao = f"{cod_peticao}.pdf"
-                if nom_pdf_peticao in portal.sapl_documentos.peticao.objectIds():
-                    arq_data = portal.sapl_documentos.peticao[nom_pdf_peticao].data
-                else:
-                    raise FileNotFoundError(f"Arquivo da petição {nom_pdf_peticao} não encontrado.")
-
-                for usuario in skins.zsql.usuario_obter_zsql(cod_usuario=peticao.cod_usuario):
-                    nom_autor = usuario.nom_completo
-
-                pdf_stream = reparar_pdf_stream(BytesIO(bytes(arq_data)))
-
-            if not arq_data:
-                raise ValueError("Arquivo da petição está vazio.")
-
-        # ======================
-        # 2) Contexto de destino (texto/caminho/arquivo de saída)
-        # ======================
-        info_protocolo = f"- Recebido em {peticao.dat_recebimento}."
-        texto = ''
-        storage_path = None
-        caminho = ''
-        nom_pdf_saida = ''
-
-        if peticao.ind_doc_adm == "1":
-            for documento in skins.zsql.documento_administrativo_obter_zsql(cod_documento=peticao.cod_documento):
-                for protocolo in skins.zsql.protocolo_obter_zsql(
-                    num_protocolo=documento.num_protocolo, ano_protocolo=documento.ano_documento
-                ):
-                    info_protocolo = (
-                        f" - Prot. nº {protocolo.num_protocolo}/{protocolo.ano_protocolo} "
-                        f"{DateTime(protocolo.dat_protocolo).strftime('%d/%m/%Y')} {protocolo.hor_protocolo}."
-                    )
-                texto = f"{documento.des_tipo_documento} nº {documento.num_documento}/{documento.ano_documento}"
-                storage_path = portal.sapl_documentos.administrativo
-                nom_pdf_saida = f"{documento.cod_documento}_texto_integral.pdf"
-                caminho = '/sapl_documentos/administrativo/'
-
-        elif peticao.ind_doc_materia == "1":
-            id_materia = ""
-            for documento in skins.zsql.documento_acessorio_obter_zsql(cod_documento=peticao.cod_doc_acessorio):
-                for materia in skins.zsql.materia_obter_zsql(cod_materia=documento.cod_materia):
-                    id_materia = f"{materia.sgl_tipo_materia} {materia.num_ident_basica}/{materia.ano_ident_basica}"
-                texto = f"{documento.des_tipo_documento} - {id_materia}".strip(" -")
-                storage_path = portal.sapl_documentos.materia
-                nom_pdf_saida = f"{documento.cod_documento}.pdf"
-                caminho = '/sapl_documentos/materia/'
-
-        elif peticao.ind_norma == "1":
-            for norma in skins.zsql.norma_juridica_obter_zsql(cod_norma=peticao.cod_norma):
-                texto = f"{norma.des_tipo_norma} nº {norma.num_norma}/{norma.ano_norma}"
-                storage_path = portal.sapl_documentos.norma_juridica
-                nom_pdf_saida = f"{norma.cod_norma}_texto_integral.pdf"
-                caminho = '/sapl_documentos/norma_juridica/'
-
-        if not storage_path or not nom_pdf_saida:
-            raise ValueError(
-                "Não foi possível determinar o destino do arquivo (storage_path/nom_pdf_saida). "
-                "Verifique os indicadores ind_doc_adm / ind_doc_materia / ind_norma."
-            )
 
         # ======================
-        # 3) Carimbo de rodapé + QR (com offset visual no logo)
+        # 2) Processar PDF: reparar, adicionar carimbo e QR code
         # ======================
+        # Repara o stream
+        pdf_stream = reparar_pdf_stream(BytesIO(arq_data))
+        
         try:
             pdf_stream.seek(0)
             existing_pdf = pymupdf.open(stream=pdf_stream.read(), filetype="pdf")
@@ -291,7 +268,7 @@ def peticao_autuar_task(self, portal, cod_peticao, portal_url):
                     shape.commit()
 
             # Cabeçalho (somente Doc Administrativo): mede pela página 0
-            if peticao.ind_doc_adm == "1" and total_paginas > 0:
+            if ind_doc_adm == "1" and total_paginas > 0:
                 p0 = existing_pdf[0]
                 w0, h0 = p0.rect.width, p0.rect.height
                 rect = pymupdf.Rect(40, 120, max(40, w0 - 20), 170)
@@ -308,23 +285,55 @@ def peticao_autuar_task(self, portal, cod_peticao, portal_url):
                 pass
 
         # ======================
-        # 4) Persistência no Zope (e catalogação específica)
+        # 3) Salvar PDF via chamada HTTP (view tem contexto Zope correto)
         # ======================
-        if nom_pdf_saida in storage_path.objectIds():
-            arquivo_peticao = storage_path[nom_pdf_saida]
-            arquivo_peticao.update_data(content)
+        pdf_base64_saida = base64.b64encode(content).decode('utf-8')
+        
+        salvar_url = portal_url.rstrip('/')
+        if '/sagl/' not in salvar_url:
+            salvar_url = f"{salvar_url}/sagl/@@peticao_autuar_salvar"
         else:
-            storage_path.manage_addFile(id=nom_pdf_saida, file=content, title=texto)
-            arquivo_peticao = storage_path[nom_pdf_saida]
-
-        # Permissões
-        arquivo_peticao.manage_permission('View', roles=['Manager', 'Authenticated'], acquire=0)
-        if peticao.ind_norma == "1":
-            arquivo_peticao.manage_permission('View', roles=['Manager', 'Anonymous'], acquire=1)
-            portal.sapl_documentos.norma_juridica.Catalog.atualizarCatalogo(cod_norma=peticao.cod_norma)
+            salvar_url = f"{salvar_url}/@@peticao_autuar_salvar"
+        
+        save_data = urllib.parse.urlencode({
+            'cod_peticao': str(cod_peticao),
+            'pdf_base64': pdf_base64_saida,
+            'nom_pdf_saida': nom_pdf_saida,
+            'texto': texto,
+            'ind_norma': str(ind_norma),
+            'cod_norma': str(cod_norma) if cod_norma else '',
+        }).encode('utf-8')
+        
+        save_req = urllib.request.Request(
+            salvar_url,
+            data=save_data,
+            headers={'Content-Type': 'application/x-www-form-urlencoded'}
+        )
+        
+        with urllib.request.urlopen(save_req, timeout=60) as save_response:
+            save_result = save_response.read().decode('utf-8')
+            try:
+                save_result_json = json.loads(save_result)
+                if not save_result_json.get('success'):
+                    error_msg = save_result_json.get('error', 'Erro desconhecido')
+                    raise Exception(f"Erro ao salvar PDF: {error_msg}")
+            except json.JSONDecodeError:
+                # Se não for JSON, assume sucesso se não houver erro HTTP
+                pass
+            logging.info(f"[peticao_autuar_task] PDF salvo no repositório via view HTTP (cod_peticao={cod_peticao})")
 
         return nom_pdf_saida
 
+    except urllib.error.HTTPError as e:
+        error_body = e.read().decode('utf-8') if hasattr(e, 'read') else str(e)
+        logging.error(f"[peticao_autuar_task] Erro HTTP {e.code}: {error_body}")
+        raise Exception(f"Erro HTTP {e.code} ao processar petição: {error_body}")
+    except urllib.error.URLError as e:
+        logging.error(f"[peticao_autuar_task] Erro de URL: {e}")
+        raise Exception(f"Erro de conexão ao processar petição: {str(e)}")
+    except json.JSONDecodeError as e:
+        logging.error(f"[peticao_autuar_task] Erro ao decodificar JSON: {e}")
+        raise Exception(f"Resposta inválida do servidor: {str(e)}")
     except Exception as e:
         logging.error(
             f"[peticao_autuar_task] Erro na tentativa {getattr(self.request, 'retries', 0) + 1} "

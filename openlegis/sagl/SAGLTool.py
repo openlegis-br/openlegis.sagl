@@ -2763,6 +2763,8 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
     # Tarefas assincronas
 
     def proposicao_autuar_async(self, cod_proposicao):
+        # Importa tasks dentro do método para evitar problemas de permissão no carregamento do módulo
+        import tasks
         portal_url = str(self.url())
         async_result = tasks.proposicao_autuar_task.apply_async(
             kwargs={'cod_proposicao': cod_proposicao, 'portal_url': portal_url},
@@ -2771,6 +2773,8 @@ class SAGLTool(UniqueObject, SimpleItem, ActionProviderBase):
         return async_result
 
     def peticao_autuar(self, cod_peticao):
+        # Importa tasks dentro do método para evitar problemas de permissão no carregamento do módulo
+        import tasks
         portal_url = str(self.url())
         async_result = tasks.peticao_autuar_task.apply_async(
             kwargs={'cod_peticao': cod_peticao, 'portal_url': portal_url}

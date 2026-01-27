@@ -780,9 +780,87 @@ class ProcessoAdmView(grok.View):
             logger.error(f"Erro ao obter dados do documento: {str(e)}", exc_info=True)
             raise PDFGenerationError(f"Falha ao obter dados do documento: {str(e)}")
     
+    def _baixar_arquivo_direto_zope(self, container, filename: str, caminho_saida: str) -> bool:
+        """
+        Baixa um arquivo diretamente do Zope (sem HTTP), respeitando permissões de usuários autenticados.
+        
+        IMPORTANTE: Esta função acessa os arquivos diretamente do Zope, não via HTTP.
+        Isso permite acessar arquivos com permissão restrita de usuários autenticados,
+        já que a view roda no contexto Zope com o usuário autenticado.
+        
+        Args:
+            container: Container Zope onde o arquivo está (ex: portal.sapl_documentos.administrativo)
+            filename: Nome do arquivo
+            caminho_saida: Caminho completo onde salvar o arquivo
+            
+        Returns:
+            bool: True se baixou com sucesso, False caso contrário
+        """
+        # OTIMIZAÇÃO: Cache - verifica se arquivo já existe
+        if os.path.exists(caminho_saida) and os.path.getsize(caminho_saida) > 0:
+            return True
+        
+        try:
+            # Acessa o arquivo diretamente do Zope
+            if not hasattr(container, 'objectIds'):
+                return False
+            
+            # Verifica se arquivo existe
+            if filename not in container.objectIds():
+                return False
+            
+            # Obtém o objeto do arquivo
+            arquivo_obj = getattr(container, filename, None)
+            if arquivo_obj is None:
+                return False
+            
+            # Obtém os dados do arquivo
+            if hasattr(arquivo_obj, 'data'):
+                file_data = arquivo_obj.data
+            elif hasattr(arquivo_obj, 'get_data'):
+                file_data = arquivo_obj.get_data()
+            else:
+                logger.warning(f"[_baixar_arquivo_direto_zope] Arquivo '{filename}' não tem atributo 'data' ou 'get_data'")
+                return False
+            
+            if file_data and len(file_data) > 0:
+                # Cria diretório se necessário
+                dir_saida = os.path.dirname(caminho_saida)
+                if dir_saida:
+                    os.makedirs(dir_saida, exist_ok=True)
+                
+                # Salva arquivo
+                with open(caminho_saida, 'wb') as f:
+                    # Converte para bytes se necessário
+                    if isinstance(file_data, str):
+                        file_data = file_data.encode('utf-8')
+                    f.write(bytes(file_data))
+                return True
+            else:
+                return False
+                
+        except Exception as e:
+            error_type = type(e).__name__
+            error_msg = str(e).lower()
+            
+            # Trata erros NotFound/KeyError silenciosamente
+            if ('notfound' in error_type.lower() or 
+                'keyerror' in error_type.lower() or 
+                'cannot locate' in error_msg or 
+                'not found' in error_msg):
+                return False
+            
+            logger.warning(f"[_baixar_arquivo_direto_zope] Erro ao baixar '{filename}': {e}")
+            return False
+    
     def _baixar_arquivo_via_http_local(self, portal_url: str, caminho_relativo: str, caminho_saida: str, timeout: int = None) -> bool:
         """
         Baixa um arquivo via HTTP do Zope (função auxiliar local).
+        
+        DEPRECADO: Esta função está sendo substituída por _baixar_arquivo_direto_zope
+        que acessa arquivos diretamente do Zope, respeitando permissões de usuários autenticados.
+        
+        Mantida para compatibilidade, mas deve ser evitada para arquivos com permissão restrita.
         
         Trata silenciosamente arquivos que não existem (404/NotFound), seguindo o padrão do processo_leg.
         
@@ -862,7 +940,7 @@ class ProcessoAdmView(grok.View):
                 except:
                     pass
                 return False
-            logger.warning(f"[_baixar_arquivo_via_http_local] Erro HTTP {e.code} ao baixar {caminho_relativo}")
+            logger.warning(f"[_baixar_arquivo_via_http_local] Erro HTTP {e.code} ao baixar {caminho_relativo} - verificar como obter os arquivos na view diretamente do zope, não na task, respeitando para conseguir acessar arquivos com permissão restrita de usuários autenticado")
             return False
         except urllib.error.URLError as e:
             # Erros de URL (timeout, conexão, etc) - trata como arquivo não encontrado silenciosamente
@@ -944,16 +1022,20 @@ class ProcessoAdmView(grok.View):
         """
         Coleta o texto integral do documento administrativo.
         OTIMIZAÇÃO: Método separado para facilitar manutenção.
+        
+        IMPORTANTE: Acessa arquivos diretamente do Zope (não via HTTP) para respeitar
+        permissões de usuários autenticados.
         """
         nom_arquivo_texto = f"{cod_documento}_texto_integral.pdf"
-        texto_path_rel = f"sapl_documentos/administrativo/{nom_arquivo_texto}"
         texto_path_abs = os.path.join(dir_base, nom_arquivo_texto)
         
         try:
-            # Verifica se o arquivo existe no Zope antes de tentar baixar
+            # Acessa arquivo diretamente do Zope (não via HTTP)
+            # Isso permite acessar arquivos com permissão restrita de usuários autenticados
             if hasattr(portal, 'sapl_documentos') and hasattr(portal.sapl_documentos, 'administrativo'):
-                if safe_check_file(portal.sapl_documentos.administrativo, nom_arquivo_texto):
-                    if self._baixar_arquivo_via_http_local(portal_url, texto_path_rel, texto_path_abs):
+                container = portal.sapl_documentos.administrativo
+                if safe_check_file(container, nom_arquivo_texto):
+                    if self._baixar_arquivo_direto_zope(container, nom_arquivo_texto, texto_path_abs):
                         return {
                             "data": f"{dat_documento[:10]} 00:00:02",
                             'path': dir_base,
@@ -1001,37 +1083,43 @@ class ProcessoAdmView(grok.View):
         except Exception:
             pass
         
-        # OTIMIZAÇÃO: Coleta URLs primeiro, depois baixa em paralelo
+        # OTIMIZAÇÃO: Coleta informações primeiro, depois baixa em paralelo
+        # IMPORTANTE: Acessa arquivos diretamente do Zope (não via HTTP) para respeitar
+        # permissões de usuários autenticados
         itens_para_baixar = []
         documentos_map = {}
+        container = None
+        
+        try:
+            if hasattr(portal, 'sapl_documentos') and hasattr(portal.sapl_documentos, 'administrativo'):
+                container = portal.sapl_documentos.administrativo
+        except Exception:
+            pass
         
         for doc_acess in documentos_acessorios:
             nome_acessorio = f"{doc_acess.cod_documento_acessorio}.pdf"
             
             # Verifica se arquivo existe (verificação em lote)
             if arquivos_existentes.get(nome_acessorio, False):
-                acessorio_path_rel = f"sapl_documentos/administrativo/{nome_acessorio}"
                 acessorio_path_abs = os.path.join(dir_base, nome_acessorio)
                 
                 itens_para_baixar.append({
-                    'url': f"{portal_url.rstrip('/')}/{acessorio_path_rel}",
-                    'path': acessorio_path_abs,
+                    'container': container,
                     'filename': nome_acessorio,
+                    'path': acessorio_path_abs,
                     'doc': doc_acess,
                     'dat': _convert_to_datetime_string(doc_acess.dat_documento) if doc_acess.dat_documento else dat_documento
                 })
                 documentos_map[nome_acessorio] = doc_acess
         
-        # OTIMIZAÇÃO: Downloads paralelos
-        if itens_para_baixar:
+        # OTIMIZAÇÃO: Downloads paralelos usando acesso direto ao Zope
+        if itens_para_baixar and container:
             max_workers = min(4, len(itens_para_baixar))
             
             def _baixar_item(item):
-                """Worker para download de um item"""
+                """Worker para download de um item usando acesso direto ao Zope"""
                 try:
-                    # Extrai caminho relativo da URL completa
-                    caminho_rel = item['url'].replace(portal_url.rstrip('/'), '').lstrip('/')
-                    if self._baixar_arquivo_via_http_local(portal_url, caminho_rel, item['path']):
+                    if self._baixar_arquivo_direto_zope(item['container'], item['filename'], item['path']):
                         return item
                 except Exception:
                     pass
@@ -1092,36 +1180,44 @@ class ProcessoAdmView(grok.View):
         except Exception:
             pass
         
-        # OTIMIZAÇÃO: Coleta URLs primeiro, depois baixa em paralelo
+        # OTIMIZAÇÃO: Coleta informações primeiro, depois baixa em paralelo
+        # IMPORTANTE: Acessa arquivos diretamente do Zope (não via HTTP) para respeitar
+        # permissões de usuários autenticados
         itens_para_baixar = []
+        container = None
+        
+        try:
+            if (hasattr(portal, 'sapl_documentos') and 
+                hasattr(portal.sapl_documentos, 'administrativo') and 
+                hasattr(portal.sapl_documentos.administrativo, 'tramitacao')):
+                container = portal.sapl_documentos.administrativo.tramitacao
+        except Exception:
+            pass
         
         for tram, status in tramitacoes:
             nome_tram = f"{tram.cod_tramitacao}_tram.pdf"
             
             # Verifica se arquivo existe (verificação em lote)
             if arquivos_existentes.get(nome_tram, False):
-                tram_path_rel = f"sapl_documentos/administrativo/tramitacao/{nome_tram}"
                 tram_path_abs = os.path.join(dir_base, nome_tram)
                 
                 itens_para_baixar.append({
-                    'url': f"{portal_url.rstrip('/')}/{tram_path_rel}",
-                    'path': tram_path_abs,
+                    'container': container,
                     'filename': nome_tram,
+                    'path': tram_path_abs,
                     'tram': tram,
                     'status': status,
                     'dat': _convert_to_datetime_string(tram.dat_tramitacao) if tram.dat_tramitacao else dat_documento
                 })
         
-        # OTIMIZAÇÃO: Downloads paralelos
-        if itens_para_baixar:
+        # OTIMIZAÇÃO: Downloads paralelos usando acesso direto ao Zope
+        if itens_para_baixar and container:
             max_workers = min(4, len(itens_para_baixar))
             
             def _baixar_item(item):
-                """Worker para download de um item"""
+                """Worker para download de um item usando acesso direto ao Zope"""
                 try:
-                    # Extrai caminho relativo da URL completa
-                    caminho_rel = item['url'].replace(portal_url.rstrip('/'), '').lstrip('/')
-                    if self._baixar_arquivo_via_http_local(portal_url, caminho_rel, item['path']):
+                    if self._baixar_arquivo_direto_zope(item['container'], item['filename'], item['path']):
                         return item
                 except Exception:
                     pass
@@ -1190,10 +1286,19 @@ class ProcessoAdmView(grok.View):
         except Exception:
             pass
         
-        # OTIMIZAÇÃO: Coleta URLs primeiro, depois baixa em paralelo
+        # OTIMIZAÇÃO: Coleta informações primeiro, depois baixa em paralelo
+        # IMPORTANTE: Acessa arquivos diretamente do Zope (não via HTTP) para respeitar
+        # permissões de usuários autenticados
         # Para cada matéria, tenta encontrar apenas um arquivo válido (prioriza texto_integral)
         itens_para_baixar = []
         materias_processadas = set()
+        container = None
+        
+        try:
+            if hasattr(portal, 'sapl_documentos') and hasattr(portal.sapl_documentos, 'materia'):
+                container = portal.sapl_documentos.materia
+        except Exception:
+            pass
         
         for doc_mat, materia, tipo_materia in materias_vinculadas:
             # Evita processar a mesma matéria duas vezes
@@ -1207,13 +1312,12 @@ class ProcessoAdmView(grok.View):
                 
                 # Verifica se arquivo existe (verificação em lote)
                 if arquivos_existentes.get(nome_materia, False):
-                    materia_path_rel = f"sapl_documentos/materia/{nome_materia}"
                     materia_path_abs = os.path.join(dir_base, nome_materia)
                     
                     itens_para_baixar.append({
-                        'url': f"{portal_url.rstrip('/')}/{materia_path_rel}",
-                        'path': materia_path_abs,
+                        'container': container,
                         'filename': nome_materia,
+                        'path': materia_path_abs,
                         'doc_mat': doc_mat,
                         'materia': materia,
                         'tipo_materia': tipo_materia,
@@ -1222,16 +1326,14 @@ class ProcessoAdmView(grok.View):
                     materias_processadas.add(materia_id)
                     break  # Para na primeira encontrada para cada matéria
         
-        # OTIMIZAÇÃO: Downloads paralelos
-        if itens_para_baixar:
+        # OTIMIZAÇÃO: Downloads paralelos usando acesso direto ao Zope
+        if itens_para_baixar and container:
             max_workers = min(4, len(itens_para_baixar))
             
             def _baixar_item(item):
-                """Worker para download de um item"""
+                """Worker para download de um item usando acesso direto ao Zope"""
                 try:
-                    # Extrai caminho relativo da URL completa
-                    caminho_rel = item['url'].replace(portal_url.rstrip('/'), '').lstrip('/')
-                    if self._baixar_arquivo_via_http_local(portal_url, caminho_rel, item['path']):
+                    if self._baixar_arquivo_direto_zope(item['container'], item['filename'], item['path']):
                         return item
                 except Exception:
                     pass

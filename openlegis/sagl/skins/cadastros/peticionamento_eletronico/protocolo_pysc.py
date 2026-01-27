@@ -41,7 +41,7 @@ for peticao in context.zsql.peticao_obter_zsql(cod_peticao=cod_peticao):
        tip_documento_acessorio = tip_derivado
        cod_materia_principal = peticao.cod_materia
 
-    if context.sapl_documentos.props_sagl.numero_protocolo_anual == 1:
+    if context.sapl_documentos.props_sagl.numero_protocolo_anual == 1 or context.sapl_documentos.props_sagl.numero_protocolo_anual == '1':
        for numero in context.zsql.protocolo_numero_obter_zsql(ano_protocolo = DateTime(datefmt='international').strftime('%Y')):
            hdn_num_protocolo = int(numero.novo_numero)
     else:
@@ -84,7 +84,7 @@ def criar_documento(numero,ano,data,tip_documento,hdn_num_protocolo,txt_interess
        tmp_id = context.sapl_documentos.administrativo.manage_pasteObjects(tmp_copy)[0]['new_id']
        context.sapl_documentos.administrativo.manage_renameObjects(ids=list([tmp_id]),new_ids=list([id_odt]))
        odt = getattr(context.sapl_documentos.administrativo, id_odt)
-       odt.manage_permission('View', roles=['Manager','Authenticated'], acquire=1)
+       odt.manage_permission('View', roles=['Manager','Authenticated'], acquire=0)
 
     anexos = context.pysc.anexo_peticao_pysc(str(cod_peticao), listar=True)
     i = 0
@@ -103,7 +103,7 @@ def criar_documento(numero,ano,data,tip_documento,hdn_num_protocolo,txt_interess
             tmp_id = context.sapl_documentos.administrativo.manage_pasteObjects(tmp_copy)[0]['new_id']
             context.sapl_documentos.administrativo.manage_renameObjects(ids=list([tmp_id]),new_ids=list([id_pdf]))
             pdf = getattr(context.sapl_documentos.administrativo, id_pdf)
-            pdf.manage_permission('View', roles=['Manager','Authenticated'], acquire=1)
+            pdf.manage_permission('View', roles=['Manager','Authenticated'], acquire=0)
 
     if cod_documento_vinculado != None and cod_documento_vinculado !='Nulo':
         context.zsql.documento_administrativo_vinculado_incluir_zsql(cod_documento_vinculante = cod_documento_vinculado, cod_documento_vinculado = cod_documento)

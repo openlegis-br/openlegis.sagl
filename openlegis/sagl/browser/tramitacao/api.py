@@ -2658,7 +2658,7 @@ class TramitacaoLoteSalvarView(GrokView, TramitacaoAPIBase):
                                 'monitor_url': f"{portal_url}/@@tramitacao_despacho_pdf_lote_status?task_id={task_id}",
                                 'total': len(cod_tramitacoes)
                             }
-                            logger.info(f"TramitacaoLoteSalvarView - Task PDF lote disparada: {task_id}")
+                            logger.debug(f"TramitacaoLoteSalvarView - Task PDF lote disparada: {task_id}")
                     except Exception as e:
                         logger.error(f"TramitacaoLoteSalvarView - Erro ao disparar geração de PDF em lote: {e}", exc_info=True)
                     
@@ -2691,7 +2691,7 @@ class TramitacaoLoteSalvarView(GrokView, TramitacaoAPIBase):
                                     'monitor_url': f"{portal_url}/@@tramitacao_anexar_arquivo_lote_status?task_id={task_id}",
                                     'total': len(cod_tramitacoes)
                                 }
-                                logger.info(f"TramitacaoLoteSalvarView - Task anexo lote disparada: {task_id}")
+                                logger.debug(f"TramitacaoLoteSalvarView - Task anexo lote disparada: {task_id}")
                         except Exception as e:
                             logger.error(f"TramitacaoLoteSalvarView - Erro ao disparar junção de anexo em lote: {e}", exc_info=True)
                 except Exception as e:
@@ -3181,7 +3181,7 @@ class TramitacaoIndividualSalvarView(GrokView, TramitacaoAPIBase):
                                     'task_id': task_id,
                                     'monitor_url': f"{portal_url}/@@tramitacao_anexar_arquivo_status?task_id={task_id}"
                                 }
-                                logger.info(f"TramitacaoIndividualSalvarView - Task anexo (rascunho) disparada: {task_id}")
+                                logger.debug(f"TramitacaoIndividualSalvarView - Task anexo (rascunho) disparada: {task_id}")
                         except Exception as e:
                             logger.error(f"TramitacaoIndividualSalvarView - Erro ao disparar junção de anexo (rascunho): {e}", exc_info=True)
                 except Exception as e:
@@ -3195,7 +3195,7 @@ class TramitacaoIndividualSalvarView(GrokView, TramitacaoAPIBase):
                 
                 if task_anexo:
                     resposta['task_anexo'] = task_anexo
-                    logger.info(f"TramitacaoIndividualSalvarView - task_anexo adicionado à resposta: {task_anexo}")
+                    logger.debug(f"TramitacaoIndividualSalvarView - task_anexo adicionado à resposta")
                 
                 # ✅ Adiciona link_pdf_despacho atualizado com timestamp quando PDF for gerado/atualizado
                 # Isso permite que o frontend atualize o link do botão PDF
@@ -4288,7 +4288,7 @@ class TramitacaoPDFTaskExecutor(GrokView, TramitacaoAPIBase):
                 import json
                 try:
                     dados_tramitacao_request = json.loads(dados_tramitacao_json)
-                    logger.info(f"TramitacaoPDFTaskExecutor - Usando dados do request para preparar PDF (cod_tramitacao={cod_tramitacao})")
+                    logger.debug(f"TramitacaoPDFTaskExecutor - Usando dados do request para preparar PDF (cod_tramitacao={cod_tramitacao})")
                     
                     # Usa get_session() apenas para obter propriedades da casa e outras informações
                     with get_session() as session:
@@ -4963,22 +4963,16 @@ class TramitacaoAnexarArquivoSalvarView(GrokView, TramitacaoAPIBase):
                     'status': status.get('status')
                 })
             
-            # Log para debug
-            logger.info(f"[TramitacaoAnexarArquivoSalvarView] Status recebido: keys={list(status.keys())}")
-            
             # Extrai dados do resultado (pode estar em meta, result ou diretamente no status)
             meta = status.get('meta', {})
             result = status.get('result', {})
-            
-            # Log para debug
-            logger.info(f"[TramitacaoAnexarArquivoSalvarView] Meta: {meta}, Result: {result} (tipo: {type(result)})")
             
             # Se result é uma string (JSON serializado), tenta parsear
             if isinstance(result, str):
                 try:
                     import json
                     result = json.loads(result)
-                    logger.info(f"[TramitacaoAnexarArquivoSalvarView] Result parseado de string: {result}")
+                    logger.debug(f"[TramitacaoAnexarArquivoSalvarView] Result parseado de string JSON")
                 except Exception as e:
                     logger.warning(f"[TramitacaoAnexarArquivoSalvarView] Erro ao parsear result como JSON: {e}")
             

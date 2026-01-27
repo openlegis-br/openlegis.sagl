@@ -3192,6 +3192,9 @@ class TramitacaoEmailStyle {
         $(toastElement).on('hidden.bs.toast', function() {
             $(this).remove();
         });
+        
+        // Retorna o ID do toast para permitir fechamento manual
+        return toastId;
     }
 
     _obterFormularioIndividualNoSidebar() {
@@ -3270,25 +3273,36 @@ class TramitacaoEmailStyle {
                         }
                     } catch (_) {}
 
-                    if (acao === 'salvar_rascunho') {
-                        // Após salvar, habilita botão "Enviar"
-                        try {
-                            if (this.sidebarManager && typeof this.sidebarManager._atualizarBotoesFormulario === 'function') {
-                                this.sidebarManager._atualizarBotoesFormulario(!!codTramitacao);
-                            } else {
-                                const btnEnviar = document.getElementById('btnEnviarTramitacao');
-                                if (btnEnviar) btnEnviar.style.display = '';
-                            }
-                        } catch (_) {}
-
-                        this.mostrarToast('Atenção', dados?.mensagem || 'Rascunho salvo com sucesso', 'success');
+                    // ✅ Verifica se há tarefa de anexo individual para aguardar
+                    const taskAnexo = dados && dados.task_anexo;
+                    if (taskAnexo && taskAnexo.task_id && taskAnexo.monitor_url) {
+                        // Mostra mensagem informando que está aguardando junção de PDFs (toast com duração longa)
+                        const toastId = this.mostrarToast('Aguarde', acao === 'salvar_rascunho' ? 'Rascunho salvo. Aguardando junção de PDFs...' : 'Tramitação salva. Aguardando junção de PDFs...', 'info', 60000);
+                        
+                        // Monitora a tarefa de junção de PDFs
+                        this._aguardarTaskAnexoIndividual(taskAnexo, codTramitacao, acao, btn, btnHtmlOriginal, toastId);
                     } else {
-                        this.mostrarToast('Atenção', dados?.mensagem || 'Tramitação enviada com sucesso', 'success');
+                        // Sem tarefa de anexo: comportamento normal
+                        if (acao === 'salvar_rascunho') {
+                            // Após salvar, habilita botão "Enviar"
+                            try {
+                                if (this.sidebarManager && typeof this.sidebarManager._atualizarBotoesFormulario === 'function') {
+                                    this.sidebarManager._atualizarBotoesFormulario(!!codTramitacao);
+                                } else {
+                                    const btnEnviar = document.getElementById('btnEnviarTramitacao');
+                                    if (btnEnviar) btnEnviar.style.display = '';
+                                }
+                            } catch (_) {}
 
-                        // Fecha formulário se backend indicar
-                        const deveFechar = !!dados?.fechar_formulario || !!dados?.tramitacao_enviada;
-                        if (deveFechar && this.sidebarManager && typeof this.sidebarManager._forceFecharSidebar === 'function') {
-                            this.sidebarManager._forceFecharSidebar('individual');
+                            this.mostrarToast('Atenção', dados?.mensagem || 'Rascunho salvo com sucesso', 'success');
+                        } else {
+                            this.mostrarToast('Atenção', dados?.mensagem || 'Tramitação enviada com sucesso', 'success');
+
+                            // Fecha formulário se backend indicar
+                            const deveFechar = !!dados?.fechar_formulario || !!dados?.tramitacao_enviada;
+                            if (deveFechar && this.sidebarManager && typeof this.sidebarManager._forceFecharSidebar === 'function') {
+                                this.sidebarManager._forceFecharSidebar('individual');
+                            }
                         }
                     }
                 },
@@ -3547,24 +3561,20 @@ class TramitacaoEmailStyle {
                     }
 
                     const total = dados?.total || dados?.total_tramitado || null;
-                    this.mostrarToast('Sucesso', total ? `Tramitação em lote concluída (${total}).` : 'Tramitação em lote concluída.', 'success');
-
-                    // Limpa seleção e fecha sidebar (a página já tem interceptor para recarregar contadores/lista)
-                    this.processosSelecionados.clear();
-                    this.todosSelecionados = false;
-                    try { this.atualizarContadorSelecionados(); } catch (_) {}
-
-                    try {
-                        // ✅ Sempre prefere o fechamento robusto do manager (bypass de guards/backdrop).
-                        if (this.sidebarManager && typeof this.sidebarManager._forceFecharSidebar === 'function') {
-                            this.sidebarManager._forceFecharSidebar('lote');
-                        } else {
-                            const sidebarEl = document.getElementById('tramitacaoLoteOffcanvas');
-                            if (sidebarEl && typeof bootstrap !== 'undefined') {
-                                bootstrap.Offcanvas.getOrCreateInstance(sidebarEl).hide();
-                            }
-                        }
-                    } catch (_) {}
+                    
+                    // ✅ Verifica se há tarefa de anexo em lote para aguardar
+                    const taskAnexoLote = dados && dados.task_anexo_lote;
+                    if (taskAnexoLote && taskAnexoLote.task_id && taskAnexoLote.monitor_url) {
+                        // Mostra mensagem informando que está aguardando junção de PDFs (toast com duração longa)
+                        const toastId = this.mostrarToast('Aguarde', 'Tramitação salva. Aguardando junção de PDFs...', 'info', 60000);
+                        
+                        // Monitora a tarefa de junção de PDFs
+                        this._aguardarTaskAnexoLote(taskAnexoLote, total, btn, btnHtmlOriginal, toastId);
+                    } else {
+                        // Sem tarefa de anexo: comportamento normal
+                        this.mostrarToast('Sucesso', total ? `Tramitação em lote concluída (${total}).` : 'Tramitação em lote concluída.', 'success');
+                        this._finalizarTramitacaoLote(btn, btnHtmlOriginal);
+                    }
                 },
                 error: (xhr) => {
                     const msg = xhr?.responseJSON?.erro || xhr?.responseText || 'Erro ao tramitar em lote.';
@@ -3584,6 +3594,340 @@ class TramitacaoEmailStyle {
                 btn.disabled = false;
                 btn.innerHTML = btnHtmlOriginal || '<i class="mdi mdi-send-multiple" aria-hidden="true"></i> Tramitar Processos';
             }
+        }
+    }
+    
+    /**
+     * Aguarda conclusão da tarefa de junção de PDFs em lote
+     */
+    _aguardarTaskAnexoLote(taskAnexoLote, total, btn, btnHtmlOriginal, toastIdAguardar = null) {
+        const self = this;
+        const taskId = taskAnexoLote.task_id;
+        const monitorUrl = taskAnexoLote.monitor_url;
+        
+        if (!taskId || !monitorUrl) {
+            console.warn('[Tramitação Lote] Task anexo sem task_id ou monitor_url:', taskAnexoLote);
+            this._fecharToast(toastIdAguardar);
+            this._finalizarTramitacaoLote(btn, btnHtmlOriginal, total);
+            return;
+        }
+        
+        let tentativas = 0;
+        const maxTentativas = 120; // ~2 min (1s por tentativa)
+        
+        // Atualiza botão para mostrar progresso
+        if (btn) {
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Aguardando junção de PDFs...';
+        }
+        
+        const tick = () => {
+            tentativas += 1;
+            
+            $.ajax({
+                url: monitorUrl,
+                method: 'GET',
+                dataType: 'json',
+                success: (status) => {
+                    const st = status && status.status ? String(status.status) : 'UNKNOWN';
+                    
+                    if (st === 'SUCCESS') {
+                        // Fecha toast de aguardar
+                        self._fecharToast(toastIdAguardar);
+                        
+                        // Task concluída: salva os PDFs juntados no repositório Zope
+                        $.ajax({
+                            url: `${PORTAL_URL}/@@tramitacao_anexar_arquivo_lote_salvar`,
+                            method: 'GET',
+                            dataType: 'json',
+                            data: { task_id: taskId },
+                            success: (resp) => {
+                                if (resp && resp.erro) {
+                                    self.mostrarToast('Aviso', `Tramitação concluída, mas houve erro ao salvar PDFs: ${resp.erro}`, 'warning');
+                                    console.error('[Tramitação Lote] Erro ao salvar PDFs juntados:', resp);
+                                } else {
+                                    self.mostrarToast('Sucesso', total ? `Tramitação em lote concluída (${total}). PDFs anexados com sucesso.` : 'Tramitação em lote concluída. PDFs anexados com sucesso.', 'success');
+                                }
+                                self._finalizarTramitacaoLote(btn, btnHtmlOriginal, total);
+                            },
+                            error: (xhr) => {
+                                console.error('[Tramitação Lote] Erro ao chamar @@tramitacao_anexar_arquivo_lote_salvar:', xhr);
+                                self.mostrarToast('Aviso', 'Tramitação concluída, mas houve erro ao salvar PDFs anexados.', 'warning');
+                                self._finalizarTramitacaoLote(btn, btnHtmlOriginal, total);
+                            }
+                        });
+                        return;
+                    }
+                    
+                    if (st === 'FAILURE') {
+                        self._fecharToast(toastIdAguardar);
+                        self.mostrarToast('Aviso', 'Tramitação concluída, mas houve erro ao juntar PDFs. Verifique o worker de tasks.', 'warning');
+                        console.error('[Tramitação Lote] Task anexo falhou:', status);
+                        self._finalizarTramitacaoLote(btn, btnHtmlOriginal, total);
+                        return;
+                    }
+                    
+                    if (tentativas >= maxTentativas) {
+                        self._fecharToast(toastIdAguardar);
+                        self.mostrarToast('Aviso', 'Tramitação concluída, mas timeout ao aguardar junção de PDFs. Os PDFs podem estar sendo processados em segundo plano.', 'warning');
+                        console.warn('[Tramitação Lote] Timeout aguardando task anexo:', status);
+                        self._finalizarTramitacaoLote(btn, btnHtmlOriginal, total);
+                        return;
+                    }
+                    
+                    // Continua aguardando
+                    setTimeout(tick, 1000);
+                },
+                error: (xhr) => {
+                    if (tentativas >= maxTentativas) {
+                        self._fecharToast(toastIdAguardar);
+                        self.mostrarToast('Aviso', 'Tramitação concluída, mas timeout ao aguardar junção de PDFs. Os PDFs podem estar sendo processados em segundo plano.', 'warning');
+                        console.warn('[Tramitação Lote] Timeout aguardando task anexo (erro):', xhr);
+                        self._finalizarTramitacaoLote(btn, btnHtmlOriginal, total);
+                        return;
+                    }
+                    // Continua tentando mesmo em caso de erro temporário
+                    setTimeout(tick, 1000);
+                }
+            });
+        };
+        
+        // Inicia o polling
+        tick();
+    }
+    
+    /**
+     * Fecha um toast pelo ID
+     */
+    _fecharToast(toastId) {
+        if (!toastId) return;
+        try {
+            const toastEl = typeof toastId === 'string' ? document.getElementById(toastId) : toastId;
+            if (toastEl) {
+                const toastInstance = bootstrap.Toast.getInstance(toastEl);
+                if (toastInstance) {
+                    toastInstance.hide();
+                } else {
+                    $(toastEl).remove();
+                }
+            }
+        } catch (_) {}
+    }
+    
+    /**
+     * Finaliza a tramitação em lote (limpa seleção, fecha sidebar, atualiza contadores)
+     */
+    _finalizarTramitacaoLote(btn, btnHtmlOriginal, total = null) {
+        // Limpa seleção
+        this.processosSelecionados.clear();
+        this.todosSelecionados = false;
+        try { this.atualizarContadorSelecionados(); } catch (_) {}
+        
+        // Fecha sidebar
+        try {
+            if (this.sidebarManager && typeof this.sidebarManager._forceFecharSidebar === 'function') {
+                this.sidebarManager._forceFecharSidebar('lote');
+            } else {
+                const sidebarEl = document.getElementById('tramitacaoLoteOffcanvas');
+                if (sidebarEl && typeof bootstrap !== 'undefined') {
+                    bootstrap.Offcanvas.getOrCreateInstance(sidebarEl).hide();
+                }
+            }
+        } catch (_) {}
+        
+        // Restaura botão
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = btnHtmlOriginal || '<i class="mdi mdi-send-multiple" aria-hidden="true"></i> Tramitar Processos';
+        }
+        
+        // Atualiza contadores e lista (após um pequeno delay para garantir que o backend processou)
+        setTimeout(() => {
+            try {
+                this.carregarContadores();
+                this.carregarTramitacoes();
+            } catch (_) {}
+        }, 500);
+    }
+    
+    /**
+     * Aguarda conclusão da tarefa de junção de PDFs individual
+     */
+    _aguardarTaskAnexoIndividual(taskAnexo, codTramitacao, acao, btn, btnHtmlOriginal, toastIdAguardar = null) {
+        const self = this;
+        const taskId = taskAnexo.task_id;
+        const monitorUrl = taskAnexo.monitor_url;
+        
+        if (!taskId || !monitorUrl) {
+            console.warn('[Tramitação Individual] Task anexo sem task_id ou monitor_url:', taskAnexo);
+            this._fecharToast(toastIdAguardar);
+            this._finalizarTramitacaoIndividual(acao, btn, btnHtmlOriginal);
+            return;
+        }
+        
+        let tentativas = 0;
+        const maxTentativas = 120; // ~2 min (1s por tentativa)
+        
+        // Obtém tipo da tramitação
+        const form = this._obterFormularioIndividualNoSidebar();
+        const tipoEl = form ? form.querySelector('input[name="hdn_tipo_tramitacao"]') : null;
+        const tipo = (tipoEl && tipoEl.value) ? String(tipoEl.value) : 'MATERIA';
+        
+        // Atualiza botão para mostrar progresso
+        if (btn) {
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Aguardando junção de PDFs...';
+        }
+        
+        const tick = () => {
+            tentativas += 1;
+            
+            $.ajax({
+                url: monitorUrl,
+                method: 'GET',
+                dataType: 'json',
+                success: (status) => {
+                    const st = status && status.status ? String(status.status) : 'UNKNOWN';
+                    
+                    if (st === 'SUCCESS') {
+                        // Fecha toast de aguardar
+                        self._fecharToast(toastIdAguardar);
+                        
+                        // Task concluída: salva o PDF juntado no repositório Zope
+                        $.ajax({
+                            url: `${PORTAL_URL}/@@tramitacao_anexar_arquivo_salvar`,
+                            method: 'GET',
+                            dataType: 'json',
+                            data: { task_id: taskId },
+                            success: (resp) => {
+                                if (resp && resp.erro) {
+                                    self.mostrarToast('Aviso', `Tramitação ${acao === 'salvar_rascunho' ? 'salva' : 'enviada'}, mas houve erro ao salvar PDF: ${resp.erro}`, 'warning');
+                                    console.error('[Tramitação Individual] Erro ao salvar PDF juntado:', resp);
+                                } else {
+                                    // Atualiza link do PDF com cache-buster
+                                    self._atualizarLinkPdfTramitacao(codTramitacao, tipo);
+                                    
+                                    if (acao === 'salvar_rascunho') {
+                                        self.mostrarToast('Sucesso', 'Rascunho salvo. PDF anexado ao despacho com sucesso.', 'success');
+                                    } else {
+                                        self.mostrarToast('Sucesso', 'Tramitação enviada. PDF anexado ao despacho com sucesso.', 'success');
+                                    }
+                                }
+                                self._finalizarTramitacaoIndividual(acao, btn, btnHtmlOriginal);
+                            },
+                            error: (xhr) => {
+                                console.error('[Tramitação Individual] Erro ao chamar @@tramitacao_anexar_arquivo_salvar:', xhr);
+                                self.mostrarToast('Aviso', `Tramitação ${acao === 'salvar_rascunho' ? 'salva' : 'enviada'}, mas houve erro ao salvar PDF anexado.`, 'warning');
+                                self._finalizarTramitacaoIndividual(acao, btn, btnHtmlOriginal);
+                            }
+                        });
+                        return;
+                    }
+                    
+                    if (st === 'FAILURE') {
+                        self._fecharToast(toastIdAguardar);
+                        self.mostrarToast('Aviso', `Tramitação ${acao === 'salvar_rascunho' ? 'salva' : 'enviada'}, mas houve erro ao juntar PDF. Verifique o worker de tasks.`, 'warning');
+                        console.error('[Tramitação Individual] Task anexo falhou:', status);
+                        self._finalizarTramitacaoIndividual(acao, btn, btnHtmlOriginal);
+                        return;
+                    }
+                    
+                    if (tentativas >= maxTentativas) {
+                        self._fecharToast(toastIdAguardar);
+                        self.mostrarToast('Aviso', `Tramitação ${acao === 'salvar_rascunho' ? 'salva' : 'enviada'}, mas timeout ao aguardar junção de PDFs. O PDF pode estar sendo processado em segundo plano.`, 'warning');
+                        console.warn('[Tramitação Individual] Timeout aguardando task anexo:', status);
+                        self._finalizarTramitacaoIndividual(acao, btn, btnHtmlOriginal);
+                        return;
+                    }
+                    
+                    // Continua aguardando
+                    setTimeout(tick, 1000);
+                },
+                error: (xhr) => {
+                    if (tentativas >= maxTentativas) {
+                        self._fecharToast(toastIdAguardar);
+                        self.mostrarToast('Aviso', `Tramitação ${acao === 'salvar_rascunho' ? 'salva' : 'enviada'}, mas timeout ao aguardar junção de PDFs. O PDF pode estar sendo processado em segundo plano.`, 'warning');
+                        console.warn('[Tramitação Individual] Timeout aguardando task anexo (erro):', xhr);
+                        self._finalizarTramitacaoIndividual(acao, btn, btnHtmlOriginal);
+                        return;
+                    }
+                    // Continua tentando mesmo em caso de erro temporário
+                    setTimeout(tick, 1000);
+                }
+            });
+        };
+        
+        // Inicia o polling
+        tick();
+    }
+    
+    /**
+     * Finaliza a tramitação individual (habilita botão Enviar se rascunho, fecha sidebar se enviar)
+     */
+    _finalizarTramitacaoIndividual(acao, btn, btnHtmlOriginal) {
+        const form = this._obterFormularioIndividualNoSidebar();
+        const codTramitacao = form ? (form.querySelector('input[name="hdn_cod_tramitacao"]')?.value || null) : null;
+        
+        if (acao === 'salvar_rascunho') {
+            // Após salvar, habilita botão "Enviar"
+            try {
+                if (this.sidebarManager && typeof this.sidebarManager._atualizarBotoesFormulario === 'function') {
+                    this.sidebarManager._atualizarBotoesFormulario(!!codTramitacao);
+                } else {
+                    const btnEnviar = document.getElementById('btnEnviarTramitacao');
+                    if (btnEnviar) btnEnviar.style.display = '';
+                }
+            } catch (_) {}
+        } else {
+            // Fecha formulário após enviar
+            if (this.sidebarManager && typeof this.sidebarManager._forceFecharSidebar === 'function') {
+                this.sidebarManager._forceFecharSidebar('individual');
+            }
+        }
+        
+        // Restaura botão
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = btnHtmlOriginal || (acao === 'salvar_rascunho'
+                ? '<i class="mdi mdi-content-save-outline" aria-hidden="true"></i> Salvar'
+                : '<i class="mdi mdi-send" aria-hidden="true"></i> Enviar Tramitação');
+        }
+        
+        // Atualiza contadores e lista (após um pequeno delay para garantir que o backend processou)
+        if (acao === 'enviar') {
+            setTimeout(() => {
+                try {
+                    this.carregarContadores();
+                    this.carregarTramitacoes();
+                } catch (_) {}
+            }, 500);
+        }
+    }
+    
+    /**
+     * Atualiza link do PDF da tramitação individual
+     */
+    _atualizarLinkPdfTramitacao(codTramitacao, tipo) {
+        try {
+            const cod = String(codTramitacao);
+            const isMateria = String(tipo) === 'MATERIA';
+            const pdfPath = isMateria
+                ? `/sapl_documentos/materia/tramitacao/${cod}_tram.pdf`
+                : `/sapl_documentos/administrativo/tramitacao/${cod}_tram.pdf`;
+            const baseUrl = `${PORTAL_URL}${pdfPath}`;
+            const ts = Date.now();
+            const sep = baseUrl.includes('?') ? '&' : '?';
+            const link = `${baseUrl}${sep}_t=${ts}`;
+
+            const btnPdf = document.getElementById('btn_visualizar_pdf_tramitacao');
+            if (btnPdf) {
+                btnPdf.href = link;
+                btnPdf.setAttribute('data-link-pdf', link);
+            }
+            if (typeof window.atualizarLinkPdfTramitacao === 'function') {
+                try { window.atualizarLinkPdfTramitacao(link); } catch (_) {}
+            }
+            return link;
+        } catch (_) {
+            return null;
         }
     }
     

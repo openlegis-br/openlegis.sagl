@@ -72,6 +72,7 @@ try:
             
             # Adiciona propriedade do tipo
             anexo = getattr(container.sapl_documentos.peticao, nom_arquivo)
+            anexo.manage_permission('View', roles=['Manager','Authenticated'], acquire=0)
             anexo.manage_addProperty('tip_documento', tipo, 'string')
             
             saved_files.append(nom_arquivo)

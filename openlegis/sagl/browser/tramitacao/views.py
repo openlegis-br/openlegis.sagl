@@ -26,6 +26,47 @@ from DateTime import DateTime
 logger = logging.getLogger(__name__)
 
 # ============================================
+# FUNÇÕES HELPER PARA FORMATAÇÃO DE DATAS
+# ============================================
+
+def _formatar_datetime_iso(dt):
+    """
+    Formata datetime para ISO 8601 preservando timezone local.
+    
+    Se o datetime não tiver timezone info, assume timezone local do servidor.
+    Isso garante consistência com o formulário que usa timezone local.
+    
+    Args:
+        dt: datetime object (pode ser None, datetime do Python, ou DateTime do Zope)
+    
+    Returns:
+        String ISO 8601 formatada ou None
+    """
+    if dt is None:
+        return None
+    
+    from datetime import datetime, timezone, timedelta
+    
+    # Converte DateTime do Zope para datetime do Python se necessário
+    if hasattr(dt, 'asdatetime'):
+        dt = dt.asdatetime()
+    
+    # Se já é datetime do Python
+    if isinstance(dt, datetime):
+        # Se não tem timezone info, assume timezone local (UTC-3 para Brasil)
+        # O JavaScript interpretará como timezone local se não houver timezone info
+        # Por isso, mantemos sem timezone para que o frontend trate como local
+        if dt.tzinfo is None:
+            # Retorna ISO format sem timezone (será tratado como local pelo frontend)
+            return dt.isoformat()
+        else:
+            # Se tem timezone, retorna com timezone
+            return dt.isoformat()
+    
+    # Fallback: converte para string
+    return str(dt)
+
+# ============================================
 # CACHE DE CONTADORES (OTIMIZAÇÃO)
 # ============================================
 
@@ -747,6 +788,7 @@ class TramitacaoCaixaEntradaUnificadaView(GrokView, TramitacaoAPIBase):
                 unidades_responsavel = [u.cod_unid_tramitacao for u in unidades if u.ind_responsavel == 1]
                 unidades_nao_responsavel = [u.cod_unid_tramitacao for u in unidades if u.ind_responsavel == 0]
                 
+                
                 # Lista para armazenar todas as tramitações
                 todas_tramitacoes = []
                 
@@ -771,7 +813,8 @@ class TramitacaoCaixaEntradaUnificadaView(GrokView, TramitacaoAPIBase):
                             Tramitacao.cod_unid_tram_dest.in_(unidades_responsavel),
                             Tramitacao.ind_ult_tramitacao == 1,
                             Tramitacao.dat_encaminha.isnot(None),
-                            # ✅ REMOVIDO: Tramitacao.dat_recebimento.is_(None) - processos visualizados/recebidos devem permanecer na caixa de entrada
+                            # NOTE: Mesmo após visualizar/receber (dat_visualizacao/dat_recebimento),
+                            # a tramitação deve continuar aparecendo na Caixa de Entrada.
                             Tramitacao.ind_excluido == 0
                         ).join(
                             StatusTramitacao, Tramitacao.cod_status == StatusTramitacao.cod_status
@@ -782,7 +825,7 @@ class TramitacaoCaixaEntradaUnificadaView(GrokView, TramitacaoAPIBase):
                         ).filter(
                             MateriaLegislativa.ind_tramitacao == 1,
                             MateriaLegislativa.ind_excluido == 0
-                        )
+                        ).distinct()
                         
                         # Filtro por tipo de matéria (sigla) - aplica no backend
                         if filtro_tipo_materia:
@@ -790,7 +833,7 @@ class TramitacaoCaixaEntradaUnificadaView(GrokView, TramitacaoAPIBase):
                                 TipoMateriaLegislativa, MateriaLegislativa.tip_id_basica == TipoMateriaLegislativa.tip_materia
                             ).filter(
                                 TipoMateriaLegislativa.sgl_tipo_materia == filtro_tipo_materia
-                            )
+                            ).distinct()
                         
                         # Aplica filtro para excluir tramitações com rascunhos posteriores
                         # Usa a primeira unidade responsável para o filtro (ou None se não houver)
@@ -839,10 +882,11 @@ class TramitacaoCaixaEntradaUnificadaView(GrokView, TramitacaoAPIBase):
                                 'cod_tramitacao': tram.cod_tramitacao,
                                 'cod_entidade': tram.cod_materia,  # Adiciona cod_entidade para compatibilidade
                                 'cod_materia': tram.cod_materia,
-                                'dat_encaminha': tram.dat_encaminha.isoformat() if tram.dat_encaminha else None,
-                                'dat_visualizacao': tram.dat_visualizacao.isoformat() if tram.dat_visualizacao else None,
-                                'dat_recebimento': tram.dat_recebimento.isoformat() if tram.dat_recebimento else None,
-                                'dat_fim_prazo': tram.dat_fim_prazo.isoformat() if tram.dat_fim_prazo else None,
+                                'dat_tramitacao': _formatar_datetime_iso(tram.dat_tramitacao),  # ✅ Adiciona dat_tramitacao para consistência com formulário
+                                'dat_encaminha': _formatar_datetime_iso(tram.dat_encaminha),
+                                'dat_visualizacao': _formatar_datetime_iso(tram.dat_visualizacao),
+                                'dat_recebimento': _formatar_datetime_iso(tram.dat_recebimento),
+                                'dat_fim_prazo': _formatar_datetime_iso(tram.dat_fim_prazo),
                                 'des_status': tram.status_tramitacao.des_status if tram.status_tramitacao else '',
                                 'unidade_origem': _get_nome_unidade_tramitacao(tram.unidade_tramitacao_),
                                 'unidade_destino': _get_nome_unidade_tramitacao(tram.unidade_tramitacao),
@@ -871,7 +915,7 @@ class TramitacaoCaixaEntradaUnificadaView(GrokView, TramitacaoAPIBase):
                             (Tramitacao.cod_usuario_dest == cod_usuario) | (Tramitacao.cod_usuario_dest.is_(None)),
                             Tramitacao.ind_ult_tramitacao == 1,
                             Tramitacao.dat_encaminha.isnot(None),
-                            # ✅ REMOVIDO: Tramitacao.dat_recebimento.is_(None) - processos visualizados/recebidos devem permanecer na caixa de entrada
+                            # NOTE: Mantém na Caixa de Entrada mesmo após receber/visualizar.
                             Tramitacao.ind_excluido == 0
                         ).join(
                             StatusTramitacao, Tramitacao.cod_status == StatusTramitacao.cod_status
@@ -882,7 +926,7 @@ class TramitacaoCaixaEntradaUnificadaView(GrokView, TramitacaoAPIBase):
                         ).filter(
                             MateriaLegislativa.ind_tramitacao == 1,
                             MateriaLegislativa.ind_excluido == 0
-                        )
+                        ).distinct()
                         
                         # Filtro por tipo de matéria (sigla) - aplica no backend
                         if filtro_tipo_materia:
@@ -890,7 +934,7 @@ class TramitacaoCaixaEntradaUnificadaView(GrokView, TramitacaoAPIBase):
                                 TipoMateriaLegislativa, MateriaLegislativa.tip_id_basica == TipoMateriaLegislativa.tip_materia
                             ).filter(
                                 TipoMateriaLegislativa.sgl_tipo_materia == filtro_tipo_materia
-                            )
+                            ).distinct()
                         
                         # Aplica filtro para excluir tramitações com rascunhos posteriores
                         # Usa a primeira unidade não responsável para o filtro (ou None se não houver)
@@ -940,9 +984,10 @@ class TramitacaoCaixaEntradaUnificadaView(GrokView, TramitacaoAPIBase):
                             'cod_tramitacao': tram.cod_tramitacao,
                             'cod_entidade': cod_materia,  # Adiciona cod_entidade para compatibilidade
                             'cod_materia': cod_materia,
-                            'dat_encaminha': tram.dat_encaminha.isoformat() if tram.dat_encaminha else None,
-                            'dat_recebimento': tram.dat_recebimento.isoformat() if tram.dat_recebimento else None,
-                            'dat_fim_prazo': tram.dat_fim_prazo.isoformat() if tram.dat_fim_prazo else None,
+                            'dat_tramitacao': _formatar_datetime_iso(tram.dat_tramitacao),  # ✅ Adiciona dat_tramitacao para consistência com formulário
+                            'dat_encaminha': _formatar_datetime_iso(tram.dat_encaminha),
+                            'dat_recebimento': _formatar_datetime_iso(tram.dat_recebimento),
+                            'dat_fim_prazo': _formatar_datetime_iso(tram.dat_fim_prazo),
                             'des_status': tram.status_tramitacao.des_status if tram.status_tramitacao else '',
                             'unidade_origem': _get_nome_unidade_tramitacao(tram.unidade_tramitacao_),
                             'unidade_destino': _get_nome_unidade_tramitacao(tram.unidade_tramitacao),
@@ -972,7 +1017,7 @@ class TramitacaoCaixaEntradaUnificadaView(GrokView, TramitacaoAPIBase):
                             TramitacaoAdministrativo.cod_unid_tram_dest.in_(unidades_responsavel),
                             TramitacaoAdministrativo.ind_ult_tramitacao == 1,
                             TramitacaoAdministrativo.dat_encaminha.isnot(None),
-                            # ✅ REMOVIDO: TramitacaoAdministrativo.dat_recebimento.is_(None) - processos visualizados/recebidos devem permanecer na caixa de entrada
+                            # NOTE: Mantém na Caixa de Entrada mesmo após receber/visualizar.
                             TramitacaoAdministrativo.ind_excluido == 0
                         ).join(
                             StatusTramitacaoAdministrativo, TramitacaoAdministrativo.cod_status == StatusTramitacaoAdministrativo.cod_status
@@ -983,7 +1028,7 @@ class TramitacaoCaixaEntradaUnificadaView(GrokView, TramitacaoAPIBase):
                         ).filter(
                             DocumentoAdministrativo.ind_tramitacao == 1,
                             DocumentoAdministrativo.ind_excluido == 0
-                        )
+                        ).distinct()
                         
                         # Filtro por tipo de documento (sigla) - aplica no backend
                         if filtro_tipo_documento:
@@ -991,7 +1036,7 @@ class TramitacaoCaixaEntradaUnificadaView(GrokView, TramitacaoAPIBase):
                                 TipoDocumentoAdministrativo, DocumentoAdministrativo.tip_documento == TipoDocumentoAdministrativo.tip_documento
                             ).filter(
                                 TipoDocumentoAdministrativo.sgl_tipo_documento == filtro_tipo_documento
-                            )
+                            ).distinct()
                         
                         # Aplica filtro para excluir tramitações com rascunhos posteriores
                         # Usa a primeira unidade responsável para o filtro (ou None se não houver)
@@ -1041,10 +1086,11 @@ class TramitacaoCaixaEntradaUnificadaView(GrokView, TramitacaoAPIBase):
                             'cod_tramitacao': tram.cod_tramitacao,
                             'cod_entidade': tram.cod_documento,  # Adiciona cod_entidade para compatibilidade
                             'cod_documento': tram.cod_documento,
-                            'dat_encaminha': tram.dat_encaminha.isoformat() if tram.dat_encaminha else None,
-                            'dat_visualizacao': tram.dat_visualizacao.isoformat() if tram.dat_visualizacao else None,
-                            'dat_recebimento': tram.dat_recebimento.isoformat() if tram.dat_recebimento else None,
-                            'dat_fim_prazo': tram.dat_fim_prazo.isoformat() if tram.dat_fim_prazo else None,
+                            'dat_tramitacao': _formatar_datetime_iso(tram.dat_tramitacao),  # ✅ Adiciona dat_tramitacao para consistência com formulário
+                            'dat_encaminha': _formatar_datetime_iso(tram.dat_encaminha),
+                            'dat_visualizacao': _formatar_datetime_iso(tram.dat_visualizacao),
+                            'dat_recebimento': _formatar_datetime_iso(tram.dat_recebimento),
+                            'dat_fim_prazo': _formatar_datetime_iso(tram.dat_fim_prazo),
                             'des_status': tram.status_tramitacao_administrativo.des_status if tram.status_tramitacao_administrativo else '',
                             'unidade_origem': _get_nome_unidade_tramitacao(tram.unidade_tramitacao_),
                             'unidade_destino': _get_nome_unidade_tramitacao(tram.unidade_tramitacao),
@@ -1074,7 +1120,7 @@ class TramitacaoCaixaEntradaUnificadaView(GrokView, TramitacaoAPIBase):
                             (TramitacaoAdministrativo.cod_usuario_dest == cod_usuario) | (TramitacaoAdministrativo.cod_usuario_dest.is_(None)),
                             TramitacaoAdministrativo.ind_ult_tramitacao == 1,
                             TramitacaoAdministrativo.dat_encaminha.isnot(None),
-                            # ✅ REMOVIDO: TramitacaoAdministrativo.dat_recebimento.is_(None) - processos visualizados/recebidos devem permanecer na caixa de entrada
+                            # NOTE: Mantém na Caixa de Entrada mesmo após receber/visualizar.
                             TramitacaoAdministrativo.ind_excluido == 0
                         ).join(
                             StatusTramitacaoAdministrativo, TramitacaoAdministrativo.cod_status == StatusTramitacaoAdministrativo.cod_status
@@ -1085,7 +1131,7 @@ class TramitacaoCaixaEntradaUnificadaView(GrokView, TramitacaoAPIBase):
                         ).filter(
                             DocumentoAdministrativo.ind_tramitacao == 1,
                             DocumentoAdministrativo.ind_excluido == 0
-                        )
+                        ).distinct()
                         
                         # Filtro por tipo de documento (sigla) - aplica no backend
                         if filtro_tipo_documento:
@@ -1093,7 +1139,7 @@ class TramitacaoCaixaEntradaUnificadaView(GrokView, TramitacaoAPIBase):
                                 TipoDocumentoAdministrativo, DocumentoAdministrativo.tip_documento == TipoDocumentoAdministrativo.tip_documento
                             ).filter(
                                 TipoDocumentoAdministrativo.sgl_tipo_documento == filtro_tipo_documento
-                            )
+                            ).distinct()
                         
                         # Aplica filtro para excluir tramitações com rascunhos posteriores
                         # Usa a primeira unidade não responsável para o filtro (ou None se não houver)
@@ -1143,10 +1189,11 @@ class TramitacaoCaixaEntradaUnificadaView(GrokView, TramitacaoAPIBase):
                             'cod_tramitacao': tram.cod_tramitacao,
                             'cod_entidade': tram.cod_documento,  # Adiciona cod_entidade para compatibilidade
                             'cod_documento': tram.cod_documento,
-                            'dat_encaminha': tram.dat_encaminha.isoformat() if tram.dat_encaminha else None,
-                            'dat_visualizacao': tram.dat_visualizacao.isoformat() if tram.dat_visualizacao else None,
-                            'dat_recebimento': tram.dat_recebimento.isoformat() if tram.dat_recebimento else None,
-                            'dat_fim_prazo': tram.dat_fim_prazo.isoformat() if tram.dat_fim_prazo else None,
+                            'dat_tramitacao': _formatar_datetime_iso(tram.dat_tramitacao),  # ✅ Adiciona dat_tramitacao para consistência com formulário
+                            'dat_encaminha': _formatar_datetime_iso(tram.dat_encaminha),
+                            'dat_visualizacao': _formatar_datetime_iso(tram.dat_visualizacao),
+                            'dat_recebimento': _formatar_datetime_iso(tram.dat_recebimento),
+                            'dat_fim_prazo': _formatar_datetime_iso(tram.dat_fim_prazo),
                             'des_status': tram.status_tramitacao_administrativo.des_status if tram.status_tramitacao_administrativo else '',
                             'unidade_origem': _get_nome_unidade_tramitacao(tram.unidade_tramitacao_),
                             'unidade_destino': _get_nome_unidade_tramitacao(tram.unidade_tramitacao),
@@ -1221,6 +1268,16 @@ class TramitacaoCaixaEntradaUnificadaView(GrokView, TramitacaoAPIBase):
                 total_materias = sum(1 for t in tramitacoes_unicas if t['tipo'] == 'MATERIA')
                 total_documentos = sum(1 for t in tramitacoes_unicas if t['tipo'] == 'DOCUMENTO')
                 total_geral = len(tramitacoes_unicas)
+                
+                # Log resumido para diagnóstico
+                logger.debug(
+                    f"TramitacaoCaixaEntradaUnificadaView - Usuário {cod_usuario}, "
+                    f"Total geral: {total_geral}, "
+                    f"Total matérias: {total_materias}, "
+                    f"Total documentos: {total_documentos}, "
+                    f"Filtro tipo: {filtro_tipo or 'TODOS'}, "
+                    f"Filtro unidade: {cod_unid_tramitacao_filtro or 'TODAS'}"
+                )
                 
                 # Aplica paginação se fornecida
                 limit = None
@@ -1633,8 +1690,11 @@ class TramitacaoRascunhosView(GrokView, TramitacaoAPIBase):
                         'tipo': 'MATERIA',
                         'cod_tramitacao': tram.cod_tramitacao,
                         'cod_entidade': cod_materia,
-                        'dat_tramitacao': tram.dat_tramitacao.isoformat() if tram.dat_tramitacao else None,
-                        'dat_fim_prazo': tram.dat_fim_prazo.isoformat() if tram.dat_fim_prazo else None,
+                        'dat_tramitacao': _formatar_datetime_iso(tram.dat_tramitacao),  # ✅ Usa formatação consistente
+                        'dat_encaminha': _formatar_datetime_iso(tram.dat_encaminha),  # ✅ Adiciona dat_encaminha (será None para rascunhos)
+                        'dat_visualizacao': _formatar_datetime_iso(tram.dat_visualizacao),
+                        'dat_recebimento': _formatar_datetime_iso(tram.dat_recebimento),
+                        'dat_fim_prazo': _formatar_datetime_iso(tram.dat_fim_prazo),
                         'des_status': tram.status_tramitacao.des_status if tram.status_tramitacao else '',
                         'unidade_origem': _get_nome_unidade_tramitacao(tram.unidade_tramitacao_),
                         'unidade_destino': _get_nome_unidade_tramitacao(tram.unidade_tramitacao),
@@ -1779,8 +1839,11 @@ class TramitacaoRascunhosView(GrokView, TramitacaoAPIBase):
                         'tipo': 'DOCUMENTO',
                         'cod_tramitacao': tram.cod_tramitacao,
                         'cod_entidade': tram.cod_documento,
-                        'dat_tramitacao': tram.dat_tramitacao.isoformat() if tram.dat_tramitacao else None,
-                        'dat_fim_prazo': tram.dat_fim_prazo.isoformat() if tram.dat_fim_prazo else None,
+                        'dat_tramitacao': _formatar_datetime_iso(tram.dat_tramitacao),  # ✅ Usa formatação consistente
+                        'dat_encaminha': _formatar_datetime_iso(tram.dat_encaminha),  # ✅ Adiciona dat_encaminha (será None para rascunhos)
+                        'dat_visualizacao': _formatar_datetime_iso(tram.dat_visualizacao),
+                        'dat_recebimento': _formatar_datetime_iso(tram.dat_recebimento),
+                        'dat_fim_prazo': _formatar_datetime_iso(tram.dat_fim_prazo),
                         'des_status': tram.status_tramitacao_administrativo.des_status if tram.status_tramitacao_administrativo else '',
                         'unidade_origem': _get_nome_unidade_tramitacao(tram.unidade_tramitacao_),
                         'unidade_destino': _get_nome_unidade_tramitacao(tram.unidade_tramitacao),
@@ -1880,7 +1943,7 @@ class TramitacaoItensEnviadosView(GrokView, TramitacaoAPIBase):
     require('zope2.View')
     
     def render(self):
-        """Retorna itens enviados (tramitações encaminhadas mas não recebidas) em JSON"""
+        """Retorna itens enviados (tramitações encaminhadas pelo usuário) em JSON"""
         # O require('zope2.View') já garante autenticação
         
         # MONITORAMENTO: Inicia contagem de tempo e queries
@@ -1966,6 +2029,8 @@ class TramitacaoItensEnviadosView(GrokView, TramitacaoAPIBase):
                             Tramitacao.cod_usuario_local == cod_usuario,
                             Tramitacao.ind_ult_tramitacao == 1,
                             Tramitacao.dat_encaminha.isnot(None),
+                            # ✅ Enviados deve listar/contar apenas tramitações retomas (mesma regra do botão Retomar no frontend)
+                            Tramitacao.dat_visualizacao.is_(None),
                             Tramitacao.dat_recebimento.is_(None),
                             Tramitacao.ind_excluido == 0
                         ]
@@ -2025,6 +2090,8 @@ class TramitacaoItensEnviadosView(GrokView, TramitacaoAPIBase):
                             TramitacaoAdministrativo.cod_usuario_local == cod_usuario,
                             TramitacaoAdministrativo.ind_ult_tramitacao == 1,
                             TramitacaoAdministrativo.dat_encaminha.isnot(None),
+                            # ✅ Enviados deve listar/contar apenas tramitações retomas (mesma regra do botão Retomar no frontend)
+                            TramitacaoAdministrativo.dat_visualizacao.is_(None),
                             TramitacaoAdministrativo.dat_recebimento.is_(None),
                             TramitacaoAdministrativo.ind_excluido == 0
                         ]
@@ -2082,13 +2149,15 @@ class TramitacaoItensEnviadosView(GrokView, TramitacaoAPIBase):
                         query_count += 1
                 
                 # Busca itens enviados de MATÉRIAS
-                # Itens enviados = ind_encaminha=1 AND ind_recebido=0 = dat_encaminha IS NOT NULL AND dat_recebimento IS NULL
+                # Itens enviados = encaminhadas pelo usuário (dat_encaminha IS NOT NULL)
                 if not filtro_tipo or filtro_tipo == 'MATERIA':
                     filtros_materia = [
                     Tramitacao.cod_usuario_local == cod_usuario,
                     Tramitacao.ind_ult_tramitacao == 1,
                     Tramitacao.dat_encaminha.isnot(None),  # ind_encaminha = 1
-                        Tramitacao.dat_recebimento.is_(None),  # ind_recebido = 0
+                        # ✅ Apenas itens que podem ser retomados (não visualizados/recebidos)
+                        Tramitacao.dat_visualizacao.is_(None),
+                        Tramitacao.dat_recebimento.is_(None),
                         Tramitacao.ind_excluido == 0
                     ]
                     # Não filtra por unidade - itens enviados são por usuário
@@ -2183,13 +2252,15 @@ class TramitacaoItensEnviadosView(GrokView, TramitacaoAPIBase):
                         })
                 
                 # Busca itens enviados de DOCUMENTOS
-                # Itens enviados = ind_encaminha=1 AND ind_recebido=0 = dat_encaminha IS NOT NULL AND dat_recebimento IS NULL
+                # Itens enviados = encaminhadas pelo usuário (dat_encaminha IS NOT NULL)
                 if not filtro_tipo or filtro_tipo == 'DOCUMENTO':
                     filtros_doc = [
                         TramitacaoAdministrativo.cod_usuario_local == cod_usuario,
                         TramitacaoAdministrativo.ind_ult_tramitacao == 1,
                         TramitacaoAdministrativo.dat_encaminha.isnot(None),  # ind_encaminha = 1
-                        TramitacaoAdministrativo.dat_recebimento.is_(None),  # ind_recebido = 0
+                        # ✅ Apenas itens que podem ser retomados (não visualizados/recebidos)
+                        TramitacaoAdministrativo.dat_visualizacao.is_(None),
+                        TramitacaoAdministrativo.dat_recebimento.is_(None),
                         TramitacaoAdministrativo.ind_excluido == 0
                     ]
                     # Não filtra por unidade - itens enviados são por usuário
@@ -2602,15 +2673,19 @@ class TramitacaoContadoresView(GrokView, TramitacaoAPIBase):
     
     def _contar_caixa_entrada(self, session, cod_usuario, cod_unid_tramitacao_filtro, filtro_tipo):
         """
-        Conta tramitações na caixa de entrada usando COUNT().
+        Conta tramitações na caixa de entrada usando a mesma lógica da view unificada.
         
         OTIMIZAÇÕES APLICADAS:
-        - Reutiliza alias de rascunho para evitar criação múltipla
-        - Queries otimizadas para usar índices (ver indices_performance.sql)
-        - Subqueries EXISTS otimizadas com índices compostos
+        - Usa o mesmo método filtrar_tramitacoes_caixa_entrada() da view unificada
+        - Remove duplicatas por cod_tramitacao (mesma lógica da view unificada)
+        - Usa DISTINCT para contar apenas tramitações únicas
+        - Garante consistência com TramitacaoCaixaEntradaUnificadaView
         """
-        from sqlalchemy import func, exists, and_
-        from sqlalchemy.orm import aliased
+        from sqlalchemy import func, distinct
+        
+        # Importa TramitacaoService para usar o mesmo filtro de rascunhos
+        from .services import TramitacaoService
+        service = TramitacaoService(session)
         
         # Obtém unidades do usuário
         unidades = session.query(UsuarioUnidTram).filter(
@@ -2634,44 +2709,20 @@ class TramitacaoContadoresView(GrokView, TramitacaoAPIBase):
         unidades_responsavel = [u.cod_unid_tramitacao for u in unidades if u.ind_responsavel == 1]
         unidades_nao_responsavel = [u.cod_unid_tramitacao for u in unidades if u.ind_responsavel == 0]
         
-        total = 0
-        
-        # OTIMIZAÇÃO: Cria aliases uma única vez e reutiliza
-        rascunho_alias = aliased(Tramitacao)
-        rascunho_doc_alias = aliased(TramitacaoAdministrativo)
-        
-        # Subquery EXISTS otimizada para rascunhos de matérias
-        # NOTA: Requer índice idx_tramitacao_rascunhos (ver indices_performance.sql)
-        rascunho_exists_materia = exists().where(
-            and_(
-                rascunho_alias.cod_materia == Tramitacao.cod_materia,
-                rascunho_alias.ind_ult_tramitacao == 0,  # Rascunho
-                rascunho_alias.dat_encaminha.is_(None),  # Não enviado
-                rascunho_alias.ind_excluido == 0
-            )
-        )
-        
-        # Subquery EXISTS otimizada para rascunhos de documentos
-        # NOTA: Requer índice idx_tramitacao_adm_rascunhos (ver indices_performance.sql)
-        rascunho_exists_doc = exists().where(
-            and_(
-                rascunho_doc_alias.cod_documento == TramitacaoAdministrativo.cod_documento,
-                rascunho_doc_alias.ind_ult_tramitacao == 0,  # Rascunho
-                rascunho_doc_alias.dat_encaminha.is_(None),  # Não enviado
-                rascunho_doc_alias.ind_excluido == 0
-            )
-        )
+        # Lista para armazenar cod_tramitacao únicos (para remover duplicatas)
+        cod_tramitacoes_unicos = set()
         
         # Conta MATÉRIAS
         if not filtro_tipo or filtro_tipo == 'MATERIA':
             # Unidades responsáveis
             if unidades_responsavel:
-                # Query otimizada - usa índice idx_tramitacao_caixa_entrada
-                # ✅ REMOVIDO: Tramitacao.dat_recebimento.is_(None) - processos visualizados/recebidos devem ser contados
-                query_resp = session.query(func.count(Tramitacao.cod_tramitacao)).filter(
+                # Query base (mesma lógica da view unificada) - busca objeto completo para garantir que subquery funcione
+                # IMPORTANTE: Usa distinct() para garantir que não haja duplicatas no nível do banco
+                query_resp = session.query(Tramitacao).filter(
                     Tramitacao.cod_unid_tram_dest.in_(unidades_responsavel),
                     Tramitacao.ind_ult_tramitacao == 1,
                     Tramitacao.dat_encaminha.isnot(None),
+                    # NOTE: Mantém na Caixa de Entrada mesmo após receber/visualizar.
                     Tramitacao.ind_excluido == 0
                 ).join(
                     StatusTramitacao, Tramitacao.cod_status == StatusTramitacao.cod_status
@@ -2682,21 +2733,32 @@ class TramitacaoContadoresView(GrokView, TramitacaoAPIBase):
                 ).filter(
                     MateriaLegislativa.ind_tramitacao == 1,
                     MateriaLegislativa.ind_excluido == 0
-                ).filter(~rascunho_exists_materia)
+                ).distinct()
                 
-                count_resp = query_resp.scalar() or 0
-                total += count_resp
+                # Aplica filtro de rascunhos (mesmo método da view unificada)
+                # ✅ IMPORTANTE: A caixa de entrada deve considerar apenas tramitações sem rascunhos pendentes
+                # O módulo antigo não aplica esse filtro, mas está incorreto - processos com rascunhos não devem aparecer
+                cod_unid_tram_dest_filtro = unidades_responsavel[0] if unidades_responsavel else None
+                query_resp = service.filtrar_tramitacoes_caixa_entrada('MATERIA', query_resp, cod_unid_tram_dest_filtro)
+                
+                # Obtém cod_tramitacao únicos (mesma lógica da view unificada)
+                tramitacoes_resp_list = query_resp.all()
+                cod_tramitacoes_resp = {tram.cod_tramitacao for tram in tramitacoes_resp_list}
+                cod_tramitacoes_unicos.update(cod_tramitacoes_resp)
             
             # Unidades não responsáveis
             if unidades_nao_responsavel:
-                # Query otimizada - usa índice idx_tramitacao_caixa_entrada
-                # ✅ REMOVIDO: Tramitacao.dat_recebimento.is_(None) - processos visualizados/recebidos devem ser contados
-                query_nao_resp = session.query(func.count(Tramitacao.cod_tramitacao)).filter(
+                # Query base (mesma lógica da view unificada) - busca objeto completo para garantir que subquery funcione
+                # IMPORTANTE: Usa distinct() para garantir que não haja duplicatas no nível do banco
+                # Isso é necessário porque quando há múltiplas unidades, uma mesma tramitação pode aparecer
+                # se houver joins que causem duplicação
+                query_nao_resp = session.query(Tramitacao).filter(
                     Tramitacao.cod_unid_tram_dest.in_(unidades_nao_responsavel),
                     # Para unidades não responsáveis: cod_usuario_dest deve ser igual ao usuário OU NULL
                     (Tramitacao.cod_usuario_dest == cod_usuario) | (Tramitacao.cod_usuario_dest.is_(None)),
                     Tramitacao.ind_ult_tramitacao == 1,
                     Tramitacao.dat_encaminha.isnot(None),
+                    # NOTE: Mantém na Caixa de Entrada mesmo após receber/visualizar.
                     Tramitacao.ind_excluido == 0
                 ).join(
                     StatusTramitacao, Tramitacao.cod_status == StatusTramitacao.cod_status
@@ -2707,39 +2769,100 @@ class TramitacaoContadoresView(GrokView, TramitacaoAPIBase):
                 ).filter(
                     MateriaLegislativa.ind_tramitacao == 1,
                     MateriaLegislativa.ind_excluido == 0
-                ).filter(~rascunho_exists_materia)
+                ).distinct()
                 
-                count_nao_resp = query_nao_resp.scalar() or 0
-                total += count_nao_resp
+                # Aplica filtro de rascunhos (mesmo método da view unificada)
+                # ✅ IMPORTANTE: A caixa de entrada deve considerar apenas tramitações sem rascunhos pendentes
+                # O módulo antigo não aplica esse filtro, mas está incorreto - processos com rascunhos não devem aparecer
+                cod_unid_tram_dest_filtro = unidades_nao_responsavel[0] if unidades_nao_responsavel else None
+                query_nao_resp = service.filtrar_tramitacoes_caixa_entrada('MATERIA', query_nao_resp, cod_unid_tram_dest_filtro)
+                
+                # Obtém cod_tramitacao únicos (duplicatas são automaticamente removidas pelo set)
+                tramitacoes_nao_resp_list = query_nao_resp.all()
+                cod_tramitacoes_nao_resp = {tram.cod_tramitacao for tram in tramitacoes_nao_resp_list}
+                
+                if len(tramitacoes_nao_resp_list) > len(cod_tramitacoes_nao_resp):
+                    logger.warning(
+                        f"_contar_caixa_entrada - DUPLICATAS DETECTADAS: "
+                        f"{len(tramitacoes_nao_resp_list)} tramitações encontradas, "
+                        f"{len(cod_tramitacoes_nao_resp)} únicas"
+                    )
+                cod_tramitacoes_unicos.update(cod_tramitacoes_nao_resp)
         
         # Conta DOCUMENTOS
         if not filtro_tipo or filtro_tipo == 'DOCUMENTO':
-            # Unidades não responsáveis (documentos só aparecem em não responsáveis)
+            # ✅ IMPORTANTE: DOCUMENTOS podem aparecer tanto em unidades responsáveis quanto não responsáveis
+            # (mesma lógica da TramitacaoCaixaEntradaUnificadaView).
+            #
+            # Unidades responsáveis: não filtra por cod_usuario_dest
+            if unidades_responsavel:
+                query_doc_resp = session.query(TramitacaoAdministrativo).filter(
+                    TramitacaoAdministrativo.cod_unid_tram_dest.in_(unidades_responsavel),
+                    TramitacaoAdministrativo.ind_ult_tramitacao == 1,
+                    TramitacaoAdministrativo.dat_encaminha.isnot(None),
+                    # NOTE: Mantém na Caixa de Entrada mesmo após receber/visualizar.
+                    TramitacaoAdministrativo.ind_excluido == 0
+                ).join(
+                    StatusTramitacaoAdministrativo,
+                    TramitacaoAdministrativo.cod_status == StatusTramitacaoAdministrativo.cod_status
+                ).filter(
+                    StatusTramitacaoAdministrativo.ind_retorno_tramitacao == 1
+                ).join(
+                    DocumentoAdministrativo,
+                    TramitacaoAdministrativo.cod_documento == DocumentoAdministrativo.cod_documento
+                ).filter(
+                    DocumentoAdministrativo.ind_tramitacao == 1,
+                    DocumentoAdministrativo.ind_excluido == 0
+                ).distinct()
+
+                # Aplica filtro de rascunhos (mesmo método da view unificada)
+                cod_unid_tram_dest_filtro = unidades_responsavel[0] if unidades_responsavel else None
+                query_doc_resp = service.filtrar_tramitacoes_caixa_entrada('DOCUMENTO', query_doc_resp, cod_unid_tram_dest_filtro)
+
+                cod_tramitacoes_doc_resp = {tram.cod_tramitacao for tram in query_doc_resp.all()}
+                cod_tramitacoes_unicos.update(cod_tramitacoes_doc_resp)
+
+            # Unidades não responsáveis: cod_usuario_dest deve ser igual ao usuário OU NULL
             if unidades_nao_responsavel:
-                # Query otimizada - usa índice idx_tramitacao_adm_caixa_entrada
-                # ✅ REMOVIDO: TramitacaoAdministrativo.dat_recebimento.is_(None) - processos visualizados/recebidos devem ser contados
-                query_doc = session.query(func.count(TramitacaoAdministrativo.cod_tramitacao)).filter(
+                query_doc_nao_resp = session.query(TramitacaoAdministrativo).filter(
                     TramitacaoAdministrativo.cod_unid_tram_dest.in_(unidades_nao_responsavel),
                     # Para unidades não responsáveis: cod_usuario_dest deve ser igual ao usuário OU NULL
                     (TramitacaoAdministrativo.cod_usuario_dest == cod_usuario) | (TramitacaoAdministrativo.cod_usuario_dest.is_(None)),
                     TramitacaoAdministrativo.ind_ult_tramitacao == 1,
                     TramitacaoAdministrativo.dat_encaminha.isnot(None),
+                    # NOTE: Mantém na Caixa de Entrada mesmo após receber/visualizar.
                     TramitacaoAdministrativo.ind_excluido == 0
                 ).join(
-                    StatusTramitacaoAdministrativo, 
+                    StatusTramitacaoAdministrativo,
                     TramitacaoAdministrativo.cod_status == StatusTramitacaoAdministrativo.cod_status
                 ).filter(
                     StatusTramitacaoAdministrativo.ind_retorno_tramitacao == 1
                 ).join(
-                    DocumentoAdministrativo, 
+                    DocumentoAdministrativo,
                     TramitacaoAdministrativo.cod_documento == DocumentoAdministrativo.cod_documento
                 ).filter(
                     DocumentoAdministrativo.ind_tramitacao == 1,
                     DocumentoAdministrativo.ind_excluido == 0
-                ).filter(~rascunho_exists_doc)
-                
-                count_doc = query_doc.scalar() or 0
-                total += count_doc
+                ).distinct()
+
+                # Aplica filtro de rascunhos (mesmo método da view unificada)
+                cod_unid_tram_dest_filtro = unidades_nao_responsavel[0] if unidades_nao_responsavel else None
+                query_doc_nao_resp = service.filtrar_tramitacoes_caixa_entrada('DOCUMENTO', query_doc_nao_resp, cod_unid_tram_dest_filtro)
+
+                cod_tramitacoes_doc_nao_resp = {tram.cod_tramitacao for tram in query_doc_nao_resp.all()}
+                cod_tramitacoes_unicos.update(cod_tramitacoes_doc_nao_resp)
+        
+        # Retorna o total de tramitações únicas (removendo duplicatas entre unidades responsáveis e não responsáveis)
+        total = len(cod_tramitacoes_unicos)
+        
+        # Log resumido para diagnóstico
+        logger.debug(
+            f"_contar_caixa_entrada - Usuário {cod_usuario}, "
+            f"Unidades resp: {len(unidades_responsavel)}, não resp: {len(unidades_nao_responsavel)}, "
+            f"Total único: {total}, "
+            f"Filtro tipo: {filtro_tipo or 'TODOS'}, "
+            f"Filtro unidade: {cod_unid_tramitacao_filtro or 'TODAS'}"
+        )
         
         return total
     
@@ -2789,13 +2912,15 @@ class TramitacaoContadoresView(GrokView, TramitacaoAPIBase):
         total = 0
         
         # Conta MATÉRIAS
-        # Itens enviados = ind_encaminha=1 AND ind_recebido=0 = dat_encaminha IS NOT NULL AND dat_recebimento IS NULL
+        # Itens enviados = encaminhadas pelo usuário (dat_encaminha IS NOT NULL) que ainda podem ser retomadas
+        # (mesma regra do botão Retomar no frontend): não visualizadas e não recebidas.
         if not filtro_tipo or filtro_tipo == 'MATERIA':
             count_materia = session.query(func.count(Tramitacao.cod_tramitacao)).filter(
                 Tramitacao.cod_usuario_local == cod_usuario,
                 Tramitacao.ind_ult_tramitacao == 1,
                 Tramitacao.dat_encaminha.isnot(None),  # ind_encaminha = 1
-                Tramitacao.dat_recebimento.is_(None),  # ind_recebido = 0
+                Tramitacao.dat_visualizacao.is_(None),
+                Tramitacao.dat_recebimento.is_(None),
                 Tramitacao.ind_excluido == 0
             ).join(
                 MateriaLegislativa, Tramitacao.cod_materia == MateriaLegislativa.cod_materia
@@ -2806,13 +2931,15 @@ class TramitacaoContadoresView(GrokView, TramitacaoAPIBase):
             total += count_materia
         
         # Conta DOCUMENTOS
-        # Itens enviados = ind_encaminha=1 AND ind_recebido=0 = dat_encaminha IS NOT NULL AND dat_recebimento IS NULL
+        # Itens enviados = encaminhadas pelo usuário (dat_encaminha IS NOT NULL) que ainda podem ser retomadas
+        # (mesma regra do botão Retomar no frontend): não visualizadas e não recebidas.
         if not filtro_tipo or filtro_tipo == 'DOCUMENTO':
             count_doc = session.query(func.count(TramitacaoAdministrativo.cod_tramitacao)).filter(
                 TramitacaoAdministrativo.cod_usuario_local == cod_usuario,
                 TramitacaoAdministrativo.ind_ult_tramitacao == 1,
                 TramitacaoAdministrativo.dat_encaminha.isnot(None),  # ind_encaminha = 1
-                TramitacaoAdministrativo.dat_recebimento.is_(None),  # ind_recebido = 0
+                TramitacaoAdministrativo.dat_visualizacao.is_(None),
+                TramitacaoAdministrativo.dat_recebimento.is_(None),
                 TramitacaoAdministrativo.ind_excluido == 0
             ).join(
                 DocumentoAdministrativo, 

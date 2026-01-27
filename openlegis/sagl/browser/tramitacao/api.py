@@ -627,7 +627,7 @@ class TramitacaoAPIBase:
                     logger.debug(f"TramitacaoIndividualSalvarView - Alteração detectada: {campo} = {valor_atual} -> {valor_novo}")
             
             if alteracoes_detectadas:
-                logger.info(f"TramitacaoIndividualSalvarView - Alterações detectadas: {', '.join(alteracoes_detectadas)}")
+                logger.debug(f"TramitacaoIndividualSalvarView - Alterações detectadas: {', '.join(alteracoes_detectadas)}")
                 return True
             
             logger.debug(f"TramitacaoIndividualSalvarView - Nenhuma alteração detectada nos campos")
@@ -682,19 +682,33 @@ class TramitacaoAPIBase:
                 else:
                     dat_fim_prazo_str = str(dat_fim)
             
-            # Formata dat_tramitacao (normaliza para string DD/MM/YYYY para comparação)
+            # ✅ CORRIGIDO: Formata dat_tramitacao com hora (DD/MM/YYYY HH:MM) para consistência com formulário
             dat_tramitacao_str = None
             if dat_tram:
                 if isinstance(dat_tram, datetime):
-                    dat_tramitacao_str = dat_tram.strftime('%d/%m/%Y')
+                    dat_tramitacao_str = dat_tram.strftime('%d/%m/%Y %H:%M')
                 elif hasattr(dat_tram, 'strftime'):
-                    dat_tramitacao_str = dat_tram.strftime('%d/%m/%Y')
+                    dat_tramitacao_str = dat_tram.strftime('%d/%m/%Y %H:%M')
                 else:
-                    dat_tramitacao_str = str(dat_tram)[:10]  # Pega apenas data
-                    if '-' in dat_tramitacao_str:
-                        parts = dat_tramitacao_str.split('-')
-                        if len(parts) == 3:
-                            dat_tramitacao_str = f"{parts[2]}/{parts[1]}/{parts[0]}"
+                    # Tenta extrair data e hora da string
+                    dat_tram_str = str(dat_tram)
+                    if 'T' in dat_tram_str:
+                        # Formato ISO: 2026-01-22T17:50:00
+                        parts = dat_tram_str.split('T')
+                        if len(parts) == 2:
+                            data_part = parts[0]
+                            hora_part = parts[1].split('.')[0].split('+')[0].split('-')[0]  # Remove timezone e microsegundos
+                            if len(hora_part) >= 5:  # HH:MM
+                                data_parts = data_part.split('-')
+                                if len(data_parts) == 3:
+                                    dat_tramitacao_str = f"{data_parts[2]}/{data_parts[1]}/{data_parts[0]} {hora_part[:5]}"
+                    if not dat_tramitacao_str:
+                        # Fallback: apenas data
+                        dat_tramitacao_str = str(dat_tram)[:10]  # Pega apenas data
+                        if '-' in dat_tramitacao_str:
+                            parts = dat_tramitacao_str.split('-')
+                            if len(parts) == 3:
+                                dat_tramitacao_str = f"{parts[2]}/{parts[1]}/{parts[0]}"
             
             return {
                 'cod_tramitacao': cod_tram,
@@ -987,7 +1001,8 @@ class TramitacaoUsuariosView(GrokView, TramitacaoAPIBase):
             svalue = self._obter_parametro('svalue', '')  # cod_unidade de destino
             
             if not svalue:
-                return self._resposta_json([{'name': '', 'id': ''}])
+                # Sem unidade selecionada: retorna lista vazia (placeholder fica no frontend)
+                return self._resposta_json([])
             
             with db_session_readonly() as session:
                 # Query para usuários da unidade
@@ -996,7 +1011,8 @@ class TramitacaoUsuariosView(GrokView, TramitacaoAPIBase):
                     UsuarioUnidTram.ind_excluido == 0
                 ).all()
                 
-                usuarioArray = [{'name': '', 'id': ''}]
+                # Lista apenas com usuários (sem opção "Selecione" do backend)
+                usuarioArray = []
                 
                 for usuario_unid in usuarios_unid:
                     usuario = session.query(Usuario).filter(
@@ -1016,16 +1032,13 @@ class TramitacaoUsuariosView(GrokView, TramitacaoAPIBase):
                         })
                 
                 # Ordena por nome
-                usuarioArray.sort(key=lambda x: x['name'])
-                
-                # Extrai dados antes de retornar
-                resultado = usuarioArray
+                resultado = sorted(usuarioArray, key=lambda x: x['name'])
                 session.expunge_all()  # Remove objetos da sessão
                 return self._resposta_json(resultado)
         
         except Exception as e:
             logger.error(f"Erro ao obter usuários: {e}", exc_info=True)
-            return self._resposta_json([{'name': 'Erro ao carregar', 'id': ''}])
+            return self._resposta_json([])
 
 
 class TramitacaoUnidadesUsuarioView(GrokView, TramitacaoAPIBase):
@@ -1133,6 +1146,7 @@ class TramitacaoIndividualObterView(GrokView, TramitacaoAPIBase):
                 dat_rec = tram.dat_recebimento
                 dat_enc = tram.dat_encaminha
                 dat_fim = tram.dat_fim_prazo
+                dat_tram = tram.dat_tramitacao  # ✅ Adiciona dat_tramitacao para consistência com cards
                 
                 # Extrai cod_entidade baseado no tipo
                 if tipo == 'MATERIA':
@@ -1143,13 +1157,12 @@ class TramitacaoIndividualObterView(GrokView, TramitacaoAPIBase):
                 # Expunge objetos da sessão antes de formatar
                 session.expunge_all()
                 
-                # Formata datas após expungar
-                dat_encaminha_str = None
-                if dat_enc:
-                    if isinstance(dat_enc, datetime):
-                        dat_encaminha_str = dat_enc.strftime('%d/%m/%Y %H:%M')
-                    else:
-                        dat_encaminha_str = str(dat_enc)
+                # ✅ CORRIGIDO: Formata datas em ISO 8601 para consistência com cards
+                # O frontend já trata ISO 8601 corretamente, então mantemos formato consistente
+                from openlegis.sagl.browser.tramitacao.views import _formatar_datetime_iso
+                
+                dat_encaminha_str = _formatar_datetime_iso(dat_enc)
+                dat_tramitacao_str = _formatar_datetime_iso(dat_tram)
                 
                 dat_fim_prazo_str = None
                 if dat_fim:
@@ -1169,6 +1182,7 @@ class TramitacaoIndividualObterView(GrokView, TramitacaoAPIBase):
                     'cod_status': cod_stat,
                     'ind_urgencia': ind_urg,
                     'txt_tramitacao': txt_tram,
+                    'dat_tramitacao': dat_tramitacao_str,  # ✅ Adiciona dat_tramitacao formatado com hora
                     'dat_encaminha': dat_encaminha_str,
                     'dat_fim_prazo': dat_fim_prazo_str,
                     'ind_ult_tramitacao': ind_ult,
@@ -1338,10 +1352,6 @@ class TramitacaoIndividualFormView(GrokView, BaseTramitacaoFormView):
                 # Obtém dados do usuário usando sessão existente
                 unidades_usuario, nome_usuario = self._obter_dados_usuario_em_sessao(session, cod_usuario, tipo)
                 
-                # Obtém data atual
-                from datetime import datetime
-                dat_tramitacao = datetime.now().strftime('%d/%m/%Y %H:%M')
-                
                 # Processa unidade da caixa de entrada
                 cod_unid_tram_local_int = None
                 if cod_unid_tram_local_caixa:
@@ -1362,6 +1372,37 @@ class TramitacaoIndividualFormView(GrokView, BaseTramitacaoFormView):
                 dados_tramitacao = None
                 if cod_tramitacao:
                     dados_tramitacao = self._obter_dados_tramitacao_form_em_sessao(session, tipo, cod_tramitacao)
+                
+                # ✅ CORRIGIDO: Usa dat_tramitacao do banco se disponível, senão usa data atual
+                from datetime import datetime
+                if dados_tramitacao and dados_tramitacao.get('dat_tramitacao'):
+                    # Se editando tramitação existente, usa dat_tramitacao do banco formatada com hora
+                    # Busca a tramitação novamente para obter dat_tramitacao completo (com hora)
+                    from openlegis.sagl.models.models import Tramitacao, TramitacaoAdministrativo
+                    cod_tramitacao_int = validar_codigo_entidade(cod_tramitacao, 'cod_tramitacao')
+                    if tipo == 'MATERIA':
+                        tram = session.query(Tramitacao).filter(
+                            Tramitacao.cod_tramitacao == cod_tramitacao_int,
+                            Tramitacao.ind_excluido == 0
+                        ).first()
+                    else:
+                        tram = session.query(TramitacaoAdministrativo).filter(
+                            TramitacaoAdministrativo.cod_tramitacao == cod_tramitacao_int,
+                            TramitacaoAdministrativo.ind_excluido == 0
+                        ).first()
+                    
+                    if tram and tram.dat_tramitacao:
+                        if isinstance(tram.dat_tramitacao, datetime):
+                            dat_tramitacao = tram.dat_tramitacao.strftime('%d/%m/%Y %H:%M')
+                        elif hasattr(tram.dat_tramitacao, 'strftime'):
+                            dat_tramitacao = tram.dat_tramitacao.strftime('%d/%m/%Y %H:%M')
+                        else:
+                            dat_tramitacao = datetime.now().strftime('%d/%m/%Y %H:%M')
+                    else:
+                        dat_tramitacao = datetime.now().strftime('%d/%m/%Y %H:%M')
+                else:
+                    # Nova tramitação, usa data atual
+                    dat_tramitacao = datetime.now().strftime('%d/%m/%Y %H:%M')
                 
                 # Usa cod_unid_tram_local dos dados da tramitação se existir, senão usa do parâmetro
                 cod_unid_tram_local_final = None
@@ -2226,14 +2267,14 @@ class TramitacaoIndividualFormView(GrokView, BaseTramitacaoFormView):
         html += '<div class="row g-2">'
         html += '<div class="col-12 col-sm-6 mb-2">'
         html += '<label class="form-label small required" for="lst_cod_unid_tram_dest">Unidade de Destino</label>'
-        html += '<select class="select2 form-select form-select-sm" name="lst_cod_unid_tram_dest" id="lst_cod_unid_tram_dest" style="width:100%" required>'
+        html += '<select class="tomselect form-select form-select-sm" name="lst_cod_unid_tram_dest" id="lst_cod_unid_tram_dest" data-placeholder="Selecione a unidade de destino..." style="width:100%" required>'
         html += '<option value="">Selecione a unidade de destino...</option>'
         html += '</select></div>'
         
         html += '<div class="col-12 col-sm-6 mb-2">'
         html += '<label class="form-label small" for="lst_cod_usuario_dest">Usuário de Destino</label>'
-        html += '<select class="select2 form-select form-select-sm" name="lst_cod_usuario_dest" id="lst_cod_usuario_dest" style="width:100%">'
-        html += '<option value=""></option>'
+        html += '<select class="tomselect form-select form-select-sm" name="lst_cod_usuario_dest" id="lst_cod_usuario_dest" data-placeholder="Selecione o usuário de destino..." style="width:100%">'
+        html += '<option value="">Selecione</option>'  # ✅ Opção em branco inicial (será substituída quando usuários forem carregados)
         html += '</select></div></div></div></div>'
         
         # Seção: Status e Prazo
@@ -2245,7 +2286,7 @@ class TramitacaoIndividualFormView(GrokView, BaseTramitacaoFormView):
         html += '<div class="row g-3">'
         html += '<div class="col-12 col-md-6 mb-2">'
         html += _renderizar_label_campo('lst_cod_status', 'Status', obrigatorio=True)
-        html += '<select class="select2 form-select form-select-sm" id="lst_cod_status" name="lst_cod_status" style="width:100%" required aria-required="true">'
+        html += '<select class="tomselect form-select form-select-sm" id="lst_cod_status" name="lst_cod_status" data-placeholder="Selecione o status..." style="width:100%" required aria-required="true">'
         html += '<option value="">Selecione o status...</option>'
         html += '</select></div>'
         
@@ -2425,6 +2466,10 @@ class TramitacaoIndividualFormView(GrokView, BaseTramitacaoFormView):
             }
         });
         </script>
+        
+        <!-- TomSelect CSS e JS -->
+        <link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.bootstrap5.css" rel="stylesheet">
+        <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
         '''
         
         return html
@@ -2908,7 +2953,7 @@ class TramitacaoIndividualSalvarView(GrokView, TramitacaoAPIBase):
                         
                         logger.debug(f"TramitacaoIndividualSalvarView - Comparando dados: novos={dados_para_comparar}, atuais={dados_atuais}")
                         houve_alteracao = self._detectar_alteracoes_tramitacao(dados_para_comparar, dados_atuais, tipo)
-                        logger.info(f"TramitacaoIndividualSalvarView - Detecção de alterações: houve_alteracao={houve_alteracao}, opcao_pdf={opcao_pdf}, cod_tramitacao={cod_tramitacao_int}")
+                        logger.debug(f"TramitacaoIndividualSalvarView - Detecção de alterações: houve_alteracao={houve_alteracao}, opcao_pdf={opcao_pdf}, cod_tramitacao={cod_tramitacao_int}")
                     else:
                         logger.warning(f"TramitacaoIndividualSalvarView - Não foi possível obter dados atuais da tramitação {cod_tramitacao_int} para comparação")
                 
@@ -2944,10 +2989,10 @@ class TramitacaoIndividualSalvarView(GrokView, TramitacaoAPIBase):
                 if cod_tramitacao_retorno:
                     if cod_tramitacao_int:  # É edição
                         deve_gerar_pdf = (opcao_pdf == 'G' and houve_alteracao)
-                        logger.info(f"TramitacaoIndividualSalvarView - Decisão PDF (edição): opcao_pdf={opcao_pdf}, houve_alteracao={houve_alteracao}, deve_gerar_pdf={deve_gerar_pdf}, cod_tramitacao={cod_tramitacao_retorno}")
+                        logger.debug(f"TramitacaoIndividualSalvarView - Decisão PDF (edição): opcao_pdf={opcao_pdf}, houve_alteracao={houve_alteracao}, deve_gerar_pdf={deve_gerar_pdf}, cod_tramitacao={cod_tramitacao_retorno}")
                     else:  # É novo rascunho
                         deve_gerar_pdf = (opcao_pdf != 'M')
-                        logger.info(f"TramitacaoIndividualSalvarView - Decisão PDF (novo rascunho): opcao_pdf={opcao_pdf}, deve_gerar_pdf={deve_gerar_pdf}, cod_tramitacao={cod_tramitacao_retorno}")
+                        logger.debug(f"TramitacaoIndividualSalvarView - Decisão PDF (novo rascunho): opcao_pdf={opcao_pdf}, deve_gerar_pdf={deve_gerar_pdf}, cod_tramitacao={cod_tramitacao_retorno}")
                 
                 # ✅ CRÍTICO: Dispara task PDF via afterCommitHook APÓS o commit
                 # Isso garante que os dados já estejam persistidos quando a task for executada
@@ -3018,9 +3063,9 @@ class TramitacaoIndividualSalvarView(GrokView, TramitacaoAPIBase):
                             task_id = task_result.id if hasattr(task_result, 'id') else getattr(task_result, 'task_id', None)
                             
                             if task_id:
-                                logger.info(f"TramitacaoIndividualSalvarView - Task PDF disparada APÓS commit com dados do request: task_id={task_id} para cod_tramitacao={cod_tramitacao}")
+                                logger.debug(f"TramitacaoIndividualSalvarView - Task PDF disparada APÓS commit com dados do request: task_id={task_id} para cod_tramitacao={cod_tramitacao}")
                             else:
-                                logger.warning(f"TramitacaoIndividualSalvarView - Task PDF não retornou task_id após commit para cod_tramitacao={cod_tramitacao}")
+                                logger.debug(f"TramitacaoIndividualSalvarView - Task PDF não retornou task_id após commit para cod_tramitacao={cod_tramitacao}")
                         except Exception as e:
                             logger.error(f"TramitacaoIndividualSalvarView - Erro ao disparar task PDF após commit: {e}", exc_info=True)
                     
@@ -3109,6 +3154,8 @@ class TramitacaoIndividualSalvarView(GrokView, TramitacaoAPIBase):
                     # Se opção for "Manter", não junta anexo também
                     if opcao_pdf != 'M' and arquivo_pdf and hasattr(arquivo_pdf, 'read'):
                         try:
+                            # ✅ Necessário para usar tasks.juntar_pdfs_task (Celery)
+                            import tasks
                             import base64
                             
                             arquivo_pdf.seek(0)
@@ -3144,7 +3191,7 @@ class TramitacaoIndividualSalvarView(GrokView, TramitacaoAPIBase):
                 if task_pdf:
                     resposta['task_pdf'] = task_pdf
                 else:
-                    logger.warning(f"TramitacaoIndividualSalvarView - task_pdf não foi criado, não será adicionado à resposta")
+                    logger.debug(f"TramitacaoIndividualSalvarView - task_pdf não foi criado, não será adicionado à resposta")
                 
                 if task_anexo:
                     resposta['task_anexo'] = task_anexo
@@ -3190,7 +3237,7 @@ class TramitacaoIndividualSalvarView(GrokView, TramitacaoAPIBase):
                                 }}
                             }})();
                         '''
-                        logger.info(f"TramitacaoIndividualSalvarView - Link PDF atualizado na resposta: {link_pdf_despacho}")
+                        logger.debug(f"TramitacaoIndividualSalvarView - Link PDF atualizado na resposta: {link_pdf_despacho}")
                     except Exception as e:
                         logger.warning(f"TramitacaoIndividualSalvarView - Erro ao construir link PDF atualizado: {e}")
                 
@@ -4115,14 +4162,14 @@ class TramitacaoLoteFormView(GrokView, TramitacaoAPIBase):
         html += '<div class="row g-3">'
         html += '<div class="col-12 col-md-6 mb-2">'
         html += _renderizar_label_campo('lst_cod_unid_tram_dest', 'Unidade de Destino', obrigatorio=True)
-        html += '<select class="select2 form-select form-select-sm" name="lst_cod_unid_tram_dest" id="lst_cod_unid_tram_dest" style="width:100%" required aria-required="true">'
+        html += '<select class="tomselect form-select form-select-sm" name="lst_cod_unid_tram_dest" id="lst_cod_unid_tram_dest" data-placeholder="Selecione a unidade de destino..." style="width:100%" required aria-required="true">'
         html += '<option value="">Selecione a unidade de destino...</option>'
         html += '</select></div>'
         
         html += '<div class="col-12 col-md-6 mb-2">'
         html += _renderizar_label_campo('lst_cod_usuario_dest', 'Usuário de Destino', obrigatorio=False)
-        html += '<select class="select2 form-select form-select-sm" name="lst_cod_usuario_dest" id="lst_cod_usuario_dest" style="width:100%">'
-        html += '<option value=""></option>'
+        html += '<select class="tomselect form-select form-select-sm" name="lst_cod_usuario_dest" id="lst_cod_usuario_dest" data-placeholder="Selecione o usuário de destino..." style="width:100%">'
+        html += '<option value="">Selecione</option>'
         html += '</select></div></div></div></div>'
         
         # Seção: Status e Prazo
@@ -4134,7 +4181,7 @@ class TramitacaoLoteFormView(GrokView, TramitacaoAPIBase):
         html += '<div class="row g-3">'
         html += '<div class="col-12 col-md-6 mb-2">'
         html += _renderizar_label_campo('lst_cod_status', 'Status', obrigatorio=True)
-        html += '<select class="select2 form-select form-select-sm" id="lst_cod_status" name="lst_cod_status" style="width:100%" required aria-required="true">'
+        html += '<select class="tomselect form-select form-select-sm" id="lst_cod_status" name="lst_cod_status" data-placeholder="Selecione o status..." style="width:100%" required aria-required="true">'
         html += '<option value="">Selecione o status...</option>'
         html += '</select></div>'
         
@@ -4206,6 +4253,10 @@ class TramitacaoLoteFormView(GrokView, TramitacaoAPIBase):
             });
         });
         </script>
+        
+        <!-- TomSelect CSS e JS -->
+        <link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.bootstrap5.css" rel="stylesheet">
+        <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
         '''
         
         return html
@@ -4332,7 +4383,7 @@ class TramitacaoSalvarPDFView(GrokView, TramitacaoAPIBase):
             
             try:
                 generator.salvar_pdf_no_repositorio(tipo, cod_tramitacao, pdf_bytes, self.context)
-                logger.info(f"TramitacaoSalvarPDFView - PDF salvo no repositório (cod_tramitacao={cod_tramitacao})")
+                logger.debug(f"TramitacaoSalvarPDFView - PDF salvo no repositório (cod_tramitacao={cod_tramitacao})")
                 return self._resposta_json({
                     'success': True,
                     'message': 'PDF salvo com sucesso',

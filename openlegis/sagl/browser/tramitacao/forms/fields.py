@@ -214,7 +214,17 @@ class RadioGroupField(FormField):
         mb_class = 'mb-2' if self.inline and 'col-md' in col_class else 'mb-3'
         
         html_field = f'<div class="{col_class} {mb_class}">'
-        html_field += self._render_label()
+        # ⚠️ Diferente de inputs simples, um grupo de radios não tem um único elemento com id=self.id.
+        # Os radios gerados usam ids como `field_<name>_<value>`, então um <label for="self.id"> fica inválido.
+        # Renderizamos um label "de grupo" sem atributo `for`.
+        required_mark = ''
+        required_aria = ''
+        if self.required:
+            required_mark = ' <span class="text-danger" aria-label="obrigatório">*</span>'
+            required_aria = ' <span class="visually-hidden">(obrigatório)</span>'
+        html_field += f'<label class="form-label">{html.escape(self.label)}{required_mark}{required_aria}</label>'
+        if self.help_text:
+            html_field += f'<small class="form-text text-muted d-block" id="{self.id}_help">{self._escape(self.help_text)}</small>'
         
         # Container para as opções - sempre em uma linha separada do label
         # Quando inline=True, as opções ficam na mesma linha entre si

@@ -1155,10 +1155,13 @@ class ProcessoAdmView(grok.View):
         documentos = []
         
         from openlegis.sagl.models.models import StatusTramitacaoAdministrativo
+        # Exclui rascunhos: inclui apenas se ind_ult_tramitacao == 1 OU dat_encaminha IS NOT NULL
+        # Rascunho = ind_ult_tramitacao == 0 E dat_encaminha IS NULL
         tramitacoes = session.query(TramitacaoAdministrativo, StatusTramitacaoAdministrativo)\
             .outerjoin(StatusTramitacaoAdministrativo, TramitacaoAdministrativo.cod_status == StatusTramitacaoAdministrativo.cod_status)\
             .filter(TramitacaoAdministrativo.cod_documento == cod_documento)\
             .filter(TramitacaoAdministrativo.ind_excluido == 0)\
+            .filter(or_(TramitacaoAdministrativo.ind_ult_tramitacao == 1, TramitacaoAdministrativo.dat_encaminha.isnot(None)))\
             .order_by(TramitacaoAdministrativo.dat_tramitacao, TramitacaoAdministrativo.cod_tramitacao)\
             .all()
         

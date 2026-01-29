@@ -211,4 +211,57 @@ tinymce.init({
   content_style: 'body {font-size:14px }'
 });
 </script>
+<dtml-if modal>
+<script>
+// Fecha o modal e recarrega a página pai quando a tramitação é salva com sucesso
+(function() {
+  // Verifica se estamos dentro de um iframe (modal)
+  if (window.self !== window.top) {
+    // Aguarda um pouco para garantir que a página foi carregada
+    setTimeout(function() {
+      try {
+        // Tenta fechar o modal usando Bootstrap
+        var modalElement = window.parent.document.getElementById('iFrameModal');
+        if (modalElement) {
+          var modal = bootstrap.Modal.getInstance(modalElement);
+          if (modal) {
+            modal.hide();
+          } else {
+            // Se não existe instância, cria e fecha
+            var newModal = new bootstrap.Modal(modalElement);
+            newModal.hide();
+          }
+        }
+        
+        // Recarrega a página pai após fechar o modal
+        // Adiciona parâmetro na URL para expandir a aba de tramitação
+        setTimeout(function() {
+          if (window.parent && window.parent.location) {
+            var currentUrl = window.parent.location.href;
+            // Remove parâmetros existentes de expansão
+            var urlParts = currentUrl.split('?');
+            var baseUrl = urlParts[0];
+            var hash = urlParts[1] ? urlParts[1].split('#')[1] : (currentUrl.split('#')[1] || '');
+            // Adiciona parâmetro para expandir a aba de tramitação
+            var separator = currentUrl.indexOf('?') === -1 ? '?' : '&';
+            var newUrl = baseUrl + separator + 'expandTramitacao=1' + (hash ? '#' + hash : '');
+            window.parent.location.href = newUrl;
+          }
+        }, 300);
+      } catch (e) {
+        console.error('Erro ao fechar modal:', e);
+        // Fallback: tenta recarregar a página pai mesmo se houver erro
+        try {
+          if (window.parent && window.parent.location) {
+            window.parent.location.reload();
+          }
+        } catch (e2) {
+          console.error('Erro ao recarregar página pai:', e2);
+        }
+      }
+    }, 500);
+  }
+})();
+</script>
+</dtml-if>
 <dtml-var footer_html>

@@ -2995,6 +2995,7 @@ class TramitacaoIndividualSalvarView(GrokView, TramitacaoAPIBase):
                         logger.debug(f"TramitacaoIndividualSalvarView - Decisão PDF (novo rascunho): opcao_pdf={opcao_pdf}, deve_gerar_pdf={deve_gerar_pdf}, cod_tramitacao={cod_tramitacao_retorno}")
                 
                 # ✅ CRÍTICO: Dispara task PDF via afterCommitHook APÓS o commit
+                # Sempre usa task assíncrona - frontend aguarda task completar antes de recarregar
                 # Isso garante que os dados já estejam persistidos quando a task for executada
                 # Captura valores necessários ANTES de usar no hook
                 task_pdf = None
@@ -3043,36 +3044,65 @@ class TramitacaoIndividualSalvarView(GrokView, TramitacaoAPIBase):
                     import json as json_module
                     dados_tramitacao_json = json_module.dumps(dados_tramitacao_para_pdf, ensure_ascii=False)
                     
-                    def disparar_task_pdf_apos_commit(success, cod_tramitacao, tipo_tramitacao, portal_url_val, user_id_val, dados_json):
-                        if not success:
-                            return
+                    # ✅ CRÍTICO: Prepara task para ser disparada APÓS commit via hook
+                    # Mas já constrói task_pdf com informações para retornar na resposta
+                    # O frontend aguardará a task completar antes de recarregar o formulário
+                    try:
+                        # Constrói URL do PDF que será gerado
+                        if tipo_tram == 'MATERIA':
+                            pdf_path = f"/sapl_documentos/materia/tramitacao/{cod_tram_retorno}_tram.pdf"
+                        else:
+                            pdf_path = f"/sapl_documentos/administrativo/tramitacao/{cod_tram_retorno}_tram.pdf"
                         
-                        try:
-                            import tasks
-                            task_kwargs = {
-                                'tipo': tipo_tramitacao,
-                                'cod_tramitacao': cod_tramitacao,
-                                'portal_url': portal_url_val,
-                                'site_path': 'sagl',
-                                'dados_tramitacao_json': dados_json  # ✅ Passa dados diretamente do request
-                            }
-                            if user_id_val:
-                                task_kwargs['user_id'] = str(user_id_val)
+                        base_url = f"{portal_url_hook.rstrip('/')}{pdf_path}"
+                        
+                        # Variável para armazenar task_id (será preenchida pelo hook)
+                        task_id_container = {'task_id': None}
+                        
+                        def disparar_task_pdf_apos_commit(success, cod_tramitacao, tipo_tramitacao, portal_url_val, user_id_val, dados_json, task_id_ref, pdf_url):
+                            if not success:
+                                return
                             
-                            task_result = tasks.gerar_pdf_despacho_task.apply_async(kwargs=task_kwargs)
-                            task_id = task_result.id if hasattr(task_result, 'id') else getattr(task_result, 'task_id', None)
-                            
-                            if task_id:
-                                logger.debug(f"TramitacaoIndividualSalvarView - Task PDF disparada APÓS commit com dados do request: task_id={task_id} para cod_tramitacao={cod_tramitacao}")
-                            else:
-                                logger.debug(f"TramitacaoIndividualSalvarView - Task PDF não retornou task_id após commit para cod_tramitacao={cod_tramitacao}")
-                        except Exception as e:
-                            logger.error(f"TramitacaoIndividualSalvarView - Erro ao disparar task PDF após commit: {e}", exc_info=True)
-                    
-                    transaction.get().addAfterCommitHook(
-                        lambda success, *args:
-                            disparar_task_pdf_apos_commit(success, cod_tram_retorno, tipo_tram, portal_url_hook, user_id_hook, dados_tramitacao_json)
-                    )
+                            try:
+                                import tasks
+                                task_kwargs = {
+                                    'tipo': tipo_tramitacao,
+                                    'cod_tramitacao': cod_tramitacao,
+                                    'portal_url': portal_url_val,
+                                    'site_path': 'sagl',
+                                    'dados_tramitacao_json': dados_json
+                                }
+                                if user_id_val:
+                                    task_kwargs['user_id'] = str(user_id_val)
+                                
+                                task_result = tasks.gerar_pdf_despacho_task.apply_async(kwargs=task_kwargs)
+                                task_id = task_result.id if hasattr(task_result, 'id') else getattr(task_result, 'task_id', None)
+                                
+                                if task_id:
+                                    task_id_ref['task_id'] = task_id
+                                    logger.info(f"TramitacaoIndividualSalvarView - Task PDF disparada APÓS commit: task_id={task_id} para cod_tramitacao={cod_tramitacao}")
+                                else:
+                                    logger.warning(f"TramitacaoIndividualSalvarView - Task PDF não retornou task_id após commit para cod_tramitacao={cod_tramitacao}")
+                            except Exception as e:
+                                logger.error(f"TramitacaoIndividualSalvarView - Erro ao disparar task PDF após commit: {e}", exc_info=True)
+                        
+                        # Registra hook para disparar task após commit
+                        transaction.get().addAfterCommitHook(
+                            lambda success, *args:
+                                disparar_task_pdf_apos_commit(success, cod_tram_retorno, tipo_tram, portal_url_hook, user_id_hook, dados_tramitacao_json, task_id_container, base_url)
+                        )
+                        
+                        # Cria task_pdf com informações para o frontend aguardar
+                        # O task_id será None inicialmente, mas o frontend pode verificar o status via monitor_url
+                        task_pdf = {
+                            'pdf_url': base_url,  # URL do PDF que será gerado
+                            'aguardar_completar': True,  # Flag para frontend aguardar task completar
+                            'monitor_url': f"{portal_url_hook}/@@tramitacao_pdf_status?cod_tramitacao={cod_tram_retorno}",  # URL para monitorar status
+                            'cod_tramitacao': cod_tram_retorno  # Código da tramitação para monitoramento
+                        }
+                        logger.info(f"TramitacaoIndividualSalvarView - Task PDF será disparada APÓS commit para cod_tramitacao={cod_tram_retorno} (novo rascunho)")
+                    except Exception as e:
+                        logger.error(f"TramitacaoIndividualSalvarView - Erro ao preparar task PDF: {e}", exc_info=True)
                 
                 # ✅ CRÍTICO: NÃO calcula contadores DURANTE a transação
                 # O cálculo de contadores deve ser feito APÓS o commit (via afterCommitHook)
@@ -3197,49 +3227,22 @@ class TramitacaoIndividualSalvarView(GrokView, TramitacaoAPIBase):
                     resposta['task_anexo'] = task_anexo
                     logger.debug(f"TramitacaoIndividualSalvarView - task_anexo adicionado à resposta")
                 
-                # ✅ Adiciona link_pdf_despacho atualizado com timestamp quando PDF for gerado/atualizado
-                # Isso permite que o frontend atualize o link do botão PDF
-                if deve_gerar_pdf:
+                # ✅ Adiciona link_pdf_despacho quando task_pdf estiver disponível
+                # O frontend aguardará a task completar antes de atualizar o link
+                if task_pdf and task_pdf.get('pdf_url'):
                     try:
                         import time
-                        # Constrói URL base do PDF
-                        if tipo == 'MATERIA':
-                            pdf_path = f"/sapl_documentos/materia/tramitacao/{cod_tramitacao_retorno}_tram.pdf"
-                        else:
-                            pdf_path = f"/sapl_documentos/administrativo/tramitacao/{cod_tramitacao_retorno}_tram.pdf"
-                        
-                        base_url = f"{portal_url.rstrip('/')}{pdf_path}"
+                        base_url = task_pdf['pdf_url']
                         timestamp = int(time.time() * 1000)  # Timestamp em milissegundos
                         separator = '&' if '?' in base_url else '?'
                         link_pdf_despacho = f"{base_url}{separator}_t={timestamp}"
                         resposta['link_pdf_despacho'] = link_pdf_despacho
-                        resposta['pdf_atualizado'] = True  # Flag para indicar que PDF foi atualizado
+                        resposta['pdf_atualizado'] = True  # Flag para indicar que PDF será atualizado
                         resposta['update_pdf_link'] = True  # Flag para indicar que deve atualizar o link
-                        # ✅ Adiciona código JavaScript inline que será executado automaticamente
-                        # Isso garante que o link seja atualizado mesmo se o interceptor AJAX não funcionar
-                        resposta['exec_script'] = f'''
-                            (function() {{
-                                var btnPdf = document.getElementById('btn_visualizar_pdf_tramitacao');
-                                if (btnPdf) {{
-                                    btnPdf.href = '{link_pdf_despacho}';
-                                    btnPdf.setAttribute('data-link-pdf', '{link_pdf_despacho}');
-                                    console.log('[Tramitacao] Link PDF atualizado:', '{link_pdf_despacho}');
-                                }} else {{
-                                    // Tenta novamente após um pequeno delay (caso o botão ainda não exista)
-                                    setTimeout(function() {{
-                                        var btnPdf = document.getElementById('btn_visualizar_pdf_tramitacao');
-                                        if (btnPdf) {{
-                                            btnPdf.href = '{link_pdf_despacho}';
-                                            btnPdf.setAttribute('data-link-pdf', '{link_pdf_despacho}');
-                                            console.log('[Tramitacao] Link PDF atualizado (retry):', '{link_pdf_despacho}');
-                                        }}
-                                    }}, 100);
-                                }}
-                            }})();
-                        '''
-                        logger.debug(f"TramitacaoIndividualSalvarView - Link PDF atualizado na resposta: {link_pdf_despacho}")
+                        resposta['aguardar_task_pdf'] = True  # Flag para frontend aguardar task completar
+                        logger.debug(f"TramitacaoIndividualSalvarView - Link PDF será atualizado após task completar: {link_pdf_despacho}")
                     except Exception as e:
-                        logger.warning(f"TramitacaoIndividualSalvarView - Erro ao construir link PDF atualizado: {e}")
+                        logger.warning(f"TramitacaoIndividualSalvarView - Erro ao construir link PDF: {e}")
                 
                 # Garante que resposta tenha sucesso: true para compatibilidade com frontend
                 resposta['sucesso'] = True

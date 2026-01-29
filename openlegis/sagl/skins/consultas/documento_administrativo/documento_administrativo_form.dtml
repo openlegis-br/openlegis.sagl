@@ -593,6 +593,29 @@
   </dtml-if> 
 </dtml-let>
 
+// Expande a aba de tramitação se o parâmetro expandTramitacao estiver presente na URL
+(function() {
+  var urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('expandTramitacao') === '1') {
+    // Remove o parâmetro da URL para limpar
+    urlParams.delete('expandTramitacao');
+    var newUrl = window.location.pathname + (urlParams.toString() ? '?' + urlParams.toString() : '') + window.location.hash;
+    window.history.replaceState({}, '', newUrl);
+    
+    // Expande a aba de tramitação
+    setTimeout(function() {
+      var collapseTram = document.getElementById('collapseTram');
+      var headingTram = document.getElementById('headingTram');
+      if (collapseTram && headingTram) {
+        var bsCollapse = new bootstrap.Collapse(collapseTram, {
+          toggle: true
+        });
+        bsCollapse.show();
+      }
+    }, 100);
+  }
+})();
+
 </script>
 <dtml-if expr="AUTHENTICATED_USER.has_role(['Authenticated']) and _.has_key('add_doc')">
 <script type='text/javascript'>

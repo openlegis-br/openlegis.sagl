@@ -1,20 +1,57 @@
 <legend class="font-size-16">Tramitações</legend>
 
+      <dtml-in expr="zsql.tramitacao_obter_zsql(cod_materia=cod_materia)">
+        <dtml-if expr="ind_ult_tramitacao==0 and not dat_encaminha">
+          <dtml-call expr="REQUEST.set('tem_rascunho', 1)">
+          <dtml-call expr="REQUEST.set('cod_usuario_rascunho', cod_usuario_local)">
+          <dtml-call expr="REQUEST.set('cod_tramitacao_rascunho', cod_tramitacao)">
+          <dtml-call expr="REQUEST.set('dat_tramitacao_rascunho', dat_tramitacao)">
+        </dtml-if>
+      </dtml-in>
+
+      <dtml-if expr="REQUEST.get('tem_rascunho')">
+        <div class="alert alert-warning alert-dismissible fade show mb-3" role="alert">
+          <i class="fas fa-exclamation-triangle me-2"></i>
+          <strong>Aguardando Andamento</strong>
+          <div class="d-flex align-items-center flex-wrap gap-2 mt-2">
+            <dtml-if expr="REQUEST.get('cod_usuario_rascunho')">
+              <dtml-in expr="zsql.usuario_obter_zsql(cod_usuario=REQUEST.get('cod_usuario_rascunho'))">
+                <span class="me-2">
+                  Processo aguardando encaminhamento de tramitação em rascunho por <strong><dtml-var nom_completo></strong>.
+                </span>
+              </dtml-in>
+            <dtml-else>
+              <span class="me-2">
+                Processo aguardando finalização e encaminhamento da tramitação em rascunho.
+              </span>
+            </dtml-if>
+            <dtml-if expr="REQUEST.get('cod_tramitacao_rascunho')">
+              <a href="#" class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Visualização de Tramitação em Rascunho" data-src="tramitacao/tramitacao_mostrar_proc?hdn_cod_tramitacao=<dtml-var expr="REQUEST.get('cod_tramitacao_rascunho')">&cod_materia=<dtml-var cod_materia>&modal=1">
+                <i class="fas fa-eye me-1"></i> Visualizar Rascunho
+              </a>
+            </dtml-if>
+          </div>
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
+        </div>
+      </dtml-if>
+
 <dtml-in expr="zsql.tramitacao_obter_zsql(cod_materia=cod_materia)">
-  <dtml-if sequence-start>
-    <div class="table-responsive">
-    <table id="tramitacoes_table" class="table datatable-tramitacao w-100">
-     <thead class="table-light">
-      <tr>  
-         <th width="15%">Data e Hora</th>
-         <th>Unidade de Origem</th>
-         <th>Unidade de Destino</th>
-         <th>Status</th>
-         <th width="10%">Despacho</th>
-      </tr>
-     </thead>
-    </dtml-if sequence-start>
-      <tr <dtml-if expr="ind_ult_tramitacao==1">class="bg-light"</dtml-if>> 
+  <dtml-unless expr="ind_ult_tramitacao==0 and not dat_encaminha">
+    <dtml-if expr="not REQUEST.get('tram_table_started')">
+      <dtml-call expr="REQUEST.set('tram_table_started', 1)">
+      <div class="table-responsive">
+      <table id="tramitacoes_table" class="table datatable-tramitacao w-100">
+       <thead class="table-light">
+        <tr>  
+           <th width="15%">Data e Hora</th>
+           <th>Unidade de Origem</th>
+           <th>Unidade de Destino</th>
+           <th>Status</th>
+           <th width="10%">Despacho</th>
+        </tr>
+       </thead>
+    </dtml-if>
+        <tr <dtml-if expr="ind_ult_tramitacao==1">class="bg-light"</dtml-if>> 
          <td>
             <a href="#" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Visualização de Tramitação" data-src="tramitacao/tramitacao_mostrar_proc?hdn_cod_tramitacao=<dtml-var cod_tramitacao>&cod_materia=<dtml-var cod_materia>&modal=1">  
               <dtml-var dat_tramitacao>
@@ -58,14 +95,20 @@
         </dtml-if> 
          </td>
       </tr>
-    <dtml-if sequence-end>   
+  </dtml-unless>
+  <dtml-if sequence-end>
+    <dtml-if expr="REQUEST.get('tram_table_started')">
+      <dtml-call expr="REQUEST.set('tram_table_started', 0)">
       </table>
       </div>
-    </dtml-if sequence-end>
+    </dtml-if>
+  </dtml-if sequence-end>
 <dtml-else>
     <p>Nenhuma tramitação cadastrada.</p>
 </dtml-in>
 
-  <div class="text-start">
-     <button type="button" class="btn btn-light d-print-none" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Cadastro de Tramitação" data-src="tramitacao/tramitacao_form?cod_materia=<dtml-var cod_materia>&modal=1">Incluir Tramitação</button> 
-  </div>
+  <dtml-unless expr="REQUEST.get('tem_rascunho')">
+    <div class="text-start">
+       <button type="button" class="btn btn-light d-print-none" data-bs-toggle="modal" data-bs-target="#iFrameModal" data-title="Cadastro de Tramitação" data-src="tramitacao/tramitacao_form?cod_materia=<dtml-var cod_materia>&modal=1">Incluir Tramitação</button> 
+    </div>
+  </dtml-unless>

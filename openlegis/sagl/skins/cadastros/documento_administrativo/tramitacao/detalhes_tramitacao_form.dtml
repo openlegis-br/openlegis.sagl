@@ -118,9 +118,9 @@
   </div>
 
   <div class="text-start">
-    <dtml-if expr="ind_ult_tramitacao==1 and AUTHENTICATED_USER.has_role(['Operador'])">
+    <dtml-if expr="ind_ult_tramitacao==1 and AUTHENTICATED_USER.has_role(['Operador']) and not dat_recebimento">
        <input type="button" class="btn btn-danger" value="Excluir" onClick="tramitacao_excluir()" />
-    <dtml-elif expr="ind_ult_tramitacao==1 and int(cod_usuario_corrente)==int(cod_usuario_local)">
+    <dtml-elif expr="ind_ult_tramitacao==1 and int(cod_usuario_corrente)==int(cod_usuario_local) and not dat_recebimento">
        <input type="button" class="btn btn-danger" value="Excluir" onClick="tramitacao_excluir()" />
     </dtml-if>
   </div>     
